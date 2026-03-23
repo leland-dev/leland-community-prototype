@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import profilePhoto from "../assets/profile photos/profile photo.png";
+import lelandLogo from "../assets/Logo.svg";
 
 import likesIcon from "../assets/icons/likes.svg";
 import commentsIcon from "../assets/icons/comments.svg";
@@ -65,7 +66,32 @@ interface LinkPost extends PostBase {
   };
 }
 
-type Post = TextPost | ImagePost | LinkPost;
+interface EventPost extends PostBase {
+  type: "event";
+  body: string;
+  event: {
+    title: string;
+    image: string;
+    date: string;
+    time: string;
+    format: "Online" | "In-person";
+    spotsLeft?: number;
+  };
+}
+
+interface MilestonePost extends PostBase {
+  type: "milestone";
+  body: string;
+  milestone: {
+    school: string;
+    program: string;
+    clientName: string;
+    clientAvatar: string;
+    schoolColor: string;
+  };
+}
+
+type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost;
 
 // ─── Sample data ──────────────────────────────────────
 
@@ -129,6 +155,48 @@ const posts: Post[] = [
     comments: 63,
     reposts: 34,
     shares: 2,
+  },
+  {
+    id: 13,
+    type: "event",
+    author: "Leland",
+    avatar: lelandLogo,
+    time: "1h",
+    headline: "Official Leland Events",
+    body: "Join us for a live panel with admissions officers from HBS, Wharton, and GSB. Get your questions answered directly — no fluff, no scripts.",
+    event: {
+      title: "MBA Admissions Live: Ask the Officers Anything",
+      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&h=400&fit=crop",
+      date: "Thursday, April 3, 2026",
+      time: "6:00 PM – 7:30 PM PT",
+      format: "Online",
+      spotsLeft: 38,
+    },
+    likes: 214,
+    comments: 29,
+    reposts: 61,
+    shares: 12,
+  },
+  {
+    id: 14,
+    type: "milestone",
+    author: "David Kim",
+    avatar: pic4,
+    time: "2h",
+    verified: true,
+    headline: "MBA Admissions Consultant | Ex-Bain, HBS '19",
+    body: "Incredibly proud of my client Jordan. We worked together for 6 months — rebuilding his narrative from scratch, reframing his non-traditional background into his biggest asset. Today he got the call from Wharton. This is why I do this work. 🎉",
+    milestone: {
+      school: "Wharton School",
+      program: "MBA, Class of 2028",
+      clientName: "Jordan M.",
+      clientAvatar: pic6,
+      schoolColor: "#002f6c",
+    },
+    likes: 431,
+    comments: 47,
+    reposts: 22,
+    shares: 8,
   },
   {
     id: 5,
@@ -275,7 +343,7 @@ function formatCount(n: number): string {
   return n.toString();
 }
 
-function ActionBar({ likes, comments, reposts, shares, verified }: { likes: number; comments: number; reposts: number; shares: number; verified?: boolean }) {
+function ActionBar({ likes, comments, reposts, shares, verified, isEvent }: { likes: number; comments: number; reposts: number; shares: number; verified?: boolean; isEvent?: boolean }) {
   const actions = [
     { icon: likesIcon, count: likes, label: "Like" },
     { icon: commentsIcon, count: comments, label: "Comment" },
@@ -286,12 +354,17 @@ function ActionBar({ likes, comments, reposts, shares, verified }: { likes: numb
   return (
     <div className="mt-1 flex items-center gap-2 pl-[44px]">
       {actions.map(({ icon, count, label }) => (
-        <button key={label} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-[#424242] transition-colors hover:bg-gray-hover">
-          <img src={icon} alt={label} className="h-[22px] w-[22px]" />
+        <button key={label} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
+          <img src={icon} alt={label} className="h-[22px] w-[22px] [filter:invert(46%)]" />
           {count > 0 && label !== "Share" && <span className="text-[15px] font-normal">{formatCount(count)}</span>}
         </button>
       ))}
-      {verified && (
+      {isEvent && (
+        <button className="ml-auto cursor-pointer rounded-[100px] bg-[#222222]/5 px-[14px] py-1.5 text-[15px] font-medium text-[#424242] transition-colors hover:bg-[#222222]/[0.08]">
+          Register for free
+        </button>
+      )}
+      {verified && !isEvent && (
         <button className="ml-auto cursor-pointer rounded-[100px] bg-[#222222]/5 px-[14px] py-1.5 text-[15px] font-medium text-[#424242] transition-colors hover:bg-[#222222]/[0.08]">
           Free intro call
         </button>
@@ -376,6 +449,65 @@ function LinkCard({ link }: { link: LinkPost["link"] }) {
   );
 }
 
+function EventCard({ event }: { event: EventPost["event"] }) {
+  return (
+    <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
+      <img src={event.image} alt={event.title} className="h-[180px] w-full object-cover" />
+      <div className="px-4 py-4">
+        <span className="inline-block rounded-full bg-primary/10 px-3 py-0.5 text-[13px] font-medium text-primary">{event.format}</span>
+        <p className="mt-2 text-[17px] font-semibold leading-snug text-gray-dark">{event.title}</p>
+        <div className="mt-2 space-y-1">
+          <div className="flex items-center gap-2 text-[15px] text-gray-light">
+            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span>{event.date}</span>
+          </div>
+          <div className="flex items-center gap-2 text-[15px] text-gray-light">
+            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>{event.time}</span>
+          </div>
+        </div>
+        {event.spotsLeft !== undefined && (
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-[13px] font-medium text-orange-500">Only {event.spotsLeft} spots left</p>
+            <button className="cursor-pointer rounded-[100px] bg-[#222222]/5 px-[14px] py-1.5 text-[15px] font-medium text-[#424242] transition-colors hover:bg-[#222222]/[0.08]">
+              Register for free
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MilestoneCard({ milestone }: { milestone: MilestonePost["milestone"] }) {
+  return (
+    <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
+      <div className="h-1.5 w-full" style={{ backgroundColor: milestone.schoolColor }} />
+      <div className="flex items-center gap-4 px-4 py-4">
+        <div className="relative shrink-0">
+          <img
+            src={milestone.clientAvatar}
+            alt={milestone.clientName}
+            className="h-14 w-14 rounded-full object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)]"
+          />
+          <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[14px] shadow-sm">
+            🎉
+          </span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-medium uppercase tracking-wide text-gray-light">Admitted</p>
+          <p className="mt-0.5 text-[17px] font-semibold leading-tight text-gray-dark">{milestone.school}</p>
+          <p className="text-[14px] text-gray-light">{milestone.program}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Post component ───────────────────────────────────
 
 function FeedPost({ post }: { post: Post }) {
@@ -397,9 +529,11 @@ function FeedPost({ post }: { post: Post }) {
           <p className="mt-1 text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
           {post.type === "image" && <ImageGallery images={post.images} />}
           {post.type === "link" && <LinkCard link={post.link} />}
+          {post.type === "event" && <EventCard event={post.event} />}
+          {post.type === "milestone" && <MilestoneCard milestone={post.milestone} />}
         </div>
       </div>
-      <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} verified={post.verified} />
+      <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} verified={post.verified} isEvent={post.type === "event"} />
     </div>
   );
 }
