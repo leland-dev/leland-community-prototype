@@ -710,27 +710,154 @@ function LiveCard({ live }: { live: LivePost["live"] }) {
   );
 }
 
+// ─── Coach hover card ─────────────────────────────────
+
+const coachProfiles: Record<string, { sessions: number; rating: number; reviews: number; tags: string[] }> = {
+  "Sarah Chen":     { sessions: 312, rating: 4.9, reviews: 187, tags: ["Stanford GSB", "MBA Admissions"] },
+  "David Kim":      { sessions: 428, rating: 5.0, reviews: 214, tags: ["MBA Admissions", "Case Prep", "Ex-Bain"] },
+  "Nina Kowalski":  { sessions: 196, rating: 4.9, reviews: 103, tags: ["Consulting", "McKinsey", "Recruiting"] },
+  "Marcus Williams":{ sessions: 88,  rating: 4.8, reviews: 52,  tags: ["MBA Essays", "Stanford GSB"] },
+  "Priya Patel":    { sessions: 143, rating: 4.9, reviews: 76,  tags: ["MBA Admissions", "Networking"] },
+  "Emma Rodriguez": { sessions: 201, rating: 4.8, reviews: 98,  tags: ["Career Change", "MBA Strategy"] },
+};
+
+function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
+  author: string;
+  avatar: string;
+  verified?: boolean;
+  headline?: string;
+  isEvent?: boolean;
+}) {
+  if (isEvent) return null;
+  const profile = coachProfiles[author];
+
+  return (
+    <motion.div
+      className="absolute left-0 top-12 z-50 w-[280px] rounded-2xl border border-gray-stroke bg-white p-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
+      initial={{ opacity: 0, y: 6, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 4, scale: 0.97 }}
+      transition={{ duration: 0.15, ease: "easeOut" }}
+      // Keep card open when hovering over it
+      onMouseEnter={(e) => e.stopPropagation()}
+    >
+      {/* Top row: avatar + follow */}
+      <div className="flex items-start justify-between">
+        <img
+          src={avatar}
+          alt={author}
+          className="h-14 w-14 rounded-full object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
+        />
+        <button className="rounded-full border border-gray-stroke px-4 py-1.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
+          Follow
+        </button>
+      </div>
+
+      {/* Name + verified */}
+      <div className="mt-3 flex items-center gap-1.5">
+        <span className="text-[16px] font-semibold text-gray-dark">{author}</span>
+        {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
+      </div>
+
+      {/* Headline */}
+      {headline ? (
+        <p className="mt-0.5 text-[13px] leading-snug text-gray-light">{headline}</p>
+      ) : null}
+
+      {/* Stats */}
+      {profile ? (
+        <>
+          <div className="mt-3 flex items-center gap-3 text-[13px]">
+            <span className="font-semibold text-gray-dark">{profile.sessions.toLocaleString()}</span>
+            <span className="text-gray-light">sessions</span>
+            <span className="text-gray-xlight">·</span>
+            <span className="font-semibold text-gray-dark">★ {profile.rating.toFixed(1)}</span>
+            <span className="text-gray-light">({profile.reviews})</span>
+          </div>
+
+          {/* Specialty tags */}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {profile.tags.map(tag => (
+              <span
+                key={tag}
+                className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[12px] font-medium text-gray-dark"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </>
+      ) : null}
+
+      {/* CTA */}
+      <button className="mt-4 w-full cursor-pointer rounded-lg bg-primary py-2 text-[14px] font-semibold text-white transition-colors hover:bg-primary-hover">
+        Book a session
+      </button>
+    </motion.div>
+  );
+}
+
+function AvatarWithHoverCard({ post }: { post: Post }) {
+  const [open, setOpen] = useState(false);
+  const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isEvent = post.type === "event";
+
+  const handleMouseEnter = () => {
+    if (isEvent) return;
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    openTimer.current = setTimeout(() => setOpen(true), 350);
+  };
+
+  const handleMouseLeave = () => {
+    if (openTimer.current) clearTimeout(openTimer.current);
+    closeTimer.current = setTimeout(() => setOpen(false), 200);
+  };
+
+  return (
+    <div
+      className="relative shrink-0"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="group relative h-10 w-10 cursor-pointer">
+        {isEvent ? (
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black">
+            <img src={post.avatar} alt={post.author} className="h-5 w-5 brightness-0 invert" />
+          </div>
+        ) : (
+          <img
+            src={post.avatar}
+            alt={post.author}
+            className="h-10 w-10 rounded-full object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)]"
+          />
+        )}
+        <div className="absolute inset-0 rounded-full bg-black/0 transition-colors group-hover:bg-black/10" />
+      </div>
+
+      <AnimatePresence>
+        {open ? (
+          <CoachHoverCard
+            author={post.author}
+            avatar={post.avatar}
+            verified={post.verified}
+            headline={post.headline}
+            isEvent={isEvent}
+          />
+        ) : null}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ─── Post component ───────────────────────────────────
 
 function FeedPost({ post }: { post: Post }) {
   return (
     <div className="pt-5 pb-[14px]">
       <div className="flex gap-3">
-        {/* Left column: avatar */}
-        <div className="group relative h-10 w-10 shrink-0 cursor-pointer">
-          {post.type === "event" ? (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black">
-              <img src={post.avatar} alt={post.author} className="h-5 w-5 brightness-0 invert" />
-            </div>
-          ) : (
-            <img
-              src={post.avatar}
-              alt={post.author}
-              className="h-10 w-10 rounded-full object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)]"
-            />
-          )}
-          <div className="absolute inset-0 rounded-full bg-black/0 transition-colors group-hover:bg-black/10" />
-        </div>
+        {/* Left column: avatar with hover card */}
+        <AvatarWithHoverCard post={post} />
         {/* Right column: content */}
         <div className="min-w-0 flex-1">
           <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} />
