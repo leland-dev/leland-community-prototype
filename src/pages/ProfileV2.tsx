@@ -5,6 +5,7 @@ import TopNav from "../components/TopNav";
 import MobileTopNav from "../components/MobileTopNav";
 import BottomNav from "../components/BottomNav";
 import { ExtraLinksProvider } from "../components/ExtraLinksContext";
+import pic2 from "../assets/profile photos/pic-2.png";
 import pic6 from "../assets/profile photos/pic-6.png";
 import mailIcon from "../assets/icons/mail.svg";
 import checkIcon from "../assets/icons/check.svg";
@@ -54,6 +55,13 @@ export default function ProfileV2() {
   const [adminOpen, setAdminOpen] = useState(false);
   const [showCustomerFavorite, setShowCustomerFavorite] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [showCoachNote, setShowCoachNote] = useState(false);
+  const [showSupercoach, setShowSupercoach] = useState(true);
+  const [isCustomerProfile, setIsCustomerProfile] = useState(false);
+  const [customerTab, setCustomerTab] = useState<"activity" | "about">("activity");
+
+  const profilePhoto = isCustomerProfile ? pic2 : pic6;
+  const profileName = isCustomerProfile ? "James Allen" : "Samantha Parker";
 
   const adminRef = useRef<HTMLDivElement>(null);
   const heroSentinelRef = useRef<HTMLDivElement>(null);
@@ -155,7 +163,7 @@ export default function ProfileV2() {
       {/* Sticky secondary nav — portaled to body to escape framer-motion layoutId containing blocks */}
       {createPortal(
         <AnimatePresence>
-          {stickyNavVisible && (
+          {stickyNavVisible && !isCustomerProfile && (
             <motion.div
               initial={{ y: "-100%" }}
               animate={{ y: 0 }}
@@ -170,12 +178,12 @@ export default function ProfileV2() {
                   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
                   <img
-                    src={pic6}
-                    alt="Samantha Parker"
+                    src={profilePhoto}
+                    alt={profileName}
                     className="h-10 w-10 rounded-[4px] object-cover"
                   />
                   <div className="flex flex-col text-[16px] leading-tight md:text-[16px]">
-                    <span className="text-[18px] font-medium text-gray-dark md:text-[16px]">Samantha Parker</span>
+                    <span className="text-[18px] font-medium text-gray-dark md:text-[16px]">{profileName}</span>
                     <span className="text-[#707070]">$150/hr</span>
                   </div>
                 </div>
@@ -238,8 +246,8 @@ export default function ProfileV2() {
               <div className="relative overflow-hidden rounded-[4px]">
                 <motion.img
                   layoutId="profile-photo"
-                  src={pic6}
-                  alt="Samantha Parker"
+                  src={profilePhoto}
+                  alt={profileName}
                   className="block h-[132px] w-[132px] object-cover"
                 />
                 <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
@@ -256,21 +264,27 @@ export default function ProfileV2() {
                 {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
                 {isFollowing ? "Following" : "Follow"}
               </button>
-              <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
-                Free intro call
-              </button>
+              {!isCustomerProfile && (
+                <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                  Free intro call
+                </button>
+              )}
             </div>
           </div>
 
           {/* Name + Supercoach badge */}
-          <div className="mb-1 flex items-center justify-center gap-2 md:justify-start">
-            <h1 className="text-[18px] font-medium text-gray-dark">Samantha Parker</h1>
-            <span className="text-[18px] text-[#999999]">·</span>
-            <span className="text-[18px] text-[#707070]"><span className="text-[16px]">🏆</span> Supercoach</span>
+          <div className={`flex items-center justify-center gap-2 md:justify-start ${isCustomerProfile ? "" : "mb-1"}`}>
+            <h1 className={`font-medium text-gray-dark ${isCustomerProfile ? "text-[24px]" : "text-[18px]"}`}>{profileName}</h1>
+            {showSupercoach && !isCustomerProfile && (
+              <>
+                <span className="text-[18px] text-[#999999]">·</span>
+                <span className="text-[18px] text-[#707070]"><span className="text-[16px]">🏆</span> Supercoach</span>
+              </>
+            )}
           </div>
 
           {/* Headline */}
-          <p className="mb-[6px] text-center text-[24px] font-medium leading-[1.3] text-[#333333] md:text-left">
+          <p className={`mb-[6px] text-center leading-[1.3] md:text-left ${isCustomerProfile ? "text-[18px] font-normal text-[#707070]" : "text-[24px] font-medium text-[#333333]"}`}>
             Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB
           </p>
 
@@ -289,7 +303,7 @@ export default function ProfileV2() {
             </div>
 
             {/* Successful clients at */}
-            <div className="flex items-center gap-[6px]">
+            {!isCustomerProfile && <div className="flex items-center gap-[6px]">
               <span>Successful clients at</span>
               <div className="flex items-center -space-x-[2px]">
                 <img src={clientLogo1} alt="" className="h-[18px] w-[18px] rounded border border-white" />
@@ -297,7 +311,7 @@ export default function ProfileV2() {
                 <img src={clientLogo3} alt="" className="h-[18px] w-[18px] rounded border border-white" />
                 <img src={clientLogo4} alt="" className="h-[18px] w-[18px] rounded border border-white" />
               </div>
-            </div>
+            </div>}
           </div>
 
 
@@ -305,18 +319,22 @@ export default function ProfileV2() {
           <div className="mb-2 flex flex-col rounded-lg border-transparent md:border-gray-200 md:border">
             <div className="flex">
               {/* Reviews (combined) */}
-              <div
-                className="flex flex-1 cursor-pointer flex-col items-center py-1 transition-opacity hover:opacity-70 md:py-4"
-                onClick={() => scrollToSection("reviews")}
-              >
-                <div className="flex items-center gap-1">
-                  <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">5.0</span>
-                  <img src={starIcon} alt="" className="h-[14px] w-[14px] md:h-[16px] md:w-[16px]" />
-                </div>
-                <span className="text-[14px] leading-tight text-gray-dark md:text-[16px]">52 reviews</span>
-              </div>
+              {!isCustomerProfile && (
+                <>
+                  <div
+                    className="flex flex-1 cursor-pointer flex-col items-center py-1 transition-opacity hover:opacity-70 md:py-4"
+                    onClick={() => scrollToSection("reviews")}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">5.0</span>
+                      <img src={starIcon} alt="" className="h-[14px] w-[14px] md:h-[16px] md:w-[16px]" />
+                    </div>
+                    <span className="text-[14px] leading-tight text-gray-dark md:text-[16px]">52 reviews</span>
+                  </div>
 
-              <div className="h-[36px] w-px self-center bg-gray-200" />
+                  <div className="h-[36px] w-px self-center bg-gray-200" />
+                </>
+              )}
 
               {/* Followers */}
               <div className="flex flex-1 flex-col items-center py-1 md:py-4">
@@ -359,9 +377,11 @@ export default function ProfileV2() {
 
           {/* Mobile inline CTA + secondary buttons */}
           <div className="mt-3 flex flex-col gap-3 md:hidden">
-            <button className="w-full cursor-pointer rounded-full bg-[#038561] px-4 py-3 text-[18px] font-medium text-white transition-colors hover:bg-[#038561]/90">
-              Free intro call
-            </button>
+            {!isCustomerProfile && (
+              <button className="w-full cursor-pointer rounded-full bg-[#038561] px-4 py-3 text-[18px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                Free intro call
+              </button>
+            )}
             <div className="flex gap-2">
               <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                 <img src={mailIcon} alt="" className="h-[20px] w-[20px]" />
@@ -378,18 +398,38 @@ export default function ProfileV2() {
           </div>
 
           {/* Availability row */}
-          <div className="mt-2 flex flex-col items-center text-center text-[16px] md:items-start md:text-left md:mt-0 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-[#1A73E8]">Available tomorrow</span>
-              <span className="text-[#707070]">·</span>
-              <span className="text-[#707070]">Responds within 12 hours</span>
+          {!isCustomerProfile && (
+            <div className="mt-2 flex flex-col items-center text-center text-[16px] md:items-start md:text-left md:mt-0 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[#1A73E8]">Available tomorrow</span>
+                <span className="text-[#707070]">·</span>
+                <span className="text-[#707070]">Responds within 12 hours</span>
+              </div>
+              <span className="text-[#9b9b9b]">1,240 minutes coached</span>
             </div>
-            <span className="text-[#9b9b9b]">1,240 minutes coached</span>
-          </div>
+          )}
+
+          {/* Note from coach */}
+          {showCoachNote && (
+            <div className="mt-4 flex cursor-pointer gap-3 rounded-lg bg-[#f5f5f5] p-4 transition-colors hover:bg-[#ebebeb]">
+              <img
+                src={profilePhoto}
+                alt={profileName}
+                className="h-10 w-10 shrink-0 rounded-[4px] object-cover"
+              />
+              <div className="min-w-0">
+                <p className="text-[16px] font-medium text-gray-dark">Note from {profileName.split(" ")[0]}</p>
+                <p className="mt-0.5 line-clamp-2 text-[16px] leading-snug text-[#707070]">
+                  If you're looking for comprehensive MBA application help, for deferred or R1 2026, I have 1-2 spots remaining, so the earlier you reach out the better! When you reach out, let me know where you're applying (or an initial list), the round you're applying, and why you're looking for coaching. I've helped 300+ individuals earn admission into M7 programs, specializing in GSB and HBS. I've also helped individuals earn admission to every top-25 MBA program. Drop me a line to get started.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Hero sentinel for sticky nav detection */}
           <div ref={heroSentinelRef} />
 
+          {!isCustomerProfile && (<>
           {/* ── Offerings group: Offerings + Free Events + Resources ── */}
           <div ref={setGroupRef("offerings")} data-group="offerings">
             <div className="my-[36px] border-t border-gray-200" />
@@ -639,6 +679,117 @@ export default function ProfileV2() {
               See all 52 reviews
             </button>
           </div>
+          </>)}
+
+          {/* Customer profile tabs */}
+          {isCustomerProfile && (
+            <>
+              <div className="sticky top-0 z-10 mt-6 flex border-b border-gray-stroke bg-white">
+                {(["activity", "about"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setCustomerTab(tab)}
+                    className={`relative flex-1 cursor-pointer py-3 text-[17px] font-medium capitalize transition-colors ${
+                      customerTab === tab
+                        ? "text-gray-dark"
+                        : "text-gray-light hover:text-gray-dark"
+                    }`}
+                  >
+                    {tab}
+                    {customerTab === tab && (
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#038561]" />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-6">
+                {customerTab === "activity" && (
+                  <div className="flex flex-col gap-4">
+                    {[...Array(10)].map((_, i) => (
+                      <div key={i} className="flex gap-3">
+                        <div className="h-10 w-10 shrink-0 rounded-full border border-dashed border-[#C5C5C5] bg-[#f5f5f5]" />
+                        <div className="h-[120px] min-w-0 flex-1 rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {customerTab === "about" && (
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="mb-3 text-[20px] font-medium text-gray-dark">About</h3>
+                      <p className="text-[17px] leading-relaxed text-gray-dark">
+                        Product Manager at Stripe with a background in consulting and engineering. Currently pursuing my MBA at Stanford GSB. Passionate about fintech, developer tools, and building products that scale.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h3 className="mb-4 text-[20px] font-medium text-gray-dark">Experience</h3>
+                      <div className="space-y-6">
+                        <div className="flex gap-4">
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
+                            <span className="text-[20px]">💳</span>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-[18px] font-medium text-gray-dark">Product Manager</h4>
+                            <p className="text-[16px] text-gray-light">Stripe</p>
+                            <p className="mt-1 text-[15px] text-gray-light">2022 – Present</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-4">
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
+                            <span className="text-[20px]">📦</span>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-[18px] font-medium text-gray-dark">Associate Product Manager</h4>
+                            <p className="text-[16px] text-gray-light">Dropbox</p>
+                            <p className="mt-1 text-[15px] text-gray-light">2020 – 2022</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-4">
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
+                            <span className="text-[20px]">🏢</span>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-[18px] font-medium text-gray-dark">Business Analyst</h4>
+                            <p className="text-[16px] text-gray-light">Accenture</p>
+                            <p className="mt-1 text-[15px] text-gray-light">2018 – 2020</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="mb-4 text-[20px] font-medium text-gray-dark">Education</h3>
+                      <div className="space-y-6">
+                        <div className="flex gap-4">
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
+                            <span className="text-[20px]">🎓</span>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-[18px] font-medium text-gray-dark">Stanford GSB</h4>
+                            <p className="text-[16px] text-gray-light">MBA</p>
+                            <p className="mt-1 text-[15px] text-gray-light">2024 – 2026</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-4">
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
+                            <span className="text-[20px]">🎓</span>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-[18px] font-medium text-gray-dark">MIT</h4>
+                            <p className="text-[16px] text-gray-light">B.S. Computer Science and Engineering</p>
+                            <p className="mt-1 text-[15px] text-gray-light">2014 – 2018</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Right column — fixed 240px sidebar, hidden on tablet */}
@@ -678,8 +829,8 @@ export default function ProfileV2() {
             </motion.button>
             <motion.img
               layoutId="profile-photo"
-              src={pic6}
-              alt="Samantha Parker"
+              src={profilePhoto}
+              alt={profileName}
               className="max-h-[80vh] max-w-[80vw] rounded-xl object-contain shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
@@ -702,12 +853,61 @@ export default function ProfileV2() {
                 Admin controls
               </div>
               <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                <span className="text-[16px] font-medium text-gray-dark">Customer profile</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={isCustomerProfile}
+                    onChange={() => {
+                      const next = !isCustomerProfile;
+                      setIsCustomerProfile(next);
+                      if (next) {
+                        setShowCustomerFavorite(false);
+                        setShowCoachNote(false);
+                      }
+                    }}
+                    className="peer sr-only"
+                  />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+              <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${isCustomerProfile ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
                 <span className="text-[16px] font-medium text-gray-dark">Customer favorite</span>
                 <div className="relative">
                   <input
                     type="checkbox"
                     checked={showCustomerFavorite}
-                    onChange={() => setShowCustomerFavorite(!showCustomerFavorite)}
+                    onChange={() => !isCustomerProfile && setShowCustomerFavorite(!showCustomerFavorite)}
+                    disabled={isCustomerProfile}
+                    className="peer sr-only"
+                  />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+              <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${isCustomerProfile ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
+                <span className="text-[16px] font-medium text-gray-dark">Coach note</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={showCoachNote}
+                    onChange={() => !isCustomerProfile && setShowCoachNote(!showCoachNote)}
+                    disabled={isCustomerProfile}
+                    className="peer sr-only"
+                  />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+              <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${isCustomerProfile ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
+                <span className="text-[16px] font-medium text-gray-dark">Supercoach</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={showSupercoach}
+                    onChange={() => !isCustomerProfile && setShowSupercoach(!showSupercoach)}
+                    disabled={isCustomerProfile}
                     className="peer sr-only"
                   />
                   <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
