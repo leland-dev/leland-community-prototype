@@ -1078,7 +1078,7 @@ const suggestedExperts = [
   { name: "Jason Park",     avatar: pic14, verified: false, headline: "Deloitte Strategy Lead | MBA Career Coach | Finance & Consulting" },
 ];
 
-function ExpertCard({ expert }: { expert: typeof suggestedExperts[number] }) {
+function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[number]; isOnline?: boolean }) {
   const p = coachProfiles[expert.name];
   return (
     <div
@@ -1087,11 +1087,18 @@ function ExpertCard({ expert }: { expert: typeof suggestedExperts[number] }) {
     >
       {/* Avatar + name row */}
       <div className="flex items-start gap-3">
-        <img
-          src={expert.avatar}
-          alt={expert.name}
-          className="h-[56px] w-[56px] shrink-0 rounded-xl object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
-        />
+        <div className="relative shrink-0">
+          <img
+            src={expert.avatar}
+            alt={expert.name}
+            className="h-[56px] w-[56px] rounded-xl object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
+          />
+          {isOnline ? (
+            <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-white">
+              Online now
+            </span>
+          ) : null}
+        </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
             <span className="text-[14px] font-semibold leading-tight text-gray-dark">{expert.name}</span>
@@ -1104,68 +1111,62 @@ function ExpertCard({ expert }: { expert: typeof suggestedExperts[number] }) {
               <span className="text-gray-light">({p.reviews})</span>
             </div>
           ) : null}
-          {p?.customerFavorite ? (
-            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-              ✦ Customer favorite
-            </span>
-          ) : null}
         </div>
       </div>
 
       {/* Headline */}
-      <p className="mt-2.5 line-clamp-2 text-[12px] font-semibold leading-snug text-gray-dark">
+      <p className="mt-3 line-clamp-2 text-[12px] font-semibold leading-snug text-gray-dark">
         {expert.headline}
       </p>
 
       {/* Stats */}
       {p ? (
-        <p className="mt-1.5 text-[11px] text-gray-light">
+        <p className="mt-1 text-[11px] text-gray-light">
           <span className="font-medium text-gray-dark">{p.minutesCoached.toLocaleString()}</span> min coached
           <span className="mx-1.5 text-gray-stroke">|</span>
           <span className="font-medium text-gray-dark">{p.followers.toLocaleString()}</span> followers
         </p>
       ) : null}
 
-      {/* Badge chips */}
+      {/* Badges — icon + text only, no pill background */}
       {p ? (
-        <div className="mt-3 flex flex-col gap-1.5">
+        <div className="mt-3 flex flex-col gap-2">
           {p.supercoach ? (
-            <BadgeChip icon={<span>🏆</span>} label="Supercoach" />
+            <div className="flex items-center gap-2">
+              <span className="text-[13px] leading-none">🏆</span>
+              <span className="text-[12px] text-gray-dark">Supercoach</span>
+            </div>
           ) : null}
           {p.affiliation ? (
-            <BadgeChip
-              icon={
-                <span
-                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm text-[9px] font-bold text-white"
-                  style={{ backgroundColor: p.companyColor ?? "#555" }}
-                >
-                  {(p.affiliation.match(/at (.+)$/) ?? [])[1]?.[0] ?? "·"}
-                </span>
-              }
-              label={p.affiliation}
-            />
+            <div className="flex items-center gap-2">
+              <span
+                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm text-[9px] font-bold text-white"
+                style={{ backgroundColor: p.companyColor ?? "#555" }}
+              >
+                {(p.affiliation.match(/at (.+)$/) ?? [])[1]?.[0] ?? "·"}
+              </span>
+              <span className="truncate text-[12px] text-gray-dark">{p.affiliation}</span>
+            </div>
           ) : null}
           {p.company && !p.affiliation ? (
-            <BadgeChip
-              icon={
-                <span
-                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm text-[9px] font-bold text-white"
-                  style={{ backgroundColor: p.companyColor ?? "#555" }}
-                >
-                  {p.companyInitial}
-                </span>
-              }
-              label={`Worked at ${p.company}`}
-            />
+            <div className="flex items-center gap-2">
+              <span
+                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm text-[9px] font-bold text-white"
+                style={{ backgroundColor: p.companyColor ?? "#555" }}
+              >
+                {p.companyInitial}
+              </span>
+              <span className="truncate text-[12px] text-gray-dark">Worked at {p.company}</span>
+            </div>
           ) : null}
           {p.successfulClients.length > 0 ? (
-            <div className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5">
-              <div className="flex -space-x-1.5">
+            <div className="flex items-center gap-2">
+              <div className="flex shrink-0 -space-x-1.5">
                 {p.successfulClients.slice(0, 3).map((s, i) => (
                   <SchoolDot key={i} initial={s.initial} color={s.color} />
                 ))}
               </div>
-              <span className="text-[12px] font-medium leading-none text-gray-dark">
+              <span className="text-[12px] text-gray-dark">
                 Clients{p.successfulClientsMore ? ` +${p.successfulClientsMore}` : ""}
               </span>
             </div>
@@ -1176,20 +1177,45 @@ function ExpertCard({ expert }: { expert: typeof suggestedExperts[number] }) {
       {/* Spacer pushes button to bottom */}
       <div className="flex-1" />
 
-      <button className="mt-4 w-full cursor-pointer rounded-lg bg-primary py-2 text-[13px] font-semibold text-white transition-colors hover:bg-primary-hover">
-        Book a session
-      </button>
+      {isOnline ? (
+        <button className="mt-4 w-full cursor-pointer rounded-lg bg-primary py-2 text-[13px] font-semibold text-white transition-colors hover:bg-primary-hover">
+          Chat now
+        </button>
+      ) : (
+        <button className="mt-4 w-full cursor-pointer rounded-lg bg-gray-100 py-2 text-[13px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
+          Book a session
+        </button>
+      )}
     </div>
   );
 }
 
 function SuggestedExperts() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: scrollRef.current.clientWidth * 0.75, behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="py-5">
-      <p className="text-[17px] font-semibold text-gray-dark">Suggested experts</p>
-      <div className="scrollbar-hide mt-4 flex gap-3 overflow-x-auto">
-        {suggestedExperts.map((expert) => (
-          <ExpertCard key={expert.name} expert={expert} />
+      <div className="flex items-center justify-between">
+        <p className="text-[17px] font-semibold text-gray-dark">Suggested experts</p>
+        <button
+          onClick={scroll}
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-stroke text-gray-dark transition-colors hover:bg-gray-hover"
+          aria-label="Scroll right"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+      </div>
+      <div ref={scrollRef} className="scrollbar-hide mt-4 flex gap-3 overflow-x-auto">
+        {suggestedExperts.map((expert, i) => (
+          <ExpertCard key={expert.name} expert={expert} isOnline={i === 0} />
         ))}
       </div>
     </div>
