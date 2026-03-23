@@ -864,126 +864,125 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
 
   return (
     <motion.div
-      className="absolute left-0 top-12 z-50 w-[310px] rounded-2xl border border-gray-stroke bg-white p-4 shadow-[0_8px_32px_rgba(0,0,0,0.13)]"
+      className="absolute left-0 top-12 z-50 w-[310px] overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_8px_32px_rgba(0,0,0,0.13)]"
       initial={{ opacity: 0, y: 6, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 4, scale: 0.97 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
       onMouseEnter={(e) => e.stopPropagation()}
     >
-      {/* Row 1: avatar + name/rating + follow */}
-      <div className="flex items-start gap-3">
-        <img
-          src={avatar}
-          alt={author}
-          className="h-[52px] w-[52px] shrink-0 rounded-xl object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
-        />
-        <div className="min-w-0 flex-1">
-          {/* Name row */}
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="text-[15px] font-semibold text-gray-dark leading-tight">{author}</span>
-            {verified ? <img src={verifiedIcon} alt="" className="h-[14px] w-[14px] shrink-0" /> : null}
+      {/* Large avatar — full width at top */}
+      <img
+        src={avatar}
+        alt={author}
+        className="h-[180px] w-full object-cover object-top"
+      />
+
+      {/* Info section */}
+      <div className="p-4">
+        {/* Name + follow */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[16px] font-semibold leading-tight text-gray-dark">{author}</span>
+              {verified ? <img src={verifiedIcon} alt="" className="h-[14px] w-[14px] shrink-0" /> : null}
+            </div>
+            {/* Rating below name */}
             {p ? (
-              <span className="flex items-center gap-1 text-[13px] text-gray-dark">
+              <div className="mt-0.5 flex items-center gap-1 text-[13px]">
                 <span className="text-yellow-400">★</span>
-                <span className="font-semibold">{p.rating.toFixed(1)}</span>
+                <span className="font-semibold text-gray-dark">{p.rating.toFixed(1)}</span>
                 <span className="text-gray-light">({p.reviews})</span>
-              </span>
+              </div>
             ) : null}
           </div>
-          {/* Customer favorite badge */}
-          {p?.customerFavorite ? (
-            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-              <span>✦</span> Customer favorite
-            </span>
-          ) : null}
+          {/* Follow button — grey fill, no outline */}
+          <button
+            className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
+            aria-label="Follow"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <line x1="19" y1="8" x2="19" y2="14" />
+              <line x1="22" y1="11" x2="16" y2="11" />
+            </svg>
+          </button>
         </div>
-        {/* Follow icon button */}
-        <button
-          className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full border border-gray-stroke text-gray-dark transition-colors hover:bg-gray-hover"
-          aria-label="Follow"
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <line x1="19" y1="8" x2="19" y2="14" />
-            <line x1="22" y1="11" x2="16" y2="11" />
-          </svg>
-        </button>
-      </div>
 
-      {/* Headline */}
-      {headline ? (
-        <p className="mt-3 text-[13px] font-semibold leading-snug text-gray-dark">{headline}</p>
-      ) : null}
+        {/* Headline */}
+        {headline ? (
+          <p className="mt-2.5 text-[13px] font-semibold leading-snug text-gray-dark">{headline}</p>
+        ) : null}
 
-      {/* Minutes coached + followers */}
-      {p ? (
-        <p className="mt-1 text-[12px] text-gray-light">
-          <span className="font-medium text-gray-dark">{p.minutesCoached.toLocaleString()}</span> min coached
-          <span className="mx-2 text-gray-stroke">|</span>
-          <span className="font-medium text-gray-dark">{p.followers.toLocaleString()}</span> followers
-        </p>
-      ) : null}
+        {/* Minutes coached + followers */}
+        {p ? (
+          <p className="mt-1 text-[12px] text-gray-light">
+            <span className="font-medium text-gray-dark">{p.minutesCoached.toLocaleString()}</span> min coached
+            <span className="mx-2 text-gray-stroke">|</span>
+            <span className="font-medium text-gray-dark">{p.followers.toLocaleString()}</span> followers
+          </p>
+        ) : null}
 
-      {/* Badge chips */}
-      {p ? (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {p.supercoach ? (
-            <BadgeChip icon={<span>🏆</span>} label="Supercoach" />
-          ) : null}
-          {p.affiliation ? (
-            <BadgeChip
-              icon={
-                <span
-                  className="flex h-4 w-4 items-center justify-center rounded-sm text-[9px] font-bold text-white"
-                  style={{ backgroundColor: p.companyColor ?? "#555" }}
-                >
-                  {(p.affiliation.match(/at (.+)$/) ?? [])[1]?.[0] ?? "·"}
+        {/* Badge chips */}
+        {p ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {p.supercoach ? (
+              <BadgeChip icon={<span>🏆</span>} label="Supercoach" />
+            ) : null}
+            {p.affiliation ? (
+              <BadgeChip
+                icon={
+                  <span
+                    className="flex h-4 w-4 items-center justify-center rounded-sm text-[9px] font-bold text-white"
+                    style={{ backgroundColor: p.companyColor ?? "#555" }}
+                  >
+                    {(p.affiliation.match(/at (.+)$/) ?? [])[1]?.[0] ?? "·"}
+                  </span>
+                }
+                label={p.affiliation}
+              />
+            ) : null}
+            {p.company ? (
+              <BadgeChip
+                icon={
+                  <span
+                    className="flex h-4 w-4 items-center justify-center rounded-sm text-[9px] font-bold text-white"
+                    style={{ backgroundColor: p.companyColor ?? "#555" }}
+                  >
+                    {p.companyInitial}
+                  </span>
+                }
+                label={`Worked at ${p.company}`}
+              />
+            ) : null}
+            {p.successfulClients.length > 0 ? (
+              <div className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5">
+                <div className="flex -space-x-1.5">
+                  {p.successfulClients.map((s, i) => (
+                    <SchoolDot key={i} initial={s.initial} color={s.color} />
+                  ))}
+                </div>
+                <span className="text-[12px] font-medium text-gray-dark leading-none">
+                  Successful clients{p.successfulClientsMore ? ` +${p.successfulClientsMore}` : ""}
                 </span>
-              }
-              label={p.affiliation}
-            />
-          ) : null}
-          {p.company ? (
-            <BadgeChip
-              icon={
-                <span
-                  className="flex h-4 w-4 items-center justify-center rounded-sm text-[9px] font-bold text-white"
-                  style={{ backgroundColor: p.companyColor ?? "#555" }}
-                >
-                  {p.companyInitial}
-                </span>
-              }
-              label={`Worked at ${p.company}`}
-            />
-          ) : null}
-          {p.successfulClients.length > 0 ? (
-            <div className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5">
-              <div className="flex -space-x-1.5">
-                {p.successfulClients.map((s, i) => (
-                  <SchoolDot key={i} initial={s.initial} color={s.color} />
-                ))}
               </div>
-              <span className="text-[12px] font-medium text-gray-dark leading-none">
-                Successful clients{p.successfulClientsMore ? ` +${p.successfulClientsMore}` : ""}
-              </span>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
+            ) : null}
+          </div>
+        ) : null}
 
-      {/* CTAs */}
-      <div className="mt-4 flex gap-2">
-        <button className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-gray-stroke py-2 text-[13px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-          Message
-        </button>
-        <button className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-primary py-2 text-[13px] font-semibold text-white transition-colors hover:bg-primary-hover">
-          Book a session
-        </button>
+        {/* CTAs */}
+        <div className="mt-4 flex gap-2">
+          <button className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-gray-100 py-2 text-[13px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            Message
+          </button>
+          <button className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-gray-100 py-2 text-[13px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
+            Book a session
+          </button>
+        </div>
       </div>
     </motion.div>
   );
@@ -1087,18 +1086,11 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
     >
       {/* Avatar + name row */}
       <div className="flex items-start gap-3">
-        <div className="relative shrink-0">
-          <img
-            src={expert.avatar}
-            alt={expert.name}
-            className="h-[56px] w-[56px] rounded-xl object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
-          />
-          {isOnline ? (
-            <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-white">
-              Online now
-            </span>
-          ) : null}
-        </div>
+        <img
+          src={expert.avatar}
+          alt={expert.name}
+          className="h-[56px] w-[56px] shrink-0 rounded-xl object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
+        />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
             <span className="text-[14px] font-semibold leading-tight text-gray-dark">{expert.name}</span>
@@ -1109,6 +1101,16 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
               <span className="text-yellow-400">★</span>
               <span className="font-semibold text-gray-dark">{p.rating.toFixed(1)}</span>
               <span className="text-gray-light">({p.reviews})</span>
+            </div>
+          ) : null}
+          {/* Online now pill — sits below rating, no image overlap */}
+          {isOnline ? (
+            <div className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2 py-0.5">
+              <span className="relative flex h-1.5 w-1.5 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+              </span>
+              <span className="text-[10px] font-semibold text-gray-dark">Online now</span>
             </div>
           ) : null}
         </div>
@@ -1128,7 +1130,7 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
         </p>
       ) : null}
 
-      {/* Badges — icon + text only, no pill background */}
+      {/* Badges — company logo + role/affiliation rows, no client stacks */}
       {p ? (
         <div className="mt-3 flex flex-col gap-2">
           {p.supercoach ? (
@@ -1148,7 +1150,7 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
               <span className="truncate text-[12px] text-gray-dark">{p.affiliation}</span>
             </div>
           ) : null}
-          {p.company && !p.affiliation ? (
+          {p.company ? (
             <div className="flex items-center gap-2">
               <span
                 className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm text-[9px] font-bold text-white"
@@ -1156,18 +1158,8 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
               >
                 {p.companyInitial}
               </span>
-              <span className="truncate text-[12px] text-gray-dark">Worked at {p.company}</span>
-            </div>
-          ) : null}
-          {p.successfulClients.length > 0 ? (
-            <div className="flex items-center gap-2">
-              <div className="flex shrink-0 -space-x-1.5">
-                {p.successfulClients.slice(0, 3).map((s, i) => (
-                  <SchoolDot key={i} initial={s.initial} color={s.color} />
-                ))}
-              </div>
-              <span className="text-[12px] text-gray-dark">
-                Clients{p.successfulClientsMore ? ` +${p.successfulClientsMore}` : ""}
+              <span className="truncate text-[12px] text-gray-dark">
+                {p.affiliation ? `Worked at ${p.company}` : `Director at ${p.company}`}
               </span>
             </div>
           ) : null}
@@ -1178,7 +1170,7 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
       <div className="flex-1" />
 
       {isOnline ? (
-        <button className="mt-4 w-full cursor-pointer rounded-lg bg-primary py-2 text-[13px] font-semibold text-white transition-colors hover:bg-primary-hover">
+        <button className="mt-4 w-full cursor-pointer rounded-lg bg-gray-dark py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#222]">
           Chat now
         </button>
       ) : (
@@ -1193,25 +1185,34 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
 function SuggestedExperts() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const scroll = () => {
+  const scrollBy = (dir: 1 | -1) => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: scrollRef.current.clientWidth * 0.75, behavior: "smooth" });
+      scrollRef.current.scrollBy({ left: dir * scrollRef.current.clientWidth * 0.75, behavior: "smooth" });
     }
   };
+
+  const NavBtn = ({ dir, label }: { dir: 1 | -1; label: string }) => (
+    <button
+      onClick={() => scrollBy(dir)}
+      className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-stroke text-gray-dark transition-colors hover:bg-gray-hover"
+      aria-label={label}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        {dir === 1
+          ? <polyline points="9 18 15 12 9 6" />
+          : <polyline points="15 18 9 12 15 6" />}
+      </svg>
+    </button>
+  );
 
   return (
     <div className="py-5">
       <div className="flex items-center justify-between">
         <p className="text-[17px] font-semibold text-gray-dark">Suggested experts</p>
-        <button
-          onClick={scroll}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-stroke text-gray-dark transition-colors hover:bg-gray-hover"
-          aria-label="Scroll right"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-1.5">
+          <NavBtn dir={-1} label="Scroll left" />
+          <NavBtn dir={1} label="Scroll right" />
+        </div>
       </div>
       <div ref={scrollRef} className="scrollbar-hide mt-4 flex gap-3 overflow-x-auto">
         {suggestedExperts.map((expert, i) => (
