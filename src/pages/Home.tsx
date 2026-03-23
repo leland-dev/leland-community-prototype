@@ -360,7 +360,7 @@ function ActionBar({ likes, comments, reposts, shares, verified }: { likes: numb
         </button>
       ))}
       {verified && (
-        <button className="ml-auto cursor-pointer text-[15px] font-medium text-[#424242] underline underline-offset-2 transition-opacity hover:opacity-60">
+        <button className="ml-auto cursor-pointer text-[15px] font-medium text-gray-light transition-opacity hover:opacity-60">
           Free intro call
         </button>
       )}
