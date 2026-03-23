@@ -271,7 +271,7 @@ export default function ProfileV2() {
 
           {/* Headline */}
           <p className="mb-[6px] text-center text-[24px] font-medium leading-[1.3] text-[#333333] md:text-left">
-            Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB AdComm
+            Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB
           </p>
 
           {/* Credentials row */}
@@ -402,17 +402,17 @@ export default function ProfileV2() {
             </h2>
 
             {/* Offering cards grid */}
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-              <div className="h-[220px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-              <div className="h-[220px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-              <div className="h-[220px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+            <div className="scrollbar-hide flex gap-4 overflow-x-auto md:grid md:grid-cols-3 md:overflow-visible">
+              <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
+              <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
+              <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
             </div>
 
             {/* Full-width placeholder */}
             <div className="mt-4 h-[88px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
 
             {/* View more + guarantee */}
-            <div className="mt-4 flex items-center justify-between">
+            <div className="mt-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
               <button className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                 See 8 more packages
               </button>
@@ -460,10 +460,10 @@ export default function ProfileV2() {
             >
               Activity
             </h2>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="h-[220px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-              <div className="h-[220px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-              <div className="h-[220px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+            <div className="scrollbar-hide flex gap-4 overflow-x-auto md:grid md:grid-cols-3 md:overflow-visible">
+              <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
+              <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
+              <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
             </div>
             <button className="mt-4 cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
               See all
@@ -544,9 +544,9 @@ export default function ProfileV2() {
             <div className="my-5 border-t border-gray-200" />
 
             {/* Rating breakdown — Airbnb-style columns */}
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+            <div className="flex flex-col gap-4 md:grid md:grid-cols-5">
               {/* Overall rating distribution */}
-              <div className="col-span-2 sm:col-span-1">
+              <div className="md:col-span-1">
                 <p className="mb-1 text-[16px] font-medium text-gray-dark">Overall rating</p>
                 <div className="flex flex-col gap-1">
                   {[
@@ -569,29 +569,31 @@ export default function ProfileV2() {
                 </div>
               </div>
 
-              {[
-                {
-                  label: "Knowledge",
-                  score: 5.0,
-                  icon: <img src={bookBookmarkIcon} alt="" className="h-[32px] w-[32px]" />,
-                },
-                {
-                  label: "Value",
-                  score: 4.9,
-                  icon: <img src={piggyBankIcon} alt="" className="h-[32px] w-[32px]" />,
-                },
-                {
-                  label: "Responsiveness",
-                  score: 5.0,
-                  icon: <img src={stopwatchIcon} alt="" className="h-[32px] w-[32px]" />,
-                },
-                {
-                  label: "Supportiveness",
-                  score: 5.0,
-                  icon: <img src={supportivenessIcon} alt="" className="h-[32px] w-[32px]" />,
-                },
-              ].map((item) => (
-                <div key={item.label} className="flex flex-col justify-between border-l border-gray-200 pl-4">
+              {/* Category scores — horizontal scroll on mobile, grid columns on desktop */}
+              <div className="scrollbar-hide col-span-4 flex gap-3 overflow-x-auto md:contents">
+                {[
+                  {
+                    label: "Knowledge",
+                    score: 5.0,
+                    icon: <img src={bookBookmarkIcon} alt="" className="h-[32px] w-[32px]" />,
+                  },
+                  {
+                    label: "Value",
+                    score: 4.9,
+                    icon: <img src={piggyBankIcon} alt="" className="h-[32px] w-[32px]" />,
+                  },
+                  {
+                    label: "Responsiveness",
+                    score: 5.0,
+                    icon: <img src={stopwatchIcon} alt="" className="h-[32px] w-[32px]" />,
+                  },
+                  {
+                    label: "Supportiveness",
+                    score: 5.0,
+                    icon: <img src={supportivenessIcon} alt="" className="h-[32px] w-[32px]" />,
+                  },
+                ].map((item) => (
+                  <div key={item.label} className="flex w-[60vw] shrink-0 flex-col justify-between rounded-lg border border-gray-200 p-4 md:w-auto md:shrink md:rounded-none md:border-0 md:border-l md:p-0 md:pl-4">
                   <div>
                     <p className="text-[16px] font-medium text-gray-dark">{item.label}</p>
                     <p className="text-[24px] font-medium text-gray-dark">{item.score.toFixed(1)}</p>
@@ -599,6 +601,7 @@ export default function ProfileV2() {
                   <div className="mt-3 text-gray-dark">{item.icon}</div>
                 </div>
               ))}
+              </div>
             </div>
 
             <div className="my-6 border-t border-gray-200" />
