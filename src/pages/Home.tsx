@@ -393,11 +393,6 @@ function ActionBar({ likes, comments, reposts, shares, verified }: { likes: numb
           {count > 0 && label !== "Share" && <span className="text-[15px] font-normal">{formatCount(count)}</span>}
         </button>
       ))}
-      {verified && (
-        <button className="ml-auto cursor-pointer text-[15px] font-medium text-gray-light transition-opacity hover:opacity-60">
-          Free intro call
-        </button>
-      )}
     </div>
   );
 }
