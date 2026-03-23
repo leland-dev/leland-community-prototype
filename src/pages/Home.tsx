@@ -635,20 +635,17 @@ function LiveCard({ live }: { live: LivePost["live"] }) {
           style={{ border: "none", pointerEvents: "none" }}
         />
 
-        {/* Live comments overlay — left side */}
-        <div className="pointer-events-none absolute bottom-10 left-3 flex w-[55%] flex-col justify-end gap-1.5 overflow-hidden" style={{ height: 200 }}>
+        {/* Live comments overlay — bottom-left third */}
+        <div className="pointer-events-none absolute bottom-10 left-3 flex w-[33%] flex-col justify-end gap-1.5 overflow-hidden" style={{ height: 200 }}>
           {LIVE_COMMENTS.map((c, i) => (
             <motion.div
               key={i}
-              className="flex max-w-full items-start gap-1.5"
+              className="flex max-w-full"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: [0, 1, 1, 0], y: [16, 0, 0, -8] }}
               transition={{ duration: 4, delay: c.delay, repeat: Infinity, repeatDelay: LIVE_COMMENTS.length * 2.5 - 4, ease: "easeOut" }}
             >
-              <span className="shrink-0 rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
-                {c.user}
-              </span>
-              <span className="rounded-lg bg-black/40 px-2 py-0.5 text-[12px] leading-snug text-white backdrop-blur-sm">
+              <span className="rounded-lg bg-black/40 px-2 py-0.5 text-[10px] leading-snug text-white/90 backdrop-blur-sm">
                 {c.text}
               </span>
             </motion.div>
