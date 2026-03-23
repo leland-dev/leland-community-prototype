@@ -215,11 +215,11 @@ const posts: Post[] = [
   {
     id: 15,
     type: "live",
-    author: "Nina Kowalski",
+    author: "Eric",
     avatar: pic7,
     time: "Now",
     verified: true,
-    headline: "Partner at McKinsey & Company | Recruiting Lead",
+    headline: "Ex-McKinsey | Consulting Recruiting Coach | 400+ Offers",
     body: "Going live to answer your consulting recruiting questions — case prep, fit interviews, offer negotiation. Drop your questions in the chat.",
     live: {
       title: "Consulting Recruiting Q&A",
@@ -749,6 +749,17 @@ const coachProfiles: Record<string, CoachProfile> = {
     rating: 4.9, reviews: 103,
     minutesCoached: 98730, followers: 412,
     company: "McKinsey & Company", companyColor: "#003580", companyInitial: "M",
+    successfulClients: [
+      { initial: "D", color: "#006400" }, { initial: "B", color: "#003580" },
+      { initial: "A", color: "#7B0000" },
+    ],
+    successfulClientsMore: 14,
+  },
+  "Eric": {
+    rating: 4.9, reviews: 103, supercoach: true,
+    minutesCoached: 98730, followers: 412,
+    company: "McKinsey & Company", companyColor: "#003580", companyInitial: "M",
+    affiliation: "Recruiting at McKinsey & Company",
     successfulClients: [
       { initial: "D", color: "#006400" }, { initial: "B", color: "#003580" },
       { initial: "A", color: "#7B0000" },
