@@ -430,7 +430,7 @@ function LinkCard({ link }: { link: LinkPost["link"] }) {
       href={link.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="mt-3 block max-w-[480px] overflow-hidden rounded-xl border border-gray-stroke transition-colors hover:bg-gray-hover"
+      className="mt-3 block overflow-hidden rounded-xl border border-gray-stroke transition-colors hover:bg-gray-hover"
     >
       <div className="relative w-full" style={{ paddingBottom: `${(1 / 1.91) * 100}%` }}>
         <img
