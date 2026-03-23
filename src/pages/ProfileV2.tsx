@@ -96,25 +96,23 @@ export default function ProfileV2() {
     return () => observer.disconnect();
   }, []);
 
-  // Observer B: Track active section group
+  // Observer B: Track active section group via scroll position
   useEffect(() => {
-    const groups = Object.values(groupRefs.current).filter(Boolean) as HTMLDivElement[];
-    if (groups.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const id = entry.target.getAttribute("data-group");
-            if (id) setActiveSection(id);
-          }
+    const handleScroll = () => {
+      const offset = 80;
+      let active: string | null = null;
+      for (const section of PROFILE_SECTIONS) {
+        const el = groupRefs.current[section.id];
+        if (el && el.getBoundingClientRect().top <= offset) {
+          active = section.id;
         }
-      },
-      { rootMargin: "-60px 0px -70% 0px" },
-    );
+      }
+      if (active) setActiveSection(active);
+    };
 
-    groups.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Auto-scroll active tab into view
