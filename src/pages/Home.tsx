@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import profilePhoto from "../assets/profile photos/profile photo.png";
-import lelandLogo from "../assets/Logo.svg";
+import lelandCompass from "../assets/leland-compass.svg";
 
 import likesIcon from "../assets/icons/likes.svg";
 import commentsIcon from "../assets/icons/comments.svg";
@@ -160,7 +160,7 @@ const posts: Post[] = [
     id: 13,
     type: "event",
     author: "Leland",
-    avatar: lelandLogo,
+    avatar: lelandCompass,
     time: "1h",
     headline: "Official Leland Events",
     body: "Join us for a live panel with admissions officers from HBS, Wharton, and GSB. Get your questions answered directly — no fluff, no scripts.",
@@ -447,10 +447,12 @@ function LinkCard({ link }: { link: LinkPost["link"] }) {
 function EventCard({ event }: { event: EventPost["event"] }) {
   return (
     <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
-      <img src={event.image} alt={event.title} className="h-[180px] w-full object-cover" />
+      <div className="relative">
+        <img src={event.image} alt={event.title} className="h-[180px] w-full object-cover" />
+        <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-0.5 text-[13px] font-medium text-gray-dark backdrop-blur-sm">{event.format}</span>
+      </div>
       <div className="px-4 py-4">
-        <span className="inline-block rounded-full bg-[#222222]/[0.06] px-3 py-0.5 text-[13px] font-medium text-gray-dark">{event.format}</span>
-        <p className="mt-2 text-[17px] font-semibold leading-snug text-gray-dark">{event.title}</p>
+        <p className="text-[17px] font-semibold leading-snug text-gray-dark">{event.title}</p>
         <div className="mt-2 space-y-1">
           <div className="flex items-center gap-2 text-[15px] text-gray-light">
             <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -511,11 +513,17 @@ function FeedPost({ post }: { post: Post }) {
       <div className="flex gap-3">
         {/* Left column: avatar */}
         <div className="group relative h-10 w-10 shrink-0 cursor-pointer">
-          <img
-            src={post.avatar}
-            alt={post.author}
-            className="h-10 w-10 rounded-full object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)]"
-          />
+          {post.type === "event" ? (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary">
+              <img src={post.avatar} alt={post.author} className="h-5 w-5 brightness-0 invert" />
+            </div>
+          ) : (
+            <img
+              src={post.avatar}
+              alt={post.author}
+              className="h-10 w-10 rounded-full object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)]"
+            />
+          )}
           <div className="absolute inset-0 rounded-full bg-black/0 transition-colors group-hover:bg-black/10" />
         </div>
         {/* Right column: content */}
