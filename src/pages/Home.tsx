@@ -89,7 +89,7 @@ interface MilestonePost extends PostBase {
     clientName: string;
     clientAvatar: string;
     schoolColor: string;
-    schoolLogo: string;
+    schoolInitial: string;
   };
 }
 
@@ -194,7 +194,7 @@ const posts: Post[] = [
       clientName: "Jordan M.",
       clientAvatar: pic6,
       schoolColor: "#002f6c",
-      schoolLogo: "https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/UPenn_shield_with_banner.svg/150px-UPenn_shield_with_banner.svg.png",
+      schoolInitial: "W",
     },
     likes: 431,
     comments: 47,
@@ -515,6 +515,14 @@ function MilestoneCard({ milestone }: { milestone: MilestonePost["milestone"] })
 
       {/* Card content */}
       <div className="flex items-center gap-4 px-4 py-4">
+        {/* School initial avatar */}
+        <div
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-[22px] font-bold text-white"
+          style={{ backgroundColor: milestone.schoolColor }}
+        >
+          {milestone.schoolInitial}
+        </div>
+
         {/* Client avatar */}
         <div className="relative shrink-0">
           <img
@@ -533,13 +541,6 @@ function MilestoneCard({ milestone }: { milestone: MilestonePost["milestone"] })
           <p className="mt-0.5 text-[17px] font-semibold leading-tight text-gray-dark">{milestone.school}</p>
           <p className="text-[14px] text-gray-light">{milestone.program}</p>
         </div>
-
-        {/* School logo */}
-        <img
-          src={milestone.schoolLogo}
-          alt={milestone.school}
-          className="h-12 w-12 shrink-0 object-contain"
-        />
       </div>
     </div>
   );
