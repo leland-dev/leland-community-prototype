@@ -611,19 +611,61 @@ function MilestoneCard({ milestone }: { milestone: MilestonePost["milestone"] })
   );
 }
 
+const LIVE_COMMENTS = [
+  { user: "alex_mba", text: "How do you handle the 'why consulting' question?", delay: 0 },
+  { user: "priya_t", text: "Should I cold email partners or go through recruiting?", delay: 2.5 },
+  { user: "jliu_biz", text: "What's the biggest mistake candidates make in fit interviews?", delay: 5 },
+  { user: "mwilliams", text: "Is a non-target school a dealbreaker for MBB?", delay: 7.5 },
+  { user: "sarah_k", text: "How many cases should I do before my first round?", delay: 10 },
+  { user: "r_nguyen", text: "Love your content Nina!! 🙌", delay: 12 },
+  { user: "david_c", text: "Can you talk about the BCG vs McKinsey culture diff?", delay: 14.5 },
+  { user: "emma_t", text: "What about lateral hires from industry?", delay: 17 },
+];
+
 function LiveCard({ live }: { live: LivePost["live"] }) {
   return (
     <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
-      <div className="relative">
-        <img src={live.image} alt={live.title} className="h-[180px] w-full object-cover brightness-75" />
-        {/* LIVE badge */}
-        <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-red-500 px-3 py-1">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
-          </span>
-          <span className="text-[13px] font-semibold tracking-wide text-white">LIVE</span>
+      {/* Video + comments */}
+      <div className="relative h-[300px] bg-black">
+        {/* Video — swap src for real video when available */}
+        <video
+          src={live.image}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="h-full w-full object-cover opacity-90"
+        />
+
+        {/* Live comments overlay — left side */}
+        <div className="pointer-events-none absolute bottom-10 left-3 flex w-[55%] flex-col justify-end gap-1.5 overflow-hidden" style={{ height: 200 }}>
+          {LIVE_COMMENTS.map((c, i) => (
+            <motion.div
+              key={i}
+              className="flex max-w-full items-start gap-1.5"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: [0, 1, 1, 0], y: [16, 0, 0, -8] }}
+              transition={{ duration: 4, delay: c.delay, repeat: Infinity, repeatDelay: LIVE_COMMENTS.length * 2.5 - 4, ease: "easeOut" }}
+            >
+              <span className="shrink-0 rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
+                {c.user}
+              </span>
+              <span className="rounded-lg bg-black/40 px-2 py-0.5 text-[12px] leading-snug text-white backdrop-blur-sm">
+                {c.text}
+              </span>
+            </motion.div>
+          ))}
         </div>
+
+        {/* LIVE badge — grey with red dot */}
+        <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 backdrop-blur-sm">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+          </span>
+          <span className="text-[13px] font-semibold tracking-wide text-gray-dark">LIVE</span>
+        </div>
+
         {/* Viewer count */}
         <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1 backdrop-blur-sm">
           <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -632,6 +674,8 @@ function LiveCard({ live }: { live: LivePost["live"] }) {
           <span className="text-[13px] font-medium text-white">{live.viewers.toLocaleString()} watching</span>
         </div>
       </div>
+
+      {/* Info row */}
       <div className="px-4 py-4">
         <p className="text-[17px] font-semibold leading-snug text-gray-dark">{live.title}</p>
         <p className="mt-1 text-[14px] text-gray-light">{live.topic}</p>
