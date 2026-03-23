@@ -887,11 +887,11 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="text-[14px] font-semibold leading-tight text-gray-dark">{author}</span>
-            {verified ? <img src={verifiedIcon} alt="" className="h-[13px] w-[13px] shrink-0" /> : null}
+            <span className="text-[17px] font-semibold leading-tight text-gray-dark">{author}</span>
+            {verified ? <img src={verifiedIcon} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
           </div>
           {p ? (
-            <div className="mt-0.5 flex items-center gap-1 text-[12px]">
+            <div className="mt-0.5 flex items-center gap-1 text-[15px]">
               <span className="text-yellow-400">★</span>
               <span className="font-semibold text-gray-dark">{p.rating.toFixed(1)}</span>
               <span className="text-gray-light">({p.reviews})</span>
@@ -914,12 +914,12 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
 
       {/* Headline */}
       {headline ? (
-        <p className="mt-3 line-clamp-2 text-[12px] font-semibold leading-snug text-gray-dark">{headline}</p>
+        <p className="mt-3 line-clamp-2 text-[15px] font-semibold leading-snug text-gray-dark">{headline}</p>
       ) : null}
 
       {/* Minutes coached + followers */}
       {p ? (
-        <p className="mt-1 text-[11px] text-gray-light">
+        <p className="mt-1 text-[14px] text-gray-light">
           <span className="font-medium text-gray-dark">{p.minutesCoached.toLocaleString()}</span> min coached
           <span className="mx-1.5 text-gray-stroke">|</span>
           <span className="font-medium text-gray-dark">{p.followers.toLocaleString()}</span> followers
@@ -931,30 +931,30 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
         <div className="mt-3 flex flex-col gap-2">
           {p.supercoach ? (
             <div className="flex items-center gap-2">
-              <span className="text-[13px] leading-none">🏆</span>
-              <span className="text-[12px] text-gray-dark">Supercoach</span>
+              <span className="text-[15px] leading-none">🏆</span>
+              <span className="text-[14px] text-gray-dark">Supercoach</span>
             </div>
           ) : null}
           {p.affiliation ? (
             <div className="flex items-center gap-2">
               <span
-                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm text-[9px] font-bold text-white"
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-[10px] font-bold text-white"
                 style={{ backgroundColor: p.companyColor ?? "#555" }}
               >
                 {(p.affiliation.match(/at (.+)$/) ?? [])[1]?.[0] ?? "·"}
               </span>
-              <span className="truncate text-[12px] text-gray-dark">{p.affiliation}</span>
+              <span className="truncate text-[14px] text-gray-dark">{p.affiliation}</span>
             </div>
           ) : null}
           {p.company ? (
             <div className="flex items-center gap-2">
               <span
-                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm text-[9px] font-bold text-white"
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-[10px] font-bold text-white"
                 style={{ backgroundColor: p.companyColor ?? "#555" }}
               >
                 {p.companyInitial}
               </span>
-              <span className="truncate text-[12px] text-gray-dark">
+              <span className="truncate text-[14px] text-gray-dark">
                 {p.affiliation ? `Worked at ${p.company}` : `Director at ${p.company}`}
               </span>
             </div>
@@ -964,13 +964,13 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
 
       {/* CTAs */}
       <div className="mt-4 flex gap-2">
-        <button className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-gray-100 py-2 text-[13px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <button className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-gray-100 py-2.5 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
           Message
         </button>
-        <button className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-gray-100 py-2 text-[13px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
+        <button className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-gray-100 py-2.5 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
           Book a session
         </button>
       </div>
@@ -1083,11 +1083,11 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-            <span className="text-[14px] font-semibold leading-tight text-gray-dark">{expert.name}</span>
-            {expert.verified ? <img src={verifiedIcon} alt="" className="h-[13px] w-[13px] shrink-0" /> : null}
+            <span className="text-[17px] font-semibold leading-tight text-gray-dark">{expert.name}</span>
+            {expert.verified ? <img src={verifiedIcon} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
           </div>
           {p ? (
-            <div className="mt-0.5 flex items-center gap-1 text-[12px]">
+            <div className="mt-0.5 flex items-center gap-1 text-[15px]">
               <span className="text-yellow-400">★</span>
               <span className="font-semibold text-gray-dark">{p.rating.toFixed(1)}</span>
               <span className="text-gray-light">({p.reviews})</span>
@@ -1097,65 +1097,62 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
           {isOnline ? (
             <div className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2 py-0.5">
               <span className="relative flex h-2 w-2 shrink-0">
-                {/* outer slow pulse ring */}
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" style={{ animationDuration: "1.2s" }} />
-                {/* inner fast pulse ring */}
                 <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-30 animate-ping" style={{ animationDuration: "0.7s", animationDelay: "0.3s" }} />
-                {/* solid core with LED glow */}
                 <span
                   className="relative inline-flex h-2 w-2 rounded-full bg-primary"
                   style={{ boxShadow: "0 0 6px 2px rgba(21,176,120,0.8), 0 0 12px 4px rgba(21,176,120,0.4)" }}
                 />
               </span>
-              <span className="text-[10px] font-semibold text-gray-dark">Online now</span>
+              <span className="text-[13px] font-semibold text-gray-dark">Online now</span>
             </div>
           ) : null}
         </div>
       </div>
 
       {/* Headline */}
-      <p className="mt-3 line-clamp-2 text-[12px] font-semibold leading-snug text-gray-dark">
+      <p className="mt-3 line-clamp-2 text-[15px] font-semibold leading-snug text-gray-dark">
         {expert.headline}
       </p>
 
       {/* Stats */}
       {p ? (
-        <p className="mt-1 text-[11px] text-gray-light">
+        <p className="mt-1 text-[14px] text-gray-light">
           <span className="font-medium text-gray-dark">{p.minutesCoached.toLocaleString()}</span> min coached
           <span className="mx-1.5 text-gray-stroke">|</span>
           <span className="font-medium text-gray-dark">{p.followers.toLocaleString()}</span> followers
         </p>
       ) : null}
 
-      {/* Badges — company logo + role/affiliation rows, no client stacks */}
+      {/* Badges — company logo + role/affiliation rows */}
       {p ? (
         <div className="mt-3 flex flex-col gap-2">
           {p.supercoach ? (
             <div className="flex items-center gap-2">
-              <span className="text-[13px] leading-none">🏆</span>
-              <span className="text-[12px] text-gray-dark">Supercoach</span>
+              <span className="text-[15px] leading-none">🏆</span>
+              <span className="text-[14px] text-gray-dark">Supercoach</span>
             </div>
           ) : null}
           {p.affiliation ? (
             <div className="flex items-center gap-2">
               <span
-                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm text-[9px] font-bold text-white"
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-[10px] font-bold text-white"
                 style={{ backgroundColor: p.companyColor ?? "#555" }}
               >
                 {(p.affiliation.match(/at (.+)$/) ?? [])[1]?.[0] ?? "·"}
               </span>
-              <span className="truncate text-[12px] text-gray-dark">{p.affiliation}</span>
+              <span className="truncate text-[14px] text-gray-dark">{p.affiliation}</span>
             </div>
           ) : null}
           {p.company ? (
             <div className="flex items-center gap-2">
               <span
-                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm text-[9px] font-bold text-white"
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-[10px] font-bold text-white"
                 style={{ backgroundColor: p.companyColor ?? "#555" }}
               >
                 {p.companyInitial}
               </span>
-              <span className="truncate text-[12px] text-gray-dark">
+              <span className="truncate text-[14px] text-gray-dark">
                 {p.affiliation ? `Worked at ${p.company}` : `Director at ${p.company}`}
               </span>
             </div>
@@ -1167,11 +1164,11 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
       <div className="flex-1" />
 
       {isOnline ? (
-        <button className="mt-4 w-full cursor-pointer rounded-lg bg-gray-dark py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#222]">
+        <button className="mt-4 w-full cursor-pointer rounded-lg bg-gray-dark py-2.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#222]">
           Chat now
         </button>
       ) : (
-        <button className="mt-4 w-full cursor-pointer rounded-lg bg-gray-100 py-2 text-[13px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
+        <button className="mt-4 w-full cursor-pointer rounded-lg bg-gray-100 py-2.5 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
           Book a session
         </button>
       )}
