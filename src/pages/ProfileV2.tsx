@@ -14,7 +14,6 @@ import bookBookmarkIcon from "../assets/icons/book-bookmark.svg";
 import piggyBankIcon from "../assets/icons/Piggy bank, Coin.1.svg";
 import stopwatchIcon from "../assets/icons/stopwatch.svg";
 import supportivenessIcon from "../assets/icons/supportiveness.svg";
-import wreathImg from "../assets/img/Wreath.svg";
 import wreathSmallImg from "../assets/img/wreath-small.svg";
 import questionIcon from "../assets/icons/question-filled.svg";
 import starIcon from "../assets/icons/icon/star.svg";

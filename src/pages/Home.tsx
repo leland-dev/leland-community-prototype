@@ -1,7 +1,5 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
-import HomeSidebar from "../components/HomeSidebar";
-import { useSetRightSidebar } from "../components/RightSidebarContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 
 import likesIcon from "../assets/icons/likes.svg";
@@ -460,8 +458,6 @@ function SuggestedExperts() {
 // ─── Page ─────────────────────────────────────────────
 
 export default function Home() {
-  // useSetRightSidebar(<HomeSidebar />);
-
   return (
     <div>
       {/* Post composer */}

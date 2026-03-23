@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import verifiedIcon from "../assets/icons/verified.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
 import likesIcon from "../assets/icons/likes.svg";
@@ -15,11 +15,8 @@ import clientLogo1 from "../assets/logos/Rectangle 3012.png";
 import clientLogo2 from "../assets/logos/Rectangle 3013.png";
 import clientLogo3 from "../assets/logos/Rectangle 3017.png";
 import clientLogo4 from "../assets/logos/Rectangle 3018.png";
-import blueStarIcon from "../assets/icons/blue0star.svg";
 import coverImage from "../assets/img/cpver-image 1.jpg";
 import workTogetherImg from "../assets/img/work-together.png";
-import HomeSidebar from "../components/HomeSidebar";
-import { useSetRightSidebar } from "../components/RightSidebarContext";
 
 // Sample post images
 const postImages = [
@@ -35,7 +32,7 @@ function formatCount(n: number): string {
 }
 
 // Post component
-function FeedPost({ body, image, time, likes, comments, reposts, shares }: {
+function FeedPost({ body, image, time, likes, comments, reposts }: {
   body: string;
   image?: string;
   time: string;
@@ -44,8 +41,6 @@ function FeedPost({ body, image, time, likes, comments, reposts, shares }: {
   reposts: number;
   shares: number;
 }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
   return (
     <div className="border-b border-gray-stroke pt-5 pb-[14px]">
       <div className="flex gap-3">
@@ -118,8 +113,6 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState<"activity" | "offerings" | "reviews" | "about">("activity");
   const [isVerifiedExpert, setIsVerifiedExpert] = useState(true);
   const [largeBadges, setLargeBadges] = useState(false);
-
-  // useSetRightSidebar(<HomeSidebar />);
 
   return (
     <>
