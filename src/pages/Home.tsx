@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import lelandCompass from "../assets/leland-compass.svg";
@@ -88,6 +89,7 @@ interface MilestonePost extends PostBase {
     clientName: string;
     clientAvatar: string;
     schoolColor: string;
+    schoolLogo: string;
   };
 }
 
@@ -192,6 +194,7 @@ const posts: Post[] = [
       clientName: "Jordan M.",
       clientAvatar: pic6,
       schoolColor: "#002f6c",
+      schoolLogo: "https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/UPenn_shield_with_banner.svg/150px-UPenn_shield_with_banner.svg.png",
     },
     likes: 431,
     comments: 47,
@@ -480,11 +483,39 @@ function EventCard({ event }: { event: EventPost["event"] }) {
   );
 }
 
+const CONFETTI = [
+  { color: "#f59e0b", x: 15, delay: 0,    dur: 1.4 },
+  { color: "#15b078", x: 30, delay: 0.15, dur: 1.6 },
+  { color: "#3b82f6", x: 50, delay: 0.05, dur: 1.3 },
+  { color: "#fb5a42", x: 65, delay: 0.25, dur: 1.5 },
+  { color: "#a855f7", x: 78, delay: 0.1,  dur: 1.7 },
+  { color: "#f59e0b", x: 88, delay: 0.3,  dur: 1.4 },
+  { color: "#15b078", x: 22, delay: 0.2,  dur: 1.6 },
+  { color: "#fb5a42", x: 55, delay: 0.35, dur: 1.3 },
+  { color: "#3b82f6", x: 42, delay: 0.08, dur: 1.5 },
+  { color: "#a855f7", x: 93, delay: 0.18, dur: 1.4 },
+];
+
 function MilestoneCard({ milestone }: { milestone: MilestonePost["milestone"] }) {
   return (
-    <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
-      <div className="h-1.5 w-full" style={{ backgroundColor: milestone.schoolColor }} />
+    <div className="relative mt-3 overflow-hidden rounded-xl border border-gray-stroke">
+      {/* Confetti */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-16 overflow-hidden">
+        {CONFETTI.map((c, i) => (
+          <motion.div
+            key={i}
+            className="absolute top-0 h-2 w-1.5 rounded-sm"
+            style={{ left: `${c.x}%`, backgroundColor: c.color }}
+            initial={{ y: -8, opacity: 1, rotate: 0 }}
+            animate={{ y: 56, opacity: [1, 1, 0], rotate: 360 }}
+            transition={{ duration: c.dur, delay: c.delay, repeat: Infinity, repeatDelay: 2.5, ease: "easeIn" }}
+          />
+        ))}
+      </div>
+
+      {/* Card content */}
       <div className="flex items-center gap-4 px-4 py-4">
+        {/* Client avatar */}
         <div className="relative shrink-0">
           <img
             src={milestone.clientAvatar}
@@ -495,11 +526,20 @@ function MilestoneCard({ milestone }: { milestone: MilestonePost["milestone"] })
             🎉
           </span>
         </div>
+
+        {/* Text */}
         <div className="min-w-0 flex-1">
           <p className="text-[13px] font-medium uppercase tracking-wide text-gray-light">Admitted</p>
           <p className="mt-0.5 text-[17px] font-semibold leading-tight text-gray-dark">{milestone.school}</p>
           <p className="text-[14px] text-gray-light">{milestone.program}</p>
         </div>
+
+        {/* School logo */}
+        <img
+          src={milestone.schoolLogo}
+          alt={milestone.school}
+          className="h-12 w-12 shrink-0 object-contain"
+        />
       </div>
     </div>
   );
