@@ -360,7 +360,7 @@ function ActionBar({ likes, comments, reposts, shares, verified }: { likes: numb
         </button>
       ))}
       {verified && (
-        <button className="ml-auto cursor-pointer rounded-[100px] bg-[#222222]/5 px-[14px] py-1.5 text-[15px] font-medium text-[#424242] transition-colors hover:bg-[#222222]/[0.08]">
+        <button className="ml-auto cursor-pointer text-[15px] font-medium text-[#424242] underline underline-offset-2 transition-opacity hover:opacity-60">
           Free intro call
         </button>
       )}
@@ -470,7 +470,7 @@ function EventCard({ event }: { event: EventPost["event"] }) {
         {event.spotsLeft !== undefined && (
           <div className="mt-3 flex items-center justify-between">
             <p className="text-[13px] font-medium text-orange-500">Only {event.spotsLeft} spots left</p>
-            <button className="cursor-pointer rounded-[100px] bg-[#222222]/5 px-[14px] py-1.5 text-[15px] font-medium text-[#424242] transition-colors hover:bg-[#222222]/[0.08]">
+            <button className="cursor-pointer rounded-lg bg-[#222222]/5 px-[14px] py-1.5 text-[15px] font-medium text-[#424242] transition-colors hover:bg-[#222222]/[0.08]">
               Register for free
             </button>
           </div>
