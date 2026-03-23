@@ -52,7 +52,7 @@ export default function ProfileV2() {
   const [stickyNavVisible, setStickyNavVisible] = useState(false);
   const [activeSection, setActiveSection] = useState("offerings");
   const [adminOpen, setAdminOpen] = useState(false);
-  const [showCustomerFavorite, setShowCustomerFavorite] = useState(true);
+  const [showCustomerFavorite, setShowCustomerFavorite] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
 
   const adminRef = useRef<HTMLDivElement>(null);
@@ -174,8 +174,8 @@ export default function ProfileV2() {
                     alt="Samantha Parker"
                     className="h-10 w-10 rounded-[4px] object-cover"
                   />
-                  <div className="flex flex-col text-[16px] leading-tight">
-                    <span className="font-medium text-gray-dark">Samantha Parker</span>
+                  <div className="flex flex-col text-[16px] leading-tight md:text-[16px]">
+                    <span className="text-[18px] font-medium text-gray-dark md:text-[16px]">Samantha Parker</span>
                     <span className="text-[#707070]">$150/hr</span>
                   </div>
                 </div>
@@ -302,11 +302,11 @@ export default function ProfileV2() {
 
 
           {/* Alt stats bar + Customer Favorite */}
-          <div className="mb-2 flex flex-col rounded-lg border border-gray-200">
+          <div className="mb-2 flex flex-col rounded-lg border-transparent md:border-gray-200 md:border">
             <div className="flex">
               {/* Reviews (combined) */}
               <div
-                className="flex flex-1 cursor-pointer flex-col items-start py-3 pl-3 transition-opacity hover:opacity-70 md:items-center md:py-4 md:pl-0"
+                className="flex flex-1 cursor-pointer flex-col items-center py-3 transition-opacity hover:opacity-70 md:py-4"
                 onClick={() => scrollToSection("reviews")}
               >
                 <div className="flex items-center gap-1">
@@ -319,7 +319,7 @@ export default function ProfileV2() {
               <div className="h-[36px] w-px self-center bg-gray-200" />
 
               {/* Followers */}
-              <div className="flex flex-1 flex-col items-start py-3 pl-3 md:items-center md:py-4 md:pl-0">
+              <div className="flex flex-1 flex-col items-center py-3 md:py-4">
                 <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">182</span>
                 <span className="text-[14px] leading-tight text-gray-dark md:text-[16px]">Followers</span>
               </div>
@@ -328,7 +328,7 @@ export default function ProfileV2() {
 
               {/* Posts */}
               <div
-                className="flex flex-1 cursor-pointer flex-col items-start py-3 pl-3 transition-opacity hover:opacity-70 md:items-center md:py-4 md:pl-0"
+                className="flex flex-1 cursor-pointer flex-col items-center py-3 transition-opacity hover:opacity-70 md:py-4"
                 onClick={() => scrollToSection("activity")}
               >
                 <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">12</span>
@@ -338,7 +338,7 @@ export default function ProfileV2() {
               <div className="h-[36px] w-px self-center bg-gray-200" />
 
               {/* Impressions */}
-              <div className="flex flex-1 flex-col items-start py-3 pl-3 md:items-center md:py-4 md:pl-0">
+              <div className="flex flex-1 flex-col items-center py-3 md:py-4">
                 <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">8.2k</span>
                 <span className="text-[14px] leading-tight text-gray-dark md:text-[16px]">Impressions</span>
               </div>
@@ -358,12 +358,12 @@ export default function ProfileV2() {
           </div>
 
           {/* Mobile inline CTA */}
-          <button className="mt-3 w-full cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90 md:hidden">
+          <button className="mt-3 w-full cursor-pointer rounded-full bg-[#038561] px-4 py-3 text-[18px] font-medium text-white transition-colors hover:bg-[#038561]/90 md:hidden">
             Free intro call
           </button>
 
           {/* Availability row */}
-          <div className="mt-2 flex flex-col text-[16px] md:mt-0 md:flex-row md:items-center md:justify-between">
+          <div className="mt-2 flex flex-col items-center text-center text-[16px] md:items-start md:text-left md:mt-0 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-2">
               <span className="text-[#1A73E8]">Available tomorrow</span>
               <span className="text-[#707070]">·</span>
