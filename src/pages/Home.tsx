@@ -98,7 +98,7 @@ interface LivePost extends PostBase {
   body: string;
   live: {
     title: string;
-    image: string;
+    videoId: string;
     viewers: number;
     topic: string;
   };
@@ -223,7 +223,7 @@ const posts: Post[] = [
     body: "Going live to answer your consulting recruiting questions — case prep, fit interviews, offer negotiation. Drop your questions in the chat.",
     live: {
       title: "Consulting Recruiting Q&A",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=900&h=400&fit=crop",
+      videoId: "1cfIAVasP6E",
       viewers: 214,
       topic: "Case prep · Fit interviews · Offer negotiation",
     },
@@ -627,14 +627,12 @@ function LiveCard({ live }: { live: LivePost["live"] }) {
     <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
       {/* Video + comments */}
       <div className="relative h-[300px] bg-black">
-        {/* Video — swap src for real video when available */}
-        <video
-          src={live.image}
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="h-full w-full object-cover opacity-90"
+        {/* YouTube embed — autoplay, muted, loop */}
+        <iframe
+          src={`https://www.youtube.com/embed/${live.videoId}?autoplay=1&mute=1&loop=1&playlist=${live.videoId}&controls=0&modestbranding=1&rel=0&playsinline=1`}
+          allow="autoplay; encrypted-media"
+          className="h-full w-full"
+          style={{ border: "none", pointerEvents: "none" }}
         />
 
         {/* Live comments overlay — left side */}
