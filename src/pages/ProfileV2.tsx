@@ -311,18 +311,18 @@ export default function ProfileV2() {
                 onClick={() => scrollToSection("reviews")}
               >
                 <div className="flex items-center gap-1">
-                  <span className="text-[18px] font-medium leading-none text-gray-dark md:text-[22px]">5.0</span>
+                  <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">5.0</span>
                   <img src={starIcon} alt="" className="h-[14px] w-[14px] md:h-[16px] md:w-[16px]" />
                 </div>
-                <span className="text-[13px] leading-tight text-gray-dark md:text-[16px]">52 reviews</span>
+                <span className="text-[14px] leading-tight text-gray-dark md:text-[16px]">52 reviews</span>
               </div>
 
               <div className="h-[36px] w-px self-center bg-gray-200" />
 
               {/* Followers */}
               <div className="flex flex-1 flex-col items-start py-3 pl-3 md:items-center md:py-4 md:pl-0">
-                <span className="text-[18px] font-medium leading-none text-gray-dark md:text-[22px]">182</span>
-                <span className="text-[13px] leading-tight text-gray-dark md:text-[16px]">Followers</span>
+                <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">182</span>
+                <span className="text-[14px] leading-tight text-gray-dark md:text-[16px]">Followers</span>
               </div>
 
               <div className="h-[36px] w-px self-center bg-gray-200" />
@@ -332,16 +332,16 @@ export default function ProfileV2() {
                 className="flex flex-1 cursor-pointer flex-col items-start py-3 pl-3 transition-opacity hover:opacity-70 md:items-center md:py-4 md:pl-0"
                 onClick={() => scrollToSection("activity")}
               >
-                <span className="text-[18px] font-medium leading-none text-gray-dark md:text-[22px]">12</span>
-                <span className="text-[13px] leading-tight text-gray-dark md:text-[16px]">Posts</span>
+                <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">12</span>
+                <span className="text-[14px] leading-tight text-gray-dark md:text-[16px]">Posts</span>
               </div>
 
               <div className="h-[36px] w-px self-center bg-gray-200" />
 
               {/* Impressions */}
               <div className="flex flex-1 flex-col items-start py-3 pl-3 md:items-center md:py-4 md:pl-0">
-                <span className="text-[18px] font-medium leading-none text-gray-dark md:text-[22px]">8.2k</span>
-                <span className="text-[13px] leading-tight text-gray-dark md:text-[16px]">Impressions</span>
+                <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">8.2k</span>
+                <span className="text-[14px] leading-tight text-gray-dark md:text-[16px]">Impressions</span>
               </div>
             </div>
 
