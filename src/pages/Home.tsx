@@ -483,32 +483,54 @@ function EventCard({ event }: { event: EventPost["event"] }) {
   );
 }
 
-const CONFETTI = [
-  { color: "#f59e0b", x: 15, delay: 0,    dur: 1.4 },
-  { color: "#15b078", x: 30, delay: 0.15, dur: 1.6 },
-  { color: "#3b82f6", x: 50, delay: 0.05, dur: 1.3 },
-  { color: "#fb5a42", x: 65, delay: 0.25, dur: 1.5 },
-  { color: "#a855f7", x: 78, delay: 0.1,  dur: 1.7 },
-  { color: "#f59e0b", x: 88, delay: 0.3,  dur: 1.4 },
-  { color: "#15b078", x: 22, delay: 0.2,  dur: 1.6 },
-  { color: "#fb5a42", x: 55, delay: 0.35, dur: 1.3 },
-  { color: "#3b82f6", x: 42, delay: 0.08, dur: 1.5 },
-  { color: "#a855f7", x: 93, delay: 0.18, dur: 1.4 },
+// shape: "rect" | "square" | "circle" | "streamer"
+const CONFETTI: { color: string; x: number; delay: number; dur: number; drift: number; w: number; h: number; shape: string; spin: number }[] = [
+  { color: "#f59e0b", x: 8,  delay: 0,    dur: 1.8, drift:  8,  w: 8,  h: 12, shape: "rect",     spin: 720  },
+  { color: "#15b078", x: 18, delay: 0.3,  dur: 2.1, drift: -10, w: 6,  h: 6,  shape: "square",   spin: 540  },
+  { color: "#3b82f6", x: 28, delay: 0.1,  dur: 1.6, drift:  6,  w: 10, h: 5,  shape: "streamer", spin: 1080 },
+  { color: "#fb5a42", x: 38, delay: 0.5,  dur: 2.0, drift: -8,  w: 7,  h: 10, shape: "rect",     spin: 360  },
+  { color: "#a855f7", x: 48, delay: 0.15, dur: 1.7, drift:  12, w: 6,  h: 6,  shape: "circle",   spin: 0    },
+  { color: "#f59e0b", x: 57, delay: 0.4,  dur: 2.2, drift: -6,  w: 9,  h: 5,  shape: "streamer", spin: 900  },
+  { color: "#15b078", x: 66, delay: 0.05, dur: 1.9, drift:  9,  w: 7,  h: 11, shape: "rect",     spin: 720  },
+  { color: "#fb5a42", x: 74, delay: 0.6,  dur: 1.6, drift: -11, w: 6,  h: 6,  shape: "square",   spin: 540  },
+  { color: "#3b82f6", x: 83, delay: 0.25, dur: 2.0, drift:  7,  w: 5,  h: 9,  shape: "rect",     spin: 360  },
+  { color: "#a855f7", x: 91, delay: 0.45, dur: 1.8, drift: -9,  w: 8,  h: 5,  shape: "streamer", spin: 1080 },
+  { color: "#fbbf24", x: 13, delay: 0.7,  dur: 2.1, drift:  10, w: 6,  h: 6,  shape: "circle",   spin: 0    },
+  { color: "#fb5a42", x: 53, delay: 0.8,  dur: 1.7, drift: -7,  w: 7,  h: 10, shape: "rect",     spin: 720  },
+  { color: "#15b078", x: 96, delay: 0.2,  dur: 2.3, drift:  5,  w: 6,  h: 6,  shape: "square",   spin: 540  },
 ];
 
 function MilestoneCard({ milestone }: { milestone: MilestonePost["milestone"] }) {
   return (
     <div className="relative mt-3 overflow-hidden rounded-xl border border-gray-stroke">
       {/* Confetti */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-16 overflow-hidden">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 overflow-hidden">
         {CONFETTI.map((c, i) => (
           <motion.div
             key={i}
-            className="absolute top-0 h-2 w-1.5 rounded-sm"
-            style={{ left: `${c.x}%`, backgroundColor: c.color }}
-            initial={{ y: -8, opacity: 1, rotate: 0 }}
-            animate={{ y: 56, opacity: [1, 1, 0], rotate: 360 }}
-            transition={{ duration: c.dur, delay: c.delay, repeat: Infinity, repeatDelay: 2.5, ease: "easeIn" }}
+            className="absolute top-0"
+            style={{
+              left: `${c.x}%`,
+              width: c.w,
+              height: c.h,
+              backgroundColor: c.color,
+              borderRadius: c.shape === "circle" ? "50%" : c.shape === "streamer" ? "2px" : "2px",
+            }}
+            initial={{ y: -14, x: 0, opacity: 1, rotate: 0, scaleX: 1 }}
+            animate={{
+              y: 72,
+              x: [0, c.drift * 0.4, c.drift, c.drift * 0.6, 0],
+              opacity: [1, 1, 1, 0.6, 0],
+              rotate: c.spin,
+              scaleX: c.shape === "streamer" ? [1, 0.2, 1, 0.2, 1] : [1, 0.3, 1, 0.3, 1],
+            }}
+            transition={{
+              duration: c.dur,
+              delay: c.delay,
+              repeat: Infinity,
+              repeatDelay: 1.8 + c.delay,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
           />
         ))}
       </div>
