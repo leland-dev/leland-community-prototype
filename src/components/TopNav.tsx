@@ -18,7 +18,7 @@ import lelandLogo from "../assets/Logo.svg";
 
 /* ── Nav links ── */
 const navLinks = [
-  { to: "/", label: "Feed", end: true },
+  { to: "/", label: "Home", end: true },
   { to: "/events", label: "Free Events" },
   { to: "/courses", label: "Courses" },
   { to: "/plus", label: "Leland+" },
@@ -112,7 +112,7 @@ export default function TopNav() {
                 }`
               }
             >
-              Feed
+              Home
             </NavLink>
 
             {/* Browse dropdown */}
@@ -389,7 +389,7 @@ export default function TopNav() {
                     }`
                   }
                 >
-                  Feed
+                  Home
                 </NavLink>
 
                 {/* Browse dropdown */}

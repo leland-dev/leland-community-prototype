@@ -12,7 +12,7 @@ import chatActive from "../assets/icons/nav-icons/chat-active.svg";
 import chatInactive from "../assets/icons/nav-icons/chat-inactive.svg";
 
 const navItems = [
-  { to: "/", active: homeActive, inactive: homeInactive, label: "Feed" },
+  { to: "/", active: homeActive, inactive: homeInactive, label: "Home" },
   { to: "/browse", active: browseActive, inactive: browseInactive, label: "Browse" },
   { to: "/search", active: searchActive, inactive: searchInactive, label: "Search" },
   { to: "/notifications", active: notificationsActive, inactive: notificationsInactive, label: "Notifications" },
