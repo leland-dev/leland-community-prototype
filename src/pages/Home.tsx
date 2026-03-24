@@ -964,13 +964,10 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
 
       {/* CTAs */}
       <div className="mt-4 flex gap-2">
-        <button className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-gray-100 py-2.5 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
+        <button className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-gray-100 py-2.5 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
           Message
         </button>
-        <button className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-gray-100 py-2.5 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
+        <button className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-gray-dark py-2.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#222]">
           Book a session
         </button>
       </div>
