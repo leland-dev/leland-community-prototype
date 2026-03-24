@@ -1360,17 +1360,17 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
                 <motion.span
                   className="relative inline-flex h-2 w-2 rounded-full"
                   animate={{
-                    backgroundColor: ["#064e3b", "#065f46", "#15b078", "#a3e635", "#facc15", "#a3e635", "#15b078", "#065f46", "#064e3b"],
+                    backgroundColor: ["#111111", "#3b0000", "#7f0000", "#cc0000", "#ef4444", "#cc0000", "#7f0000", "#3b0000", "#111111"],
                     boxShadow: [
-                      "0 0 0.2px 0.1px rgba(6,78,59,0.6)",
-                      "0 0 0.4px 0.2px rgba(21,176,120,0.7)",
-                      "0 0 0.8px 0.3px rgba(21,176,120,0.9)",
-                      "0 0 1.2px 0.4px rgba(163,230,53,1)",
-                      "0 0 1.6px 0.6px rgba(250,204,21,1), 0 0 2.8px 0.8px rgba(250,204,21,0.4)",
-                      "0 0 1.2px 0.4px rgba(163,230,53,1)",
-                      "0 0 0.8px 0.3px rgba(21,176,120,0.9)",
-                      "0 0 0.4px 0.2px rgba(21,176,120,0.7)",
-                      "0 0 0.2px 0.1px rgba(6,78,59,0.6)",
+                      "0 0 0.2px 0.1px rgba(0,0,0,0.6)",
+                      "0 0 0.4px 0.2px rgba(127,0,0,0.7)",
+                      "0 0 0.8px 0.3px rgba(204,0,0,0.8)",
+                      "0 0 1.2px 0.4px rgba(239,68,68,1)",
+                      "0 0 1.6px 0.6px rgba(239,68,68,1), 0 0 2.8px 0.8px rgba(239,68,68,0.4)",
+                      "0 0 1.2px 0.4px rgba(239,68,68,1)",
+                      "0 0 0.8px 0.3px rgba(204,0,0,0.8)",
+                      "0 0 0.4px 0.2px rgba(127,0,0,0.7)",
+                      "0 0 0.2px 0.1px rgba(0,0,0,0.6)",
                     ],
                   }}
                   transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
