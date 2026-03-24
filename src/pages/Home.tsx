@@ -4,6 +4,24 @@ import { Link } from "react-router-dom";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import lelandCompass from "../assets/leland-compass.svg";
 
+// Organisation logos
+import orgHBS       from "../assets/org-logos/hbs.png";
+import orgKellogg   from "../assets/org-logos/kellogg.png";
+import orgMITSloan  from "../assets/org-logos/mit-sloan.png";
+import orgColumbia  from "../assets/org-logos/columbia.png";
+import orgHaas      from "../assets/org-logos/haas.png";
+import orgTuck      from "../assets/org-logos/tuck.png";
+import orgNYUStern  from "../assets/org-logos/nyu-stern.png";
+import orgFuqua     from "../assets/org-logos/fuqua.png";
+import orgMcKinsey  from "../assets/org-logos/mckinsey.png";
+import orgBain      from "../assets/org-logos/bain.png";
+import orgBCG       from "../assets/org-logos/bcg.png";
+import orgDeloitte  from "../assets/org-logos/deloitte.png";
+import orgGoogle    from "../assets/org-logos/google.png";
+import orgGoldman   from "../assets/org-logos/goldman.png";
+import orgMorganStanley from "../assets/org-logos/morgan-stanley.png";
+import orgOpenAI    from "../assets/org-logos/openai.png";
+
 import likesIcon from "../assets/icons/likes.svg";
 import commentsIcon from "../assets/icons/comments.svg";
 import repostsIcon from "../assets/icons/reposts.svg";
@@ -979,9 +997,10 @@ interface CoachProfile {
   followers: number;
   affiliation?: string;        // e.g. "Admissions at Stanford GSB"
   company?: string;            // e.g. "McKinsey & Company"
+  companyLogo?: string;        // imported logo image
   companyColor?: string;
   companyInitial?: string;
-  successfulClients: { initial: string; color: string }[];
+  successfulClients: { logo: string; name: string }[];
   successfulClientsMore?: number;
 }
 
@@ -990,10 +1009,12 @@ const coachProfiles: Record<string, CoachProfile> = {
     rating: 4.9, reviews: 187, customerFavorite: true, supercoach: true,
     minutesCoached: 156420, followers: 843,
     affiliation: "Admissions at Stanford GSB",
-    company: "Stanford GSB", companyColor: "#8C1515", companyInitial: "S",
+    company: "Harvard Business School", companyLogo: orgHBS, companyColor: "#A51C30", companyInitial: "H",
     successfulClients: [
-      { initial: "H", color: "#A51C30" }, { initial: "W", color: "#002F6C" },
-      { initial: "S", color: "#8C1515" }, { initial: "B", color: "#003262" },
+      { logo: orgHBS,      name: "Harvard Business School" },
+      { logo: orgKellogg,  name: "Kellogg" },
+      { logo: orgColumbia, name: "Columbia Business School" },
+      { logo: orgTuck,     name: "Tuck" },
     ],
     successfulClientsMore: 19,
   },
@@ -1001,31 +1022,35 @@ const coachProfiles: Record<string, CoachProfile> = {
     rating: 5.0, reviews: 214, customerFavorite: true, supercoach: true,
     minutesCoached: 219990, followers: 596,
     affiliation: "Adm. Committee at Chicago Booth",
-    company: "Bain & Company", companyColor: "#CC0000", companyInitial: "B",
+    company: "Bain & Company", companyLogo: orgBain, companyColor: "#CC0000", companyInitial: "B",
     successfulClients: [
-      { initial: "H", color: "#A51C30" }, { initial: "W", color: "#002F6C" },
-      { initial: "K", color: "#00356B" }, { initial: "M", color: "#00274C" },
+      { logo: orgHBS,      name: "Harvard Business School" },
+      { logo: orgKellogg,  name: "Kellogg" },
+      { logo: orgMITSloan, name: "MIT Sloan" },
+      { logo: orgColumbia, name: "Columbia" },
     ],
     successfulClientsMore: 27,
   },
   "Nina Kowalski": {
     rating: 4.9, reviews: 103,
     minutesCoached: 98730, followers: 412,
-    company: "McKinsey & Company", companyColor: "#003580", companyInitial: "M",
+    company: "McKinsey & Company", companyLogo: orgMcKinsey, companyColor: "#003580", companyInitial: "M",
     successfulClients: [
-      { initial: "D", color: "#006400" }, { initial: "B", color: "#003580" },
-      { initial: "A", color: "#7B0000" },
+      { logo: orgMcKinsey, name: "McKinsey" },
+      { logo: orgBCG,      name: "BCG" },
+      { logo: orgBain,     name: "Bain" },
     ],
     successfulClientsMore: 14,
   },
   "Eric": {
     rating: 4.9, reviews: 103, supercoach: true,
     minutesCoached: 98730, followers: 412,
-    company: "McKinsey & Company", companyColor: "#003580", companyInitial: "M",
+    company: "McKinsey & Company", companyLogo: orgMcKinsey, companyColor: "#003580", companyInitial: "M",
     affiliation: "Recruiting at McKinsey & Company",
     successfulClients: [
-      { initial: "D", color: "#006400" }, { initial: "B", color: "#003580" },
-      { initial: "A", color: "#7B0000" },
+      { logo: orgMcKinsey, name: "McKinsey" },
+      { logo: orgBCG,      name: "BCG" },
+      { logo: orgDeloitte, name: "Deloitte" },
     ],
     successfulClientsMore: 14,
   },
@@ -1034,47 +1059,55 @@ const coachProfiles: Record<string, CoachProfile> = {
     minutesCoached: 44200, followers: 198,
     affiliation: "Admissions at Stanford GSB",
     successfulClients: [
-      { initial: "S", color: "#8C1515" }, { initial: "H", color: "#A51C30" },
+      { logo: orgHBS,      name: "Harvard Business School" },
+      { logo: orgKellogg,  name: "Kellogg" },
     ],
     successfulClientsMore: 8,
   },
   "Priya Patel": {
     rating: 4.9, reviews: 76,
     minutesCoached: 71580, followers: 305,
-    company: "Harvard Business School", companyColor: "#A51C30", companyInitial: "H",
+    company: "Harvard Business School", companyLogo: orgHBS, companyColor: "#A51C30", companyInitial: "H",
     successfulClients: [
-      { initial: "H", color: "#A51C30" }, { initial: "W", color: "#002F6C" },
-      { initial: "T", color: "#4B0082" },
+      { logo: orgHBS,      name: "Harvard Business School" },
+      { logo: orgMITSloan, name: "MIT Sloan" },
+      { logo: orgTuck,     name: "Tuck" },
     ],
     successfulClientsMore: 11,
   },
   "Emma Rodriguez": {
     rating: 4.8, reviews: 98,
     minutesCoached: 103440, followers: 467,
-    company: "BCG", companyColor: "#006600", companyInitial: "B",
+    company: "BCG", companyLogo: orgBCG, companyColor: "#006600", companyInitial: "B",
     successfulClients: [
-      { initial: "K", color: "#00356B" }, { initial: "B", color: "#003262" },
-      { initial: "M", color: "#00274C" }, { initial: "S", color: "#8C1515" },
+      { logo: orgKellogg,  name: "Kellogg" },
+      { logo: orgColumbia, name: "Columbia" },
+      { logo: orgMITSloan, name: "MIT Sloan" },
+      { logo: orgHaas,     name: "Haas" },
     ],
     successfulClientsMore: 16,
   },
   "Alex Thompson": {
     rating: 4.8, reviews: 64,
     minutesCoached: 58200, followers: 278,
-    company: "Google", companyColor: "#4285F4", companyInitial: "G",
+    company: "Google", companyLogo: orgGoogle, companyColor: "#4285F4", companyInitial: "G",
     successfulClients: [
-      { initial: "H", color: "#A51C30" }, { initial: "S", color: "#8C1515" }, { initial: "K", color: "#00356B" },
+      { logo: orgGoogle,   name: "Google" },
+      { logo: orgOpenAI,   name: "OpenAI" },
+      { logo: orgMcKinsey, name: "McKinsey" },
     ],
     successfulClientsMore: 9,
   },
   "Michael Chen": {
     rating: 4.9, reviews: 118, supercoach: true,
     minutesCoached: 134760, followers: 521,
-    company: "BCG", companyColor: "#006600", companyInitial: "B",
+    company: "BCG", companyLogo: orgBCG, companyColor: "#006600", companyInitial: "B",
     affiliation: "Admissions at Kellogg",
     successfulClients: [
-      { initial: "K", color: "#4E2A84" }, { initial: "B", color: "#003262" },
-      { initial: "W", color: "#002F6C" }, { initial: "S", color: "#8C1515" },
+      { logo: orgKellogg,  name: "Kellogg" },
+      { logo: orgColumbia, name: "Columbia" },
+      { logo: orgHBS,      name: "Harvard Business School" },
+      { logo: orgMITSloan, name: "MIT Sloan" },
     ],
     successfulClientsMore: 21,
   },
@@ -1082,20 +1115,22 @@ const coachProfiles: Record<string, CoachProfile> = {
     rating: 5.0, reviews: 93, customerFavorite: true,
     minutesCoached: 87300, followers: 389,
     affiliation: "Admissions at Harvard Business School",
-    company: "Harvard Business School", companyColor: "#A51C30", companyInitial: "H",
+    company: "Harvard Business School", companyLogo: orgHBS, companyColor: "#A51C30", companyInitial: "H",
     successfulClients: [
-      { initial: "H", color: "#A51C30" }, { initial: "W", color: "#002F6C" },
-      { initial: "S", color: "#8C1515" },
+      { logo: orgHBS,      name: "Harvard Business School" },
+      { logo: orgMITSloan, name: "MIT Sloan" },
+      { logo: orgTuck,     name: "Tuck" },
     ],
     successfulClientsMore: 13,
   },
   "Jason Park": {
     rating: 4.8, reviews: 71,
     minutesCoached: 62490, followers: 243,
-    company: "Deloitte", companyColor: "#86BC25", companyInitial: "D",
+    company: "Deloitte", companyLogo: orgDeloitte, companyColor: "#86BC25", companyInitial: "D",
     successfulClients: [
-      { initial: "K", color: "#4E2A84" }, { initial: "M", color: "#00274C" },
-      { initial: "T", color: "#4B0082" },
+      { logo: orgKellogg,  name: "Kellogg" },
+      { logo: orgMITSloan, name: "MIT Sloan" },
+      { logo: orgFuqua,    name: "Fuqua" },
     ],
     successfulClientsMore: 7,
   },
@@ -1110,14 +1145,15 @@ function BadgeChip({ icon, label }: { icon: React.ReactNode; label: string }) {
   );
 }
 
-function SchoolDot({ initial, color }: { initial: string; color: string }) {
+function OrgLogo({ logo, name, size = 24 }: { logo: string; name: string; size?: number }) {
   return (
-    <span
-      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-white"
-      style={{ backgroundColor: color }}
-    >
-      {initial}
-    </span>
+    <img
+      src={logo}
+      alt={name}
+      title={name}
+      className="shrink-0 rounded-md object-contain ring-1 ring-black/10"
+      style={{ width: size, height: size }}
+    />
   );
 }
 
@@ -1189,7 +1225,7 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
         </p>
       ) : null}
 
-      {/* Badge rows — icon + text, no pill background */}
+      {/* Badge rows — real logos */}
       {p ? (
         <div className="mt-3 flex flex-col gap-2">
           {p.supercoach ? (
@@ -1198,30 +1234,35 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
               <span className="text-[14px] text-gray-dark">Supercoach</span>
             </div>
           ) : null}
-          {p.affiliation ? (
+          {p.affiliation && p.companyLogo ? (
             <div className="flex items-center gap-2">
-              <span
-                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-[10px] font-bold text-white"
-                style={{ backgroundColor: p.companyColor ?? "#555" }}
-              >
-                {(p.affiliation.match(/at (.+)$/) ?? [])[1]?.[0] ?? "·"}
-              </span>
+              <OrgLogo logo={p.companyLogo} name={p.company ?? ""} size={20} />
               <span className="truncate text-[14px] text-gray-dark">{p.affiliation}</span>
             </div>
           ) : null}
-          {p.company ? (
+          {p.company && p.companyLogo ? (
             <div className="flex items-center gap-2">
-              <span
-                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-[10px] font-bold text-white"
-                style={{ backgroundColor: p.companyColor ?? "#555" }}
-              >
-                {p.companyInitial}
-              </span>
+              <OrgLogo logo={p.companyLogo} name={p.company} size={20} />
               <span className="truncate text-[14px] text-gray-dark">
                 {p.affiliation ? `Worked at ${p.company}` : `Director at ${p.company}`}
               </span>
             </div>
           ) : null}
+        </div>
+      ) : null}
+
+      {/* Successful clients */}
+      {p && p.successfulClients.length > 0 ? (
+        <div className="mt-3">
+          <p className="text-[12px] text-gray-light">Successful clients at:</p>
+          <div className="mt-1.5 flex items-center gap-1.5">
+            {p.successfulClients.slice(0, 5).map((c, i) => (
+              <OrgLogo key={i} logo={c.logo} name={c.name} size={22} />
+            ))}
+            {p.successfulClientsMore ? (
+              <span className="ml-0.5 text-[12px] text-gray-light">+{p.successfulClientsMore}</span>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
@@ -1391,7 +1432,7 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
         </p>
       ) : null}
 
-      {/* Badges — company logo + role/affiliation rows */}
+      {/* Badge rows — real logos */}
       {p ? (
         <div className="mt-3 flex flex-col gap-2">
           {p.supercoach ? (
@@ -1400,30 +1441,35 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
               <span className="text-[14px] text-gray-dark">Supercoach</span>
             </div>
           ) : null}
-          {p.affiliation ? (
+          {p.affiliation && p.companyLogo ? (
             <div className="flex items-center gap-2">
-              <span
-                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-[10px] font-bold text-white"
-                style={{ backgroundColor: p.companyColor ?? "#555" }}
-              >
-                {(p.affiliation.match(/at (.+)$/) ?? [])[1]?.[0] ?? "·"}
-              </span>
+              <OrgLogo logo={p.companyLogo} name={p.company ?? ""} size={20} />
               <span className="truncate text-[14px] text-gray-dark">{p.affiliation}</span>
             </div>
           ) : null}
-          {p.company ? (
+          {p.company && p.companyLogo ? (
             <div className="flex items-center gap-2">
-              <span
-                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-[10px] font-bold text-white"
-                style={{ backgroundColor: p.companyColor ?? "#555" }}
-              >
-                {p.companyInitial}
-              </span>
+              <OrgLogo logo={p.companyLogo} name={p.company} size={20} />
               <span className="truncate text-[14px] text-gray-dark">
                 {p.affiliation ? `Worked at ${p.company}` : `Director at ${p.company}`}
               </span>
             </div>
           ) : null}
+        </div>
+      ) : null}
+
+      {/* Successful clients */}
+      {p && p.successfulClients.length > 0 ? (
+        <div className="mt-3">
+          <p className="text-[12px] text-gray-light">Successful clients at:</p>
+          <div className="mt-1.5 flex items-center gap-1.5">
+            {p.successfulClients.slice(0, 5).map((c, i) => (
+              <OrgLogo key={i} logo={c.logo} name={c.name} size={22} />
+            ))}
+            {p.successfulClientsMore ? (
+              <span className="ml-0.5 text-[12px] text-gray-light">+{p.successfulClientsMore}</span>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
