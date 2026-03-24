@@ -1150,7 +1150,7 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="text-[17px] font-semibold leading-tight text-gray-dark">{author}</span>
+            <span className="text-[17px] font-medium leading-tight text-gray-dark">{author}</span>
             {verified ? <img src={verifiedIcon} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
           </div>
           {p ? (
@@ -1177,7 +1177,7 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
 
       {/* Headline */}
       {headline ? (
-        <p className="mt-3 line-clamp-2 text-[15px] font-semibold leading-snug text-gray-dark">{headline}</p>
+        <p className="mt-3 line-clamp-2 text-[15px] leading-snug text-gray-dark">{headline}</p>
       ) : null}
 
       {/* Minutes coached + followers */}
@@ -1343,7 +1343,7 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-            <span className="text-[17px] font-semibold leading-tight text-gray-dark">{expert.name}</span>
+            <span className="text-[17px] font-medium leading-tight text-gray-dark">{expert.name}</span>
             {expert.verified ? <img src={verifiedIcon} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
           </div>
           {p ? (
@@ -1383,7 +1383,7 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
       </div>
 
       {/* Headline */}
-      <p className="mt-3 line-clamp-2 text-[15px] font-semibold leading-snug text-gray-dark">
+      <p className="mt-3 line-clamp-2 text-[15px] leading-snug text-gray-dark">
         {expert.headline}
       </p>
 
