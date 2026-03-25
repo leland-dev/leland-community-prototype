@@ -60,7 +60,7 @@ export default function ProfileV2() {
   const [showSidebar, setShowSidebar] = useState(true);
   const [showCoachNote, setShowCoachNote] = useState(false);
   const [showCoachVideo, setShowCoachVideo] = useState(false);
-  const [showSupercoach, setShowSupercoach] = useState(true);
+  const [showSupercoach, setShowSupercoach] = useState(false);
   const [isCustomerProfile, setIsCustomerProfile] = useState(false);
   const [customerTab, setCustomerTab] = useState<"activity" | "about">("activity");
   const [viewingOwnProfile, setViewingOwnProfile] = useState(false);
