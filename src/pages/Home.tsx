@@ -1405,7 +1405,7 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
       </div>
 
       {/* Headline */}
-      <p className="mt-3 line-clamp-2 text-[15px] leading-snug text-gray-dark">
+      <p className="mt-3 line-clamp-2 w-4/5 text-[15px] leading-snug text-gray-dark">
         {expert.headline}
       </p>
 
