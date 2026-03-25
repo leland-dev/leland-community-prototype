@@ -1431,25 +1431,12 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
         <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gray-100 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
           {isOnline ? (
             <>
-              {/* Radiating live indicator */}
-              <span className="relative flex h-2.5 w-2.5 shrink-0">
-                {/* Ring 1 */}
-                <motion.span
-                  className="absolute inset-0 rounded-full"
-                  style={{ backgroundColor: "#4ade80" }}
-                  animate={{ scale: [1, 3], opacity: [0.7, 0] }}
-                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
-                />
-                {/* Ring 2 — offset by half a cycle */}
-                <motion.span
-                  className="absolute inset-0 rounded-full"
-                  style={{ backgroundColor: "#4ade80" }}
-                  animate={{ scale: [1, 3], opacity: [0.7, 0] }}
-                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut", delay: 0.8 }}
-                />
-                {/* Solid center */}
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "#22c55e" }} />
-              </span>
+              {/* Blinking neon green dot */}
+              <motion.span
+                className="inline-flex h-2.5 w-2.5 shrink-0 rounded-full"
+                animate={{ backgroundColor: ["#166534", "#4ade80", "#166534"] }}
+                transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+              />
               Chat now
             </>
           ) : "Free intro call"}
