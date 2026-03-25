@@ -9,14 +9,17 @@ import pic2 from "../assets/profile photos/pic-2.png";
 import pic6 from "../assets/profile photos/pic-6.png";
 import mailIcon from "../assets/icons/mail.svg";
 import checkIcon from "../assets/icons/check.svg";
+import editIcon from "../assets/icons/edit.svg";
+import lockIcon from "../assets/icons/lock.svg";
+import verifiedIcon from "../assets/icons/verified.svg";
 import shieldIcon from "../assets/icons/shield-light.svg";
 import chevronDownIcon from "../assets/icons/chevron-down.svg";
 import bookBookmarkIcon from "../assets/icons/book-bookmark.svg";
 import piggyBankIcon from "../assets/icons/Piggy bank, Coin.1.svg";
 import stopwatchIcon from "../assets/icons/stopwatch.svg";
 import supportivenessIcon from "../assets/icons/supportiveness.svg";
-import wreathSmallImg from "../assets/img/wreath-small.svg";
-import questionIcon from "../assets/icons/question-filled.svg";
+import wreathImg from "../assets/img/Wreath.svg";
+import videoThumbnail from "../assets/img/Video-Thumbnail.png";
 import starIcon from "../assets/icons/icon/star.svg";
 import atlassianLogo from "../assets/logos/atlassian.png";
 import yaleLogo from "../assets/logos/yale.png";
@@ -53,12 +56,14 @@ export default function ProfileV2() {
   const [stickyNavVisible, setStickyNavVisible] = useState(false);
   const [activeSection, setActiveSection] = useState("offerings");
   const [adminOpen, setAdminOpen] = useState(false);
-  const [showCustomerFavorite, setShowCustomerFavorite] = useState(false);
+  const [showCustomerFavorite, setShowCustomerFavorite] = useState(true);
   const [showSidebar, setShowSidebar] = useState(true);
   const [showCoachNote, setShowCoachNote] = useState(false);
+  const [showCoachVideo, setShowCoachVideo] = useState(false);
   const [showSupercoach, setShowSupercoach] = useState(true);
   const [isCustomerProfile, setIsCustomerProfile] = useState(false);
   const [customerTab, setCustomerTab] = useState<"activity" | "about">("activity");
+  const [viewingOwnProfile, setViewingOwnProfile] = useState(false);
 
   const profilePhoto = isCustomerProfile ? pic2 : pic6;
   const profileName = isCustomerProfile ? "James Allen" : "Samantha Parker";
@@ -239,7 +244,7 @@ export default function ProfileV2() {
         {/* Left column — fills available width */}
         <div className="min-w-0 flex-1">
           {/* Profile photo + CTA buttons */}
-          <div className="-mt-[80px] mb-4 flex flex-col items-center md:flex-row md:items-end md:justify-between">
+          <div className="-mt-[80px] mb-4 flex flex-col items-start md:flex-row md:items-end md:justify-between">
             <div className="group relative z-20 cursor-pointer rounded-lg border-[4px] border-white bg-white" onClick={() => setLightboxOpen(true)}>
               <div className="relative overflow-hidden rounded-[4px]">
                 <motion.img
@@ -252,42 +257,57 @@ export default function ProfileV2() {
               </div>
             </div>
             <div className="hidden items-center gap-2 pb-[72px] md:flex">
-              <button className="flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-lg border border-[#222222]/10 bg-white transition-colors hover:border-[#222222]/20">
-                <img src={mailIcon} alt="Message" className="h-[20px] w-[20px]" />
-              </button>
-              <button
-                onClick={() => setIsFollowing(!isFollowing)}
-                className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20"
-              >
-                {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
-                {isFollowing ? "Following" : "Follow"}
-              </button>
-              {!isCustomerProfile && (
-                <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
-                  Free intro call
+              {viewingOwnProfile ? (
+                <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
+                  <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
+                  Edit profile
                 </button>
+              ) : (
+                <>
+                  <button className="flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-lg border border-[#222222]/10 bg-white transition-colors hover:border-[#222222]/20">
+                    <img src={mailIcon} alt="Message" className="h-[20px] w-[20px]" />
+                  </button>
+                  <button
+                    onClick={() => setIsFollowing(!isFollowing)}
+                    className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20"
+                  >
+                    {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
+                    {isFollowing ? "Following" : "Follow"}
+                  </button>
+                  {!isCustomerProfile && (
+                    <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                      Free intro call
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>
 
           {/* Name + Supercoach badge */}
-          <div className={`flex items-center justify-center gap-2 md:justify-start ${isCustomerProfile ? "" : "mb-1"}`}>
+          <div className={`flex items-center ${isCustomerProfile ? "gap-2" : "gap-1 mb-1"}`}>
             <h1 className={`font-medium text-gray-dark ${isCustomerProfile ? "text-[24px]" : "text-[18px]"}`}>{profileName}</h1>
+            {!isCustomerProfile && (
+              <img src={verifiedIcon} alt="Verified" className="mt-[2px] h-[16px] w-[16px]" />
+            )}
             {showSupercoach && !isCustomerProfile && (
               <>
-                <span className="text-[18px] text-[#999999]">·</span>
+                <span className="ml-1 text-[18px] text-[#999999]">·</span>
                 <span className="text-[18px] text-[#707070]"><span className="text-[16px]">🏆</span> Supercoach</span>
               </>
             )}
           </div>
 
           {/* Headline */}
-          <p className={`mb-[6px] text-center leading-[1.3] md:text-left ${isCustomerProfile ? "text-[18px] font-normal text-[#707070]" : "text-[24px] font-medium text-[#333333]"}`}>
-            Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB
+          <p className={`mb-[6px] leading-[1.3] ${isCustomerProfile ? "text-[18px] font-normal text-[#707070]" : "text-[24px] font-medium text-[#333333]"}`}>
+            {isCustomerProfile
+              ? "Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB"
+              : <>Experienced Product Leader at LinkedIn <span className="font-normal text-[#9B9B9B]">|</span> Ex-Meta <span className="font-normal text-[#9B9B9B]">|</span> Stanford GSB</>
+            }
           </p>
 
           {/* Credentials row */}
-          <div className="mb-4 flex flex-wrap items-center justify-center gap-x-[20px] gap-y-[2px] text-[16px] text-[#707070] md:justify-start">
+          {!isCustomerProfile && <div className="mb-1 flex flex-wrap items-center gap-x-[20px] gap-y-[2px] text-[16px] text-[#707070] md:mb-4">
             {/* Atlassian */}
             <div className="flex items-center gap-[6px]">
               <img src={atlassianLogo} alt="Atlassian" className="h-[18px] w-[18px] rounded" />
@@ -310,100 +330,229 @@ export default function ProfileV2() {
                 <img src={clientLogo4} alt="" className="h-[18px] w-[18px] rounded border border-white" />
               </div>
             </div>}
-          </div>
+          </div>}
 
 
-          {/* Alt stats bar + Customer Favorite */}
-          <div className="mb-2 flex flex-col rounded-lg border-transparent md:border-gray-200 md:border">
-            <div className="flex">
-              {/* Reviews (combined) */}
-              {!isCustomerProfile && (
-                <>
-                  <div
-                    className="flex flex-1 cursor-pointer flex-col items-center py-1 transition-opacity hover:opacity-70 md:py-4"
-                    onClick={() => scrollToSection("reviews")}
-                  >
-                    <div className="flex items-center gap-1">
-                      <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">5.0</span>
-                      <img src={starIcon} alt="" className="h-[14px] w-[14px] md:h-[16px] md:w-[16px]" />
-                    </div>
-                    <span className="text-[14px] leading-tight text-gray-dark md:text-[16px]">52 reviews</span>
-                  </div>
-
-                  <div className="h-[36px] w-px self-center bg-gray-200" />
-                </>
-              )}
-
-              {/* Followers */}
-              <div className="flex flex-1 flex-col items-center py-1 md:py-4">
-                <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">182</span>
-                <span className="text-[14px] leading-tight text-gray-dark md:text-[16px]">Followers</span>
-              </div>
-
-              <div className="h-[36px] w-px self-center bg-gray-200" />
-
-              {/* Posts */}
+          {/* Stats row — mobile: v1-style flat inline for both profiles */}
+          <div className="mt-3 flex flex-wrap items-center gap-4 md:hidden">
+            {!isCustomerProfile && (
               <div
-                className="flex flex-1 cursor-pointer flex-col items-center py-1 transition-opacity hover:opacity-70 md:py-4"
-                onClick={() => scrollToSection("activity")}
+                className="flex cursor-pointer items-baseline gap-1 transition-opacity hover:opacity-70"
+                onClick={() => scrollToSection("reviews")}
               >
-                <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">12</span>
-                <span className="text-[14px] leading-tight text-gray-dark md:text-[16px]">Posts</span>
-              </div>
-
-              <div className="h-[36px] w-px self-center bg-gray-200" />
-
-              {/* Impressions */}
-              <div className="flex flex-1 flex-col items-center py-1 md:py-4">
-                <span className="text-[20px] font-medium leading-none text-gray-dark md:text-[22px]">8.2k</span>
-                <span className="text-[14px] leading-tight text-gray-dark md:text-[16px]">Impressions</span>
-              </div>
-            </div>
-
-            {/* Customer Favorite */}
-            {showCustomerFavorite && (
-              <div className="relative flex items-center justify-center border-t border-gray-200 py-2.5">
-                <div className="flex items-center gap-[6px]">
-                  <img src={wreathSmallImg} alt="" className="h-auto w-[10px]" />
-                  <span className="text-[16px] font-medium text-gray-dark">Customer favorite</span>
-                  <img src={wreathSmallImg} alt="" className="h-auto w-[10px] scale-x-[-1]" />
-                </div>
-                <img src={questionIcon} alt="Info" className="absolute right-2 top-1/2 h-[20px] w-[20px] -translate-y-1/2 cursor-pointer opacity-50 transition-opacity hover:opacity-100" />
+                <img src={starIcon} alt="" className="mb-[2px] h-[15px] w-[15px]" />
+                <span className="text-[18px] font-medium text-gray-dark">5.0</span>
+                <span className="text-[16px] text-gray-600">52 reviews</span>
               </div>
             )}
+            <div className="flex items-baseline gap-1">
+              <span className="text-[18px] font-medium text-gray-dark">{isCustomerProfile ? "245" : "182"}</span>
+              <span className="text-[16px] text-gray-600">followers</span>
+            </div>
+            <div
+              className={`flex items-baseline gap-1 ${!isCustomerProfile ? "cursor-pointer transition-opacity hover:opacity-70" : ""}`}
+              onClick={!isCustomerProfile ? () => scrollToSection("activity") : undefined}
+            >
+              <span className="text-[18px] font-medium text-gray-dark">8.2K</span>
+              <span className="text-[16px] text-gray-600">impressions</span>
+            </div>
           </div>
+
+          {/* Customer Favorite — mobile coach profile */}
+          {showCustomerFavorite && !isCustomerProfile && (
+            <div className="mt-3 flex items-center gap-4 rounded-lg border border-gray-200 px-4 py-3 md:hidden">
+              <div className="flex shrink-0 items-center gap-[2px]">
+                <img src={wreathImg} alt="" className="h-[45px] w-[21px]" />
+                <span className="text-center text-[18px] font-medium leading-[110%] text-gray-dark">Customer<br/>Favorite</span>
+                <img src={wreathImg} alt="" className="h-[45px] w-[21px] scale-x-[-1]" />
+              </div>
+              <div className="h-[36px] w-px shrink-0 bg-gray-200" />
+              <span className="text-[16px] leading-snug text-[#707070]">In the top 10% of experts on Leland, according to customers.</span>
+            </div>
+          )}
+
+          {/* Desktop flat stats — customer profile only */}
+          {isCustomerProfile && (
+            <div className="mt-3 hidden flex-wrap items-center gap-4 md:flex">
+              <div className="flex items-baseline gap-1">
+                <span className="text-[18px] font-medium text-gray-dark">245</span>
+                <span className="text-[16px] text-gray-600">followers</span>
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-[18px] font-medium text-gray-dark">8.2K</span>
+                <span className="text-[16px] text-gray-600">impressions</span>
+              </div>
+            </div>
+          )}
+
+          {/* Desktop bordered card stats — coach only */}
+          {!isCustomerProfile && (
+            <div className="mb-2 hidden flex-col rounded-lg border border-gray-200 md:flex">
+              {/* Customer Favorite — mobile row (hidden on desktop) */}
+              {showCustomerFavorite && (
+                <div className="flex items-center py-2 md:hidden">
+                  <div className="flex items-center gap-[2px]">
+                    <img src={wreathImg} alt="" className="h-[45px] w-[21px]" />
+                    <span className="text-center text-[18px] font-medium leading-[110%] text-gray-dark">Customer<br/>Favorite</span>
+                    <img src={wreathImg} alt="" className="h-[45px] w-[21px] scale-x-[-1]" />
+                  </div>
+                </div>
+              )}
+              <div className="flex">
+                {/* Reviews */}
+                <div
+                  className="flex flex-1 cursor-pointer flex-col items-center py-4 transition-opacity hover:opacity-70"
+                  onClick={() => scrollToSection("reviews")}
+                >
+                  <div className="flex items-center gap-1">
+                    <span className="text-[22px] font-medium leading-none text-gray-dark">5.0</span>
+                    <img src={starIcon} alt="" className="h-[16px] w-[16px]" />
+                  </div>
+                  <span className="text-[16px] leading-tight text-gray-dark">52 reviews</span>
+                </div>
+
+                <div className="h-[36px] w-px self-center bg-gray-200" />
+
+                {/* Followers */}
+                <div className="flex flex-1 flex-col items-center py-4">
+                  <span className="text-[22px] font-medium leading-none text-gray-dark">182</span>
+                  <span className="text-[16px] leading-tight text-gray-dark">Followers</span>
+                </div>
+
+                <div className="h-[36px] w-px self-center bg-gray-200" />
+
+                {/* Impressions */}
+                <div
+                  className="flex flex-1 cursor-pointer flex-col items-center py-4 transition-opacity hover:opacity-70"
+                  onClick={() => scrollToSection("activity")}
+                >
+                  <span className="text-[22px] font-medium leading-none text-gray-dark">8.2k</span>
+                  <span className="text-[16px] leading-tight text-gray-dark">Impressions</span>
+                </div>
+
+                {/* Customer Favorite — desktop inline */}
+                {showCustomerFavorite && (
+                  <>
+                    <div className="h-[36px] w-px self-center bg-gray-200" />
+                    <div className="flex flex-1 flex-col items-center justify-center py-3">
+                      <div className="flex items-center gap-[2px]">
+                        <img src={wreathImg} alt="" className="h-[45px] w-[21px]" />
+                        <span className="text-center text-[18px] font-medium leading-[110%] text-gray-dark">Customer<br/>Favorite</span>
+                        <img src={wreathImg} alt="" className="h-[45px] w-[21px] scale-x-[-1]" />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Mobile inline CTA + secondary buttons */}
           <div className="mt-3 flex flex-col gap-3 md:hidden">
-            {!isCustomerProfile && (
-              <button className="w-full cursor-pointer rounded-full bg-[#038561] px-4 py-3 text-[18px] font-medium text-white transition-colors hover:bg-[#038561]/90">
-                Free intro call
+            {viewingOwnProfile ? (
+              <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
+                Edit profile
               </button>
+            ) : (
+              <>
+                {!isCustomerProfile && (
+                  <button className="w-full cursor-pointer rounded-full bg-[#038561] px-4 py-3 text-[18px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                    Free intro call
+                  </button>
+                )}
+                <div className="flex gap-2">
+                  {isCustomerProfile ? (
+                    <>
+                      <button
+                        onClick={() => setIsFollowing(!isFollowing)}
+                        className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-6 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                      >
+                        {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
+                        {isFollowing ? "Following" : "Follow"}
+                      </button>
+                      <button className="flex cursor-pointer items-center justify-center rounded-full bg-[#222222]/5 px-4 py-3 transition-colors hover:bg-[#222222]/[0.08]">
+                        <img src={mailIcon} alt="Message" className="h-[20px] w-[20px]" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                        <img src={mailIcon} alt="" className="h-[20px] w-[20px]" />
+                        Message
+                      </button>
+                      <button
+                        onClick={() => setIsFollowing(!isFollowing)}
+                        className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                      >
+                        {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
+                        {isFollowing ? "Following" : "Follow"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </>
             )}
-            <div className="flex gap-2">
-              <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
-                <img src={mailIcon} alt="" className="h-[20px] w-[20px]" />
-                Message
-              </button>
-              <button
-                onClick={() => setIsFollowing(!isFollowing)}
-                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
-              >
-                {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
-                {isFollowing ? "Following" : "Follow"}
-              </button>
-            </div>
           </div>
 
           {/* Availability row */}
           {!isCustomerProfile && (
-            <div className="mt-2 flex flex-col items-center text-center text-[16px] md:items-start md:text-left md:mt-0 md:flex-row md:items-center md:justify-between">
+            <div className="mt-2 flex flex-col items-start text-[16px] md:mt-0 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-[#1A73E8]">Available tomorrow</span>
                 <span className="text-[#707070]">·</span>
                 <span className="text-[#707070]">Responds within 12 hours</span>
               </div>
               <span className="text-[#9b9b9b]">1,240 minutes coached</span>
+            </div>
+          )}
+
+          {/* Coach video — mobile */}
+          {showCoachVideo && !isCustomerProfile && (
+            <div className="group relative mt-4 cursor-pointer overflow-hidden rounded-lg lg:hidden">
+              <img
+                src={videoThumbnail}
+                alt="Coach video"
+                className="block w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <div className="absolute inset-0 transition-colors group-hover:bg-black/10" />
+              <div className="absolute bottom-0 left-0 right-0 flex items-center gap-3 px-2 pb-2">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/40 backdrop-blur-[6px]">
+                  <svg width="14" height="16" viewBox="0 0 18 20" fill="none">
+                    <path d="M17 10L1 19V1L17 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-[16px] font-medium text-white">Get to know me</p>
+                  <p className="text-[14px] text-white/70">1:40</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Coach video — desktop horizontal banner (no sidebar) */}
+          {showCoachVideo && !isCustomerProfile && !showSidebar && (
+            <div className="group mt-4 hidden cursor-pointer items-center gap-4 overflow-hidden rounded-lg bg-[#f5f5f5] p-3 transition-colors hover:bg-[#ebebeb] lg:flex">
+              <div className="relative h-[56px] w-[90px] shrink-0 overflow-hidden rounded-md">
+                <img
+                  src={videoThumbnail}
+                  alt="Coach video"
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 transition-colors group-hover:bg-black/10" />
+                <div className="absolute bottom-1.5 left-1.5">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/40 backdrop-blur-[6px]">
+                    <svg width="9" height="11" viewBox="0 0 18 20" fill="none">
+                      <path d="M17 10L1 19V1L17 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p className="text-[16px] font-medium text-gray-dark">Get to know {profileName.split(" ")[0]}</p>
+                <p className="text-[16px] text-[#707070]">1:40</p>
+              </div>
             </div>
           )}
 
@@ -714,75 +863,14 @@ export default function ProfileV2() {
                 )}
 
                 {customerTab === "about" && (
-                  <div className="space-y-8">
-                    <div>
-                      <h3 className="mb-3 text-[20px] font-medium text-gray-dark">About</h3>
-                      <p className="text-[17px] leading-relaxed text-gray-dark">
-                        Product Manager at Stripe with a background in consulting and engineering. Currently pursuing my MBA at Stanford GSB. Passionate about fintech, developer tools, and building products that scale.
-                      </p>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-3 text-[16px] font-medium text-[#707070]">
+                      <img src={lockIcon} alt="" className="h-[20px] w-[20px] opacity-50" />
+                      <span>Only visible to experts you work with</span>
                     </div>
-
-                    <div>
-                      <h3 className="mb-4 text-[20px] font-medium text-gray-dark">Experience</h3>
-                      <div className="space-y-6">
-                        <div className="flex gap-4">
-                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                            <span className="text-[20px]">💳</span>
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-[18px] font-medium text-gray-dark">Product Manager</h4>
-                            <p className="text-[16px] text-gray-light">Stripe</p>
-                            <p className="mt-1 text-[15px] text-gray-light">2022 – Present</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-4">
-                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                            <span className="text-[20px]">📦</span>
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-[18px] font-medium text-gray-dark">Associate Product Manager</h4>
-                            <p className="text-[16px] text-gray-light">Dropbox</p>
-                            <p className="mt-1 text-[15px] text-gray-light">2020 – 2022</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-4">
-                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                            <span className="text-[20px]">🏢</span>
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-[18px] font-medium text-gray-dark">Business Analyst</h4>
-                            <p className="text-[16px] text-gray-light">Accenture</p>
-                            <p className="mt-1 text-[15px] text-gray-light">2018 – 2020</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="mb-4 text-[20px] font-medium text-gray-dark">Education</h3>
-                      <div className="space-y-6">
-                        <div className="flex gap-4">
-                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                            <span className="text-[20px]">🎓</span>
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-[18px] font-medium text-gray-dark">Stanford GSB</h4>
-                            <p className="text-[16px] text-gray-light">MBA</p>
-                            <p className="mt-1 text-[15px] text-gray-light">2024 – 2026</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-4">
-                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                            <span className="text-[20px]">🎓</span>
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-[18px] font-medium text-gray-dark">MIT</h4>
-                            <p className="text-[16px] text-gray-light">B.S. Computer Science and Engineering</p>
-                            <p className="mt-1 text-[15px] text-gray-light">2014 – 2018</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                    <div className="h-[120px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                    <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
                   </div>
                 )}
               </div>
@@ -794,6 +882,29 @@ export default function ProfileV2() {
         {showSidebar && (
           <div className="hidden w-[240px] shrink-0 pt-6 lg:block">
             <div className="flex flex-col gap-[14px]">
+              {/* Coach video — desktop sidebar */}
+              {showCoachVideo && !isCustomerProfile && (
+                <div className="group relative cursor-pointer overflow-hidden rounded-lg">
+                  <img
+                    src={videoThumbnail}
+                    alt="Coach video"
+                    className="block w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute inset-0 transition-colors group-hover:bg-black/10" />
+                  <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 px-2 pb-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/40 backdrop-blur-[6px]">
+                      <svg width="11" height="13" viewBox="0 0 18 20" fill="none">
+                        <path d="M17 10L1 19V1L17 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-[16px] font-medium leading-tight text-white">Get to know me</p>
+                      <p className="text-[14px] leading-tight text-white/70">1:40</p>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
               <div className="h-[280px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
               <div className="h-[120px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
@@ -837,7 +948,7 @@ export default function ProfileV2() {
       </AnimatePresence>
 
       {/* Admin controls */}
-      <div ref={adminRef} className="fixed bottom-6 right-6 z-40">
+      <div ref={adminRef} className="fixed bottom-24 right-4 z-40 md:bottom-6 md:right-6">
         <AnimatePresence>
           {adminOpen && (
             <motion.div
@@ -848,28 +959,29 @@ export default function ProfileV2() {
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
               <div className="mb-1.5 px-2 pt-1 text-[11px] font-medium uppercase tracking-wider text-[#9b9b9b]">
-                Admin controls
+                Profile type
               </div>
-              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                <span className="text-[16px] font-medium text-gray-dark">Customer profile</span>
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    checked={isCustomerProfile}
-                    onChange={() => {
-                      const next = !isCustomerProfile;
-                      setIsCustomerProfile(next);
-                      if (next) {
-                        setShowCustomerFavorite(false);
-                        setShowCoachNote(false);
-                      }
-                    }}
-                    className="peer sr-only"
-                  />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
-                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
-                </div>
-              </label>
+              <div className="mx-2 mb-2 flex rounded-lg bg-[#f5f5f5] p-[3px]">
+                <button
+                  onClick={() => {
+                    setIsCustomerProfile(false);
+                  }}
+                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[14px] font-medium transition-colors ${!isCustomerProfile ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
+                >
+                  Coach
+                </button>
+                <button
+                  onClick={() => {
+                    setIsCustomerProfile(true);
+                    setShowCustomerFavorite(false);
+                    setShowCoachNote(false);
+                    setShowCoachVideo(false);
+                  }}
+                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[14px] font-medium transition-colors ${isCustomerProfile ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
+                >
+                  Customer
+                </button>
+              </div>
               <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${isCustomerProfile ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
                 <span className="text-[16px] font-medium text-gray-dark">Customer favorite</span>
                 <div className="relative">
@@ -877,6 +989,20 @@ export default function ProfileV2() {
                     type="checkbox"
                     checked={showCustomerFavorite}
                     onChange={() => !isCustomerProfile && setShowCustomerFavorite(!showCustomerFavorite)}
+                    disabled={isCustomerProfile}
+                    className="peer sr-only"
+                  />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+              <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${isCustomerProfile ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
+                <span className="text-[16px] font-medium text-gray-dark">Coach video</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={showCoachVideo}
+                    onChange={() => !isCustomerProfile && setShowCoachVideo(!showCoachVideo)}
                     disabled={isCustomerProfile}
                     className="peer sr-only"
                   />
@@ -925,12 +1051,25 @@ export default function ProfileV2() {
                   <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                 </div>
               </label>
+              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                <span className="text-[16px] font-medium text-gray-dark">Viewing own profile</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={viewingOwnProfile}
+                    onChange={() => setViewingOwnProfile(!viewingOwnProfile)}
+                    className="peer sr-only"
+                  />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
             </motion.div>
           )}
         </AnimatePresence>
         <button
           onClick={() => setAdminOpen(!adminOpen)}
-          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#222222]/5 transition-colors hover:bg-[#222222]/[0.08]"
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 md:bg-[#222222]/5 md:shadow-none md:border-0 transition-colors hover:bg-gray-50 md:hover:bg-[#222222]/[0.08]"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <circle cx="3" cy="8" r="1.5" fill="#707070" />
