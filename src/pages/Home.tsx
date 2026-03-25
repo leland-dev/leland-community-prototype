@@ -1254,10 +1254,10 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
       {/* Successful clients */}
       {p && p.successfulClients.length > 0 ? (
         <div className="mt-3">
-          <p className="text-[12px] text-gray-light">Successful clients at:</p>
+          <p className="text-[14px] text-gray-light">Successful clients at:</p>
           <div className="mt-1.5 flex items-center gap-1.5">
             {p.successfulClients.slice(0, 5).map((c, i) => (
-              <OrgLogo key={i} logo={c.logo} name={c.name} size={22} />
+              <OrgLogo key={i} logo={c.logo} name={c.name} size={26} />
             ))}
             {p.successfulClientsMore ? (
               <span className="ml-0.5 text-[12px] text-gray-light">+{p.successfulClientsMore}</span>
@@ -1440,10 +1440,10 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
       {/* Successful clients */}
       {p && p.successfulClients.length > 0 ? (
         <div className="mt-3">
-          <p className="text-[12px] text-gray-light">Successful clients at:</p>
+          <p className="text-[14px] text-gray-light">Successful clients at:</p>
           <div className="mt-1.5 flex items-center gap-1.5">
             {p.successfulClients.slice(0, 5).map((c, i) => (
-              <OrgLogo key={i} logo={c.logo} name={c.name} size={22} />
+              <OrgLogo key={i} logo={c.logo} name={c.name} size={26} />
             ))}
             {p.successfulClientsMore ? (
               <span className="ml-0.5 text-[12px] text-gray-light">+{p.successfulClientsMore}</span>
