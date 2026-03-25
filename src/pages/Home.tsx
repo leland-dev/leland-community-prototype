@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Link } from "react-router-dom";
 import profilePhoto from "../assets/profile photos/profile photo.png";
@@ -11,15 +11,12 @@ import orgMITSloan  from "../assets/org-logos/mit-sloan.png";
 import orgColumbia  from "../assets/org-logos/columbia.png";
 import orgHaas      from "../assets/org-logos/haas.png";
 import orgTuck      from "../assets/org-logos/tuck.png";
-import orgNYUStern  from "../assets/org-logos/nyu-stern.png";
 import orgFuqua     from "../assets/org-logos/fuqua.png";
 import orgMcKinsey  from "../assets/org-logos/mckinsey.png";
 import orgBain      from "../assets/org-logos/bain.png";
 import orgBCG       from "../assets/org-logos/bcg.png";
 import orgDeloitte  from "../assets/org-logos/deloitte.png";
 import orgGoogle    from "../assets/org-logos/google.png";
-import orgGoldman   from "../assets/org-logos/goldman.png";
-import orgMorganStanley from "../assets/org-logos/morgan-stanley.png";
 import orgOpenAI    from "../assets/org-logos/openai.png";
 
 import likesIcon from "../assets/icons/likes.svg";
@@ -395,7 +392,7 @@ function formatCount(n: number): string {
   return n.toString();
 }
 
-function ActionBar({ likes, comments, reposts, shares, verified }: { likes: number; comments: number; reposts: number; shares: number; verified?: boolean }) {
+function ActionBar({ likes, comments, reposts, shares }: { likes: number; comments: number; reposts: number; shares: number }) {
   const actions = [
     { icon: likesIcon, count: likes, label: "Like" },
     { icon: commentsIcon, count: comments, label: "Comment" },
@@ -1002,6 +999,7 @@ interface CoachProfile {
   companyInitial?: string;
   successfulClients: { logo: string; name: string }[];
   successfulClientsMore?: number;
+  price?: string;
 }
 
 const coachProfiles: Record<string, CoachProfile> = {
@@ -1135,15 +1133,6 @@ const coachProfiles: Record<string, CoachProfile> = {
     successfulClientsMore: 7,
   },
 };
-
-function BadgeChip({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <div className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5">
-      <span className="shrink-0">{icon}</span>
-      <span className="text-[12px] font-medium text-gray-dark leading-none">{label}</span>
-    </div>
-  );
-}
 
 function OrgLogo({ logo, name, size = 24 }: { logo: string; name: string; size?: number }) {
   return (
@@ -1351,7 +1340,7 @@ function FeedPost({ post }: { post: Post }) {
           {post.type === "live" && <LiveCard live={post.live} author={post.author} avatar={post.avatar} />}
         </div>
       </div>
-      <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} verified={post.verified} />
+      <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} />
     </div>
   );
 }
