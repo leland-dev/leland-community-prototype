@@ -1398,7 +1398,7 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
                   <span className="text-gray-light">({p.reviews})</span>
                 </div>
               ) : null}
-              <p className="mt-0.5 text-[14px] font-medium text-gray-dark">$150/hr</p>
+              <p className="mt-0.5 text-[14px] text-gray-light">$150/hr</p>
             </div>
           </div>
         </div>
