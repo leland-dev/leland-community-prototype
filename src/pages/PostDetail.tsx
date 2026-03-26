@@ -259,7 +259,7 @@ function PostMedia({ post }: { post: Post }) {
 
 function StatsRow({ post }: { post: Post }) {
   return (
-    <div className="mt-4 flex items-center gap-5 py-3">
+    <div className="mt-2 flex items-center gap-5 py-1.5">
       {[
         { icon: likesIcon, count: post.likes, label: "Likes" },
         { icon: commentsIcon, count: post.comments, label: "Comments" },
