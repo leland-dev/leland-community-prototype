@@ -447,7 +447,7 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
         </div>
 
         {/* Comment text */}
-        <p className="mt-0.5 text-[15px] leading-[1.45] text-gray-dark">{comment.text}</p>
+        <p className="mt-0.5 text-[17px] leading-[1.45] text-gray-dark">{comment.text}</p>
 
         {/* Actions */}
         <div className="mt-2 flex items-center gap-4">
