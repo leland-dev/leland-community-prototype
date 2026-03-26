@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import TopNav from "../components/TopNav";
@@ -61,7 +62,8 @@ export default function ProfileV2() {
   const [showCoachNote, setShowCoachNote] = useState(false);
   const [showCoachVideo, setShowCoachVideo] = useState(false);
   const [showSupercoach, setShowSupercoach] = useState(false);
-  const [isCustomerProfile, setIsCustomerProfile] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [isCustomerProfile, setIsCustomerProfile] = useState(searchParams.get("type") === "customer");
   const [customerTab, setCustomerTab] = useState<"activity" | "about">("activity");
   const [viewingOwnProfile, setViewingOwnProfile] = useState(false);
 

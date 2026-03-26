@@ -417,7 +417,7 @@ function PostHeaderRow({ author, time, verified, headline }: { author: string; t
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <Link to="/profile" className="cursor-pointer text-[17px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50">{author}</Link>
+          <Link to={`/profile-v2?type=${verified ? "coach" : "customer"}`} className="cursor-pointer text-[17px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50">{author}</Link>
           {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
           <span className="shrink-0 text-[17px] leading-tight text-gray-xlight">{time}</span>
         </div>
