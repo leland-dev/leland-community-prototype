@@ -448,7 +448,7 @@ function FeedLikeButton({ initialCount }: { initialCount: number }) {
           viewBox="0 0 24 24"
           fill={liked ? "currentColor" : "none"}
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.5"
           animate={liked ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1] } : { scale: 1 }}
           transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
         >
