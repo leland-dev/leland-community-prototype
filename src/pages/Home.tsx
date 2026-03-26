@@ -1715,7 +1715,7 @@ function ComposeModal({ onClose, onPost }: { onClose: () => void; onPost: (text:
             <button
               onClick={() => { onPost(text.trim()); onClose(); }}
               disabled={!text.trim() || overLimit}
-              className="rounded-[16px] bg-gray-dark px-5 py-1.5 text-[15px] font-semibold text-white transition-opacity disabled:opacity-40 enabled:hover:opacity-90"
+              className="rounded-[16px] bg-gray-dark px-6 py-2.5 text-[15px] font-semibold text-white transition-opacity disabled:opacity-40 enabled:hover:opacity-90"
             >
               Post
             </button>
