@@ -380,7 +380,7 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
 
         {/* Nested replies */}
         {replies.length > 0 ? (
-          <div className="mt-3 pl-2 border-l-2 border-gray-stroke">
+          <div className="mt-3 pl-2">
             {replies.map(r => (
               <CommentItem key={r.id} comment={r} depth={1} />
             ))}
