@@ -19,7 +19,6 @@ import orgDeloitte  from "../assets/org-logos/deloitte.png";
 import orgGoogle    from "../assets/org-logos/google.png";
 import orgOpenAI    from "../assets/org-logos/openai.png";
 
-import likesIcon from "../assets/icons/likes.svg";
 import commentsIcon from "../assets/icons/comments.svg";
 import repostsIcon from "../assets/icons/reposts.svg";
 import sharesIcon from "../assets/icons/shares.svg";
@@ -1569,9 +1568,166 @@ function SuggestedExperts() {
   );
 }
 
+// ─── Compose Modal ────────────────────────────────────
+
+function ComposeModal({ onClose }: { onClose: () => void }) {
+  const [text, setText] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    textareaRef.current?.focus();
+  }, []);
+
+  const autoGrow = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = e.target.scrollHeight + "px";
+  };
+
+  const charCount = text.length;
+  const maxChars = 280;
+  const remaining = maxChars - charCount;
+  const circleR = 9;
+  const circumference = 2 * Math.PI * circleR;
+  const progress = Math.min(charCount / maxChars, 1);
+  const dashOffset = circumference * (1 - progress);
+  const overLimit = remaining < 0;
+  const nearLimit = remaining <= 20;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-50 flex items-start justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.15 }}
+      >
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0 bg-black/50"
+          onClick={onClose}
+        />
+
+        {/* Modal */}
+        <motion.div
+          className="relative z-10 mt-[60px] w-full max-w-[600px] rounded-2xl bg-white shadow-2xl mx-4"
+          initial={{ opacity: 0, scale: 0.95, y: -20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: -20 }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 pt-4 pb-2">
+            <button
+              onClick={onClose}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-gray-dark hover:bg-gray-hover transition-colors"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <button className="text-[15px] font-semibold text-[#4F46E5] hover:text-[#3730A3] transition-colors">
+              Drafts
+            </button>
+          </div>
+
+          {/* Compose area */}
+          <div className="flex gap-3 px-4 pt-2 pb-3">
+            <img
+              src={profilePhoto}
+              alt="Your profile"
+              className="h-10 w-10 shrink-0 rounded-full object-cover"
+            />
+            <div className="flex-1 min-w-0">
+              <textarea
+                ref={textareaRef}
+                value={text}
+                onChange={autoGrow}
+                placeholder="What's on your mind?"
+                rows={4}
+                className="w-full resize-none bg-transparent text-[17px] text-gray-dark placeholder:text-gray-light focus:outline-none leading-relaxed"
+                style={{ minHeight: "100px" }}
+              />
+            </div>
+          </div>
+
+          {/* Everyone can reply */}
+          <div className="px-4 pb-3">
+            <button className="flex items-center gap-1.5 text-[14px] font-semibold text-[#4F46E5] hover:text-[#3730A3] transition-colors">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
+              Everyone can reply
+            </button>
+          </div>
+
+          <div className="border-t border-gray-stroke" />
+
+          {/* Bottom toolbar */}
+          <div className="flex items-center justify-between px-4 py-3">
+            {/* Attachment icons */}
+            <div className="flex items-center gap-1">
+              {[
+                <path key="img" d="M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>,
+                <><rect key="gif-r" x="2" y="6" width="20" height="12" rx="2"/><text key="gif-t" x="12" y="15.5" textAnchor="middle" fontSize="7" fontWeight="700" fill="currentColor">GIF</text></>,
+                <><circle key="poll-c" cx="12" cy="12" r="10"/><path key="poll-p" d="M8 12h8M12 8v8"/></>,
+                <path key="emoji" d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 18a8 8 0 110-16 8 8 0 010 16zm-3-9a1 1 0 110-2 1 1 0 010 2zm6 0a1 1 0 110-2 1 1 0 010 2zm-5.27 4.5h4.54a.75.75 0 000-1.5H9.73a.75.75 0 000 1.5z"/>,
+                <path key="location" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>,
+              ].map((d, i) => (
+                <button key={i} className="flex h-8 w-8 items-center justify-center rounded-full text-[#4F46E5] hover:bg-indigo-50 transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill={i === 0 || i === 3 || i === 4 ? "currentColor" : "none"} stroke={i === 2 ? "currentColor" : "none"} strokeWidth="1.5">
+                    {d}
+                  </svg>
+                </button>
+              ))}
+            </div>
+
+            {/* Char counter + Post button */}
+            <div className="flex items-center gap-3">
+              {charCount > 0 && (
+                <div className="relative flex items-center justify-center">
+                  <svg width="26" height="26" viewBox="0 0 26 26">
+                    <circle cx="13" cy="13" r={circleR} fill="none" stroke="#E5E5E5" strokeWidth="2.5" />
+                    <circle
+                      cx="13" cy="13" r={circleR}
+                      fill="none"
+                      stroke={overLimit ? "#EF4444" : nearLimit ? "#F59E0B" : "#4F46E5"}
+                      strokeWidth="2.5"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={dashOffset}
+                      strokeLinecap="round"
+                      transform="rotate(-90 13 13)"
+                      style={{ transition: "stroke-dashoffset 0.1s, stroke 0.2s" }}
+                    />
+                  </svg>
+                  {nearLimit && (
+                    <span className={`absolute text-[10px] font-semibold ${overLimit ? "text-red-500" : "text-amber-500"}`}>
+                      {remaining}
+                    </span>
+                  )}
+                </div>
+              )}
+              <button
+                onClick={onClose}
+                disabled={!text.trim() || overLimit}
+                className="rounded-full bg-gray-dark px-5 py-1.5 text-[15px] font-semibold text-white transition-opacity disabled:opacity-40 enabled:hover:opacity-90"
+              >
+                Post
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────
 
 export default function Home() {
+  const [composeOpen, setComposeOpen] = useState(false);
+
   return (
     <div>
       {/* Post composer */}
@@ -1581,11 +1737,12 @@ export default function Home() {
           alt="Your profile"
           className="h-10 w-10 shrink-0 rounded-full object-cover"
         />
-        <input
-          type="text"
-          placeholder="Share an update..."
-          className="flex-1 rounded-full bg-gray-hover px-4 py-[10px] text-[16px] text-gray-dark placeholder:text-[16px] placeholder:text-gray-light transition-shadow focus:bg-white focus:shadow-[0_0_0_2px_#222222] focus:outline-none"
-        />
+        <button
+          onClick={() => setComposeOpen(true)}
+          className="flex-1 rounded-full bg-gray-hover px-4 py-[10px] text-left text-[16px] text-gray-light transition-shadow hover:shadow-[0_0_0_2px_#dddddd]"
+        >
+          Share an update...
+        </button>
       </div>
 
       {/* Feed */}
@@ -1597,6 +1754,8 @@ export default function Home() {
           </div>
         ))}
       </div>
+
+      {composeOpen ? <ComposeModal onClose={() => setComposeOpen(false)} /> : null}
     </div>
   );
 }
