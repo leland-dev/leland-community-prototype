@@ -154,15 +154,15 @@ function AuthorRow({ post }: { post: Post }) {
         className="h-11 w-11 shrink-0 rounded-full object-cover"
         style={{ objectPosition: "50% 15%" }}
       />
-      <div className="min-w-0">
-        <div className="flex items-center gap-1">
-          <span className="text-[17px] font-semibold text-gray-dark">{post.author}</span>
-          {post.verified ? <img src={verifiedIconSrc} alt="" className="h-4 w-4 shrink-0" /> : null}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="text-[17px] font-medium leading-tight text-gray-dark">{post.author}</span>
+          {post.verified ? <img src={verifiedIconSrc} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
+          <span className="shrink-0 text-[17px] leading-tight text-gray-xlight">{post.time}</span>
         </div>
         {post.headline ? (
-          <p className="text-[14px] text-gray-light">{post.headline}</p>
+          <p className="truncate text-[15px] leading-tight text-[#707070]">{post.headline}</p>
         ) : null}
-        <p className="text-[13px] text-gray-light">{post.time}</p>
       </div>
     </div>
   );
