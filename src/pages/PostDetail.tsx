@@ -280,7 +280,14 @@ function StatsRow({ post }: { post: Post }) {
 function ReplyInput({ onPost, onCancel }: { onPost: (text: string) => void; onCancel: () => void }) {
   const [text, setText] = useState("");
   return (
-    <div className="mt-3 flex gap-2">
+    <div
+      className="mt-3 flex gap-2"
+      onBlur={e => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node) && !text.trim()) {
+          onCancel();
+        }
+      }}
+    >
       <img src={profilePhoto} alt="You" className="h-7 w-7 shrink-0 rounded-full object-cover" />
       <div className="flex-1">
         <textarea
