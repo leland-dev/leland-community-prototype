@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import lelandCompass from "../assets/leland-compass.svg";
 
@@ -119,11 +119,12 @@ interface LivePost extends PostBase {
   };
 }
 
-type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost | LivePost;
+export type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost | LivePost;
+export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, LivePost };
 
 // ─── Sample data ──────────────────────────────────────
 
-const posts: Post[] = [
+export const posts: Post[] = [
   {
     id: 1,
     type: "text",
@@ -1324,23 +1325,34 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
 // ─── Post component ───────────────────────────────────
 
 function FeedPost({ post }: { post: Post }) {
+  const navigate = useNavigate();
+
   return (
     <div className="pt-5 pb-[14px]">
-      <div className="flex gap-3">
+      <div
+        className="flex gap-3 cursor-pointer"
+        onClick={() => navigate(`/post/${post.id}`)}
+      >
         {/* Left column: avatar with hover card */}
-        <AvatarWithHoverCard post={post} />
+        <div onClick={e => e.stopPropagation()}>
+          <AvatarWithHoverCard post={post} />
+        </div>
         {/* Right column: content */}
         <div className="min-w-0 flex-1">
           <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} />
           <p className="mt-1 text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
-          {post.type === "image" && <ImageGallery images={post.images} />}
-          {post.type === "link" && <LinkCard link={post.link} />}
-          {post.type === "event" && <EventCard event={post.event} />}
-          {post.type === "milestone" && <MilestoneCard milestone={post.milestone} />}
-          {post.type === "live" && <LiveCard live={post.live} author={post.author} avatar={post.avatar} />}
+          <div onClick={e => e.stopPropagation()}>
+            {post.type === "image" && <ImageGallery images={post.images} />}
+            {post.type === "link" && <LinkCard link={post.link} />}
+            {post.type === "event" && <EventCard event={post.event} />}
+            {post.type === "milestone" && <MilestoneCard milestone={post.milestone} />}
+            {post.type === "live" && <LiveCard live={post.live} author={post.author} avatar={post.avatar} />}
+          </div>
         </div>
       </div>
-      <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} />
+      <div onClick={e => e.stopPropagation()}>
+        <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} verified={post.verified} />
+      </div>
     </div>
   );
 }

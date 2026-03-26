@@ -10,6 +10,7 @@ import ProfileV2 from "./pages/ProfileV2";
 import Events from "./pages/Events";
 import Courses from "./pages/Courses";
 import LelandPlus from "./pages/LelandPlus";
+import PostDetail from "./pages/PostDetail";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
 
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/post/:postId" element={<PostDetail />} />
         <Route path="/browse" element={<Browse />} />
         <Route path="/search" element={<Search />} />
         <Route path="/events" element={<Events />} />
