@@ -326,14 +326,18 @@ function ReplyInput({ onPost, onCancel }: { onPost: (text: string) => void; onCa
 }
 
 const HEART_PARTICLES = [
-  { angle: 0,   color: "#ff4757" },
-  { angle: 45,  color: "#ff6b81" },
-  { angle: 90,  color: "#ff4757" },
-  { angle: 135, color: "#fd79a8" },
-  { angle: 180, color: "#ff4757" },
-  { angle: 225, color: "#ff6b81" },
-  { angle: 270, color: "#ff4757" },
-  { angle: 315, color: "#fd79a8" },
+  { angle: -80,  r: 22, color: "#ff4757", size: 5 },
+  { angle: -40,  r: 26, color: "#fd79a8", size: 4 },
+  { angle: -10,  r: 20, color: "#ff6b81", size: 6 },
+  { angle: 20,   r: 24, color: "#ff4757", size: 4 },
+  { angle: 55,   r: 22, color: "#ff6348", size: 5 },
+  { angle: 90,   r: 26, color: "#ff4757", size: 4 },
+  { angle: 130,  r: 20, color: "#fd79a8", size: 6 },
+  { angle: 160,  r: 24, color: "#ff6b81", size: 4 },
+  { angle: 200,  r: 22, color: "#ff4757", size: 5 },
+  { angle: 240,  r: 20, color: "#ff6348", size: 4 },
+  { angle: 270,  r: 26, color: "#fd79a8", size: 5 },
+  { angle: 310,  r: 22, color: "#ff4757", size: 4 },
 ];
 
 function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number; onToggle: () => void }) {
@@ -341,27 +345,33 @@ function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number
 
   const handleClick = () => {
     onToggle();
-    if (!liked) { setBurst(true); setTimeout(() => setBurst(false), 600); }
+    if (!liked) { setBurst(true); setTimeout(() => setBurst(false), 700); }
   };
 
   return (
     <div className="relative flex items-center gap-1">
-      {/* Particle burst */}
+      {/* Balloon-pop particle burst */}
       <div className="pointer-events-none absolute left-[7px] top-[7px]">
         <AnimatePresence>
           {burst ? HEART_PARTICLES.map((p, i) => (
             <motion.span
               key={i}
-              className="absolute h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: p.color, marginLeft: -3, marginTop: -3 }}
-              initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+              className="absolute rounded-full"
+              style={{
+                backgroundColor: p.color,
+                width: p.size,
+                height: p.size,
+                marginLeft: -p.size / 2,
+                marginTop: -p.size / 2,
+              }}
+              initial={{ scale: 1, x: 0, y: 0, opacity: 1 }}
               animate={{
-                scale: [0, 1.2, 0],
-                x: Math.cos((p.angle * Math.PI) / 180) * 14,
-                y: Math.sin((p.angle * Math.PI) / 180) * 14,
+                scale: [1, 1, 0],
+                x: [0, Math.cos((p.angle * Math.PI) / 180) * p.r * 0.4, Math.cos((p.angle * Math.PI) / 180) * p.r],
+                y: [0, Math.sin((p.angle * Math.PI) / 180) * p.r * 0.4, Math.sin((p.angle * Math.PI) / 180) * p.r + 6],
                 opacity: [1, 1, 0],
               }}
-              transition={{ duration: 0.5, ease: "easeOut", delay: i * 0.01 }}
+              transition={{ duration: 0.55, ease: [0.2, 0, 0.8, 1], delay: i * 0.008 }}
             />
           )) : null}
         </AnimatePresence>
@@ -378,16 +388,16 @@ function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number
           stroke="currentColor"
           strokeWidth="2"
           animate={liked
-            ? { scale: [1, 0.7, 1.5, 1.1, 1], rotate: [0, -12, 8, -4, 0] }
-            : { scale: 1, rotate: 0 }
+            ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1] }
+            : { scale: 1 }
           }
-          transition={{ duration: 0.45, ease: [0.175, 0.885, 0.32, 1.275] }}
+          transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
         >
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
         </motion.svg>
         <motion.span
-          animate={liked ? { scale: [1, 1.3, 1] } : { scale: 1 }}
-          transition={{ duration: 0.3 }}
+          animate={liked ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
         >
           {count}
         </motion.span>
