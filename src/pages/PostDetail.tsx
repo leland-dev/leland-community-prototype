@@ -325,6 +325,77 @@ function ReplyInput({ onPost, onCancel }: { onPost: (text: string) => void; onCa
   );
 }
 
+const HEART_PARTICLES = [
+  { angle: 0,   color: "#ff4757" },
+  { angle: 45,  color: "#ff6b81" },
+  { angle: 90,  color: "#ff4757" },
+  { angle: 135, color: "#fd79a8" },
+  { angle: 180, color: "#ff4757" },
+  { angle: 225, color: "#ff6b81" },
+  { angle: 270, color: "#ff4757" },
+  { angle: 315, color: "#fd79a8" },
+];
+
+function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number; onToggle: () => void }) {
+  const [burst, setBurst] = useState(false);
+
+  const handleClick = () => {
+    onToggle();
+    if (!liked) { setBurst(true); setTimeout(() => setBurst(false), 600); }
+  };
+
+  return (
+    <div className="relative flex items-center gap-1">
+      {/* Particle burst */}
+      <div className="pointer-events-none absolute left-[7px] top-[7px]">
+        <AnimatePresence>
+          {burst ? HEART_PARTICLES.map((p, i) => (
+            <motion.span
+              key={i}
+              className="absolute h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: p.color, marginLeft: -3, marginTop: -3 }}
+              initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+              animate={{
+                scale: [0, 1.2, 0],
+                x: Math.cos((p.angle * Math.PI) / 180) * 14,
+                y: Math.sin((p.angle * Math.PI) / 180) * 14,
+                opacity: [1, 1, 0],
+              }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: i * 0.01 }}
+            />
+          )) : null}
+        </AnimatePresence>
+      </div>
+
+      <button
+        onClick={handleClick}
+        className={`flex items-center gap-1 text-[13px] transition-colors ${liked ? "text-red-500" : "text-gray-light hover:text-gray-dark"}`}
+      >
+        <motion.svg
+          className="h-3.5 w-3.5"
+          viewBox="0 0 24 24"
+          fill={liked ? "currentColor" : "none"}
+          stroke="currentColor"
+          strokeWidth="2"
+          animate={liked
+            ? { scale: [1, 0.7, 1.5, 1.1, 1], rotate: [0, -12, 8, -4, 0] }
+            : { scale: 1, rotate: 0 }
+          }
+          transition={{ duration: 0.45, ease: [0.175, 0.885, 0.32, 1.275] }}
+        >
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </motion.svg>
+        <motion.span
+          animate={liked ? { scale: [1, 1.3, 1] } : { scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          {count}
+        </motion.span>
+      </button>
+    </div>
+  );
+}
+
 function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: number }) {
   const [liked, setLiked] = useState(false);
   const [showReply, setShowReply] = useState(false);
@@ -370,15 +441,7 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
 
         {/* Actions */}
         <div className="mt-2 flex items-center gap-4">
-          <button
-            onClick={() => setLiked(l => !l)}
-            className={`flex items-center gap-1 text-[13px] transition-colors ${liked ? "text-red-500" : "text-gray-light hover:text-gray-dark"}`}
-          >
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill={liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-            </svg>
-            {comment.likes + (liked ? 1 : 0)}
-          </button>
+          <HeartButton liked={liked} count={comment.likes + (liked ? 1 : 0)} onToggle={() => setLiked(l => !l)} />
           {depth === 0 ? (
             <button
               onClick={() => setShowReply(s => !s)}
