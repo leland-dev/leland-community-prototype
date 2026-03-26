@@ -1715,6 +1715,7 @@ function ComposeModal({ onClose, onPost }: { onClose: () => void; onPost: (text:
 // ─── Page ─────────────────────────────────────────────
 
 export default function Home() {
+  useEffect(() => { document.title = "Leland Prototype | Feed"; }, []);
   const [composeOpen, setComposeOpen] = useState(false);
   const [feedPosts, setFeedPosts] = useState<Post[]>(posts);
 

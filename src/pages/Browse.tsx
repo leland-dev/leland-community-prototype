@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import {
   Users,
   Calendar,
@@ -21,6 +23,7 @@ const categories = [
 ];
 
 export default function Browse() {
+  useEffect(() => { document.title = "Leland Prototype | Browse"; }, []);
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-dark">Browse</h1>

@@ -1,6 +1,9 @@
+import { useEffect } from "react";
+
 import { Search as SearchIcon } from "lucide-react";
 
 export default function Search() {
+  useEffect(() => { document.title = "Leland Prototype | Search"; }, []);
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-dark">Search</h1>
