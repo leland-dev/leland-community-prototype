@@ -1571,7 +1571,7 @@ function SuggestedExperts() {
 
 // ─── Compose Modal ────────────────────────────────────
 
-function ComposeModal({ onClose }: { onClose: () => void }) {
+function ComposeModal({ onClose, onPost }: { onClose: () => void; onPost: (text: string) => void }) {
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -1698,7 +1698,7 @@ function ComposeModal({ onClose }: { onClose: () => void }) {
                 </div>
               )}
               <button
-                onClick={onClose}
+                onClick={() => { onPost(text.trim()); onClose(); }}
                 disabled={!text.trim() || overLimit}
                 className="rounded-full bg-gray-dark px-5 py-1.5 text-[15px] font-semibold text-white transition-opacity disabled:opacity-40 enabled:hover:opacity-90"
               >
@@ -1716,6 +1716,23 @@ function ComposeModal({ onClose }: { onClose: () => void }) {
 
 export default function Home() {
   const [composeOpen, setComposeOpen] = useState(false);
+  const [feedPosts, setFeedPosts] = useState<Post[]>(posts);
+
+  const handlePost = (text: string) => {
+    const newPost: Post = {
+      id: Date.now(),
+      type: "text",
+      author: "You",
+      avatar: profilePhoto,
+      time: "just now",
+      body: text,
+      likes: 0,
+      comments: 0,
+      reposts: 0,
+      shares: 0,
+    };
+    setFeedPosts(prev => [newPost, ...prev]);
+  };
 
   return (
     <div>
@@ -1736,7 +1753,7 @@ export default function Home() {
 
       {/* Feed */}
       <div className="divide-y divide-gray-stroke">
-        {posts.map((post, i) => (
+        {feedPosts.map((post, i) => (
           <div key={post.id}>
             <FeedPost post={post} />
             {i === 3 && <SuggestedExperts />}
@@ -1744,7 +1761,7 @@ export default function Home() {
         ))}
       </div>
 
-      {composeOpen ? <ComposeModal onClose={() => setComposeOpen(false)} /> : null}
+      {composeOpen ? <ComposeModal onClose={() => setComposeOpen(false)} onPost={handlePost} /> : null}
     </div>
   );
 }
