@@ -281,38 +281,45 @@ function ReplyInput({ onPost, onCancel }: { onPost: (text: string) => void; onCa
   const [text, setText] = useState("");
   return (
     <div
-      className="mt-3 flex gap-2"
+      className="mt-3 flex gap-3"
       onBlur={e => {
         if (!e.currentTarget.contains(e.relatedTarget as Node) && !text.trim()) {
           onCancel();
         }
       }}
     >
-      <img src={profilePhoto} alt="You" className="h-7 w-7 shrink-0 rounded-full object-cover" />
+      <img src={profilePhoto} alt="You" className="h-9 w-9 shrink-0 rounded-full object-cover" />
       <div className="flex-1">
         <textarea
           autoFocus
           value={text}
-          onChange={e => setText(e.target.value)}
-          placeholder="Write a reply..."
-          className="w-full resize-none rounded-xl border border-gray-stroke px-3 py-2 text-[14px] text-gray-dark outline-none focus:border-gray-dark"
-          rows={2}
+          onChange={e => {
+            setText(e.target.value);
+            e.target.style.height = "auto";
+            e.target.style.height = `${e.target.scrollHeight}px`;
+          }}
+          placeholder="Write a reply…"
+          rows={1}
+          className="w-full resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[15px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
+          onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && text.trim()) { onPost(text.trim()); } }}
         />
-        <div className="mt-1.5 flex justify-end gap-2">
-          <button
-            onClick={onCancel}
-            className="rounded-lg px-3 py-1.5 text-[13px] text-gray-light hover:text-gray-dark"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => { if (text.trim()) { onPost(text.trim()); setText(""); } }}
-            disabled={!text.trim()}
-            className="rounded-lg bg-gray-dark px-4 py-1.5 text-[13px] font-semibold text-white disabled:opacity-40"
-          >
-            Reply
-          </button>
-        </div>
+        <AnimatePresence>
+          {text.trim() ? (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-2 flex justify-end"
+            >
+              <button
+                onClick={() => { onPost(text.trim()); }}
+                className="rounded-xl bg-gray-dark px-5 py-2 text-[14px] font-semibold text-white transition-colors hover:bg-[#222]"
+              >
+                Reply
+              </button>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </div>
     </div>
   );
