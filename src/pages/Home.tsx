@@ -1351,7 +1351,7 @@ function FeedPost({ post }: { post: Post }) {
         </div>
       </div>
       <div onClick={e => e.stopPropagation()}>
-        <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} verified={post.verified} />
+        <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} />
       </div>
     </div>
   );
