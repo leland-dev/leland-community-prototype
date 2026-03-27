@@ -1,52 +1,33 @@
+import { Link } from "react-router-dom";
+import settingsIcon from "../assets/icons/settings.svg";
+
 export default function Notifications() {
+  const dashedBorderStyle = {
+    backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")`,
+  };
+
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-dark">Notifications</h1>
-      <p className="mt-1 text-sm text-gray-light">
-        Stay updated on activity that matters to you.
-      </p>
-
-      {/* Filter tabs */}
-      <div className="mt-6 flex gap-1 border-b border-gray-stroke">
-        {["All", "Mentions", "Replies"].map((tab, i) => (
-          <button
-            key={tab}
-            className={`px-4 py-2.5 text-sm font-medium transition-colors ${
-              i === 0
-                ? "text-gray-dark shadow-[inset_0_-2px_0_0_#15b078]"
-                : "text-gray-light hover:text-gray-dark"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+      <div className="flex items-center justify-between">
+        <h1 className="text-[40px] font-medium text-gray-dark">
+          Notifications
+        </h1>
+        <Link
+          to="/settings?tab=notifications"
+          className="flex items-center justify-center rounded-full bg-[#222222]/5 p-2.5 transition-colors hover:bg-[#222222]/[0.08]"
+        >
+          <img src={settingsIcon} alt="Settings" className="h-5 w-5" />
+        </Link>
       </div>
 
-      {/* Notification items skeleton */}
-      <div className="mt-2 divide-y divide-gray-hover">
-        {[
-          { unread: true },
-          { unread: true },
-          { unread: false },
-          { unread: false },
-          { unread: false },
-        ].map((item, i) => (
+      {/* Placeholder boxes */}
+      <div className="mt-8 flex flex-col gap-4">
+        {[0, 1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className={`flex gap-3 px-2 py-4 ${
-              item.unread ? "bg-primary-xlight" : ""
-            }`}
-          >
-            <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-gray-stroke" />
-            <div className="min-w-0 flex-1 space-y-1.5">
-              <div className="h-3.5 w-4/5 animate-pulse rounded bg-gray-stroke" />
-              <div className="h-3 w-3/5 animate-pulse rounded bg-gray-hover" />
-              <div className="h-3 w-24 animate-pulse rounded bg-gray-hover" />
-            </div>
-            {item.unread && (
-              <div className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />
-            )}
-          </div>
+            className="h-[160px] rounded-xl bg-[#F5F5F5]"
+            style={dashedBorderStyle}
+          />
         ))}
       </div>
     </div>

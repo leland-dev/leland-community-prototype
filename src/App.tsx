@@ -11,12 +11,16 @@ import Events from "./pages/Events";
 import Courses from "./pages/Courses";
 import LelandPlus from "./pages/LelandPlus";
 import PostDetail from "./pages/PostDetail";
+import AccountSettings from "./pages/AccountSettings";
 
 export default function App() {
   return (
     <Routes>
       {/* ProfileV2 gets its own layout - no max-width wrapper */}
       <Route path="/profile-v2" element={<ProfileV2 />} />
+
+      {/* Settings gets its own layout - full-width sidebar */}
+      <Route path="/settings" element={<AccountSettings />} />
 
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />

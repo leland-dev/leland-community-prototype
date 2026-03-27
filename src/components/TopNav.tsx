@@ -47,7 +47,7 @@ const profileMenuGroups = [
     items: [
       { to: "/profile-v2", icon: profilePhoto, label: "View Profile", danger: false, isProfile: true },
       { to: null, icon: giftIcon, label: "Refer a friend", danger: false },
-      { to: null, icon: settingsIcon, label: "Settings", danger: false },
+      { to: "/settings", icon: settingsIcon, label: "Settings", danger: false },
       { to: null, icon: arrowRoundIcon, label: "Order History", danger: false },
     ],
   },
