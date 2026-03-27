@@ -658,7 +658,7 @@ function EventCard({ event }: { event: EventPost["event"] }) {
                   {event.spotsLeft !== undefined ? <> ({event.spotsLeft} spots remaining)</> : null}
                 </span>
               </div>
-              <button style={{ fontWeight: 500 }} className="shrink-0 cursor-pointer rounded-lg bg-[#222222]/5 px-[16px] py-2.5 text-[15px] text-[#424242] transition-colors hover:bg-[#222222]/[0.08]">
+              <button className="shrink-0 cursor-pointer rounded-xl bg-gray-100 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
                 Register for free
               </button>
             </div>
