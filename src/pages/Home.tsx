@@ -501,7 +501,6 @@ function ShareDropdown({ postId, onClose }: { postId: number; onClose: () => voi
           )}
           {copied ? "Copied!" : "Copy link"}
         </button>
-        <div className="mx-4 border-t border-gray-stroke" />
         <a
           href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`}
           target="_blank" rel="noopener noreferrer"
