@@ -7,6 +7,7 @@ import eventImageSrc from "../assets/img/EventImage.avif";
 import lelandCompass from "../assets/leland-compass.svg";
 
 // Organisation logos
+import orgWharton   from "../assets/org-logos/wharton.png";
 import orgHBS       from "../assets/org-logos/hbs.png";
 import orgKellogg   from "../assets/org-logos/kellogg.png";
 import orgMITSloan  from "../assets/org-logos/mit-sloan.png";
@@ -107,6 +108,7 @@ interface MilestonePost extends PostBase {
     clientAvatar: string;
     schoolColor: string;
     schoolInitial: string;
+    schoolLogo?: string;
   };
 }
 
@@ -225,6 +227,7 @@ export const posts: Post[] = [
       clientAvatar: pic6,
       schoolColor: "#002f6c",
       schoolInitial: "W",
+      schoolLogo: orgWharton,
     },
     likes: 431,
     comments: 47,
@@ -735,13 +738,21 @@ function MilestoneCard({ milestone }: { milestone: MilestonePost["milestone"] })
       <div className="flex items-center gap-4 px-4 py-4">
         {/* Overlapping avatars */}
         <div className="relative flex shrink-0 items-center">
-          {/* School initial avatar — behind */}
-          <div
-            className="relative z-0 flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-[22px] font-bold text-white ring-2 ring-white"
-            style={{ backgroundColor: milestone.schoolColor }}
-          >
-            {milestone.schoolInitial}
-          </div>
+          {/* School logo/avatar — behind */}
+          {milestone.schoolLogo ? (
+            <img
+              src={milestone.schoolLogo}
+              alt={milestone.school}
+              className="relative z-0 h-14 w-14 shrink-0 rounded-full object-cover ring-2 ring-white"
+            />
+          ) : (
+            <div
+              className="relative z-0 flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-[22px] font-bold text-white ring-2 ring-white"
+              style={{ backgroundColor: milestone.schoolColor }}
+            >
+              {milestone.schoolInitial}
+            </div>
+          )}
           {/* Client avatar — overlaps on top */}
           <div className="relative z-10 -ml-4 shrink-0">
             <img
