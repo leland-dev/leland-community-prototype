@@ -1691,7 +1691,7 @@ function ComposeModal({ onClose, onPost }: { onClose: () => void; onPost: (text:
         {/* X button — absolute top right */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-[16px] border border-gray-stroke bg-white text-gray-dark shadow-sm transition-colors hover:bg-gray-hover"
+          className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-[16px] border border-gray-stroke bg-white text-gray-dark transition-colors hover:bg-gray-hover"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <path d="M18 6L6 18M6 6l12 12" />
