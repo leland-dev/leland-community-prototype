@@ -531,13 +531,13 @@ function ActionBar({ likes, comments, reposts, postId }: { likes: number; commen
         { icon: repostsIcon,  count: reposts,  label: "Repost",  onClick: undefined as ((e: React.MouseEvent) => void) | undefined },
       ].map(({ icon, count, label, onClick }) => (
         <button key={label} onClick={onClick} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
-          <img src={icon} alt={label} className="h-[22px] w-[22px] [filter:invert(46%)]" />
+          <img src={icon} alt={label} className="h-[22px] w-[22px] [filter:invert(44%)]" />
           {count > 0 && <span className="text-[15px] font-normal">{formatCount(count)}</span>}
         </button>
       ))}
       <div className="relative">
         <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
-          <img src={sharesIcon} alt="Share" className="h-[22px] w-[22px] [filter:invert(46%)]" />
+          <img src={sharesIcon} alt="Share" className="h-[22px] w-[22px] [filter:invert(44%)]" />
         </button>
         <AnimatePresence>
           {shareOpen ? <ShareDropdown postId={postId} onClose={() => setShareOpen(false)} /> : null}
