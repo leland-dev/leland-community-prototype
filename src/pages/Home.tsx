@@ -491,33 +491,37 @@ function ShareDropdown({ postId, onClose }: { postId: number; onClose: () => voi
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: -4 }}
         transition={{ duration: 0.12 }}
-        className="absolute bottom-full left-0 z-50 mb-2 w-52 overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-lg"
+        className="absolute bottom-full left-0 z-50 mb-2 w-56 overflow-hidden rounded-lg border border-[#f0f0f0] bg-white shadow-md"
       >
+        {/* Copy link */}
         <button onClick={copyLink} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[15px] text-gray-dark hover:bg-gray-hover">
-          {copied ? (
-            <svg className="h-4 w-4 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          ) : (
-            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          )}
-          {copied ? "Copied!" : "Copy link"}
+          <span className="flex-1 flex items-center gap-3">
+            {copied ? (
+              <svg className="h-4 w-4 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            ) : (
+              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            )}
+            {copied ? "Copied!" : "Copy link"}
+          </span>
+          <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         </button>
-        <a
-          href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`}
-          target="_blank" rel="noopener noreferrer"
-          onClick={onClose}
-          className="flex w-full items-center gap-3 px-4 py-3 text-[15px] text-gray-dark hover:bg-gray-hover"
-        >
-          <svg className="h-4 w-4 shrink-0 rounded-[3px]" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-          LinkedIn
+        <div className="border-t border-[#f2f2f2]" />
+        {/* LinkedIn */}
+        <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-3 px-4 py-3 text-[15px] text-gray-dark hover:bg-gray-hover">
+          <span className="flex-1 flex items-center gap-3">
+            <svg className="h-4 w-4 shrink-0 rounded-[3px]" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+          </span>
+          <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         </a>
-        <a
-          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`}
-          target="_blank" rel="noopener noreferrer"
-          onClick={onClose}
-          className="flex w-full items-center gap-3 px-4 py-3 text-[15px] text-gray-dark hover:bg-gray-hover"
-        >
-          <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          Twitter / X
+        <div className="border-t border-[#f2f2f2]" />
+        {/* Twitter/X */}
+        <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-3 px-4 py-3 text-[15px] text-gray-dark hover:bg-gray-hover">
+          <span className="flex-1 flex items-center gap-3">
+            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Twitter / X
+          </span>
+          <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         </a>
       </motion.div>
     </>
