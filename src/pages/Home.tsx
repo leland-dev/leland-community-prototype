@@ -399,6 +399,21 @@ function formatCount(n: number): string {
   return n.toString();
 }
 
+const FEED_REPOST_PARTICLES = [
+  { angle: -80,  r: 28, color: "#00b894", size: 6 },
+  { angle: -40,  r: 32, color: "#55efc4", size: 5 },
+  { angle: -10,  r: 25, color: "#00cec9", size: 7 },
+  { angle: 20,   r: 30, color: "#00b894", size: 5 },
+  { angle: 55,   r: 28, color: "#55efc4", size: 6 },
+  { angle: 90,   r: 32, color: "#00b894", size: 5 },
+  { angle: 130,  r: 25, color: "#00cec9", size: 7 },
+  { angle: 160,  r: 30, color: "#55efc4", size: 5 },
+  { angle: 200,  r: 28, color: "#00b894", size: 6 },
+  { angle: 240,  r: 25, color: "#00cec9", size: 5 },
+  { angle: 270,  r: 32, color: "#55efc4", size: 6 },
+  { angle: 310,  r: 28, color: "#00b894", size: 5 },
+];
+
 const FEED_HEART_PARTICLES = [
   { angle: -80,  r: 28, color: "#ff4757", size: 6 },
   { angle: -40,  r: 32, color: "#fd79a8", size: 5 },
@@ -495,76 +510,131 @@ function ShareDropdown({ postId, onClose }: { postId: number; onClose: () => voi
       >
         {/* Copy link */}
         <button onClick={copyLink} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[15px] text-gray-dark hover:bg-gray-hover">
-          <span className="flex-1 flex items-center gap-3">
-            {copied ? (
-              <svg className="h-4 w-4 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            ) : (
-              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            )}
-            {copied ? "Copied!" : "Copy link"}
-          </span>
-          <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {copied ? (
+            <svg className="h-4 w-4 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          ) : (
+            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          )}
+          {copied ? "Copied!" : "Copy link"}
         </button>
-        <div className="border-t border-[#f2f2f2]" />
+        <div className="mx-4 border-t border-[#f2f2f2]" />
         {/* LinkedIn */}
         <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-3 px-4 py-3 text-[15px] text-gray-dark hover:bg-gray-hover">
-          <span className="flex-1 flex items-center gap-3">
-            <svg className="h-4 w-4 shrink-0 rounded-[3px]" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-            LinkedIn
-          </span>
-          <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <svg className="h-4 w-4 shrink-0 rounded-[3px]" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          LinkedIn
         </a>
-        <div className="border-t border-[#f2f2f2]" />
+        <div className="mx-4 border-t border-[#f2f2f2]" />
         {/* Twitter/X */}
         <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-3 px-4 py-3 text-[15px] text-gray-dark hover:bg-gray-hover">
-          <span className="flex-1 flex items-center gap-3">
-            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            Twitter / X
-          </span>
-          <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          Twitter / X
         </a>
       </motion.div>
     </>
   );
 }
 
-function RepostDropdown({ authorName, onClose }: { authorName: string; onClose: () => void }) {
-  const firstName = authorName.split(" ")[0];
+function FeedRepostButton({ initialCount }: { initialCount: number }) {
+  const [reposted, setReposted] = useState(false);
+  const [burst, setBurst] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  const triggerRepost = () => {
+    if (!reposted) {
+      setReposted(true);
+      setBurst(true);
+      setTimeout(() => setBurst(false), 700);
+    }
+    setOpen(false);
+  };
+
+  const handleOpen = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = btnRef.current?.getBoundingClientRect();
+    if (rect) setMenuPos({ x: rect.left, y: rect.top });
+    setOpen(o => !o);
+  };
+
   return (
-    <>
-      <div className="fixed inset-0 z-40" onClick={onClose} />
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: -4 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: -4 }}
-        transition={{ duration: 0.12 }}
-        className="absolute bottom-full left-0 z-50 mb-2 w-72 overflow-hidden rounded-lg border border-[#f0f0f0] bg-white shadow-md"
+    <div className="relative">
+      {/* Particles */}
+      <div className="pointer-events-none absolute left-[13px] top-[13px]">
+        <AnimatePresence>
+          {burst ? FEED_REPOST_PARTICLES.map((p, i) => (
+            <motion.span
+              key={i}
+              className="absolute rounded-full"
+              style={{ backgroundColor: p.color, width: p.size, height: p.size, marginLeft: -p.size / 2, marginTop: -p.size / 2 }}
+              initial={{ scale: 1, x: 0, y: 0, opacity: 1 }}
+              animate={{
+                scale: [1, 1, 0],
+                x: [0, Math.cos((p.angle * Math.PI) / 180) * p.r * 0.4, Math.cos((p.angle * Math.PI) / 180) * p.r],
+                y: [0, Math.sin((p.angle * Math.PI) / 180) * p.r * 0.4, Math.sin((p.angle * Math.PI) / 180) * p.r + 7],
+                opacity: [1, 1, 0],
+              }}
+              transition={{ duration: 0.55, ease: [0.2, 0, 0.8, 1], delay: i * 0.008 }}
+            />
+          )) : null}
+        </AnimatePresence>
+      </div>
+
+      <button
+        ref={btnRef}
+        onClick={handleOpen}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${reposted ? "text-[#00b894]" : "text-gray-light"}`}
       >
-        {/* Repost with your thoughts */}
-        <button onClick={onClose} className="flex w-full items-start gap-3 px-4 py-3.5 text-left hover:bg-gray-hover">
-          <svg className="mt-0.5 h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          <div>
-            <div className="text-[15px] font-semibold text-gray-dark">Repost with your thoughts</div>
-            <div className="text-[13px] text-gray-light">Create a new post with {firstName}'s post attached</div>
-          </div>
-        </button>
-        <div className="border-t border-[#f2f2f2]" />
-        {/* Repost */}
-        <button onClick={onClose} className="flex w-full items-start gap-3 px-4 py-3.5 text-left hover:bg-gray-hover">
-          <svg className="mt-0.5 h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-          <div>
-            <div className="text-[15px] font-semibold text-gray-dark">Repost</div>
-            <div className="text-[13px] text-gray-light">Instantly bring {firstName}'s post to others' feeds</div>
-          </div>
-        </button>
-      </motion.div>
-    </>
+        <motion.img
+          src={repostsIcon}
+          alt="Repost"
+          className="h-[22px] w-[22px]"
+          style={{ filter: reposted ? "invert(62%) sepia(80%) saturate(400%) hue-rotate(115deg)" : "invert(44%)" }}
+          animate={reposted && burst ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1] } : { scale: 1 }}
+          transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
+        />
+        <motion.span
+          className="text-[15px] font-normal"
+          animate={reposted && burst ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
+          {formatCount(initialCount + (reposted ? 1 : 0))}
+        </motion.span>
+      </button>
+
+      {/* Dropdown via portal — fixed positioning to avoid overflow clipping */}
+      <AnimatePresence>
+        {open ? createPortal(
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 4 }}
+              transition={{ duration: 0.12 }}
+              style={{ position: "fixed", left: menuPos.x, top: menuPos.y - 130, zIndex: 50 }}
+              className="w-72 overflow-hidden rounded-lg border border-[#f0f0f0] bg-white shadow-md"
+            >
+              <button onClick={triggerRepost} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[15px] text-gray-dark hover:bg-gray-hover">
+                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Repost with your thoughts
+              </button>
+              <div className="mx-4 border-t border-[#f2f2f2]" />
+              <button onClick={triggerRepost} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[15px] text-gray-dark hover:bg-gray-hover">
+                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                Repost
+              </button>
+            </motion.div>
+          </>,
+          document.body
+        ) : null}
+      </AnimatePresence>
+    </div>
   );
 }
 
-function ActionBar({ likes, comments, reposts, postId, authorName }: { likes: number; comments: number; reposts: number; shares: number; postId: number; authorName: string }) {
+function ActionBar({ likes, comments, reposts, postId }: { likes: number; comments: number; reposts: number; shares: number; postId: number; authorName: string }) {
   const navigate = useNavigate();
-  const [repostOpen, setRepostOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
   return (
@@ -576,15 +646,7 @@ function ActionBar({ likes, comments, reposts, postId, authorName }: { likes: nu
         {comments > 0 && <span className="text-[15px] font-normal">{formatCount(comments)}</span>}
       </button>
       {/* Repost */}
-      <div className="relative">
-        <button onClick={() => setRepostOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
-          <img src={repostsIcon} alt="Repost" className="h-[22px] w-[22px] [filter:invert(44%)]" />
-          {reposts > 0 && <span className="text-[15px] font-normal">{formatCount(reposts)}</span>}
-        </button>
-        <AnimatePresence>
-          {repostOpen ? <RepostDropdown authorName={authorName} onClose={() => setRepostOpen(false)} /> : null}
-        </AnimatePresence>
-      </div>
+      <FeedRepostButton initialCount={reposts} />
       {/* Share */}
       <div className="relative">
         <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
@@ -1731,7 +1793,16 @@ function ComposeModal({ onClose, onPost, onGoLive }: { onClose: () => void; onPo
   const [eventAttached, setEventAttached] = useState(false);
   const [selectingEvent, setSelectingEvent] = useState(false);
   const [eventIndex, setEventIndex] = useState(0);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setUploadedImage(url);
+  };
 
   useEffect(() => {
     textareaRef.current?.focus();
@@ -1796,6 +1867,28 @@ function ComposeModal({ onClose, onPost, onGoLive }: { onClose: () => void; onPo
             />
           </div>
         </div>
+
+        {/* Uploaded image preview */}
+        <AnimatePresence>
+          {uploadedImage ? (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden px-4 pb-3"
+            >
+              <div className="relative inline-block w-full">
+                <img src={uploadedImage} alt="Uploaded" className="w-full rounded-xl object-cover max-h-72" />
+                <button
+                  onClick={() => { setUploadedImage(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                  className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
 
         {/* Event picker / attached preview */}
         <AnimatePresence>
@@ -1896,13 +1989,14 @@ function ComposeModal({ onClose, onPost, onGoLive }: { onClose: () => void; onPo
           {/* Action icons: Image, Poll, Video */}
           <div className="flex items-center gap-1">
             {/* Image */}
-            <button className="flex h-9 w-9 items-center justify-center rounded-full text-gray-light hover:bg-gray-hover transition-colors" title="Add image">
+            <button onClick={() => fileInputRef.current?.click()} className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${uploadedImage ? "text-primary bg-primary/10" : "text-gray-light hover:bg-gray-hover"}`} title="Add image">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
                 <circle cx="8.5" cy="8.5" r="1.5"/>
                 <path d="M21 15l-5-5L5 21"/>
               </svg>
             </button>
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
           </div>
 
           {/* Char counter + Post button */}
