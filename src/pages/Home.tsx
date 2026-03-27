@@ -735,7 +735,7 @@ function MilestoneCard({ milestone }: { milestone: MilestonePost["milestone"] })
 
       {/* Card content */}
       <div className="px-5 py-5">
-        <div className="flex items-center gap-4">
+        <div className="flex items-end gap-4">
           {/* Overlapping avatars */}
           <div className="relative flex shrink-0 items-center">
             {milestone.schoolLogo ? (
