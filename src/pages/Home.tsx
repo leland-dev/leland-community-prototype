@@ -394,7 +394,7 @@ function MoreDotsIcon() {
 
 // ─── Sub-components ───────────────────────────────────
 
-function formatCount(n: number): string {
+export function formatCount(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}K`;
   return n.toString();
 }
@@ -429,7 +429,7 @@ const FEED_HEART_PARTICLES = [
   { angle: 310,  r: 28, color: "#ff4757", size: 5 },
 ];
 
-function FeedLikeButton({ initialCount }: { initialCount: number }) {
+export function FeedLikeButton({ initialCount }: { initialCount: number }) {
   const [liked, setLiked] = useState(false);
   const [burst, setBurst] = useState(false);
 
@@ -487,7 +487,7 @@ function FeedLikeButton({ initialCount }: { initialCount: number }) {
   );
 }
 
-function ShareDropdown({ postId, onClose }: { postId: number; onClose: () => void }) {
+export function ShareDropdown({ postId, onClose }: { postId: number; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
   const postUrl = `${window.location.origin}${window.location.pathname}#/post/${postId}`;
 
@@ -534,7 +534,7 @@ function ShareDropdown({ postId, onClose }: { postId: number; onClose: () => voi
   );
 }
 
-function FeedRepostButton({ initialCount }: { initialCount: number }) {
+export function FeedRepostButton({ initialCount }: { initialCount: number }) {
   const [reposted, setReposted] = useState(false);
   const [burst, setBurst] = useState(false);
   const [open, setOpen] = useState(false);
@@ -652,7 +652,7 @@ function PostHeaderRow({ author, time, verified, headline }: { author: string; t
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <Link to={`/profile-v2?type=${verified ? "coach" : "customer"}`} className="cursor-pointer text-[17px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50">{author}</Link>
+          <Link to={`/profile-v2?type=${verified ? "coach" : "customer"}`} onClick={(e) => e.stopPropagation()} className="cursor-pointer text-[17px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50">{author}</Link>
           {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
           <span className="shrink-0 text-[17px] leading-tight text-gray-xlight">{time}</span>
         </div>
@@ -1527,6 +1527,7 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
   const [open, setOpen] = useState(false);
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigate = useNavigate();
   const isEvent = post.type === "event";
 
   const handleMouseEnter = () => {
@@ -1546,7 +1547,10 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="group relative h-10 w-10 cursor-pointer">
+      <div
+        className="group relative h-10 w-10 cursor-pointer"
+        onClick={(e) => { e.stopPropagation(); if (!isEvent) navigate(`/profile-v2?type=${post.verified ? "coach" : "customer"}`); }}
+      >
         {isEvent ? (
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black">
             <img src={post.avatar} alt={post.author} className="h-5 w-5 brightness-0 invert" />

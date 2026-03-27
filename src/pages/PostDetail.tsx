@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { posts, type Post } from "./Home";
+import { posts, type Post, FeedLikeButton, FeedRepostButton, ShareDropdown } from "./Home";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import verifiedIconSrc from "../assets/icons/verified.svg";
 import commentsIcon from "../assets/icons/comments.svg";
-import repostsIcon from "../assets/icons/reposts.svg";
 import sharesIcon from "../assets/icons/shares.svg";
 
 import pic1 from "../assets/profile photos/pic-1.png";
@@ -256,25 +255,34 @@ function PostMedia({ post }: { post: Post }) {
   return null;
 }
 
-function StatsRow({ post }: { post: Post }) {
+function StatsRow({ post, onCommentFocus }: { post: Post; onCommentFocus: () => void }) {
+  const [shareOpen, setShareOpen] = useState(false);
+
   return (
     <div className="mt-2 flex items-center gap-2 py-1.5">
-      <button className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
-        <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-        </svg>
-        {post.likes > 0 && <span className="text-[15px] font-normal">{post.likes.toLocaleString()}</span>}
+      <FeedLikeButton initialCount={post.likes} />
+      {/* Comment */}
+      <button
+        onClick={onCommentFocus}
+        className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover"
+      >
+        <img src={commentsIcon} alt="Comment" className="h-[22px] w-[22px] [filter:invert(44%)]" />
+        {post.comments > 0 && <span className="text-[15px] font-normal">{post.comments.toLocaleString()}</span>}
       </button>
-      {[
-        { icon: commentsIcon, count: post.comments, label: "Comments" },
-        { icon: repostsIcon, count: post.reposts, label: "Reposts" },
-        { icon: sharesIcon, count: post.shares, label: "Shares" },
-      ].map(({ icon, count, label }) => (
-        <button key={label} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
-          <img src={icon} alt={label} className="h-[22px] w-[22px] [filter:invert(44%)]" />
-          {count > 0 && <span className="text-[15px] font-normal">{count.toLocaleString()}</span>}
+      {/* Repost */}
+      <FeedRepostButton initialCount={post.reposts} />
+      {/* Share */}
+      <div className="relative">
+        <button
+          onClick={() => setShareOpen(o => !o)}
+          className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover"
+        >
+          <img src={sharesIcon} alt="Share" className="h-[22px] w-[22px] [filter:invert(44%)]" />
         </button>
-      ))}
+        <AnimatePresence>
+          {shareOpen ? <ShareDropdown postId={post.id} onClose={() => setShareOpen(false)} /> : null}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
@@ -488,7 +496,7 @@ export default function PostDetail() {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { sourceY = 80, focusInput = false } = (location.state as { sourceY?: number; focusInput?: boolean }) ?? {};
+  const { focusInput = false } = (location.state as { sourceY?: number; focusInput?: boolean }) ?? {};
   const post = posts.find(p => p.id === Number(postId));
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -532,9 +540,9 @@ export default function PostDetail() {
 
   return (
     <motion.div
-      initial={{ y: Math.min(sourceY, window.innerHeight * 0.55), opacity: 0 }}
+      initial={{ y: 16, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 380, damping: 36, mass: 0.8 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
     >
       {/* Back button */}
       <button
@@ -552,7 +560,7 @@ export default function PostDetail() {
         <AuthorRow post={post} />
         <p className="mt-1 pl-[56px] text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
         <div className="pl-[56px]"><PostMedia post={post} /></div>
-        <div className="pl-[56px]"><StatsRow post={post} /></div>
+        <div className="pl-[56px]"><StatsRow post={post} onCommentFocus={() => commentInputRef.current?.focus()} /></div>
       </div>
 
       {/* Comment input */}
