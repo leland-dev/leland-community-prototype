@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Link, useNavigate } from "react-router-dom";
 import profilePhoto from "../assets/profile photos/profile photo.png";
+import eventImageSrc from "../assets/img/EventImage.avif";
 import lelandCompass from "../assets/leland-compass.svg";
 
 // Organisation logos
@@ -195,7 +196,7 @@ export const posts: Post[] = [
     body: "Join us for a live panel with admissions officers from HBS, Wharton, and GSB. Get your questions answered directly — no fluff, no scripts.",
     event: {
       title: "Public Policy Graduate Programs: Ask Me Anything",
-      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&h=628&fit=crop",
+      image: eventImageSrc,
       date: "Thursday, April 3, 2026",
       time: "6:00 PM – 7:30 PM PT",
       format: "Online",
@@ -628,7 +629,6 @@ function EventCard({ event }: { event: EventPost["event"] }) {
     <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
       <div className="relative">
         <img src={event.image} alt={event.title} className="aspect-[1200/628] w-full object-cover" />
-        <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-0.5 text-[13px] font-medium text-gray-dark backdrop-blur-sm">{event.format}</span>
       </div>
       <div className="px-4 py-4">
         <p className="text-[17px] font-semibold leading-snug text-gray-dark">{event.title}</p>
@@ -1567,17 +1567,7 @@ function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[numb
 
       <div className="mt-4 flex gap-2">
         <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gray-100 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
-          {isOnline ? (
-            <>
-              {/* Blinking neon green dot */}
-              <motion.span
-                className="inline-flex h-2.5 w-2.5 shrink-0 rounded-full"
-                animate={{ backgroundColor: ["#166534", "#4ade80", "#166534"] }}
-                transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-              />
-              Available now
-            </>
-          ) : "Free intro call"}
+          Free intro call
         </button>
         <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-xl border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Follow">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
