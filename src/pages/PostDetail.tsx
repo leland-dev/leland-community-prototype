@@ -260,8 +260,13 @@ function PostMedia({ post }: { post: Post }) {
 function StatsRow({ post }: { post: Post }) {
   return (
     <div className="mt-2 flex items-center gap-5 py-1.5">
+      <button className="flex items-center gap-1.5 text-gray-light transition-colors hover:text-gray-dark">
+        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+        <span className="text-[14px]"><span className="text-gray-dark">{post.likes.toLocaleString()}</span> Likes</span>
+      </button>
       {[
-        { icon: likesIcon, count: post.likes, label: "Likes" },
         { icon: commentsIcon, count: post.comments, label: "Comments" },
         { icon: repostsIcon, count: post.reposts, label: "Reposts" },
         { icon: sharesIcon, count: post.shares, label: "Shares" },
@@ -386,7 +391,7 @@ function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number
           viewBox="0 0 24 24"
           fill={liked ? "currentColor" : "none"}
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.5"
           animate={liked
             ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1] }
             : { scale: 1 }
