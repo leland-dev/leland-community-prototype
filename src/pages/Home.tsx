@@ -194,8 +194,8 @@ export const posts: Post[] = [
     headline: "Official Leland Events",
     body: "Join us for a live panel with admissions officers from HBS, Wharton, and GSB. Get your questions answered directly — no fluff, no scripts.",
     event: {
-      title: "MBA Admissions Live: Ask the Officers Anything",
-      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&h=400&fit=crop",
+      title: "Public Policy Graduate Programs: Ask Me Anything",
+      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&h=628&fit=crop",
       date: "Thursday, April 3, 2026",
       time: "6:00 PM – 7:30 PM PT",
       format: "Online",
@@ -627,7 +627,7 @@ function EventCard({ event }: { event: EventPost["event"] }) {
   return (
     <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
       <div className="relative">
-        <img src={event.image} alt={event.title} className="h-[180px] w-full object-cover" />
+        <img src={event.image} alt={event.title} className="aspect-[1200/628] w-full object-cover" />
         <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-0.5 text-[13px] font-medium text-gray-dark backdrop-blur-sm">{event.format}</span>
       </div>
       <div className="px-4 py-4">
