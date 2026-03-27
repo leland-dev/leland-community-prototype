@@ -531,9 +531,9 @@ export default function PostDetail() {
       {/* Post */}
       <div className="mt-3 pb-2">
         <AuthorRow post={post} />
-        <p className="mt-3 text-[17px] leading-[1.5] text-gray-dark">{post.body}</p>
-        <PostMedia post={post} />
-        <StatsRow post={post} />
+        <p className="mt-1 pl-[56px] text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
+        <div className="pl-[56px]"><PostMedia post={post} /></div>
+        <div className="pl-[56px]"><StatsRow post={post} /></div>
       </div>
 
       {/* Comment input */}
