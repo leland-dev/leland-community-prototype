@@ -528,22 +528,64 @@ function ShareDropdown({ postId, onClose }: { postId: number; onClose: () => voi
   );
 }
 
-function ActionBar({ likes, comments, reposts, postId }: { likes: number; comments: number; reposts: number; shares: number; postId: number }) {
+function RepostDropdown({ authorName, onClose }: { authorName: string; onClose: () => void }) {
+  const firstName = authorName.split(" ")[0];
+  return (
+    <>
+      <div className="fixed inset-0 z-40" onClick={onClose} />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: -4 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: -4 }}
+        transition={{ duration: 0.12 }}
+        className="absolute bottom-full left-0 z-50 mb-2 w-72 overflow-hidden rounded-lg border border-[#f0f0f0] bg-white shadow-md"
+      >
+        {/* Repost with your thoughts */}
+        <button onClick={onClose} className="flex w-full items-start gap-3 px-4 py-3.5 text-left hover:bg-gray-hover">
+          <svg className="mt-0.5 h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <div>
+            <div className="text-[15px] font-semibold text-gray-dark">Repost with your thoughts</div>
+            <div className="text-[13px] text-gray-light">Create a new post with {firstName}'s post attached</div>
+          </div>
+        </button>
+        <div className="border-t border-[#f2f2f2]" />
+        {/* Repost */}
+        <button onClick={onClose} className="flex w-full items-start gap-3 px-4 py-3.5 text-left hover:bg-gray-hover">
+          <svg className="mt-0.5 h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          <div>
+            <div className="text-[15px] font-semibold text-gray-dark">Repost</div>
+            <div className="text-[13px] text-gray-light">Instantly bring {firstName}'s post to others' feeds</div>
+          </div>
+        </button>
+      </motion.div>
+    </>
+  );
+}
+
+function ActionBar({ likes, comments, reposts, postId, authorName }: { likes: number; comments: number; reposts: number; shares: number; postId: number; authorName: string }) {
   const navigate = useNavigate();
+  const [repostOpen, setRepostOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
   return (
     <div className="mt-1 flex items-center gap-2 pl-[44px]">
       <FeedLikeButton initialCount={likes} />
-      {[
-        { icon: commentsIcon, count: comments, label: "Comment", onClick: (e: React.MouseEvent) => { const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`/post/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); } },
-        { icon: repostsIcon,  count: reposts,  label: "Repost",  onClick: undefined as ((e: React.MouseEvent) => void) | undefined },
-      ].map(({ icon, count, label, onClick }) => (
-        <button key={label} onClick={onClick} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
-          <img src={icon} alt={label} className="h-[22px] w-[22px] [filter:invert(44%)]" />
-          {count > 0 && <span className="text-[15px] font-normal">{formatCount(count)}</span>}
+      {/* Comment */}
+      <button onClick={(e) => { const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`/post/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
+        <img src={commentsIcon} alt="Comment" className="h-[22px] w-[22px] [filter:invert(44%)]" />
+        {comments > 0 && <span className="text-[15px] font-normal">{formatCount(comments)}</span>}
+      </button>
+      {/* Repost */}
+      <div className="relative">
+        <button onClick={() => setRepostOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
+          <img src={repostsIcon} alt="Repost" className="h-[22px] w-[22px] [filter:invert(44%)]" />
+          {reposts > 0 && <span className="text-[15px] font-normal">{formatCount(reposts)}</span>}
         </button>
-      ))}
+        <AnimatePresence>
+          {repostOpen ? <RepostDropdown authorName={authorName} onClose={() => setRepostOpen(false)} /> : null}
+        </AnimatePresence>
+      </div>
+      {/* Share */}
       <div className="relative">
         <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
           <img src={sharesIcon} alt="Share" className="h-[22px] w-[22px] [filter:invert(44%)]" />
@@ -1517,7 +1559,7 @@ function FeedPost({ post }: { post: Post }) {
         </div>
       </div>
       <div onClick={e => e.stopPropagation()}>
-        <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} postId={post.id} />
+        <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} postId={post.id} authorName={post.author} />
       </div>
     </div>
   );
@@ -1684,7 +1726,7 @@ const UPCOMING_EVENTS: EventPost["event"][] = [
   },
 ];
 
-function ComposeModal({ onClose, onPost }: { onClose: () => void; onPost: (text: string) => void }) {
+function ComposeModal({ onClose, onPost, onGoLive }: { onClose: () => void; onPost: (text: string) => void; onGoLive?: () => void }) {
   const [text, setText] = useState("");
   const [eventAttached, setEventAttached] = useState(false);
   const [selectingEvent, setSelectingEvent] = useState(false);
@@ -1832,7 +1874,7 @@ function ComposeModal({ onClose, onPost }: { onClose: () => void; onPost: (text:
           {[
             { label: "Attach your upcoming event", icon: <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />, onClick: () => { setSelectingEvent(true); setEventAttached(false); setEventIndex(0); } },
             { label: "Attach Bootcamp", icon: <><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></>, onClick: undefined as (() => void) | undefined },
-            { label: "Go Live", icon: <><circle cx="12" cy="12" r="3"/><path d="M8.5 8.5a5 5 0 000 7M15.5 8.5a5 5 0 010 7"/><path d="M5.5 5.5a9 9 0 000 13M18.5 5.5a9 9 0 010 13"/></>, onClick: undefined as (() => void) | undefined },
+            { label: "Go Live", icon: <><circle cx="12" cy="12" r="3"/><path d="M8.5 8.5a5 5 0 000 7M15.5 8.5a5 5 0 010 7"/><path d="M5.5 5.5a9 9 0 000 13M18.5 5.5a9 9 0 010 13"/></>, onClick: onGoLive ? () => { onClose(); onGoLive(); } : undefined },
           ].map(({ label, icon, onClick }) => (
             <button
               key={label}
@@ -1903,11 +1945,176 @@ function ComposeModal({ onClose, onPost }: { onClose: () => void; onPost: (text:
   );
 }
 
+// ─── Go Live Modal ────────────────────────────────────
+
+const LIVE_TOPICS = ["MBA Admissions", "Career Coaching", "Resume Review", "Interview Prep", "Law School", "Med School"];
+const MOCK_LIVE_COMMENTS = [
+  { user: "sarah_m", text: "So excited for this!", delay: 1.2 },
+  { user: "jordan_k", text: "Thanks for doing this 🙏", delay: 3.5 },
+  { user: "priya_c", text: "Can you talk about essays?", delay: 5.8 },
+  { user: "alex_w", text: "Joining from NYC!", delay: 7.2 },
+  { user: "mike_t", text: "This is exactly what I needed", delay: 9.1 },
+  { user: "lisa_r", text: "How long will this be?", delay: 11.4 },
+  { user: "david_h", text: "👏👏👏", delay: 13.0 },
+  { user: "emma_s", text: "Can we get a recording after?", delay: 15.5 },
+];
+
+function GoLiveModal({ onClose }: { onClose: () => void }) {
+  const [stage, setStage] = useState<"setup" | "live">("setup");
+  const [title, setTitle] = useState("");
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [viewers, setViewers] = useState(1);
+  const [visibleComments, setVisibleComments] = useState<typeof MOCK_LIVE_COMMENTS>([]);
+  const [elapsed, setElapsed] = useState(0);
+
+  // Tick viewer count up while live
+  useEffect(() => {
+    if (stage !== "live") return;
+    const t = setInterval(() => {
+      setViewers(v => v + Math.floor(Math.random() * 3));
+      setElapsed(e => e + 1);
+    }, 1000);
+    return () => clearInterval(t);
+  }, [stage]);
+
+  // Push mock comments while live
+  useEffect(() => {
+    if (stage !== "live") return;
+    const timers = MOCK_LIVE_COMMENTS.map(c =>
+      setTimeout(() => setVisibleComments(prev => [...prev.slice(-6), c]), c.delay * 1000)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [stage]);
+
+  const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.7)" }} onClick={stage === "setup" ? onClose : undefined}>
+      <motion.div
+        className="relative w-full max-w-[480px] mx-4 overflow-hidden rounded-2xl bg-white shadow-2xl"
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        onClick={e => e.stopPropagation()}
+      >
+        {stage === "setup" ? (
+          <>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-stroke">
+              <h2 className="text-[17px] font-semibold text-gray-dark">Go Live</h2>
+              <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-stroke bg-white text-gray-dark hover:bg-gray-hover transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            {/* Camera preview */}
+            <div className="mx-5 mt-5 aspect-video overflow-hidden rounded-xl bg-[#111] flex flex-col items-center justify-center gap-3">
+              <img src={profilePhoto} alt="You" className="h-20 w-20 rounded-full object-cover opacity-60 ring-2 ring-white/20" />
+              <p className="text-[13px] text-white/50">Camera preview</p>
+            </div>
+
+            {/* Title input */}
+            <div className="px-5 mt-4">
+              <label className="text-[13px] font-medium text-gray-light">Stream title</label>
+              <input
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="What are you talking about today?"
+                className="mt-1.5 w-full rounded-lg border border-gray-stroke px-3 py-2.5 text-[15px] text-gray-dark outline-none focus:border-gray-dark transition-colors"
+              />
+            </div>
+
+            {/* Topic chips */}
+            <div className="px-5 mt-4">
+              <label className="text-[13px] font-medium text-gray-light">Topic</label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {LIVE_TOPICS.map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setSelectedTopic(t === selectedTopic ? null : t)}
+                    className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${t === selectedTopic ? "bg-gray-dark text-white" : "bg-gray-100 text-gray-dark hover:bg-gray-200"}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Go live button */}
+            <div className="px-5 py-5">
+              <button
+                onClick={() => setStage("live")}
+                disabled={!title.trim()}
+                className="w-full rounded-lg bg-red-500 py-3 text-[16px] font-semibold text-white transition-opacity disabled:opacity-40 hover:opacity-90"
+              >
+                <span className="mr-2">●</span> Go Live
+              </button>
+            </div>
+          </>
+        ) : (
+          /* ── Live stage ── */
+          <div className="relative aspect-[9/16] max-h-[75vh] bg-[#0a0a0a] flex flex-col overflow-hidden">
+            {/* Video bg — blurred profile photo */}
+            <img src={profilePhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 blur-xl scale-110" />
+            <img src={profilePhoto} alt="You" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-32 w-32 rounded-full object-cover ring-4 ring-white/20 shadow-2xl" />
+
+            {/* Top bar */}
+            <div className="relative z-10 flex items-center justify-between px-4 pt-4">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 rounded-full bg-red-500 px-3 py-1 text-[13px] font-semibold text-white">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                  LIVE
+                </span>
+                <span className="rounded-full bg-black/40 px-2.5 py-1 text-[13px] text-white backdrop-blur-sm">{formatTime(elapsed)}</span>
+              </div>
+              <span className="flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-[13px] text-white backdrop-blur-sm">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                {viewers.toLocaleString()}
+              </span>
+            </div>
+
+            {/* Title */}
+            <div className="relative z-10 px-4 mt-3">
+              <p className="text-[15px] font-semibold text-white drop-shadow">{title}</p>
+              {selectedTopic ? <span className="mt-1 inline-block rounded-full bg-white/20 px-2 py-0.5 text-[12px] text-white/80 backdrop-blur-sm">{selectedTopic}</span> : null}
+            </div>
+
+            {/* Live comments */}
+            <div className="relative z-10 mt-auto px-4 pb-2 flex flex-col gap-1.5">
+              <AnimatePresence>
+                {visibleComments.map((c, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
+                    <div className="h-6 w-6 shrink-0 rounded-full bg-white/20 flex items-center justify-center text-[11px] text-white font-semibold">{c.user[0].toUpperCase()}</div>
+                    <span className="rounded-full bg-black/50 px-3 py-1 text-[13px] text-white backdrop-blur-sm"><span className="font-semibold">{c.user}</span> {c.text}</span>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* Bottom bar */}
+            <div className="relative z-10 flex items-center justify-between px-4 pb-5 pt-3 bg-gradient-to-t from-black/60 to-transparent">
+              <button className="flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-[14px] font-medium text-white backdrop-blur-sm hover:bg-white/30 transition-colors">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Comment
+              </button>
+              <button onClick={onClose} className="rounded-full bg-red-500/90 px-5 py-2 text-[14px] font-semibold text-white hover:bg-red-600 transition-colors">
+                End stream
+              </button>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </div>,
+    document.body
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────
 
 export default function Home() {
   useEffect(() => { document.title = "Leland Prototype | Feed"; }, []);
   const [composeOpen, setComposeOpen] = useState(false);
+  const [goLiveOpen, setGoLiveOpen] = useState(false);
   const [feedPosts, setFeedPosts] = useState<Post[]>(posts);
 
   const handlePost = (text: string) => {
@@ -1953,7 +2160,8 @@ export default function Home() {
         ))}
       </div>
 
-      {composeOpen ? <ComposeModal onClose={() => setComposeOpen(false)} onPost={handlePost} /> : null}
+      {composeOpen ? <ComposeModal onClose={() => setComposeOpen(false)} onPost={handlePost} onGoLive={() => setGoLiveOpen(true)} /> : null}
+      {goLiveOpen ? <GoLiveModal onClose={() => setGoLiveOpen(false)} /> : null}
     </div>
   );
 }
