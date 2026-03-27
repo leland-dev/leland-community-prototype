@@ -648,21 +648,21 @@ function EventCard({ event }: { event: EventPost["event"] }) {
             <span>{event.time}</span>
           </div>
           {(event.registered !== undefined || event.spotsLeft !== undefined) && (
-            <div className="flex items-center gap-2 text-[15px] text-gray-light">
-              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-              <span>
-                {event.registered !== undefined ? <>{event.registered.toLocaleString()} registered</> : null}
-                {event.spotsLeft !== undefined ? <> ({event.spotsLeft} spots remaining)</> : null}
-              </span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-[15px] text-gray-light">
+                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span>
+                  {event.registered !== undefined ? <>{event.registered.toLocaleString()} registered</> : null}
+                  {event.spotsLeft !== undefined ? <> ({event.spotsLeft} spots remaining)</> : null}
+                </span>
+              </div>
+              <button className="shrink-0 cursor-pointer rounded-lg bg-[#222222]/5 px-[14px] py-1.5 text-[15px] font-medium text-[#424242] transition-colors hover:bg-[#222222]/[0.08]">
+                Register for free
+              </button>
             </div>
           )}
-        </div>
-        <div className="mt-3 flex justify-end">
-          <button className="cursor-pointer rounded-lg bg-[#222222]/5 px-[14px] py-1.5 text-[15px] font-medium text-[#424242] transition-colors hover:bg-[#222222]/[0.08]">
-            Register for free
-          </button>
         </div>
       </div>
     </div>
