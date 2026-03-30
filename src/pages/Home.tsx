@@ -1620,15 +1620,15 @@ function CoachCardContent({ avatar, name, verified, headline, price, ctaLabel, p
 
         {/* CTAs */}
         <div className="mt-4 flex gap-2">
-          <button className="flex flex-1 cursor-pointer items-center justify-center rounded-xl bg-gray-dark py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-[#333]">
+          <button className="flex flex-1 cursor-pointer items-center justify-center rounded-lg bg-gray-dark py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-[#333]">
             {ctaLabel}
           </button>
-          <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-xl border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Message">
+          <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Message">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
           </button>
-          <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-xl border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Follow">
+          <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Follow">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
               <circle cx="9" cy="7" r="4" />
