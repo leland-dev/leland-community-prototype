@@ -2257,7 +2257,7 @@ function HomeSidebar() {
 
       {/* Upcoming Sessions */}
       <div className="px-1">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1">
           <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#707070]">Upcoming Sessions</p>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[#707070]">
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
