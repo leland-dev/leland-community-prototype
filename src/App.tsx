@@ -23,6 +23,9 @@ export default function App() {
       {/* Settings gets its own layout - full-width sidebar */}
       <Route path="/settings" element={<AccountSettings />} />
 
+      {/* Calendar gets its own layout - wider two-column */}
+      <Route path="/calendar" element={<Calendar />} />
+
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/post/:postId" element={<PostDetail />} />
@@ -31,7 +34,6 @@ export default function App() {
         <Route path="/events" element={<Events />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/plus" element={<LelandPlus />} />
-        <Route path="/calendar" element={<Calendar />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/messages" element={<Messaging />} />
         <Route path="/profile" element={<Profile />} />
