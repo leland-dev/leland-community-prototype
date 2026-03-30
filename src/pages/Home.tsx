@@ -548,6 +548,11 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
     setOpen(false);
   };
 
+  const undoRepost = () => {
+    setReposted(false);
+    setOpen(false);
+  };
+
   return (
     <div className="relative">
       {/* Particles */}
@@ -608,10 +613,17 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
                 Repost with your thoughts
               </button>
               <div className="mx-4 border-t border-[#f2f2f2]" />
-              <button onClick={triggerRepost} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[15px] text-gray-dark hover:bg-gray-hover">
-                <img src={repostsIcon} alt="Repost" className="h-4 w-4 shrink-0 [filter:invert(44%)]" />
-                Repost to feed
-              </button>
+              {reposted ? (
+                <button onClick={undoRepost} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[15px] text-gray-dark hover:bg-gray-hover">
+                  <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+                  Undo repost
+                </button>
+              ) : (
+                <button onClick={triggerRepost} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[15px] text-gray-dark hover:bg-gray-hover">
+                  <img src={repostsIcon} alt="Repost" className="h-4 w-4 shrink-0 [filter:invert(44%)]" />
+                  Repost to feed
+                </button>
+              )}
             </motion.div>
           </>
         ) : null}
