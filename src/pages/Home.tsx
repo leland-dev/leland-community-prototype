@@ -2225,9 +2225,9 @@ function HomeSidebar() {
   return (
     <div className="flex flex-col gap-5">
       {/* Profile card */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+      <div className="overflow-hidden rounded-2xl border border-gray-200/50 bg-white">
         {/* Banner — buttons live here, top-right */}
-        <div className="relative h-[80px] bg-gray-100">
+        <div className="relative h-[56px] bg-gray-100">
           {/* Avatar overlaps banner bottom */}
           <div className="absolute -bottom-10 left-4">
             <img
@@ -2263,11 +2263,11 @@ function HomeSidebar() {
             <div className="mt-2 flex flex-col gap-2.5">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[14px] text-gray-dark truncate">Land McKinsey offer</span>
-                <span className="shrink-0 rounded-full bg-[#e6f4ef] px-2.5 py-0.5 text-[12px] font-semibold text-[#138462]">In Progress</span>
+                <span className="shrink-0 rounded-[8px] bg-[#e6f4ef] px-2.5 py-0.5 text-[12px] font-normal text-[#138462]">In Progress</span>
               </div>
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[14px] text-gray-dark truncate">GMAT 750+</span>
-                <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[12px] font-semibold text-gray-light">Planning</span>
+                <span className="shrink-0 rounded-[8px] bg-gray-100 px-2.5 py-0.5 text-[12px] font-normal text-gray-light">Planning</span>
               </div>
             </div>
           </div>
@@ -2287,13 +2287,13 @@ function HomeSidebar() {
             { month: "NOV", day: "3",  title: "Jasmine <> James Sync", time: "Nov 3, 5:00 PM", coach: "Jasmine Singer", avatar: pic3 },
           ].map(s => (
             <div key={s.title} className="flex items-start gap-3">
-              {/* Calendar tile: grey top strip (month) + white bottom (day) */}
-              <div className="h-[49px] w-[49px] shrink-0 overflow-hidden rounded-lg border border-gray-200 shadow-sm">
-                <div className="flex h-[20px] items-center justify-center bg-gray-100">
-                  <span className="text-[12px] font-medium uppercase tracking-wide text-gray-light">{s.month}</span>
+              {/* Calendar tile */}
+              <div className="flex w-[48px] shrink-0 flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
+                <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">
+                  {s.month}
                 </div>
-                <div className="flex h-[29px] items-center justify-center bg-white">
-                  <span className="text-[19px] font-medium leading-none text-gray-dark">{s.day}</span>
+                <div className="w-full pt-0.5 pb-1 text-center text-[19px] font-medium leading-tight text-[#707070]">
+                  {s.day}
                 </div>
               </div>
               <div className="min-w-0 flex-1">
