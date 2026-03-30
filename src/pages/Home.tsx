@@ -2226,36 +2226,35 @@ function HomeSidebar() {
     <div className="flex flex-col gap-5">
       {/* Profile card */}
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-        {/* Banner — matches CTA grey */}
-        <div className="h-[60px] bg-gray-100" />
-        {/* Body */}
-        <div className="relative px-4 pb-5">
-          {/* Avatar */}
-          <div className="absolute -top-9 left-4">
+        {/* Banner — buttons live here, top-right */}
+        <div className="relative h-[80px] bg-gray-100">
+          {/* Avatar overlaps banner bottom */}
+          <div className="absolute -bottom-10 left-4">
             <img
               src={profilePhoto}
               alt="James Allen"
-              className="h-[72px] w-[72px] rounded-full border-[3px] border-white object-cover shadow-sm"
+              className="h-[80px] w-[80px] rounded-full border-[3px] border-white object-cover shadow-sm"
             />
           </div>
-          {/* Edit + My profile */}
-          <div className="flex items-center justify-end gap-2 pt-2">
-            <button className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          {/* Edit + My profile — top right of banner */}
+          <div className="absolute right-3 top-3 flex items-center gap-2">
+            <button className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-gray-dark shadow-sm transition-colors hover:bg-gray-50">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
-            <button className="rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-100">
+            <button className="rounded-full border border-gray-200 bg-white px-4 py-2 text-[14px] font-medium text-gray-dark shadow-sm transition-colors hover:bg-gray-50">
               My profile
             </button>
           </div>
+        </div>
+        {/* Body */}
+        <div className="px-4 pb-5 pt-12">
           {/* Name / headline */}
-          <div className="mt-6">
-            <p className="text-[17px] font-semibold leading-tight text-gray-dark">James Allen</p>
-            <p className="mt-0.5 text-[15px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
-            <a href="#" className="mt-1.5 inline-flex items-center gap-1 text-[15px] font-medium text-blue-600 hover:underline">
-              My website
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
+          <p className="text-[19px] font-medium leading-tight text-gray-dark">James Allen</p>
+          <p className="mt-0.5 text-[15px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
+          <a href="#" className="mt-1.5 inline-flex items-center gap-1 text-[15px] font-medium text-blue-600 hover:underline">
+            My website
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
           {/* Work & Education */}
           <div className="mt-3 flex flex-col gap-2">
             <div className="flex items-center gap-2">
