@@ -51,8 +51,8 @@ function LayoutInner() {
       >
         {hasLeftSidebar ? (
           /* Left-sidebar layout: flex row, sidebar sits 40px left of feed */
-          <div className="mx-auto flex max-w-[960px] items-start gap-10 px-4 py-6 lg:px-8">
-            <aside className="hidden w-[220px] shrink-0 xl:block sticky top-[68px] self-start">
+          <div className="mx-auto flex max-w-[1060px] items-start gap-10 px-4 py-6 lg:px-8">
+            <aside className="hidden w-[286px] shrink-0 xl:block sticky top-[68px] self-start">
               {leftSidebar}
             </aside>
             <div className="min-w-0 flex-1">
