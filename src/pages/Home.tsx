@@ -2257,13 +2257,18 @@ function HomeSidebar() {
               <span className="text-[14px] text-gray-light">Studied at Harvard Business School</span>
             </div>
           </div>
-          {/* Interests */}
+          {/* Goals */}
           <div className="mt-4">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-xlight">Interested in</p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {["MBA", "Product Management", "+"].map(tag => (
-                <span key={tag} className="rounded-full bg-gray-100 px-3 py-1 text-[14px] font-medium text-gray-dark">{tag}</span>
-              ))}
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-xlight">Goals</p>
+            <div className="mt-2 flex flex-col gap-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[14px] text-gray-dark truncate">Land McKinsey offer</span>
+                <span className="shrink-0 rounded-full bg-[#e6f4ef] px-2.5 py-0.5 text-[12px] font-semibold text-[#138462]">In Progress</span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[14px] text-gray-dark truncate">GMAT 750+</span>
+                <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[12px] font-semibold text-gray-light">Planning</span>
+              </div>
             </div>
           </div>
         </div>
@@ -2304,23 +2309,6 @@ function HomeSidebar() {
         </div>
       </div>
 
-      {/* Your Goals */}
-      <div className="mt-5 px-1">
-        <div className="mb-4 flex items-center gap-4">
-          <span className="text-[14px] font-medium uppercase tracking-widest text-gray-xlight">Your Goals</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[15px] text-gray-dark truncate">Land McKinsey offer</span>
-            <span className="shrink-0 rounded-full bg-[#e6f4ef] px-3 py-1 text-[13px] font-semibold text-[#138462]">In Progress</span>
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[15px] text-gray-dark truncate">GMAT 750+</span>
-            <span className="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-[13px] font-semibold text-gray-light">Planning</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
