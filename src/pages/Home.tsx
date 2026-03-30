@@ -2226,13 +2226,18 @@ function HomeSidebar() {
     <div className="flex flex-col gap-5">
       {/* Profile card */}
       <div className="overflow-hidden rounded-2xl bg-white border border-gray-200">
+        {/* Banner */}
+        <div className="relative h-[56px] bg-gray-100">
+          <div className="absolute -bottom-10 left-4">
+            <img
+              src={profilePhoto}
+              alt="Jamie"
+              className="h-[80px] w-[80px] rounded-full border-[3px] border-white object-cover shadow-sm"
+            />
+          </div>
+        </div>
         {/* Body */}
-        <div className="px-4 pt-5 pb-5">
-          <img
-            src={profilePhoto}
-            alt="Jamie"
-            className="h-[64px] w-[64px] rounded-full object-cover mb-3"
-          />
+        <div className="px-4 pb-5 pt-12">
           {/* Name / headline */}
           <p className="text-[19px] font-medium leading-tight text-gray-dark">Jamie Allen</p>
           <p className="mt-0.5 text-[15px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
