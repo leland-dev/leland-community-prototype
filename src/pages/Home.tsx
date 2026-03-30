@@ -2265,18 +2265,26 @@ function HomeSidebar() {
         </div>
         <div className="mt-4 flex flex-col gap-4">
           {[
-            { title: "Mock Interview", time: "Today, 3:00 PM", coach: "Jasmine Singer", avatar: pic3 },
-            { title: "Resume Review", time: "Oct 29, 5:00 PM", coach: "Michael Busby", avatar: pic5 },
-            { title: "Jasmine <> James Sync", time: "Nov 3, 5:00 PM", coach: "Jasmine Singer", avatar: pic3 },
+            { month: "OCT", day: "22", title: "Mock Interview", time: "Today, 3:00 PM", coach: "Jasmine Singer", avatar: pic3 },
+            { month: "OCT", day: "29", title: "Resume Review", time: "Oct 29, 5:00 PM", coach: "Michael Busby", avatar: pic5 },
+            { month: "NOV", day: "3",  title: "Jasmine <> James Sync", time: "Nov 3, 5:00 PM", coach: "Jasmine Singer", avatar: pic3 },
           ].map(s => (
-            <div key={s.title} className="flex items-center gap-3">
-              <img src={s.avatar} alt={s.coach} className="h-[44px] w-[44px] shrink-0 rounded-lg object-cover" />
-              <div className="min-w-0">
-                <p className="truncate text-[14px] font-medium text-gray-dark">{s.title}</p>
-                <p className="truncate text-[13px]">
-                  <span className="text-gray-light">{s.time}</span>
-                  <span className="text-gray-light"> · {s.coach}</span>
-                </p>
+            <div key={s.title} className="flex items-start gap-3">
+              <div className="flex w-[48px] shrink-0 flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
+                <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">
+                  {s.month}
+                </div>
+                <div className="w-full pt-0.5 pb-1 text-center text-[19px] font-medium leading-tight text-[#707070]">
+                  {s.day}
+                </div>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[16px] font-semibold text-gray-dark leading-snug">{s.title}</p>
+                <p className="mt-0.5 text-[14px] text-gray-light">{s.time}</p>
+                <div className="mt-1 flex items-center gap-1.5">
+                  <img src={s.avatar} alt={s.coach} className="h-[18px] w-[18px] rounded-full object-cover" />
+                  <span className="text-[14px] text-gray-light">{s.coach}</span>
+                </div>
               </div>
             </div>
           ))}
