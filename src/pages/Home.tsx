@@ -2317,9 +2317,10 @@ function HomeSidebar() {
       </div>
 
       {/* Your Goals */}
-      <div className="rounded-2xl border border-gray-200 bg-white px-4 py-4">
-        <div className="mb-3">
-          <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-xlight">Your Goals</span>
+      <div className="px-1">
+        <div className="mb-4 flex items-center justify-between">
+          <span className="text-[14px] font-medium uppercase tracking-widest text-gray-xlight">Your Goals</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
