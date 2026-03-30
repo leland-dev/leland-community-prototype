@@ -2257,12 +2257,12 @@ function HomeSidebar() {
 
       {/* Upcoming Sessions */}
       <div className="px-1">
-        <div className="flex items-center gap-1">
-          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#707070]">Upcoming Sessions</p>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[#707070]">
+        <NavLink to="/calendar" className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+          Upcoming Sessions
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-        </div>
+        </NavLink>
         <div className="mt-4 flex flex-col gap-4">
           {[
             { month: "OCT", day: "22", title: "Mock Interview", time: "Today, 3:00 PM", coach: "Jasmine Singer", avatar: pic3 },
