@@ -1,5 +1,12 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import Layout from "./components/Layout";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
 import Home from "./pages/Home";
 import Browse from "./pages/Browse";
 import Search from "./pages/Search";
@@ -18,6 +25,7 @@ import MyCourses from "./pages/MyCourses";
 export default function App() {
   return (
     <Routes>
+      <Route path="*" element={<ScrollToTop />} />
       {/* ProfileV2 gets its own layout - no max-width wrapper */}
       <Route path="/profile-v2" element={<ProfileV2 />} />
 
