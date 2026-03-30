@@ -609,8 +609,8 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
               </button>
               <div className="mx-4 border-t border-[#f2f2f2]" />
               <button onClick={triggerRepost} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[15px] text-gray-dark hover:bg-gray-hover">
-                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                Repost
+                <img src={repostsIcon} alt="Repost" className="h-4 w-4 shrink-0 [filter:invert(44%)]" />
+                Repost to feed
               </button>
             </motion.div>
           </>
