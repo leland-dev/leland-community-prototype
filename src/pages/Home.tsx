@@ -2225,12 +2225,12 @@ function HomeSidebar() {
   return (
     <div className="flex flex-col gap-5">
       {/* Profile card */}
-      <div className="overflow-hidden rounded-2xl border border-[#e8e8e8] bg-white">
-        {/* Banner — grey */}
-        <div className="h-[60px] bg-[#f0f0f0]" />
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+        {/* Banner — matches CTA grey */}
+        <div className="h-[60px] bg-gray-100" />
         {/* Body */}
         <div className="relative px-4 pb-5">
-          {/* Avatar — overlaps banner */}
+          {/* Avatar */}
           <div className="absolute -top-9 left-4">
             <img
               src={profilePhoto}
@@ -2238,21 +2238,20 @@ function HomeSidebar() {
               className="h-[72px] w-[72px] rounded-full border-[3px] border-white object-cover shadow-sm"
             />
           </div>
-          {/* Edit + My profile — top-right */}
+          {/* Edit + My profile */}
           <div className="flex items-center justify-end gap-2 pt-2">
-            <button className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f0f0f0] text-[#555] transition-colors hover:bg-[#e4e4e4]">
+            <button className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
-            <button className="rounded-full border border-[#d8d8d8] bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#333] transition-colors hover:bg-[#f8f8f8]">
+            <button className="rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-100">
               My profile
             </button>
           </div>
           {/* Name / headline */}
           <div className="mt-6">
             <p className="text-[17px] font-semibold leading-tight text-gray-dark">James Allen</p>
-            <p className="mt-0.5 text-[13px] leading-snug text-[#606060]">Interactive Lead at Airbnb</p>
-            {/* Website — blue */}
-            <a href="#" className="mt-1.5 inline-flex items-center gap-1 text-[13px] font-medium text-blue-600 hover:underline">
+            <p className="mt-0.5 text-[15px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
+            <a href="#" className="mt-1.5 inline-flex items-center gap-1 text-[15px] font-medium text-blue-600 hover:underline">
               My website
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
@@ -2261,30 +2260,30 @@ function HomeSidebar() {
           <div className="mt-3 flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <img src={orgGoogle} alt="Google" className="h-[20px] w-[20px] shrink-0 rounded-[4px] object-contain" />
-              <span className="text-[13px] text-[#555]">Product Manager at Google</span>
+              <span className="text-[14px] text-gray-light">Product Manager at Google</span>
             </div>
             <div className="flex items-center gap-2">
               <img src={orgHBS} alt="HBS" className="h-[20px] w-[20px] shrink-0 rounded-[4px] object-contain" />
-              <span className="text-[13px] text-[#555]">Studied at Harvard Business School</span>
+              <span className="text-[14px] text-gray-light">Studied at Harvard Business School</span>
             </div>
           </div>
           {/* Interests */}
           <div className="mt-4">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#aaa]">Interested in</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-xlight">Interested in</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {["MBA", "Product Management", "+"].map(tag => (
-                <span key={tag} className="rounded-full bg-[#f0f0f0] px-3 py-1 text-[12px] font-medium text-[#444]">{tag}</span>
+                <span key={tag} className="rounded-full bg-gray-100 px-3 py-1 text-[14px] font-medium text-gray-dark">{tag}</span>
               ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Upcoming Sessions — no card border, clean list */}
+      {/* Upcoming Sessions */}
       <div className="px-1">
         <div className="mb-3 flex items-center justify-between">
-          <span className="text-[11px] font-medium uppercase tracking-widest text-[#999]">Upcoming Sessions</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-xlight">Upcoming Sessions</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
         <div className="flex flex-col gap-4">
           {[
@@ -2293,39 +2292,39 @@ function HomeSidebar() {
             { month: "NOV", day: "3",  title: "Jasmine <> James Sync", time: "Nov 3, 5:00 PM", coach: "Jasmine Singer", avatar: pic3 },
           ].map(s => (
             <div key={s.title} className="flex items-start gap-3">
-              <div className="flex w-10 shrink-0 flex-col items-center rounded-lg border border-[#e8e8e8] bg-white pb-1.5 pt-0.5 shadow-sm">
-                <span className="text-[9px] font-semibold uppercase tracking-wide text-[#888]">{s.month}</span>
-                <span className="text-[18px] font-semibold leading-tight text-gray-dark">{s.day}</span>
+              <div className="flex w-11 shrink-0 flex-col items-center rounded-lg border border-gray-200 bg-white pb-1.5 pt-0.5 shadow-sm">
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-light">{s.month}</span>
+                <span className="text-[19px] font-semibold leading-tight text-gray-dark">{s.day}</span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-semibold text-gray-dark leading-tight">{s.title}</p>
-                <p className="mt-0.5 text-[12px] text-[#999]">{s.time}</p>
+                <p className="truncate text-[15px] font-semibold text-gray-dark leading-tight">{s.title}</p>
+                <p className="mt-0.5 text-[14px] text-gray-light">{s.time}</p>
                 <div className="mt-1 flex items-center gap-1.5">
                   <img src={s.avatar} alt={s.coach} className="h-[18px] w-[18px] rounded-full object-cover" />
-                  <span className="text-[12px] text-[#666]">{s.coach}</span>
+                  <span className="text-[14px] text-gray-light">{s.coach}</span>
                 </div>
               </div>
             </div>
           ))}
         </div>
-        <button className="mt-4 w-full rounded-xl bg-[#f0f0f0] py-2 text-[13px] font-semibold text-[#444] transition-colors hover:bg-[#e8e8e8]">
+        <button className="mt-4 w-full rounded-xl bg-gray-100 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
           See full calendar
         </button>
       </div>
 
       {/* Your Goals */}
-      <div className="rounded-2xl border border-[#e8e8e8] bg-white px-4 py-4">
+      <div className="rounded-2xl border border-gray-200 bg-white px-4 py-4">
         <div className="mb-3">
-          <span className="text-[11px] font-medium uppercase tracking-widest text-[#999]">Your Goals</span>
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-xlight">Your Goals</span>
         </div>
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[13px] text-gray-dark truncate">Land McKinsey offer</span>
-            <span className="shrink-0 rounded-full bg-[#e6f4ef] px-3 py-1 text-[11px] font-semibold text-[#138462]">In Progress</span>
+            <span className="text-[15px] text-gray-dark truncate">Land McKinsey offer</span>
+            <span className="shrink-0 rounded-full bg-[#e6f4ef] px-3 py-1 text-[13px] font-semibold text-[#138462]">In Progress</span>
           </div>
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[13px] text-gray-dark truncate">GMAT 750+</span>
-            <span className="shrink-0 rounded-full bg-[#f0f0f0] px-3 py-1 text-[11px] font-semibold text-[#777]">Planning</span>
+            <span className="text-[15px] text-gray-dark truncate">GMAT 750+</span>
+            <span className="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-[13px] font-semibold text-gray-light">Planning</span>
           </div>
         </div>
       </div>
