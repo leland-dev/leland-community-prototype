@@ -88,7 +88,7 @@ export default function TopNav() {
   }, [profileOpen, browseOpen]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 bg-white border-b border-gray-stroke">
+    <header className="border-b border-gray-stroke bg-white">
       <div className="mx-auto flex items-center justify-between px-5 py-3">
         {/* Left: Logo + Nav links */}
         <div className="flex items-center gap-1">
