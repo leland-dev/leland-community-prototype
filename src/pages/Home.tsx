@@ -1929,6 +1929,7 @@ function ComposeModal({ onClose, onPost, onGoLive }: { onClose: () => void; onPo
             { label: "Attach Bootcamp", icon: <><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></>, onClick: undefined as (() => void) | undefined },
             { label: "Go Live", icon: <><circle cx="12" cy="12" r="3"/><path d="M8.5 8.5a5 5 0 000 7M15.5 8.5a5 5 0 010 7"/><path d="M5.5 5.5a9 9 0 000 13M18.5 5.5a9 9 0 010 13"/></>, onClick: onGoLive ? () => { onClose(); onGoLive(); } : undefined },
             { label: "Celebrate someone", icon: <><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></>, onClick: undefined as (() => void) | undefined },
+            { label: "Available now", icon: <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>, onClick: undefined as (() => void) | undefined },
           ].map(({ label, icon, onClick }) => (
             <button
               key={label}
