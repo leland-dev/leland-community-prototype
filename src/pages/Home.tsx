@@ -2223,106 +2223,109 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 
 function HomeSidebar() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       {/* Profile card */}
-      <div className="overflow-hidden rounded-xl border border-[#e8e8e8]">
-        {/* Banner */}
-        <div className="h-14 bg-gradient-to-r from-[#e8f5f0] to-[#d0ede4]" />
-        {/* Avatar row */}
-        <div className="relative px-4 pb-4">
-          <div className="absolute -top-7 left-4">
+      <div className="overflow-hidden rounded-2xl border border-[#e8e8e8] bg-white">
+        {/* Banner — grey */}
+        <div className="h-[60px] bg-[#f0f0f0]" />
+        {/* Body */}
+        <div className="relative px-4 pb-5">
+          {/* Avatar — overlaps banner */}
+          <div className="absolute -top-9 left-4">
             <img
               src={profilePhoto}
-              alt="Benjamin Parker"
-              className="h-14 w-14 rounded-full border-2 border-white object-cover shadow-sm"
+              alt="James Allen"
+              className="h-[72px] w-[72px] rounded-full border-[3px] border-white object-cover shadow-sm"
             />
           </div>
-          <div className="flex items-start justify-end pt-1 gap-2">
-            <button className="flex h-7 w-7 items-center justify-center rounded-full text-[#707070] transition-colors hover:bg-gray-hover">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          {/* Edit + My profile — top-right */}
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <button className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f0f0f0] text-[#555] transition-colors hover:bg-[#e4e4e4]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
-            <button className="rounded-full border border-[#e0e0e0] px-3 py-1 text-[13px] font-medium text-[#424242] transition-colors hover:bg-gray-hover">
+            <button className="rounded-full border border-[#d8d8d8] bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#333] transition-colors hover:bg-[#f8f8f8]">
               My profile
             </button>
           </div>
-          <div className="mt-5">
-            <p className="text-[16px] font-semibold text-gray-dark leading-tight">Benjamin Parker</p>
-            <p className="mt-0.5 text-[13px] text-[#606060] leading-snug">Interactive Lead at Airbnb</p>
-            <a href="#" className="mt-1 inline-flex items-center gap-1 text-[13px] font-medium text-[#138462] hover:underline">
+          {/* Name / headline */}
+          <div className="mt-6">
+            <p className="text-[17px] font-semibold leading-tight text-gray-dark">James Allen</p>
+            <p className="mt-0.5 text-[13px] leading-snug text-[#606060]">Interactive Lead at Airbnb</p>
+            {/* Website — blue */}
+            <a href="#" className="mt-1.5 inline-flex items-center gap-1 text-[13px] font-medium text-blue-600 hover:underline">
               My website
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
           </div>
           {/* Work & Education */}
-          <div className="mt-3 flex flex-col gap-1.5">
+          <div className="mt-3 flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <img src={orgGoogle} alt="Google" className="h-[18px] w-[18px] shrink-0 rounded-sm object-contain" />
-              <span className="text-[13px] text-[#606060]">Product Manager at Google</span>
+              <img src={orgGoogle} alt="Google" className="h-[20px] w-[20px] shrink-0 rounded-[4px] object-contain" />
+              <span className="text-[13px] text-[#555]">Product Manager at Google</span>
             </div>
             <div className="flex items-center gap-2">
-              <img src={orgHBS} alt="HBS" className="h-[18px] w-[18px] shrink-0 rounded-sm object-contain" />
-              <span className="text-[13px] text-[#606060]">Studied at Harvard Business School</span>
+              <img src={orgHBS} alt="HBS" className="h-[20px] w-[20px] shrink-0 rounded-[4px] object-contain" />
+              <span className="text-[13px] text-[#555]">Studied at Harvard Business School</span>
             </div>
           </div>
           {/* Interests */}
-          <div className="mt-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#909090]">Interested in</p>
-            <div className="mt-1.5 flex flex-wrap gap-1.5">
+          <div className="mt-4">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#aaa]">Interested in</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
               {["MBA", "Product Management", "+"].map(tag => (
-                <span key={tag} className="rounded-full border border-[#e0e0e0] px-2.5 py-0.5 text-[12px] text-[#424242]">{tag}</span>
+                <span key={tag} className="rounded-full bg-[#f0f0f0] px-3 py-1 text-[12px] font-medium text-[#444]">{tag}</span>
               ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Upcoming Sessions */}
-      <div className="rounded-xl border border-[#e8e8e8] px-4 py-4">
+      {/* Upcoming Sessions — no card border, clean list */}
+      <div className="px-1">
         <div className="mb-3 flex items-center justify-between">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#909090]">Upcoming Sessions</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#909090" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          <span className="text-[11px] font-medium uppercase tracking-widest text-[#999]">Upcoming Sessions</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           {[
             { month: "OCT", day: "22", title: "Mock Interview", time: "Today, 3:00 PM", coach: "Jasmine Singer", avatar: pic3 },
             { month: "OCT", day: "29", title: "Resume Review", time: "Oct 29, 5:00 PM", coach: "Michael Busby", avatar: pic5 },
-            { month: "NOV", day: "3",  title: "Jasmine <> Benjamin Sync", time: "Nov 3, 5:00 PM", coach: "Jasmine Singer", avatar: pic3 },
+            { month: "NOV", day: "3",  title: "Jasmine <> James Sync", time: "Nov 3, 5:00 PM", coach: "Jasmine Singer", avatar: pic3 },
           ].map(s => (
             <div key={s.title} className="flex items-start gap-3">
-              <div className="flex w-8 shrink-0 flex-col items-center rounded-lg border border-[#e8e8e8] py-0.5">
-                <span className="text-[9px] font-semibold uppercase tracking-wide text-[#e05252]">{s.month}</span>
-                <span className="text-[15px] font-semibold leading-tight text-gray-dark">{s.day}</span>
+              <div className="flex w-10 shrink-0 flex-col items-center rounded-lg border border-[#e8e8e8] bg-white pb-1.5 pt-0.5 shadow-sm">
+                <span className="text-[9px] font-bold uppercase tracking-wide text-[#e05252]">{s.month}</span>
+                <span className="text-[17px] font-semibold leading-tight text-gray-dark">{s.day}</span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-medium text-gray-dark leading-tight">{s.title}</p>
-                <p className="text-[12px] text-[#909090]">{s.time}</p>
-                <div className="mt-1 flex items-center gap-1">
-                  <img src={s.avatar} alt={s.coach} className="h-4 w-4 rounded-full object-cover" />
-                  <span className="text-[12px] text-[#606060]">{s.coach}</span>
+                <p className="truncate text-[13px] font-semibold text-gray-dark leading-tight">{s.title}</p>
+                <p className="mt-0.5 text-[12px] text-[#999]">{s.time}</p>
+                <div className="mt-1 flex items-center gap-1.5">
+                  <img src={s.avatar} alt={s.coach} className="h-[18px] w-[18px] rounded-full object-cover" />
+                  <span className="text-[12px] text-[#666]">{s.coach}</span>
                 </div>
               </div>
             </div>
           ))}
         </div>
-        <button className="mt-3 w-full rounded-lg border border-[#e0e0e0] py-1.5 text-[13px] font-medium text-[#424242] transition-colors hover:bg-gray-hover">
+        <button className="mt-4 w-full rounded-xl bg-[#f0f0f0] py-2 text-[13px] font-semibold text-[#444] transition-colors hover:bg-[#e8e8e8]">
           See full calendar
         </button>
       </div>
 
       {/* Your Goals */}
-      <div className="rounded-xl border border-[#e8e8e8] px-4 py-4">
-        <div className="mb-3 flex items-center gap-2">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#138462" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-          <span className="text-[14px] font-semibold text-gray-dark">Your Goals</span>
+      <div className="rounded-2xl border border-[#e8e8e8] bg-white px-4 py-4">
+        <div className="mb-3">
+          <span className="text-[11px] font-medium uppercase tracking-widest text-[#999]">Your Goals</span>
         </div>
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-[13px] text-gray-dark truncate">Land McKinsey offer</span>
-            <span className="shrink-0 rounded-full bg-[#e8f5f0] px-2.5 py-0.5 text-[11px] font-medium text-[#138462]">In Progress</span>
+            <span className="shrink-0 rounded-full bg-[#e6f4ef] px-3 py-1 text-[11px] font-semibold text-[#138462]">In Progress</span>
           </div>
           <div className="flex items-center justify-between gap-2">
             <span className="text-[13px] text-gray-dark truncate">GMAT 750+</span>
-            <span className="shrink-0 rounded-full bg-[#f4f4f4] px-2.5 py-0.5 text-[11px] font-medium text-[#707070]">Planning</span>
+            <span className="shrink-0 rounded-full bg-[#f0f0f0] px-3 py-1 text-[11px] font-semibold text-[#777]">Planning</span>
           </div>
         </div>
       </div>
