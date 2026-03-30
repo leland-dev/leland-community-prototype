@@ -147,7 +147,7 @@ export default function AccountSettings() {
           <MobileTopNav />
         </ExtraLinksProvider>
       </div>
-      <div className="sticky top-0 z-30 hidden md:block">
+      <div className="hidden md:block">
         <TopNav />
       </div>
     <div className="flex min-h-[calc(100vh-73px)]">
