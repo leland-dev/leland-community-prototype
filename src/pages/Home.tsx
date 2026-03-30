@@ -580,7 +580,7 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
           alt="Repost"
           className="h-[22px] w-[22px]"
           style={{ filter: reposted ? "invert(62%) sepia(80%) saturate(400%) hue-rotate(115deg)" : "invert(44%)" }}
-          animate={reposted && burst ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1] } : { scale: 1 }}
+          animate={reposted && burst ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1], rotate: [0, 360] } : { scale: 1, rotate: 0 }}
           transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
         />
         <motion.span
