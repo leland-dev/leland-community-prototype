@@ -2225,14 +2225,14 @@ function HomeSidebar() {
   return (
     <div className="flex flex-col gap-5">
       {/* Profile card */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200/50 bg-white">
+      <div className="overflow-hidden rounded-2xl bg-white">
         {/* Banner — buttons live here, top-right */}
         <div className="relative h-[56px] bg-gray-100">
           {/* Avatar overlaps banner bottom */}
           <div className="absolute -bottom-10 left-4">
             <img
               src={profilePhoto}
-              alt="James Allen"
+              alt="Jamie"
               className="h-[80px] w-[80px] rounded-full border-[3px] border-white object-cover shadow-sm"
             />
           </div>
@@ -2240,7 +2240,7 @@ function HomeSidebar() {
         {/* Body */}
         <div className="px-4 pb-5 pt-12">
           {/* Name / headline */}
-          <p className="text-[19px] font-medium leading-tight text-gray-dark">James Allen</p>
+          <p className="text-[19px] font-medium leading-tight text-gray-dark">Jamie</p>
           <p className="mt-0.5 text-[15px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
           <a href="#" className="mt-1.5 inline-flex items-center gap-1 text-[15px] font-medium text-blue-600 hover:underline">
             My website
@@ -2263,11 +2263,11 @@ function HomeSidebar() {
             <div className="mt-2 flex flex-col gap-2.5">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[14px] text-gray-dark truncate">Land McKinsey offer</span>
-                <span className="shrink-0 rounded-[8px] bg-[#e6f4ef] px-2.5 py-0.5 text-[12px] font-normal text-[#138462]">In Progress</span>
+                <span className="shrink-0 rounded-[4px] bg-[#e6f4ef] px-2.5 py-0.5 text-[12px] font-normal text-[#138462]">In Progress</span>
               </div>
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[14px] text-gray-dark truncate">GMAT 750+</span>
-                <span className="shrink-0 rounded-[8px] bg-gray-100 px-2.5 py-0.5 text-[12px] font-normal text-gray-light">Planning</span>
+                <span className="shrink-0 rounded-[4px] bg-gray-100 px-2.5 py-0.5 text-[12px] font-normal text-gray-light">Planning</span>
               </div>
             </div>
           </div>
