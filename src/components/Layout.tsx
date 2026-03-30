@@ -3,7 +3,6 @@ import TopNav from "./TopNav";
 import BottomNav from "./BottomNav";
 import MobileTopNav from "./MobileTopNav";
 import RightSidebar from "./RightSidebar";
-import LeftSidebar from "./LeftSidebar";
 import {
   RightSidebarProvider,
   useRightSidebarContent,
@@ -48,17 +47,24 @@ function LayoutInner() {
       <main
         className={`relative z-0 pt-14 pb-20 md:pt-0 md:pb-0${
           hasRightSidebar ? " xl:mr-[300px]" : ""
-        }${
-          hasLeftSidebar ? " xl:ml-[280px]" : ""
         }`}
       >
-        <div className="mx-auto max-w-2xl px-4 py-6 lg:px-8">
-          <Outlet />
-        </div>
+        {hasLeftSidebar ? (
+          /* Left-sidebar layout: flex row, sidebar sits 40px left of feed */
+          <div className="mx-auto flex max-w-[960px] items-start gap-10 px-4 py-6 lg:px-8">
+            <aside className="hidden w-[220px] shrink-0 xl:block sticky top-[68px] self-start">
+              {leftSidebar}
+            </aside>
+            <div className="min-w-0 flex-1">
+              <Outlet />
+            </div>
+          </div>
+        ) : (
+          <div className="mx-auto max-w-2xl px-4 py-6 lg:px-8">
+            <Outlet />
+          </div>
+        )}
       </main>
-
-      {/* Left sidebar (xl+ only, when a page opts in) */}
-      <LeftSidebar />
 
       {/* Right sidebar (xl+ only, when a page opts in) */}
       <RightSidebar />
