@@ -13,6 +13,7 @@ import LelandPlus from "./pages/LelandPlus";
 import PostDetail from "./pages/PostDetail";
 import AccountSettings from "./pages/AccountSettings";
 import Calendar from "./pages/Calendar";
+import MyCourses from "./pages/MyCourses";
 
 export default function App() {
   return (
@@ -25,6 +26,9 @@ export default function App() {
 
       {/* Calendar gets its own layout - wider two-column */}
       <Route path="/calendar" element={<Calendar />} />
+
+      {/* My Courses gets its own layout */}
+      <Route path="/my-courses" element={<MyCourses />} />
 
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />

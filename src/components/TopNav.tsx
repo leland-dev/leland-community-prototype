@@ -10,6 +10,7 @@ import chatInactive from "../assets/icons/nav-icons/chat-inactive.svg";
 import chatActive from "../assets/icons/nav-icons/chat-active.svg";
 import calendarInactive from "../assets/icons/nav-icons/calendar-inactive.svg";
 import calendarActive from "../assets/icons/nav-icons/calendar-active.svg";
+import myCoursesIcon from "../assets/icons/my-courses.svg";
 import giftIcon from "../assets/icons/gift.svg";
 import settingsIcon from "../assets/icons/settings.svg";
 import switchIcon from "../assets/icons/switch.svg";
@@ -47,6 +48,7 @@ const profileMenuGroups = [
   {
     items: [
       { to: "/profile-v2", icon: profilePhoto, label: "Profile", danger: false, isProfile: true },
+      { to: "/my-courses", icon: myCoursesIcon, label: "My courses", danger: false },
       { to: null, icon: giftIcon, label: "Refer a friend", danger: false },
       { to: "/settings", icon: settingsIcon, label: "Settings", danger: false },
     ],

@@ -285,14 +285,14 @@ export default function Calendar() {
               </NavLink>
               <div className="mt-4 flex flex-col gap-4">
                 {popularEvents.map((event, i) => (
-                  <div key={i} className="flex items-center gap-3">
+                  <div key={i} className="group flex cursor-pointer items-center gap-3">
                     <img
                       src={event.image}
                       alt=""
                       className="h-[36px] w-[55px] shrink-0 rounded-[4px] object-cover"
                     />
                     <div className="min-w-0">
-                      <p className="truncate text-[16px] font-medium text-gray-dark">{event.title}</p>
+                      <p className="truncate text-[16px] font-medium text-gray-dark group-hover:opacity-70">{event.title}</p>
                       <p className="truncate text-[14px]">
                         <span className={event.subtitleColor}>{event.subtitle}</span>
                         <span className="text-gray-light"> · {event.meta}</span>
