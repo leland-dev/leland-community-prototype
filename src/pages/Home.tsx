@@ -1575,7 +1575,7 @@ function CoachCardContent({ avatar, name, verified, headline, price, ctaLabel, p
         <img
           src={avatar}
           alt={name}
-          className="h-[220px] w-full rounded-t-2xl object-cover"
+          className="h-[300px] w-full rounded-t-2xl object-cover"
           style={{ objectPosition: "50% 15%" }}
         />
         <div className="absolute right-3 top-3 rounded-xl bg-white/90 px-3 py-1.5 text-[14px] font-medium text-gray-dark shadow-sm backdrop-blur-sm">
