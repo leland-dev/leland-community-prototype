@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { NavLink } from "react-router-dom";
 import Logo from "../assets/Logo.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
+import notificationsInactive from "../assets/icons/nav-icons/notifications-inactive.svg";
 import MobileSidebar from "./MobileSidebar";
 
 export default function MobileTopNav() {
@@ -24,8 +26,17 @@ export default function MobileTopNav() {
         {/* Center: logo */}
         <img src={Logo} alt="Leland" className="h-[22px] w-auto" />
 
-        {/* Right: placeholder */}
-        <div className="h-8 w-8" />
+        {/* Right: notifications */}
+        <NavLink
+          to="/notifications"
+          className="flex h-8 w-8 items-center justify-center"
+        >
+          <img
+            src={notificationsInactive}
+            alt="Notifications"
+            className="h-[20px] w-[20px]"
+          />
+        </NavLink>
       </header>
 
       <MobileSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />

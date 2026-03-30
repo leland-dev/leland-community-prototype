@@ -1,11 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import notificationsInactive from "../assets/icons/nav-icons/notifications-inactive.svg";
 import notificationsActive from "../assets/icons/nav-icons/notifications-active.svg";
 import searchInactive from "../assets/icons/nav-icons/search-inactive.svg";
-import searchActive from "../assets/icons/nav-icons/search-active.svg";
 import chatInactive from "../assets/icons/nav-icons/chat-inactive.svg";
 import chatActive from "../assets/icons/nav-icons/chat-active.svg";
 import calendarInactive from "../assets/icons/nav-icons/calendar-inactive.svg";
@@ -65,6 +64,9 @@ const profileMenuGroups = [
 export default function TopNav() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [browseOpen, setBrowseOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+  const navigate = useNavigate();
   const profileRef = useRef<HTMLDivElement>(null);
   const browseRef = useRef<HTMLDivElement>(null);
 
@@ -190,18 +192,28 @@ export default function TopNav() {
         {/* Right: Search, Inbox, Calendar, Notifications, Profile */}
         <div className="flex shrink-0 items-center gap-1">
           {/* Search */}
-          <NavLink
-            to="/search"
-            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-hover"
-          >
-            {({ isActive }) => (
+          {showSearch && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                navigate("/search");
+              }}
+              className="relative mr-1"
+            >
               <img
-                src={isActive ? searchActive : searchInactive}
-                alt="Search"
-                className="h-[20px] w-[20px]"
+                src={searchInactive}
+                alt=""
+                className="pointer-events-none absolute left-3 top-1/2 h-[16px] w-[16px] -translate-y-1/2"
               />
-            )}
-          </NavLink>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search..."
+                className="h-10 w-72 rounded-lg bg-[#f5f5f5] pl-9 pr-3 text-[15px] font-medium text-[#222222] placeholder:font-normal placeholder-[#999999] outline-none transition-colors focus:bg-[#eeeeee]"
+              />
+            </form>
+          )}
 
           {/* Inbox */}
           <NavLink
@@ -314,6 +326,27 @@ export default function TopNav() {
                       )}
                     </div>
                   ))}
+
+                  {/* Admin controls */}
+                  <div className="border-t border-gray-stroke px-2 py-2">
+                    <p className="px-3 pb-1 pt-2 text-[12px] font-semibold uppercase tracking-wide text-[#999999]">
+                      Admin Controls
+                    </p>
+                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+                      Search bar
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={showSearch}
+                        onClick={() => setShowSearch(!showSearch)}
+                        className={`relative h-6 w-11 rounded-full transition-colors ${showSearch ? "bg-[#222222]" : "bg-[#d9d9d9]"}`}
+                      >
+                        <span
+                          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${showSearch ? "translate-x-5" : ""}`}
+                        />
+                      </button>
+                    </label>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
