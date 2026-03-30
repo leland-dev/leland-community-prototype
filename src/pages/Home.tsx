@@ -2292,12 +2292,12 @@ function HomeSidebar() {
           ].map(s => (
             <div key={s.title} className="flex items-start gap-3">
               {/* Calendar tile: grey top strip (month) + white bottom (day) */}
-              <div className="h-[49px] w-[49px] shrink-0 overflow-hidden rounded-lg border border-gray-200 shadow-sm">
+              <div className="w-[49px] shrink-0 overflow-hidden rounded-lg border border-gray-200 shadow-sm">
                 <div className="bg-gray-100 py-0.5 text-center">
-                  <span className="text-[9px] font-medium uppercase tracking-wide text-gray-light">{s.month}</span>
+                  <span className="text-[12px] font-medium uppercase tracking-wide text-gray-light">{s.month}</span>
                 </div>
                 <div className="bg-white py-1 text-center">
-                  <span className="text-[18px] font-medium leading-none text-gray-dark">{s.day}</span>
+                  <span className="text-[19px] font-medium leading-none text-gray-dark">{s.day}</span>
                 </div>
               </div>
               <div className="min-w-0 flex-1">
