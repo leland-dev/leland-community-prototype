@@ -2221,7 +2221,7 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 
 // ─── Left Sidebar ──────────────────────────────────────
 
-function HomeSidebar() {
+function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
   return (
     <div className="flex flex-col gap-5">
       {/* Profile card */}
@@ -2289,7 +2289,7 @@ function HomeSidebar() {
             </div>
           ))}
         </div>
-        <button className="mt-5 w-full cursor-pointer rounded-lg bg-gray-100 py-2.5 text-center text-[15px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
+        <button onClick={onCreatePost} className="mt-5 w-full cursor-pointer rounded-lg bg-gray-100 py-2.5 text-center text-[15px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
           Create post
         </button>
       </div>
@@ -2302,9 +2302,9 @@ function HomeSidebar() {
 
 export default function Home() {
   useEffect(() => { document.title = "Leland Prototype | Feed"; }, []);
-  useSetLeftSidebar(<HomeSidebar />);
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
+  useSetLeftSidebar(<HomeSidebar onCreatePost={() => setComposeOpen(true)} />);
   const [feedPosts, setFeedPosts] = useState<Post[]>(posts);
 
   const handlePost = (text: string) => {
