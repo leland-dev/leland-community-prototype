@@ -1433,75 +1433,21 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
 
   return (
     <motion.div
-      className="absolute left-0 top-12 z-50 w-[310px] rounded-2xl border border-gray-stroke bg-white p-4 shadow-[0_8px_32px_rgba(0,0,0,0.13)]"
+      className="absolute left-0 top-12 z-50 w-[305px] overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_8px_32px_rgba(0,0,0,0.13)]"
       initial={{ opacity: 0, y: 6, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 4, scale: 0.97 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
       onMouseEnter={(e) => e.stopPropagation()}
     >
-      {/* Avatar + name row */}
-      <div className="flex items-start gap-3">
-        <img
-          src={avatar}
-          alt={author}
-          className="h-[112px] w-[112px] shrink-0 rounded-xl object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
-          style={{ objectPosition: "50% 15%" }}
-        />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-1">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-                <span className="text-[17px] font-medium leading-tight text-gray-dark">{author}</span>
-                {verified ? <img src={verifiedIcon} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
-              </div>
-              {p ? (
-                <div className="mt-0.5 flex items-center gap-1 text-[15px]">
-                  <span className="text-yellow-400">★</span>
-                  <span className="text-gray-dark">{p.rating.toFixed(1)}</span>
-                  <span className="text-gray-light">({p.reviews})</span>
-                </div>
-              ) : null}
-              <p className="mt-0.5 text-[14px] text-gray-light">$150/hr</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Headline */}
-      {headline ? (
-        <p className="mt-3 line-clamp-2 w-4/5 text-[15px] leading-snug text-gray-dark">{headline}</p>
-      ) : null}
-
-      {/* Successful clients */}
-      {p && p.successfulClients.length > 0 ? (
-        <div className="mt-3">
-          <p className="text-[14px] text-gray-light">Successful clients at:</p>
-          <div className="mt-1.5 flex items-center gap-1.5">
-            {p.successfulClients.slice(0, 5).map((c, i) => (
-              <OrgLogo key={i} logo={c.logo} name={c.name} size={26} />
-            ))}
-            {p.successfulClientsMore ? (
-              <span className="ml-0.5 text-[12px] text-gray-light">+{p.successfulClientsMore}</span>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-
-      {/* CTAs */}
-      <div className="mt-4 flex gap-2">
-        <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-100 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
-          Book a session
-        </button>
-        <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-xl border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Follow">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <line x1="19" y1="8" x2="19" y2="14" />
-            <line x1="22" y1="11" x2="16" y2="11" />
-          </svg>
-        </button>
-      </div>
+      <CoachCardContent
+        avatar={avatar}
+        name={author}
+        verified={verified}
+        headline={headline}
+        ctaLabel="Book a session"
+        p={p}
+      />
     </motion.div>
   );
 }
@@ -1613,78 +1559,104 @@ const suggestedExperts = [
   { name: "Jason Park",     avatar: pic14, verified: false, headline: "Deloitte Strategy Lead | MBA Career Coach | Finance & Consulting" },
 ];
 
+function CoachCardContent({ avatar, name, verified, headline, price, ctaLabel, p }: {
+  avatar: string;
+  name: string;
+  verified?: boolean;
+  headline?: string;
+  price?: string;
+  ctaLabel: string;
+  p: typeof coachProfiles[string] | undefined;
+}) {
+  return (
+    <>
+      {/* Full-width image with price badge */}
+      <div className="relative">
+        <img
+          src={avatar}
+          alt={name}
+          className="h-[220px] w-full rounded-t-2xl object-cover"
+          style={{ objectPosition: "50% 15%" }}
+        />
+        <div className="absolute right-3 top-3 rounded-xl bg-white/90 px-3 py-1.5 text-[14px] font-medium text-gray-dark shadow-sm backdrop-blur-sm">
+          {price ?? "$150/hr"}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-4">
+        {/* Name + rating */}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+          <span className="text-[17px] font-medium text-gray-dark">{name}</span>
+          {verified ? <img src={verifiedIcon} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
+          {p ? (
+            <>
+              <span className="text-yellow-400">★</span>
+              <span className="text-[15px] text-gray-dark">{p.rating.toFixed(1)}</span>
+              <span className="text-[15px] text-gray-light">{p.reviews} reviews</span>
+            </>
+          ) : null}
+        </div>
+
+        {/* Headline */}
+        {headline ? (
+          <p className="mt-2 line-clamp-2 text-[15px] leading-snug text-gray-dark">{headline}</p>
+        ) : null}
+
+        {/* Successful clients */}
+        {p && p.successfulClients.length > 0 ? (
+          <div className="mt-3">
+            <p className="text-[14px] text-gray-light">Successful clients at:</p>
+            <div className="mt-1.5 flex items-center gap-1.5">
+              {p.successfulClients.slice(0, 5).map((c, i) => (
+                <OrgLogo key={i} logo={c.logo} name={c.name} size={26} />
+              ))}
+              {p.successfulClientsMore ? (
+                <span className="ml-0.5 text-[12px] text-gray-light">+{p.successfulClientsMore}</span>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {/* CTAs */}
+        <div className="mt-4 flex gap-2">
+          <button className="flex flex-1 cursor-pointer items-center justify-center rounded-xl bg-gray-dark py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-[#333]">
+            {ctaLabel}
+          </button>
+          <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-xl border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </button>
+          <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-xl border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Follow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <line x1="19" y1="8" x2="19" y2="14" />
+              <line x1="22" y1="11" x2="16" y2="11" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 function ExpertCard({ expert }: { expert: typeof suggestedExperts[number]; isOnline?: boolean }) {
   const p = coachProfiles[expert.name];
   return (
     <div
-      className="flex shrink-0 flex-col rounded-2xl border border-gray-stroke p-4"
-      style={{ width: "310px", minWidth: "310px" }}
+      className="flex shrink-0 flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white"
+      style={{ width: "305px", minWidth: "305px" }}
     >
-      {/* Avatar + name row */}
-      <div className="flex items-start gap-3">
-        <img
-          src={expert.avatar}
-          alt={expert.name}
-          className="h-[112px] w-[112px] shrink-0 rounded-xl object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
-          style={{ objectPosition: "50% 15%" }}
-        />
-
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-1">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-                <span className="text-[17px] font-medium leading-tight text-gray-dark">{expert.name}</span>
-                {expert.verified ? <img src={verifiedIcon} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
-              </div>
-              {p ? (
-                <div className="mt-0.5 flex items-center gap-1 text-[15px]">
-                  <span className="text-yellow-400">★</span>
-                  <span className="text-gray-dark">{p.rating.toFixed(1)}</span>
-                  <span className="text-gray-light">({p.reviews})</span>
-                </div>
-              ) : null}
-              <p className="mt-0.5 text-[14px] text-gray-light">$150/hr</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Headline */}
-      <p className="mt-3 line-clamp-2 w-4/5 text-[15px] leading-snug text-gray-dark">
-        {expert.headline}
-      </p>
-
-      {/* Successful clients */}
-      {p && p.successfulClients.length > 0 ? (
-        <div className="mt-3">
-          <p className="text-[14px] text-gray-light">Successful clients at:</p>
-          <div className="mt-1.5 flex items-center gap-1.5">
-            {p.successfulClients.slice(0, 5).map((c, i) => (
-              <OrgLogo key={i} logo={c.logo} name={c.name} size={26} />
-            ))}
-            {p.successfulClientsMore ? (
-              <span className="ml-0.5 text-[12px] text-gray-light">+{p.successfulClientsMore}</span>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-
-      {/* Spacer pushes button to bottom */}
-      <div className="flex-1" />
-
-      <div className="mt-4 flex gap-2">
-        <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-100 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
-          Free intro call
-        </button>
-        <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-xl border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Follow">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <line x1="19" y1="8" x2="19" y2="14" />
-            <line x1="22" y1="11" x2="16" y2="11" />
-          </svg>
-        </button>
-      </div>
+      <CoachCardContent
+        avatar={expert.avatar}
+        name={expert.name}
+        verified={expert.verified}
+        headline={expert.headline}
+        ctaLabel="Free intro call"
+        p={p}
+      />
     </div>
   );
 }
