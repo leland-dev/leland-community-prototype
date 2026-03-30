@@ -45,7 +45,7 @@ function LayoutInner() {
 
       {/* Main content area */}
       <main
-        className={`relative z-0 pt-14 pb-20 md:pt-0 md:pb-0${
+        className={`relative z-0 pt-14 pb-20 md:pt-[60px] md:pb-0${
           hasRightSidebar ? " xl:mr-[300px]" : ""
         }`}
       >
