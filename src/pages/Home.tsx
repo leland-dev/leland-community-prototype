@@ -1627,10 +1627,8 @@ function CoachCardContent({ avatar, name, verified, headline, price, ctaLabel, s
           <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-dark py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-[#333]">
             {isOnline ? (
               <>
-                <span className="relative flex h-2 w-2 shrink-0">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
-                </span>
+                <style>{`@keyframes talk-now-blink { 0%,100%{background-color:#4b5563} 50%{background-color:#4ade80} }`}</style>
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ animation: 'talk-now-blink 1s ease-in-out infinite' }} />
                 Talk now
               </>
             ) : ctaLabel}
