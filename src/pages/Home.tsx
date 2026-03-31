@@ -2215,7 +2215,7 @@ function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
             { month: "OCT", day: "29", title: "Resume Review", time: "Oct 29, 5:00 PM", coach: "Michael Busby", avatar: pic5 },
             { month: "NOV", day: "3",  title: "Jasmine <> James Sync", time: "Nov 3, 5:00 PM", coach: "Jasmine Singer", avatar: pic3 },
           ].map(s => (
-            <div key={s.title} className="flex items-start gap-3 rounded-xl p-1.5 -mx-1.5 cursor-pointer transition-colors hover:bg-gray-50">
+            <div key={s.title} className="flex items-start gap-3 rounded-xl p-1.5 -mx-1.5 cursor-pointer transition-colors hover:bg-gray-hover">
               <div className="flex w-[48px] shrink-0 flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
                 <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">
                   {s.month}
