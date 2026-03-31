@@ -2171,7 +2171,7 @@ function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
   return (
     <div className="flex flex-col gap-5">
       {/* Profile card */}
-      <div className="overflow-hidden rounded-2xl bg-white border border-gray-200">
+      <Link to="/profile" className="group block overflow-hidden rounded-2xl bg-white border border-gray-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
         {/* Banner */}
         <div className="relative h-[56px] bg-gray-100">
           <div className="absolute -bottom-10 left-4">
@@ -2199,7 +2199,7 @@ function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
             </div>
           </div>
         </div>
-      </div>
+      </Link>
 
       {/* Upcoming Sessions */}
       <div className="px-1">
