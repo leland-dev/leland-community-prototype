@@ -543,73 +543,87 @@ export default function PostDetail() {
       initial={{ y: 16, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="xl:ml-[340px]"
+      className="flex items-start gap-2 xl:ml-[296px]"
     >
-      {/* Back button */}
+      {/* Persistent circle back button — xl only, sits left of avatars */}
       <button
         onClick={() => navigate(-1)}
-        className="mt-4 flex items-center gap-2 text-[15px] text-gray-light transition-colors hover:text-gray-dark"
+        aria-label="Go back"
+        className="mt-4 hidden shrink-0 sticky top-6 self-start h-9 w-9 xl:flex items-center justify-center rounded-full border border-gray-200 bg-white text-gray-dark shadow-sm transition-colors hover:bg-gray-50"
       >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="15 18 9 12 15 6"/>
         </svg>
-        Back
       </button>
 
-      {/* Post */}
-      <div className="mt-3 pb-2">
-        <AuthorRow post={post} />
-        <p className="mt-1 pl-[56px] text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
-        <div className="pl-[56px]"><PostMedia post={post} /></div>
-        <div className="pl-[56px]"><StatsRow post={post} onCommentFocus={() => commentInputRef.current?.focus()} /></div>
-      </div>
+      {/* Content */}
+      <div className="min-w-0 flex-1">
+        {/* Mobile-only inline back button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-4 flex items-center gap-2 text-[15px] text-gray-light transition-colors hover:text-gray-dark xl:hidden"
+        >
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Back
+        </button>
 
-      {/* Comment input */}
-      <div className="flex gap-3 py-2">
-        <img
-          src={profilePhoto}
-          alt="You"
-          className="h-9 w-9 shrink-0 rounded-full object-cover"
-        />
-        <div className="flex-1">
-          <textarea
-            ref={commentInputRef}
-            value={commentText}
-            onChange={e => {
-              setCommentText(e.target.value);
-              e.target.style.height = "auto";
-              e.target.style.height = `${e.target.scrollHeight}px`;
-            }}
-            placeholder="Add a comment…"
-            rows={1}
-            className="w-full resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[15px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
-            onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
-          />
-          <AnimatePresence>
-            {commentText.trim() ? (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-2 flex justify-end"
-              >
-                <button
-                  onClick={submitComment}
-                  className="rounded-xl bg-gray-dark px-5 py-2 text-[14px] font-semibold text-white transition-colors hover:bg-[#222]"
-                >
-                  Post
-                </button>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
+        {/* Post */}
+        <div className="mt-3 pb-2">
+          <AuthorRow post={post} />
+          <p className="mt-1 pl-[56px] text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
+          <div className="pl-[56px]"><PostMedia post={post} /></div>
+          <div className="pl-[56px]"><StatsRow post={post} onCommentFocus={() => commentInputRef.current?.focus()} /></div>
         </div>
-      </div>
 
-      {/* Comments */}
-      <div className="mt-1">
-        {comments.map(c => (
-          <CommentItem key={c.id} comment={c} />
-        ))}
+        {/* Comment input */}
+        <div className="flex gap-3 py-2">
+          <img
+            src={profilePhoto}
+            alt="You"
+            className="h-9 w-9 shrink-0 rounded-full object-cover"
+          />
+          <div className="flex-1">
+            <textarea
+              ref={commentInputRef}
+              value={commentText}
+              onChange={e => {
+                setCommentText(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
+              placeholder="Add a comment…"
+              rows={1}
+              className="w-full resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[15px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
+              onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
+            />
+            <AnimatePresence>
+              {commentText.trim() ? (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-2 flex justify-end"
+                >
+                  <button
+                    onClick={submitComment}
+                    className="rounded-xl bg-gray-dark px-5 py-2 text-[14px] font-semibold text-white transition-colors hover:bg-[#222]"
+                  >
+                    Post
+                  </button>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Comments */}
+        <div className="mt-1">
+          {comments.map(c => (
+            <CommentItem key={c.id} comment={c} />
+          ))}
+        </div>
       </div>
     </motion.div>
   );
