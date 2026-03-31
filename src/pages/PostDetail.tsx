@@ -543,6 +543,7 @@ export default function PostDetail() {
       initial={{ y: 16, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className="xl:ml-[340px]"
     >
       {/* Back button */}
       <button
