@@ -21,13 +21,15 @@ import PostDetail from "./pages/PostDetail";
 import AccountSettings from "./pages/AccountSettings";
 import Calendar from "./pages/Calendar";
 import MyCourses from "./pages/MyCourses";
+import Site from "./pages/Site";
 
 export default function App() {
   return (
     <Routes>
       <Route path="*" element={<ScrollToTop />} />
-      {/* ProfileV2 gets its own layout - no max-width wrapper */}
+      {/* Pages with their own full-width layout */}
       <Route path="/profile-v2" element={<ProfileV2 />} />
+      <Route path="/site" element={<Site />} />
 
       {/* Settings gets its own layout - full-width sidebar */}
       <Route path="/settings" element={<AccountSettings />} />
