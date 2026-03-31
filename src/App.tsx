@@ -21,6 +21,7 @@ import PostDetail from "./pages/PostDetail";
 import AccountSettings from "./pages/AccountSettings";
 import Calendar from "./pages/Calendar";
 import MyCourses from "./pages/MyCourses";
+import Dashboard from "./pages/Dashboard";
 import Site from "./pages/Site";
 
 export default function App() {
@@ -40,14 +41,19 @@ export default function App() {
       {/* My Courses gets its own layout */}
       <Route path="/my-courses" element={<MyCourses />} />
 
+      {/* Dashboard gets its own layout */}
+      <Route path="/dashboard" element={<Dashboard />} />
+
+      {/* These pages get their own layout with 1100px max-width */}
+      <Route path="/events" element={<Events />} />
+      <Route path="/courses" element={<Courses />} />
+      <Route path="/plus" element={<LelandPlus />} />
+
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/post/:postId" element={<PostDetail />} />
         <Route path="/browse" element={<Browse />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/events" element={<Events />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/plus" element={<LelandPlus />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/messages" element={<Messaging />} />
         <Route path="/profile" element={<Profile />} />

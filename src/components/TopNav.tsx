@@ -215,6 +215,14 @@ export default function TopNav() {
             </form>
           )}
 
+          {/* Dashboard */}
+          <NavLink
+            to="/dashboard"
+            className="relative p-3 text-[18px] font-medium whitespace-nowrap rounded-lg text-[#222222] hover:bg-gray-hover"
+          >
+            Dashboard
+          </NavLink>
+
           {/* Inbox */}
           <NavLink
             to="/messages"
