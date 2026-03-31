@@ -205,7 +205,7 @@ export default function ProfileV2() {
               transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               className="fixed top-0 left-0 right-0 z-30 border-b border-gray-stroke bg-white"
             >
-              <div className={`mx-auto flex items-stretch gap-4 px-4 py-2 transition-all duration-300 md:py-0 md:px-10 ${showSidebar ? "max-w-[1144px]" : "max-w-[900px]"}`}>
+              <div className="mx-auto flex max-w-[1060px] items-stretch gap-4 px-6 py-2 transition-all duration-300 md:py-0">
                 {/* Left: photo + name + rate — click to scroll to top */}
                 <div
                   className="flex shrink-0 cursor-pointer items-center gap-2.5"
@@ -262,7 +262,7 @@ export default function ProfileV2() {
       {/* Full-bleed header background */}
       <div className="w-full bg-[#f5f5f5]">
         {/* Category bar placeholder */}
-        <div className={`mx-auto px-4 transition-all duration-300 md:px-10 ${showSidebar ? "max-w-[1144px]" : "max-w-[900px]"}`}>
+        <div className="mx-auto max-w-[1060px] px-6">
           <div className="h-[44px]" />
         </div>
 
@@ -271,7 +271,7 @@ export default function ProfileV2() {
       </div>
 
       {/* Main content area */}
-      <div className={`mx-auto flex gap-16 px-4 pb-[120px] transition-all duration-300 md:px-10 ${showSidebar ? "max-w-[1144px]" : "max-w-[900px]"}`}>
+      <div className="mx-auto flex max-w-[1060px] gap-10 px-6 pb-[120px]">
         {/* Left column — fills available width */}
         <div className="min-w-0 flex-1">
           {/* Profile photo + CTA buttons */}
@@ -981,7 +981,7 @@ export default function ProfileV2() {
 
         {/* Right column — fixed 240px sidebar, hidden on tablet */}
         {showSidebar && (
-          <div className="hidden w-[240px] shrink-0 pt-6 lg:block">
+          <div className="hidden w-[300px] shrink-0 pt-6 lg:block">
             <div className="flex flex-col gap-[14px]">
               {/* Coach video — desktop sidebar */}
               {showCoachVideo && !isCustomerProfile && (

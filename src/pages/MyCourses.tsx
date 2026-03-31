@@ -397,7 +397,7 @@ export default function MyCourses() {
         <TopNav />
       </div>
 
-      <div className="mx-auto max-w-[1060px] px-4 pt-20 pb-20 md:px-10 md:pt-6 md:pb-[100px]">
+      <div className="mx-auto max-w-[1060px] px-6 pt-20 pb-20 md:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">
@@ -433,7 +433,7 @@ export default function MyCourses() {
           </div>
 
           {/* ── Right column ── */}
-          <div className="hidden w-[280px] shrink-0 lg:block">
+          <div className="hidden w-[300px] shrink-0 lg:block">
             <NavLink
               to="/browse"
               className="flex items-center gap-1.5 text-[13px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80"

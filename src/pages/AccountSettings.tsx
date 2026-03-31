@@ -150,9 +150,9 @@ export default function AccountSettings() {
       <div className="hidden md:block">
         <TopNav />
       </div>
-    <div className="flex min-h-[calc(100vh-73px)]">
+    <div className="mx-auto flex max-w-[1060px] items-start gap-10 px-6 pt-14 pb-20 md:py-6">
       {/* Sidebar */}
-      <div className="hidden w-[220px] shrink-0 border-r border-gray-stroke p-2 md:block">
+      <aside className="hidden w-[300px] shrink-0 md:block sticky top-5 self-start">
         <nav className="flex flex-col gap-1">
           {tabs.map((tab) => (
             <button
@@ -169,11 +169,10 @@ export default function AccountSettings() {
             </button>
           ))}
         </nav>
-      </div>
+      </aside>
 
       {/* Content area */}
-      <div className="flex flex-1 justify-center px-5 pt-20 pb-20 md:px-10 md:pt-6 md:pb-0">
-        <div className="w-full max-w-[680px]">
+      <div className="min-w-0 flex-1">
           <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">
             {(() => { const t = tabs.find((t) => t.key === activeTab); return t?.title ?? t?.label; })()}
           </h1>
@@ -361,7 +360,6 @@ export default function AccountSettings() {
               ))}
             </div>
           )}
-        </div>
       </div>
     </div>
       <div className="md:hidden">

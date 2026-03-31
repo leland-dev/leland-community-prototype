@@ -169,7 +169,7 @@ export default function Calendar() {
         <TopNav />
       </div>
 
-      <div className="mx-auto max-w-[1020px] px-4 pt-20 pb-20 md:px-10 md:pt-6 md:pb-[100px]">
+      <div className="mx-auto max-w-[1060px] px-6 pt-20 pb-20 md:p-6">
         {/* Header — spans full width above both columns */}
         <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">
           Calendar
@@ -178,7 +178,7 @@ export default function Calendar() {
           Everything on your schedule, between 1:1 coaching sessions, events, and courses.
         </p>
 
-        <div className="mt-6 flex gap-16">
+        <div className="mt-6 flex gap-10">
           {/* Left column — main content */}
           <div className="min-w-0 flex-1 border-t border-gray-stroke">
             {/* Event list */}

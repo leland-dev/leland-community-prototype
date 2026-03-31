@@ -12,13 +12,16 @@ import {
   useLeftSidebarContent,
 } from "./LeftSidebarContext";
 import { ExtraLinksProvider } from "./ExtraLinksContext";
+import { SubNavProvider, useSubNavContent } from "./SubNavContext";
 
 export default function Layout() {
   return (
     <ExtraLinksProvider>
       <RightSidebarProvider>
         <LeftSidebarProvider>
-          <LayoutInner />
+          <SubNavProvider>
+            <LayoutInner />
+          </SubNavProvider>
         </LeftSidebarProvider>
       </RightSidebarProvider>
     </ExtraLinksProvider>
@@ -28,6 +31,7 @@ export default function Layout() {
 function LayoutInner() {
   const rightSidebar = useRightSidebarContent();
   const leftSidebar = useLeftSidebarContent();
+  const subNav = useSubNavContent();
   const hasRightSidebar = rightSidebar != null;
   const hasLeftSidebar = leftSidebar != null;
 
@@ -43,6 +47,17 @@ function LayoutInner() {
         <TopNav />
       </div>
 
+      {/* Sub-nav */}
+      {subNav && (
+        <div className="hidden border-b border-gray-stroke bg-white md:block">
+          <div className="mx-auto max-w-[1060px] px-6">
+            <div className="flex gap-1 overflow-x-auto py-2 scrollbar-none">
+              {subNav}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main content area */}
       <main
         className={`relative z-0 pt-14 pb-20 md:pt-0 md:pb-0${
@@ -51,8 +66,8 @@ function LayoutInner() {
       >
         {hasLeftSidebar ? (
           /* Left-sidebar layout: flex row, sidebar sits 40px left of feed */
-          <div className="mx-auto flex max-w-[1060px] items-start gap-10 px-4 py-6 lg:px-8">
-            <aside className="hidden w-[286px] shrink-0 xl:block sticky top-5 self-start">
+          <div className="mx-auto flex max-w-[1060px] items-start gap-10 px-6 py-6">
+            <aside className="hidden w-[300px] shrink-0 xl:block sticky top-5 self-start">
               {leftSidebar}
             </aside>
             <div className="min-w-0 flex-1">
@@ -60,7 +75,7 @@ function LayoutInner() {
             </div>
           </div>
         ) : (
-          <div className="mx-auto max-w-2xl px-4 py-6 lg:px-8">
+          <div className="mx-auto max-w-[1060px] px-6 py-6">
             <Outlet />
           </div>
         )}
