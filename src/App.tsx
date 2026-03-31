@@ -48,12 +48,10 @@ export default function App() {
       {/* Dashboard gets its own layout */}
       <Route path="/dashboard" element={<Dashboard />} />
 
-      {/* These pages get their own layout with 1100px max-width */}
-      <Route path="/events" element={<Events />} />
-      <Route path="/courses" element={<Courses />} />
-      <Route path="/plus" element={<LelandPlus />} />
-
       <Route element={<Layout />}>
+        <Route path="/events" element={<Events />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/plus" element={<LelandPlus />} />
         <Route path="/" element={<Home />} />
         <Route path="/post/:postId" element={<PostDetail />} />
         <Route path="/browse" element={<Browse />} />
