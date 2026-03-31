@@ -608,7 +608,7 @@ export default function PostDetail() {
                 >
                   <button
                     onClick={submitComment}
-                    className="rounded-xl bg-gray-dark px-5 py-2 text-[14px] font-semibold text-white transition-colors hover:bg-[#222]"
+                    className="rounded-[8px] bg-gray-dark px-5 py-1.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#222]"
                   >
                     Post
                   </button>
