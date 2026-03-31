@@ -117,7 +117,7 @@ export default function Profile() {
 
   return (
     <>
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-[1060px]">
       {/* Cover Image */}
       <div>
         <div className="-mx-3 lg:mx-0">

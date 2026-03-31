@@ -5,6 +5,7 @@ import profilePhoto from "../assets/profile photos/profile photo.png";
 import notificationsInactive from "../assets/icons/nav-icons/notifications-inactive.svg";
 import notificationsActive from "../assets/icons/nav-icons/notifications-active.svg";
 import searchInactive from "../assets/icons/nav-icons/search-inactive.svg";
+import searchActive from "../assets/icons/nav-icons/search-active.svg";
 import chatInactive from "../assets/icons/nav-icons/chat-inactive.svg";
 import chatActive from "../assets/icons/nav-icons/chat-active.svg";
 import calendarInactive from "../assets/icons/nav-icons/calendar-inactive.svg";
@@ -16,6 +17,8 @@ import switchIcon from "../assets/icons/switch.svg";
 import helpIcon from "../assets/icons/help.svg";
 import logOutIcon from "../assets/icons/log out.svg";
 import lelandLogo from "../assets/Logo.svg";
+import homeInactive from "../assets/icons/nav-icons/home-inactive.svg";
+import homeActive from "../assets/icons/nav-icons/home-active.svg";
 
 /* ── Nav links ── */
 const navLinks = [
@@ -65,6 +68,7 @@ export default function TopNav() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [browseOpen, setBrowseOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const navigate = useNavigate();
   const profileRef = useRef<HTMLDivElement>(null);
@@ -93,28 +97,19 @@ export default function TopNav() {
 
   return (
     <header className="border-b border-gray-stroke bg-white">
-      <div className="mx-auto flex items-center justify-between px-5 py-3">
+      <div className="mx-auto flex max-w-[1060px] items-stretch justify-between px-6">
         {/* Left: Logo + Nav links */}
-        <div className="flex items-center gap-1">
-          <NavLink to="/" className="mr-4 flex shrink-0 items-center">
+        <div className="flex items-stretch gap-1">
+          <NavLink to="/" className="mr-4 flex shrink-0 items-center py-5">
             <img src={lelandLogo} alt="Leland" className="h-[22px] w-auto" />
           </NavLink>
 
-          <nav className="flex items-center gap-3">
-            {/* Feed */}
-            <NavLink
-              to="/"
-              end
-              className="relative p-3 text-[18px] font-medium whitespace-nowrap rounded-lg text-[#222222] hover:bg-gray-hover"
-            >
-              Home
-            </NavLink>
-
+          <nav className="flex items-stretch gap-3">
             {/* Browse dropdown */}
-            <div ref={browseRef} className="relative">
+            <div ref={browseRef} className="relative flex self-stretch items-center">
               <button
                 onClick={() => setBrowseOpen(!browseOpen)}
-                className="flex items-center gap-1 rounded-lg p-3 text-[18px] font-medium whitespace-nowrap text-[#222222] hover:bg-gray-hover"
+                className="flex items-center gap-1 rounded-lg px-3 py-2 text-[18px] font-medium whitespace-nowrap text-[#222222] hover:bg-gray-hover"
               >
                 Browse
                 <svg
@@ -181,84 +176,98 @@ export default function TopNav() {
                 key={to}
                 to={to}
                 end={end}
-                className="relative p-3 text-[18px] font-medium whitespace-nowrap rounded-lg text-[#222222] hover:bg-gray-hover"
+                className="relative flex self-stretch items-center"
               >
-                {label}
+                {({ isActive }) => (
+                  <>
+                    <span className={`flex items-center rounded-lg px-3 py-2 text-[18px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                      {label}
+                    </span>
+                    {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
+                  </>
+                )}
               </NavLink>
             ))}
+
+            {/* Search */}
+            {showSearch && <div className="relative flex self-stretch items-center">
+              <form
+                onSubmit={(e) => e.preventDefault()}
+                className="flex items-center gap-2 px-3 py-2"
+              >
+                <img
+                  src={searchFocused ? searchActive : searchInactive}
+                  alt=""
+                  className="h-[20px] w-[20px] shrink-0"
+                />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
+                  placeholder="Search..."
+                  className="w-40 bg-transparent text-[18px] font-medium text-[#222222] placeholder:font-normal placeholder:text-[#999999] outline-none"
+                />
+              </form>
+              {searchFocused && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
+            </div>}
           </nav>
         </div>
 
-        {/* Right: Search, Inbox, Calendar, Notifications, Profile */}
-        <div className="flex shrink-0 items-center gap-1">
-          {/* Search */}
-          {showSearch && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                navigate("/search");
-              }}
-              className="relative mr-1"
-            >
-              <img
-                src={searchInactive}
-                alt=""
-                className="pointer-events-none absolute left-3 top-1/2 h-[16px] w-[16px] -translate-y-1/2"
-              />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search..."
-                className="h-10 w-72 rounded-lg bg-[#f5f5f5] pl-9 pr-3 text-[15px] font-medium text-[#222222] placeholder:font-normal placeholder-[#999999] outline-none transition-colors focus:bg-[#eeeeee]"
-              />
-            </form>
-          )}
+        {/* Right: Home, Inbox, Calendar, Notifications, Profile */}
+        <div className="flex shrink-0 items-stretch gap-1">
+
+          {/* Home */}
+          <NavLink to="/" end className="relative flex self-stretch items-center">
+            {({ isActive }) => (
+              <>
+                <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                  <img src={isActive ? homeActive : homeInactive} alt="Home" className="h-[20px] w-[20px]" />
+                </span>
+                {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
+              </>
+            )}
+          </NavLink>
 
           {/* Inbox */}
-          <NavLink
-            to="/messages"
-            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-hover"
-          >
+          <NavLink to="/messages" className="relative flex self-stretch items-center">
             {({ isActive }) => (
-              <img
-                src={isActive ? chatActive : chatInactive}
-                alt="Inbox"
-                className="h-[20px] w-[20px]"
-              />
+              <>
+                <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                  <img src={isActive ? chatActive : chatInactive} alt="Inbox" className="h-[20px] w-[20px]" />
+                </span>
+                {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
+              </>
             )}
           </NavLink>
 
           {/* Calendar */}
-          <NavLink
-            to="/calendar"
-            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-hover"
-          >
+          <NavLink to="/calendar" className="relative flex self-stretch items-center">
             {({ isActive }) => (
-              <img
-                src={isActive ? calendarActive : calendarInactive}
-                alt="Calendar"
-                className="h-[20px] w-[20px]"
-              />
+              <>
+                <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                  <img src={isActive ? calendarActive : calendarInactive} alt="Calendar" className="h-[20px] w-[20px]" />
+                </span>
+                {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
+              </>
             )}
           </NavLink>
 
           {/* Notifications */}
-          <NavLink
-            to="/notifications"
-            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-hover"
-          >
+          <NavLink to="/notifications" className="relative flex self-stretch items-center">
             {({ isActive }) => (
-              <img
-                src={isActive ? notificationsActive : notificationsInactive}
-                alt="Notifications"
-                className="h-[20px] w-[20px]"
-              />
+              <>
+                <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                  <img src={isActive ? notificationsActive : notificationsInactive} alt="Notifications" className="h-[20px] w-[20px]" />
+                </span>
+                {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
+              </>
             )}
           </NavLink>
 
           {/* Profile avatar + dropdown */}
-          <div ref={profileRef} className="relative ml-1">
+          <div ref={profileRef} className="relative ml-1 flex items-center">
             <button
               onClick={() => setProfileOpen(!profileOpen)}
               className="flex h-9 w-9 items-center justify-center rounded-full"
@@ -347,6 +356,7 @@ export default function TopNav() {
                       </button>
                     </label>
                   </div>
+
                 </motion.div>
               )}
             </AnimatePresence>
