@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { VersionProvider } from "./contexts/VersionContext";
 import VersionToggle from "./components/VersionToggle";
 import Layout from "./components/Layout";
+import { ContextLayout } from "./components/Layout";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -37,33 +38,28 @@ export default function App() {
     <HomeOnlyVersionToggle />
     <Routes>
       <Route path="*" element={<ScrollToTop />} />
-      {/* Pages with their own full-width layout */}
-      <Route path="/profile-v2" element={<ProfileV2 />} />
-      <Route path="/site" element={<Site />} />
-
-      {/* Settings gets its own layout - full-width sidebar */}
-      <Route path="/settings" element={<AccountSettings />} />
-
-      {/* Calendar gets its own layout - wider two-column */}
-      <Route path="/calendar" element={<Calendar />} />
-
-      {/* My Courses gets its own layout */}
-      <Route path="/my-courses" element={<MyCourses />} />
-
-      {/* Dashboard gets its own layout */}
-      <Route path="/dashboard" element={<Dashboard />} />
-
       <Route element={<Layout />}>
-        <Route path="/events" element={<Events />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/plus" element={<LelandPlus />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/post/:postId" element={<PostDetail />} />
-        <Route path="/browse" element={<Browse />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/messages" element={<Messaging />} />
-        <Route path="/profile" element={<Profile />} />
+        {/* Standalone pages using PageShell directly */}
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile-v2" element={<ProfileV2 />} />
+        <Route path="/site" element={<Site />} />
+        <Route path="/settings" element={<AccountSettings />} />
+        <Route path="/calendar" element={<Calendar />} />
+        <Route path="/my-courses" element={<MyCourses />} />
+
+        {/* Context-driven pages (sidebar/variant via hooks) */}
+        <Route element={<ContextLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/browse" element={<Browse />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/messages" element={<Messaging />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/post/:postId" element={<PostDetail />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/plus" element={<LelandPlus />} />
+        </Route>
       </Route>
     </Routes>
     </VersionProvider>

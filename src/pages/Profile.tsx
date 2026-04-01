@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSetLayoutVariant } from "../components/LayoutVariantContext";
 import verifiedIcon from "../assets/icons/verified.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
 import likesIcon from "../assets/icons/likes.svg";
@@ -110,6 +111,7 @@ function FeedPost({ body, image, time, likes, comments, reposts }: {
 }
 
 export default function Profile() {
+  useSetLayoutVariant("thin");
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
   const [activeTab, setActiveTab] = useState<"activity" | "offerings" | "reviews" | "about">("activity");
   const [isVerifiedExpert, setIsVerifiedExpert] = useState(true);

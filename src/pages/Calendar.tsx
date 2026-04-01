@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import TopNav from "../components/TopNav";
-import MobileTopNav from "../components/MobileTopNav";
-import BottomNav from "../components/BottomNav";
-import { ExtraLinksProvider } from "../components/ExtraLinksContext";
+import PageShell from "../components/PageShell";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic3 from "../assets/profile photos/pic-3.png";
@@ -158,18 +155,37 @@ const pastEvents = [
 export default function Calendar() {
   const [pastOpen, setPastOpen] = useState(false);
 
-  return (
-    <div className="min-h-full bg-white">
-      <div className="md:hidden">
-        <ExtraLinksProvider>
-          <MobileTopNav />
-        </ExtraLinksProvider>
+  const popularEventsSection = (
+    <>
+      <NavLink to="/events" className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+        Popular events
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
+          <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </NavLink>
+      <div className="mt-4 flex flex-col gap-4">
+        {popularEvents.map((event, i) => (
+          <div key={i} className="group flex cursor-pointer items-center gap-3">
+            <img
+              src={event.image}
+              alt=""
+              className="h-[36px] w-[55px] shrink-0 rounded-[4px] object-cover"
+            />
+            <div className="min-w-0">
+              <p className="truncate text-[16px] font-medium text-gray-dark group-hover:opacity-70">{event.title}</p>
+              <p className="truncate text-[14px]">
+                <span className={event.subtitleColor}>{event.subtitle}</span>
+                <span className="text-gray-light"> · {event.meta}</span>
+              </p>
+            </div>
+          </div>
+        ))}
       </div>
-      <div className="hidden md:block">
-        <TopNav />
-      </div>
+    </>
+  );
 
-      <div className="mx-auto max-w-[1060px] px-6 pt-20 pb-20 md:p-6">
+  return (
+    <PageShell rightSidebar={popularEventsSection}>
         {/* Header — spans full width above both columns */}
         <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">
           Calendar
@@ -178,9 +194,7 @@ export default function Calendar() {
           Everything on your schedule, between 1:1 coaching sessions, events, and courses.
         </p>
 
-        <div className="mt-6 flex gap-10">
-          {/* Left column — main content */}
-          <div className="min-w-0 flex-1 border-t border-gray-stroke">
+        <div className="mt-6 border-t border-gray-stroke">
             {/* Event list */}
             <div className="mt-2 flex flex-col gap-1">
               {upcomingEvents.map((event, i) => (
@@ -272,42 +286,7 @@ export default function Calendar() {
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Right column — sidebar */}
-          <div className="hidden w-[300px] shrink-0 lg:block">
-              {/* Popular events */}
-              <NavLink to="/events" className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
-                Popular events
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
-                  <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </NavLink>
-              <div className="mt-4 flex flex-col gap-4">
-                {popularEvents.map((event, i) => (
-                  <div key={i} className="group flex cursor-pointer items-center gap-3">
-                    <img
-                      src={event.image}
-                      alt=""
-                      className="h-[36px] w-[55px] shrink-0 rounded-[4px] object-cover"
-                    />
-                    <div className="min-w-0">
-                      <p className="truncate text-[16px] font-medium text-gray-dark group-hover:opacity-70">{event.title}</p>
-                      <p className="truncate text-[14px]">
-                        <span className={event.subtitleColor}>{event.subtitle}</span>
-                        <span className="text-gray-light"> · {event.meta}</span>
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-          </div>
         </div>
-      </div>
-
-      <div className="md:hidden">
-        <BottomNav />
-      </div>
-    </div>
+    </PageShell>
   );
 }

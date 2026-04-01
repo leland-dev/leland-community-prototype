@@ -97,7 +97,7 @@ export default function TopNav() {
 
   return (
     <header className="border-b border-gray-stroke bg-white">
-      <div className="mx-auto flex max-w-[1060px] items-stretch justify-between px-6">
+      <div className="mx-auto flex max-w-[1280px] items-stretch justify-between px-6">
         {/* Left: Logo + Nav links */}
         <div className="flex items-stretch gap-1">
           <NavLink to="/" className="mr-4 flex shrink-0 items-center py-5">

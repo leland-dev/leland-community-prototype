@@ -1,9 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
-import TopNav from "../components/TopNav";
-import MobileTopNav from "../components/MobileTopNav";
-import BottomNav from "../components/BottomNav";
-import { ExtraLinksProvider } from "../components/ExtraLinksContext";
+import PageShell from "../components/PageShell";
 import event1 from "../assets/placeholder images/placeholder-event-01.png";
 import event2 from "../assets/placeholder images/placeholder-event-02.png";
 import event3 from "../assets/placeholder images/placeholder-event-03.png";
@@ -386,18 +383,39 @@ export default function MyCourses() {
   const [filter, setFilter] = useState<Filter>("all");
   const visibleCourses = filter === "all" ? enrolledCourses : enrolledCourses.filter((c) => c.type === (filter === "live" ? "live" : "selfPaced"));
 
-  return (
-    <div className="min-h-full bg-white">
-      <div className="md:hidden">
-        <ExtraLinksProvider>
-          <MobileTopNav />
-        </ExtraLinksProvider>
+  const suggestedCoursesSection = (
+    <>
+      <NavLink
+        to="/browse"
+        className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80"
+      >
+        Suggested courses
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 16 16"
+          fill="none"
+          className="shrink-0"
+        >
+          <path
+            d="M6 4L10 8L6 12"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </NavLink>
+      <div className="mt-4 flex flex-col gap-5">
+        {suggestedCourses.map((course, i) => (
+          <SuggestedCourseCard key={i} course={course} />
+        ))}
       </div>
-      <div className="hidden md:block">
-        <TopNav />
-      </div>
+    </>
+  );
 
-      <div className="mx-auto max-w-[1060px] px-6 pt-20 pb-20 md:p-6">
+  return (
+    <PageShell rightSidebar={suggestedCoursesSection}>
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">
@@ -420,53 +438,15 @@ export default function MyCourses() {
           </div>
         </div>
 
-        <div className="mt-6 flex gap-10">
-          {/* ── Left column ── */}
-          <div className="min-w-0 flex-1 border-t border-gray-stroke/50">
-            {visibleCourses.map((course) =>
-              course.type === "live" ? (
-                <LiveCourseCard key={course.id} course={course} />
-              ) : (
-                <SelfPacedCourseCard key={course.id} course={course} />
-              )
-            )}
-          </div>
-
-          {/* ── Right column ── */}
-          <div className="hidden w-[300px] shrink-0 lg:block">
-            <NavLink
-              to="/browse"
-              className="flex items-center gap-1.5 text-[13px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80"
-            >
-              Suggested courses
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 16 16"
-                fill="none"
-                className="shrink-0"
-              >
-                <path
-                  d="M6 4L10 8L6 12"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </NavLink>
-            <div className="mt-4 flex flex-col gap-5">
-              {suggestedCourses.map((course, i) => (
-                <SuggestedCourseCard key={i} course={course} />
-              ))}
-            </div>
-          </div>
+        <div className="mt-6 border-t border-gray-stroke/50">
+          {visibleCourses.map((course) =>
+            course.type === "live" ? (
+              <LiveCourseCard key={course.id} course={course} />
+            ) : (
+              <SelfPacedCourseCard key={course.id} course={course} />
+            )
+          )}
         </div>
-      </div>
-
-      <div className="md:hidden">
-        <BottomNav />
-      </div>
-    </div>
+    </PageShell>
   );
 }

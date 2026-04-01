@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
+import { useSetLayoutVariant } from "../components/LayoutVariantContext";
 import { posts, type Post, FeedLikeButton, FeedRepostButton, ShareDropdown } from "./Home";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
@@ -493,6 +494,7 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
 // ─── Page ─────────────────────────────────────────────
 
 export default function PostDetail() {
+  useSetLayoutVariant("thin");
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const location = useLocation();

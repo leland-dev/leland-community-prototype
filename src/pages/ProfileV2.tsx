@@ -2,10 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
-import TopNav from "../components/TopNav";
-import MobileTopNav from "../components/MobileTopNav";
-import BottomNav from "../components/BottomNav";
-import { ExtraLinksProvider } from "../components/ExtraLinksContext";
+import PageShell from "../components/PageShell";
 import pic2 from "../assets/profile photos/pic-2.png";
 import pic6 from "../assets/profile photos/pic-6.png";
 import mailIcon from "../assets/icons/mail.svg";
@@ -181,19 +178,7 @@ export default function ProfileV2() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Mobile top nav — non-fixed on this page */}
-      <div className="md:hidden [&_header]:static">
-        <ExtraLinksProvider>
-          <MobileTopNav />
-        </ExtraLinksProvider>
-      </div>
-
-      {/* Desktop/Tablet top nav */}
-      <div className="hidden md:block">
-        <TopNav />
-      </div>
-
+    <>
       {/* Sticky secondary nav — portaled to body to escape framer-motion layoutId containing blocks */}
       {createPortal(
         <AnimatePresence>
@@ -205,7 +190,7 @@ export default function ProfileV2() {
               transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               className="fixed top-0 left-0 right-0 z-30 border-b border-gray-stroke bg-white"
             >
-              <div className="mx-auto flex max-w-[1060px] items-stretch gap-4 px-6 py-2 transition-all duration-300 md:py-0">
+              <div className="mx-auto flex max-w-[1280px] items-stretch gap-4 px-6 py-2 transition-all duration-300 md:py-0">
                 {/* Left: photo + name + rate — click to scroll to top */}
                 <div
                   className="flex shrink-0 cursor-pointer items-center gap-2.5"
@@ -262,7 +247,7 @@ export default function ProfileV2() {
       {/* Full-bleed header background */}
       <div className="w-full bg-[#f5f5f5]">
         {/* Category bar placeholder */}
-        <div className="mx-auto max-w-[1060px] px-6">
+        <div className="mx-auto max-w-[1280px] px-6">
           <div className="h-[44px]" />
         </div>
 
@@ -271,9 +256,37 @@ export default function ProfileV2() {
       </div>
 
       {/* Main content area */}
-      <div className="mx-auto flex max-w-[1060px] gap-10 px-6 pb-[120px]">
-        {/* Left column — fills available width */}
-        <div className="min-w-0 flex-1">
+      <PageShell rightSidebar={showSidebar ? (
+          <div className="flex flex-col gap-[14px]">
+            {/* Coach video — desktop sidebar */}
+            {showCoachVideo && !isCustomerProfile && (
+              <div className="group relative cursor-pointer overflow-hidden rounded-lg">
+                <img
+                  src={videoThumbnail}
+                  alt="Coach video"
+                  className="block w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 transition-colors group-hover:bg-black/10" />
+                <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 px-2 pb-2">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/40 backdrop-blur-[6px]">
+                    <svg width="11" height="13" viewBox="0 0 18 20" fill="none">
+                      <path d="M17 10L1 19V1L17 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-[16px] font-medium leading-tight text-white">Get to know me</p>
+                    <p className="text-[14px] leading-tight text-white/70">1:40</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+            <div className="h-[280px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+            <div className="h-[120px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+          </div>
+        ) : undefined}>
+        <div>
           {/* Profile photo + CTA buttons */}
           <div className="-mt-[80px] mb-4 flex flex-col items-start md:flex-row md:items-end md:justify-between">
             <div className="group relative z-20 cursor-pointer rounded-lg border-[4px] border-white bg-white" onClick={() => setLightboxOpen(true)}>
@@ -978,41 +991,7 @@ export default function ProfileV2() {
             </>
           )}
         </div>
-
-        {/* Right column — fixed 240px sidebar, hidden on tablet */}
-        {showSidebar && (
-          <div className="hidden w-[300px] shrink-0 pt-6 lg:block">
-            <div className="flex flex-col gap-[14px]">
-              {/* Coach video — desktop sidebar */}
-              {showCoachVideo && !isCustomerProfile && (
-                <div className="group relative cursor-pointer overflow-hidden rounded-lg">
-                  <img
-                    src={videoThumbnail}
-                    alt="Coach video"
-                    className="block w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute inset-0 transition-colors group-hover:bg-black/10" />
-                  <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 px-2 pb-2">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/40 backdrop-blur-[6px]">
-                      <svg width="11" height="13" viewBox="0 0 18 20" fill="none">
-                        <path d="M17 10L1 19V1L17 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-[16px] font-medium leading-tight text-white">Get to know me</p>
-                      <p className="text-[14px] leading-tight text-white/70">1:40</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-              <div className="h-[280px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-              <div className="h-[120px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-            </div>
-          </div>
-        )}
-      </div>
+      </PageShell>
 
       {/* Profile photo lightbox */}
       <AnimatePresence>
@@ -1180,10 +1159,6 @@ export default function ProfileV2() {
         </button>
       </div>
 
-      {/* Mobile bottom nav */}
-      <div className="md:hidden">
-        <BottomNav />
-      </div>
-    </div>
+    </>
   );
 }

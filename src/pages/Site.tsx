@@ -1,10 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, Check, Loader2, Search, X } from "lucide-react";
-import TopNav from "../components/TopNav";
-import MobileTopNav from "../components/MobileTopNav";
-import BottomNav from "../components/BottomNav";
-import { ExtraLinksProvider } from "../components/ExtraLinksContext";
 
 const coverImage = "https://design.joinleland.com/photography/lg/entrepreneur-woman-modern-office.jpg";
 
@@ -389,19 +385,8 @@ export default function Site() {
   }
 
   return (
-    <ExtraLinksProvider>
-      <div className="min-h-full bg-white">
-        {/* Mobile top nav */}
-        <div className="md:hidden">
-          <MobileTopNav />
-        </div>
-
-        {/* Desktop top nav */}
-        <div className="sticky top-0 z-30 hidden md:block">
-          <TopNav />
-        </div>
-
-        <main className="pt-14 pb-20 md:pt-0 md:pb-0">
+    <>
+        <div>
           {/* ── Hero ── */}
           <section
             className="relative flex min-h-[560px] flex-col justify-end overflow-hidden pb-4 pt-16 md:min-h-[600px] md:justify-center"
@@ -526,18 +511,12 @@ export default function Site() {
               ))}
             </div>
           </div>
-        </main>
-
-        {/* Mobile bottom nav */}
-        <div className="md:hidden">
-          <BottomNav />
         </div>
 
         {/* Search overlay */}
         <AnimatePresence>
           {overlayOpen && <SearchOverlay onClose={handleClose} />}
         </AnimatePresence>
-      </div>
-    </ExtraLinksProvider>
+    </>
   );
 }

@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 import TopNav from "./TopNav";
 import BottomNav from "./BottomNav";
 import MobileTopNav from "./MobileTopNav";
-import RightSidebar from "./RightSidebar";
+import PageShell from "./PageShell";
 import {
   RightSidebarProvider,
   useRightSidebarContent,
@@ -13,14 +13,31 @@ import {
 } from "./LeftSidebarContext";
 import { ExtraLinksProvider } from "./ExtraLinksContext";
 import { SubNavProvider, useSubNavContent } from "./SubNavContext";
+import {
+  LayoutVariantProvider,
+  useLayoutVariant,
+} from "./LayoutVariantContext";
+import {
+  ContentMaxWidthProvider,
+  useContentMaxWidth,
+} from "./ContentMaxWidthContext";
 
+/**
+ * Layout — nav chrome (TopNav, MobileTopNav, BottomNav) + context providers + <Outlet />
+ */
 export default function Layout() {
   return (
     <ExtraLinksProvider>
       <RightSidebarProvider>
         <LeftSidebarProvider>
           <SubNavProvider>
-            <LayoutInner />
+            <LayoutVariantProvider>
+              <ContentMaxWidthProvider>
+                <LayoutChrome>
+                  <Outlet />
+                </LayoutChrome>
+              </ContentMaxWidthProvider>
+            </LayoutVariantProvider>
           </SubNavProvider>
         </LeftSidebarProvider>
       </RightSidebarProvider>
@@ -28,12 +45,12 @@ export default function Layout() {
   );
 }
 
-function LayoutInner() {
-  const rightSidebar = useRightSidebarContent();
-  const leftSidebar = useLeftSidebarContent();
+/**
+ * LayoutChrome — renders the nav chrome around children.
+ * Used by both Layout (with raw Outlet) and ContextLayout (with PageShell + Outlet).
+ */
+function LayoutChrome({ children }: { children: React.ReactNode }) {
   const subNav = useSubNavContent();
-  const hasRightSidebar = rightSidebar != null;
-  const hasLeftSidebar = leftSidebar != null;
 
   return (
     <div className="min-h-full bg-white">
@@ -50,7 +67,7 @@ function LayoutInner() {
       {/* Sub-nav */}
       {subNav && (
         <div className="hidden border-b border-gray-stroke bg-white md:block">
-          <div className="mx-auto max-w-[1060px] px-6">
+          <div className="mx-auto max-w-[1280px] px-6">
             <div className="flex gap-1 overflow-x-auto py-2 scrollbar-none">
               {subNav}
             </div>
@@ -59,35 +76,36 @@ function LayoutInner() {
       )}
 
       {/* Main content area */}
-      <main
-        className={`relative z-0 pt-14 pb-20 md:pt-0 md:pb-0${
-          hasRightSidebar ? " xl:mr-[300px]" : ""
-        }`}
-      >
-        {hasLeftSidebar ? (
-          /* Left-sidebar layout: flex row, sidebar sits 40px left of feed */
-          <div className="mx-auto flex max-w-[1060px] items-start gap-10 px-6 py-6">
-            <aside className="hidden w-[300px] shrink-0 xl:block sticky top-5 self-start">
-              {leftSidebar}
-            </aside>
-            <div className="min-w-0 flex-1">
-              <Outlet />
-            </div>
-          </div>
-        ) : (
-          <div className="mx-auto max-w-[1060px] px-6 py-6">
-            <Outlet />
-          </div>
-        )}
+      <main className="relative z-0 pt-14 pb-20 md:pt-0 md:pb-0">
+        {children}
       </main>
-
-      {/* Right sidebar (xl+ only, when a page opts in) */}
-      <RightSidebar />
 
       {/* Mobile bottom nav */}
       <div className="md:hidden">
         <BottomNav />
       </div>
     </div>
+  );
+}
+
+/**
+ * ContextLayout — reads sidebar/variant contexts, wraps <Outlet /> in <PageShell>.
+ * Sits as a nested route element inside <Layout />.
+ */
+export function ContextLayout() {
+  const rightSidebar = useRightSidebarContent();
+  const leftSidebar = useLeftSidebarContent();
+  const variant = useLayoutVariant();
+  const contentMaxWidth = useContentMaxWidth();
+
+  return (
+    <PageShell
+      variant={variant}
+      leftSidebar={leftSidebar}
+      rightSidebar={rightSidebar}
+      contentMaxWidth={contentMaxWidth}
+    >
+      <Outlet />
+    </PageShell>
   );
 }

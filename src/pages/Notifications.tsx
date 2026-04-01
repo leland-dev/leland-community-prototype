@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
+import { useSetLayoutVariant } from "../components/LayoutVariantContext";
 import settingsIcon from "../assets/icons/settings.svg";
 import checkIcon from "../assets/icons/check.svg";
 
 export default function Notifications() {
+  useSetLayoutVariant("thin");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 

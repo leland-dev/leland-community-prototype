@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
+import { useSetContentMaxWidth } from "../components/ContentMaxWidthContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import eventImageSrc from "../assets/img/EventImage.avif";
 import lelandCompass from "../assets/leland-compass.svg";
@@ -2251,6 +2252,7 @@ export default function Home() {
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
   useSetLeftSidebar(<HomeSidebar onCreatePost={() => setComposeOpen(true)} />);
+  useSetContentMaxWidth(672);
   const [feedPosts, setFeedPosts] = useState<Post[]>(posts);
 
   const handlePost = (text: string) => {
