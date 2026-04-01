@@ -434,64 +434,65 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
     setShowReply(false);
   };
 
+  const hasThread = replies.length > 0 || showReply;
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex gap-3 pt-3"
-    >
-      {/* Avatar column — no running line; each reply draws its own L-connector */}
-      <div className="w-11 shrink-0">
-        <img
-          src={comment.avatar}
-          alt={comment.author}
-          className="h-11 w-11 rounded-full object-cover"
-          style={{ objectPosition: "50% 15%" }}
-        />
-      </div>
-
-      {/* Content + nested replies */}
-      <div className="min-w-0 flex-1 pb-1">
-        {/* Author + time */}
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-[17px] font-medium text-gray-dark">{comment.author}</span>
-          {comment.headline ? (
-            <span className="text-[15px] text-gray-light">· {comment.headline}</span>
-          ) : null}
-          <span className="text-[15px] text-gray-light">· {comment.time}</span>
+    <div>
+      {/* Main row: avatar (+ connecting line) + content */}
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex gap-3 pt-3"
+      >
+        {/* Avatar + vertical line — flex-1 ends at bottom of THIS row only */}
+        <div className="flex w-11 shrink-0 flex-col items-center">
+          <img
+            src={comment.avatar}
+            alt={comment.author}
+            className="h-11 w-11 shrink-0 rounded-full object-cover"
+            style={{ objectPosition: "50% 15%" }}
+          />
+          {hasThread ? <div className="mt-2 w-px flex-1 bg-gray-200" /> : null}
         </div>
 
-        {/* Comment text */}
-        <p className="mt-0.5 text-[17px] leading-[1.4] text-gray-dark">{comment.text}</p>
-
-        {/* Actions */}
-        <div className="mt-2 flex items-center gap-4">
-          <HeartButton liked={liked} count={comment.likes + (liked ? 1 : 0)} onToggle={() => setLiked(l => !l)} />
-          <button
-            onClick={() => setShowReply(s => !s)}
-            className="text-[13px] text-gray-light transition-colors hover:text-gray-dark"
-          >
-            Reply
-          </button>
-        </div>
-
-        {/* Reply input */}
-        {showReply ? <ReplyInput onPost={addReply} onCancel={() => setShowReply(false)} /> : null}
-
-        {/* Nested replies with L-shaped connectors */}
-        {replies.length > 0 ? (
-          <div className="mt-1">
-            {replies.map(r => (
-              <div key={r.id} className="relative">
-                {/* L-shaped connector: runs from parent avatar center, curves right to child avatar */}
-                <div className="absolute -left-[34px] top-0 h-[34px] w-[34px] rounded-bl-[10px] border-b border-l border-gray-200" />
-                <CommentItem comment={r} depth={depth + 1} />
-              </div>
-            ))}
+        {/* Content */}
+        <div className="min-w-0 flex-1 pb-2">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-[17px] font-medium text-gray-dark">{comment.author}</span>
+            {comment.headline ? (
+              <span className="text-[15px] text-gray-light">· {comment.headline}</span>
+            ) : null}
+            <span className="text-[15px] text-gray-light">· {comment.time}</span>
           </div>
-        ) : null}
-      </div>
-    </motion.div>
+          <p className="mt-0.5 text-[17px] leading-[1.4] text-gray-dark">{comment.text}</p>
+          <div className="mt-2 flex items-center gap-4">
+            <HeartButton liked={liked} count={comment.likes + (liked ? 1 : 0)} onToggle={() => setLiked(l => !l)} />
+            <button
+              onClick={() => setShowReply(s => !s)}
+              className="text-[13px] text-gray-light transition-colors hover:text-gray-dark"
+            >
+              Reply
+            </button>
+          </div>
+          {showReply ? <ReplyInput onPost={addReply} onCancel={() => setShowReply(false)} /> : null}
+        </div>
+      </motion.div>
+
+      {/* Replies sit OUTSIDE the flex row so the vertical line ends exactly where the L-connector begins */}
+      {replies.length > 0 ? (
+        <div className="pl-[22px]">
+          {replies.map(r => (
+            <div key={r.id} className="relative">
+              {/* L-connector: left-0 = parent avatar center (x=22 in outer div)
+                  w-[22px] reaches child avatar center (x=44)
+                  h-[34px] = child avatar vertical center (pt-3=12 + half-avatar=22) */}
+              <div className="absolute left-0 top-0 h-[34px] w-[22px] rounded-bl-[10px] border-b border-l border-gray-200" />
+              <CommentItem comment={r} depth={depth + 1} />
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
