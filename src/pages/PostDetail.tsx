@@ -324,7 +324,7 @@ function ReplyInput({ onPost, onCancel }: { onPost: (text: string) => void; onCa
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.85 }}
               onClick={() => { onPost(text.trim()); }}
-              className="absolute bottom-2 right-2 rounded-[8px] bg-gray-dark px-3 py-1 text-[13px] font-semibold text-white transition-colors hover:bg-[#222]"
+              className="absolute top-[2px] right-[2px] bottom-[2px] rounded-[6px] bg-gray-dark px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#222]"
             >
               Reply
             </motion.button>
@@ -611,7 +611,7 @@ export default function PostDetail() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.85 }}
                   onClick={submitComment}
-                  className="absolute bottom-2 right-2 rounded-[8px] bg-gray-dark px-3 py-1 text-[13px] font-semibold text-white transition-colors hover:bg-[#222]"
+                  className="absolute top-[2px] right-[2px] bottom-[2px] rounded-[6px] bg-gray-dark px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#222]"
                 >
                   Post
                 </motion.button>
