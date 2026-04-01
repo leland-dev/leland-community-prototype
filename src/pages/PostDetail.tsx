@@ -434,25 +434,20 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
     setShowReply(false);
   };
 
-  const hasThread = replies.length > 0 || showReply;
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       className="flex gap-3 pt-3"
     >
-      {/* Avatar column + vertical thread line */}
-      <div className="flex w-11 shrink-0 flex-col items-center">
+      {/* Avatar column — no running line; each reply draws its own L-connector */}
+      <div className="w-11 shrink-0">
         <img
           src={comment.avatar}
           alt={comment.author}
-          className="h-11 w-11 shrink-0 rounded-full object-cover"
+          className="h-11 w-11 rounded-full object-cover"
           style={{ objectPosition: "50% 15%" }}
         />
-        {hasThread ? (
-          <div className="mt-2 w-px flex-1 rounded-full bg-gray-200" />
-        ) : null}
       </div>
 
       {/* Content + nested replies */}
