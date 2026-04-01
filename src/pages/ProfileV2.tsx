@@ -61,7 +61,7 @@ export default function ProfileV2() {
   const [showCoachVideo, setShowCoachVideo] = useState(false);
   const [showSupercoach, setShowSupercoach] = useState(false);
   const [searchParams] = useSearchParams();
-  const [isCustomerProfile, setIsCustomerProfile] = useState(searchParams.get("type") === "customer");
+  const [isCustomerProfile, setIsCustomerProfile] = useState(searchParams.get("type") !== "coach");
   const [customerTab, setCustomerTab] = useState<"activity" | "about">("activity");
   const [sectionFilter, setSectionFilter] = useState("All");
   const [offeringsType, setOfferingsType] = useState("All");
@@ -300,7 +300,7 @@ export default function ProfileV2() {
                 <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
               </div>
             </div>
-            <div className="hidden items-center gap-2 pb-[72px] md:flex">
+            <div className="hidden items-center gap-2 pb-[94px] md:flex">
               {viewingOwnProfile ? (
                 <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
                   <img src={editIcon} alt="" className="h-[18px] w-[18px]" />

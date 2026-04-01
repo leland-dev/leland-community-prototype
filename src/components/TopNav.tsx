@@ -256,18 +256,6 @@ export default function TopNav() {
             )}
           </NavLink>
 
-          {/* Calendar */}
-          <NavLink to="/calendar" className="relative flex self-stretch items-center">
-            {({ isActive }) => (
-              <>
-                <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-gray-hover" : ""}`}>
-                  <img src={isActive ? calendarActive : calendarInactive} alt="Calendar" className="h-[20px] w-[20px]" />
-                </span>
-                {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
-              </>
-            )}
-          </NavLink>
-
           {/* Notifications */}
           <NavLink to="/notifications" className="relative flex self-stretch items-center">
             {({ isActive }) => (

@@ -15,7 +15,6 @@ const navItems = [
   { to: "/", active: homeActive, inactive: homeInactive, label: "Home" },
   { to: "/browse", active: browseActive, inactive: browseInactive, label: "Browse" },
   { to: "/search", active: searchActive, inactive: searchInactive, label: "Search" },
-  { to: "/calendar", active: calendarActive, inactive: calendarInactive, label: "Calendar" },
   { to: "/messages", active: chatActive, inactive: chatInactive, label: "Inbox" },
 ];
 
