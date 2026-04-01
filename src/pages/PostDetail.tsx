@@ -450,13 +450,13 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
       />
       <div className="min-w-0 flex-1">
         {/* Author + time */}
-        <div className="flex items-center gap-2">
-          <span className="text-[16px] font-medium leading-tight text-gray-dark">{comment.author}</span>
-          <span className="shrink-0 text-[15px] leading-tight text-gray-xlight">{comment.time}</span>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-[15px] font-semibold text-gray-dark">{comment.author}</span>
+          {comment.headline ? (
+            <span className="text-[13px] text-gray-light">· {comment.headline}</span>
+          ) : null}
+          <span className="text-[13px] text-gray-light">· {comment.time}</span>
         </div>
-        {comment.headline ? (
-          <p className="truncate text-[14px] leading-tight text-[#707070]">{comment.headline}</p>
-        ) : null}
 
         {/* Comment text */}
         <p className="mt-0.5 text-[17px] leading-[1.45] text-gray-dark">{comment.text}</p>
