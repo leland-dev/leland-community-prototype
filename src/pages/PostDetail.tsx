@@ -73,6 +73,16 @@ const COMMENT_SEEDS: CommentData[] = [
         time: "1h",
         text: "This. A 700 with a compelling narrative beats a 780 with a bland one every time.",
         likes: 19,
+        replies: [
+          {
+            id: 2011,
+            author: "Marcus Williams",
+            avatar: pic2,
+            time: "45m",
+            text: "Exactly — I've seen 760s get dinged at H/S/W while 680s with great stories get in. The number opens doors, the story walks through them.",
+            likes: 8,
+          },
+        ],
       },
       {
         id: 202,
@@ -133,14 +143,17 @@ const COMMENT_SEEDS: CommentData[] = [
   },
 ];
 
+function offsetIds(comment: CommentData, offset: number): CommentData {
+  return {
+    ...comment,
+    id: comment.id + offset,
+    replies: comment.replies?.map(r => offsetIds(r, offset)),
+  };
+}
+
 function getCommentsForPost(postId: number): CommentData[] {
-  // Rotate through seeds based on post id for variety
   const count = 3 + (postId % 3);
-  return COMMENT_SEEDS.slice(0, count).map(c => ({
-    ...c,
-    id: c.id + postId * 1000,
-    replies: c.replies?.map(r => ({ ...r, id: r.id + postId * 1000 })),
-  }));
+  return COMMENT_SEEDS.slice(0, count).map(c => offsetIds(c, postId * 1000));
 }
 
 // ─── Sub-components ───────────────────────────────────
