@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
+import { useSubNavStyle } from "./SubNavStyleContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import notificationsInactive from "../assets/icons/nav-icons/notifications-inactive.svg";
 import notificationsActive from "../assets/icons/nav-icons/notifications-active.svg";
@@ -68,6 +69,7 @@ export default function TopNav() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const { showSubNav, setShowSubNav } = useSubNavStyle();
 
   const profileRef = useRef<HTMLDivElement>(null);
   const browseRef = useRef<HTMLDivElement>(null);
@@ -352,6 +354,20 @@ export default function TopNav() {
                       >
                         <span
                           className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${showSearch ? "translate-x-5" : ""}`}
+                        />
+                      </button>
+                    </label>
+                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+                      Sub-nav
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={showSubNav}
+                        onClick={() => setShowSubNav(!showSubNav)}
+                        className={`relative h-6 w-11 rounded-full transition-colors ${showSubNav ? "bg-[#222222]" : "bg-[#d9d9d9]"}`}
+                      >
+                        <span
+                          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${showSubNav ? "translate-x-5" : ""}`}
                         />
                       </button>
                     </label>

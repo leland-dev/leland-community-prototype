@@ -1,44 +1,93 @@
 import { useState, useEffect, useContext } from "react";
 import { SubNavContext } from "../components/SubNavContext";
+import SubNavItem from "../components/SubNavItem";
 
-const subNavItems = [
-  "All",
-  "School Admissions",
-  "Career",
-  "Test Prep",
-  "AI",
-  "Business",
-  "Finance",
-  "Product",
-  "Technology",
-  "Health & Medicine",
-  "Law",
+const departments = [
+  {
+    label: "School Admissions",
+    subCategories: ["MBA", "Law School", "Medical School", "Grad School", "Undergraduate"],
+  },
+  {
+    label: "Test Prep",
+    subCategories: ["GMAT", "LSAT", "MCAT", "GRE", "SAT / ACT"],
+  },
+  {
+    label: "General",
+    subCategories: ["Career Coaching", "Executive Coaching", "Leadership Coaching", "Communication & Public Speaking", "Life Coaching"],
+  },
+  {
+    label: "Business",
+    subCategories: ["Management Consulting", "Marketing", "Sales", "Human Resources", "Customer Success", "Startup Careers"],
+  },
+  {
+    label: "Product",
+    subCategories: ["Product Management", "Design", "Product Marketing", "Technical Program Management"],
+  },
+  {
+    label: "Development",
+    subCategories: ["Software Engineering", "Data Science", "Cybersecurity", "Web Development", "AI & ML Engineering"],
+  },
+  {
+    label: "Finance & Accounting",
+    subCategories: ["Investment Banking", "Private Equity", "Venture Capital", "FP&A", "Real Estate", "Accounting"],
+  },
+  {
+    label: "Health & Medicine",
+    subCategories: ["Pre-Med", "Nursing", "Public Health", "Research", "Healthcare Admin"],
+  },
+  {
+    label: "Law & Public Policy",
+    subCategories: ["Law School Admissions", "Bar Prep", "Legal Career", "Government & Policy"],
+  },
+  {
+    label: "Arts, Media, and Entertainment",
+    subCategories: ["Journalism", "Film & TV", "Music", "Fashion", "Sports"],
+  },
+  {
+    label: "Science",
+    subCategories: ["Biotech & Life Sciences", "Environmental Science", "Research", "Engineering"],
+  },
+  {
+    label: "Education & Human Services",
+    subCategories: ["Teaching", "Nonprofit", "Social Work", "Higher Education"],
+  },
+  {
+    label: "AI",
+    subCategories: ["AI Automation & Agents", "Break Into AI Careers", "AI Strategy & Transformation", "AI for Finance"],
+  },
+  {
+    label: "Emerging Industries",
+    subCategories: ["Climate & Sustainability", "Web3 & Crypto", "Space", "Gaming"],
+  },
+  {
+    label: "After Hours",
+    subCategories: ["Personal Finance", "Side Projects", "Freelancing", "Creative Pursuits"],
+  },
 ];
 
 export default function Courses() {
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeDept, setActiveDept] = useState<string | null>(null);
+  const [activeSubCategory, setActiveSubCategory] = useState<string | null>(null);
   const { setContent } = useContext(SubNavContext);
 
   useEffect(() => {
     setContent(
       <>
-        {subNavItems.map((item) => (
-          <button
-            key={item}
-            onClick={() => setActiveCategory(item)}
-            className={`shrink-0 rounded-full px-4 py-1.5 text-[15px] font-medium whitespace-nowrap transition-colors ${
-              item === activeCategory
-                ? "bg-[#222222] text-white"
-                : "text-gray-dark hover:bg-gray-hover"
-            }`}
-          >
-            {item}
-          </button>
+        {departments.map((dept) => (
+          <SubNavItem
+            key={dept.label}
+            label={dept.label}
+            isActive={activeDept === dept.label}
+            onClick={() => { setActiveDept(dept.label); setActiveSubCategory(null); }}
+            subCategories={dept.subCategories}
+            onSubCategoryClick={(cat) => { setActiveDept(dept.label); setActiveSubCategory(cat); }}
+            activeSubCategory={activeDept === dept.label ? activeSubCategory : null}
+          />
         ))}
       </>
     );
     return () => setContent(null);
-  }, [activeCategory, setContent]);
+  }, [activeDept, activeSubCategory, setContent]);
 
   return (
     <div>
@@ -49,10 +98,7 @@ export default function Courses() {
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="rounded-lg border border-gray-stroke p-4"
-          >
+          <div key={i} className="rounded-lg border border-gray-stroke p-4">
             <div className="h-32 w-full animate-pulse rounded bg-gray-stroke" />
             <div className="mt-3 space-y-2">
               <div className="h-4 w-3/4 animate-pulse rounded bg-gray-stroke" />
