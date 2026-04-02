@@ -450,22 +450,25 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
   const hasThread = replies.length > 0 || showReply;
 
   return (
-    <div>
-      {/* Main row: avatar (+ connecting line) + content */}
+    <div className="relative">
+      {/* Absolute vertical line — starts below avatar, spans through ALL replies at this level */}
+      {hasThread ? (
+        <div className="absolute left-[21px] top-[64px] bottom-0 w-px bg-gray-200" />
+      ) : null}
+
+      {/* Main row: avatar + content */}
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex gap-3 pt-3"
       >
-        {/* Avatar + vertical line — flex-1 ends at bottom of THIS row only */}
-        <div className="flex w-11 shrink-0 flex-col items-center">
+        <div className="w-11 shrink-0">
           <img
             src={comment.avatar}
             alt={comment.author}
             className="h-11 w-11 shrink-0 rounded-full object-cover"
             style={{ objectPosition: "50% 15%" }}
           />
-          {hasThread ? <div className="mt-2 w-px flex-1 bg-gray-200" /> : null}
         </div>
 
         {/* Content */}
