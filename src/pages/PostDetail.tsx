@@ -480,13 +480,13 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
 
       {/* Replies sit OUTSIDE the flex row so the vertical line ends exactly where the L-connector begins */}
       {replies.length > 0 ? (
-        <div className="pl-[22px]">
+        <div className="pl-[44px]">
           {replies.map(r => (
             <div key={r.id} className="relative">
-              {/* L-connector: left-0 = parent avatar center (x=22 in outer div)
-                  w-[22px] reaches child avatar center (x=44)
+              {/* L-connector: -left-[22px] anchors to parent avatar center (x=22 in outer div)
+                  w-[18px] stops 4px before child avatar left edge
                   h-[34px] = child avatar vertical center (pt-3=12 + half-avatar=22) */}
-              <div className="absolute left-0 top-0 h-[34px] w-[22px] rounded-bl-[10px] border-b border-l border-gray-200" />
+              <div className="absolute -left-[22px] top-0 h-[34px] w-[18px] rounded-bl-[10px] border-b border-l border-gray-200" />
               <CommentItem comment={r} depth={depth + 1} />
             </div>
           ))}
