@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import PageShell from "../components/PageShell";
+import { posts, FeedPost } from "./Home";
 import arrowRoundIcon from "../assets/icons/arrow-round.svg";
+import lockIcon from "../assets/icons/lock.svg";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import pic1 from "../assets/profile photos/pic-1.png";
@@ -9,6 +12,9 @@ import pic3 from "../assets/profile photos/pic-3.png";
 import pic4 from "../assets/profile photos/pic-4.png";
 import pic5 from "../assets/profile photos/pic-5.png";
 import pic6 from "../assets/profile photos/pic-6.png";
+
+import orgGoogle from "../assets/org-logos/google.png";
+import orgHBS from "../assets/org-logos/hbs.png";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -116,6 +122,7 @@ export default function Dashboard() {
   const [pastOpen, setPastOpen] = useState(false);
   const [layoutVersion, setLayoutVersion] = useState<1 | 2 | 3>(1);
   const [contentFilter, setContentFilter] = useState("All");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "activity">("dashboard");
   const dashedBorder = { backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")` };
   const [adminOpen, setAdminOpen] = useState(false);
   const adminRef = useRef<HTMLDivElement>(null);
@@ -131,26 +138,45 @@ export default function Dashboard() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [adminOpen]);
 
-  // Build right sidebar based on layout version
+  // ─── V1: left sidebar with profile card ───────────────────────────────────
+
+  const profileCardSidebar = (
+    <div className="pt-6">
+      <Link to="/profile-v2" className="group block overflow-hidden rounded-2xl bg-white border border-gray-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+        {/* Banner */}
+        <div className="relative h-[56px] bg-gray-100">
+          <div className="absolute -bottom-10 left-4">
+            <img
+              src={profilePhoto}
+              alt="Jamie"
+              className="h-[80px] w-[80px] rounded-full border-[3px] border-white object-cover shadow-sm"
+            />
+          </div>
+        </div>
+        {/* Body */}
+        <div className="px-4 pb-5 pt-12">
+          <p className="text-[19px] font-medium leading-tight text-gray-dark">Jamie Allen</p>
+          <p className="mt-0.5 text-[15px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
+          <div className="mt-3 flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <img src={orgGoogle} alt="Google" className="h-[20px] w-[20px] shrink-0 rounded-[4px] object-contain" />
+              <span className="text-[14px] text-gray-light">Product Manager at Google</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <img src={orgHBS} alt="HBS" className="h-[20px] w-[20px] shrink-0 rounded-[4px] object-contain" />
+              <span className="text-[14px] text-gray-light">Studied at Harvard Business School</span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    </div>
+  );
+
+  // ─── V2/V3: right sidebar content (unchanged) ────────────────────────────
+
   let rightSidebarContent: React.ReactNode = undefined;
 
-  if (layoutVersion === 1) {
-    rightSidebarContent = (
-      <div className="pt-6">
-        <a href="#" className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
-          My Experts
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
-            <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </a>
-        <div className="mt-4 flex flex-col gap-4">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-[60px] rounded-lg bg-[#F5F5F5]" style={dashedBorder} />
-          ))}
-        </div>
-      </div>
-    );
-  } else if (layoutVersion === 2) {
+  if (layoutVersion === 2) {
     rightSidebarContent = (
       <div className="pt-6">
         <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
@@ -224,7 +250,7 @@ export default function Dashboard() {
         </div>
       </div>
     );
-  } else {
+  } else if (layoutVersion === 3) {
     rightSidebarContent = (
       <div className="pt-6">
         <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
@@ -252,33 +278,35 @@ export default function Dashboard() {
     );
   }
 
-  return (
+  // ─── V1 main content (tabbed) ─────────────────────────────────────────────
+
+  const v1Content = (
     <>
-      <PageShell rightSidebar={rightSidebarContent}>
-        <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">
-          Welcome back, Alex
-        </h1>
+      {/* Tab bar */}
+      <div className="flex flex-wrap gap-[6px]">
+        <button
+          onClick={() => setActiveTab("dashboard")}
+          className={`flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+            activeTab === "dashboard" ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
+          }`}
+        >
+          <img src={lockIcon} alt="" className="h-[14px] w-[14px]" />
+          Dashboard
+        </button>
+        <button
+          onClick={() => setActiveTab("activity")}
+          className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+            activeTab === "activity" ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
+          }`}
+        >
+          Activity
+        </button>
+      </div>
 
-        {/* My Goals */}
-        <section className="mt-8">
-          <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
-            My Goals
-          </h2>
-          <div className="scrollbar-hide -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
-            {[0, 1].map((i) => (
-              <div key={i} className="h-[100px] w-[200px] shrink-0 snap-start rounded-xl bg-[#F5F5F5]" style={dashedBorder} />
-            ))}
-            <button className="flex h-[100px] w-[200px] shrink-0 cursor-pointer snap-start items-center justify-center rounded-xl border-none bg-[#F5F5F5] transition-colors hover:bg-[#EEEEEE]" style={dashedBorder}>
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
-              </svg>
-            </button>
-          </div>
-        </section>
-
-        {/* Upcoming Sessions — V1 and V3 show inline */}
-        {(layoutVersion === 1 || layoutVersion === 3) && (
-          <section className="mt-12">
+      {activeTab === "dashboard" ? (
+        <>
+          {/* Upcoming Sessions */}
+          <section className="mt-8">
             <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
               Upcoming Sessions
             </h2>
@@ -348,36 +376,182 @@ export default function Dashboard() {
               )}
             </div>
           </section>
-        )}
 
-        {/* My Courses */}
-        <section className="mt-12">
-          <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
-            My Courses
-          </h2>
-          <div className="mt-3 flex flex-col gap-4">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="h-[160px] rounded-xl bg-[#F5F5F5]" style={dashedBorder} />
-            ))}
-          </div>
-        </section>
-
-        {/* My Experts — V2 and V3 show inline */}
-        {(layoutVersion === 2 || layoutVersion === 3) && (
+          {/* My Courses */}
           <section className="mt-12">
-            <a href="#" className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
-              My Experts
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
-                <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </a>
+            <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+              My Courses
+            </h2>
             <div className="mt-3 flex flex-col gap-4">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-[60px] rounded-lg bg-[#F5F5F5]" style={dashedBorder} />
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-[160px] rounded-xl bg-[#F5F5F5]" style={dashedBorder} />
               ))}
             </div>
           </section>
-        )}
+
+          {/* My Goals */}
+          <section className="mt-12">
+            <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+              My Goals
+            </h2>
+            <div className="scrollbar-hide -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
+              {[0, 1].map((i) => (
+                <div key={i} className="h-[100px] w-[200px] shrink-0 snap-start rounded-xl bg-[#F5F5F5]" style={dashedBorder} />
+              ))}
+              <button className="flex h-[100px] w-[200px] shrink-0 cursor-pointer snap-start items-center justify-center rounded-xl border-none bg-[#F5F5F5] transition-colors hover:bg-[#EEEEEE]" style={dashedBorder}>
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                  <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+          </section>
+        </>
+      ) : (
+        /* Activity tab */
+        <div className="mt-4 divide-y divide-gray-200">
+          {posts.map((post) => (
+            <FeedPost key={post.id} post={post} />
+          ))}
+        </div>
+      )}
+    </>
+  );
+
+  // ─── V2/V3 main content (unchanged) ───────────────────────────────────────
+
+  const v2v3Content = (
+    <>
+      <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">
+        Welcome back, Alex
+      </h1>
+
+      {/* My Goals */}
+      <section className="mt-8">
+        <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+          My Goals
+        </h2>
+        <div className="scrollbar-hide -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
+          {[0, 1].map((i) => (
+            <div key={i} className="h-[100px] w-[200px] shrink-0 snap-start rounded-xl bg-[#F5F5F5]" style={dashedBorder} />
+          ))}
+          <button className="flex h-[100px] w-[200px] shrink-0 cursor-pointer snap-start items-center justify-center rounded-xl border-none bg-[#F5F5F5] transition-colors hover:bg-[#EEEEEE]" style={dashedBorder}>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      {/* Upcoming Sessions — V3 shows inline */}
+      {layoutVersion === 3 && (
+        <section className="mt-12">
+          <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+            Upcoming Sessions
+          </h2>
+          <div className="mt-3">
+            <div className="flex flex-col gap-1">
+              {upcomingEvents.map((event, i) => (
+                <div key={i} className="flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
+                  <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[18px] font-medium text-gray-dark">{event.title}</p>
+                    <p className="text-[16px] text-[#707070]">
+                      {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center self-stretch">
+                    {event.isNow ? (
+                      <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                        Join
+                      </button>
+                    ) : (
+                      <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
+                        <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">
+                          {event.day}
+                        </div>
+                        <div className="w-full pt-0.5 pb-1 text-center text-[19px] font-medium leading-tight text-[#707070]">
+                          {event.date}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setPastOpen(!pastOpen)}
+              className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+            >
+              {pastOpen ? "Hide past sessions" : "View past sessions"}
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${pastOpen ? "rotate-180" : ""}`}>
+                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            {pastOpen && (
+              <div className="mt-2 flex flex-col gap-1">
+                {pastEvents.map((event, i) => (
+                  <div key={i} className="group flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
+                    <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover opacity-50 transition-opacity group-hover:opacity-100" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[18px] font-medium text-[#707070]">{event.title}</p>
+                      <p className="text-[16px] text-[#707070]">
+                        {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
+                      </p>
+                    </div>
+                    {event.hasRecording && (
+                      <div className="flex shrink-0 items-center self-stretch">
+                        <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
+                          <img src={arrowRoundIcon} alt="" className="h-5 w-5" />
+                          Rewatch
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* My Courses */}
+      <section className="mt-12">
+        <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+          My Courses
+        </h2>
+        <div className="mt-3 flex flex-col gap-4">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-[160px] rounded-xl bg-[#F5F5F5]" style={dashedBorder} />
+          ))}
+        </div>
+      </section>
+
+      {/* My Experts — V2 and V3 show inline */}
+      <section className="mt-12">
+        <a href="#" className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+          My Experts
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
+            <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </a>
+        <div className="mt-3 flex flex-col gap-4">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-[60px] rounded-lg bg-[#F5F5F5]" style={dashedBorder} />
+          ))}
+        </div>
+      </section>
+    </>
+  );
+
+  return (
+    <>
+      <PageShell
+        leftSidebar={layoutVersion === 1 ? profileCardSidebar : undefined}
+        rightSidebar={layoutVersion !== 1 ? rightSidebarContent : undefined}
+      >
+        {layoutVersion === 1 ? v1Content : v2v3Content}
       </PageShell>
 
       {/* ── Admin controls ── */}

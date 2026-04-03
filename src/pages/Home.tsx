@@ -1512,7 +1512,7 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
 
 // ─── Post component ───────────────────────────────────
 
-function FeedPost({ post }: { post: Post }) {
+export function FeedPost({ post }: { post: Post }) {
   const navigate = useNavigate();
 
   return (

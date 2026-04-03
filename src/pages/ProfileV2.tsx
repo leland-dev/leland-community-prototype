@@ -5,6 +5,11 @@ import { motion, AnimatePresence } from "motion/react";
 import PageShell from "../components/PageShell";
 import pic2 from "../assets/profile photos/pic-2.png";
 import pic6 from "../assets/profile photos/pic-6.png";
+import pic1 from "../assets/profile photos/pic-1.png";
+import pic3 from "../assets/profile photos/pic-3.png";
+import pic4 from "../assets/profile photos/pic-4.png";
+import pic5 from "../assets/profile photos/pic-5.png";
+import arrowRoundIcon from "../assets/icons/arrow-round.svg";
 import mailIcon from "../assets/icons/mail.svg";
 import checkIcon from "../assets/icons/check.svg";
 import editIcon from "../assets/icons/edit.svg";
@@ -48,6 +53,21 @@ const dashedBorderStyle = {
   backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")`,
 };
 
+const upcomingEvents = [
+  { day: "MON", date: 30, title: "1:1 Session with Jessica", dateTime: "March 30 at 2:00 PM", duration: "45 minutes", image: pic6, isNow: true },
+  { day: "MON", date: 30, title: "MBA Strategy Live", dateTime: "March 30 at 4:00 PM", duration: "45 minutes", image: pic3, isNow: false },
+  { day: "WED", date: 1, title: "Intro Call with Samantha", dateTime: "April 1 at 11:00 AM", duration: "30 minutes", image: pic1, isNow: false },
+  { day: "THU", date: 2, title: "GMAT Exam Prep Bootcamp", dateTime: "April 2 at 6:00 PM", duration: "60 minutes", image: pic4, isNow: false },
+];
+
+const pastEvents = [
+  { title: "1:1 Session with Marcus", dateTime: "March 28 at 10:00 AM", duration: "45 minutes", image: pic3, hasRecording: false },
+  { title: "Resume Review Workshop", dateTime: "March 27 at 3:00 PM", duration: "60 minutes", image: pic4, hasRecording: true },
+  { title: "1:1 Session with Jessica", dateTime: "March 26 at 2:00 PM", duration: "45 minutes", image: pic6, hasRecording: false },
+  { title: "MBA Admissions Strategy", dateTime: "March 25 at 1:00 PM", duration: "45 minutes", image: pic5, hasRecording: true },
+  { title: "Intro Call with David", dateTime: "March 24 at 11:00 AM", duration: "30 minutes", image: pic1, hasRecording: false },
+];
+
 export default function ProfileV2() {
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -63,6 +83,7 @@ export default function ProfileV2() {
   const [searchParams] = useSearchParams();
   const [isCustomerProfile, setIsCustomerProfile] = useState(searchParams.get("type") !== "coach");
   const [customerTab, setCustomerTab] = useState<"activity" | "about">("activity");
+  const [pastOpen, setPastOpen] = useState(false);
   const [sectionFilter, setSectionFilter] = useState("All");
   const [offeringsType, setOfferingsType] = useState("All");
   const [viewingOwnProfile, setViewingOwnProfile] = useState(false);
@@ -950,13 +971,17 @@ export default function ProfileV2() {
                   <button
                     key={tab}
                     onClick={() => setCustomerTab(tab)}
-                    className={`relative flex-1 cursor-pointer py-3 text-[17px] font-medium capitalize transition-colors ${
+                    className={`relative flex-1 cursor-pointer py-3 transition-colors ${
                       customerTab === tab
                         ? "text-gray-dark"
                         : "text-gray-light hover:text-gray-dark"
                     }`}
                   >
-                    {tab}
+                    <span className="text-[17px] font-medium">{tab === "activity" ? "Dashboard" : "Activity"}</span>
+                    <div className="mt-0.5 flex items-center justify-center gap-1 text-[14px] text-[#707070]">
+                      {tab === "activity" && <img src={lockIcon} alt="" className="h-[14px] w-[14px] opacity-50" />}
+                      {tab === "activity" ? "Only visible to you" : "Visible to everyone"}
+                    </div>
                     {customerTab === tab && (
                       <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#038561]" />
                     )}
@@ -966,6 +991,111 @@ export default function ProfileV2() {
 
               <div className="mt-6">
                 {customerTab === "activity" && (
+                  <>
+                    {/* Upcoming Sessions */}
+                    <section>
+                      <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+                        Upcoming Sessions
+                      </h2>
+                      <div className="mt-3">
+                        <div className="flex flex-col gap-1">
+                          {upcomingEvents.map((event, i) => (
+                            <div key={i} className="flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
+                              <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover" />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-[18px] font-medium text-gray-dark">{event.title}</p>
+                                <p className="text-[16px] text-[#707070]">
+                                  {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
+                                </p>
+                              </div>
+                              <div className="flex shrink-0 items-center self-stretch">
+                                {event.isNow ? (
+                                  <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                                    Join
+                                  </button>
+                                ) : (
+                                  <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
+                                    <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">
+                                      {event.day}
+                                    </div>
+                                    <div className="w-full pt-0.5 pb-1 text-center text-[19px] font-medium leading-tight text-[#707070]">
+                                      {event.date}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <button
+                          onClick={() => setPastOpen(!pastOpen)}
+                          className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                        >
+                          {pastOpen ? "Hide past sessions" : "View past sessions"}
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${pastOpen ? "rotate-180" : ""}`}>
+                            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+
+                        {pastOpen && (
+                          <div className="mt-2 flex flex-col gap-1">
+                            {pastEvents.map((event, i) => (
+                              <div key={i} className="group flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
+                                <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover opacity-50 transition-opacity group-hover:opacity-100" />
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-[18px] font-medium text-[#707070]">{event.title}</p>
+                                  <p className="text-[16px] text-[#707070]">
+                                    {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
+                                  </p>
+                                </div>
+                                {event.hasRecording && (
+                                  <div className="flex shrink-0 items-center self-stretch">
+                                    <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
+                                      <img src={arrowRoundIcon} alt="" className="h-5 w-5" />
+                                      Rewatch
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </section>
+
+                    {/* My Courses */}
+                    <section className="mt-12">
+                      <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+                        My Courses
+                      </h2>
+                      <div className="mt-3 flex flex-col gap-4">
+                        {[0, 1, 2].map((i) => (
+                          <div key={i} className="h-[160px] rounded-xl bg-[#F5F5F5]" style={dashedBorderStyle} />
+                        ))}
+                      </div>
+                    </section>
+
+                    {/* My Goals */}
+                    <section className="mt-12">
+                      <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+                        My Goals
+                      </h2>
+                      <div className="scrollbar-hide -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
+                        {[0, 1].map((i) => (
+                          <div key={i} className="h-[100px] w-[200px] shrink-0 snap-start rounded-xl bg-[#F5F5F5]" style={dashedBorderStyle} />
+                        ))}
+                        <button className="flex h-[100px] w-[200px] shrink-0 cursor-pointer snap-start items-center justify-center rounded-xl border-none bg-[#F5F5F5] transition-colors hover:bg-[#EEEEEE]" style={dashedBorderStyle}>
+                          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
+                          </svg>
+                        </button>
+                      </div>
+                    </section>
+                  </>
+                )}
+
+                {customerTab === "about" && (
                   <div className="flex flex-col gap-4">
                     {[...Array(10)].map((_, i) => (
                       <div key={i} className="flex gap-3">
@@ -975,21 +1105,10 @@ export default function ProfileV2() {
                     ))}
                   </div>
                 )}
-
-                {customerTab === "about" && (
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-3 text-[16px] font-medium text-[#707070]">
-                      <img src={lockIcon} alt="" className="h-[20px] w-[20px] opacity-50" />
-                      <span>Only visible to experts you work with</span>
-                    </div>
-                    <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-                    <div className="h-[120px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-                    <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-                  </div>
-                )}
               </div>
             </>
           )}
+          <div className="h-[120px]" />
         </div>
       </PageShell>
 
