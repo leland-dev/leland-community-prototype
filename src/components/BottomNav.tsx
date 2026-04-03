@@ -8,6 +8,7 @@ import searchActive from "../assets/icons/nav-icons/search-active.svg";
 import searchInactive from "../assets/icons/nav-icons/search-inactive.svg";
 import chatActive from "../assets/icons/nav-icons/chat-active.svg";
 import chatInactive from "../assets/icons/nav-icons/chat-inactive.svg";
+import profilePhoto from "../assets/profile photos/profile photo.png";
 
 const navItems = [
   { to: "/", active: homeActive, inactive: homeInactive, label: "Home" },
@@ -46,6 +47,29 @@ export default function BottomNav() {
             </NavLink>
           </li>
         ))}
+        <li>
+          <NavLink
+            to="/profile-v2"
+            className={({ isActive }) =>
+              `flex flex-col items-center gap-1 rounded-lg px-3 py-3 transition-colors ${
+                isActive
+                  ? "text-gray-dark"
+                  : "text-gray-light active:bg-gray-hover"
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <img
+                  src={profilePhoto}
+                  alt="Profile"
+                  className={`h-[22px] w-[22px] rounded-full object-cover ${isActive ? "ring-2 ring-gray-dark" : ""}`}
+                />
+                <span className="text-[12px] font-medium leading-tight">Profile</span>
+              </>
+            )}
+          </NavLink>
+        </li>
       </ul>
     </nav>
   );
