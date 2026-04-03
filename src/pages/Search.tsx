@@ -12,7 +12,7 @@ export default function Search() {
       </p>
 
       {/* Search input */}
-      <div className="relative mt-6">
+      <div className="relative mt-8">
         <SearchIcon
           size={20}
           className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-xlight"

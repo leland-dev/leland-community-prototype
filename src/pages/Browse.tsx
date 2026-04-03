@@ -31,7 +31,7 @@ export default function Browse() {
         Explore categories across Leland&rsquo;s offerings.
       </p>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {categories.map(({ name, icon: Icon, color }) => (
           <button
             key={name}

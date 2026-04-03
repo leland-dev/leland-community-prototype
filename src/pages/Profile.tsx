@@ -308,7 +308,7 @@ export default function Profile() {
         )}
 
         {/* Tabs */}
-        <div className="sticky top-14 z-10 mt-6 flex border-b border-gray-stroke bg-white md:top-0">
+        <div className="sticky top-14 z-10 mt-8 flex border-b border-gray-stroke bg-white md:top-0">
           {(isVerifiedExpert
             ? (["activity", "offerings", "reviews", "about"] as const)
             : (["activity", "about"] as const)

@@ -194,7 +194,7 @@ export default function Calendar() {
           Everything on your schedule, between 1:1 coaching sessions, events, and courses.
         </p>
 
-        <div className="mt-6 border-t border-gray-stroke">
+        <div className="mt-8 border-t border-gray-stroke">
             {/* Event list */}
             <div className="mt-2 flex flex-col gap-1">
               {upcomingEvents.map((event, i) => (

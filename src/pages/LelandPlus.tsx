@@ -96,7 +96,7 @@ export default function LelandPlus() {
         Exclusive perks and content for Leland+ members.
       </p>
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-8 space-y-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="rounded-lg border border-gray-stroke p-5">
             <div className="flex items-center gap-3">

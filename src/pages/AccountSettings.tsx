@@ -336,7 +336,7 @@ export default function AccountSettings() {
             </>
           ) : (
             /* Placeholder boxes for other tabs */
-            <div className="mt-6 flex flex-col gap-4">
+            <div className="mt-8 flex flex-col gap-4">
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}

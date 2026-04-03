@@ -329,51 +329,48 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
 
       {/* Zone 1: Header */}
       <div className="flex flex-col gap-5 bg-white p-4 sm:p-5 md:flex-row md:items-center md:gap-5">
-        {/* On mobile: image + title side-by-side. On desktop: image and content are separate flex children. */}
-        <div className="flex items-start gap-5 md:contents">
+        {/* <428px: stacked. 428px+: side-by-side. md+: contents (desktop flex children). */}
+        <div className="flex flex-col gap-3 min-[428px]:flex-row min-[428px]:items-start md:contents">
           {/* Thumbnail */}
           <img
             src={course.image}
             alt=""
-            className="h-16 w-[122px] shrink-0 rounded-lg object-cover sm:h-20 sm:w-[152px] md:h-[100px] md:w-[190px]"
+            className="h-auto w-[122px] shrink-0 rounded-lg object-cover min-[428px]:h-16 md:h-[100px] md:w-[190px]"
           />
           {/* Title group (mobile/tablet: inline with image) */}
           <div className="flex min-w-0 flex-1 flex-col gap-1 md:flex-[1_0_0] md:gap-4">
             <div>
               <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Live cohort</p>
-              <p className="mt-1 text-[20px] font-medium leading-[1.2] text-gray-dark md:text-[24px]">{course.title}</p>
+              <p className="mt-1 text-[20px] font-medium leading-[1.2] text-gray-dark min-[428px]:text-[24px]">{course.title}</p>
             </div>
             {/* Buttons: desktop only (inside content column) */}
             <div className="hidden flex-wrap gap-2 md:flex">{actionButtons}</div>
           </div>
         </div>
         {/* Buttons: mobile/tablet only (full-width row below image+title) */}
-        <div className="flex flex-wrap gap-2 md:hidden">{actionButtons}</div>
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 sm:-mx-5 sm:px-5 md:hidden">{actionButtons}</div>
       </div>
 
       {/* Zone 2: Metadata strip */}
-      <div className="flex items-center gap-6 border-t border-gray-stroke bg-white px-4 py-3 sm:px-5 sm:py-4">
-        {/* Dates */}
+      <div className="flex items-center gap-6 overflow-x-auto border-b border-gray-stroke bg-white px-4 pb-4 scroll-pr-4 sm:px-5 sm:pb-5 sm:scroll-pr-5">
+        {/* Instructors */}
         <div className="flex flex-col gap-0.5 md:flex-row md:items-center md:gap-2">
-          <span className="text-[16px] font-medium leading-[1.2] text-gray-dark">{course.cohortDateLabel}:</span>
-          <span className="text-[16px] leading-[1.2] text-gray-light">{course.cohortDates}</span>
+          <span className="text-[16px] font-medium leading-[1.2] text-gray-light">Instructors:</span>
+          <a href="#" className="text-[16px] leading-[1.2] text-gray-light underline-offset-2 hover:underline">{course.instructor.name}</a>
         </div>
         {/* Divider */}
         <div className="w-px self-stretch bg-gray-stroke" />
-        {/* Instructors */}
+        {/* Dates */}
         <div className="flex flex-col gap-0.5 md:flex-row md:items-center md:gap-2">
-          <span className="text-[16px] font-medium leading-[1.2] text-gray-dark">Instructors:</span>
-          <div className="flex items-center gap-1.5">
-            <img src={course.instructor.avatar} alt="" className="h-4 w-4 shrink-0 rounded-full object-cover" />
-            <span className="text-[16px] leading-[1.2] text-gray-light">{course.instructor.name}</span>
-          </div>
+          <span className="text-[16px] font-medium leading-[1.2] text-gray-light">{course.cohortDateLabel}:</span>
+          <span className="text-[16px] leading-[1.2] text-gray-light">{course.cohortDates}</span>
         </div>
       </div>
 
       {/* Zone 3: Sessions accordion toggle */}
       <button
         onClick={() => setSessionsOpen(!sessionsOpen)}
-        className="flex w-full cursor-pointer items-center gap-3 bg-gray-hover px-4 py-3 sm:px-5"
+        className="flex w-full cursor-pointer items-center gap-3 bg-white px-4 py-3 sm:px-5"
       >
         <span className="flex-1 text-left text-[16px] font-medium text-gray-dark">
           {course.sessions.length} Sessions
@@ -447,16 +444,39 @@ function SelfPacedCourseCard({ course }: { course: SelfPacedCourse }) {
 
 function SuggestedCourseCard({ course }: { course: (typeof suggestedCourses)[0] }) {
   return (
-    <div className="group flex cursor-pointer items-center gap-3">
-      <div className="w-[108px] shrink-0 overflow-hidden rounded-[6px]">
-        <img src={course.image} alt="" className="aspect-[120/63] w-full object-cover" />
+    <div className="group flex cursor-pointer items-center gap-4">
+      {/* Thumbnail: 143×75 fixed, rounded-lg */}
+      <div className="h-[75px] w-[143px] shrink-0 overflow-hidden rounded-lg">
+        <img src={course.image} alt="" className="h-full w-full object-cover" />
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="line-clamp-2 text-[15px] font-medium leading-snug text-gray-dark transition-opacity group-hover:opacity-70">
+      {/* Content */}
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        {/* Eyebrow */}
+        <p className="text-[12px] font-medium uppercase leading-[1.2] tracking-[1.2px] text-[#707070]">
+          {course.type}
+        </p>
+        {/* Title */}
+        <p className="overflow-hidden text-ellipsis text-[16px] font-medium leading-[1.2] text-gray-dark transition-opacity group-hover:opacity-70" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
           {course.title}
         </p>
-        <p className="mt-0.5 text-[13px] text-[#707070]">{course.type} · {course.duration}</p>
-        {course.enrolledCount && <p className="text-[13px] text-[#707070]">{course.enrolledCount}</p>}
+        {/* Avatars + metadata */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {course.enrolledCount && (
+            <>
+              {/* Stacked mini-avatars */}
+              <div className="flex items-center pr-1.5">
+                {[pic1, pic2, pic3].map((avatar, i) => (
+                  <div key={i} className="-mr-1.5 h-3.5 w-3.5 shrink-0 overflow-hidden rounded-full border border-white">
+                    <img src={avatar} alt="" className="h-full w-full object-cover" />
+                  </div>
+                ))}
+              </div>
+              <span className="text-[14px] leading-[1.2] text-[#707070]">{course.enrolledCount}</span>
+              <span className="text-[14px] leading-[1.2] text-[#707070]">·</span>
+            </>
+          )}
+          <span className="text-[14px] leading-[1.2] text-[#707070]">{course.duration}</span>
+        </div>
       </div>
     </div>
   );
@@ -509,7 +529,7 @@ export default function MyCourses() {
       </div>
 
       {/* Live cohort cards */}
-      <div className="mt-6 flex flex-col gap-4">
+      <div className="mt-8 flex flex-col gap-8">
         {visibleCourses
           .filter((c) => c.type === "live")
           .map((course) => <LiveCourseCard key={course.id} course={course as LiveCourse} />)}
@@ -517,7 +537,7 @@ export default function MyCourses() {
 
       {/* Self-paced courses */}
       {visibleCourses.some((c) => c.type === "selfPaced") && (
-        <div className={`border-t border-gray-stroke/50 ${visibleCourses.some((c) => c.type === "live") ? "mt-6" : "mt-0"}`}>
+        <div className={`border-t border-gray-stroke/50 ${visibleCourses.some((c) => c.type === "live") ? "mt-8" : "mt-0"}`}>
           {visibleCourses
             .filter((c) => c.type === "selfPaced")
             .map((course) => <SelfPacedCourseCard key={course.id} course={course as SelfPacedCourse} />)}

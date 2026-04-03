@@ -96,7 +96,7 @@ export default function Events() {
         Live sessions, workshops, and Q&amp;As from top coaches.
       </p>
 
-      <div className="mt-6 space-y-3">
+      <div className="mt-8 space-y-3">
         {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="flex items-center gap-4 rounded-lg border border-gray-stroke p-4">
             <div className="flex h-14 w-14 shrink-0 animate-pulse flex-col items-center justify-center rounded-lg bg-gray-stroke" />

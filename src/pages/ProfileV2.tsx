@@ -945,7 +945,7 @@ export default function ProfileV2() {
           {/* Customer profile tabs */}
           {isCustomerProfile && (
             <>
-              <div className="sticky top-0 z-10 mt-6 flex border-b border-gray-stroke bg-white">
+              <div className="sticky top-0 z-10 mt-8 flex border-b border-gray-stroke bg-white">
                 {(["activity", "about"] as const).map((tab) => (
                   <button
                     key={tab}

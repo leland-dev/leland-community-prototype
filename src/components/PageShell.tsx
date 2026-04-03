@@ -17,7 +17,7 @@ export default function PageShell({
 }: PageShellProps) {
   if (variant === "thin") {
     return (
-      <div className="mx-auto max-w-[620px] px-6 py-6">
+      <div className="mx-auto max-w-[620px] px-4 py-8 sm:px-6">
         {children}
       </div>
     );
@@ -28,7 +28,7 @@ export default function PageShell({
   const hasBoth = hasLeft && hasRight;
 
   return (
-    <div className="mx-auto max-w-[1280px] px-6 py-6">
+    <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
       <div
         className={contentMaxWidth
           ? "flex items-start justify-center"

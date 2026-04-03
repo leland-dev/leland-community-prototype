@@ -7,7 +7,7 @@ export default function Messaging() {
       </p>
 
       {/* Search conversations */}
-      <div className="mt-6">
+      <div className="mt-8">
         <input
           type="text"
           placeholder="Search messages..."
