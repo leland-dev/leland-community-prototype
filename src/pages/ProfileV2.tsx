@@ -977,7 +977,7 @@ export default function ProfileV2() {
                         : "text-gray-light hover:text-gray-dark"
                     }`}
                   >
-                    <span className="text-[17px] font-medium">{tab === "activity" ? "Dashboard" : "Activity"}</span>
+                    <span className="text-[17px] font-medium">{tab === "activity" ? "My Learning" : "Activity"}</span>
                     <div className="mt-0.5 flex items-center justify-center gap-1 text-[14px] text-[#707070]">
                       {tab === "activity" && <img src={lockIcon} alt="" className="h-[14px] w-[14px] opacity-50" />}
                       {tab === "activity" ? "Only visible to you" : "Visible to everyone"}
