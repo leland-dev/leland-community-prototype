@@ -189,20 +189,6 @@ export default function TopNav() {
               </NavLink>
             ))}
 
-            {/* Dashboard */}
-            <div className="relative flex self-stretch items-center">
-              <NavLink to="/dashboard">
-                {({ isActive }) => (
-                  <>
-                    <span className={`flex items-center rounded-lg px-3 py-2 text-[18px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-gray-hover" : ""}`}>
-                      Dashboard
-                    </span>
-                    {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
-                  </>
-                )}
-              </NavLink>
-            </div>
-
             {/* Search */}
             {showSearch && <div className="relative flex self-stretch items-center">
               <form
