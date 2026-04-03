@@ -22,10 +22,10 @@ export default function VersionToggle() {
   }, [open]);
 
   return (
-    <div ref={ref} className="fixed bottom-5 right-5 z-[9999]">
+    <div ref={ref} className="fixed bottom-24 right-4 z-[9999] md:bottom-6 md:right-6">
       {/* Popover menu */}
       {open ? (
-        <div className="absolute bottom-12 right-0 w-[200px] rounded-xl border border-gray-200 bg-white shadow-xl overflow-hidden">
+        <div className="absolute bottom-14 right-0 w-[200px] rounded-xl border border-gray-200 bg-white shadow-xl overflow-hidden">
           <div className="px-3 py-2 border-b border-gray-100">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Prototype</p>
           </div>
@@ -55,22 +55,17 @@ export default function VersionToggle() {
       <button
         onClick={() => setOpen((o) => !o)}
         title="Switch prototype version"
-        className={`flex h-9 w-9 items-center justify-center rounded-full shadow-lg border transition-all ${
-          open
-            ? "bg-gray-900 border-gray-900 text-white"
-            : "bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-800"
-        }`}
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 md:bg-[#222222]/5 md:shadow-none md:border-0 transition-colors hover:bg-gray-50 md:hover:bg-[#222222]/[0.08]"
       >
-        {/* Three vertical dots */}
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          <circle cx="8" cy="3" r="1.4" />
-          <circle cx="8" cy="8" r="1.4" />
-          <circle cx="8" cy="13" r="1.4" />
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="3" cy="8" r="1.5" fill="#707070" />
+          <circle cx="8" cy="8" r="1.5" fill="#707070" />
+          <circle cx="13" cy="8" r="1.5" fill="#707070" />
         </svg>
       </button>
 
       {/* Active version badge */}
-      <span className="pointer-events-none absolute -top-1.5 -left-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 text-[9px] font-bold text-white">
+      <span className="pointer-events-none absolute -top-1.5 -left-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#222222] text-[10px] font-bold text-white">
         {version}
       </span>
     </div>
