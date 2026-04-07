@@ -6,6 +6,7 @@ import event2 from "../assets/placeholder images/placeholder-event-02.png";
 import event3 from "../assets/placeholder images/placeholder-event-03.png";
 import eventImage from "../assets/img/EventImage.avif";
 import playIcon from "../assets/icons/play.svg";
+import playVideoIcon from "../assets/icons/play-video.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic2 from "../assets/profile photos/pic-2.png";
 import pic3 from "../assets/profile photos/pic-3.png";
@@ -558,15 +559,19 @@ function SuggestedCourseCard({ course }: { course: (typeof suggestedCourses)[0] 
         <p className="overflow-hidden text-ellipsis text-[16px] font-medium leading-[1.2] text-gray-dark transition-opacity group-hover:opacity-70" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
           {course.title}
         </p>
-        {/* Facepile + type · duration */}
+        {/* Icon + type · duration */}
         <div className="flex items-center gap-1.5">
-          <div className="flex items-center pr-1.5">
-            {[pic1, pic2, pic3].map((avatar, i) => (
-              <div key={i} className="-mr-1.5 h-3.5 w-3.5 shrink-0 overflow-hidden rounded-full border border-white">
-                <img src={avatar} alt="" className="h-full w-full object-cover" />
-              </div>
-            ))}
-          </div>
+          {course.type === "Self-paced" ? (
+            <img src={playVideoIcon} alt="" className="h-[18px] w-[18px] shrink-0 opacity-50" />
+          ) : (
+            <div className="flex items-center pr-1.5">
+              {[pic1, pic2, pic3].map((avatar, i) => (
+                <div key={i} className="-mr-1.5 h-3.5 w-3.5 shrink-0 overflow-hidden rounded-full border border-white">
+                  <img src={avatar} alt="" className="h-full w-full object-cover" />
+                </div>
+              ))}
+            </div>
+          )}
           <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[14px] leading-[1.2] text-[#707070]">
             {course.type} · {course.duration}
           </span>
