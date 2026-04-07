@@ -328,10 +328,9 @@ function SlotOption({ slot, isNext }: { slot: TimeSlot; isNext: boolean }) {
   const state = getSessionState(slot);
   const isLive = state === "live";
   const isRecording = state === "past-recording";
-
   return (
     <div className={`flex w-full items-center justify-between rounded-lg px-4 py-4 transition-colors ${
-      isLive ? "cursor-pointer bg-[#296cef] hover:bg-[#3b7dfd]" : isRecording ? "cursor-pointer bg-gray-hover hover:bg-[#ebebeb]" : "border border-gray-stroke"
+      isLive ? "cursor-pointer bg-[#296cef] hover:bg-[#3b7dfd]" : isRecording ? "cursor-pointer bg-gray-hover hover:bg-[#ebebeb]" : "bg-gray-hover"
     }`}>
       <span className={`text-[16px] leading-[1.2] ${isLive ? "text-[#f5f5f5]" : "text-gray-light"}`}>
         {formatTime(slot.startTime)}
