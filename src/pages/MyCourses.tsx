@@ -297,10 +297,8 @@ function SessionCTA({ slot, isNext }: { slot: TimeSlot; isNext: boolean }) {
   if (state === "past-recording") {
     return (
       <a href={slot.recordingUrl} className="flex shrink-0 items-center gap-1.5 text-[16px] font-medium text-gray-dark">
-        View recording
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="-rotate-90 shrink-0">
-          <path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <img src={playVideoIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
+        Watch
       </a>
     );
   }
