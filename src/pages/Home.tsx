@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
+import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { useSetContentMaxWidth } from "../components/ContentMaxWidthContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import eventImageSrc from "../assets/img/EventImage.avif";
@@ -2166,6 +2167,119 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Right Sidebar ─────────────────────────────────────
+
+const HAPPENING_NOW = [
+  {
+    id: 1,
+    title: "MBA Strategy Live",
+    thumbnail: pic6,
+    status: "live" as const,
+    detail: "125 watching",
+  },
+  {
+    id: 2,
+    title: "Tech Consulting Workshop",
+    thumbnail: pic9,
+    status: "soon" as const,
+    detail: "Starts 4:30 PM · 89 registered",
+  },
+  {
+    id: 3,
+    title: "Interview Prep Session",
+    thumbnail: pic11,
+    status: "upcoming" as const,
+    detail: "Tomorrow, 2:00 PM · 54 registered",
+  },
+];
+
+const TRENDING_TOPICS = [
+  { id: 1, tag: "MBB Recruitment", posts: 234 },
+  { id: 2, tag: "Case Interviews", posts: 189 },
+  { id: 3, tag: "MBA Essays", posts: 156 },
+];
+
+function HomeRightSidebar() {
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Happening Now */}
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+            Happening Now
+          </span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-gray-400">
+            <path d="M5.5 3L9 7L5.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div className="flex flex-col gap-3">
+          {HAPPENING_NOW.map(event => (
+            <button
+              key={event.id}
+              className="flex items-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-gray-50"
+            >
+              <div className="relative h-11 w-16 shrink-0 overflow-hidden rounded-lg">
+                <img
+                  src={event.thumbnail}
+                  alt={event.title}
+                  className="h-full w-full object-cover"
+                  style={{ objectPosition: "50% 15%" }}
+                />
+                {event.status === "live" && (
+                  <div className="absolute bottom-1 left-1 rounded bg-red-500 px-1 py-0.5 text-[9px] font-bold uppercase leading-none text-white">
+                    Live
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-[14px] font-medium text-gray-dark">{event.title}</p>
+                {event.status === "live" ? (
+                  <p className="text-[12px] text-red-500">
+                    Live now · {event.detail}
+                  </p>
+                ) : (
+                  <p className="text-[12px] text-gray-light">{event.detail}</p>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-gray-100" />
+
+      {/* Trending Topics */}
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+            Trending Topics
+          </span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-gray-400">
+            <path d="M5.5 3L9 7L5.5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div className="flex flex-col gap-1">
+          {TRENDING_TOPICS.map(topic => (
+            <button
+              key={topic.id}
+              className="flex items-center gap-3 rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-gray-50"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100">
+                <span className="text-[13px] font-semibold text-gray-500">#</span>
+              </div>
+              <div>
+                <p className="text-[14px] font-medium text-gray-dark">{topic.tag}</p>
+                <p className="text-[12px] text-gray-light">{topic.posts} posts today</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Left Sidebar ──────────────────────────────────────
 
 function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
@@ -2252,6 +2366,7 @@ export default function Home() {
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
   useSetLeftSidebar(<HomeSidebar onCreatePost={() => setComposeOpen(true)} />);
+  useSetRightSidebar(<HomeRightSidebar />);
   useSetContentMaxWidth(672);
   const [feedPosts, setFeedPosts] = useState<Post[]>(posts);
 
