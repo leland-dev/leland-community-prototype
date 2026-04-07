@@ -12,7 +12,6 @@ import pic3 from "../assets/profile photos/pic-3.png";
 import pic4 from "../assets/profile photos/pic-4.png";
 import pic5 from "../assets/profile photos/pic-5.png";
 import pic6 from "../assets/profile photos/pic-6.png";
-import pic7 from "../assets/profile photos/pic-7.png";
 
 // ─── Figma icon assets ────────────────────────────────────────────────────────
 const figmaSyllabusIcon = "https://www.figma.com/api/mcp/asset/6eb7cc2d-90b9-49e5-9d0b-541c668a79f0";
@@ -21,17 +20,22 @@ const figmaSlack1 = "https://www.figma.com/api/mcp/asset/c66c77e8-363b-4742-87f2
 const figmaSlack2 = "https://www.figma.com/api/mcp/asset/9453f0d5-c53a-4128-b604-1ff16db95a9f";
 const figmaSlack3 = "https://www.figma.com/api/mcp/asset/a51db8bb-c981-4b77-a5dc-761d347a7019";
 const figmaSlack4 = "https://www.figma.com/api/mcp/asset/d6fb8824-812f-4b5c-8d90-5b56cb53286a";
-const figmaVideoIcon = "https://www.figma.com/api/mcp/asset/38cad94b-b535-4e09-9a67-a935b180f7ed";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
+
+type TimeSlot = {
+  id: number;
+  startTime: Date;
+  endTime: Date;
+  joinUrl?: string;
+  recordingUrl?: string;
+};
 
 type Session = {
   id: number;
   title: string;
-  startTime: Date;
-  endTime: Date;
   duration: string;
-  recordingUrl?: string;
+  slots: [TimeSlot, TimeSlot]; // [morning, evening]
 };
 
 type LiveCourse = {
@@ -43,7 +47,7 @@ type LiveCourse = {
   registrants: string[];
   sessions: Session[];
   image: string;
-  instructor: { name: string; avatar: string };
+  cohortSelected?: boolean;
 };
 
 type SelfPacedCourse = {
@@ -59,21 +63,21 @@ type EnrolledCourse = LiveCourse | SelfPacedCourse;
 
 type SessionState = "past-recording" | "past-pending" | "live" | "soon" | "future";
 
-function getSessionState(session: Session): SessionState {
+function getSessionState(slot: TimeSlot): SessionState {
   const now = new Date();
-  if (session.endTime < now) return session.recordingUrl ? "past-recording" : "past-pending";
-  if (session.startTime.getTime() - now.getTime() <= 30 * 60 * 1000) return "live";
-  if (session.startTime.getTime() - now.getTime() <= 7 * 24 * 60 * 60 * 1000) return "soon";
+  if (slot.endTime < now) return slot.recordingUrl ? "past-recording" : "past-pending";
+  if (slot.startTime.getTime() - now.getTime() <= 30 * 60 * 1000) return "live";
+  if (slot.startTime.getTime() - now.getTime() <= 7 * 24 * 60 * 60 * 1000) return "soon";
   return "future";
 }
 
 function sortKey(course: EnrolledCourse): number {
   if (course.type === "live") {
     const next = course.sessions.find((s) => {
-      const st = getSessionState(s);
+      const st = getSessionState(s.slots[0]);
       return st === "live" || st === "soon" || st === "future";
     });
-    if (next) return next.startTime.getTime();
+    if (next) return next.slots[0].startTime.getTime();
     return Number.MAX_SAFE_INTEGER;
   }
   if (course.percentComplete >= 100) return Number.MAX_SAFE_INTEGER;
@@ -82,6 +86,8 @@ function sortKey(course: EnrolledCourse): number {
 
 const liveNow = new Date(Date.now() + 15 * 60 * 1000);
 const liveEnd = new Date(Date.now() + 105 * 60 * 1000);
+const eveningSoon = new Date(Date.now() + 3 * 60 * 60 * 1000);
+const eveningSoonEnd = new Date(Date.now() + 4.5 * 60 * 60 * 1000);
 
 const enrolledCourses: EnrolledCourse[] = ([
   {
@@ -92,14 +98,31 @@ const enrolledCourses: EnrolledCourse[] = ([
     cohortDates: "Mar 12 – Apr 23, 2026",
     registrants: [pic1, pic3, pic4],
     image: event1,
-    instructor: { name: "Sarah Chen", avatar: pic2 },
     sessions: [
-      { id: 101, title: "Introduction & Goal Setting", duration: "90 min", startTime: new Date("2026-03-12T17:00:00"), endTime: new Date("2026-03-12T18:30:00"), recordingUrl: "#" },
-      { id: 102, title: "School Selection Strategy", duration: "90 min", startTime: new Date("2026-03-19T17:00:00"), endTime: new Date("2026-03-19T18:30:00") },
-      { id: 103, title: "Crafting Your Story", duration: "90 min", startTime: new Date("2026-03-26T17:00:00"), endTime: new Date("2026-03-26T18:30:00"), recordingUrl: "#" },
-      { id: 104, title: "Building Your Narrative", duration: "90 min", startTime: liveNow, endTime: liveEnd },
-      { id: 105, title: "Essays & Short Answers", duration: "90 min", startTime: new Date("2026-04-09T17:00:00"), endTime: new Date("2026-04-09T18:30:00") },
-      { id: 106, title: "Final Q&A & Wrap-Up", duration: "60 min", startTime: new Date("2026-04-23T17:00:00"), endTime: new Date("2026-04-23T18:00:00") },
+      { id: 101, title: "Introduction & Goal Setting", duration: "90 min", slots: [
+        { id: 1010, startTime: new Date("2026-03-12T09:00:00"), endTime: new Date("2026-03-12T10:30:00"), recordingUrl: "#" },
+        { id: 1011, startTime: new Date("2026-03-12T19:00:00"), endTime: new Date("2026-03-12T20:30:00"), recordingUrl: "#" },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 102, title: "School Selection Strategy", duration: "90 min", slots: [
+        { id: 1020, startTime: new Date("2026-03-19T09:00:00"), endTime: new Date("2026-03-19T10:30:00"), recordingUrl: "#" },
+        { id: 1021, startTime: new Date("2026-03-19T19:00:00"), endTime: new Date("2026-03-19T20:30:00"), recordingUrl: "#" },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 103, title: "Crafting Your Story", duration: "90 min", slots: [
+        { id: 1030, startTime: new Date("2026-03-26T09:00:00"), endTime: new Date("2026-03-26T10:30:00"), recordingUrl: "#" },
+        { id: 1031, startTime: new Date("2026-03-26T19:00:00"), endTime: new Date("2026-03-26T20:30:00"), recordingUrl: "#" },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 104, title: "Building Your Narrative", duration: "90 min", slots: [
+        { id: 1040, startTime: liveNow, endTime: liveEnd },
+        { id: 1041, startTime: eveningSoon, endTime: eveningSoonEnd },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 105, title: "Essays & Short Answers", duration: "90 min", slots: [
+        { id: 1050, startTime: new Date("2026-04-09T09:00:00"), endTime: new Date("2026-04-09T10:30:00") },
+        { id: 1051, startTime: new Date("2026-04-09T19:00:00"), endTime: new Date("2026-04-09T20:30:00") },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 106, title: "Final Q&A & Wrap-Up", duration: "60 min", slots: [
+        { id: 1060, startTime: new Date("2026-04-23T09:00:00"), endTime: new Date("2026-04-23T10:00:00") },
+        { id: 1061, startTime: new Date("2026-04-23T19:00:00"), endTime: new Date("2026-04-23T20:00:00") },
+      ] as [TimeSlot, TimeSlot] },
     ],
   },
   {
@@ -110,15 +133,35 @@ const enrolledCourses: EnrolledCourse[] = ([
     cohortDates: "Apr 7 – May 19, 2026",
     registrants: [pic5, pic6, pic3],
     image: event2,
-    instructor: { name: "James Park", avatar: pic7 },
     sessions: [
-      { id: 201, title: "Quantitative Reasoning Foundations", duration: "60 min", startTime: new Date("2026-04-07T16:00:00"), endTime: new Date("2026-04-07T17:00:00") },
-      { id: 202, title: "Verbal Reasoning Deep Dive", duration: "60 min", startTime: new Date("2026-04-14T16:00:00"), endTime: new Date("2026-04-14T17:00:00") },
-      { id: 203, title: "Data Insights & Problem Solving", duration: "60 min", startTime: new Date("2026-04-21T16:00:00"), endTime: new Date("2026-04-21T17:00:00") },
-      { id: 204, title: "Practice Test Review", duration: "60 min", startTime: new Date("2026-04-28T16:00:00"), endTime: new Date("2026-04-28T17:00:00") },
-      { id: 205, title: "Timing & Test Strategy", duration: "60 min", startTime: new Date("2026-05-05T16:00:00"), endTime: new Date("2026-05-05T17:00:00") },
-      { id: 206, title: "Final Mock Exam & Debrief", duration: "90 min", startTime: new Date("2026-05-12T16:00:00"), endTime: new Date("2026-05-12T17:30:00") },
-      { id: 207, title: "Score Submission Strategy", duration: "60 min", startTime: new Date("2026-05-19T16:00:00"), endTime: new Date("2026-05-19T17:00:00") },
+      { id: 201, title: "Quantitative Reasoning Foundations", duration: "60 min", slots: [
+        { id: 2010, startTime: new Date("2026-04-07T09:00:00"), endTime: new Date("2026-04-07T10:00:00") },
+        { id: 2011, startTime: new Date("2026-04-07T19:00:00"), endTime: new Date("2026-04-07T20:00:00") },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 202, title: "Verbal Reasoning Deep Dive", duration: "60 min", slots: [
+        { id: 2020, startTime: new Date("2026-04-14T09:00:00"), endTime: new Date("2026-04-14T10:00:00") },
+        { id: 2021, startTime: new Date("2026-04-14T19:00:00"), endTime: new Date("2026-04-14T20:00:00") },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 203, title: "Data Insights & Problem Solving", duration: "60 min", slots: [
+        { id: 2030, startTime: new Date("2026-04-21T09:00:00"), endTime: new Date("2026-04-21T10:00:00") },
+        { id: 2031, startTime: new Date("2026-04-21T19:00:00"), endTime: new Date("2026-04-21T20:00:00") },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 204, title: "Practice Test Review", duration: "60 min", slots: [
+        { id: 2040, startTime: new Date("2026-04-28T09:00:00"), endTime: new Date("2026-04-28T10:00:00") },
+        { id: 2041, startTime: new Date("2026-04-28T19:00:00"), endTime: new Date("2026-04-28T20:00:00") },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 205, title: "Timing & Test Strategy", duration: "60 min", slots: [
+        { id: 2050, startTime: new Date("2026-05-05T09:00:00"), endTime: new Date("2026-05-05T10:00:00") },
+        { id: 2051, startTime: new Date("2026-05-05T19:00:00"), endTime: new Date("2026-05-05T20:00:00") },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 206, title: "Final Mock Exam & Debrief", duration: "90 min", slots: [
+        { id: 2060, startTime: new Date("2026-05-12T09:00:00"), endTime: new Date("2026-05-12T10:30:00") },
+        { id: 2061, startTime: new Date("2026-05-12T19:00:00"), endTime: new Date("2026-05-12T20:30:00") },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 207, title: "Score Submission Strategy", duration: "60 min", slots: [
+        { id: 2070, startTime: new Date("2026-05-19T09:00:00"), endTime: new Date("2026-05-19T10:00:00") },
+        { id: 2071, startTime: new Date("2026-05-19T19:00:00"), endTime: new Date("2026-05-19T20:00:00") },
+      ] as [TimeSlot, TimeSlot] },
     ],
   },
   {
@@ -129,14 +172,39 @@ const enrolledCourses: EnrolledCourse[] = ([
     cohortDates: "Jan 6 – Feb 3, 2026",
     registrants: [pic4, pic1, pic6],
     image: eventImage,
-    instructor: { name: "Maria Torres", avatar: pic5 },
     sessions: [
-      { id: 501, title: "PM Fundamentals", duration: "60 min", startTime: new Date("2026-01-06T17:00:00"), endTime: new Date("2026-01-06T18:00:00"), recordingUrl: "#" },
-      { id: 502, title: "Product Sense & Design", duration: "60 min", startTime: new Date("2026-01-13T17:00:00"), endTime: new Date("2026-01-13T18:00:00"), recordingUrl: "#" },
-      { id: 503, title: "Metrics & Analytical Questions", duration: "60 min", startTime: new Date("2026-01-20T17:00:00"), endTime: new Date("2026-01-20T18:00:00"), recordingUrl: "#" },
-      { id: 504, title: "Behavioral & Leadership", duration: "60 min", startTime: new Date("2026-01-27T17:00:00"), endTime: new Date("2026-01-27T18:00:00"), recordingUrl: "#" },
-      { id: 505, title: "Mock Interviews & Debrief", duration: "90 min", startTime: new Date("2026-02-03T17:00:00"), endTime: new Date("2026-02-03T18:30:00"), recordingUrl: "#" },
+      { id: 501, title: "PM Fundamentals", duration: "60 min", slots: [
+        { id: 5010, startTime: new Date("2026-01-06T09:00:00"), endTime: new Date("2026-01-06T10:00:00"), recordingUrl: "#" },
+        { id: 5011, startTime: new Date("2026-01-06T19:00:00"), endTime: new Date("2026-01-06T20:00:00"), recordingUrl: "#" },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 502, title: "Product Sense & Design", duration: "60 min", slots: [
+        { id: 5020, startTime: new Date("2026-01-13T09:00:00"), endTime: new Date("2026-01-13T10:00:00"), recordingUrl: "#" },
+        { id: 5021, startTime: new Date("2026-01-13T19:00:00"), endTime: new Date("2026-01-13T20:00:00"), recordingUrl: "#" },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 503, title: "Metrics & Analytical Questions", duration: "60 min", slots: [
+        { id: 5030, startTime: new Date("2026-01-20T09:00:00"), endTime: new Date("2026-01-20T10:00:00"), recordingUrl: "#" },
+        { id: 5031, startTime: new Date("2026-01-20T19:00:00"), endTime: new Date("2026-01-20T20:00:00"), recordingUrl: "#" },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 504, title: "Behavioral & Leadership", duration: "60 min", slots: [
+        { id: 5040, startTime: new Date("2026-01-27T09:00:00"), endTime: new Date("2026-01-27T10:00:00"), recordingUrl: "#" },
+        { id: 5041, startTime: new Date("2026-01-27T19:00:00"), endTime: new Date("2026-01-27T20:00:00"), recordingUrl: "#" },
+      ] as [TimeSlot, TimeSlot] },
+      { id: 505, title: "Mock Interviews & Debrief", duration: "90 min", slots: [
+        { id: 5050, startTime: new Date("2026-02-03T09:00:00"), endTime: new Date("2026-02-03T10:30:00"), recordingUrl: "#" },
+        { id: 5051, startTime: new Date("2026-02-03T19:00:00"), endTime: new Date("2026-02-03T20:30:00"), recordingUrl: "#" },
+      ] as [TimeSlot, TimeSlot] },
     ],
+  },
+  {
+    type: "live" as const,
+    id: 7,
+    title: "Law School Admissions Bootcamp",
+    cohortDateLabel: "Fall admissions",
+    cohortDates: "May 5 – Jun 9, 2026",
+    registrants: [pic3, pic5, pic1],
+    image: event3,
+    cohortSelected: false,
+    sessions: [],
   },
   { type: "selfPaced" as const, id: 3, title: "Nail the Google PM Interview Cycle", image: event3, percentComplete: 65, totalTime: "7 hours" },
   { type: "selfPaced" as const, id: 4, title: "Consulting Case Interview Mastery", image: eventImage, percentComplete: 20, totalTime: "6 hours" },
@@ -161,10 +229,12 @@ function formatStartsIn(ms: number): string {
   return `Starts in ${hours}h`;
 }
 
-function formatSessionDateTime(date: Date): string {
-  const dateStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const timeStr = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  return `${dateStr} at ${timeStr}`;
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
+function formatShortDate(date: Date): string {
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 function getCalendarInfo(date: Date) {
@@ -210,80 +280,106 @@ function ActionButton({ icon, label }: { icon: React.ReactNode; label: string })
 
 // ─── Session CTA ──────────────────────────────────────────────────────────────
 
-function SessionCTA({ session }: { session: Session }) {
-  const state = getSessionState(session);
+function SessionCTA({ slot, isNext }: { slot: TimeSlot; isNext: boolean }) {
+  const state = getSessionState(slot);
 
   if (state === "live") {
     return (
-      <button className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-black px-3 py-2 text-[16px] font-medium text-white transition-colors hover:bg-[#222]">
-        <div className="relative h-5 w-5 shrink-0 overflow-hidden">
-          <div className="absolute inset-[26.04%_12.5%]">
-            <div className="absolute inset-[-7.83%_-5%]">
-              <img alt="" className="block max-w-none size-full" src={figmaVideoIcon} />
-            </div>
-          </div>
-        </div>
+      <a href={slot.joinUrl ?? "#"} className="flex shrink-0 items-center gap-1.5 text-[16px] font-medium text-white">
         Join
-      </button>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="-rotate-90 shrink-0">
+          <path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </a>
     );
   }
   if (state === "past-recording") {
     return (
-      <button className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-gray-hover px-3 py-2 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]">
-        <div className="relative h-5 w-5 shrink-0">
-          <div className="absolute inset-0">
-            <img alt="" className="absolute block max-w-none size-full" src={figmaPlayIcon} />
-          </div>
-        </div>
-        Recording
-      </button>
+      <a href={slot.recordingUrl} className="flex shrink-0 items-center gap-1.5 text-[16px] font-medium text-gray-dark">
+        View recording
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="-rotate-90 shrink-0">
+          <path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </a>
     );
   }
   if (state === "past-pending") {
-    return <span className="shrink-0 text-[16px] font-medium text-[#9b9b9b]">Check back soon</span>;
+    return <span className="shrink-0 text-[16px] text-[#9b9b9b]">Processing</span>;
   }
-  if (state === "soon") {
+  if (state === "soon" || state === "future") {
+    if (isNext) {
+      return (
+        <span className="shrink-0 text-[16px] font-medium text-[#3b7dfd]">
+          {formatStartsIn(slot.startTime.getTime() - Date.now())}
+        </span>
+      );
+    }
     return (
-      <span className="shrink-0 text-[16px] font-medium text-[#3b7dfd]">
-        {formatStartsIn(session.startTime.getTime() - Date.now())}
+      <span className="shrink-0 text-[16px] text-[#9b9b9b]">
+        {formatShortDate(slot.startTime)}
       </span>
     );
   }
   return null;
 }
 
-// ─── Session row ──────────────────────────────────────────────────────────────
+// ─── Slot option ──────────────────────────────────────────────────────────────
 
-function SessionRow({ session }: { session: Session }) {
-  const state = getSessionState(session);
-  const isPast = state === "past-recording" || state === "past-pending";
-  const cal = getCalendarInfo(session.startTime);
+function SlotOption({ slot, isNext }: { slot: TimeSlot; isNext: boolean }) {
+  const state = getSessionState(slot);
+  const isLive = state === "live";
+  const isRecording = state === "past-recording";
 
   return (
-    <div className="flex gap-4 border-b border-[#e6e6e6] py-4 last:border-b-0">
-      {/* Mini calendar */}
-      <div className="w-[47px] shrink-0 overflow-hidden rounded-lg border border-gray-stroke">
-        <div className="flex items-center justify-center bg-gray-hover px-2.5 py-0.5">
-          <span className="text-[12px] font-medium uppercase tracking-[1.2px] text-gray-dark">{cal.day}</span>
+    <div className={`flex w-full items-center justify-between rounded-lg px-4 py-4 ${
+      isLive ? "bg-[#296cef]" : isRecording ? "bg-gray-hover" : "border border-gray-stroke"
+    }`}>
+      <span className={`text-[16px] leading-[1.2] ${isLive ? "text-[#f5f5f5]" : "text-gray-light"}`}>
+        {formatTime(slot.startTime)}
+      </span>
+      <SessionCTA slot={slot} isNext={isNext} />
+    </div>
+  );
+}
+
+// ─── Session row ──────────────────────────────────────────────────────────────
+
+function SessionRow({ session, isNext }: { session: Session; isNext: boolean }) {
+  const isPast = session.slots.every((slot) => {
+    const st = getSessionState(slot);
+    return st === "past-recording" || st === "past-pending";
+  });
+  const cal = getCalendarInfo(session.slots[0].startTime);
+
+  return (
+    <div className="border-t border-[#e6e6e6] first:border-t-0">
+      {/* Title row */}
+      <div className="flex gap-4 px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
+        <div className="w-12 shrink-0 text-center">
+          <p className="text-[14px] font-medium uppercase leading-[1.2] tracking-[1.4px] text-gray-light">{cal.day}</p>
+          <p className={`text-[20px] font-medium leading-[1.2] ${isPast ? "text-gray-light" : "text-gray-dark"}`}>{cal.date}</p>
         </div>
-        <div className="flex items-center justify-center bg-white px-2 py-1">
-          <span className="text-[18px] font-medium leading-[1.2] text-gray-dark">{cal.date}</span>
+        <div className="flex min-w-0 flex-1 flex-col gap-1 justify-center">
+          <p className={`text-[18px] font-medium leading-[1.2] ${isPast ? "text-gray-light" : "text-gray-dark"}`}>
+            {session.title}
+          </p>
+          <p className="text-[14px] text-gray-light">{session.duration}</p>
         </div>
       </div>
 
-      {/* Content + CTA */}
-      <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-        {/* Text */}
-        <div className="min-w-0 flex-1">
-          <p className={`truncate text-[18px] font-medium leading-[1.2] ${isPast ? "text-gray-light" : "text-gray-dark"}`}>
-            {session.title}
-          </p>
-          <p className="mt-0.5 text-[16px] text-gray-light">
-            {formatSessionDateTime(session.startTime)}
-            <span className="text-[#9b9b9b]"> · {session.duration}</span>
-          </p>
+      {/* Slots row */}
+      <div className="flex items-stretch px-4 pb-4 sm:px-5 sm:pb-5">
+        {/* OR column — aligns with date column above */}
+        <div className="flex w-16 shrink-0 flex-col items-end pr-2">
+          <div className="flex-1 border-r border-dashed border-gray-stroke" />
+          <span className="py-1 text-[14px] font-medium uppercase leading-[1.2] tracking-[1.4px] text-[#9b9b9b]">or</span>
+          <div className="flex-1 border-r border-dashed border-gray-stroke" />
         </div>
-        <SessionCTA session={session} />
+        {/* Two slot rows stacked */}
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <SlotOption slot={session.slots[0]} isNext={isNext} />
+          <SlotOption slot={session.slots[1]} isNext={isNext} />
+        </div>
       </div>
     </div>
   );
@@ -292,13 +388,23 @@ function SessionRow({ session }: { session: Session }) {
 // ─── Live course card ─────────────────────────────────────────────────────────
 
 function LiveCourseCard({ course }: { course: LiveCourse }) {
-  const isCompleted = course.sessions.every((s) => {
-    const st = getSessionState(s);
-    return st === "past-recording" || st === "past-pending";
-  });
+  const isCompleted = course.sessions.length > 0 && course.sessions.every((s) =>
+    s.slots.every((slot) => {
+      const st = getSessionState(slot);
+      return st === "past-recording" || st === "past-pending";
+    })
+  );
+  const nextSession = course.sessions.find((s) =>
+    s.slots.some((slot) => {
+      const st = getSessionState(slot);
+      return st === "live" || st === "soon" || st === "future";
+    })
+  );
   const [sessionsOpen, setSessionsOpen] = useState(!isCompleted);
 
-  const actionButtons = (
+  const cohortSelected = course.cohortSelected ?? true;
+
+  const actionButtons = cohortSelected ? (
     <>
       <ActionButton
         icon={
@@ -322,6 +428,10 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
       />
       <ActionButton icon={<SlackIcon />} label="Group Slack" />
     </>
+  ) : (
+    <button className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-dark px-3 py-2 text-[16px] font-medium text-white transition-colors hover:bg-[#444444]">
+      Select cohort
+    </button>
   );
 
   return (
@@ -352,28 +462,21 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
       </div>
 
       {/* Zone 2: Metadata strip */}
-      <div className="flex items-center gap-6 overflow-x-auto border-b border-gray-stroke bg-white px-4 pb-4 scroll-pr-4 sm:px-5 sm:pb-5 sm:scroll-pr-5">
-        {/* Instructors */}
-        <div className="flex flex-col gap-0.5 md:flex-row md:items-center md:gap-2">
-          <span className="text-[16px] font-medium leading-[1.2] text-gray-light">Instructors:</span>
-          <a href="#" className="text-[16px] leading-[1.2] text-gray-light underline-offset-2 hover:underline">{course.instructor.name}</a>
-        </div>
-        {/* Divider */}
-        <div className="w-px self-stretch bg-gray-stroke" />
-        {/* Dates */}
+      <div className={`flex items-center bg-white px-4 pb-4 sm:px-5 sm:pb-5 ${cohortSelected ? "border-b border-gray-stroke" : ""}`}>
         <div className="flex flex-col gap-0.5 md:flex-row md:items-center md:gap-2">
           <span className="text-[16px] font-medium leading-[1.2] text-gray-light">{course.cohortDateLabel}:</span>
           <span className="text-[16px] leading-[1.2] text-gray-light">{course.cohortDates}</span>
         </div>
       </div>
 
-      {/* Zone 3: Sessions accordion toggle */}
-      <button
+      {/* Zone 3: Sessions accordion toggle (cohort-selected only) */}
+      {cohortSelected && <button
         onClick={() => setSessionsOpen(!sessionsOpen)}
         className="flex w-full cursor-pointer items-center gap-3 bg-white px-4 py-3 sm:px-5"
       >
         <span className="flex-1 text-left text-[16px] font-medium text-gray-dark">
           {course.sessions.length} Sessions
+          {!isCompleted && <a href="#" onClick={(e) => e.stopPropagation()} className="ml-3 font-normal text-gray-light underline">Add all to calendar</a>}
         </span>
         <svg
           width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -381,13 +484,13 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
         >
           <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-      </button>
+      </button>}
 
       {/* Sessions list */}
-      {sessionsOpen && (
-        <div className="bg-white px-4 sm:px-5">
+      {cohortSelected && sessionsOpen && (
+        <div className="bg-white">
           {course.sessions.map((session) => (
-            <SessionRow key={session.id} session={session} />
+            <SessionRow key={session.id} session={session} isNext={session.id === nextSession?.id} />
           ))}
         </div>
       )}
@@ -445,37 +548,28 @@ function SelfPacedCourseCard({ course }: { course: SelfPacedCourse }) {
 function SuggestedCourseCard({ course }: { course: (typeof suggestedCourses)[0] }) {
   return (
     <div className="group flex cursor-pointer items-center gap-4">
-      {/* Thumbnail: 143×75 fixed, rounded-lg */}
-      <div className="h-[75px] w-[143px] shrink-0 overflow-hidden rounded-lg">
+      {/* Thumbnail: 122×64 fixed */}
+      <div className="h-16 w-[122px] shrink-0 overflow-hidden rounded-lg">
         <img src={course.image} alt="" className="h-full w-full object-cover" />
       </div>
       {/* Content */}
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        {/* Eyebrow */}
-        <p className="text-[12px] font-medium uppercase leading-[1.2] tracking-[1.2px] text-[#707070]">
-          {course.type}
-        </p>
         {/* Title */}
         <p className="overflow-hidden text-ellipsis text-[16px] font-medium leading-[1.2] text-gray-dark transition-opacity group-hover:opacity-70" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
           {course.title}
         </p>
-        {/* Avatars + metadata */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {course.enrolledCount && (
-            <>
-              {/* Stacked mini-avatars */}
-              <div className="flex items-center pr-1.5">
-                {[pic1, pic2, pic3].map((avatar, i) => (
-                  <div key={i} className="-mr-1.5 h-3.5 w-3.5 shrink-0 overflow-hidden rounded-full border border-white">
-                    <img src={avatar} alt="" className="h-full w-full object-cover" />
-                  </div>
-                ))}
+        {/* Facepile + type · duration */}
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center pr-1.5">
+            {[pic1, pic2, pic3].map((avatar, i) => (
+              <div key={i} className="-mr-1.5 h-3.5 w-3.5 shrink-0 overflow-hidden rounded-full border border-white">
+                <img src={avatar} alt="" className="h-full w-full object-cover" />
               </div>
-              <span className="text-[14px] leading-[1.2] text-[#707070]">{course.enrolledCount}</span>
-              <span className="text-[14px] leading-[1.2] text-[#707070]">·</span>
-            </>
-          )}
-          <span className="text-[14px] leading-[1.2] text-[#707070]">{course.duration}</span>
+            ))}
+          </div>
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[14px] leading-[1.2] text-[#707070]">
+            {course.type} · {course.duration}
+          </span>
         </div>
       </div>
     </div>
