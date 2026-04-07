@@ -298,7 +298,7 @@ function SessionCTA({ slot, isNext }: { slot: TimeSlot; isNext: boolean }) {
     return (
       <a href={slot.recordingUrl} className="flex shrink-0 items-center gap-1.5 text-[16px] font-medium text-gray-dark">
         <img src={playVideoIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
-        Watch
+        Replay
       </a>
     );
   }
