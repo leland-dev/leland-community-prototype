@@ -2247,11 +2247,11 @@ function HomeRightSidebar() {
       {/* Divider */}
       <div className="border-t border-gray-100" />
 
-      {/* Trending Topics */}
+      {/* Categories */}
       <div>
         <div className="mb-4 flex items-center gap-1.5">
           <span className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
-            Trending Topics
+            Categories
           </span>
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-[#707070]">
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -2261,15 +2261,10 @@ function HomeRightSidebar() {
           {TRENDING_TOPICS.map(topic => (
             <button
               key={topic.id}
-              className="flex items-center gap-3 rounded-xl p-1.5 -mx-1.5 text-left transition-colors hover:bg-gray-hover"
+              className="-mx-1.5 rounded-xl p-1.5 text-left transition-colors hover:bg-gray-hover"
             >
-              <div className="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
-                <span className="text-[18px] font-medium text-[#707070]">#</span>
-              </div>
-              <div>
-                <p className="text-[16px] font-medium leading-snug text-gray-dark">{topic.tag}</p>
-                <p className="mt-0.5 text-[14px] text-gray-light">{topic.posts} posts today</p>
-              </div>
+              <p className="text-[16px] font-medium leading-snug text-gray-dark">#{topic.tag}</p>
+              <p className="mt-0.5 text-[14px] text-gray-light">{topic.posts} posts today</p>
             </button>
           ))}
         </div>
