@@ -2197,8 +2197,6 @@ const TRENDING_TOPICS = [
   { id: 1, tag: "MBA", coaches: 234 },
   { id: 2, tag: "GMAT", coaches: 189 },
   { id: 3, tag: "Consulting", coaches: 156 },
-  { id: 4, tag: "Product Management", coaches: 98 },
-  { id: 5, tag: "Investment Banking", coaches: 74 },
 ];
 
 function HomeRightSidebar() {
