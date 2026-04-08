@@ -826,6 +826,7 @@ export default function MyCourses() {
       {/* Self-paced courses */}
       {enrolledCourses.some((c) => c.type === "selfPaced") && (
         <div className={`border-t border-gray-stroke/50 ${enrolledCourses.some((c) => c.type === "live") ? "mt-8" : "mt-0"}`}>
+          <p className="pt-8 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">Self-paced</p>
           {enrolledCourses
             .filter((c) => c.type === "selfPaced")
             .map((course) => <SelfPacedCourseCard key={course.id} course={course as SelfPacedCourse} />)}
