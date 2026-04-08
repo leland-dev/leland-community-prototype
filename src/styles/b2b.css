@@ -1,0 +1,40 @@
+/* B2B Dashboard — styles that can't be done with Tailwind utilities */
+
+/* Table row hover */
+.b2b-table tbody tr:hover td {
+  background-color: #fafafa;
+}
+
+/* Utilization expandable row hover */
+.b2b-util-expand:hover td {
+  background-color: #f8fbf9 !important;
+}
+
+/* Overview section divider line */
+.b2b-section-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-gray-stroke);
+}
+
+/* Util section title divider */
+.b2b-util-section-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-gray-stroke);
+}
+
+/* Thin scrollbar */
+.b2b-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.b2b-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.b2b-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
