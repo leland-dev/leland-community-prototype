@@ -363,7 +363,7 @@ function SessionRowChip({ session, index, isNext }: { session: Session; index: n
   // CTA — desktop shows text, mobile shows icon only
   const cta = (() => {
     if (isLive) return (
-      <a href={slot.joinUrl ?? "#"} className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#296cef] p-3.5 text-[16px] font-medium text-white transition-colors hover:bg-[#3b7dfd] sm:px-4 sm:py-3.5">
+      <a href={slot.joinUrl ?? "#"} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#296cef] p-3.5 text-[16px] font-medium text-white transition-colors hover:bg-[#3b7dfd] sm:px-4 sm:py-3.5">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <path d="M2 7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
           <path d="M14 8.5l4-2v7l-4-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -372,14 +372,14 @@ function SessionRowChip({ session, index, isNext }: { session: Session; index: n
       </a>
     );
     if (state === "past-recording") return (
-      <a href={slot.recordingUrl} className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb] sm:px-4 sm:py-3.5">
+      <a href={slot.recordingUrl} className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb] sm:px-4 sm:py-3.5">
         <img src={playVideoIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
         <span className="hidden sm:inline">Replay</span>
       </a>
     );
     if (state === "past-pending") return (
-      <div className="group relative">
-        <div className="flex shrink-0 cursor-default items-center justify-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-[#c0c0c0] sm:px-4 sm:py-3.5">
+      <div className="group relative w-full">
+        <div className="flex w-full cursor-default items-center justify-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-[#c0c0c0] sm:px-4 sm:py-3.5">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="animate-spin sm:hidden">
             <path d="M10 2a8 8 0 1 0 8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
@@ -391,7 +391,7 @@ function SessionRowChip({ session, index, isNext }: { session: Session; index: n
       </div>
     );
     if ((state === "soon" || state === "future") && isNext) return (
-      <span className="shrink-0 text-[16px] font-medium text-[#3b7dfd]">
+      <span className="w-full text-right text-[16px] font-medium text-[#3b7dfd]">
         <span className="sm:hidden">{formatStartsIn(slot.startTime.getTime() - Date.now()).replace("Starts in ", "In ")}</span>
         <span className="hidden sm:inline">{formatStartsIn(slot.startTime.getTime() - Date.now())}</span>
       </span>
@@ -441,8 +441,8 @@ function SessionRowChip({ session, index, isNext }: { session: Session; index: n
       <div className="sm:hidden">{chips}</div>
       <div className="hidden sm:block">{chips}</div>
 
-      {/* CTA — desktop only, grid col 3 */}
-      <div className="hidden sm:flex sm:justify-end">{cta}</div>
+      {/* CTA — desktop only, grid col 3, fixed width so chips always align */}
+      <div className="hidden sm:flex sm:w-28 sm:justify-end">{cta}</div>
     </div>
   );
 }
