@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useVersion } from "../contexts/VersionContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { useSetContentMaxWidth } from "../components/ContentMaxWidthContext";
@@ -1750,7 +1751,7 @@ const UPCOMING_EVENTS: EventPost["event"][] = [
   },
 ];
 
-function ComposeModal({ onClose, onPost, onGoLive }: { onClose: () => void; onPost: (text: string) => void; onGoLive?: () => void }) {
+function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string) => void; onGoLive?: () => void; isMVP?: boolean }) {
   const [text, setText] = useState("");
   const [eventAttached, setEventAttached] = useState(false);
   const [selectingEvent, setSelectingEvent] = useState(false);
@@ -1924,43 +1925,48 @@ function ComposeModal({ onClose, onPost, onGoLive }: { onClose: () => void; onPo
           ) : null}
         </AnimatePresence>
 
-        {/* Suggestion chips */}
-        <div className="flex flex-wrap gap-2 px-4 pb-4">
-          {[
-            { label: "Attach your upcoming event", icon: <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />, onClick: () => { setSelectingEvent(true); setEventAttached(false); setEventIndex(0); } },
-            { label: "Attach Bootcamp", icon: <><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></>, onClick: undefined as (() => void) | undefined },
-            { label: "Go Live", icon: <><circle cx="12" cy="12" r="3"/><path d="M8.5 8.5a5 5 0 000 7M15.5 8.5a5 5 0 010 7"/><path d="M5.5 5.5a9 9 0 000 13M18.5 5.5a9 9 0 010 13"/></>, onClick: onGoLive ? () => { onClose(); onGoLive(); } : undefined },
-            { label: "Celebrate someone", icon: <><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></>, onClick: undefined as (() => void) | undefined },
-            { label: "Available now", icon: <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>, onClick: undefined as (() => void) | undefined },
-          ].map(({ label, icon, onClick }) => (
-            <button
-              key={label}
-              onClick={onClick}
-              className="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-[13px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                {icon}
-              </svg>
-              {label}
-            </button>
-          ))}
-        </div>
+        {/* Suggestion chips — Experimental only */}
+        {!isMVP && (
+          <div className="flex flex-wrap gap-2 px-4 pb-4">
+            {[
+              { label: "Attach your upcoming event", icon: <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />, onClick: () => { setSelectingEvent(true); setEventAttached(false); setEventIndex(0); } },
+              { label: "Attach Bootcamp", icon: <><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></>, onClick: undefined as (() => void) | undefined },
+              { label: "Go Live", icon: <><circle cx="12" cy="12" r="3"/><path d="M8.5 8.5a5 5 0 000 7M15.5 8.5a5 5 0 010 7"/><path d="M5.5 5.5a9 9 0 000 13M18.5 5.5a9 9 0 010 13"/></>, onClick: onGoLive ? () => { onClose(); onGoLive(); } : undefined },
+              { label: "Celebrate someone", icon: <><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></>, onClick: undefined as (() => void) | undefined },
+              { label: "Available now", icon: <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>, onClick: undefined as (() => void) | undefined },
+            ].map(({ label, icon, onClick }) => (
+              <button
+                key={label}
+                onClick={onClick}
+                className="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-[13px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {icon}
+                </svg>
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="border-t border-gray-stroke" />
 
         {/* Bottom toolbar */}
         <div className="flex items-center justify-between px-4 py-3">
-          {/* Action icons: Image, Poll, Video */}
+          {/* Action icons: Image — Experimental only */}
           <div className="flex items-center gap-1">
-            {/* Image */}
-            <button onClick={() => fileInputRef.current?.click()} className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${uploadedImage ? "text-primary bg-primary/10" : "text-gray-light hover:bg-gray-hover"}`} title="Add image">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </button>
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+            {!isMVP ? (
+              <>
+                <button onClick={() => fileInputRef.current?.click()} className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${uploadedImage ? "text-primary bg-primary/10" : "text-gray-light hover:bg-gray-hover"}`} title="Add image">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                </button>
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+              </>
+            ) : <div />}
           </div>
 
           {/* Char counter + Post button */}
@@ -2356,6 +2362,7 @@ function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
 
 export default function Home() {
   useEffect(() => { document.title = "Leland Prototype | Feed"; }, []);
+  const { version } = useVersion();
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
   useSetLeftSidebar(<HomeSidebar onCreatePost={() => setComposeOpen(true)} />);
@@ -2406,7 +2413,7 @@ export default function Home() {
         ))}
       </div>
 
-      {composeOpen ? <ComposeModal onClose={() => setComposeOpen(false)} onPost={handlePost} onGoLive={() => setGoLiveOpen(true)} /> : null}
+      {composeOpen ? <ComposeModal onClose={() => setComposeOpen(false)} onPost={handlePost} onGoLive={() => setGoLiveOpen(true)} isMVP={version === "A"} /> : null}
       {goLiveOpen ? <GoLiveModal onClose={() => setGoLiveOpen(false)} /> : null}
     </div>
   );
