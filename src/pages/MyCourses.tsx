@@ -313,7 +313,7 @@ function SlotOption({ slot, isNext }: { slot: TimeSlot; isNext: boolean }) {
 
 const SLOT_TIME_LABELS = ["9:00 AM", "7:00 PM"] as const;
 
-function SessionRowChip({ session, index, isNext, preferredSlot }: { session: Session; index: number; isNext: boolean; preferredSlot: number }) {
+function SessionRowChip({ session, index, isNext, preferredSlot, isFirst }: { session: Session; index: number; isNext: boolean; preferredSlot: number; isFirst?: boolean }) {
   const [selectedSlot, setSelectedSlot] = useState(preferredSlot);
   // Sync when global preference changes
   useEffect(() => { setSelectedSlot(preferredSlot); }, [preferredSlot]);
@@ -385,7 +385,7 @@ function SessionRowChip({ session, index, isNext, preferredSlot }: { session: Se
   );
 
   return (
-    <div className="border-t border-[#e5e5e5] px-4 py-5 first:border-t-0 sm:grid sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-6 sm:px-5">
+    <div className={`px-4 py-5 sm:grid sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-6 sm:px-5 ${isFirst ? "" : "border-t border-[#e5e5e5]"}`}>
       {/* Text + chips (mobile) + mobile CTA */}
       <div className="mb-3 flex items-start gap-4 sm:mb-0">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -413,9 +413,9 @@ function SessionRowChip({ session, index, isNext, preferredSlot }: { session: Se
 
 // ─── Session row (simple variant) ────────────────────────────────────────────
 
-function SessionRowSimple({ session, index, isNext }: { session: Session; index: number; isNext: boolean }) {
+function SessionRowSimple({ session, index, isNext, isFirst }: { session: Session; index: number; isNext: boolean; isFirst?: boolean }) {
   return (
-    <div className="border-t border-[#e5e5e5] first:border-t-0">
+    <div className={isFirst ? "" : "border-t border-[#e5e5e5]"}>
       {session.slots.map((slot, slotIndex) => {
         const state = getSessionState(slot);
         const isPast = state === "past-recording" || state === "past-pending";
@@ -496,7 +496,7 @@ function SessionRowSimple({ session, index, isNext }: { session: Session; index:
 
 // ─── Session row ──────────────────────────────────────────────────────────────
 
-function SessionRow({ session, isNext }: { session: Session; isNext: boolean }) {
+function SessionRow({ session, isNext, isFirst }: { session: Session; isNext: boolean; isFirst?: boolean }) {
   const isPast = session.slots.every((slot) => {
     const st = getSessionState(slot);
     return st === "past-recording" || st === "past-pending";
@@ -504,7 +504,7 @@ function SessionRow({ session, isNext }: { session: Session; isNext: boolean }) 
   const cal = getCalendarInfo(session.slots[0].startTime);
 
   return (
-    <div className="border-t border-[#e6e6e6] first:border-t-0">
+    <div className={isFirst ? "" : "border-t border-[#e6e6e6]"}>
       {/* Title row */}
       <div className="flex gap-4 px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
         <div className="w-8 shrink-0 text-center">
@@ -752,15 +752,15 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
                   </div>
                 </div>
                 {course.sessions.map((session, i) => (
-                  <SessionRowChip key={session.id} session={session} index={i + 1} isNext={session.id === nextSession?.id} preferredSlot={preferredSlot} />
+                  <SessionRowChip key={session.id} session={session} index={i + 1} isNext={session.id === nextSession?.id} preferredSlot={preferredSlot} isFirst={i === 0} />
                 ))}
               </>
             : simpleSessionLayout
             ? course.sessions.map((session, i) => (
-                <SessionRowSimple key={session.id} session={session} index={i + 1} isNext={session.id === nextSession?.id} />
+                <SessionRowSimple key={session.id} session={session} index={i + 1} isNext={session.id === nextSession?.id} isFirst={i === 0} />
               ))
-            : course.sessions.map((session) => (
-                <SessionRow key={session.id} session={session} isNext={session.id === nextSession?.id} />
+            : course.sessions.map((session, i) => (
+                <SessionRow key={session.id} session={session} isNext={session.id === nextSession?.id} isFirst={i === 0} />
               ))
           }
         </div>
