@@ -420,7 +420,8 @@ function SessionRowSimple({ session, index, isNext }: { session: Session; index:
               )}
               {(state === "soon" || state === "future") && isNext && (
                 <span className="shrink-0 text-[16px] font-medium text-[#3b7dfd]">
-                  {formatStartsIn(slot.startTime.getTime() - Date.now()).replace("Starts in ", "In ")}
+                  <span className="sm:hidden">{formatStartsIn(slot.startTime.getTime() - Date.now()).replace("Starts in ", "In ")}</span>
+                  <span className="hidden sm:inline">{formatStartsIn(slot.startTime.getTime() - Date.now())}</span>
                 </span>
               )}
             </div>
