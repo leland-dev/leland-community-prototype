@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import PageShell from "../components/PageShell";
+import { useSessionLayout } from "../components/SessionLayoutContext";
 import event1 from "../assets/placeholder images/placeholder-event-01.png";
 import event2 from "../assets/placeholder images/placeholder-event-02.png";
 import event3 from "../assets/placeholder images/placeholder-event-03.png";
@@ -238,6 +239,12 @@ function formatShortDate(date: Date): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+function formatSlotDateTime(date: Date): string {
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" }) +
+    " at " +
+    date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
 function getCalendarInfo(date: Date) {
   return {
     day: date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase(),
@@ -340,6 +347,73 @@ function SlotOption({ slot, isNext }: { slot: TimeSlot; isNext: boolean }) {
   );
 }
 
+// ─── Session row (simple variant) ────────────────────────────────────────────
+
+function SessionRowSimple({ session, index, isNext }: { session: Session; index: number; isNext: boolean }) {
+  return (
+    <>
+      {session.slots.map((slot) => {
+        const state = getSessionState(slot);
+        const isPast = state === "past-recording" || state === "past-pending";
+        const isLive = state === "live";
+        const timeLabel = formatTime(slot.startTime);
+
+        return (
+          <div key={slot.id} className="flex items-center gap-4 border-t border-[#e5e5e5] px-4 py-4 first:border-t-0 sm:px-5 sm:py-5">
+            {/* Session number icon */}
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-stroke">
+              <span className="text-[18px] font-medium leading-[1.2] text-gray-dark">{index}</span>
+            </div>
+
+            {/* Title + subtitle */}
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <p className={`text-[16px] font-medium leading-[1.2] ${isPast ? "text-gray-light" : "text-gray-dark"}`}>
+                {session.title}
+                <span className="font-normal text-gray-dark"> – {timeLabel}</span>
+              </p>
+              <p className="text-[14px] leading-[1.2] text-gray-light">
+                {formatSlotDateTime(slot.startTime)}
+                <span className="text-[#9b9b9b]"> · {session.duration}</span>
+              </p>
+            </div>
+
+            {/* CTA */}
+            {isLive && (
+              <a href={slot.joinUrl ?? "#"} className="flex shrink-0 items-center justify-center rounded-lg bg-[#296cef] px-4 py-3.5 text-[16px] font-medium text-white transition-colors hover:bg-[#3b7dfd]">
+                Join
+              </a>
+            )}
+            {state === "past-recording" && (
+              <a href={slot.recordingUrl} className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-4 py-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]">
+                <img src={playVideoIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
+                Replay
+              </a>
+            )}
+            {state === "past-pending" && (
+              <div className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-4 py-3.5 text-[16px] font-medium text-[#9b9b9b]">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0 animate-spin">
+                  <path d="M10 2a8 8 0 1 0 8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                Processing
+              </div>
+            )}
+            {(state === "soon" || state === "future") && isNext && (
+              <span className="shrink-0 text-[16px] font-medium text-[#3b7dfd]">
+                {formatStartsIn(slot.startTime.getTime() - Date.now())}
+              </span>
+            )}
+            {(state === "soon" || state === "future") && !isNext && (
+              <span className="shrink-0 text-[16px] text-[#9b9b9b]">
+                {formatShortDate(slot.startTime)}
+              </span>
+            )}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 // ─── Session row ──────────────────────────────────────────────────────────────
 
 function SessionRow({ session, isNext }: { session: Session; isNext: boolean }) {
@@ -386,6 +460,7 @@ function SessionRow({ session, isNext }: { session: Session; isNext: boolean }) 
 // ─── Live course card ─────────────────────────────────────────────────────────
 
 function LiveCourseCard({ course }: { course: LiveCourse }) {
+  const { simpleSessionLayout } = useSessionLayout();
   const isCompleted = course.sessions.length > 0 && course.sessions.every((s) =>
     s.slots.every((slot) => {
       const st = getSessionState(slot);
@@ -487,9 +562,14 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
       {/* Sessions list */}
       {cohortSelected && sessionsOpen && (
         <div className="bg-white">
-          {course.sessions.map((session) => (
-            <SessionRow key={session.id} session={session} isNext={session.id === nextSession?.id} />
-          ))}
+          {simpleSessionLayout
+            ? course.sessions.map((session, i) => (
+                <SessionRowSimple key={session.id} session={session} index={i + 1} isNext={session.id === nextSession?.id} />
+              ))
+            : course.sessions.map((session) => (
+                <SessionRow key={session.id} session={session} isNext={session.id === nextSession?.id} />
+              ))
+          }
         </div>
       )}
     </div>

@@ -23,6 +23,7 @@ import {
   useContentMaxWidth,
 } from "./ContentMaxWidthContext";
 import { SubNavStyleProvider, useSubNavStyle } from "./SubNavStyleContext";
+import { SessionLayoutProvider } from "./SessionLayoutContext";
 
 /**
  * Layout — nav chrome (TopNav, MobileTopNav, BottomNav) + context providers + <Outlet />
@@ -34,6 +35,7 @@ export default function Layout() {
         <LeftSidebarProvider>
           <SubNavProvider>
             <SubNavStyleProvider>
+              <SessionLayoutProvider>
               <LayoutVariantProvider>
                 <ContentMaxWidthProvider>
                   <LayoutChrome>
@@ -41,6 +43,7 @@ export default function Layout() {
                   </LayoutChrome>
                 </ContentMaxWidthProvider>
               </LayoutVariantProvider>
+              </SessionLayoutProvider>
             </SubNavStyleProvider>
           </SubNavProvider>
         </LeftSidebarProvider>
