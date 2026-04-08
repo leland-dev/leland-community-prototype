@@ -349,7 +349,7 @@ function SessionRowChip({ session, index, isNext, preferredSlot }: { session: Se
           </svg>
           <span className="hidden sm:inline">Processing</span>
         </div>
-        <div className="pointer-events-none absolute bottom-full right-0 mb-2 hidden w-max max-w-[200px] rounded-lg bg-gray-dark px-3 py-2 text-[13px] leading-[1.3] text-white shadow-lg group-hover:block">
+        <div className="pointer-events-none absolute bottom-full right-0 mb-2 hidden w-max max-w-[200px] rounded-lg bg-gray-dark px-3 py-2 text-[14px] leading-[1.3] text-white shadow-lg group-hover:block">
           Check back soon for the recording
         </div>
       </div>
@@ -389,7 +389,7 @@ function SessionRowChip({ session, index, isNext, preferredSlot }: { session: Se
       {/* Text + chips (mobile) + mobile CTA */}
       <div className="mb-3 flex items-start gap-4 sm:mb-0">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-gray-light">
+          <p className="text-[14px] font-medium uppercase tracking-[0.1em] text-gray-light">
             Session {index}
           </p>
           <p className={`text-[16px] font-medium leading-[1.2] sm:text-[18px] ${isPast ? "text-gray-light" : "text-gray-dark"}`}>
@@ -428,7 +428,7 @@ function SessionRowSimple({ session, index, isNext }: { session: Session; index:
             {slotIndex === 1 && (
               <div className="flex items-center gap-3 px-4 sm:px-5">
                 <div className="flex-1 border-t border-dashed border-gray-stroke" />
-                <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#9b9b9b]">or</span>
+                <span className="text-[14px] font-medium uppercase tracking-[0.08em] text-[#9b9b9b]">or</span>
                 <div className="flex-1 border-t border-dashed border-gray-stroke" />
               </div>
             )}
@@ -475,7 +475,7 @@ function SessionRowSimple({ session, index, isNext }: { session: Session; index:
                     </svg>
                     <span className="hidden sm:inline">Processing</span>
                   </div>
-                  <div className="pointer-events-none absolute bottom-full right-0 mb-2 hidden w-max max-w-[200px] rounded-lg bg-gray-dark px-3 py-2 text-[13px] leading-[1.3] text-white shadow-lg group-hover:block">
+                  <div className="pointer-events-none absolute bottom-full right-0 mb-2 hidden w-max max-w-[200px] rounded-lg bg-gray-dark px-3 py-2 text-[14px] leading-[1.3] text-white shadow-lg group-hover:block">
                     Check back soon for the recording
                   </div>
                 </div>
@@ -588,7 +588,7 @@ function SelectCohortModal({ open, onClose, onSelect }: { open: boolean; onClose
                     <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">{cohort.dates}</p>
                     <p className="text-[14px] leading-[1.3] text-gray-light">{cohort.days} · {cohort.time}</p>
                     {cohort.urgencyTag && (
-                      <span className="mt-0.5 inline-flex w-fit items-center rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-[12px] font-medium text-[#92400E]">
+                      <span className="mt-0.5 inline-flex w-fit items-center rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-[14px] font-medium text-[#92400E]">
                         {cohort.urgencyTag}
                       </span>
                     )}
@@ -720,7 +720,7 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
         <div className="bg-white">
           {!isCompleted && (
             <div className="px-4 py-2 sm:px-5">
-              <button className="inline-flex items-center gap-1.5 rounded-lg bg-gray-hover px-3 py-2 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]">
+              <button className="flex w-full items-center gap-1.5 rounded-lg bg-gray-hover px-3 py-2 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0 text-gray-light">
                   <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
