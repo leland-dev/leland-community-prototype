@@ -807,11 +807,11 @@ function SuggestedCourseCard({ course }: { course: (typeof suggestedCourses)[0] 
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-type Variant = "default" | "simple" | "chip";
+type Variant = "stacked" | "simple" | "chip";
 
 export default function MyCourses() {
   const { setSimpleSessionLayout, setChipSessionLayout } = useSessionLayout();
-  const [variant, setVariant] = useState<Variant>("default");
+  const [variant, setVariant] = useState<Variant>("stacked");
 
   function applyVariant(v: Variant) {
     setVariant(v);
@@ -841,7 +841,7 @@ export default function MyCourses() {
       <div className="flex items-center justify-between">
         <h1 className="text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">My Courses</h1>
         <div className="flex rounded-lg border border-gray-stroke/50 bg-gray-hover p-0.5 text-[14px] font-medium">
-          {(["default", "simple", "chip"] as Variant[]).map((v) => (
+          {(["stacked", "simple", "chip"] as Variant[]).map((v) => (
             <button
               key={v}
               onClick={() => applyVariant(v)}
