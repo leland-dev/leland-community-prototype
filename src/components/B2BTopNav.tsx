@@ -1,0 +1,154 @@
+import { useState, useRef, useEffect } from "react";
+import { NavLink } from "react-router-dom";
+import { motion, AnimatePresence } from "motion/react";
+import profilePhoto from "../assets/profile photos/profile photo.png";
+import switchIcon from "../assets/icons/switch.svg";
+import helpIcon from "../assets/icons/help.svg";
+import logOutIcon from "../assets/icons/log out.svg";
+import settingsIcon from "../assets/icons/settings.svg";
+import moreIcon from "../assets/icons/nav-icons/more-active.svg";
+import lelandLogo from "../assets/Logo.svg";
+
+const profileMenuGroups = [
+  {
+    items: [
+      { to: "/", icon: switchIcon, label: "Switch to customer", danger: false },
+      { to: null, icon: helpIcon, label: "Help", danger: false },
+      { to: null, icon: logOutIcon, label: "Log out", danger: true },
+    ],
+  },
+];
+
+export default function B2BTopNav({
+  onNavigateSettings,
+  onOpenMobileSidebar,
+}: {
+  onNavigateSettings?: () => void;
+  onOpenMobileSidebar?: () => void;
+} = {}) {
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+    if (profileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileOpen]);
+
+  return (
+    <header className="border-b border-gray-stroke bg-white">
+      <div className="relative flex h-14 items-center justify-between px-4 md:px-6">
+        {/* Left: hamburger (mobile) / Logo (desktop) */}
+        <div className="flex items-center">
+          <button
+            onClick={onOpenMobileSidebar}
+            className="flex h-8 w-8 items-center justify-center md:hidden"
+          >
+            <img src={moreIcon} alt="Menu" className="h-[20px] w-[20px]" />
+          </button>
+          <NavLink to="/" className="hidden shrink-0 items-center md:flex">
+            <img src={lelandLogo} alt="Leland" className="h-[22px] w-auto" />
+          </NavLink>
+        </div>
+
+        {/* Center: logo (mobile only) */}
+        <NavLink to="/" className="absolute left-1/2 -translate-x-1/2 md:hidden">
+          <img src={lelandLogo} alt="Leland" className="h-[22px] w-auto" />
+        </NavLink>
+
+        {/* Right: Profile avatar + dropdown */}
+        <div ref={profileRef} className="relative flex items-center">
+          <button
+            onClick={() => setProfileOpen(!profileOpen)}
+            className="flex h-9 w-9 items-center justify-center rounded-full"
+          >
+            <img
+              src={profilePhoto}
+              alt="Profile"
+              className={`h-[30px] w-[30px] rounded-full object-cover transition-shadow ${
+                profileOpen ? "ring-2 ring-gray-dark" : "hover:ring-2 hover:ring-gray-stroke"
+              }`}
+            />
+          </button>
+
+          <AnimatePresence>
+            {profileOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
+                transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+                className="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+              >
+                {/* Admin Settings */}
+                <div className="hidden px-2 py-2 md:block">
+                  <button
+                    onClick={() => {
+                      setProfileOpen(false);
+                      onNavigateSettings?.();
+                    }}
+                    className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                  >
+                    <img src={settingsIcon} alt="Admin Settings" className="h-6 w-6 shrink-0" />
+                    Admin Settings
+                  </button>
+                </div>
+                {profileMenuGroups.map((group, gi) => (
+                  <div
+                    key={gi}
+                    className="border-t border-gray-stroke px-2 py-2"
+                  >
+                    {group.items.map(({ to, icon, label, danger }) =>
+                      to ? (
+                        <NavLink
+                          key={label}
+                          to={to}
+                          onClick={() => setProfileOpen(false)}
+                          className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium transition-colors ${
+                            danger
+                              ? "text-[#D92D20] hover:bg-gray-hover"
+                              : "text-gray-dark hover:bg-gray-hover"
+                          }`}
+                        >
+                          {icon && (
+                            <img
+                              src={icon}
+                              alt={label}
+                              className="h-6 w-6 shrink-0"
+                            />
+                          )}
+                          {label}
+                        </NavLink>
+                      ) : (
+                        <button
+                          key={label}
+                          onClick={() => setProfileOpen(false)}
+                          className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium transition-colors ${
+                            danger
+                              ? "text-[#D92D20] hover:bg-gray-hover"
+                              : "text-gray-dark hover:bg-gray-hover"
+                          }`}
+                        >
+                          {icon && (
+                            <img src={icon} alt={label} className="h-6 w-6 shrink-0" />
+                          )}
+                          {label}
+                        </button>
+                      )
+                    )}
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </header>
+  );
+}
