@@ -722,25 +722,27 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
           {chipSessionLayout
             ? <>
                 {/* Preferred time row */}
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-[#e5e5e5] px-4 pb-4 pt-0 sm:flex-nowrap sm:px-5">
-                  <span className="shrink-0 text-[14px] leading-[1.3] text-gray-light">Preferred<br />time</span>
-                  <div className="flex gap-2">
-                    {([0, 1] as const).map((i) => (
-                      <button
-                        key={i}
-                        onClick={() => setPreferredSlot(i)}
-                        className={`rounded-full px-[14px] py-2 text-[14px] font-medium leading-[1.2] text-gray-dark transition-colors ${
-                          preferredSlot === i
-                            ? "border-2 border-gray-dark bg-white"
-                            : "border border-gray-stroke bg-white hover:bg-gray-hover"
-                        }`}
-                      >
-                        {SLOT_TIME_LABELS[i]}
-                      </button>
-                    ))}
+                <div className="flex items-start justify-between border-b border-[#e5e5e5] px-4 pb-4 pt-0 sm:px-5">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[14px] leading-[1.3] text-gray-light">Preferred time</span>
+                    <div className="flex gap-2">
+                      {([0, 1] as const).map((i) => (
+                        <button
+                          key={i}
+                          onClick={() => setPreferredSlot(i)}
+                          className={`rounded-full px-[14px] py-2 text-[14px] font-medium leading-[1.2] text-gray-dark transition-colors ${
+                            preferredSlot === i
+                              ? "border-2 border-gray-dark bg-white"
+                              : "border border-gray-stroke bg-white hover:bg-gray-hover"
+                          }`}
+                        >
+                          {SLOT_TIME_LABELS[i]}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   {!isCompleted && (
-                    <a href="#" className="w-full text-[14px] font-normal text-gray-light underline sm:ml-auto sm:w-auto">Add all to calendar</a>
+                    <a href="#" className="shrink-0 text-[14px] font-normal text-gray-light underline">Add all to calendar</a>
                   )}
                 </div>
                 {course.sessions.map((session, i) => (
