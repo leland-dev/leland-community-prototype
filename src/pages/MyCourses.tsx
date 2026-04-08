@@ -720,7 +720,7 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
         <div className="bg-white">
           {!isCompleted && (
             <div className="px-4 pb-3 pt-0 sm:px-5">
-              <button className="flex w-full items-center gap-1.5 rounded-lg bg-gray-hover px-3 py-2 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]">
+              <button className="flex w-full items-center gap-2 rounded-lg bg-gray-hover px-4 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0 text-gray-light">
                   <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
