@@ -378,7 +378,7 @@ function SessionRowSimple({ session, index, isNext }: { session: Session; index:
               </div>
 
               {/* Title + subtitle */}
-              <div className="flex min-h-[80px] min-w-0 flex-1 flex-col justify-center gap-1">
+              <div className="flex min-h-[48px] min-w-0 flex-1 flex-col justify-center gap-1">
                 <p className={`text-[16px] font-medium leading-[1.2] ${isPast ? "text-gray-light" : "text-gray-dark"}`}>
                   {session.title}
                   <span className="font-normal text-gray-dark"> – {timeLabel}</span>
