@@ -391,25 +391,27 @@ function SessionRowSimple({ session, index, isNext }: { session: Session; index:
 
               {/* CTA */}
               {isLive && (
-                <a href={slot.joinUrl ?? "#"} className="flex shrink-0 items-center justify-center rounded-lg bg-[#296cef] p-3.5 text-white transition-colors hover:bg-[#3b7dfd]">
+                <a href={slot.joinUrl ?? "#"} className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#296cef] p-3.5 text-[16px] font-medium text-white transition-colors hover:bg-[#3b7dfd] sm:px-4 sm:py-3.5">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M2 7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
                     <path d="M14 8.5l4-2v7l-4-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
+                  <span className="hidden sm:inline">Join</span>
                 </a>
               )}
               {state === "past-recording" && (
-                <a href={slot.recordingUrl} className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-4 py-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]">
+                <a href={slot.recordingUrl} className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb] sm:px-4 sm:py-3.5">
                   <img src={playVideoIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
                   <span className="hidden sm:inline">Replay</span>
                 </a>
               )}
               {state === "past-pending" && (
                 <div className="group relative">
-                  <div className="flex shrink-0 cursor-default items-center justify-center rounded-lg bg-gray-hover p-3.5 text-[#c0c0c0]">
+                  <div className="flex shrink-0 cursor-default items-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-[#c0c0c0] sm:px-4 sm:py-3.5">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="animate-spin">
                       <path d="M10 2a8 8 0 1 0 8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
+                    <span className="hidden sm:inline">Processing</span>
                   </div>
                   <div className="pointer-events-none absolute bottom-full right-0 mb-2 hidden w-max max-w-[200px] rounded-lg bg-gray-dark px-3 py-2 text-[13px] leading-[1.3] text-white shadow-lg group-hover:block">
                     Check back soon for the recording
