@@ -505,7 +505,7 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
                 <div className="absolute -left-[22px] top-0 h-[34px] w-[18px] rounded-bl-[10px] border-b border-l border-gray-200" />
                 {/* White eraser: covers the border below the last child's avatar center */}
                 {isLast ? (
-                  <div className="absolute -left-[1px] top-[34px] bottom-0 w-px bg-white" />
+                  <div className="absolute -left-[23px] top-[34px] bottom-0 w-px bg-white" />
                 ) : null}
                 <CommentItem comment={r} depth={depth + 1} />
               </div>

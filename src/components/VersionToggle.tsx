@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useVersion, type PrototypeVersion } from "../contexts/VersionContext";
 
 const versions: { label: string; value: PrototypeVersion; description: string }[] = [
-  { label: "Version A", value: "A", description: "Current prototype" },
-  { label: "Version B", value: "B", description: "Alternate prototype" },
+  { label: "MVP", value: "A", description: "Core experience" },
+  { label: "Experimental", value: "B", description: "New features in testing" },
 ];
 
 export default function VersionToggle() {
@@ -65,8 +65,8 @@ export default function VersionToggle() {
       </button>
 
       {/* Active version badge */}
-      <span className="pointer-events-none absolute -top-1.5 -left-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#222222] text-[10px] font-bold text-white">
-        {version}
+      <span className="pointer-events-none absolute -top-2 -left-2 flex h-auto min-w-[20px] items-center justify-center rounded-full bg-[#222222] px-1.5 py-0.5 text-[9px] font-bold leading-none text-white">
+        {version === "A" ? "MVP" : "EXP"}
       </span>
     </div>
   );

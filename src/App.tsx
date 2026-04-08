@@ -15,6 +15,7 @@ function HomeOnlyVersionToggle() {
   const { pathname } = useLocation();
   return pathname === "/" ? <VersionToggle /> : null;
 }
+
 import Home from "./pages/Home";
 import Browse from "./pages/Browse";
 import Search from "./pages/Search";
@@ -31,6 +32,7 @@ import Calendar from "./pages/Calendar";
 import MyCourses from "./pages/MyCourses";
 import Dashboard from "./pages/Dashboard";
 import Site from "./pages/Site";
+import B2BDashboard from "./pages/B2BDashboard";
 
 export default function App() {
   return (
@@ -38,6 +40,7 @@ export default function App() {
     <HomeOnlyVersionToggle />
     <Routes>
       <Route path="*" element={<ScrollToTop />} />
+      <Route path="/b2b-dashboard" element={<B2BDashboard />} />
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
         <Route path="/dashboard" element={<Dashboard />} />

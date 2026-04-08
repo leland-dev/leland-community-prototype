@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
+import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { useSetContentMaxWidth } from "../components/ContentMaxWidthContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import eventImageSrc from "../assets/img/EventImage.avif";
@@ -2166,6 +2167,112 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Right Sidebar ─────────────────────────────────────
+
+const HAPPENING_NOW = [
+  {
+    id: 1,
+    title: "MBA Strategy Live",
+    thumbnail: pic6,
+    status: "live" as const,
+    detail: "125 watching",
+  },
+  {
+    id: 2,
+    title: "Tech Consulting Workshop",
+    thumbnail: pic9,
+    status: "soon" as const,
+    detail: "Starts 4:30 PM · 89 registered",
+  },
+  {
+    id: 3,
+    title: "Interview Prep Session",
+    thumbnail: pic11,
+    status: "upcoming" as const,
+    detail: "Tomorrow, 2:00 PM · 54 registered",
+  },
+];
+
+const TRENDING_TOPICS = [
+  { id: 1, tag: "MBA", coaches: 234 },
+  { id: 2, tag: "GMAT", coaches: 189 },
+  { id: 3, tag: "Consulting", coaches: 156 },
+];
+
+function HomeRightSidebar() {
+  return (
+    <div className="flex flex-col gap-6 px-1">
+      {/* Happening Now */}
+      <div>
+        <div className="mb-4 flex items-center gap-1.5">
+          <span className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+            Happening Now
+          </span>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-[#707070]">
+            <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div className="flex flex-col gap-4">
+          {HAPPENING_NOW.map(event => (
+            <button
+              key={event.id}
+              className="flex items-start gap-3 rounded-xl p-1.5 -mx-1.5 text-left transition-colors hover:bg-gray-hover"
+            >
+              <div className="relative h-[52px] w-[72px] shrink-0 overflow-hidden rounded-[8px]">
+                <img
+                  src={event.thumbnail}
+                  alt={event.title}
+                  className="h-full w-full object-cover"
+                  style={{ objectPosition: "50% 15%" }}
+                />
+                {event.status === "live" && (
+                  <div className="absolute bottom-1 left-1 rounded bg-red-500 px-1 py-0.5 text-[9px] font-bold uppercase leading-none text-white">
+                    Live
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[16px] font-medium leading-snug text-gray-dark">{event.title}</p>
+                {event.status === "live" ? (
+                  <p className="mt-0.5 text-[14px] text-red-500">Live now · {event.detail}</p>
+                ) : (
+                  <p className="mt-0.5 text-[14px] text-gray-light">{event.detail}</p>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-gray-100" />
+
+      {/* Categories */}
+      <div>
+        <div className="mb-4 flex items-center gap-1.5">
+          <span className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+            Coach Categories
+          </span>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-[#707070]">
+            <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div className="flex flex-col gap-1">
+          {TRENDING_TOPICS.map(topic => (
+            <button
+              key={topic.id}
+              className="-mx-1.5 rounded-xl p-1.5 text-left transition-colors hover:bg-gray-hover"
+            >
+              <p className="text-[16px] font-medium leading-snug text-gray-dark">{topic.tag}</p>
+              <p className="mt-0.5 text-[14px] text-gray-light">{topic.coaches} coaches</p>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Left Sidebar ──────────────────────────────────────
 
 function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
@@ -2252,6 +2359,7 @@ export default function Home() {
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
   useSetLeftSidebar(<HomeSidebar onCreatePost={() => setComposeOpen(true)} />);
+  useSetRightSidebar(<HomeRightSidebar />);
   useSetContentMaxWidth(672);
   const [feedPosts, setFeedPosts] = useState<Post[]>(posts);
 
