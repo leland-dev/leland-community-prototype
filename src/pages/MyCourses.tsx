@@ -668,7 +668,7 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
       >
         <span className="flex-1 text-left text-[16px] font-medium text-gray-dark">
           {course.sessions.length} Sessions
-          {!isCompleted && <a href="#" onClick={(e) => e.stopPropagation()} className="ml-3 font-normal text-gray-light underline">Add all to calendar</a>}
+          {!isCompleted && !chipSessionLayout && <a href="#" onClick={(e) => e.stopPropagation()} className="ml-3 font-normal text-gray-light underline">Add all to calendar</a>}
         </span>
         <svg
           width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -701,6 +701,9 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
                       </button>
                     ))}
                   </div>
+                  {!isCompleted && (
+                    <a href="#" className="ml-auto text-[14px] font-normal text-gray-light underline">Add all to calendar</a>
+                  )}
                 </div>
                 {course.sessions.map((session, i) => (
                   <SessionRowChip key={session.id} session={session} index={i + 1} isNext={session.id === nextSession?.id} preferredSlot={preferredSlot} />
