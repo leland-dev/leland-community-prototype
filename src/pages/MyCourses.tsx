@@ -701,7 +701,7 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
       {/* Zone 3: Sessions accordion toggle (cohort-selected only) */}
       {cohortSelected && <button
         onClick={() => setSessionsOpen(!sessionsOpen)}
-        className="flex w-full cursor-pointer items-center gap-3 bg-white px-4 py-3 sm:px-5"
+        className="flex w-full cursor-pointer items-center gap-3 border-t border-gray-stroke bg-white px-4 py-3 sm:px-5"
       >
         <span className="flex-1 text-left text-[16px] font-medium text-gray-dark">
           {course.sessions.length} Sessions
