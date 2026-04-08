@@ -391,7 +391,7 @@ function SessionRowSimple({ session, index, isNext }: { session: Session; index:
 
               {/* CTA */}
               {isLive && (
-                <a href={slot.joinUrl ?? "#"} className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#296cef] p-3.5 text-[16px] font-medium text-white transition-colors hover:bg-[#3b7dfd] sm:px-4 sm:py-3.5">
+                <a href={slot.joinUrl ?? "#"} className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#296cef] p-3.5 text-[16px] font-medium text-white transition-colors hover:bg-[#3b7dfd] sm:w-28 sm:px-4 sm:py-3.5">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M2 7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
                     <path d="M14 8.5l4-2v7l-4-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -400,15 +400,15 @@ function SessionRowSimple({ session, index, isNext }: { session: Session; index:
                 </a>
               )}
               {state === "past-recording" && (
-                <a href={slot.recordingUrl} className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb] sm:px-4 sm:py-3.5">
+                <a href={slot.recordingUrl} className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb] sm:w-28 sm:px-4 sm:py-3.5">
                   <img src={playVideoIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
                   <span className="hidden sm:inline">Replay</span>
                 </a>
               )}
               {state === "past-pending" && (
                 <div className="group relative">
-                  <div className="flex shrink-0 cursor-default items-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-[#c0c0c0] sm:px-4 sm:py-3.5">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="animate-spin">
+                  <div className="flex shrink-0 cursor-default items-center justify-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-[#c0c0c0] sm:w-28 sm:px-4 sm:py-3.5">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="animate-spin sm:hidden">
                       <path d="M10 2a8 8 0 1 0 8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
                     <span className="hidden sm:inline">Processing</span>
