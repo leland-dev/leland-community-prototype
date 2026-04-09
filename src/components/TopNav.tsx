@@ -18,8 +18,6 @@ import logOutIcon from "../assets/icons/log out.svg";
 import browserIcon from "../assets/icons/browser.svg";
 import codeIcon from "../assets/icons/code.svg";
 import lelandLogo from "../assets/Logo.svg";
-import homeInactive from "../assets/icons/nav-icons/home-inactive.svg";
-import homeActive from "../assets/icons/nav-icons/home-active.svg";
 
 /* ── Nav links ── */
 const navLinks = [
@@ -107,6 +105,22 @@ export default function TopNav() {
           </NavLink>
 
           <nav className="flex items-stretch gap-3">
+            {/* Home */}
+            <NavLink
+              to="/"
+              end
+              className="relative flex self-stretch items-center"
+            >
+              {({ isActive }) => (
+                <>
+                  <span className={`flex items-center rounded-lg px-3 py-2 text-[18px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                    Home
+                  </span>
+                  {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
+                </>
+              )}
+            </NavLink>
+
             {/* Browse dropdown */}
             <div ref={browseRef} className="relative flex self-stretch items-center">
               <button
@@ -172,7 +186,7 @@ export default function TopNav() {
               </AnimatePresence>
             </div>
 
-            {/* Remaining nav links */}
+            {/* Nav links (Events, Courses, Leland+) */}
             {navLinks.filter(({ to }) => to !== "/").map(({ to, label, end }) => (
               <NavLink
                 key={to}
@@ -219,18 +233,6 @@ export default function TopNav() {
 
         {/* Right: Home, Inbox, Calendar, Notifications, Profile */}
         <div className="flex shrink-0 items-stretch gap-1">
-
-          {/* Home */}
-          <NavLink to="/" end className="relative flex self-stretch items-center">
-            {({ isActive }) => (
-              <>
-                <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-gray-hover" : ""}`}>
-                  <img src={isActive ? homeActive : homeInactive} alt="Home" className="h-[20px] w-[20px]" />
-                </span>
-                {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
-              </>
-            )}
-          </NavLink>
 
           {/* Inbox */}
           <NavLink to="/messages" className="relative flex self-stretch items-center">
