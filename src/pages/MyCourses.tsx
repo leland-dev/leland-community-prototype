@@ -430,7 +430,7 @@ function SessionRowSimple({ session, isNext }: { session: Session; index: number
   return (
     <div className="flex items-stretch px-1 sm:px-2">
       {/* Left OR bracket connector */}
-      <div className="flex shrink-0 flex-col items-end justify-center py-5">
+      <div className="flex shrink-0 flex-col items-end justify-center py-5 pl-2">
         <div className="h-[30px] w-2 border-l border-t border-dashed border-[#9b9b9b]" />
         <span className="py-2 text-[14px] font-medium uppercase tracking-[0.1em] text-[#9b9b9b]">or</span>
         <div className="h-[30px] w-2 border-l border-b border-dashed border-[#9b9b9b]" />
