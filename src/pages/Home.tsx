@@ -7,6 +7,7 @@ import { useVersion } from "../contexts/VersionContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { useSetContentMaxWidth } from "../components/ContentMaxWidthContext";
+import SessionCard from "../components/SessionCard";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import eventImageSrc from "../assets/img/EventImage.avif";
 import lelandCompass from "../assets/leland-compass.svg";
@@ -512,29 +513,29 @@ export function ShareDropdown({ postId, onClose }: { postId: number; onClose: ()
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: -4 }}
         transition={{ duration: 0.12 }}
-        className="absolute bottom-full left-0 z-50 mb-2 w-56 overflow-hidden rounded-lg border border-[#f0f0f0] bg-white shadow-md"
+        className="absolute top-full right-0 z-50 mt-1 w-56 rounded-2xl border border-gray-stroke bg-white shadow-lg"
       >
-        {/* Copy link */}
-        <button onClick={copyLink} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[15px] text-gray-dark hover:bg-gray-hover">
-          {copied ? (
-            <svg className="h-4 w-4 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          ) : (
-            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          )}
-          {copied ? "Copied!" : "Copy link"}
-        </button>
-        <div className="mx-4 border-t border-[#f2f2f2]" />
-        {/* LinkedIn */}
-        <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-3 px-4 py-3 text-[15px] text-gray-dark hover:bg-gray-hover">
-          <svg className="h-4 w-4 shrink-0 rounded-[3px]" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-          LinkedIn
-        </a>
-        <div className="mx-4 border-t border-[#f2f2f2]" />
-        {/* Twitter/X */}
-        <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-3 px-4 py-3 text-[15px] text-gray-dark hover:bg-gray-hover">
-          <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          Twitter / X
-        </a>
+        <div className="px-2 py-2">
+          {/* Copy link */}
+          <button onClick={copyLink} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+            {copied ? (
+              <svg className="h-5 w-5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            ) : (
+              <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            )}
+            {copied ? "Copied!" : "Copy link"}
+          </button>
+          {/* LinkedIn */}
+          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+            <svg className="h-5 w-5 shrink-0 rounded-[3px]" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+          </a>
+          {/* Twitter/X */}
+          <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Twitter / X
+          </a>
+        </div>
       </motion.div>
     </>
   );
@@ -612,24 +613,25 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -4 }}
               transition={{ duration: 0.12 }}
-              className="absolute bottom-full left-0 z-50 mb-2 w-64 overflow-hidden rounded-lg border border-[#f0f0f0] bg-white shadow-md"
+              className="absolute bottom-full left-0 z-50 mb-2 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
             >
-              <button onClick={triggerRepost} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[15px] text-gray-dark hover:bg-gray-hover">
-                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                Repost with your thoughts
-              </button>
-              <div className="mx-4 border-t border-[#f2f2f2]" />
-              {reposted ? (
-                <button onClick={undoRepost} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[15px] text-gray-dark hover:bg-gray-hover">
-                  <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
-                  Undo repost
+              <div className="px-2 py-2">
+                <button onClick={triggerRepost} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+                  <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Repost with your thoughts
                 </button>
-              ) : (
-                <button onClick={triggerRepost} className="flex w-full items-center gap-3 px-4 py-3 text-left text-[15px] text-gray-dark hover:bg-gray-hover">
-                  <img src={repostsIcon} alt="Repost" className="h-4 w-4 shrink-0 [filter:invert(44%)]" />
-                  Repost to feed
-                </button>
-              )}
+                {reposted ? (
+                  <button onClick={undoRepost} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+                    <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+                    Undo repost
+                  </button>
+                ) : (
+                  <button onClick={triggerRepost} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+                    <img src={repostsIcon} alt="Repost" className="h-5 w-5 shrink-0 [filter:invert(44%)]" />
+                    Repost to feed
+                  </button>
+                )}
+              </div>
             </motion.div>
           </>
         ) : null}
@@ -738,20 +740,22 @@ function PostHeaderRow({ author, time, verified, headline }: { author: string; t
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -4 }}
                 transition={{ duration: 0.12 }}
-                className="absolute right-0 top-7 z-50 w-48 overflow-hidden rounded-xl border border-[#f0f0f0] bg-white shadow-lg"
+                className="absolute right-0 top-7 z-50 w-48 rounded-2xl border border-gray-stroke bg-white shadow-lg"
               >
-                {menuItems.map(({ label, icon, danger }, i) => (
-                  <button
-                    key={label}
-                    onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }}
-                    className={`flex w-full items-center gap-3 px-4 py-3 text-left text-[14px] transition-colors hover:bg-gray-50 ${
-                      danger ? "text-red-500" : "text-gray-700"
-                    } ${i > 0 ? "border-t border-[#f2f2f2]" : ""}`}
-                  >
-                    {icon}
-                    {label}
-                  </button>
-                ))}
+                <div className="px-2 py-2">
+                  {menuItems.map(({ label, icon, danger }) => (
+                    <button
+                      key={label}
+                      onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }}
+                      className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium transition-colors hover:bg-gray-hover ${
+                        danger ? "text-[#D92D20]" : "text-gray-dark"
+                      }`}
+                    >
+                      {icon}
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </motion.div>
             </>
           )}
@@ -773,16 +777,28 @@ function PostImageGrid({
   images,
   renderOverlay,
   className = "",
+  maxHeight,
+  onImageClick,
 }: {
   images: { src: string; aspectRatio?: number }[];
   renderOverlay?: (idx: number) => React.ReactNode;
   className?: string;
+  maxHeight?: number;
+  onImageClick?: (idx: number) => void;
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scroll = (dir: "left" | "right") =>
+    scrollRef.current?.scrollBy({ left: dir === "right" ? 175 : -175, behavior: "smooth" });
+
   const count = images.length;
   if (count === 0) return null;
 
   const cell = (src: string, idx: number, extraClass = "") => (
-    <div key={idx} className={`relative overflow-hidden bg-black group ${extraClass}`}>
+    <div
+      key={idx}
+      className={`relative overflow-hidden bg-black group ${extraClass}${onImageClick ? " cursor-zoom-in" : ""}`}
+      onClick={onImageClick ? () => onImageClick(idx) : undefined}
+    >
       <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover object-center" draggable={false} />
       {renderOverlay?.(idx)}
     </div>
@@ -791,11 +807,14 @@ function PostImageGrid({
   if (count === 1) {
     const r = images[0].aspectRatio ?? 1;
     const clamped = Math.min(Math.max(r, 0.5), 2); // 1:2 portrait → 2:1 landscape
-    // Single image: the container IS the positioned element so absolute inset-0 works
+    const singleStyle: React.CSSProperties = { aspectRatio: String(clamped) };
+    if (maxHeight) { singleStyle.maxHeight = maxHeight; singleStyle.maxWidth = maxHeight * clamped; }
     return (
       <div
-        className={`relative overflow-hidden rounded-xl bg-black group ${className}`}
-        style={{ aspectRatio: String(clamped) }}>
+        className={`relative overflow-hidden rounded-xl bg-white group ${className}${onImageClick ? " cursor-zoom-in" : ""}`}
+        style={singleStyle}
+        onClick={onImageClick ? () => onImageClick(0) : undefined}
+      >
         <img src={images[0].src} alt="" className="absolute inset-0 w-full h-full object-cover object-center" draggable={false} />
         {renderOverlay?.(0)}
       </div>
@@ -823,24 +842,44 @@ function PostImageGrid({
     );
   }
 
-  // 4 images: horizontal scroll strip
+  // 4 images: horizontal scroll strip with arrow buttons
   return (
-    <div className={`flex gap-2 overflow-x-auto scrollbar-hide rounded-xl ${className}`}>
-      {images.map((img, i) => (
-        <div key={i} className="relative shrink-0 overflow-hidden rounded-xl bg-black group" style={{ height: 220, width: 165 }}>
-          <img src={img.src} alt="" className="absolute inset-0 w-full h-full object-cover object-center" draggable={false} />
-          {renderOverlay?.(i)}
-        </div>
-      ))}
+    <div className={`relative ${className}`}>
+      <div ref={scrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide rounded-xl">
+        {images.map((img, i) => (
+          <div
+            key={i}
+            className={`relative shrink-0 overflow-hidden rounded-xl bg-black group${onImageClick ? " cursor-zoom-in" : ""}`}
+            style={{ height: 220, width: 165 }}
+            onClick={onImageClick ? () => onImageClick(i) : undefined}
+          >
+            <img src={img.src} alt="" className="absolute inset-0 w-full h-full object-cover object-center" draggable={false} />
+            {renderOverlay?.(i)}
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={() => scroll("left")}
+        className="absolute left-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/60 text-gray-dark shadow-sm backdrop-blur-sm transition-colors hover:bg-white/85"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button
+        onClick={() => scroll("right")}
+        className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/60 text-gray-dark shadow-sm backdrop-blur-sm transition-colors hover:bg-white/85"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
     </div>
   );
 }
 
-function ImageGallery({ images, imageAspectRatios }: { images: string[]; imageAspectRatios?: number[] }) {
+function ImageGallery({ images, imageAspectRatios, onImageClick }: { images: string[]; imageAspectRatios?: number[]; onImageClick?: (idx: number) => void }) {
   return (
     <PostImageGrid
       className="mt-3"
       images={images.map((src, i) => ({ src, aspectRatio: imageAspectRatios?.[i] }))}
+      onImageClick={onImageClick}
     />
   );
 }
@@ -1664,7 +1703,13 @@ export function FeedPost({ post }: { post: Post }) {
           <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} />
           <p className="mt-1 text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
           <div onClick={e => e.stopPropagation()}>
-            {post.type === "image" && <ImageGallery images={post.images} imageAspectRatios={post.imageAspectRatios} />}
+            {post.type === "image" && (
+              <ImageGallery
+                images={post.images}
+                imageAspectRatios={post.imageAspectRatios}
+                onImageClick={(idx) => navigate(`/post/${post.id}`, { state: { focusImage: idx } })}
+              />
+            )}
             {post.type === "link" && <LinkCard link={post.link} />}
             {post.type === "event" && <EventCard event={post.event} />}
             {post.type === "milestone" && <MilestoneCard milestone={post.milestone} postId={post.id} authorName={post.milestone.clientName} />}
@@ -1672,7 +1717,7 @@ export function FeedPost({ post }: { post: Post }) {
           </div>
         </div>
       </div>
-      <div onClick={e => e.stopPropagation()}>
+      <div className="mt-1" onClick={e => e.stopPropagation()}>
         <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} postId={post.id} authorName={post.author} />
       </div>
     </div>
@@ -2085,17 +2130,17 @@ function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => voi
           <>
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-stroke">
-              <button onClick={cancelCrop} className="text-[14px] font-medium text-gray-light hover:text-gray-dark transition-colors">Cancel</button>
+              <div className="w-8" />
               <span className="text-[15px] font-semibold text-gray-dark">
                 {cropQueue.length > 0 ? `Crop photo (${images.length + 1} of ${images.length + 1 + cropQueue.length})` : "Crop photo"}
               </span>
-              <button onClick={applyCrop} className="rounded-[8px] bg-gray-dark px-4 py-1.5 text-[14px] font-semibold text-white hover:opacity-90 transition-opacity">
-                {cropQueue.length > 0 ? "Next →" : "Apply"}
+              <button onClick={cancelCrop} className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-stroke bg-white text-gray-dark transition-colors hover:bg-gray-hover">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
             </div>
 
             {/* Crop area */}
-            <div ref={cropContainerRef} className="relative select-none bg-black overflow-hidden" style={{ height: 360 }}>
+            <div ref={cropContainerRef} className="relative select-none bg-white overflow-hidden" style={{ height: 360 }}>
               {/* Rotate buttons */}
               <div className="absolute top-2 left-2 z-10 flex gap-1">
                 {([
@@ -2132,10 +2177,10 @@ function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => voi
                 const bh = cropBox.h * rh;
                 return (
                   <>
-                    <div className="absolute bg-black/55 pointer-events-none" style={{ left: 0, right: 0, top: 0, height: by }} />
-                    <div className="absolute bg-black/55 pointer-events-none" style={{ left: 0, right: 0, top: by + bh, bottom: 0 }} />
-                    <div className="absolute bg-black/55 pointer-events-none" style={{ left: 0, width: bx, top: by, height: bh }} />
-                    <div className="absolute bg-black/55 pointer-events-none" style={{ left: bx + bw, right: 0, top: by, height: bh }} />
+                    <div className="absolute bg-black/20 pointer-events-none" style={{ left: 0, right: 0, top: 0, height: by }} />
+                    <div className="absolute bg-black/20 pointer-events-none" style={{ left: 0, right: 0, top: by + bh, bottom: 0 }} />
+                    <div className="absolute bg-black/20 pointer-events-none" style={{ left: 0, width: bx, top: by, height: bh }} />
+                    <div className="absolute bg-black/20 pointer-events-none" style={{ left: bx + bw, right: 0, top: by, height: bh }} />
                     <div className="absolute cursor-move" style={{ left: bx, top: by, width: bw, height: bh }} onMouseDown={e => startCropDrag("move", e)}>
                       <div className="absolute inset-0 border-2 border-white pointer-events-none" />
                       <div className="absolute inset-0 pointer-events-none" style={{
@@ -2156,14 +2201,19 @@ function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => voi
               })()}
             </div>
 
-            {/* Aspect ratio pills */}
-            <div className="flex items-center justify-center gap-2 px-4 py-3">
-              {(["free", "1:1", "4:5", "16:9"] as const).map(r => (
-                <button key={r} onClick={() => applyRatioPreset(r)}
-                  className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-colors ${cropRatio === r ? "bg-gray-dark text-white" : "text-gray-light hover:bg-gray-hover"}`}>
-                  {r === "free" ? "Original" : r}
-                </button>
-              ))}
+            {/* Aspect ratio pills + Apply */}
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-2">
+                {(["free", "1:1", "4:5", "16:9"] as const).map(r => (
+                  <button key={r} onClick={() => applyRatioPreset(r)}
+                    className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-colors ${cropRatio === r ? "bg-gray-200 text-gray-dark" : "text-gray-light hover:bg-gray-hover"}`}>
+                    {r === "free" ? "Original" : r}
+                  </button>
+                ))}
+              </div>
+              <button onClick={applyCrop} className="rounded-[8px] bg-gray-dark px-4 py-1.5 text-[14px] font-semibold text-white hover:opacity-90 transition-opacity">
+                {cropQueue.length > 0 ? "Next →" : "Apply"}
+              </button>
             </div>
           </>
         ) : (
@@ -2189,6 +2239,7 @@ function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => voi
               {images.length > 0 && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden px-4 pb-3">
                   <PostImageGrid
+                    maxHeight={400}
                     images={images.map(img => ({ src: img.cropped, aspectRatio: img.aspectRatio }))}
                     renderOverlay={(idx) => (
                       <>
@@ -2209,12 +2260,6 @@ function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => voi
                       </>
                     )}
                   />
-                  {images.length < 4 && (
-                    <button onClick={() => fileInputRef.current?.click()} className="mt-2 flex items-center gap-1.5 text-[13px] font-medium text-gray-light hover:text-gray-dark transition-colors">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                      Add photo ({images.length}/4)
-                    </button>
-                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -2291,9 +2336,12 @@ function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => voi
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-1">
                 <button onClick={() => fileInputRef.current?.click()} disabled={images.length >= 4}
-                  className="flex h-9 w-9 items-center justify-center rounded-full transition-colors text-gray-light hover:bg-gray-hover disabled:opacity-30"
+                  className="flex h-9 items-center justify-center gap-1 rounded-full px-2 transition-colors text-gray-light hover:bg-gray-hover disabled:opacity-30"
                   title={images.length >= 4 ? "Maximum 4 images" : "Add photo"}>
                   <ImageIcon size={24} strokeWidth={1.5} />
+                  {images.length > 0 && (
+                    <span className="text-[13px] font-medium">{images.length}/4</span>
+                  )}
                 </button>
                 <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelect} />
               </div>
@@ -2533,22 +2581,10 @@ function HomeRightSidebar() {
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <div className="flex flex-col">
-          {HAPPENING_NOW.map(event => (
-            <button
-              key={event.id}
-              className="flex items-start rounded-lg px-1.5 py-2 -mx-1.5 text-left transition-colors hover:bg-gray-hover"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="text-[15px] font-medium leading-snug text-gray-dark">{event.title}</p>
-                {event.status === "live" ? (
-                  <p className="mt-0.5 text-[13px] text-red-500">Live now · {event.detail}</p>
-                ) : (
-                  <p className="mt-0.5 text-[13px] text-gray-light">{event.detail}</p>
-                )}
-              </div>
-            </button>
-          ))}
+        <div className="flex flex-col -mx-2">
+          <SessionCard title="MBA Strategy Live" dateTime="Today at 3:00 PM" duration="60 min" image={pic6} type="event" status="live" />
+          <SessionCard title="Tech Consulting Workshop" dateTime="Today, 4:30 PM" duration="90 min" image={pic9} type="event" status="upcoming" startsIn="30 min" />
+          <SessionCard title="Interview Prep Session" dateTime="Tomorrow, 2:00 PM" duration="60 min" image={pic11} type="event" status="upcoming" />
         </div>
       </div>
 
@@ -2614,31 +2650,10 @@ function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </NavLink>
-        <div className="mt-4 flex flex-col gap-4">
-          {[
-            { month: "OCT", day: "22", title: "Mock Interview", time: "Today, 3:00 PM", coach: "Jasmine Singer", avatar: pic3 },
-            { month: "OCT", day: "29", title: "Resume Review", time: "Oct 29, 5:00 PM", coach: "Michael Busby", avatar: pic5 },
-            { month: "NOV", day: "3",  title: "Jasmine <> James Sync", time: "Nov 3, 5:00 PM", coach: "Jasmine Singer", avatar: pic3 },
-          ].map(s => (
-            <div key={s.title} className="flex items-start gap-3 rounded-xl p-1.5 -mx-1.5 cursor-pointer transition-colors hover:bg-gray-hover">
-              <div className="flex w-[48px] shrink-0 flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
-                <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">
-                  {s.month}
-                </div>
-                <div className="w-full pt-0.5 pb-1 text-center text-[19px] font-medium leading-tight text-[#707070]">
-                  {s.day}
-                </div>
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[16px] font-medium text-gray-dark leading-snug">{s.title}</p>
-                <p className="mt-0.5 text-[14px] text-gray-light">{s.time}</p>
-                <div className="mt-1 flex items-center gap-1.5">
-                  <img src={s.avatar} alt={s.coach} className="h-[18px] w-[18px] rounded-full object-cover" />
-                  <span className="text-[14px] text-gray-light">{s.coach}</span>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="mt-2 flex flex-col -mx-2">
+          <SessionCard title="Mock Interview" dateTime="Today, 3:00 PM" duration="45 min" image={pic3} type="coach" status="upcoming" startsIn="2h" />
+          <SessionCard title="Resume Review" dateTime="Oct 29, 5:00 PM" duration="45 min" image={pic5} type="coach" status="upcoming" />
+          <SessionCard title="Jasmine <> James Sync" dateTime="Nov 3, 5:00 PM" duration="60 min" image={pic3} type="coach" status="upcoming" />
         </div>
         <button onClick={onCreatePost} className="mt-5 w-full cursor-pointer rounded-lg bg-gray-100 py-2.5 text-center text-[15px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
           Create post

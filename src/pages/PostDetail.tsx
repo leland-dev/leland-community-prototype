@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -73,16 +74,6 @@ const COMMENT_SEEDS: CommentData[] = [
         time: "1h",
         text: "This. A 700 with a compelling narrative beats a 780 with a bland one every time.",
         likes: 19,
-        replies: [
-          {
-            id: 2011,
-            author: "Marcus Williams",
-            avatar: pic2,
-            time: "45m",
-            text: "Exactly — I've seen 760s get dinged at H/S/W while 680s with great stories get in. The number opens doors, the story walks through them.",
-            likes: 8,
-          },
-        ],
       },
       {
         id: 202,
@@ -181,16 +172,106 @@ function AuthorRow({ post }: { post: Post }) {
   );
 }
 
-function PostMedia({ post }: { post: Post }) {
+function ImageLightbox({ images, index, onClose, onChangeIndex }: {
+  images: string[];
+  index: number;
+  onClose: () => void;
+  onChangeIndex: (i: number) => void;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft" && index > 0) onChangeIndex(index - 1);
+      if (e.key === "ArrowRight" && index < images.length - 1) onChangeIndex(index + 1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [index, images.length, onClose, onChangeIndex]);
+
+  return createPortal(
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95"
+      onClick={onClose}
+    >
+      <button
+        onClick={e => { e.stopPropagation(); onClose(); }}
+        className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+
+      <motion.img
+        key={index}
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.18 }}
+        src={images[index]}
+        alt=""
+        className="max-h-[90vh] max-w-[90vw] rounded-xl object-contain"
+        onClick={e => e.stopPropagation()}
+      />
+
+      {index > 0 && (
+        <button
+          onClick={e => { e.stopPropagation(); onChangeIndex(index - 1); }}
+          className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      )}
+      {index < images.length - 1 && (
+        <button
+          onClick={e => { e.stopPropagation(); onChangeIndex(index + 1); }}
+          className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      )}
+
+      {images.length > 1 && (
+        <div className="absolute bottom-5 flex gap-2">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              onClick={e => { e.stopPropagation(); onChangeIndex(i); }}
+              className={`h-1.5 rounded-full transition-all ${i === index ? "w-4 bg-white" : "w-1.5 bg-white/40"}`}
+            />
+          ))}
+        </div>
+      )}
+    </motion.div>,
+    document.body
+  );
+}
+
+function PostMedia({ post, onImageClick }: { post: Post; onImageClick?: (idx: number) => void }) {
   if (post.type === "image") {
     const imgs = post.images;
     if (imgs.length === 1) {
-      return <img src={imgs[0]} alt="" className="mt-3 w-full rounded-xl object-cover" style={{ maxHeight: 480 }} />;
+      return (
+        <img
+          src={imgs[0]}
+          alt=""
+          className={`mt-3 w-full rounded-xl object-cover${onImageClick ? " cursor-zoom-in" : ""}`}
+          style={{ maxHeight: 480 }}
+          onClick={onImageClick ? () => onImageClick(0) : undefined}
+        />
+      );
     }
     return (
       <div className={`mt-3 grid gap-1 ${imgs.length === 2 ? "grid-cols-2" : imgs.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
         {imgs.map((img, i) => (
-          <img key={i} src={img} alt="" className="aspect-square w-full rounded-lg object-cover" />
+          <img
+            key={i}
+            src={img}
+            alt=""
+            className={`aspect-square w-full rounded-lg object-cover${onImageClick ? " cursor-zoom-in" : ""}`}
+            onClick={onImageClick ? () => onImageClick(i) : undefined}
+          />
         ))}
       </div>
     );
@@ -450,25 +531,29 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
   const hasThread = replies.length > 0 || showReply;
 
   return (
-    <div>
-      {/* Main row: avatar (+ flex-1 line down to first reply) + content */}
+    // relative wrapper so we can absolutely-position the thread line
+    <div className="relative">
+      {/*
+        Thread line: a single 1px line centered on the avatar (x=21→22),
+        starting just below the avatar bottom (top=56: pt-3=12 + h-11=44)
+        and extending to the wrapper bottom (through all replies).
+      */}
+      {hasThread && (
+        <div className="pointer-events-none absolute bottom-0 w-px bg-gray-200" style={{ left: 21, top: 56 }} />
+      )}
+
+      {/* Comment row */}
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex gap-3 pt-3"
       >
-        {/* Avatar + line — flex-1 ends exactly at the bottom of THIS flex row */}
-        <div className="flex w-11 shrink-0 flex-col items-center">
-          <img
-            src={comment.avatar}
-            alt={comment.author}
-            className="h-11 w-11 shrink-0 rounded-full object-cover"
-            style={{ objectPosition: "50% 15%" }}
-          />
-          {hasThread ? <div className="mt-2 w-px flex-1 bg-gray-200" /> : null}
-        </div>
-
-        {/* Content */}
+        <img
+          src={comment.avatar}
+          alt={comment.author}
+          className="h-11 w-11 shrink-0 rounded-full object-cover"
+          style={{ objectPosition: "50% 15%" }}
+        />
         <div className="min-w-0 flex-1 pb-2">
           <div className="flex items-baseline gap-1.5">
             <span className="text-[17px] font-medium text-gray-dark">{comment.author}</span>
@@ -480,39 +565,39 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
           <p className="mt-0.5 text-[17px] leading-[1.4] text-gray-dark">{comment.text}</p>
           <div className="mt-2 flex items-center gap-4">
             <HeartButton liked={liked} count={comment.likes + (liked ? 1 : 0)} onToggle={() => setLiked(l => !l)} />
-            <button
-              onClick={() => setShowReply(s => !s)}
-              className="text-[13px] text-gray-light transition-colors hover:text-gray-dark"
-            >
-              Reply
-            </button>
+            {depth === 0 ? (
+              <button
+                onClick={() => setShowReply(s => !s)}
+                className="text-[13px] text-gray-light transition-colors hover:text-gray-dark"
+              >
+                Reply
+              </button>
+            ) : null}
           </div>
           {showReply ? <ReplyInput onPost={addReply} onCancel={() => setShowReply(false)} /> : null}
         </div>
       </motion.div>
 
-      {/* Replies outside the flex row.
-          border-l on the container draws one continuous line from first child top to last child bottom.
-          The last child's white overlay erases everything below its avatar center (top-[34px]),
-          so the line appears to stop cleanly at the last avatar. */}
-      {replies.length > 0 ? (
-        <div className="ml-[22px] border-l border-gray-200 pl-[22px]">
-          {replies.map((r, i) => {
-            const isLast = i === replies.length - 1;
-            return (
-              <div key={r.id} className="relative">
-                {/* L-connector: curves from the border down-right to this child's avatar */}
-                <div className="absolute -left-[22px] top-0 h-[34px] w-[18px] rounded-bl-[10px] border-b border-l border-gray-200" />
-                {/* White eraser: covers the border below the last child's avatar center */}
-                {isLast ? (
-                  <div className="absolute -left-[23px] top-[34px] bottom-0 w-px bg-white" />
-                ) : null}
-                <CommentItem comment={r} depth={depth + 1} />
-              </div>
-            );
-          })}
-        </div>
-      ) : null}
+      {/*
+        Replies are siblings at x=0 — their avatars (w-11, center x=22) align with
+        the thread line above, creating one smooth vertical connection.
+        For the last reply a white overlay trims the line at that avatar's center
+        (top=34: pt-3=12 + half avatar=22).
+      */}
+      {replies.map((r, i) => {
+        const isLast = i === replies.length - 1;
+        return (
+          <div key={r.id} className="relative">
+            {isLast && (
+              <div
+                className="pointer-events-none absolute bottom-0 w-px bg-white"
+                style={{ left: 21, top: 34 }}
+              />
+            )}
+            <CommentItem comment={r} depth={depth + 1} />
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -524,7 +609,7 @@ export default function PostDetail() {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { focusInput = false, prefillComment = "" } = (location.state as { sourceY?: number; focusInput?: boolean; prefillComment?: string }) ?? {};
+  const { focusInput = false, prefillComment = "", focusImage } = (location.state as { sourceY?: number; focusInput?: boolean; prefillComment?: string; focusImage?: number }) ?? {};
   const post = posts.find(p => p.id === Number(postId));
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -539,6 +624,9 @@ export default function PostDetail() {
   const [commentText, setCommentText] = useState(prefillComment);
   const [comments, setComments] = useState<CommentData[]>(() =>
     post ? getCommentsForPost(post.id) : []
+  );
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(
+    typeof focusImage === "number" ? focusImage : null
   );
 
   if (!post) {
@@ -567,41 +655,30 @@ export default function PostDetail() {
   };
 
   return (
+    <>
     <motion.div
       initial={{ y: 16, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="flex items-start gap-4"
     >
-      {/* Persistent circle back button — xl only, sits left of avatars */}
-      <button
-        onClick={() => navigate(-1)}
-        aria-label="Go back"
-        className="hidden shrink-0 sticky top-6 self-start h-9 w-9 xl:flex items-center justify-center rounded-full border border-gray-200 bg-white text-gray-dark transition-colors hover:bg-gray-50"
-      >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
-      </button>
-
-      {/* Content */}
-      <div className="min-w-0 flex-1">
-        {/* Mobile-only inline back button */}
+      {/* Content — full width */}
+      <div className="min-w-0">
+        {/* Back button above the post avatar */}
         <button
           onClick={() => navigate(-1)}
-          className="mt-4 flex items-center gap-2 text-[15px] text-gray-light transition-colors hover:text-gray-dark xl:hidden"
+          aria-label="Go back"
+          className="mt-4 mb-3 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-dark transition-colors hover:bg-gray-50"
         >
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
-          Back
         </button>
 
         {/* Post */}
         <div className="pb-2">
           <AuthorRow post={post} />
           <p className="mt-1 pl-[56px] text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
-          <div className="pl-[56px]"><PostMedia post={post} /></div>
+          <div className="pl-[56px]"><PostMedia post={post} onImageClick={post.type === "image" ? setLightboxIndex : undefined} /></div>
           <div className="pl-[56px]"><StatsRow post={post} onCommentFocus={() => commentInputRef.current?.focus()} /></div>
         </div>
 
@@ -650,5 +727,17 @@ export default function PostDetail() {
         </div>
       </div>
     </motion.div>
+
+    <AnimatePresence>
+      {lightboxIndex !== null && post.type === "image" && (
+        <ImageLightbox
+          images={post.images}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onChangeIndex={setLightboxIndex}
+        />
+      )}
+    </AnimatePresence>
+    </>
   );
 }
