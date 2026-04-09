@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import PageShell from "../components/PageShell";
 import SessionCard from "../components/SessionCard";
@@ -198,10 +198,6 @@ function formatTime(date: Date): string {
   return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
-function formatShortDate(date: Date): string {
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
 function formatSlotDateTime(date: Date): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" }) +
     " at " +
@@ -247,109 +243,9 @@ function ActionButton({ icon, label }: { icon: React.ReactNode; label: string })
 // ─── Slot option ──────────────────────────────────────────────────────────────
 
 
-// ─── Session row (chip variant) ──────────────────────────────────────────────
+// ─── Session row (grouped variant) ───────────────────────────────────────────
 
 const SLOT_TIME_LABELS = ["9:00 AM", "7:00 PM"] as const;
-
-function SessionRowChip({ session, index, isNext, preferredSlot, isFirst }: { session: Session; index: number; isNext: boolean; preferredSlot: number; isFirst?: boolean }) {
-  const [selectedSlot, setSelectedSlot] = useState(preferredSlot);
-  // Sync when global preference changes
-  useEffect(() => { setSelectedSlot(preferredSlot); }, [preferredSlot]);
-  const slot = session.slots[selectedSlot];
-  const state = getSessionState(slot);
-  const isPast = state === "past-recording" || state === "past-pending";
-  const isLive = state === "live";
-
-  const dateLabel = `${formatShortDate(slot.startTime)} · ${session.duration}`;
-
-  // CTA — desktop shows text, mobile shows icon only
-  const cta = (() => {
-    if (isLive) return (
-      <a href={slot.joinUrl ?? "#"} className="flex items-center justify-center gap-2 rounded-lg bg-[#296cef] p-3.5 text-[16px] font-medium text-white transition-colors hover:bg-[#3b7dfd] sm:px-4 sm:py-3.5">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M2 7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-          <path d="M14 8.5l4-2v7l-4-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <span className="hidden sm:inline">Join</span>
-      </a>
-    );
-    if (state === "past-recording") return (
-      <a href={slot.recordingUrl} className="flex items-center justify-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb] sm:px-4 sm:py-3.5">
-        <img src={playVideoIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
-        <span className="hidden sm:inline">Replay</span>
-      </a>
-    );
-    if (state === "past-pending") return (
-      <div className="group relative">
-        <div className="flex cursor-default items-center justify-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-[#c0c0c0] sm:px-4 sm:py-3.5">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="animate-spin sm:hidden">
-            <path d="M10 2a8 8 0 1 0 8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          <span className="hidden sm:inline">Processing</span>
-        </div>
-        <div className="pointer-events-none absolute bottom-full right-0 mb-2 hidden w-max max-w-[200px] rounded-lg bg-gray-dark px-3 py-2 text-[14px] leading-[1.3] text-white shadow-lg group-hover:block">
-          Check back soon for the recording
-        </div>
-      </div>
-    );
-    if ((state === "soon" || state === "future") && isNext) return (
-      <span className="text-right text-[16px] font-medium text-[#3b7dfd]">
-        <span className="sm:hidden">{formatStartsIn(slot.startTime.getTime() - Date.now()).replace("Starts in ", "In ")}</span>
-        <span className="hidden sm:inline">{formatStartsIn(slot.startTime.getTime() - Date.now())}</span>
-      </span>
-    );
-    return null;
-  })();
-
-  const chips = (
-    <div className="flex flex-wrap gap-2">
-      {session.slots.map((s, i) => {
-        const selected = i === selectedSlot;
-        return (
-          <button
-            key={s.id}
-            onClick={() => setSelectedSlot(i)}
-            className={`rounded-full px-[14px] py-2 text-[14px] font-medium leading-[1.2] text-gray-dark transition-colors ${
-              selected
-                ? "border-2 border-gray-dark bg-white"
-                : "border border-gray-stroke bg-white hover:bg-gray-hover"
-            }`}
-          >
-            {SLOT_TIME_LABELS[i]}
-          </button>
-        );
-      })}
-    </div>
-  );
-
-  return (
-    <div className={`px-4 py-5 sm:grid sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-6 sm:px-5 ${isFirst ? "" : "border-t border-[#e5e5e5]"}`}>
-      {/* Text + chips (mobile) + mobile CTA */}
-      <div className="mb-3 flex items-start gap-4 sm:mb-0">
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <p className="text-[14px] font-medium uppercase tracking-[0.1em] text-gray-light">
-            Session {index}
-          </p>
-          <p className={`text-[16px] font-medium leading-[1.2] sm:text-[18px] ${isPast ? "text-gray-light" : "text-gray-dark"}`}>
-            {session.title}
-          </p>
-          <p className="text-[14px] leading-[1.2] text-gray-light">{dateLabel}</p>
-        </div>
-        {/* CTA icon — mobile only */}
-        <div className="shrink-0 sm:hidden">{cta}</div>
-      </div>
-
-      {/* Chips — mobile: below text; desktop: grid col 2 */}
-      <div className="sm:hidden">{chips}</div>
-      <div className="hidden sm:block">{chips}</div>
-
-      {/* CTA — desktop only, grid col 3, fixed width so chips always align */}
-      <div className="hidden sm:flex sm:w-28 sm:justify-end">{cta}</div>
-    </div>
-  );
-}
-
-// ─── Session row (grouped variant) ───────────────────────────────────────────
 
 function SessionRowSimple({ session, isNext }: { session: Session; index: number; isNext: boolean; isFirst?: boolean }) {
   const slots = session.slots.map((slot) => {
@@ -507,7 +403,7 @@ function SelectCohortModal({ open, onClose, onSelect }: { open: boolean; onClose
 // ─── Live course card ─────────────────────────────────────────────────────────
 
 function LiveCourseCard({ course }: { course: LiveCourse }) {
-  const { simpleSessionLayout, chipSessionLayout } = useSessionLayout();
+  const { simpleSessionLayout } = useSessionLayout();
   const isCompleted = course.sessions.length > 0 && course.sessions.every((s) =>
     s.slots.every((slot) => {
       const st = getSessionState(slot);
@@ -521,7 +417,6 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
     })
   );
   const [sessionsOpen, setSessionsOpen] = useState(!isCompleted);
-  const [preferredSlot, setPreferredSlot] = useState(0);
   const [cohortSelected, setCohortSelected] = useState(course.cohortSelected ?? true);
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
 
@@ -613,35 +508,8 @@ function LiveCourseCard({ course }: { course: LiveCourse }) {
 
       {/* Sessions list */}
       {cohortSelected && sessionsOpen && (
-        <div className="bg-white">
-          {chipSessionLayout
-            ? <>
-                {/* Preferred time row */}
-                <div className="flex items-start border-b border-[#e5e5e5] px-4 pb-4 pt-3 sm:px-5">
-                  <div className="flex flex-col gap-2">
-                    <span className="text-[14px] leading-[1.3] text-gray-light">Preferred time</span>
-                    <div className="flex gap-2">
-                      {([0, 1] as const).map((i) => (
-                        <button
-                          key={i}
-                          onClick={() => setPreferredSlot(i)}
-                          className={`rounded-full px-[14px] py-2 text-[14px] font-medium leading-[1.2] text-gray-dark transition-colors ${
-                            preferredSlot === i
-                              ? "border-2 border-gray-dark bg-white"
-                              : "border border-gray-stroke bg-white hover:bg-gray-hover"
-                          }`}
-                        >
-                          {SLOT_TIME_LABELS[i]}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                {course.sessions.map((session, i) => (
-                  <SessionRowChip key={session.id} session={session} index={i + 1} isNext={session.id === nextSession?.id} preferredSlot={preferredSlot} isFirst={i === 0} />
-                ))}
-              </>
-            : simpleSessionLayout
+        <div className="bg-white pb-2">
+          {simpleSessionLayout
             ? course.sessions.map((session, i) => (
                 <SessionRowSimple key={session.id} session={session} index={i + 1} isNext={session.id === nextSession?.id} isFirst={i === 0} />
               ))
@@ -745,16 +613,15 @@ function SuggestedCourseCard({ course }: { course: (typeof suggestedCourses)[0] 
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-type Variant = "simple" | "grouped" | "chip";
+type Variant = "simple" | "grouped";
 
 export default function MyCourses() {
-  const { setSimpleSessionLayout, setChipSessionLayout } = useSessionLayout();
+  const { setSimpleSessionLayout } = useSessionLayout();
   const [variant, setVariant] = useState<Variant>("simple");
 
   function applyVariant(v: Variant) {
     setVariant(v);
     setSimpleSessionLayout(v === "grouped");
-    setChipSessionLayout(v === "chip");
   }
 
   const suggestedCoursesSection = (
@@ -779,7 +646,7 @@ export default function MyCourses() {
       <div className="flex items-center justify-between">
         <h1 className="text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">My Courses</h1>
         <div className="flex rounded-lg border border-gray-stroke/50 bg-gray-hover p-0.5 text-[14px] font-medium">
-          {(["simple", "grouped", "chip"] as Variant[]).map((v) => (
+          {(["simple", "grouped"] as Variant[]).map((v) => (
             <button
               key={v}
               onClick={() => applyVariant(v)}
