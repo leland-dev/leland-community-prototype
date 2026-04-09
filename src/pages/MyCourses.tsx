@@ -412,7 +412,7 @@ function SessionRowChip({ session, index, isNext, preferredSlot, isFirst }: { se
   );
 }
 
-// ─── Session row (simple variant) ────────────────────────────────────────────
+// ─── Session row (grouped variant) ───────────────────────────────────────────
 
 function SessionRowSimple({ session, isNext }: { session: Session; index: number; isNext: boolean; isFirst?: boolean }) {
   const slots = session.slots.map((slot) => {
@@ -820,7 +820,7 @@ function SuggestedCourseCard({ course }: { course: (typeof suggestedCourses)[0] 
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-type Variant = "stacked" | "simple" | "chip";
+type Variant = "stacked" | "grouped" | "chip";
 
 export default function MyCourses() {
   const { setSimpleSessionLayout, setChipSessionLayout } = useSessionLayout();
@@ -828,7 +828,7 @@ export default function MyCourses() {
 
   function applyVariant(v: Variant) {
     setVariant(v);
-    setSimpleSessionLayout(v === "simple");
+    setSimpleSessionLayout(v === "grouped");
     setChipSessionLayout(v === "chip");
   }
 
@@ -854,7 +854,7 @@ export default function MyCourses() {
       <div className="flex items-center justify-between">
         <h1 className="text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">My Courses</h1>
         <div className="flex rounded-lg border border-gray-stroke/50 bg-gray-hover p-0.5 text-[14px] font-medium">
-          {(["stacked", "simple", "chip"] as Variant[]).map((v) => (
+          {(["stacked", "grouped", "chip"] as Variant[]).map((v) => (
             <button
               key={v}
               onClick={() => applyVariant(v)}
