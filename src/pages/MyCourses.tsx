@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { useState, useEffect, Fragment } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import PageShell from "../components/PageShell";
+import SessionCard from "../components/SessionCard";
 import { useSessionLayout } from "../components/SessionLayoutContext";
 import event1 from "../assets/placeholder images/placeholder-event-01.png";
 import event2 from "../assets/placeholder images/placeholder-event-02.png";
@@ -413,80 +414,37 @@ function SessionRowChip({ session, index, isNext, preferredSlot, isFirst }: { se
 
 // ─── Session row (simple variant) ────────────────────────────────────────────
 
-function SessionRowSimple({ session, index, isNext, isFirst }: { session: Session; index: number; isNext: boolean; isFirst?: boolean }) {
+function SessionRowSimple({ session, isNext, isFirst }: { session: Session; index: number; isNext: boolean; isFirst?: boolean }) {
   return (
-    <div className={isFirst ? "" : "border-t border-[#e5e5e5]"}>
+    <div className={`px-2 sm:px-3 ${isFirst ? "pt-1" : ""}`}>
       {session.slots.map((slot, slotIndex) => {
         const state = getSessionState(slot);
-        const isPast = state === "past-recording" || state === "past-pending";
-        const isLive = state === "live";
-        const timeLabel = SLOT_TIME_LABELS[slotIndex] ?? formatTime(slot.startTime);
+        const status: "live" | "upcoming" | "past" =
+          state === "live" ? "live" : (state === "past-recording" || state === "past-pending") ? "past" : "upcoming";
+        const startsInText = isNext && (state === "soon" || state === "future")
+          ? formatStartsIn(slot.startTime.getTime() - Date.now()).replace("Starts in ", "")
+          : undefined;
 
         return (
           <Fragment key={slot.id}>
-            {/* OR divider between the two slots */}
             {slotIndex === 1 && (
-              <div className="flex items-center gap-3 px-4 sm:px-5">
+              <div className="flex items-center gap-3 px-2">
                 <div className="flex-1 border-t border-dashed border-gray-stroke" />
                 <span className="text-[14px] font-medium uppercase tracking-[0.08em] text-[#9b9b9b]">or</span>
                 <div className="flex-1 border-t border-dashed border-gray-stroke" />
               </div>
             )}
-
-            <div className={`flex items-center gap-4 px-4 sm:px-5 ${slotIndex === 0 ? "pt-4 pb-2 sm:pt-5 sm:pb-3" : "pt-2 pb-4 sm:pt-3 sm:pb-5"}`}>
-              {/* Session number icon */}
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-stroke">
-                <span className="text-[18px] font-medium leading-[1.2] text-gray-dark">{index}</span>
-              </div>
-
-              {/* Title + subtitle */}
-              <div className="flex min-h-[48px] min-w-0 flex-1 flex-col justify-center gap-1">
-                <p className={`text-[16px] font-medium leading-[1.2] ${isPast ? "text-gray-light" : "text-gray-dark"}`}>
-                  {session.title}
-                  <span className="font-normal text-gray-dark"> – {timeLabel}</span>
-                </p>
-                <p className="truncate text-[14px] leading-[1.2] text-gray-light">
-                  {formatSlotDateTime(slot.startTime)}
-                  <span className="text-[#9b9b9b]"> · {session.duration}</span>
-                </p>
-              </div>
-
-              {/* CTA */}
-              {isLive && (
-                <a href={slot.joinUrl ?? "#"} className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#296cef] p-3.5 text-[16px] font-medium text-white transition-colors hover:bg-[#3b7dfd] sm:w-28 sm:px-4 sm:py-3.5">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M2 7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                    <path d="M14 8.5l4-2v7l-4-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  <span className="hidden sm:inline">Join</span>
-                </a>
-              )}
-              {state === "past-recording" && (
-                <a href={slot.recordingUrl} className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb] sm:w-28 sm:px-4 sm:py-3.5">
-                  <img src={playVideoIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
-                  <span className="hidden sm:inline">Replay</span>
-                </a>
-              )}
-              {state === "past-pending" && (
-                <div className="group relative">
-                  <div className="flex shrink-0 cursor-default items-center justify-center gap-2 rounded-lg bg-gray-hover p-3.5 text-[16px] font-medium text-[#c0c0c0] sm:w-28 sm:px-4 sm:py-3.5">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="animate-spin sm:hidden">
-                      <path d="M10 2a8 8 0 1 0 8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                    <span className="hidden sm:inline">Processing</span>
-                  </div>
-                  <div className="pointer-events-none absolute bottom-full right-0 mb-2 hidden w-max max-w-[200px] rounded-lg bg-gray-dark px-3 py-2 text-[14px] leading-[1.3] text-white shadow-lg group-hover:block">
-                    Check back soon for the recording
-                  </div>
-                </div>
-              )}
-              {(state === "soon" || state === "future") && isNext && (
-                <span className="shrink-0 text-[16px] font-medium text-[#3b7dfd]">
-                  <span className="sm:hidden">{formatStartsIn(slot.startTime.getTime() - Date.now()).replace("Starts in ", "In ")}</span>
-                  <span className="hidden sm:inline">{formatStartsIn(slot.startTime.getTime() - Date.now())}</span>
-                </span>
-              )}
-            </div>
+            <SessionCard
+              title={`${session.title} – ${SLOT_TIME_LABELS[slotIndex] ?? formatTime(slot.startTime)}`}
+              dateTime={formatSlotDateTime(slot.startTime)}
+              duration={session.duration}
+              image=""
+              type="event"
+              status={status}
+              startsIn={startsInText}
+              hasRecording={state === "past-recording"}
+              hideImage
+            />
           </Fragment>
         );
       })}
