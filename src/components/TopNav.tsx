@@ -16,6 +16,7 @@ import switchIcon from "../assets/icons/switch.svg";
 import helpIcon from "../assets/icons/help.svg";
 import logOutIcon from "../assets/icons/log out.svg";
 import browserIcon from "../assets/icons/browser.svg";
+import codeIcon from "../assets/icons/code.svg";
 import lelandLogo from "../assets/Logo.svg";
 import homeInactive from "../assets/icons/nav-icons/home-inactive.svg";
 import homeActive from "../assets/icons/nav-icons/home-active.svg";
@@ -365,6 +366,14 @@ export default function TopNav() {
                     >
                       <img src={browserIcon} alt="B2B Dashboard" className="h-6 w-6 shrink-0" />
                       B2B Dashboard
+                    </NavLink>
+                    <NavLink
+                      to="/components"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover"
+                    >
+                      <img src={codeIcon} alt="Components" className="h-6 w-6 shrink-0" />
+                      Components
                     </NavLink>
                   </div>
 

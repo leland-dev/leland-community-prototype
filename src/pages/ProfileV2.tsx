@@ -3,13 +3,14 @@ import { useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import PageShell from "../components/PageShell";
+import SessionCard from "../components/SessionCard";
 import pic2 from "../assets/profile photos/pic-2.png";
 import pic6 from "../assets/profile photos/pic-6.png";
-import pic1 from "../assets/profile photos/pic-1.png";
-import pic3 from "../assets/profile photos/pic-3.png";
-import pic4 from "../assets/profile photos/pic-4.png";
-import pic5 from "../assets/profile photos/pic-5.png";
-import arrowRoundIcon from "../assets/icons/arrow-round.svg";
+import pic7 from "../assets/profile photos/pic-7.png";
+import pic8 from "../assets/profile photos/pic-8.png";
+import pic9 from "../assets/profile photos/pic-9.png";
+import pic10 from "../assets/profile photos/pic-10.png";
+import pic11 from "../assets/profile photos/pic-11.png";
 import mailIcon from "../assets/icons/mail.svg";
 import checkIcon from "../assets/icons/check.svg";
 import editIcon from "../assets/icons/edit.svg";
@@ -40,6 +41,9 @@ import bainLogo from "../assets/logos/bain.png";
 import lekLogo from "../assets/logos/lek.png";
 import nikeLogo from "../assets/logos/nike.png";
 import goldmanSachsLogo from "../assets/logos/goldman-sachs.png";
+import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
+import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
+import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
 
 const PROFILE_SECTIONS = [
   { id: "offerings", label: "Offerings" },
@@ -54,18 +58,21 @@ const dashedBorderStyle = {
 };
 
 const upcomingEvents = [
-  { day: "MON", date: 30, title: "1:1 Session with Jessica", dateTime: "March 30 at 2:00 PM", duration: "45 minutes", image: pic6, isNow: true },
-  { day: "MON", date: 30, title: "MBA Strategy Live", dateTime: "March 30 at 4:00 PM", duration: "45 minutes", image: pic3, isNow: false },
-  { day: "WED", date: 1, title: "Intro Call with Samantha", dateTime: "April 1 at 11:00 AM", duration: "30 minutes", image: pic1, isNow: false },
-  { day: "THU", date: 2, title: "GMAT Exam Prep Bootcamp", dateTime: "April 2 at 6:00 PM", duration: "60 minutes", image: pic4, isNow: false },
+  { title: "1:1 Session with Jessica", dateTime: "Monday, Mar 30 at 2:00 PM", duration: "45m", image: pic6, type: "coach" as const, status: "live" as const },
+  { title: "MBA Strategy Live", dateTime: "Monday, Mar 30 at 4:00 PM", duration: "45m", image: eventImg1, type: "event" as const, status: "upcoming" as const, startsIn: "2h" },
+  { title: "Intro Call with Samantha", dateTime: "Wednesday, Apr 1 at 11:00 AM", duration: "30m", image: pic8, type: "coach" as const, status: "upcoming" as const, startsIn: "2d" },
+  { title: "GMAT Exam Prep Bootcamp", dateTime: "Thursday, Apr 2 at 6:00 PM", duration: "60m", image: eventImg2, type: "event" as const, status: "upcoming" as const, startsIn: "3d" },
 ];
 
 const pastEvents = [
-  { title: "1:1 Session with Marcus", dateTime: "March 28 at 10:00 AM", duration: "45 minutes", image: pic3, hasRecording: false },
-  { title: "Resume Review Workshop", dateTime: "March 27 at 3:00 PM", duration: "60 minutes", image: pic4, hasRecording: true },
-  { title: "1:1 Session with Jessica", dateTime: "March 26 at 2:00 PM", duration: "45 minutes", image: pic6, hasRecording: false },
-  { title: "MBA Admissions Strategy", dateTime: "March 25 at 1:00 PM", duration: "45 minutes", image: pic5, hasRecording: true },
-  { title: "Intro Call with David", dateTime: "March 24 at 11:00 AM", duration: "30 minutes", image: pic1, hasRecording: false },
+  { title: "1:1 Session with Marcus", dateTime: "Friday, Mar 28 at 10:00 AM", duration: "45m", image: pic7, type: "coach" as const, hasRecording: false },
+  { title: "Resume Review Workshop", dateTime: "Thursday, Mar 27 at 3:00 PM", duration: "60m", image: eventImg3, type: "event" as const, hasRecording: true },
+  { title: "1:1 Session with Jessica", dateTime: "Wednesday, Mar 26 at 2:00 PM", duration: "45m", image: pic6, type: "coach" as const, hasRecording: false },
+  { title: "MBA Admissions Strategy", dateTime: "Tuesday, Mar 25 at 1:00 PM", duration: "45m", image: eventImg1, type: "event" as const, hasRecording: true },
+  { title: "Intro Call with David", dateTime: "Monday, Mar 24 at 11:00 AM", duration: "30m", image: pic9, type: "coach" as const, hasRecording: false },
+  { title: "1:1 Session with Rachel", dateTime: "Sunday, Mar 23 at 3:00 PM", duration: "45m", image: pic10, type: "coach" as const, hasRecording: false },
+  { title: "Career Pivot Workshop", dateTime: "Saturday, Mar 22 at 10:00 AM", duration: "90m", image: eventImg2, type: "event" as const, hasRecording: true },
+  { title: "1:1 Session with Alex", dateTime: "Friday, Mar 21 at 1:00 PM", duration: "45m", image: pic11, type: "coach" as const, hasRecording: false },
 ];
 
 export default function ProfileV2() {
@@ -82,7 +89,7 @@ export default function ProfileV2() {
   const [showSupercoach, setShowSupercoach] = useState(false);
   const [searchParams] = useSearchParams();
   const [isCustomerProfile, setIsCustomerProfile] = useState(searchParams.get("type") !== "coach");
-  const [customerTab, setCustomerTab] = useState<"activity" | "about">("activity");
+  const [customerTab, setCustomerTab] = useState<"activity" | "about" | "likes">("activity");
   const [pastOpen, setPastOpen] = useState(false);
   const [sectionFilter, setSectionFilter] = useState("All");
   const [offeringsType, setOfferingsType] = useState("All");
@@ -309,7 +316,7 @@ export default function ProfileV2() {
         ) : undefined}>
         <div>
           {/* Profile photo + CTA buttons */}
-          <div className="-mt-[80px] mb-4 flex flex-col items-start md:flex-row md:items-end md:justify-between">
+          <div className="-mt-[100px] mb-4 flex flex-col items-start md:flex-row md:items-end md:justify-between">
             <div className="group relative z-20 cursor-pointer rounded-lg border-[4px] border-white bg-white" onClick={() => setLightboxOpen(true)}>
               <div className="relative overflow-hidden rounded-[4px]">
                 <motion.img
@@ -321,7 +328,7 @@ export default function ProfileV2() {
                 <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
               </div>
             </div>
-            <div className="hidden items-center gap-2 pb-[94px] md:flex">
+            <div className="hidden items-center gap-2 pb-[82px] md:flex">
               {viewingOwnProfile ? (
                 <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
                   <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
@@ -416,14 +423,14 @@ export default function ProfileV2() {
             )}
             <div className="flex items-baseline gap-1">
               <span className="text-[18px] font-medium text-gray-dark">{isCustomerProfile ? "245" : "182"}</span>
-              <span className="text-[16px] text-gray-600">followers</span>
+              <span className="text-[16px] text-[#707070]">followers</span>
             </div>
             <div
               className={`flex items-baseline gap-1 ${!isCustomerProfile ? "cursor-pointer transition-opacity hover:opacity-70" : ""}`}
               onClick={!isCustomerProfile ? () => scrollToSection("activity") : undefined}
             >
               <span className="text-[18px] font-medium text-gray-dark">8.2K</span>
-              <span className="text-[16px] text-gray-600">impressions</span>
+              <span className="text-[16px] text-[#707070]">impressions</span>
             </div>
           </div>
 
@@ -445,11 +452,11 @@ export default function ProfileV2() {
             <div className="mt-3 hidden flex-wrap items-center gap-4 md:flex">
               <div className="flex items-baseline gap-1">
                 <span className="text-[18px] font-medium text-gray-dark">245</span>
-                <span className="text-[16px] text-gray-600">followers</span>
+                <span className="text-[16px] text-[#707070]">followers</span>
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-[18px] font-medium text-gray-dark">8.2K</span>
-                <span className="text-[16px] text-gray-600">impressions</span>
+                <span className="text-[16px] text-[#707070]">impressions</span>
               </div>
             </div>
           )}
@@ -967,7 +974,7 @@ export default function ProfileV2() {
           {isCustomerProfile && (
             <>
               <div className="sticky top-0 z-10 mt-8 flex border-b border-gray-stroke bg-white">
-                {(["activity", "about"] as const).map((tab) => (
+                {(["activity", "about", "likes"] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setCustomerTab(tab)}
@@ -977,11 +984,7 @@ export default function ProfileV2() {
                         : "text-gray-light hover:text-gray-dark"
                     }`}
                   >
-                    <span className="text-[17px] font-medium">{tab === "activity" ? "My Learning" : "Activity"}</span>
-                    <div className="mt-0.5 flex items-center justify-center gap-1 text-[14px] text-[#707070]">
-                      {tab === "activity" && <img src={lockIcon} alt="" className="h-[14px] w-[14px] opacity-50" />}
-                      {tab === "activity" ? "Only visible to you" : "Visible to everyone"}
-                    </div>
+                    <span className="text-[17px] font-medium">{tab === "activity" ? "Overview" : tab === "about" ? "Activity" : "Likes"}</span>
                     {customerTab === tab && (
                       <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#038561]" />
                     )}
@@ -992,6 +995,10 @@ export default function ProfileV2() {
               <div className="mt-6">
                 {customerTab === "activity" && (
                   <>
+                    <div className="mb-6 flex items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 py-3 text-[14px] font-medium text-[#707070]">
+                      <img src={lockIcon} alt="" className="h-[16px] w-[16px] opacity-50" />
+                      Only visible to you
+                    </div>
                     {/* Upcoming Sessions */}
                     <section>
                       <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
@@ -1000,31 +1007,7 @@ export default function ProfileV2() {
                       <div className="mt-3">
                         <div className="flex flex-col gap-1">
                           {upcomingEvents.map((event, i) => (
-                            <div key={i} className="flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
-                              <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover" />
-                              <div className="min-w-0 flex-1">
-                                <p className="text-[18px] font-medium text-gray-dark">{event.title}</p>
-                                <p className="text-[16px] text-[#707070]">
-                                  {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
-                                </p>
-                              </div>
-                              <div className="flex shrink-0 items-center self-stretch">
-                                {event.isNow ? (
-                                  <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
-                                    Join
-                                  </button>
-                                ) : (
-                                  <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
-                                    <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">
-                                      {event.day}
-                                    </div>
-                                    <div className="w-full pt-0.5 pb-1 text-center text-[19px] font-medium leading-tight text-[#707070]">
-                                      {event.date}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
+                            <SessionCard key={i} {...event} />
                           ))}
                         </div>
 
@@ -1038,29 +1021,23 @@ export default function ProfileV2() {
                           </svg>
                         </button>
 
-                        {pastOpen && (
-                          <div className="mt-2 flex flex-col gap-1">
-                            {pastEvents.map((event, i) => (
-                              <div key={i} className="group flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
-                                <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover opacity-50 transition-opacity group-hover:opacity-100" />
-                                <div className="min-w-0 flex-1">
-                                  <p className="text-[18px] font-medium text-[#707070]">{event.title}</p>
-                                  <p className="text-[16px] text-[#707070]">
-                                    {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
-                                  </p>
-                                </div>
-                                {event.hasRecording && (
-                                  <div className="flex shrink-0 items-center self-stretch">
-                                    <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
-                                      <img src={arrowRoundIcon} alt="" className="h-5 w-5" />
-                                      Rewatch
-                                    </button>
-                                  </div>
-                                )}
+                        <AnimatePresence initial={false}>
+                          {pastOpen && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                              className="overflow-hidden"
+                            >
+                              <div className="mt-2 flex flex-col gap-1">
+                                {pastEvents.map((event, i) => (
+                                  <SessionCard key={i} {...event} status="past" />
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        )}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     </section>
 
@@ -1098,6 +1075,17 @@ export default function ProfileV2() {
                 {customerTab === "about" && (
                   <div className="flex flex-col gap-4">
                     {[...Array(10)].map((_, i) => (
+                      <div key={i} className="flex gap-3">
+                        <div className="h-10 w-10 shrink-0 rounded-full border border-dashed border-[#C5C5C5] bg-[#f5f5f5]" />
+                        <div className="h-[120px] min-w-0 flex-1 rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {customerTab === "likes" && (
+                  <div className="flex flex-col gap-4">
+                    {[...Array(8)].map((_, i) => (
                       <div key={i} className="flex gap-3">
                         <div className="h-10 w-10 shrink-0 rounded-full border border-dashed border-[#C5C5C5] bg-[#f5f5f5]" />
                         <div className="h-[120px] min-w-0 flex-1 rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />

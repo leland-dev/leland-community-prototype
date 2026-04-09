@@ -33,6 +33,8 @@ import MyCourses from "./pages/MyCourses";
 import Dashboard from "./pages/Dashboard";
 import Site from "./pages/Site";
 import B2BDashboard from "./pages/B2BDashboard";
+import SessionCardTest from "./pages/SessionCardTest";
+import Components from "./pages/Components";
 
 export default function App() {
   return (
@@ -49,6 +51,8 @@ export default function App() {
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/my-courses" element={<MyCourses />} />
+        <Route path="/components" element={<Components />} />
+        <Route path="/components/session-card" element={<SessionCardTest />} />
 
         {/* Context-driven pages (sidebar/variant via hooks) */}
         <Route element={<ContextLayout />}>
