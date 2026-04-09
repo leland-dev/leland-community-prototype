@@ -39,8 +39,8 @@ export default function PageShell({
         {hasLeft && (
           <aside
             className={hasBoth
-              ? "hidden w-[320px] shrink-0 sticky top-5 self-start xl:block"
-              : "hidden w-[320px] shrink-0 sticky top-5 self-start xl:block"
+              ? "hidden w-[300px] shrink-0 sticky top-5 self-start xl:block"
+              : "hidden w-[300px] shrink-0 sticky top-5 self-start xl:block"
             }
           >
             {leftSidebar}
@@ -55,8 +55,8 @@ export default function PageShell({
         {hasRight && (
           <aside
             className={hasBoth
-              ? "hidden w-[320px] shrink-0 sticky top-5 self-start 2xl:block"
-              : "hidden w-[320px] shrink-0 sticky top-5 self-start xl:block"
+              ? "hidden w-[300px] shrink-0 sticky top-5 self-start 2xl:block"
+              : "hidden w-[300px] shrink-0 sticky top-5 self-start xl:block"
             }
           >
             {rightSidebar}
