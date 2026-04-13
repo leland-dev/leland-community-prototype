@@ -1065,7 +1065,7 @@ export default function ProfileV2() {
                       <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>
                         Upcoming Sessions
                       </h2>
-                      <p className="mt-1 text-[18px] text-[#707070]">Your scheduled coaching sessions and events.</p>
+                      <p className="text-[18px] text-[#707070]">Your scheduled coaching sessions and events.</p>
                       <div className="mt-3">
                         <div className="flex flex-col gap-1">
                           {upcomingEvents.map((event, i) => (
@@ -1108,7 +1108,7 @@ export default function ProfileV2() {
                       <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>
                         My Courses
                       </h2>
-                      <p className="mt-1 text-[18px] text-[#707070]">Courses you're enrolled in or have completed.</p>
+                      <p className="text-[18px] text-[#707070]">Courses you're enrolled in or have completed.</p>
                       <div className="mt-3 flex flex-col gap-4">
                         {profileCourses.map((course) => (
                           <div key={course.id} className="overflow-hidden rounded-xl border border-gray-stroke">
@@ -1222,7 +1222,7 @@ export default function ProfileV2() {
                       <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>
                         My Goals
                       </h2>
-                      <p className="mt-1 text-[18px] text-[#707070]">Track your progress toward what matters most.</p>
+                      <p className="text-[18px] text-[#707070]">Track your progress toward what matters most.</p>
                       <div className="scrollbar-hide -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
                         {[0, 1].map((i) => (
                           <div key={i} className="h-[100px] w-[200px] shrink-0 snap-start rounded-xl bg-[#F5F5F5]" style={dashedBorderStyle} />
