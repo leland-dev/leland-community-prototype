@@ -27,6 +27,14 @@ export default function PageShell({
   const hasRight = rightSidebar != null;
   const hasBoth = hasLeft && hasRight;
 
+  // Right sidebar in a 3-col layout needs more room, so it appears at a
+  // larger viewport than a sidebar in a 2-col layout. Any single sidebar
+  // (2-col) shows at the smaller threshold.
+  const leftClass = "hidden w-[300px] shrink-0 sticky top-5 self-start min-[960px]:block";
+  const rightClass = hasBoth
+    ? "hidden w-[300px] shrink-0 sticky top-5 self-start min-[1200px]:block"
+    : "hidden w-[300px] shrink-0 sticky top-5 self-start min-[960px]:block";
+
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
       <div
@@ -36,32 +44,14 @@ export default function PageShell({
         }
         style={{ gap: 40 }}
       >
-        {hasLeft && (
-          <aside
-            className={hasBoth
-              ? "hidden w-[300px] shrink-0 sticky top-5 self-start xl:block"
-              : "hidden w-[300px] shrink-0 sticky top-5 self-start xl:block"
-            }
-          >
-            {leftSidebar}
-          </aside>
-        )}
+        {hasLeft && <aside className={leftClass}>{leftSidebar}</aside>}
         <div
           className={contentMaxWidth ? "min-w-0 w-full" : "min-w-0 flex-1"}
           style={contentMaxWidth ? { maxWidth: contentMaxWidth } : undefined}
         >
           {children}
         </div>
-        {hasRight && (
-          <aside
-            className={hasBoth
-              ? "hidden w-[300px] shrink-0 sticky top-5 self-start 2xl:block"
-              : "hidden w-[300px] shrink-0 sticky top-5 self-start xl:block"
-            }
-          >
-            {rightSidebar}
-          </aside>
-        )}
+        {hasRight && <aside className={rightClass}>{rightSidebar}</aside>}
       </div>
     </div>
   );

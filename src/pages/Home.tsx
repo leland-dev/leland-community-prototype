@@ -6,7 +6,6 @@ import { Image as ImageIcon } from "lucide-react";
 import { useVersion } from "../contexts/VersionContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
-import { useSetContentMaxWidth } from "../components/ContentMaxWidthContext";
 import SessionCard from "../components/SessionCard";
 import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
 import profilePhoto from "../assets/profile photos/profile photo.png";
@@ -2703,7 +2702,6 @@ export default function Home() {
   const [goLiveOpen, setGoLiveOpen] = useState(false);
   useSetLeftSidebar(<HomeSidebar onCreatePost={() => setComposeOpen(true)} />);
   useSetRightSidebar(<HomeRightSidebar />);
-  useSetContentMaxWidth(675);
   const [feedPosts, setFeedPosts] = useState<Post[]>(posts);
 
   const handlePost = (text: string, postImages: ImageEntry[]) => {
