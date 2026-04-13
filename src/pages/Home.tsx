@@ -2538,7 +2538,7 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 
 // ─── Right Sidebar ─────────────────────────────────────
 
-const HAPPENING_NOW = [
+const _HAPPENING_NOW = [
   {
     id: 1,
     title: "MBA Strategy Live",
