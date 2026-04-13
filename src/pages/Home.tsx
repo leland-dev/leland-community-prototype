@@ -2538,29 +2538,6 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 
 // ─── Right Sidebar ─────────────────────────────────────
 
-const _HAPPENING_NOW = [
-  {
-    id: 1,
-    title: "MBA Strategy Live",
-    thumbnail: pic6,
-    status: "live" as const,
-    detail: "125 watching",
-  },
-  {
-    id: 2,
-    title: "Tech Consulting Workshop",
-    thumbnail: pic9,
-    status: "soon" as const,
-    detail: "Starts 4:30 PM · 89 registered",
-  },
-  {
-    id: 3,
-    title: "Interview Prep Session",
-    thumbnail: pic11,
-    status: "upcoming" as const,
-    detail: "Tomorrow, 2:00 PM · 54 registered",
-  },
-];
 
 const TRENDING_TOPICS = [
   { id: 1, tag: "MBA", coaches: 234 },
