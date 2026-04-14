@@ -4,14 +4,16 @@ import kelloggLogo from "../../assets/img/kellogg.svg";
 export default function B2BSidebar({
   activeView,
   onNavigate,
+  items = navItems,
 }: {
   activeView: B2BView;
   onNavigate: (view: B2BView) => void;
+  items?: typeof navItems;
 }) {
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-gray-stroke bg-white">
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-2 py-2">
-        {navItems.map((item) => (
+        {items.map((item) => (
           <button
             key={item.key}
             onClick={() => onNavigate(item.key)}

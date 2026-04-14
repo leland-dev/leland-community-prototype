@@ -2,16 +2,22 @@ import { useEffect, useState } from "react";
 import B2BTopNav from "../components/B2BTopNav";
 import B2BMobileSidebar from "../components/B2BMobileSidebar";
 import B2BSidebar from "./b2b/B2BSidebar";
-import B2BOverview from "./b2b/B2BOverview";
+import B2BOverviewV2 from "./b2b/B2BOverviewV2";
 import B2BUtilization from "./b2b/B2BUtilization";
 import B2BLiveCourses from "./b2b/B2BLiveCourses";
 import B2BSelfStudy from "./b2b/B2BSelfStudy";
 import B2BLelandPlus from "./b2b/B2BLelandPlus";
-import B2BUsers from "./b2b/B2BUsers";
 import B2BSettings from "./b2b/B2BSettings";
 import { B2BModalDispatcher } from "./b2b/B2BModals";
-import type { B2BView, ModalId } from "./b2b/B2BData";
+import { navItems, type B2BView, type ModalId } from "./b2b/B2BData";
+import settingsIcon from "../assets/icons/settings.svg";
 import "../styles/b2b.css";
+
+const v2HiddenKeys: B2BView[] = ["utilization", "live-courses", "self-study", "leland-plus", "users"];
+const v2NavItems = [
+  ...navItems.filter((item) => !v2HiddenKeys.includes(item.key)),
+  { key: "settings" as B2BView, label: "Admin Settings", icon: settingsIcon },
+];
 
 export default function B2BDashboardV2() {
   const [activeView, setActiveView] = useState<B2BView>("overview");
@@ -36,12 +42,12 @@ export default function B2BDashboardV2() {
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop sidebar */}
         <div className="hidden md:flex">
-          <B2BSidebar activeView={activeView} onNavigate={setActiveView} />
+          <B2BSidebar activeView={activeView} onNavigate={setActiveView} items={v2NavItems} />
         </div>
         <main className="flex-1 overflow-y-auto p-4 md:p-7">
           <div className="mx-auto max-w-[1280px]">
           {activeView === "overview" && (
-            <B2BOverview
+            <B2BOverviewV2
               onNavigate={setActiveView}
               onSetUtilFilter={setUtilFilter}
               onOpenModal={setOpenModal}
@@ -59,7 +65,6 @@ export default function B2BDashboardV2() {
           {activeView === "live-courses" && <B2BLiveCourses />}
           {activeView === "self-study" && <B2BSelfStudy />}
           {activeView === "leland-plus" && <B2BLelandPlus onOpenModal={setOpenModal} />}
-          {activeView === "users" && <B2BUsers onOpenModal={setOpenModal} />}
           {activeView === "settings" && <B2BSettings />}
           <div className="h-[120px] shrink-0" />
           </div>
@@ -71,6 +76,7 @@ export default function B2BDashboardV2() {
         activeView={activeView}
         onNavigate={setActiveView}
         onNavigateSettings={navigateSettings}
+        items={v2NavItems}
       />
       <B2BModalDispatcher
         openModal={openModal}

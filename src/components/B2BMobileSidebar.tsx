@@ -10,9 +10,10 @@ interface Props {
   activeView: B2BView;
   onNavigate: (view: B2BView) => void;
   onNavigateSettings: () => void;
+  items?: typeof navItems;
 }
 
-export default function B2BMobileSidebar({ open, onClose, activeView, onNavigate, onNavigateSettings }: Props) {
+export default function B2BMobileSidebar({ open, onClose, activeView, onNavigate, onNavigateSettings, items = navItems }: Props) {
   const handleNav = (view: B2BView) => {
     onNavigate(view);
     onClose();
@@ -53,7 +54,7 @@ export default function B2BMobileSidebar({ open, onClose, activeView, onNavigate
 
             {/* Nav items + Admin Settings */}
             <div className="border-t border-gray-stroke py-2">
-              {navItems.map((item) => (
+              {items.map((item) => (
                 <button
                   key={item.key}
                   onClick={() => handleNav(item.key)}

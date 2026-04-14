@@ -86,24 +86,6 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter, onOpenModal }
         <p className="mt-[2px] text-[18px] text-[#707070]">Kellogg School of Management &middot; Contract Jan 2025 &ndash; Jun 2026</p>
       </div>
 
-      {/* Submit a User hero */}
-      <div className="mb-6 flex items-center justify-between gap-6 rounded-xl border border-primary bg-primary-xlight px-7 py-[22px]">
-        <div>
-          <div className="mb-[6px] text-[11px] font-bold uppercase tracking-[0.08em] text-dark-green">Primary Action</div>
-          <h2 className="mb-1 text-[18px] font-medium text-dark-green">Submit a User</h2>
-          <p className="text-[13px] text-dark-green opacity-70">Register a user to access their assigned Leland coaching session, Leland+, or live course</p>
-        </div>
-        <button
-          onClick={() => onOpenModal("invite")}
-          className="inline-flex shrink-0 items-center gap-[6px] whitespace-nowrap rounded-lg border border-primary bg-primary px-6 py-3 text-[15px] font-semibold text-white hover:bg-primary-hover"
-        >
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-          </svg>
-          Submit a User
-        </button>
-      </div>
-
       {/* ── 1:1 Sessions Section ── */}
       <div className="b2b-section-divider mb-5 mt-7 flex items-center gap-3">
         <h2 className="whitespace-nowrap text-[15px] font-medium text-gray-dark">1:1 Sessions</h2>
