@@ -2599,7 +2599,7 @@ function HomeRightSidebar() {
       </SidebarGroup>
 
       {/* Popular categories */}
-      <SidebarGroup label="Popular categories">
+      <SidebarGroup label="Popular categories" hideChevron>
         <SidebarCard
           variant="category"
           image={categoryInvestmentBanking}

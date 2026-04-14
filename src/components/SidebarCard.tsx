@@ -5,16 +5,19 @@ import type { ReactNode } from "react";
 interface SidebarGroupProps {
   label: string;
   href?: string;
+  hideChevron?: boolean;
   children: ReactNode;
 }
 
-export function SidebarGroup({ label, href, children }: SidebarGroupProps) {
+export function SidebarGroup({ label, href, hideChevron, children }: SidebarGroupProps) {
   const header = (
     <div className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
       {label}
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
-        <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+      {!hideChevron && (
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
+          <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
     </div>
   );
 

@@ -143,7 +143,7 @@ export default function SidebarCardsTest() {
           </SidebarGroup>
 
           {/* Popular Categories */}
-          <SidebarGroup label="Popular categories">
+          <SidebarGroup label="Popular categories" hideChevron>
             <SidebarCard
               variant="category"
               image={categoryInvestmentBanking}

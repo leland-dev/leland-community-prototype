@@ -1,13 +1,15 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import PageShell from "../components/PageShell";
 import SessionCard from "../components/SessionCard";
+import OfferingCard, { type OfferingType } from "../components/OfferingCard";
 import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
 import topicHash from "../assets/img/topic-hash.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic2 from "../assets/profile photos/pic-2.png";
+import customerPhoto from "../assets/profile photos/profile photo.png";
 import pic3 from "../assets/profile photos/pic-3.png";
 import pic5 from "../assets/profile photos/pic-5.png";
 import pic6 from "../assets/profile photos/pic-6.png";
@@ -29,6 +31,10 @@ import supportivenessIcon from "../assets/icons/supportiveness.svg";
 import wreathImg from "../assets/img/Wreath.svg";
 import videoThumbnail from "../assets/img/Video-Thumbnail.png";
 import starIcon from "../assets/icons/icon/star.svg";
+import categoryMBA from "../assets/placeholder images/category images/gmat-tutoring.png";
+import categoryConsulting from "../assets/placeholder images/category images/management-consulting.png";
+import categoryPM from "../assets/placeholder images/category images/product-management.png";
+
 import atlassianLogo from "../assets/logos/atlassian.png";
 import yaleLogo from "../assets/logos/yale.png";
 import clientLogo1 from "../assets/logos/Rectangle 3012.png";
@@ -48,6 +54,8 @@ import goldmanSachsLogo from "../assets/logos/goldman-sachs.png";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
+import bootcampImg1 from "../assets/placeholder images/bootcamp-1.webp";
+import lelandPlusImg1 from "../assets/placeholder images/leland-plus-images/3cf6e985-7397-4e50-8e06-ef9a8f40491c.webp";
 import stanford1 from "../assets/placeholder post assets/stanford-post/00c1e12547190979b4db2978dbe211e2.jpg";
 import stanford2 from "../assets/placeholder post assets/stanford-post/39a9980b59e79fa3b58e8d7d5145b9a9.jpg";
 import stanford3 from "../assets/placeholder post assets/stanford-post/989ac1d56cf981c783808b83154d8a25.jpg";
@@ -94,12 +102,46 @@ const pastEvents = [
   { title: "Behavioral Interview Prep", dateTime: "Wednesday, Mar 12 at 3:00 PM", duration: "60m", image: eventImg3, type: "event" as const, hasRecording: true },
 ];
 
+interface PurchasedOffering {
+  type: OfferingType;
+  title: string;
+  subtitle: ReactNode;
+  image: string;
+}
+
+const purchasedOfferings: PurchasedOffering[] = [
+  {
+    type: "hourly",
+    title: "1h 20m with Marcus",
+    subtitle: "45m available to schedule",
+    image: pic9,
+  },
+  {
+    type: "package",
+    title: "MBA Application Package",
+    subtitle: <>Comprehensive package · <span className="text-[#038561]">Currently active</span></>,
+    image: pic7,
+  },
+  {
+    type: "course",
+    title: "GMAT Exam Prep Bootcamp",
+    subtitle: <>Started June 1 <span className="text-[#9B9B9B]">· Next session tomorrow</span></>,
+    image: bootcampImg1,
+  },
+  {
+    type: "content",
+    title: "How I Got Into Stanford GSB",
+    subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>,
+    image: lelandPlusImg1,
+  },
+];
+
 const customerPosts: Post[] = [
   {
     id: 201,
     type: "image",
-    author: "James Allen",
-    avatar: pic2,
+    author: "June Allen",
+    avatar: customerPhoto,
     time: "3d",
     body: "Stanford GSB admit weekend in the books. The campus, the people, the energy — surreal. Two years ago I almost convinced myself not to apply. Glad I didn't listen to that voice.",
     images: [stanford1, stanford2, stanford3, stanford4],
@@ -111,8 +153,8 @@ const customerPosts: Post[] = [
   {
     id: 202,
     type: "text",
-    author: "James Allen",
-    avatar: pic2,
+    author: "June Allen",
+    avatar: customerPhoto,
     time: "1w",
     body: "I got in. STANFORD GSB. I literally screamed in my apartment when I saw the email. To everyone who supported me through this brutal process — this is for you. More to come, but for now I'm just letting it sink in.",
     likes: 1487,
@@ -123,8 +165,8 @@ const customerPosts: Post[] = [
   {
     id: 203,
     type: "text",
-    author: "James Allen",
-    avatar: pic2,
+    author: "June Allen",
+    avatar: customerPhoto,
     time: "3w",
     body: "Interview invite from Stanford. I'm pacing around my living room trying to act normal. Time to lock in for the next two weeks.",
     likes: 423,
@@ -135,8 +177,8 @@ const customerPosts: Post[] = [
   {
     id: 204,
     type: "text",
-    author: "James Allen",
-    avatar: pic2,
+    author: "June Allen",
+    avatar: customerPhoto,
     time: "1mo",
     body: "Hardest part of the application wasn't the essays — it was being honest with myself about why I actually wanted an MBA. My coach pushed me on this for weeks. Every time I gave a polished answer, she'd ask 'but why really?' Eventually I cracked. Turns out the real reason wasn't the version I'd been telling people.",
     likes: 891,
@@ -147,8 +189,8 @@ const customerPosts: Post[] = [
   {
     id: 205,
     type: "text",
-    author: "James Allen",
-    avatar: pic2,
+    author: "June Allen",
+    avatar: customerPhoto,
     time: "2mo",
     body: "Submitted Round 1 to Stanford, HBS, and Wharton tonight. 11 months of work compressed into a few clicks. I don't know what's going to happen but I know the application I sent in is the most honest version of myself I could put on paper. That has to count for something.",
     likes: 567,
@@ -159,8 +201,8 @@ const customerPosts: Post[] = [
   {
     id: 206,
     type: "text",
-    author: "James Allen",
-    avatar: pic2,
+    author: "June Allen",
+    avatar: customerPhoto,
     time: "4mo",
     body: "Took the GMAT today. Walked out feeling like I bombed it. Score came back 30 minutes later — 740. I genuinely don't know how. Lesson: your gut after the test means almost nothing.",
     likes: 342,
@@ -171,8 +213,8 @@ const customerPosts: Post[] = [
   {
     id: 207,
     type: "text",
-    author: "James Allen",
-    avatar: pic2,
+    author: "June Allen",
+    avatar: customerPhoto,
     time: "6mo",
     body: "Started working with an MBA admissions coach this week. Honestly didn't think I needed one — I'm a strong writer, I have a clear story, how hard could this be? First session: she tore my draft personal narrative apart in the kindest possible way and I realized I had no idea what I was doing. Money well spent already.",
     likes: 278,
@@ -183,8 +225,8 @@ const customerPosts: Post[] = [
   {
     id: 208,
     type: "text",
-    author: "James Allen",
-    avatar: pic2,
+    author: "June Allen",
+    avatar: customerPhoto,
     time: "9mo",
     body: "Decided I'm going to apply to business school this year. Have been thinking about it for three years and finally pulled the trigger. Target schools: Stanford, HBS, Wharton, Booth, Kellogg. If you've been through this and have advice, I'm all ears.",
     likes: 195,
@@ -193,6 +235,25 @@ const customerPosts: Post[] = [
     shares: 2,
   },
 ];
+
+function CategorySubtitle({ photos, experts }: { photos: string[]; experts: string }) {
+  return (
+    <span className="inline-flex items-center gap-[6px] align-middle">
+      <span className="inline-flex">
+        {photos.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt=""
+            className="inline-block h-[14px] w-[14px] shrink-0 rounded-full border border-white object-cover"
+            style={{ marginLeft: i === 0 ? 0 : "-3px" }}
+          />
+        ))}
+      </span>
+      {experts}
+    </span>
+  );
+}
 
 export default function ProfileV2() {
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
@@ -217,8 +278,8 @@ export default function ProfileV2() {
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [eventsCategoryOpen, setEventsCategoryOpen] = useState(false);
 
-  const profilePhoto = isCustomerProfile ? pic2 : pic6;
-  const profileName = isCustomerProfile ? "James Allen" : "Samantha Parker";
+  const profilePhoto = isCustomerProfile ? customerPhoto : pic6;
+  const profileName = isCustomerProfile ? "June Allen" : "Samantha Parker";
 
   const categoryRef = useRef<HTMLDivElement>(null);
   const eventsCategoryRef = useRef<HTMLDivElement>(null);
@@ -407,6 +468,27 @@ export default function ProfileV2() {
       <PageShell rightSidebar={showSidebar ? (
           isCustomerProfile ? (
             <div className="flex flex-col gap-6 px-1">
+              <SidebarGroup label="For you" hideChevron>
+                <SidebarCard
+                  variant="category"
+                  image={categoryMBA}
+                  title="MBA Admissions"
+                  subtitle={<CategorySubtitle photos={[pic1, pic5, pic8]} experts="312 experts" />}
+                />
+                <SidebarCard
+                  variant="category"
+                  image={categoryConsulting}
+                  title="Management Consulting"
+                  subtitle={<CategorySubtitle photos={[pic3, pic7, pic10]} experts="278 experts" />}
+                />
+                <SidebarCard
+                  variant="category"
+                  image={categoryPM}
+                  title="Product Management"
+                  subtitle={<CategorySubtitle photos={[pic6, pic9, pic11]} experts="195 experts" />}
+                />
+              </SidebarGroup>
+
               <SidebarGroup label="Happening now">
                 <SidebarCard
                   variant="event"
@@ -1237,10 +1319,10 @@ export default function ProfileV2() {
               <div className="mt-6">
                 {customerTab === "activity" && viewingOwnProfile && (
                   <>
-                    {/* Upcoming Sessions */}
+                    {/* Upcoming sessions */}
                     <section>
                       <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>
-                        Upcoming Sessions
+                        Upcoming sessions
                       </h2>
                       <div className="mt-3">
                         <div className="flex flex-col gap-1">
@@ -1276,16 +1358,30 @@ export default function ProfileV2() {
                           </button>
                         ))}
                       </div>
-                      <div className="mt-4 flex flex-col gap-4">
-                        {[0, 1, 2, 3].map((i) => (
-                          <div key={i} className="h-[140px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-                        ))}
+                      <div className="mt-4 flex flex-col gap-1">
+                        {purchasedOfferings
+                          .filter((offering) => {
+                            if (purchasesFilter === "All") return true;
+                            if (purchasesFilter === "Coaching") return offering.type === "hourly" || offering.type === "hourly-package" || offering.type === "package";
+                            if (purchasesFilter === "Courses") return offering.type === "course";
+                            return offering.type === "content";
+                          })
+                          .map((offering) => (
+                            <OfferingCard
+                              key={offering.title}
+                              type={offering.type}
+                              title={offering.title}
+                              subtitle={offering.subtitle}
+                              image={offering.image}
+                              purchased
+                            />
+                          ))}
                       </div>
                       <Link
-                        to="/my-courses"
-                        className="mt-4 inline-flex cursor-pointer items-center rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                        to="/settings?tab=orders"
+                        className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
                       >
-                        View all
+                        View full order history
                       </Link>
                     </section>
 
@@ -1320,7 +1416,7 @@ export default function ProfileV2() {
                 {viewingOwnProfile && customerTab === "calendar" && (
                   <section>
                     <h2 className="mb-3 text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>
-                      Calendar
+                      Upcoming sessions
                     </h2>
                     <div>
                       <div className="flex flex-col gap-1">
