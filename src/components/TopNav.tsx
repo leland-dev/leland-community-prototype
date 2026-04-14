@@ -362,7 +362,7 @@ export default function TopNav() {
                       </button>
                     </label>
                     <NavLink
-                      to="/b2b-dashboard"
+                      to="/b2b-dashboard-v2"
                       onClick={() => setProfileOpen(false)}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover"
                     >

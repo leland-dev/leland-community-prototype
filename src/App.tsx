@@ -33,6 +33,7 @@ import MyCourses from "./pages/MyCourses";
 import Dashboard from "./pages/Dashboard";
 import Site from "./pages/Site";
 import B2BDashboard from "./pages/B2BDashboard";
+import B2BDashboardV2 from "./pages/B2BDashboardV2";
 import SessionCardTest from "./pages/SessionCardTest";
 import Components from "./pages/Components";
 
@@ -43,6 +44,7 @@ export default function App() {
     <Routes>
       <Route path="*" element={<ScrollToTop />} />
       <Route path="/b2b-dashboard" element={<B2BDashboard />} />
+      <Route path="/b2b-dashboard-v2" element={<B2BDashboardV2 />} />
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
         <Route path="/dashboard" element={<Dashboard />} />
