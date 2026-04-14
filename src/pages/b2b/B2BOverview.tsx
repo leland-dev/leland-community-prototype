@@ -72,7 +72,7 @@ function FunnelArrow() {
   );
 }
 
-export default function B2BOverview({ onNavigate, onSetUtilFilter, onOpenModal }: Props) {
+export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
   const goToUtil = (filterKey: string) => {
     onSetUtilFilter(filterKey);
     onNavigate("utilization");
