@@ -8,8 +8,9 @@ import menuBurgerIcon from "../assets/icons/icon/menu-burger.svg";
 import playVideoIcon from "../assets/icons/icon/play-video.svg";
 import slackIcon from "../assets/icons/icon/slack-black.svg";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
+import introCallImg from "../assets/img/intro-call.png";
 
-export type OfferingType = "hourly" | "hourly-package" | "package" | "course" | "content";
+export type OfferingType = "free-intro" | "hourly" | "hourly-package" | "package" | "course" | "content";
 
 interface OfferingCardProps {
   type: OfferingType;
@@ -17,21 +18,23 @@ interface OfferingCardProps {
   subtitle: ReactNode;
   image: string;
   purchased?: boolean;
+  ctaLabel?: string;
 }
 
-function getDefaultCta(type: OfferingType, purchased: boolean): { label: string } {
+function getDefaultCta(type: OfferingType, purchased: boolean): { label: string; green?: boolean } {
   if (purchased) {
-    if (type === "hourly") return { label: "Schedule session" };
-    if (type === "hourly-package") return { label: "Schedule session" };
-    if (type === "package") return { label: "Schedule session" };
+    if (type === "hourly") return { label: "Schedule" };
+    if (type === "hourly-package") return { label: "Schedule" };
+    if (type === "package") return { label: "Schedule" };
     if (type === "course") return { label: "Details" };
-    return { label: "View" };
+    return { label: "Details" };
   }
-  if (type === "hourly") return { label: "Book a session" };
+  if (type === "free-intro") return { label: "Schedule", green: true };
+  if (type === "hourly") return { label: "Details" };
   if (type === "hourly-package") return { label: "Details" };
   if (type === "package") return { label: "Details" };
-  if (type === "course") return { label: "Enroll" };
-  return { label: "Get access" };
+  if (type === "course") return { label: "Details" };
+  return { label: "Details" };
 }
 
 interface MenuItem {
@@ -87,12 +90,14 @@ export default function OfferingCard({
   subtitle,
   image,
   purchased = false,
+  ctaLabel,
 }: OfferingCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isPersonImage = type === "hourly" || ((type === "hourly-package" || type === "package") && purchased);
   const cta = getDefaultCta(type, purchased);
+  const label = ctaLabel || cta.label;
   const menuItems = getMenuItems(type);
 
   useEffect(() => {
@@ -107,12 +112,37 @@ export default function OfferingCard({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
+  /* ── Free intro card ── */
+  if (type === "free-intro" && !purchased) {
+    return (
+      <div className="@container">
+        <div className="flex cursor-pointer items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-[#F5F5F5] transition-colors hover:bg-[#EFEFEF]">
+          <img
+            src={introCallImg}
+            alt=""
+            className="hidden @[380px]:block ml-3 w-[64px] shrink-0 object-contain"
+          />
+          <div className="flex min-w-0 flex-1 flex-col gap-[2px] py-4 pl-3">
+            <p className="truncate text-[18px] leading-tight font-medium text-gray-dark">{title}</p>
+            <p className="truncate text-[16px] leading-tight text-[#707070]">{subtitle}</p>
+          </div>
+          <div className="flex shrink-0 items-center pr-2 py-4">
+            <button className="hidden @[448px]:flex cursor-pointer items-center gap-2 rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+              {label}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Standard inline row layout ── */
   return (
     <div className="@container">
       <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 py-3 transition-colors hover:bg-[#F5F5F5] ${purchased ? "pr-1" : "pr-2"}`}>
-        {/* Image — icon container for default hourly, round for purchased coach, rectangle for course/content */}
+        {/* Image */}
         {type === "hourly" && !purchased ? (
-          <div className="hidden @[380px]:flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-[4px] bg-[#F5F5F5]">
+          <div className="hidden @[380px]:flex h-[40px] w-[72px] shrink-0 items-center justify-center rounded-[4px] bg-[#222222]/5">
             <img src={hourglassIcon} alt="" className="h-[20px] w-[20px]" />
           </div>
         ) : isPersonImage ? (
@@ -141,8 +171,12 @@ export default function OfferingCard({
 
         {/* Right action area */}
         <div className="flex shrink-0 items-center gap-0 self-stretch">
-          <button className="hidden @[448px]:flex cursor-pointer items-center gap-2 bg-[#222222]/5 text-gray-dark transition-colors hover:bg-[#222222]/[0.08] rounded-lg px-4 py-2.5 text-[16px] font-medium">
-            {cta.label}
+          <button className={`hidden @[448px]:flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
+            cta.green
+              ? "bg-[#038561] text-white hover:bg-[#038561]/90"
+              : "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
+          }`}>
+            {label}
           </button>
 
           {/* 3-dot menu — purchased state only */}
@@ -165,9 +199,9 @@ export default function OfferingCard({
                     className="absolute right-0 top-full z-50 mt-1 w-56 rounded-2xl border border-gray-stroke bg-white shadow-lg"
                   >
                     <div className="px-2 py-2">
-                      {menuItems.map(({ icon, label, danger }) => (
+                      {menuItems.map(({ icon, label: menuLabel, danger }) => (
                         <button
-                          key={label}
+                          key={menuLabel}
                           className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium transition-colors ${
                             danger
                               ? "text-[#D92D20] hover:bg-gray-hover"
@@ -179,7 +213,7 @@ export default function OfferingCard({
                           ) : (
                             <img src={icon} alt="" className="h-6 w-6 shrink-0" />
                           )}
-                          {label}
+                          {menuLabel}
                         </button>
                       ))}
                     </div>

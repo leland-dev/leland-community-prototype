@@ -56,6 +56,8 @@ import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
 import bootcampImg1 from "../assets/placeholder images/bootcamp-1.webp";
 import lelandPlusImg1 from "../assets/placeholder images/leland-plus-images/3cf6e985-7397-4e50-8e06-ef9a8f40491c.webp";
+import lelandPlusImg2 from "../assets/placeholder images/leland-plus-images/b9669ad2-4b6f-4c32-83e1-d1370dbf9484.webp";
+import lelandPlusImg3 from "../assets/placeholder images/leland-plus-images/db2eb673-d212-41d5-8df9-6fa6de57bc23.webp";
 import stanford1 from "../assets/placeholder post assets/stanford-post/00c1e12547190979b4db2978dbe211e2.jpg";
 import stanford2 from "../assets/placeholder post assets/stanford-post/39a9980b59e79fa3b58e8d7d5145b9a9.jpg";
 import stanford3 from "../assets/placeholder post assets/stanford-post/989ac1d56cf981c783808b83154d8a25.jpg";
@@ -134,6 +136,17 @@ const purchasedOfferings: PurchasedOffering[] = [
     subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>,
     image: lelandPlusImg1,
   },
+];
+
+const coachOfferings: { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string }[] = [
+  { type: "free-intro", title: "Free 15-minute intro call", subtitle: "Get to know Samantha and make a plan", image: "" },
+  { type: "hourly-package", title: "10-Hour Coaching Package", subtitle: "10 hours · $1,200", image: eventImg1 },
+  { type: "package", title: "MBA Application Package", subtitle: "Comprehensive Package · Starting at $750", image: eventImg2 },
+  { type: "package", title: "Interview Prep Package", subtitle: "Comprehensive Package · Starting at $500", image: eventImg3 },
+  { type: "hourly", title: "Custom hourly coaching", subtitle: "$150 per hour", image: "" },
+  { type: "content", title: "How I Got Into Stanford GSB", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>, image: lelandPlusImg1 },
+  { type: "content", title: "GMAT Study Plan: 3 Months to 750+", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 184 views</span></span>, image: lelandPlusImg2 },
+  { type: "content", title: "My Consulting Recruiting Timeline", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 97 views</span></span>, image: lelandPlusImg3 },
 ];
 
 const customerPosts: Post[] = [
@@ -1031,15 +1044,26 @@ export default function ProfileV2() {
               </div>
             </div>
 
-            {/* Offering cards grid */}
-            <div className="-mx-4 scrollbar-hide flex gap-4 overflow-x-auto px-4 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
-              <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
-              <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
-              <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
-            </div>
-
-            {/* Full-width placeholder */}
-            <div className="mt-4 h-[88px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+            {/* Offering cards */}
+            {(() => {
+              const filteredOfferings = coachOfferings.filter((o) => {
+                if (offeringsType === "All") return true;
+                if (offeringsType === "Packages") return o.type === "hourly-package" || o.type === "package";
+                if (offeringsType === "Memberships") return o.type === "course";
+                return o.type === "content";
+              });
+              return filteredOfferings.length > 0 ? (
+                <div className="flex flex-col gap-1">
+                  {filteredOfferings.slice(0, 5).map((o) => (
+                    <OfferingCard key={o.title} type={o.type} title={o.title} subtitle={o.subtitle} image={o.image} ctaLabel={o.ctaLabel} />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[#D0D0D0] py-10 text-center">
+                  <p className="text-[16px] text-[#9B9B9B]">No memberships available yet</p>
+                </div>
+              );
+            })()}
 
             {/* View more + guarantee */}
             <div className="mt-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
@@ -1335,7 +1359,7 @@ export default function ProfileV2() {
                           onClick={() => setCustomerTab("calendar")}
                           className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
                         >
-                          View full calendar
+                          See full calendar
                         </button>
                       </div>
                     </section>
@@ -1381,7 +1405,7 @@ export default function ProfileV2() {
                         to="/settings?tab=orders"
                         className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
                       >
-                        View full order history
+                        See full order history
                       </Link>
                     </section>
 
