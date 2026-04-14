@@ -19,18 +19,18 @@ const activity = [
 ];
 
 const users = [
-  { initials: "SK", name: "Sarah Kim", email: "sarah.kim@kellogg.edu", sessions: 3, sessionsTotal: 5, cohorts: 1, cohortsTotal: 1, plus: "Active", lastActive: "2h ago" },
-  { initials: "RP", name: "Raj Patel", email: "raj.patel@kellogg.edu", sessions: 1, sessionsTotal: 3, cohorts: null, cohortsTotal: null, plus: "Active", lastActive: "Yesterday" },
-  { initials: "MC", name: "Mia Chen", email: "mia.chen@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: 1, cohortsTotal: 2, plus: "—", lastActive: "2d ago" },
-  { initials: "ET", name: "Evan Torres", email: "evan.torres@kellogg.edu", sessions: 2, sessionsTotal: 4, cohorts: null, cohortsTotal: null, plus: "Active", lastActive: "3d ago" },
-  { initials: "AL", name: "Aisha Lee", email: "aisha.lee@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: null, cohortsTotal: null, plus: "Invited", lastActive: "—" },
-  { initials: "JL", name: "Jordan Lee", email: "jordan.lee@kellogg.edu", sessions: 2, sessionsTotal: 3, cohorts: 1, cohortsTotal: 1, plus: "Active", lastActive: "4d ago" },
-  { initials: "PM", name: "Priya Mehta", email: "priya.mehta@kellogg.edu", sessions: 1, sessionsTotal: 2, cohorts: null, cohortsTotal: null, plus: "Active", lastActive: "5d ago" },
-  { initials: "DW", name: "Daniel Wu", email: "daniel.wu@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: 1, cohortsTotal: 1, plus: "—", lastActive: "1w ago" },
-  { initials: "NB", name: "Nina Brooks", email: "nina.brooks@kellogg.edu", sessions: 3, sessionsTotal: 4, cohorts: null, cohortsTotal: null, plus: "Active", lastActive: "1w ago" },
-  { initials: "CR", name: "Carlos Rivera", email: "carlos.rivera@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: null, cohortsTotal: null, plus: "Expired", lastActive: "—" },
-  { initials: "HS", name: "Hannah Seo", email: "hannah.seo@kellogg.edu", sessions: 1, sessionsTotal: 2, cohorts: 1, cohortsTotal: 1, plus: "Active", lastActive: "2w ago" },
-  { initials: "TO", name: "Tunde Okafor", email: "tunde.okafor@kellogg.edu", sessions: 2, sessionsTotal: 3, cohorts: null, cohortsTotal: null, plus: "—", lastActive: "2w ago" },
+  { initials: "SK", name: "Sarah Kim", email: "sarah.kim@kellogg.edu", sessions: 3, sessionsTotal: 5, cohorts: 1, cohortsTotal: 1, plus: "Active", lastActive: "2h ago", lastActiveDays: 0.08, dateAdded: "Jan 10, 2026", daysAdded: 94 },
+  { initials: "RP", name: "Raj Patel", email: "raj.patel@kellogg.edu", sessions: 1, sessionsTotal: 3, cohorts: null, cohortsTotal: null, plus: "Active", lastActive: "Yesterday", lastActiveDays: 1, dateAdded: "Jan 10, 2026", daysAdded: 94 },
+  { initials: "MC", name: "Mia Chen", email: "mia.chen@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: 1, cohortsTotal: 2, plus: "—", lastActive: "2d ago", lastActiveDays: 2, dateAdded: "Jan 15, 2026", daysAdded: 89 },
+  { initials: "ET", name: "Evan Torres", email: "evan.torres@kellogg.edu", sessions: 2, sessionsTotal: 4, cohorts: null, cohortsTotal: null, plus: "Active", lastActive: "3d ago", lastActiveDays: 3, dateAdded: "Jan 15, 2026", daysAdded: 89 },
+  { initials: "AL", name: "Aisha Lee", email: "aisha.lee@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: null, cohortsTotal: null, plus: "Invited", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 1, 2026", daysAdded: 72 },
+  { initials: "JL", name: "Jordan Lee", email: "jordan.lee@kellogg.edu", sessions: 2, sessionsTotal: 3, cohorts: 1, cohortsTotal: 1, plus: "Active", lastActive: "4d ago", lastActiveDays: 4, dateAdded: "Jan 20, 2026", daysAdded: 84 },
+  { initials: "PM", name: "Priya Mehta", email: "priya.mehta@kellogg.edu", sessions: 1, sessionsTotal: 2, cohorts: null, cohortsTotal: null, plus: "Active", lastActive: "5d ago", lastActiveDays: 5, dateAdded: "Jan 20, 2026", daysAdded: 84 },
+  { initials: "DW", name: "Daniel Wu", email: "daniel.wu@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: 1, cohortsTotal: 1, plus: "—", lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Feb 3, 2026", daysAdded: 70 },
+  { initials: "NB", name: "Nina Brooks", email: "nina.brooks@kellogg.edu", sessions: 3, sessionsTotal: 4, cohorts: null, cohortsTotal: null, plus: "Active", lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Jan 25, 2026", daysAdded: 79 },
+  { initials: "CR", name: "Carlos Rivera", email: "carlos.rivera@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: null, cohortsTotal: null, plus: "Expired", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 10, 2026", daysAdded: 63 },
+  { initials: "HS", name: "Hannah Seo", email: "hannah.seo@kellogg.edu", sessions: 1, sessionsTotal: 2, cohorts: 1, cohortsTotal: 1, plus: "Active", lastActive: "2w ago", lastActiveDays: 14, dateAdded: "Feb 15, 2026", daysAdded: 58 },
+  { initials: "TO", name: "Tunde Okafor", email: "tunde.okafor@kellogg.edu", sessions: 2, sessionsTotal: 3, cohorts: null, cohortsTotal: null, plus: "—", lastActive: "2w ago", lastActiveDays: 14, dateAdded: "Mar 1, 2026", daysAdded: 44 },
 ];
 
 const PAGE_SIZE = 5;
@@ -111,8 +111,25 @@ const userDetails: Record<string, UserDetail> = {
 export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
   const [page, setPage] = useState(0);
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
-  const totalPages = Math.ceil(users.length / PAGE_SIZE);
-  const visibleUsers = users.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const [filter, setFilter] = useState<"all" | "active" | "invited">("all");
+  const [sort, setSort] = useState<"last-active" | "date-added">("date-added");
+
+  const filteredUsers = users.filter((u) => {
+    if (filter === "active") return u.lastActive !== "—";
+    if (filter === "invited") return u.lastActive === "—";
+    return true;
+  });
+
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if (sort === "last-active") return a.lastActiveDays - b.lastActiveDays;
+    return a.daysAdded - b.daysAdded;
+  });
+
+  const totalPages = Math.ceil(sortedUsers.length / PAGE_SIZE);
+  const visibleUsers = sortedUsers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  const handleFilter = (f: "all" | "active" | "invited") => { setFilter(f); setPage(0); };
+  const handleSort = (s: typeof sort) => { setSort(s); setPage(0); };
 
   return (
     <div className="leading-[1.2]">
@@ -145,7 +162,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
         </button>
 
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
-          <div className="mb-2 text-[18px] font-normal text-gray-light">Users granted</div>
+          <div className="mb-2 text-[18px] font-normal text-gray-light">Users invited</div>
           <div className="flex items-baseline gap-[6px] sm:block">
             <div className="text-[32px] font-medium leading-none text-gray-dark">325</div>
             <div className="text-[14px] text-gray-light sm:mt-[6px]">3 added this week</div>
@@ -155,7 +172,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
           <div className="mb-2 text-[18px] font-normal text-gray-light">Users engaged</div>
           <div className="flex items-baseline gap-[6px] sm:block">
             <div className="text-[32px] font-medium leading-none text-gray-dark">289</div>
-            <div className="text-[14px] text-gray-light sm:mt-[6px]">89% of granted users</div>
+            <div className="text-[14px] text-gray-light sm:mt-[6px]">89% of invited users</div>
           </div>
         </div>
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
@@ -174,19 +191,22 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
       <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr]">
         {/* Offerings */}
         <div>
-          <h2 className="mb-4 text-[20px] font-medium text-gray-dark">Offerings</h2>
+          <h2 className="mb-4 text-[20px] font-medium text-gray-dark">Utilization</h2>
           <div className="rounded-lg border border-gray-stroke bg-white p-2 shadow-card">
             {/* 1:1 Coaching */}
             <div
-              className="flex cursor-pointer items-center justify-between gap-2 rounded-lg p-3 hover:bg-gray-hover"
+              className="flex cursor-pointer items-center justify-between gap-6 rounded-lg p-3 hover:bg-gray-hover"
               onClick={() => onNavigate("utilization")}
             >
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <h3 className="text-[16px] font-medium text-gray-dark">1:1 Coaching</h3>
-                <div className="truncate text-[14px] text-gray-dark">
-                  38 sessions left &middot; <span className="text-gray-light">102 used</span>
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-stroke">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${(102/140)*100}%` }} />
+                  </div>
+                  <span className="shrink-0 text-[14px] text-gray-light">102 / 140 sessions used</span>
                 </div>
-                <div className="truncate text-[14px] text-gray-xlight">Individual coach matching for personalized guidance</div>
+                <div className="text-[14px] text-gray-xlight">Individual coach matching for personalized guidance</div>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenModal("invite"); }}
@@ -200,15 +220,18 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
 
             {/* Live cohorts */}
             <div
-              className="flex cursor-pointer items-center justify-between gap-2 rounded-lg p-3 hover:bg-gray-hover"
+              className="flex cursor-pointer items-center justify-between gap-6 rounded-lg p-3 hover:bg-gray-hover"
               onClick={() => onNavigate("live-courses")}
             >
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <h3 className="text-[16px] font-medium text-gray-dark">Live cohorts</h3>
-                <div className="truncate text-[14px]">
-                  <span className="text-red">2 seats left</span> &middot; <span className="text-gray-light">64 used</span>
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-stroke">
+                    <div className="h-full rounded-full bg-red" style={{ width: `${(64/66)*100}%` }} />
+                  </div>
+                  <span className="shrink-0 text-[14px] text-gray-light">64 / 66 seats used</span>
                 </div>
-                <div className="truncate text-[14px] text-gray-xlight">Cohort-based programs with live instruction and feedback</div>
+                <div className="text-[14px] text-gray-xlight">Cohort-based programs with live instruction and feedback</div>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenModal("invite"); }}
@@ -222,15 +245,18 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
 
             {/* Leland+ */}
             <div
-              className="flex cursor-pointer items-center justify-between gap-2 rounded-lg p-3 hover:bg-gray-hover"
+              className="flex cursor-pointer items-center justify-between gap-6 rounded-lg p-3 hover:bg-gray-hover"
               onClick={() => onNavigate("leland-plus")}
             >
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <h3 className="text-[16px] font-medium text-gray-dark">Leland+</h3>
-                <div className="truncate text-[14px] text-gray-dark">
-                  24 seats left &middot; <span className="text-gray-light">6 used</span>
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-stroke">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${(6/30)*100}%` }} />
+                  </div>
+                  <span className="shrink-0 text-[14px] text-gray-light">6 / 30 licenses used</span>
                 </div>
-                <div className="truncate text-[14px] text-gray-xlight">On-demand access to courses, examples, and tools</div>
+                <div className="text-[14px] text-gray-xlight">On-demand access to courses, examples, and tools</div>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenModal("invite"); }}
@@ -288,31 +314,13 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
         </div>
       </div>
 
-      {/* Pending invites banner */}
-      <div
-        className="flex items-center justify-between rounded-lg border px-[18px] py-3"
-        style={{ background: "#fdfbf0", borderColor: "#ede9c8" }}
-      >
-        <div className="flex items-center gap-[10px]">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-          </svg>
-          <span className="text-[15px] text-gray-dark">
-            <strong>5 users</strong> haven't activated yet &middot; Last reminder sent 2d ago
-          </span>
-        </div>
-        <button className="inline-flex items-center rounded-lg border border-gray-stroke bg-white px-3 py-[6px] text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
-          Resend invites
-        </button>
-      </div>
-
       {/* Users table */}
       <div className="mt-8">
         <h2 className="mb-4 text-[20px] font-medium text-gray-dark">Users</h2>
         <div className="rounded-lg border border-gray-stroke bg-white shadow-card">
           {/* Toolbar */}
-          <div className="flex items-center gap-3 rounded-t-lg border-b border-gray-stroke bg-white px-4 py-3">
-            <div className="flex max-w-[360px] flex-1 items-center gap-2 rounded-lg border border-gray-stroke px-3 py-2">
+          <div className="flex flex-wrap items-center gap-3 rounded-t-lg border-b border-gray-stroke bg-white px-4 py-3">
+            <div className="flex max-w-[280px] flex-1 items-center gap-2 rounded-lg border border-gray-stroke px-3 py-2">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9b9b9b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
@@ -320,6 +328,34 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
                 className="flex-1 border-none bg-transparent text-[15px] text-gray-dark outline-none placeholder:text-gray-xlight"
                 placeholder="Search by name or email"
               />
+            </div>
+            {/* Filter pills */}
+            <div className="flex items-center gap-1">
+              {(["all", "active", "invited"] as const).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => handleFilter(f)}
+                  className={`rounded-full border px-3 py-1 text-[14px] font-medium transition-colors ${
+                    filter === f
+                      ? "border-2 border-gray-dark bg-white text-gray-dark"
+                      : "border-gray-stroke bg-white text-gray-light hover:border-gray-dark hover:text-gray-dark"
+                  }`}
+                >
+                  {f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              ))}
+            </div>
+            {/* Sort */}
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-[14px] text-gray-xlight">Sort by</span>
+              <select
+                value={sort}
+                onChange={(e) => handleSort(e.target.value as typeof sort)}
+                className="rounded-lg border border-gray-stroke bg-white px-3 py-[6px] text-[14px] text-gray-dark outline-none"
+              >
+                <option value="date-added">Date added</option>
+                <option value="last-active">Last active</option>
+              </select>
             </div>
           </div>
           {/* Table */}
@@ -383,7 +419,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
           {/* Pagination */}
           <div className="flex items-center justify-between border-t border-gray-stroke px-4 py-3">
             <span className="text-[14px] text-gray-light">
-              {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, users.length)} of {users.length} users
+              {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, sortedUsers.length)} of {sortedUsers.length} users
             </span>
             <div className="flex items-center gap-1">
               <button
@@ -403,6 +439,24 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Pending invites banner */}
+      <div
+        className="mt-6 flex items-center justify-between rounded-lg border px-[18px] py-3"
+        style={{ background: "#fdfbf0", borderColor: "#ede9c8" }}
+      >
+        <div className="flex items-center gap-[10px]">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span className="text-[15px] text-gray-dark">
+            <strong>5 users</strong> haven't activated yet &middot; Last reminder sent 2d ago
+          </span>
+        </div>
+        <button className="inline-flex items-center rounded-lg border border-gray-stroke bg-white px-3 py-[6px] text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
+          Resend invites
+        </button>
       </div>
 
       <div className="h-[120px] shrink-0" />
