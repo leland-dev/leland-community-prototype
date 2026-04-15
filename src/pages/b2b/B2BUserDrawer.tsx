@@ -83,13 +83,6 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mb-4 text-[24px] font-medium text-gray-dark">
-      {children}
-    </div>
-  );
-}
 
 function formatInviteDate(dateStr: string) {
   const date = new Date(dateStr);
@@ -168,12 +161,13 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
             </div>
 
             {/* Body */}
-            <div className="flex flex-1 flex-col gap-8 overflow-y-auto px-4 sm:px-6 py-6">
+            <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 sm:px-6 py-6">
+
+              <div className="text-[30px] font-medium text-gray-dark">User details</div>
 
               {/* 1:1 Coaching */}
               {user.coaching && (
                 <div>
-                  <SectionLabel>1:1 Coaching</SectionLabel>
 
                   {(() => {
                     const scheduled = user.coaching.sessions.filter(s => s.status === "scheduled").length;
@@ -251,7 +245,6 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
               {/* Leland+ */}
               {user.plus && (
                 <div>
-                  <SectionLabel>Leland+</SectionLabel>
                   {user.plus.inviteSent && !user.plus.recentItems.length ? (
                     <InviteBanner message="Not activated yet" inviteSent={user.plus.inviteSent} />
                   ) : (
@@ -291,7 +284,6 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
               {/* Live Courses */}
               {user.liveCourses && user.liveCourses.length > 0 && (
                 <div>
-                  <SectionLabel>Live Cohorts</SectionLabel>
                   {(() => {
                     const enrolled = user.liveCourses!.filter(c => c.status === "enrolled").length;
                     const total = user.liveCourses!.length;

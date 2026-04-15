@@ -26,7 +26,7 @@ const activity = [
 
 const users = [
   { initials: "SK", name: "Sarah Kim", email: "sarah.kim@kellogg.edu", sessions: 2, sessionsTotal: 4, cohorts: 1, cohortsTotal: 2, cohortsStatus: "Enrolled", plus: "Active", lastActive: "2h ago", lastActiveDays: 0.08, dateAdded: "Jan 10, 2026", daysAdded: 94 },
-  { initials: "RP", name: "Raj Patel", email: "raj.patel@kellogg.edu", sessions: 1, sessionsTotal: 3, cohorts: 0, cohortsTotal: 1, cohortsStatus: null, plus: "Active", lastActive: "Yesterday", lastActiveDays: 1, dateAdded: "Jan 10, 2026", daysAdded: 94 },
+  { initials: "RP", name: "Raj Patel", email: "raj.patel@kellogg.edu", sessions: 1, sessionsTotal: 3, cohorts: 0, cohortsTotal: 1, cohortsStatus: "Granted", plus: "Active", lastActive: "Yesterday", lastActiveDays: 1, dateAdded: "Jan 10, 2026", daysAdded: 94 },
   { initials: "MC", name: "Mia Chen", email: "mia.chen@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: 1, cohortsTotal: 2, cohortsStatus: "Enrolled", plus: "—", lastActive: "2d ago", lastActiveDays: 2, dateAdded: "Jan 15, 2026", daysAdded: 89 },
   { initials: "ET", name: "Evan Torres", email: "evan.torres@kellogg.edu", sessions: 2, sessionsTotal: 4, cohorts: null, cohortsTotal: null, cohortsStatus: null, plus: "Active", lastActive: "3d ago", lastActiveDays: 3, dateAdded: "Jan 15, 2026", daysAdded: 89 },
   { initials: "AL", name: "Aisha Lee", email: "aisha.lee@kellogg.edu", sessions: 0, sessionsTotal: 3, cohorts: null, cohortsTotal: null, cohortsStatus: null, plus: "Invited", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 1, 2026", daysAdded: 72 },
@@ -78,6 +78,7 @@ const userDetails: Record<string, UserDetail> = {
     },
     plus: {
       topCategories: ["Private Equity", "Career Strategy", "Consulting"],
+      totalEngaged: 23,
       recentItems: [
         { title: "PE Associate Interview Guide", category: "Private Equity" },
         { title: "Consulting to PE Transition", category: "Career Strategy", type: "video" },
@@ -133,7 +134,21 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
   const [showCoachingStat, setShowCoachingStat] = useState(false);
+  const [showNonMvp, setShowNonMvp] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
   const adminRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setHeaderVisible(entry.isIntersecting),
+      { rootMargin: "-1px 0px 0px 0px", threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -145,7 +160,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
   const [filter, setFilter] = useState<"all" | "active" | "invited">("all");
-  const [sort, setSort] = useState<"last-active" | "date-added">("last-active");
+  const [sort] = useState<"last-active" | "date-added">("date-added");
 
   const filteredUsers = users.filter((u) => {
     if (filter === "active") return u.lastActive !== "—";
@@ -164,7 +179,6 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
   const [openMenuEmail, setOpenMenuEmail] = useState<string | null>(null);
 
   const handleFilter = (f: "all" | "active" | "invited") => { setFilter(f); setPage(0); };
-  const handleSort = (s: typeof sort) => { setSort(s); setPage(0); };
 
   const needsResend = (u: typeof users[0]) =>
     (u.sessions === 0 && u.sessionsTotal != null) ||
@@ -173,28 +187,54 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
 
   return (
     <div className="leading-[1.2]">
-      {/* Sticky button — floated right so it doesn't affect content width */}
-      <div className="sticky top-4 z-10 float-right ml-4">
-        <div
-          className="pointer-events-none absolute -bottom-3 -left-10 -right-3 -top-3 bg-gradient-to-r from-transparent via-white/60 to-white"
-          style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 50%)", maskImage: "linear-gradient(to right, transparent, black 50%)" }}
-        />
-        <button
-          onClick={() => onOpenModal("invite")}
-          className="relative flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-3 text-[16px] font-medium text-white shadow-md hover:bg-primary-hover"
-        >
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-          </svg>
-          Add users
-        </button>
+      {/* Page header + desktop sticky button */}
+      <div className="mb-4 flex items-start justify-between sm:mb-8">
+        <div ref={headerRef}>
+          <h1 className="text-[40px] font-medium leading-[1.5] text-gray-dark">Overview</h1>
+          <p className="mt-1 text-[18px] text-[#707070]">Kellogg School of Management &middot; Contract Jan 2025 &ndash; Jun 2026</p>
+        </div>
+        <div className="sticky hidden self-start sm:block" style={{ top: "28px" }}>
+          <button
+            onClick={() => onOpenModal("invite")}
+            className="flex shrink-0 items-center gap-2 rounded-lg bg-[#038561] px-4 py-3 text-[16px] font-medium text-white shadow-md"
+          >
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+            </svg>
+            Add users
+          </button>
+        </div>
       </div>
 
-      {/* Page header */}
-      <div className="mb-8">
-        <h1 className="text-[40px] font-medium leading-[1.5] text-gray-dark">Overview</h1>
-        <p className="mt-1 text-[18px] text-[#707070]">Kellogg School of Management &middot; Contract Jan 2025 &ndash; Jun 2026</p>
-      </div>
+      {/* Mobile full-width button — below header, hidden once scrolled */}
+      <button
+        onClick={() => onOpenModal("invite")}
+        className="mb-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#038561] px-4 py-3 text-[16px] font-medium text-white shadow-md sm:hidden"
+      >
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+        </svg>
+        Add users
+      </button>
+
+      {/* Mobile corner button — appears when header scrolls out of view */}
+      <AnimatePresence>
+        {!headerVisible && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.85 }}
+            transition={{ duration: 0.18 }}
+            onClick={() => onOpenModal("invite")}
+            className="fixed right-4 top-[72px] z-30 flex items-center gap-2 rounded-lg bg-[#038561] px-4 py-3 text-[16px] font-medium text-white shadow-md sm:hidden"
+          >
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+            </svg>
+            Add users
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Stats row */}
       <div className={`mb-8 grid grid-cols-1 gap-4 ${showCoachingStat ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
@@ -206,13 +246,10 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
           </div>
         </div>
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
-          <div className="mb-2 text-[18px] font-normal text-gray-light">Active users*</div>
+          <div className="mb-2 text-[18px] font-normal text-gray-light">Active users</div>
           <div className="flex items-baseline gap-[6px] sm:block">
             <div className="text-[30px] font-medium leading-none text-gray-dark">289</div>
-            <div className="mt-[6px] flex items-baseline justify-between">
-              <span className="text-[14px] text-gray-light">89% of seats granted</span>
-              <span className="text-[14px] text-gray-xlight">*All time</span>
-            </div>
+            <div className="mt-[6px] text-[14px] text-gray-light">89% of seats granted</div>
           </div>
         </div>
         {showCoachingStat && (
@@ -267,18 +304,6 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
                 </button>
               ))}
             </div>
-            {/* Sort */}
-            <div className="ml-auto flex items-center gap-2">
-              <button
-                onClick={() => handleSort(sort === "date-added" ? "last-active" : "date-added")}
-                className="flex items-center gap-1.5 rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[14px] font-medium text-[#222222] transition-colors hover:bg-gray-hover"
-              >
-                {sort === "date-added" ? "Date added" : "Last active"}
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
-            </div>
           </div>
           {/* Table */}
           <div className="overflow-x-auto">
@@ -289,6 +314,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">1:1 Sessions</th>
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">Live Cohorts</th>
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">Leland+</th>
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">Date added</th>
                   <th className="bg-[#fafafa] px-4 py-3" />
                 </tr>
               </thead>
@@ -302,9 +328,9 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
                     <td className="px-4 py-[14px]">
                       <div className="flex items-center gap-[10px]">
                         {userDetails[user.email]?.image ? (
-                          <img src={userDetails[user.email].image} alt={user.name} className="h-8 w-8 shrink-0 rounded-full object-cover" />
+                          <img src={userDetails[user.email].image} alt={user.name} className="h-9 w-9 shrink-0 rounded-full object-cover" />
                         ) : (
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[14px] font-semibold text-dark-green">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[14px] font-semibold text-dark-green">
                             {user.initials}
                           </div>
                         )}
@@ -324,14 +350,16 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
                     <td className="px-4 py-[14px] text-[16px]">
                       {user.cohortsStatus === "Enrolled" && <span className="text-gray-dark">Enrolled</span>}
                       {user.cohortsStatus === "Completed" && <span className="text-gray-dark">Completed</span>}
+                      {user.cohortsStatus === "Granted" && <span className="text-gray-xlight">Granted</span>}
                       {!user.cohortsStatus && <span className="text-gray-light">—</span>}
                     </td>
                     <td className="px-4 py-[14px] text-[16px]">
                       {user.plus === "Active" && <span className="text-gray-dark">Active</span>}
-                      {user.plus === "Invited" && <span className="text-gray-xlight">Invited</span>}
+                      {user.plus === "Invited" && <span className="text-gray-xlight">Granted</span>}
                       {user.plus === "Expired" && <span className="text-gray-xlight">Expired</span>}
                       {user.plus === "—" && <span className="text-gray-light">—</span>}
                     </td>
+                    <td className="px-4 py-[14px] text-[16px] text-gray-light">{user.dateAdded}</td>
                     <td className="px-2 py-2">
                       <div className="relative flex justify-end">
                         <button
@@ -411,7 +439,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
       </div>
 
       {/* Two-column: Offerings + Activity */}
-      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr]">
+      {showNonMvp && <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr]">
         {/* Offerings */}
         <div>
           <h2 className="mb-4 text-[20px] font-medium text-gray-dark">Utilization</h2>
@@ -535,7 +563,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
             ))}
           </div>
         </div>
-        </div>
+        </div>}
 
       <div className="h-[120px] shrink-0" />
 
@@ -560,6 +588,15 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
                 <span>1:1 coaching sessions stat</span>
                 <span className={`text-[11px] font-medium ${showCoachingStat ? "text-primary" : "text-gray-xlight"}`}>
                   {showCoachingStat ? "ON" : "OFF"}
+                </span>
+              </button>
+              <button
+                onClick={() => setShowNonMvp(!showNonMvp)}
+                className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-[13px] text-gray-dark hover:bg-gray-hover"
+              >
+                <span>Non-MVP content</span>
+                <span className={`text-[11px] font-medium ${showNonMvp ? "text-primary" : "text-gray-xlight"}`}>
+                  {showNonMvp ? "ON" : "OFF"}
                 </span>
               </button>
             </motion.div>
