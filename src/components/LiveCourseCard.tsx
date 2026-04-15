@@ -272,7 +272,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
   ) : (
     <button
       onClick={() => setCohortModalOpen(true)}
-      className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium leading-[1.2] text-white transition-colors hover:bg-[#038561]/90 md:w-auto"
+      className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#038561] px-6 py-4 text-[16px] font-medium leading-[1.2] text-white transition-colors hover:bg-[#038561]/90 md:w-auto md:px-4 md:py-2.5"
     >
       Select cohort
     </button>
@@ -323,7 +323,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
   );
 
   const header = (
-    <div className={`flex flex-col gap-4 bg-white md:flex-row md:items-start md:gap-5${boxed ? " p-4 md:p-5" : ""}`}>
+    <div className={`flex flex-col gap-4 bg-white md:flex-row md:items-center md:gap-5${boxed ? " p-4 md:p-5" : ""}`}>
       <div className="flex flex-row items-center gap-4 md:contents md:gap-0">
         {/* Thumbnail */}
         <img
@@ -335,7 +335,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
         <div className="flex min-w-0 flex-1 flex-col gap-1 md:flex-[1_0_0] md:gap-4">
           <div>
             <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Live cohort</p>
-            <p className="mt-1 line-clamp-2 text-[20px] font-medium leading-[1.2] text-gray-dark md:text-[24px]">{course.title}</p>
+            <p className="mt-1 line-clamp-2 text-[20px] font-medium leading-[1.2] text-gray-dark md:line-clamp-1 md:text-[24px]">{course.title}</p>
           </div>
           {/* Buttons: desktop only */}
           <div className="hidden gap-2 overflow-x-auto md:flex">{actionButtons}</div>

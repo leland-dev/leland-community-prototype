@@ -166,7 +166,7 @@ function SelfPacedCourseCard({ course, boxed }: { course: SelfPacedCourse; boxed
   return (
     <div className={boxed ? `overflow-hidden rounded-xl border border-gray-stroke p-4 shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-transform hover:translate-x-0.5 md:p-5${isCompleted ? " opacity-75" : ""}` : ""}>
       {/* Image + text */}
-      <div className="flex items-center gap-4 md:items-start md:gap-5">
+      <div className="flex items-center gap-4 md:gap-5">
         <div className="w-1/3 shrink-0 md:w-[220px]">
           <img
             src={course.image}
@@ -176,7 +176,7 @@ function SelfPacedCourseCard({ course, boxed }: { course: SelfPacedCourse; boxed
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
           <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Self-paced</p>
-          <h3 className="mt-1 line-clamp-2 text-[20px] font-medium leading-[1.2] text-gray-dark md:text-[24px]">{course.title}</h3>
+          <h3 className="mt-1 line-clamp-2 text-[20px] font-medium leading-[1.2] text-gray-dark md:line-clamp-1 md:text-[24px]">{course.title}</h3>
           {/* Progress + button: desktop only */}
           <div className="mt-4 hidden md:block">{progressRow}</div>
         </div>
