@@ -3,8 +3,8 @@ import { createPortal } from "react-dom";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 
-import { useSetLayoutVariant } from "../components/LayoutVariantContext";
-import { posts, type Post, FeedLikeButton, FeedRepostButton, ShareDropdown } from "./Home";
+import { useSetRightSidebar } from "../components/RightSidebarContext";
+import { posts, type Post, FeedLikeButton, FeedRepostButton, ShareDropdown, HomeRightSidebar } from "./Home";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import verifiedIconSrc from "../assets/icons/verified.svg";
@@ -613,7 +613,7 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
 // ─── Page ─────────────────────────────────────────────
 
 export default function PostDetail() {
-  useSetLayoutVariant("thin");
+  useSetRightSidebar(<HomeRightSidebar />);
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -675,7 +675,7 @@ export default function PostDetail() {
         <button
           onClick={() => navigate(-1)}
           aria-label="Go back"
-          className="mt-4 mb-3 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-dark transition-colors hover:bg-gray-50"
+          className="mb-3 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-dark transition-colors hover:bg-gray-50"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6"/>

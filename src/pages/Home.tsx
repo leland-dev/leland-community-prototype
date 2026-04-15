@@ -2586,7 +2586,7 @@ function CategorySubtitle({ photos, experts }: { photos: string[]; experts: stri
   );
 }
 
-function HomeRightSidebar() {
+export function HomeRightSidebar() {
   return (
     <div className="flex flex-col gap-6 px-1">
       {/* Free events */}
