@@ -189,11 +189,11 @@ function SelfPacedCourseCard({ course, boxed }: { course: SelfPacedCourse; boxed
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-type Variant = "simple" | "grouped" | "boxed";
+type Variant = "default" | "grouped" | "simple";
 
 export default function MyCourses() {
   const { setSimpleSessionLayout } = useSessionLayout();
-  const [variant, setVariant] = useState<Variant>("simple");
+  const [variant, setVariant] = useState<Variant>("default");
 
   function applyVariant(v: Variant) {
     setVariant(v);
@@ -220,7 +220,7 @@ export default function MyCourses() {
       <div className="flex items-center justify-between">
         <h1 className="text-[32px] font-medium leading-[1.2] text-gray-dark md:text-[40px]">My Courses</h1>
         <div className="flex rounded-lg border border-gray-stroke/50 bg-gray-hover p-0.5 text-[14px] font-medium">
-          {(["simple", "grouped", "boxed"] as Variant[]).map((v) => (
+          {(["default", "grouped"] as Variant[]).map((v) => (
             <button
               key={v}
               onClick={() => applyVariant(v)}
@@ -235,11 +235,11 @@ export default function MyCourses() {
       </div>
 
       {/* All enrolled courses */}
-      <div className={`mt-8 flex flex-col ${variant === "boxed" ? "gap-8" : "gap-16"}`}>
+      <div className={`mt-8 flex flex-col ${variant === "simple" ? "gap-16" : "gap-8"}`}>
         {enrolledCourses.map((course) =>
           course.type === "live"
-            ? <LiveCourseCard key={course.id} course={course as LiveCourse} boxed={variant === "boxed"} />
-            : <SelfPacedCourseCard key={course.id} course={course as SelfPacedCourse} boxed={variant === "boxed"} />
+            ? <LiveCourseCard key={course.id} course={course as LiveCourse} boxed={variant !== "simple"} />
+            : <SelfPacedCourseCard key={course.id} course={course as SelfPacedCourse} boxed={variant !== "simple"} />
         )}
       </div>
       </div>
