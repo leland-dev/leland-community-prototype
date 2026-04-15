@@ -15,7 +15,6 @@ import lelandCompass from "../assets/leland-compass.svg";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
-import bootcampImg from "../assets/placeholder images/bootcamp-1.webp";
 import categoryInvestmentBanking from "../assets/placeholder images/category images/investment-banking.png";
 import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
 import categoryGMAT from "../assets/placeholder images/category images/gmat-tutoring.png";
