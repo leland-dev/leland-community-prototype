@@ -145,7 +145,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
   const [filter, setFilter] = useState<"all" | "active" | "invited">("all");
-  const [sort, setSort] = useState<"last-active" | "date-added">("date-added");
+  const [sort, setSort] = useState<"last-active" | "date-added">("last-active");
 
   const filteredUsers = users.filter((u) => {
     if (filter === "active") return u.lastActive !== "—";
