@@ -33,7 +33,7 @@ export interface CoachingSession {
   coachHeadline?: string;
   date: string;
   status?: "scheduled" | "completed";
-  summary: string;
+  summary?: string;
   review?: { rating: number; text: string };
 }
 
@@ -59,6 +59,7 @@ export interface UserDetail {
   plus?: {
     topCategories: string[];
     recentItems: Array<{ title: string; category: string; type?: "video" | "document" }>;
+    totalEngaged?: number;
     inviteSent?: string;
   };
   liveCourses?: LiveCourseEnrollment[];
@@ -87,6 +88,16 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
       {children}
     </div>
   );
+}
+
+function formatInviteDate(dateStr: string) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+  const opts: Intl.DateTimeFormatOptions = date < oneYearAgo
+    ? { month: "short", day: "numeric", year: "numeric" }
+    : { month: "short", day: "numeric" };
+  return date.toLocaleDateString("en-US", opts);
 }
 
 function InviteBanner({ message, inviteSent, variant = "yellow" }: { message: string; inviteSent?: string; variant?: "yellow" | "red" }) {
@@ -133,11 +144,11 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
             className="fixed right-0 top-0 z-50 flex h-full w-full max-w-[480px] flex-col bg-white shadow-xl"
           >
             {/* Header */}
-            <div className="flex shrink-0 items-center gap-4 border-b border-gray-stroke px-6 py-5">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[13px] font-semibold text-dark-green">
+            <div className="flex shrink-0 items-center gap-3 border-b border-gray-stroke px-4 sm:px-6 py-5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[13px] font-semibold text-dark-green">
                 {user.initials}
               </div>
-              <div className="min-w-0 flex-1 text-center">
+              <div className="min-w-0 flex-1">
                 <div className="text-[16px] font-medium text-gray-dark">{user.name}</div>
                 <div className="text-[14px] text-gray-xlight">{user.email}</div>
               </div>
@@ -152,71 +163,80 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
             </div>
 
             {/* Body */}
-            <div className="flex flex-1 flex-col gap-8 overflow-y-auto px-6 py-6">
+            <div className="flex flex-1 flex-col gap-8 overflow-y-auto px-4 sm:px-6 py-6">
 
               {/* 1:1 Coaching */}
               {user.coaching && (
                 <div>
                   <SectionLabel>1:1 Coaching</SectionLabel>
 
-                  <div className="mb-3 flex items-baseline gap-2">
-                    <span className="text-[18px] font-medium text-gray-dark">{user.coaching.used} / {user.coaching.granted}</span>
-                    <span className="text-[14px] font-medium uppercase tracking-[0.06em] text-gray-light">sessions redeemed</span>
-                  </div>
+                  {(() => {
+                    const scheduled = user.coaching.sessions.filter(s => s.status === "scheduled").length;
+                    const completed = user.coaching.sessions.filter(s => s.status !== "scheduled").length;
+                    return (
+                      <div className="mb-4 rounded-lg border border-gray-stroke bg-white p-5">
+                        <div className="mb-2 text-[18px] font-normal text-gray-light">Sessions completed</div>
+                        <div className="flex items-baseline gap-[6px]">
+                          <span className="text-[24px] font-medium leading-none text-gray-dark">{completed}</span>
+                          <span className="text-[18px] font-medium text-gray-dark">of</span>
+                          <span className="text-[24px] font-medium leading-none text-gray-dark">{user.coaching.granted}</span>
+                        </div>
+                        <div className="mt-[6px] text-[14px] text-gray-light">{scheduled} scheduled</div>
+                      </div>
+                    );
+                  })()}
 
-                  {user.coaching.sessions.length > 0 && (
-                    <div className="flex flex-col">
-                      {user.coaching.sessions.flatMap((s, i) => {
-                        const items = [
-                          <div key={`session-${i}`} className="border-b border-gray-stroke py-3">
-                            <SidebarCard
-                              variant="coach"
-                              image={s.coachImg}
-                              title={s.coach}
-                              subtitle={s.coachHeadline ?? ""}
-                              right={
-                                <div className="flex flex-col items-end gap-0.5 text-gray-xlight">
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                                  </svg>
-                                  <span className="text-[14px]">{s.date}</span>
-                                </div>
-                              }
-                            />
-                            {s.status === "scheduled"
-                              ? <p className="mt-3 text-[14px] font-medium uppercase tracking-[0.06em] text-gray-light">Scheduled</p>
-                              : <ExpandableText text={s.summary} className="mt-3 text-[16px] text-gray-light" />
-                            }
-                          </div>,
-                        ];
-                        if (s.review) {
-                          items.push(
-                            <div key={`review-${i}`} className="border-b border-gray-stroke py-3">
-                              <SidebarCard
-                                variant="coach"
-                                image={s.coachImg}
-                                title={s.coach}
-                                subtitle={s.coachHeadline ?? ""}
-                                right={
-                                  <div className="flex flex-col items-end gap-0.5 text-gray-xlight">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                                    </svg>
-                                    <span className="text-[14px]">{s.date}</span>
-                                  </div>
-                                }
-                              />
-                              <div className="flex flex-col gap-[6px] px-2">
+                  {user.coaching.sessions.length > 0 && (() => {
+                    const allItems = [] as { key: string; label: string; date: string; isScheduled?: boolean; content: JSX.Element }[];
+                    user.coaching.sessions.forEach((s, i) => {
+                      allItems.push({
+                        key: `session-${i}`,
+                        label: s.status === "scheduled" ? "Session Scheduled" : "Session Completed",
+                        date: s.date,
+                        isScheduled: s.status === "scheduled",
+                        content: (
+                          <>
+                            <SidebarCard variant="coach" image={s.coachImg} title={s.coach} subtitle={s.coachHeadline ?? ""} />
+                          </>
+                        ),
+                      });
+                      if (s.review) {
+                        allItems.push({
+                          key: `review-${i}`,
+                          label: "Review",
+                          date: s.date,
+                          content: (
+                            <>
+                              <SidebarCard variant="coach" image={s.coachImg} title={s.coach} subtitle={s.coachHeadline ?? ""} />
+                              <div className="mt-1 flex flex-col gap-[6px] px-2">
                                 <StarRating rating={s.review.rating} />
                                 <ExpandableText text={s.review.text} className="text-[16px] italic text-gray-light" />
                               </div>
+                            </>
+                          ),
+                        });
+                      }
+                    });
+                    return (
+                      <div className="mt-2 flex flex-col">
+                        {allItems.map((item, idx) => (
+                          <div key={item.key} className="flex gap-3">
+                            <div className="flex flex-col items-center pt-3">
+                              <div className={`mt-[5px] h-[9px] w-[9px] shrink-0 rounded-full border ${item.isScheduled ? "border-gray-light bg-white" : "border-gray-light bg-gray-light"}`} />
+                              {idx < allItems.length - 1 && <div className="mt-1 w-px flex-1 bg-gray-stroke" />}
                             </div>
-                          );
-                        }
-                        return items;
-                      })}
-                    </div>
-                  )}
+                            <div className="min-w-0 flex-1 py-3">
+                              <div className="mb-1 flex items-center justify-between text-[14px]">
+                                <span className="text-gray-light">{item.label}</span>
+                                <span className="text-gray-xlight">{item.date}</span>
+                              </div>
+                              {item.content}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                   {user.coaching.used === 0 && (
                     <InviteBanner message="Not scheduled yet" inviteSent={user.coaching.inviteSent} />
                   )}
@@ -231,35 +251,31 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
                     <InviteBanner message="Not activated yet" inviteSent={user.plus.inviteSent} />
                   ) : (
                     <>
-                      <div className="mb-3 text-[14px] font-medium uppercase tracking-[0.06em] text-gray-light">Recently viewed</div>
-                      <div className="flex flex-col">
-                        {user.plus.recentItems.map((item, i, arr) => (
-                          <div key={i} className={`flex items-center justify-between gap-3 py-2 ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}>
-                            <div className="flex min-w-0 items-center gap-2">
-                              {item.type === "video" ? (
-                                <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
-                                  <path fillRule="evenodd" clipRule="evenodd" d="M17.5 10C17.5 14.1425 14.1425 17.5 10 17.5C5.8575 17.5 2.5 14.1425 2.5 10C2.5 5.8575 5.8575 2.5 10 2.5C14.1425 2.5 17.5 5.8575 17.5 10Z"/>
-                                  <path fillRule="evenodd" clipRule="evenodd" d="M9.11753 7.549L12.3525 9.46234C12.7617 9.704 12.7617 10.2965 12.3525 10.5382L9.11753 12.4515C8.70086 12.6982 8.17419 12.3973 8.17419 11.9132V8.08734C8.17419 7.60317 8.70086 7.30234 9.11753 7.549Z"/>
-                                </svg>
-                              ) : (
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
-                                  <path d="M19.1213 6.12132L16.8787 3.87868C16.3161 3.31607 15.553 3 14.7574 3H7C6.20435 3 5.44129 3.31607 4.87868 3.87868C4.31607 4.44129 4 5.20435 4 6V18C4 18.7956 4.31607 19.5587 4.87868 20.1213C5.44129 20.6839 6.20435 21 7 21H17C17.7956 21 18.5587 20.6839 19.1213 20.1213C19.6839 19.5587 20 18.7956 20 18V8.24264C20 7.44699 19.6839 6.68393 19.1213 6.12132Z"/>
-                                  <path d="M20 8.5H16.5C15.9696 8.5 15.4609 8.28929 15.0858 7.91421C14.7107 7.53914 14.5 7.03043 14.5 6.5V3"/>
-                                  <path d="M16 16.5H8"/><path d="M8 13H16"/><path d="M10.7 9.5H8"/>
-                                </svg>
-                              )}
-                              <span className="text-[16px] text-gray-dark">{item.title}</span>
-                            </div>
-                            <span className="shrink-0 text-[14px] text-gray-xlight">{item.category}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mb-3 mt-5 text-[14px] font-medium uppercase tracking-[0.06em] text-gray-light">Top categories</div>
+                      {user.plus.totalEngaged != null && (
+                        <div className="mb-4 rounded-lg border border-gray-stroke bg-white p-5">
+                          <div className="mb-2 text-[18px] font-normal text-gray-light">Resources viewed</div>
+                          <div className="text-[24px] font-medium leading-none text-gray-dark">{user.plus.totalEngaged}</div>
+                          <div className="mt-[6px] text-[14px] text-gray-light">Across all categories</div>
+                        </div>
+                      )}
                       <div className="flex flex-wrap gap-2">
                         {user.plus.topCategories.map((cat) => (
                           <span key={cat} className="rounded-full bg-gray-hover px-3 py-1 text-[14px] font-medium text-gray-light">
                             {cat}
                           </span>
+                        ))}
+                      </div>
+                      <div className="mb-3 mt-5 text-[14px] font-medium uppercase tracking-[0.06em] text-gray-light">Recently viewed</div>
+                      <div className="flex flex-col">
+                        {user.plus.recentItems.map((item, i) => (
+                          <div key={i} className="flex items-center justify-between gap-3 border-t border-gray-stroke py-2">
+                            <div className="flex min-w-0 items-center gap-2">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
+                                <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+                              </svg>
+                              <span className="text-[16px] text-gray-dark">{item.title}</span>
+                            </div>
+                          </div>
                         ))}
                       </div>
                     </>
@@ -270,29 +286,69 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
               {/* Live Courses */}
               {user.liveCourses && user.liveCourses.length > 0 && (
                 <div>
-                  <SectionLabel>Live Courses</SectionLabel>
-                  <div className="flex flex-col">
-                    {user.liveCourses.map((course, i, arr) => (
-                      <div key={i} className={`pb-4 ${i > 0 ? "pt-4" : ""} ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}>
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="text-[16px] font-medium text-gray-dark">{course.cohort}</div>
-                          <span className="shrink-0 text-[14px] text-gray-xlight">{course.status === "enrolled" ? "Enrolled" : "Invited"}</span>
+                  <SectionLabel>Live Cohorts</SectionLabel>
+                  {(() => {
+                    const enrolled = user.liveCourses!.filter(c => c.status === "enrolled").length;
+                    const total = user.liveCourses!.length;
+                    return (
+                      <div className="mb-4 rounded-lg border border-gray-stroke bg-white p-5">
+                        <div className="mb-2 text-[18px] font-normal text-gray-light">Cohorts joined</div>
+                        <div className="flex items-baseline gap-[6px]">
+                          <span className="text-[24px] font-medium leading-none text-gray-dark">{enrolled}</span>
+                          <span className="text-[18px] font-medium text-gray-dark">of</span>
+                          <span className="text-[24px] font-medium leading-none text-gray-dark">{total}</span>
                         </div>
-                        <div className="mt-1 text-[14px] text-gray-xlight">{course.startDate} – {course.endDate}</div>
-                        {course.status === "invited" && (
-                          <div className="mt-3">
-                            <InviteBanner message="Not enrolled yet" inviteSent={course.inviteSent} variant="red" />
-                          </div>
-                        )}
-                        {course.review && (
-                          <div className="mt-3 flex flex-col gap-2 px-2">
-                            <StarRating rating={course.review.rating} />
-                            <ExpandableText text={course.review.text} className="text-[16px] italic text-gray-light" />
-                          </div>
-                        )}
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })()}
+                  {(() => {
+                    const allItems = [] as { key: string; label: string; date: string; isPending?: boolean; content: JSX.Element }[];
+                    const sortedCourses = [...user.liveCourses!].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+                    sortedCourses.forEach((course, i) => {
+                      allItems.push({
+                        key: `cohort-${i}`,
+                        label: course.status === "enrolled" ? "Enrolled" : "Invited",
+                        date: course.status === "invited" && course.inviteSent ? formatInviteDate(course.inviteSent) : course.startDate,
+                        isPending: course.status === "invited",
+                        content: (
+                          <>
+                            <div className="py-[10px]">
+                              <div className="text-[16px] font-medium text-gray-dark">{course.cohort}</div>
+                              <div className="mt-[2px] text-[14px] text-gray-xlight">{course.startDate} – {course.endDate}</div>
+                            </div>
+                            {course.status === "invited" && (
+                              <button className="mt-1 rounded-lg bg-gray-hover px-3 py-2 text-[14px] font-medium text-gray-dark hover:bg-gray-stroke">Resend invite</button>
+                            )}
+                            {course.review && (
+                              <div className="mt-1 flex flex-col gap-[6px]">
+                                <StarRating rating={course.review.rating} />
+                                <ExpandableText text={course.review.text} className="text-[16px] italic text-gray-light" />
+                              </div>
+                            )}
+                          </>
+                        ),
+                      });
+                    });
+                    return (
+                      <div className="mt-2 flex flex-col">
+                        {allItems.map((item, idx) => (
+                          <div key={item.key} className="flex gap-3">
+                            <div className="flex flex-col items-center pt-3">
+                              <div className={`mt-[5px] h-[9px] w-[9px] shrink-0 rounded-full border ${item.isPending ? "border-gray-light bg-white" : "border-gray-light bg-gray-light"}`} />
+                              {idx < allItems.length - 1 && <div className="mt-1 w-px flex-1 bg-gray-stroke" />}
+                            </div>
+                            <div className="min-w-0 flex-1 py-3">
+                              <div className="mb-1 flex items-center justify-between text-[14px]">
+                                <span className="text-gray-light">{item.label}</span>
+                                <span className="text-gray-xlight">{item.date}</span>
+                              </div>
+                              {item.content}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 

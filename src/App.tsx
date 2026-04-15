@@ -37,6 +37,7 @@ import B2BDashboardV2 from "./pages/B2BDashboardV2";
 import SessionCardTest from "./pages/SessionCardTest";
 import SidebarCardsTest from "./pages/SidebarCardsTest";
 import OfferingCardTest from "./pages/OfferingCardTest";
+import CourseBlockTest from "./pages/CourseBlockTest";
 import Components from "./pages/Components";
 
 export default function App() {
@@ -59,6 +60,7 @@ export default function App() {
         <Route path="/components/session-card" element={<SessionCardTest />} />
         <Route path="/components/sidebar-cards" element={<SidebarCardsTest />} />
         <Route path="/components/offering-card" element={<OfferingCardTest />} />
+        <Route path="/components/course-block" element={<CourseBlockTest />} />
 
         {/* Context-driven pages (sidebar/variant via hooks) */}
         <Route element={<ContextLayout />}>

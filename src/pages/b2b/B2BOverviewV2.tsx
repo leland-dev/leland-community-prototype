@@ -19,7 +19,7 @@ const activity = [
 ];
 
 const users = [
-  { initials: "SK", name: "Sarah Kim", email: "sarah.kim@kellogg.edu", sessions: 3, sessionsTotal: 5, cohorts: 1, cohortsTotal: 2, plus: "Active", lastActive: "2h ago", lastActiveDays: 0.08, dateAdded: "Jan 10, 2026", daysAdded: 94 },
+  { initials: "SK", name: "Sarah Kim", email: "sarah.kim@kellogg.edu", sessions: 2, sessionsTotal: 4, cohorts: 1, cohortsTotal: 2, plus: "Active", lastActive: "2h ago", lastActiveDays: 0.08, dateAdded: "Jan 10, 2026", daysAdded: 94 },
   { initials: "RP", name: "Raj Patel", email: "raj.patel@kellogg.edu", sessions: 1, sessionsTotal: 3, cohorts: 0, cohortsTotal: 1, plus: "Active", lastActive: "Yesterday", lastActiveDays: 1, dateAdded: "Jan 10, 2026", daysAdded: 94 },
   { initials: "MC", name: "Mia Chen", email: "mia.chen@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: 1, cohortsTotal: 2, plus: "—", lastActive: "2d ago", lastActiveDays: 2, dateAdded: "Jan 15, 2026", daysAdded: 89 },
   { initials: "ET", name: "Evan Torres", email: "evan.torres@kellogg.edu", sessions: 2, sessionsTotal: 4, cohorts: null, cohortsTotal: null, plus: "Active", lastActive: "3d ago", lastActiveDays: 3, dateAdded: "Jan 15, 2026", daysAdded: 89 },
@@ -39,16 +39,16 @@ const userDetails: Record<string, UserDetail> = {
   "sarah.kim@kellogg.edu": {
     name: "Sarah Kim", email: "sarah.kim@kellogg.edu", initials: "SK",
     coaching: {
-      granted: 5, used: 3,
+      granted: 4, used: 2,
       sessions: [
-        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Apr 18, 2026", status: "scheduled", summary: "" },
-        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Mar 28, 2026", summary: "Focused on IB technical prep — LBO modeling and valuation frameworks. Sarah showed strong progress on DCF concepts. Jordan walked through a full paper LBO from scratch, identified gaps in returns analysis, and assigned two modeling tests to complete before the next session.", review: { rating: 5, text: "Jordan was incredibly well-prepared and gave me concrete feedback I could act on immediately. He clearly knows the recruiting process inside and out — every suggestion was specific, actionable, and calibrated to exactly where I am in the process. I left the session with a clear plan and a lot more confidence." } },
+        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Apr 18, 2026", status: "scheduled" },
+        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Mar 28, 2026", review: { rating: 5, text: "Jordan was incredibly well-prepared and gave me concrete feedback I could act on immediately. He clearly knows the recruiting process inside and out — every suggestion was specific, actionable, and calibrated to exactly where I am in the process. I left the session with a clear plan and a lot more confidence." } },
         { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Feb 14, 2026", summary: "Behavioral interview prep and fit story development. Worked through the 'why banking' narrative in depth, refined Sarah's answer to 'walk me through your resume,' and practiced responding to curveball questions under time pressure." },
-        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jan 10, 2026", summary: "Initial session covering goals, timeline, and target firms. Built a study plan for the recruiting cycle." },
       ],
     },
     plus: {
       topCategories: ["Investment Banking", "Valuation", "Interview Guides"],
+      totalEngaged: 47,
       recentItems: [
         { title: "LBO Modeling: Step-by-Step", category: "Investment Banking", type: "video" },
         { title: "IB Interview Question Bank", category: "Interview Guides" },
@@ -155,55 +155,46 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
   return (
     <div className="leading-[1.2]">
       {/* Page header */}
-      <div className="mb-8">
-        <h1 className="text-[40px] font-medium text-gray-dark">Overview</h1>
-        <p className="mt-[2px] text-[18px] text-[#707070]">Kellogg School of Management &middot; Contract Jan 2025 &ndash; Jun 2026</p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-[40px] font-medium text-gray-dark">Overview</h1>
+          <p className="mt-[2px] text-[18px] text-[#707070]">Kellogg School of Management &middot; Contract Jan 2025 &ndash; Jun 2026</p>
+        </div>
+        <button
+          onClick={() => onOpenModal("invite")}
+          className="mt-2 flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-[15px] font-semibold text-white hover:bg-primary-hover"
+        >
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+          </svg>
+          Add users
+        </button>
       </div>
 
       {/* Stats row */}
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Add users — mobile: full-width green button; sm+: stat-style card */}
-        <button
-          onClick={() => onOpenModal("invite")}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-[16px] font-semibold text-white hover:bg-primary-hover sm:flex-col sm:items-start sm:justify-start sm:border sm:border-gray-stroke sm:bg-white sm:p-5 sm:font-normal sm:text-left sm:hover:bg-gray-hover"
-        >
-          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="shrink-0 sm:hidden">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-          </svg>
-          <span className="sm:hidden">Add users</span>
-          <div className="hidden sm:mb-0 sm:flex sm:h-8 sm:w-8 sm:items-center sm:justify-center sm:rounded-full sm:bg-primary">
-            <svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
-          <div className="hidden sm:block">
-            <div className="text-[18px] font-medium text-gray-dark">Add users</div>
-            <div className="mt-[6px] text-[14px] font-normal text-gray-light">Grant access</div>
-          </div>
-        </button>
-
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
-          <div className="mb-2 text-[18px] font-normal text-gray-light">Users invited</div>
+          <div className="mb-2 text-[18px] font-normal text-gray-light">Seats granted</div>
           <div className="flex items-baseline gap-[6px] sm:block">
-            <div className="text-[32px] font-medium leading-none text-gray-dark">325</div>
+            <div className="text-[30px] font-medium leading-none text-gray-dark">325</div>
             <div className="text-[14px] text-gray-light sm:mt-[6px]">3 added this week</div>
           </div>
         </div>
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
-          <div className="mb-2 text-[18px] font-normal text-gray-light">Users engaged</div>
+          <div className="mb-2 text-[18px] font-normal text-gray-light">Seats used</div>
           <div className="flex items-baseline gap-[6px] sm:block">
-            <div className="text-[32px] font-medium leading-none text-gray-dark">289</div>
-            <div className="text-[14px] text-gray-light sm:mt-[6px]">89% of invited users</div>
+            <div className="text-[30px] font-medium leading-none text-gray-dark">289</div>
+            <div className="text-[14px] text-gray-light sm:mt-[6px]">89% of seats granted</div>
           </div>
         </div>
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
-          <div className="mb-2 text-[18px] font-normal text-gray-light">Rating</div>
+          <div className="mb-2 text-[18px] font-normal text-gray-light">Average rating</div>
           <div className="flex items-baseline gap-[6px] sm:block">
-            <div className="flex items-baseline gap-[6px] text-[32px] font-medium leading-none text-gray-dark">
+            <div className="flex items-baseline gap-[6px] text-[30px] font-medium leading-none text-gray-dark">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginBottom: "-2px" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              4.8<span className="text-[16px] font-normal text-gray-light"> / 5</span>
+              4.8
             </div>
-            <div className="text-[14px] text-gray-light sm:mt-[6px]">across 112 reviews</div>
+            <div className="text-[14px] text-gray-light sm:mt-[6px]">Across 112 reviews</div>
           </div>
         </div>
       </div>

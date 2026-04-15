@@ -1,4 +1,9 @@
 import { useEffect } from "react";
+import LiveCourseCard, { LiveCourse } from "../components/LiveCourseCard";
+import { SessionLayoutProvider } from "../components/SessionLayoutContext";
+import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
+import pic3 from "../assets/profile photos/pic-3.png";
+import pic5 from "../assets/profile photos/pic-5.png";
 import { Link } from "react-router-dom";
 import PageShell from "../components/PageShell";
 import SessionCard from "../components/SessionCard";
@@ -96,6 +101,40 @@ export default function Components() {
           <div className="flex flex-col gap-1 px-5 py-4">
             <span className="text-[18px] font-medium text-gray-dark">Offering Card</span>
             <span className="text-[16px] text-[#707070]">Displays a coach's available offerings, and the same offerings in their purchased state for customers.</span>
+          </div>
+        </Link>
+        <Link
+          to="/components/course-block"
+          className="overflow-hidden rounded-[16px] border border-[#E5E5E5] transition-colors hover:border-[#CCCCCC]"
+        >
+          <div className="relative h-[220px] overflow-hidden rounded-[12px] bg-[#F5F5F5] mx-3 mt-3">
+            <SessionLayoutProvider>
+              <div className="absolute inset-x-0 top-0 pointer-events-none">
+                <div
+                  className="origin-top-left"
+                  style={{ transform: "scale(0.5)", width: "200%", padding: "24px 32px 0" }}
+                >
+                  <LiveCourseCard
+                    course={{
+                      type: "live",
+                      id: 99,
+                      title: "Law School Admissions Bootcamp",
+                      cohortDateLabel: "Fall admissions",
+                      cohortDates: "May 5 – Jun 9, 2026",
+                      registrants: [pic3, pic5],
+                      image: eventImg3,
+                      cohortSelected: false,
+                      sessions: [],
+                    } as LiveCourse}
+                    boxed
+                  />
+                </div>
+              </div>
+            </SessionLayoutProvider>
+          </div>
+          <div className="flex flex-col gap-1 px-5 py-4">
+            <span className="text-[18px] font-medium text-gray-dark">Course Block</span>
+            <span className="text-[16px] text-[#707070]">Displays an enrolled course — live cohort or self-paced — with sessions, status, and actions.</span>
           </div>
         </Link>
       </div>
