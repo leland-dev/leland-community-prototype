@@ -7,6 +7,7 @@ import { useVersion } from "../contexts/VersionContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
 import SessionCard from "../components/SessionCard";
+import OfferingCard from "../components/OfferingCard";
 import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import eventImageSrc from "../assets/img/EventImage.avif";
@@ -14,6 +15,7 @@ import lelandCompass from "../assets/leland-compass.svg";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
+import bootcampImg from "../assets/placeholder images/bootcamp-1.webp";
 import categoryInvestmentBanking from "../assets/placeholder images/category images/investment-banking.png";
 import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
 import categoryGMAT from "../assets/placeholder images/category images/gmat-tutoring.png";
@@ -1708,7 +1710,7 @@ export function FeedPost({ post }: { post: Post }) {
         <div className="min-w-0 flex-1">
           <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} />
           <p className="mt-1 text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
-          <div onClick={e => e.stopPropagation()}>
+          <div className={post.type !== "text" ? "pb-1" : ""} onClick={e => e.stopPropagation()}>
             {post.type === "image" && (
               <ImageGallery
                 images={post.images}
@@ -1936,6 +1938,18 @@ type ImageEntry = { original: string; cropped: string; aspectRatio: number };
 
 function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string, images: ImageEntry[]) => void; onGoLive?: () => void; isMVP?: boolean }) {
   const [text, setText] = useState("");
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
+  const [placeholderVisible, setPlaceholderVisible] = useState(true);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPlaceholderVisible(false);
+      setTimeout(() => {
+        setPlaceholderIdx(i => (i + 1) % composerPrompts.length);
+        setPlaceholderVisible(true);
+      }, 250);
+    }, 3200);
+    return () => clearInterval(timer);
+  }, []);
   const [eventAttached, setEventAttached] = useState(false);
   const [selectingEvent, setSelectingEvent] = useState(false);
   const [eventIndex, setEventIndex] = useState(0);
@@ -2233,10 +2247,18 @@ function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => voi
             {/* Compose area */}
             <div className="flex gap-3 px-4 pt-4 pb-3 pr-14">
               <img src={profilePhoto} alt="Your profile" className="h-10 w-10 shrink-0 rounded-full object-cover" />
-              <div className="flex-1 min-w-0">
-                <textarea ref={textareaRef} value={text} onChange={autoGrow} placeholder="What's on your mind?" rows={4}
-                  className="w-full resize-none bg-transparent text-[17px] text-gray-dark placeholder:text-gray-light focus:outline-none leading-relaxed"
-                  style={{ minHeight: "100px" }} />
+              <div className="relative flex-1 min-w-0">
+                {text === "" && (
+                  <span
+                    className="pointer-events-none absolute left-0 text-[17px] text-gray-light leading-relaxed transition-opacity duration-200"
+                    style={{ opacity: placeholderVisible ? 1 : 0, top: 7 }}
+                  >
+                    {composerPrompts[placeholderIdx]}
+                  </span>
+                )}
+                <textarea ref={textareaRef} value={text} onChange={autoGrow} rows={4}
+                  className="w-full resize-none bg-transparent text-[17px] text-gray-dark focus:outline-none leading-relaxed"
+                  style={{ minHeight: "180px", padding: 0, paddingTop: 7 }} />
               </div>
             </div>
 
@@ -2652,7 +2674,7 @@ function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
   return (
     <div className="flex flex-col gap-5">
       {/* Profile card */}
-      <Link to="/profile" className="group block overflow-hidden rounded-2xl bg-white border border-gray-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+      <div className="overflow-hidden rounded-2xl bg-white border border-gray-200">
         {/* Banner */}
         <div className="relative h-[56px] bg-gray-100">
           <div className="absolute -bottom-10 left-4">
@@ -2664,14 +2686,19 @@ function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
           </div>
         </div>
         {/* Body */}
-        <div className="px-4 pb-5 pt-12">
-          {/* Name / headline */}
+        <div className="px-4 pt-12 pb-4">
           <p className="text-[19px] font-medium leading-tight text-gray-dark">Jamie Allen</p>
           <p className="mt-0.5 text-[15px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
+          <button
+            onClick={onCreatePost}
+            className="mt-4 w-full cursor-pointer rounded-lg bg-gray-dark py-2 text-center text-[14px] font-medium text-white transition-opacity hover:opacity-85"
+          >
+            Create post
+          </button>
         </div>
-      </Link>
+      </div>
 
-      {/* Upcoming Sessions */}
+      {/* Upcoming Sessions + My Purchases + Create post */}
       <div className="px-1">
         <NavLink to="/calendar" className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
           Upcoming Sessions
@@ -2684,14 +2711,35 @@ function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
           <SessionCard size="small" title="Resume Review" dateTime="Oct 29, 5:00 PM" duration="45 min" image={pic5} type="coach" status="upcoming" />
           <SessionCard size="small" title="Jasmine <> James Sync" dateTime="Nov 3, 5:00 PM" duration="60 min" image={pic3} type="coach" status="upcoming" />
         </div>
-        <button onClick={onCreatePost} className="mt-5 w-full cursor-pointer rounded-lg bg-gray-100 py-2.5 text-center text-[15px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
-          Create post
-        </button>
+
+        <NavLink to="/my-courses" className="mt-5 flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+          My Purchases
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
+            <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </NavLink>
+        <div className="mt-2 flex flex-col -mx-2">
+          <OfferingCard type="hourly" title="1h 20m with Jessica" subtitle="45m available to schedule" image={pic6} purchased showImage size="small" />
+          <OfferingCard type="package" title="MBA Application Package" subtitle={<span>Comprehensive package · <span className="text-[#038561]">Active</span></span>} image={pic3} purchased showImage size="small" />
+        </div>
       </div>
 
     </div>
   );
 }
+
+// ─── Composer prompts ────────────────────────────────
+
+const composerPrompts = [
+  "What's on your mind?",
+  "Does anyone have a good GMAT practice test?",
+  "Who's the best coach for MBA admissions?",
+  "Any tips for Columbia's essays this cycle?",
+  "Looking for case prep resource recommendations...",
+  "Share a win with the community!",
+  "What's your biggest MBA application challenge?",
+  "Ask the community anything...",
+];
 
 // ─── Page ─────────────────────────────────────────────
 
@@ -2746,7 +2794,7 @@ export default function Home() {
           onClick={() => setComposeOpen(true)}
           className="flex-1 rounded-full bg-gray-hover px-4 py-[10px] text-left text-[16px] text-gray-light transition-shadow hover:shadow-[0_0_0_1.5px_#111111]"
         >
-          Create a post...
+          Create post
         </button>
       </div>
 

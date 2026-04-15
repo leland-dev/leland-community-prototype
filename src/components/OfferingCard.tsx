@@ -19,6 +19,8 @@ interface OfferingCardProps {
   image: string;
   purchased?: boolean;
   ctaLabel?: string;
+  showImage?: boolean;
+  size?: "large" | "small";
 }
 
 function getDefaultCta(type: OfferingType, purchased: boolean): { label: string; green?: boolean } {
@@ -91,10 +93,13 @@ export default function OfferingCard({
   image,
   purchased = false,
   ctaLabel,
+  showImage = false,
+  size = "large",
 }: OfferingCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const isSmall = size === "small";
   const isPersonImage = type === "hourly" || ((type === "hourly-package" || type === "package") && purchased);
   const cta = getDefaultCta(type, purchased);
   const label = ctaLabel || cta.label;
@@ -142,29 +147,29 @@ export default function OfferingCard({
       <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 py-3 transition-colors hover:bg-[#F5F5F5] ${purchased ? "pr-1" : "pr-2"}`}>
         {/* Image */}
         {type === "hourly" && !purchased ? (
-          <div className="hidden @[380px]:flex h-[40px] w-[72px] shrink-0 items-center justify-center rounded-[4px] bg-[#222222]/5">
+          <div className={`${showImage ? "flex" : "hidden @[380px]:flex"} h-[40px] w-[40px] shrink-0 items-center justify-center rounded-[4px] bg-[#F5F5F5]`}>
             <img src={hourglassIcon} alt="" className="h-[20px] w-[20px]" />
           </div>
         ) : isPersonImage ? (
           <img
             src={image}
             alt=""
-            className="hidden @[380px]:block h-[40px] w-[40px] shrink-0 rounded-full object-cover"
+            className={`${showImage ? "block" : "hidden @[380px]:block"} h-[40px] w-[40px] shrink-0 rounded-full object-cover`}
           />
         ) : (
           <img
             src={image}
             alt=""
-            className="hidden @[380px]:block h-[40px] w-[72px] shrink-0 rounded-[4px] object-cover"
+            className={`${showImage ? "block" : "hidden @[380px]:block"} h-[40px] w-[72px] shrink-0 rounded-[4px] object-cover`}
           />
         )}
 
         {/* Title + subtitle */}
         <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
-          <p className="truncate text-[18px] leading-tight font-medium text-gray-dark">
+          <p className={`truncate ${isSmall ? "text-[16px]" : "text-[18px]"} leading-tight font-medium text-gray-dark`}>
             {title}
           </p>
-          <p className="truncate text-[16px] leading-tight text-[#707070]">
+          <p className={`truncate ${isSmall ? "text-[14px]" : "text-[16px]"} leading-tight text-[#707070]`}>
             {subtitle}
           </p>
         </div>
