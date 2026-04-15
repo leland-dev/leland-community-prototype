@@ -133,7 +133,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
   const [page, setPage] = useState(0);
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
-  const [showCoachingStat, setShowCoachingStat] = useState(false);
+  const [thirdStat, setThirdStat] = useState<"coaching" | "rating">("rating");
   const [showNonMvp, setShowNonMvp] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const adminRef = useRef<HTMLDivElement>(null);
@@ -237,7 +237,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
       </AnimatePresence>
 
       {/* Stats row */}
-      <div className={`mb-8 grid grid-cols-1 gap-4 ${showCoachingStat ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
           <div className="mb-2 text-[18px] font-normal text-gray-light">Seats granted</div>
           <div className="flex items-baseline gap-[6px] sm:block">
@@ -252,7 +252,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
             <div className="mt-[6px] text-[14px] text-gray-light">89% of seats granted</div>
           </div>
         </div>
-        {showCoachingStat && (
+        {thirdStat === "coaching" ? (
           <div className="rounded-lg border border-gray-stroke bg-white p-5">
             <div className="mb-2 text-[18px] font-normal text-gray-light">Coaching sessions</div>
             <div className="flex items-baseline gap-[6px] sm:block">
@@ -260,17 +260,18 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
               <div className="text-[14px] text-gray-light sm:mt-[6px]">Scheduled or completed</div>
             </div>
           </div>
-        )}
-        <div className="rounded-lg border border-gray-stroke bg-white p-5">
-          <div className="mb-2 text-[18px] font-normal text-gray-light">Average rating</div>
-          <div className="flex items-baseline gap-[6px] sm:block">
-            <div className="flex items-baseline gap-[6px] text-[30px] font-medium leading-none text-gray-dark">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginBottom: "-2px" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              4.8
+        ) : (
+          <div className="rounded-lg border border-gray-stroke bg-white p-5">
+            <div className="mb-2 text-[18px] font-normal text-gray-light">Average rating</div>
+            <div className="flex items-baseline gap-[6px] sm:block">
+              <div className="flex items-baseline gap-[6px] text-[30px] font-medium leading-none text-gray-dark">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginBottom: "-2px" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                4.8
+              </div>
+              <div className="text-[14px] text-gray-light sm:mt-[6px]">Across 112 reviews</div>
             </div>
-            <div className="text-[14px] text-gray-light sm:mt-[6px]">Across 112 reviews</div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Users table */}
@@ -578,27 +579,31 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 4 }}
               transition={{ duration: 0.15 }}
-              className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+              className="absolute bottom-full right-0 mb-2 w-[260px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg"
             >
-              <div className="px-2 py-1 text-[11px] font-medium uppercase tracking-wider text-[#9b9b9b]">Prototype options</div>
-              <button
-                onClick={() => setShowCoachingStat(!showCoachingStat)}
-                className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-[13px] text-gray-dark hover:bg-gray-hover"
-              >
-                <span>1:1 coaching sessions stat</span>
-                <span className={`text-[11px] font-medium ${showCoachingStat ? "text-primary" : "text-gray-xlight"}`}>
-                  {showCoachingStat ? "ON" : "OFF"}
-                </span>
-              </button>
-              <button
-                onClick={() => setShowNonMvp(!showNonMvp)}
-                className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-[13px] text-gray-dark hover:bg-gray-hover"
-              >
-                <span>Non-MVP content</span>
-                <span className={`text-[11px] font-medium ${showNonMvp ? "text-primary" : "text-gray-xlight"}`}>
-                  {showNonMvp ? "ON" : "OFF"}
-                </span>
-              </button>
+              <div className="bg-[#f5f5f5] px-3 py-2 text-[14px] font-medium uppercase tracking-wider text-[#9b9b9b]">Prototype options</div>
+              <div className="p-2">
+              <div className="px-2 pb-2 pt-1 text-[14px] font-medium uppercase tracking-wider text-[#9b9b9b]">3rd metric</div>
+              <div className="mx-2 mb-1 flex rounded-lg bg-[#f5f5f5] p-[3px]">
+                {(["rating", "coaching"] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => setThirdStat(opt)}
+                    className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[14px] font-medium transition-colors ${thirdStat === opt ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
+                  >
+                    <span className="whitespace-nowrap">{opt === "rating" ? "Avg. rating" : "Coaching sessions"}</span>
+                  </button>
+                ))}
+              </div>
+              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                <span className="text-[16px] font-medium text-gray-dark">Non-MVP content</span>
+                <div className="relative">
+                  <input type="checkbox" checked={showNonMvp} onChange={() => setShowNonMvp(!showNonMvp)} className="peer sr-only" />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

@@ -1549,7 +1549,7 @@ export default function ProfileV2() {
               transition={{ duration: 0.15 }}
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
-              <div className="mb-1.5 px-2 pt-1 text-[11px] font-medium uppercase tracking-wider text-[#9b9b9b]">
+              <div className="mb-1.5 px-2 pt-1 text-[14px] font-medium uppercase tracking-wider text-[#9b9b9b]">
                 Profile type
               </div>
               <div className="mx-2 mb-2 flex rounded-lg bg-[#f5f5f5] p-[3px]">
