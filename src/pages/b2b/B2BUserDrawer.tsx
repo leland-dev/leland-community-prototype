@@ -59,7 +59,7 @@ export interface UserDetail {
   };
   plus?: {
     topCategories: string[];
-    recentItems: Array<{ title: string; category: string; type?: "video" | "document" }>;
+    recentItems: Array<{ title: string; category: string; type?: "video" | "document"; url?: string }>;
     totalEngaged?: number;
     inviteSent?: string;
   };
@@ -266,13 +266,20 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
                       <div className="mb-3 mt-6 text-[14px] font-medium uppercase tracking-[0.06em] text-gray-light">Recently viewed</div>
                       <div className="flex flex-col">
                         {user.plus.recentItems.map((item, i) => (
-                          <div key={i} className="flex items-center justify-between gap-3 py-[6px]">
-                            <div className="flex min-w-0 items-center gap-2">
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
-                                <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
-                              </svg>
-                              <span className="text-[16px] text-gray-dark">{item.title}</span>
+                          <div key={i} className="flex gap-3">
+                            <div className="flex flex-col items-center">
+                              <div className="mt-[9px] h-[7px] w-[7px] shrink-0 rounded-full border border-gray-light bg-gray-light" />
+                              {i < user.plus!.recentItems.length - 1 && <div className="mt-1 w-px flex-1 bg-gray-stroke" />}
                             </div>
+                            <a
+                              href={item.url ?? "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="min-w-0 flex-1 pb-2 pt-[5px] hover:opacity-70"
+                            >
+                              <div className="text-[14px] text-gray-light">{item.category}</div>
+                              <div className="text-[16px] text-gray-dark">{item.title}</div>
+                            </a>
                           </div>
                         ))}
                       </div>

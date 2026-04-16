@@ -676,20 +676,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
               transition={{ duration: 0.15 }}
               className="absolute bottom-full right-0 mb-2 w-[260px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg"
             >
-              <div className="bg-[#f5f5f5] px-3 py-2 text-[14px] font-medium uppercase tracking-wider text-[#9b9b9b]">Prototype options</div>
               <div className="p-2">
-              <div className="px-2 pb-2 pt-1 text-[14px] font-medium uppercase tracking-wider text-[#9b9b9b]">3rd metric</div>
-              <div className="mx-2 mb-1 flex rounded-lg bg-[#f5f5f5] p-[3px]">
-                {(["rating", "coaching"] as const).map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => setThirdStat(opt)}
-                    className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[14px] font-medium transition-colors ${thirdStat === opt ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
-                  >
-                    <span className="whitespace-nowrap">{opt === "rating" ? "Avg. rating" : "Coaching sessions"}</span>
-                  </button>
-                ))}
-              </div>
               <div className="px-2 pb-2 pt-1 text-[14px] font-medium uppercase tracking-wider text-[#9b9b9b]">Partner model</div>
               <div className="mx-2 mb-1 flex rounded-lg bg-[#f5f5f5] p-[3px]">
                 {(["per-seat", "a-la-carte"] as const).map((opt) => (
@@ -699,6 +686,18 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                     className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[14px] font-medium transition-colors ${partnerModel === opt ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
                   >
                     <span className="whitespace-nowrap">{opt === "per-seat" ? "Per Seat" : "À la Carte"}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="px-2 pb-2 pt-1 text-[14px] font-medium uppercase tracking-wider text-[#9b9b9b]">3rd metric</div>
+              <div className="mx-2 mb-1 flex rounded-lg bg-[#f5f5f5] p-[3px]">
+                {(["rating", "coaching"] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => setThirdStat(opt)}
+                    className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[14px] font-medium transition-colors ${thirdStat === opt ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
+                  >
+                    <span className="whitespace-nowrap">{opt === "rating" ? "Avg. rating" : "Coaching sessions"}</span>
                   </button>
                 ))}
               </div>
