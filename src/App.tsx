@@ -49,7 +49,7 @@ export default function App() {
     <Routes>
       <Route path="*" element={<ScrollToTop />} />
       <Route path="/b2b-dashboard" element={<B2BDashboard />} />
-      <Route path="/b2b-dashboard-v2" element={<B2BDashboardV2 />} />
+      <Route path="/partner-dashboard" element={<B2BDashboardV2 />} />
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
         <Route path="/dashboard" element={<Dashboard />} />

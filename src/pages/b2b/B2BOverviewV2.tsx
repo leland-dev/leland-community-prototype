@@ -15,8 +15,8 @@ interface Props {
   onNavigate: (view: B2BView) => void;
   onSetUtilFilter: (filter: string) => void;
   onOpenModal: (m: ModalId) => void;
-  showVerizon: boolean;
-  onToggleVerizon: () => void;
+  partnerModel: "per-seat" | "a-la-carte";
+  onSetPartnerModel: (m: "per-seat" | "a-la-carte") => void;
 }
 
 const activity = [
@@ -131,7 +131,8 @@ const userDetails: Record<string, UserDetail> = {
   },
 };
 
-export default function B2BOverviewV2({ onNavigate, onOpenModal, showVerizon, onToggleVerizon }: Props) {
+export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, onSetPartnerModel }: Props) {
+  const showVerizon = partnerModel === "per-seat";
   const [page, setPage] = useState(0);
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -176,24 +177,26 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, showVerizon, on
   });
 
   const totalPages = Math.ceil(sortedUsers.length / PAGE_SIZE);
-  const visibleUsers = sortedUsers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const pagedUsers = sortedUsers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const visibleUsers = pagedUsers.map((u) =>
+    showVerizon
+      ? { ...u, sessions: 0, sessionsTotal: 2, cohorts: 0, cohortsTotal: 1, cohortsStatus: "Granted" as const, plus: "Invited" }
+      : u
+  );
 
   const [openMenuEmail, setOpenMenuEmail] = useState<string | null>(null);
+  const [openTooltip, setOpenTooltip] = useState<"sessions" | "cohorts" | "seats" | "active" | null>(null);
 
   const handleFilter = (f: "all" | "active" | "invited") => { setFilter(f); setPage(0); };
 
-  const needsResend = (u: typeof users[0]) =>
-    (u.sessions === 0 && u.sessionsTotal != null) ||
-    (u.cohorts === 0 && u.cohortsTotal != null) ||
-    u.plus === "Invited";
-
   return (
     <div className="leading-[1.2]">
+      {openTooltip && <div className="fixed inset-0 z-40" onClick={() => setOpenTooltip(null)} />}
       {/* Page header + desktop sticky button */}
       <div className="mb-4 flex items-start justify-between sm:mb-8">
         <div ref={headerRef}>
           <h1 className="text-[40px] font-medium leading-[1.5] text-gray-dark">Overview</h1>
-          <p className="mt-1 text-[18px] text-[#707070]">{showVerizon ? "Verizon" : "Kellogg School of Management"}{!showVerizon && <> &middot; Contract Jan 2025 &ndash; Jun 2026</>}</p>
+          <p className="mt-1 text-[18px] text-[#707070]">{showVerizon ? "Verizon" : "Kellogg School of Management"} &middot; Contract {showVerizon ? "Jul 2026 \u2013 Dec 2026" : "Jan 2025 \u2013 Jun 2026"}</p>
         </div>
         <div className="sticky hidden self-start sm:block" style={{ top: "28px" }}>
           <button
@@ -238,17 +241,66 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, showVerizon, on
         )}
       </AnimatePresence>
 
-      {/* Stats row */}
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {/* Stats row — À la Carte */}
+      {partnerModel === "a-la-carte" && (
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-lg border border-gray-stroke bg-white p-5">
+            <div className="mb-2 text-[18px] font-normal text-gray-light">Coaching sessions</div>
+            <div className="flex items-baseline gap-[6px] sm:block">
+              <div className="text-[30px] font-medium leading-none text-gray-dark">147</div>
+              <div className="text-[14px] text-gray-light sm:mt-[6px]">Scheduled or completed</div>
+            </div>
+          </div>
+          <div className="rounded-lg border border-gray-stroke bg-white p-5">
+            <div className="mb-2 text-[18px] font-normal text-gray-light">Live cohorts</div>
+            <div className="flex items-baseline gap-[6px] sm:block">
+              <div className="text-[30px] font-medium leading-none text-gray-dark">64</div>
+              <div className="text-[14px] text-gray-light sm:mt-[6px]">Users enrolled to date</div>
+            </div>
+          </div>
+          <div className="rounded-lg border border-gray-stroke bg-white p-5">
+            <div className="mb-2 text-[18px] font-normal text-gray-light">Resources viewed</div>
+            <div className="flex items-baseline gap-[6px] sm:block">
+              <div className="text-[30px] font-medium leading-none text-gray-dark">1,240</div>
+              <div className="text-[14px] text-gray-light sm:mt-[6px]">Across Leland+ content</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stats row — Per Seat */}
+      {partnerModel === "per-seat" && <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
-          <div className="mb-2 text-[18px] font-normal text-gray-light">Seats granted</div>
+          <div className="mb-2 flex items-center gap-1.5 text-[18px] font-normal text-gray-light">
+            Seats granted
+            <div className="group relative flex items-center">
+              <svg onClick={() => setOpenTooltip(openTooltip === "seats" ? null : "seats")} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cursor-pointer text-gray-xlight">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <div className={`pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-[240px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[13px] font-normal leading-[1.4] text-white shadow-lg transition-opacity group-hover:opacity-100 ${openTooltip === "seats" ? "opacity-100" : "opacity-0"}`}>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-dark" />
+                Users your organization has invited and granted access to Leland
+              </div>
+            </div>
+          </div>
           <div className="flex items-baseline gap-[6px] sm:block">
             <div className="text-[30px] font-medium leading-none text-gray-dark">325</div>
             <div className="text-[14px] text-gray-light sm:mt-[6px]">of 400 available</div>
           </div>
         </div>
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
-          <div className="mb-2 text-[18px] font-normal text-gray-light">Active users</div>
+          <div className="mb-2 flex items-center gap-1.5 text-[18px] font-normal text-gray-light">
+            Active users
+            <div className="group relative flex items-center">
+              <svg onClick={() => setOpenTooltip(openTooltip === "active" ? null : "active")} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cursor-pointer text-gray-xlight">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <div className={`pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-[240px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[13px] font-normal leading-[1.4] text-white shadow-lg transition-opacity group-hover:opacity-100 ${openTooltip === "active" ? "opacity-100" : "opacity-0"}`}>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-dark" />
+                Users who signed in or completed onboarding after being invited
+              </div>
+            </div>
+          </div>
           <div className="flex items-baseline gap-[6px] sm:block">
             <div className="text-[30px] font-medium leading-none text-gray-dark">289</div>
             <div className="mt-[6px] text-[14px] text-gray-light">89% of seats granted</div>
@@ -274,7 +326,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, showVerizon, on
             </div>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Users table */}
       <div className="mt-8">
@@ -314,8 +366,34 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, showVerizon, on
               <thead>
                 <tr className="border-b border-gray-stroke">
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">User</th>
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">1:1 Sessions</th>
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">Live Cohorts</th>
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
+                    <div className="flex items-center gap-1.5">
+                      1:1 Sessions
+                      <div className="group relative flex items-center">
+                        <svg onClick={() => setOpenTooltip(openTooltip === "sessions" ? null : "sessions")} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight cursor-pointer">
+                          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        <div className={`pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-[220px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[13px] font-normal leading-[1.4] text-white shadow-lg transition-opacity group-hover:opacity-100 ${openTooltip === "sessions" ? "opacity-100" : "opacity-0"}`}>
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-dark" />
+                          Sessions used (scheduled or completed) out of total sessions granted
+                        </div>
+                      </div>
+                    </div>
+                  </th>
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
+                    <div className="flex items-center gap-1.5">
+                      Live Cohorts
+                      <div className="group relative flex items-center">
+                        <svg onClick={() => setOpenTooltip(openTooltip === "cohorts" ? null : "cohorts")} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight cursor-pointer">
+                          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        <div className={`pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-[220px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[13px] font-normal leading-[1.4] text-white shadow-lg transition-opacity group-hover:opacity-100 ${openTooltip === "cohorts" ? "opacity-100" : "opacity-0"}`}>
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-dark" />
+                          Cohort seats used out of total seats granted to this user
+                        </div>
+                      </div>
+                    </div>
+                  </th>
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">Leland+</th>
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">Date added</th>
                   <th className="bg-[#fafafa] px-4 py-3" />
@@ -350,11 +428,10 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, showVerizon, on
                         </div>
                       ) : <span className="text-[16px] text-gray-light">—</span>}
                     </td>
-                    <td className="px-4 py-[14px] text-[16px]">
-                      {user.cohortsStatus === "Enrolled" && <span className="text-gray-dark">Enrolled</span>}
-                      {user.cohortsStatus === "Completed" && <span className="text-gray-dark">Completed</span>}
-                      {user.cohortsStatus === "Granted" && <span className="text-gray-xlight">Granted</span>}
-                      {!user.cohortsStatus && <span className="text-gray-light">—</span>}
+                    <td className="px-4 py-[14px]">
+                      {user.cohorts != null ? (
+                        <div className="text-[16px] font-medium text-gray-dark">{user.cohorts} <span className="font-normal text-gray-light">/ {user.cohortsTotal}</span></div>
+                      ) : <span className="text-[16px] text-gray-light">—</span>}
                     </td>
                     <td className="px-4 py-[14px] text-[16px]">
                       {user.plus === "Active" && <span className="text-gray-dark">Active</span>}
@@ -386,25 +463,14 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, showVerizon, on
                                 </svg>
                                 Grant access
                               </button>
-                              {needsResend(user) && (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); }}
-                                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[14px] text-gray-dark hover:bg-gray-hover"
-                                >
-                                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
-                                  </svg>
-                                  Resend invite
-                                </button>
-                              )}
                               <button
                                 onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); }}
-                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[14px] text-red hover:bg-gray-hover"
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[14px] text-gray-dark hover:bg-gray-hover"
                               >
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
+                                  <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
                                 </svg>
-                                Revoke access
+                                Resend invite
                               </button>
                             </div>
                           </>
@@ -597,14 +663,18 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, showVerizon, on
                   </button>
                 ))}
               </div>
-              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                <span className="text-[16px] font-medium text-gray-dark">Verizon</span>
-                <div className="relative">
-                  <input type="checkbox" checked={showVerizon} onChange={onToggleVerizon} className="peer sr-only" />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
-                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
-                </div>
-              </label>
+              <div className="px-2 pb-2 pt-1 text-[14px] font-medium uppercase tracking-wider text-[#9b9b9b]">Partner model</div>
+              <div className="mx-2 mb-1 flex rounded-lg bg-[#f5f5f5] p-[3px]">
+                {(["per-seat", "a-la-carte"] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => onSetPartnerModel(opt)}
+                    className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[14px] font-medium transition-colors ${partnerModel === opt ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
+                  >
+                    <span className="whitespace-nowrap">{opt === "per-seat" ? "Per Seat" : "À la Carte"}</span>
+                  </button>
+                ))}
+              </div>
               <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
                 <span className="text-[16px] font-medium text-gray-dark">Non-MVP content</span>
                 <div className="relative">

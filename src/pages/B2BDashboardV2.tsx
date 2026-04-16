@@ -26,7 +26,8 @@ export default function B2BDashboardV2() {
   const [emailRecipients, setEmailRecipients] = useState<{ name: string; email: string }[]>([]);
   const [emailFilterLabel, setEmailFilterLabel] = useState("All users");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [showVerizon, setShowVerizon] = useState(false);
+  const [partnerModel, setPartnerModel] = useState<"per-seat" | "a-la-carte">("a-la-carte");
+  const showVerizon = partnerModel === "per-seat";
 
   useEffect(() => {
     document.title = "B2B Dashboard – Leland";
@@ -52,8 +53,8 @@ export default function B2BDashboardV2() {
               onNavigate={setActiveView}
               onSetUtilFilter={setUtilFilter}
               onOpenModal={setOpenModal}
-              showVerizon={showVerizon}
-              onToggleVerizon={() => setShowVerizon((v) => !v)}
+              partnerModel={partnerModel}
+              onSetPartnerModel={setPartnerModel}
             />
           )}
           {activeView === "utilization" && (
