@@ -5,10 +5,12 @@ export default function B2BSidebar({
   activeView,
   onNavigate,
   items = navItems,
+  showVerizon,
 }: {
   activeView: B2BView;
   onNavigate: (view: B2BView) => void;
   items?: typeof navItems;
+  showVerizon?: boolean;
 }) {
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-gray-stroke bg-white">
@@ -34,7 +36,11 @@ export default function B2BSidebar({
           <span className="whitespace-nowrap text-[14px] font-normal uppercase tracking-[0.1em] text-[#9B9B9B]">Provisioned for</span>
           <div className="h-px flex-1 bg-gray-stroke" />
         </div>
-        <img src={kelloggLogo} alt="Kellogg School of Management" className="mt-5 max-h-16 max-w-[60%]" />
+        {showVerizon ? (
+          <span className="mt-5 text-[22px] font-bold tracking-tight text-[#CD040B]">Verizon</span>
+        ) : (
+          <img src={kelloggLogo} alt="Kellogg School of Management" className="mt-5 max-h-16 max-w-[60%]" />
+        )}
       </div>
     </aside>
   );

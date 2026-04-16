@@ -147,7 +147,7 @@ const chevronDown = (
 
 const selectCls2 = "h-[48px] w-full appearance-none rounded-[8px] border border-gray-stroke bg-white px-4 pr-10 text-[16px] outline-none focus:border-primary";
 
-export function InviteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function InviteModal({ open, onClose, hideOffering }: { open: boolean; onClose: () => void; hideOffering?: boolean }) {
   const [mode, setMode] = useState<"individual" | "bulk">("individual");
   const [offering, setOffering] = useState("");
 
@@ -217,18 +217,20 @@ export function InviteModal({ open, onClose }: { open: boolean; onClose: () => v
                   <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
                 </div>
               </div>
-              <div className="mb-5">
-                <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Grant an offering</label>
-                <div className="relative">
-                  <select className={`${selectCls2} ${offering ? "text-gray-dark" : "text-gray-light"}`} value={offering} onChange={(e) => setOffering(e.target.value)}>
-                    <option value="" disabled>Select one or more options</option>
-                    <option value="session">1:1 session</option>
-                    <option value="leland-plus">Leland+ access</option>
-                    <option value="live-course">Live course</option>
-                  </select>
-                  {chevronDown}
+              {!hideOffering && (
+                <div className="mb-5">
+                  <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Grant an offering</label>
+                  <div className="relative">
+                    <select className={`${selectCls2} ${offering ? "text-gray-dark" : "text-gray-light"}`} value={offering} onChange={(e) => setOffering(e.target.value)}>
+                      <option value="" disabled>Select one or more options</option>
+                      <option value="session">1:1 session</option>
+                      <option value="leland-plus">Leland+ access</option>
+                      <option value="live-course">Live course</option>
+                    </select>
+                    {chevronDown}
+                  </div>
                 </div>
-              </div>
+              )}
             </>
           ) : (
             <>
@@ -250,18 +252,20 @@ export function InviteModal({ open, onClose }: { open: boolean; onClose: () => v
                 </svg>
                 Download template CSV to get started.
               </button>
-              <div className="mb-5">
-                <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Grant an offering</label>
-                <div className="relative">
-                  <select className={`${selectCls2} ${offering ? "text-gray-dark" : "text-gray-light"}`} value={offering} onChange={(e) => setOffering(e.target.value)}>
-                    <option value="" disabled>Select one or more options</option>
-                    <option value="session">1:1 session</option>
-                    <option value="leland-plus">Leland+ access</option>
-                    <option value="live-course">Live course</option>
-                  </select>
-                  {chevronDown}
+              {!hideOffering && (
+                <div className="mb-5">
+                  <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Grant an offering</label>
+                  <div className="relative">
+                    <select className={`${selectCls2} ${offering ? "text-gray-dark" : "text-gray-light"}`} value={offering} onChange={(e) => setOffering(e.target.value)}>
+                      <option value="" disabled>Select one or more options</option>
+                      <option value="session">1:1 session</option>
+                      <option value="leland-plus">Leland+ access</option>
+                      <option value="live-course">Live course</option>
+                    </select>
+                    {chevronDown}
+                  </div>
                 </div>
-              </div>
+              )}
             </>
           )}
         </div>
@@ -470,15 +474,17 @@ export function B2BModalDispatcher({
   onClose,
   emailRecipients,
   emailFilterLabel,
+  showVerizon,
 }: {
   openModal: ModalId;
   onClose: () => void;
   emailRecipients: { name: string; email: string }[];
   emailFilterLabel: string;
+  showVerizon?: boolean;
 }) {
   return (
     <>
-      <InviteModal open={openModal === "invite"} onClose={onClose} />
+      <InviteModal open={openModal === "invite"} onClose={onClose} hideOffering={showVerizon} />
       <GrantModal open={openModal === "grant"} onClose={onClose} />
       <BulkImportModal open={openModal === "bulk"} onClose={onClose} />
       <AdminModal open={openModal === "admin"} onClose={onClose} />

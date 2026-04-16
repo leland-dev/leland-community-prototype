@@ -26,6 +26,7 @@ export default function B2BDashboardV2() {
   const [emailRecipients, setEmailRecipients] = useState<{ name: string; email: string }[]>([]);
   const [emailFilterLabel, setEmailFilterLabel] = useState("All users");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [showVerizon, setShowVerizon] = useState(false);
 
   useEffect(() => {
     document.title = "B2B Dashboard – Leland";
@@ -42,7 +43,7 @@ export default function B2BDashboardV2() {
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop sidebar */}
         <div className="hidden md:flex">
-          <B2BSidebar activeView={activeView} onNavigate={setActiveView} items={v2NavItems} />
+          <B2BSidebar activeView={activeView} onNavigate={setActiveView} items={v2NavItems} showVerizon={showVerizon} />
         </div>
         <main className="flex-1 overflow-y-auto p-4 md:p-7">
           <div className="mx-auto max-w-[1280px]">
@@ -51,6 +52,8 @@ export default function B2BDashboardV2() {
               onNavigate={setActiveView}
               onSetUtilFilter={setUtilFilter}
               onOpenModal={setOpenModal}
+              showVerizon={showVerizon}
+              onToggleVerizon={() => setShowVerizon((v) => !v)}
             />
           )}
           {activeView === "utilization" && (
@@ -77,12 +80,14 @@ export default function B2BDashboardV2() {
         onNavigate={setActiveView}
         onNavigateSettings={navigateSettings}
         items={v2NavItems}
+        showVerizon={showVerizon}
       />
       <B2BModalDispatcher
         openModal={openModal}
         onClose={() => setOpenModal(null)}
         emailRecipients={emailRecipients}
         emailFilterLabel={emailFilterLabel}
+        showVerizon={showVerizon}
       />
     </div>
   );

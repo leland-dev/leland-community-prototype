@@ -15,6 +15,8 @@ interface Props {
   onNavigate: (view: B2BView) => void;
   onSetUtilFilter: (filter: string) => void;
   onOpenModal: (m: ModalId) => void;
+  showVerizon: boolean;
+  onToggleVerizon: () => void;
 }
 
 const activity = [
@@ -129,7 +131,7 @@ const userDetails: Record<string, UserDetail> = {
   },
 };
 
-export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
+export default function B2BOverviewV2({ onNavigate, onOpenModal, showVerizon, onToggleVerizon }: Props) {
   const [page, setPage] = useState(0);
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -191,7 +193,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
       <div className="mb-4 flex items-start justify-between sm:mb-8">
         <div ref={headerRef}>
           <h1 className="text-[40px] font-medium leading-[1.5] text-gray-dark">Overview</h1>
-          <p className="mt-1 text-[18px] text-[#707070]">Kellogg School of Management &middot; Contract Jan 2025 &ndash; Jun 2026</p>
+          <p className="mt-1 text-[18px] text-[#707070]">{showVerizon ? "Verizon" : "Kellogg School of Management"}{!showVerizon && <> &middot; Contract Jan 2025 &ndash; Jun 2026</>}</p>
         </div>
         <div className="sticky hidden self-start sm:block" style={{ top: "28px" }}>
           <button
@@ -595,6 +597,14 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal }: Props) {
                   </button>
                 ))}
               </div>
+              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                <span className="text-[16px] font-medium text-gray-dark">Verizon</span>
+                <div className="relative">
+                  <input type="checkbox" checked={showVerizon} onChange={onToggleVerizon} className="peer sr-only" />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
               <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
                 <span className="text-[16px] font-medium text-gray-dark">Non-MVP content</span>
                 <div className="relative">
