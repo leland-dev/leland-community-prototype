@@ -299,60 +299,37 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
       {partnerModel === "per-seat" && <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
           <div className="mb-2 flex items-center gap-1.5 text-[18px] font-normal text-gray-light">
-            Seats granted
-            <div className="group relative flex items-center">
-              <svg onClick={() => setOpenTooltip(openTooltip === "seats" ? null : "seats")} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cursor-pointer text-gray-xlight">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
-              </svg>
-              <div className={`pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-[240px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[13px] font-normal leading-[1.4] text-white shadow-lg transition-opacity group-hover:opacity-100 ${openTooltip === "seats" ? "opacity-100" : "opacity-0"}`}>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-dark" />
-                Users your organization has invited and granted access to Leland
-              </div>
-            </div>
-          </div>
-          <div className="flex items-baseline gap-[6px] sm:block">
-            <div className="text-[30px] font-medium leading-none text-gray-dark">325</div>
-            <div className="text-[14px] text-gray-light sm:mt-[6px]">of 400 available</div>
-          </div>
-        </div>
-        <div className="rounded-lg border border-gray-stroke bg-white p-5">
-          <div className="mb-2 flex items-center gap-1.5 text-[18px] font-normal text-gray-light">
-            Active users
+            Seats redeemed
             <div className="group relative flex items-center">
               <svg onClick={() => setOpenTooltip(openTooltip === "active" ? null : "active")} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cursor-pointer text-gray-xlight">
                 <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
               </svg>
               <div className={`pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-[240px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[13px] font-normal leading-[1.4] text-white shadow-lg transition-opacity group-hover:opacity-100 ${openTooltip === "active" ? "opacity-100" : "opacity-0"}`}>
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-dark" />
-                Users who signed in or completed onboarding after being invited
+                Users who completed a session, enrolled in a cohort, or viewed resources in Leland+
               </div>
             </div>
           </div>
           <div className="flex items-baseline gap-[6px] sm:block">
             <div className="text-[30px] font-medium leading-none text-gray-dark">289</div>
-            <div className="mt-[6px] text-[14px] text-gray-light">89% of seats granted</div>
           </div>
         </div>
-        {thirdStat === "coaching" ? (
-          <div className="rounded-lg border border-gray-stroke bg-white p-5">
-            <div className="mb-2 text-[18px] font-normal text-gray-light">Coaching sessions</div>
-            <div className="flex items-baseline gap-[6px] sm:block">
-              <div className="text-[30px] font-medium leading-none text-gray-dark">147</div>
-              <div className="text-[14px] text-gray-light sm:mt-[6px]">Scheduled or completed</div>
+        <div className="rounded-lg border border-gray-stroke bg-white p-5">
+          <div className="mb-2 text-[18px] font-normal text-gray-light">Seats left</div>
+          <div className="flex items-baseline gap-[6px] sm:block">
+            <div className="text-[30px] font-medium leading-none text-gray-dark">75</div>
+          </div>
+        </div>
+        <div className="rounded-lg border border-gray-stroke bg-white p-5">
+          <div className="mb-2 text-[18px] font-normal text-gray-light">Average rating</div>
+          <div className="flex items-baseline gap-[6px] sm:block">
+            <div className="flex items-baseline gap-2 text-[30px] font-medium leading-none text-gray-dark">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginBottom: "-2px" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              4.8
+              <span className="text-[16px] font-normal text-gray-light">(112)</span>
             </div>
           </div>
-        ) : (
-          <div className="rounded-lg border border-gray-stroke bg-white p-5">
-            <div className="mb-2 text-[18px] font-normal text-gray-light">Average rating</div>
-            <div className="flex items-baseline gap-[6px] sm:block">
-              <div className="flex items-baseline gap-[6px] text-[30px] font-medium leading-none text-gray-dark">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginBottom: "-2px" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                4.8
-              </div>
-              <div className="text-[14px] text-gray-light sm:mt-[6px]">Across 112 reviews</div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>}
 
       {/* Users table */}
