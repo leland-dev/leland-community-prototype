@@ -26,7 +26,7 @@ export default function B2BDashboardV2() {
   const [emailRecipients, setEmailRecipients] = useState<{ name: string; email: string }[]>([]);
   const [emailFilterLabel, setEmailFilterLabel] = useState("All users");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [partnerModel, setPartnerModel] = useState<"per-seat" | "a-la-carte">("a-la-carte");
+  const [partnerModel, setPartnerModel] = useState<"per-seat" | "a-la-carte">("per-seat");
   const showVerizon = partnerModel === "per-seat";
 
   useEffect(() => {
