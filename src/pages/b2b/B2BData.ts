@@ -23,6 +23,7 @@ export type ModalId =
   | "admin"
   | "grant-access"
   | "email"
+  | "get-more"
   | null;
 
 export interface User {

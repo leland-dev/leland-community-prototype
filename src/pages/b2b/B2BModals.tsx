@@ -34,7 +34,7 @@ function B2BModal({
 
   return (
     <div
-      className="fixed inset-0 z-[1010] flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-[1010] flex items-end justify-center bg-black/40 sm:items-center"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -79,14 +79,14 @@ function FormGroup({ label, hint, children }: { label: string; hint?: string; ch
 const inputCls = "w-full rounded-lg border border-gray-stroke bg-white px-3 py-2 text-[13px] text-gray-dark outline-none focus:border-primary";
 const selectCls = inputCls;
 
-function Btn({ variant, children, onClick }: { variant: "primary" | "secondary"; children: ReactNode; onClick?: () => void }) {
+function Btn({ variant, children, onClick, className }: { variant: "primary" | "secondary"; children: ReactNode; onClick?: () => void; className?: string }) {
   const base = "inline-flex items-center gap-[6px] rounded-lg px-6 py-4 text-[16px] font-medium leading-[1.2] transition-all";
   const cls =
     variant === "primary"
       ? `${base} bg-[#038561] text-white`
       : `${base} bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]`;
   return (
-    <button className={cls} onClick={onClick}>
+    <button className={`${cls} ${className ?? ""}`} onClick={onClick}>
       {children}
     </button>
   );
@@ -147,11 +147,65 @@ const chevronDown = (
 
 const selectCls2 = "h-[48px] w-full appearance-none rounded-[8px] border border-gray-stroke bg-white px-4 pr-10 text-[16px] outline-none focus:border-primary";
 
-export function InviteModal({ open, onClose, hideOffering }: { open: boolean; onClose: () => void; hideOffering?: boolean }) {
+function AlaCArteOfferings({ sessions, setSessions, cohortSeats, setCohortSeats, lelandPlus, setLelandPlus }: {
+  sessions: number; setSessions: (n: number) => void;
+  cohortSeats: number; setCohortSeats: (n: number) => void;
+  lelandPlus: boolean; setLelandPlus: (b: boolean) => void;
+}) {
+  return (
+    <div className="mb-5 mt-8 flex flex-col divide-y divide-gray-stroke rounded-[10px] border border-gray-stroke">
+      {([
+        { label: "1:1 sessions", value: sessions, set: setSessions },
+        { label: "Live cohort seats", value: cohortSeats, set: setCohortSeats },
+      ] as const).map(({ label, value, set }) => (
+        <div key={label} className="flex items-center justify-between gap-4 px-4 py-3">
+          <span className="text-[15px] text-gray-dark">{label}</span>
+          <div className="flex items-center gap-1">
+            <button onClick={() => set(Math.max(0, value - 1))} disabled={value === 0}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb] disabled:opacity-30 disabled:cursor-not-allowed">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <span className="w-6 text-center text-[15px] font-medium text-gray-dark">{value}</span>
+            <button onClick={() => set(value + 1)}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+      ))}
+      <div className="flex items-center justify-between gap-4 px-4 py-3">
+        <span className="text-[15px] text-gray-dark">Leland+</span>
+        {lelandPlus ? (
+          <div className="flex items-center gap-2 rounded-full bg-[#e6f4ef] px-3 py-1.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#038561" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span className="text-[14px] font-medium text-[#038561]">3 months granted</span>
+            <button onClick={() => setLelandPlus(false)} className="ml-1 text-[#038561] hover:opacity-70">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => setLelandPlus(true)}
+            className="flex items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Grant access
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open: boolean; onClose: () => void; hideOffering?: boolean; isAlaCarte?: boolean }) {
   const [mode, setMode] = useState<"individual" | "bulk">("individual");
+  const [email, setEmail] = useState("");
   const [offering, setOffering] = useState("");
+  const [sessions, setSessions] = useState(0);
+  const [cohortSeats, setCohortSeats] = useState(0);
+  const [lelandPlus, setLelandPlus] = useState(false);
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
+    if (!open) { setSent(false); setEmail(""); }
     if (!open) return;
     function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
     document.addEventListener("keydown", onKey);
@@ -160,123 +214,148 @@ export function InviteModal({ open, onClose, hideOffering }: { open: boolean; on
 
   if (!open) return null;
 
-  return (
+  const successMessage = mode === "bulk"
+    ? "Emails have been sent to 12 users."
+    : `An email has been sent to ${email || "your new user"}.`;
+
+  const modalWrapper = (children: React.ReactNode) => (
     <div
-      className="fixed inset-0 z-[1010] flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-[1010] flex items-end justify-center bg-black/40 sm:items-center"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-[520px] max-w-[95vw] overflow-hidden rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]">
-        {/* Header */}
-        <button
-          onClick={onClose}
-          className="absolute right-0 top-0 p-2"
-        >
+      <div className="relative w-full overflow-y-auto rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] sm:w-[520px] sm:max-w-[95vw] sm:overflow-hidden sm:rounded-2xl" style={{ maxHeight: "100dvh" }}>
+        <button onClick={onClose} className="absolute right-0 top-0 p-2">
           <div className="flex items-center justify-center rounded-full border border-gray-stroke bg-white p-[10px] text-gray-dark hover:bg-gray-hover">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <line x1="1" y1="1" x2="13" y2="13" /><line x1="13" y1="1" x2="1" y2="13" />
             </svg>
           </div>
         </button>
-        <div className="px-6 pb-4 pt-6">
-          <h3 className="text-[30px] font-medium text-gray-dark">Add users</h3>
-        </div>
-
-        {/* Body */}
-        <div className="px-6 pb-2">
-          {/* Toggle */}
-          <div className="mb-6 flex gap-2">
-            {(["individual", "bulk"] as const).map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`rounded-full px-4 py-[6px] text-[14px] font-medium transition-colors ${
-                  mode === m
-                    ? "border-2 border-gray-dark bg-[#f5f5f5] text-gray-dark"
-                    : "border border-transparent bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]"
-                }`}
-              >
-                {m === "individual" ? "Individual" : "Bulk Upload"}
-              </button>
-            ))}
-          </div>
-
-          {mode === "individual" ? (
-            <>
-              <div className="mb-5">
-                <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Email address</label>
-                <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" type="email" />
-                <p className="mt-[6px] text-[14px] text-gray-light">If this email already has a Leland account, they'll be linked automatically.</p>
-              </div>
-              <div className="mb-5 grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">First name</label>
-                  <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
-                </div>
-                <div>
-                  <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Last name</label>
-                  <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
-                </div>
-              </div>
-              {!hideOffering && (
-                <div className="mb-5">
-                  <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Grant an offering</label>
-                  <div className="relative">
-                    <select className={`${selectCls2} ${offering ? "text-gray-dark" : "text-gray-light"}`} value={offering} onChange={(e) => setOffering(e.target.value)}>
-                      <option value="" disabled>Select one or more options</option>
-                      <option value="session">1:1 session</option>
-                      <option value="leland-plus">Leland+ access</option>
-                      <option value="live-course">Live course</option>
-                    </select>
-                    {chevronDown}
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              <label className="mb-3 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-gray-stroke bg-[#f5f5f5] px-5 py-8 transition-colors hover:border-primary">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-light">
-                  <polyline points="16 16 12 12 8 16" />
-                  <line x1="12" y1="12" x2="12" y2="21" />
-                  <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3" />
-                </svg>
-                <span className="text-[15px] font-semibold text-gray-dark">Click to upload CSV</span>
-                <span className="text-[13px] text-gray-light">One email address per row</span>
-                <input type="file" accept=".csv" className="hidden" />
-              </label>
-              <button className="mb-5 flex items-center gap-1.5 text-[14px] font-medium text-primary hover:underline">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                Download template CSV to get started.
-              </button>
-              {!hideOffering && (
-                <div className="mb-5">
-                  <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Grant an offering</label>
-                  <div className="relative">
-                    <select className={`${selectCls2} ${offering ? "text-gray-dark" : "text-gray-light"}`} value={offering} onChange={(e) => setOffering(e.target.value)}>
-                      <option value="" disabled>Select one or more options</option>
-                      <option value="session">1:1 session</option>
-                      <option value="leland-plus">Leland+ access</option>
-                      <option value="live-course">Live course</option>
-                    </select>
-                    {chevronDown}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-t border-gray-stroke px-6 py-[14px]">
-          <Btn variant="secondary" onClick={onClose}>Cancel</Btn>
-          <Btn variant="primary">Send Invite</Btn>
-        </div>
+        {children}
       </div>
     </div>
+  );
+
+  if (sent) return modalWrapper(
+    <>
+      <div className="flex flex-col items-center px-6 pb-8 pt-12 text-center">
+        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-[#ecfdf5]">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#038561" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h3 className="mb-3 text-[30px] font-medium text-gray-dark">
+          {isAlaCarte ? "Access granted!" : mode === "bulk" ? "Invites sent!" : "Invite sent!"}
+        </h3>
+        <p className="text-[18px] leading-[1.5] text-gray-light">{successMessage}</p>
+      </div>
+      <div className="border-t border-gray-stroke px-6 py-[14px]">
+        <Btn variant="primary" onClick={onClose} className="w-full justify-center">Sounds good</Btn>
+      </div>
+    </>
+  );
+
+  return modalWrapper(
+    <>
+      <div className="px-6 pb-4 pt-6">
+        <h3 className="text-[30px] font-medium text-gray-dark">{isAlaCarte ? "Grant access" : "Add users"}</h3>
+      </div>
+
+      {/* Body */}
+      <div className="px-6 pb-2">
+        {/* Toggle */}
+        <div className="mb-6 flex gap-2">
+          {(["individual", "bulk"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={`rounded-full px-4 py-[6px] text-[14px] font-medium transition-colors ${
+                mode === m
+                  ? "border-2 border-gray-dark bg-[#f5f5f5] text-gray-dark"
+                  : "border border-transparent bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]"
+              }`}
+            >
+              {m === "individual" ? "Individual" : "Bulk Upload"}
+            </button>
+          ))}
+        </div>
+
+        {mode === "individual" ? (
+          <>
+            <div className="mb-5">
+              <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Email address</label>
+              <input value={email} onChange={(e) => setEmail(e.target.value)} className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" type="email" />
+              <p className="mt-[6px] text-[14px] text-gray-light">If this email already has a Leland account, they'll be linked automatically.</p>
+            </div>
+            <div className="mb-5 grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">First name</label>
+                <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
+              </div>
+              <div>
+                <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Last name</label>
+                <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
+              </div>
+            </div>
+            {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} cohortSeats={cohortSeats} setCohortSeats={setCohortSeats} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} /> : !hideOffering && (
+              <div className="mb-5">
+                <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Grant an offering</label>
+                <div className="relative">
+                  <select className={`${selectCls2} ${offering ? "text-gray-dark" : "text-gray-light"}`} value={offering} onChange={(e) => setOffering(e.target.value)}>
+                    <option value="" disabled>Select one or more options</option>
+                    <option value="session">1:1 session</option>
+                    <option value="leland-plus">Leland+ access</option>
+                    <option value="live-course">Live course</option>
+                  </select>
+                  {chevronDown}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <label className="mb-3 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-gray-stroke bg-[#f5f5f5] px-5 py-8 transition-colors hover:border-primary">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-light">
+                <polyline points="16 16 12 12 8 16" />
+                <line x1="12" y1="12" x2="12" y2="21" />
+                <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3" />
+              </svg>
+              <span className="text-[15px] font-semibold text-gray-dark">Click to upload CSV</span>
+              <span className="text-[14px] text-gray-light">One email address per row</span>
+              <input type="file" accept=".csv" className="hidden" />
+            </label>
+            <button className="mb-5 flex items-center gap-1.5 text-[14px] font-medium text-primary hover:underline">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download template CSV to get started.
+            </button>
+            {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} cohortSeats={cohortSeats} setCohortSeats={setCohortSeats} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} /> : !hideOffering && (
+              <div className="mb-5">
+                <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Grant an offering</label>
+                <div className="relative">
+                  <select className={`${selectCls2} ${offering ? "text-gray-dark" : "text-gray-light"}`} value={offering} onChange={(e) => setOffering(e.target.value)}>
+                    <option value="" disabled>Select one or more options</option>
+                    <option value="session">1:1 session</option>
+                    <option value="leland-plus">Leland+ access</option>
+                    <option value="live-course">Live course</option>
+                  </select>
+                  {chevronDown}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between border-t border-gray-stroke px-6 py-[14px]">
+        <Btn variant="secondary" onClick={onClose}>Cancel</Btn>
+        <Btn variant="primary" onClick={() => setSent(true)}>{isAlaCarte ? "Grant access" : "Send invite"}</Btn>
+      </div>
+    </>
   );
 }
 
@@ -414,6 +493,65 @@ export function GrantAccessModal({ open, onClose }: { open: boolean; onClose: ()
   );
 }
 
+// ── GetMoreModal ──
+
+export function GetMoreModal({ open, onClose, offering }: { open: boolean; onClose: () => void; offering?: string }) {
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[1010] flex items-end justify-center bg-black/40 sm:items-center"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="relative w-full overflow-y-auto rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] sm:w-[520px] sm:max-w-[95vw] sm:overflow-hidden sm:rounded-2xl" style={{ maxHeight: "100dvh" }}>
+        <button onClick={onClose} className="absolute right-0 top-0 p-2">
+          <div className="flex items-center justify-center rounded-full border border-gray-stroke bg-white p-[10px] text-gray-dark hover:bg-gray-hover">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <line x1="1" y1="1" x2="13" y2="13" /><line x1="13" y1="1" x2="1" y2="13" />
+            </svg>
+          </div>
+        </button>
+        <div className="px-6 pb-8 pt-6">
+          <h3 className="text-[30px] font-medium text-gray-dark">Expand your plan or request more access</h3>
+          <p className="mt-2 text-[18px] leading-[1.5] text-gray-light">
+            {offering
+              ? `Need more ${offering}? We'll get you set up.`
+              : "Need more capacity or interested in additional services? We'll get you set up."}
+          </p>
+        </div>
+        <div className="px-6 pb-2">
+          <div className="mb-5">
+            <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">What do you need?</label>
+            <textarea
+              rows={4}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder={offering
+                ? `e.g. We'd like to add 20 more ${offering} to our contract.`
+                : "e.g. We'd like to add more coaching sessions and explore live cohort access."}
+              className="w-full resize-none rounded-[8px] border border-gray-stroke bg-white px-4 py-3 text-[16px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-primary"
+            />
+            <p className="mt-2 text-[14px] text-gray-light">Your account manager will follow up to discuss options.</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between border-t border-gray-stroke px-6 py-[14px]">
+          <Btn variant="secondary" onClick={onClose}>Cancel</Btn>
+          <Btn variant="primary">Send request</Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── EmailModal ──
 
 export function EmailModal({
@@ -475,20 +613,23 @@ export function B2BModalDispatcher({
   emailRecipients,
   emailFilterLabel,
   showVerizon,
+  isAlaCarte,
 }: {
   openModal: ModalId;
   onClose: () => void;
   emailRecipients: { name: string; email: string }[];
   emailFilterLabel: string;
   showVerizon?: boolean;
+  isAlaCarte?: boolean;
 }) {
   return (
     <>
-      <InviteModal open={openModal === "invite"} onClose={onClose} hideOffering={showVerizon} />
+      <InviteModal open={openModal === "invite"} onClose={onClose} hideOffering={showVerizon} isAlaCarte={isAlaCarte} />
       <GrantModal open={openModal === "grant"} onClose={onClose} />
       <BulkImportModal open={openModal === "bulk"} onClose={onClose} />
       <AdminModal open={openModal === "admin"} onClose={onClose} />
       <GrantAccessModal open={openModal === "grant-access"} onClose={onClose} />
+      <GetMoreModal open={openModal === "get-more"} onClose={onClose} />
       <EmailModal
         open={openModal === "email"}
         onClose={onClose}

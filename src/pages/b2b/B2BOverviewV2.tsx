@@ -206,7 +206,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
             </svg>
-            Add users
+            {partnerModel === "a-la-carte" ? "Grant access" : "Add users"}
           </button>
         </div>
       </div>
@@ -219,7 +219,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
         </svg>
-        Add users
+        {partnerModel === "a-la-carte" ? "Grant access" : "Add users"}
       </button>
 
       {/* Mobile corner button — appears when header scrolls out of view */}
@@ -236,7 +236,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
             </svg>
-            Add users
+            {partnerModel === "a-la-carte" ? "Grant access" : "Add users"}
           </motion.button>
         )}
       </AnimatePresence>
@@ -267,6 +267,33 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
           </div>
         </div>
       )}
+
+      {/* Remaining balance — À la Carte */}
+      {partnerModel === "a-la-carte" && (() => {
+        const inventory = [
+          { label: "sessions", purchased: 140, used: 102 },
+          { label: "cohort seats", purchased: 80, used: 64 },
+          { label: "Leland+ licenses", purchased: 30, used: 18 },
+        ].filter(({ purchased }) => purchased > 0);
+        return (
+          <div className="mb-8 flex flex-wrap items-center gap-2">
+            {inventory.map(({ label, purchased, used }) => {
+              const remaining = purchased - used;
+              const cls = remaining === 0
+                ? "border-[#f5c6c6] bg-[#fef2f2] text-[#b91c1c]"
+                : remaining < 20
+                ? "border-[#fde68a] bg-[#fffbeb] text-[#92400e]"
+                : "border-[#a7f3d0] bg-[#ecfdf5] text-[#065f46]";
+              return (
+                <button key={label} onClick={() => onOpenModal("get-more")} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[14px] transition-opacity hover:opacity-80 ${cls}`}>
+                  <span className="font-medium">{remaining}</span>
+                  <span className="opacity-70">{label} remaining</span>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* Stats row — Per Seat */}
       {partnerModel === "per-seat" && <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -344,7 +371,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
               />
             </div>
             {/* Filter pills */}
-            <div className="flex flex-wrap gap-[6px]">
+            <div className="flex flex-wrap gap-2">
               {(["all", "active", "invited"] as const).map((f) => (
                 <button
                   key={f}
@@ -355,7 +382,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                       : "border-transparent hover:bg-[#ebebeb]"
                   }`}
                 >
-                  {f.charAt(0).toUpperCase() + f.slice(1)}
+                  {f === "invited" ? "Invite pending" : f.charAt(0).toUpperCase() + f.slice(1)}
                 </button>
               ))}
             </div>

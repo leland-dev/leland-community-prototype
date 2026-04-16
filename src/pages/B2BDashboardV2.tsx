@@ -89,6 +89,7 @@ export default function B2BDashboardV2() {
         emailRecipients={emailRecipients}
         emailFilterLabel={emailFilterLabel}
         showVerizon={showVerizon}
+        isAlaCarte={partnerModel === "a-la-carte"}
       />
     </div>
   );
