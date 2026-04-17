@@ -243,27 +243,10 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
 
       {/* Stats row — À la Carte */}
       {partnerModel === "a-la-carte" && (
-        <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="rounded-lg border border-gray-stroke bg-white p-5">
-            <div className="mb-2 text-[18px] font-normal text-gray-light">Coaching sessions</div>
-            <div className="flex items-baseline gap-[6px] sm:block">
-              <div className="text-[30px] font-medium leading-none text-gray-dark">147</div>
-              <div className="text-[14px] text-gray-light sm:mt-[6px]">Scheduled or completed</div>
-            </div>
-          </div>
-          <div className="rounded-lg border border-gray-stroke bg-white p-5">
-            <div className="mb-2 text-[18px] font-normal text-gray-light">Live cohorts</div>
-            <div className="flex items-baseline gap-[6px] sm:block">
-              <div className="text-[30px] font-medium leading-none text-gray-dark">64</div>
-              <div className="text-[14px] text-gray-light sm:mt-[6px]">Users enrolled to date</div>
-            </div>
-          </div>
-          <div className="rounded-lg border border-gray-stroke bg-white p-5">
-            <div className="mb-2 text-[18px] font-normal text-gray-light">Resources viewed</div>
-            <div className="flex items-baseline gap-[6px] sm:block">
-              <div className="text-[30px] font-medium leading-none text-gray-dark">1,240</div>
-              <div className="text-[14px] text-gray-light sm:mt-[6px]">Across Leland+ content</div>
-            </div>
+            <div className="mb-2 text-[18px] font-normal text-gray-light">Users added</div>
+            <div className="text-[30px] font-medium leading-none text-gray-dark">64</div>
           </div>
           <div className="rounded-lg border border-gray-stroke bg-white p-5">
             <div className="mb-2 text-[18px] font-normal text-gray-light">Average rating</div>

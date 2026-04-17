@@ -40,7 +40,7 @@ export default function B2BTopNav({
 
   return (
     <header className="border-b border-gray-stroke bg-white">
-      <div className="mx-auto max-w-[1280px] px-4 md:px-7">
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6">
       <div className="relative flex h-14 items-center justify-between">
         {/* Left: Logo */}
         <NavLink to="/" className="flex shrink-0 items-center">

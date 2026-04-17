@@ -156,7 +156,8 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }:
   const [cohortInvited, setCohortInvited] = useState<Record<string, boolean>>({});
 
   return (
-    <div className="mb-5 mt-8 flex flex-col divide-y divide-gray-stroke rounded-[10px] border border-gray-stroke">
+    <div className="mb-5 mt-8 rounded-[10px] border border-gray-stroke">
+      {/* 1:1 sessions */}
       <div className="flex items-center justify-between gap-4 px-4 py-3">
         <span className="text-[15px] text-gray-dark">1:1 sessions</span>
         <div className="flex items-center gap-1">
@@ -171,27 +172,33 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }:
           </button>
         </div>
       </div>
-      {COHORTS.map((cohort) => (
-        <div key={cohort} className="flex items-center justify-between gap-4 px-4 py-3">
-          <span className="text-[15px] text-gray-dark">{cohort}</span>
-          {cohortInvited[cohort] ? (
-            <div className="flex items-center gap-2 rounded-full bg-[#e6f4ef] px-3 py-1.5">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#038561" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span className="text-[14px] font-medium text-[#038561]">Invited</span>
-              <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: false }))} className="ml-1 text-[#038561] hover:opacity-70">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
+      {/* Live cohorts group */}
+      <div className="border-t border-gray-stroke px-4 pb-3 pt-3">
+        <span className="text-[15px] text-gray-dark">Live cohorts</span>
+        <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
+          {COHORTS.map((cohort) => (
+            <div key={cohort} className="flex items-center justify-between gap-4 py-1.5">
+              <span className="text-[14px] text-gray-light">{cohort}</span>
+              {cohortInvited[cohort] ? (
+                <div className="flex items-center gap-2 rounded-full bg-[#e6f4ef] px-3 py-1.5">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#038561" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span className="text-[14px] font-medium text-[#038561]">Invited</span>
+                  <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: false }))} className="ml-1 text-[#038561] hover:opacity-70">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              ) : (
+                <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: true }))}
+                  className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Invite user
+                </button>
+              )}
             </div>
-          ) : (
-            <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: true }))}
-              className="flex items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Invite user
-            </button>
-          )}
+          ))}
         </div>
-      ))}
-      <div className="flex items-center justify-between gap-4 px-4 py-3">
+      </div>
+      <div className="flex items-center justify-between gap-4 border-t border-gray-stroke px-4 py-3">
         <span className="text-[15px] text-gray-dark">Leland+</span>
         {lelandPlus ? (
           <div className="flex items-center gap-2 rounded-full bg-[#e6f4ef] px-3 py-1.5">
@@ -240,7 +247,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
       className="fixed inset-0 z-[1010] flex items-end justify-center bg-black/40 sm:items-center"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-full overflow-y-auto rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] sm:w-[520px] sm:max-w-[95vw] sm:overflow-hidden sm:rounded-2xl" style={{ maxHeight: "100dvh" }}>
+      <div className="relative flex w-full flex-col overflow-hidden rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] max-h-[100dvh] sm:max-h-[90dvh] sm:w-[520px] sm:max-w-[95vw] sm:rounded-2xl">
         <button onClick={onClose} className="absolute right-0 top-0 p-2">
           <div className="flex items-center justify-center rounded-full border border-gray-stroke bg-white p-[10px] text-gray-dark hover:bg-gray-hover">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -279,7 +286,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
       </div>
 
       {/* Body */}
-      <div className="px-6 pb-2">
+      <div className="flex-1 overflow-y-auto px-6 pb-2">
         {/* Toggle */}
         <div className="mb-6 flex gap-2">
           {(["individual", "bulk"] as const).map((m) => (
@@ -529,7 +536,7 @@ export function GetMoreModal({ open, onClose, offering }: { open: boolean; onClo
       className="fixed inset-0 z-[1010] flex items-end justify-center bg-black/40 sm:items-center"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-full overflow-y-auto rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] sm:w-[520px] sm:max-w-[95vw] sm:overflow-hidden sm:rounded-2xl" style={{ maxHeight: "100dvh" }}>
+      <div className="relative flex w-full flex-col overflow-hidden rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] max-h-[100dvh] sm:max-h-[90dvh] sm:w-[520px] sm:max-w-[95vw] sm:rounded-2xl">
         <button onClick={onClose} className="absolute right-0 top-0 p-2">
           <div className="flex items-center justify-center rounded-full border border-gray-stroke bg-white p-[10px] text-gray-dark hover:bg-gray-hover">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">

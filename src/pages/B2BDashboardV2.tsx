@@ -21,8 +21,8 @@ export default function B2BDashboardV2() {
   return (
     <div className="flex h-screen flex-col">
       <B2BTopNav onNavigateSettings={() => setActiveView("settings")} />
-      <main className="flex-1 overflow-y-auto p-4 md:p-7">
-        <div className="mx-auto max-w-[1280px]">
+      <main className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
           {activeView === "overview" && (
             <B2BOverviewV2
               onNavigate={setActiveView}
