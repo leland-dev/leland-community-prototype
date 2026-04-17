@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import arrowRoundIcon from "../assets/icons/arrow-round.svg";
+import arrowRightIcon from "../assets/icons/arrow-right.svg";
 import dotsVerticalIcon from "../assets/icons/dots-vertical.svg";
 import calendarPageIcon from "../assets/icons/calendar-page.svg";
 import editIcon from "../assets/icons/edit.svg";
@@ -27,7 +28,7 @@ function getMenuItems(status: string, type: string) {
   if (type === "bootcamp") {
     const items = [{ icon: textIcon, label: "Session Guide" }];
     if (status === "past") {
-      items.unshift({ icon: playVideoIcon, label: "Watch recording" });
+      items.unshift({ icon: arrowRoundIcon, label: "Watch recording" });
     }
     if (status === "upcoming") {
       items.unshift({ icon: calendarPageIcon, label: "Add to calendar" });
@@ -44,8 +45,8 @@ function getMenuItems(status: string, type: string) {
   }
   if (status === "past") {
     return [
-      { icon: playVideoIcon, label: "Watch recording" },
-      { icon: arrowRoundIcon, label: "Browse more events" },
+      { icon: arrowRoundIcon, label: "Watch recording" },
+      { icon: arrowRightIcon, label: "Browse more events" },
     ];
   }
   if (type === "event") {
@@ -158,7 +159,7 @@ export default function SessionCard({
             >
               Starts in {startsIn}
             </div>
-          ) : isPast && hasRecording && type === "event" ? (
+          ) : isPast && hasRecording && (type === "event" || type === "bootcamp") ? (
             <button
               className={`hidden @[448px]:flex cursor-pointer items-center gap-2 bg-[#222222]/5 text-gray-dark transition-colors hover:bg-[#222222]/[0.08] ${actionBtnClass}`}
               style={actionBtnStyle}
