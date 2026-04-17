@@ -14,7 +14,7 @@ import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
 export default function SessionCardTest() {
   useEffect(() => { document.title = "Component: Session Card"; }, []);
   const [pastOpen, setPastOpen] = useState(false);
-  const [sandboxType, setSandboxType] = useState<"coach" | "event">("coach");
+  const [sandboxType, setSandboxType] = useState<"coach" | "event" | "bootcamp">("coach");
   const [sandboxStatus, setSandboxStatus] = useState<"upcoming" | "live" | "past">("upcoming");
   const [sandboxSize, setSandboxSize] = useState<"large" | "small">("large");
   const [sandboxRecording, setSandboxRecording] = useState(true);
@@ -130,7 +130,7 @@ export default function SessionCardTest() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           {/* Type toggle */}
           <div className="flex rounded-lg bg-[#f5f5f5] p-[3px]">
-            {(["coach", "event"] as const).map((t) => (
+            {(["coach", "event", "bootcamp"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setSandboxType(t)}
@@ -140,7 +140,7 @@ export default function SessionCardTest() {
                     : "text-[#707070]"
                 }`}
               >
-                <span className="whitespace-nowrap">{t === "coach" ? "1:1 Session" : "Event"}</span>
+                <span className="whitespace-nowrap">{t === "coach" ? "1:1 Session" : t === "event" ? "Event" : "Bootcamp Session"}</span>
               </button>
             ))}
           </div>

@@ -147,30 +147,48 @@ const chevronDown = (
 
 const selectCls2 = "h-[48px] w-full appearance-none rounded-[8px] border border-gray-stroke bg-white px-4 pr-10 text-[16px] outline-none focus:border-primary";
 
-function AlaCArteOfferings({ sessions, setSessions, cohortSeats, setCohortSeats, lelandPlus, setLelandPlus }: {
+const COHORTS = ["Spring '26 IB Recruiting", "PE Recruiting Bootcamp", "AI for Finance"];
+
+function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }: {
   sessions: number; setSessions: (n: number) => void;
-  cohortSeats: number; setCohortSeats: (n: number) => void;
   lelandPlus: boolean; setLelandPlus: (b: boolean) => void;
 }) {
+  const [cohortInvited, setCohortInvited] = useState<Record<string, boolean>>({});
+
   return (
     <div className="mb-5 mt-8 flex flex-col divide-y divide-gray-stroke rounded-[10px] border border-gray-stroke">
-      {([
-        { label: "1:1 sessions", value: sessions, set: setSessions },
-        { label: "Live cohort seats", value: cohortSeats, set: setCohortSeats },
-      ] as const).map(({ label, value, set }) => (
-        <div key={label} className="flex items-center justify-between gap-4 px-4 py-3">
-          <span className="text-[15px] text-gray-dark">{label}</span>
-          <div className="flex items-center gap-1">
-            <button onClick={() => set(Math.max(0, value - 1))} disabled={value === 0}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb] disabled:opacity-30 disabled:cursor-not-allowed">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <div className="flex items-center justify-between gap-4 px-4 py-3">
+        <span className="text-[15px] text-gray-dark">1:1 sessions</span>
+        <div className="flex items-center gap-1">
+          <button onClick={() => setSessions(Math.max(0, sessions - 1))} disabled={sessions === 0}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb] disabled:cursor-not-allowed disabled:opacity-30">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <span className="w-6 text-center text-[15px] font-medium text-gray-dark">{sessions}</span>
+          <button onClick={() => setSessions(sessions + 1)}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+      {COHORTS.map((cohort) => (
+        <div key={cohort} className="flex items-center justify-between gap-4 px-4 py-3">
+          <span className="text-[15px] text-gray-dark">{cohort}</span>
+          {cohortInvited[cohort] ? (
+            <div className="flex items-center gap-2 rounded-full bg-[#e6f4ef] px-3 py-1.5">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#038561" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span className="text-[14px] font-medium text-[#038561]">Invited</span>
+              <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: false }))} className="ml-1 text-[#038561] hover:opacity-70">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: true }))}
+              className="flex items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Invite user
             </button>
-            <span className="w-6 text-center text-[15px] font-medium text-gray-dark">{value}</span>
-            <button onClick={() => set(value + 1)}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </button>
-          </div>
+          )}
         </div>
       ))}
       <div className="flex items-center justify-between gap-4 px-4 py-3">
@@ -200,7 +218,6 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
   const [email, setEmail] = useState("");
   const [offering, setOffering] = useState("");
   const [sessions, setSessions] = useState(0);
-  const [cohortSeats, setCohortSeats] = useState(0);
   const [lelandPlus, setLelandPlus] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -297,7 +314,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
                 <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
               </div>
             </div>
-            {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} cohortSeats={cohortSeats} setCohortSeats={setCohortSeats} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} /> : !hideOffering && (
+            {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} /> : !hideOffering && (
               <div className="mb-5">
                 <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Grant an offering</label>
                 <div className="relative">
@@ -332,7 +349,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
               </svg>
               Download template CSV to get started.
             </button>
-            {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} cohortSeats={cohortSeats} setCohortSeats={setCohortSeats} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} /> : !hideOffering && (
+            {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} /> : !hideOffering && (
               <div className="mb-5">
                 <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Grant an offering</label>
                 <div className="relative">

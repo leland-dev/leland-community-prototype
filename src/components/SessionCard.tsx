@@ -7,13 +7,15 @@ import editIcon from "../assets/icons/edit.svg";
 import sessionSummaryIcon from "../assets/icons/session-summary.svg";
 import downloadIcon from "../assets/icons/download.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
+import textIcon from "../assets/icons/text.svg";
+import playVideoIcon from "../assets/icons/play-video.svg";
 
 interface SessionCardProps {
   title: string;
   dateTime: string;
   duration: string;
   image: string;
-  type?: "coach" | "event";
+  type?: "coach" | "event" | "bootcamp";
   status?: "live" | "upcoming" | "past";
   startsIn?: string;
   hasRecording?: boolean;
@@ -22,6 +24,16 @@ interface SessionCardProps {
 }
 
 function getMenuItems(status: string, type: string) {
+  if (type === "bootcamp") {
+    const items = [{ icon: textIcon, label: "Session Guide" }];
+    if (status === "past") {
+      items.unshift({ icon: playVideoIcon, label: "Watch recording" });
+    }
+    if (status === "upcoming") {
+      items.unshift({ icon: calendarPageIcon, label: "Add to calendar" });
+    }
+    return items;
+  }
   if (status === "past" && type === "coach") {
     return [
       { icon: sessionSummaryIcon, label: "View summary" },
@@ -32,8 +44,8 @@ function getMenuItems(status: string, type: string) {
   }
   if (status === "past") {
     return [
-      { icon: sessionSummaryIcon, label: "View summary" },
-      { icon: downloadIcon, label: "Download recording" },
+      { icon: playVideoIcon, label: "Watch recording" },
+      { icon: arrowRoundIcon, label: "Browse more events" },
     ];
   }
   if (type === "event") {
