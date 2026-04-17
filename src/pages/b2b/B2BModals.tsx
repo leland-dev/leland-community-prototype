@@ -220,6 +220,41 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }:
   );
 }
 
+const CONTRACT_COHORTS_MODAL = [
+  "Spring '26 IB Recruiting Bootcamp",
+  "Private Equity Recruiting Bootcamp",
+  "AI for Finance Professionals",
+];
+
+function PerSeatIncludes() {
+  return (
+    <div className="mt-8">
+      <div className="mb-2 text-[14px] text-gray-light">This seat includes</div>
+    <div className="mb-5 rounded-[10px] border border-gray-stroke">
+      <div className="flex items-center justify-between gap-4 px-4 py-3">
+        <span className="text-[15px] text-gray-dark">1:1 sessions</span>
+        <span className="text-[15px] font-medium text-gray-dark">2 included</span>
+      </div>
+      <div className="border-t border-gray-stroke px-4 pb-3 pt-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[15px] text-gray-dark">Live cohorts</span>
+          <span className="text-[15px] font-medium text-gray-dark">{CONTRACT_COHORTS_MODAL.length} included</span>
+        </div>
+        <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
+          {CONTRACT_COHORTS_MODAL.map((cohort) => (
+            <div key={cohort} className="py-1.5 text-[14px] text-gray-light">{cohort}</div>
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-4 border-t border-gray-stroke px-4 py-3">
+        <span className="text-[15px] text-gray-dark">Leland+</span>
+        <span className="text-[15px] font-medium text-gray-dark">6 months included</span>
+      </div>
+    </div>
+    </div>
+  );
+}
+
 export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open: boolean; onClose: () => void; hideOffering?: boolean; isAlaCarte?: boolean }) {
   const [mode, setMode] = useState<"individual" | "bulk">("individual");
   const [email, setEmail] = useState("");
@@ -321,20 +356,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
                 <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
               </div>
             </div>
-            {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} /> : !hideOffering && (
-              <div className="mb-5">
-                <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Grant an offering</label>
-                <div className="relative">
-                  <select className={`${selectCls2} ${offering ? "text-gray-dark" : "text-gray-light"}`} value={offering} onChange={(e) => setOffering(e.target.value)}>
-                    <option value="" disabled>Select one or more options</option>
-                    <option value="session">1:1 session</option>
-                    <option value="leland-plus">Leland+ access</option>
-                    <option value="live-course">Live course</option>
-                  </select>
-                  {chevronDown}
-                </div>
-              </div>
-            )}
+            {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} /> : <PerSeatIncludes />}
           </>
         ) : (
           <>
@@ -356,20 +378,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
               </svg>
               Download template CSV to get started.
             </button>
-            {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} /> : !hideOffering && (
-              <div className="mb-5">
-                <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Grant an offering</label>
-                <div className="relative">
-                  <select className={`${selectCls2} ${offering ? "text-gray-dark" : "text-gray-light"}`} value={offering} onChange={(e) => setOffering(e.target.value)}>
-                    <option value="" disabled>Select one or more options</option>
-                    <option value="session">1:1 session</option>
-                    <option value="leland-plus">Leland+ access</option>
-                    <option value="live-course">Live course</option>
-                  </select>
-                  {chevronDown}
-                </div>
-              </div>
-            )}
+            {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} /> : <PerSeatIncludes />}
           </>
         )}
       </div>

@@ -198,7 +198,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
   const pagedUsers = sortedUsers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const visibleUsers = pagedUsers.map((u) =>
     showVerizon
-      ? { ...u, sessions: 0, sessionsTotal: 2, cohortStatuses: { ib: "invited", pe: "invited", ai: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Invited" }
+      ? { ...u, sessions: 0, sessionsTotal: 2, cohortStatuses: { ib: "invited", pe: "invited", ai: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Dec 31, 2026" }
       : u
   );
 
@@ -263,27 +263,27 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
       {/* Offering usage + Recent activity — À la Carte */}
       {partnerModel === "a-la-carte" && (() => {
         const offerings = [
-          { label: "1:1 Coaching Sessions", description: "Personalized coaching with an expert matched to each user's recruiting track.", purchased: 140, used: 102 },
+          { label: "1:1 Sessions", description: "Personalized coaching with an expert matched to each user's recruiting track.", purchased: 140, used: 102 },
           { label: "Live Cohort Seats", description: "Instructor-led group programs covering recruiting strategy, technical skills, and more.", purchased: 80, used: 64 },
           { label: "Leland+ Licenses", description: "Unlimited access to Leland's full library of guides, templates, and video content.", purchased: 30, used: 18 },
         ];
         return (
           <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.8fr]">
             {/* Left: combined stats card */}
-            <div className="rounded-lg border border-gray-stroke bg-white">
-              <div className="p-5">
+            <div className="flex flex-col justify-start gap-5 rounded-lg border border-gray-stroke bg-white p-5">
+              <div>
                 <div className="mb-2 text-[18px] font-normal text-gray-light">Users added</div>
-                <div className="flex items-baseline gap-2">
-                  <img src={usersIcon} alt="" className="opacity-40" style={{ width: 24, height: 24, flexShrink: 0, marginBottom: "-2px" }} />
-                  <span className="text-[30px] font-medium leading-none text-gray-dark">64</span>
-                </div>
+                <span className="text-[24px] font-medium leading-[1.2] text-gray-dark">64</span>
               </div>
-              <div className="border-t border-gray-stroke p-5">
+              <div className="border-t border-gray-stroke" />
+              <div>
                 <div className="mb-2 text-[18px] font-normal text-gray-light">Average rating</div>
-                <div className="flex items-baseline gap-2">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginBottom: "-2px" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                  <span className="text-[30px] font-medium leading-none text-gray-dark">4.8</span>
-                  <span className="text-[16px] font-normal text-gray-light">(112)</span>
+                <div className="flex items-end gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span className="text-[24px] font-medium leading-[1.2] text-gray-dark">4.8</span>
+                  </div>
+                  <span className="text-[14px] leading-[1.5] text-gray-light">(112)</span>
                 </div>
               </div>
             </div>
@@ -298,15 +298,18 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                     ? "text-[#92400e]"
                     : "text-[#065f46]";
                   return (
-                    <div key={label} className={`flex items-center justify-between gap-6 px-5 py-4 ${i > 0 ? "border-t border-gray-stroke" : ""}`}>
+                    <div key={label}>
+                    {i > 0 && <div className="mx-5 border-t border-gray-stroke" />}
+                    <div className="flex items-center justify-between gap-6 px-5 py-4">
                       <div className="min-w-0">
                         <div className="text-[16px] font-medium text-gray-dark">{label}</div>
                         <div className="mt-0.5 text-[14px] text-gray-light">{description}</div>
                       </div>
                       <div className="shrink-0 text-right">
                         <div className="text-[16px] font-medium text-gray-dark">{used} <span className="font-normal text-gray-light">used</span></div>
-                        <div className={`text-[14px] font-medium ${remainingCls}`}>{remaining} remaining</div>
+                        <div className={`text-[14px] ${remainingCls}`}>{remaining} remaining</div>
                       </div>
+                    </div>
                     </div>
                   );
                 })}
@@ -343,12 +346,12 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
         </div>
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
           <div className="mb-2 text-[18px] font-normal text-gray-light">Average rating</div>
-          <div className="flex items-baseline gap-[6px] sm:block">
-            <div className="flex items-baseline gap-2 text-[30px] font-medium leading-none text-gray-dark">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginBottom: "-2px" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              4.8
-              <span className="text-[16px] font-normal text-gray-light">(112)</span>
+          <div className="flex items-end gap-2">
+            <div className="flex items-center gap-1.5">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span className="text-[24px] font-medium leading-[1.2] text-gray-dark">4.8</span>
             </div>
+            <span className="text-[14px] leading-[1.5] text-gray-light">(112)</span>
           </div>
         </div>
       </div>}
@@ -570,15 +573,17 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                                 </svg>
                                 Grant access
                               </button>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); }}
-                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[14px] text-gray-dark hover:bg-gray-hover"
-                              >
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
-                                </svg>
-                                Resend invite
-                              </button>
+                              {hasInvitePending(user) && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); }}
+                                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[14px] text-gray-dark hover:bg-gray-hover"
+                                >
+                                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
+                                  </svg>
+                                  Resend invite
+                                </button>
+                              )}
                             </div>
                           </>
                         )}
