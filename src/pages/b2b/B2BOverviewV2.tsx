@@ -10,6 +10,7 @@ import userImg2 from "../../assets/profile photos/pic-5.png";
 import userImg3 from "../../assets/profile photos/pic-6.png";
 import userImg4 from "../../assets/profile photos/pic-7.png";
 import userImg5 from "../../assets/profile photos/pic-8.png";
+import usersIcon from "../../assets/icons/user-community.svg";
 
 interface Props {
   onNavigate: (view: B2BView) => void;
@@ -26,19 +27,28 @@ const activity = [
   { type: "session", coachImg: coachImg3, name: "Evan Torres", action: "booked a session with", target: "Alex Morgan", time: "3d ago", category: "Private Equity" },
 ];
 
+const CONTRACT_COHORTS = [
+  { key: "ib", label: "Spring '26 IB" },
+  { key: "pe", label: "PE Bootcamp" },
+  { key: "ai", label: "AI for Finance" },
+] as const;
+
+type CohortKey = typeof CONTRACT_COHORTS[number]["key"];
+type CohortStatus = "invited" | "enrolled" | "completed";
+
 const users = [
-  { initials: "SK", name: "Sarah Kim", email: "sarah.kim@kellogg.edu", sessions: 2, sessionsTotal: 4, cohorts: 1, cohortsTotal: 2, cohortsStatus: "Enrolled", plus: "Active", lastActive: "2h ago", lastActiveDays: 0.08, dateAdded: "Jan 10, 2026", daysAdded: 94 },
-  { initials: "RP", name: "Raj Patel", email: "raj.patel@kellogg.edu", sessions: 1, sessionsTotal: 3, cohorts: 0, cohortsTotal: 1, cohortsStatus: "Granted", plus: "Active", lastActive: "Yesterday", lastActiveDays: 1, dateAdded: "Jan 10, 2026", daysAdded: 94 },
-  { initials: "MC", name: "Mia Chen", email: "mia.chen@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: 1, cohortsTotal: 2, cohortsStatus: "Enrolled", plus: "—", lastActive: "2d ago", lastActiveDays: 2, dateAdded: "Jan 15, 2026", daysAdded: 89 },
-  { initials: "ET", name: "Evan Torres", email: "evan.torres@kellogg.edu", sessions: 2, sessionsTotal: 4, cohorts: null, cohortsTotal: null, cohortsStatus: null, plus: "Active", lastActive: "3d ago", lastActiveDays: 3, dateAdded: "Jan 15, 2026", daysAdded: 89 },
-  { initials: "AL", name: "Aisha Lee", email: "aisha.lee@kellogg.edu", sessions: 0, sessionsTotal: 3, cohorts: null, cohortsTotal: null, cohortsStatus: null, plus: "Invited", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 1, 2026", daysAdded: 72 },
-  { initials: "JL", name: "Jordan Lee", email: "jordan.lee@kellogg.edu", sessions: 2, sessionsTotal: 3, cohorts: 1, cohortsTotal: 1, cohortsStatus: "Completed", plus: "Active", lastActive: "4d ago", lastActiveDays: 4, dateAdded: "Jan 20, 2026", daysAdded: 84 },
-  { initials: "PM", name: "Priya Mehta", email: "priya.mehta@kellogg.edu", sessions: 1, sessionsTotal: 2, cohorts: null, cohortsTotal: null, cohortsStatus: null, plus: "Active", lastActive: "5d ago", lastActiveDays: 5, dateAdded: "Jan 20, 2026", daysAdded: 84 },
-  { initials: "DW", name: "Daniel Wu", email: "daniel.wu@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: 1, cohortsTotal: 1, cohortsStatus: "Enrolled", plus: "—", lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Feb 3, 2026", daysAdded: 70 },
-  { initials: "NB", name: "Nina Brooks", email: "nina.brooks@kellogg.edu", sessions: 3, sessionsTotal: 4, cohorts: null, cohortsTotal: null, cohortsStatus: null, plus: "Active", lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Jan 25, 2026", daysAdded: 79 },
-  { initials: "CR", name: "Carlos Rivera", email: "carlos.rivera@kellogg.edu", sessions: null, sessionsTotal: null, cohorts: null, cohortsTotal: null, cohortsStatus: null, plus: "Expired", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 10, 2026", daysAdded: 63 },
-  { initials: "HS", name: "Hannah Seo", email: "hannah.seo@kellogg.edu", sessions: 1, sessionsTotal: 2, cohorts: 1, cohortsTotal: 1, cohortsStatus: "Completed", plus: "Active", lastActive: "2w ago", lastActiveDays: 14, dateAdded: "Feb 15, 2026", daysAdded: 58 },
-  { initials: "TO", name: "Tunde Okafor", email: "tunde.okafor@kellogg.edu", sessions: 2, sessionsTotal: 3, cohorts: null, cohortsTotal: null, cohortsStatus: null, plus: "—", lastActive: "2w ago", lastActiveDays: 14, dateAdded: "Mar 1, 2026", daysAdded: 44 },
+  { initials: "SK", name: "Sarah Kim", email: "sarah.kim@kellogg.edu", sessions: 2, sessionsTotal: 4, cohortStatuses: { ib: "enrolled", pe: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 10, 2026", lastActive: "2h ago", lastActiveDays: 0.08, dateAdded: "Jan 10, 2026", daysAdded: 94 },
+  { initials: "RP", name: "Raj Patel", email: "raj.patel@kellogg.edu", sessions: 1, sessionsTotal: 3, cohortStatuses: { ib: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 10, 2026", lastActive: "Yesterday", lastActiveDays: 1, dateAdded: "Jan 10, 2026", daysAdded: 94 },
+  { initials: "MC", name: "Mia Chen", email: "mia.chen@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: { ib: "enrolled", ai: "enrolled" } as Partial<Record<CohortKey, CohortStatus>>, plus: "—", plusExpiry: null, lastActive: "2d ago", lastActiveDays: 2, dateAdded: "Jan 15, 2026", daysAdded: 89 },
+  { initials: "ET", name: "Evan Torres", email: "evan.torres@kellogg.edu", sessions: 2, sessionsTotal: 4, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 15, 2026", lastActive: "3d ago", lastActiveDays: 3, dateAdded: "Jan 15, 2026", daysAdded: 89 },
+  { initials: "AL", name: "Aisha Lee", email: "aisha.lee@kellogg.edu", sessions: 0, sessionsTotal: 3, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Aug 1, 2026", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 1, 2026", daysAdded: 72 },
+  { initials: "JL", name: "Jordan Lee", email: "jordan.lee@kellogg.edu", sessions: 2, sessionsTotal: 3, cohortStatuses: { pe: "completed" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 20, 2026", lastActive: "4d ago", lastActiveDays: 4, dateAdded: "Jan 20, 2026", daysAdded: 84 },
+  { initials: "PM", name: "Priya Mehta", email: "priya.mehta@kellogg.edu", sessions: 1, sessionsTotal: 2, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 20, 2026", lastActive: "5d ago", lastActiveDays: 5, dateAdded: "Jan 20, 2026", daysAdded: 84 },
+  { initials: "DW", name: "Daniel Wu", email: "daniel.wu@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: { ib: "enrolled" } as Partial<Record<CohortKey, CohortStatus>>, plus: "—", plusExpiry: null, lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Feb 3, 2026", daysAdded: 70 },
+  { initials: "NB", name: "Nina Brooks", email: "nina.brooks@kellogg.edu", sessions: 3, sessionsTotal: 4, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 25, 2026", lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Jan 25, 2026", daysAdded: 79 },
+  { initials: "CR", name: "Carlos Rivera", email: "carlos.rivera@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Expired", plusExpiry: "Apr 10, 2026", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 10, 2026", daysAdded: 63 },
+  { initials: "HS", name: "Hannah Seo", email: "hannah.seo@kellogg.edu", sessions: 1, sessionsTotal: 2, cohortStatuses: { pe: "completed" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Aug 15, 2026", lastActive: "2w ago", lastActiveDays: 14, dateAdded: "Feb 15, 2026", daysAdded: 58 },
+  { initials: "TO", name: "Tunde Okafor", email: "tunde.okafor@kellogg.edu", sessions: 2, sessionsTotal: 3, cohortStatuses: { ai: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "—", plusExpiry: null, lastActive: "2w ago", lastActiveDays: 14, dateAdded: "Mar 1, 2026", daysAdded: 44 },
 ];
 
 const PAGE_SIZE = 25;
@@ -180,7 +190,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
   const pagedUsers = sortedUsers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const visibleUsers = pagedUsers.map((u) =>
     showVerizon
-      ? { ...u, sessions: 0, sessionsTotal: 2, cohorts: 0, cohortsTotal: 1, cohortsStatus: "Granted" as const, plus: "Invited" }
+      ? { ...u, sessions: 0, sessionsTotal: 2, cohortStatuses: { ib: "invited", pe: "invited", ai: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Invited" }
       : u
   );
 
@@ -241,47 +251,59 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
         )}
       </AnimatePresence>
 
-      {/* Stats row — À la Carte */}
-      {partnerModel === "a-la-carte" && (
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-gray-stroke bg-white p-5">
-            <div className="mb-2 text-[18px] font-normal text-gray-light">Users added</div>
-            <div className="text-[30px] font-medium leading-none text-gray-dark">64</div>
-          </div>
-          <div className="rounded-lg border border-gray-stroke bg-white p-5">
-            <div className="mb-2 text-[18px] font-normal text-gray-light">Average rating</div>
-            <div className="flex items-baseline gap-2">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginBottom: "-2px" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <span className="text-[30px] font-medium leading-none text-gray-dark">4.8</span>
-              <span className="text-[16px] font-normal text-gray-light">(112)</span>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Remaining balance — À la Carte */}
+      {/* Offering usage + Recent activity — À la Carte */}
       {partnerModel === "a-la-carte" && (() => {
-        const inventory = [
-          { label: "sessions", purchased: 140, used: 102 },
-          { label: "cohort seats", purchased: 80, used: 64 },
-          { label: "Leland+ licenses", purchased: 30, used: 18 },
-        ].filter(({ purchased }) => purchased > 0);
+        const offerings = [
+          { label: "1:1 Coaching Sessions", description: "Personalized coaching with an expert matched to each user's recruiting track.", purchased: 140, used: 102 },
+          { label: "Live Cohort Seats", description: "Instructor-led group programs covering recruiting strategy, technical skills, and more.", purchased: 80, used: 64 },
+          { label: "Leland+ Licenses", description: "Unlimited access to Leland's full library of guides, templates, and video content.", purchased: 30, used: 18 },
+        ];
         return (
-          <div className="mb-8 flex flex-wrap items-center gap-2">
-            {inventory.map(({ label, purchased, used }) => {
-              const remaining = purchased - used;
-              const cls = remaining === 0
-                ? "border-[#f5c6c6] bg-[#fef2f2] text-[#b91c1c]"
-                : remaining < 20
-                ? "border-[#fde68a] bg-[#fffbeb] text-[#92400e]"
-                : "border-[#a7f3d0] bg-[#ecfdf5] text-[#065f46]";
-              return (
-                <button key={label} onClick={() => onOpenModal("get-more")} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[14px] transition-opacity hover:opacity-80 ${cls}`}>
-                  <span className="font-medium">{remaining}</span>
-                  <span className="opacity-70">{label} remaining</span>
-                </button>
-              );
-            })}
+          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.8fr]">
+            {/* Left: combined stats card */}
+            <div className="rounded-lg border border-gray-stroke bg-white">
+              <div className="p-5">
+                <div className="mb-2 text-[18px] font-normal text-gray-light">Users added</div>
+                <div className="flex items-baseline gap-2">
+                  <img src={usersIcon} alt="" className="opacity-40" style={{ width: 24, height: 24, flexShrink: 0, marginBottom: "-2px" }} />
+                  <span className="text-[30px] font-medium leading-none text-gray-dark">64</span>
+                </div>
+              </div>
+              <div className="border-t border-gray-stroke p-5">
+                <div className="mb-2 text-[18px] font-normal text-gray-light">Average rating</div>
+                <div className="flex items-baseline gap-2">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginBottom: "-2px" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span className="text-[30px] font-medium leading-none text-gray-dark">4.8</span>
+                  <span className="text-[16px] font-normal text-gray-light">(112)</span>
+                </div>
+              </div>
+            </div>
+            {/* Right: offering utilization */}
+            <div>
+              <div className="overflow-hidden rounded-lg border border-gray-stroke bg-white">
+                {offerings.map(({ label, description, purchased, used }, i) => {
+                  const remaining = purchased - used;
+                  const remainingCls = remaining === 0
+                    ? "text-[#b91c1c]"
+                    : remaining < 20
+                    ? "text-[#92400e]"
+                    : "text-[#065f46]";
+                  return (
+                    <div key={label} className={`flex items-center justify-between gap-6 px-5 py-4 ${i > 0 ? "border-t border-gray-stroke" : ""}`}>
+                      <div className="min-w-0">
+                        <div className="text-[16px] font-medium text-gray-dark">{label}</div>
+                        <div className="mt-0.5 text-[14px] text-gray-light">{description}</div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <div className="text-[16px] font-medium text-gray-dark">{used} <span className="font-normal text-gray-light">used</span></div>
+                        <div className={`text-[14px] font-medium ${remainingCls}`}>{remaining} remaining</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         );
       })()}
@@ -375,20 +397,16 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                       </div>
                     </div>
                   </th>
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
-                    <div className="flex items-center gap-1.5">
-                      Live Cohorts
-                      <div className="group relative flex items-center">
-                        <svg onClick={() => setOpenTooltip(openTooltip === "cohorts" ? null : "cohorts")} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight cursor-pointer">
-                          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
-                        </svg>
-                        <div className={`pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-[220px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[13px] font-normal leading-[1.4] text-white shadow-lg transition-opacity group-hover:opacity-100 ${openTooltip === "cohorts" ? "opacity-100" : "opacity-0"}`}>
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-dark" />
-                          Cohort seats used out of total seats granted to this user
+                  {CONTRACT_COHORTS.map((c) => (
+                    <th key={c.key} className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
+                      <div className="group relative max-w-[140px] cursor-default">
+                        <div className="truncate">{c.label}</div>
+                        <div className="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden whitespace-nowrap rounded-lg bg-gray-dark px-3 py-2 text-[13px] font-normal text-white shadow-lg group-hover:block">
+                          {c.label}
                         </div>
                       </div>
-                    </div>
-                  </th>
+                    </th>
+                  ))}
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">Leland+</th>
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">Date added</th>
                   <th className="bg-[#fafafa] px-4 py-3" />
@@ -423,16 +441,25 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                         </div>
                       ) : <span className="text-[16px] text-gray-light">—</span>}
                     </td>
+                    {CONTRACT_COHORTS.map((c) => {
+                      const status = user.cohortStatuses[c.key];
+                      return (
+                        <td key={c.key} className="px-4 py-[14px] text-[16px]">
+                          {status === "completed" && <span className="text-[#038561]">Completed</span>}
+                          {status === "enrolled" && <span className="text-gray-dark">Enrolled</span>}
+                          {status === "invited" && <span className="text-gray-xlight">Invited</span>}
+                          {!status && <span className="text-gray-light">—</span>}
+                        </td>
+                      );
+                    })}
                     <td className="px-4 py-[14px]">
-                      {user.cohorts != null ? (
-                        <div className="text-[16px] font-medium text-gray-dark">{user.cohorts} <span className="font-normal text-gray-light">/ {user.cohortsTotal}</span></div>
-                      ) : <span className="text-[16px] text-gray-light">—</span>}
-                    </td>
-                    <td className="px-4 py-[14px] text-[16px]">
-                      {user.plus === "Active" && <span className="text-gray-dark">Active</span>}
-                      {user.plus === "Invited" && <span className="text-gray-xlight">Granted</span>}
-                      {user.plus === "Expired" && <span className="text-gray-xlight">Expired</span>}
-                      {user.plus === "—" && <span className="text-gray-light">—</span>}
+                      {user.plus === "Granted" && user.plusExpiry && (
+                        <span className="text-[16px] text-gray-dark">
+                          Expires {user.plusExpiry.replace(/,\s*\d{4}$/, (m) => ", '" + m.trim().slice(-2))}
+                        </span>
+                      )}
+                      {user.plus === "Expired" && <span className="text-[16px] text-gray-xlight">Expired</span>}
+                      {user.plus === "—" && <span className="text-[16px] text-gray-light">—</span>}
                     </td>
                     <td className="px-4 py-[14px] text-[16px] text-gray-light">{user.dateAdded}</td>
                     <td className="px-2 py-2">
