@@ -28,9 +28,9 @@ const activity = [
 ];
 
 const CONTRACT_COHORTS = [
-  { key: "ib", label: "Spring '26 IB" },
-  { key: "pe", label: "PE Bootcamp" },
-  { key: "ai", label: "AI for Finance" },
+  { key: "ib", label: "Spring '26 IB Recruiting Bootcamp" },
+  { key: "pe", label: "Private Equity Recruiting Bootcamp" },
+  { key: "ai", label: "AI for Finance Professionals" },
 ] as const;
 
 type CohortKey = typeof CONTRACT_COHORTS[number]["key"];
@@ -145,8 +145,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
   const showVerizon = partnerModel === "per-seat";
   const [page, setPage] = useState(0);
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
+  const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [adminOpen, setAdminOpen] = useState(false);
-  const [thirdStat, setThirdStat] = useState<"coaching" | "rating">("rating");
   const [showNonMvp, setShowNonMvp] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const adminRef = useRef<HTMLDivElement>(null);
@@ -175,9 +175,17 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
   const [filter, setFilter] = useState<"all" | "active" | "invited">("all");
   const [sort] = useState<"last-active" | "date-added">("date-added");
 
+  const isActive = (u: typeof users[number]) =>
+    (u.sessions != null && u.sessions > 0) ||
+    Object.values(u.cohortStatuses).some((s) => s === "enrolled" || s === "completed");
+
+  const hasInvitePending = (u: typeof users[number]) =>
+    Object.values(u.cohortStatuses).some((s) => s === "invited") ||
+    (u.sessionsTotal != null && (u.sessions === 0 || u.sessions === null));
+
   const filteredUsers = users.filter((u) => {
-    if (filter === "active") return u.lastActive !== "—";
-    if (filter === "invited") return u.lastActive === "—";
+    if (filter === "active") return isActive(u);
+    if (filter === "invited") return hasInvitePending(u);
     return true;
   });
 
@@ -349,9 +357,31 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
       <div className="mt-8">
         <h2 className="mb-4 text-[20px] font-medium text-gray-dark">Users</h2>
         <div className="rounded-lg border border-gray-stroke bg-white shadow-card">
+          {/* Bulk action bar — a la carte only */}
+          {partnerModel === "a-la-carte" && selectedEmails.size > 0 && (
+            <div className="flex items-center gap-3 rounded-t-lg border-b border-gray-stroke bg-white px-4 py-3">
+              <button onClick={() => setSelectedEmails(new Set())} className="flex h-11 items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+                {selectedEmails.size} selected
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { onOpenModal("invite"); }}
+                  className="flex h-11 items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 text-[16px] font-medium text-gray-dark hover:bg-[#ebebeb]"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  Grant access
+                </button>
+              </div>
+            </div>
+          )}
           {/* Toolbar */}
-          <div className="flex flex-wrap items-center gap-3 rounded-t-lg border-b border-gray-stroke bg-white px-4 py-3">
-            <div className="flex max-w-[280px] flex-1 items-center gap-2 rounded-lg border border-gray-stroke px-4 py-3">
+          {(partnerModel !== "a-la-carte" || selectedEmails.size === 0) && <div className="flex flex-wrap items-center gap-3 rounded-t-lg border-b border-gray-stroke bg-white px-4 py-3">
+            <div className="flex w-full items-center gap-2 rounded-lg border border-gray-stroke px-4 py-3 sm:max-w-[280px] sm:flex-1 sm:w-auto">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
@@ -360,13 +390,13 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                 placeholder="Search by name or email"
               />
             </div>
-            {/* Filter pills */}
-            <div className="flex flex-wrap gap-2">
+            {/* Filter pills + Resend invite — scrollable row */}
+            <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto sm:flex-none">
               {(["all", "active", "invited"] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => handleFilter(f)}
-                  className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] border-[1.5px] transition-colors ${
+                  className={`shrink-0 cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] border-[1.5px] transition-colors ${
                     filter === f
                       ? "border-[#222222]"
                       : "border-transparent hover:bg-[#ebebeb]"
@@ -375,17 +405,50 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                   {f === "invited" ? "Invite pending" : f.charAt(0).toUpperCase() + f.slice(1)}
                 </button>
               ))}
+              {filter === "invited" && (
+                <button
+                  onClick={() => {}}
+                  className="ml-2 flex shrink-0 items-center gap-1.5 py-[6px] text-[14px] font-medium text-gray-dark hover:opacity-70"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
+                  </svg>
+                  Resend invite
+                </button>
+              )}
             </div>
-          </div>
+          </div>}
           {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-gray-stroke">
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">User</th>
+                  {partnerModel === "a-la-carte" && <th className="bg-[#fafafa] px-4 py-3 text-left">
+                    <label className="relative flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border border-[#CCCCCC]"
+                      style={visibleUsers.length > 0 && visibleUsers.every((u) => selectedEmails.has(u.email)) ? { backgroundColor: "#038561", borderColor: "#038561" } : undefined}>
+                      <input
+                        type="checkbox"
+                        className="absolute inset-0 cursor-pointer opacity-0"
+                        checked={visibleUsers.length > 0 && visibleUsers.every((u) => selectedEmails.has(u.email))}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedEmails((prev) => new Set([...prev, ...visibleUsers.map((u) => u.email)]));
+                          } else {
+                            setSelectedEmails((prev) => { const next = new Set(prev); visibleUsers.forEach((u) => next.delete(u.email)); return next; });
+                          }
+                        }}
+                      />
+                      {visibleUsers.length > 0 && visibleUsers.every((u) => selectedEmails.has(u.email)) && (
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <path d="M2.5 6L5 8.5L9.5 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </label>
+                  </th>}
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">User</div></th>
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
                     <div className="flex items-center gap-1.5">
-                      1:1 Sessions
+                      <span className="max-w-[120px] truncate">1:1 Sessions</span>
                       <div className="group relative flex items-center">
                         <svg onClick={() => setOpenTooltip(openTooltip === "sessions" ? null : "sessions")} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight cursor-pointer">
                           <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
@@ -407,8 +470,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                       </div>
                     </th>
                   ))}
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">Leland+</th>
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">Date added</th>
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+ Access</div></th>
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[120px] truncate">Date added</div></th>
                   <th className="bg-[#fafafa] px-4 py-3" />
                 </tr>
               </thead>
@@ -419,6 +482,28 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                     className={`cursor-pointer hover:bg-[#fafafa] ${i < visibleUsers.length - 1 ? "border-b border-gray-stroke" : ""}`}
                     onClick={() => setSelectedUser(userDetails[user.email] ?? { name: user.name, email: user.email, initials: user.initials })}
                   >
+                    {partnerModel === "a-la-carte" && <td className="px-4 py-[14px]" onClick={(e) => e.stopPropagation()}>
+                      <label className="relative flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border border-[#CCCCCC]"
+                        style={selectedEmails.has(user.email) ? { backgroundColor: "#038561", borderColor: "#038561" } : undefined}>
+                        <input
+                          type="checkbox"
+                          className="absolute inset-0 cursor-pointer opacity-0"
+                          checked={selectedEmails.has(user.email)}
+                          onChange={(e) => {
+                            setSelectedEmails((prev) => {
+                              const next = new Set(prev);
+                              e.target.checked ? next.add(user.email) : next.delete(user.email);
+                              return next;
+                            });
+                          }}
+                        />
+                        {selectedEmails.has(user.email) && (
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <path d="M2.5 6L5 8.5L9.5 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </label>
+                    </td>}
                     <td className="px-4 py-[14px]">
                       <div className="flex items-center gap-[10px]">
                         {userDetails[user.email]?.image ? (
@@ -445,7 +530,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                       const status = user.cohortStatuses[c.key];
                       return (
                         <td key={c.key} className="px-4 py-[14px] text-[16px]">
-                          {status === "completed" && <span className="text-[#038561]">Completed</span>}
+                          {status === "completed" && <span className="text-gray-dark">Completed</span>}
                           {status === "enrolled" && <span className="text-gray-dark">Enrolled</span>}
                           {status === "invited" && <span className="text-gray-xlight">Invited</span>}
                           {!status && <span className="text-gray-light">—</span>}
@@ -455,7 +540,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                     <td className="px-4 py-[14px]">
                       {user.plus === "Granted" && user.plusExpiry && (
                         <span className="text-[16px] text-gray-dark">
-                          Expires {user.plusExpiry.replace(/,\s*\d{4}$/, (m) => ", '" + m.trim().slice(-2))}
+                          Expires {user.plusExpiry.replace(/,\s*\d{4}$/, "")}
                         </span>
                       )}
                       {user.plus === "Expired" && <span className="text-[16px] text-gray-xlight">Expired</span>}
@@ -681,18 +766,6 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                     className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[14px] font-medium transition-colors ${partnerModel === opt ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
                   >
                     <span className="whitespace-nowrap">{opt === "per-seat" ? "Per Seat" : "À la Carte"}</span>
-                  </button>
-                ))}
-              </div>
-              <div className="px-2 pb-2 pt-1 text-[14px] font-medium uppercase tracking-wider text-[#9b9b9b]">3rd metric</div>
-              <div className="mx-2 mb-1 flex rounded-lg bg-[#f5f5f5] p-[3px]">
-                {(["rating", "coaching"] as const).map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => setThirdStat(opt)}
-                    className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[14px] font-medium transition-colors ${thirdStat === opt ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
-                  >
-                    <span className="whitespace-nowrap">{opt === "rating" ? "Avg. rating" : "Coaching sessions"}</span>
                   </button>
                 ))}
               </div>
