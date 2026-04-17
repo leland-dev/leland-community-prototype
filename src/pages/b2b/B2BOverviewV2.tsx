@@ -292,11 +292,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
               <div className="overflow-hidden rounded-lg border border-gray-stroke bg-white">
                 {offerings.map(({ label, description, purchased, used }, i) => {
                   const remaining = purchased - used;
-                  const remainingCls = remaining === 0
-                    ? "text-[#b91c1c]"
-                    : remaining < 20
-                    ? "text-[#92400e]"
-                    : "text-[#065f46]";
+                  const remainingCls = "text-gray-light";
                   return (
                     <div key={label}>
                     {i > 0 && <div className="mx-5 border-t border-gray-stroke" />}
@@ -483,7 +479,17 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                   <tr
                     key={i}
                     className={`cursor-pointer hover:bg-[#fafafa] ${i < visibleUsers.length - 1 ? "border-b border-gray-stroke" : ""}`}
-                    onClick={() => setSelectedUser(userDetails[user.email] ?? { name: user.name, email: user.email, initials: user.initials })}
+                    onClick={() => setSelectedUser({
+                      ...(userDetails[user.email] ?? { name: user.name, email: user.email, initials: user.initials }),
+                      plusAccess: { status: user.plus, expiry: user.plusExpiry },
+                      cohortStatuses: Object.fromEntries(
+                        CONTRACT_COHORTS
+                          .filter((c) => user.cohortStatuses[c.key])
+                          .map((c) => [c.label, user.cohortStatuses[c.key]!])
+                      ),
+                      sessionsGranted: user.sessionsTotal ?? undefined,
+                      sessionsUsed: user.sessions ?? undefined,
+                    })}
                   >
                     {partnerModel === "a-la-carte" && <td className="px-4 py-[14px]" onClick={(e) => e.stopPropagation()}>
                       <label className="relative flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border border-[#CCCCCC]"

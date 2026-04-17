@@ -64,6 +64,11 @@ export interface UserDetail {
     inviteSent?: string;
   };
   liveCourses?: LiveCourseEnrollment[];
+  // Table-level access summary
+  plusAccess?: { status: string; expiry: string | null };
+  cohortStatuses?: Partial<Record<string, string>>;
+  sessionsGranted?: number;
+  sessionsUsed?: number | null;
 }
 
 interface Props {
@@ -118,6 +123,13 @@ function InviteBanner({ message, inviteSent, variant = "yellow" }: { message: st
 
 export default function B2BUserDrawer({ user, onClose }: Props) {
 
+  useEffect(() => {
+    if (!user) return;
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [user, onClose]);
+
   return (
     <AnimatePresence>
       {user && (
@@ -127,15 +139,18 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black/25"
+            className="fixed inset-0 z-40 bg-black/40"
             onClick={onClose}
           />
           <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
-            className="fixed right-0 top-0 z-50 flex h-full w-full max-w-[480px] flex-col bg-white shadow-xl"
+            initial={{ opacity: 0, scale: 0.97, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: 8 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+          >
+          <div className="relative flex w-full flex-col overflow-hidden rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] max-h-[100dvh] sm:max-h-[90dvh] sm:w-[560px] sm:max-w-[95vw] sm:rounded-2xl"
           >
             {/* Header */}
             <div className="flex shrink-0 items-center gap-3 border-b border-gray-stroke px-4 sm:px-6 py-5">
@@ -161,7 +176,8 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
             </div>
 
             {/* Body */}
-            <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 sm:px-6 py-6">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
+              <div className="flex flex-col gap-6">
 
               <div className="text-[30px] font-medium text-gray-dark">User details</div>
 
@@ -242,49 +258,16 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
                 </div>
               )}
 
-              {/* Leland+ */}
-              {user.plus && (
-                <div>
-                  {user.plus.inviteSent && !user.plus.recentItems.length ? (
-                    <InviteBanner message="Not activated yet" inviteSent={user.plus.inviteSent} />
-                  ) : (
-                    <>
-                      {user.plus.totalEngaged != null && (
-                        <div className="mb-4 rounded-lg border border-gray-stroke bg-white p-5">
-                          <div className="mb-2 text-[18px] font-normal text-gray-light">Resources viewed</div>
-                          <div className="text-[24px] font-medium leading-none text-gray-dark">{user.plus.totalEngaged}</div>
-                          <div className="mt-[6px] text-[14px] text-gray-light">Across all categories</div>
-                        </div>
-                      )}
-                      <div className="flex flex-wrap gap-2">
-                        {user.plus.topCategories.map((cat) => (
-                          <span key={cat} className="rounded-full bg-gray-hover px-3 py-1 text-[14px] font-medium text-gray-light">
-                            {cat}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="mb-3 mt-6 text-[14px] font-medium uppercase tracking-[0.06em] text-gray-light">Recently viewed</div>
-                      <div className="flex flex-col">
-                        {user.plus.recentItems.map((item, i) => (
-                          <div key={i} className="flex gap-3">
-                            <div className="flex flex-col items-center">
-                              <div className="mt-[9px] h-[7px] w-[7px] shrink-0 rounded-full border border-gray-light bg-gray-light" />
-                              {i < user.plus!.recentItems.length - 1 && <div className="mt-1 w-px flex-1 bg-gray-stroke" />}
-                            </div>
-                            <a
-                              href={item.url ?? "#"}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="min-w-0 flex-1 pb-2 pt-[5px] hover:opacity-70"
-                            >
-                              <div className="text-[14px] text-gray-light">{item.category}</div>
-                              <div className="text-[16px] text-gray-dark">{item.title}</div>
-                            </a>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
+
+              {/* Sessions fallback — only if no detailed coaching data */}
+              {user.sessionsGranted != null && !user.coaching && (
+                <div className="rounded-lg border border-gray-stroke bg-white p-5">
+                  <div className="mb-2 text-[18px] font-normal text-gray-light">Sessions completed</div>
+                  <div className="flex items-baseline gap-[6px]">
+                    <span className="text-[24px] font-medium leading-none text-gray-dark">{user.sessionsUsed ?? 0}</span>
+                    <span className="text-[18px] font-medium text-gray-dark">of</span>
+                    <span className="text-[24px] font-medium leading-none text-gray-dark">{user.sessionsGranted}</span>
+                  </div>
                 </div>
               )}
 
@@ -356,7 +339,45 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
                 </div>
               )}
 
+              {/* Cohorts fallback — only if no detailed live course data */}
+              {user.cohortStatuses && Object.keys(user.cohortStatuses).length > 0 && !(user.liveCourses?.length) && (
+                <div className="rounded-lg border border-gray-stroke bg-white p-5">
+                  <div className="mb-3 text-[18px] font-normal text-gray-light">Live cohorts</div>
+                  <div className="flex flex-col gap-3">
+                    {Object.entries(user.cohortStatuses).map(([cohort, status]) => (
+                      <div key={cohort} className="flex items-center justify-between gap-4">
+                        <span className="text-[16px] text-gray-dark">{cohort}</span>
+                        <span className={`shrink-0 text-[14px] ${status === "invited" ? "text-gray-xlight" : "text-gray-dark"}`}>
+                          {status === "completed" ? "Completed" : status === "enrolled" ? "Enrolled" : "Invited"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Leland+ access */}
+              {user.plusAccess && user.plusAccess.status !== "—" && (
+                <div className="rounded-lg border border-gray-stroke bg-white p-5">
+                  <div className="mb-2 text-[18px] font-normal text-gray-light">Leland+ access</div>
+                  {user.plusAccess.status === "Granted" ? (
+                    <div>
+                      <div className="text-[24px] font-medium leading-none text-gray-dark">Active</div>
+                      {user.plusAccess.expiry && (
+                        <div className="mt-[6px] text-[14px] text-gray-light">
+                          Expires {user.plusAccess.expiry.replace(/,\s*\d{4}$/, "")}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-[24px] font-medium leading-none text-gray-xlight">Expired</div>
+                  )}
+                </div>
+              )}
+
             </div>
+            </div>
+          </div>
           </motion.div>
         </>
       )}
