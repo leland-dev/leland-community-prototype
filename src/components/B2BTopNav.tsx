@@ -6,7 +6,6 @@ import switchIcon from "../assets/icons/switch.svg";
 import helpIcon from "../assets/icons/help.svg";
 import logOutIcon from "../assets/icons/log out.svg";
 import settingsIcon from "../assets/icons/settings.svg";
-import moreIcon from "../assets/icons/nav-icons/more-active.svg";
 import lelandLogo from "../assets/Logo.svg";
 
 const profileMenuGroups = [
@@ -21,10 +20,8 @@ const profileMenuGroups = [
 
 export default function B2BTopNav({
   onNavigateSettings,
-  onOpenMobileSidebar,
 }: {
   onNavigateSettings?: () => void;
-  onOpenMobileSidebar?: () => void;
 } = {}) {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -43,22 +40,10 @@ export default function B2BTopNav({
 
   return (
     <header className="border-b border-gray-stroke bg-white">
-      <div className="relative flex h-14 items-center justify-between px-4 md:px-6">
-        {/* Left: hamburger (mobile) / Logo (desktop) */}
-        <div className="flex items-center">
-          <button
-            onClick={onOpenMobileSidebar}
-            className="flex h-8 w-8 items-center justify-center md:hidden"
-          >
-            <img src={moreIcon} alt="Menu" className="h-[20px] w-[20px]" />
-          </button>
-          <NavLink to="/" className="hidden shrink-0 items-center md:flex">
-            <img src={lelandLogo} alt="Leland" className="h-[22px] w-auto" />
-          </NavLink>
-        </div>
-
-        {/* Center: logo (mobile only) */}
-        <NavLink to="/" className="absolute left-1/2 -translate-x-1/2 md:hidden">
+      <div className="mx-auto max-w-[1280px] px-4 md:px-7">
+      <div className="relative flex h-14 items-center justify-between">
+        {/* Left: Logo */}
+        <NavLink to="/" className="flex shrink-0 items-center">
           <img src={lelandLogo} alt="Leland" className="h-[22px] w-auto" />
         </NavLink>
 
@@ -148,6 +133,7 @@ export default function B2BTopNav({
             )}
           </AnimatePresence>
         </div>
+      </div>
       </div>
     </header>
   );

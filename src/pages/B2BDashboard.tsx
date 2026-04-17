@@ -31,7 +31,6 @@ export default function B2BDashboard() {
     <div className="flex h-screen flex-col">
       <B2BTopNav
         onNavigateSettings={navigateSettings}
-        onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
       />
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop sidebar */}
