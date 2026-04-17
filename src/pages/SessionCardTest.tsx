@@ -10,6 +10,7 @@ import pic6 from "../assets/profile photos/pic-6.png";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
+import bootcampImg1 from "../assets/placeholder images/bootcamp-1.webp";
 
 export default function SessionCardTest() {
   useEffect(() => { document.title = "Component: Session Card"; }, []);
@@ -42,13 +43,22 @@ export default function SessionCardTest() {
               status="live"
             />
             <SessionCard
-              title="GMAT Exam Prep Bootcamp"
+              title="Ask Me Anything: Former Director of Stanford MBA Admissions"
               dateTime="Tuesday, Aug 3 at 4:00 PM"
               duration="45m"
               image={eventImg1}
               type="event"
               status="upcoming"
               startsIn="2d"
+            />
+            <SessionCard
+              title="GMAT Exam Prep Bootcamp"
+              dateTime="Wednesday, Aug 4 at 2:00 PM"
+              duration="60m"
+              image={bootcampImg1}
+              type="bootcamp"
+              status="upcoming"
+              startsIn="3d"
             />
             <SessionCard
               title="1:1 Session with Jessica"
@@ -128,21 +138,20 @@ export default function SessionCardTest() {
         <p className="mt-1 mb-4 text-[18px] text-[#707070]">Toggle the options below to preview all possible states of the component.</p>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
-          {/* Type toggle */}
-          <div className="flex rounded-lg bg-[#f5f5f5] p-[3px]">
-            {(["coach", "event", "bootcamp"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setSandboxType(t)}
-                className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[14px] font-medium transition-colors ${
-                  sandboxType === t
-                    ? "bg-white text-gray-dark shadow-sm"
-                    : "text-[#707070]"
-                }`}
-              >
-                <span className="whitespace-nowrap">{t === "coach" ? "1:1 Session" : t === "event" ? "Event" : "Bootcamp Session"}</span>
-              </button>
-            ))}
+          {/* Type dropdown */}
+          <div className="relative">
+            <select
+              value={sandboxType}
+              onChange={(e) => setSandboxType(e.target.value as "coach" | "event" | "bootcamp")}
+              className="cursor-pointer appearance-none rounded-lg border-none bg-[#f5f5f5] pl-3 pr-8 py-2 text-[14px] font-medium text-gray-dark"
+            >
+              <option value="coach">1:1 Session</option>
+              <option value="event">Event</option>
+              <option value="bootcamp">Bootcamp Session</option>
+            </select>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-dark">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
 
           {/* Size toggle */}
@@ -181,7 +190,7 @@ export default function SessionCardTest() {
         </div>
 
         {sandboxStatus === "past" && (
-          <label className="mt-2 flex cursor-pointer items-center gap-2 text-[16px] font-normal text-[#707070]">
+          <label className="mt-4 flex cursor-pointer items-center gap-2 text-[16px] font-normal text-[#707070]">
             <span
               className="relative flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[4px] border border-[#CCCCCC]"
               style={sandboxRecording ? { backgroundColor: "#038561", borderColor: "#038561" } : undefined}
@@ -202,7 +211,7 @@ export default function SessionCardTest() {
           </label>
         )}
 
-        <label className="mt-2 flex cursor-pointer items-center gap-2 text-[16px] font-normal text-[#707070]">
+        <label className={`${sandboxStatus === "past" ? "mt-2" : "mt-4"} flex cursor-pointer items-center gap-2 text-[16px] font-normal text-[#707070]`}>
           <span
             className="relative flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[4px] border border-[#CCCCCC]"
             style={sandboxHideImage ? { backgroundColor: "#038561", borderColor: "#038561" } : undefined}
@@ -233,10 +242,10 @@ export default function SessionCardTest() {
             style={{ boxShadow: "0 20px 24px -4px rgba(16, 24, 40, 0.08)" }}
           >
             <SessionCard
-              title={sandboxType === "coach" ? "1:1 Session with Jessica" : "GMAT Exam Prep Bootcamp"}
+              title={sandboxType === "coach" ? "1:1 Session with Jessica" : sandboxType === "event" ? "Ask Me Anything: Former Director of Stanford MBA Admissions" : "GMAT Exam Prep Bootcamp"}
               dateTime={sandboxStatus === "live" ? "Tuesday, Aug 3 at 4:00 PM" : sandboxStatus === "upcoming" ? "Friday, Aug 6 at 4:00 PM" : "Thursday, Mar 27 at 3:00 PM"}
-              duration={sandboxType === "coach" ? "45m" : "60m"}
-              image={sandboxType === "coach" ? pic6 : eventImg1}
+              duration={sandboxType === "bootcamp" ? "60m" : "45m"}
+              image={sandboxType === "coach" ? pic6 : sandboxType === "bootcamp" ? bootcampImg1 : eventImg1}
               type={sandboxType}
               status={sandboxStatus}
               size={sandboxSize}
