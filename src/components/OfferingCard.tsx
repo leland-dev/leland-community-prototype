@@ -8,6 +8,7 @@ import menuBurgerIcon from "../assets/icons/menu-burger.svg";
 import playVideoIcon from "../assets/icons/play-video.svg";
 import slackIcon from "../assets/icons/slack-black.svg";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
+import browserIcon from "../assets/icons/browser.svg";
 import introCallImg from "../assets/img/intro-call.png";
 
 export type OfferingType = "free-intro" | "hourly" | "hourly-package" | "package" | "course" | "content";
@@ -18,17 +19,18 @@ interface OfferingCardProps {
   subtitle: ReactNode;
   image: string;
   purchased?: boolean;
+  cohortSelected?: boolean;
   ctaLabel?: string;
   showImage?: boolean;
   size?: "large" | "small";
 }
 
-function getDefaultCta(type: OfferingType, purchased: boolean): { label: string; green?: boolean } {
+function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: boolean): { label: string; green?: boolean } {
   if (purchased) {
     if (type === "hourly") return { label: "Schedule" };
     if (type === "hourly-package") return { label: "Schedule" };
     if (type === "package") return { label: "Schedule" };
-    if (type === "course") return { label: "Details" };
+    if (type === "course") return cohortSelected ? { label: "Details" } : { label: "Select cohort", green: true };
     return { label: "Details" };
   }
   if (type === "free-intro") return { label: "Schedule", green: true };
@@ -45,7 +47,7 @@ interface MenuItem {
   danger?: boolean;
 }
 
-function getMenuItems(type: OfferingType): MenuItem[] {
+function getMenuItems(type: OfferingType, cohortSelected: boolean): MenuItem[] {
   if (type === "hourly") {
     return [
       { icon: addPlusIcon, label: "Buy more time" },
@@ -65,6 +67,11 @@ function getMenuItems(type: OfferingType): MenuItem[] {
     ];
   }
   if (type === "course") {
+    if (!cohortSelected) {
+      return [
+        { icon: browserIcon, label: "Course details" },
+      ];
+    }
     return [
       { icon: menuBurgerIcon, label: "Syllabus" },
       { icon: playVideoIcon, label: "Recordings" },
@@ -76,6 +83,7 @@ function getMenuItems(type: OfferingType): MenuItem[] {
     { icon: downloadIcon, label: "Download" },
   ];
 }
+
 
 function CancelIcon() {
   return (
@@ -92,6 +100,7 @@ export default function OfferingCard({
   subtitle,
   image,
   purchased = false,
+  cohortSelected = true,
   ctaLabel,
   showImage = false,
   size = "large",
@@ -101,9 +110,9 @@ export default function OfferingCard({
 
   const isSmall = size === "small";
   const isPersonImage = type === "hourly" || ((type === "hourly-package" || type === "package") && purchased);
-  const cta = getDefaultCta(type, purchased);
+  const cta = getDefaultCta(type, purchased, cohortSelected);
   const label = ctaLabel || cta.label;
-  const menuItems = getMenuItems(type);
+  const menuItems = getMenuItems(type, cohortSelected);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
