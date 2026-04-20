@@ -2,9 +2,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import SessionCard from "./SessionCard";
 import { useSessionLayout } from "./SessionLayoutContext";
-import menuBurgerIcon from "../assets/icons/icon/menu-burger.svg";
-import playVideoIcon from "../assets/icons/icon/play-video.svg";
-import slackIcon from "../assets/icons/icon/slack-black.svg";
+import menuBurgerIcon from "../assets/icons/menu-burger.svg";
+import playVideoIcon from "../assets/icons/play-video.svg";
+import slackIcon from "../assets/icons/slack-black.svg";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

@@ -189,7 +189,7 @@ function SelfPacedCourseCard({ course, boxed }: { course: SelfPacedCourse; boxed
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-type Variant = "default" | "grouped" | "simple";
+type Variant = "default" | "grouped" | "empty" | "simple";
 
 export default function MyCourses() {
   const { setSimpleSessionLayout } = useSessionLayout();
@@ -220,7 +220,7 @@ export default function MyCourses() {
       <div className="flex items-center justify-between">
         <h1 className="text-[32px] font-medium leading-[1.2] text-gray-dark md:text-[40px]">My Courses</h1>
         <div className="flex rounded-lg border border-gray-stroke/50 bg-gray-hover p-0.5 text-[14px] font-medium">
-          {(["default", "grouped"] as Variant[]).map((v) => (
+          {(["default", "grouped", "empty"] as Variant[]).map((v) => (
             <button
               key={v}
               onClick={() => applyVariant(v)}
@@ -235,13 +235,28 @@ export default function MyCourses() {
       </div>
 
       {/* All enrolled courses */}
-      <div className={`mt-8 flex flex-col ${variant === "simple" ? "gap-16" : "gap-8"}`}>
-        {enrolledCourses.map((course) =>
-          course.type === "live"
-            ? <LiveCourseCard key={course.id} course={course as LiveCourse} boxed={variant !== "simple"} />
-            : <SelfPacedCourseCard key={course.id} course={course as SelfPacedCourse} boxed={variant !== "simple"} />
-        )}
-      </div>
+      {variant === "empty" ? (
+        <div className="mt-8 flex h-[75vh] min-h-fit min-w-fit flex-col items-center justify-center gap-5 rounded-xl bg-[#F5F5F5] py-10 text-center">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-[24px] font-medium text-gray-dark">No purchased courses</h2>
+            <p className="max-w-xs text-[16px] text-[#707070]">Courses you enroll in will appear here.</p>
+          </div>
+          <a
+            href="/courses"
+            className="mt-1 flex h-[44px] items-center rounded-lg bg-[#038561] px-4 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90"
+          >
+            Browse courses
+          </a>
+        </div>
+      ) : (
+        <div className={`mt-8 flex flex-col ${variant === "simple" ? "gap-16" : "gap-8"}`}>
+          {enrolledCourses.map((course) =>
+            course.type === "live"
+              ? <LiveCourseCard key={course.id} course={course as LiveCourse} boxed={variant !== "simple"} />
+              : <SelfPacedCourseCard key={course.id} course={course as SelfPacedCourse} boxed={variant !== "simple"} />
+          )}
+        </div>
+      )}
       </div>
     </PageShell>
   );

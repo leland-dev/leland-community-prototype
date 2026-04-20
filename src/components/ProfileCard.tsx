@@ -1,5 +1,5 @@
 import verifiedIcon from "../assets/icons/verified.svg";
-import starIcon from "../assets/icons/icon/star.svg";
+import starIcon from "../assets/icons/star.svg";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 

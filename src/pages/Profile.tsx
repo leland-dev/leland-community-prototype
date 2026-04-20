@@ -8,7 +8,7 @@ import repostsIcon from "../assets/icons/reposts.svg";
 import sharesIcon from "../assets/icons/shares.svg";
 import mailIcon from "../assets/icons/mail.svg";
 import wreathImg from "../assets/img/wreath.png";
-import starIcon from "../assets/icons/icon/star.svg";
+import starIcon from "../assets/icons/star.svg";
 import atlassianLogo from "../assets/logos/atlassian.png";
 import gsbLogo from "../assets/logos/gsb.png";
 import yaleLogo from "../assets/logos/yale.png";

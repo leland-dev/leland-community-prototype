@@ -30,7 +30,7 @@ import stopwatchIcon from "../assets/icons/stopwatch.svg";
 import supportivenessIcon from "../assets/icons/supportiveness.svg";
 import wreathImg from "../assets/img/Wreath.svg";
 import videoThumbnail from "../assets/img/Video-Thumbnail.png";
-import starIcon from "../assets/icons/icon/star.svg";
+import starIcon from "../assets/icons/star.svg";
 import categoryMBA from "../assets/placeholder images/category images/gmat-tutoring.png";
 import categoryConsulting from "../assets/placeholder images/category images/management-consulting.png";
 import categoryPM from "../assets/placeholder images/category images/product-management.png";

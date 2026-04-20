@@ -4,9 +4,9 @@ import dotsVerticalIcon from "../assets/icons/dots-vertical.svg";
 import downloadIcon from "../assets/icons/download.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import chatIcon from "../assets/icons/nav-icons/chat-inactive.svg";
-import menuBurgerIcon from "../assets/icons/icon/menu-burger.svg";
-import playVideoIcon from "../assets/icons/icon/play-video.svg";
-import slackIcon from "../assets/icons/icon/slack-black.svg";
+import menuBurgerIcon from "../assets/icons/menu-burger.svg";
+import playVideoIcon from "../assets/icons/play-video.svg";
+import slackIcon from "../assets/icons/slack-black.svg";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import introCallImg from "../assets/img/intro-call.png";
 
