@@ -22,6 +22,7 @@ interface DemoConfig {
   description: string;
   defaultProps: { title: string; subtitle: ReactNode; image: string };
   purchasedProps: { title: string; subtitle: ReactNode; image: string };
+  purchasedAltProps?: { label: string; cohortSelected: boolean; title: string; subtitle: ReactNode; image: string };
 }
 
 const demos: DemoConfig[] = [
@@ -97,6 +98,13 @@ const demos: DemoConfig[] = [
     purchasedProps: {
       title: "GMAT Exam Prep Bootcamp",
       subtitle: <>Started June 1 <span className="text-[#9B9B9B]">· Next session tomorrow</span></>,
+      image: bootcampImg1,
+    },
+    purchasedAltProps: {
+      label: "Purchased · Cohort not yet selected",
+      cohortSelected: false,
+      title: "GMAT Exam Prep Bootcamp",
+      subtitle: "Select a cohort to get started",
       image: bootcampImg1,
     },
   },
@@ -317,7 +325,7 @@ function DemoSection({ demo }: { demo: DemoConfig }) {
           </div>
           {demo.type !== "free-intro" && (
             <div>
-              <span className="flex items-center gap-1 text-[14px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />Purchased</span>
+              <span className="flex items-center gap-1 text-[14px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />Purchased{demo.purchasedAltProps ? " · Cohort enrolled" : ""}</span>
               {demo.type === "hourly-package" ? (
                 <div className="mt-1 flex items-center justify-center rounded-[12px] bg-[#F0F0F0] px-4 py-5 text-[16px] text-[#707070]" style={{ backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")` }}>
                   Shows Hourly Coaching card once purchased
@@ -331,6 +339,19 @@ function DemoSection({ demo }: { demo: DemoConfig }) {
                   purchased
                 />
               )}
+            </div>
+          )}
+          {demo.purchasedAltProps && (
+            <div>
+              <span className="flex items-center gap-1 text-[14px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />{demo.purchasedAltProps.label}</span>
+              <OfferingCard
+                type={demo.type}
+                title={demo.purchasedAltProps.title}
+                subtitle={demo.purchasedAltProps.subtitle}
+                image={demo.purchasedAltProps.image}
+                purchased
+                cohortSelected={demo.purchasedAltProps.cohortSelected}
+              />
             </div>
           )}
         </div>
