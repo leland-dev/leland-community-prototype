@@ -46,7 +46,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
       <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-[1fr_280px] sm:gap-x-col-gap">
         <Card header={<h2 className="text-[16px] font-medium text-gray-dark">Admin Users</h2>} headerPadding="py-3" headerClassName="bg-[#fafafa]">
           {/* Search toolbar */}
-          <div className="flex items-center gap-3 border-b border-gray-stroke px-4 py-3">
+          <div className="flex items-center gap-3 border-b border-gray-stroke bg-gray-hover px-4 py-3">
             <div className="flex flex-1 items-center gap-2 rounded-lg border border-gray-stroke px-4 py-3">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -58,7 +58,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
                 placeholder="Search by name or email"
               />
             </div>
-            <button className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-4 py-3 text-[16px] font-medium text-gray-dark hover:bg-gray-stroke">
+            <button className="flex shrink-0 items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
               </svg>
