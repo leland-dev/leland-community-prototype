@@ -635,7 +635,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                 <button
                   key={f}
                   onClick={() => handleFilter(f)}
-                  className={`shrink-0 cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] border-[1.5px] transition-colors ${
+                  className={`shrink-0 cursor-pointer rounded-full bg-[#f5f5f5] px-4 py-3 text-[16px] font-medium text-[#222222] border-[1.5px] transition-colors ${
                     filter === f
                       ? "border-[#222222]"
                       : "border-transparent hover:bg-[#ebebeb]"
