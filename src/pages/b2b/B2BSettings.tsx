@@ -45,15 +45,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
 
       <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-[1fr_280px] sm:gap-x-col-gap">
         <div>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-[24px] font-medium text-gray-dark">Admin Users</h2>
-            <button className="flex shrink-0 items-center gap-1.5 rounded-lg bg-gray-hover px-3 py-2 text-[14px] font-medium text-gray-dark hover:bg-gray-stroke">
-              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-              </svg>
-              Add new
-            </button>
-          </div>
+          <h2 className="mb-4 text-[24px] font-medium text-gray-dark">Admin Users</h2>
           <Card>
             {/* Search toolbar */}
             <div className="flex items-center gap-3 border-b border-gray-stroke px-4 py-3">
@@ -68,6 +60,12 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
                   placeholder="Search by name or email"
                 />
               </div>
+              <button className="flex h-[44px] shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-3 text-[16px] font-medium text-gray-dark hover:bg-gray-stroke sm:px-4">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="hidden sm:inline">Add new</span>
+              </button>
             </div>
             <div>
               {pagedAdmins.length > 0 ? pagedAdmins.map((admin, i, arr) => (
