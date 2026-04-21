@@ -1,8 +1,21 @@
+import { useState } from "react";
 import { Avatar, Card } from "./B2BShared";
 import { Tag } from "./B2BUserDrawerV2";
 import layoutGridIcon from "../../assets/icons/layout-grid.svg";
 
+const PAGE_SIZE = 25;
+
+const ADMIN_USERS = [
+  { initials: "KB", name: "Katie Brown", email: "katie.brown@kellogg.edu", role: "Owner", tagColor: "green" as const },
+  { initials: "MR", name: "Michael Reyes", email: "m-reyes@kellogg.edu", role: "Admin", tagColor: "green" as const },
+  { initials: "JS", name: "Jennifer Sullivan", email: "j-sullivan@kellogg.edu", role: "View Only", tagColor: "gray" as const },
+];
+
 export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboard?: () => void }) {
+  const [page, setPage] = useState(0);
+  const totalPages = Math.ceil(ADMIN_USERS.length / PAGE_SIZE);
+  const pagedAdmins = ADMIN_USERS.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
   return (
     <>
       <div className="mb-6 flex items-start justify-between">
@@ -22,11 +35,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
       <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-[1fr_280px] sm:gap-x-col-gap">
         <Card header={<h2 className="text-[16px] font-medium text-gray-dark">Admin Users</h2>} headerPadding="py-3">
           <div>
-            {[
-              { initials: "KB", name: "Katie Brown", email: "katie.brown@kellogg.edu", role: "Owner", tagColor: "green" as const },
-              { initials: "MR", name: "Michael Reyes", email: "m-reyes@kellogg.edu", role: "Admin", tagColor: "green" as const },
-              { initials: "JS", name: "Jennifer Sullivan", email: "j-sullivan@kellogg.edu", role: "View Only", tagColor: "gray" as const },
-            ].map((admin, i, arr) => (
+            {pagedAdmins.map((admin, i, arr) => (
               <div
                 key={admin.initials}
                 className={`flex items-center justify-between px-4 py-[14px] ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}
@@ -41,6 +50,27 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
                 <Tag color={admin.tagColor}>{admin.role}</Tag>
               </div>
             ))}
+          </div>
+          <div className="flex items-center justify-between border-t border-gray-stroke px-4 py-3">
+            <span className="text-[14px] text-gray-light">
+              {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, ADMIN_USERS.length)} of {ADMIN_USERS.length} users
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage((p) => p - 1)}
+                disabled={page === 0}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-stroke bg-white text-gray-dark hover:bg-gray-hover disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                disabled={page >= totalPages - 1}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-stroke bg-white text-gray-dark hover:bg-gray-hover disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
           </div>
         </Card>
 
