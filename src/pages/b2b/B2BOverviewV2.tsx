@@ -662,7 +662,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-gray-stroke">
-                  {partnerModel === "a-la-carte" && <th className="px-4 py-3 text-left">
+                  {partnerModel === "a-la-carte" && <th className="bg-[#fafafa] px-4 py-3 text-left">
                     <label className="relative flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border border-[#CCCCCC]"
                       style={visibleUsers.length > 0 && visibleUsers.every((u) => selectedEmails.has(u.email)) ? { backgroundColor: "#038561", borderColor: "#038561" } : undefined}>
                       <input
@@ -684,8 +684,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       )}
                     </label>
                   </th>}
-                  <th className="px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">User</div></th>
-                  <th className="px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">User</div></th>
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
                     <div className="flex items-center gap-1.5">
                       <span className="max-w-[120px] truncate">1:1 Sessions</span>
                       <div className="group relative flex items-center">
@@ -700,7 +700,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     </div>
                   </th>
                   {CONTRACT_COHORTS.map((c) => (
-                    <th key={c.key} className="px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
+                    <th key={c.key} className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
                       <div className="group relative max-w-[140px] cursor-default">
                         <div className="truncate">{c.label}</div>
                         <div className="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden whitespace-nowrap rounded-lg bg-gray-dark px-3 py-2 text-[13px] font-normal text-white shadow-lg group-hover:block">
@@ -709,9 +709,9 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       </div>
                     </th>
                   ))}
-                  <th className="px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+ Access</div></th>
-                  <th className="px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[120px] truncate">Date added</div></th>
-                  <th className="px-4 py-3" />
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+ Access</div></th>
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[120px] truncate">Date added</div></th>
+                  <th className="bg-[#fafafa] px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
