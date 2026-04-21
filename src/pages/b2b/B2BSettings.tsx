@@ -62,7 +62,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
               </svg>
-              Add new
+              <span className="hidden sm:inline">Add new</span>
             </button>
           </div>
           <div>
