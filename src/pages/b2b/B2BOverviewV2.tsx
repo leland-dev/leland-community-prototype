@@ -452,7 +452,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
         <div className="sticky hidden items-center gap-2 self-start sm:flex" style={{ top: "28px" }}>
           <button
             onClick={onNavigateSettings}
-            className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-4 py-3 text-[16px] font-medium text-gray-dark shadow-md hover:bg-gray-stroke"
+            className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-4 py-3 text-[16px] font-medium text-gray-dark hover:bg-gray-stroke"
           >
             <img src={settingsIcon} alt="" className="h-4 w-4 opacity-60" />
             Admin Settings
