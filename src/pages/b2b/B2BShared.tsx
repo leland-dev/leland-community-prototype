@@ -215,17 +215,19 @@ export function Card({
   children,
   className = "",
   headerPadding = "py-4",
+  headerClassName = "",
 }: {
   header?: ReactNode;
   headerRight?: ReactNode;
   children: ReactNode;
   className?: string;
   headerPadding?: string;
+  headerClassName?: string;
 }) {
   return (
     <div className={`overflow-hidden rounded-xl border border-gray-stroke bg-white ${className}`}>
       {header && (
-        <div className={`flex items-center justify-between border-b border-gray-stroke px-5 ${headerPadding}`}>
+        <div className={`flex items-center justify-between border-b border-gray-stroke px-5 ${headerPadding} ${headerClassName}`}>
           <div>{header}</div>
           {headerRight}
         </div>

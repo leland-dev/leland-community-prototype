@@ -33,7 +33,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
       </div>
 
       <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-[1fr_280px] sm:gap-x-col-gap">
-        <Card header={<h2 className="text-[16px] font-medium text-gray-dark">Admin Users</h2>} headerPadding="py-3">
+        <Card header={<h2 className="text-[16px] font-medium text-gray-dark">Admin Users</h2>} headerPadding="py-3" headerClassName="bg-[#fafafa]">
           <div>
             {pagedAdmins.map((admin, i, arr) => (
               <div
