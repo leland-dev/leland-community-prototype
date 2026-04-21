@@ -54,7 +54,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
               <input
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="flex-1 border-none bg-transparent text-[16px] text-gray-dark outline-none placeholder:text-gray-xlight"
+                className="flex-1 border-none bg-transparent text-[16px] leading-[1.2] text-gray-dark outline-none placeholder:text-gray-xlight"
                 placeholder="Search by name or email"
               />
             </div>
