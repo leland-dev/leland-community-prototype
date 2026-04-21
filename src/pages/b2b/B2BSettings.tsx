@@ -13,8 +13,19 @@ const ADMIN_USERS = [
 
 export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboard?: () => void }) {
   const [page, setPage] = useState(0);
-  const totalPages = Math.ceil(ADMIN_USERS.length / PAGE_SIZE);
-  const pagedAdmins = ADMIN_USERS.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const [search, setSearch] = useState("");
+
+  const filteredAdmins = ADMIN_USERS.filter((a) => {
+    const q = search.toLowerCase();
+    return a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q);
+  });
+  const totalPages = Math.ceil(filteredAdmins.length / PAGE_SIZE);
+  const pagedAdmins = filteredAdmins.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    setPage(0);
+  };
 
   return (
     <>
@@ -34,8 +45,22 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
 
       <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-[1fr_280px] sm:gap-x-col-gap">
         <Card header={<h2 className="text-[16px] font-medium text-gray-dark">Admin Users</h2>} headerPadding="py-3" headerClassName="bg-[#fafafa]">
+          {/* Search toolbar */}
+          <div className="border-b border-gray-stroke px-4 py-3">
+            <div className="flex items-center gap-2 rounded-lg border border-gray-stroke px-4 py-3 sm:max-w-[280px]">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="flex-1 border-none bg-transparent text-[16px] text-gray-dark outline-none placeholder:text-gray-xlight"
+                placeholder="Search by name or email"
+              />
+            </div>
+          </div>
           <div>
-            {pagedAdmins.map((admin, i, arr) => (
+            {pagedAdmins.length > 0 ? pagedAdmins.map((admin, i, arr) => (
               <div
                 key={admin.initials}
                 className={`flex items-center justify-between px-4 py-[14px] ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}
@@ -49,11 +74,15 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
                 </div>
                 <Tag color={admin.tagColor}>{admin.role}</Tag>
               </div>
-            ))}
+            )) : (
+              <div className="px-4 py-8 text-center text-[16px] text-gray-light">No results found</div>
+            )}
           </div>
           <div className="flex items-center justify-between border-t border-gray-stroke px-4 py-3">
             <span className="text-[14px] text-gray-light">
-              {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, ADMIN_USERS.length)} of {ADMIN_USERS.length} users
+              {filteredAdmins.length === 0
+                ? "0 users"
+                : `${page * PAGE_SIZE + 1}–${Math.min((page + 1) * PAGE_SIZE, filteredAdmins.length)} of ${filteredAdmins.length} users`}
             </span>
             <div className="flex items-center gap-1">
               <button
