@@ -11,6 +11,7 @@ import userImg3 from "../../assets/profile photos/pic-6.png";
 import userImg4 from "../../assets/profile photos/pic-7.png";
 import userImg5 from "../../assets/profile photos/pic-8.png";
 import usersIcon from "../../assets/icons/user-community.svg";
+import settingsIcon from "../../assets/icons/settings.svg";
 
 interface Props {
   onNavigate: (view: B2BView) => void;
@@ -453,9 +454,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             onClick={onNavigateSettings}
             className="flex items-center justify-center rounded-lg px-3 py-3 text-gray-dark hover:bg-gray-hover"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
+            <img src={settingsIcon} alt="" className="h-6 w-6 opacity-40" />
           </button>
           <button
             onClick={() => onOpenModal("invite")}
