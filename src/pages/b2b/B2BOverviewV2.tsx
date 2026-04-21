@@ -598,7 +598,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
         <div className="rounded-lg border border-gray-stroke bg-white shadow-card">
           {/* Bulk action bar — a la carte only */}
           {partnerModel === "a-la-carte" && selectedEmails.size > 0 && (
-            <div className="flex items-center gap-3 rounded-t-lg border-b border-gray-stroke bg-white px-4 py-3">
+            <div className="flex items-center gap-3 rounded-t-lg bg-white px-4 py-3">
               <button onClick={() => setSelectedEmails(new Set())} className="flex h-11 items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
                 {selectedEmails.size} selected
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -619,7 +619,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             </div>
           )}
           {/* Toolbar */}
-          {(partnerModel !== "a-la-carte" || selectedEmails.size === 0) && <div className="flex flex-wrap items-center gap-3 rounded-t-lg border-b border-gray-stroke bg-white px-4 py-3">
+          {(partnerModel !== "a-la-carte" || selectedEmails.size === 0) && <div className="flex flex-wrap items-center gap-3 rounded-t-lg bg-white px-4 py-3">
             <div className="flex w-full items-center gap-2 rounded-lg border border-gray-stroke px-4 py-3 sm:max-w-[280px] sm:flex-1 sm:w-auto">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
