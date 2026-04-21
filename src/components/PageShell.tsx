@@ -39,10 +39,9 @@ export default function PageShell({
     <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
       <div
         className={contentMaxWidth
-          ? "flex items-start justify-center"
-          : "flex items-start"
+          ? "flex items-start justify-center gap-col-gap"
+          : "flex items-start gap-col-gap"
         }
-        style={{ gap: 40 }}
       >
         {hasLeft && <aside className={leftClass}>{leftSidebar}</aside>}
         <div

@@ -19,7 +19,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
         </button>
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-[1fr_280px]">
+      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-[1fr_280px] sm:gap-x-col-gap">
         <Card header={<h2 className="text-[16px] font-medium text-gray-dark">Admin Users</h2>} headerPadding="py-3">
           <div>
             {[
@@ -44,16 +44,15 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
           </div>
         </Card>
 
-        <Card header={<h2 className="text-[16px] font-medium text-gray-dark">Support</h2>} headerPadding="py-3">
-          <div className="p-5">
-            <p className="text-[14px] text-gray-light">
-              Need help with your account? Reach out to your Leland success team at{" "}
-              <a href="mailto:success@joinleland.com" className="font-medium text-primary">
-                success@joinleland.com
-              </a>
-            </p>
-          </div>
-        </Card>
+        <div>
+          <p className="mb-2 text-[14px] uppercase tracking-[0.06em] text-gray-light">Support</p>
+          <p className="text-[16px] text-gray-dark">
+            Need help with your account? Reach out to your Leland success team at{" "}
+            <a href="mailto:success@joinleland.com" className="font-medium text-primary">
+              success@joinleland.com
+            </a>
+          </p>
+        </div>
       </div>
     </>
   );

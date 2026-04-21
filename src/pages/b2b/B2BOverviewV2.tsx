@@ -508,7 +508,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
           { label: "Leland+ Licenses", description: "Unlimited access to Leland's full library of guides, templates, and video content.", purchased: 30, used: 18 },
         ];
         return (
-          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.8fr]">
+          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.8fr] lg:gap-x-col-gap">
             {/* Left: combined stats card */}
             <div className="flex flex-col justify-start gap-5 rounded-lg border border-gray-stroke bg-white p-5">
               <div>
@@ -556,7 +556,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
       })()}
 
       {/* Stats row — Per Seat */}
-      {partnerModel === "per-seat" && <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {partnerModel === "per-seat" && <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-x-col-gap">
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
           <div className="mb-2 flex items-center gap-1.5 text-[18px] font-normal text-gray-light">
             Seats redeemed
@@ -858,7 +858,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
       </div>
 
       {/* Two-column: Offerings + Activity */}
-      {showNonMvp && <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr]">
+      {showNonMvp && <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr] lg:gap-x-col-gap">
         {/* Offerings */}
         <div>
           <h2 className="mb-4 text-[20px] font-medium text-gray-dark">Utilization</h2>

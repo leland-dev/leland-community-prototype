@@ -69,6 +69,9 @@
   --color-blue: #3b82f6;
   --color-yellow: #fbbf24;
 
+  /* Layout */
+  --spacing-col-gap: 40px;
+
   /* Shadows */
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
 
