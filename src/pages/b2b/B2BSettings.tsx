@@ -20,23 +20,6 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
       </div>
 
       <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
-        {/* Left column */}
-        <div>
-          <Card header={<h2 className="text-[16px] font-medium text-gray-dark">License Summary</h2>} headerPadding="py-3">
-            <div className="grid grid-cols-2 gap-3 p-5">
-              <div className="rounded-lg bg-gray-hover p-[14px] text-center">
-                <div className="text-[24px] font-bold text-dark-green">325</div>
-                <div className="mt-[3px] text-[11px] uppercase tracking-[0.06em] text-gray-xlight">Total Licenses</div>
-              </div>
-              <div className="rounded-lg bg-gray-hover p-[14px] text-center">
-                <div className="text-[24px] font-bold text-primary">74</div>
-                <div className="mt-[3px] text-[11px] uppercase tracking-[0.06em] text-gray-xlight">Remaining</div>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Right column */}
         <div className="flex flex-col gap-4">
           <Card header={<h2 className="text-[16px] font-medium text-gray-dark">Admin Users</h2>} headerPadding="py-3">
             <div>
