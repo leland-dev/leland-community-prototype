@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, type ReactNode } from "react";
+import { motion, AnimatePresence } from "motion/react";
 
 // ── Pill ──
 
@@ -204,6 +205,59 @@ export function ActionMenu({ items }: { items: { label: string; danger?: boolean
         </div>
       )}
     </div>
+  );
+}
+
+// ── RowMenu ──
+
+export type RowMenuPos = { top: number; right: number; isMobile: boolean };
+
+export function RowMenu({ isOpen, pos, onClose, children }: {
+  isOpen: boolean;
+  pos: RowMenuPos | null;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <AnimatePresence>
+      {isOpen && pos && (
+        pos.isMobile ? (
+          <>
+            <motion.div
+              key="overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/40"
+              onClick={onClose}
+            />
+            <motion.div
+              key="sheet"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+              className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl border-t border-gray-stroke bg-white shadow-lg"
+              style={{ maxHeight: "75dvh" }}
+            >
+              <div className="px-2 py-2">{children}</div>
+            </motion.div>
+          </>
+        ) : (
+          <>
+            <div key="bg" className="fixed inset-0 z-10" onClick={onClose} />
+            <div
+              key="dropdown"
+              className="fixed z-20 w-56 overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-lg"
+              style={{ top: pos.top, right: pos.right }}
+            >
+              <div className="px-2 py-2">{children}</div>
+            </div>
+          </>
+        )
+      )}
+    </AnimatePresence>
   );
 }
 

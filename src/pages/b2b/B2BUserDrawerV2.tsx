@@ -197,12 +197,8 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                       icon={usersIcon}
                       title="1:1 Sessions"
                       subtitle={(() => {
-                        const completed = user.sessions.entries.filter(s => s.status === "completed").length;
                         const scheduled = user.sessions.entries.filter(s => s.status === "scheduled").length;
-                        return [
-                          completed > 0 && `${completed} completed`,
-                          scheduled > 0 && `${scheduled} scheduled`,
-                        ].filter(Boolean).join(" · ") || "None yet";
+                        return `${sessionsUsed}/${user.sessions.granted} used${scheduled > 0 ? `, ${scheduled} scheduled` : ""}`;
                       })()}
                       pill={sessionsUsed === user.sessions.granted ? <Tag color="green">Complete</Tag> : undefined}
                     >
@@ -269,10 +265,10 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                         const invited = user.cohorts.filter(c => c.status === "invited").length;
                         const completed = user.cohorts.filter(c => c.status === "completed").length;
                         return [
-                          enrolled > 0 && `${enrolled} enrolled`,
-                          invited > 0 && `${invited} invited`,
-                          completed > 0 && `${completed} completed`,
-                        ].filter(Boolean).join(" · ");
+                          enrolled > 0 && `Enrolled: ${enrolled}`,
+                          invited > 0 && `Invited: ${invited}`,
+                          completed > 0 && `Completed: ${completed}`,
+                        ].filter(Boolean).join("  ");
                       })()}
                       pill={undefined}
                     >
@@ -320,7 +316,7 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                     <AccordionSection
                       icon={starIcon}
                       title="Reviews"
-                      subtitle={`${reviews.length} review${reviews.length !== 1 ? "s" : ""}`}
+                      subtitle={`${reviews.length}`}
                     >
                       <div className="flex flex-col">
                         {reviews.map((r, i) => (

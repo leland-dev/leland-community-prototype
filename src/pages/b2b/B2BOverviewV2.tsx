@@ -12,6 +12,7 @@ import userImg4 from "../../assets/profile photos/pic-7.png";
 import userImg5 from "../../assets/profile photos/pic-8.png";
 import usersIcon from "../../assets/icons/user-community.svg";
 import settingsIcon from "../../assets/icons/settings.svg";
+import { RowMenu, type RowMenuPos } from "./B2BShared";
 
 interface Props {
   onNavigate: (view: B2BView) => void;
@@ -436,6 +437,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
   });
 
   const [openMenuEmail, setOpenMenuEmail] = useState<string | null>(null);
+  const [menuPos, setMenuPos] = useState<RowMenuPos | null>(null);
   const [openTooltip, setOpenTooltip] = useState<"sessions" | "cohorts" | "seats" | "active" | null>(null);
 
   const handleFilter = (f: "all" | "active" | "invited") => { setFilter(f); setPage(0); };
@@ -594,7 +596,46 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
 
       {/* Users table */}
       <div className="mt-8">
-        <h2 className="mb-4 text-[20px] font-medium text-gray-dark">Users</h2>
+        <h2 className="mb-3 text-[20px] font-medium text-gray-dark">Users</h2>
+        {/* Search + filters toolbar */}
+        <div className="mb-3 flex flex-wrap items-center gap-3">
+          <div className="flex w-full items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3 sm:w-auto sm:max-w-[280px] sm:flex-1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              className="flex-1 border-none bg-transparent text-[16px] leading-[1.2] text-gray-dark outline-none placeholder:text-gray-xlight"
+              placeholder="Search by name or email"
+            />
+          </div>
+          {/* Filter pills + Resend invite — scrollable row */}
+          <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto sm:flex-none">
+            {(["all", "active", "invited"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => handleFilter(f)}
+                className={`shrink-0 cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] border-[1.5px] transition-colors ${
+                  filter === f
+                    ? "border-[#222222]"
+                    : "border-transparent hover:bg-[#ebebeb]"
+                }`}
+              >
+                {f === "invited" ? "Invite pending" : f.charAt(0).toUpperCase() + f.slice(1)}
+              </button>
+            ))}
+            {filter === "invited" && (
+              <button
+                onClick={() => {}}
+                className="ml-2 flex shrink-0 items-center gap-1.5 py-[6px] text-[14px] font-medium text-gray-dark hover:opacity-70"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
+                </svg>
+                Resend invite
+              </button>
+            )}
+          </div>
+        </div>
         <div className="rounded-lg border border-gray-stroke bg-white shadow-card">
           {/* Bulk action bar — a la carte only */}
           {partnerModel === "a-la-carte" && selectedEmails.size > 0 && (
@@ -618,45 +659,6 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               </div>
             </div>
           )}
-          {/* Toolbar */}
-          {(partnerModel !== "a-la-carte" || selectedEmails.size === 0) && <div className="flex flex-wrap items-center gap-3 rounded-t-lg border-b border-gray-stroke bg-white px-4 py-3">
-            <div className="flex w-full items-center gap-2 rounded-lg border border-gray-stroke px-4 py-3 sm:max-w-[280px] sm:flex-1 sm:w-auto">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
-                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                className="flex-1 border-none bg-transparent text-[16px] leading-[1.2] text-gray-dark outline-none placeholder:text-gray-xlight"
-                placeholder="Search by name or email"
-              />
-            </div>
-            {/* Filter pills + Resend invite — scrollable row */}
-            <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto sm:flex-none">
-              {(["all", "active", "invited"] as const).map((f) => (
-                <button
-                  key={f}
-                  onClick={() => handleFilter(f)}
-                  className={`shrink-0 cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] border-[1.5px] transition-colors ${
-                    filter === f
-                      ? "border-[#222222]"
-                      : "border-transparent hover:bg-[#ebebeb]"
-                  }`}
-                >
-                  {f === "invited" ? "Invite pending" : f.charAt(0).toUpperCase() + f.slice(1)}
-                </button>
-              ))}
-              {filter === "invited" && (
-                <button
-                  onClick={() => {}}
-                  className="ml-2 flex shrink-0 items-center gap-1.5 py-[6px] text-[14px] font-medium text-gray-dark hover:opacity-70"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
-                  </svg>
-                  Resend invite
-                </button>
-              )}
-            </div>
-          </div>}
           {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
@@ -789,42 +791,37 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     </td>
                     <td className="px-4 py-[14px] text-[16px] text-gray-light">{user.dateAdded}</td>
                     <td className="px-2 py-2">
-                      <div className="relative flex justify-end">
+                      <div className="flex justify-end">
                         <button
-                          onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(openMenuEmail === user.email ? null : user.email); }}
+                          onClick={(e) => { e.stopPropagation(); const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); if (openMenuEmail === user.email) { setOpenMenuEmail(null); setMenuPos(null); } else { setOpenMenuEmail(user.email); setMenuPos({ top: r.bottom + 4, right: window.innerWidth - r.right, isMobile: window.innerWidth < 640 }); } }}
                           className="flex h-12 w-12 items-center justify-center rounded-full text-gray-xlight hover:bg-gray-hover hover:text-gray-dark"
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
                           </svg>
                         </button>
-                        {openMenuEmail === user.email && (
-                          <>
-                            <div className="fixed inset-0 z-10" onClick={() => setOpenMenuEmail(null)} />
-                            <div className="absolute right-0 top-8 z-20 min-w-[152px] overflow-hidden rounded-lg border border-gray-stroke bg-white shadow-card">
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); }}
-                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[14px] text-gray-dark hover:bg-gray-hover"
-                              >
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                                </svg>
-                                Grant access
-                              </button>
-                              {hasInvitePending(user) && (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); }}
-                                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[14px] text-gray-dark hover:bg-gray-hover"
-                                >
-                                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
-                                  </svg>
-                                  Resend invite
-                                </button>
-                              )}
-                            </div>
-                          </>
-                        )}
+                        <RowMenu isOpen={openMenuEmail === user.email} pos={menuPos} onClose={() => { setOpenMenuEmail(null); setMenuPos(null); }}>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); setMenuPos(null); }}
+                            className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover"
+                          >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                            Grant access
+                          </button>
+                          {hasInvitePending(user) && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); setMenuPos(null); }}
+                              className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover"
+                            >
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                                <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
+                              </svg>
+                              Resend invite
+                            </button>
+                          )}
+                        </RowMenu>
                       </div>
                     </td>
                   </tr>
