@@ -45,7 +45,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
 
       <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-[1fr_280px] sm:gap-x-col-gap">
         <div>
-          <h2 className="mb-4 text-[24px] font-medium leading-[1.2] text-gray-dark">Admin Users</h2>
+          <h2 className="mb-4 text-[20px] font-medium leading-[1.2] text-gray-dark">Admin Users</h2>
           <Card>
             {/* Search toolbar */}
             <div className="flex items-center gap-3 border-b border-gray-stroke px-4 py-3">
