@@ -1,6 +1,8 @@
 import { Avatar, Card } from "./B2BShared";
 import { Tag } from "./B2BUserDrawerV2";
-export default function B2BSettings() {
+import layoutGridIcon from "../../assets/icons/layout-grid.svg";
+
+export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboard?: () => void }) {
   return (
     <>
       <div className="mb-6 flex items-start justify-between">
@@ -8,6 +10,13 @@ export default function B2BSettings() {
           <h1 className="text-[40px] font-medium text-gray-dark">Admin Settings</h1>
           <p className="mt-[2px] text-[18px] text-[#707070]">Manage permissions, licenses, and account configuration</p>
         </div>
+        <button
+          onClick={onNavigateDashboard}
+          className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-4 py-2.5 text-[16px] font-medium text-gray-dark hover:bg-gray-stroke"
+        >
+          <img src={layoutGridIcon} alt="" className="h-5 w-5" />
+          Overview
+        </button>
       </div>
 
       <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">

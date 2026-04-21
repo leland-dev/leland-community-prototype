@@ -16,6 +16,7 @@ interface Props {
   onNavigate: (view: B2BView) => void;
   onSetUtilFilter: (filter: string) => void;
   onOpenModal: (m: ModalId) => void;
+  onNavigateSettings?: () => void;
   partnerModel: "per-seat" | "a-la-carte";
   onSetPartnerModel: (m: "per-seat" | "a-la-carte") => void;
 }
@@ -371,7 +372,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
 };
 
-export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, onSetPartnerModel }: Props) {
+export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSettings, partnerModel, onSetPartnerModel }: Props) {
   const showVerizon = partnerModel === "per-seat";
   const [page, setPage] = useState(0);
   const [selectedUserV2, setSelectedUserV2] = useState<UserDetailV2 | null>(null);
@@ -447,7 +448,15 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
           <h1 className="text-[40px] font-medium leading-[1.5] text-gray-dark">Overview</h1>
           <p className="mt-1 text-[18px] text-[#707070]">{showVerizon ? "Verizon" : "Kellogg School of Management"} &middot; Contract {showVerizon ? "Jul 2026 \u2013 Dec 2026" : "Jan 2025 \u2013 Jun 2026"}</p>
         </div>
-        <div className="sticky hidden self-start sm:block" style={{ top: "28px" }}>
+        <div className="sticky hidden items-center gap-2 self-start sm:flex" style={{ top: "28px" }}>
+          <button
+            onClick={onNavigateSettings}
+            className="flex items-center justify-center rounded-lg px-3 py-3 text-gray-dark hover:bg-gray-hover"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
           <button
             onClick={() => onOpenModal("invite")}
             className="flex shrink-0 items-center gap-2 rounded-lg bg-[#038561] px-4 py-3 text-[16px] font-medium text-white shadow-md"

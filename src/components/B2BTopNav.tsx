@@ -6,6 +6,7 @@ import switchIcon from "../assets/icons/switch.svg";
 import helpIcon from "../assets/icons/help.svg";
 import logOutIcon from "../assets/icons/log out.svg";
 import settingsIcon from "../assets/icons/settings.svg";
+import layoutGridIcon from "../assets/icons/layout-grid.svg";
 import lelandLogo from "../assets/Logo.svg";
 
 const profileMenuGroups = [
@@ -82,8 +83,8 @@ export default function B2BTopNav({
                       onClick={() => { setProfileOpen(false); onNavigateDashboard?.(); }}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                     >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 shrink-0 text-gray-dark"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-                      Partner dashboard
+                      <img src={layoutGridIcon} alt="Overview" className="h-6 w-6 shrink-0" />
+                      Overview
                     </button>
                   ) : (
                     <button

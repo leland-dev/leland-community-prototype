@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "motion/react";
 import { navItems, type B2BView } from "../pages/b2b/B2BData";
 import settingsIcon from "../assets/icons/settings.svg";
-import browserIcon from "../assets/icons/browser.svg";
+import layoutGridIcon from "../assets/icons/layout-grid.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import kelloggLogo from "../assets/img/kellogg.svg";
 
@@ -75,8 +75,8 @@ export default function B2BMobileSidebar({ open, onClose, activeView, onNavigate
                   onClick={() => { handleNav("overview"); }}
                   className="flex w-full items-center gap-[10px] px-5 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                 >
-                  <img src={browserIcon} alt="" className="h-6 w-6 shrink-0" />
-                  Partner dashboard
+                  <img src={layoutGridIcon} alt="" className="h-6 w-6 shrink-0" />
+                  Overview
                 </button>
               ) : (
                 <button
