@@ -47,11 +47,11 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
         <div>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-[24px] font-medium text-gray-dark">Admin Users</h2>
-            <button className="flex h-[44px] shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-3 text-[16px] font-medium text-gray-dark hover:bg-gray-stroke sm:px-4">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button className="flex shrink-0 items-center gap-1.5 rounded-lg bg-gray-hover px-3 py-2 text-[14px] font-medium text-gray-dark hover:bg-gray-stroke">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
               </svg>
-              <span className="hidden sm:inline">Add new</span>
+              Add new
             </button>
           </div>
           <Card>
