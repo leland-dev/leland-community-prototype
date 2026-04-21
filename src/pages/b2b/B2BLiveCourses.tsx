@@ -44,7 +44,7 @@ export default function B2BLiveCourses() {
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-[40px] font-medium text-gray-dark">Live Courses</h1>
-          <p className="mt-[2px] text-[18px] text-[#707070]">Cohort-based live course enrollment and attendance tracking</p>
+          <p className="mt-2 text-[18px] text-[#707070]">Cohort-based live course enrollment and attendance tracking</p>
         </div>
         <button className="inline-flex items-center gap-[6px] rounded-lg border border-gray-stroke bg-white px-[14px] py-[7px] text-[13px] font-semibold text-gray-dark hover:bg-gray-hover">
           <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">

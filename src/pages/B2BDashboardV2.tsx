@@ -26,17 +26,18 @@ export default function B2BDashboardV2() {
         isOnSettings={activeView === "settings"}
       />
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
+        <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
           {activeView === "overview" && (
             <B2BOverviewV2
               onNavigate={setActiveView}
               onSetUtilFilter={() => {}}
               onOpenModal={setOpenModal}
+              onNavigateSettings={() => setActiveView("settings")}
               partnerModel={partnerModel}
               onSetPartnerModel={setPartnerModel}
             />
           )}
-          {activeView === "settings" && <B2BSettings />}
+          {activeView === "settings" && <B2BSettings onNavigateDashboard={() => setActiveView("overview")} />}
           <div className="h-[120px] shrink-0" />
         </div>
       </main>

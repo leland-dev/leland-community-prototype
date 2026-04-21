@@ -32,7 +32,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-[40px] font-medium text-gray-dark">Admin Settings</h1>
-          <p className="mt-[2px] text-[18px] text-[#707070]">Manage permissions, licenses, and account configuration</p>
+          <p className="mt-2 text-[18px] text-[#707070]">Manage permissions, licenses, and account configuration</p>
         </div>
         <button
           onClick={onNavigateDashboard}

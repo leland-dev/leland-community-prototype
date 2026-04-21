@@ -218,7 +218,7 @@ export default function MyCourses() {
     <PageShell rightSidebar={suggestedCoursesSection}>
       <div className="pb-20 leading-[1.2] [&_button]:leading-[1.2]">
       <div className="flex items-center justify-between">
-        <h1 className="text-[32px] font-medium leading-[1.2] text-gray-dark md:text-[40px]">My Courses</h1>
+        <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">My Courses</h1>
         <div className="flex rounded-lg border border-gray-stroke/50 bg-gray-hover p-0.5 text-[14px] font-medium">
           {(["default", "grouped", "empty"] as Variant[]).map((v) => (
             <button

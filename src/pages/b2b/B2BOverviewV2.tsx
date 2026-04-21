@@ -446,8 +446,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
       {/* Page header + desktop sticky button */}
       <div className="mb-4 flex items-start justify-between sm:mb-8">
         <div ref={headerRef}>
-          <h1 className="text-[40px] font-medium leading-[1.5] text-gray-dark">Overview</h1>
-          <p className="mt-1 text-[18px] text-[#707070]">{showVerizon ? "Verizon" : "Kellogg School of Management"} &middot; Contract {showVerizon ? "Jul 2026 \u2013 Dec 2026" : "Jan 2025 \u2013 Jun 2026"}</p>
+          <h1 className="text-[40px] font-medium text-gray-dark">Overview</h1>
+          <p className="mt-2 text-[18px] text-[#707070]">{showVerizon ? "Verizon" : "Kellogg School of Management"} &middot; Contract {showVerizon ? "Jul 2026 \u2013 Dec 2026" : "Jan 2025 \u2013 Jun 2026"}</p>
         </div>
         <div className="sticky hidden items-center gap-2 self-start sm:flex" style={{ top: "28px" }}>
           <button

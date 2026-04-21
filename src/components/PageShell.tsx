@@ -17,7 +17,7 @@ export default function PageShell({
 }: PageShellProps) {
   if (variant === "thin") {
     return (
-      <div className="mx-auto max-w-[600px] px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-[600px] px-4 py-10 sm:px-6">
         {children}
       </div>
     );
@@ -36,7 +36,7 @@ export default function PageShell({
     : "hidden w-[300px] shrink-0 sticky top-5 self-start min-[960px]:block";
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
       <div
         className={contentMaxWidth
           ? "flex items-start justify-center gap-col-gap"

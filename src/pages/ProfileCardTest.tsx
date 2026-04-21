@@ -59,7 +59,7 @@ export default function ProfileCardTest() {
       {/* Header */}
       <Link to="/components" className="inline-block rounded-[4px] border border-[#E5E5E5] bg-[#F5F5F5] px-2 py-1 text-[13px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-colors hover:bg-[#EBEBEB]">&lt;COMPONENT&gt;</Link>
       <h1 className="mt-1 text-[40px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Profile Card</h1>
-      <p className="mt-1 text-[18px] text-[#707070]">
+      <p className="mt-2 text-[18px] text-[#707070]">
         A card displaying a user's identity — avatar, name, headline, and key stats. Two variants: client and coach.
       </p>
 

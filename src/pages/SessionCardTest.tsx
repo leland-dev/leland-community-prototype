@@ -26,7 +26,7 @@ export default function SessionCardTest() {
       {/* Page header */}
       <Link to="/components" className="inline-block rounded-[4px] border border-[#E5E5E5] bg-[#F5F5F5] px-2 py-1 text-[13px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-colors hover:bg-[#EBEBEB]">&lt;COMPONENT&gt;</Link>
       <h1 className="mt-1 text-[40px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Session Card</h1>
-      <p className="mt-1 text-[18px] text-[#707070]">
+      <p className="mt-2 text-[18px] text-[#707070]">
         A global component to display a user's upcoming, live, and past sessions across 1:1 coaching, events, and courses.
       </p>
 

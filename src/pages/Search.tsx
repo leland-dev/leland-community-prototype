@@ -7,7 +7,7 @@ export default function Search() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-dark">Search</h1>
-      <p className="mt-1 text-[18px] text-gray-light">
+      <p className="mt-2 text-[18px] text-gray-light">
         Find coaches, programs, events, and more.
       </p>
 

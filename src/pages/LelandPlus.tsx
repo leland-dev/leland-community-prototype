@@ -92,7 +92,7 @@ export default function LelandPlus() {
   return (
     <div>
       <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">Leland+</h1>
-      <p className="mt-1 text-[18px] text-gray-light">
+      <p className="mt-2 text-[18px] text-gray-light">
         Exclusive perks and content for Leland+ members.
       </p>
 

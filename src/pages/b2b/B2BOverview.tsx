@@ -83,7 +83,7 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
       {/* Page header */}
       <div className="mb-5">
         <h1 className="text-[40px] font-medium text-gray-dark">Overview</h1>
-        <p className="mt-[2px] text-[18px] text-[#707070]">Kellogg School of Management &middot; Contract Jan 2025 &ndash; Jun 2026</p>
+        <p className="mt-2 text-[18px] text-[#707070]">Kellogg School of Management &middot; Contract Jan 2025 &ndash; Jun 2026</p>
       </div>
 
       {/* ── 1:1 Sessions Section ── */}
