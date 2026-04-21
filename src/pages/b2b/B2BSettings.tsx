@@ -36,7 +36,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
         </div>
         <button
           onClick={onNavigateDashboard}
-          className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-4 py-2.5 text-[16px] font-medium text-gray-dark hover:bg-gray-stroke"
+          className="hidden shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-4 py-2.5 text-[16px] font-medium text-gray-dark hover:bg-gray-stroke sm:flex"
         >
           <img src={layoutGridIcon} alt="" className="h-5 w-5" />
           Overview
