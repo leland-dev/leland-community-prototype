@@ -452,9 +452,10 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
         <div className="sticky hidden items-center gap-2 self-start sm:flex" style={{ top: "28px" }}>
           <button
             onClick={onNavigateSettings}
-            className="flex items-center justify-center rounded-lg px-3 py-3 text-gray-dark hover:bg-gray-hover"
+            className="flex shrink-0 items-center gap-2 rounded-lg px-4 py-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover"
           >
-            <img src={settingsIcon} alt="" className="h-6 w-6 opacity-40" />
+            <img src={settingsIcon} alt="" className="h-[18px] w-[18px] opacity-50" />
+            Admin Settings
           </button>
           <button
             onClick={() => onOpenModal("invite")}
