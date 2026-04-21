@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { B2BView, ModalId } from "./B2BData";
-import B2BUserDrawer, { type UserDetail } from "./B2BUserDrawer";
+import B2BUserDrawerV2, { type UserDetailV2, type CohortEntry, type SessionEntry } from "./B2BUserDrawerV2";
 import coachImg1 from "../../assets/profile photos/pic-1.png";
 import coachImg2 from "../../assets/profile photos/pic-2.png";
 import coachImg3 from "../../assets/profile photos/pic-3.png";
@@ -23,7 +23,7 @@ interface Props {
 const activity = [
   { type: "session", coachImg: coachImg1, name: "Sarah Kim", action: "booked a coaching session with", target: "Jordan Lee", time: "2h ago", category: "Investment Banking" },
   { type: "review", coachImg: coachImg2, name: "Raj Patel", action: "left a 5-star review for", target: "Priya N.", time: "Yesterday", category: "Career Strategy" },
-  { type: "enrollment", name: "Mia Chen", action: "enrolled in", target: "Spring '26 IB Cohort", time: "2d ago", category: "Live cohorts" },
+  { type: "enrollment", name: "Mia Chen", action: "enrolled in", target: "Spring '26 IB Cohort", time: "2d ago", category: "Live courses" },
   { type: "session", coachImg: coachImg3, name: "Evan Torres", action: "booked a session with", target: "Alex Morgan", time: "3d ago", category: "Private Equity" },
 ];
 
@@ -33,10 +33,42 @@ const CONTRACT_COHORTS = [
   { key: "ai", label: "AI for Finance Professionals" },
 ] as const;
 
+const COHORT_META: Record<CohortKey, { label: string; image: string; startDate: string; endDate: string }> = {
+  ib: { label: "Spring '26 IB Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026" },
+  pe: { label: "Private Equity Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841c0c4dde9ed55e539fe5f.png", startDate: "Apr 7, 2026", endDate: "May 9, 2026" },
+  ai: { label: "AI for Finance Professionals", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Mar 1, 2026", endDate: "Mar 29, 2026" },
+};
+
+function cohortEntry(key: CohortKey, status: CohortEntry["status"], extra?: Partial<CohortEntry>): CohortEntry {
+  const m = COHORT_META[key];
+  return { name: m.label, image: m.image, startDate: m.startDate, endDate: m.endDate, status, ...extra };
+}
+
+function tableRowToUserDetailV2(row: typeof users[number]): UserDetailV2 {
+  const sessionsGranted = row.sessionsTotal ?? 0;
+  const sessionsCompleted = row.sessions ?? 0;
+  const entries: SessionEntry[] = [];
+  for (let i = 0; i < sessionsCompleted; i++) entries.push({ date: "—", status: "completed" });
+  for (let i = sessionsCompleted; i < sessionsGranted; i++) entries.push({ date: "—", status: "unbooked" });
+  const cohorts: CohortEntry[] = CONTRACT_COHORTS
+    .filter((c) => row.cohortStatuses[c.key])
+    .map((c) => cohortEntry(c.key, row.cohortStatuses[c.key]!));
+  const plus: UserDetailV2["plus"] = row.plus !== "—" && row.plusExpiry
+    ? { status: row.plus === "Expired" ? "expired" : "active", expiry: row.plusExpiry }
+    : undefined;
+  return {
+    name: row.name, email: row.email, initials: row.initials, dateAdded: row.dateAdded,
+    sessions: sessionsGranted > 0 ? { granted: sessionsGranted, entries } : undefined,
+    cohorts: cohorts.length > 0 ? cohorts : undefined,
+    plus,
+  };
+}
+
 type CohortKey = typeof CONTRACT_COHORTS[number]["key"];
 type CohortStatus = "invited" | "enrolled" | "completed";
 
 const users = [
+  { initials: "ZP", name: "Zoe Park", email: "zoe.park@kellogg.edu", sessions: 1, sessionsTotal: 3, cohortStatuses: { ib: "enrolled", pe: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Aug 15, 2026", lastActive: "1d ago", lastActiveDays: 1, dateAdded: "Jan 5, 2026", daysAdded: 99 },
   { initials: "SK", name: "Sarah Kim", email: "sarah.kim@kellogg.edu", sessions: 2, sessionsTotal: 4, cohortStatuses: { ib: "enrolled", pe: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 10, 2026", lastActive: "2h ago", lastActiveDays: 0.08, dateAdded: "Jan 10, 2026", daysAdded: 94 },
   { initials: "RP", name: "Raj Patel", email: "raj.patel@kellogg.edu", sessions: 1, sessionsTotal: 3, cohortStatuses: { ib: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 10, 2026", lastActive: "Yesterday", lastActiveDays: 1, dateAdded: "Jan 10, 2026", daysAdded: 94 },
   { initials: "MC", name: "Mia Chen", email: "mia.chen@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: { ib: "enrolled", ai: "enrolled" } as Partial<Record<CohortKey, CohortStatus>>, plus: "—", plusExpiry: null, lastActive: "2d ago", lastActiveDays: 2, dateAdded: "Jan 15, 2026", daysAdded: 89 },
@@ -53,98 +85,296 @@ const users = [
 
 const PAGE_SIZE = 25;
 
-const userDetails: Record<string, UserDetail> = {
-  "sarah.kim@kellogg.edu": {
-    name: "Sarah Kim", email: "sarah.kim@kellogg.edu", initials: "SK", image: userImg1,
-    coaching: {
-      granted: 4, used: 2,
-      sessions: [
-        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Apr 18, 2026", status: "scheduled" },
-        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Mar 28, 2026", review: { rating: 5, text: "Jordan was incredibly well-prepared and gave me concrete feedback I could act on immediately. He clearly knows the recruiting process inside and out — every suggestion was specific, actionable, and calibrated to exactly where I am in the process. I left the session with a clear plan and a lot more confidence." } },
-        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Feb 14, 2026", summary: "Behavioral interview prep and fit story development. Worked through the 'why banking' narrative in depth, refined Sarah's answer to 'walk me through your resume,' and practiced responding to curveball questions under time pressure." },
+const userDetailsV2: Record<string, UserDetailV2> = {
+  "zoe.park@kellogg.edu": {
+    name: "Zoe Park", email: "zoe.park@kellogg.edu", initials: "ZP", dateAdded: "Jan 5, 2026",
+    sessions: {
+      granted: 3,
+      entries: [
+        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Feb 10, 2026", status: "completed", review: { rating: 5, text: "Jordan gave me a completely fresh perspective on how to structure my IB story. Specific, actionable, and incredibly well-prepared." } },
+        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Apr 25, 2026", status: "scheduled" },
+        { date: "—", status: "unbooked" },
       ],
     },
-    plus: {
-      topCategories: ["Investment Banking", "Valuation", "Interview Guides"],
-      totalEngaged: 47,
-      recentItems: [
-        { title: "LBO Modeling: Step-by-Step", category: "Investment Banking", type: "video" },
-        { title: "IB Interview Question Bank", category: "Interview Guides" },
-        { title: "DCF Valuation Deep Dive", category: "Valuation", type: "video" },
-        { title: "Restructuring 101", category: "Investment Banking" },
-        { title: "Walk Me Through a DCF", category: "Valuation", type: "video" },
-      ],
-    },
-    liveCourses: [
-      { cohort: "Spring '26 IB Recruiting", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", status: "enrolled", review: { rating: 5, text: "Exactly what I needed — structured, fast-paced, and the instructors had real deal experience." } },
-      { cohort: "PE Recruiting Bootcamp", startDate: "Apr 7, 2026", endDate: "May 9, 2026", status: "invited", inviteSent: "Mar 25, 2026" },
+    cohorts: [
+      cohortEntry("ib", "enrolled", { review: { rating: 5, text: "Incredibly well-structured and the coaches had real recruiting experience. I felt prepared going into every interview." } }),
+      cohortEntry("pe", "invited", { inviteSent: "Mar 25, 2026" }),
     ],
+    plus: { status: "active", grantedDate: "Feb 15, 2026", expiry: "Aug 15, 2026" },
+  },
+  "sarah.kim@kellogg.edu": {
+    name: "Sarah Kim", email: "sarah.kim@kellogg.edu", initials: "SK", image: userImg1, dateAdded: "Jan 10, 2026",
+    sessions: {
+      granted: 4,
+      entries: [
+        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Mar 28, 2026", status: "completed", review: { rating: 5, text: "Jordan was incredibly well-prepared and gave me concrete feedback I could act on immediately. Every suggestion was specific, actionable, and calibrated to exactly where I am in the process." } },
+        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Feb 14, 2026", status: "completed" },
+        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Apr 18, 2026", status: "scheduled" },
+        { date: "—", status: "unbooked" },
+      ],
+    },
+    cohorts: [
+      cohortEntry("ib", "enrolled", { review: { rating: 5, text: "Exactly what I needed — structured, fast-paced, and the instructors had real deal experience." } }),
+      cohortEntry("pe", "invited", { inviteSent: "Mar 25, 2026" }),
+    ],
+    plus: { status: "active", expiry: "Jul 10, 2026" },
   },
   "raj.patel@kellogg.edu": {
-    name: "Raj Patel", email: "raj.patel@kellogg.edu", initials: "RP", image: userImg2,
-    coaching: {
-      granted: 3, used: 1,
-      sessions: [
-        { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Mar 15, 2026", summary: "Career strategy session focused on transitioning from consulting to PE. Covered the timeline and how to position prior deal experience.", review: { rating: 5, text: "Priya gave me a completely different perspective on how to frame my background. Game-changer." } },
+    name: "Raj Patel", email: "raj.patel@kellogg.edu", initials: "RP", image: userImg2, dateAdded: "Jan 10, 2026",
+    sessions: {
+      granted: 3,
+      entries: [
+        { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Mar 15, 2026", status: "completed", review: { rating: 5, text: "Priya gave me a completely different perspective on how to frame my background. Game-changer." } },
+        { date: "—", status: "unbooked" },
+        { date: "—", status: "unbooked" },
       ],
     },
-    plus: {
-      topCategories: ["Private Equity", "Career Strategy", "Consulting"],
-      totalEngaged: 23,
-      recentItems: [
-        { title: "PE Associate Interview Guide", category: "Private Equity" },
-        { title: "Consulting to PE Transition", category: "Career Strategy", type: "video" },
-        { title: "Operating Partner vs. Deal Team", category: "Private Equity", type: "video" },
-        { title: "Case Interview Frameworks", category: "Consulting" },
-        { title: "Leveraged Buyout Overview", category: "Private Equity", type: "video" },
-      ],
-    },
-    liveCourses: [
-      { cohort: "Spring '26 IB Recruiting", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", status: "invited", inviteSent: "Mar 20, 2026" },
+    cohorts: [
+      cohortEntry("ib", "invited", { inviteSent: "Mar 20, 2026" }),
     ],
-  },
-  "aisha.lee@kellogg.edu": {
-    name: "Aisha Lee", email: "aisha.lee@kellogg.edu", initials: "AL", image: userImg3,
-    coaching: {
-      granted: 3, used: 0, sessions: [], inviteSent: "Mar 30, 2026",
-    },
-    plus: {
-      topCategories: [], recentItems: [], inviteSent: "Mar 30, 2026",
-    },
+    plus: { status: "active", expiry: "Jul 10, 2026" },
   },
   "mia.chen@kellogg.edu": {
-    name: "Mia Chen", email: "mia.chen@kellogg.edu", initials: "MC", image: userImg4,
-    liveCourses: [
-      { cohort: "Spring '26 IB Cohort", startDate: "Feb 3, 2026", endDate: "Apr 10, 2026", status: "enrolled" },
-      { cohort: "AI for Finance", startDate: "Mar 1, 2026", endDate: "Mar 29, 2026", status: "enrolled", review: { rating: 4, text: "Great content, though I wished there was more time for hands-on exercises." } },
+    name: "Mia Chen", email: "mia.chen@kellogg.edu", initials: "MC", image: userImg4, dateAdded: "Jan 15, 2026",
+    cohorts: [
+      cohortEntry("ib", "enrolled"),
+      cohortEntry("ai", "enrolled", { review: { rating: 4, text: "Great content, though I wished there was more time for hands-on exercises." } }),
     ],
   },
   "evan.torres@kellogg.edu": {
-    name: "Evan Torres", email: "evan.torres@kellogg.edu", initials: "ET", image: userImg5,
-    coaching: {
-      granted: 4, used: 2,
-      sessions: [
-        { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Mar 22, 2026", summary: "PE modeling practice — worked through a full LBO with a healthcare target. Identified gaps in returns analysis, specifically around entry multiple assumptions and the sensitivity table. Alex also introduced a framework for stress-testing deal structures under downside scenarios, which Evan found especially useful for on-cycle prep.", review: { rating: 4, text: "Very thorough session. Alex clearly knows the PE recruiting process inside out." } },
-        { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Feb 5, 2026", summary: "Introduction session. Mapped out Evan's background and identified target fund types and deal sizes." },
+    name: "Evan Torres", email: "evan.torres@kellogg.edu", initials: "ET", image: userImg5, dateAdded: "Jan 15, 2026",
+    sessions: {
+      granted: 4,
+      entries: [
+        { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Mar 22, 2026", status: "completed", review: { rating: 4, text: "Very thorough session. Alex clearly knows the PE recruiting process inside out." } },
+        { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Feb 5, 2026", status: "completed" },
+        { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Apr 28, 2026", status: "scheduled" },
+        { date: "—", status: "unbooked" },
       ],
     },
-    plus: {
-      topCategories: ["Private Equity", "Valuation", "Investment Banking"],
-      recentItems: [
-        { title: "Healthcare LBO Case Study", category: "Private Equity", type: "video" },
-        { title: "Returns Analysis Deep Dive", category: "Valuation" },
-        { title: "PE Fund Structures", category: "Private Equity" },
-        { title: "IRR vs. MOIC", category: "Valuation", type: "video" },
-        { title: "Growth Equity vs. Buyout", category: "Private Equity", type: "video" },
+    plus: { status: "active", expiry: "Jul 15, 2026" },
+  },
+  "aisha.lee@kellogg.edu": {
+    name: "Aisha Lee", email: "aisha.lee@kellogg.edu", initials: "AL", image: userImg3, dateAdded: "Feb 1, 2026",
+    sessions: {
+      granted: 3,
+      entries: [
+        { date: "—", status: "unbooked" },
+        { date: "—", status: "unbooked" },
+        { date: "—", status: "unbooked" },
       ],
     },
+    plus: { status: "active", expiry: "Aug 1, 2026" },
+  },
+  "jordan.lee@kellogg.edu": {
+    name: "Jordan Lee", email: "jordan.lee@kellogg.edu", initials: "JL", dateAdded: "Jan 20, 2026",
+    sessions: {
+      granted: 3,
+      entries: [
+        { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Mar 5, 2026", status: "completed", review: { rating: 5, text: "Helped me see exactly how to position my background for on-cycle PE recruiting. Really valuable." } },
+        { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Feb 3, 2026", status: "completed" },
+        { date: "—", status: "unbooked" },
+      ],
+    },
+    cohorts: [
+      cohortEntry("pe", "completed"),
+    ],
+    plus: { status: "active", expiry: "Jul 20, 2026" },
+  },
+  "priya.mehta@kellogg.edu": {
+    name: "Priya Mehta", email: "priya.mehta@kellogg.edu", initials: "PM", dateAdded: "Jan 20, 2026",
+    sessions: {
+      granted: 2,
+      entries: [
+        { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Mar 12, 2026", status: "completed" },
+        { date: "—", status: "unbooked" },
+      ],
+    },
+    plus: { status: "active", expiry: "Jul 20, 2026" },
+  },
+  "daniel.wu@kellogg.edu": {
+    name: "Daniel Wu", email: "daniel.wu@kellogg.edu", initials: "DW", dateAdded: "Feb 3, 2026",
+    cohorts: [
+      cohortEntry("ib", "enrolled"),
+    ],
+  },
+  "nina.brooks@kellogg.edu": {
+    name: "Nina Brooks", email: "nina.brooks@kellogg.edu", initials: "NB", dateAdded: "Jan 25, 2026",
+    sessions: {
+      granted: 4,
+      entries: [
+        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Apr 2, 2026", status: "completed", review: { rating: 5, text: "Incredibly insightful. Left with a completely clear action plan and more confidence going into interviews." } },
+        { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Mar 14, 2026", status: "completed" },
+        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Feb 20, 2026", status: "completed" },
+        { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Apr 22, 2026", status: "scheduled" },
+      ],
+    },
+    plus: { status: "active", expiry: "Jul 25, 2026" },
+  },
+  "carlos.rivera@kellogg.edu": {
+    name: "Carlos Rivera", email: "carlos.rivera@kellogg.edu", initials: "CR", dateAdded: "Feb 10, 2026",
+    plus: { status: "expired", expiry: "Apr 10, 2026" },
+  },
+  "hannah.seo@kellogg.edu": {
+    name: "Hannah Seo", email: "hannah.seo@kellogg.edu", initials: "HS", dateAdded: "Feb 15, 2026",
+    sessions: {
+      granted: 2,
+      entries: [
+        { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Feb 28, 2026", status: "completed" },
+        { date: "—", status: "unbooked" },
+      ],
+    },
+    cohorts: [
+      cohortEntry("pe", "completed"),
+    ],
+    plus: { status: "active", expiry: "Aug 15, 2026" },
+  },
+  "tunde.okafor@kellogg.edu": {
+    name: "Tunde Okafor", email: "tunde.okafor@kellogg.edu", initials: "TO", dateAdded: "Mar 1, 2026",
+    sessions: {
+      granted: 3,
+      entries: [
+        { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Apr 8, 2026", status: "completed" },
+        { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Mar 3, 2026", status: "completed" },
+        { date: "—", status: "unbooked" },
+      ],
+    },
+    cohorts: [
+      cohortEntry("ai", "invited", { inviteSent: "Apr 1, 2026" }),
+    ],
+  },
+};
+
+// Shared Verizon cohort invites for all users
+const verizonCohorts: CohortEntry[] = [
+  cohortEntry("ib", "invited", { inviteSent: "Jun 5, 2026" }),
+  cohortEntry("pe", "invited", { inviteSent: "Jun 5, 2026" }),
+];
+
+const verizonUserDetailsV2: Record<string, UserDetailV2> = {
+  "zoe.park@kellogg.edu": {
+    name: "Zoe Park", email: "zoe.park@kellogg.edu", initials: "ZP", dateAdded: "Jan 5, 2026",
+    sessions: { granted: 2, entries: [
+      { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 8, 2026", status: "completed" },
+      { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 22, 2026", status: "scheduled" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
+  },
+  "sarah.kim@kellogg.edu": {
+    name: "Sarah Kim", email: "sarah.kim@kellogg.edu", initials: "SK", image: userImg1, dateAdded: "Jan 10, 2026",
+    sessions: { granted: 2, entries: [
+      { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Jul 10, 2026", status: "completed" },
+      { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Jul 24, 2026", status: "scheduled" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
+  },
+  "raj.patel@kellogg.edu": {
+    name: "Raj Patel", email: "raj.patel@kellogg.edu", initials: "RP", image: userImg2, dateAdded: "Jan 10, 2026",
+    sessions: { granted: 2, entries: [
+      { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Jul 14, 2026", status: "completed" },
+      { date: "—", status: "unbooked" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
+  },
+  "mia.chen@kellogg.edu": {
+    name: "Mia Chen", email: "mia.chen@kellogg.edu", initials: "MC", image: userImg4, dateAdded: "Jan 15, 2026",
+    sessions: { granted: 2, entries: [
+      { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 29, 2026", status: "scheduled" },
+      { date: "—", status: "unbooked" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
+  },
+  "evan.torres@kellogg.edu": {
+    name: "Evan Torres", email: "evan.torres@kellogg.edu", initials: "ET", image: userImg5, dateAdded: "Jan 15, 2026",
+    sessions: { granted: 2, entries: [
+      { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Jul 9, 2026", status: "completed" },
+      { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Jul 21, 2026", status: "completed" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
+  },
+  "aisha.lee@kellogg.edu": {
+    name: "Aisha Lee", email: "aisha.lee@kellogg.edu", initials: "AL", image: userImg3, dateAdded: "Feb 1, 2026",
+    sessions: { granted: 2, entries: [
+      { date: "—", status: "unbooked" },
+      { date: "—", status: "unbooked" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
+  },
+  "jordan.lee@kellogg.edu": {
+    name: "Jordan Lee", email: "jordan.lee@kellogg.edu", initials: "JL", dateAdded: "Jan 20, 2026",
+    sessions: { granted: 2, entries: [
+      { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Jul 11, 2026", status: "completed" },
+      { date: "—", status: "unbooked" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
+  },
+  "priya.mehta@kellogg.edu": {
+    name: "Priya Mehta", email: "priya.mehta@kellogg.edu", initials: "PM", dateAdded: "Jan 20, 2026",
+    sessions: { granted: 2, entries: [
+      { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 15, 2026", status: "completed" },
+      { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 28, 2026", status: "scheduled" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
+  },
+  "daniel.wu@kellogg.edu": {
+    name: "Daniel Wu", email: "daniel.wu@kellogg.edu", initials: "DW", dateAdded: "Feb 3, 2026",
+    sessions: { granted: 2, entries: [
+      { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Jul 30, 2026", status: "scheduled" },
+      { date: "—", status: "unbooked" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
+  },
+  "nina.brooks@kellogg.edu": {
+    name: "Nina Brooks", email: "nina.brooks@kellogg.edu", initials: "NB", dateAdded: "Jan 25, 2026",
+    sessions: { granted: 2, entries: [
+      { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 7, 2026", status: "completed" },
+      { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 18, 2026", status: "completed" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
+  },
+  "carlos.rivera@kellogg.edu": {
+    name: "Carlos Rivera", email: "carlos.rivera@kellogg.edu", initials: "CR", dateAdded: "Feb 10, 2026",
+    sessions: { granted: 2, entries: [
+      { date: "—", status: "unbooked" },
+      { date: "—", status: "unbooked" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
+  },
+  "hannah.seo@kellogg.edu": {
+    name: "Hannah Seo", email: "hannah.seo@kellogg.edu", initials: "HS", dateAdded: "Feb 15, 2026",
+    sessions: { granted: 2, entries: [
+      { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Jul 16, 2026", status: "completed" },
+      { date: "—", status: "unbooked" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
+  },
+  "tunde.okafor@kellogg.edu": {
+    name: "Tunde Okafor", email: "tunde.okafor@kellogg.edu", initials: "TO", dateAdded: "Mar 1, 2026",
+    sessions: { granted: 2, entries: [
+      { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Jul 31, 2026", status: "scheduled" },
+      { date: "—", status: "unbooked" },
+    ]},
+    cohorts: verizonCohorts,
+    plus: { status: "active", expiry: "Dec 31, 2026" },
   },
 };
 
 export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, onSetPartnerModel }: Props) {
   const showVerizon = partnerModel === "per-seat";
   const [page, setPage] = useState(0);
-  const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
+  const [selectedUserV2, setSelectedUserV2] = useState<UserDetailV2 | null>(null);
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [adminOpen, setAdminOpen] = useState(false);
   const [showNonMvp, setShowNonMvp] = useState(false);
@@ -196,11 +426,12 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
 
   const totalPages = Math.ceil(sortedUsers.length / PAGE_SIZE);
   const pagedUsers = sortedUsers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-  const visibleUsers = pagedUsers.map((u) =>
-    showVerizon
-      ? { ...u, sessions: 0, sessionsTotal: 2, cohortStatuses: { ib: "invited", pe: "invited", ai: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Dec 31, 2026" }
-      : u
-  );
+  const visibleUsers = pagedUsers.map((u) => {
+    if (!showVerizon) return u;
+    const vz = verizonUserDetailsV2[u.email];
+    const completedCount = vz?.sessions?.entries.filter((e) => e.status === "completed").length ?? 0;
+    return { ...u, sessions: completedCount, sessionsTotal: 2, cohortStatuses: { ib: "invited", pe: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted" as const, plusExpiry: "Dec 31, 2026" };
+  });
 
   const [openMenuEmail, setOpenMenuEmail] = useState<string | null>(null);
   const [openTooltip, setOpenTooltip] = useState<"sessions" | "cohorts" | "seats" | "active" | null>(null);
@@ -264,7 +495,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
       {partnerModel === "a-la-carte" && (() => {
         const offerings = [
           { label: "1:1 Sessions", description: "Personalized coaching with an expert matched to each user's recruiting track.", purchased: 140, used: 102 },
-          { label: "Live Cohort Seats", description: "Instructor-led group programs covering recruiting strategy, technical skills, and more.", purchased: 80, used: 64 },
+          { label: "Live Course Seats", description: "Instructor-led group programs covering recruiting strategy, technical skills, and more.", purchased: 80, used: 64 },
           { label: "Leland+ Licenses", description: "Unlimited access to Leland's full library of guides, templates, and video content.", purchased: 30, used: 18 },
         ];
         return (
@@ -479,17 +710,9 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                   <tr
                     key={i}
                     className={`cursor-pointer hover:bg-[#fafafa] ${i < visibleUsers.length - 1 ? "border-b border-gray-stroke" : ""}`}
-                    onClick={() => setSelectedUser({
-                      ...(userDetails[user.email] ?? { name: user.name, email: user.email, initials: user.initials }),
-                      plusAccess: { status: user.plus, expiry: user.plusExpiry },
-                      cohortStatuses: Object.fromEntries(
-                        CONTRACT_COHORTS
-                          .filter((c) => user.cohortStatuses[c.key])
-                          .map((c) => [c.label, user.cohortStatuses[c.key]!])
-                      ),
-                      sessionsGranted: user.sessionsTotal ?? undefined,
-                      sessionsUsed: user.sessions ?? undefined,
-                    })}
+                    onClick={() => {
+                      setSelectedUserV2(showVerizon ? (verizonUserDetailsV2[user.email] ?? tableRowToUserDetailV2(user)) : (userDetailsV2[user.email] ?? tableRowToUserDetailV2(user)));
+                    }}
                   >
                     {partnerModel === "a-la-carte" && <td className="px-4 py-[14px]" onClick={(e) => e.stopPropagation()}>
                       <label className="relative flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border border-[#CCCCCC]"
@@ -515,8 +738,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
                     </td>}
                     <td className="px-4 py-[14px]">
                       <div className="flex items-center gap-[10px]">
-                        {userDetails[user.email]?.image ? (
-                          <img src={userDetails[user.email].image} alt={user.name} className="h-9 w-9 shrink-0 rounded-full object-cover" />
+                        {userDetailsV2[user.email]?.image ? (
+                          <img src={userDetailsV2[user.email].image} alt={user.name} className="h-9 w-9 shrink-0 rounded-full object-cover" />
                         ) : (
                           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[14px] font-semibold text-dark-green">
                             {user.initials}
@@ -656,13 +879,13 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
               </button>
             </div>
 
-            {/* Live cohorts */}
+            {/* Live courses */}
             <div
               className="flex cursor-pointer items-center justify-between gap-6 rounded-lg p-3 hover:bg-gray-hover"
               onClick={() => onNavigate("live-courses")}
             >
               <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <h3 className="text-[16px] font-medium text-gray-dark">Live cohorts</h3>
+                <h3 className="text-[16px] font-medium text-gray-dark">Live courses</h3>
                 <div className="flex items-center gap-2">
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-stroke">
                     <div className="h-full rounded-full bg-red" style={{ width: `${(64/66)*100}%` }} />
@@ -754,7 +977,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, partnerModel, o
 
       <div className="h-[120px] shrink-0" />
 
-      <B2BUserDrawer user={selectedUser} onClose={() => setSelectedUser(null)} />
+      <B2BUserDrawerV2 user={selectedUserV2} onClose={() => setSelectedUserV2(null)} />
 
       {/* Prototype toggle */}
       <div ref={adminRef} className="fixed bottom-24 right-4 z-40 md:bottom-6 md:right-6">
