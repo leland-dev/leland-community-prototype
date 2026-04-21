@@ -556,7 +556,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
       })()}
 
       {/* Stats row — Per Seat */}
-      {partnerModel === "per-seat" && <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-x-col-gap">
+      {partnerModel === "per-seat" && <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-x-5">
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
           <div className="mb-2 flex items-center gap-1.5 text-[18px] font-normal text-gray-light">
             Seats redeemed
