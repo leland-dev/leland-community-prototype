@@ -366,8 +366,8 @@ export default function TopNav() {
                       onClick={() => setProfileOpen(false)}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover"
                     >
-                      <img src={browserIcon} alt="B2B Dashboard" className="h-6 w-6 shrink-0" />
-                      B2B Dashboard
+                      <img src={browserIcon} alt="Partner dashboard" className="h-6 w-6 shrink-0" />
+                      Partner dashboard
                     </NavLink>
                     <NavLink
                       to="/components"

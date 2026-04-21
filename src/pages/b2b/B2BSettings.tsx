@@ -1,4 +1,5 @@
-import { Avatar, Pill, Card } from "./B2BShared";
+import { Avatar, Card } from "./B2BShared";
+import { Tag } from "./B2BUserDrawerV2";
 export default function B2BSettings() {
   return (
     <>
@@ -9,10 +10,10 @@ export default function B2BSettings() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 items-start gap-4">
+      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
         {/* Left column */}
         <div>
-          <Card header={<h2 className="text-[14px] font-medium text-gray-dark">License Summary</h2>}>
+          <Card header={<h2 className="text-[16px] font-medium text-gray-dark">License Summary</h2>} headerPadding="py-3">
             <div className="grid grid-cols-2 gap-3 p-5">
               <div className="rounded-lg bg-gray-hover p-[14px] text-center">
                 <div className="text-[24px] font-bold text-dark-green">325</div>
@@ -28,31 +29,31 @@ export default function B2BSettings() {
 
         {/* Right column */}
         <div className="flex flex-col gap-4">
-          <Card header={<h2 className="text-[14px] font-medium text-gray-dark">Admin Users</h2>}>
+          <Card header={<h2 className="text-[16px] font-medium text-gray-dark">Admin Users</h2>} headerPadding="py-3">
             <div>
               {[
-                { initials: "KB", name: "Katie Brown", email: "katie.brown@kellogg.edu", role: "Owner", bg: "bg-dark-green", color: "text-white", pillVariant: "dark" },
-                { initials: "MR", name: "Michael Reyes", email: "m-reyes@kellogg.edu", role: "Admin", bg: "bg-gray-xlight", color: "text-white", pillVariant: "green" },
-                { initials: "JS", name: "Jennifer Sullivan", email: "j-sullivan@kellogg.edu", role: "View Only", bg: "bg-gray-xlight", color: "text-white", pillVariant: "gray" },
+                { initials: "KB", name: "Katie Brown", email: "katie.brown@kellogg.edu", role: "Owner", tagColor: "green" as const },
+                { initials: "MR", name: "Michael Reyes", email: "m-reyes@kellogg.edu", role: "Admin", tagColor: "green" as const },
+                { initials: "JS", name: "Jennifer Sullivan", email: "j-sullivan@kellogg.edu", role: "View Only", tagColor: "gray" as const },
               ].map((admin, i, arr) => (
                 <div
                   key={admin.initials}
-                  className={`flex items-center justify-between px-5 py-3 ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}
+                  className={`flex items-center justify-between px-4 py-[14px] ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}
                 >
                   <div className="flex items-center gap-[10px]">
-                    <Avatar initials={admin.initials} bg={admin.bg} color={admin.color} />
-                    <div>
-                      <div className="text-[13px] font-semibold">{admin.name}</div>
-                      <div className="text-[12px] text-gray-xlight">{admin.email}</div>
+                    <Avatar initials={admin.initials} size={36} />
+                    <div className="leading-[1.2]">
+                      <div className="text-[16px] font-medium text-gray-dark">{admin.name}</div>
+                      <div className="text-[14px] text-gray-light">{admin.email}</div>
                     </div>
                   </div>
-                  <Pill variant={admin.pillVariant}>{admin.role}</Pill>
+                  <Tag color={admin.tagColor}>{admin.role}</Tag>
                 </div>
               ))}
             </div>
           </Card>
 
-          <Card header={<h2 className="text-[14px] font-medium text-gray-dark">Support</h2>}>
+          <Card header={<h2 className="text-[16px] font-medium text-gray-dark">Support</h2>} headerPadding="py-3">
             <div className="p-5">
               <p className="text-[13px] text-gray-light">
                 Need help with your account? Reach out to your Leland success team at{" "}

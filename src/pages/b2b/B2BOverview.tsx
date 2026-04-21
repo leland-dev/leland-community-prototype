@@ -233,7 +233,7 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
           header={
             <div>
               <h2 className="text-[14px] font-medium text-gray-dark">AI Mastery</h2>
-              <p className="text-[12px] text-gray-light">Live cohort course</p>
+              <p className="text-[12px] text-gray-light">Live course</p>
             </div>
           }
           headerRight={<Pill variant="green">Active</Pill>}
@@ -270,7 +270,7 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
           header={
             <div>
               <h2 className="text-[14px] font-medium text-gray-dark">Consulting Recruiting</h2>
-              <p className="text-[12px] text-gray-light">Live cohort course</p>
+              <p className="text-[12px] text-gray-light">Live course</p>
             </div>
           }
           headerRight={<Pill variant="purple">Active</Pill>}
@@ -307,7 +307,7 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
           header={
             <div>
               <h2 className="text-[14px] font-medium text-gray-dark">IB Recruiting</h2>
-              <p className="text-[12px] text-gray-light">Live cohort course</p>
+              <p className="text-[12px] text-gray-light">Live course</p>
             </div>
           }
           headerRight={<Pill variant="orange">Starting Soon</Pill>}

@@ -13,6 +13,7 @@ import switchIcon from "../assets/icons/switch.svg";
 import helpIcon from "../assets/icons/help.svg";
 import logOutIcon from "../assets/icons/log out.svg";
 import arrowRightIcon from "../assets/icons/arrow-right.svg";
+import browserIcon from "../assets/icons/browser.svg";
 
 const menuItems = [
   { to: "/events", icon: eventsIcon, label: "Free Events", danger: false, darkIcon: true },
@@ -22,6 +23,7 @@ const menuItems = [
   { to: null, icon: settingsIcon, label: "Settings", danger: false },
   { to: null, icon: arrowRoundIcon, label: "Order History", danger: false },
   { to: null, icon: switchIcon, label: "Switch to coaching", danger: false },
+  { to: "/partner-dashboard", icon: browserIcon, label: "Partner dashboard", danger: false },
   { to: null, icon: helpIcon, label: "Help", danger: false },
   { to: null, icon: logOutIcon, label: "Log out", danger: true },
 ];

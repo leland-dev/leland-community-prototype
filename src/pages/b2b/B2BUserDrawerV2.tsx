@@ -69,7 +69,7 @@ function StatusDot({ status }: { status: "completed" | "scheduled" | "unbooked" 
   return <span className={`inline-block h-[7px] w-[7px] shrink-0 rounded-full ${color}`} />;
 }
 
-function Tag({ children, color = "gray" }: { children: React.ReactNode; color?: "gray" | "green" | "orange" | "blue" | "red" }) {
+export function Tag({ children, color = "gray" }: { children: React.ReactNode; color?: "gray" | "green" | "orange" | "blue" | "red" }) {
   const cls =
     color === "green"  ? "bg-primary-xlight text-dark-green border border-primary-xlight" :
     color === "orange" ? "bg-orange/10 text-orange border border-orange/10" :

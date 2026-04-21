@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "motion/react";
 import { navItems, type B2BView } from "../pages/b2b/B2BData";
 import settingsIcon from "../assets/icons/settings.svg";
+import browserIcon from "../assets/icons/browser.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import kelloggLogo from "../assets/img/kellogg.svg";
 
@@ -69,17 +70,23 @@ export default function B2BMobileSidebar({ open, onClose, activeView, onNavigate
                   {item.label}
                 </button>
               ))}
-              <button
-                onClick={() => { onNavigateSettings(); onClose(); }}
-                className={`flex w-full items-center gap-[10px] px-5 py-3 text-[16px] font-medium transition-colors ${
-                  activeView === "settings"
-                    ? "bg-[#222222]/5 text-gray-dark"
-                    : "text-gray-dark hover:bg-gray-hover"
-                }`}
-              >
-                <img src={settingsIcon} alt="" className="h-6 w-6 shrink-0" />
-                Admin Settings
-              </button>
+              {activeView === "settings" ? (
+                <button
+                  onClick={() => { handleNav("overview"); }}
+                  className="flex w-full items-center gap-[10px] px-5 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                >
+                  <img src={browserIcon} alt="" className="h-6 w-6 shrink-0" />
+                  Partner dashboard
+                </button>
+              ) : (
+                <button
+                  onClick={() => { onNavigateSettings(); onClose(); }}
+                  className="flex w-full items-center gap-[10px] px-5 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                >
+                  <img src={settingsIcon} alt="" className="h-6 w-6 shrink-0" />
+                  Admin Settings
+                </button>
+              )}
             </div>
 
             {/* Provisioned for */}

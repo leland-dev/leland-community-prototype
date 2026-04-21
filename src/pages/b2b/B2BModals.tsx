@@ -172,9 +172,9 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }:
           </button>
         </div>
       </div>
-      {/* Live cohorts group */}
+      {/* Live courses group */}
       <div className="border-t border-gray-stroke px-4 pb-3 pt-3">
-        <span className="text-[15px] text-gray-dark">Live cohorts</span>
+        <span className="text-[15px] text-gray-dark">Live courses</span>
         <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
           {COHORTS.map((cohort) => (
             <div key={cohort} className="flex items-center justify-between gap-4 py-1.5">
@@ -237,7 +237,7 @@ function PerSeatIncludes() {
       </div>
       <div className="border-t border-gray-stroke px-4 pb-3 pt-3">
         <div className="flex items-center justify-between">
-          <span className="text-[15px] text-gray-dark">Live cohorts</span>
+          <span className="text-[15px] text-gray-dark">Live courses</span>
           <span className="text-[15px] font-medium text-gray-dark">{CONTRACT_COHORTS_MODAL.length} included</span>
         </div>
         <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
@@ -570,7 +570,7 @@ export function GetMoreModal({ open, onClose, offering }: { open: boolean; onClo
               onChange={(e) => setMessage(e.target.value)}
               placeholder={offering
                 ? `e.g. We'd like to add 20 more ${offering} to our contract.`
-                : "e.g. We'd like to add more coaching sessions and explore live cohort access."}
+                : "e.g. We'd like to add more coaching sessions and explore live course access."}
               className="w-full resize-none rounded-[8px] border border-gray-stroke bg-white px-4 py-3 text-[16px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-primary"
             />
             <p className="mt-2 text-[14px] text-gray-light">Your account manager will follow up to discuss options.</p>

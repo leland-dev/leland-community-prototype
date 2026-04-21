@@ -20,8 +20,12 @@ const profileMenuGroups = [
 
 export default function B2BTopNav({
   onNavigateSettings,
+  onNavigateDashboard,
+  isOnSettings = false,
 }: {
   onNavigateSettings?: () => void;
+  onNavigateDashboard?: () => void;
+  isOnSettings?: boolean;
 } = {}) {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -71,18 +75,25 @@ export default function B2BTopNav({
                 transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
                 className="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
               >
-                {/* Admin Settings */}
-                <div className="hidden px-2 py-2 md:block">
-                  <button
-                    onClick={() => {
-                      setProfileOpen(false);
-                      onNavigateSettings?.();
-                    }}
-                    className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
-                  >
-                    <img src={settingsIcon} alt="Admin Settings" className="h-6 w-6 shrink-0" />
-                    Admin Settings
-                  </button>
+                {/* Admin Settings / Partner dashboard toggle */}
+                <div className="px-2 py-2">
+                  {isOnSettings ? (
+                    <button
+                      onClick={() => { setProfileOpen(false); onNavigateDashboard?.(); }}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 shrink-0 text-gray-dark"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                      Partner dashboard
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { setProfileOpen(false); onNavigateSettings?.(); }}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                    >
+                      <img src={settingsIcon} alt="Admin Settings" className="h-6 w-6 shrink-0" />
+                      Admin Settings
+                    </button>
+                  )}
                 </div>
                 {profileMenuGroups.map((group, gi) => (
                   <div
