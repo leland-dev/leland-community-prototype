@@ -69,12 +69,13 @@ function StatusDot({ status }: { status: "completed" | "scheduled" | "unbooked" 
   return <span className={`inline-block h-[7px] w-[7px] shrink-0 rounded-full ${color}`} />;
 }
 
-export function Tag({ children, color = "gray" }: { children: React.ReactNode; color?: "gray" | "green" | "orange" | "blue" | "red" }) {
+export function Tag({ children, color = "gray" }: { children: React.ReactNode; color?: "gray" | "white" | "green" | "orange" | "blue" | "red" }) {
   const cls =
     color === "green"  ? "bg-primary-xlight text-dark-green border border-primary-xlight" :
     color === "orange" ? "bg-orange/10 text-orange border border-orange/10" :
     color === "blue"   ? "bg-blue/10 text-blue border border-blue/10" :
     color === "red"    ? "bg-red/10 text-red border border-red/10" :
+    color === "white"  ? "bg-white text-gray-light border border-gray-stroke" :
     "bg-gray-hover text-gray-light border border-gray-hover";
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-1.5 text-sm font-medium ${cls}`}>

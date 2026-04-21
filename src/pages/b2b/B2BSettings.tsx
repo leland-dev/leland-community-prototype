@@ -8,7 +8,7 @@ const PAGE_SIZE = 25;
 const ADMIN_USERS = [
   { initials: "KB", name: "Katie Brown", email: "katie.brown@kellogg.edu", role: "Owner", tagColor: "green" as const },
   { initials: "MR", name: "Michael Reyes", email: "m-reyes@kellogg.edu", role: "Admin", tagColor: "green" as const },
-  { initials: "JS", name: "Jennifer Sullivan", email: "j-sullivan@kellogg.edu", role: "View Only", tagColor: "gray" as const },
+  { initials: "JS", name: "Jennifer Sullivan", email: "j-sullivan@kellogg.edu", role: "View Only", tagColor: "white" as const },
 ];
 
 export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboard?: () => void }) {
