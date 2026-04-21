@@ -76,7 +76,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
 
         <div>
           <p className="mb-2 text-[14px] font-medium uppercase tracking-[0.1em] text-gray-light">Support</p>
-          <p className="text-[16px] text-gray-dark">
+          <p className="text-[16px] text-gray-light">
             Need help with your account? Reach out to your Leland success team at{" "}
             <a href="mailto:success@joinleland.com" className="font-medium text-primary">
               success@joinleland.com

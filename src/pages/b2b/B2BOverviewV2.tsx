@@ -619,7 +619,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             </div>
           )}
           {/* Toolbar */}
-          {(partnerModel !== "a-la-carte" || selectedEmails.size === 0) && <div className="flex flex-wrap items-center gap-3 rounded-t-lg bg-white px-4 py-3">
+          {(partnerModel !== "a-la-carte" || selectedEmails.size === 0) && <div className="flex flex-wrap items-center gap-3 rounded-t-lg border-b border-gray-stroke bg-white px-4 py-3">
             <div className="flex w-full items-center gap-2 rounded-lg border border-gray-stroke px-4 py-3 sm:max-w-[280px] sm:flex-1 sm:w-auto">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
