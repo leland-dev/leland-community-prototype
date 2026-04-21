@@ -58,7 +58,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
                 placeholder="Search by name or email"
               />
             </div>
-            <button className="flex shrink-0 items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+            <button className="flex shrink-0 items-center gap-2 rounded-lg border border-gray-stroke bg-white px-3 py-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover sm:px-4">
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
               </svg>
