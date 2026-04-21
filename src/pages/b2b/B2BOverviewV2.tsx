@@ -571,13 +571,13 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             </div>
           </div>
           <div className="flex items-baseline gap-[6px] sm:block">
-            <div className="text-[30px] font-medium leading-none text-gray-dark">289</div>
+            <div className="text-[24px] font-medium leading-none text-gray-dark sm:text-[30px]">289</div>
           </div>
         </div>
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
           <div className="mb-2 text-[18px] font-normal text-gray-light">Seats left</div>
           <div className="flex items-baseline gap-[6px] sm:block">
-            <div className="text-[30px] font-medium leading-none text-gray-dark">75</div>
+            <div className="text-[24px] font-medium leading-none text-gray-dark sm:text-[30px]">75</div>
           </div>
         </div>
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
@@ -585,7 +585,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
           <div className="flex items-end gap-2">
             <div className="flex items-center gap-1.5">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <span className="text-[24px] font-medium leading-[1.2] text-gray-dark">4.8</span>
+              <span className="text-[24px] font-medium leading-[1.2] text-gray-dark sm:text-[30px]">4.8</span>
             </div>
             <span className="text-[14px] leading-[1.5] text-gray-light">(112)</span>
           </div>
