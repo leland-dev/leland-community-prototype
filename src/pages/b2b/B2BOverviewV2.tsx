@@ -587,7 +587,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               <span className="text-[24px] font-medium leading-[1.2] text-gray-dark sm:text-[30px]">4.8</span>
             </div>
-            <span className="text-[14px] leading-[1.5] text-gray-light">(112)</span>
+            <span className="pb-[2px] text-[14px] leading-[1.5] text-gray-light">(112)</span>
           </div>
         </div>
       </div>}
