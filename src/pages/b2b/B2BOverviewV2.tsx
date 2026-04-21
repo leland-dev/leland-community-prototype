@@ -625,7 +625,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               <input
-                className="flex-1 border-none bg-transparent text-[16px] text-gray-dark outline-none placeholder:text-gray-xlight"
+                className="flex-1 border-none bg-transparent text-[16px] leading-[1.2] text-gray-dark outline-none placeholder:text-gray-xlight"
                 placeholder="Search by name or email"
               />
             </div>
