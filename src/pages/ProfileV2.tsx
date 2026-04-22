@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
+import { Button } from "../components/Button";
 import { useSearchParams, Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
@@ -510,12 +511,9 @@ export default function ProfileV2() {
                   title="MBA Strategy Live"
                   subtitle={<><span className="font-medium text-[#FB5A42]">Live now</span> · 125 registered</>}
                   right={
-                    <div
-                      className="rounded-[8px] bg-[#038561] px-[14px] py-2 text-[14px] font-medium text-white"
-                      style={{ lineHeight: 1.2 }}
-                    >
+                    <Button size="sm" variant="primary">
                       Join
-                    </div>
+                    </Button>
                   }
                 />
                 <SidebarCard

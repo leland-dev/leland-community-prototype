@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { Button } from "./Button";
 import SessionCard from "./SessionCard";
 import { useSessionLayout } from "./SessionLayoutContext";
 import calendarIcon from "../assets/icons/calendar-page.svg";
 import menuBurgerIcon from "../assets/icons/menu-burger.svg";
 import playVideoIcon from "../assets/icons/play-video.svg";
 import slackIcon from "../assets/icons/slack-black.svg";
+import orderHistoryIcon from "../assets/icons/order-history.svg";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -82,10 +84,10 @@ function formatSlotDateTime(date: Date): string {
 
 function ActionButton({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <button className="flex shrink-0 items-center gap-1.5 rounded-lg bg-gray-hover px-3 py-2 text-[14px] font-medium leading-[1.2] text-gray-dark transition-colors hover:bg-[#ebebeb]">
+    <Button size="sm" variant="secondary" className="shrink-0">
       {icon}
       {label}
-    </button>
+    </Button>
   );
 }
 
@@ -319,14 +321,15 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
         icon={<img src={slackIcon} alt="" className="h-4 w-4 shrink-0" />}
         label="Slack"
       />
+      <ActionButton
+        icon={<img src={orderHistoryIcon} alt="" className="h-4 w-4 shrink-0" />}
+        label="Office Hours"
+      />
     </>
   ) : (
-    <button
-      onClick={() => setCohortModalOpen(true)}
-      className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#038561] px-6 py-4 text-[16px] font-medium leading-[1.2] text-white transition-colors hover:bg-[#038561]/90 md:w-auto md:px-4 md:py-2.5"
-    >
+    <Button size="md" variant="primary" onClick={() => setCohortModalOpen(true)} className="w-full md:w-auto">
       Select cohort
-    </button>
+    </Button>
   );
 
   const sessionsList = (
@@ -352,12 +355,12 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
       {sessionsOpen && (
         <div className="border-t border-gray-stroke bg-white pb-2 pt-2">
           {(calendarButton || nextSession) && (
-            <div className="flex flex-wrap items-center gap-4 px-4 pb-2 pt-2">
+            <div className="flex items-center justify-between px-4 pb-2 pt-2">
               {calendarButton}
               {!isCompleted && nextSession && (
                 <button
                   onClick={() => setCohortModalOpen(true)}
-                  className="text-[14px] text-gray-light underline transition-colors hover:text-gray-dark"
+                  className="ml-auto inline-flex items-center py-2 text-[14px] text-gray-light underline transition-colors hover:text-gray-dark"
                 >
                   Switch cohort
                 </button>
@@ -378,7 +381,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
   );
 
   const header = (
-    <div className={`flex flex-col gap-4 bg-white md:flex-row md:items-center md:gap-5${boxed ? " p-4 md:p-5" : ""}`}>
+    <div className={`flex flex-col gap-4 bg-white md:flex-row md:items-stretch md:gap-5${boxed ? " p-4 md:p-5" : ""}`}>
       <div className="flex flex-row items-center gap-4 md:contents md:gap-0">
         {/* Thumbnail */}
         <div className="relative w-1/3 shrink-0 md:w-[220px]">
@@ -394,17 +397,19 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
           )}
         </div>
         {/* Title group */}
-        <div className="flex min-w-0 flex-1 flex-col gap-1 md:flex-[1_0_0] md:gap-4">
-          <div>
-            <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Live course</p>
-            <p className="mt-1 line-clamp-2 text-[20px] font-medium leading-[1.2] text-gray-dark md:line-clamp-1 md:text-[24px]">{course.title}</p>
+        <div className="flex min-w-0 flex-1 flex-col gap-1 md:flex-[1_0_0] md:gap-0">
+          <div className="flex md:flex-1 md:items-center">
+            <div>
+              <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Live course</p>
+              <p className="mt-1 line-clamp-2 text-[20px] font-medium leading-[1.2] text-gray-dark md:line-clamp-1 md:text-[24px]">{course.title}</p>
+            </div>
           </div>
           {/* Buttons: desktop only */}
           <div className="hidden gap-2 overflow-visible md:flex">{actionButtons}</div>
         </div>
       </div>
       {/* Buttons: mobile/tablet only */}
-      <div className="flex gap-2 overflow-x-auto md:hidden">{actionButtons}</div>
+      <div className={`flex gap-2 overflow-x-auto md:hidden${boxed ? " -mr-4 pr-4 sm:-mr-5 sm:pr-5" : ""}`}>{actionButtons}</div>
     </div>
   );
 

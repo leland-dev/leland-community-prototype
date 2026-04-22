@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PageShell from "../components/PageShell";
+import { LinkButton } from "../components/Button";
 import LiveCourseCard, { LiveCourse, TimeSlot, getSessionState, isLiveCourseCompleted } from "../components/LiveCourseCard";
 import { useSessionLayout } from "../components/SessionLayoutContext";
 import event1 from "../assets/placeholder images/placeholder-event-01.png";
@@ -186,7 +187,7 @@ function SelfPacedCourseCard({ course, boxed }: { course: SelfPacedCourse; boxed
   return (
     <a href="#" className={`block cursor-pointer no-underline${boxed ? " overflow-hidden rounded-xl border border-gray-stroke p-4 shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-transform hover:translate-x-0.5 md:p-5" : ""}`}>
       {/* Image + text */}
-      <div className="flex items-center gap-4 md:gap-5">
+      <div className="flex items-center gap-4 md:items-stretch md:gap-5">
         <div className="relative w-1/3 shrink-0 md:w-[220px]">
           <img
             src={course.image}
@@ -199,10 +200,12 @@ function SelfPacedCourseCard({ course, boxed }: { course: SelfPacedCourse; boxed
             </span>
           )}
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-1 md:gap-4">
-          <div>
-            <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Self study</p>
-            <h3 className="mt-1 line-clamp-2 text-[20px] font-medium leading-[1.2] text-gray-dark md:line-clamp-1 md:text-[24px]">{course.title}</h3>
+        <div className="flex min-w-0 flex-1 flex-col gap-1 md:gap-0">
+          <div className="flex md:flex-1 md:items-center">
+            <div>
+              <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Self study</p>
+              <h3 className="mt-1 line-clamp-2 text-[20px] font-medium leading-[1.2] text-gray-dark md:line-clamp-1 md:text-[24px]">{course.title}</h3>
+            </div>
           </div>
           {/* Progress + chevron: desktop only */}
           <div className="hidden items-center gap-5 md:flex">
@@ -278,6 +281,16 @@ export default function MyCourses() {
   const activeCourses = courseList.filter((c) => !isCourseDone(c));
   const completedCourses = courseList.filter(isCourseDone);
 
+  const noInProgressPlaceholder = (
+    <div className="flex flex-col items-center justify-center gap-5 rounded-xl bg-[#F5F5F5] py-16 text-center">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-[24px] font-medium text-gray-dark">No in-progress courses</h2>
+        <p className="max-w-xs text-[16px] text-[#707070]">Courses you enroll in will appear here.</p>
+      </div>
+      <LinkButton href="/courses" size="lg" variant="primary">Browse courses</LinkButton>
+    </div>
+  );
+
   const renderCard = (course: EnrolledCourse) =>
     course.type === "live"
       ? <LiveCourseCard key={course.id} course={course as LiveCourse} boxed={variant !== "simple"} />
@@ -298,7 +311,7 @@ export default function MyCourses() {
   );
 
   return (
-    <PageShell contentMaxWidth={600}>
+    <PageShell rightSidebar={suggestedCoursesSection}>
       <div className="pb-20 leading-[1.2] [&_button]:leading-[1.2]">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">My Courses</h1>
@@ -319,34 +332,10 @@ export default function MyCourses() {
 
       {/* All enrolled courses */}
       {variant === "empty" ? (
-        <div className="mt-8 flex h-[75vh] min-h-fit min-w-fit flex-col items-center justify-center gap-5 rounded-xl bg-[#F5F5F5] py-10 text-center">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-[24px] font-medium text-gray-dark">No purchased courses</h2>
-            <p className="max-w-xs text-[16px] text-[#707070]">Courses you enroll in will appear here.</p>
-          </div>
-          <a
-            href="/courses"
-            className="mt-1 flex h-[44px] items-center rounded-lg bg-[#038561] px-4 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90"
-          >
-            Browse courses
-          </a>
-        </div>
+        <div className="mt-8">{noInProgressPlaceholder}</div>
       ) : (
         <div className={`mt-8 flex flex-col ${variant === "simple" ? "gap-16" : "gap-6"}`}>
-          {activeCourses.length === 0 && completedCourses.length > 0 && (
-            <div className="flex flex-col items-center justify-center gap-5 rounded-xl bg-[#F5F5F5] py-10 text-center">
-              <div className="flex flex-col gap-2">
-                <h2 className="text-[24px] font-medium text-gray-dark">No in-progress courses</h2>
-                <p className="max-w-xs text-[16px] text-[#707070]">Courses you enroll in will appear here.</p>
-              </div>
-              <a
-                href="/courses"
-                className="mt-1 flex h-[44px] items-center rounded-lg bg-[#038561] px-4 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90"
-              >
-                Browse courses
-              </a>
-            </div>
-          )}
+          {activeCourses.length === 0 && completedCourses.length > 0 && noInProgressPlaceholder}
           {activeCourses.map(renderCard)}
           {completedCourses.length > 0 && (
             <>

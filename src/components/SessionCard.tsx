@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Button } from "./Button";
 import { motion, AnimatePresence } from "motion/react";
 import arrowRoundIcon from "../assets/icons/arrow-round.svg";
 import arrowRightIcon from "../assets/icons/arrow-right.svg";
@@ -94,10 +95,6 @@ export default function SessionCard({
 
   const titleSizeClass = isSmall ? "text-[16px]" : "text-[18px]";
   const subtitleSizeClass = isSmall ? "text-[14px]" : "text-[16px]";
-  const actionBtnClass = isSmall
-    ? "rounded-[8px] px-[14px] py-2 text-[14px] font-medium leading-[1.2]"
-    : "rounded-lg px-4 py-2.5 text-[16px] font-medium leading-[1.2]";
-  const actionBtnStyle = undefined;
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -148,27 +145,16 @@ export default function SessionCard({
         {/* Right action area */}
         <div className="flex shrink-0 items-center gap-0 self-stretch">
           {cta ? cta : status === "live" ? (
-            <button
-              className={`cursor-pointer bg-[#038561] text-white transition-colors hover:bg-[#038561]/90 ${actionBtnClass}`}
-              style={actionBtnStyle}
-            >
-              Join
-            </button>
+            <Button size="md" variant="primary">Join</Button>
           ) : status === "upcoming" && startsIn ? (
-            <div
-              className={`hidden @[448px]:block bg-[#F5F5F5] text-[#9B9B9B] ${actionBtnClass}`}
-              style={actionBtnStyle}
-            >
+            <div className="hidden @[448px]:block rounded-lg px-4 py-3 text-[16px] font-medium leading-[1.2] bg-[#F5F5F5] text-[#9B9B9B]">
               Starts in {startsIn}
             </div>
           ) : isPast && hasRecording && (type === "event" || type === "bootcamp") ? (
-            <button
-              className={`hidden @[448px]:flex cursor-pointer items-center gap-2 bg-[#222222]/5 text-gray-dark transition-colors hover:bg-[#222222]/[0.08] ${actionBtnClass}`}
-              style={actionBtnStyle}
-            >
-              <img src={arrowRoundIcon} alt="" className={isSmall ? "h-4 w-4" : "h-5 w-5"} />
+            <Button size="md" variant="secondary" className="hidden @[448px]:inline-flex">
+              <img src={arrowRoundIcon} alt="" className="h-4 w-4" />
               Watch
-            </button>
+            </Button>
           ) : null}
 
           {/* 3-dot menu */}

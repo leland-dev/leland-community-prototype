@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Button } from "../components/Button";
 import { Link } from "react-router-dom";
 import PageShell from "../components/PageShell";
 import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
@@ -119,14 +120,7 @@ export default function SidebarCardsTest() {
               image={eventImg1}
               title="MBA Strategy Live"
               subtitle={<><span className="font-medium text-[#FB5A42]">Live now</span> · 125 registered</>}
-              right={
-                <button
-                  className="cursor-pointer rounded-[8px] bg-[#038561] px-[14px] py-2 text-[14px] font-medium text-white transition-colors hover:bg-[#038561]/90"
-                  style={{ lineHeight: 1.2 }}
-                >
-                  Join
-                </button>
-              }
+              right={<Button size="sm" variant="primary">Join</Button>}
             />
             <SidebarCard
               variant="event"

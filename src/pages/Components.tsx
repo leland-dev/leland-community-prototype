@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Button } from "../components/Button";
 import LiveCourseCard, { LiveCourse } from "../components/LiveCourseCard";
 import { SessionLayoutProvider } from "../components/SessionLayoutContext";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
@@ -67,12 +68,9 @@ export default function Components() {
                   title="MBA Strategy Live"
                   subtitle={<><span className="font-medium text-[#FB5A42]">Live now</span> · 125 registered</>}
                   right={
-                    <div
-                      className="rounded-[8px] bg-[#038561] px-[14px] py-2 text-[14px] font-medium text-white"
-                      style={{ lineHeight: 1.2 }}
-                    >
+                    <Button size="sm" variant="primary">
                       Join
-                    </div>
+                    </Button>
                   }
                 />
                 <SidebarCard
