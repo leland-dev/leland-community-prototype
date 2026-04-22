@@ -2728,7 +2728,7 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 // ─── Right Sidebar ─────────────────────────────────────
 
 
-function CategorySubtitle({ photos, experts }: { photos: string[]; experts: string }) {
+export function CategorySubtitle({ photos, experts }: { photos: string[]; experts: string }) {
   return (
     <span className="inline-flex items-center gap-[6px] align-middle">
       <span className="inline-flex">

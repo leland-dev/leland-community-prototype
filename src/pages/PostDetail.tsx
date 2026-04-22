@@ -614,10 +614,22 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
 // ─── Page ─────────────────────────────────────────────
 
 export default function PostDetail() {
-  useSetLeftSidebar(<div />);
+  const navigate = useNavigate();
+  useSetLeftSidebar(
+    <div className="flex justify-end">
+      <button
+        onClick={() => navigate(-1)}
+        aria-label="Go back"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-dark transition-colors hover:bg-gray-50"
+      >
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+    </div>
+  );
   useSetRightSidebar(<HomeRightSidebar />);
   const { postId } = useParams<{ postId: string }>();
-  const navigate = useNavigate();
   const location = useLocation();
   const { focusInput = false, prefillComment = "", focusImage } = (location.state as { sourceY?: number; focusInput?: boolean; prefillComment?: string; focusImage?: number }) ?? {};
   const post = posts.find(p => p.id === Number(postId));
@@ -673,17 +685,6 @@ export default function PostDetail() {
     >
       {/* Content — full width */}
       <div className="min-w-0">
-        {/* Back button above the post avatar */}
-        <button
-          onClick={() => navigate(-1)}
-          aria-label="Go back"
-          className="mb-3 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-dark transition-colors hover:bg-gray-50"
-        >
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-
         {/* Post */}
         <div className="pb-2">
           <AuthorRow post={post} />

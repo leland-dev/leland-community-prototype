@@ -1,12 +1,14 @@
-import { useState, useRef, useEffect, type ReactNode } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import PageShell from "../components/PageShell";
 import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
-import { FeedPost, ComposeModal, type Post, type ImageEntry } from "./Home";
+import { FeedPost, ComposeModal, CategorySubtitle, type Post, type ImageEntry } from "./Home";
+
 
 import bootcampBanner from "../assets/placeholder images/bootcamp-1.webp";
+import verifiedIconSrc from "../assets/icons/verified.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic2 from "../assets/profile photos/pic-2.png";
 import pic3 from "../assets/profile photos/pic-3.png";
@@ -23,12 +25,21 @@ import profilePhoto from "../assets/profile photos/profile photo.png";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
+import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
+import categoryGMAT from "../assets/placeholder images/category images/gmat-tutoring.png";
+import categoryIB from "../assets/placeholder images/category images/investment-banking.png";
+import categoryLaw from "../assets/placeholder images/category images/law-school.png";
+import categoryConsulting from "../assets/placeholder images/category images/management-consulting.png";
+import categoryPE from "../assets/placeholder images/category images/private-equity.png";
+import categoryPM from "../assets/placeholder images/category images/product-management.png";
 
 // ─── Types ────────────────────────────────────────────
 
 type Tab = "activity" | "members";
 
 type LinkType = "profile" | "resource" | "booking" | "guide" | "support";
+
+type GroupTheme = "ai" | "mba" | "consulting" | "law";
 
 interface GroupData {
   name: string;
@@ -39,6 +50,7 @@ interface GroupData {
   sessionCount: number;
   banner: string;
   accentColor: string;
+  theme: GroupTheme;
   instructor: { name: string; avatar: string; headline: string };
   helpfulLinks: Array<{ label: string; description: string; type: LinkType }>;
 }
@@ -56,6 +68,7 @@ const GROUPS: Record<string, GroupData> = {
     sessionCount: 8,
     banner: bootcampBanner,
     accentColor: "#2563EB",
+    theme: "ai",
     instructor: { name: "David Kim", avatar: pic4, headline: "MBA Admissions Consultant | Ex-Bain, HBS '19" },
     helpfulLinks: [
       { label: "Instructor Profile", description: "View David Kim's full profile and book a session", type: "profile" },
@@ -74,6 +87,7 @@ const GROUPS: Record<string, GroupData> = {
     sessionCount: 0,
     banner: eventImg1,
     accentColor: "#038561",
+    theme: "mba",
     instructor: { name: "David Kim", avatar: pic4, headline: "MBA Admissions Consultant | Ex-Bain, HBS '19" },
     helpfulLinks: [
       { label: "Browse MBA Coaches", description: "Find an expert to help with your applications", type: "profile" },
@@ -92,6 +106,7 @@ const GROUPS: Record<string, GroupData> = {
     sessionCount: 0,
     banner: eventImg2,
     accentColor: "#7C3AED",
+    theme: "consulting",
     instructor: { name: "Nina Kowalski", avatar: pic7, headline: "Partner at McKinsey & Company | Recruiting Lead" },
     helpfulLinks: [
       { label: "Browse Consulting Coaches", description: "MBB veterans and recruiting experts", type: "profile" },
@@ -110,6 +125,7 @@ const GROUPS: Record<string, GroupData> = {
     sessionCount: 0,
     banner: eventImg3,
     accentColor: "#1e3a5f",
+    theme: "law",
     instructor: { name: "Rachel Nguyen", avatar: pic9, headline: "1L at Yale Law School | Pre-Law Admissions Coach" },
     helpfulLinks: [
       { label: "Browse Law Coaches", description: "Find LSAT tutors and admissions advisors", type: "profile" },
@@ -128,6 +144,7 @@ const GROUPS: Record<string, GroupData> = {
     sessionCount: 8,
     banner: bootcampBanner,
     accentColor: "#2563EB",
+    theme: "ai",
     instructor: { name: "David Kim", avatar: pic4, headline: "MBA Admissions Consultant | Ex-Bain, HBS '19" },
     helpfulLinks: [
       { label: "Instructor Profile", description: "View David Kim's full profile and book a session", type: "profile" },
@@ -373,19 +390,6 @@ const GROUP_POSTS: Record<string, Post[]> = {
   ],
 };
 
-// ─── Sessions ─────────────────────────────────────────
-
-const COHORT_SESSIONS = [
-  { id: 1, title: "Intro to AI & LLMs", date: "Mon, Apr 21", time: "6:00 PM PT", duration: "90m", past: true, hasRecording: true, image: eventImg1 },
-  { id: 2, title: "Prompt Engineering", date: "Wed, Apr 23", time: "6:00 PM PT", duration: "90m", past: true, hasRecording: true, image: eventImg2 },
-  { id: 3, title: "Building with APIs", date: "Mon, Apr 28", time: "6:00 PM PT", duration: "90m", past: false, hasRecording: false, image: eventImg3 },
-  { id: 4, title: "AI Product Strategy", date: "Wed, Apr 30", time: "6:00 PM PT", duration: "90m", past: false, hasRecording: false, image: eventImg1 },
-  { id: 5, title: "RAG & Fine-tuning", date: "Mon, May 5", time: "6:00 PM PT", duration: "90m", past: false, hasRecording: false, image: eventImg2 },
-  { id: 6, title: "Building Your Project", date: "Wed, May 7", time: "6:00 PM PT", duration: "90m", past: false, hasRecording: false, image: eventImg3 },
-  { id: 7, title: "Guest Speakers", date: "Mon, May 12", time: "6:00 PM PT", duration: "90m", past: false, hasRecording: false, image: eventImg1 },
-  { id: 8, title: "Demo Day", date: "Fri, May 16", time: "4:00 PM PT", duration: "2h", past: false, hasRecording: false, image: eventImg2 },
-];
-
 // ─── Members ──────────────────────────────────────────
 
 const COHORT_MEMBERS: { name: string; avatar: string; headline: string; role: "self" | "coach" | "member" }[] = [
@@ -423,6 +427,29 @@ function CheckIcon() {
 
 // ─── Tab content ──────────────────────────────────────
 
+function LockedTabState({ tab, onRequestJoin }: { tab: Tab; onRequestJoin: () => void }) {
+  const label = tab === "activity" ? "posts" : "members";
+  return (
+    <div className="mt-6 flex flex-col items-center justify-center rounded-[12px] border border-dashed border-gray-stroke bg-[#FAFAFA] px-6 py-16 text-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white border border-gray-stroke text-[#707070]">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+      </div>
+      <p className="mt-4 text-[17px] font-medium text-gray-dark">Join this group to see {label}</p>
+      <p className="mt-1 max-w-[360px] text-[15px] text-[#707070]">
+        Group {label} are only visible to members.
+      </p>
+      <button
+        onClick={onRequestJoin}
+        className="mt-5 cursor-pointer rounded-lg bg-[#F0F0F0] px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#E8E8E8]"
+      >
+        Request to join
+      </button>
+    </div>
+  );
+}
 
 function ActivityTab({ posts: initialPosts }: { posts: Post[] }) {
   const [posts, setPosts] = useState(initialPosts);
@@ -475,35 +502,6 @@ function ActivityTab({ posts: initialPosts }: { posts: Post[] }) {
   );
 }
 
-const LINK_ICONS: Record<LinkType, ReactNode> = {
-  profile: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-    </svg>
-  ),
-  resource: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4h16v16H4z" /><path d="M8 8h8M8 12h8M8 16h5" />
-    </svg>
-  ),
-  booking: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
-    </svg>
-  ),
-  guide: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
-  ),
-  support: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-    </svg>
-  ),
-};
-
-
 function MembersTab({ memberCount }: { memberCount: number }) {
   const navigate = useNavigate();
   const [followed, setFollowed] = useState<Set<string>>(new Set());
@@ -524,22 +522,24 @@ function MembersTab({ memberCount }: { memberCount: number }) {
           >
             <img src={m.avatar} alt={m.name} className="h-10 w-10 shrink-0 rounded-full object-cover" />
             <div className="min-w-0 flex-1">
-              <p className="text-[16px] font-medium leading-tight text-gray-dark">{m.name}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="truncate text-[16px] font-medium leading-tight text-gray-dark">{m.name}</p>
+                {m.role === "coach" && (
+                  <img src={verifiedIconSrc} alt="Coach" className="h-[14px] w-[14px] shrink-0" />
+                )}
+              </div>
               <p className="truncate text-[14px] leading-tight text-[#707070]">{m.headline}</p>
             </div>
-            {m.role === "coach" && (
-              <button
-                onClick={(e) => e.stopPropagation()}
-                className="shrink-0 rounded-[8px] bg-[#F0F0F0] px-3 py-1.5 text-[13px] font-medium text-gray-dark transition-colors hover:bg-[#E8E8E8]"
-              >
-                Message
-              </button>
-            )}
-            {m.role === "member" && (
+            {m.role !== "self" && (
               <button
                 onClick={(e) => { e.stopPropagation(); setFollowed(prev => { const next = new Set(prev); next.has(m.name) ? next.delete(m.name) : next.add(m.name); return next; }); }}
-                className="shrink-0 rounded-[8px] bg-[#F0F0F0] px-3 py-1.5 text-[13px] font-medium text-gray-dark transition-colors hover:bg-[#E8E8E8]"
+                className="flex shrink-0 items-center gap-1 rounded-[8px] bg-[#F0F0F0] px-3 py-1.5 text-[13px] font-medium text-gray-dark transition-colors hover:bg-[#E8E8E8]"
               >
+                {followed.has(m.name) && (
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
                 {followed.has(m.name) ? "Following" : "Follow"}
               </button>
             )}
@@ -552,53 +552,151 @@ function MembersTab({ memberCount }: { memberCount: number }) {
 
 // ─── Right sidebar ────────────────────────────────────
 
-function GroupSidebar({ group }: { group: GroupData }) {
-  const isCohort = group.sessionCount > 0;
-  const nextSession = isCohort ? COHORT_SESSIONS.find((s) => !s.past) : null;
+type SidebarEvent = { title: string; subtitle: string; image: string; live?: boolean };
+type SidebarCategory = { title: string; image: string; photos: string[]; experts: string };
+type SidebarCoach = { name: string; avatar: string; headline: string };
 
+const SIDEBAR_DATA: Record<GroupTheme, { events: SidebarEvent[]; categories: SidebarCategory[]; coaches: SidebarCoach[] }> = {
+  ai: {
+    events: [
+      { title: "Build Your First AI Agent", subtitle: "Live now · 142 registered", image: eventImg1, live: true },
+      { title: "Prompt Engineering Deep Dive", subtitle: "Tomorrow, 4:00 PM · 210 registered", image: eventImg2 },
+      { title: "AI Product Strategy Q&A", subtitle: "Fri, May 2 · 95 registered", image: eventImg3 },
+    ],
+    categories: [
+      { title: "AI Automation & Agents", image: categoryAI, photos: [pic6, pic7, pic8], experts: "300 experts" },
+      { title: "Product Management", image: categoryPM, photos: [pic2, pic3, pic5], experts: "180 experts" },
+      { title: "Management Consulting", image: categoryConsulting, photos: [pic4, pic7, pic10], experts: "240 experts" },
+    ],
+    coaches: [
+      { name: "Marcus Williams", avatar: pic2, headline: "AI Product Lead at OpenAI | Ex-Google" },
+      { name: "Jessica Park", avatar: pic5, headline: "Generative AI Consultant | Ex-Meta" },
+      { name: "David Kim", avatar: pic4, headline: "AI Research Engineer | Stanford PhD" },
+    ],
+  },
+  mba: {
+    events: [
+      { title: "HBS Essay Workshop", subtitle: "Live now · 180 registered", image: eventImg1, live: true },
+      { title: "Wharton Admissions Q&A", subtitle: "Tomorrow, 3:00 PM · 220 registered", image: eventImg2 },
+      { title: "GMAT Strategy Session", subtitle: "Thu, May 1 · 134 registered", image: eventImg3 },
+    ],
+    categories: [
+      { title: "GMAT Tutoring", image: categoryGMAT, photos: [pic2, pic3, pic10], experts: "156 experts" },
+      { title: "Investment Banking", image: categoryIB, photos: [pic1, pic4, pic5], experts: "234 experts" },
+      { title: "Management Consulting", image: categoryConsulting, photos: [pic4, pic7, pic8], experts: "240 experts" },
+    ],
+    coaches: [
+      { name: "Olivia Park", avatar: pic11, headline: "HBS Admissions Coach | Ex-Yale AMS" },
+      { name: "James Allen", avatar: pic1, headline: "Former Director at Stanford GSB" },
+      { name: "Priya Patel", avatar: pic3, headline: "HBS MBA '25 | Admissions Consultant" },
+    ],
+  },
+  consulting: {
+    events: [
+      { title: "MBB Case Interview Prep", subtitle: "Live now · 156 registered", image: eventImg1, live: true },
+      { title: "McKinsey Recruiting Q&A", subtitle: "Tomorrow, 5:00 PM · 198 registered", image: eventImg2 },
+      { title: "Fit Interview Workshop", subtitle: "Sat, May 3 · 87 registered", image: eventImg3 },
+    ],
+    categories: [
+      { title: "Management Consulting", image: categoryConsulting, photos: [pic4, pic7, pic8], experts: "240 experts" },
+      { title: "Investment Banking", image: categoryIB, photos: [pic1, pic4, pic5], experts: "234 experts" },
+      { title: "Private Equity", image: categoryPE, photos: [pic2, pic10, pic12], experts: "112 experts" },
+    ],
+    coaches: [
+      { name: "Nina Kowalski", avatar: pic7, headline: "Partner at McKinsey & Company" },
+      { name: "Alex Thompson", avatar: pic8, headline: "Ex-BCG | Career Coach" },
+      { name: "Ryan Foster", avatar: pic12, headline: "Ex-McKinsey | Career Coach" },
+    ],
+  },
+  law: {
+    events: [
+      { title: "LSAT Logic Games Workshop", subtitle: "Live now · 98 registered", image: eventImg1, live: true },
+      { title: "Yale Law Essay Review", subtitle: "Tomorrow, 2:00 PM · 140 registered", image: eventImg2 },
+      { title: "BigLaw Summer Recruiting", subtitle: "Wed, Apr 30 · 76 registered", image: eventImg3 },
+    ],
+    categories: [
+      { title: "Law School", image: categoryLaw, photos: [pic9, pic11, pic3], experts: "128 experts" },
+      { title: "Management Consulting", image: categoryConsulting, photos: [pic4, pic7, pic8], experts: "240 experts" },
+      { title: "Investment Banking", image: categoryIB, photos: [pic1, pic4, pic5], experts: "234 experts" },
+    ],
+    coaches: [
+      { name: "Rachel Nguyen", avatar: pic9, headline: "1L at Yale Law | Pre-Law Coach" },
+      { name: "Benjamin Shaw", avatar: pic2, headline: "Harvard Law '24 | BigLaw Associate" },
+      { name: "Sophia Chen", avatar: pic11, headline: "LSAT Tutor | 180 Score" },
+    ],
+  },
+};
+
+const LinkThumbnail = (
+  <div className="flex h-[44px] w-[44px] items-center justify-center rounded-[4px] bg-[#f5f5f5] text-[#707070]">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11 5" />
+      <path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13 19" />
+    </svg>
+  </div>
+);
+
+function GroupRightSidebar({ group }: { group: GroupData }) {
+  const data = SIDEBAR_DATA[group.theme];
   return (
     <div className="flex flex-col gap-6 px-1">
-      {nextSession && (
-        <SidebarGroup label="Next session">
-          <SidebarCard
-            variant="event"
-            image={nextSession.image}
-            title={nextSession.title}
-            subtitle={`${nextSession.date} · ${nextSession.time}`}
-            right={
-              <div className="rounded-[8px] bg-[#038561] px-3 py-1.5 text-[13px] font-medium text-white" style={{ lineHeight: 1.2 }}>
-                RSVP
-              </div>
-            }
-          />
-        </SidebarGroup>
-      )}
-
-      {!isCohort && (
-        <SidebarGroup label="Top contributors">
-          <SidebarCard variant="coach" image={pic4} title="David Kim" subtitle="MBA Admissions Consultant | Ex-Bain" />
-          <SidebarCard variant="coach" image={pic7} title="Nina Kowalski" subtitle="Partner at McKinsey | Recruiting Lead" />
-          <SidebarCard variant="coach" image={pic8} title="Alex Thompson" subtitle="Management Consultant | Career Coach" />
-        </SidebarGroup>
-      )}
-
       {group.helpfulLinks.length > 0 && (
         <SidebarGroup label="Helpful Links" hideChevron>
-          {group.helpfulLinks.map((link) => (
+          {group.helpfulLinks.slice(0, 2).map((link) => (
             <SidebarCard
               key={link.label}
               variant="topic"
-              icon={
-                <div className="flex h-[44px] w-[80px] items-center justify-center rounded-[4px] bg-[#f5f5f5] text-[#707070]">
-                  {LINK_ICONS[link.type]}
-                </div>
-              }
+              icon={LinkThumbnail}
               title={link.label}
               subtitle={link.description}
             />
           ))}
         </SidebarGroup>
       )}
+
+      <SidebarGroup label="Free events">
+        {data.events.map((e) => (
+          <SidebarCard
+            key={e.title}
+            variant="event"
+            live={e.live}
+            image={e.image}
+            title={e.title}
+            subtitle={e.live ? <><span className="font-medium text-[#FB5A42]">Live now</span>{e.subtitle.replace(/^Live now/, "")}</> : e.subtitle}
+            right={
+              e.live ? (
+                <div className="rounded-[8px] bg-[#038561] px-[14px] py-2 text-[14px] font-medium text-white" style={{ lineHeight: 1.2 }}>
+                  Join
+                </div>
+              ) : undefined
+            }
+          />
+        ))}
+      </SidebarGroup>
+
+      <SidebarGroup label="Popular categories" hideChevron>
+        {data.categories.map((c) => (
+          <SidebarCard
+            key={c.title}
+            variant="category"
+            image={c.image}
+            title={c.title}
+            subtitle={<CategorySubtitle photos={c.photos} experts={c.experts} />}
+          />
+        ))}
+      </SidebarGroup>
+
+      <SidebarGroup label="Popular coaches">
+        {data.coaches.map((c) => (
+          <SidebarCard
+            key={c.name}
+            variant="coach"
+            image={c.avatar}
+            title={c.name}
+            subtitle={c.headline}
+          />
+        ))}
+      </SidebarGroup>
     </div>
   );
 }
@@ -658,21 +756,6 @@ export default function Group() {
               className="fixed top-0 left-0 right-0 z-30 border-b border-gray-stroke bg-white"
             >
               <div className="mx-auto flex max-w-[1280px] items-stretch gap-4 px-6">
-                <div
-                  className="flex shrink-0 cursor-pointer items-center gap-2.5 py-3"
-                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                >
-                  <div
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white text-[14px] font-bold"
-                    style={{ backgroundColor: group.accentColor }}
-                  >
-                    {group.name.charAt(0)}
-                  </div>
-                  <span className="text-[17px] font-medium text-gray-dark">{group.name}</span>
-                </div>
-
-                <div className="min-w-0 flex-1" />
-
                 <div className="flex shrink-0 items-stretch gap-1">
                   {TABS.map((tab) => (
                     <button
@@ -688,6 +771,8 @@ export default function Group() {
                     </button>
                   ))}
                 </div>
+
+                <div className="min-w-0 flex-1" />
               </div>
             </motion.div>
           )}
@@ -698,7 +783,7 @@ export default function Group() {
       {/* Full-bleed banner — outside PageShell */}
       <div className="w-full bg-[#f0f0f0]" style={{ height: 122 }} />
 
-      <PageShell rightSidebar={<GroupSidebar group={group} />} rightSidebarWidth={360} contentMaxWidth={740} sidebarAlign="start">
+      <PageShell rightSidebar={<GroupRightSidebar group={group} />}>
         {/* Group icon + CTA row — overlaps banner with negative margin */}
         <div className="-mt-[100px] mb-4 flex items-end justify-between">
           <div
@@ -707,7 +792,7 @@ export default function Group() {
           >
             {group.name.charAt(0)}
           </div>
-          <div className="pb-[82px]">
+          <div className="pb-[90px]">
             <button
               onClick={() => setIsJoined(!isJoined)}
               className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
@@ -717,7 +802,7 @@ export default function Group() {
               }`}
             >
               {isJoined && <CheckIcon />}
-              {isJoined ? "Joined" : "Join group"}
+              {isJoined ? "Joined" : "Request to join"}
             </button>
           </div>
         </div>
@@ -725,6 +810,23 @@ export default function Group() {
         {/* Group name + tagline */}
         <h1 className="text-[24px] font-medium leading-tight text-gray-dark">{group.name}</h1>
         <p className="mt-1 mb-[6px] text-[18px] leading-[1.3] text-[#707070]">{group.tagline}</p>
+
+        {/* Face pile + stats */}
+        <div className="mt-3 flex items-center gap-2 text-[14px] text-[#707070]">
+          <div className="flex -space-x-1.5">
+            {COHORT_MEMBERS.slice(0, 4).map((m) => (
+              <img
+                key={m.name}
+                src={m.avatar}
+                alt=""
+                className="h-6 w-6 rounded-full border-2 border-white object-cover"
+              />
+            ))}
+          </div>
+          <span>{group.memberCount.toLocaleString()} members</span>
+          <span className="text-[#D0D0D0]">·</span>
+          <span>{posts.length} {posts.length === 1 ? "post" : "posts"}</span>
+        </div>
 
         {/* Sentinel for sticky nav */}
         <div ref={heroSentinelRef} />
@@ -747,8 +849,14 @@ export default function Group() {
         </div>
 
         {/* Tab content */}
-        {activeTab === "activity" && <ActivityTab posts={posts} />}
-{activeTab === "members" && <MembersTab memberCount={group.memberCount} />}
+        {!isJoined ? (
+          <LockedTabState tab={activeTab} onRequestJoin={() => setIsJoined(true)} />
+        ) : (
+          <>
+            {activeTab === "activity" && <ActivityTab posts={posts} />}
+            {activeTab === "members" && <MembersTab memberCount={group.memberCount} />}
+          </>
+        )}
       </PageShell>
     </>
   );
