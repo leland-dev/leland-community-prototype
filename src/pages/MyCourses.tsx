@@ -341,7 +341,6 @@ export default function MyCourses() {
             <>
               <div className="mt-4">
                 <h2 className="text-[24px] font-medium leading-[1.2] text-gray-dark">Past courses</h2>
-                <div className="mt-3 border-t border-gray-stroke" />
               </div>
               {completedCourses.map(renderCard)}
             </>
