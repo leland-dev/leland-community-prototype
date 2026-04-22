@@ -9,9 +9,12 @@ import playVideoIcon from "../assets/icons/play-video.svg";
 import slackIcon from "../assets/icons/slack-black.svg";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import browserIcon from "../assets/icons/browser.svg";
+import settingsIcon from "../assets/icons/settings.svg";
 import introCallImg from "../assets/img/intro-call.png";
+import matchingPhoto from "../assets/img/Matching-Photo.png";
+import lelandPlusImg from "../assets/img/Leland-Plus.png";
 
-export type OfferingType = "free-intro" | "hourly" | "hourly-package" | "package" | "course" | "content";
+export type OfferingType = "free-intro" | "hourly" | "hourly-package" | "package" | "course" | "content" | "coach-matching" | "leland-plus";
 
 interface OfferingCardProps {
   type: OfferingType;
@@ -19,6 +22,7 @@ interface OfferingCardProps {
   subtitle: ReactNode;
   image: string;
   purchased?: boolean;
+  pending?: boolean;
   cohortSelected?: boolean;
   ctaLabel?: string;
   showImage?: boolean;
@@ -31,8 +35,10 @@ function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: b
     if (type === "hourly-package") return { label: "Schedule" };
     if (type === "package") return { label: "Schedule" };
     if (type === "course") return cohortSelected ? { label: "Details" } : { label: "Select cohort", green: true };
+    if (type === "leland-plus") return { label: "Library" };
     return { label: "Details" };
   }
+  if (type === "coach-matching") return { label: "Get matched", green: true };
   if (type === "free-intro") return { label: "Schedule", green: true };
   if (type === "hourly") return { label: "Details" };
   if (type === "hourly-package") return { label: "Details" };
@@ -48,6 +54,16 @@ interface MenuItem {
 }
 
 function getMenuItems(type: OfferingType, cohortSelected: boolean): MenuItem[] {
+  if (type === "coach-matching") {
+    return [
+      { icon: chatIcon, label: "Message" },
+    ];
+  }
+  if (type === "leland-plus") {
+    return [
+      { icon: settingsIcon, label: "Manage" },
+    ];
+  }
   if (type === "hourly") {
     return [
       { icon: addPlusIcon, label: "Buy more time" },
@@ -100,6 +116,7 @@ export default function OfferingCard({
   subtitle,
   image,
   purchased = false,
+  pending = false,
   cohortSelected = true,
   ctaLabel,
   showImage = false,
@@ -109,10 +126,13 @@ export default function OfferingCard({
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isSmall = size === "small";
-  const isPersonImage = type === "hourly" || ((type === "hourly-package" || type === "package") && purchased);
-  const cta = getDefaultCta(type, purchased, cohortSelected);
+  const isPersonImage = type === "hourly" || type === "coach-matching" || ((type === "hourly-package" || type === "package") && purchased);
+  const cta = pending && type === "coach-matching"
+    ? { label: "Matching", green: false, disabled: true }
+    : { ...getDefaultCta(type, purchased, cohortSelected), disabled: false };
   const label = ctaLabel || cta.label;
   const menuItems = getMenuItems(type, cohortSelected);
+  const showMenu = purchased || type === "leland-plus";
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -153,9 +173,21 @@ export default function OfferingCard({
   /* ── Standard inline row layout ── */
   return (
     <div className="@container">
-      <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 py-3 transition-colors hover:bg-[#F5F5F5] ${purchased ? "pr-1" : "pr-2"}`}>
+      <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 py-3 transition-colors hover:bg-[#F5F5F5] ${showMenu ? "pr-1" : "pr-2"}`}>
         {/* Image */}
-        {type === "hourly" && !purchased ? (
+        {type === "leland-plus" ? (
+          <img
+            src={lelandPlusImg}
+            alt=""
+            className={`${showImage ? "block" : "hidden @[380px]:block"} h-[40px] w-[72px] shrink-0 rounded-[4px] object-cover`}
+          />
+        ) : type === "coach-matching" ? (
+          <img
+            src={matchingPhoto}
+            alt=""
+            className={`${showImage ? "block" : "hidden @[380px]:block"} h-[40px] w-[40px] shrink-0 rounded-full object-cover`}
+          />
+        ) : type === "hourly" && !purchased ? (
           <div className={`${showImage ? "flex" : "hidden @[380px]:flex"} h-[40px] w-[40px] shrink-0 items-center justify-center rounded-[4px] bg-[#F5F5F5]`}>
             <img src={hourglassIcon} alt="" className="h-[20px] w-[20px]" />
           </div>
@@ -185,16 +217,21 @@ export default function OfferingCard({
 
         {/* Right action area */}
         <div className="flex shrink-0 items-center gap-0 self-stretch">
-          <button className={`hidden @[448px]:flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
-            cta.green
-              ? "bg-[#038561] text-white hover:bg-[#038561]/90"
-              : "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
-          }`}>
+          <button
+            disabled={cta.disabled}
+            className={`hidden @[448px]:flex items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
+              cta.disabled
+                ? "bg-[#222222]/5 text-[#9B9B9B] cursor-default"
+                : cta.green
+                  ? "cursor-pointer bg-[#038561] text-white hover:bg-[#038561]/90"
+                  : "cursor-pointer bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
+            }`}
+          >
             {label}
           </button>
 
-          {/* 3-dot menu — purchased state only */}
-          {purchased && (
+          {/* 3-dot menu */}
+          {showMenu && (
             <div ref={menuRef} className="relative self-stretch">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}

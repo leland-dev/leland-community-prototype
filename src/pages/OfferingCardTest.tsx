@@ -104,7 +104,7 @@ const demos: DemoConfig[] = [
       label: "Purchased · Cohort not yet selected",
       cohortSelected: false,
       title: "GMAT Exam Prep Bootcamp",
-      subtitle: "Select a cohort to get started",
+      subtitle: "Next cohort starts June 1",
       image: bootcampImg1,
     },
   },
@@ -372,11 +372,66 @@ export default function OfferingCardTest() {
         Displays a coach's available offerings on their profile, and the same offerings in their purchased state on the customer's profile and dashboard.
       </p>
 
-      <LiveDemo />
-
       {demos.map((demo) => (
         <DemoSection key={demo.type} demo={demo} />
       ))}
+
+      {/* Coach Matching */}
+      <section className="mt-10">
+        <h2 className="text-[24px] font-medium text-gray-dark">Coach Matching</h2>
+        <p className="mt-1 text-[18px] text-[#707070]">Prompts the user to get matched with a coach, then shows a pending state while matching is in progress.</p>
+        <div
+          className="mt-4 rounded-[32px] bg-[#F0F0F0] p-3"
+          style={{ backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='32' ry='32' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")` }}
+        >
+          <div className="flex flex-col gap-4 rounded-[24px] bg-white px-6 py-5" style={{ boxShadow: "0 20px 24px -4px rgba(16, 24, 40, 0.08)" }}>
+            <div>
+              <span className="text-[14px] uppercase tracking-[0.05em] text-[#707070]">Initial state</span>
+              <OfferingCard
+                type="coach-matching"
+                title="Free 1:1 session with an expert"
+                subtitle="Get matched with an expert to get started"
+                image=""
+              />
+            </div>
+            <div>
+              <span className="text-[14px] uppercase tracking-[0.05em] text-[#707070]">Pending state</span>
+              <OfferingCard
+                type="coach-matching"
+                pending
+                title="We're matching you with a coach."
+                subtitle="Hang tight! Matching usually takes 2-3 days."
+                image=""
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Leland+ Membership */}
+      <section className="mt-10">
+        <h2 className="text-[24px] font-medium text-gray-dark">Leland+ Membership</h2>
+        <p className="mt-1 text-[18px] text-[#707070]">An active Leland+ subscription displayed in the customer's purchases.</p>
+        <div
+          className="mt-4 rounded-[32px] bg-[#F0F0F0] p-3"
+          style={{ backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='32' ry='32' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")` }}
+        >
+          <div className="flex flex-col gap-4 rounded-[24px] bg-white px-6 py-5" style={{ boxShadow: "0 20px 24px -4px rgba(16, 24, 40, 0.08)" }}>
+            <div>
+              <span className="text-[14px] uppercase tracking-[0.05em] text-[#707070]">Purchased</span>
+              <OfferingCard
+                type="leland-plus"
+                title="Leland+ Membership"
+                subtitle={<>Started June 1 · Expires {"{date}"}</>}
+                image=""
+                purchased
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <LiveDemo />
 
       <div className="h-16" />
     </PageShell>
