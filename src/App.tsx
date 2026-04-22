@@ -23,6 +23,8 @@ import Notifications from "./pages/Notifications";
 import Messaging from "./pages/Messaging";
 import Profile from "./pages/Profile";
 import ProfileV2 from "./pages/ProfileV2";
+import Group from "./pages/Group";
+import GroupCommunity from "./pages/GroupCommunity";
 import Events from "./pages/Events";
 import Courses from "./pages/Courses";
 import LelandPlus from "./pages/LelandPlus";
@@ -54,6 +56,7 @@ export default function App() {
         {/* Standalone pages using PageShell directly */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile-v2" element={<ProfileV2 />} />
+        <Route path="/groups/:groupId" element={<Group />} />
         <Route path="/site" element={<Site />} />
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/calendar" element={<Calendar />} />
@@ -68,6 +71,7 @@ export default function App() {
 
         {/* Context-driven pages (sidebar/variant via hooks) */}
         <Route element={<ContextLayout />}>
+          <Route path="/groups/law" element={<GroupCommunity />} />
           <Route path="/" element={<Home />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/search" element={<Search />} />

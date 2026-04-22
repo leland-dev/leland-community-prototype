@@ -69,6 +69,7 @@ interface PostBase {
   time: string;
   verified?: boolean;
   headline?: string;
+  feed?: string;
   likes: number;
   comments: number;
   reposts: number;
@@ -144,6 +145,21 @@ export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, LivePost 
 
 export const posts: Post[] = [
   {
+    id: 16,
+    type: "text",
+    author: "Sarah Chen",
+    avatar: pic3,
+    time: "45m",
+    verified: false,
+    headline: "Product Manager | AI BP April 26 Cohort",
+    feed: "AI BP April 26",
+    body: "Session 1 was last night and I already feel like a different person.\n\nI'd always thought of AI as a black box that either works or doesn't. Turns out the way you ask is almost everything. We rewrote the same prompt three different ways and the outputs were completely different — one was useless, one was okay, one was exactly what I needed.\n\nSix weeks ago I would have called that magic. Now I know it's just structure. Can't believe I waited this long to learn this.",
+    likes: 47,
+    comments: 9,
+    reposts: 6,
+    shares: 2,
+  },
+  {
     id: 1,
     type: "text",
     author: "James Allen",
@@ -163,6 +179,8 @@ export const posts: Post[] = [
     author: "Marcus Williams",
     avatar: pic2,
     time: "4h",
+    headline: "Incoming MBA Candidate | Stanford GSB '26",
+    feed: "MBA Admissions",
     body: "Stanford GSB admit weekend was everything I hoped for and more. The campus, the people, the energy — can't wait to start in the fall. Here are some highlights:",
     images: [stanford1, stanford2, stanford3, stanford4],
     likes: 384,
@@ -176,6 +194,7 @@ export const posts: Post[] = [
     author: "Priya Patel",
     avatar: pic3,
     time: "6h",
+    headline: "HBS MBA '25 | Former Investment Banking Analyst",
     body: "This article perfectly captures why networking in MBA admissions is so misunderstood. It's not about collecting contacts — it's about genuine curiosity.",
     link: {
       url: "https://example.com/mba-networking",
@@ -196,6 +215,7 @@ export const posts: Post[] = [
     avatar: pic4,
     time: "8h",
     verified: true,
+    feed: "MBA Admissions",
     headline: "MBA Admissions Consultant | Ex-Bain, HBS '19",
     body: "Hot take: the GMAT is not the most important part of your MBA application. I've seen 780 scorers get rejected and 680 scorers get into M7. Your story matters more than your score.",
     likes: 521,
@@ -255,6 +275,7 @@ export const posts: Post[] = [
     avatar: pic7,
     time: "Now",
     verified: true,
+    feed: "Consulting",
     headline: "Ex-McKinsey | Consulting Recruiting Coach | 400+ Offers",
     body: "Going live to answer your consulting recruiting questions — case prep, fit interviews, offer negotiation. Drop your questions in the chat.",
     live: {
@@ -274,6 +295,7 @@ export const posts: Post[] = [
     author: "Emma Rodriguez",
     avatar: pic5,
     time: "10h",
+    headline: "MBA Admissions Coach | Ex-Deloitte | Wharton '22",
     body: "Coaching session with an incredible candidate today. Went from a shaky \"tell me about yourself\" to a compelling 2-minute narrative. Love this work.",
     images: [
       "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&h=750&fit=crop",
@@ -289,11 +311,26 @@ export const posts: Post[] = [
     author: "James Liu",
     avatar: pic6,
     time: "12h",
+    headline: "Incoming Business Analyst at Bain & Company | Booth '25",
     body: "After 6 months of prep, 4 applications, and 2 interviews — I just got the call. Bain offered me a position in their SF office. I'm literally shaking right now. Thank you to everyone who believed in me when I didn't believe in myself.",
     likes: 892,
     comments: 97,
     reposts: 41,
     shares: 15,
+  },
+  {
+    id: 18,
+    type: "text",
+    author: "Rachel Nguyen",
+    avatar: pic9,
+    time: "13h",
+    headline: "1L at Yale Law School | Pre-Law Admissions Coach",
+    feed: "Law School",
+    body: "A lot of people ask me how I chose between law schools. Honestly? I stopped looking at rankings and started asking: where do the students actually seem happy?\n\nVisited three campuses. At two of them, the 2Ls and 3Ls gave very polished answers. At Yale, someone told me \"it's not perfect, but we actually like each other.\" That was enough.\n\nThe rankings will shuffle. The culture won't.",
+    likes: 318,
+    comments: 41,
+    reposts: 29,
+    shares: 7,
   },
   {
     id: 7,
@@ -336,6 +373,7 @@ export const posts: Post[] = [
     author: "Rachel Nguyen",
     avatar: pic9,
     time: "1d",
+    headline: "Wharton MBA '24 | Product Strategy | Ex-Google",
     body: "Throwback to our Wharton study group that turned into lifelong friends. Two years later and we still meet every month. Business school is really about the people.",
     images: [
       "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&h=750&fit=crop",
@@ -367,6 +405,7 @@ export const posts: Post[] = [
     author: "Olivia Park",
     avatar: pic11,
     time: "1d",
+    headline: "MBA Admissions Coach | Former HBS Admissions Reader",
     body: "New essay guide just dropped for HBS 2027 intake. The prompt changed subtly but the implications are huge for positioning.",
     link: {
       url: "https://example.com/hbs-essay",
@@ -386,6 +425,7 @@ export const posts: Post[] = [
     author: "Ryan Foster",
     avatar: pic12,
     time: "2d",
+    headline: "Career & MBA Coach | 100+ Sessions | Ex-McKinsey",
     body: "Just hit 100 coaching sessions on Leland. What I've learned: every single person has a compelling story — most just need help finding it. The \"I'm not interesting enough\" narrative is almost never true.",
     likes: 178,
     comments: 22,
@@ -652,7 +692,7 @@ function ActionBar({ likes, comments, reposts, postId }: { likes: number; commen
   const [shareOpen, setShareOpen] = useState(false);
 
   return (
-    <div className="mt-1 flex items-center justify-between pl-[44px]">
+    <div className="mt-1 flex items-center gap-[24px] pl-[44px]">
       <FeedLikeButton initialCount={likes} />
       {/* Comment */}
       <button onClick={(e) => { const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`/post/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
@@ -674,7 +714,7 @@ function ActionBar({ likes, comments, reposts, postId }: { likes: number; commen
   );
 }
 
-function PostHeaderRow({ author, time, verified, headline }: { author: string; time: string; verified?: boolean; headline?: string }) {
+function PostHeaderRow({ author, time, verified, headline, feed, onEdit }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; onEdit?: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -688,6 +728,16 @@ function PostHeaderRow({ author, time, verified, headline }: { author: string; t
   }, [menuOpen]);
 
   const menuItems = [
+    ...(onEdit ? [{
+      label: "Edit post",
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      ),
+      danger: false,
+      onClick: onEdit,
+    }] : []),
     {
       label: "Delete post",
       icon: (
@@ -696,6 +746,7 @@ function PostHeaderRow({ author, time, verified, headline }: { author: string; t
         </svg>
       ),
       danger: true,
+      onClick: undefined as (() => void) | undefined,
     },
     {
       label: "Not interested",
@@ -707,6 +758,7 @@ function PostHeaderRow({ author, time, verified, headline }: { author: string; t
         </svg>
       ),
       danger: false,
+      onClick: undefined as (() => void) | undefined,
     },
     {
       label: "Report post",
@@ -716,6 +768,7 @@ function PostHeaderRow({ author, time, verified, headline }: { author: string; t
         </svg>
       ),
       danger: false,
+      onClick: undefined as (() => void) | undefined,
     },
   ];
 
@@ -731,7 +784,17 @@ function PostHeaderRow({ author, time, verified, headline }: { author: string; t
           <p className="truncate text-[15px] leading-tight text-[#707070]">{headline}</p>
         )}
       </div>
-      <div ref={menuRef} className="relative shrink-0">
+      <div className="flex shrink-0 items-start gap-1">
+        {feed && (
+          <Link
+            to={`/groups/${FEEDS.find(f => f.label === feed)?.id ?? feed.toLowerCase().replace(/\s+/g, "-")}`}
+            onClick={(e) => e.stopPropagation()}
+            className="mt-0.5 text-[12px] font-medium leading-none text-[#A0A0A0] hover:text-[#707070] transition-colors"
+          >
+            {feed}
+          </Link>
+        )}
+      <div ref={menuRef} className="relative">
         <button
           onClick={(e) => { e.stopPropagation(); setMenuOpen(o => !o); }}
           className="cursor-pointer pl-2 text-[#424242] opacity-40 transition-opacity hover:opacity-100"
@@ -750,10 +813,10 @@ function PostHeaderRow({ author, time, verified, headline }: { author: string; t
                 className="absolute right-0 top-7 z-50 w-48 rounded-2xl border border-gray-stroke bg-white shadow-lg"
               >
                 <div className="px-2 py-2">
-                  {menuItems.map(({ label, icon, danger }) => (
+                  {menuItems.map(({ label, icon, danger, onClick }) => (
                     <button
                       key={label}
-                      onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }}
+                      onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onClick?.(); }}
                       className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium transition-colors hover:bg-gray-hover ${
                         danger ? "text-[#D92D20]" : "text-gray-dark"
                       }`}
@@ -767,6 +830,7 @@ function PostHeaderRow({ author, time, verified, headline }: { author: string; t
             </>
           )}
         </AnimatePresence>
+      </div>
       </div>
     </div>
   );
@@ -1689,8 +1753,9 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
 
 // ─── Post component ───────────────────────────────────
 
-export function FeedPost({ post }: { post: Post }) {
+export function FeedPost({ post, onUpdate }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void }) {
   const navigate = useNavigate();
+  const [editOpen, setEditOpen] = useState(false);
 
   return (
     <div className="pt-5 pb-[14px]">
@@ -1707,7 +1772,7 @@ export function FeedPost({ post }: { post: Post }) {
         </div>
         {/* Right column: content */}
         <div className="min-w-0 flex-1">
-          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} />
+          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} onEdit={onUpdate ? () => setEditOpen(true) : undefined} />
           <p className="mt-1 text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
           <div className={post.type !== "text" ? "pb-1" : ""} onClick={e => e.stopPropagation()}>
             {post.type === "image" && (
@@ -1727,6 +1792,15 @@ export function FeedPost({ post }: { post: Post }) {
       <div className="mt-1" onClick={e => e.stopPropagation()}>
         <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} postId={post.id} authorName={post.author} />
       </div>
+      {editOpen && (
+        <ComposeModal
+          editPost={post}
+          onClose={() => setEditOpen(false)}
+          onPost={() => {}}
+          onUpdate={(id, text, images) => { onUpdate?.(id, text, images); }}
+          isMVP={true}
+        />
+      )}
     </div>
   );
 }
@@ -1933,10 +2007,28 @@ const UPCOMING_EVENTS: EventPost["event"][] = [
 ];
 
 type CropRatio = "free" | "1:1" | "4:5" | "16:9";
-type ImageEntry = { original: string; cropped: string; aspectRatio: number };
+export type ImageEntry = { original: string; cropped: string; aspectRatio: number };
 
-function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string, images: ImageEntry[]) => void; onGoLive?: () => void; isMVP?: boolean }) {
-  const [text, setText] = useState("");
+export const FEEDS = [
+  { id: "community", label: "Leland Community" },
+  { id: "mba", label: "MBA Admissions" },
+  { id: "consulting", label: "Consulting" },
+  { id: "tech", label: "Tech Recruiting" },
+  { id: "law", label: "Law School" },
+  { id: "ai-bp-apr-26", label: "AI BP April 26" },
+];
+
+export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string, images: ImageEntry[]) => void; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; editPost?: Post; onGoLive?: () => void; isMVP?: boolean }) {
+  const isEditing = editPost != null;
+  const [text, setText] = useState(editPost?.body ?? "");
+  const [selectedFeed, setSelectedFeed] = useState(FEEDS[0]);
+  const [feedDropdownOpen, setFeedDropdownOpen] = useState(false);
+
+  function selectFeed(feed: typeof FEEDS[number]) {
+    setSelectedFeed(feed);
+    setFeedDropdownOpen(false);
+  }
+  const feedDropdownRef = useRef<HTMLDivElement>(null);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
   useEffect(() => {
@@ -1949,10 +2041,24 @@ function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => voi
     }, 3200);
     return () => clearInterval(timer);
   }, []);
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (feedDropdownRef.current && !feedDropdownRef.current.contains(e.target as Node)) {
+        setFeedDropdownOpen(false);
+      }
+    }
+    if (feedDropdownOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [feedDropdownOpen]);
+
   const [eventAttached, setEventAttached] = useState(false);
   const [selectingEvent, setSelectingEvent] = useState(false);
   const [eventIndex, setEventIndex] = useState(0);
-  const [images, setImages] = useState<ImageEntry[]>([]);
+  const [images, setImages] = useState<ImageEntry[]>(
+    editPost?.type === "image"
+      ? editPost.images.map((img, i) => ({ original: img, cropped: img, aspectRatio: editPost.imageAspectRatios?.[i] ?? 1 }))
+      : []
+  );
   const [cropMode, setCropMode] = useState(false);
   const [cropOriginalUrl, setCropOriginalUrl] = useState<string | null>(null);
   const [cropQueue, setCropQueue] = useState<string[]>([]);
@@ -2244,12 +2350,67 @@ function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => voi
             </button>
 
             {/* Compose area */}
-            <div className="flex gap-3 px-4 pt-4 pb-3 pr-14">
-              <img src={profilePhoto} alt="Your profile" className="h-10 w-10 shrink-0 rounded-full object-cover" />
-              <div className="relative flex-1 min-w-0">
+            <div className="px-4 pt-4 pb-3 pr-14">
+              {/* Avatar + name row */}
+              <div className="flex items-center gap-3 mb-3">
+                <img src={profilePhoto} alt="Your profile" className="h-10 w-10 shrink-0 rounded-full object-cover" />
+                <div className="flex items-center gap-2">
+                  <span className="text-[17px] font-medium text-gray-dark leading-none">Jamie Allen</span>
+                  {!isEditing && <div ref={feedDropdownRef} className="relative">
+                    <button
+                      onClick={() => setFeedDropdownOpen(o => !o)}
+                      className="flex items-center gap-1 rounded-lg border border-gray-stroke bg-[#F5F5F5] pl-2.5 pr-1.5 py-1 text-[13px] font-medium text-gray-dark transition-colors hover:bg-[#EBEBEB]"
+                    >
+                      {selectedFeed.label}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                        className={`shrink-0 transition-transform duration-150 ${feedDropdownOpen ? "rotate-180" : ""}`}>
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </button>
+                    <AnimatePresence>
+                      {feedDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 4 }}
+                          transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+                          className="absolute left-0 top-full z-50 mt-1 w-52 rounded-xl border border-gray-stroke bg-white shadow-lg"
+                        >
+                          <div className="px-3 pb-1.5 pt-2.5">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#A0A0A0]">Post Audience</p>
+                          </div>
+                          <div className="p-1.5 pt-0">
+                            {FEEDS.map(feed => {
+                              const isSelected = selectedFeed.id === feed.id;
+                              return (
+                                <button
+                                  key={feed.id}
+                                  onClick={() => selectFeed(feed)}
+                                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-[14px] font-medium transition-colors ${
+                                    isSelected ? "bg-[#F5F5F5] text-gray-dark" : "text-gray-dark hover:bg-[#F5F5F5]"
+                                  }`}
+                                >
+                                  {feed.label}
+                                  {isSelected && (
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                      <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>}
+                </div>
+              </div>
+              {/* Textarea with cycling placeholder — indented to align with name */}
+              <div className="relative pl-[52px]">
                 {text === "" && (
                   <span
-                    className="pointer-events-none absolute left-0 text-[17px] text-gray-light leading-relaxed transition-opacity duration-200"
+                    className="pointer-events-none absolute left-[52px] text-[17px] text-gray-light leading-relaxed transition-opacity duration-200"
                     style={{ opacity: placeholderVisible ? 1 : 0, top: 7 }}
                   >
                     {composerPrompts[placeholderIdx]}
@@ -2384,10 +2545,10 @@ function ComposeModal({ onClose, onPost, onGoLive, isMVP }: { onClose: () => voi
                     {nearLimit && <span className={`absolute text-[10px] font-semibold ${overLimit ? "text-red-500" : "text-amber-500"}`}>{remaining}</span>}
                   </div>
                 )}
-                <button onClick={() => { onPost(text.trim(), images); onClose(); }}
+                <button onClick={() => { if (isEditing && onUpdate) { onUpdate(editPost!.id, text.trim(), images); } else { onPost(text.trim(), images); } onClose(); }}
                   disabled={(!text.trim() && images.length === 0) || overLimit}
                   className="rounded-[8px] bg-gray-dark px-6 py-2 text-[15px] font-semibold text-white transition-opacity disabled:opacity-40 enabled:hover:opacity-90">
-                  Post
+                  {isEditing ? "Save" : "Post"}
                 </button>
               </div>
             </div>
@@ -2669,7 +2830,7 @@ export function HomeRightSidebar() {
 
 // ─── Left Sidebar ──────────────────────────────────────
 
-function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
+export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
   return (
     <div className="flex flex-col gap-5">
       {/* Profile card */}
@@ -2751,6 +2912,16 @@ export default function Home() {
   useSetRightSidebar(<HomeRightSidebar />);
   const [feedPosts, setFeedPosts] = useState<Post[]>(posts);
 
+  const handleEdit = (id: number, text: string, postImages: ImageEntry[]) => {
+    setFeedPosts(prev => prev.map(p => {
+      if (p.id !== id) return p;
+      if (postImages.length > 0) {
+        return { ...p, type: "image" as const, body: text, images: postImages.map(img => img.cropped), imageAspectRatios: postImages.map(img => img.aspectRatio) };
+      }
+      return { ...p, type: "text" as const, body: text } as Post;
+    }));
+  };
+
   const handlePost = (text: string, postImages: ImageEntry[]) => {
     const base = {
       id: Date.now(),
@@ -2801,7 +2972,7 @@ export default function Home() {
       <div className="divide-y divide-gray-stroke/50">
         {feedPosts.map((post, i) => (
           <div key={post.id}>
-            <FeedPost post={post} />
+            <FeedPost post={post} onUpdate={handleEdit} />
             {i === 3 && <SuggestedExperts />}
           </div>
         ))}

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import arrowRoundIcon from "../assets/icons/arrow-round.svg";
 import arrowRightIcon from "../assets/icons/arrow-right.svg";
@@ -22,6 +22,7 @@ interface SessionCardProps {
   hasRecording?: boolean;
   hideImage?: boolean;
   size?: "large" | "small";
+  cta?: React.ReactNode;
 }
 
 function getMenuItems(status: string, type: string) {
@@ -84,6 +85,7 @@ export default function SessionCard({
   hasRecording,
   hideImage,
   size = "large",
+  cta,
 }: SessionCardProps) {
   const isPast = status === "past";
   const isSmall = size === "small";
@@ -145,7 +147,7 @@ export default function SessionCard({
 
         {/* Right action area */}
         <div className="flex shrink-0 items-center gap-0 self-stretch">
-          {status === "live" ? (
+          {cta ? cta : status === "live" ? (
             <button
               className={`cursor-pointer bg-[#038561] text-white transition-colors hover:bg-[#038561]/90 ${actionBtnClass}`}
               style={actionBtnStyle}

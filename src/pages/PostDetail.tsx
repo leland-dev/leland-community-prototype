@@ -4,6 +4,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 
 import { useSetRightSidebar } from "../components/RightSidebarContext";
+import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { posts, type Post, FeedLikeButton, FeedRepostButton, ShareDropdown, HomeRightSidebar } from "./Home";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
@@ -613,6 +614,7 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
 // ─── Page ─────────────────────────────────────────────
 
 export default function PostDetail() {
+  useSetLeftSidebar(<div />);
   useSetRightSidebar(<HomeRightSidebar />);
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();

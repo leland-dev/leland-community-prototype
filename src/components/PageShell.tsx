@@ -4,8 +4,10 @@ type PageShellProps = {
   variant?: "standard" | "thin";
   leftSidebar?: ReactNode;
   rightSidebar?: ReactNode;
+  rightSidebarWidth?: number;
   contentMaxWidth?: number;
   leftMaxWidth?: number;
+  sidebarAlign?: "start" | "between";
   children: ReactNode;
 };
 
@@ -13,8 +15,10 @@ export default function PageShell({
   variant = "standard",
   leftSidebar,
   rightSidebar,
+  rightSidebarWidth = 300,
   contentMaxWidth,
   leftMaxWidth,
+  sidebarAlign = "between",
   children,
 }: PageShellProps) {
   if (variant === "thin") {
@@ -33,9 +37,14 @@ export default function PageShell({
   // larger viewport than a sidebar in a 2-col layout. Any single sidebar
   // (2-col) shows at the smaller threshold.
   const leftClass = "hidden w-[300px] shrink-0 sticky top-5 self-start min-[960px]:block";
-  const rightClass = hasBoth
-    ? "hidden w-[300px] shrink-0 sticky top-5 self-start min-[1200px]:block"
-    : "hidden w-[300px] shrink-0 sticky top-5 self-start min-[960px]:block";
+  const rightBreakpoint = hasBoth ? "min-[1200px]" : "min-[960px]";
+  const rightClass = `hidden shrink-0 sticky top-5 self-start ${rightBreakpoint}:block`;
+
+  const flexClass = contentMaxWidth
+    ? (hasRight || hasLeft
+        ? (sidebarAlign === "start" ? "flex items-start" : "flex items-start justify-between")
+        : "flex items-start justify-center")
+    : "flex items-start";
 
   if (leftMaxWidth) {
     return (
@@ -54,20 +63,15 @@ export default function PageShell({
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-8 sm:py-10 sm:px-6">
-      <div
-        className={contentMaxWidth
-          ? "flex items-start justify-center gap-col-gap"
-          : "flex items-start gap-col-gap"
-        }
-      >
+      <div className={flexClass} style={{ gap: 40 }}>
         {hasLeft && <aside className={leftClass}>{leftSidebar}</aside>}
         <div
-          className={contentMaxWidth ? "min-w-0 w-full" : "min-w-0 flex-1"}
-          style={contentMaxWidth ? { maxWidth: contentMaxWidth } : undefined}
+          className="min-w-0"
+          style={contentMaxWidth ? { width: contentMaxWidth } : { flex: "1 1 0%" }}
         >
           {children}
         </div>
-        {hasRight && <aside className={rightClass}>{rightSidebar}</aside>}
+        {hasRight && <aside className={rightClass} style={{ width: rightSidebarWidth }}>{rightSidebar}</aside>}
       </div>
     </div>
   );
