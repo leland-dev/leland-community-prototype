@@ -36,9 +36,13 @@ export default function PageShell({
   // Right sidebar in a 3-col layout needs more room, so it appears at a
   // larger viewport than a sidebar in a 2-col layout. Any single sidebar
   // (2-col) shows at the smaller threshold.
+  // NOTE: keep full class strings literal so Tailwind's JIT scanner picks them
+  // up. Building arbitrary variants like `min-[1200px]:block` via template
+  // strings causes the rule to be silently dropped from the generated CSS.
   const leftClass = "hidden w-[300px] shrink-0 sticky top-5 self-start min-[960px]:block";
-  const rightBreakpoint = hasBoth ? "min-[1200px]" : "min-[960px]";
-  const rightClass = `hidden shrink-0 sticky top-5 self-start ${rightBreakpoint}:block`;
+  const rightClass = hasBoth
+    ? "hidden shrink-0 sticky top-5 self-start min-[1200px]:block"
+    : "hidden shrink-0 sticky top-5 self-start min-[960px]:block";
 
   const flexClass = contentMaxWidth
     ? (hasRight || hasLeft
