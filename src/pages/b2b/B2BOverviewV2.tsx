@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Button } from "../../components/Button";
 import { motion, AnimatePresence } from "motion/react";
 import type { B2BView, ModalId } from "./B2BData";
 import B2BUserDrawerV2, { type UserDetailV2, type CohortEntry, type SessionEntry } from "./B2BUserDrawerV2";
@@ -446,41 +447,38 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
     <div className="leading-[1.2]">
       {openTooltip && <div className="fixed inset-0 z-40" onClick={() => setOpenTooltip(null)} />}
       {/* Page header + desktop sticky button */}
-      <div className="mb-4 flex items-start justify-between sm:mb-8">
+      <div className="mb-6 flex items-start justify-between sm:mb-8">
         <div ref={headerRef}>
           <h1 className="text-[40px] font-medium text-gray-dark">Overview</h1>
           <p className="mt-2 text-[18px] text-[#707070]">{showVerizon ? "Verizon" : "Kellogg School of Management"} &middot; Contract {showVerizon ? "Jul 2026 \u2013 Dec 2026" : "Jan 2025 \u2013 Jun 2026"}</p>
         </div>
-        <div className="sticky hidden items-center gap-2 self-start sm:flex" style={{ top: "28px" }}>
-          <button
-            onClick={onNavigateSettings}
-            className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-4 py-3 text-[16px] font-medium text-gray-dark hover:bg-gray-stroke"
-          >
+        <div className="sticky hidden gap-2 self-start sm:flex sm:items-center" style={{ top: "28px" }}>
+          <Button size="lg" variant="secondary" onClick={onNavigateSettings}>
             <img src={settingsIcon} alt="" className="h-4 w-4" />
             Admin Settings
-          </button>
-          <button
-            onClick={() => onOpenModal("invite")}
-            className="flex shrink-0 items-center gap-2 rounded-lg bg-[#038561] px-4 py-3 text-[16px] font-medium text-white shadow-md"
-          >
+          </Button>
+          <Button size="lg" variant="primary" onClick={() => onOpenModal("invite")} className="shadow-md">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
             </svg>
             {partnerModel === "a-la-carte" ? "Grant access" : "Add users"}
-          </button>
+          </Button>
         </div>
       </div>
 
-      {/* Mobile full-width button — below header, hidden once scrolled */}
-      <button
-        onClick={() => onOpenModal("invite")}
-        className="mb-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#038561] px-4 py-3 text-[16px] font-medium text-white shadow-md sm:hidden"
-      >
-        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-        </svg>
-        {partnerModel === "a-la-carte" ? "Grant access" : "Add users"}
-      </button>
+      {/* Mobile buttons — below header, stacked full-width */}
+      <div className="mb-6 flex flex-col gap-2 sm:hidden">
+        <Button size="lg" variant="secondary" onClick={onNavigateSettings} className="w-full">
+          <img src={settingsIcon} alt="" className="h-4 w-4" />
+          Admin Settings
+        </Button>
+        <Button size="lg" variant="primary" onClick={() => onOpenModal("invite")} className="w-full shadow-md">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+          </svg>
+          {partnerModel === "a-la-carte" ? "Grant access" : "Add users"}
+        </Button>
+      </div>
 
       {/* Mobile corner button — appears when header scrolls out of view */}
       <AnimatePresence>
@@ -596,7 +594,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
 
       {/* Users table */}
       <div className="mt-8">
-        <h2 className="mb-3 text-[20px] font-medium text-gray-dark">Users</h2>
+        <h2 className="mb-3 text-[24px] font-medium text-gray-dark">Users</h2>
         {/* Search + filters toolbar */}
         <div className="mb-3 flex flex-wrap items-center gap-3">
           <div className="flex w-full items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3 sm:w-auto sm:max-w-[280px] sm:flex-1">
@@ -614,10 +612,10 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               <button
                 key={f}
                 onClick={() => handleFilter(f)}
-                className={`shrink-0 cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] border-[1.5px] transition-colors ${
+                className={`shrink-0 cursor-pointer rounded-full bg-[#f5f5f5] px-3.5 py-2.5 text-[14px] font-medium leading-[1.2] text-[#222222] transition-colors ${
                   filter === f
-                    ? "border-[#222222]"
-                    : "border-transparent hover:bg-[#ebebeb]"
+                    ? "ring-[1.5px] ring-inset ring-[#222222]"
+                    : "hover:bg-[#ebebeb]"
                 }`}
               >
                 {f === "invited" ? "Invite pending" : f.charAt(0).toUpperCase() + f.slice(1)}

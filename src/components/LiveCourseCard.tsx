@@ -397,7 +397,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
           )}
         </div>
         {/* Title group */}
-        <div className="flex min-w-0 flex-1 flex-col gap-1 md:flex-[1_0_0] md:gap-0">
+        <div className={`flex min-w-0 flex-1 flex-col gap-1 md:flex-[1_0_0] md:gap-0${!cohortSelected ? " md:justify-center" : ""}`}>
           <div className="flex md:flex-1 md:items-center">
             <div>
               <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Live course</p>
@@ -405,7 +405,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
             </div>
           </div>
           {/* Buttons: desktop only */}
-          <div className="hidden gap-2 overflow-visible md:flex">{actionButtons}</div>
+          <div className="hidden gap-2 overflow-x-auto md:flex">{actionButtons}</div>
         </div>
       </div>
       {/* Buttons: mobile/tablet only */}
