@@ -640,7 +640,7 @@ export default function ProfileV2() {
                 <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
               </div>
             </div>
-            <div className="hidden items-center gap-2 pb-[82px] md:flex">
+            <div className="hidden items-center gap-2 pb-[90px] md:flex">
               {viewingOwnProfile ? (
                 <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
                   <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
