@@ -44,12 +44,6 @@ export default function PageShell({
     ? "hidden shrink-0 sticky top-5 self-start min-[1200px]:block"
     : "hidden shrink-0 sticky top-5 self-start min-[960px]:block";
 
-  const flexClass = contentMaxWidth
-    ? (hasRight || hasLeft
-        ? (sidebarAlign === "start" ? "flex items-start" : "flex items-start justify-between")
-        : "flex items-start justify-center")
-    : "flex items-start";
-
   if (leftMaxWidth) {
     return (
       <div className="mx-auto max-w-[1280px] px-4 py-8 sm:py-10 sm:px-6">
@@ -65,13 +59,15 @@ export default function PageShell({
     );
   }
 
+  const effectiveMaxWidth = contentMaxWidth ?? 800;
+
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-8 sm:py-10 sm:px-6">
-      <div className={flexClass} style={{ gap: 40 }}>
+      <div className="flex items-start justify-between" style={{ gap: 40 }}>
         {hasLeft && <aside className={leftClass}>{leftSidebar}</aside>}
         <div
           className="min-w-0"
-          style={contentMaxWidth ? { width: contentMaxWidth } : { flex: "1 1 0%" }}
+          style={(hasLeft || hasRight) ? { width: effectiveMaxWidth, maxWidth: effectiveMaxWidth } : { flex: "1 1 0%" }}
         >
           {children}
         </div>
