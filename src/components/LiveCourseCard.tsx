@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import SessionCard from "./SessionCard";
 import { useSessionLayout } from "./SessionLayoutContext";
+import calendarIcon from "../assets/icons/calendar-page.svg";
 import menuBurgerIcon from "../assets/icons/menu-burger.svg";
 import playVideoIcon from "../assets/icons/play-video.svg";
 import slackIcon from "../assets/icons/slack-black.svg";
@@ -45,6 +46,15 @@ export function getSessionState(slot: TimeSlot): SessionState {
   return "future";
 }
 
+export function isLiveCourseCompleted(course: LiveCourse): boolean {
+  return course.sessions.length > 0 && course.sessions.every((s) =>
+    s.slots.every((slot) => {
+      const st = getSessionState(slot);
+      return st === "past-recording" || st === "past-pending";
+    })
+  );
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatStartsIn(ms: number): string {
@@ -72,7 +82,7 @@ function formatSlotDateTime(date: Date): string {
 
 function ActionButton({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <button className="flex shrink-0 items-center gap-2 rounded-lg bg-gray-hover px-4 py-2.5 text-[16px] font-medium leading-[1.2] text-gray-dark transition-colors hover:bg-[#ebebeb]">
+    <button className="flex shrink-0 items-center gap-1.5 rounded-lg bg-gray-hover px-3 py-2 text-[14px] font-medium leading-[1.2] text-gray-dark transition-colors hover:bg-[#ebebeb]">
       {icon}
       {label}
     </button>
@@ -238,12 +248,7 @@ function SelectCohortModal({ open, onClose, onSelect }: { open: boolean; onClose
 
 export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; boxed?: boolean }) {
   const { simpleSessionLayout } = useSessionLayout();
-  const isCompleted = course.sessions.length > 0 && course.sessions.every((s) =>
-    s.slots.every((slot) => {
-      const st = getSessionState(slot);
-      return st === "past-recording" || st === "past-pending";
-    })
-  );
+  const isCompleted = isLiveCourseCompleted(course);
   const nextSession = course.sessions.find((s) =>
     s.slots.some((slot) => {
       const st = getSessionState(slot);
@@ -253,20 +258,66 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
   const [sessionsOpen, setSessionsOpen] = useState(!isCompleted);
   const [cohortSelected, setCohortSelected] = useState(course.cohortSelected ?? true);
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!calendarOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) {
+        setCalendarOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [calendarOpen]);
+
+  const calendarButton = !isCompleted && (
+    <div ref={calendarRef} className="relative">
+      <button
+        onClick={() => setCalendarOpen((o) => !o)}
+        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-stroke bg-white px-3 py-2 text-[14px] font-medium leading-[1.2] text-gray-dark transition-colors hover:bg-gray-hover"
+      >
+        <img src={calendarIcon} alt="" className="h-4 w-4 shrink-0" />
+        Add all to calendar
+      </button>
+      <AnimatePresence>
+        {calendarOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+            className="absolute left-0 top-full z-50 mt-2 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+          >
+            <div className="px-2 py-2">
+              <button className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
+                Google Calendar
+              </button>
+              <button className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
+                iCal
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 
   const actionButtons = cohortSelected ? (
     <>
       <ActionButton
-        icon={<img src={menuBurgerIcon} alt="" className="h-5 w-5 shrink-0" />}
+        icon={<img src={menuBurgerIcon} alt="" className="h-4 w-4 shrink-0" />}
         label="Syllabus"
       />
       <ActionButton
-        icon={<img src={playVideoIcon} alt="" className="h-5 w-5 shrink-0" />}
+        icon={<img src={playVideoIcon} alt="" className="h-4 w-4 shrink-0" />}
         label="Recordings"
       />
       <ActionButton
-        icon={<img src={slackIcon} alt="" className="h-5 w-5 shrink-0" />}
-        label="Group Slack"
+        icon={<img src={slackIcon} alt="" className="h-4 w-4 shrink-0" />}
+        label="Slack"
       />
     </>
   ) : (
@@ -288,15 +339,6 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
         <span className="flex-1 text-left leading-[1.2]">
           <span className="text-[16px] font-medium text-gray-dark">{course.sessions.length} Sessions</span>
           <span className="ml-2 text-[16px] font-normal text-gray-light">{course.cohortDates}</span>
-          {!isCompleted && sessionsOpen && (
-            <a
-              href="#"
-              onClick={(e) => e.stopPropagation()}
-              className="ml-3 hidden text-[16px] font-normal text-gray-light underline sm:inline"
-            >
-              Add all to calendar
-            </a>
-          )}
         </span>
         <svg
           width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -309,6 +351,19 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
       {/* Sessions list */}
       {sessionsOpen && (
         <div className="border-t border-gray-stroke bg-white pb-2 pt-2">
+          {(calendarButton || nextSession) && (
+            <div className="flex flex-wrap items-center gap-4 px-4 pb-2 pt-2">
+              {calendarButton}
+              {!isCompleted && nextSession && (
+                <button
+                  onClick={() => setCohortModalOpen(true)}
+                  className="text-[14px] text-gray-light underline transition-colors hover:text-gray-dark"
+                >
+                  Switch cohort
+                </button>
+              )}
+            </div>
+          )}
           {simpleSessionLayout
             ? course.sessions.map((session, i) => (
                 <SessionRowSimple key={session.id} session={session} index={i + 1} isNext={session.id === nextSession?.id} isFirst={i === 0} />
@@ -326,19 +381,26 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
     <div className={`flex flex-col gap-4 bg-white md:flex-row md:items-center md:gap-5${boxed ? " p-4 md:p-5" : ""}`}>
       <div className="flex flex-row items-center gap-4 md:contents md:gap-0">
         {/* Thumbnail */}
-        <img
-          src={course.image}
-          alt=""
-          className="aspect-[120/63] w-1/3 shrink-0 rounded-lg object-cover md:w-[220px]"
-        />
+        <div className="relative w-1/3 shrink-0 md:w-[220px]">
+          <img
+            src={course.image}
+            alt=""
+            className={`aspect-[120/63] w-full rounded-lg object-cover${isCompleted ? " opacity-50" : ""}`}
+          />
+          {isCompleted && (
+            <span className="absolute bottom-2 left-2 rounded-md bg-white px-2 py-1 text-[14px] font-medium text-gray-dark shadow-sm">
+              Complete
+            </span>
+          )}
+        </div>
         {/* Title group */}
         <div className="flex min-w-0 flex-1 flex-col gap-1 md:flex-[1_0_0] md:gap-4">
           <div>
-            <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Live cohort</p>
+            <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Live course</p>
             <p className="mt-1 line-clamp-2 text-[20px] font-medium leading-[1.2] text-gray-dark md:line-clamp-1 md:text-[24px]">{course.title}</p>
           </div>
           {/* Buttons: desktop only */}
-          <div className="hidden gap-2 overflow-x-auto md:flex">{actionButtons}</div>
+          <div className="hidden gap-2 overflow-visible md:flex">{actionButtons}</div>
         </div>
       </div>
       {/* Buttons: mobile/tablet only */}
@@ -347,7 +409,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
   );
 
   return (
-    <div className={isCompleted ? "opacity-75" : ""}>
+    <div ref={cardRef}>
       {boxed ? (
         <div className="overflow-hidden rounded-xl border border-gray-stroke shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-transform hover:translate-x-0.5">
           {header}

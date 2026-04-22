@@ -5,6 +5,7 @@ type PageShellProps = {
   leftSidebar?: ReactNode;
   rightSidebar?: ReactNode;
   contentMaxWidth?: number;
+  leftMaxWidth?: number;
   children: ReactNode;
 };
 
@@ -13,6 +14,7 @@ export default function PageShell({
   leftSidebar,
   rightSidebar,
   contentMaxWidth,
+  leftMaxWidth,
   children,
 }: PageShellProps) {
   if (variant === "thin") {
@@ -34,6 +36,21 @@ export default function PageShell({
   const rightClass = hasBoth
     ? "hidden w-[300px] shrink-0 sticky top-5 self-start min-[1200px]:block"
     : "hidden w-[300px] shrink-0 sticky top-5 self-start min-[960px]:block";
+
+  if (leftMaxWidth) {
+    return (
+      <div className="mx-auto max-w-[1280px] px-4 py-8 sm:py-10 sm:px-6">
+        <div className="flex items-start">
+          {hasLeft && <aside className={leftClass}>{leftSidebar}</aside>}
+          <div className="min-w-0" style={{ flex: `0 1 ${leftMaxWidth}px` }}>
+            {children}
+          </div>
+          {hasRight && <div className="hidden min-[960px]:block" style={{ flex: '1 0 40px' }} />}
+          {hasRight && <aside className={rightClass}>{rightSidebar}</aside>}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-8 sm:py-10 sm:px-6">
