@@ -200,7 +200,7 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                         const scheduled = user.sessions.entries.filter(s => s.status === "scheduled").length;
                         return `${sessionsUsed}/${user.sessions.granted} used${scheduled > 0 ? `, ${scheduled} scheduled` : ""}`;
                       })()}
-                      pill={sessionsUsed === user.sessions.granted ? <Tag color="green">Complete</Tag> : undefined}
+                      pill={undefined}
                     >
                       {/* Progress bar */}
                       <div className="mb-4 flex items-center gap-3">
