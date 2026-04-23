@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -409,7 +410,7 @@ function ReplyInput({ onPost, onCancel }: { onPost: (text: string) => void; onCa
           }}
           placeholder="Write a reply…"
           rows={1}
-          className="flex-1 resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[15px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
+          className="flex-1 resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[16px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
           onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && text.trim()) { onPost(text.trim()); } }}
         />
         <AnimatePresence>
@@ -635,13 +636,41 @@ export default function PostDetail() {
   const post = posts.find(p => p.id === Number(postId));
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  // Only scroll to top on initial mount when not arriving via Comment tap —
+  // otherwise we fight the scroll that brings the comment input above the
+  // keyboard.
+  useEffect(() => { if (!focusInput) window.scrollTo(0, 0); }, [focusInput]);
+
+  // When arriving via a Comment tap, focus the comment box so the mobile
+  // keyboard pops open AND scroll the input so it sits just above the
+  // keyboard. iOS won't auto-scroll for programmatic focus, so we watch the
+  // Visual Viewport: once the keyboard opens (visible height shrinks), bring
+  // the input to rest right above the visible-area bottom.
   useEffect(() => {
-    if (focusInput) {
-      const t = setTimeout(() => commentInputRef.current?.focus(), 380);
-      return () => clearTimeout(t);
-    }
+    if (!focusInput) return;
+    const focusId = requestAnimationFrame(() => commentInputRef.current?.focus());
+
+    const scrollInputAboveKeyboard = () => {
+      const input = commentInputRef.current;
+      if (!input) return;
+      const vv = window.visualViewport;
+      const visibleBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+      const rect = input.getBoundingClientRect();
+      const delta = rect.bottom - visibleBottom + 16;
+      if (delta > 0) window.scrollBy({ top: delta, behavior: "smooth" });
+    };
+
+    // Try a few times — keyboard takes ~200–400ms to animate in on iOS.
+    const timers = [160, 320, 520].map(ms => setTimeout(scrollInputAboveKeyboard, ms));
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", scrollInputAboveKeyboard);
+    return () => {
+      cancelAnimationFrame(focusId);
+      timers.forEach(clearTimeout);
+      vv?.removeEventListener("resize", scrollInputAboveKeyboard);
+    };
   }, [focusInput]);
+
 
   const [commentText, setCommentText] = useState(prefillComment);
   const [comments, setComments] = useState<CommentData[]>(() =>
@@ -693,7 +722,7 @@ export default function PostDetail() {
           <div className="pl-[56px]"><StatsRow post={post} onCommentFocus={() => commentInputRef.current?.focus()} /></div>
         </div>
 
-        {/* Comment input */}
+        {/* Comment input — sits inline where the comment will land in the thread */}
         <div className="flex gap-3 py-2">
           <img
             src={profilePhoto}
@@ -703,6 +732,7 @@ export default function PostDetail() {
           <div className="flex flex-1 items-center gap-2">
             <textarea
               ref={commentInputRef}
+              autoFocus={focusInput}
               value={commentText}
               onChange={e => {
                 setCommentText(e.target.value);
@@ -711,7 +741,7 @@ export default function PostDetail() {
               }}
               placeholder="Add a comment…"
               rows={1}
-              className="flex-1 resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[15px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
+              className="flex-1 resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[16px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
               onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
             />
             <AnimatePresence>

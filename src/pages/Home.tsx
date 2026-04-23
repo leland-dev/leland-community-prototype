@@ -7,6 +7,8 @@ import { Image as ImageIcon } from "lucide-react";
 import { useVersion } from "../contexts/VersionContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
+import { useIsMobile } from "../hooks/useIsMobile";
+import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
 import SessionCard from "../components/SessionCard";
 import OfferingCard from "../components/OfferingCard";
 import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
@@ -16,6 +18,7 @@ import lelandCompass from "../assets/leland-compass.svg";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
+import bootcampImg from "../assets/placeholder images/bootcamp-2.webp";
 import categoryInvestmentBanking from "../assets/placeholder images/category images/investment-banking.png";
 import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
 import categoryGMAT from "../assets/placeholder images/category images/gmat-tutoring.png";
@@ -145,6 +148,37 @@ export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, LivePost 
 // ─── Sample data ──────────────────────────────────────
 
 export const posts: Post[] = [
+  {
+    id: 19,
+    type: "text",
+    author: "Emma Rodriguez",
+    avatar: pic5,
+    time: "12m",
+    verified: false,
+    headline: "Ops Lead at Notion | AI BP April 26 Cohort",
+    feed: "AI BP April 26",
+    body: "Quick Q for cohort 1 — for the week 2 project, did anyone find a good way to handle rate limits when chaining multiple Claude calls?\n\nI've got a little script that pulls meeting notes, summarizes them, and then drafts follow-up emails. Works great on one meeting, blows up on five. Considering just adding a sleep() but that feels dumb. Open to ideas before I over-engineer this.",
+    likes: 18,
+    comments: 11,
+    reposts: 1,
+    shares: 0,
+  },
+  {
+    id: 20,
+    type: "image",
+    author: "Jackson Ringger",
+    avatar: pic6,
+    time: "32m",
+    verified: false,
+    headline: "Strategy @ Airbnb | AI BP April 26 Cohort",
+    feed: "AI BP April 26",
+    body: "Wild — asked Claude to rewrite our team's weekly status update template and this is what it came back with. Three years of 'what shipped / what's blocked' and nobody thought to add the third column. Trying it at standup Monday. 👀",
+    images: [bootcampImg],
+    likes: 64,
+    comments: 14,
+    reposts: 4,
+    shares: 2,
+  },
   {
     id: 16,
     type: "text",
@@ -454,6 +488,27 @@ export function formatCount(n: number): string {
   return n.toString();
 }
 
+// iOS Safari only opens the soft keyboard when focus() is called synchronously
+// inside a user gesture. When tapping Comment we navigate to a new route, so by
+// the time the real <textarea> mounts the gesture context is gone. Prime the
+// keyboard here: create a hidden, focusable input in the same tap handler,
+// focus it, then let PostDetail's autoFocus/rAF transfer focus to the real
+// comment box — the keyboard stays open through the route change.
+function primeKeyboard() {
+  if (typeof document === "undefined") return;
+  const tmp = document.createElement("input");
+  tmp.type = "text";
+  tmp.setAttribute("autocomplete", "off");
+  tmp.setAttribute("aria-hidden", "true");
+  tmp.tabIndex = -1;
+  // font-size must be ≥16px or iOS will trigger a zoom.
+  tmp.style.cssText =
+    "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;border:0;padding:0;font-size:16px;";
+  document.body.appendChild(tmp);
+  tmp.focus();
+  setTimeout(() => tmp.remove(), 600);
+}
+
 const FEED_REPOST_PARTICLES = [
   { angle: -80,  r: 28, color: "#138462", size: 6 },
   { angle: -40,  r: 32, color: "#1aad80", size: 5 },
@@ -544,6 +599,8 @@ export function FeedLikeButton({ initialCount }: { initialCount: number }) {
 
 export function ShareDropdown({ postId, onClose }: { postId: number; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
+  const isMobile = useIsMobile();
+  useLockBodyScroll(isMobile);
   const postUrl = `${window.location.origin}${window.location.pathname}#/post/${postId}`;
 
   const copyLink = () => {
@@ -553,46 +610,69 @@ export function ShareDropdown({ postId, onClose }: { postId: number; onClose: ()
     });
   };
 
-  return (
+  const mobileVariants = {
+    initial: { opacity: 0, y: "100%" },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: "100%" },
+  };
+  const desktopVariants = {
+    initial: { opacity: 0, scale: 0.95, y: -4 },
+    animate: { opacity: 1, scale: 1, y: 0 },
+    exit: { opacity: 0, scale: 0.95, y: -4 },
+  };
+
+  const content = (
     <>
-      <div className="fixed inset-0 z-40" onClick={onClose} />
+      <div className={`fixed inset-0 z-[60] ${isMobile ? "bg-black/30" : ""}`} onClick={onClose} />
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: -4 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: -4 }}
-        transition={{ duration: 0.12 }}
-        className="absolute top-full right-0 z-50 mt-1 w-56 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+        initial={(isMobile ? mobileVariants : desktopVariants).initial}
+        animate={(isMobile ? mobileVariants : desktopVariants).animate}
+        exit={(isMobile ? mobileVariants : desktopVariants).exit}
+        transition={{ duration: isMobile ? 0.22 : 0.12, ease: [0.25, 0.1, 0.25, 1] }}
+        drag={isMobile ? "y" : false}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0, bottom: 0.6 }}
+        onDragEnd={(_, info) => { if (isMobile && (info.offset.y > 100 || info.velocity.y > 400)) onClose(); }}
+        className={
+          isMobile
+            ? "fixed inset-x-0 bottom-0 z-[70] rounded-t-2xl border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)] shadow-lg"
+            : "absolute top-full right-0 z-50 mt-1 w-56 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+        }
       >
-        <div className="px-2 py-2">
+        {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1.5 w-12 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
+        <div className={isMobile ? "px-3 pt-1 pb-3" : "px-2 py-2"}>
           {/* Copy link */}
-          <button onClick={copyLink} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+          <button onClick={copyLink} className={`flex w-full items-center gap-3 rounded-lg font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"}`}>
             {copied ? (
-              <svg className="h-5 w-5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0 text-primary`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             ) : (
-              <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
             )}
             {copied ? "Copied!" : "Copy link"}
           </button>
           {/* LinkedIn */}
-          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
-            <svg className="h-5 w-5 shrink-0 rounded-[3px]" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className={`flex w-full items-center gap-3 rounded-lg font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"}`}>
+            <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0 rounded-[3px]`} viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
             LinkedIn
           </a>
           {/* Twitter/X */}
-          <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
-            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className={`flex w-full items-center gap-3 rounded-lg font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"}`}>
+            <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             Twitter / X
           </a>
         </div>
       </motion.div>
     </>
   );
+  return isMobile ? createPortal(content, document.body) : content;
 }
 
 export function FeedRepostButton({ initialCount }: { initialCount: number }) {
   const [reposted, setReposted] = useState(false);
   const [burst, setBurst] = useState(false);
   const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
+  useLockBodyScroll(open && isMobile);
 
   const triggerRepost = () => {
     if (!reposted) {
@@ -652,38 +732,52 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
         </motion.span>
       </button>
 
-      <AnimatePresence>
-        {open ? (
+      {(() => {
+        const menuBody = (
+          <AnimatePresence>
+          {open ? (
           <>
-            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+            <div className={`fixed inset-0 ${isMobile ? "z-[60] bg-black/30" : "z-40"}`} onClick={() => setOpen(false)} />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -4 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -4 }}
-              transition={{ duration: 0.12 }}
-              className="absolute bottom-full left-0 z-50 mb-2 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+              initial={isMobile ? { opacity: 0, y: "100%" } : { opacity: 0, scale: 0.95, y: -4 }}
+              animate={isMobile ? { opacity: 1, y: 0 } : { opacity: 1, scale: 1, y: 0 }}
+              exit={isMobile ? { opacity: 0, y: "100%" } : { opacity: 0, scale: 0.95, y: -4 }}
+              transition={{ duration: isMobile ? 0.22 : 0.12, ease: [0.25, 0.1, 0.25, 1] }}
+              drag={isMobile ? "y" : false}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.6 }}
+              onDragEnd={(_, info) => { if (isMobile && (info.offset.y > 100 || info.velocity.y > 400)) setOpen(false); }}
+              className={
+                isMobile
+                  ? "fixed inset-x-0 bottom-0 z-[70] rounded-t-2xl border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)] shadow-lg"
+                  : "absolute bottom-full left-0 z-50 mb-2 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+              }
             >
-              <div className="px-2 py-2">
-                <button onClick={triggerRepost} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
-                  <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1.5 w-12 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
+              <div className={isMobile ? "px-3 pt-1 pb-3" : "px-2 py-2"}>
+                <button onClick={triggerRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"}`}>
+                  <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   Repost with your thoughts
                 </button>
                 {reposted ? (
-                  <button onClick={undoRepost} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
-                    <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+                  <button onClick={undoRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"}`}>
+                    <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
                     Undo repost
                   </button>
                 ) : (
-                  <button onClick={triggerRepost} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
-                    <img src={repostsIcon} alt="Repost" className="h-5 w-5 shrink-0 [filter:invert(44%)]" />
+                  <button onClick={triggerRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"}`}>
+                    <img src={repostsIcon} alt="Repost" className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0 [filter:invert(44%)]`} />
                     Repost to feed
                   </button>
                 )}
               </div>
             </motion.div>
           </>
-        ) : null}
-      </AnimatePresence>
+          ) : null}
+          </AnimatePresence>
+        );
+        return isMobile ? createPortal(menuBody, document.body) : menuBody;
+      })()}
     </div>
   );
 }
@@ -696,7 +790,7 @@ function ActionBar({ likes, comments, reposts, postId }: { likes: number; commen
     <div className="mt-1 flex items-center gap-[24px] pl-[44px]">
       <FeedLikeButton initialCount={likes} />
       {/* Comment */}
-      <button onClick={(e) => { const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`/post/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
+      <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`/post/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
         <img src={commentsIcon} alt="Comment" className="h-[22px] w-[22px] [filter:invert(44%)]" />
         {comments > 0 && <span className="text-[15px] font-normal">{formatCount(comments)}</span>}
       </button>
@@ -718,6 +812,8 @@ function ActionBar({ likes, comments, reposts, postId }: { likes: number; commen
 function PostHeaderRow({ author, time, verified, headline, feed, onEdit }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; onEdit?: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  useLockBodyScroll(menuOpen && isMobile);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -732,7 +828,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, onEdit }: { aut
     ...(onEdit ? [{
       label: "Edit post",
       icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <svg width={isMobile ? 22 : 16} height={isMobile ? 22 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
         </svg>
       ),
@@ -742,7 +838,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, onEdit }: { aut
     {
       label: "Delete post",
       icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <svg width={isMobile ? 22 : 16} height={isMobile ? 22 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
         </svg>
       ),
@@ -752,7 +848,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, onEdit }: { aut
     {
       label: "Not interested",
       icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <svg width={isMobile ? 22 : 16} height={isMobile ? 22 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M17 14c.34-.57.54-1.26.54-2 0-2.21-1.91-4-4.27-4-1.89 0-3.5 1.16-4.12 2.8"/><path d="M9.17 9.17L3 3m18 18-5.18-5.18"/>
           <path d="M6.5 6.5C5.57 7.4 5 8.63 5 10c0 2.76 2.24 5 5 5 1.37 0 2.6-.57 3.5-1.5"/>
           <line x1="2" y1="2" x2="22" y2="22"/>
@@ -764,7 +860,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, onEdit }: { aut
     {
       label: "Report post",
       icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <svg width={isMobile ? 22 : 16} height={isMobile ? 22 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
         </svg>
       ),
@@ -802,35 +898,49 @@ function PostHeaderRow({ author, time, verified, headline, feed, onEdit }: { aut
         >
           <MoreDotsIcon />
         </button>
-        <AnimatePresence>
-          {menuOpen && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }} />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -4 }}
-                transition={{ duration: 0.12 }}
-                className="absolute right-0 top-7 z-50 w-48 rounded-2xl border border-gray-stroke bg-white shadow-lg"
-              >
-                <div className="px-2 py-2">
-                  {menuItems.map(({ label, icon, danger, onClick }) => (
-                    <button
-                      key={label}
-                      onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onClick?.(); }}
-                      className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium transition-colors hover:bg-gray-hover ${
-                        danger ? "text-[#D92D20]" : "text-gray-dark"
-                      }`}
-                    >
-                      {icon}
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+        {(() => {
+          const menuBody = (
+            <AnimatePresence>
+              {menuOpen && (
+                <>
+                  <div className={`fixed inset-0 ${isMobile ? "z-[60] bg-black/30" : "z-40"}`} onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }} />
+                  <motion.div
+                    initial={isMobile ? { opacity: 0, y: "100%" } : { opacity: 0, scale: 0.95, y: -4 }}
+                    animate={isMobile ? { opacity: 1, y: 0 } : { opacity: 1, scale: 1, y: 0 }}
+                    exit={isMobile ? { opacity: 0, y: "100%" } : { opacity: 0, scale: 0.95, y: -4 }}
+                    transition={{ duration: isMobile ? 0.22 : 0.12, ease: [0.25, 0.1, 0.25, 1] }}
+                    drag={isMobile ? "y" : false}
+                    dragConstraints={{ top: 0, bottom: 0 }}
+                    dragElastic={{ top: 0, bottom: 0.6 }}
+                    onDragEnd={(_, info) => { if (isMobile && (info.offset.y > 100 || info.velocity.y > 400)) setMenuOpen(false); }}
+                    className={
+                      isMobile
+                        ? "fixed inset-x-0 bottom-0 z-[70] rounded-t-2xl border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)] shadow-lg"
+                        : "absolute right-0 top-7 z-50 w-48 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+                    }
+                  >
+                    {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1.5 w-12 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
+                    <div className={isMobile ? "px-3 pt-1 pb-3" : "px-2 py-2"}>
+                      {menuItems.map(({ label, icon, danger, onClick }) => (
+                        <button
+                          key={label}
+                          onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onClick?.(); }}
+                          className={`flex w-full items-center gap-3 rounded-lg text-left font-medium transition-colors hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"} ${
+                            danger ? "text-[#D92D20]" : "text-gray-dark"
+                          }`}
+                        >
+                          {icon}
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          );
+          return isMobile ? createPortal(menuBody, document.body) : menuBody;
+        })()}
       </div>
       </div>
     </div>
@@ -1127,6 +1237,7 @@ function MilestoneCard({ milestone, postId, authorName }: { milestone: Milestone
           <button
             onClick={(e) => {
               e.stopPropagation();
+              primeKeyboard();
               navigate(`/post/${postId}`, { state: { focusInput: true, prefillComment: `@${authorName} Congratulations! 🎉` } });
             }}
             className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
@@ -2021,13 +2132,61 @@ export const FEEDS = [
 
 export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string, images: ImageEntry[]) => void; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; editPost?: Post; onGoLive?: () => void; isMVP?: boolean }) {
   const isEditing = editPost != null;
+  const isMobileModal = useIsMobile();
+  useLockBodyScroll(true);
+
+  // Escape key closes the modal (unless we're in crop mode — handled below)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  // Track keyboard height on mobile via the Visual Viewport API so the bottom
+  // media bar can sit flush against the top of the keyboard (iOS Safari does
+  // not resize the layout viewport when the keyboard appears).
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  useEffect(() => {
+    if (!isMobileModal || typeof window === "undefined" || !window.visualViewport) return;
+    const vv = window.visualViewport;
+    const update = () => {
+      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      setKeyboardOffset(offset);
+    };
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+    };
+  }, [isMobileModal]);
+
+  // Post animation state — brief "posting" signal before the modal dismisses.
+  const [posting, setPosting] = useState(false);
+  const submitPost = () => {
+    if (posting) return;
+    if ((!text.trim() && images.length === 0) || overLimit) return;
+    setPosting(true);
+    setTimeout(() => {
+      if (isEditing && onUpdate) onUpdate(editPost!.id, text.trim(), images);
+      else onPost(text.trim(), images);
+      onClose();
+    }, 450);
+  };
   const [text, setText] = useState(editPost?.body ?? "");
   const [selectedFeed, setSelectedFeed] = useState(FEEDS[0]);
   const [feedDropdownOpen, setFeedDropdownOpen] = useState(false);
 
   function selectFeed(feed: typeof FEEDS[number]) {
     setSelectedFeed(feed);
-    setFeedDropdownOpen(false);
+    // On mobile (bottom sheet), delay close so the radio-fill + row highlight
+    // register as selection feedback before the tray dismisses.
+    if (isMobileModal) {
+      setTimeout(() => setFeedDropdownOpen(false), 280);
+    } else {
+      setFeedDropdownOpen(false);
+    }
   }
   const feedDropdownRef = useRef<HTMLDivElement>(null);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
@@ -2240,15 +2399,20 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-start justify-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      className={`fixed inset-0 z-[9999] flex justify-center ${isMobileModal ? "items-stretch" : "items-start"}`}
+      style={{ backgroundColor: isMobileModal ? "#ffffff" : "rgba(0,0,0,0.5)" }}
       onClick={cropMode ? undefined : onClose}
     >
       <motion.div
-        className="relative mt-[60px] w-full max-w-[600px] rounded-2xl bg-white shadow-2xl mx-4 overflow-hidden"
-        initial={{ opacity: 0, scale: 0.95, y: -20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        className={
+          isMobileModal
+            ? "relative flex w-full flex-col bg-white overflow-hidden pb-[env(safe-area-inset-bottom)]"
+            : "relative mt-[60px] w-full max-w-[600px] rounded-2xl bg-white shadow-2xl mx-4 overflow-hidden"
+        }
+        style={isMobileModal ? { height: "100dvh" } : undefined}
+        initial={isMobileModal ? { opacity: 0, y: 24 } : { opacity: 0, scale: 0.95, y: -20 }}
+        animate={isMobileModal ? { opacity: 1, y: 0 } : { opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
         onClick={(e) => e.stopPropagation()}
       >
         {cropMode ? (
@@ -2345,15 +2509,104 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
         ) : (
           /* ── COMPOSE MODE ──────────────────────────────────────────────── */
           <>
-            {/* X button */}
-            <button onClick={onClose} className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-[16px] border border-gray-stroke bg-white text-gray-dark transition-colors hover:bg-gray-hover">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-            </button>
+            {/* Mobile top bar: X (left) + audience + Post (right) */}
+            {isMobileModal && (
+              <div className="flex items-center gap-2 border-b border-gray-stroke px-3 py-2.5">
+                <button onClick={onClose} aria-label="Close" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+                {!isEditing && (
+                  <button
+                    onClick={() => setFeedDropdownOpen(o => !o)}
+                    className="flex items-center gap-1 rounded-lg border border-gray-stroke bg-[#F5F5F5] pl-3 pr-2 py-1.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#EBEBEB]"
+                  >
+                    {selectedFeed.label}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      className={`shrink-0 transition-transform duration-150 ${feedDropdownOpen ? "rotate-180" : ""}`}>
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+                )}
+                <div className="flex-1" />
+                <button
+                  onClick={submitPost}
+                  disabled={(!text.trim() && images.length === 0) || overLimit || posting}
+                  className="flex items-center gap-1.5 rounded-lg bg-gray-dark px-5 py-2 text-[15px] font-semibold text-white transition-opacity disabled:opacity-40 enabled:hover:opacity-90"
+                >
+                  {posting && (
+                    <motion.span
+                      className="inline-block h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 0.7, repeat: Infinity, ease: "linear" }}
+                    />
+                  )}
+                  {posting ? "Posting…" : isEditing ? "Save" : "Post"}
+                </button>
+              </div>
+            )}
+
+            {/* Desktop-only X in top-right */}
+            {!isMobileModal && (
+              <button onClick={onClose} className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-[16px] border border-gray-stroke bg-white text-gray-dark transition-colors hover:bg-gray-hover">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            )}
+
+            {/* Mobile audience sheet — portaled to body so it sits above everything */}
+            {isMobileModal && feedDropdownOpen && createPortal(
+                  <>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.18 }}
+                      className="fixed inset-0 z-[10000] bg-black/30"
+                      onClick={() => setFeedDropdownOpen(false)}
+                    />
+                    <motion.div
+                      initial={{ y: "100%" }}
+                      animate={{ y: 0 }}
+                      transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+                      drag="y"
+                      dragConstraints={{ top: 0, bottom: 0 }}
+                      dragElastic={{ top: 0, bottom: 0.6 }}
+                      onDragEnd={(_, info) => { if (info.offset.y > 100 || info.velocity.y > 400) setFeedDropdownOpen(false); }}
+                      className="fixed inset-x-0 bottom-0 z-[10001] rounded-t-2xl border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)] shadow-lg"
+                    >
+                      <div className="mx-auto mt-2.5 mb-1 h-1.5 w-12 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />
+                      <p className="px-5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#A0A0A0]">Post Audience</p>
+                      <div className="p-2 pt-1">
+                        {FEEDS.map(feed => {
+                          const isSelected = selectedFeed.id === feed.id;
+                          return (
+                            <button
+                              key={feed.id}
+                              onClick={() => selectFeed(feed)}
+                              className={`flex w-full items-center justify-between rounded-lg px-4 py-4 text-[17px] font-medium text-gray-dark transition-colors active:bg-[#EBEBEB] ${isSelected ? "bg-[#F5F5F5]" : ""}`}
+                            >
+                              <span>{feed.label}</span>
+                              <span
+                                aria-hidden
+                                className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isSelected ? "border-[#038561]" : "border-gray-stroke"}`}
+                              >
+                                <span className={`h-[10px] w-[10px] rounded-full bg-[#038561] transition-transform duration-150 ${isSelected ? "scale-100" : "scale-0"}`} />
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  </>,
+                  document.body
+                )}
 
             {/* Compose area */}
-            <div className="px-4 pt-4 pb-3 pr-14">
-              {/* Avatar + name row */}
-              <div className="flex items-center gap-3 mb-3">
+            <div className={`${isMobileModal ? "flex-1 min-h-0 flex gap-3 px-4 pt-4" : "px-4 pt-4 pb-3 pr-14"}`}>
+              {isMobileModal && (
+                <img src={profilePhoto} alt="Your profile" className="h-10 w-10 shrink-0 rounded-full object-cover" />
+              )}
+              {/* Desktop: Avatar + audience row */}
+              {!isMobileModal && <div className="flex items-center gap-3 mb-3">
                 <img src={profilePhoto} alt="Your profile" className="h-10 w-10 shrink-0 rounded-full object-cover" />
                 <div className="flex items-center gap-2">
                   <span className="text-[17px] font-medium text-gray-dark leading-none">Jamie Allen</span>
@@ -2369,7 +2622,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                       </svg>
                     </button>
                     <AnimatePresence>
-                      {feedDropdownOpen && (
+                      {feedDropdownOpen && !isMobileModal && (
                         <motion.div
                           initial={{ opacity: 0, y: 4 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -2406,20 +2659,20 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                     </AnimatePresence>
                   </div>}
                 </div>
-              </div>
-              {/* Textarea with cycling placeholder — indented to align with name */}
-              <div className="relative pl-[52px]">
+              </div>}
+              {/* Textarea with cycling placeholder — indented to align with name on desktop, inline with avatar on mobile */}
+              <div className={`relative ${isMobileModal ? "flex-1 min-w-0" : "pl-[52px]"}`}>
                 {text === "" && (
                   <span
-                    className="pointer-events-none absolute left-[52px] text-[17px] text-gray-light leading-relaxed transition-opacity duration-200"
+                    className={`pointer-events-none absolute text-[17px] text-gray-light leading-relaxed transition-opacity duration-200 ${isMobileModal ? "left-0" : "left-[52px]"}`}
                     style={{ opacity: placeholderVisible ? 1 : 0, top: 7 }}
                   >
                     {composerPrompts[placeholderIdx]}
                   </span>
                 )}
-                <textarea ref={textareaRef} value={text} onChange={autoGrow} rows={4}
-                  className="w-full resize-none bg-transparent text-[17px] text-gray-dark focus:outline-none leading-relaxed"
-                  style={{ minHeight: "180px", padding: 0, paddingTop: 7 }} />
+                <textarea ref={textareaRef} autoFocus value={text} onChange={autoGrow} rows={4}
+                  className={`w-full resize-none bg-transparent text-[17px] text-gray-dark focus:outline-none leading-relaxed ${isMobileModal ? "h-full" : ""}`}
+                  style={isMobileModal ? { padding: 0, paddingTop: 7, minHeight: 0 } : { minHeight: "180px", padding: 0, paddingTop: 7 }} />
               </div>
             </div>
 
@@ -2522,21 +2775,22 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
             <div className="border-t border-gray-stroke" />
 
             {/* Bottom toolbar */}
-            <div className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-1">
+            {isMobileModal ? (
+              <div
+                className="fixed inset-x-0 z-[10] flex items-center gap-2 border-t border-gray-stroke bg-white px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+8px)]"
+                style={{ bottom: keyboardOffset }}
+              >
                 <button onClick={() => fileInputRef.current?.click()} disabled={images.length >= 4}
-                  className="flex h-9 items-center justify-center gap-1 rounded-full px-2 transition-colors text-gray-light hover:bg-gray-hover disabled:opacity-30"
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover disabled:opacity-30"
                   title={images.length >= 4 ? "Maximum 4 images" : "Add photo"}>
-                  <ImageIcon size={24} strokeWidth={1.5} />
-                  {images.length > 0 && (
-                    <span className="text-[13px] font-medium">{images.length}/4</span>
-                  )}
+                  <ImageIcon size={24} strokeWidth={1.75} />
                 </button>
+                {images.length > 0 && (
+                  <span className="text-[13px] font-medium text-gray-light">{images.length}/4</span>
+                )}
                 <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelect} />
-              </div>
-              <div className="flex items-center gap-3">
                 {charCount > 0 && (
-                  <div className="relative flex items-center justify-center">
+                  <div className="ml-auto relative flex items-center justify-center">
                     <svg width="26" height="26" viewBox="0 0 26 26">
                       <circle cx="13" cy="13" r={circleR} fill="none" stroke="#E5E5E5" strokeWidth="2.5" />
                       <circle cx="13" cy="13" r={circleR} fill="none" stroke={overLimit ? "#EF4444" : nearLimit ? "#F59E0B" : "#222222"}
@@ -2546,13 +2800,47 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                     {nearLimit && <span className={`absolute text-[10px] font-semibold ${overLimit ? "text-red-500" : "text-amber-500"}`}>{remaining}</span>}
                   </div>
                 )}
-                <button onClick={() => { if (isEditing && onUpdate) { onUpdate(editPost!.id, text.trim(), images); } else { onPost(text.trim(), images); } onClose(); }}
-                  disabled={(!text.trim() && images.length === 0) || overLimit}
-                  className="rounded-[8px] bg-gray-dark px-6 py-2 text-[15px] font-semibold text-white transition-opacity disabled:opacity-40 enabled:hover:opacity-90">
-                  {isEditing ? "Save" : "Post"}
-                </button>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-1">
+                  <button onClick={() => fileInputRef.current?.click()} disabled={images.length >= 4}
+                    className="flex h-9 items-center justify-center gap-1 rounded-full px-2 transition-colors text-gray-light hover:bg-gray-hover disabled:opacity-30"
+                    title={images.length >= 4 ? "Maximum 4 images" : "Add photo"}>
+                    <ImageIcon size={24} strokeWidth={1.5} />
+                    {images.length > 0 && (
+                      <span className="text-[13px] font-medium">{images.length}/4</span>
+                    )}
+                  </button>
+                  <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelect} />
+                </div>
+                <div className="flex items-center gap-3">
+                  {charCount > 0 && (
+                    <div className="relative flex items-center justify-center">
+                      <svg width="26" height="26" viewBox="0 0 26 26">
+                        <circle cx="13" cy="13" r={circleR} fill="none" stroke="#E5E5E5" strokeWidth="2.5" />
+                        <circle cx="13" cy="13" r={circleR} fill="none" stroke={overLimit ? "#EF4444" : nearLimit ? "#F59E0B" : "#222222"}
+                          strokeWidth="2.5" strokeDasharray={circumference} strokeDashoffset={dashOffset} strokeLinecap="round"
+                          transform="rotate(-90 13 13)" style={{ transition: "stroke-dashoffset 0.1s, stroke 0.2s" }} />
+                      </svg>
+                      {nearLimit && <span className={`absolute text-[10px] font-semibold ${overLimit ? "text-red-500" : "text-amber-500"}`}>{remaining}</span>}
+                    </div>
+                  )}
+                  <button onClick={submitPost}
+                    disabled={(!text.trim() && images.length === 0) || overLimit || posting}
+                    className="flex items-center gap-1.5 rounded-[8px] bg-gray-dark px-6 py-2 text-[15px] font-semibold text-white transition-opacity disabled:opacity-40 enabled:hover:opacity-90">
+                    {posting && (
+                      <motion.span
+                        className="inline-block h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 0.7, repeat: Infinity, ease: "linear" }}
+                      />
+                    )}
+                    {posting ? "Posting…" : isEditing ? "Save" : "Post"}
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </motion.div>
@@ -2902,9 +3190,24 @@ export default function Home() {
   const { version } = useVersion();
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
+  const lastScrollY = useRef(0);
   useSetLeftSidebar(<HomeSidebar onCreatePost={() => setComposeOpen(true)} />);
   useSetRightSidebar(<HomeRightSidebar />);
   const [feedPosts, setFeedPosts] = useState<Post[]>(posts);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastScrollY.current;
+      if (y < 80) setNavHidden(false);
+      else if (delta > 6) setNavHidden(true);
+      else if (delta < -6) setNavHidden(false);
+      lastScrollY.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const handleEdit = (id: number, text: string, postImages: ImageEntry[]) => {
     setFeedPosts(prev => prev.map(p => {
@@ -2946,7 +3249,7 @@ export default function Home() {
   };
 
   return (
-    <div>
+    <div className="-mt-3 md:mt-0">
       {/* Post composer */}
       <div className="flex items-center gap-3 border-b border-gray-stroke pb-5">
         <img
@@ -2971,6 +3274,22 @@ export default function Home() {
           </div>
         ))}
       </div>
+
+      {/* Mobile floating compose button — sits 16px above bottom nav,
+          slides down to bottom-16 when nav hides on scroll. Portaled so
+          it escapes the main stacking context and sits above the nav. */}
+      {createPortal(
+        <button
+          onClick={() => setComposeOpen(true)}
+          aria-label="Create post"
+          className={`fixed bottom-[calc(env(safe-area-inset-bottom)+24px)] right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#038561] text-white shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden ${navHidden ? "translate-y-0" : "-translate-y-[62px]"}`}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>,
+        document.body
+      )}
 
       {composeOpen ? <ComposeModal onClose={() => setComposeOpen(false)} onPost={handlePost} onGoLive={() => setGoLiveOpen(true)} isMVP={version === "A"} /> : null}
       {goLiveOpen ? <GoLiveModal onClose={() => setGoLiveOpen(false)} /> : null}

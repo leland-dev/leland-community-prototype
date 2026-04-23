@@ -1,7 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { VersionProvider } from "./contexts/VersionContext";
-import VersionToggle from "./components/VersionToggle";
 import Layout from "./components/Layout";
 import { ContextLayout } from "./components/Layout";
 
@@ -9,11 +8,6 @@ function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return null;
-}
-
-function HomeOnlyVersionToggle() {
-  const { pathname } = useLocation();
-  return pathname === "/" ? <VersionToggle /> : null;
 }
 
 import Home from "./pages/Home";
@@ -47,7 +41,6 @@ import Components from "./pages/Components";
 export default function App() {
   return (
     <VersionProvider>
-    <HomeOnlyVersionToggle />
     <Routes>
       <Route path="*" element={<ScrollToTop />} />
       <Route path="/b2b-dashboard" element={<B2BDashboard />} />

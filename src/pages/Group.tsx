@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import PageShell from "../components/PageShell";
 import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
 import { FeedPost, ComposeModal, CategorySubtitle, type Post, type ImageEntry } from "./Home";
+import { useIsMobile } from "../hooks/useIsMobile";
 
 
 import bootcampBanner from "../assets/placeholder images/bootcamp-1.webp";
@@ -35,7 +36,7 @@ import categoryPM from "../assets/placeholder images/category images/product-man
 
 // ─── Types ────────────────────────────────────────────
 
-type Tab = "activity" | "members";
+type Tab = "activity" | "members" | "other";
 
 type LinkType = "profile" | "resource" | "booking" | "guide" | "support";
 
@@ -502,13 +503,12 @@ function ActivityTab({ posts: initialPosts }: { posts: Post[] }) {
   );
 }
 
-function MembersTab({ memberCount }: { memberCount: number }) {
+function MembersTab() {
   const navigate = useNavigate();
   const [followed, setFollowed] = useState<Set<string>>(new Set());
 
   return (
     <div className="py-6">
-      <p className="mb-5 text-[16px] text-[#707070]">{memberCount} members</p>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {[...COHORT_MEMBERS].sort((a, b) => {
           const rank = (m: typeof COHORT_MEMBERS[number]) =>
@@ -716,16 +716,24 @@ export default function Group() {
   const [isJoined, setIsJoined] = useState(true);
   const [stickyNavVisible, setStickyNavVisible] = useState(false);
   const heroSentinelRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const visibleTabs = isMobile ? [...TABS, { id: "other" as Tab, label: "More" }] : TABS;
+
+  // If viewport moves to desktop while on "Other" tab, fall back to Activity
+  useEffect(() => {
+    if (!isMobile && activeTab === "other") setActiveTab("activity");
+  }, [isMobile, activeTab]);
 
   useEffect(() => {
-    const sentinel = heroSentinelRef.current;
-    if (!sentinel) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setStickyNavVisible(!entry.isIntersecting),
-      { threshold: 0 },
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
+    // Show the sticky tab nav as soon as the user starts scrolling past the hero
+    // (roughly past the profile icon). Scroll-based trigger feels more in-line
+    // with the scroll gesture than an IntersectionObserver on a lower sentinel.
+    const onScroll = () => {
+      setStickyNavVisible(window.scrollY > 120);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   if (!group) {
@@ -757,7 +765,7 @@ export default function Group() {
             >
               <div className="mx-auto flex max-w-[1280px] items-stretch gap-4 px-6">
                 <div className="flex shrink-0 items-stretch gap-1">
-                  {TABS.map((tab) => (
+                  {visibleTabs.map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
@@ -781,21 +789,21 @@ export default function Group() {
       )}
 
       {/* Full-bleed banner — outside PageShell */}
-      <div className="w-full bg-[#f0f0f0]" style={{ height: 122 }} />
+      <div className="w-full bg-[#f0f0f0] h-[72px] md:h-[122px]" />
 
-      <PageShell rightSidebar={<GroupRightSidebar group={group} />}>
+      <PageShell rightSidebar={isMobile ? undefined : <GroupRightSidebar group={group} />}>
         {/* Group icon + CTA row — overlaps banner with negative margin */}
-        <div className="-mt-[100px] mb-4 flex items-end justify-between">
+        <div className="-mt-[88px] md:-mt-[100px] mb-3 md:mb-4 flex items-end justify-between">
           <div
-            className="flex h-[132px] w-[132px] shrink-0 items-center justify-center rounded-lg border-[4px] border-white text-white text-[48px] font-bold"
+            className="flex h-[88px] w-[88px] md:h-[132px] md:w-[132px] shrink-0 items-center justify-center rounded-lg border-[4px] border-white text-white text-[32px] md:text-[48px] font-bold"
             style={{ backgroundColor: group.accentColor }}
           >
             {group.name.charAt(0)}
           </div>
-          <div className="pb-[90px]">
+          <div className="h-[88px] md:h-auto md:pb-[90px]">
             <button
               onClick={() => setIsJoined(!isJoined)}
-              className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
+              className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[15px] md:text-[16px] font-medium transition-colors ${
                 isJoined
                   ? "border border-[#222222]/10 bg-white text-gray-dark hover:border-[#222222]/20"
                   : "bg-[#038561] text-white hover:bg-[#038561]/90"
@@ -808,18 +816,18 @@ export default function Group() {
         </div>
 
         {/* Group name + tagline */}
-        <h1 className="text-[24px] font-medium leading-tight text-gray-dark">{group.name}</h1>
-        <p className="mt-1 mb-[6px] text-[18px] leading-[1.3] text-[#707070]">{group.tagline}</p>
+        <h1 className="text-[22px] md:text-[24px] font-medium leading-tight text-gray-dark">{group.name}</h1>
+        <p className="mt-1 mb-[6px] text-[16px] md:text-[18px] leading-[1.3] text-[#707070]">{group.tagline}</p>
 
         {/* Face pile + stats */}
-        <div className="mt-3 flex items-center gap-2 text-[14px] text-[#707070]">
+        <div className="mt-3 flex items-center gap-2.5 text-[16px] md:text-[14px] text-[#707070]">
           <div className="flex -space-x-1.5">
             {COHORT_MEMBERS.slice(0, 4).map((m) => (
               <img
                 key={m.name}
                 src={m.avatar}
                 alt=""
-                className="h-6 w-6 rounded-full border-2 border-white object-cover"
+                className="h-7 w-7 md:h-6 md:w-6 rounded-full border-2 border-white object-cover"
               />
             ))}
           </div>
@@ -832,12 +840,12 @@ export default function Group() {
         <div ref={heroSentinelRef} />
 
         {/* Tab bar */}
-        <div className="mt-4 flex gap-1 border-b border-[#E5E5E5]">
-          {TABS.map((tab) => (
+        <div className="mt-2 md:mt-4 flex gap-1 border-b border-[#E5E5E5]">
+          {visibleTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`cursor-pointer border-b-2 px-3 pt-4 pb-4 text-[16px] font-medium transition-colors ${
+              className={`cursor-pointer border-b-2 px-3 pt-4 pb-2 md:pb-4 text-[16px] font-medium transition-colors ${
                 activeTab === tab.id
                   ? "border-[#038561] text-gray-dark"
                   : "border-transparent text-[#707070] hover:text-gray-dark"
@@ -854,7 +862,12 @@ export default function Group() {
         ) : (
           <>
             {activeTab === "activity" && <ActivityTab posts={posts} />}
-            {activeTab === "members" && <MembersTab memberCount={group.memberCount} />}
+            {activeTab === "members" && <MembersTab />}
+            {activeTab === "other" && (
+              <div className="pt-6">
+                <GroupRightSidebar group={group} />
+              </div>
+            )}
           </>
         )}
       </PageShell>

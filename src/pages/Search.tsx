@@ -19,6 +19,7 @@ export default function Search() {
         />
         <input
           type="text"
+          autoFocus
           placeholder="Search Leland..."
           className="w-full rounded-lg border border-gray-stroke bg-gray-hover py-3 pl-12 pr-4 text-sm outline-none transition-colors placeholder:text-gray-xlight focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
         />
