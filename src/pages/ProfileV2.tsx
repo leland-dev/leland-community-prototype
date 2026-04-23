@@ -463,7 +463,7 @@ export default function ProfileV2() {
                       </button>
                     ))}
                   </div>
-                  <div className="flex items-center pl-4">
+                  <div className="flex items-center pl-4 md:hidden">
                     <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
                       Free intro call
                     </button>
@@ -561,7 +561,7 @@ export default function ProfileV2() {
               </SidebarGroup>
             </div>
           ) : (
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 transition-[padding] duration-300" style={{ paddingTop: stickyNavVisible ? 56 : 0 }}>
               {/* Coach video — desktop sidebar */}
               {showCoachVideo && (
                 <div className="group relative cursor-pointer overflow-hidden rounded-lg">
@@ -586,52 +586,21 @@ export default function ProfileV2() {
                 </div>
               )}
 
-              <div className="px-1 flex flex-col gap-6">
-                <SidebarGroup label="Related experts">
-                  <SidebarCard
-                    variant="coach"
-                    image={pic1}
-                    title="Jasmine Singer"
-                    subtitle="Experienced Product Leader at LinkedIn | Ex-..."
-                  />
-                  <SidebarCard
-                    variant="coach"
-                    image={pic3}
-                    title="Jackson Ringger"
-                    subtitle="Ex-McKinsey Engagement Manager | Wharton MBA..."
-                  />
-                  <SidebarCard
-                    variant="coach"
-                    image={pic5}
-                    title="Erika Mah"
-                    subtitle="Senior PM at Google | Stanford GSB | Ex-Stripe..."
-                  />
-                </SidebarGroup>
-
-                <SidebarGroup label="Trending topics">
-                  <SidebarCard
-                    variant="topic"
-                    align="top"
-                    icon={<img src={topicHash} alt="" className="h-[20px] w-[20px] shrink-0" />}
-                    title="MBB Recruitment"
-                    subtitle="234 posts today"
-                  />
-                  <SidebarCard
-                    variant="topic"
-                    align="top"
-                    icon={<img src={topicHash} alt="" className="h-[20px] w-[20px] shrink-0" />}
-                    title="Case Interviews"
-                    subtitle="189 posts today"
-                  />
-                  <SidebarCard
-                    variant="topic"
-                    align="top"
-                    icon={<img src={topicHash} alt="" className="h-[20px] w-[20px] shrink-0" />}
-                    title="MBA Essays"
-                    subtitle="156 posts today"
-                  />
-                </SidebarGroup>
+              {/* Availability + CTA buttons + guarantee */}
+              <div className="flex flex-col gap-3 px-1">
+                <span className="text-[16px] text-[#296CEF]">Available today at 4:00 PM MDT</span>
+                <button className="w-full cursor-pointer rounded-lg bg-[#038561] px-4 py-3 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                  Schedule a free intro call
+                </button>
+                <button className="w-full cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                  Book a session
+                </button>
+                <div className="flex items-center justify-center gap-2 text-[14px] text-[#9b9b9b]">
+                  <img src={shieldIcon} alt="" className="w-[12px]" />
+                  <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
+                </div>
               </div>
+
             </div>
           )
         ) : undefined}>
@@ -671,11 +640,6 @@ export default function ProfileV2() {
                     {isFollowing && <img src={checkIcon} alt="" className={`h-[18px] w-[18px] ${isCustomerProfile ? "brightness-0 invert" : ""}`} />}
                     {isFollowing ? "Following" : "Follow"}
                   </button>
-                  {!isCustomerProfile && (
-                    <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
-                      Free intro call
-                    </button>
-                  )}
                 </>
               )}
             </div>
@@ -772,93 +736,71 @@ export default function ProfileV2() {
             </div>
           )}
 
-          {/* Desktop bordered card stats — customer profile only */}
+          {/* Desktop stats row — customer profile */}
           {isCustomerProfile && (
-            <div className="mt-4 mb-2 hidden flex-col rounded-lg border border-gray-200 md:flex">
-              <div className="flex">
-                {/* Followers */}
-                <div className="flex flex-1 flex-col items-center py-4">
-                  <span className="text-[22px] font-medium leading-none text-gray-dark">245</span>
-                  <span className="text-[16px] leading-tight text-gray-dark">Followers</span>
-                </div>
-
-                <div className="h-[36px] w-px self-center bg-gray-200" />
-
-                {/* Likes */}
-                <div className="flex flex-1 flex-col items-center py-4">
-                  <span className="text-[22px] font-medium leading-none text-gray-dark">1.6k</span>
-                  <span className="text-[16px] leading-tight text-gray-dark">Likes</span>
-                </div>
-
-                <div className="h-[36px] w-px self-center bg-gray-200" />
-
-                {/* Impressions */}
-                <div className="flex flex-1 flex-col items-center py-4">
-                  <span className="text-[22px] font-medium leading-none text-gray-dark">8.2k</span>
-                  <span className="text-[16px] leading-tight text-gray-dark">Impressions</span>
-                </div>
+            <div className="mt-4 mb-2 hidden items-center gap-6 md:flex">
+              <div className="flex flex-col gap-[2px]">
+                <span className="text-[20px] font-medium leading-none text-gray-dark">245</span>
+                <span className="text-[16px] leading-tight text-[#707070]">Followers</span>
+              </div>
+              <div className="h-[24px] w-px shrink-0 bg-gray-200" />
+              <div className="flex flex-col gap-[2px]">
+                <span className="text-[20px] font-medium leading-none text-gray-dark">1.6k</span>
+                <span className="text-[16px] leading-tight text-[#707070]">Likes</span>
+              </div>
+              <div className="h-[24px] w-px shrink-0 bg-gray-200" />
+              <div className="flex flex-col gap-[2px]">
+                <span className="text-[20px] font-medium leading-none text-gray-dark">8.2k</span>
+                <span className="text-[16px] leading-tight text-[#707070]">Impressions</span>
               </div>
             </div>
           )}
 
-          {/* Desktop bordered card stats — coach only */}
+          {/* Desktop stats row — coach profile */}
           {!isCustomerProfile && (
-            <div className="mb-2 hidden flex-col rounded-lg border border-gray-200 md:flex">
-              {/* Customer Favorite — mobile row (hidden on desktop) */}
+            <div className="mb-2 hidden items-center gap-6 md:flex">
+              {/* Customer Favorite */}
               {showCustomerFavorite && (
-                <div className="flex items-center py-2 md:hidden">
+                <>
                   <div className="flex items-center gap-[2px]">
                     <img src={wreathImg} alt="" className="h-[45px] w-[21px]" />
                     <span className="text-center text-[18px] font-medium leading-[110%] text-gray-dark">Customer<br/>Favorite</span>
                     <img src={wreathImg} alt="" className="h-[45px] w-[21px] scale-x-[-1]" />
                   </div>
-                </div>
+                  <div className="h-[24px] w-px shrink-0 bg-gray-200" />
+                </>
               )}
-              <div className="flex">
-                {/* Reviews */}
-                <div
-                  className="flex flex-1 cursor-pointer flex-col items-center py-4 transition-opacity hover:opacity-70"
-                  onClick={() => scrollToSection("reviews")}
-                >
-                  <div className="flex items-center gap-1">
-                    <span className="text-[22px] font-medium leading-none text-gray-dark">5.0</span>
-                    <img src={starIcon} alt="" className="h-[16px] w-[16px]" />
-                  </div>
-                  <span className="text-[16px] leading-tight text-gray-dark">52 reviews</span>
+              {/* Reviews */}
+              <div
+                className="flex cursor-pointer flex-col gap-[2px] transition-opacity hover:opacity-70"
+                onClick={() => scrollToSection("reviews")}
+              >
+                <div className="flex items-center gap-1">
+                  <span className="text-[20px] font-medium leading-none text-gray-dark">4.9</span>
+                  <img src={starIcon} alt="" className="h-[16px] w-[16px]" />
                 </div>
-
-                <div className="h-[36px] w-px self-center bg-gray-200" />
-
-                {/* Followers */}
-                <div className="flex flex-1 flex-col items-center py-4">
-                  <span className="text-[22px] font-medium leading-none text-gray-dark">182</span>
-                  <span className="text-[16px] leading-tight text-gray-dark">Followers</span>
-                </div>
-
-                <div className="h-[36px] w-px self-center bg-gray-200" />
-
-                {/* Impressions */}
-                <div
-                  className="flex flex-1 cursor-pointer flex-col items-center py-4 transition-opacity hover:opacity-70"
-                  onClick={() => scrollToSection("activity")}
-                >
-                  <span className="text-[22px] font-medium leading-none text-gray-dark">8.2k</span>
-                  <span className="text-[16px] leading-tight text-gray-dark">Impressions</span>
-                </div>
-
-                {/* Customer Favorite — desktop inline */}
-                {showCustomerFavorite && (
-                  <>
-                    <div className="h-[36px] w-px self-center bg-gray-200" />
-                    <div className="flex flex-1 flex-col items-center justify-center py-3">
-                      <div className="flex items-center gap-[2px]">
-                        <img src={wreathImg} alt="" className="h-[45px] w-[21px]" />
-                        <span className="text-center text-[18px] font-medium leading-[110%] text-gray-dark">Customer<br/>Favorite</span>
-                        <img src={wreathImg} alt="" className="h-[45px] w-[21px] scale-x-[-1]" />
-                      </div>
-                    </div>
-                  </>
-                )}
+                <span className="text-[16px] leading-tight text-[#707070]">52 Reviews</span>
+              </div>
+              <div className="h-[24px] w-px shrink-0 bg-gray-200" />
+              {/* Minutes coached */}
+              <div className="flex flex-col gap-[2px]">
+                <span className="text-[20px] font-medium leading-none text-gray-dark">6.6k</span>
+                <span className="text-[16px] leading-tight text-[#707070]">Min coached</span>
+              </div>
+              <div className="h-[24px] w-px shrink-0 bg-gray-200" />
+              {/* Followers */}
+              <div className="flex flex-col gap-[2px]">
+                <span className="text-[20px] font-medium leading-none text-gray-dark">84</span>
+                <span className="text-[16px] leading-tight text-[#707070]">Followers</span>
+              </div>
+              <div className="h-[24px] w-px shrink-0 bg-gray-200" />
+              {/* Impressions */}
+              <div
+                className="flex cursor-pointer flex-col gap-[2px] transition-opacity hover:opacity-70"
+                onClick={() => scrollToSection("activity")}
+              >
+                <span className="text-[20px] font-medium leading-none text-gray-dark">8.5k</span>
+                <span className="text-[16px] leading-tight text-[#707070]">Impressions</span>
               </div>
             </div>
           )}
@@ -911,17 +853,6 @@ export default function ProfileV2() {
             )}
           </div>
 
-          {/* Availability row */}
-          {!isCustomerProfile && (
-            <div className="mt-2 flex flex-col items-start text-[16px] md:mt-0 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-[#1A73E8]">Available tomorrow</span>
-                <span className="text-[#707070]">·</span>
-                <span className="text-[#707070]">Responds within 12 hours</span>
-              </div>
-              <span className="text-[#9b9b9b]">1,240 minutes coached</span>
-            </div>
-          )}
 
           {/* Coach video — mobile */}
           {showCoachVideo && !isCustomerProfile && (
