@@ -32,6 +32,7 @@ export interface UserDetailV2 {
   dateAdded?: string;
   sessions?: {
     granted: number;
+    minutesPerSession?: number;
     entries: SessionEntry[];
   };
   cohorts?: CohortEntry[];
@@ -215,10 +216,10 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
 
                       {/* Session rows */}
                       <div className="flex flex-col">
-                        {user.sessions.entries.filter(s => s.status !== "unbooked").map((s, i) => (
+                        {user.sessions.entries.map((s, i) => (
                           <div key={i} className="flex items-center justify-between gap-4 border-b border-gray-stroke py-3 last:border-0">
                             <div className="flex min-w-0 items-center gap-3">
-                              {s.coachImg && (
+                              {s.coachImg ? (
                                 <div className="relative shrink-0">
                                   <img src={s.coachImg} alt={s.coach} className="h-9 w-9 rounded-full object-cover" />
                                   {s.status === "completed" && (
@@ -229,25 +230,25 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                                     </div>
                                   )}
                                 </div>
+                              ) : (
+                                <div className="h-9 w-9 shrink-0 rounded-full border-2 border-dashed border-gray-stroke bg-gray-hover" />
                               )}
-                              <div className="min-w-0">
-                                {s.coach ? (
-                                  <a href="https://www.joinleland.com/coach/jordan-lee" target="_blank" rel="noreferrer" className="truncate text-[16px] font-medium text-gray-dark hover:underline">
-                                    {`${s.coach.split(" ")[0]} ${s.coach.split(" ")[1]?.[0] ?? ""}.`}
-                                  </a>
+                              <div className="flex min-w-0 flex-col gap-0.5">
+                                <div className="truncate text-[16px] font-medium leading-[1.2] text-gray-dark">
+                                  Session {i + 1}{s.coach ? `: ${s.coach.split(" ")[0]} ${s.coach.split(" ")[1]?.[0] ?? ""}.` : ""}
+                                </div>
+                                {s.coachHeadline ? (
+                                  <div className="truncate text-[14px] leading-[1.2] text-gray-light">{s.coachHeadline}</div>
                                 ) : (
-                                  <div className="truncate text-[16px] font-medium text-gray-dark">
-                                    {s.status === "scheduled" ? "Coach TBD" : "Session"}
-                                  </div>
+                                  <div className="text-[14px] leading-[1.2] text-gray-light">Not yet scheduled</div>
                                 )}
-                                {s.coachHeadline && <div className="truncate text-[14px] text-gray-xlight">{s.coachHeadline}</div>}
                               </div>
                             </div>
-                            <div className="shrink-0 text-right">
-                              <div className={`text-[16px] ${s.status === "unbooked" ? "text-gray-xlight" : "text-gray-dark"}`}>
-                                {s.status === "completed" ? "Completed" : s.status === "scheduled" ? "Scheduled" : "Not scheduled"}
+                            <div className="flex shrink-0 flex-col gap-0.5 text-right">
+                              <div className={`text-[16px] leading-[1.2] ${s.status === "unbooked" ? "text-gray-xlight" : "text-gray-dark"}`}>
+                                {s.status === "completed" ? "Completed" : s.status === "scheduled" ? "Scheduled" : "—"}
                               </div>
-                              {s.date !== "—" && <div className="text-[14px] text-gray-xlight">{s.date}</div>}
+                              {s.date !== "—" && <div className="text-[14px] leading-[1.2] text-gray-light">{s.date}</div>}
                             </div>
                           </div>
                         ))}
@@ -275,7 +276,7 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                       <div className="flex flex-col">
                         <div>
                         {user.cohorts.map((c, i) => (
-                          <div key={i} className="border-b border-gray-stroke py-3 last:border-0">
+                          <div key={i} className="border-b border-gray-stroke py-3 last:border-0 transition-transform hover:translate-x-0.5 cursor-pointer">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex min-w-0 items-start gap-3">
                                 {c.image && (
@@ -290,12 +291,12 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                                     )}
                                   </div>
                                 )}
-                                <div className="min-w-0">
-                                  <div className="truncate text-[16px] font-medium text-gray-dark">{c.name}</div>
-                                  <div className="text-[14px] text-gray-xlight">{c.startDate} – {c.endDate}</div>
+                                <div className="flex min-w-0 flex-col gap-0.5">
+                                  <div className="truncate text-[16px] font-medium leading-[1.2] text-gray-dark">{c.name}</div>
+                                  <div className="text-[14px] leading-[1.2] text-gray-light">{c.startDate} – {c.endDate}</div>
                                 </div>
                               </div>
-                              <span className={`shrink-0 text-[16px] ${c.status === "invited" ? "text-gray-xlight" : "text-gray-dark"}`}>
+                              <span className={`shrink-0 text-[16px] leading-[1.2] ${c.status === "invited" ? "text-gray-xlight" : "text-gray-dark"}`}>
                                 {c.status === "completed" ? "Completed" : c.status === "invited" ? "Invited" : "Enrolled"}
                               </span>
                             </div>

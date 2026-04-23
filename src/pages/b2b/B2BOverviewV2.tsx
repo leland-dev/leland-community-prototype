@@ -258,7 +258,7 @@ const verizonCohorts: CohortEntry[] = [
 const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   "zoe.park@kellogg.edu": {
     name: "Zoe Park", email: "zoe.park@kellogg.edu", initials: "ZP", dateAdded: "Jan 5, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 8, 2026", status: "completed" },
       { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 22, 2026", status: "scheduled" },
     ]},
@@ -267,7 +267,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
   "sarah.kim@kellogg.edu": {
     name: "Sarah Kim", email: "sarah.kim@kellogg.edu", initials: "SK", image: userImg1, dateAdded: "Jan 10, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Jul 10, 2026", status: "completed" },
       { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Jul 24, 2026", status: "scheduled" },
     ]},
@@ -276,7 +276,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
   "raj.patel@kellogg.edu": {
     name: "Raj Patel", email: "raj.patel@kellogg.edu", initials: "RP", image: userImg2, dateAdded: "Jan 10, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Jul 14, 2026", status: "completed" },
       { date: "—", status: "unbooked" },
     ]},
@@ -285,7 +285,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
   "mia.chen@kellogg.edu": {
     name: "Mia Chen", email: "mia.chen@kellogg.edu", initials: "MC", image: userImg4, dateAdded: "Jan 15, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 29, 2026", status: "scheduled" },
       { date: "—", status: "unbooked" },
     ]},
@@ -294,7 +294,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
   "evan.torres@kellogg.edu": {
     name: "Evan Torres", email: "evan.torres@kellogg.edu", initials: "ET", image: userImg5, dateAdded: "Jan 15, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Jul 9, 2026", status: "completed" },
       { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Jul 21, 2026", status: "completed" },
     ]},
@@ -303,7 +303,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
   "aisha.lee@kellogg.edu": {
     name: "Aisha Lee", email: "aisha.lee@kellogg.edu", initials: "AL", image: userImg3, dateAdded: "Feb 1, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { date: "—", status: "unbooked" },
       { date: "—", status: "unbooked" },
     ]},
@@ -312,7 +312,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
   "jordan.lee@kellogg.edu": {
     name: "Jordan Lee", email: "jordan.lee@kellogg.edu", initials: "JL", dateAdded: "Jan 20, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Jul 11, 2026", status: "completed" },
       { date: "—", status: "unbooked" },
     ]},
@@ -321,7 +321,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
   "priya.mehta@kellogg.edu": {
     name: "Priya Mehta", email: "priya.mehta@kellogg.edu", initials: "PM", dateAdded: "Jan 20, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 15, 2026", status: "completed" },
       { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 28, 2026", status: "scheduled" },
     ]},
@@ -330,7 +330,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
   "daniel.wu@kellogg.edu": {
     name: "Daniel Wu", email: "daniel.wu@kellogg.edu", initials: "DW", dateAdded: "Feb 3, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Jul 30, 2026", status: "scheduled" },
       { date: "—", status: "unbooked" },
     ]},
@@ -339,7 +339,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
   "nina.brooks@kellogg.edu": {
     name: "Nina Brooks", email: "nina.brooks@kellogg.edu", initials: "NB", dateAdded: "Jan 25, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 7, 2026", status: "completed" },
       { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 18, 2026", status: "completed" },
     ]},
@@ -348,7 +348,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
   "carlos.rivera@kellogg.edu": {
     name: "Carlos Rivera", email: "carlos.rivera@kellogg.edu", initials: "CR", dateAdded: "Feb 10, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { date: "—", status: "unbooked" },
       { date: "—", status: "unbooked" },
     ]},
@@ -357,7 +357,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
   "hannah.seo@kellogg.edu": {
     name: "Hannah Seo", email: "hannah.seo@kellogg.edu", initials: "HS", dateAdded: "Feb 15, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Jul 16, 2026", status: "completed" },
       { date: "—", status: "unbooked" },
     ]},
@@ -366,7 +366,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
   "tunde.okafor@kellogg.edu": {
     name: "Tunde Okafor", email: "tunde.okafor@kellogg.edu", initials: "TO", dateAdded: "Mar 1, 2026",
-    sessions: { granted: 2, entries: [
+    sessions: { granted: 2, minutesPerSession: 30, entries: [
       { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Jul 31, 2026", status: "scheduled" },
       { date: "—", status: "unbooked" },
     ]},
@@ -686,18 +686,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                   </th>}
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">User</div></th>
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
-                    <div className="flex items-center gap-1.5">
-                      <span className="max-w-[120px] truncate">1:1 Sessions</span>
-                      <div className="group relative flex items-center">
-                        <svg onClick={() => setOpenTooltip(openTooltip === "sessions" ? null : "sessions")} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight cursor-pointer">
-                          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
-                        </svg>
-                        <div className={`pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-[220px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[13px] font-normal leading-[1.4] text-white shadow-lg transition-opacity group-hover:opacity-100 ${openTooltip === "sessions" ? "opacity-100" : "opacity-0"}`}>
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-dark" />
-                          Sessions used (scheduled or completed) out of total sessions granted
-                        </div>
-                      </div>
-                    </div>
+                    <span className="max-w-[120px] truncate">1:1 Sessions</span>
                   </th>
                   {CONTRACT_COHORTS.map((c) => (
                     <th key={c.key} className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
@@ -762,9 +751,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     </td>
                     <td className="px-4 py-[14px]">
                       {user.sessions != null ? (
-                        <div>
-                          <div className="text-[16px] font-medium text-gray-dark">{user.sessions} <span className="font-normal text-gray-light">/ {user.sessionsTotal}</span></div>
-                        </div>
+                        <div className="text-[16px] font-medium text-gray-dark">{user.sessions} <span className="font-normal text-gray-light">/ {user.sessionsTotal}</span></div>
                       ) : <span className="text-[16px] text-gray-light">—</span>}
                     </td>
                     {CONTRACT_COHORTS.map((c) => {
