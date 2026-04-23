@@ -8,6 +8,7 @@ import menuBurgerIcon from "../assets/icons/menu-burger.svg";
 import playVideoIcon from "../assets/icons/play-video.svg";
 import slackIcon from "../assets/icons/slack-black.svg";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
+import eyeClosedIcon from "../assets/icons/eye-closed.svg";
 import browserIcon from "../assets/icons/browser.svg";
 import settingsIcon from "../assets/icons/settings.svg";
 import introCallImg from "../assets/img/intro-call.png";
@@ -22,6 +23,7 @@ interface OfferingCardProps {
   subtitle: ReactNode;
   image: string;
   purchased?: boolean;
+  exhausted?: boolean;
   pending?: boolean;
   cohortSelected?: boolean;
   ctaLabel?: string;
@@ -29,8 +31,9 @@ interface OfferingCardProps {
   size?: "large" | "small";
 }
 
-function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: boolean): { label: string; green?: boolean } {
+function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: boolean, exhausted: boolean): { label: string; green?: boolean } {
   if (purchased) {
+    if (type === "hourly" && exhausted) return { label: "Buy coaching" };
     if (type === "hourly") return { label: "Schedule" };
     if (type === "hourly-package") return { label: "Schedule" };
     if (type === "package") return { label: "Schedule" };
@@ -53,7 +56,7 @@ interface MenuItem {
   danger?: boolean;
 }
 
-function getMenuItems(type: OfferingType, cohortSelected: boolean): MenuItem[] {
+function getMenuItems(type: OfferingType, cohortSelected: boolean, exhausted: boolean): MenuItem[] {
   if (type === "coach-matching") {
     return [
       { icon: chatIcon, label: "Message" },
@@ -65,10 +68,10 @@ function getMenuItems(type: OfferingType, cohortSelected: boolean): MenuItem[] {
     ];
   }
   if (type === "hourly") {
-    return [
-      { icon: addPlusIcon, label: "Buy more time" },
-      { icon: chatIcon, label: "Message" },
-    ];
+    const items: MenuItem[] = exhausted
+      ? [{ icon: chatIcon, label: "Message" }, { icon: eyeClosedIcon, label: "Hide from list" }]
+      : [{ icon: addPlusIcon, label: "Buy coaching" }, { icon: chatIcon, label: "Message" }];
+    return items;
   }
   if (type === "hourly-package") {
     return [
@@ -116,6 +119,7 @@ export default function OfferingCard({
   subtitle,
   image,
   purchased = false,
+  exhausted = false,
   pending = false,
   cohortSelected = true,
   ctaLabel,
@@ -129,9 +133,9 @@ export default function OfferingCard({
   const isPersonImage = type === "hourly" || type === "coach-matching" || ((type === "hourly-package" || type === "package") && purchased);
   const cta = pending && type === "coach-matching"
     ? { label: "Matching", green: false, disabled: true }
-    : { ...getDefaultCta(type, purchased, cohortSelected), disabled: false };
+    : { ...getDefaultCta(type, purchased, cohortSelected, exhausted), disabled: false };
   const label = ctaLabel || cta.label;
-  const menuItems = getMenuItems(type, cohortSelected);
+  const menuItems = getMenuItems(type, cohortSelected, exhausted);
   const showMenu = purchased || type === "leland-plus";
 
   useEffect(() => {

@@ -110,6 +110,7 @@ interface PurchasedOffering {
   title: string;
   subtitle: ReactNode;
   image: string;
+  exhausted?: boolean;
 }
 
 const purchasedOfferings: PurchasedOffering[] = [
@@ -118,6 +119,13 @@ const purchasedOfferings: PurchasedOffering[] = [
     title: "1h 20m with Marcus",
     subtitle: "45m available to schedule",
     image: pic9,
+  },
+  {
+    type: "hourly",
+    title: "Out of time with Jessica",
+    subtitle: "0m available to schedule",
+    image: pic6,
+    exhausted: true,
   },
   {
     type: "package",
@@ -285,6 +293,7 @@ export default function ProfileV2() {
   const [isCustomerProfile, setIsCustomerProfile] = useState(searchParams.get("type") !== "coach");
   const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes">("activity");
   const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Courses" | "Content">("All");
+  const [purchasesExpanded, setPurchasesExpanded] = useState(false);
   const [pastOpen, setPastOpen] = useState(false);
   const [sectionFilter, setSectionFilter] = useState("All");
   const [offeringsType, setOfferingsType] = useState("All");
@@ -1371,7 +1380,7 @@ export default function ProfileV2() {
                         {(["All", "Coaching", "Courses", "Content"] as const).map((tab) => (
                           <button
                             key={tab}
-                            onClick={() => setPurchasesFilter(tab)}
+                            onClick={() => { setPurchasesFilter(tab); setPurchasesExpanded(false); }}
                             className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
                               purchasesFilter === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
                             }`}
@@ -1380,31 +1389,64 @@ export default function ProfileV2() {
                           </button>
                         ))}
                       </div>
-                      <div className="mt-4 flex flex-col gap-1">
-                        {purchasedOfferings
-                          .filter((offering) => {
-                            if (purchasesFilter === "All") return true;
-                            if (purchasesFilter === "Coaching") return offering.type === "hourly" || offering.type === "hourly-package" || offering.type === "package";
-                            if (purchasesFilter === "Courses") return offering.type === "course";
-                            return offering.type === "content";
-                          })
-                          .map((offering) => (
-                            <OfferingCard
-                              key={offering.title}
-                              type={offering.type}
-                              title={offering.title}
-                              subtitle={offering.subtitle}
-                              image={offering.image}
-                              purchased
-                            />
-                          ))}
-                      </div>
-                      <Link
-                        to="/settings?tab=orders"
-                        className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
-                      >
-                        See full order history
-                      </Link>
+                      {(() => {
+                        const filtered = purchasedOfferings.filter((offering) => {
+                          if (purchasesFilter === "All") return true;
+                          if (purchasesFilter === "Coaching") return offering.type === "hourly" || offering.type === "hourly-package" || offering.type === "package";
+                          if (purchasesFilter === "Courses") return offering.type === "course";
+                          return offering.type === "content";
+                        });
+                        const canTruncate = purchasesFilter === "All" && filtered.length > 4;
+                        const alwaysVisible = canTruncate ? filtered.slice(0, 4) : filtered;
+                        const overflow = canTruncate ? filtered.slice(4) : [];
+                        return (
+                          <>
+                            <div className="mt-4 flex flex-col gap-1">
+                              {alwaysVisible.map((offering) => (
+                                <OfferingCard
+                                  key={offering.title}
+                                  type={offering.type}
+                                  title={offering.title}
+                                  subtitle={offering.subtitle}
+                                  image={offering.image}
+                                  purchased
+                                  exhausted={!!offering.exhausted}
+                                />
+                              ))}
+                              <AnimatePresence initial={false}>
+                                {purchasesExpanded && overflow.map((offering, i) => (
+                                  <motion.div
+                                    key={offering.title}
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1], delay: i * 0.03 }}
+                                    className="overflow-hidden"
+                                  >
+                                    <OfferingCard
+                                      type={offering.type}
+                                      title={offering.title}
+                                      subtitle={offering.subtitle}
+                                      image={offering.image}
+                                      purchased
+                                      exhausted={!!offering.exhausted}
+                                    />
+                                  </motion.div>
+                                ))}
+                              </AnimatePresence>
+                            </div>
+                            {canTruncate && (
+                              <button
+                                onClick={() => setPurchasesExpanded(!purchasesExpanded)}
+                                className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                              >
+                                {purchasesExpanded ? "See less" : "See all"}
+                                <img src={chevronDownIcon} alt="" className={`h-[16px] w-[16px] transition-transform ${purchasesExpanded ? "rotate-180" : ""}`} />
+                              </button>
+                            )}
+                          </>
+                        );
+                      })()}
                     </section>
 
                     {/* My Goals */}

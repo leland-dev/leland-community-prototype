@@ -8,6 +8,7 @@ import chevronDownIcon from "../assets/icons/chevron-down.svg";
 import shieldIcon from "../assets/icons/shield-light.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic6 from "../assets/profile photos/pic-6.png";
+import pic8 from "../assets/profile photos/pic-8.png";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
@@ -23,6 +24,7 @@ interface DemoConfig {
   defaultProps: { title: string; subtitle: ReactNode; image: string };
   purchasedProps: { title: string; subtitle: ReactNode; image: string };
   purchasedAltProps?: { label: string; cohortSelected: boolean; title: string; subtitle: ReactNode; image: string };
+  exhaustedProps?: { title: string; subtitle: ReactNode; image: string };
 }
 
 const demos: DemoConfig[] = [
@@ -53,6 +55,11 @@ const demos: DemoConfig[] = [
     purchasedProps: {
       title: "1h 20m with Jessica",
       subtitle: "45m available to schedule",
+      image: pic6,
+    },
+    exhaustedProps: {
+      title: "Out of time with Jessica",
+      subtitle: "0m available to schedule",
       image: pic6,
     },
   },
@@ -138,8 +145,9 @@ const defaultOfferings: { type: OfferingType; title: string; subtitle: ReactNode
 ];
 
 /* ── Purchased offerings for the live demo ── */
-const purchasedOfferingsDemo: { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string }[] = [
+const purchasedOfferingsDemo: { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string; exhausted?: boolean }[] = [
   { type: "hourly", title: "1h 20m with Jessica", subtitle: "45m available to schedule", image: pic6 },
+  { type: "hourly", title: "Out of time with Marcus", subtitle: "0m available to schedule", image: pic8, exhausted: true },
   { type: "package", title: "MBA Application Package", subtitle: <>Comprehensive package · <span className="text-[#038561]">Currently active</span></>, image: pic1 },
   { type: "course", title: "GMAT Exam Prep Bootcamp", subtitle: <>Started June 1 <span className="text-[#9B9B9B]">· Next session tomorrow</span></>, image: bootcampImg1 },
   { type: "content", title: "How I Got Into Stanford GSB", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>, image: lelandPlusImg1 },
@@ -148,6 +156,7 @@ const purchasedOfferingsDemo: { type: OfferingType; title: string; subtitle: Rea
 function LiveDemo() {
   const [purchased, setPurchased] = useState(false);
   const [filter, setFilter] = useState<string>("All");
+  const [expanded, setExpanded] = useState(false);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [category, setCategory] = useState("All");
   const categoryRef = useRef<HTMLDivElement>(null);
@@ -186,7 +195,7 @@ function LiveDemo() {
       {/* Toggle */}
       <div className="flex gap-[6px]">
         <button
-          onClick={() => setPurchased(false)}
+          onClick={() => { setPurchased(false); setExpanded(false); }}
           className={`cursor-pointer rounded-full px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
             !purchased ? "border-[1.5px] border-[#222222] bg-[#f5f5f5]" : "border-[1.5px] border-transparent bg-[#f5f5f5] transition-colors hover:bg-[#ebebeb]"
           }`}
@@ -194,7 +203,7 @@ function LiveDemo() {
           Default
         </button>
         <button
-          onClick={() => setPurchased(true)}
+          onClick={() => { setPurchased(true); setExpanded(false); }}
           className={`cursor-pointer rounded-full px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
             purchased ? "border-[1.5px] border-[#222222] bg-[#f5f5f5]" : "border-[1.5px] border-transparent bg-[#f5f5f5] transition-colors hover:bg-[#ebebeb]"
           }`}
@@ -220,7 +229,7 @@ function LiveDemo() {
               {tabs.map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setFilter(tab)}
+                  onClick={() => { setFilter(tab); setExpanded(false); }}
                   className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
                     activeFilter === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
                   }`}
@@ -265,38 +274,72 @@ function LiveDemo() {
           </div>
 
           {/* Cards */}
-          {filtered.length > 0 ? (
-            <div className="mt-4 flex flex-col gap-1">
-              {filtered.slice(0, 5).map((o) => (
-                <OfferingCard
-                  key={o.title}
-                  type={o.type}
-                  title={o.title}
-                  subtitle={o.subtitle}
-                  image={o.image}
-                  purchased={purchased}
-                  ctaLabel={o.ctaLabel}
-                />
-              ))}
-            </div>
-          ) : (
+          {filtered.length > 0 ? (() => {
+            const canTruncate = activeFilter === "All" && filtered.length > 4;
+            const alwaysVisible = canTruncate ? filtered.slice(0, 4) : filtered;
+            const overflow = canTruncate ? filtered.slice(4) : [];
+            return (
+              <div className="mt-4 flex flex-col gap-1">
+                {alwaysVisible.map((o) => (
+                  <OfferingCard
+                    key={o.title}
+                    type={o.type}
+                    title={o.title}
+                    subtitle={o.subtitle}
+                    image={o.image}
+                    purchased={purchased}
+                    exhausted={"exhausted" in o && !!o.exhausted}
+                    ctaLabel={o.ctaLabel}
+                  />
+                ))}
+                <AnimatePresence initial={false}>
+                  {expanded && overflow.map((o, i) => (
+                    <motion.div
+                      key={o.title}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1], delay: i * 0.03 }}
+                      className="overflow-hidden"
+                    >
+                      <OfferingCard
+                        type={o.type}
+                        title={o.title}
+                        subtitle={o.subtitle}
+                        image={o.image}
+                        purchased={purchased}
+                        exhausted={"exhausted" in o && !!o.exhausted}
+                        ctaLabel={o.ctaLabel}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            );
+          })() : (
             <div className="mt-4 flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[#D0D0D0] py-10 text-center">
               <p className="text-[16px] text-[#9B9B9B]">No memberships available yet</p>
             </div>
           )}
 
-          {/* Bottom CTA + guarantee */}
-          <div className="mt-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
-            <button className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
-              {purchased ? "See full order history" : "See all offerings"}
-            </button>
-            {!purchased && (
+          {/* Bottom row: See all + guarantee */}
+          {!purchased && (
+            <div className="mt-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
+              {activeFilter === "All" && filtered.length > 4 ? (
+                <button
+                  onClick={() => setExpanded(!expanded)}
+                  className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                >
+                  {expanded ? "See less" : "See all"}
+                  <img src={chevronDownIcon} alt="" className={`h-[16px] w-[16px] transition-transform ${expanded ? "rotate-180" : ""}`} />
+                </button>
+              ) : <div />}
               <div className="flex items-center gap-2 text-[15px] text-[#9b9b9b]">
                 <img src={shieldIcon} alt="" className="w-[12px]" />
                 <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
@@ -339,6 +382,19 @@ function DemoSection({ demo }: { demo: DemoConfig }) {
                   purchased
                 />
               )}
+            </div>
+          )}
+          {demo.exhaustedProps && (
+            <div>
+              <span className="flex items-center gap-1 text-[14px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />Purchased · No time remaining</span>
+              <OfferingCard
+                type={demo.type}
+                title={demo.exhaustedProps.title}
+                subtitle={demo.exhaustedProps.subtitle}
+                image={demo.exhaustedProps.image}
+                purchased
+                exhausted
+              />
             </div>
           )}
           {demo.purchasedAltProps && (
