@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import { Button } from "../components/Button";
-import { useSearchParams, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import PageShell from "../components/PageShell";
@@ -281,7 +281,7 @@ function CategorySubtitle({ photos, experts }: { photos: string[]; experts: stri
   );
 }
 
-export default function ProfileV2() {
+export default function ProfileV2({ coach = false }: { coach?: boolean }) {
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
   const [isFollowing, setIsFollowing] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -296,8 +296,7 @@ export default function ProfileV2() {
   const [showSupercoach, setShowSupercoach] = useState(false);
   const [showCoverImage, setShowCoverImage] = useState(false);
   const [showGrayHeader, setShowGrayHeader] = useState(true);
-  const [searchParams] = useSearchParams();
-  const [isCustomerProfile, setIsCustomerProfile] = useState(searchParams.get("type") !== "coach");
+  const isCustomerProfile = !coach;
   const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes">("activity");
   const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Courses" | "Content">("All");
   const [purchasesExpanded, setPurchasesExpanded] = useState(false);
@@ -412,17 +411,19 @@ export default function ProfileV2() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === "c") setIsCustomerProfile(p => !p);
-      if (e.key === "v") setShowCoachVideo(p => !p);
       if (e.key === "o") setViewingOwnProfile(p => !p);
       if (e.key === "i") setShowCoverImage(p => !p);
-      if (e.key === "n") setShowCoachNote(p => !p);
-      if (e.key === "f") setShowCustomerFavorite(p => !p);
-      if (e.key === "s") setShowSupercoach(p => !p);
+      if (e.key === "g") setShowGrayHeader(p => !p);
+      if (!isCustomerProfile) {
+        if (e.key === "v") setShowCoachVideo(p => !p);
+        if (e.key === "n") setShowCoachNote(p => !p);
+        if (e.key === "f") setShowCustomerFavorite(p => !p);
+        if (e.key === "s") setShowSupercoach(p => !p);
+      }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isCustomerProfile]);
 
   const scrollToSection = (id: string) => {
     const el = sectionRefs.current[id];
@@ -1619,59 +1620,36 @@ export default function ProfileV2() {
               transition={{ duration: 0.15 }}
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
-              <div className="mb-1.5 px-2 pt-1 text-[14px] font-medium uppercase tracking-wider text-[#9b9b9b]">
-                Profile type
-              </div>
-              <div className="mx-2 mb-2 flex rounded-lg bg-[#f5f5f5] p-[3px]">
-                <button
-                  onClick={() => {
-                    setIsCustomerProfile(false);
-                    setShowCoachVideo(true);
-                  }}
-                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[14px] font-medium transition-colors ${!isCustomerProfile ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
-                >
-                  Coach
-                </button>
-                <button
-                  onClick={() => {
-                    setIsCustomerProfile(true);
-                    setShowCustomerFavorite(false);
-                    setShowCoachNote(false);
-                    setShowCoachVideo(false);
-                  }}
-                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[14px] font-medium transition-colors ${isCustomerProfile ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
-                >
-                  Customer
-                </button>
-              </div>
-              <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${isCustomerProfile ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
-                <span className="text-[16px] font-medium text-gray-dark">Customer favorite</span>
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    checked={showCustomerFavorite}
-                    onChange={() => !isCustomerProfile && setShowCustomerFavorite(!showCustomerFavorite)}
-                    disabled={isCustomerProfile}
-                    className="peer sr-only"
-                  />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
-                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
-                </div>
-              </label>
-              <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${isCustomerProfile ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
-                <span className="text-[16px] font-medium text-gray-dark">Coach video</span>
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    checked={showCoachVideo}
-                    onChange={() => !isCustomerProfile && setShowCoachVideo(!showCoachVideo)}
-                    disabled={isCustomerProfile}
-                    className="peer sr-only"
-                  />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
-                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
-                </div>
-              </label>
+              {!isCustomerProfile && (
+                <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                  <span className="text-[16px] font-medium text-gray-dark">Customer favorite</span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={showCustomerFavorite}
+                      onChange={() => setShowCustomerFavorite(!showCustomerFavorite)}
+                      className="peer sr-only"
+                    />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                    <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                  </div>
+                </label>
+              )}
+              {!isCustomerProfile && (
+                <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                  <span className="text-[16px] font-medium text-gray-dark">Coach video</span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={showCoachVideo}
+                      onChange={() => setShowCoachVideo(!showCoachVideo)}
+                      className="peer sr-only"
+                    />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                    <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                  </div>
+                </label>
+              )}
               <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${showCoverImage ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
                 <span className="text-[16px] font-medium text-gray-dark">Gray header</span>
                 <div className="relative">
@@ -1698,34 +1676,36 @@ export default function ProfileV2() {
                   <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                 </div>
               </label>
-              <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${isCustomerProfile ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
-                <span className="text-[16px] font-medium text-gray-dark">Coach note</span>
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    checked={showCoachNote}
-                    onChange={() => !isCustomerProfile && setShowCoachNote(!showCoachNote)}
-                    disabled={isCustomerProfile}
-                    className="peer sr-only"
-                  />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
-                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
-                </div>
-              </label>
-              <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${isCustomerProfile ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
-                <span className="text-[16px] font-medium text-gray-dark">Supercoach</span>
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    checked={showSupercoach}
-                    onChange={() => !isCustomerProfile && setShowSupercoach(!showSupercoach)}
-                    disabled={isCustomerProfile}
-                    className="peer sr-only"
-                  />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
-                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
-                </div>
-              </label>
+              {!isCustomerProfile && (
+                <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                  <span className="text-[16px] font-medium text-gray-dark">Coach note</span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={showCoachNote}
+                      onChange={() => setShowCoachNote(!showCoachNote)}
+                      className="peer sr-only"
+                    />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                    <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                  </div>
+                </label>
+              )}
+              {!isCustomerProfile && (
+                <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                  <span className="text-[16px] font-medium text-gray-dark">Supercoach</span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={showSupercoach}
+                      onChange={() => setShowSupercoach(!showSupercoach)}
+                      className="peer sr-only"
+                    />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                    <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                  </div>
+                </label>
+              )}
               <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
                 <span className="text-[16px] font-medium text-gray-dark">Show sidebar</span>
                 <div className="relative">

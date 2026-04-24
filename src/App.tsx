@@ -49,6 +49,7 @@ export default function App() {
         {/* Standalone pages using PageShell directly */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile-v2" element={<ProfileV2 />} />
+        <Route path="/coach-profile" element={<ProfileV2 coach />} />
         <Route path="/groups/:groupId" element={<Group />} />
         <Route path="/site" element={<Site />} />
         <Route path="/settings" element={<AccountSettings />} />
