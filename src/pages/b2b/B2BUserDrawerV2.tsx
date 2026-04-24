@@ -96,14 +96,14 @@ function AccordionSection({
   onToggle?: () => void;
 }) {
   return (
-    <div className="overflow-hidden rounded-[12px] border border-gray-stroke">
-      <div className="flex items-center justify-between gap-4 border-b border-gray-stroke bg-gray-hover px-4 py-2.5">
+    <div className="rounded-[12px] border border-gray-stroke">
+      <div className="flex items-center justify-between gap-4 overflow-hidden rounded-t-[11px] border-b border-gray-stroke bg-gray-hover px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           <div className="shrink-0 text-[14px] font-medium text-gray-light">{title}</div>
         </div>
         {pill && <div className="shrink-0">{pill}</div>}
       </div>
-      <div className="px-4 pb-4 pt-3">{children}</div>
+      <div className="px-4 pb-4 pt-4">{children}</div>
     </div>
   );
 }
@@ -204,17 +204,26 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                       pill={undefined}
                     >
                       {/* Progress bar */}
-                      <div className="mb-4 flex items-center gap-3">
+                      <div className="mb-3 flex items-center gap-3">
                         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-stroke">
                           <div
                             className="h-full rounded-full bg-primary transition-all"
                             style={{ width: `${(sessionsCompleted / user.sessions.granted) * 100}%` }}
                           />
                         </div>
-                        <span className="shrink-0 text-[14px] text-gray-light">{sessionsCompleted}/{user.sessions.granted} completed</span>
+                        <div className="group relative flex shrink-0 cursor-pointer items-center gap-1">
+                          <span className="text-[14px] leading-none text-gray-light">{sessionsCompleted} of {user.sessions.granted} completed</span>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight">
+                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                          </svg>
+                          <div className="pointer-events-none absolute bottom-full right-0 mb-2 w-[200px] rounded-lg bg-gray-dark px-3 py-2 text-[13px] leading-[1.4] text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                            Sessions are calculated based on time used.
+                            <div className="absolute right-2 top-full border-4 border-transparent border-t-gray-dark" />
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Session rows */}
+                      {/* Session rows — one per granted session slot */}
                       <div className="flex flex-col">
                         {user.sessions.entries.map((s, i) => (
                           <div key={i} className="flex items-center justify-between gap-4 border-b border-gray-stroke py-3 last:border-0">
@@ -234,22 +243,24 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                                 <div className="h-9 w-9 shrink-0 rounded-full border-2 border-dashed border-gray-stroke bg-gray-hover" />
                               )}
                               <div className="flex min-w-0 flex-col gap-0.5">
-                                <div className="truncate text-[16px] font-medium leading-[1.2] text-gray-dark">
-                                  Session {i + 1}{s.coach ? `: ${s.coach.split(" ")[0]} ${s.coach.split(" ")[1]?.[0] ?? ""}.` : ""}
-                                </div>
-                                {s.coachHeadline ? (
-                                  <div className="truncate text-[14px] leading-[1.2] text-gray-light">{s.coachHeadline}</div>
+                                {s.coach ? (
+                                  <div className="truncate text-[16px] font-medium leading-[1.2] text-gray-dark">
+                                    With {`${s.coach.split(" ")[0]} ${s.coach.split(" ")[1]?.[0] ?? ""}.`}
+                                  </div>
                                 ) : (
-                                  <div className="text-[14px] leading-[1.2] text-gray-light">Not yet scheduled</div>
+                                  <div className="truncate text-[16px] font-medium leading-[1.2] text-gray-dark">Not yet scheduled</div>
                                 )}
+                                {s.coachHeadline && <div className="truncate text-[14px] leading-[1.2] text-gray-light">{s.coachHeadline}</div>}
                               </div>
                             </div>
-                            <div className="flex shrink-0 flex-col gap-0.5 text-right">
-                              <div className={`text-[16px] leading-[1.2] ${s.status === "unbooked" ? "text-gray-xlight" : "text-gray-dark"}`}>
-                                {s.status === "completed" ? "Completed" : s.status === "scheduled" ? "Scheduled" : "—"}
+                            {s.status !== "unbooked" && (
+                              <div className="flex shrink-0 flex-col gap-0.5 text-right">
+                                <div className="text-[16px] leading-[1.2] text-gray-dark">
+                                  {s.status === "completed" ? "Completed" : "Scheduled"}
+                                </div>
+                                {s.date !== "—" && <div className="text-[14px] leading-[1.2] text-gray-light">{s.date}</div>}
                               </div>
-                              {s.date !== "—" && <div className="text-[14px] leading-[1.2] text-gray-light">{s.date}</div>}
-                            </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -348,18 +359,18 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                     >
                       <div className="flex flex-col">
                         {user.plus.grantedDate && (
-                          <div className="flex items-center justify-between border-b border-gray-stroke py-2.5">
+                          <div className="flex items-center justify-between border-b border-gray-stroke py-3">
                             <span className="text-[16px] text-gray-light">Access granted</span>
                             <span className="text-[16px] text-gray-dark">{user.plus.grantedDate}</span>
                           </div>
                         )}
-                        <div className="flex items-center justify-between border-b border-gray-stroke py-2.5">
+                        <div className="flex items-center justify-between border-b border-gray-stroke py-3">
                           <span className="text-[16px] text-gray-light">Status</span>
                           <span className={`text-[16px] ${user.plus.status === "active" ? "text-gray-dark" : "text-gray-xlight"}`}>
                             {user.plus.status === "active" ? "Active" : "Expired"}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between py-2.5">
+                        <div className="flex items-center justify-between py-3">
                           <span className="text-[16px] text-gray-light">{user.plus.status === "active" ? "Expires" : "Expired"}</span>
                           <span className="text-[16px] text-gray-dark">{user.plus.expiry}</span>
                         </div>
@@ -368,15 +379,6 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                   )}
 
                 </div>
-              </div>
-              {/* Footer */}
-              <div className="shrink-0 border-t border-gray-stroke px-4 py-4 sm:px-6">
-                <button
-                  onClick={onClose}
-                  className="w-full rounded-lg bg-gray-hover py-4 text-[16px] font-medium text-gray-dark hover:bg-gray-stroke"
-                >
-                  Back to dashboard
-                </button>
               </div>
             </div>
           </motion.div>
