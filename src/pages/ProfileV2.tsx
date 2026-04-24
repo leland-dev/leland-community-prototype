@@ -20,10 +20,12 @@ import pic9 from "../assets/profile photos/pic-9.png";
 import pic10 from "../assets/profile photos/pic-10.png";
 import pic11 from "../assets/profile photos/pic-11.png";
 import mailIcon from "../assets/icons/mail.svg";
+import shareArrowIcon from "../assets/icons/share-arrow.svg";
 import checkIcon from "../assets/icons/check.svg";
 import editIcon from "../assets/icons/edit.svg";
 import verifiedIcon from "../assets/icons/verified.svg";
 import shieldIcon from "../assets/icons/shield-light.svg";
+import airplaneIcon from "../assets/icons/airplane.svg";
 import chevronDownIcon from "../assets/icons/chevron-down.svg";
 import bookBookmarkIcon from "../assets/icons/book-bookmark.svg";
 import piggyBankIcon from "../assets/icons/Piggy bank, Coin.1.svg";
@@ -36,6 +38,8 @@ import categoryMBA from "../assets/placeholder images/category images/gmat-tutor
 import categoryConsulting from "../assets/placeholder images/category images/management-consulting.png";
 import categoryPM from "../assets/placeholder images/category images/product-management.png";
 
+import coachCoverImage from "../assets/img/cover-2.avif";
+import customerCoverImage from "../assets/img/cpver-image 1.jpg";
 import atlassianLogo from "../assets/logos/atlassian.png";
 import yaleLogo from "../assets/logos/yale.png";
 import clientLogo1 from "../assets/logos/Rectangle 3012.png";
@@ -287,8 +291,11 @@ export default function ProfileV2() {
   const [showCustomerFavorite, setShowCustomerFavorite] = useState(true);
   const [showSidebar, setShowSidebar] = useState(true);
   const [showCoachNote, setShowCoachNote] = useState(false);
+  const [coachNoteExpanded, setCoachNoteExpanded] = useState(false);
   const [showCoachVideo, setShowCoachVideo] = useState(true);
   const [showSupercoach, setShowSupercoach] = useState(false);
+  const [showCoverImage, setShowCoverImage] = useState(false);
+  const [showGrayHeader, setShowGrayHeader] = useState(true);
   const [searchParams] = useSearchParams();
   const [isCustomerProfile, setIsCustomerProfile] = useState(searchParams.get("type") !== "coach");
   const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes">("activity");
@@ -402,6 +409,21 @@ export default function ProfileV2() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [eventsCategoryOpen]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "c") setIsCustomerProfile(p => !p);
+      if (e.key === "v") setShowCoachVideo(p => !p);
+      if (e.key === "o") setViewingOwnProfile(p => !p);
+      if (e.key === "i") setShowCoverImage(p => !p);
+      if (e.key === "n") setShowCoachNote(p => !p);
+      if (e.key === "f") setShowCustomerFavorite(p => !p);
+      if (e.key === "s") setShowSupercoach(p => !p);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const scrollToSection = (id: string) => {
     const el = sectionRefs.current[id];
     if (el) {
@@ -477,15 +499,14 @@ export default function ProfileV2() {
       )}
 
       {/* Full-bleed header background */}
-      <div className="w-full bg-[#f5f5f5]">
-        {/* Category bar placeholder */}
-        <div className="mx-auto max-w-[1280px] px-6">
-          <div className="h-[44px]" />
+      {!showCoverImage && showGrayHeader && (
+        <div className="w-full bg-[#f5f5f5]">
+          <div className="mx-auto max-w-[1280px] px-6">
+            <div className="h-[44px]" />
+          </div>
+          <div className="h-[78px]" />
         </div>
-
-        {/* Remaining header space */}
-        <div className="h-[78px]" />
-      </div>
+      )}
 
       {/* Main content area */}
       <PageShell rightSidebar={showSidebar ? (
@@ -562,40 +583,104 @@ export default function ProfileV2() {
             </div>
           ) : (
             <div className="flex flex-col gap-6 transition-[padding] duration-300" style={{ paddingTop: stickyNavVisible ? 56 : 0 }}>
-              {/* Coach video — desktop sidebar */}
-              {showCoachVideo && (
-                <div className="group relative cursor-pointer overflow-hidden rounded-lg">
-                  <img
-                    src={videoThumbnail}
-                    alt="Coach video"
-                    className="block w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute inset-0 transition-colors group-hover:bg-black/10" />
-                  <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 px-2 pb-2">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/40 backdrop-blur-[6px]">
-                      <svg width="11" height="13" viewBox="0 0 18 20" fill="none">
-                        <path d="M17 10L1 19V1L17 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-[16px] font-medium leading-tight text-white">Get to know me</p>
-                      <p className="text-[14px] leading-tight text-white/70">1:40</p>
+              {/* Video + Availability + CTA buttons */}
+              <div className="flex flex-col" style={{ gap: 14 }}>
+                {/* Coach video — desktop sidebar */}
+                {showCoachVideo && (
+                  <div className="group relative cursor-pointer overflow-hidden rounded-lg">
+                    <img
+                      src={videoThumbnail}
+                      alt="Coach video"
+                      className="block w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute inset-0 transition-colors group-hover:bg-black/10" />
+                    <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 px-2 pb-2">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/40 backdrop-blur-[6px]">
+                        <svg width="11" height="13" viewBox="0 0 18 20" fill="none">
+                          <path d="M17 10L1 19V1L17 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-[16px] font-medium leading-tight text-white">Get to know me</p>
+                        <p className="text-[14px] leading-tight text-white/70">1:40</p>
+                      </div>
                     </div>
                   </div>
+                )}
+                <div className="flex items-center justify-between rounded-lg border border-[#E5E5E5] bg-white px-5 py-4" style={{ boxShadow: "0px 1px 2px 0px rgba(16,24,40,0.05)" }}>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[16px] leading-none font-medium text-gray-dark">Available today at 5:30pm</span>
+                    <span className="text-[16px] leading-none text-[#707070]">Usually responds within 12 hours</span>
+                  </div>
+                  <span className="h-[12px] w-[12px] shrink-0 rounded-full bg-[#038561] animate-[pulse-ring_2.4s_ease-out_infinite]" />
                 </div>
-              )}
+                <div className="flex flex-col gap-2">
+                  <button className="w-full cursor-pointer rounded-lg bg-[#038561] px-4 py-3 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                    Schedule a free intro call
+                  </button>
+                  <button className="w-full cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                    Book a session
+                  </button>
+                </div>
+              </div>
 
-              {/* Availability + CTA buttons + guarantee */}
-              <div className="flex flex-col gap-3 px-1">
-                <span className="text-[16px] text-[#296CEF]">Available today at 4:00 PM MDT</span>
-                <button className="w-full cursor-pointer rounded-lg bg-[#038561] px-4 py-3 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
-                  Schedule a free intro call
-                </button>
-                <button className="w-full cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
-                  Book a session
-                </button>
-                <div className="flex items-center justify-center gap-2 text-[14px] text-[#9b9b9b]">
+              {/* Coach note + Questions + Guarantee */}
+              <div className="flex flex-col">
+                {/* Coach note */}
+                {showCoachNote && (
+                  <div
+                    className="flex cursor-pointer gap-3 border-t border-b border-[#E5E5E5] py-6"
+                    onClick={() => setCoachNoteExpanded(p => !p)}
+                  >
+                    <img
+                      src={profilePhoto}
+                      alt={profileName}
+                      className="h-9 w-9 shrink-0 rounded-[4px] object-cover"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-[16px] font-medium text-gray-dark">Note from {profileName.split(" ")[0]}</p>
+                      <div className="relative mt-0.5">
+                        <motion.div
+                          initial={false}
+                          animate={{ height: coachNoteExpanded ? "auto" : 66 }}
+                          transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <p className="text-[16px] leading-snug text-[#707070]">
+                            If you're looking for AI coaching, from fundamentals to building out more advanced agents and workflows, I'm taking on a few new folks for 1:1 productivity coaching for both your professional and personal life. Keeping up with the pace of development alone requires dedication. But we can bring your information together and rewire how you work. If you're looking for MBA application support, essay-writing, or other coaching, message me directly through Leland and I'll get right back to you.
+                          </p>
+                        </motion.div>
+                        {!coachNoteExpanded && (
+                          <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[16px] leading-snug font-medium text-[#038561]">
+                            Read more
+                          </span>
+                        )}
+                        {coachNoteExpanded && (
+                          <span className="mt-1 inline-block text-[16px] font-medium text-[#038561]">
+                            Read less
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Message section */}
+                <div className={`flex gap-3 border-b border-[#E5E5E5] py-6 ${!showCoachNote ? "border-t" : ""}`}>
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
+                    <img src={airplaneIcon} alt="" className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[16px] font-medium text-gray-dark">Questions?</p>
+                    <p className="mt-0.5 text-[16px] leading-snug text-[#707070]">
+                      You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-[#038561]">Send a message</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Guarantee — always at bottom */}
+                <div className="flex items-center justify-center gap-2 py-3 text-[14px] text-[#9b9b9b]">
                   <img src={shieldIcon} alt="" className="w-[12px]" />
                   <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
                 </div>
@@ -603,10 +688,19 @@ export default function ProfileV2() {
 
             </div>
           )
-        ) : undefined}>
+        ) : undefined} rightSidebarWidth={isCustomerProfile ? 300 : 340}>
         <div>
+          {/* Cover image */}
+          {showCoverImage && (
+            <img
+              src={isCustomerProfile ? customerCoverImage : coachCoverImage}
+              alt="Cover"
+              className="h-[220px] w-full rounded-[6px] object-cover"
+            />
+          )}
+
           {/* Profile photo + CTA buttons */}
-          <div className="-mt-[100px] mb-4 flex flex-col items-start md:flex-row md:items-end md:justify-between">
+          <div className={`${showCoverImage ? "-mt-[80px] pl-4" : showGrayHeader ? "-mt-[100px]" : "mt-0"} mb-4 flex flex-col items-start md:flex-row ${showCoverImage || showGrayHeader ? "md:items-end" : "md:items-start"} md:justify-between`}>
             <div className="group relative z-20 cursor-pointer rounded-lg border-[4px] border-white bg-white" onClick={() => setLightboxOpen(true)}>
               <div className="relative overflow-hidden rounded-[4px]">
                 <motion.img
@@ -618,23 +712,33 @@ export default function ProfileV2() {
                 <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
               </div>
             </div>
-            <div className="hidden items-center gap-2 pb-[90px] md:flex">
+            <div className={`hidden items-center gap-2 ${showCoverImage ? "pb-1" : showGrayHeader ? "pb-[90px]" : "pb-1"} md:flex`}>
               {viewingOwnProfile ? (
-                <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
+                <button className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
+                  showCoverImage || !showGrayHeader
+                    ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
+                    : "border border-[#222222]/10 bg-white text-gray-dark hover:border-[#222222]/20"
+                }`}>
                   <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
                   Edit profile
                 </button>
               ) : (
                 <>
-                  <button className="flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-lg border border-[#222222]/10 bg-white transition-colors hover:border-[#222222]/20">
-                    <img src={mailIcon} alt="Message" className="h-[20px] w-[20px]" />
+                  <button className={`flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-lg transition-colors ${
+                    showCoverImage || !showGrayHeader
+                      ? "bg-[#222222]/5 hover:bg-[#222222]/[0.08]"
+                      : "border border-[#222222]/10 bg-white hover:border-[#222222]/20"
+                  }`}>
+                    <img src={shareArrowIcon} alt="Share" className="h-[20px] w-[20px]" />
                   </button>
                   <button
                     onClick={() => setIsFollowing(!isFollowing)}
                     className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
                       isCustomerProfile
                         ? "bg-[#038561] text-white hover:bg-[#038561]/90"
-                        : "border border-[#222222]/10 bg-white text-gray-dark hover:border-[#222222]/20"
+                        : showCoverImage || !showGrayHeader
+                          ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
+                          : "border border-[#222222]/10 bg-white text-gray-dark hover:border-[#222222]/20"
                     }`}
                   >
                     {isFollowing && <img src={checkIcon} alt="" className={`h-[18px] w-[18px] ${isCustomerProfile ? "brightness-0 invert" : ""}`} />}
@@ -644,6 +748,9 @@ export default function ProfileV2() {
               )}
             </div>
           </div>
+
+          {/* Name → stats wrapper (padded when cover image is on) */}
+          <div className={showCoverImage ? "pl-4" : ""}>
 
           {/* Name + Supercoach badge */}
           <div className={`flex items-center ${isCustomerProfile ? "gap-2" : "gap-1 mb-1"}`}>
@@ -794,6 +901,12 @@ export default function ProfileV2() {
                 <span className="text-[16px] leading-tight text-[#707070]">Followers</span>
               </div>
               <div className="h-[24px] w-px shrink-0 bg-gray-200" />
+              {/* Likes */}
+              <div className="flex flex-col gap-[2px]">
+                <span className="text-[20px] font-medium leading-none text-gray-dark">1.6k</span>
+                <span className="text-[16px] leading-tight text-[#707070]">Likes</span>
+              </div>
+              <div className="h-[24px] w-px shrink-0 bg-gray-200" />
               {/* Impressions */}
               <div
                 className="flex cursor-pointer flex-col gap-[2px] transition-opacity hover:opacity-70"
@@ -804,6 +917,8 @@ export default function ProfileV2() {
               </div>
             </div>
           )}
+
+          </div>{/* end name → stats wrapper */}
 
           {/* Mobile inline CTA + secondary buttons */}
           <div className="mt-3 flex flex-col gap-3 md:hidden">
@@ -830,7 +945,7 @@ export default function ProfileV2() {
                         {isFollowing ? "Following" : "Follow"}
                       </button>
                       <button className="flex cursor-pointer items-center justify-center rounded-full bg-[#222222]/5 px-4 py-3 transition-colors hover:bg-[#222222]/[0.08]">
-                        <img src={mailIcon} alt="Message" className="h-[20px] w-[20px]" />
+                        <img src={shareArrowIcon} alt="Share" className="h-[20px] w-[20px]" />
                       </button>
                     </>
                   ) : (
@@ -903,22 +1018,6 @@ export default function ProfileV2() {
             </div>
           )}
 
-          {/* Note from coach */}
-          {showCoachNote && (
-            <div className="mt-4 flex cursor-pointer gap-3 rounded-lg bg-[#f5f5f5] p-4 transition-colors hover:bg-[#ebebeb]">
-              <img
-                src={profilePhoto}
-                alt={profileName}
-                className="h-10 w-10 shrink-0 rounded-[4px] object-cover"
-              />
-              <div className="min-w-0">
-                <p className="text-[16px] font-medium text-gray-dark">Note from {profileName.split(" ")[0]}</p>
-                <p className="mt-0.5 line-clamp-2 text-[16px] leading-snug text-[#707070]">
-                  If you're looking for comprehensive MBA application help, for deferred or R1 2026, I have 1-2 spots remaining, so the earlier you reach out the better! When you reach out, let me know where you're applying (or an initial list), the round you're applying, and why you're looking for coaching. I've helped 300+ individuals earn admission into M7 programs, specializing in GSB and HBS. I've also helped individuals earn admission to every top-25 MBA program. Drop me a line to get started.
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* Hero sentinel for sticky nav detection */}
           <div ref={heroSentinelRef} />
@@ -1567,6 +1666,32 @@ export default function ProfileV2() {
                     checked={showCoachVideo}
                     onChange={() => !isCustomerProfile && setShowCoachVideo(!showCoachVideo)}
                     disabled={isCustomerProfile}
+                    className="peer sr-only"
+                  />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+              <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${showCoverImage ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
+                <span className="text-[16px] font-medium text-gray-dark">Gray header</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={showGrayHeader}
+                    onChange={() => !showCoverImage && setShowGrayHeader(!showGrayHeader)}
+                    className="peer sr-only"
+                  />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                <span className="text-[16px] font-medium text-gray-dark">Cover image</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={showCoverImage}
+                    onChange={() => setShowCoverImage(!showCoverImage)}
                     className="peer sr-only"
                   />
                   <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
