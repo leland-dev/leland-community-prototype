@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Button } from "../../components/Button";
 import { motion, AnimatePresence } from "motion/react";
 import usersIcon from "../../assets/icons/users-icon.svg";
 import starIcon from "../../assets/icons/star-icon.svg";
@@ -187,6 +188,18 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                   <div className="mt-1 text-[16px] text-gray-light">
                     {user.email}{user.dateAdded ? ` · Added ${user.dateAdded}` : ""}
                   </div>
+                  <div className="mt-5 flex items-center justify-between gap-4 rounded-xl bg-gray-hover px-4 py-3">
+                    <div>
+                      <div className="text-[16px] font-medium leading-[1.2] text-gray-dark">Send reminder</div>
+                      <div className="mt-0.5 text-[14px] leading-[1.4] text-gray-light">Email the user links to benefits they haven't used yet</div>
+                    </div>
+                    <Button size="sm" variant="secondary" onClick={() => {}} className="shrink-0 border border-gray-stroke bg-white hover:bg-white/90">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
+                      </svg>
+                      Remind
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Accordion sections */}
@@ -225,7 +238,7 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
 
                       {/* Session rows — one per granted session slot */}
                       <div className="flex flex-col">
-                        {user.sessions.entries.map((s, i) => (
+                        {user.sessions.entries.filter(s => s.status !== "unbooked").map((s, i) => (
                           <div key={i} className="flex items-center justify-between gap-4 border-b border-gray-stroke py-3 last:border-0">
                             <div className="flex min-w-0 items-center gap-3">
                               {s.coachImg ? (
@@ -314,11 +327,6 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                           </div>
                         ))}
                         </div>
-                        {user.cohorts.some(c => c.status === "invited") && (
-                          <button className="mt-3 w-full rounded-lg bg-primary px-4 text-[16px] font-medium text-white hover:bg-primary-dark" style={{ height: 44 }}>
-                            Send course invite reminder
-                          </button>
-                        )}
                       </div>
                     </AccordionSection>
                   )}

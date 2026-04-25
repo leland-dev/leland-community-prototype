@@ -621,17 +621,6 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                 {f === "invited" ? "Invite pending" : f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
             ))}
-            {filter === "invited" && (
-              <button
-                onClick={() => {}}
-                className="ml-2 flex shrink-0 items-center gap-1.5 py-[6px] text-[14px] font-medium text-gray-dark hover:opacity-70"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
-                </svg>
-                Resend invite
-              </button>
-            )}
           </div>
         </div>
         <div className="rounded-lg border border-gray-stroke bg-white shadow-card">
@@ -777,6 +766,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     <td className="px-4 py-[14px] text-[16px] text-gray-light">{user.dateAdded}</td>
                     <td className="px-2 py-2">
                       <div className="flex justify-end">
+                        {!showVerizon && (
                         <button
                           onClick={(e) => { e.stopPropagation(); const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); if (openMenuEmail === user.email) { setOpenMenuEmail(null); setMenuPos(null); } else { setOpenMenuEmail(user.email); setMenuPos({ top: r.bottom + 4, right: window.innerWidth - r.right, isMobile: window.innerWidth < 640 }); } }}
                           className="flex h-12 w-12 items-center justify-center rounded-full text-gray-xlight hover:bg-gray-hover hover:text-gray-dark"
@@ -785,6 +775,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                             <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
                           </svg>
                         </button>
+                        )}
+                        {!showVerizon && (
                         <RowMenu isOpen={openMenuEmail === user.email} pos={menuPos} onClose={() => { setOpenMenuEmail(null); setMenuPos(null); }}>
                           <button
                             onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); setMenuPos(null); }}
@@ -807,6 +799,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                             </button>
                           )}
                         </RowMenu>
+                        )}
                       </div>
                     </td>
                   </tr>
