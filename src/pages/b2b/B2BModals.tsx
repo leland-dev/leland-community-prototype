@@ -182,16 +182,15 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }:
               {cohortInvited[cohort] ? (
                 <div className="flex items-center gap-2 rounded-full bg-[#e6f4ef] px-3 py-1.5">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#038561" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span className="text-[14px] font-medium text-[#038561]">Invited</span>
+                  <span className="text-[14px] font-medium text-[#038561]">Added</span>
                   <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: false }))} className="ml-1 text-[#038561] hover:opacity-70">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 </div>
               ) : (
                 <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: true }))}
-                  className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  Invite user
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </button>
               )}
             </div>
@@ -387,6 +386,107 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
       <div className="flex items-center justify-between border-t border-gray-stroke px-6 py-[14px]">
         <Btn variant="secondary" onClick={onClose}>Cancel</Btn>
         <Btn variant="primary" onClick={() => setSent(true)}>{isAlaCarte ? "Grant access" : "Send invite"}</Btn>
+      </div>
+    </>
+  );
+}
+
+// ── AddAdminModal ──
+
+export function AddAdminModal({ open, onClose, onAdd, existingEmails = [] }: { open: boolean; onClose: () => void; onAdd?: (admin: { initials: string; name: string; email: string }) => void; existingEmails?: string[] }) {
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [sent, setSent] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+
+  useEffect(() => {
+    if (!open) { setSent(false); setEmail(""); setFirstName(""); setLastName(""); setEmailError(false); }
+    if (!open) return;
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  const modalWrapper = (children: React.ReactNode) => (
+    <div
+      className="fixed inset-0 z-[1010] flex items-end justify-center bg-black/40 sm:items-center"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="relative flex w-full flex-col overflow-hidden rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] max-h-[100dvh] sm:max-h-[90dvh] sm:w-[520px] sm:max-w-[95vw] sm:rounded-2xl">
+        <button onClick={onClose} className="absolute right-0 top-0 p-2">
+          <div className="flex items-center justify-center rounded-full border border-gray-stroke bg-white p-[10px] text-gray-dark hover:bg-gray-hover">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <line x1="1" y1="1" x2="13" y2="13" /><line x1="13" y1="1" x2="1" y2="13" />
+            </svg>
+          </div>
+        </button>
+        {children}
+      </div>
+    </div>
+  );
+
+  if (sent) return modalWrapper(
+    <>
+      <div className="flex flex-col items-center px-6 pb-8 pt-12 text-center">
+        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-[#ecfdf5]">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#038561" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h3 className="mb-3 text-[30px] font-medium text-gray-dark">Invite sent!</h3>
+        <p className="text-[18px] leading-[1.5] text-gray-light">An email has been sent to {email || "the new admin"}.</p>
+      </div>
+      <div className="border-t border-gray-stroke px-6 py-[14px]">
+        <Btn variant="primary" onClick={onClose} className="w-full justify-center">Sounds good</Btn>
+      </div>
+    </>
+  );
+
+  return modalWrapper(
+    <>
+      <div className="px-6 pb-4 pt-6">
+        <h3 className="text-[30px] font-medium text-gray-dark">Add admin</h3>
+      </div>
+      <div className="flex-1 overflow-y-auto px-6 pb-2">
+        <div className="mb-5">
+          <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Email address</label>
+          <input
+            value={email}
+            onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
+            className={`h-[48px] w-full rounded-[8px] border bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary ${emailError ? "border-[#D92D20]" : "border-gray-stroke"}`}
+            type="email"
+            placeholder="admin@kellogg.edu"
+          />
+          {emailError
+            ? <p className="mt-[6px] text-[14px] text-[#D92D20]">This email is already an admin on this account.</p>
+            : <p className="mt-[6px] text-[14px] text-gray-light">If this email already has a Leland account, they'll be linked automatically.</p>
+          }
+        </div>
+        <div className="mb-5 grid grid-cols-2 gap-3">
+          <div>
+            <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">First name</label>
+            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
+          </div>
+          <div>
+            <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Last name</label>
+            <input value={lastName} onChange={(e) => setLastName(e.target.value)} className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between border-t border-gray-stroke px-6 py-[14px]">
+        <Btn variant="secondary" onClick={onClose}>Cancel</Btn>
+        <Btn variant="primary" onClick={() => {
+          if (existingEmails.some((e) => e.toLowerCase() === email.toLowerCase())) {
+            setEmailError(true);
+            return;
+          }
+          const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "?";
+          onAdd?.({ initials, name: `${firstName} ${lastName}`.trim() || email, email });
+          setSent(true);
+        }}>Send invite</Btn>
       </div>
     </>
   );

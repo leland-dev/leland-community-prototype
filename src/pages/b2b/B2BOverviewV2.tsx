@@ -623,7 +623,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             ))}
           </div>
         </div>
-        <div className="rounded-lg border border-gray-stroke bg-white shadow-card">
+        <div className="relative rounded-lg border border-gray-stroke bg-white shadow-card">
           {/* Bulk action bar — a la carte only */}
           {partnerModel === "a-la-carte" && selectedEmails.size > 0 && (
             <div className="flex items-center gap-3 rounded-t-lg bg-white px-4 py-3">
@@ -689,7 +689,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                   ))}
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+ Access</div></th>
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[120px] truncate">Date added</div></th>
-                  <th className="sticky right-0 bg-[#fafafa] px-4 py-3" />
+                  <th className="sticky right-0 bg-[#fafafa] px-4 py-3"><div className="pointer-events-none absolute inset-y-0 -left-8 w-8 bg-gradient-to-r from-transparent to-[#fafafa]" /></th>
                 </tr>
               </thead>
               <tbody>
@@ -765,6 +765,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     </td>
                     <td className="px-4 py-[14px] text-[16px] text-gray-light">{user.dateAdded}</td>
                     <td className="sticky right-0 bg-white px-4 py-[14px] group-hover:bg-[#fafafa]">
+                      <div className="pointer-events-none absolute inset-y-0 -left-8 w-8 bg-gradient-to-r from-transparent to-white group-hover:to-[#fafafa]" />
                       <div className="flex items-center justify-end gap-2">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight">
                           <polyline points="9 18 15 12 9 6" />

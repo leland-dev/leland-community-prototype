@@ -3,6 +3,7 @@ import { Button } from "../../components/Button";
 import { Avatar, Card } from "./B2BShared";
 import layoutGridIcon from "../../assets/icons/layout-grid.svg";
 import { motion, AnimatePresence } from "motion/react";
+import { AddAdminModal } from "./B2BModals";
 
 const PAGE_SIZE = 25;
 
@@ -13,11 +14,13 @@ const ADMIN_USERS = [
 ];
 
 export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboard?: () => void }) {
+  const [admins, setAdmins] = useState(ADMIN_USERS);
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<{ name: string; email: string } | null>(null);
+  const [addAdminOpen, setAddAdminOpen] = useState(false);
 
-  const filteredAdmins = ADMIN_USERS.filter((a) => {
+  const filteredAdmins = admins.filter((a) => {
     const q = search.toLowerCase();
     return a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q);
   });
@@ -54,7 +57,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
         <div>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-[24px] font-medium leading-[1.2] text-gray-dark">Admins</h2>
-            <Button size="md" variant="secondary" className="shrink-0">
+            <Button size="md" variant="secondary" className="shrink-0" onClick={() => setAddAdminOpen(true)}>
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
               </svg>
@@ -153,6 +156,12 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
           </div>
         </div>
       </div>
+      <AddAdminModal
+        open={addAdminOpen}
+        onClose={() => setAddAdminOpen(false)}
+        onAdd={(admin) => setAdmins((prev) => [...prev, admin])}
+        existingEmails={admins.map((a) => a.email)}
+      />
       {/* Delete confirmation modal */}
       <AnimatePresence>
         {confirmDelete && (
@@ -173,7 +182,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
               <div className="mt-6 flex gap-3">
                 <Button size="md" variant="secondary" onClick={() => setConfirmDelete(null)} className="flex-1">Cancel</Button>
                 <button
-                  onClick={() => setConfirmDelete(null)}
+                  onClick={() => { setAdmins((prev) => prev.filter((a) => a.email !== confirmDelete?.email)); setConfirmDelete(null); }}
                   className="flex-1 rounded-lg bg-[#D92D20] py-2.5 px-4 text-[16px] font-medium leading-[1.2] text-white hover:bg-[#b91c10] transition-colors"
                 >
                   Remove
