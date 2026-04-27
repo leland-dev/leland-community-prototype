@@ -33,7 +33,7 @@ import piggyBankIcon from "../assets/icons/Piggy bank, Coin.1.svg";
 import stopwatchIcon from "../assets/icons/stopwatch.svg";
 import supportivenessIcon from "../assets/icons/supportiveness.svg";
 import wreathImg from "../assets/img/Wreath.svg";
-import wreathSmallImg from "../assets/img/Wreath-Small.svg";
+import wreathSmallImg from "../assets/img/wreath-small.svg";
 import videoThumbnail from "../assets/img/Video-Thumbnail.png";
 import starIcon from "../assets/icons/star.svg";
 import categoryMBA from "../assets/placeholder images/category images/gmat-tutoring.png";
