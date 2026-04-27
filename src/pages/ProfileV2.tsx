@@ -332,13 +332,22 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
     [],
   );
 
-  // Observer A: Show/hide sticky nav based on hero sentinel visibility
+  // Observer A: Show/hide sticky nav based on hero sentinel visibility.
+  // We check boundingClientRect.top so the nav only appears when the
+  // sentinel has scrolled ABOVE the viewport — not when it's simply
+  // below the fold on small screens (e.g. mobile on initial load).
   useEffect(() => {
     const sentinel = heroSentinelRef.current;
     if (!sentinel) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => setStickyNavVisible(!entry.isIntersecting),
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setStickyNavVisible(false);
+        } else {
+          setStickyNavVisible(entry.boundingClientRect.top < 0);
+        }
+      },
       { threshold: 0 },
     );
     observer.observe(sentinel);
