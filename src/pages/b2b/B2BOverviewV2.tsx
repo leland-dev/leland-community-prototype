@@ -689,14 +689,14 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                   ))}
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+ Access</div></th>
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[120px] truncate">Date added</div></th>
-                  <th className="bg-[#fafafa] px-4 py-3" />
+                  <th className="sticky right-0 bg-[#fafafa] px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
                 {visibleUsers.map((user, i) => (
                   <tr
                     key={i}
-                    className={`cursor-pointer hover:bg-[#fafafa] ${i < visibleUsers.length - 1 ? "border-b border-gray-stroke" : ""}`}
+                    className={`group cursor-pointer hover:bg-[#fafafa] ${i < visibleUsers.length - 1 ? "border-b border-gray-stroke" : ""}`}
                     onClick={() => {
                       setSelectedUserV2(showVerizon ? (verizonUserDetailsV2[user.email] ?? tableRowToUserDetailV2(user)) : (userDetailsV2[user.email] ?? tableRowToUserDetailV2(user)));
                     }}
@@ -764,8 +764,11 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       {user.plus === "—" && <span className="text-[16px] text-gray-light">—</span>}
                     </td>
                     <td className="px-4 py-[14px] text-[16px] text-gray-light">{user.dateAdded}</td>
-                    <td className="px-2 py-2">
-                      <div className="flex justify-end">
+                    <td className="sticky right-0 bg-white px-4 py-[14px] group-hover:bg-[#fafafa]">
+                      <div className="flex items-center justify-end gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
                         {!showVerizon && (
                         <button
                           onClick={(e) => { e.stopPropagation(); const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); if (openMenuEmail === user.email) { setOpenMenuEmail(null); setMenuPos(null); } else { setOpenMenuEmail(user.email); setMenuPos({ top: r.bottom + 4, right: window.innerWidth - r.right, isMobile: window.innerWidth < 640 }); } }}

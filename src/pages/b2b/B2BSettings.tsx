@@ -1,22 +1,21 @@
 import { useState } from "react";
 import { Button } from "../../components/Button";
-import { Avatar, Card, RowMenu, type RowMenuPos } from "./B2BShared";
-import { Tag } from "./B2BUserDrawerV2";
+import { Avatar, Card } from "./B2BShared";
 import layoutGridIcon from "../../assets/icons/layout-grid.svg";
+import { motion, AnimatePresence } from "motion/react";
 
 const PAGE_SIZE = 25;
 
 const ADMIN_USERS = [
-  { initials: "KB", name: "Katie Brown", email: "katie.brown@kellogg.edu", role: "Editor", tagColor: "green" as const },
-  { initials: "MR", name: "Michael Reyes", email: "m-reyes@kellogg.edu", role: "Editor", tagColor: "green" as const },
-  { initials: "JS", name: "Jennifer Sullivan", email: "j-sullivan@kellogg.edu", role: "Viewer", tagColor: "gray" as const },
+  { initials: "KB", name: "Katie Brown", email: "katie.brown@kellogg.edu" },
+  { initials: "MR", name: "Michael Reyes", email: "m-reyes@kellogg.edu" },
+  { initials: "JS", name: "Jennifer Sullivan", email: "j-sullivan@kellogg.edu" },
 ];
 
 export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboard?: () => void }) {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
-  const [openMenuEmail, setOpenMenuEmail] = useState<string | null>(null);
-  const [menuPos, setMenuPos] = useState<RowMenuPos | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{ name: string; email: string } | null>(null);
 
   const filteredAdmins = ADMIN_USERS.filter((a) => {
     const q = search.toLowerCase();
@@ -87,41 +86,14 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
                       <div className="truncate text-[14px] text-gray-light">{admin.email}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Tag color={admin.tagColor}>{admin.role}</Tag>
-                    <div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); if (openMenuEmail === admin.email) { setOpenMenuEmail(null); setMenuPos(null); } else { setOpenMenuEmail(admin.email); setMenuPos({ top: r.bottom + 4, right: window.innerWidth - r.right, isMobile: window.innerWidth < 640 }); } }}
-                          className="flex h-8 w-8 items-center justify-center rounded-full text-gray-xlight hover:bg-gray-hover hover:text-gray-dark"
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
-                          </svg>
-                        </button>
-                        <RowMenu isOpen={openMenuEmail === admin.email} pos={menuPos} onClose={() => { setOpenMenuEmail(null); setMenuPos(null); }}>
-                          {admin.role === "Viewer" && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); setMenuPos(null); }}
-                              className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover"
-                            >
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                                <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                              </svg>
-                              Grant edit access
-                            </button>
-                          )}
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); setMenuPos(null); }}
-                            className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-[#D92D20] hover:bg-gray-hover"
-                          >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                              <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" />
-                            </svg>
-                            Remove admin
-                          </button>
-                        </RowMenu>
-                    </div>
-                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setConfirmDelete({ name: admin.name, email: admin.email }); }}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-gray-xlight hover:bg-gray-hover hover:text-[#D92D20]"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" />
+                    </svg>
+                  </button>
                 </div>
               )) : (
                 <div className="px-4 py-8 text-center text-[16px] text-gray-light">No results found</div>
@@ -181,6 +153,36 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
           </div>
         </div>
       </div>
+      {/* Delete confirmation modal */}
+      <AnimatePresence>
+        {confirmDelete && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
+              className="fixed inset-0 z-40 bg-black/40"
+              onClick={() => setConfirmDelete(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+              className="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-[0_20px_60px_rgba(0,0,0,0.15)] sm:inset-auto sm:left-1/2 sm:w-[400px] sm:-translate-x-1/2 sm:-translate-y-1/2"
+            >
+              <h2 className="text-[20px] font-medium leading-[1.2] text-gray-dark">Remove admin?</h2>
+              <p className="mt-2 text-[16px] leading-[1.5] text-gray-light">
+                <span className="font-medium text-gray-dark">{confirmDelete.name}</span> will no longer have access to this dashboard.
+              </p>
+              <div className="mt-6 flex gap-3">
+                <Button size="md" variant="secondary" onClick={() => setConfirmDelete(null)} className="flex-1">Cancel</Button>
+                <button
+                  onClick={() => setConfirmDelete(null)}
+                  className="flex-1 rounded-lg bg-[#D92D20] py-2.5 px-4 text-[16px] font-medium leading-[1.2] text-white hover:bg-[#b91c10] transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }
