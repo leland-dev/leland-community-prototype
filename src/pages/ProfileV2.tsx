@@ -952,8 +952,8 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
               <div className="mt-2 flex flex-col">
                 {/* Customer Favorite */}
                 {showCustomerFavorite && (
-                  <div className="flex gap-3 py-4">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center">
+                  <div className="flex gap-4 py-4">
+                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center">
                       <img src={wreathSmallImg} alt="" className="w-8" />
                     </div>
                     <div className="min-w-0">
@@ -964,8 +964,8 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                 )}
 
                 {/* Availability */}
-                <div className="flex gap-3 py-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
+                <div className="flex gap-4 py-4">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
                     <img src={calendarIcon} alt="" className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
@@ -977,13 +977,13 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                 {/* Coach note */}
                 {showCoachNote && (
                   <div
-                    className="flex cursor-pointer gap-3 py-4"
+                    className="flex cursor-pointer gap-4 py-4"
                     onClick={() => setCoachNoteExpanded(p => !p)}
                   >
                     <img
                       src={profilePhoto}
                       alt={profileName}
-                      className="h-9 w-9 shrink-0 rounded-[4px] object-cover"
+                      className="mt-0.5 h-9 w-9 shrink-0 rounded-[4px] object-cover"
                     />
                     <div className="min-w-0">
                       <p className="text-[16px] font-medium text-gray-dark">Note from {profileName.split(" ")[0]}</p>
@@ -1014,8 +1014,8 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                 )}
 
                 {/* Questions */}
-                <div className="flex gap-3 py-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
+                <div className="flex gap-4 py-4">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
                     <img src={airplaneIcon} alt="" className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
