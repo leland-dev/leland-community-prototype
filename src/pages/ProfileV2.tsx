@@ -1106,7 +1106,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
               Offerings
             </h2>
 
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="flex flex-wrap gap-[6px]">
                 {["All", "Packages", "Memberships", "Content"].map((tab) => (
                   <button
