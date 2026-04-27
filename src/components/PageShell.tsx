@@ -62,12 +62,12 @@ export default function PageShell({
   const effectiveMaxWidth = contentMaxWidth ?? 800;
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 py-8 sm:py-10 sm:px-6">
+    <div className="mx-auto max-w-[1280px] px-4 py-4 sm:py-10 sm:px-6">
       <div className="flex items-start justify-between" style={{ gap: 40 }}>
         {hasLeft && <aside className={leftClass}>{leftSidebar}</aside>}
         <div
           className="min-w-0"
-          style={(hasLeft || hasRight) ? { width: effectiveMaxWidth, maxWidth: effectiveMaxWidth } : { flex: "1 1 0%" }}
+          style={(hasLeft || hasRight) ? { width: "100%", maxWidth: effectiveMaxWidth } : { flex: "1 1 0%" }}
         >
           {children}
         </div>

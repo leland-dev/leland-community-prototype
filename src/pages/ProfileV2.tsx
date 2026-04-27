@@ -26,12 +26,14 @@ import editIcon from "../assets/icons/edit.svg";
 import verifiedIcon from "../assets/icons/verified.svg";
 import shieldIcon from "../assets/icons/shield-light.svg";
 import airplaneIcon from "../assets/icons/airplane.svg";
+import calendarIcon from "../assets/icons/calendar.svg";
 import chevronDownIcon from "../assets/icons/chevron-down.svg";
 import bookBookmarkIcon from "../assets/icons/book-bookmark.svg";
 import piggyBankIcon from "../assets/icons/Piggy bank, Coin.1.svg";
 import stopwatchIcon from "../assets/icons/stopwatch.svg";
 import supportivenessIcon from "../assets/icons/supportiveness.svg";
 import wreathImg from "../assets/img/Wreath.svg";
+import wreathSmallImg from "../assets/img/Wreath-Small.svg";
 import videoThumbnail from "../assets/img/Video-Thumbnail.png";
 import starIcon from "../assets/icons/star.svg";
 import categoryMBA from "../assets/placeholder images/category images/gmat-tutoring.png";
@@ -710,7 +712,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
           )}
 
           {/* Profile photo + CTA buttons */}
-          <div className={`${showCoverImage ? "-mt-[80px] pl-4" : showGrayHeader ? "-mt-[100px]" : "mt-0"} mb-4 flex flex-col items-start md:flex-row ${showCoverImage || showGrayHeader ? "md:items-end" : "md:items-start"} md:justify-between`}>
+          <div className={`${showCoverImage ? "-mt-[80px] pl-4" : showGrayHeader ? "-mt-[100px]" : "mt-0"} mb-4 flex items-start justify-between ${showCoverImage || showGrayHeader ? "md:items-end" : ""}`}>
             <div className="group relative z-20 cursor-pointer rounded-lg border-[4px] border-white bg-white" onClick={() => setLightboxOpen(true)}>
               <div className="relative overflow-hidden rounded-[4px]">
                 <motion.img
@@ -722,7 +724,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                 <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
               </div>
             </div>
-            <div className={`hidden items-center gap-2 ${showCoverImage ? "pb-1" : showGrayHeader ? "pb-[90px]" : "pb-1"} md:flex`}>
+            <div className={`flex items-center gap-2 ${showCoverImage ? "pb-1" : showGrayHeader ? "pb-[90px]" : "pb-1"}`}>
               {viewingOwnProfile ? (
                 <button className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
                   showCoverImage || !showGrayHeader
@@ -803,7 +805,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
             </div>
 
             {/* Successful clients at */}
-            {!isCustomerProfile && <div className="flex items-center gap-[6px]">
+            {!isCustomerProfile && <div className="hidden items-center gap-[6px] md:flex">
               <span>Successful clients at</span>
               <div className="flex items-center -space-x-[2px]">
                 <img src={clientLogo1} alt="" className="h-[18px] w-[18px] rounded border border-white" />
@@ -815,41 +817,17 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
           </div>}
 
 
-          {/* Stats row — mobile: v1-style flat inline for both profiles */}
-          <div className="mt-3 flex flex-wrap items-center gap-4 md:hidden">
-            {!isCustomerProfile && (
-              <div
-                className="flex cursor-pointer items-baseline gap-1 transition-opacity hover:opacity-70"
-                onClick={() => scrollToSection("reviews")}
-              >
-                <img src={starIcon} alt="" className="mb-[2px] h-[15px] w-[15px]" />
-                <span className="text-[18px] font-medium text-gray-dark">5.0</span>
-                <span className="text-[16px] text-gray-600">52 reviews</span>
+          {/* Stats row — mobile: v1-style flat inline (customer profile only) */}
+          {isCustomerProfile && (
+            <div className="mt-3 flex flex-wrap items-center gap-4 md:hidden">
+              <div className="flex items-baseline gap-1">
+                <span className="text-[18px] font-medium text-gray-dark">245</span>
+                <span className="text-[16px] text-[#707070]">followers</span>
               </div>
-            )}
-            <div className="flex items-baseline gap-1">
-              <span className="text-[18px] font-medium text-gray-dark">{isCustomerProfile ? "245" : "182"}</span>
-              <span className="text-[16px] text-[#707070]">followers</span>
-            </div>
-            <div
-              className={`flex items-baseline gap-1 ${!isCustomerProfile ? "cursor-pointer transition-opacity hover:opacity-70" : ""}`}
-              onClick={!isCustomerProfile ? () => scrollToSection("activity") : undefined}
-            >
-              <span className="text-[18px] font-medium text-gray-dark">8.2K</span>
-              <span className="text-[16px] text-[#707070]">impressions</span>
-            </div>
-          </div>
-
-          {/* Customer Favorite — mobile coach profile */}
-          {showCustomerFavorite && !isCustomerProfile && (
-            <div className="mt-3 flex items-center gap-4 rounded-lg border border-gray-200 px-4 py-3 md:hidden">
-              <div className="flex shrink-0 items-center gap-[2px]">
-                <img src={wreathImg} alt="" className="h-[45px] w-[21px]" />
-                <span className="text-center text-[18px] font-medium leading-[110%] text-gray-dark">Customer<br/>Favorite</span>
-                <img src={wreathImg} alt="" className="h-[45px] w-[21px] scale-x-[-1]" />
+              <div className="flex items-baseline gap-1">
+                <span className="text-[18px] font-medium text-gray-dark">8.2K</span>
+                <span className="text-[16px] text-[#707070]">impressions</span>
               </div>
-              <div className="h-[36px] w-px shrink-0 bg-gray-200" />
-              <span className="text-[16px] leading-snug text-[#707070]">In the top 10% of experts on Leland, according to customers.</span>
             </div>
           )}
 
@@ -873,53 +851,53 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
             </div>
           )}
 
-          {/* Desktop stats row — coach profile */}
+          {/* Stats row — coach profile */}
           {!isCustomerProfile && (
-            <div className="mb-2 hidden items-center gap-6 md:flex">
-              {/* Customer Favorite */}
+            <div className="mt-4 mb-2 flex flex-wrap items-center gap-x-6 gap-y-3 md:mt-0">
+              {/* Customer Favorite — desktop only (mobile gets its own banner below) */}
               {showCustomerFavorite && (
                 <>
-                  <div className="flex items-center gap-[2px]">
+                  <div className="hidden items-center gap-[2px] md:flex">
                     <img src={wreathImg} alt="" className="h-[45px] w-[21px]" />
                     <span className="text-center text-[18px] font-medium leading-[110%] text-gray-dark">Customer<br/>Favorite</span>
                     <img src={wreathImg} alt="" className="h-[45px] w-[21px] scale-x-[-1]" />
                   </div>
-                  <div className="h-[24px] w-px shrink-0 bg-gray-200" />
+                  <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
                 </>
               )}
               {/* Reviews */}
               <div
-                className="flex cursor-pointer flex-col gap-[2px] transition-opacity hover:opacity-70"
+                className="flex cursor-pointer flex-col md:gap-[2px] transition-opacity hover:opacity-70"
                 onClick={() => scrollToSection("reviews")}
               >
                 <div className="flex items-center gap-1">
-                  <span className="text-[20px] font-medium leading-none text-gray-dark">4.9</span>
+                  <span className="text-[18px] font-medium leading-none text-gray-dark md:text-[20px]">4.9</span>
                   <img src={starIcon} alt="" className="h-[16px] w-[16px]" />
                 </div>
                 <span className="text-[16px] leading-tight text-[#707070]">52 Reviews</span>
               </div>
-              <div className="h-[24px] w-px shrink-0 bg-gray-200" />
+              <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
               {/* Minutes coached */}
-              <div className="flex flex-col gap-[2px]">
-                <span className="text-[20px] font-medium leading-none text-gray-dark">6.6k</span>
+              <div className="flex flex-col md:gap-[2px]">
+                <span className="text-[18px] font-medium leading-none text-gray-dark md:text-[20px]">6.6k</span>
                 <span className="text-[16px] leading-tight text-[#707070]">Min coached</span>
               </div>
-              <div className="h-[24px] w-px shrink-0 bg-gray-200" />
+              <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
               {/* Followers */}
-              <div className="flex flex-col gap-[2px]">
-                <span className="text-[20px] font-medium leading-none text-gray-dark">84</span>
+              <div className="flex flex-col md:gap-[2px]">
+                <span className="text-[18px] font-medium leading-none text-gray-dark md:text-[20px]">84</span>
                 <span className="text-[16px] leading-tight text-[#707070]">Followers</span>
               </div>
-              <div className="h-[24px] w-px shrink-0 bg-gray-200" />
+              <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
               {/* Likes */}
-              <div className="flex flex-col gap-[2px]">
-                <span className="text-[20px] font-medium leading-none text-gray-dark">1.6k</span>
+              <div className="flex flex-col md:gap-[2px]">
+                <span className="text-[18px] font-medium leading-none text-gray-dark md:text-[20px]">1.6k</span>
                 <span className="text-[16px] leading-tight text-[#707070]">Likes</span>
               </div>
-              <div className="h-[24px] w-px shrink-0 bg-gray-200" />
-              {/* Impressions */}
+              <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
+              {/* Impressions — desktop only */}
               <div
-                className="flex cursor-pointer flex-col gap-[2px] transition-opacity hover:opacity-70"
+                className="hidden cursor-pointer flex-col gap-[2px] transition-opacity hover:opacity-70 md:flex"
                 onClick={() => scrollToSection("activity")}
               >
                 <span className="text-[20px] font-medium leading-none text-gray-dark">8.5k</span>
@@ -930,76 +908,160 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
 
           </div>{/* end name → stats wrapper */}
 
-          {/* Mobile inline CTA + secondary buttons */}
-          <div className="mt-3 flex flex-col gap-3 md:hidden">
-            {viewingOwnProfile ? (
+          {/* Customer Favorite — mobile banner (hidden for now) */}
+
+          {/* Mobile inline CTA — customer profile only */}
+          {isCustomerProfile && (
+            <div className="mt-3 flex flex-col gap-3 md:hidden">
+              {viewingOwnProfile ? (
+                <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                  <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
+                  Edit profile
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsFollowing(!isFollowing)}
+                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#038561] px-6 py-3 text-[18px] font-medium text-white transition-colors hover:bg-[#038561]/90"
+                  >
+                    {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px] brightness-0 invert" />}
+                    {isFollowing ? "Following" : "Follow"}
+                  </button>
+                  <button className="flex cursor-pointer items-center justify-center rounded-full bg-[#222222]/5 px-4 py-3 transition-colors hover:bg-[#222222]/[0.08]">
+                    <img src={shareArrowIcon} alt="Share" className="h-[20px] w-[20px]" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Mobile sidebar content — coach profile: Availability, CTAs, Customer Favorite, Coach note, Video, Questions */}
+          {!isCustomerProfile && !viewingOwnProfile && (
+            <div className="mt-4 flex flex-col md:hidden">
+              {/* CTA buttons */}
+              <div className="flex flex-col gap-2">
+                <button className="w-full cursor-pointer rounded-lg bg-[#038561] px-4 py-[14px] text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                  Schedule free intro call
+                </button>
+                <button className="w-full cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-[14px] text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                  Book a session
+                </button>
+              </div>
+
+              {/* Customer Favorite, Coach note, Video, Questions */}
+              <div className="mt-2 flex flex-col">
+                {/* Customer Favorite */}
+                {showCustomerFavorite && (
+                  <div className="flex gap-3 py-4">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center">
+                      <img src={wreathSmallImg} alt="" className="w-8" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[16px] font-medium text-gray-dark">Customer Favorite</p>
+                      <p className="text-[16px] leading-snug text-[#707070]">In the top 10% of MBA experts on Leland</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Availability */}
+                <div className="flex gap-3 py-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
+                    <img src={calendarIcon} alt="" className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[16px] font-medium text-gray-dark">Available today at 5:30 PM</p>
+                    <p className="text-[16px] leading-snug text-[#707070]">Usually responds within 12h</p>
+                  </div>
+                </div>
+
+                {/* Coach note */}
+                {showCoachNote && (
+                  <div
+                    className="flex cursor-pointer gap-3 py-4"
+                    onClick={() => setCoachNoteExpanded(p => !p)}
+                  >
+                    <img
+                      src={profilePhoto}
+                      alt={profileName}
+                      className="h-9 w-9 shrink-0 rounded-[4px] object-cover"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-[16px] font-medium text-gray-dark">Note from {profileName.split(" ")[0]}</p>
+                      <div className="relative">
+                        <motion.div
+                          initial={false}
+                          animate={{ height: coachNoteExpanded ? "auto" : 66 }}
+                          transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <p className="text-[16px] leading-snug text-[#707070]">
+                            If you're looking for AI coaching, from fundamentals to building out more advanced agents and workflows, I'm taking on a few new folks for 1:1 productivity coaching for both your professional and personal life. Keeping up with the pace of development alone requires dedication. But we can bring your information together and rewire how you work. If you're looking for MBA application support, essay-writing, or other coaching, message me directly through Leland and I'll get right back to you.
+                          </p>
+                        </motion.div>
+                        {!coachNoteExpanded && (
+                          <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[16px] leading-snug font-medium text-[#038561]">
+                            Read more
+                          </span>
+                        )}
+                        {coachNoteExpanded && (
+                          <span className="mt-1 inline-block text-[16px] font-medium text-[#038561]">
+                            Read less
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Questions */}
+                <div className="flex gap-3 py-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
+                    <img src={airplaneIcon} alt="" className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[16px] font-medium text-gray-dark">Questions?</p>
+                    <p className="text-[16px] leading-snug text-[#707070]">
+                      You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-[#038561]">Send a message</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Coach video */}
+                {showCoachVideo && (
+                  <div className="group relative cursor-pointer overflow-hidden py-4">
+                    <div className="relative overflow-hidden rounded-lg">
+                      <img
+                        src={videoThumbnail}
+                        alt="Coach video"
+                        className="block w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <div className="absolute inset-0 transition-colors group-hover:bg-black/10" />
+                      <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 px-2 pb-2">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/40 backdrop-blur-[6px]">
+                          <svg width="11" height="13" viewBox="0 0 18 20" fill="none">
+                            <path d="M17 10L1 19V1L17 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-[16px] font-medium leading-tight text-white">Get to know me</p>
+                          <p className="text-[14px] leading-tight text-white/70">1:40</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Mobile inline CTA — coach viewing own profile */}
+          {!isCustomerProfile && viewingOwnProfile && (
+            <div className="mt-3 md:hidden">
               <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                 <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
                 Edit profile
               </button>
-            ) : (
-              <>
-                {!isCustomerProfile && (
-                  <button className="w-full cursor-pointer rounded-full bg-[#038561] px-4 py-3 text-[18px] font-medium text-white transition-colors hover:bg-[#038561]/90">
-                    Free intro call
-                  </button>
-                )}
-                <div className="flex gap-2">
-                  {isCustomerProfile ? (
-                    <>
-                      <button
-                        onClick={() => setIsFollowing(!isFollowing)}
-                        className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#038561] px-6 py-3 text-[18px] font-medium text-white transition-colors hover:bg-[#038561]/90"
-                      >
-                        {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px] brightness-0 invert" />}
-                        {isFollowing ? "Following" : "Follow"}
-                      </button>
-                      <button className="flex cursor-pointer items-center justify-center rounded-full bg-[#222222]/5 px-4 py-3 transition-colors hover:bg-[#222222]/[0.08]">
-                        <img src={shareArrowIcon} alt="Share" className="h-[20px] w-[20px]" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
-                        <img src={mailIcon} alt="" className="h-[20px] w-[20px]" />
-                        Message
-                      </button>
-                      <button
-                        onClick={() => setIsFollowing(!isFollowing)}
-                        className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
-                      >
-                        {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
-                        {isFollowing ? "Following" : "Follow"}
-                      </button>
-                    </>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-
-
-          {/* Coach video — mobile */}
-          {showCoachVideo && !isCustomerProfile && (
-            <div className="group relative mt-4 cursor-pointer overflow-hidden rounded-lg lg:hidden">
-              <img
-                src={videoThumbnail}
-                alt="Coach video"
-                className="block w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              <div className="absolute inset-0 transition-colors group-hover:bg-black/10" />
-              <div className="absolute bottom-0 left-0 right-0 flex items-center gap-3 px-2 pb-2">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/40 backdrop-blur-[6px]">
-                  <svg width="14" height="16" viewBox="0 0 18 20" fill="none">
-                    <path d="M17 10L1 19V1L17 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-[16px] font-medium text-white">Get to know me</p>
-                  <p className="text-[14px] text-white/70">1:40</p>
-                </div>
-              </div>
             </div>
           )}
 
@@ -1035,7 +1097,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
           {!isCustomerProfile && (<>
           {/* ── Offerings group: Offerings + Free Events + Resources ── */}
           <div ref={setGroupRef("offerings")} data-group="offerings">
-            <div className="my-[36px] border-t border-gray-200" />
+            <div className="my-[16px] border-t border-gray-200 md:my-[36px]" />
 
             <h2
               ref={setSectionRef("offerings")}
