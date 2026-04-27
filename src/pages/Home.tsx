@@ -74,6 +74,10 @@ interface PostBase {
   verified?: boolean;
   headline?: string;
   feed?: string;
+  isGroupPost?: boolean;
+  groupId?: string;
+  groupColor?: string;
+  groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean };
   likes: number;
   comments: number;
   reposts: number;
@@ -149,13 +153,62 @@ export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, LivePost 
 
 export const posts: Post[] = [
   {
+    id: 20,
+    type: "text",
+    author: "AI BP April 26",
+    avatar: "",
+    isGroupPost: true,
+    groupId: "ai-bp-apr-26",
+    groupColor: "#2563EB",
+    headline: "Build AI-powered workflows for your career",
+    time: "1h",
+    feed: "AI BP April 26",
+    body: "Welcome to week 3, cohort! 👋\n\nThis week's focus: deploying your first real AI workflow to production. Office hours are Thursday at 5pm PT — bring your projects, questions, and anything that broke over the weekend.\n\nAlso a reminder: the week 2 project submissions are due tonight at midnight. 18 of you have already submitted — great work. If you're stuck, post in the group and someone will help.",
+    likes: 24,
+    comments: 8,
+    reposts: 2,
+    shares: 1,
+  },
+  {
+    id: 22,
+    type: "text",
+    author: "AI BP April 26",
+    avatar: "",
+    groupId: "ai-bp-apr-26",
+    groupColor: "#2563EB",
+    groupPoster: { name: "Sarah Chen", avatar: pic3, headline: "Product Manager", overlay: true },
+    time: "30m",
+    feed: "AI BP April 26",
+    body: "Does anyone have a good mental model for deciding when to use RAG vs just stuffing more context into the prompt?\n\nI've been going back and forth on this for my week 2 project. At some point the context window is big enough that RAG feels like over-engineering — but I also don't want to pay for 200K tokens every call.",
+    likes: 19,
+    comments: 22,
+    reposts: 3,
+    shares: 1,
+  },
+  {
+    id: 21,
+    type: "text",
+    author: "AI BP April 26",
+    avatar: "",
+    groupId: "ai-bp-apr-26",
+    groupColor: "#2563EB",
+    groupPoster: { name: "Jackson Ringger", avatar: pic6, headline: "Strategy @ Airbnb" },
+    time: "45m",
+    feed: "AI BP April 26",
+    body: "Just shipped my week 2 project — a Slack bot that auto-summarizes long threads and surfaces action items. Used Claude with tool use to pull context from linked docs.\n\nBiggest lesson: prompt structure matters way more than I expected. Same model, same data, totally different outputs depending on how I framed the task. Happy to share the prompts if anyone wants to riff on them.",
+    likes: 31,
+    comments: 14,
+    reposts: 4,
+    shares: 2,
+  },
+  {
     id: 19,
     type: "text",
     author: "Emma Rodriguez",
     avatar: pic5,
     time: "12m",
     verified: false,
-    headline: "Ops Lead at Notion | AI BP April 26 Cohort",
+    headline: "Ops Lead at Notion",
     feed: "AI BP April 26",
     body: "Quick Q for cohort 1 — for the week 2 project, did anyone find a good way to handle rate limits when chaining multiple Claude calls?\n\nI've got a little script that pulls meeting notes, summarizes them, and then drafts follow-up emails. Works great on one meeting, blows up on five. Considering just adding a sleep() but that feels dumb. Open to ideas before I over-engineer this.",
     likes: 18,
@@ -170,7 +223,7 @@ export const posts: Post[] = [
     avatar: pic6,
     time: "32m",
     verified: false,
-    headline: "Strategy @ Airbnb | AI BP April 26 Cohort",
+    headline: "Strategy @ Airbnb",
     feed: "AI BP April 26",
     body: "Wild — asked Claude to rewrite our team's weekly status update template and this is what it came back with. Three years of 'what shipped / what's blocked' and nobody thought to add the third column. Trying it at standup Monday. 👀",
     images: [bootcampImg],
@@ -186,7 +239,7 @@ export const posts: Post[] = [
     avatar: pic3,
     time: "45m",
     verified: false,
-    headline: "Product Manager | AI BP April 26 Cohort",
+    headline: "Product Manager",
     feed: "AI BP April 26",
     body: "Session 1 was last night and I already feel like a different person.\n\nI'd always thought of AI as a black box that either works or doesn't. Turns out the way you ask is almost everything. We rewrote the same prompt three different ways and the outputs were completely different — one was useless, one was okay, one was exactly what I needed.\n\nSix weeks ago I would have called that magic. Now I know it's just structure. Can't believe I waited this long to learn this.",
     likes: 47,
@@ -809,7 +862,7 @@ function ActionBar({ likes, comments, reposts, postId }: { likes: number; commen
   );
 }
 
-function PostHeaderRow({ author, time, verified, headline, feed, onEdit }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; onEdit?: () => void }) {
+function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, groupId, groupPoster, onEdit }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string }; onEdit?: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -873,20 +926,34 @@ function PostHeaderRow({ author, time, verified, headline, feed, onEdit }: { aut
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <Link to={`/profile-v2?type=${verified ? "coach" : "customer"}`} onClick={(e) => e.stopPropagation()} className="cursor-pointer text-[17px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50">{author}</Link>
+          <Link
+            to={isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `/profile-v2?type=${verified ? "coach" : "customer"}`}
+            onClick={(e) => e.stopPropagation()}
+            className="cursor-pointer text-[17px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50"
+          >{author}</Link>
           {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
           <span className="shrink-0 text-[17px] leading-tight text-gray-xlight">{time}</span>
         </div>
-        {headline && (
+        {groupPoster ? (
+          <div className="mt-[3px] flex items-center gap-1.5">
+            {!groupPoster.overlay && (
+              <img src={groupPoster.avatar} alt={groupPoster.name} className="h-[18px] w-[18px] rounded-full object-cover shrink-0" />
+            )}
+            <Link to="/profile-v2?type=customer" onClick={(e) => e.stopPropagation()} className="text-[15px] leading-tight text-[#707070] hover:underline hover:decoration-[1px] hover:underline-offset-[2px]">
+              {groupPoster.name}
+            </Link>
+            {groupPoster.headline && <span className="truncate text-[15px] leading-tight text-[#a3a3a3]">· {groupPoster.headline}</span>}
+          </div>
+        ) : headline ? (
           <p className="truncate text-[15px] leading-tight text-[#707070]">{headline}</p>
-        )}
+        ) : null}
       </div>
       <div className="flex shrink-0 items-start gap-1">
-        {feed && (
+        {feed && !isGroupPost && !groupPoster && (
           <Link
             to={`/groups/${FEEDS.find(f => f.label === feed)?.id ?? feed.toLowerCase().replace(/\s+/g, "-")}`}
             onClick={(e) => e.stopPropagation()}
-            className="mt-0.5 text-[12px] font-medium leading-none text-[#A0A0A0] hover:text-[#707070] transition-colors"
+            className="mt-0.5 text-[15px] leading-none text-gray-xlight hover:text-[#707070] transition-colors"
           >
             {feed}
           </Link>
@@ -1812,9 +1879,10 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
   const isEvent = post.type === "event";
+  const isGroupPost = post.isGroupPost || !!post.groupPoster;
 
   const handleMouseEnter = () => {
-    if (isEvent) return;
+    if (isEvent || isGroupPost) return;
     if (closeTimer.current) clearTimeout(closeTimer.current);
     openTimer.current = setTimeout(() => setOpen(true), 350);
   };
@@ -1832,9 +1900,29 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
     >
       <div
         className="group relative h-10 w-10 cursor-pointer"
-        onClick={(e) => { e.stopPropagation(); if (!isEvent) navigate(`/profile-v2?type=${post.verified ? "coach" : "customer"}`); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (isGroupPost) navigate(`/groups/${post.groupId ?? "ai-bp-apr-26"}`);
+          else if (!isEvent) navigate(`/profile-v2?type=${post.verified ? "coach" : "customer"}`);
+        }}
       >
-        {isEvent ? (
+        {isGroupPost ? (
+          <>
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-[8px] text-[17px] font-bold text-white"
+              style={{ backgroundColor: post.groupColor ?? "#2563EB" }}
+            >
+              {post.author.charAt(0)}
+            </div>
+            {post.groupPoster?.overlay && (
+              <img
+                src={post.groupPoster.avatar}
+                alt={post.groupPoster.name}
+                className="absolute -bottom-1.5 -right-1.5 h-[22px] w-[22px] rounded-full border-2 border-white object-cover shadow-sm"
+              />
+            )}
+          </>
+        ) : isEvent ? (
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black">
             <img src={post.avatar} alt={post.author} className="h-5 w-5 brightness-0 invert" />
           </div>
@@ -1845,7 +1933,7 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
             className="h-10 w-10 rounded-full object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)]"
           />
         )}
-        <div className="absolute inset-0 rounded-full bg-black/0 transition-colors group-hover:bg-black/10" />
+        <div className={`absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10 ${isGroupPost ? "rounded-[8px]" : "rounded-full"}`} />
       </div>
 
       <AnimatePresence>
@@ -1884,7 +1972,7 @@ export function FeedPost({ post, onUpdate }: { post: Post; onUpdate?: (id: numbe
         </div>
         {/* Right column: content */}
         <div className="min-w-0 flex-1">
-          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} onEdit={onUpdate ? () => setEditOpen(true) : undefined} />
+          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} onEdit={onUpdate ? () => setEditOpen(true) : undefined} />
           <p className="mt-1 text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
           <div className={post.type !== "text" ? "pb-1" : ""} onClick={e => e.stopPropagation()}>
             {post.type === "image" && (
@@ -3163,6 +3251,35 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
         <div className="mt-2 flex flex-col -mx-2">
           <OfferingCard type="hourly" title="1h 20m with Jessica" subtitle="45m available to schedule" image={pic6} purchased showImage size="small" />
           <OfferingCard type="package" title="MBA Application Package" subtitle={<span>Comprehensive package · <span className="text-[#038561]">Active</span></span>} image={pic3} purchased showImage size="small" />
+        </div>
+
+        <NavLink to="/groups/ai-bp-apr-26" className="mt-5 flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+          My Groups
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
+            <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </NavLink>
+        <div className="mt-2 flex flex-col">
+          {[
+            { id: "ai-bp-apr-26", name: "AI BP April 26", color: "#2563EB", subtitle: "18 members · 3 new posts" },
+          ].map(g => (
+            <NavLink
+              key={g.id}
+              to={`/groups/${g.id}`}
+              className="group flex cursor-pointer items-center gap-3 rounded-[8px] py-[10px] transition-[padding] duration-300 ease-out hover:pl-[4px]"
+            >
+              <div
+                className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[6px] text-white text-[16px] font-bold"
+                style={{ backgroundColor: g.color }}
+              >
+                {g.name.charAt(0)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[15px] font-medium leading-tight text-gray-dark group-hover:underline group-hover:decoration-[1px] group-hover:underline-offset-[2px]">{g.name}</p>
+                <p className="mt-[3px] truncate text-[13px] leading-tight text-[#707070]">{g.subtitle}</p>
+              </div>
+            </NavLink>
+          ))}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useExtraLinks } from "./ExtraLinksContext";
+import { useDarkMode } from "../contexts/DarkModeContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 
 import eventsIcon from "../assets/icons/nav-icons/calendar-inactive.svg";
@@ -14,11 +15,13 @@ import helpIcon from "../assets/icons/help.svg";
 import logOutIcon from "../assets/icons/log out.svg";
 import arrowRightIcon from "../assets/icons/arrow-right.svg";
 import browserIcon from "../assets/icons/browser.svg";
+import usersGroupIcon from "../assets/icons/users-group.svg";
 
 const menuItems = [
   { to: "/events", icon: eventsIcon, label: "Free Events", danger: false, darkIcon: true },
   { to: "/courses", icon: coursesIcon, label: "Courses", danger: false, darkIcon: true },
   { to: "/plus", icon: lelandPlusIcon, label: "Leland+", danger: false, darkIcon: true },
+  { to: "/profile-v2?tab=groups", icon: usersGroupIcon, label: "My Groups", danger: false, darkIcon: true },
   { to: null, icon: giftIcon, label: "Refer a friend", danger: false },
   { to: null, icon: settingsIcon, label: "Settings", danger: false },
   { to: null, icon: arrowRoundIcon, label: "Order History", danger: false },
@@ -40,6 +43,9 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const visibleMenuItems = showExtraLinks
     ? menuItems
     : menuItems.filter((item) => !extraPaths.has(item.to ?? ""));
+
+  // Design toggles — wired to DarkModeContext so the rest of the app can react.
+  const { dark: darkMode, toggle: toggleDarkMode } = useDarkMode();
 
   return (
     <AnimatePresence>
@@ -109,6 +115,26 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                     </button>
                   )
                 )}
+              </div>
+
+              {/* Design toggles — for mocking alternate UI versions */}
+              <div className="border-t border-gray-stroke py-2">
+                <p className="px-5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#A0A0A0]">Design toggles</p>
+                <button
+                  onClick={toggleDarkMode}
+                  className="flex w-full items-center justify-between gap-[10px] px-5 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                >
+                  <span>Dark Mode</span>
+                  <span
+                    aria-hidden
+                    className={`relative inline-flex h-[26px] w-[44px] shrink-0 items-center rounded-full transition-colors ${darkMode ? "bg-[#038561]" : "bg-[#E5E5E5]"}`}
+                  >
+                    <span
+                      className="absolute h-[22px] w-[22px] rounded-full bg-white shadow-sm transition-transform"
+                      style={{ transform: `translateX(${darkMode ? 20 : 2}px)` }}
+                    />
+                  </span>
+                </button>
               </div>
             </div>
           </motion.div>

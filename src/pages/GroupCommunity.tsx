@@ -135,10 +135,6 @@ function GroupCommLeft({ onCreatePost }: { onCreatePost: () => void }) {
               <span className="text-[15px] font-medium text-gray-dark">{GROUP.memberCount.toLocaleString()}</span>
               <span className="text-[13px] text-gray-light">members</span>
             </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-[15px] font-medium text-gray-dark">4.2K</span>
-              <span className="text-[13px] text-gray-light">posts</span>
-            </div>
           </div>
 
           <button

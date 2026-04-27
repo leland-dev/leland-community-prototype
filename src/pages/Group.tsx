@@ -820,20 +820,18 @@ export default function Group() {
         <p className="mt-1 mb-[6px] text-[16px] md:text-[18px] leading-[1.3] text-[#707070]">{group.tagline}</p>
 
         {/* Face pile + stats */}
-        <div className="mt-3 flex items-center gap-2.5 text-[16px] md:text-[14px] text-[#707070]">
+        <div className="mt-3 flex items-center gap-2.5 text-[16px] text-[#707070]">
           <div className="flex -space-x-1.5">
             {COHORT_MEMBERS.slice(0, 4).map((m) => (
               <img
                 key={m.name}
                 src={m.avatar}
                 alt=""
-                className="h-7 w-7 md:h-6 md:w-6 rounded-full border-2 border-white object-cover"
+                className="h-8 w-8 rounded-full border-2 border-white object-cover"
               />
             ))}
           </div>
           <span>{group.memberCount.toLocaleString()} members</span>
-          <span className="text-[#D0D0D0]">·</span>
-          <span>{posts.length} {posts.length === 1 ? "post" : "posts"}</span>
         </div>
 
         {/* Sentinel for sticky nav */}

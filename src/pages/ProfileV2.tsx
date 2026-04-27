@@ -298,8 +298,11 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
   const [showSupercoach, setShowSupercoach] = useState(false);
   const [showCoverImage, setShowCoverImage] = useState(false);
   const [showGrayHeader, setShowGrayHeader] = useState(false);
+  const [searchParams] = useSearchParams();
   const isCustomerProfile = !coach;
-  const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes">("activity");
+  const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes" | "groups">(
+    searchParams.get("tab") === "groups" ? "groups" : "activity"
+  );
   const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Courses" | "Content">("All");
   const [purchasesExpanded, setPurchasesExpanded] = useState(false);
   const [pastOpen, setPastOpen] = useState(false);
@@ -1427,8 +1430,8 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
           {isCustomerProfile && (
             <>
               {viewingOwnProfile ? (
-                <div className="sticky top-0 z-10 mt-5 flex gap-5 border-b border-gray-stroke bg-white">
-                  {(["activity", "about", "calendar", "likes"] as const).map((tab) => (
+                <div className="sticky top-0 z-10 mt-5 flex gap-5 border-b border-gray-stroke bg-white overflow-x-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {(["activity", "about", "calendar", "likes", "groups"] as const).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setCustomerTab(tab)}
@@ -1438,7 +1441,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                           : "text-gray-light hover:text-gray-dark"
                       }`}
                     >
-                      <span className="text-[18px] font-medium">{tab === "activity" ? "Overview" : tab === "about" ? "Activity" : tab === "calendar" ? "Calendar" : "Likes"}</span>
+                      <span className="text-[18px] font-medium">{tab === "activity" ? "Overview" : tab === "about" ? "Activity" : tab === "calendar" ? "Calendar" : tab === "likes" ? "Likes" : "Groups"}</span>
                       {customerTab === tab && (
                         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#038561]" />
                       )}
@@ -1638,6 +1641,31 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                     ))}
                   </div>
                   </>
+                )}
+
+                {viewingOwnProfile && customerTab === "groups" && (
+                  <div className="flex flex-col">
+                    {[
+                      { id: "ai-bp-apr-26", name: "AI BP April 26", color: "#2563EB", subtitle: "18 members · 3 new posts" },
+                    ].map((g) => (
+                      <Link
+                        key={g.id}
+                        to={`/groups/${g.id}`}
+                        className="group flex cursor-pointer items-center gap-3 rounded-[8px] py-[10px] transition-[padding] duration-300 ease-out hover:pl-[4px]"
+                      >
+                        <div
+                          className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[6px] text-white text-[16px] font-bold"
+                          style={{ backgroundColor: g.color }}
+                        >
+                          {g.name.charAt(0)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[15px] font-medium leading-tight text-gray-dark group-hover:underline group-hover:decoration-[1px] group-hover:underline-offset-[2px]">{g.name}</p>
+                          <p className="mt-[3px] truncate text-[13px] leading-tight text-[#707070]">{g.subtitle}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 )}
               </div>
             </>
