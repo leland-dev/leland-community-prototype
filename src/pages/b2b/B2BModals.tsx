@@ -165,7 +165,7 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }:
             className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb] disabled:cursor-not-allowed disabled:opacity-30">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
-          <span className="w-6 text-center text-[15px] font-medium text-gray-dark">{sessions}</span>
+          <span className={`w-6 text-center text-[15px] font-medium ${sessions > 0 ? "text-primary" : "text-gray-dark"}`}>{sessions}</span>
           <button onClick={() => setSessions(sessions + 1)}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -180,17 +180,17 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }:
             <div key={cohort} className="flex items-center justify-between gap-4 py-1.5">
               <span className="text-[14px] text-gray-light">{cohort}</span>
               {cohortInvited[cohort] ? (
-                <div className="flex items-center gap-2 rounded-full bg-[#e6f4ef] px-3 py-1.5">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#038561" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <div className="flex items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
                   <span className="text-[14px] font-medium text-[#038561]">Added</span>
-                  <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: false }))} className="ml-1 text-[#038561] hover:opacity-70">
+                  <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: false }))} className="text-[#038561] hover:opacity-70">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 </div>
               ) : (
                 <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: true }))}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add
                 </button>
               )}
             </div>
@@ -200,8 +200,7 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }:
       <div className="flex items-center justify-between gap-4 border-t border-gray-stroke px-4 py-3">
         <span className="text-[15px] text-gray-dark">Leland+</span>
         {lelandPlus ? (
-          <div className="flex items-center gap-2 rounded-full bg-[#e6f4ef] px-3 py-1.5">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#038561" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <div className="flex items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
             <span className="text-[14px] font-medium text-[#038561]">3 months granted</span>
             <button onClick={() => setLelandPlus(false)} className="ml-1 text-[#038561] hover:opacity-70">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -211,7 +210,7 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }:
           <button onClick={() => setLelandPlus(true)}
             className="flex items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Grant access
+            Add
           </button>
         )}
       </div>
