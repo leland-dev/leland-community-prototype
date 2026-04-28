@@ -862,7 +862,7 @@ function ActionBar({ likes, comments, reposts, postId }: { likes: number; commen
   );
 }
 
-function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, groupId, groupPoster, onEdit }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string }; onEdit?: () => void }) {
+function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, groupId, groupPoster, onEdit }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; onEdit?: () => void}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();

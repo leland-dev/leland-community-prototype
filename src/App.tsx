@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { VersionProvider } from "./contexts/VersionContext";
+import { DarkModeProvider } from "./contexts/DarkModeContext";
 import Layout from "./components/Layout";
 import { ContextLayout } from "./components/Layout";
 
@@ -41,6 +42,7 @@ import Components from "./pages/Components";
 export default function App() {
   return (
     <VersionProvider>
+    <DarkModeProvider>
     <Routes>
       <Route path="*" element={<ScrollToTop />} />
       <Route path="/b2b-dashboard" element={<B2BDashboard />} />
@@ -79,6 +81,7 @@ export default function App() {
         </Route>
       </Route>
     </Routes>
+    </DarkModeProvider>
     </VersionProvider>
   );
 }
