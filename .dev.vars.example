@@ -1,0 +1,4 @@
+# Used by `wrangler dev` (Cloudflare Worker) and `vite dev` (via .env.local).
+# Copy to either `.dev.vars` (wrangler) or `.env.local` (vite) — both are gitignored.
+# Get a key at https://console.anthropic.com/settings/keys
+ANTHROPIC_API_KEY="sk-ant-..."

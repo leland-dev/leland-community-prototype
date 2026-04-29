@@ -18,6 +18,8 @@ import Notifications from "./pages/Notifications";
 import Messaging from "./pages/Messaging";
 import Profile from "./pages/Profile";
 import ProfileV2 from "./pages/ProfileV2";
+import CoachAgent from "./pages/CoachAgent";
+import CoachAgentEdit from "./pages/CoachAgentEdit";
 import Group from "./pages/Group";
 import GroupCommunity from "./pages/GroupCommunity";
 import Events from "./pages/Events";
@@ -51,7 +53,10 @@ export default function App() {
         {/* Standalone pages using PageShell directly */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile-v2" element={<ProfileV2 />} />
-        <Route path="/coach-profile" element={<ProfileV2 coach />} />
+        <Route path="/coach-profile" element={<ProfileV2 coach coachId="samantha" />} />
+        <Route path="/coach-profile-john" element={<ProfileV2 coach coachId="john" />} />
+        <Route path="/agent/:agentSlug" element={<CoachAgent />} />
+        <Route path="/agent/:agentSlug/edit" element={<CoachAgentEdit />} />
         <Route path="/groups/:groupId" element={<Group />} />
         <Route path="/site" element={<Site />} />
         <Route path="/settings" element={<AccountSettings />} />

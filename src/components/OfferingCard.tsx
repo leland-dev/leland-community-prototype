@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import dotsVerticalIcon from "../assets/icons/dots-vertical.svg";
 import downloadIcon from "../assets/icons/download.svg";
@@ -15,7 +16,7 @@ import introCallImg from "../assets/img/intro-call.png";
 import matchingPhoto from "../assets/img/Matching-Photo.png";
 import lelandPlusImg from "../assets/img/Leland-Plus.png";
 
-export type OfferingType = "free-intro" | "hourly" | "hourly-package" | "package" | "course" | "content" | "coach-matching" | "leland-plus";
+export type OfferingType = "free-intro" | "hourly" | "hourly-package" | "package" | "course" | "content" | "coach-matching" | "leland-plus" | "agent";
 
 interface OfferingCardProps {
   type: OfferingType;
@@ -29,6 +30,7 @@ interface OfferingCardProps {
   ctaLabel?: string;
   showImage?: boolean;
   size?: "large" | "small";
+  href?: string;
 }
 
 function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: boolean, exhausted: boolean): { label: string; green?: boolean } {
@@ -43,6 +45,7 @@ function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: b
   }
   if (type === "coach-matching") return { label: "Get matched", green: true };
   if (type === "free-intro") return { label: "Schedule", green: true };
+  if (type === "agent") return { label: "Open chat", green: true };
   if (type === "hourly") return { label: "Details" };
   if (type === "hourly-package") return { label: "Details" };
   if (type === "package") return { label: "Details" };
@@ -125,6 +128,7 @@ export default function OfferingCard({
   ctaLabel,
   showImage = false,
   size = "large",
+  href,
 }: OfferingCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -152,32 +156,34 @@ export default function OfferingCard({
 
   /* ── Free intro card ── */
   if (type === "free-intro" && !purchased) {
+    const freeIntroBody = (
+      <div className="flex cursor-pointer items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-[#F5F5F5] transition-colors hover:bg-[#EFEFEF]">
+        <img
+          src={introCallImg}
+          alt=""
+          className="hidden @[380px]:block ml-3 w-[64px] shrink-0 object-contain"
+        />
+        <div className="flex min-w-0 flex-1 flex-col gap-[2px] py-4 pl-3">
+          <p className="truncate text-[18px] leading-tight font-medium text-gray-dark">{title}</p>
+          <p className="truncate text-[16px] leading-tight text-[#707070]">{subtitle}</p>
+        </div>
+        <div className="flex shrink-0 items-center pr-2 py-4">
+          <button className="hidden @[448px]:flex cursor-pointer items-center gap-2 rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+            {label}
+          </button>
+        </div>
+      </div>
+    );
     return (
       <div className="@container">
-        <div className="flex cursor-pointer items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-[#F5F5F5] transition-colors hover:bg-[#EFEFEF]">
-          <img
-            src={introCallImg}
-            alt=""
-            className="hidden @[380px]:block ml-3 w-[64px] shrink-0 object-contain"
-          />
-          <div className="flex min-w-0 flex-1 flex-col gap-[2px] py-4 pl-3">
-            <p className="truncate text-[18px] leading-tight font-medium text-gray-dark">{title}</p>
-            <p className="truncate text-[16px] leading-tight text-[#707070]">{subtitle}</p>
-          </div>
-          <div className="flex shrink-0 items-center pr-2 py-4">
-            <button className="hidden @[448px]:flex cursor-pointer items-center gap-2 rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
-              {label}
-            </button>
-          </div>
-        </div>
+        {href ? <Link to={href} className="block">{freeIntroBody}</Link> : freeIntroBody}
       </div>
     );
   }
 
   /* ── Standard inline row layout ── */
-  return (
-    <div className="@container">
-      <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 py-3 transition-colors hover:bg-[#F5F5F5] ${showMenu ? "pr-1" : "pr-2"}`}>
+  const cardBody = (
+    <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 py-3 transition-colors hover:bg-[#F5F5F5] ${showMenu ? "pr-1" : "pr-2"}`}>
         {/* Image */}
         {type === "leland-plus" ? (
           <img
@@ -238,7 +244,7 @@ export default function OfferingCard({
           {showMenu && (
             <div ref={menuRef} className="relative self-stretch">
               <button
-                onClick={() => setMenuOpen(!menuOpen)}
+                onClick={(e) => { e.preventDefault(); setMenuOpen(!menuOpen); }}
                 className="group/dots flex w-8 cursor-pointer items-center justify-center self-stretch h-full"
               >
                 <img src={dotsVerticalIcon} alt="" className="h-4 w-1 opacity-60 transition-opacity group-hover/dots:opacity-100" />
@@ -279,6 +285,11 @@ export default function OfferingCard({
           )}
         </div>
       </div>
+  );
+
+  return (
+    <div className="@container">
+      {href ? <Link to={href} className="block">{cardBody}</Link> : cardBody}
     </div>
   );
 }

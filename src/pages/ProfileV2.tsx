@@ -153,16 +153,60 @@ const purchasedOfferings: PurchasedOffering[] = [
   },
 ];
 
-const coachOfferings: { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string }[] = [
-  { type: "free-intro", title: "Free 15-minute intro call", subtitle: "Get to know Samantha and make a plan", image: "" },
-  { type: "hourly-package", title: "10-Hour Coaching Package", subtitle: "10 hours · $1,200", image: eventImg1 },
-  { type: "package", title: "MBA Application Package", subtitle: "Comprehensive Package · Starting at $750", image: eventImg2 },
-  { type: "package", title: "Interview Prep Package", subtitle: "Comprehensive Package · Starting at $500", image: eventImg3 },
-  { type: "hourly", title: "Custom hourly coaching", subtitle: "$150 per hour", image: "" },
-  { type: "content", title: "How I Got Into Stanford GSB", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>, image: lelandPlusImg1 },
-  { type: "content", title: "GMAT Study Plan: 3 Months to 750+", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 184 views</span></span>, image: lelandPlusImg2 },
-  { type: "content", title: "My Consulting Recruiting Timeline", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 97 views</span></span>, image: lelandPlusImg3 },
-];
+type CoachOffering = { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string; href?: string };
+
+type CoachConfig = {
+  id: string;
+  name: string;
+  firstName: string;
+  photo: string;
+  qualificationsTitle: string;
+  offerings: CoachOffering[];
+};
+
+const COACH_CONFIGS: Record<string, CoachConfig> = {
+  samantha: {
+    id: "samantha",
+    name: "Samantha Parker",
+    firstName: "Samantha",
+    photo: pic6,
+    qualificationsTitle: "MBA Qualifications",
+    offerings: [
+      { type: "free-intro", title: "Free 15-minute intro call", subtitle: "Get to know Samantha and make a plan", image: "" },
+      { type: "hourly-package", title: "10-Hour Coaching Package", subtitle: "10 hours · $1,200", image: eventImg1 },
+      { type: "package", title: "MBA Application Package", subtitle: "Comprehensive Package · Starting at $750", image: eventImg2 },
+      { type: "package", title: "Interview Prep Package", subtitle: "Comprehensive Package · Starting at $500", image: eventImg3 },
+      { type: "hourly", title: "Custom hourly coaching", subtitle: "$150 per hour", image: "" },
+      { type: "agent", title: "Samantha's MBA Admissions Agent", subtitle: "AI guidance, curated by Samantha · Subscription", image: categoryMBA, href: "/agent/samantha-mba-admissions" },
+      { type: "agent", title: "Samantha's GMAT Prep Agent", subtitle: "AI guidance, curated by Samantha · Subscription", image: categoryMBA, href: "/agent/samantha-gmat-prep" },
+      { type: "agent", title: "Samantha's Consulting Recruiting Agent", subtitle: "AI guidance, curated by Samantha · Subscription", image: categoryConsulting, href: "/agent/samantha-consulting" },
+      { type: "content", title: "How I Got Into Stanford GSB", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>, image: lelandPlusImg1 },
+      { type: "content", title: "GMAT Study Plan: 3 Months to 750+", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 184 views</span></span>, image: lelandPlusImg2 },
+      { type: "content", title: "My Consulting Recruiting Timeline", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 97 views</span></span>, image: lelandPlusImg3 },
+    ],
+  },
+  john: {
+    id: "john",
+    name: "John Koelliker",
+    firstName: "John",
+    photo: pic9,
+    qualificationsTitle: "Coach Qualifications",
+    offerings: [
+      { type: "free-intro", title: "Free 15-minute intro call", subtitle: "Get to know John and make a plan", image: "" },
+      { type: "package", title: "Deferred MBA Application Package", subtitle: "Comprehensive Package · Starting at $1,200", image: eventImg2 },
+      { type: "package", title: "Standard MBA Application Package", subtitle: "Comprehensive Package · Starting at $1,500", image: eventImg3 },
+      { type: "package", title: "Pitch Deck Review", subtitle: "Single 60-min session · $500", image: eventImg1 },
+      { type: "hourly", title: "Custom hourly coaching", subtitle: "$300 per hour", image: "" },
+      { type: "agent", title: "John's MBA Admissions Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-admissions" },
+      { type: "agent", title: "John's Deferred MBA Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-deferred-mba" },
+      { type: "agent", title: "John's Startup Strategy Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryConsulting, href: "/agent/john-startup" },
+      { type: "agent", title: "John's Fundraising Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryConsulting, href: "/agent/john-fundraising" },
+      { type: "content", title: "Components of an MBA Application Strategy", subtitle: <span className="flex items-center gap-1.5"><img src={pic9} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />John Koelliker <span className="text-[#9B9B9B]">· 560 views</span></span>, image: lelandPlusImg1 },
+      { type: "content", title: "Why Apply to Deferred MBA Programs?", subtitle: <span className="flex items-center gap-1.5"><img src={pic9} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />John Koelliker <span className="text-[#9B9B9B]">· 237 views</span></span>, image: lelandPlusImg2 },
+      { type: "content", title: "General Interview Tips", subtitle: <span className="flex items-center gap-1.5"><img src={pic9} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />John Koelliker <span className="text-[#9B9B9B]">· 354 views</span></span>, image: lelandPlusImg3 },
+    ],
+  },
+};
 
 const customerPosts: Post[] = [
   {
@@ -283,7 +327,8 @@ function CategorySubtitle({ photos, experts }: { photos: string[]; experts: stri
   );
 }
 
-export default function ProfileV2({ coach = false }: { coach?: boolean }) {
+export default function ProfileV2({ coach = false, coachId = "samantha" }: { coach?: boolean; coachId?: string }) {
+  const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
   const [isFollowing, setIsFollowing] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -312,8 +357,8 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [eventsCategoryOpen, setEventsCategoryOpen] = useState(false);
 
-  const profilePhoto = isCustomerProfile ? customerPhoto : pic6;
-  const profileName = isCustomerProfile ? "June Allen" : "Samantha Parker";
+  const profilePhoto = isCustomerProfile ? customerPhoto : coachConfig.photo;
+  const profileName = isCustomerProfile ? "June Allen" : coachConfig.name;
 
   const categoryRef = useRef<HTMLDivElement>(null);
   const eventsCategoryRef = useRef<HTMLDivElement>(null);
@@ -1111,7 +1156,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
 
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="flex flex-wrap gap-[6px]">
-                {["All", "Packages", "Memberships", "Content"].map((tab) => (
+                {["All", "Packages", "Memberships", "Agents", "Content"].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setOfferingsType(tab)}
@@ -1158,17 +1203,33 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
 
             {/* Offering cards */}
             {(() => {
-              const filteredOfferings = coachOfferings.filter((o) => {
+              const filteredOfferings = coachConfig.offerings.filter((o) => {
                 if (offeringsType === "All") return true;
                 if (offeringsType === "Packages") return o.type === "hourly-package" || o.type === "package";
                 if (offeringsType === "Memberships") return o.type === "course";
+                if (offeringsType === "Agents") return o.type === "agent";
                 return o.type === "content";
               });
+              const sliceCount = offeringsType === "All" ? 8 : 5;
+              const isOwnCoachProfile = !isCustomerProfile && viewingOwnProfile;
               return filteredOfferings.length > 0 ? (
                 <div className="flex flex-col gap-1">
-                  {filteredOfferings.slice(0, 5).map((o) => (
-                    <OfferingCard key={o.title} type={o.type} title={o.title} subtitle={o.subtitle} image={o.image} ctaLabel={o.ctaLabel} />
-                  ))}
+                  {filteredOfferings.slice(0, sliceCount).map((o) => {
+                    const isAgent = o.type === "agent";
+                    const href = isAgent && isOwnCoachProfile && o.href ? `${o.href}/edit` : o.href;
+                    const ctaLabel = isAgent && isOwnCoachProfile ? "Edit context" : o.ctaLabel;
+                    return (
+                      <OfferingCard
+                        key={o.title}
+                        type={o.type}
+                        title={o.title}
+                        subtitle={o.subtitle}
+                        image={o.image}
+                        ctaLabel={ctaLabel}
+                        href={href}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[#D0D0D0] py-10 text-center">
@@ -1262,7 +1323,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
               ref={setSectionRef("about-samantha")}
               className="scroll-mt-[60px] mb-4 text-[24px] font-medium text-gray-dark"
             >
-              MBA Qualifications
+              {coachConfig.qualificationsTitle}
             </h2>
             <div className="flex flex-col gap-4">
               <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
@@ -1270,7 +1331,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
             </div>
 
             <div className="my-[36px] border-t border-gray-200" />
-            <h2 className="mb-4 text-[24px] font-medium text-gray-dark">About Samantha</h2>
+            <h2 className="mb-4 text-[24px] font-medium text-gray-dark">About {coachConfig.firstName}</h2>
             <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
 
             <div className="my-[36px] border-t border-gray-200" />
