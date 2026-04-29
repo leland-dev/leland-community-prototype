@@ -4,12 +4,14 @@ import tailwindcss from "@tailwindcss/vite";
 import { handleAgentChat } from "./src/lib/agentChat";
 import { handleAgentEdit } from "./src/lib/agentEdit";
 import { handleAgentSave } from "./src/lib/agentSave";
+import { handleAgentGet } from "./src/lib/agentGet";
 import { FileAgentStore } from "./src/lib/fileAgentStore.node";
 import type { AgentStore } from "./src/lib/agentStore";
 
 type RouteHandler = (req: Request, apiKey: string | undefined, store: AgentStore) => Promise<Response>;
 
 const ROUTES: Record<string, RouteHandler> = {
+  "/api/agent": (req, _apiKey, store) => handleAgentGet(req, store),
   "/api/agent-chat": handleAgentChat,
   "/api/agent-edit": handleAgentEdit,
   "/api/agent-save": (req, _apiKey, store) => handleAgentSave(req, store),

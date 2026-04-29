@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "../components/Button";
-import { AGENTS } from "../lib/agents";
+import { AGENTS, type AgentDef } from "../lib/agents";
 import { AGENT_ASSETS } from "../lib/agentAssets";
 
 type Message = { role: "user" | "assistant"; content: string };
@@ -38,8 +38,25 @@ function SendIcon() {
 
 export default function CoachAgent() {
   const { agentSlug } = useParams<{ agentSlug: string }>();
-  const agent = agentSlug ? AGENTS[agentSlug] : undefined;
+  const fallback = agentSlug ? AGENTS[agentSlug] : undefined;
   const assets = agentSlug ? AGENT_ASSETS[agentSlug] : undefined;
+  const [agent, setAgent] = useState<AgentDef | undefined>(fallback);
+
+  // On mount, fetch the store-resolved agent so any saved overrides surface.
+  useEffect(() => {
+    if (!agentSlug) return;
+    let cancelled = false;
+    fetch(`/api/agent?slug=${encodeURIComponent(agentSlug)}`)
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = (await res.json()) as { agent: AgentDef };
+        if (!cancelled && data.agent) setAgent(data.agent);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [agentSlug]);
 
   useEffect(() => {
     document.title = agent ? `Leland Prototype | ${agent.agentName}` : "Leland Prototype | Agent";

@@ -1,6 +1,7 @@
 import { handleAgentChat } from "../src/lib/agentChat";
 import { handleAgentEdit } from "../src/lib/agentEdit";
 import { handleAgentSave } from "../src/lib/agentSave";
+import { handleAgentGet } from "../src/lib/agentGet";
 import { KVAgentStore, type KVNamespace } from "../src/lib/agentStore";
 
 interface Env {
@@ -14,6 +15,9 @@ export default {
     const url = new URL(request.url);
     const store = new KVAgentStore(env.AGENTS_KV);
 
+    if (url.pathname === "/api/agent") {
+      return handleAgentGet(request, store);
+    }
     if (url.pathname === "/api/agent-chat") {
       return handleAgentChat(request, env.ANTHROPIC_API_KEY, store);
     }

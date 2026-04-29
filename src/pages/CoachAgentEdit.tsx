@@ -193,6 +193,22 @@ export default function CoachAgentEdit() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // On mount, fetch the store-resolved agent so any saved overrides surface.
+  useEffect(() => {
+    if (!agentSlug) return;
+    let cancelled = false;
+    fetch(`/api/agent?slug=${encodeURIComponent(agentSlug)}`)
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = (await res.json()) as { agent: AgentDef };
+        if (!cancelled && data.agent) setAgent(data.agent);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [agentSlug]);
+
   useEffect(() => {
     document.title = agent ? `Edit | ${agent.agentName}` : "Edit agent";
   }, [agent]);
