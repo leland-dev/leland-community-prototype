@@ -11,6 +11,9 @@ import { useIsMobile } from "../hooks/useIsMobile";
 import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
 import SessionCard from "../components/SessionCard";
 import OfferingCard from "../components/OfferingCard";
+import GroupCard from "../components/GroupCard";
+import groupImg1 from "../assets/placeholder images/group images/18603db620e37b489d2d52da4c9c1f86.jpg";
+import groupImg2 from "../assets/placeholder images/group images/419a6944d25e95be7012699559c7b0be.jpg";
 import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import eventImageSrc from "../assets/img/EventImage.avif";
@@ -3239,7 +3242,6 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
         <div className="mt-2 flex flex-col -mx-2">
           <SessionCard size="small" title="Mock Interview" dateTime="Today, 3:00 PM" duration="45 min" image={pic3} type="coach" status="upcoming" startsIn="2h" />
           <SessionCard size="small" title="Resume Review" dateTime="Oct 29, 5:00 PM" duration="45 min" image={pic5} type="coach" status="upcoming" />
-          <SessionCard size="small" title="Jasmine <> James Sync" dateTime="Nov 3, 5:00 PM" duration="60 min" image={pic3} type="coach" status="upcoming" />
         </div>
 
         <NavLink to="/my-courses" className="mt-5 flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
@@ -3253,33 +3255,29 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
           <OfferingCard type="package" title="MBA Application Package" subtitle={<span>Comprehensive package · <span className="text-[#038561]">Active</span></span>} image={pic3} purchased showImage size="small" />
         </div>
 
-        <NavLink to="/groups/ai-bp-apr-26" className="mt-5 flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+        <NavLink to="/profile-v2?tab=more" className="mt-5 flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
           My Groups
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </NavLink>
-        <div className="mt-2 flex flex-col">
-          {[
-            { id: "ai-bp-apr-26", name: "AI BP April 26", color: "#2563EB", subtitle: "18 members · 3 new posts" },
-          ].map(g => (
-            <NavLink
-              key={g.id}
-              to={`/groups/${g.id}`}
-              className="group flex cursor-pointer items-center gap-3 rounded-[8px] py-[10px] transition-[padding] duration-300 ease-out hover:pl-[4px]"
-            >
-              <div
-                className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[6px] text-white text-[16px] font-bold"
-                style={{ backgroundColor: g.color }}
-              >
-                {g.name.charAt(0)}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[15px] font-medium leading-tight text-gray-dark group-hover:underline group-hover:decoration-[1px] group-hover:underline-offset-[2px]">{g.name}</p>
-                <p className="mt-[3px] truncate text-[13px] leading-tight text-[#707070]">{g.subtitle}</p>
-              </div>
-            </NavLink>
-          ))}
+        <div className="mt-2 flex flex-col -mx-2">
+          <GroupCard
+            name="AI BP April 26"
+            image={groupImg1}
+            members={18}
+            newPosts={3}
+            to="/groups/ai-bp-apr-26"
+            size="small"
+          />
+          <GroupCard
+            name="MBA Admissions 2027"
+            image={groupImg2}
+            members={142}
+            newPosts={0}
+            to="/groups/mba-admissions-2027"
+            size="small"
+          />
         </div>
       </div>
 

@@ -1,6 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { useNavigate } from "react-router-dom";
 import { useExtraLinks } from "./ExtraLinksContext";
+import { useIsCoachMode } from "../hooks/useIsCoachMode";
 import moreActive from "../assets/icons/nav-icons/more-active.svg";
 import moreInactive from "../assets/icons/nav-icons/more-inactive.svg";
 
@@ -21,7 +23,7 @@ const menuGroups = [
   },
   {
     items: [
-      { icon: switchIcon, label: "Switch to coaching", danger: false },
+      { icon: switchIcon, label: "Switch to coaching", danger: false, to: "/coach/home" as string | null },
       { icon: helpIcon, label: "Help", danger: false },
       { icon: logOutIcon, label: "Log out", danger: true },
     ],
@@ -32,6 +34,20 @@ export default function MoreMenu() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { showExtraLinks, toggleExtraLinks } = useExtraLinks();
+  const navigate = useNavigate();
+  const isCoachMode = useIsCoachMode();
+
+  const activeMenuGroups = useMemo(() => {
+    if (!isCoachMode) return menuGroups;
+    return menuGroups.map((group) => ({
+      ...group,
+      items: group.items.map((item) =>
+        item.label === "Switch to coaching"
+          ? { ...item, to: "/" as string | null, label: "Switch to customer view" }
+          : item
+      ),
+    }));
+  }, [isCoachMode]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -78,19 +94,25 @@ export default function MoreMenu() {
               </button>
             </div>
 
-            {menuGroups.map((group, gi) => (
+            {activeMenuGroups.map((group, gi) => (
               <div key={gi} className={`border-t border-gray-stroke px-2 py-2`}>
-                {group.items.map(({ icon, label, danger }) => (
+                {group.items.map((item) => (
                   <button
-                    key={label}
+                    key={item.label}
+                    onClick={() => {
+                      if ("to" in item && item.to) {
+                        navigate(item.to);
+                        setOpen(false);
+                      }
+                    }}
                     className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium transition-colors ${
-                      danger
+                      item.danger
                         ? "text-[#D92D20] hover:bg-gray-hover"
                         : "text-gray-dark hover:bg-gray-hover"
                     }`}
                   >
-                    <img src={icon} alt={label} className="h-6 w-6 shrink-0" />
-                    {label}
+                    <img src={item.icon} alt={item.label} className="h-6 w-6 shrink-0" />
+                    {item.label}
                   </button>
                 ))}
               </div>

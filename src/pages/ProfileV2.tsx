@@ -21,6 +21,13 @@ import pic10 from "../assets/profile photos/pic-10.png";
 import pic11 from "../assets/profile photos/pic-11.png";
 import mailIcon from "../assets/icons/mail.svg";
 import shareArrowIcon from "../assets/icons/share-arrow.svg";
+import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
+import reportFlagIcon from "../assets/icons/report-flag.svg";
+import lockIcon from "../assets/icons/lock.svg";
+import GroupCard from "../components/GroupCard";
+import groupImg1 from "../assets/placeholder images/group images/18603db620e37b489d2d52da4c9c1f86.jpg";
+import groupImg2 from "../assets/placeholder images/group images/419a6944d25e95be7012699559c7b0be.jpg";
+import groupImg3 from "../assets/placeholder images/group images/6c168007b1aef00bedc192e802c413e5.jpg";
 import checkIcon from "../assets/icons/check.svg";
 import editIcon from "../assets/icons/edit.svg";
 import verifiedIcon from "../assets/icons/verified.svg";
@@ -352,8 +359,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
   const [showGrayHeader, setShowGrayHeader] = useState(false);
   const [searchParams] = useSearchParams();
   const isCustomerProfile = !coach;
-  const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes" | "groups">(
-    searchParams.get("tab") === "groups" ? "groups" : "activity"
+  const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes" | "more">(
+    searchParams.get("tab") === "more" ? "more" : "activity"
   );
   const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Courses" | "Content">("All");
   const [purchasesExpanded, setPurchasesExpanded] = useState(false);
@@ -363,6 +370,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
   const [viewingOwnProfile, setViewingOwnProfile] = useState(isCustomerProfile);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [eventsCategoryOpen, setEventsCategoryOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
 
   const profilePhoto = isCustomerProfile ? customerPhoto : coachConfig.photo;
   const profileName = isCustomerProfile ? "June Allen" : coachConfig.name;
@@ -370,6 +378,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
   const categoryRef = useRef<HTMLDivElement>(null);
   const eventsCategoryRef = useRef<HTMLDivElement>(null);
   const adminRef = useRef<HTMLDivElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
   const heroSentinelRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLHeadingElement | null>>({});
   const groupRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -473,6 +482,17 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [eventsCategoryOpen]);
+
+  useEffect(() => {
+    if (!moreMenuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+        setMoreMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [moreMenuOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -791,13 +811,6 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 </button>
               ) : (
                 <>
-                  <button className={`flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-lg transition-colors ${
-                    showCoverImage || !showGrayHeader
-                      ? "bg-[#222222]/5 hover:bg-[#222222]/[0.08]"
-                      : "border border-[#222222]/10 bg-white hover:border-[#222222]/20"
-                  }`}>
-                    <img src={shareArrowIcon} alt="Share" className="h-[20px] w-[20px]" />
-                  </button>
                   <button
                     onClick={() => setIsFollowing(!isFollowing)}
                     className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
@@ -811,6 +824,46 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     {isFollowing && <img src={checkIcon} alt="" className={`h-[18px] w-[18px] ${isCustomerProfile ? "brightness-0 invert" : ""}`} />}
                     {isFollowing ? "Following" : "Follow"}
                   </button>
+                  <div ref={moreMenuRef} className="relative">
+                    <button
+                      onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                      className={`flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-lg transition-colors ${
+                        showCoverImage || !showGrayHeader
+                          ? "bg-[#222222]/5 hover:bg-[#222222]/[0.08]"
+                          : "border border-[#222222]/10 bg-white hover:border-[#222222]/20"
+                      }`}
+                    >
+                      <img src={dotsHorizontalIcon} alt="More" className="h-[20px] w-[20px]" />
+                    </button>
+                    <AnimatePresence>
+                      {moreMenuOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 6 }}
+                          transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+                          className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                        >
+                          {[
+                            { icon: shareArrowIcon, label: "Share" },
+                            { icon: airplaneIcon, label: "Message" },
+                            { icon: reportFlagIcon, label: "Report" },
+                          ].map((item) => (
+                            <button
+                              key={item.label}
+                              onClick={() => setMoreMenuOpen(false)}
+                              className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-[15px] font-medium transition-colors hover:bg-gray-hover ${
+                                "text-gray-dark"
+                              }`}
+                            >
+                              <img src={item.icon} alt="" className="h-[20px] w-[20px] shrink-0 brightness-0" />
+                              {item.label}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </>
               )}
             </div>
@@ -982,9 +1035,42 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px] brightness-0 invert" />}
                     {isFollowing ? "Following" : "Follow"}
                   </button>
-                  <button className="flex cursor-pointer items-center justify-center rounded-full bg-[#222222]/5 px-4 py-3 transition-colors hover:bg-[#222222]/[0.08]">
-                    <img src={shareArrowIcon} alt="Share" className="h-[20px] w-[20px]" />
-                  </button>
+                  <div ref={moreMenuRef} className="relative">
+                    <button
+                      onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                      className="flex cursor-pointer items-center justify-center rounded-full bg-[#222222]/5 px-4 py-3 transition-colors hover:bg-[#222222]/[0.08]"
+                    >
+                      <img src={dotsHorizontalIcon} alt="More" className="h-[20px] w-[20px]" />
+                    </button>
+                    <AnimatePresence>
+                      {moreMenuOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 6 }}
+                          transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+                          className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                        >
+                          {[
+                            { icon: shareArrowIcon, label: "Share" },
+                            { icon: airplaneIcon, label: "Message" },
+                            { icon: reportFlagIcon, label: "Report" },
+                          ].map((item) => (
+                            <button
+                              key={item.label}
+                              onClick={() => setMoreMenuOpen(false)}
+                              className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-[15px] font-medium transition-colors hover:bg-gray-hover ${
+                                "text-gray-dark"
+                              }`}
+                            >
+                              <img src={item.icon} alt="" className="h-[20px] w-[20px] shrink-0 brightness-0" />
+                              {item.label}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
               )}
             </div>
@@ -1499,7 +1585,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             <>
               {viewingOwnProfile ? (
                 <div className="sticky top-0 z-10 mt-5 flex gap-5 border-b border-gray-stroke bg-white overflow-x-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {(["activity", "about", "calendar", "likes", "groups"] as const).map((tab) => (
+                  {(["activity", "about", "calendar", "likes", "more"] as const).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setCustomerTab(tab)}
@@ -1509,7 +1595,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                           : "text-gray-light hover:text-gray-dark"
                       }`}
                     >
-                      <span className="text-[18px] font-medium">{tab === "activity" ? "Overview" : tab === "about" ? "Activity" : tab === "calendar" ? "Calendar" : tab === "likes" ? "Likes" : "Groups"}</span>
+                      <span className="text-[18px] font-medium">{tab === "activity" ? "Overview" : tab === "about" ? "Activity" : tab === "calendar" ? "Calendar" : tab === "likes" ? "Likes" : "More"}</span>
                       {customerTab === tab && (
                         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#038561]" />
                       )}
@@ -1711,28 +1797,52 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                   </>
                 )}
 
-                {viewingOwnProfile && customerTab === "groups" && (
-                  <div className="flex flex-col">
-                    {[
-                      { id: "ai-bp-apr-26", name: "AI BP April 26", color: "#2563EB", subtitle: "18 members · 3 new posts" },
-                    ].map((g) => (
-                      <Link
-                        key={g.id}
-                        to={`/groups/${g.id}`}
-                        className="group flex cursor-pointer items-center gap-3 rounded-[8px] py-[10px] transition-[padding] duration-300 ease-out hover:pl-[4px]"
-                      >
-                        <div
-                          className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[6px] text-white text-[16px] font-bold"
-                          style={{ backgroundColor: g.color }}
-                        >
-                          {g.name.charAt(0)}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-[15px] font-medium leading-tight text-gray-dark group-hover:underline group-hover:decoration-[1px] group-hover:underline-offset-[2px]">{g.name}</p>
-                          <p className="mt-[3px] truncate text-[13px] leading-tight text-[#707070]">{g.subtitle}</p>
-                        </div>
-                      </Link>
-                    ))}
+                {viewingOwnProfile && customerTab === "more" && (
+                  <div className="flex flex-col gap-8">
+                    {/* About */}
+                    <section>
+                      <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>About</h2>
+                      <div className="mt-1 flex items-center gap-1.5">
+                        <img src={lockIcon} alt="" className="h-[16px] w-[16px] shrink-0 opacity-40" />
+                        <span className="text-[16px] text-gray-extra-light">Only available to experts you're working with</span>
+                      </div>
+                      <div className="mt-3 text-[18px] text-[#444]" style={{ lineHeight: "130%" }}>
+                        <p>
+                          Product manager at Atlassian with 6+ years of experience building enterprise SaaS tools. Previously led growth initiatives at two early-stage startups, taking one from beta to 50K monthly active users. Yale graduate with a background in computer science and behavioral economics.
+                        </p>
+                        <p className="mt-4">
+                          Outside of work, I'm passionate about mentoring aspiring PMs and helping career switchers break into tech. I also run a small book club focused on product strategy and organizational design.
+                        </p>
+                      </div>
+                    </section>
+
+                    {/* Groups */}
+                    <section>
+                      <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Groups</h2>
+                      <div className="mt-3 flex flex-col gap-1">
+                        <GroupCard
+                          name="AI BP April 26"
+                          image={groupImg1}
+                          members={18}
+                          newPosts={3}
+                          to="/groups/ai-bp-apr-26"
+                        />
+                        <GroupCard
+                          name="MBA Admissions 2027"
+                          image={groupImg2}
+                          members={142}
+                          newPosts={12}
+                          to="/groups/mba-admissions-2027"
+                        />
+                        <GroupCard
+                          name="Product Management Career Switchers"
+                          image={groupImg3}
+                          members={87}
+                          newPosts={0}
+                          to="/groups/pm-career-switchers"
+                        />
+                      </div>
+                    </section>
                   </div>
                 )}
               </div>

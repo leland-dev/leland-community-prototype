@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useExtraLinks } from "./ExtraLinksContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
+import { useIsCoachMode } from "../hooks/useIsCoachMode";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 
 import eventsIcon from "../assets/icons/nav-icons/calendar-inactive.svg";
@@ -21,11 +22,11 @@ const menuItems = [
   { to: "/events", icon: eventsIcon, label: "Free Events", danger: false, darkIcon: true },
   { to: "/courses", icon: coursesIcon, label: "Courses", danger: false, darkIcon: true },
   { to: "/plus", icon: lelandPlusIcon, label: "Leland+", danger: false, darkIcon: true },
-  { to: "/profile-v2?tab=groups", icon: usersGroupIcon, label: "My Groups", danger: false, darkIcon: true },
+  { to: "/profile-v2?tab=more", icon: usersGroupIcon, label: "My Groups", danger: false, darkIcon: true },
   { to: null, icon: giftIcon, label: "Refer a friend", danger: false },
   { to: null, icon: settingsIcon, label: "Settings", danger: false },
   { to: null, icon: arrowRoundIcon, label: "Order History", danger: false },
-  { to: null, icon: switchIcon, label: "Switch to coaching", danger: false },
+  { to: "/coach/home", icon: switchIcon, label: "Switch to coaching", danger: false },
   { to: "/partner-dashboard", icon: browserIcon, label: "Partner dashboard", danger: false },
   { to: null, icon: helpIcon, label: "Help", danger: false },
   { to: null, icon: logOutIcon, label: "Log out", danger: true },
@@ -40,9 +41,19 @@ const extraPaths = new Set(["/events", "/courses", "/plus"]);
 
 export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const { showExtraLinks } = useExtraLinks();
+  const isCoachMode = useIsCoachMode();
+
+  const baseItems = isCoachMode
+    ? menuItems.map((item) =>
+        item.label === "Switch to coaching"
+          ? { ...item, to: "/", label: "Switch to customer view" }
+          : item
+      )
+    : menuItems;
+
   const visibleMenuItems = showExtraLinks
-    ? menuItems
-    : menuItems.filter((item) => !extraPaths.has(item.to ?? ""));
+    ? baseItems
+    : baseItems.filter((item) => !extraPaths.has(item.to ?? ""));
 
   // Design toggles — wired to DarkModeContext so the rest of the app can react.
   const { dark: darkMode, toggle: toggleDarkMode } = useDarkMode();

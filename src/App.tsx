@@ -39,7 +39,19 @@ import OfferingCardTest from "./pages/OfferingCardTest";
 import CourseBlockTest from "./pages/CourseBlockTest";
 import PostTest from "./pages/PostTest";
 import ProfileCardTest from "./pages/ProfileCardTest";
+import GroupCardTest from "./pages/GroupCardTest";
 import Components from "./pages/Components";
+import CoachLayout from "./components/CoachLayout";
+import CoachHome from "./pages/CoachHome";
+import CoachProducts from "./pages/CoachProducts";
+import CoachInbox from "./pages/CoachInbox";
+import CoachManage from "./pages/CoachManage";
+import CoachOpportunities from "./pages/CoachOpportunities";
+import CoachCalendar from "./pages/CoachCalendar";
+import CoachEarnings from "./pages/CoachEarnings";
+import CoachReviews from "./pages/CoachReviews";
+import CoachDiscountCodes from "./pages/CoachDiscountCodes";
+import CoachCategoryEdit from "./pages/CoachCategoryEdit";
 
 export default function App() {
   return (
@@ -62,6 +74,18 @@ export default function App() {
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/my-courses" element={<MyCourses />} />
+        <Route element={<CoachLayout />}>
+          <Route path="/coach/home" element={<CoachHome />} />
+          <Route path="/coach/inbox" element={<CoachInbox />} />
+          <Route path="/coach/manage" element={<CoachManage />} />
+          <Route path="/coach/products" element={<CoachProducts />} />
+          <Route path="/coach/manage/:category" element={<CoachCategoryEdit />} />
+          <Route path="/coach/opportunities" element={<CoachOpportunities />} />
+          <Route path="/coach/calendar" element={<CoachCalendar />} />
+          <Route path="/coach/earnings" element={<CoachEarnings />} />
+          <Route path="/coach/reviews" element={<CoachReviews />} />
+          <Route path="/coach/discount-codes" element={<CoachDiscountCodes />} />
+        </Route>
         <Route path="/components" element={<Components />} />
         <Route path="/components/session-card" element={<SessionCardTest />} />
         <Route path="/components/sidebar-cards" element={<SidebarCardsTest />} />
@@ -69,6 +93,7 @@ export default function App() {
         <Route path="/components/course-block" element={<CourseBlockTest />} />
         <Route path="/components/post" element={<PostTest />} />
         <Route path="/components/profile-card" element={<ProfileCardTest />} />
+        <Route path="/components/group-card" element={<GroupCardTest />} />
 
         {/* Context-driven pages (sidebar/variant via hooks) */}
         <Route element={<ContextLayout />}>
