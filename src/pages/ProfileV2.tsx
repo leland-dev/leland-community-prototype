@@ -39,6 +39,8 @@ import starIcon from "../assets/icons/star.svg";
 import categoryMBA from "../assets/placeholder images/category images/gmat-tutoring.png";
 import categoryConsulting from "../assets/placeholder images/category images/management-consulting.png";
 import categoryPM from "../assets/placeholder images/category images/product-management.png";
+import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
+import categoryFinance from "../assets/placeholder images/category images/investment-banking.png";
 
 import coachCoverImage from "../assets/img/cover-2.avif";
 import customerCoverImage from "../assets/img/cpver-image 1.jpg";
@@ -197,10 +199,15 @@ const COACH_CONFIGS: Record<string, CoachConfig> = {
       { type: "package", title: "Standard MBA Application Package", subtitle: "Comprehensive Package · Starting at $1,500", image: eventImg3 },
       { type: "package", title: "Pitch Deck Review", subtitle: "Single 60-min session · $500", image: eventImg1 },
       { type: "hourly", title: "Custom hourly coaching", subtitle: "$300 per hour", image: "" },
-      { type: "agent", title: "John's MBA Admissions Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-admissions" },
+      { type: "agent", title: "John's MBA Application Strategy Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-application-strategy" },
+      { type: "agent", title: "John's MBA Essays Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-essays" },
+      { type: "agent", title: "John's MBA Interviews Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-interviews" },
+      { type: "agent", title: "John's MBA Recommenders Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-recommenders" },
       { type: "agent", title: "John's Deferred MBA Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-deferred-mba" },
-      { type: "agent", title: "John's Startup Strategy Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryConsulting, href: "/agent/john-startup" },
-      { type: "agent", title: "John's Fundraising Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryConsulting, href: "/agent/john-fundraising" },
+      { type: "agent", title: "John's Fundraising Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryFinance, href: "/agent/john-fundraising" },
+      { type: "agent", title: "John's Pitch Decks Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryFinance, href: "/agent/john-pitch-decks" },
+      { type: "agent", title: "John's Startup Strategy Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryAI, href: "/agent/john-startup" },
+      { type: "agent", title: "John's Career Coaching Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryPM, href: "/agent/john-career" },
       { type: "content", title: "Components of an MBA Application Strategy", subtitle: <span className="flex items-center gap-1.5"><img src={pic9} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />John Koelliker <span className="text-[#9B9B9B]">· 560 views</span></span>, image: lelandPlusImg1 },
       { type: "content", title: "Why Apply to Deferred MBA Programs?", subtitle: <span className="flex items-center gap-1.5"><img src={pic9} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />John Koelliker <span className="text-[#9B9B9B]">· 237 views</span></span>, image: lelandPlusImg2 },
       { type: "content", title: "General Interview Tips", subtitle: <span className="flex items-center gap-1.5"><img src={pic9} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />John Koelliker <span className="text-[#9B9B9B]">· 354 views</span></span>, image: lelandPlusImg3 },
@@ -1210,7 +1217,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 if (offeringsType === "Agents") return o.type === "agent";
                 return o.type === "content";
               });
-              const sliceCount = offeringsType === "All" ? 8 : 5;
+              const sliceCount = offeringsType === "All" ? 8 : offeringsType === "Agents" ? filteredOfferings.length : 5;
               const isOwnCoachProfile = !isCustomerProfile && viewingOwnProfile;
               return filteredOfferings.length > 0 ? (
                 <div className="flex flex-col gap-1">
