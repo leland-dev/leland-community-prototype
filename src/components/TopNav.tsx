@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useSubNavStyle } from "./SubNavStyleContext";
+import { useIsCoachMode } from "../hooks/useIsCoachMode";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import notificationsInactive from "../assets/icons/nav-icons/notifications-inactive.svg";
 import notificationsActive from "../assets/icons/nav-icons/notifications-active.svg";
@@ -56,7 +57,7 @@ const profileMenuGroups = [
   },
   {
     items: [
-      { to: null, icon: switchIcon, label: "Switch to coaching", danger: false },
+      { to: "/coach/home", icon: switchIcon, label: "Switch to coaching", danger: false },
       { to: null, icon: helpIcon, label: "Help", danger: false },
       { to: null, icon: logOutIcon, label: "Log out", danger: true },
     ],
@@ -70,6 +71,21 @@ export default function TopNav() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const { showSubNav, setShowSubNav } = useSubNavStyle();
+  const isCoachMode = useIsCoachMode();
+
+  const activeProfileMenuGroups = useMemo(() => {
+    if (!isCoachMode) return profileMenuGroups;
+    return profileMenuGroups.map((group) => ({
+      ...group,
+      items: group.items
+        .filter((item) => item.label !== "My courses")
+        .map((item) =>
+          item.label === "Switch to coaching"
+            ? { ...item, to: "/", label: "Switch to customer view" }
+            : item
+        ),
+    }));
+  }, [isCoachMode]);
 
   const profileRef = useRef<HTMLDivElement>(null);
   const browseRef = useRef<HTMLDivElement>(null);
@@ -97,154 +113,158 @@ export default function TopNav() {
 
   return (
     <header className="border-b border-gray-stroke bg-white">
-      <div className="mx-auto flex max-w-[1280px] items-stretch justify-between px-6">
+      <div className={`mx-auto flex items-stretch justify-between px-6${isCoachMode ? "" : " max-w-[1280px]"}`}>
         {/* Left: Logo + Nav links */}
         <div className="flex items-stretch gap-1">
           <NavLink to="/" className="mr-4 flex shrink-0 items-center py-5">
             <img src={lelandLogo} alt="Leland" className="h-[22px] w-auto" />
           </NavLink>
 
-          <nav className="flex items-stretch gap-3">
-            {/* Home */}
-            <NavLink
-              to="/"
-              end
-              className="relative flex self-stretch items-center"
-            >
-              {({ isActive }) => (
-                <>
-                  <span className={`flex items-center rounded-lg px-3 py-2 text-[18px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-gray-hover" : ""}`}>
-                    Home
-                  </span>
-                  {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
-                </>
-              )}
-            </NavLink>
-
-            {/* Browse dropdown */}
-            <div ref={browseRef} className="relative flex self-stretch items-center">
-              <button
-                onClick={() => setBrowseOpen(!browseOpen)}
-                className="flex items-center gap-1 rounded-lg px-3 py-2 text-[18px] font-medium whitespace-nowrap text-[#222222] hover:bg-gray-hover"
-              >
-                Browse
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  className={`ml-0.5 transition-transform ${browseOpen ? "rotate-180" : ""}`}
-                >
-                  <path
-                    d="M3 4.5L6 7.5L9 4.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-
-              <AnimatePresence>
-                {browseOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 6 }}
-                    transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-                    className="absolute left-0 top-full z-50 mt-2 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
-                  >
-                    <div className="px-2 py-2">
-                      {browseCategories.map(({ to, label }) => (
-                        <NavLink
-                          key={to}
-                          to={to}
-                          onClick={() => setBrowseOpen(false)}
-                          className="flex w-full items-center justify-between rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
-                        >
-                          {label}
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            className="shrink-0 text-gray-light"
-                          >
-                            <path
-                              d="M6 4L10 8L6 12"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </NavLink>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Nav links (Events, Courses, Leland+) */}
-            {navLinks.filter(({ to }) => to !== "/").map(({ to, label, end }) => (
+          {!isCoachMode && (
+            <nav className="flex items-stretch gap-3">
+              {/* Home */}
               <NavLink
-                key={to}
-                to={to}
-                end={end}
+                to="/"
+                end
                 className="relative flex self-stretch items-center"
               >
                 {({ isActive }) => (
                   <>
                     <span className={`flex items-center rounded-lg px-3 py-2 text-[18px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-gray-hover" : ""}`}>
-                      {label}
+                      Home
                     </span>
                     {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
                   </>
                 )}
               </NavLink>
-            ))}
 
-            {/* Search */}
-            {showSearch && <div className="relative flex self-stretch items-center">
-              <form
-                onSubmit={(e) => e.preventDefault()}
-                className="flex items-center gap-2 px-3 py-2"
-              >
-                <img
-                  src={searchFocused ? searchActive : searchInactive}
-                  alt=""
-                  className="h-[20px] w-[20px] shrink-0"
-                />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setSearchFocused(false)}
-                  placeholder="Search..."
-                  className="w-40 bg-transparent text-[18px] font-medium text-[#222222] placeholder:font-normal placeholder:text-[#999999] outline-none"
-                />
-              </form>
-              {searchFocused && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
-            </div>}
-          </nav>
+              {/* Browse dropdown */}
+              <div ref={browseRef} className="relative flex self-stretch items-center">
+                <button
+                  onClick={() => setBrowseOpen(!browseOpen)}
+                  className="flex items-center gap-1 rounded-lg px-3 py-2 text-[18px] font-medium whitespace-nowrap text-[#222222] hover:bg-gray-hover"
+                >
+                  Browse
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    className={`ml-0.5 transition-transform ${browseOpen ? "rotate-180" : ""}`}
+                  >
+                    <path
+                      d="M3 4.5L6 7.5L9 4.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+
+                <AnimatePresence>
+                  {browseOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 6 }}
+                      transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+                      className="absolute left-0 top-full z-50 mt-2 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+                    >
+                      <div className="px-2 py-2">
+                        {browseCategories.map(({ to, label }) => (
+                          <NavLink
+                            key={to}
+                            to={to}
+                            onClick={() => setBrowseOpen(false)}
+                            className="flex w-full items-center justify-between rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                          >
+                            {label}
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 16 16"
+                              fill="none"
+                              className="shrink-0 text-gray-light"
+                            >
+                              <path
+                                d="M6 4L10 8L6 12"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </NavLink>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Nav links (Events, Courses, Leland+) */}
+              {navLinks.filter(({ to }) => to !== "/").map(({ to, label, end }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  className="relative flex self-stretch items-center"
+                >
+                  {({ isActive }) => (
+                    <>
+                      <span className={`flex items-center rounded-lg px-3 py-2 text-[18px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                        {label}
+                      </span>
+                      {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
+                    </>
+                  )}
+                </NavLink>
+              ))}
+
+              {/* Search */}
+              {showSearch && <div className="relative flex self-stretch items-center">
+                <form
+                  onSubmit={(e) => e.preventDefault()}
+                  className="flex items-center gap-2 px-3 py-2"
+                >
+                  <img
+                    src={searchFocused ? searchActive : searchInactive}
+                    alt=""
+                    className="h-[20px] w-[20px] shrink-0"
+                  />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
+                    placeholder="Search..."
+                    className="w-40 bg-transparent text-[18px] font-medium text-[#222222] placeholder:font-normal placeholder:text-[#999999] outline-none"
+                  />
+                </form>
+                {searchFocused && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
+              </div>}
+            </nav>
+          )}
         </div>
 
         {/* Right: Home, Inbox, Calendar, Notifications, Profile */}
         <div className="flex shrink-0 items-stretch gap-1">
 
           {/* Inbox */}
-          <NavLink to="/messages" className="relative flex self-stretch items-center">
-            {({ isActive }) => (
-              <>
-                <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-gray-hover" : ""}`}>
-                  <img src={isActive ? chatActive : chatInactive} alt="Inbox" className="h-[20px] w-[20px]" />
-                </span>
-                {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
-              </>
-            )}
-          </NavLink>
+          {!isCoachMode && (
+            <NavLink to="/messages" className="relative flex self-stretch items-center">
+              {({ isActive }) => (
+                <>
+                  <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                    <img src={isActive ? chatActive : chatInactive} alt="Inbox" className="h-[20px] w-[20px]" />
+                  </span>
+                  {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
+                </>
+              )}
+            </NavLink>
+          )}
 
           {/* Notifications */}
           <NavLink to="/notifications" className="relative flex self-stretch items-center">
@@ -282,7 +302,7 @@ export default function TopNav() {
                   transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
                   className="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
                 >
-                  {profileMenuGroups.map((group, gi) => (
+                  {activeProfileMenuGroups.map((group, gi) => (
                     <div
                       key={gi}
                       className={`px-2 py-2${gi > 0 ? " border-t border-gray-stroke" : ""}`}
