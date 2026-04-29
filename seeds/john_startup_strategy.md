@@ -111,7 +111,7 @@
 > If you're gonna build a vertical software company, like, good luck because you're gonna now have a bunch of companies doing that exact thing. And so you know, maybe if you're a 1 person shop, you might be okay with that. You might be you might not be because you might not wanna compete with so many different people. But if you're trying to build a more enduring company, that doesn't get, you know, your margins ground to the to the floor, you probably do need to figure out, like, where is the moat here?
 
 
-*Source: Cloudflare event — "Home for Ambition: Staying Ahead in a Changing World" · 2026-03-18 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69bb1da3e8160caa4026d495)*
+*Source: Cloudflare event — "Home for Ambition: Staying Ahead in a Changing World" · 2026-03-18 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69bb1da3e8160caa4026d495?fromName=all)*
 
 ---
 
@@ -185,7 +185,7 @@
 
 **Examples**: Waymo; self-driving cars; humanoid robot companies
 
-*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2)*
+*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2?fromName=all)*
 
 ---
 
@@ -725,7 +725,7 @@
 > I think there's obviously some really valuable impacts to that. You know, we've obviously been talking a lot about this as a product development org. As code and velocity increases dramatically, how do you scale some of the decision or centralized decision making that we used to have when we were slow enough to be able to make those methodical decisions.
 
 
-*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2)*
+*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2?fromName=all)*
 
 ---
 
@@ -842,7 +842,7 @@
 
 **Examples**: self-driving cars; robots
 
-*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2)*
+*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2?fromName=all)*
 
 ---
 
@@ -1248,7 +1248,7 @@
 
 **Examples**: AI data labeling companies
 
-*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2)*
+*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2?fromName=all)*
 
 ---
 
@@ -1608,7 +1608,7 @@
 
 **Examples**: Mark Zuckerberg's AI clone
 
-*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2)*
+*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2?fromName=all)*
 
 ---
 
@@ -1691,7 +1691,7 @@
 > As code and velocity increases dramatically, how do you scale some of the decision or centralized decision making that we used to have when we were slow enough to be able to make those methodical decisions. And the answer probably can't be, you know, let's just hope everyone develops a bunch of, like, really good judgment and intuition overnight. Like, that's not it. And so the answer probably does need to be, like, alright, maybe you build certain skills, maybe you build, like, certain principles or opinions.
 
 
-*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2)*
+*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2?fromName=all)*
 
 ---
 
@@ -1817,7 +1817,7 @@
 
 **Examples**: Vercel having this kind of unintuitive security gap
 
-*Source: Cloudflare event — "Home for Ambition #6 — Weekly Live Show" · 2026-04-22 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e94209c97917c70f9890cd)*
+*Source: Cloudflare event — "Home for Ambition #6 — Weekly Live Show" · 2026-04-22 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e94209c97917c70f9890cd?fromName=all)*
 
 ---
 
@@ -1910,7 +1910,7 @@
 > You probably do need to figure out, like, where is the moat here? Or where what and and it could be a platform play. It could be a network effect play. It could be brand. It could be data. It could know, there's all sorts of different moats that we could talk about.
 
 
-*Source: Cloudflare event — "Home for Ambition: Staying Ahead in a Changing World" · 2026-03-18 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69bb1da3e8160caa4026d495)*
+*Source: Cloudflare event — "Home for Ambition: Staying Ahead in a Changing World" · 2026-03-18 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69bb1da3e8160caa4026d495?fromName=all)*
 
 ---
 
@@ -2162,7 +2162,7 @@
 
 **Examples**: Atlassian
 
-*Source: Cloudflare event — "Home for Ambition: Staying Ahead in a Changing World" · 2026-03-18 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69bb1da3e8160caa4026d495)*
+*Source: Cloudflare event — "Home for Ambition: Staying Ahead in a Changing World" · 2026-03-18 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69bb1da3e8160caa4026d495?fromName=all)*
 
 ---
 
@@ -2268,7 +2268,7 @@
 
 **Examples**: backyard baseball with his 5-year-old son
 
-*Source: Cloudflare event — "Home for Ambition: Staying Ahead in a Changing World" · 2026-03-18 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69bb1da3e8160caa4026d495)*
+*Source: Cloudflare event — "Home for Ambition: Staying Ahead in a Changing World" · 2026-03-18 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69bb1da3e8160caa4026d495?fromName=all)*
 
 ---
 
@@ -2391,7 +2391,7 @@
 
 **Examples**: lean manufacturing revolution in the automotive industry; Toyota's market cap growth compared to Ford's
 
-*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2)*
+*Source: Cloudflare event — "Home for Ambition #5 — Weekly Live Show" · 2026-04-17 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2?fromName=all)*
 
 ---
 
@@ -2412,7 +2412,7 @@
 
 **Examples**: support roles
 
-*Source: Cloudflare event — "Home for Ambition #6 — Weekly Live Show" · 2026-04-22 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e94209c97917c70f9890cd)*
+*Source: Cloudflare event — "Home for Ambition #6 — Weekly Live Show" · 2026-04-22 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e94209c97917c70f9890cd?fromName=all)*
 
 ---
 
@@ -2516,7 +2516,7 @@
 > I do think there's something to the idea of, like, if AI is leveraged, right, and the bigger the lever, the more valuable you are because you can just move more stuff. I think that theory is pretty sound. The bigger, the bigger the lever, the more the more the leverage.
 
 
-*Source: Cloudflare event — "Home for Ambition #6 — Weekly Live Show" · 2026-04-22 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e94209c97917c70f9890cd)*
+*Source: Cloudflare event — "Home for Ambition #6 — Weekly Live Show" · 2026-04-22 · [Watch the recording](https://www.joinleland.com/content/item/urn:contentEntry:69e94209c97917c70f9890cd?fromName=all)*
 
 ---
 
