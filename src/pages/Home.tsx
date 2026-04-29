@@ -3233,7 +3233,7 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
 
       {/* Upcoming Sessions + My Purchases + Create post */}
       <div className="px-1">
-        <NavLink to="/calendar" className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+        <NavLink to="/profile-v2?tab=calendar" className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
           Upcoming Sessions
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -3244,7 +3244,7 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
           <SessionCard size="small" title="Resume Review" dateTime="Oct 29, 5:00 PM" duration="45 min" image={pic5} type="coach" status="upcoming" />
         </div>
 
-        <NavLink to="/my-courses" className="mt-5 flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+        <NavLink to="/profile-v2" className="mt-5 flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
           My Purchases
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

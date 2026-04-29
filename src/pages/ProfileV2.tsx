@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
-import { Button } from "../components/Button";
+import { Button, LinkButton } from "../components/Button";
 import { Link, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
@@ -24,6 +24,7 @@ import shareArrowIcon from "../assets/icons/share-arrow.svg";
 import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
 import reportFlagIcon from "../assets/icons/report-flag.svg";
 import lockIcon from "../assets/icons/lock.svg";
+import eyeClosedIcon from "../assets/icons/eye-closed.svg";
 import GroupCard from "../components/GroupCard";
 import groupImg1 from "../assets/placeholder images/group images/18603db620e37b489d2d52da4c9c1f86.jpg";
 import groupImg2 from "../assets/placeholder images/group images/419a6944d25e95be7012699559c7b0be.jpg";
@@ -360,7 +361,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
   const [searchParams] = useSearchParams();
   const isCustomerProfile = !coach;
   const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes" | "more">(
-    searchParams.get("tab") === "more" ? "more" : "activity"
+    (["activity", "about", "calendar", "likes", "more"] as const).includes(searchParams.get("tab") as any)
+      ? (searchParams.get("tab") as "activity" | "about" | "calendar" | "likes" | "more")
+      : "activity"
   );
   const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Courses" | "Content">("All");
   const [purchasesExpanded, setPurchasesExpanded] = useState(false);
@@ -801,14 +804,14 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             </div>
             <div className={`flex items-center gap-2 ${showCoverImage ? "pb-1" : showGrayHeader ? "pb-[90px]" : "pb-1"}`}>
               {viewingOwnProfile ? (
-                <button className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
+                <Link to="/settings?tab=account" className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
                   showCoverImage || !showGrayHeader
                     ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
                     : "border border-[#222222]/10 bg-white text-gray-dark hover:border-[#222222]/20"
                 }`}>
                   <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
                   Edit profile
-                </button>
+                </Link>
               ) : (
                 <>
                   <button
@@ -1022,10 +1025,10 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           {isCustomerProfile && (
             <div className="mt-3 flex flex-col gap-3 md:hidden">
               {viewingOwnProfile ? (
-                <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                <Link to="/settings?tab=account" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                   <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
                   Edit profile
-                </button>
+                </Link>
               ) : (
                 <div className="flex gap-2">
                   <button
@@ -1199,10 +1202,10 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           {/* Mobile inline CTA — coach viewing own profile */}
           {!isCustomerProfile && viewingOwnProfile && (
             <div className="mt-3 md:hidden">
-              <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+              <Link to="/settings?tab=account" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                 <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
                 Edit profile
-              </button>
+              </Link>
             </div>
           )}
 
@@ -1802,10 +1805,6 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     {/* About */}
                     <section>
                       <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>About</h2>
-                      <div className="mt-1 flex items-center gap-1.5">
-                        <img src={lockIcon} alt="" className="h-[16px] w-[16px] shrink-0 opacity-40" />
-                        <span className="text-[16px] text-gray-extra-light">Only available to experts you're working with</span>
-                      </div>
                       <div className="mt-3 text-[18px] text-[#444]" style={{ lineHeight: "130%" }}>
                         <p>
                           Product manager at Atlassian with 6+ years of experience building enterprise SaaS tools. Previously led growth initiatives at two early-stage startups, taking one from beta to 50K monthly active users. Yale graduate with a background in computer science and behavioral economics.
@@ -1813,6 +1812,16 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                         <p className="mt-4">
                           Outside of work, I'm passionate about mentoring aspiring PMs and helping career switchers break into tech. I also run a small book club focused on product strategy and organizational design.
                         </p>
+                      </div>
+                      <div className="mt-4 flex items-center justify-between">
+                        <LinkButton size="md" variant="secondary" href="/settings?tab=account">
+                          <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
+                          Edit bio
+                        </LinkButton>
+                        <div className="flex items-center gap-1.5">
+                          <img src={eyeClosedIcon} alt="" className="h-[16px] w-[16px] shrink-0 brightness-0 opacity-45" />
+                          <span className="text-[16px] text-gray-light">Visible to experts you work with</span>
+                        </div>
                       </div>
                     </section>
 
