@@ -4,7 +4,24 @@ import { Button } from "../components/Button";
 import { AGENTS, type AgentDef } from "../lib/agents";
 import { AGENT_ASSETS } from "../lib/agentAssets";
 
-type Message = { role: "user" | "assistant"; content: string };
+type Attachment = { name: string; mediaType: string; data: string };
+type Message = { role: "user" | "assistant"; content: string; attachments?: Attachment[] };
+
+const MAX_PDF_BYTES = 10 * 1024 * 1024;
+const MAX_TEXT_BYTES = 200_000;
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(",")[1] || "";
+      resolve(base64);
+    };
+    reader.onerror = () => reject(reader.error || new Error("File read failed"));
+    reader.readAsDataURL(file);
+  });
+}
 
 function SparkleIcon({ className }: { className?: string }) {
   return (
@@ -32,6 +49,32 @@ function SendIcon() {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="22" y1="2" x2="11" y2="13" />
       <polygon points="22 2 15 22 11 13 2 9 22 2" />
+    </svg>
+  );
+}
+
+function PaperclipIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+    </svg>
+  );
+}
+
+function FileIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+    </svg>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   );
 }
@@ -67,8 +110,10 @@ export default function CoachAgent() {
   const [streaming, setStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState("");
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
+  const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const threadRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const userTurnCount = useMemo(
@@ -109,13 +154,60 @@ export default function CoachAgent() {
     );
   }
 
+  const handleFile = async (file: File) => {
+    setErrorBanner(null);
+    const lower = file.name.toLowerCase();
+    const isPdf = file.type === "application/pdf" || lower.endsWith(".pdf");
+    const isText = file.type.startsWith("text/") || lower.endsWith(".md") || lower.endsWith(".markdown") || lower.endsWith(".txt");
+
+    if (isPdf) {
+      if (file.size > MAX_PDF_BYTES) {
+        setErrorBanner("PDF too large (max 10MB).");
+        return;
+      }
+      try {
+        const data = await fileToBase64(file);
+        setPendingAttachments((prev) => [...prev, { name: file.name, mediaType: "application/pdf", data }]);
+        if (!input.trim()) {
+          setInput(`Here's ${file.name} — please review.`);
+        }
+      } catch {
+        setErrorBanner("Could not read that file.");
+      }
+      return;
+    }
+
+    if (isText) {
+      if (file.size > MAX_TEXT_BYTES) {
+        setErrorBanner("Text file too large (max ~200KB).");
+        return;
+      }
+      const text = await file.text();
+      const note = `[Attached file: ${file.name}]\n\n${text}`;
+      setInput((prev) => (prev ? `${prev}\n\n${note}` : note));
+      return;
+    }
+
+    setErrorBanner("Unsupported file type. Use .pdf, .md, or .txt.");
+  };
+
+  const removeAttachment = (idx: number) => {
+    setPendingAttachments((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const sendMessage = async (raw: string) => {
     const text = raw.trim();
-    if (!text || streaming) return;
+    if ((!text && pendingAttachments.length === 0) || streaming) return;
 
-    const nextMessages: Message[] = [...messages, { role: "user", content: text }];
+    const userMessage: Message = {
+      role: "user",
+      content: text || "(attached file)",
+      attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+    };
+    const nextMessages: Message[] = [...messages, userMessage];
     setMessages(nextMessages);
     setInput("");
+    setPendingAttachments([]);
     setStreaming(true);
     setStreamingText("");
     setErrorBanner(null);
@@ -254,8 +346,20 @@ export default function CoachAgent() {
           {messages.map((m, i) =>
             m.role === "user" ? (
               <div key={i} className="flex justify-end">
-                <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-[#222222] px-4 py-3 text-[16px] leading-snug text-white whitespace-pre-wrap">
-                  {m.content}
+                <div className="flex max-w-[80%] flex-col items-end gap-1.5">
+                  {m.attachments && m.attachments.length > 0 && (
+                    <div className="flex flex-wrap justify-end gap-1.5">
+                      {m.attachments.map((a, j) => (
+                        <span key={j} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-stroke bg-white px-2.5 py-1.5 text-[12px] font-medium text-gray-dark">
+                          <FileIcon />
+                          <span className="max-w-[160px] truncate">{a.name}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="rounded-2xl rounded-tr-sm bg-[#222222] px-4 py-3 text-[16px] leading-snug text-white whitespace-pre-wrap">
+                    {m.content}
+                  </div>
                 </div>
               </div>
             ) : (
@@ -337,6 +441,25 @@ export default function CoachAgent() {
       {/* Composer */}
       <div className="border-t border-gray-stroke bg-white px-4 py-3 md:px-6 md:py-4">
         <div className="mx-auto max-w-[760px]">
+          {/* Pending attachment chips */}
+          {pendingAttachments.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {pendingAttachments.map((a, idx) => (
+                <span key={idx} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-stroke bg-[#F5F5F5] py-1.5 pl-2.5 pr-1.5 text-[13px] font-medium text-gray-dark">
+                  <FileIcon />
+                  <span className="max-w-[200px] truncate">{a.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeAttachment(idx)}
+                    className="ml-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full text-[#707070] transition-colors hover:bg-gray-hover"
+                    aria-label={`Remove ${a.name}`}
+                  >
+                    <XIcon />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -344,6 +467,26 @@ export default function CoachAgent() {
             }}
             className="flex items-end gap-2 rounded-2xl border border-gray-stroke bg-white px-3 py-2 focus-within:border-[#222222]"
           >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,application/pdf,.md,.markdown,.txt,text/markdown,text/plain"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFile(file);
+                e.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={streaming}
+              className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="Attach file"
+            >
+              <PaperclipIcon />
+            </button>
             <textarea
               ref={textareaRef}
               rows={1}
@@ -363,7 +506,7 @@ export default function CoachAgent() {
               type="submit"
               size="sm"
               variant="primary"
-              disabled={!input.trim() || streaming}
+              disabled={(!input.trim() && pendingAttachments.length === 0) || streaming}
               className="!px-3"
               aria-label="Send"
             >
@@ -371,7 +514,7 @@ export default function CoachAgent() {
             </Button>
           </form>
           <p className="mt-2 text-center text-[12px] text-[#9B9B9B]">
-            Curated by {agent.coachName}. The agent will suggest a 1:1 when guidance needs a real coach.
+            Attach an essay (.md / .txt) or a PDF (deck, document) for review. Curated by {agent.coachName}.
           </p>
         </div>
       </div>

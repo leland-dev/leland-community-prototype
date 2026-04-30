@@ -1,3 +1,17 @@
+export type AgentReference = {
+  /** Display title of the resource. Required. */
+  title: string;
+  /** Canonical URL. Optional; if absent the agent will mention the resource by title only. */
+  url?: string;
+  /** Loose categorization for the UI / system prompt. */
+  kind?: "recording" | "class" | "video" | "course" | "article" | "subscription" | "other";
+  /**
+   * Optional one-line note about *what* the reference is — when the model should
+   * reach for it. Helpful for ambiguously-titled resources.
+   */
+  note?: string;
+};
+
 export type AgentDef = {
   slug: string;
   agentName: string;
@@ -16,6 +30,12 @@ export type AgentDef = {
    * which lanes they stay out of.
    */
   voice?: string;
+  /**
+   * Curated resources the agent may cite at the end of substantive responses.
+   * The system prompt instructs the agent to keep 1:1 booking / Calendly /
+   * coach-profile links OUT of this list — those are a separate handoff.
+   */
+  references?: AgentReference[];
 };
 
 const JOHN_VOICE = [
@@ -32,6 +52,40 @@ const JOHN_VOICE = [
 ].join("\n");
 
 const JOHN_BACK_HREF = "/coach-profile-john";
+
+// Real public URLs sourced from John's seed files. Anything that's a 1:1
+// booking, Calendly, or individual coach profile is intentionally NOT here —
+// the system prompt forbids surfacing those as references.
+const REF_DEFERRED_MBA_AMA: AgentReference = {
+  title: "Deferred MBA Planning — Preparing for a Successful Application",
+  url: "https://www.joinleland.com/content/item/urn:contentEntry:6882df0c24254a042327a45a",
+  kind: "recording",
+  note: "Live AMA covering school-by-school strategy, essay frameworks, and timeline.",
+};
+const REF_HOME_FOR_AMBITION: AgentReference = {
+  title: "Home for Ambition: Staying Ahead in a Changing World",
+  url: "https://www.joinleland.com/content/item/urn:contentEntry:69bb1da3e8160caa4026d495",
+  kind: "recording",
+  note: "Conversation on AI-driven change and how to position your career around it.",
+};
+const REF_HOME_FOR_AMBITION_5: AgentReference = {
+  title: "Home for Ambition #5 — Weekly Live Show",
+  url: "https://www.joinleland.com/content/item/urn:contentEntry:69e2aa6c7c7f8d8aec7728d2",
+  kind: "recording",
+  note: "Founder/career conversations from John's weekly live show.",
+};
+const REF_MBA_INTERVIEW_CLASS: AgentReference = {
+  title: "Mastering the MBA Interview",
+  url: "https://www.joinleland.com/class/mastering-the-mba-interview",
+  kind: "class",
+  note: "Live class on MBA interview structure and answer pacing.",
+};
+const REF_LELAND_PLUS_MBA: AgentReference = {
+  title: "Leland+ for MBA applicants",
+  url: "https://go.joinleland.com/plus/mba",
+  kind: "subscription",
+  note: "Access to MBA courses, essay examples, and member content.",
+};
 
 export const AGENTS: Record<string, AgentDef> = {
   "samantha-mba-admissions": {
@@ -130,6 +184,7 @@ export const AGENTS: Record<string, AgentDef> = {
       "Complex personal context (career break, family situation, atypical background, low GPA) that needs careful framing across the application.",
     ],
     voice: JOHN_VOICE,
+    references: [REF_DEFERRED_MBA_AMA, REF_LELAND_PLUS_MBA, REF_HOME_FOR_AMBITION_5],
   },
   "john-mba-essays": {
     slug: "john-mba-essays",
@@ -166,6 +221,7 @@ export const AGENTS: Record<string, AgentDef> = {
       "Sensitive personal material (loss, mental health, family, identity) that needs careful framing.",
     ],
     voice: JOHN_VOICE,
+    references: [REF_DEFERRED_MBA_AMA, REF_LELAND_PLUS_MBA],
   },
   "john-mba-interviews": {
     slug: "john-mba-interviews",
@@ -202,6 +258,7 @@ export const AGENTS: Record<string, AgentDef> = {
       "1–2 weeks out from a specific interview and you want a tailored prep plan against your exact resume.",
     ],
     voice: JOHN_VOICE,
+    references: [REF_MBA_INTERVIEW_CLASS, REF_LELAND_PLUS_MBA, REF_DEFERRED_MBA_AMA],
   },
   "john-mba-recommenders": {
     slug: "john-mba-recommenders",
@@ -237,6 +294,7 @@ export const AGENTS: Record<string, AgentDef> = {
       "Reapplying with the same recommenders — how to recalibrate what they share.",
     ],
     voice: JOHN_VOICE,
+    references: [REF_LELAND_PLUS_MBA, REF_DEFERRED_MBA_AMA],
   },
   "john-deferred-mba": {
     slug: "john-deferred-mba",
@@ -274,6 +332,7 @@ export const AGENTS: Record<string, AgentDef> = {
       "Reapplicant strategy across the deferred pool, where adcoms see your prior file.",
     ],
     voice: JOHN_VOICE,
+    references: [REF_DEFERRED_MBA_AMA, REF_LELAND_PLUS_MBA],
   },
   "john-fundraising": {
     slug: "john-fundraising",
@@ -312,6 +371,7 @@ export const AGENTS: Record<string, AgentDef> = {
       "Negotiation reps for an upcoming partner meeting (the meeting that decides the round).",
     ],
     voice: JOHN_VOICE,
+    references: [REF_HOME_FOR_AMBITION_5, REF_HOME_FOR_AMBITION],
   },
   "john-pitch-decks": {
     slug: "john-pitch-decks",
@@ -349,6 +409,7 @@ export const AGENTS: Record<string, AgentDef> = {
       "Industry-specific framing that benefits from operator experience (vertical SaaS, marketplaces, AI-native, etc.).",
     ],
     voice: JOHN_VOICE,
+    references: [REF_HOME_FOR_AMBITION_5, REF_HOME_FOR_AMBITION],
   },
   "john-startup": {
     slug: "john-startup",
@@ -387,6 +448,7 @@ export const AGENTS: Record<string, AgentDef> = {
       "Real diligence on idea or team — needs back-and-forth and someone who can disagree credibly.",
     ],
     voice: JOHN_VOICE,
+    references: [REF_HOME_FOR_AMBITION, REF_HOME_FOR_AMBITION_5],
   },
   "john-career": {
     slug: "john-career",
@@ -423,6 +485,7 @@ export const AGENTS: Record<string, AgentDef> = {
       "Mock PM interviews or specific industry recruiting prep (APM, big tech, design partnerships).",
     ],
     voice: JOHN_VOICE,
+    references: [REF_HOME_FOR_AMBITION, REF_HOME_FOR_AMBITION_5],
   },
   "samantha-consulting": {
     slug: "samantha-consulting",
@@ -471,6 +534,7 @@ export function buildSystemPrompt(agent: AgentDef): string {
     "- If a question falls outside your scope, say so plainly and point them to the right resource (often: a different agent, or a 1:1).",
     "",
     `## ${firstName}'s playbook`,
+    `These bullets capture ${firstName}'s actual phrasing and point of view. Treat them as direct quotes — when an item answers the user's question, use ${firstName}'s wording (paraphrased lightly when needed for fit, but keep the voice). Don't water it down into corporate-speak.`,
     agent.playbook.map((p, i) => `${i + 1}. ${p}`).join("\n"),
     "",
     "## When to recommend a 1:1",
@@ -480,6 +544,37 @@ export function buildSystemPrompt(agent: AgentDef): string {
     "When you do recommend a 1:1, be specific about *why* — what about their situation needs human judgment, not just framework. Don't push it on every turn; only when it would genuinely help.",
     "",
   ];
+
+  if (agent.references && agent.references.length > 0) {
+    sections.push(
+      "## Referenced resources",
+      `Below is a curated list of ${firstName}'s public resources. After answering the user, when one or more of these is genuinely relevant to what they're working on, append a short "**Referenced resources:**" section listing 1–3 of them as markdown links.`,
+      "",
+      "Format strictly as:",
+      "",
+      "```",
+      "**Referenced resources:**",
+      "- [Title](url) — one short line on why this is relevant",
+      "```",
+      "",
+      "**Hard rules — read carefully:**",
+      "- Never put 1:1 coaching links, Calendly links, coach profile pages, or 'book a session' style links in the Referenced resources section. The 1:1 handoff is a SEPARATE recommendation (see section above) and must never be conflated with resource references.",
+      "- Only include a resource if it directly relates to what the user just asked. If nothing in the list is genuinely relevant, omit the section entirely. Do not pad responses.",
+      "- Never invent URLs. Use only the entries listed below, exactly as given.",
+      "- The Referenced resources section is the LAST thing in your message, after any 1:1 recommendation.",
+      "",
+      "Available references:",
+      agent.references
+        .map((r) => {
+          const url = r.url ? ` — ${r.url}` : "";
+          const note = r.note ? ` (${r.note})` : "";
+          const kind = r.kind ? ` [${r.kind}]` : "";
+          return `- ${r.title}${kind}${url}${note}`;
+        })
+        .join("\n"),
+      "",
+    );
+  }
 
   if (agent.voice) {
     sections.push(agent.voice);
