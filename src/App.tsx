@@ -57,8 +57,8 @@ export default function App() {
   return (
     <VersionProvider>
     <DarkModeProvider>
+    <ScrollToTop />
     <Routes>
-      <Route path="*" element={<ScrollToTop />} />
       <Route path="/b2b-dashboard" element={<B2BDashboard />} />
       <Route path="/partner-dashboard" element={<B2BDashboardV2 />} />
       <Route element={<Layout />}>

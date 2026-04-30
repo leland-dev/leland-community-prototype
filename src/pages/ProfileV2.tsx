@@ -656,18 +656,21 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                   image={pic1}
                   title="Jasmine Singer"
                   subtitle="Experienced Product Leader at LinkedIn | Ex-..."
+                  to="/coach-profile"
                 />
                 <SidebarCard
                   variant="coach"
                   image={pic3}
                   title="Jackson Ringger"
                   subtitle="Ex-McKinsey Engagement Manager | Wharton MBA..."
+                  to="/coach-profile"
                 />
                 <SidebarCard
                   variant="coach"
                   image={pic5}
                   title="Erika Mah"
                   subtitle="Senior PM at Google | Stanford GSB | Ex-Stripe..."
+                  to="/coach-profile"
                 />
               </SidebarGroup>
             </div>

@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
 
 export function useIsCoachMode() {
-  return useLocation().pathname.startsWith("/coach");
+  return useLocation().pathname.startsWith("/coach/");
 }

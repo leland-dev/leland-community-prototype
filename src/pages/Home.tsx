@@ -930,7 +930,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Link
-            to={isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `/profile-v2?type=${verified ? "coach" : "customer"}`}
+            to={isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `${verified ? "/coach-profile" : "/profile-v2"}`}
             onClick={(e) => e.stopPropagation()}
             className="cursor-pointer text-[17px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50"
           >{author}</Link>
@@ -1906,7 +1906,7 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
         onClick={(e) => {
           e.stopPropagation();
           if (isGroupPost) navigate(`/groups/${post.groupId ?? "ai-bp-apr-26"}`);
-          else if (!isEvent) navigate(`/profile-v2?type=${post.verified ? "coach" : "customer"}`);
+          else if (!isEvent) navigate(`${post.verified ? "/coach-profile" : "/profile-v2"}`);
         }}
       >
         {isGroupPost ? (
@@ -3182,18 +3182,21 @@ export function HomeRightSidebar() {
           image={pic1}
           title="Jasmine Singer"
           subtitle="Experienced Product Leader at LinkedIn | Ex-..."
+          to="/coach-profile"
         />
         <SidebarCard
           variant="coach"
           image={pic3}
           title="Jackson Ringger"
           subtitle="Experienced Product Leader at LinkedIn | Ex-..."
+          to="/coach-profile"
         />
         <SidebarCard
           variant="coach"
           image={pic5}
           title="Erika Mah"
           subtitle="Experienced Product Leader at LinkedIn | Ex-..."
+          to="/coach-profile"
         />
       </SidebarGroup>
 
