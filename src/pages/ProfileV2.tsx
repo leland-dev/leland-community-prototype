@@ -62,6 +62,7 @@ import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
 import bootcampImg1 from "../assets/placeholder images/bootcamp-1.webp";
+import aiBuilderCourseImg from "../assets/placeholder images/ai-builder-course.avif";
 import lelandPlusImg1 from "../assets/placeholder images/leland-plus-images/3cf6e985-7397-4e50-8e06-ef9a8f40491c.webp";
 import lelandPlusImg2 from "../assets/placeholder images/leland-plus-images/b9669ad2-4b6f-4c32-83e1-d1370dbf9484.webp";
 import lelandPlusImg3 from "../assets/placeholder images/leland-plus-images/db2eb673-d212-41d5-8df9-6fa6de57bc23.webp";
@@ -141,9 +142,9 @@ const purchasedOfferings: PurchasedOffering[] = [
   },
   {
     type: "course",
-    title: "GMAT Exam Prep Bootcamp",
-    subtitle: <>Started June 1 <span className="text-[#9B9B9B]">· Next session tomorrow</span></>,
-    image: bootcampImg1,
+    title: "AI Builder Program Level 1: Use AI to 10x Your Impact",
+    subtitle: <>Started May 12 <span className="text-[#9B9B9B]">· Next session tomorrow</span></>,
+    image: aiBuilderCourseImg,
   },
   {
     type: "content",
@@ -1513,6 +1514,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                                   image={offering.image}
                                   purchased
                                   exhausted={!!offering.exhausted}
+                                  href={offering.title === "AI Builder Program Level 1: Use AI to 10x Your Impact" ? "/course/ai-builder-1" : undefined}
                                 />
                               ))}
                               <AnimatePresence initial={false}>

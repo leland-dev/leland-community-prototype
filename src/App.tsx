@@ -37,6 +37,7 @@ import CourseBlockTest from "./pages/CourseBlockTest";
 import PostTest from "./pages/PostTest";
 import ProfileCardTest from "./pages/ProfileCardTest";
 import Components from "./pages/Components";
+import CourseDetail from "./pages/CourseDetail";
 
 export default function App() {
   return (
@@ -55,6 +56,7 @@ export default function App() {
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/my-courses" element={<MyCourses />} />
+        <Route path="/course/:courseId" element={<CourseDetail />} />
         <Route path="/components" element={<Components />} />
         <Route path="/components/session-card" element={<SessionCardTest />} />
         <Route path="/components/sidebar-cards" element={<SidebarCardsTest />} />

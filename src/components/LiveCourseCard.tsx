@@ -260,6 +260,15 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
   const [sessionsOpen, setSessionsOpen] = useState(!isCompleted);
   const [cohortSelected, setCohortSelected] = useState(course.cohortSelected ?? true);
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
+
+  const nextSessionIndex = nextSession ? course.sessions.findIndex((s) => s.id === nextSession.id) : -1;
+  const nextAction = !cohortSelected
+    ? null
+    : isCompleted
+    ? "Fill out the post-cohort survey"
+    : nextSession?.id === course.sessions[0]?.id
+    ? "Review Setup Guide"
+    : `Complete session ${nextSessionIndex} homework`;
   const [calendarOpen, setCalendarOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -309,10 +318,6 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
 
   const actionButtons = cohortSelected ? (
     <>
-      <ActionButton
-        icon={<img src={menuBurgerIcon} alt="" className="h-4 w-4 shrink-0" />}
-        label="Syllabus"
-      />
       <ActionButton
         icon={<img src={playVideoIcon} alt="" className="h-4 w-4 shrink-0" />}
         label="Recordings"
@@ -400,7 +405,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
         <div className="flex min-w-0 flex-1 flex-col gap-1 md:flex-[1_0_0] md:gap-0">
           <div className="flex md:flex-1 md:items-center">
             <div>
-              <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Live course</p>
+              <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Live cohort</p>
               <p className="mt-1 line-clamp-2 text-[20px] font-medium leading-[1.2] text-gray-dark md:line-clamp-1 md:text-[24px]">{course.title}</p>
             </div>
           </div>
@@ -418,6 +423,14 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
       {boxed ? (
         <div className="overflow-hidden rounded-xl border border-gray-stroke shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-transform hover:translate-x-0.5">
           {header}
+          {nextAction && (
+            <button className="flex w-full items-center justify-between border-t border-gray-stroke bg-primary-xlight px-4 py-3 text-left transition-colors hover:brightness-95">
+              <span className="text-[16px] font-medium text-gray-dark">{nextAction}</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-dark-green">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          )}
           {cohortSelected && sessionsList}
         </div>
       ) : (
@@ -425,6 +438,14 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
           {header}
           {cohortSelected && (
             <div className="mt-4 overflow-hidden rounded-xl border border-gray-stroke">
+              {nextAction && (
+                <button className="flex w-full items-center justify-between border-t border-gray-stroke px-4 py-3 text-left transition-colors hover:bg-gray-hover">
+                  <span className="text-[14px] font-medium text-primary">{nextAction}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-primary">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </button>
+              )}
               {sessionsList}
             </div>
           )}

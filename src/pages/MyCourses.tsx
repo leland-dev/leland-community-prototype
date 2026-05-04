@@ -52,7 +52,7 @@ const enrolledCourses: EnrolledCourse[] = ([
     id: 1,
     title: "MBA Admissions Strategy Bootcamp: From Application to Acceptance Letter",
     cohortDateLabel: "Spring admissions",
-    cohortDates: "Mar 12 – Apr 23, 2026",
+    cohortDates: "Mar 12 – May 21, 2026",
     registrants: [pic1, pic3, pic4],
     image: event1,
     sessions: [
@@ -73,12 +73,12 @@ const enrolledCourses: EnrolledCourse[] = ([
         { id: 1041, startTime: eveningSoon, endTime: eveningSoonEnd },
       ] as [TimeSlot, TimeSlot] },
       { id: 105, title: "Essays & Short Answers", duration: "90 min", slots: [
-        { id: 1050, startTime: new Date("2026-04-09T09:00:00"), endTime: new Date("2026-04-09T10:30:00") },
-        { id: 1051, startTime: new Date("2026-04-09T19:00:00"), endTime: new Date("2026-04-09T20:30:00") },
+        { id: 1050, startTime: new Date("2026-05-07T09:00:00"), endTime: new Date("2026-05-07T10:30:00") },
+        { id: 1051, startTime: new Date("2026-05-07T19:00:00"), endTime: new Date("2026-05-07T20:30:00") },
       ] as [TimeSlot, TimeSlot] },
       { id: 106, title: "Final Q&A & Wrap-Up", duration: "60 min", slots: [
-        { id: 1060, startTime: new Date("2026-04-23T09:00:00"), endTime: new Date("2026-04-23T10:00:00") },
-        { id: 1061, startTime: new Date("2026-04-23T19:00:00"), endTime: new Date("2026-04-23T20:00:00") },
+        { id: 1060, startTime: new Date("2026-05-21T09:00:00"), endTime: new Date("2026-05-21T10:00:00") },
+        { id: 1061, startTime: new Date("2026-05-21T19:00:00"), endTime: new Date("2026-05-21T20:00:00") },
       ] as [TimeSlot, TimeSlot] },
     ],
   },

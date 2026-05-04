@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ':*)",
+      "Read(//Users/madeleinepimentel/.claude/projects/-/99fb74b6-e377-41de-9541-01ffd585a5bc/**)",
+      "Read(//Users/madeleinepimentel/.claude/projects/-/107bbc75-5ef6-4972-a37b-7aac2e5fe6a5/**)",
+      "Bash(claude --version)",
+      "Read(//Users/madeleinepimentel/.claude/**)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('logged in:', bool\\(d\\)\\)\")",
+      "Bash(security find-generic-password:*)"
+    ]
+  }
+}

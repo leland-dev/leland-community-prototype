@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 type PageShellProps = {
   variant?: "standard" | "thin";
   leftSidebar?: ReactNode;
+  leftSidebarMobile?: boolean;
   rightSidebar?: ReactNode;
   rightSidebarWidth?: number;
   contentMaxWidth?: number;
@@ -14,6 +15,7 @@ type PageShellProps = {
 export default function PageShell({
   variant = "standard",
   leftSidebar,
+  leftSidebarMobile = false,
   rightSidebar,
   rightSidebarWidth = 300,
   contentMaxWidth,
@@ -39,7 +41,9 @@ export default function PageShell({
   // NOTE: keep full class strings literal so Tailwind's JIT scanner picks them
   // up. Building arbitrary variants like `min-[1200px]:block` via template
   // strings causes the rule to be silently dropped from the generated CSS.
-  const leftClass = "hidden w-[300px] shrink-0 sticky top-5 self-start min-[960px]:block";
+  const leftClass = leftSidebarMobile
+    ? "w-full shrink-0 md:w-[300px] md:sticky md:top-5 md:self-start"
+    : "hidden w-[300px] shrink-0 sticky top-5 self-start min-[960px]:block";
   const rightClass = hasBoth
     ? "hidden shrink-0 sticky top-5 self-start min-[1200px]:block"
     : "hidden shrink-0 sticky top-5 self-start min-[960px]:block";
@@ -63,7 +67,7 @@ export default function PageShell({
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-4 sm:py-10 sm:px-6">
-      <div className="flex items-start justify-between" style={{ gap: 40 }}>
+      <div className={`flex items-start justify-between ${leftSidebarMobile ? "flex-col md:flex-row" : ""}`} style={{ gap: 40 }}>
         {hasLeft && <aside className={leftClass}>{leftSidebar}</aside>}
         <div
           className="min-w-0"

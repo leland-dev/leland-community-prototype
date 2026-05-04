@@ -29,6 +29,7 @@ interface OfferingCardProps {
   ctaLabel?: string;
   showImage?: boolean;
   size?: "large" | "small";
+  href?: string;
 }
 
 function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: boolean, exhausted: boolean): { label: string; green?: boolean } {
@@ -125,6 +126,7 @@ export default function OfferingCard({
   ctaLabel,
   showImage = false,
   size = "large",
+  href,
 }: OfferingCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -175,9 +177,8 @@ export default function OfferingCard({
   }
 
   /* ── Standard inline row layout ── */
-  return (
-    <div className="@container">
-      <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 py-3 transition-colors hover:bg-[#F5F5F5] ${showMenu ? "pr-1" : "pr-2"}`}>
+  const cardContent = (
+    <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 py-3 transition-colors hover:bg-[#F5F5F5] ${showMenu ? "pr-1" : "pr-2"}`}>
         {/* Image */}
         {type === "leland-plus" ? (
           <img
@@ -223,6 +224,7 @@ export default function OfferingCard({
         <div className="flex shrink-0 items-center gap-0 self-stretch">
           <button
             disabled={cta.disabled}
+            onClick={(e) => e.stopPropagation()}
             className={`hidden @[448px]:flex items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
               cta.disabled
                 ? "bg-[#222222]/5 text-[#9B9B9B] cursor-default"
@@ -236,7 +238,7 @@ export default function OfferingCard({
 
           {/* 3-dot menu */}
           {showMenu && (
-            <div ref={menuRef} className="relative self-stretch">
+            <div ref={menuRef} className="relative self-stretch" onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="group/dots flex w-8 cursor-pointer items-center justify-center self-stretch h-full"
@@ -279,6 +281,15 @@ export default function OfferingCard({
           )}
         </div>
       </div>
+  );
+
+  return (
+    <div className="@container">
+      {href ? (
+        <a href={href} className="no-underline">{cardContent}</a>
+      ) : (
+        cardContent
+      )}
     </div>
   );
 }
