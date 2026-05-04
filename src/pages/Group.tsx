@@ -636,24 +636,33 @@ const LinkThumbnail = (
   </div>
 );
 
+const HELPFUL_LINKS_FIXED = [
+  { label: "Session Recordings", description: "Catch up on past sessions and download slides" },
+  { label: "Free Resources", description: "Essays, timelines, and school profiles" },
+];
+
+function HelpfulLinksList(_: { group: GroupData }) {
+  return (
+    <div className="pt-6">
+      <SidebarGroup label="Helpful Links" hideChevron>
+        {HELPFUL_LINKS_FIXED.map((link) => (
+          <SidebarCard
+            key={link.label}
+            variant="topic"
+            icon={LinkThumbnail}
+            title={link.label}
+            subtitle={link.description}
+          />
+        ))}
+      </SidebarGroup>
+    </div>
+  );
+}
+
 function GroupRightSidebar({ group }: { group: GroupData }) {
   const data = SIDEBAR_DATA[group.theme];
   return (
     <div className="flex flex-col gap-6 px-1">
-      {group.helpfulLinks.length > 0 && (
-        <SidebarGroup label="Helpful Links" hideChevron>
-          {group.helpfulLinks.slice(0, 2).map((link) => (
-            <SidebarCard
-              key={link.label}
-              variant="topic"
-              icon={LinkThumbnail}
-              title={link.label}
-              subtitle={link.description}
-            />
-          ))}
-        </SidebarGroup>
-      )}
-
       <SidebarGroup label="Free events">
         {data.events.map((e) => (
           <SidebarCard
@@ -717,12 +726,7 @@ export default function Group() {
   const [stickyNavVisible, setStickyNavVisible] = useState(false);
   const heroSentinelRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const visibleTabs = isMobile ? [...TABS, { id: "other" as Tab, label: "More" }] : TABS;
-
-  // If viewport moves to desktop while on "Other" tab, fall back to Activity
-  useEffect(() => {
-    if (!isMobile && activeTab === "other") setActiveTab("activity");
-  }, [isMobile, activeTab]);
+  const visibleTabs = [...TABS, { id: "other" as Tab, label: "More" }];
 
   useEffect(() => {
     // Show the sticky tab nav as soon as the user starts scrolling past the hero
@@ -788,24 +792,21 @@ export default function Group() {
         document.body,
       )}
 
-      {/* Full-bleed banner — outside PageShell */}
-      <div className="w-full bg-[#f0f0f0] h-[72px] md:h-[122px]" />
-
       <PageShell rightSidebar={isMobile ? undefined : <GroupRightSidebar group={group} />}>
-        {/* Group icon + CTA row — overlaps banner with negative margin */}
-        <div className="-mt-[88px] md:-mt-[100px] mb-3 md:mb-4 flex items-end justify-between">
+        {/* Group icon + CTA row — mirrors coach profile "no header" layout */}
+        <div className="mb-4 flex items-start justify-between">
           <div
-            className="flex h-[88px] w-[88px] md:h-[132px] md:w-[132px] shrink-0 items-center justify-center rounded-lg border-[4px] border-white text-white text-[32px] md:text-[48px] font-bold"
+            className="flex h-[88px] w-[88px] md:h-[132px] md:w-[132px] shrink-0 items-center justify-center rounded-lg text-white text-[32px] md:text-[48px] font-bold"
             style={{ backgroundColor: group.accentColor }}
           >
             {group.name.charAt(0)}
           </div>
-          <div className="h-[88px] md:h-auto md:pb-[90px]">
+          <div className="flex items-center pb-1">
             <button
               onClick={() => setIsJoined(!isJoined)}
               className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[15px] md:text-[16px] font-medium transition-colors ${
                 isJoined
-                  ? "border border-[#222222]/10 bg-white text-gray-dark hover:border-[#222222]/20"
+                  ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
                   : "bg-[#038561] text-white hover:bg-[#038561]/90"
               }`}
             >
@@ -820,20 +821,18 @@ export default function Group() {
         <p className="mt-1 mb-[6px] text-[16px] md:text-[18px] leading-[1.3] text-[#707070]">{group.tagline}</p>
 
         {/* Face pile + stats */}
-        <div className="mt-3 flex items-center gap-2.5 text-[16px] md:text-[14px] text-[#707070]">
+        <div className="mt-3 flex items-center gap-2.5 text-[16px] text-[#707070]">
           <div className="flex -space-x-1.5">
             {COHORT_MEMBERS.slice(0, 4).map((m) => (
               <img
                 key={m.name}
                 src={m.avatar}
                 alt=""
-                className="h-7 w-7 md:h-6 md:w-6 rounded-full border-2 border-white object-cover"
+                className="h-8 w-8 rounded-full border-2 border-white object-cover"
               />
             ))}
           </div>
           <span>{group.memberCount.toLocaleString()} members</span>
-          <span className="text-[#D0D0D0]">·</span>
-          <span>{posts.length} {posts.length === 1 ? "post" : "posts"}</span>
         </div>
 
         {/* Sentinel for sticky nav */}
@@ -863,11 +862,7 @@ export default function Group() {
           <>
             {activeTab === "activity" && <ActivityTab posts={posts} />}
             {activeTab === "members" && <MembersTab />}
-            {activeTab === "other" && (
-              <div className="pt-6">
-                <GroupRightSidebar group={group} />
-              </div>
-            )}
+            {activeTab === "other" && <HelpfulLinksList group={group} />}
           </>
         )}
       </PageShell>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
+import { Button } from "../components/Button";
 import PageShell from "../components/PageShell";
 import settingsIcon from "../assets/icons/settings.svg";
 import giftIcon from "../assets/icons/gift.svg";
@@ -16,6 +17,9 @@ import calendarUpcomingIcon from "../assets/icons/calendar-upcoming.svg";
 import browserIcon from "../assets/icons/browser.svg";
 import mailIcon from "../assets/icons/mail.svg";
 import mobilePhoneIcon from "../assets/icons/mobile-phone.svg";
+import lockIcon from "../assets/icons/lock.svg";
+import addPlusIcon from "../assets/icons/add-plus.svg";
+import profilePhoto from "../assets/profile photos/profile photo.png";
 
 const tabs = [
   { key: "account", label: "Account", icon: settingsIcon },
@@ -132,6 +136,10 @@ export default function AccountSettings() {
     const active = Object.entries(channels).filter(([, v]) => v).map(([k]) => k);
     return active.length > 0 ? active.join(", ") : "Off";
   };
+
+  const [smsReminders, setSmsReminders] = useState(true);
+  const [smsOffers, setSmsOffers] = useState(false);
+  const [sessionSummaries, setSessionSummaries] = useState(true);
 
   const dashedBorderStyle = {
     backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")`,
@@ -334,6 +342,118 @@ export default function AccountSettings() {
               })}
             </div>
             </>
+          ) : activeTab === "account" ? (
+            <div className="mt-8">
+              {/* Profile photo */}
+              <div className="flex items-center gap-5 rounded-xl bg-[#F5F5F5] p-5">
+                <img src={profilePhoto} alt="" className="h-[72px] w-[72px] shrink-0 rounded-full object-cover" />
+                <div>
+                  <p className="text-[16px] text-gray-light">Drag and drop an image or select from your files (under 1MB).</p>
+                  <div className="mt-3 flex items-center gap-4">
+                    <Button size="sm" variant="secondary">Upload new photo</Button>
+                    <button className="text-[16px] font-medium text-gray-dark">Remove photo</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Name */}
+              <div className="mt-6 border-t border-gray-stroke pt-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-[18px] font-semibold text-gray-dark">Name</h3>
+                    <p className="mt-1 text-[16px] text-gray-light">June Allen</p>
+                  </div>
+                  <button className="text-[16px] font-medium text-gray-dark underline underline-offset-2">Edit</button>
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="mt-6 border-t border-gray-stroke pt-6">
+                <h3 className="text-[18px] font-semibold text-gray-dark">Email</h3>
+                <p className="mt-1 text-[16px] text-gray-light">The ability to update your email is coming soon.</p>
+                <div className="mt-3 flex items-center gap-2.5 rounded-lg border border-[#E5E5E5] bg-white px-4 py-3">
+                  <img src={lockIcon} alt="" className="h-[16px] w-[16px] shrink-0 opacity-40" />
+                  <span className="text-[16px] text-gray-light">june.allen@gmail.com</span>
+                </div>
+              </div>
+
+              {/* Preferred Pronouns */}
+              <div className="mt-6 border-t border-gray-stroke pt-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-[18px] font-semibold text-gray-dark">Preferred Pronouns</h3>
+                    <p className="mt-1 text-[16px] text-gray-light">She/Her</p>
+                  </div>
+                  <button className="text-[16px] font-medium text-gray-dark underline underline-offset-2">Edit</button>
+                </div>
+              </div>
+
+              {/* Phone number */}
+              <div className="mt-6 border-t border-gray-stroke pt-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-[18px] font-semibold text-gray-dark">Phone number</h3>
+                    <p className="mt-1 text-[16px] text-gray-light">+1 (415) 555-0192</p>
+                  </div>
+                  <button className="text-[16px] font-medium text-gray-dark underline underline-offset-2">Edit</button>
+                </div>
+                <div className="mt-4 flex flex-col gap-2">
+                  <div className="flex items-center justify-between rounded-lg bg-[#F5F5F5] px-4 py-3.5">
+                    <span className="text-[16px] text-gray-light">Send me SMS reminders for my upcoming sessions</span>
+                    <button onClick={() => setSmsReminders(!smsReminders)} className="relative h-[26px] w-[44px] shrink-0 cursor-pointer">
+                      <div className={`h-full w-full rounded-full transition-colors ${smsReminders ? "bg-[#038561]" : "bg-[#E5E5E5]"}`} />
+                      <div className={`absolute top-[2px] h-[22px] w-[22px] rounded-full bg-white shadow-sm transition-transform ${smsReminders ? "left-[20px]" : "left-[2px]"}`} />
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg bg-[#F5F5F5] px-4 py-3.5">
+                    <span className="text-[16px] text-gray-light">Text me about relevant events and special offers</span>
+                    <button onClick={() => setSmsOffers(!smsOffers)} className="relative h-[26px] w-[44px] shrink-0 cursor-pointer">
+                      <div className={`h-full w-full rounded-full transition-colors ${smsOffers ? "bg-[#038561]" : "bg-[#E5E5E5]"}`} />
+                      <div className={`absolute top-[2px] h-[22px] w-[22px] rounded-full bg-white shadow-sm transition-transform ${smsOffers ? "left-[20px]" : "left-[2px]"}`} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* LinkedIn profile */}
+              <div className="mt-6 border-t border-gray-stroke pt-6">
+                <h3 className="text-[18px] font-semibold text-gray-dark">LinkedIn profile</h3>
+                <div className="mt-3">
+                  <Button size="md" variant="secondary">
+                    <img src={addPlusIcon} alt="" className="h-[16px] w-[16px]" />
+                    Add your LinkedIn profile URL
+                  </Button>
+                </div>
+              </div>
+
+              {/* Personal bio */}
+              <div className="mt-6 border-t border-gray-stroke pt-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-[18px] font-semibold text-gray-dark">Personal bio</h3>
+                    <p className="mt-1 text-[16px] text-gray-light">Product manager at Atlassian with 6+ years of experience building enterprise SaaS tools. I'm looking for coaching in career development to grow my expertise as a product leader.</p>
+                  </div>
+                  <button className="ml-4 shrink-0 text-[16px] font-medium text-gray-dark underline underline-offset-2">Edit</button>
+                </div>
+              </div>
+
+              {/* Generate session summaries */}
+              <div className="mt-6 border-t border-gray-stroke pt-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
+                      <path d="M10 1L11.5 7L17 5.5L13 10L17 14.5L11.5 13L10 19L8.5 13L3 14.5L7 10L3 5.5L8.5 7L10 1Z" stroke="#333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <h3 className="text-[18px] font-semibold text-gray-dark">Generate session summaries</h3>
+                  </div>
+                  <button onClick={() => setSessionSummaries(!sessionSummaries)} className="relative mt-0.5 h-[26px] w-[44px] shrink-0 cursor-pointer">
+                    <div className={`h-full w-full rounded-full transition-colors ${sessionSummaries ? "bg-[#038561]" : "bg-[#E5E5E5]"}`} />
+                    <div className={`absolute top-[2px] h-[22px] w-[22px] rounded-full bg-white shadow-sm transition-transform ${sessionSummaries ? "left-[20px]" : "left-[2px]"}`} />
+                  </button>
+                </div>
+                <p className="mt-1 text-[16px] text-gray-light">Leland can generate text summaries of your sessions, making it easy to revisit important concepts and stay aligned on your action items.</p>
+              </div>
+            </div>
           ) : (
             /* Placeholder boxes for other tabs */
             <div className="mt-8 flex flex-col gap-4">

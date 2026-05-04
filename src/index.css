@@ -60,6 +60,7 @@
   --color-gray-dark: #333333;
   --color-gray-light: #707070;
   --color-gray-xlight: #a3a3a3;
+  --color-gray-extra-light: #9B9B9B;
   --color-gray-stroke: #e5e5e5;
   --color-gray-hover: #f5f5f5;
 
@@ -98,6 +99,41 @@
   100% { box-shadow: 0 0 0 10px rgba(3,133,97,0); }
 }
 
+/* iOS-style activity indicator: 8 rounded blades arranged radially. Each
+   blade fades from full to faint on a 0.8s loop, staggered by -100ms so the
+   "head" of the trail visually races around the circle. */
+@keyframes ios-spinner-fade {
+  0%   { opacity: 1; }
+  100% { opacity: 0.18; }
+}
+.ios-spinner {
+  position: relative;
+  width: 28px;
+  height: 28px;
+}
+.ios-spinner > i {
+  position: absolute;
+  left: 12.75px;
+  top: 1.25px;
+  width: 2.5px;
+  height: 7.5px;
+  background: #8e8e93;
+  border-radius: 1.25px;
+  transform-origin: 1.25px 12.75px;
+  opacity: 0.18;
+}
+.ios-spinner.spinning > i {
+  animation: ios-spinner-fade 0.6s linear infinite;
+}
+.ios-spinner > i:nth-child(1) { transform: rotate(0deg);   animation-delay: -0.6s;   }
+.ios-spinner > i:nth-child(2) { transform: rotate(45deg);  animation-delay: -0.525s; }
+.ios-spinner > i:nth-child(3) { transform: rotate(90deg);  animation-delay: -0.45s;  }
+.ios-spinner > i:nth-child(4) { transform: rotate(135deg); animation-delay: -0.375s; }
+.ios-spinner > i:nth-child(5) { transform: rotate(180deg); animation-delay: -0.3s;   }
+.ios-spinner > i:nth-child(6) { transform: rotate(225deg); animation-delay: -0.225s; }
+.ios-spinner > i:nth-child(7) { transform: rotate(270deg); animation-delay: -0.15s;  }
+.ios-spinner > i:nth-child(8) { transform: rotate(315deg); animation-delay: -0.075s; }
+
 html,
 body,
 #root {
@@ -106,6 +142,14 @@ body,
 
 html {
   scrollbar-gutter: stable;
+  /* Disable iOS Safari's native pull-to-refresh. Feed/post pages have their
+     own in-app pull-to-refresh; on every other page, pulling past the top
+     should do nothing (no browser reload, no spinner above the URL bar). */
+  overscroll-behavior-y: contain;
+}
+
+body {
+  overscroll-behavior-y: contain;
 }
 
 body {
@@ -113,4 +157,39 @@ body {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark mode — design-demo toggle. Swaps the common background/text/border
+   utility classes used across the feed so the page reads correctly on a dark
+   canvas. Keeps brand accent (green) intact. */
+html.dark,
+html.dark body {
+  background-color: #0b0b0b;
+  color: #e8e8e8;
+}
+html.dark .bg-white { background-color: #111; }
+html.dark .bg-gray-hover { background-color: #1a1a1a; }
+html.dark .bg-gray-100 { background-color: #1a1a1a; }
+html.dark .bg-\[\#F5F5F5\],
+html.dark .bg-\[\#F0F0F0\],
+html.dark .bg-\[\#f5f5f5\],
+html.dark .bg-\[\#FAFAFA\] { background-color: #1a1a1a; }
+html.dark .text-gray-dark { color: #ededed; }
+html.dark .text-gray-light { color: #9a9a9a; }
+html.dark .text-gray-xlight { color: #6e6e6e; }
+html.dark .text-\[\#707070\] { color: #9a9a9a; }
+html.dark .text-\[\#424242\] { color: #d0d0d0; }
+html.dark .text-\[\#A0A0A0\] { color: #7e7e7e; }
+html.dark .border-gray-stroke,
+html.dark .border-\[\#E5E5E5\],
+html.dark .border-gray-200 { border-color: #2a2a2a; }
+html.dark .divide-gray-stroke > * + *,
+html.dark .divide-gray-stroke\/50 > * + * { border-color: #2a2a2a; }
+
+/* Invert icon <img>s so they read on a dark background. Excludes avatars
+   (rounded-full), category thumbnails (rounded-[4px]), and the Leland logo
+   so brand/image content is preserved. */
+html.dark :is(nav, header, aside) img:not([class*="rounded-full"]):not([class*="rounded-\[4px\]"]):not([alt="Leland"]):not([alt="Your profile"]):not([alt="Profile"]):not([alt="You"]),
+html.dark button img:not([class*="rounded-full"]):not([class*="rounded-\[4px\]"]):not([alt="Leland"]):not([alt="Your profile"]):not([alt="Profile"]):not([alt="You"]) {
+  filter: invert(0.92);
 }

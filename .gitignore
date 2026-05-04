@@ -3,3 +3,8 @@ dist
 tsconfig.tsbuildinfo
 .DS_Store
 .vercel
+.dev.vars
+.env
+.env.local
+.env.*.local
+.wrangler

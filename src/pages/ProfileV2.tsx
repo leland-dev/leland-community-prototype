@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
-import { Button } from "../components/Button";
-import { Link } from "react-router-dom";
+import { Button, LinkButton } from "../components/Button";
+import { Link, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import PageShell from "../components/PageShell";
@@ -21,6 +21,14 @@ import pic10 from "../assets/profile photos/pic-10.png";
 import pic11 from "../assets/profile photos/pic-11.png";
 import mailIcon from "../assets/icons/mail.svg";
 import shareArrowIcon from "../assets/icons/share-arrow.svg";
+import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
+import reportFlagIcon from "../assets/icons/report-flag.svg";
+import lockIcon from "../assets/icons/lock.svg";
+import eyeClosedIcon from "../assets/icons/eye-closed.svg";
+import GroupCard from "../components/GroupCard";
+import groupImg1 from "../assets/placeholder images/group images/18603db620e37b489d2d52da4c9c1f86.jpg";
+import groupImg2 from "../assets/placeholder images/group images/419a6944d25e95be7012699559c7b0be.jpg";
+import groupImg3 from "../assets/placeholder images/group images/6c168007b1aef00bedc192e802c413e5.jpg";
 import checkIcon from "../assets/icons/check.svg";
 import editIcon from "../assets/icons/edit.svg";
 import verifiedIcon from "../assets/icons/verified.svg";
@@ -33,12 +41,14 @@ import piggyBankIcon from "../assets/icons/Piggy bank, Coin.1.svg";
 import stopwatchIcon from "../assets/icons/stopwatch.svg";
 import supportivenessIcon from "../assets/icons/supportiveness.svg";
 import wreathImg from "../assets/img/Wreath.svg";
-import wreathSmallImg from "../assets/img/Wreath-Small.svg";
+import wreathSmallImg from "../assets/img/wreath-small.svg";
 import videoThumbnail from "../assets/img/Video-Thumbnail.png";
 import starIcon from "../assets/icons/star.svg";
 import categoryMBA from "../assets/placeholder images/category images/gmat-tutoring.png";
 import categoryConsulting from "../assets/placeholder images/category images/management-consulting.png";
 import categoryPM from "../assets/placeholder images/category images/product-management.png";
+import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
+import categoryFinance from "../assets/placeholder images/category images/investment-banking.png";
 
 import coachCoverImage from "../assets/img/cover-2.avif";
 import customerCoverImage from "../assets/img/cpver-image 1.jpg";
@@ -154,16 +164,65 @@ const purchasedOfferings: PurchasedOffering[] = [
   },
 ];
 
-const coachOfferings: { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string }[] = [
-  { type: "free-intro", title: "Free 15-minute intro call", subtitle: "Get to know Samantha and make a plan", image: "" },
-  { type: "hourly-package", title: "10-Hour Coaching Package", subtitle: "10 hours · $1,200", image: eventImg1 },
-  { type: "package", title: "MBA Application Package", subtitle: "Comprehensive Package · Starting at $750", image: eventImg2 },
-  { type: "package", title: "Interview Prep Package", subtitle: "Comprehensive Package · Starting at $500", image: eventImg3 },
-  { type: "hourly", title: "Custom hourly coaching", subtitle: "$150 per hour", image: "" },
-  { type: "content", title: "How I Got Into Stanford GSB", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>, image: lelandPlusImg1 },
-  { type: "content", title: "GMAT Study Plan: 3 Months to 750+", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 184 views</span></span>, image: lelandPlusImg2 },
-  { type: "content", title: "My Consulting Recruiting Timeline", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 97 views</span></span>, image: lelandPlusImg3 },
-];
+type CoachOffering = { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string; href?: string };
+
+type CoachConfig = {
+  id: string;
+  name: string;
+  firstName: string;
+  photo: string;
+  qualificationsTitle: string;
+  offerings: CoachOffering[];
+};
+
+const COACH_CONFIGS: Record<string, CoachConfig> = {
+  samantha: {
+    id: "samantha",
+    name: "Samantha Parker",
+    firstName: "Samantha",
+    photo: pic6,
+    qualificationsTitle: "MBA Qualifications",
+    offerings: [
+      { type: "free-intro", title: "Free 15-minute intro call", subtitle: "Get to know Samantha and make a plan", image: "" },
+      { type: "hourly-package", title: "10-Hour Coaching Package", subtitle: "10 hours · $1,200", image: eventImg1 },
+      { type: "package", title: "MBA Application Package", subtitle: "Comprehensive Package · Starting at $750", image: eventImg2 },
+      { type: "package", title: "Interview Prep Package", subtitle: "Comprehensive Package · Starting at $500", image: eventImg3 },
+      { type: "hourly", title: "Custom hourly coaching", subtitle: "$150 per hour", image: "" },
+      { type: "agent", title: "Samantha's MBA Admissions Agent", subtitle: "AI guidance, curated by Samantha · Subscription", image: categoryMBA, href: "/agent/samantha-mba-admissions" },
+      { type: "agent", title: "Samantha's GMAT Prep Agent", subtitle: "AI guidance, curated by Samantha · Subscription", image: categoryMBA, href: "/agent/samantha-gmat-prep" },
+      { type: "agent", title: "Samantha's Consulting Recruiting Agent", subtitle: "AI guidance, curated by Samantha · Subscription", image: categoryConsulting, href: "/agent/samantha-consulting" },
+      { type: "content", title: "How I Got Into Stanford GSB", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>, image: lelandPlusImg1 },
+      { type: "content", title: "GMAT Study Plan: 3 Months to 750+", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 184 views</span></span>, image: lelandPlusImg2 },
+      { type: "content", title: "My Consulting Recruiting Timeline", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 97 views</span></span>, image: lelandPlusImg3 },
+    ],
+  },
+  john: {
+    id: "john",
+    name: "John Koelliker",
+    firstName: "John",
+    photo: pic9,
+    qualificationsTitle: "Coach Qualifications",
+    offerings: [
+      { type: "free-intro", title: "Free 15-minute intro call", subtitle: "Get to know John and make a plan", image: "" },
+      { type: "package", title: "Deferred MBA Application Package", subtitle: "Comprehensive Package · Starting at $1,200", image: eventImg2 },
+      { type: "package", title: "Standard MBA Application Package", subtitle: "Comprehensive Package · Starting at $1,500", image: eventImg3 },
+      { type: "package", title: "Pitch Deck Review", subtitle: "Single 60-min session · $500", image: eventImg1 },
+      { type: "hourly", title: "Custom hourly coaching", subtitle: "$300 per hour", image: "" },
+      { type: "agent", title: "John's MBA Application Strategy Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-application-strategy" },
+      { type: "agent", title: "John's MBA Essays Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-essays" },
+      { type: "agent", title: "John's MBA Interviews Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-interviews" },
+      { type: "agent", title: "John's MBA Recommenders Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-recommenders" },
+      { type: "agent", title: "John's Deferred MBA Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-deferred-mba" },
+      { type: "agent", title: "John's Fundraising Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryFinance, href: "/agent/john-fundraising" },
+      { type: "agent", title: "John's Pitch Decks Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryFinance, href: "/agent/john-pitch-decks" },
+      { type: "agent", title: "John's Startup Strategy Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryAI, href: "/agent/john-startup" },
+      { type: "agent", title: "John's Career Coaching Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryPM, href: "/agent/john-career" },
+      { type: "content", title: "Components of an MBA Application Strategy", subtitle: <span className="flex items-center gap-1.5"><img src={pic9} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />John Koelliker <span className="text-[#9B9B9B]">· 560 views</span></span>, image: lelandPlusImg1 },
+      { type: "content", title: "Why Apply to Deferred MBA Programs?", subtitle: <span className="flex items-center gap-1.5"><img src={pic9} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />John Koelliker <span className="text-[#9B9B9B]">· 237 views</span></span>, image: lelandPlusImg2 },
+      { type: "content", title: "General Interview Tips", subtitle: <span className="flex items-center gap-1.5"><img src={pic9} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />John Koelliker <span className="text-[#9B9B9B]">· 354 views</span></span>, image: lelandPlusImg3 },
+    ],
+  },
+};
 
 const customerPosts: Post[] = [
   {
@@ -284,7 +343,8 @@ function CategorySubtitle({ photos, experts }: { photos: string[]; experts: stri
   );
 }
 
-export default function ProfileV2({ coach = false }: { coach?: boolean }) {
+export default function ProfileV2({ coach = false, coachId = "samantha" }: { coach?: boolean; coachId?: string }) {
+  const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
   const [isFollowing, setIsFollowing] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -296,11 +356,16 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
   const [showCoachNote, setShowCoachNote] = useState(coach);
   const [coachNoteExpanded, setCoachNoteExpanded] = useState(false);
   const [showCoachVideo, setShowCoachVideo] = useState(true);
-  const [showSupercoach, setShowSupercoach] = useState(coach);
+  const [showSupercoach, setShowSupercoach] = useState(false);
   const [showCoverImage, setShowCoverImage] = useState(false);
   const [showGrayHeader, setShowGrayHeader] = useState(false);
+  const [searchParams] = useSearchParams();
   const isCustomerProfile = !coach;
-  const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes">("activity");
+  const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes" | "more">(
+    (["activity", "about", "calendar", "likes", "more"] as const).includes(searchParams.get("tab") as any)
+      ? (searchParams.get("tab") as "activity" | "about" | "calendar" | "likes" | "more")
+      : "activity"
+  );
   const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Courses" | "Content">("All");
   const [purchasesExpanded, setPurchasesExpanded] = useState(false);
   const [pastOpen, setPastOpen] = useState(false);
@@ -309,13 +374,15 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
   const [viewingOwnProfile, setViewingOwnProfile] = useState(isCustomerProfile);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [eventsCategoryOpen, setEventsCategoryOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
 
-  const profilePhoto = isCustomerProfile ? customerPhoto : pic6;
-  const profileName = isCustomerProfile ? "June Allen" : "Samantha Parker";
+  const profilePhoto = isCustomerProfile ? customerPhoto : coachConfig.photo;
+  const profileName = isCustomerProfile ? "June Allen" : coachConfig.name;
 
   const categoryRef = useRef<HTMLDivElement>(null);
   const eventsCategoryRef = useRef<HTMLDivElement>(null);
   const adminRef = useRef<HTMLDivElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
   const heroSentinelRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLHeadingElement | null>>({});
   const groupRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -419,6 +486,17 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [eventsCategoryOpen]);
+
+  useEffect(() => {
+    if (!moreMenuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+        setMoreMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [moreMenuOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -579,18 +657,21 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                   image={pic1}
                   title="Jasmine Singer"
                   subtitle="Experienced Product Leader at LinkedIn | Ex-..."
+                  to="/coach-profile"
                 />
                 <SidebarCard
                   variant="coach"
                   image={pic3}
                   title="Jackson Ringger"
                   subtitle="Ex-McKinsey Engagement Manager | Wharton MBA..."
+                  to="/coach-profile"
                 />
                 <SidebarCard
                   variant="coach"
                   image={pic5}
                   title="Erika Mah"
                   subtitle="Senior PM at Google | Stanford GSB | Ex-Stripe..."
+                  to="/coach-profile"
                 />
               </SidebarGroup>
             </div>
@@ -727,23 +808,16 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
             </div>
             <div className={`flex items-center gap-2 ${showCoverImage ? "pb-1" : showGrayHeader ? "pb-[90px]" : "pb-1"}`}>
               {viewingOwnProfile ? (
-                <button className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
+                <Link to="/settings?tab=account" className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
                   showCoverImage || !showGrayHeader
                     ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
                     : "border border-[#222222]/10 bg-white text-gray-dark hover:border-[#222222]/20"
                 }`}>
                   <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
                   Edit profile
-                </button>
+                </Link>
               ) : (
                 <>
-                  <button className={`flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-lg transition-colors ${
-                    showCoverImage || !showGrayHeader
-                      ? "bg-[#222222]/5 hover:bg-[#222222]/[0.08]"
-                      : "border border-[#222222]/10 bg-white hover:border-[#222222]/20"
-                  }`}>
-                    <img src={shareArrowIcon} alt="Share" className="h-[20px] w-[20px]" />
-                  </button>
                   <button
                     onClick={() => setIsFollowing(!isFollowing)}
                     className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
@@ -757,6 +831,46 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                     {isFollowing && <img src={checkIcon} alt="" className={`h-[18px] w-[18px] ${isCustomerProfile ? "brightness-0 invert" : ""}`} />}
                     {isFollowing ? "Following" : "Follow"}
                   </button>
+                  <div ref={moreMenuRef} className="relative">
+                    <button
+                      onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                      className={`flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-lg transition-colors ${
+                        showCoverImage || !showGrayHeader
+                          ? "bg-[#222222]/5 hover:bg-[#222222]/[0.08]"
+                          : "border border-[#222222]/10 bg-white hover:border-[#222222]/20"
+                      }`}
+                    >
+                      <img src={dotsHorizontalIcon} alt="More" className="h-[20px] w-[20px]" />
+                    </button>
+                    <AnimatePresence>
+                      {moreMenuOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 6 }}
+                          transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+                          className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                        >
+                          {[
+                            { icon: shareArrowIcon, label: "Share" },
+                            { icon: airplaneIcon, label: "Message" },
+                            { icon: reportFlagIcon, label: "Report" },
+                          ].map((item) => (
+                            <button
+                              key={item.label}
+                              onClick={() => setMoreMenuOpen(false)}
+                              className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-[15px] font-medium transition-colors hover:bg-gray-hover ${
+                                "text-gray-dark"
+                              }`}
+                            >
+                              <img src={item.icon} alt="" className="h-[20px] w-[20px] shrink-0 brightness-0" />
+                              {item.label}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </>
               )}
             </div>
@@ -915,10 +1029,10 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
           {isCustomerProfile && (
             <div className="mt-3 flex flex-col gap-3 md:hidden">
               {viewingOwnProfile ? (
-                <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                <Link to="/settings?tab=account" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                   <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
                   Edit profile
-                </button>
+                </Link>
               ) : (
                 <div className="flex gap-2">
                   <button
@@ -928,9 +1042,42 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                     {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px] brightness-0 invert" />}
                     {isFollowing ? "Following" : "Follow"}
                   </button>
-                  <button className="flex cursor-pointer items-center justify-center rounded-full bg-[#222222]/5 px-4 py-3 transition-colors hover:bg-[#222222]/[0.08]">
-                    <img src={shareArrowIcon} alt="Share" className="h-[20px] w-[20px]" />
-                  </button>
+                  <div ref={moreMenuRef} className="relative">
+                    <button
+                      onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                      className="flex cursor-pointer items-center justify-center rounded-full bg-[#222222]/5 px-4 py-3 transition-colors hover:bg-[#222222]/[0.08]"
+                    >
+                      <img src={dotsHorizontalIcon} alt="More" className="h-[20px] w-[20px]" />
+                    </button>
+                    <AnimatePresence>
+                      {moreMenuOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 6 }}
+                          transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+                          className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                        >
+                          {[
+                            { icon: shareArrowIcon, label: "Share" },
+                            { icon: airplaneIcon, label: "Message" },
+                            { icon: reportFlagIcon, label: "Report" },
+                          ].map((item) => (
+                            <button
+                              key={item.label}
+                              onClick={() => setMoreMenuOpen(false)}
+                              className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-[15px] font-medium transition-colors hover:bg-gray-hover ${
+                                "text-gray-dark"
+                              }`}
+                            >
+                              <img src={item.icon} alt="" className="h-[20px] w-[20px] shrink-0 brightness-0" />
+                              {item.label}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
               )}
             </div>
@@ -953,8 +1100,8 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
               <div className="mt-2 flex flex-col">
                 {/* Customer Favorite */}
                 {showCustomerFavorite && (
-                  <div className="flex gap-3 py-4">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center">
+                  <div className="flex gap-4 py-4">
+                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center">
                       <img src={wreathSmallImg} alt="" className="w-8" />
                     </div>
                     <div className="min-w-0">
@@ -965,8 +1112,8 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                 )}
 
                 {/* Availability */}
-                <div className="flex gap-3 py-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
+                <div className="flex gap-4 py-4">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
                     <img src={calendarIcon} alt="" className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
@@ -978,13 +1125,13 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                 {/* Coach note */}
                 {showCoachNote && (
                   <div
-                    className="flex cursor-pointer gap-3 py-4"
+                    className="flex cursor-pointer gap-4 py-4"
                     onClick={() => setCoachNoteExpanded(p => !p)}
                   >
                     <img
                       src={profilePhoto}
                       alt={profileName}
-                      className="h-9 w-9 shrink-0 rounded-[4px] object-cover"
+                      className="mt-0.5 h-9 w-9 shrink-0 rounded-[4px] object-cover"
                     />
                     <div className="min-w-0">
                       <p className="text-[16px] font-medium text-gray-dark">Note from {profileName.split(" ")[0]}</p>
@@ -1015,8 +1162,8 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                 )}
 
                 {/* Questions */}
-                <div className="flex gap-3 py-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
+                <div className="flex gap-4 py-4">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
                     <img src={airplaneIcon} alt="" className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
@@ -1059,10 +1206,10 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
           {/* Mobile inline CTA — coach viewing own profile */}
           {!isCustomerProfile && viewingOwnProfile && (
             <div className="mt-3 md:hidden">
-              <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+              <Link to="/settings?tab=account" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                 <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
                 Edit profile
-              </button>
+              </Link>
             </div>
           )}
 
@@ -1107,9 +1254,9 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
               Offerings
             </h2>
 
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="flex flex-wrap gap-[6px]">
-                {["All", "Packages", "Memberships", "Content"].map((tab) => (
+                {["All", "Packages", "Memberships", "Agents", "Content"].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setOfferingsType(tab)}
@@ -1156,17 +1303,33 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
 
             {/* Offering cards */}
             {(() => {
-              const filteredOfferings = coachOfferings.filter((o) => {
+              const filteredOfferings = coachConfig.offerings.filter((o) => {
                 if (offeringsType === "All") return true;
                 if (offeringsType === "Packages") return o.type === "hourly-package" || o.type === "package";
                 if (offeringsType === "Memberships") return o.type === "course";
+                if (offeringsType === "Agents") return o.type === "agent";
                 return o.type === "content";
               });
+              const sliceCount = offeringsType === "All" ? 8 : offeringsType === "Agents" ? filteredOfferings.length : 5;
+              const isOwnCoachProfile = !isCustomerProfile && viewingOwnProfile;
               return filteredOfferings.length > 0 ? (
                 <div className="flex flex-col gap-1">
-                  {filteredOfferings.slice(0, 5).map((o) => (
-                    <OfferingCard key={o.title} type={o.type} title={o.title} subtitle={o.subtitle} image={o.image} ctaLabel={o.ctaLabel} />
-                  ))}
+                  {filteredOfferings.slice(0, sliceCount).map((o) => {
+                    const isAgent = o.type === "agent";
+                    const href = isAgent && isOwnCoachProfile && o.href ? `${o.href}/edit` : o.href;
+                    const ctaLabel = isAgent && isOwnCoachProfile ? "Edit context" : o.ctaLabel;
+                    return (
+                      <OfferingCard
+                        key={o.title}
+                        type={o.type}
+                        title={o.title}
+                        subtitle={o.subtitle}
+                        image={o.image}
+                        ctaLabel={ctaLabel}
+                        href={href}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[#D0D0D0] py-10 text-center">
@@ -1260,7 +1423,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
               ref={setSectionRef("about-samantha")}
               className="scroll-mt-[60px] mb-4 text-[24px] font-medium text-gray-dark"
             >
-              MBA Qualifications
+              {coachConfig.qualificationsTitle}
             </h2>
             <div className="flex flex-col gap-4">
               <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
@@ -1268,7 +1431,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
             </div>
 
             <div className="my-[36px] border-t border-gray-200" />
-            <h2 className="mb-4 text-[24px] font-medium text-gray-dark">About Samantha</h2>
+            <h2 className="mb-4 text-[24px] font-medium text-gray-dark">About {coachConfig.firstName}</h2>
             <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
 
             <div className="my-[36px] border-t border-gray-200" />
@@ -1428,8 +1591,8 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
           {isCustomerProfile && (
             <>
               {viewingOwnProfile ? (
-                <div className="sticky top-0 z-10 mt-5 flex gap-5 border-b border-gray-stroke bg-white">
-                  {(["activity", "about", "calendar", "likes"] as const).map((tab) => (
+                <div className="sticky top-0 z-10 mt-5 flex gap-5 border-b border-gray-stroke bg-white overflow-x-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {(["activity", "about", "calendar", "likes", "more"] as const).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setCustomerTab(tab)}
@@ -1439,7 +1602,7 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                           : "text-gray-light hover:text-gray-dark"
                       }`}
                     >
-                      <span className="text-[18px] font-medium">{tab === "activity" ? "Overview" : tab === "about" ? "Activity" : tab === "calendar" ? "Calendar" : "Likes"}</span>
+                      <span className="text-[18px] font-medium">{tab === "activity" ? "Overview" : tab === "about" ? "Activity" : tab === "calendar" ? "Calendar" : tab === "likes" ? "Likes" : "More"}</span>
                       {customerTab === tab && (
                         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#038561]" />
                       )}
@@ -1640,6 +1803,61 @@ export default function ProfileV2({ coach = false }: { coach?: boolean }) {
                     ))}
                   </div>
                   </>
+                )}
+
+                {viewingOwnProfile && customerTab === "more" && (
+                  <div className="flex flex-col gap-8">
+                    {/* About */}
+                    <section>
+                      <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>About</h2>
+                      <div className="mt-3 text-[18px] text-[#444]" style={{ lineHeight: "130%" }}>
+                        <p>
+                          Product manager at Atlassian with 6+ years of experience building enterprise SaaS tools. Previously led growth initiatives at two early-stage startups, taking one from beta to 50K monthly active users. Yale graduate with a background in computer science and behavioral economics.
+                        </p>
+                        <p className="mt-4">
+                          Outside of work, I'm passionate about mentoring aspiring PMs and helping career switchers break into tech. I also run a small book club focused on product strategy and organizational design.
+                        </p>
+                      </div>
+                      <div className="mt-4 flex items-center justify-between">
+                        <LinkButton size="md" variant="secondary" href="/settings?tab=account">
+                          <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
+                          Edit bio
+                        </LinkButton>
+                        <div className="flex items-center gap-1.5">
+                          <img src={eyeClosedIcon} alt="" className="h-[16px] w-[16px] shrink-0 brightness-0 opacity-45" />
+                          <span className="text-[16px] text-gray-light">Visible to experts you work with</span>
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Groups */}
+                    <section>
+                      <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Groups</h2>
+                      <div className="mt-3 flex flex-col gap-1">
+                        <GroupCard
+                          name="AI BP April 26"
+                          image={groupImg1}
+                          members={18}
+                          newPosts={3}
+                          to="/groups/ai-bp-apr-26"
+                        />
+                        <GroupCard
+                          name="MBA Admissions 2027"
+                          image={groupImg2}
+                          members={142}
+                          newPosts={12}
+                          to="/groups/mba-admissions-2027"
+                        />
+                        <GroupCard
+                          name="Product Management Career Switchers"
+                          image={groupImg3}
+                          members={87}
+                          newPosts={0}
+                          to="/groups/pm-career-switchers"
+                        />
+                      </div>
+                    </section>
+                  </div>
                 )}
               </div>
             </>

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 /* ── SidebarGroup ── */
 
@@ -52,6 +53,8 @@ interface SidebarCardProps {
   live?: boolean;
   /** Vertical alignment of content relative to the leading element */
   align?: "center" | "top";
+  /** Optional route to navigate to when clicked */
+  to?: string;
 }
 
 function ReviewRow({ rating, count }: { rating: number; count: number }) {
@@ -99,14 +102,17 @@ export default function SidebarCard({
   right,
   live,
   align = "center",
+  to,
 }: SidebarCardProps) {
-  return (
-    <div className={`group flex cursor-pointer py-[10px] transition-[padding] duration-300 ease-out hover:pl-[4px] ${variant === "topic" ? "gap-2" : "gap-3"} ${align === "top" ? "items-start" : "items-center"}`}>
+  const className = `group flex cursor-pointer py-[10px] transition-[padding] duration-300 ease-out hover:pl-[4px] ${variant === "topic" ? "gap-2" : "gap-3"} ${align === "top" ? "items-start" : "items-center"}`;
+
+  const content = (
+    <>
       <Leading variant={variant} image={image} icon={icon} live={live} />
 
       {/* Center: title + subtitle */}
       <div className={`flex min-w-0 flex-1 flex-col ${variant === "category" ? "gap-[2px]" : "gap-[4px]"}`}>
-        <p className="line-clamp-2 text-[16px] font-medium leading-[1.2] text-gray-dark hover:underline hover:decoration-[1px] hover:underline-offset-[2px]">{title}</p>
+        <p className="line-clamp-2 text-[16px] font-medium leading-[1.2] text-gray-dark group-hover:underline group-hover:decoration-[1px] group-hover:underline-offset-[2px]">{title}</p>
         <p className="truncate text-[14px] font-normal leading-none text-[#707070]">{subtitle}</p>
         {reviews && (
           <p className="truncate text-[14px] font-normal leading-none text-[#707070]">
@@ -117,6 +123,11 @@ export default function SidebarCard({
 
       {/* Right: optional element */}
       {right && <div className="shrink-0">{right}</div>}
-    </div>
+    </>
   );
+
+  if (to) {
+    return <Link to={to} className={className}>{content}</Link>;
+  }
+  return <div className={className}>{content}</div>;
 }

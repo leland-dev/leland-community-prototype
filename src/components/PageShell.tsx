@@ -25,7 +25,7 @@ export default function PageShell({
 }: PageShellProps) {
   if (variant === "thin") {
     return (
-      <div className="mx-auto max-w-[600px] px-4 py-8 sm:py-10 sm:px-6">
+      <div className="mx-auto max-w-[600px] px-4 py-4 sm:py-10 sm:px-6">
         {children}
       </div>
     );

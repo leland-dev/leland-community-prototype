@@ -1,11 +1,20 @@
 {
-  "name": "leland-community-prototype",
-"main": "worker/index.ts",
-  "compatibility_date": "2024-12-01",
-  "assets": {
-    "directory": "./dist",
-    "binding": "ASSETS",
-    "html_handling": "auto-trailing-slash",
-    "not_found_handling": "single-page-application"
-  }
+	"name": "leland-community-prototype",
+	"main": "worker/index.ts",
+	"compatibility_date": "2024-12-01",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS",
+		"html_handling": "auto-trailing-slash",
+		"not_found_handling": "single-page-application"
+	},
+	"kv_namespaces": [
+		{
+			"binding": "AGENTS_KV",
+			"id": "c9d42c2b90aa4982bd42e9c51aa37b04"
+		}
+	]
 }

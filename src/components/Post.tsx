@@ -370,7 +370,7 @@ function PostHeaderRow({ author, time, verified, headline }: {
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Link
-            to={`/profile-v2?type=${verified ? "coach" : "customer"}`}
+            to={verified ? "/coach-profile" : "/profile-v2"}
             onClick={(e) => e.stopPropagation()}
             className="cursor-pointer text-[17px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50"
           >
@@ -855,7 +855,7 @@ export default function Post({
         <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
           <div
             className="group relative h-10 w-10 cursor-pointer"
-            onClick={(e) => { e.stopPropagation(); navigate(`/profile-v2?type=${post.verified ? "coach" : "customer"}`); }}
+            onClick={(e) => { e.stopPropagation(); navigate(post.verified ? "/coach-profile" : "/profile-v2"); }}
           >
             {post.type === "event" ? (
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black">
