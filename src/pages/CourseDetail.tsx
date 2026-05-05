@@ -28,6 +28,7 @@ type CourseSession = {
   title: string;
   description: string;
   date: string;
+  duration: string;
   timeSlots: TimeSlot[];
   status: "completed" | "next" | "upcoming";
   materials: SessionMaterial[];
@@ -58,13 +59,14 @@ const mockCourse: CourseData = {
   sessionCount: 6,
   image: event1,
   resources: [
-    { label: "Slack community", icon: "slack", url: "#" },
-    { label: "Office hours", icon: "clock", url: "#" },
+    { label: "Office hours", icon: "clock", url: "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours?month=2026-05" },
+    { label: "Recordings", icon: "recording", url: "https://www.joinleland.com/content/course/urn:course:69d937e10ef66901f15b0902/urn:contentEntry:69e7f8cdcaf10f4eec4940b4" },
+    { label: "Slack community", icon: "slack", url: "https://d2fhrl04.na1.hubspotlinks.com/Ctc/UC+113/d2FHRl04/VXc0jX387Xr0N8MJ5mZVMfPKW76My975MX86-N8JCsF23m2nnW7Y8-PT6lZ3kzW79xkfq8jRrQxW2m-6Vs2_6GcMW3t1SkY84ng-4W7j53hc2H4KQ1W4MCrlt7F60D9W7FWYxr539-p0W8VHrTz2drHTLW4v0fV83YbJdTW2dsd7K9jLLd-W3rgjsV3n3hh1W2rBg4f5gjJPZW5m3HQ-3HmFbFW2DKMr-1hxzN7W2DWVHb4bSdrqW8tSF0N6Y39GnW3L1xR83vv7wHW982-rn41KZkXW1MD0nt5KRB7VW77W2NM8b8ldZW1Y2hkj2HHtD-W7hwmss61SslSW8_8BZ63CgmcVW6LKq_j2kyXHKW3TrYvt6lCh8vVTJNFh8kTCFmW5Vmz1_4XBDx3f3MfD_q04" },
     { label: "Setup guide", icon: "tool", url: "#" },
   ],
   sessions: [
     {
-      id: 1, number: 1, title: "Build a Real Product with World-Class Design", description: "Create a new product in 90 minutes, without writing a line of code, using a design system that you love.", date: "Apr 21", status: "completed",
+      id: 1, number: 1, title: "Build a Real Product with World-Class Design", duration: "90 min", description: "Create a new product in 90 minutes, without writing a line of code, using a design system that you love.", date: "Apr 21", status: "completed",
       timeSlots: [
         { id: 10, time: "11:00 AM", recordingUrl: "#" },
         { id: 11, time: "4:00 PM", recordingUrl: "#" },
@@ -72,7 +74,7 @@ const mockCourse: CourseData = {
       materials: [{ label: "Session guide", url: "#" }],
     },
     {
-      id: 2, number: 2, title: "Automate Communication in Your Voice", description: "Connect your communication tools, teach AI how you write, and set it up to manage your inbox.", date: "Apr 24", status: "completed",
+      id: 2, number: 2, title: "Automate Communication in Your Voice", duration: "90 min", description: "Connect your communication tools, teach AI how you write, and set it up to manage your inbox.", date: "Apr 24", status: "completed",
       timeSlots: [
         { id: 20, time: "11:00 AM", recordingUrl: "#" },
         { id: 21, time: "4:00 PM", recordingUrl: "#" },
@@ -80,7 +82,7 @@ const mockCourse: CourseData = {
       materials: [{ label: "Session guide", url: "#" }],
     },
     {
-      id: 3, number: 3, title: "Design Presentations That Build Themselves", description: "Go from research question to polished, animated slide deck in a single session.", date: "Apr 28", status: "next",
+      id: 3, number: 3, title: "Design Presentations That Build Themselves", duration: "90 min", description: "Go from research question to polished, animated slide deck in a single session.", date: "Apr 28", status: "next",
       timeSlots: [
         { id: 30, time: "11:00 AM", recordingUrl: "#" },
         { id: 31, time: "4:00 PM", recordingUrl: "#" },
@@ -91,17 +93,17 @@ const mockCourse: CourseData = {
       ],
     },
     {
-      id: 4, number: 4, title: "Analyze and Visualize Data Without Writing Formulas", description: "Go from data and spreadsheets to dashboards and insights in minutes.", date: "May 1", status: "upcoming",
+      id: 4, number: 4, title: "Analyze and Visualize Data Without Writing Formulas", duration: "90 min", description: "Go from data and spreadsheets to dashboards and insights in minutes.", date: "May 1", status: "upcoming",
       timeSlots: [{ id: 40, time: "11:00 AM", recordingUrl: "#" }, { id: 41, time: "4:00 PM", recordingUrl: "#" }],
       materials: [{ label: "Session guide", url: "#" }],
     },
     {
-      id: 5, number: 5, title: "Build Custom Workflows That Run While You Sleep", description: "Set up automations that run on a schedule, connect your tools, and get things done whether you're at your desk or not.", date: "May 5", status: "upcoming",
+      id: 5, number: 5, title: "Build Custom Workflows That Run While You Sleep", duration: "90 min", description: "Set up automations that run on a schedule, connect your tools, and get things done whether you're at your desk or not.", date: "May 5", status: "upcoming",
       timeSlots: [{ id: 50, time: "11:00 AM", recordingUrl: "#" }, { id: 51, time: "4:00 PM", recordingUrl: "#" }],
       materials: [{ label: "Session guide", url: "#" }],
     },
     {
-      id: 6, number: 6, title: "Launch Your AI System + Demo Day", description: "Cross the finish line with a live, working AI system and show the cohort what you built.", date: "May 8", status: "upcoming",
+      id: 6, number: 6, title: "Launch Your AI System + Demo Day", duration: "90 min", description: "Cross the finish line with a live, working AI system and show the cohort what you built.", date: "May 8", status: "upcoming",
       timeSlots: [{ id: 60, time: "11:00 AM", recordingUrl: "#" }, { id: 61, time: "4:00 PM", recordingUrl: "#" }],
       materials: [{ label: "Session guide", url: "#" }],
     },
@@ -198,27 +200,20 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
 
       {/* Content */}
       <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-baseline justify-between gap-4">
           <p className={`text-[18px] font-medium leading-[1.2] ${isNext ? "text-gray-dark" : "text-gray-light"}`}>
             {session.title}
           </p>
-          <span className="shrink-0 leading-[1.2] text-gray-light">{session.date}</span>
+          {session.duration && <p className="shrink-0 leading-[1.2] text-gray-xlight">{session.duration}</p>}
         </div>
-        {/* Offered at */}
         {multipleSessionTimes ? (() => {
           const times = session.timeSlots.map((s) => s.time);
           const formatted = times.length <= 1
             ? times[0]
             : times.slice(0, -1).join(", ") + " and " + times[times.length - 1];
-          return (
-            <p className="mt-1 leading-[1.2] text-gray-light">
-              Offered at {formatted}
-            </p>
-          );
+          return <p className="mt-1 leading-[1.2] text-gray-light">{session.date} at {formatted}</p>;
         })() : (
-          <p className="mt-1 leading-[1.2] text-gray-light">
-            Starts at {session.timeSlots[0]?.time}
-          </p>
+          <p className="mt-1 leading-[1.2] text-gray-light">{session.date} at {session.timeSlots[0]?.time}</p>
         )}
 
         {session.description && (
@@ -305,6 +300,7 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
 function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; showSessionRecordings: boolean }) {
   const nextSession = course.sessions.find((s) => s.status === "next");
 
+
   return (
     <div className="-mt-4 min-[428px]:mt-0">
       <div className="-mx-4 min-[428px]:mx-0 min-[428px]:flex min-[428px]:items-center min-[428px]:gap-4 md:mx-0 md:block">
@@ -337,7 +333,7 @@ function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; 
             {!showSessionRecordings && (
               <a
                 href="#"
-                className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+                target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
               >
                 <ResourceIcon type="recording" />
                 Recordings
@@ -347,7 +343,7 @@ function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; 
               <a
                 key={i}
                 href={resource.url}
-                className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+                target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
               >
                 <ResourceIcon type={resource.icon} />
                 {resource.label}
@@ -456,13 +452,22 @@ function ActionBanners({ course, phase, calendarVariant }: { course: CourseData;
             <ChevronRight />
           </div>
         </a>
+        <a href="#" className="mt-3 block rounded-xl border border-gray-stroke bg-white p-5 no-underline shadow-card transition-transform duration-300 ease-out hover:translate-x-1">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Share this program</p>
+              <p className="mt-1 leading-[1.2] text-gray-light">Know a coworker, boss, friend, or family member who'd love this?</p>
+            </div>
+            <ChevronRight />
+          </div>
+        </a>
       </div>
     );
   }
 
   if (phase === "post-course") {
     return (
-      <div className="mb-4">
+      <div className="mb-4 flex flex-col gap-3">
         <a href="#" className="block rounded-xl border border-gray-stroke bg-white p-5 no-underline shadow-card transition-transform duration-300 ease-out hover:translate-x-1">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
@@ -470,6 +475,15 @@ function ActionBanners({ course, phase, calendarVariant }: { course: CourseData;
               <p className="mt-1 leading-[1.2] text-gray-light">
                 Complete a short course survey to unlock your certificate of completion.
               </p>
+            </div>
+            <ChevronRight />
+          </div>
+        </a>
+        <a href="#" className="block rounded-xl border border-gray-stroke bg-white p-5 no-underline shadow-card transition-transform duration-300 ease-out hover:translate-x-1">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Share this program</p>
+              <p className="mt-1 leading-[1.2] text-gray-light">Know a coworker, boss, friend, or family member who'd love this?</p>
             </div>
             <ChevronRight />
           </div>
@@ -590,7 +604,7 @@ export default function CourseDetail() {
                   <a
                     key={i}
                     href={resource.url}
-                    className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+                    target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
                   >
                     <ResourceIcon type={resource.icon} />
                     {resource.label}
