@@ -45,7 +45,7 @@ function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: b
   }
   if (type === "coach-matching") return { label: "Get matched", green: true };
   if (type === "free-intro") return { label: "Schedule", green: true };
-  if (type === "agent") return { label: "Open chat", green: true };
+  if (type === "agent") return { label: "Open chat" };
   if (type === "hourly") return { label: "Details" };
   if (type === "hourly-package") return { label: "Details" };
   if (type === "package") return { label: "Details" };

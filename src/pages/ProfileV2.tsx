@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import PageShell from "../components/PageShell";
 import SessionCard from "../components/SessionCard";
 import OfferingCard, { type OfferingType } from "../components/OfferingCard";
+import AllOfferingsModal from "./AllOfferings";
 import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
 import topicHash from "../assets/img/topic-hash.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
@@ -81,6 +82,11 @@ import stanford2 from "../assets/placeholder post assets/stanford-post/39a9980b5
 import stanford3 from "../assets/placeholder post assets/stanford-post/989ac1d56cf981c783808b83154d8a25.jpg";
 import stanford4 from "../assets/placeholder post assets/stanford-post/eb80edada3b3db7955379d433ca2861a.jpg";
 import { FeedPost, type Post } from "./Home";
+
+const CATEGORY_ALIASES: Record<string, string> = {
+  MBA: "MBA Admissions",
+  College: "College Admissions",
+};
 
 const PROFILE_SECTIONS = [
   { id: "offerings", label: "Offerings" },
@@ -164,9 +170,9 @@ const purchasedOfferings: PurchasedOffering[] = [
   },
 ];
 
-type CoachOffering = { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string; href?: string };
+export type CoachOffering = { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string; href?: string };
 
-type CoachConfig = {
+export type CoachConfig = {
   id: string;
   name: string;
   firstName: string;
@@ -175,7 +181,7 @@ type CoachConfig = {
   offerings: CoachOffering[];
 };
 
-const COACH_CONFIGS: Record<string, CoachConfig> = {
+export const COACH_CONFIGS: Record<string, CoachConfig> = {
   samantha: {
     id: "samantha",
     name: "Samantha Parker",
@@ -184,9 +190,13 @@ const COACH_CONFIGS: Record<string, CoachConfig> = {
     qualificationsTitle: "MBA Qualifications",
     offerings: [
       { type: "free-intro", title: "Free 15-minute intro call", subtitle: "Get to know Samantha and make a plan", image: "" },
+      { type: "package", title: "Essay Review Package", subtitle: "3 essays · Starting at $400", image: eventImg1 },
       { type: "hourly-package", title: "10-Hour Coaching Package", subtitle: "10 hours · $1,200", image: eventImg1 },
       { type: "package", title: "MBA Application Package", subtitle: "Comprehensive Package · Starting at $750", image: eventImg2 },
       { type: "package", title: "Interview Prep Package", subtitle: "Comprehensive Package · Starting at $500", image: eventImg3 },
+      { type: "package", title: "Resume & Cover Letter Package", subtitle: "2 documents · Starting at $300", image: eventImg1 },
+      { type: "package", title: "School Selection Strategy", subtitle: "Comprehensive Package · Starting at $600", image: eventImg2 },
+      { type: "hourly-package", title: "5-Hour Quick Start Package", subtitle: "5 hours · $650", image: eventImg3 },
       { type: "hourly", title: "Custom hourly coaching", subtitle: "$150 per hour", image: "" },
       { type: "agent", title: "Samantha's MBA Admissions Agent", subtitle: "AI guidance, curated by Samantha · Subscription", image: categoryMBA, href: "/agent/samantha-mba-admissions" },
       { type: "agent", title: "Samantha's GMAT Prep Agent", subtitle: "AI guidance, curated by Samantha · Subscription", image: categoryMBA, href: "/agent/samantha-gmat-prep" },
@@ -194,6 +204,14 @@ const COACH_CONFIGS: Record<string, CoachConfig> = {
       { type: "content", title: "How I Got Into Stanford GSB", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>, image: lelandPlusImg1 },
       { type: "content", title: "GMAT Study Plan: 3 Months to 750+", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 184 views</span></span>, image: lelandPlusImg2 },
       { type: "content", title: "My Consulting Recruiting Timeline", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 97 views</span></span>, image: lelandPlusImg3 },
+      { type: "content", title: "Top 10 MBA Programs for Consulting", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 312 views</span></span>, image: lelandPlusImg1 },
+      { type: "content", title: "Crafting Your MBA Resume", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 428 views</span></span>, image: lelandPlusImg2 },
+      { type: "content", title: "How to Write a Standout HBS Essay", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 189 views</span></span>, image: lelandPlusImg3 },
+      { type: "content", title: "Networking Tips for MBA Applicants", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 276 views</span></span>, image: lelandPlusImg1 },
+      { type: "content", title: "GMAT vs. GRE: Which Should You Take?", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 145 views</span></span>, image: lelandPlusImg2 },
+      { type: "content", title: "Understanding MBA Scholarships", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 203 views</span></span>, image: lelandPlusImg3 },
+      { type: "content", title: "What MBA Admissions Committees Look For", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 367 views</span></span>, image: lelandPlusImg1 },
+      { type: "content", title: "Day in the Life at Wharton", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 521 views</span></span>, image: lelandPlusImg2 },
     ],
   },
   john: {
@@ -375,6 +393,10 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [eventsCategoryOpen, setEventsCategoryOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [inlineCategory, setInlineCategory] = useState(false);
+  const [offeringsTypeOpen, setOfferingsTypeOpen] = useState(false);
+  const [allOfferingsOpen, setAllOfferingsOpen] = useState(false);
+  const offeringsTypeRef = useRef<HTMLDivElement>(null);
 
   const profilePhoto = isCustomerProfile ? customerPhoto : coachConfig.photo;
   const profileName = isCustomerProfile ? "June Allen" : coachConfig.name;
@@ -497,6 +519,17 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [moreMenuOpen]);
+
+  useEffect(() => {
+    if (!offeringsTypeOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (offeringsTypeRef.current && !offeringsTypeRef.current.contains(e.target as Node)) {
+        setOfferingsTypeOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [offeringsTypeOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -880,8 +913,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           <div className={showCoverImage ? "pl-4" : ""}>
 
           {/* Name + Supercoach badge */}
-          <div className={`flex items-center ${isCustomerProfile ? "gap-2" : "gap-1 mb-1"}`}>
-            <h1 className={`font-medium text-gray-dark ${isCustomerProfile ? "text-[24px]" : "text-[18px]"}`}>{profileName}</h1>
+          <div className={`flex items-center ${isCustomerProfile ? "gap-2" : sectionFilter === "All" ? "gap-2 mb-2" : "gap-1 mb-1"}`}>
+            <h1 className={`font-medium ${isCustomerProfile ? "text-[24px] text-gray-dark" : sectionFilter === "All" ? "text-[24px] text-[#333333]" : "text-[18px] text-gray-dark"}`}>{profileName}</h1>
             {!isCustomerProfile && (
               <img src={verifiedIcon} alt="Verified" className="mt-[2px] h-[16px] w-[16px]" />
             )}
@@ -894,7 +927,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           </div>
 
           {/* Headline */}
-          <p className={`mb-[6px] leading-[1.3] ${isCustomerProfile ? "text-[18px] font-normal text-[#707070]" : "text-[24px] font-medium text-[#333333]"}`}>
+          <p className={`mb-[6px] leading-[1.3] ${isCustomerProfile ? "text-[18px] font-normal text-[#707070]" : "text-[24px] font-medium text-[#333333]"} ${!isCustomerProfile && sectionFilter === "All" ? "hidden" : ""}`}>
             {isCustomerProfile
               ? "Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB"
               : sectionFilter === "College"
@@ -1247,144 +1280,248 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           <div ref={setGroupRef("offerings")} data-group="offerings">
             <div className="my-[16px] border-t border-gray-200 md:my-[36px]" />
 
-            <h2
-              ref={setSectionRef("offerings")}
-              className="scroll-mt-[60px] mb-4 text-[24px] font-medium text-gray-dark"
-            >
-              Offerings
-            </h2>
-
-            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="flex flex-wrap gap-[6px]">
-                {["All", "Packages", "Memberships", "Agents", "Content"].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setOfferingsType(tab)}
-                    className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
-                      offeringsType === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-              <div ref={categoryRef} className="relative">
-                <button
-                  onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                  className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#ebebeb]"
-                >
-                  {sectionFilter === "All" ? "All categories" : sectionFilter}
-                  <img src={chevronDownIcon} alt="" className={`h-[14px] w-[14px] transition-transform ${categoryDropdownOpen ? "rotate-180" : ""}`} />
-                </button>
-                <AnimatePresence>
-                  {categoryDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 6 }}
-                      transition={{ duration: 0.15, ease: "easeOut" }}
-                      className="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-gray-stroke bg-white p-2 shadow-lg"
-                    >
-                      {[{ value: "All", label: "All categories" }, { value: "College", label: "College" }, { value: "MBA", label: "MBA" }, { value: "Product Management", label: "Product Management" }].map(({ value, label }) => (
+                {inlineCategory ? (
+                  /* Inline category variant: "Offerings for {category}" */
+                  <>
+                  <div ref={setSectionRef("offerings")} className="scroll-mt-[60px] mb-4">
+                    <h2 className="mb-[18px] flex items-center gap-0 text-[24px] leading-[1.1] font-medium text-gray-dark">
+                      Offerings for{" "}
+                      <span ref={categoryRef} className="relative ml-[6px]">
                         <button
-                          key={value}
-                          onClick={() => { setSectionFilter(value); setCategoryDropdownOpen(false); }}
-                          className={`flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                          onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                          className="group inline-flex cursor-pointer items-center gap-1 text-[24px] font-medium text-[#707070] transition-colors hover:text-[#222222]"
                         >
-                          {label}
-                          {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
+                          <span className="inline-block pb-[3px] -mb-[3px] bg-[length:4px_4px] bg-[position:0_100%] bg-repeat-x [background-image:radial-gradient(circle,#9B9B9B_1px,transparent_1px)]">
+                            {sectionFilter === "All" ? "all categories" : (CATEGORY_ALIASES[sectionFilter] ?? sectionFilter)}
+                          </span>
+                          <img src={chevronDownIcon} alt="" className={`h-[16px] w-[16px] opacity-50 transition-transform ${categoryDropdownOpen ? "rotate-180" : ""}`} />
                         </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
+                        <AnimatePresence>
+                          {categoryDropdownOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 6 }}
+                              transition={{ duration: 0.15, ease: "easeOut" }}
+                              className="absolute left-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                            >
+                              {[{ value: "All", label: "All categories" }, { value: "College", label: "College" }, { value: "MBA", label: "MBA" }, { value: "Product Management", label: "Product Management" }].map(({ value, label }) => (
+                                <button
+                                  key={value}
+                                  onClick={() => { setSectionFilter(value); setCategoryDropdownOpen(false); }}
+                                  className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                                >
+                                  {label}
+                                  {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </span>
+                    </h2>
+                  </div>
+                  <div className="mb-4 flex flex-wrap gap-[6px]">
+                    {["All", "Packages", "Memberships", "Agents", "Content"].map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setOfferingsType(tab)}
+                        className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+                          offeringsType === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
+                        }`}
+                      >
+                        {tab}
+                      </button>
+                    ))}
+                  </div>
+                  </>
+                ) : (
+                  <>
+                    <h2
+                      ref={setSectionRef("offerings")}
+                      className="scroll-mt-[60px] mb-4 text-[24px] font-medium text-gray-dark"
+                    >
+                      Offerings
+                    </h2>
 
-            {/* Offering cards */}
-            {(() => {
-              const filteredOfferings = coachConfig.offerings.filter((o) => {
-                if (offeringsType === "All") return true;
-                if (offeringsType === "Packages") return o.type === "hourly-package" || o.type === "package";
-                if (offeringsType === "Memberships") return o.type === "course";
-                if (offeringsType === "Agents") return o.type === "agent";
-                return o.type === "content";
-              });
-              const sliceCount = offeringsType === "All" ? 8 : offeringsType === "Agents" ? filteredOfferings.length : 5;
-              const isOwnCoachProfile = !isCustomerProfile && viewingOwnProfile;
-              return filteredOfferings.length > 0 ? (
-                <div className="flex flex-col gap-1">
-                  {filteredOfferings.slice(0, sliceCount).map((o) => {
-                    const isAgent = o.type === "agent";
-                    const href = isAgent && isOwnCoachProfile && o.href ? `${o.href}/edit` : o.href;
-                    const ctaLabel = isAgent && isOwnCoachProfile ? "Edit context" : o.ctaLabel;
-                    return (
-                      <OfferingCard
-                        key={o.title}
-                        type={o.type}
-                        title={o.title}
-                        subtitle={o.subtitle}
-                        image={o.image}
-                        ctaLabel={ctaLabel}
-                        href={href}
-                      />
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[#D0D0D0] py-10 text-center">
-                  <p className="text-[16px] text-[#9B9B9B]">No memberships available yet</p>
-                </div>
-              );
-            })()}
+                    <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                      <div className="flex flex-wrap gap-[6px]">
+                        {["All", "Packages", "Memberships", "Agents", "Content"].map((tab) => (
+                          <button
+                            key={tab}
+                            onClick={() => setOfferingsType(tab)}
+                            className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+                              offeringsType === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
+                            }`}
+                          >
+                            {tab}
+                          </button>
+                        ))}
+                      </div>
+                      <div ref={categoryRef} className="relative">
+                        <button
+                          onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                          className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#ebebeb]"
+                        >
+                          {sectionFilter === "All" ? "All categories" : sectionFilter}
+                          <img src={chevronDownIcon} alt="" className={`h-[14px] w-[14px] transition-transform ${categoryDropdownOpen ? "rotate-180" : ""}`} />
+                        </button>
+                        <AnimatePresence>
+                          {categoryDropdownOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 6 }}
+                              transition={{ duration: 0.15, ease: "easeOut" }}
+                              className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                            >
+                              {[{ value: "All", label: "All categories" }, { value: "College", label: "College" }, { value: "MBA", label: "MBA" }, { value: "Product Management", label: "Product Management" }].map(({ value, label }) => (
+                                <button
+                                  key={value}
+                                  onClick={() => { setSectionFilter(value); setCategoryDropdownOpen(false); }}
+                                  className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                                >
+                                  {label}
+                                  {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  </>
+                )}
 
-            {/* View more + guarantee */}
-            <div className="mt-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
-              <button className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
-                See all offerings
-              </button>
-              <div className="flex items-center gap-2 text-[15px] text-[#9b9b9b]">
-                <img src={shieldIcon} alt="" className="w-[12px]" />
-                <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
-              </div>
-            </div>
+                {/* Offering cards */}
+                {(() => {
+                  const filteredOfferings = coachConfig.offerings.filter((o) => {
+                    if (o.type === "free-intro") return false;
+                    if (offeringsType === "All") return true;
+                    if (offeringsType === "Packages") return o.type === "hourly-package" || o.type === "package";
+                    if (offeringsType === "Memberships") return o.type === "course";
+                    if (offeringsType === "Agents") return o.type === "agent";
+                    return o.type === "content";
+                  });
+                  const sliceCount = offeringsType === "All" ? 5 : offeringsType === "Agents" ? filteredOfferings.length : 5;
+                  const isOwnCoachProfile = !isCustomerProfile && viewingOwnProfile;
+                  return filteredOfferings.length > 0 ? (
+                    <div className="flex flex-col gap-1">
+                      {filteredOfferings.slice(0, sliceCount).map((o) => {
+                        const isAgent = o.type === "agent";
+                        const href = isAgent && isOwnCoachProfile && o.href ? `${o.href}/edit` : o.href;
+                        const ctaLabel = isAgent && isOwnCoachProfile ? "Edit context" : o.ctaLabel;
+                        return (
+                          <OfferingCard
+                            key={o.title}
+                            type={o.type}
+                            title={o.title}
+                            subtitle={o.subtitle}
+                            image={o.image}
+                            ctaLabel={ctaLabel}
+                            href={href}
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[#D0D0D0] py-10 text-center">
+                      <p className="text-[16px] text-[#9B9B9B]">No memberships available yet</p>
+                    </div>
+                  );
+                })()}
+
+                {/* View more + guarantee */}
+                <div className="mt-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
+                  <button
+                    onClick={() => setAllOfferingsOpen(true)}
+                    className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                  >
+                    See all offerings
+                  </button>
+                  <div className="flex items-center gap-2 text-[15px] text-[#9b9b9b]">
+                    <img src={shieldIcon} alt="" className="w-[12px]" />
+                    <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
+                  </div>
+                </div>
 
             {/* Events */}
             <div className="my-[36px] border-t border-gray-200" />
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[24px] font-medium text-gray-dark">Events</h2>
-              <div ref={eventsCategoryRef} className="relative">
-                <button
-                  onClick={() => setEventsCategoryOpen(!eventsCategoryOpen)}
-                  className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#ebebeb]"
-                >
-                  {sectionFilter === "All" ? "All categories" : sectionFilter}
-                  <img src={chevronDownIcon} alt="" className={`h-[14px] w-[14px] transition-transform ${eventsCategoryOpen ? "rotate-180" : ""}`} />
-                </button>
-                <AnimatePresence>
-                  {eventsCategoryOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 6 }}
-                      transition={{ duration: 0.15, ease: "easeOut" }}
-                      className="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-gray-stroke bg-white p-2 shadow-lg"
+            {inlineCategory ? (
+              <div className="mb-4">
+                <h2 className="mb-[12px] flex items-center gap-0 text-[24px] leading-[1.1] font-medium text-gray-dark">
+                  Events for{" "}
+                  <span ref={eventsCategoryRef} className="relative ml-[6px]">
+                    <button
+                      onClick={() => setEventsCategoryOpen(!eventsCategoryOpen)}
+                      className="group inline-flex cursor-pointer items-center gap-1 text-[24px] font-medium text-[#707070] transition-colors hover:text-[#222222]"
                     >
-                      {[{ value: "All", label: "All categories" }, { value: "College", label: "College" }, { value: "MBA", label: "MBA" }, { value: "Product Management", label: "Product Management" }].map(({ value, label }) => (
-                        <button
-                          key={value}
-                          onClick={() => { setSectionFilter(value); setEventsCategoryOpen(false); }}
-                          className={`flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                      <span className="inline-block pb-[3px] -mb-[3px] bg-[length:4px_4px] bg-[position:0_100%] bg-repeat-x [background-image:radial-gradient(circle,#9B9B9B_1px,transparent_1px)]">
+                        {sectionFilter === "All" ? "all categories" : (CATEGORY_ALIASES[sectionFilter] ?? sectionFilter)}
+                      </span>
+                      <img src={chevronDownIcon} alt="" className={`h-[16px] w-[16px] opacity-50 transition-transform ${eventsCategoryOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    <AnimatePresence>
+                      {eventsCategoryOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 6 }}
+                          transition={{ duration: 0.15, ease: "easeOut" }}
+                          className="absolute left-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
                         >
-                          {label}
-                          {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                          {[{ value: "All", label: "All categories" }, { value: "College", label: "College" }, { value: "MBA", label: "MBA" }, { value: "Product Management", label: "Product Management" }].map(({ value, label }) => (
+                            <button
+                              key={value}
+                              onClick={() => { setSectionFilter(value); setEventsCategoryOpen(false); }}
+                              className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                            >
+                              {label}
+                              {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </span>
+                </h2>
               </div>
-            </div>
+            ) : (
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-[24px] font-medium text-gray-dark">Events</h2>
+                <div ref={eventsCategoryRef} className="relative">
+                  <button
+                    onClick={() => setEventsCategoryOpen(!eventsCategoryOpen)}
+                    className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#ebebeb]"
+                  >
+                    {sectionFilter === "All" ? "All categories" : sectionFilter}
+                    <img src={chevronDownIcon} alt="" className={`h-[14px] w-[14px] transition-transform ${eventsCategoryOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  <AnimatePresence>
+                    {eventsCategoryOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 6 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                      >
+                        {[{ value: "All", label: "All categories" }, { value: "College", label: "College" }, { value: "MBA", label: "MBA" }, { value: "Product Management", label: "Product Management" }].map(({ value, label }) => (
+                          <button
+                            key={value}
+                            onClick={() => { setSectionFilter(value); setEventsCategoryOpen(false); }}
+                            className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                          >
+                            {label}
+                            {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            )}
             <div className="flex flex-col gap-4">
               <div className="h-[100px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
               <div className="h-[100px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
@@ -1419,18 +1556,23 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           {/* ── About group: MBA Qualifications + About Samantha + Why do I coach? ── */}
           <div ref={setGroupRef("about-samantha")} data-group="about-samantha">
             <div className="my-[36px] border-t border-gray-200" />
-            <h2
-              ref={setSectionRef("about-samantha")}
-              className="scroll-mt-[60px] mb-4 text-[24px] font-medium text-gray-dark"
-            >
-              {coachConfig.qualificationsTitle}
-            </h2>
-            <div className="flex flex-col gap-4">
-              <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-              <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
-            </div>
-
-            <div className="my-[36px] border-t border-gray-200" />
+            {sectionFilter !== "All" ? (
+              <>
+                <h2
+                  ref={setSectionRef("about-samantha")}
+                  className="scroll-mt-[60px] mb-4 text-[24px] font-medium text-gray-dark"
+                >
+                  {sectionFilter} Qualifications
+                </h2>
+                <div className="flex flex-col gap-4">
+                  <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                  <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                </div>
+                <div className="my-[36px] border-t border-gray-200" />
+              </>
+            ) : (
+              <span ref={setSectionRef("about-samantha")} className="scroll-mt-[60px]" />
+            )}
             <h2 className="mb-4 text-[24px] font-medium text-gray-dark">About {coachConfig.firstName}</h2>
             <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
 
@@ -1984,6 +2126,21 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
               )}
               {!isCustomerProfile && (
                 <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                  <span className="text-[16px] font-medium text-gray-dark">Inline category selector</span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={inlineCategory}
+                      onChange={() => setInlineCategory(!inlineCategory)}
+                      className="peer sr-only"
+                    />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                    <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                  </div>
+                </label>
+              )}
+              {!isCustomerProfile && (
+                <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
                   <span className="text-[16px] font-medium text-gray-dark">Supercoach</span>
                   <div className="relative">
                     <input
@@ -2038,6 +2195,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
         </button>
       </div>
 
+      {!isCustomerProfile && (
+        <AllOfferingsModal coachId={coachId} open={allOfferingsOpen} onClose={() => setAllOfferingsOpen(false)} />
+      )}
     </>
   );
 }
