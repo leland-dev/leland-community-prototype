@@ -174,24 +174,38 @@ function InlineChevron() {
   );
 }
 
-function DismissButton({ onDismiss }: { onDismiss: () => void }) {
+function DismissButton({ onDismiss, asCheckbox }: { onDismiss: () => void; asCheckbox?: boolean }) {
+  if (asCheckbox) {
+    return (
+      <label className="mr-4 flex shrink-0 cursor-pointer items-center self-center">
+        <input
+          type="checkbox"
+          className="peer sr-only"
+          onChange={(e) => { if (e.target.checked) { setTimeout(onDismiss, 300); } }}
+        />
+        <span className="flex h-5 w-5 items-center justify-center rounded border-[1.5px] border-gray-300 transition-colors peer-checked:border-[#038561] peer-checked:bg-[#038561]">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 6l3 3 5-5" />
+          </svg>
+        </span>
+      </label>
+    );
+  }
   return (
     <button
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDismiss(); }}
-      className="group absolute right-1.5 top-1.5 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-gray-xlight"
+      className="group ml-1 flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center self-center rounded-full text-gray-xlight transition-colors hover:bg-gray-hover hover:text-gray-dark"
     >
-      <span className="flex h-9 w-9 items-center justify-center rounded-full transition-colors group-hover:bg-gray-hover group-hover:text-gray-dark">
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-          <path d="M1 1l8 8M9 1l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-      </span>
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+        <path d="M1 1l8 8M9 1l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
     </button>
   );
 }
 
 // ─── Session row ─────────────────────────────────────────────────────────────
 
-function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLast, allCompleted, forceStatus }: { session: CourseSession; showSessionRecordings: boolean; multipleSessionTimes: boolean; isLast: boolean; allCompleted: boolean; forceStatus?: "next" | "upcoming" }) {
+function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLast, allCompleted, forceStatus, sessionMaterial }: { session: CourseSession; showSessionRecordings: boolean; multipleSessionTimes: boolean; isLast: boolean; allCompleted: boolean; forceStatus?: "next" | "upcoming"; sessionMaterial: "homework" | "session-guide" }) {
   const isCompleted = (session.status === "completed" || allCompleted) && !forceStatus;
   const isNext = (session.status === "next" && !allCompleted && !forceStatus) || forceStatus === "next";
   const [recordingsOpen, setRecordingsOpen] = useState(false);
@@ -254,7 +268,7 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
             )}
             {rowMaterials.map((mat, i) => (
               <LinkButton key={i} size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href={mat.url}>
-                {mat.label} <ExternalLinkIcon />
+                {mat.label === "Session guide" && sessionMaterial === "homework" ? "Homework" : mat.label} <ExternalLinkIcon />
               </LinkButton>
             ))}
             {hasRecordings && (multipleSessionTimes ? (
@@ -401,7 +415,7 @@ function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; 
 type CoursePhase = "pre-course" | "in-progress" | "post-course";
 type CalendarVariant = "time-picker" | "all-sessions";
 
-function ActionBanners({ course, phase, calendarVariant }: { course: CourseData; phase: CoursePhase; calendarVariant: CalendarVariant }) {
+function ActionBanners({ course, phase, calendarVariant, sessionMaterial, bannersHaveCheckbox }: { course: CourseData; phase: CoursePhase; calendarVariant: CalendarVariant; sessionMaterial: "homework" | "session-guide"; bannersHaveCheckbox: boolean }) {
   const nextSession = course.sessions.find((s) => s.status === "next");
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const dismiss = (id: string) => setDismissed((prev) => new Set([...prev, id]));
@@ -418,48 +432,53 @@ function ActionBanners({ course, phase, calendarVariant }: { course: CourseData;
       {
         id: "calendar",
         content: (
-          <div className="relative rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
-            <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">Add your calendar invites</p>
-            <p className="mt-1 leading-[1.2] text-gray-light">Two session times each day: 11:00 AM ET and 4:00 PM ET. Add whichever works for you.</p>
+          <div className="rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
+            <div className="flex items-center">
+              {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("calendar")} asCheckbox />}
+              <div className="flex-1">
+                <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Add your calendar invites</p>
+                <p className="mt-1 leading-[1.2] text-gray-light">Two session times each day: 11:00 AM ET and 4:00 PM ET. Attend whichever works for you.</p>
+              </div>
+              {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("calendar")} />}
+            </div>
             {calendarVariant === "time-picker" && (
-              <div className="mt-4 -mr-5 flex gap-1.5 overflow-x-auto pr-5 scrollbar-hide">
+              <div className={`mt-4 flex gap-1.5 overflow-x-auto scrollbar-hide ${bannersHaveCheckbox ? "sm:pl-9" : ""}`}>
                 {timeOptions.map((opt) => (
                   <ToggleChip key={opt} selected={selectedTime === opt} onClick={() => setSelectedTime(opt)} className="shrink-0 whitespace-nowrap">{opt}</ToggleChip>
                 ))}
               </div>
             )}
-            <div className="mt-3 -mr-5 flex gap-1.5 overflow-x-auto pr-5 scrollbar-hide">
+            <div className={`mt-4 flex gap-1.5 overflow-x-auto scrollbar-hide ${bannersHaveCheckbox ? "sm:pl-9" : ""}`}>
               <LinkButton size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">Google Calendar</LinkButton>
               <LinkButton size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">Microsoft</LinkButton>
               <LinkButton size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">Other calendars</LinkButton>
             </div>
-            <DismissButton onDismiss={() => dismiss("calendar")} />
           </div>
         ),
       },
       {
         id: "survey",
         content: (
-          <div className="relative rounded-xl border border-gray-stroke bg-white shadow-card">
-            <a href="#" className="block p-4 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
-              <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">Complete the intake survey <InlineChevron /></p>
+          <div className="flex items-center rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
+            {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("survey")} asCheckbox />}
+            <a href="#" className="flex-1 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
+              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Complete the intake survey <InlineChevron /></p>
               <p className="mt-1 leading-[1.2] text-gray-light">Takes about 5 minutes. Helps us tailor sessions to your experience level and goals.</p>
             </a>
-            <DismissButton onDismiss={() => dismiss("survey")} />
+            {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("survey")} />}
           </div>
         ),
       },
       {
         id: "setup",
         content: (
-          <div className="relative rounded-xl border border-gray-stroke bg-white p-4 shadow-card">
-            <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">Set up your tools</p>
-            <p className="mt-1 leading-[1.2] text-gray-light">Install Claude or your AI tool of choice before the first session.</p>
-            <div className="mt-3 -mr-4 flex gap-1.5 overflow-x-auto pr-4 scrollbar-hide">
-              <LinkButton size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">Join live setup <ExternalLinkIcon /></LinkButton>
-              <LinkButton size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">Setup guide <ExternalLinkIcon /></LinkButton>
-            </div>
-            <DismissButton onDismiss={() => dismiss("setup")} />
+          <div className="flex items-center rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
+            {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("setup")} asCheckbox />}
+            <a href="#" className="flex-1 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
+              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Set up your tools <InlineChevron /></p>
+              <p className="mt-1 leading-[1.2] text-gray-light">Install Claude or your AI tool of choice before the first session.</p>
+            </a>
+            {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("setup")} />}
           </div>
         ),
       },
@@ -481,26 +500,30 @@ function ActionBanners({ course, phase, calendarVariant }: { course: CourseData;
       {
         id: "homework",
         content: (
-          <div className="relative rounded-xl border border-gray-stroke bg-white shadow-card">
-            <a href="#" className="block p-5 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
-              <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">
-                Complete your session {lastCompleted?.number} homework <InlineChevron />
+          <div className="flex items-center rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
+            {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("homework")} asCheckbox />}
+            <a href="#" className="flex-1 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
+              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">
+                {sessionMaterial === "session-guide"
+                  ? <>Review Session {lastCompleted?.number} <InlineChevron /></>
+                  : <>Complete your session {lastCompleted?.number} homework <InlineChevron /></>}
               </p>
               <p className="mt-1 leading-[1.2] text-gray-light">{lastCompleted?.title}</p>
             </a>
-            <DismissButton onDismiss={() => dismiss("homework")} />
+            {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("homework")} />}
           </div>
         ),
       },
       {
         id: "share",
         content: (
-          <div className="relative rounded-xl border border-gray-stroke bg-white shadow-card">
-            <a href="#" className="block p-5 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
-              <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">Share this program <InlineChevron /></p>
+          <div className="flex items-center rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
+            {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("share")} asCheckbox />}
+            <a href="#" className="flex-1 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
+              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Share this program <InlineChevron /></p>
               <p className="mt-1 leading-[1.2] text-gray-light">Know a coworker, boss, friend, or family member who'd love this?</p>
             </a>
-            <DismissButton onDismiss={() => dismiss("share")} />
+            {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("share")} />}
           </div>
         ),
       },
@@ -520,24 +543,26 @@ function ActionBanners({ course, phase, calendarVariant }: { course: CourseData;
       {
         id: "certificate",
         content: (
-          <div className="relative rounded-xl border border-gray-stroke bg-white shadow-card">
-            <a href="#" className="block p-5 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
-              <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">Get your certificate <InlineChevron /></p>
+          <div className="flex items-center rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
+            {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("certificate")} asCheckbox />}
+            <a href="#" className="flex-1 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
+              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Get your certificate <InlineChevron /></p>
               <p className="mt-1 leading-[1.2] text-gray-light">Complete a short course survey to unlock your certificate of completion.</p>
             </a>
-            <DismissButton onDismiss={() => dismiss("certificate")} />
+            {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("certificate")} />}
           </div>
         ),
       },
       {
         id: "share",
         content: (
-          <div className="relative rounded-xl border border-gray-stroke bg-white shadow-card">
-            <a href="#" className="block p-5 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
-              <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">Share this program <InlineChevron /></p>
+          <div className="flex items-center rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
+            {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("share")} asCheckbox />}
+            <a href="#" className="flex-1 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
+              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Share this program <InlineChevron /></p>
               <p className="mt-1 leading-[1.2] text-gray-light">Know a coworker, boss, friend, or family member who'd love this?</p>
             </a>
-            <DismissButton onDismiss={() => dismiss("share")} />
+            {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("share")} />}
           </div>
         ),
       },
@@ -572,9 +597,11 @@ export default function CourseDetail() {
   const course = mockCourse;
   const [coursePhase, setCoursePhase] = useState<CoursePhase>("in-progress");
   const [calendarVariant, setCalendarVariant] = useState<CalendarVariant>("all-sessions");
+  const [sessionMaterial, setSessionMaterial] = useState<"homework" | "session-guide">("homework");
   const [showSessionRecordings, setShowSessionRecordings] = useState(true);
   const [multipleSessionTimes, setMultipleSessionTimes] = useState(true);
   const [showAllCompleted, setShowAllCompleted] = useState(false);
+  const [bannersHaveCheckbox, setBannersHaveCheckbox] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [mobilePivotTab, setMobilePivotTab] = useState<"sessions" | "next-steps" | "resources">("next-steps");
 
@@ -605,7 +632,7 @@ export default function CourseDetail() {
 
           {/* Action banners — desktop always, mobile only on next-steps tab */}
           <div className={`${mobilePivotTab !== "next-steps" ? "hidden md:block" : ""} py-6 md:py-0`}>
-            <ActionBanners course={course} phase={coursePhase} calendarVariant={calendarVariant} />
+            <ActionBanners course={course} phase={coursePhase} calendarVariant={calendarVariant} sessionMaterial={sessionMaterial} bannersHaveCheckbox={bannersHaveCheckbox} />
           </div>
 
           {/* Sessions — desktop always, mobile only on sessions tab */}
@@ -655,6 +682,7 @@ export default function CourseDetail() {
                         isLast={i === displaySessions.length - 1}
                         allCompleted={allCompletedPhase}
                         forceStatus={coursePhase === "pre-course" ? (originalIndex === 0 ? "next" : "upcoming") : undefined}
+                        sessionMaterial={sessionMaterial}
                       />
                     );
                   })}
@@ -692,8 +720,39 @@ export default function CourseDetail() {
       <div className="fixed bottom-6 right-6 z-50">
         {optionsOpen && (
           <div className="mb-2 w-[240px] rounded-xl border border-gray-stroke bg-white px-4 py-3 shadow-lg">
+            {/* Toggles */}
+            <div className="flex items-center justify-between">
+              <p className="text-[16px] font-medium text-gray-dark">Session recordings</p>
+              <button
+                onClick={() => setShowSessionRecordings(!showSessionRecordings)}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showSessionRecordings ? "bg-[#038561]" : "bg-gray-300"}`}
+              >
+                <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showSessionRecordings ? "translate-x-[18px]" : "translate-x-0.5"}`} />
+              </button>
+            </div>
+
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-[16px] font-medium text-gray-dark">Multiple session times</p>
+              <button
+                onClick={() => setMultipleSessionTimes(!multipleSessionTimes)}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${multipleSessionTimes ? "bg-[#038561]" : "bg-gray-300"}`}
+              >
+                <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${multipleSessionTimes ? "translate-x-[18px]" : "translate-x-0.5"}`} />
+              </button>
+            </div>
+
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-[16px] font-medium text-gray-dark">Banners have checkbox</p>
+              <button
+                onClick={() => setBannersHaveCheckbox(!bannersHaveCheckbox)}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${bannersHaveCheckbox ? "bg-[#038561]" : "bg-gray-300"}`}
+              >
+                <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${bannersHaveCheckbox ? "translate-x-[18px]" : "translate-x-0.5"}`} />
+              </button>
+            </div>
+
             {/* Course phase */}
-            <p className="mb-2.5 text-[14px] font-medium uppercase tracking-[0.5px] text-gray-light">Course phase</p>
+            <p className="mb-2.5 mt-4 text-[14px] font-medium uppercase tracking-[0.5px] text-gray-light">Course phase</p>
             <div className="flex flex-col gap-2">
               {coursePhases.map(({ value, label }) => (
                 <button
@@ -711,51 +770,26 @@ export default function CourseDetail() {
               ))}
             </div>
 
-            {/* Multiple session times */}
-            {/* Session recordings */}
-            <div className="mt-4 flex items-center justify-between">
-              <p className="text-[16px] font-medium text-gray-dark">Session recordings</p>
-              <button
-                onClick={() => setShowSessionRecordings(!showSessionRecordings)}
-                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showSessionRecordings ? "bg-[#038561]" : "bg-gray-300"}`}
-              >
-                <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showSessionRecordings ? "translate-x-[18px]" : "translate-x-0.5"}`} />
-              </button>
-            </div>
-
-            {/* Multiple session times */}
-            <div className="mt-4 flex items-center justify-between">
-              <p className="text-[16px] font-medium text-gray-dark">Multiple session times</p>
-              <button
-                onClick={() => setMultipleSessionTimes(!multipleSessionTimes)}
-                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${multipleSessionTimes ? "bg-[#038561]" : "bg-gray-300"}`}
-              >
-                <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${multipleSessionTimes ? "translate-x-[18px]" : "translate-x-0.5"}`} />
-              </button>
-            </div>
-
-            {/* Add to calendar */}
-            {multipleSessionTimes && (
-              <>
-                <p className="mb-2.5 mt-4 text-[14px] font-medium uppercase tracking-[0.5px] text-gray-light">Add to calendar</p>
-                <div className="flex flex-col gap-2">
-                  {calendarVariants.map(({ value, label }) => (
-                    <button
-                      key={value}
-                      onClick={() => setCalendarVariant(value)}
-                      className="flex cursor-pointer items-center gap-2.5 text-[16px] leading-[1.2]"
-                    >
-                      <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${calendarVariant === value ? "border-[#038561] bg-[#038561]" : "border-gray-300"}`}>
-                        {calendarVariant === value && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
-                      </span>
-                      <span className={calendarVariant === value ? "font-medium text-gray-dark" : "text-gray-light"}>
-                        {label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
+            {/* Session materials */}
+            <>
+              <p className="mb-2.5 mt-4 text-[14px] font-medium uppercase tracking-[0.5px] text-gray-light">Session materials</p>
+              <div className="flex flex-col gap-2">
+                {([{ value: "homework", label: "Homework" }, { value: "session-guide", label: "Session guide" }] as const).map(({ value, label }) => (
+                  <button
+                    key={value}
+                    onClick={() => setSessionMaterial(value)}
+                    className="flex cursor-pointer items-center gap-2.5 text-[16px] leading-[1.2]"
+                  >
+                    <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${sessionMaterial === value ? "border-[#038561] bg-[#038561]" : "border-gray-300"}`}>
+                      {sessionMaterial === value && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                    </span>
+                    <span className={sessionMaterial === value ? "font-medium text-gray-dark" : "text-gray-light"}>
+                      {label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </>
           </div>
         )}
         <button
