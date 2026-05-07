@@ -6,6 +6,7 @@ import slackIcon from "../assets/icons/slack-black.svg";
 import orderHistoryIcon from "../assets/icons/order-history.svg";
 import toolsWrenchRulerIcon from "../assets/icons/tools-wrench-ruler.svg";
 import calendarIcon from "../assets/icons/calendar.svg";
+import shareArrowIcon from "../assets/icons/share-arrow.svg";
 import playVideoIcon from "../assets/icons/play-video.svg";
 import event1 from "../assets/placeholder images/ai-builder-course.avif";
 
@@ -165,6 +166,29 @@ function CheckIcon() {
   );
 }
 
+function InlineChevron() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" className="inline-block shrink-0 translate-y-[-1px] align-middle text-gray-light" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7.5 5l5 5-5 5" />
+    </svg>
+  );
+}
+
+function DismissButton({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <button
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDismiss(); }}
+      className="group absolute right-1.5 top-1.5 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-gray-xlight"
+    >
+      <span className="flex h-9 w-9 items-center justify-center rounded-full transition-colors group-hover:bg-gray-hover group-hover:text-gray-dark">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <path d="M1 1l8 8M9 1l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      </span>
+    </button>
+  );
+}
+
 // ─── Session row ─────────────────────────────────────────────────────────────
 
 function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLast, allCompleted, forceStatus }: { session: CourseSession; showSessionRecordings: boolean; multipleSessionTimes: boolean; isLast: boolean; allCompleted: boolean; forceStatus?: "next" | "upcoming" }) {
@@ -220,9 +244,14 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
           <p className="mt-2 text-[16px] leading-[1.4] text-gray-xlight">{session.description}</p>
         )}
 
-        {/* Links row — session guide, session prep, watch recordings */}
-        {(rowMaterials.length > 0 || hasRecordings) && (
+        {/* Links row — join, session guide, session prep, watch recordings */}
+        {(isNext || rowMaterials.length > 0 || hasRecordings) && (
           <div className="mt-3 -mr-4 flex gap-1.5 overflow-x-auto pr-4 scrollbar-hide sm:-mr-6 sm:pr-6">
+            {isNext && (
+              <LinkButton size="sm" variant="primary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">
+                Join session
+              </LinkButton>
+            )}
             {rowMaterials.map((mat, i) => (
               <LinkButton key={i} size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href={mat.url}>
                 {mat.label} <ExternalLinkIcon />
@@ -314,11 +343,19 @@ function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; 
           <h1 className="text-[24px] font-medium leading-[1.1] text-gray-dark min-[428px]:line-clamp-2 md:line-clamp-none">
             {course.title}
           </h1>
-          <div className="mt-5">
-            <span className="inline-flex items-center gap-2 rounded-lg bg-gray-hover px-3 py-1.5 text-[14px] font-medium text-gray-light">
-              <img src={calendarIcon} alt="" className="h-4 w-4 shrink-0" />
-              {course.sessionCount} Sessions: {course.cohortDates}
-            </span>
+          <div className="mt-5 flex items-start">
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2 text-[16px]">
+                <span className="font-medium text-gray-dark">{course.sessionCount} sessions</span>
+                <span className="text-gray-light">{course.cohortDates}</span>
+              </div>
+              <button className="text-left text-[14px] text-gray-xlight hover:underline">Switch cohorts</button>
+            </div>
+            <button className="group ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full transition-colors group-hover:bg-gray-hover">
+                <img src={shareArrowIcon} alt="Share" className="h-5 w-5" />
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -366,6 +403,8 @@ type CalendarVariant = "time-picker" | "all-sessions";
 
 function ActionBanners({ course, phase, calendarVariant }: { course: CourseData; phase: CoursePhase; calendarVariant: CalendarVariant }) {
   const nextSession = course.sessions.find((s) => s.status === "next");
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const dismiss = (id: string) => setDismissed((prev) => new Set([...prev, id]));
 
   // Calendar time picker state (only used in pre-course)
   const allTimes = Array.from(
@@ -373,15 +412,14 @@ function ActionBanners({ course, phase, calendarVariant }: { course: CourseData;
   );
   const [selectedTime, setSelectedTime] = useState(allTimes[0]);
   const timeOptions = [...allTimes, "All available times"];
-  const [calendarOpen, setCalendarOpen] = useState(false);
-  const [setupOpen, setSetupOpen] = useState(false);
 
   if (phase === "pre-course") {
     const steps = [
       {
+        id: "calendar",
         content: (
-          <div className="rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
-            <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Add your calendar invites</p>
+          <div className="relative rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
+            <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">Add your calendar invites</p>
             <p className="mt-1 leading-[1.2] text-gray-light">Two session times each day: 11:00 AM ET and 4:00 PM ET. Add whichever works for you.</p>
             {calendarVariant === "time-picker" && (
               <div className="mt-4 -mr-5 flex gap-1.5 overflow-x-auto pr-5 scrollbar-hide">
@@ -395,41 +433,43 @@ function ActionBanners({ course, phase, calendarVariant }: { course: CourseData;
               <LinkButton size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">Microsoft</LinkButton>
               <LinkButton size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">Other calendars</LinkButton>
             </div>
+            <DismissButton onDismiss={() => dismiss("calendar")} />
           </div>
         ),
       },
       {
+        id: "survey",
         content: (
-          <a href="#" className="block rounded-xl border border-gray-stroke bg-white p-4 no-underline shadow-card transition-transform duration-300 ease-out hover:translate-x-1">
-            <div className="flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Complete the intake survey</p>
-                <p className="mt-1 leading-[1.2] text-gray-light">Takes about 5 minutes. Helps us tailor sessions to your experience level and goals.</p>
-              </div>
-              <ChevronRight />
-            </div>
-          </a>
+          <div className="relative rounded-xl border border-gray-stroke bg-white shadow-card">
+            <a href="#" className="block p-4 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
+              <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">Complete the intake survey <InlineChevron /></p>
+              <p className="mt-1 leading-[1.2] text-gray-light">Takes about 5 minutes. Helps us tailor sessions to your experience level and goals.</p>
+            </a>
+            <DismissButton onDismiss={() => dismiss("survey")} />
+          </div>
         ),
       },
       {
+        id: "setup",
         content: (
-          <div className="rounded-xl border border-gray-stroke bg-white p-4 shadow-card">
-            <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Set up your tools</p>
+          <div className="relative rounded-xl border border-gray-stroke bg-white p-4 shadow-card">
+            <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">Set up your tools</p>
             <p className="mt-1 leading-[1.2] text-gray-light">Install Claude or your AI tool of choice before the first session.</p>
             <div className="mt-3 -mr-4 flex gap-1.5 overflow-x-auto pr-4 scrollbar-hide">
               <LinkButton size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">Join live setup <ExternalLinkIcon /></LinkButton>
               <LinkButton size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">Setup guide <ExternalLinkIcon /></LinkButton>
             </div>
+            <DismissButton onDismiss={() => dismiss("setup")} />
           </div>
         ),
       },
     ];
 
+    const visible = steps.filter((s) => !dismissed.has(s.id));
+    if (visible.length === 0) return null;
     return (
       <div className="mb-4 flex flex-col gap-3">
-        {steps.map((step, i) => (
-          <div key={i}>{step.content}</div>
-        ))}
+        {visible.map((step) => <div key={step.id}>{step.content}</div>)}
       </div>
     );
   }
@@ -437,57 +477,77 @@ function ActionBanners({ course, phase, calendarVariant }: { course: CourseData;
   if (phase === "in-progress" && nextSession) {
     const lastCompleted = [...course.sessions].reverse().find((s) => s.status === "completed");
 
-    return (
-      <div className="mb-4">
-        <a href="#" className="block rounded-xl border border-gray-stroke bg-white p-5 no-underline shadow-card transition-transform duration-300 ease-out hover:translate-x-1">
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">
-                Complete your session {lastCompleted?.number} homework
+    const cards = [
+      {
+        id: "homework",
+        content: (
+          <div className="relative rounded-xl border border-gray-stroke bg-white shadow-card">
+            <a href="#" className="block p-5 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
+              <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">
+                Complete your session {lastCompleted?.number} homework <InlineChevron />
               </p>
-              <p className="mt-1 leading-[1.2] text-gray-light">
-                {lastCompleted?.title}
-              </p>
-            </div>
-            <ChevronRight />
+              <p className="mt-1 leading-[1.2] text-gray-light">{lastCompleted?.title}</p>
+            </a>
+            <DismissButton onDismiss={() => dismiss("homework")} />
           </div>
-        </a>
-        <a href="#" className="mt-3 block rounded-xl border border-gray-stroke bg-white p-5 no-underline shadow-card transition-transform duration-300 ease-out hover:translate-x-1">
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Share this program</p>
+        ),
+      },
+      {
+        id: "share",
+        content: (
+          <div className="relative rounded-xl border border-gray-stroke bg-white shadow-card">
+            <a href="#" className="block p-5 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
+              <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">Share this program <InlineChevron /></p>
               <p className="mt-1 leading-[1.2] text-gray-light">Know a coworker, boss, friend, or family member who'd love this?</p>
-            </div>
-            <ChevronRight />
+            </a>
+            <DismissButton onDismiss={() => dismiss("share")} />
           </div>
-        </a>
+        ),
+      },
+    ];
+
+    const visible = cards.filter((c) => !dismissed.has(c.id));
+    if (visible.length === 0) return null;
+    return (
+      <div className="mb-4 flex flex-col gap-3">
+        {visible.map((card) => <div key={card.id}>{card.content}</div>)}
       </div>
     );
   }
 
   if (phase === "post-course") {
+    const cards = [
+      {
+        id: "certificate",
+        content: (
+          <div className="relative rounded-xl border border-gray-stroke bg-white shadow-card">
+            <a href="#" className="block p-5 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
+              <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">Get your certificate <InlineChevron /></p>
+              <p className="mt-1 leading-[1.2] text-gray-light">Complete a short course survey to unlock your certificate of completion.</p>
+            </a>
+            <DismissButton onDismiss={() => dismiss("certificate")} />
+          </div>
+        ),
+      },
+      {
+        id: "share",
+        content: (
+          <div className="relative rounded-xl border border-gray-stroke bg-white shadow-card">
+            <a href="#" className="block p-5 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
+              <p className="pr-6 text-[18px] font-medium leading-[1.2] text-gray-dark">Share this program <InlineChevron /></p>
+              <p className="mt-1 leading-[1.2] text-gray-light">Know a coworker, boss, friend, or family member who'd love this?</p>
+            </a>
+            <DismissButton onDismiss={() => dismiss("share")} />
+          </div>
+        ),
+      },
+    ];
+
+    const visible = cards.filter((c) => !dismissed.has(c.id));
+    if (visible.length === 0) return null;
     return (
       <div className="mb-4 flex flex-col gap-3">
-        <a href="#" className="block rounded-xl border border-gray-stroke bg-white p-5 no-underline shadow-card transition-transform duration-300 ease-out hover:translate-x-1">
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Get your certificate</p>
-              <p className="mt-1 leading-[1.2] text-gray-light">
-                Complete a short course survey to unlock your certificate of completion.
-              </p>
-            </div>
-            <ChevronRight />
-          </div>
-        </a>
-        <a href="#" className="block rounded-xl border border-gray-stroke bg-white p-5 no-underline shadow-card transition-transform duration-300 ease-out hover:translate-x-1">
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Share this program</p>
-              <p className="mt-1 leading-[1.2] text-gray-light">Know a coworker, boss, friend, or family member who'd love this?</p>
-            </div>
-            <ChevronRight />
-          </div>
-        </a>
+        {visible.map((card) => <div key={card.id}>{card.content}</div>)}
       </div>
     );
   }
@@ -560,22 +620,30 @@ export default function CourseDetail() {
 
             return (
               <div className={`${mobilePivotTab !== "sessions" ? "hidden md:block" : ""} pt-6 md:pt-0`}>
-                {!hasHidden && !showAllCompleted && <p className="mb-2 mt-6 hidden text-[14px] font-medium leading-[1.2] uppercase tracking-[0.5px] text-gray-light md:mt-8 md:block">Sessions</p>}
+                {/* Desktop: Sessions header + "Show all past" text link */}
+                <div className="mb-2 mt-6 hidden items-center justify-between md:mt-8 md:flex">
+                  <p className="text-[14px] font-medium leading-[1.2] uppercase tracking-[0.5px] text-gray-light">Sessions</p>
+                  {completedSessions.length > 1 && (
+                    <button onClick={() => setShowAllCompleted(!showAllCompleted)} className="flex cursor-pointer items-center gap-1 font-medium text-[14px] text-[#038561]">
+                      {showAllCompleted ? "Hide past" : "Show all past"}
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${showAllCompleted ? "rotate-180" : ""}`}>
+                        <path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                {/* Mobile: "Show all past sessions" text link */}
+                {completedSessions.length > 1 && (
+                  <div className="mb-3 md:hidden">
+                    <button onClick={() => setShowAllCompleted(!showAllCompleted)} className="flex cursor-pointer items-center gap-1 font-medium text-[16px] text-[#038561]">
+                      {showAllCompleted ? "Hide past sessions" : "Show all past sessions"}
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${showAllCompleted ? "rotate-180" : ""}`}>
+                        <path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
                 <div className="mt-0">
-                  {hasHidden && (
-                    <div className="pb-3 md:pt-3">
-                      <Button size="lg" variant="secondary" className="w-full justify-center md:w-auto" onClick={() => setShowAllCompleted(true)}>
-                        See all past sessions
-                      </Button>
-                    </div>
-                  )}
-                  {showAllCompleted && completedSessions.length > 1 && (
-                    <div className="pb-3 md:pt-3">
-                      <Button size="lg" variant="secondary" className="w-full justify-center md:w-auto" onClick={() => setShowAllCompleted(false)}>
-                        Hide older sessions
-                      </Button>
-                    </div>
-                  )}
                   {displaySessions.map((session, i) => {
                     const originalIndex = course.sessions.indexOf(session);
                     return (
