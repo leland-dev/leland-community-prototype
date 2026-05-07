@@ -346,37 +346,39 @@ function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; 
 
   return (
     <div className="-mt-4 min-[428px]:mt-0">
-      <div className="-mx-4 min-[428px]:mx-0 min-[428px]:flex min-[428px]:items-center min-[428px]:gap-4 md:mx-0 md:block">
-        <img
-          src={course.image}
-          alt={course.title}
-          className="aspect-[1.91/1] w-full rounded-none object-cover min-[428px]:w-[160px] min-[428px]:shrink-0 min-[428px]:rounded-[12px] md:w-full md:rounded-[12px]"
-        />
+      <div className="-mx-4 min-[428px]:mx-0 min-[428px]:flex min-[428px]:flex-wrap min-[428px]:items-center min-[428px]:gap-x-4 min-[428px]:gap-y-0 md:mx-0 md:block md:gap-0">
+        <div className="relative min-[428px]:w-[160px] min-[428px]:shrink-0 md:w-full">
+          <img
+            src={course.image}
+            alt={course.title}
+            className="aspect-[1.91/1] w-full rounded-none object-cover min-[428px]:rounded-[12px] md:rounded-[12px]"
+          />
+          <button className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 transition-colors hover:bg-black/45">
+            <img src={shareArrowIcon} alt="Share" className="h-5 w-5 brightness-0 invert" />
+          </button>
+        </div>
 
-        <div className="min-[428px]:min-w-0 min-[428px]:flex-1 px-4 pt-4 pb-0 min-[428px]:px-0 min-[428px]:py-0 md:px-0 md:py-4">
+        <div className="min-[428px]:min-w-0 min-[428px]:flex-1 px-4 pt-4 pb-0 min-[428px]:px-0 min-[428px]:py-0 md:px-0 md:pt-4 md:pb-0">
           <h1 className="text-[24px] font-medium leading-[1.1] text-gray-dark min-[428px]:line-clamp-2 md:line-clamp-none">
             {course.title}
           </h1>
-          <div className="mt-5 flex items-start">
-            <div className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-2 text-[16px]">
-                <span className="font-medium text-gray-dark">{course.sessionCount} sessions</span>
-                <span className="text-gray-light">{course.cohortDates}</span>
-              </div>
-              <button className="text-left text-[14px] text-gray-xlight hover:underline">Switch cohorts</button>
-            </div>
-            <button className="group ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full transition-colors group-hover:bg-gray-hover">
-                <img src={shareArrowIcon} alt="Share" className="h-5 w-5" />
-              </span>
-            </button>
+        </div>
+
+        <div className="mt-5 px-4 min-[428px]:w-full min-[428px]:px-0 md:mt-5 md:w-auto md:px-0">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[16px]">
+            <span className="flex items-center gap-x-2">
+              <img src={calendarIcon} alt="" className="h-4 w-4 shrink-0" />
+              <span className="font-medium text-gray-dark">{course.sessionCount} sessions</span>
+              <span className="text-gray-light">{course.cohortDates}</span>
+            </span>
+            <button className="text-left text-[16px] text-gray-xlight underline">Switch cohorts</button>
           </div>
         </div>
       </div>
 
       <div>
         {/* Resources — hidden on mobile, shown in Resources tab instead */}
-        <div className="mt-4 hidden md:block">
+        <div className="mt-4 hidden md:mt-6 md:block">
           <p className="mb-2 text-[14px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">
             Resources
           </p>
