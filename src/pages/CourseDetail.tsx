@@ -7,6 +7,7 @@ import orderHistoryIcon from "../assets/icons/order-history.svg";
 import toolsWrenchRulerIcon from "../assets/icons/tools-wrench-ruler.svg";
 import calendarIcon from "../assets/icons/calendar.svg";
 import shareArrowIcon from "../assets/icons/share-arrow.svg";
+import giftIcon from "../assets/icons/gift.svg";
 import playVideoIcon from "../assets/icons/play-video.svg";
 import event1 from "../assets/placeholder images/ai-builder-course.avif";
 
@@ -37,8 +38,9 @@ type CourseSession = {
 
 type CourseResource = {
   label: string;
-  icon: "slack" | "clock" | "tool" | "recording";
+  icon: "slack" | "clock" | "tool" | "recording" | "gift";
   url: string;
+  secondary?: boolean;
 };
 
 type CourseData = {
@@ -63,7 +65,7 @@ const mockCourse: CourseData = {
     { label: "Office hours", icon: "clock", url: "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours?month=2026-05" },
     { label: "Recordings", icon: "recording", url: "https://www.joinleland.com/content/course/urn:course:69d937e10ef66901f15b0902/urn:contentEntry:69e7f8cdcaf10f4eec4940b4" },
     { label: "Slack community", icon: "slack", url: "https://d2fhrl04.na1.hubspotlinks.com/Ctc/UC+113/d2FHRl04/VXc0jX387Xr0N8MJ5mZVMfPKW76My975MX86-N8JCsF23m2nnW7Y8-PT6lZ3kzW79xkfq8jRrQxW2m-6Vs2_6GcMW3t1SkY84ng-4W7j53hc2H4KQ1W4MCrlt7F60D9W7FWYxr539-p0W8VHrTz2drHTLW4v0fV83YbJdTW2dsd7K9jLLd-W3rgjsV3n3hh1W2rBg4f5gjJPZW5m3HQ-3HmFbFW2DKMr-1hxzN7W2DWVHb4bSdrqW8tSF0N6Y39GnW3L1xR83vv7wHW982-rn41KZkXW1MD0nt5KRB7VW77W2NM8b8ldZW1Y2hkj2HHtD-W7hwmss61SslSW8_8BZ63CgmcVW6LKq_j2kyXHKW3TrYvt6lCh8vVTJNFh8kTCFmW5Vmz1_4XBDx3f3MfD_q04" },
-    { label: "Setup guide", icon: "tool", url: "#" },
+    { label: "Setup guide", icon: "tool", url: "#", secondary: true },
   ],
   sessions: [
     {
@@ -113,19 +115,18 @@ const mockCourse: CourseData = {
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 
-function ResourceIcon({ type }: { type: CourseResource["icon"] }) {
+function ResourceIcon({ type, bare }: { type: CourseResource["icon"]; bare?: boolean }) {
   const wrap = "flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-gray-hover";
-  const cls = "h-5 w-5 text-gray-dark";
-  switch (type) {
-    case "slack":
-      return <span className={wrap}><img src={slackIcon} alt="" className="h-5 w-5" /></span>;
-    case "clock":
-      return <span className={wrap}><img src={orderHistoryIcon} alt="" className="h-5 w-5" /></span>;
-    case "tool":
-      return <span className={wrap}><img src={toolsWrenchRulerIcon} alt="" className="h-5 w-5" /></span>;
-    case "recording":
-      return <span className={wrap}><img src={playVideoIcon} alt="" className="h-5 w-5" /></span>;
-  }
+  const iconMap: Record<CourseResource["icon"], string> = {
+    slack: slackIcon,
+    clock: orderHistoryIcon,
+    tool: toolsWrenchRulerIcon,
+    recording: playVideoIcon,
+    gift: giftIcon,
+  };
+  const src = iconMap[type];
+  if (bare) return <img src={src} alt="" className="h-4 w-4 shrink-0 opacity-60" />;
+  return <span className={wrap}><img src={src} alt="" className="h-5 w-5" /></span>;
 }
 
 function ExternalLinkIcon({ className = "" }: { className?: string }) {
@@ -205,9 +206,9 @@ function DismissButton({ onDismiss, asCheckbox }: { onDismiss: () => void; asChe
 
 // ─── Session row ─────────────────────────────────────────────────────────────
 
-function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLast, allCompleted, forceStatus, sessionMaterial }: { session: CourseSession; showSessionRecordings: boolean; multipleSessionTimes: boolean; isLast: boolean; allCompleted: boolean; forceStatus?: "next" | "upcoming"; sessionMaterial: "homework" | "session-guide" }) {
-  const isCompleted = (session.status === "completed" || allCompleted) && !forceStatus;
-  const isNext = (session.status === "next" && !allCompleted && !forceStatus) || forceStatus === "next";
+function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLast, allCompleted, forceStatus, sessionMaterial, markedComplete, onMarkComplete }: { session: CourseSession; showSessionRecordings: boolean; multipleSessionTimes: boolean; isLast: boolean; allCompleted: boolean; forceStatus?: "next" | "upcoming"; sessionMaterial: "homework" | "session-guide"; markedComplete?: boolean; onMarkComplete?: () => void }) {
+  const isCompleted = (session.status === "completed" || allCompleted || !!markedComplete) && !forceStatus;
+  const isNext = (session.status === "next" && !allCompleted && !markedComplete && !forceStatus) || forceStatus === "next";
   const [recordingsOpen, setRecordingsOpen] = useState(false);
   const recordingSlots = session.timeSlots.filter((s) => s.recordingUrl);
   const hasRecordings = isCompleted && recordingSlots.length > 0 && showSessionRecordings;
@@ -218,29 +219,30 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
     <div className="flex items-start gap-4 py-4">
       {/* Left column: indicator + dotted connector */}
       <div className="flex w-8 shrink-0 flex-col items-center self-stretch">
-        {isCompleted ? (
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#038561] font-medium leading-[1.2] text-white">
-            {session.number}
-          </div>
-        ) : isNext ? (
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#038561] font-medium leading-[1.2] text-white ring-2 ring-[#038561] ring-offset-2">
-            {session.number}
-          </div>
-        ) : (
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f5f5f5] font-medium leading-[1.2] text-gray-light">
-            {session.number}
-          </div>
-        )}
+        <button
+          onClick={(e) => { e.stopPropagation(); onMarkComplete?.(); }}
+          className={`group mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] transition-colors ${isCompleted ? "bg-[#038561] hover:bg-[#038561]/80" : isNext ? "border-[1.5px] border-[#038561] bg-white " : "border-[1.5px] border-gray-stroke bg-white hover:border-[#038561]/40"} ${onMarkComplete ? "cursor-pointer" : "cursor-default"}`}
+        >
+          {isCompleted ? (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2.5 7l3 3 6-6" />
+            </svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-0 transition-opacity group-hover:opacity-100 text-gray-stroke">
+              <path d="M2.5 7l3 3 6-6" />
+            </svg>
+          )}
+        </button>
         {!isLast && (
           <div className={`mt-1.5 w-0 flex-1 border-l-[1.5px] border-dashed ${isCompleted ? "border-[#038561]" : "border-gray-stroke"}`} />
         )}
       </div>
 
       {/* Content */}
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1" onClick={() => { if (!isCompleted) onMarkComplete?.(); }}>
         <div className="flex items-baseline justify-between gap-4">
-          <p className={`text-[18px] font-medium leading-[1.2] ${isNext ? "text-gray-dark" : "text-gray-light"}`}>
-            {session.title}
+          <p className={`text-[18px] font-medium leading-[1.2] ${isCompleted ? "text-gray-light" : isNext ? "text-gray-dark" : "text-gray-light"}`}>
+            {session.number}. {session.title}
           </p>
           {session.duration && <p className="shrink-0 leading-[1.2] text-gray-xlight">{session.duration}</p>}
         </div>
@@ -386,21 +388,47 @@ function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; 
             {!showSessionRecordings && (
               <a
                 href="#"
-                target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+                target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
               >
                 <ResourceIcon type="recording" />
-                Recordings
+                <span>Recordings</span>
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
+                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </a>
             )}
-            {course.resources.map((resource, i) => (
+            {course.resources.filter(r => !r.secondary).map((resource, i) => (
               <a
                 key={i}
                 href={resource.url}
-                target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+                target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
               >
                 <ResourceIcon type={resource.icon} />
-                {resource.label}
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="ml-auto shrink-0 text-gray-xlight">
+                <span>{resource.label}</span>
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
+                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
+            ))}
+            <a
+              href="#"
+              className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+            >
+              <ResourceIcon type="gift" />
+              <span>Refer and earn</span>
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
+                <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
+            {course.resources.filter(r => r.secondary).map((resource, i) => (
+              <a
+                key={i}
+                href={resource.url}
+                target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 pb-[10px] pt-5 text-[16px] leading-[1.2] text-gray-light no-underline transition-[padding] duration-300 ease-out hover:pl-[4px] hover:text-gray-dark"
+              >
+                <ResourceIcon type={resource.icon} bare />
+                <span>{resource.label}</span>
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
                   <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </a>
@@ -429,71 +457,7 @@ function ActionBanners({ course, phase, calendarVariant, sessionMaterial, banner
   const [selectedTime, setSelectedTime] = useState(allTimes[0]);
   const timeOptions = [...allTimes, "All available times"];
 
-  if (phase === "pre-course") {
-    const steps = [
-      {
-        id: "calendar",
-        content: (
-          <div className="rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
-            <div className="flex items-center">
-              {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("calendar")} asCheckbox />}
-              <div className="flex-1">
-                <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Add your calendar invites</p>
-                <p className="mt-1 leading-[1.2] text-gray-light">Two session times each day: 11:00 AM ET and 4:00 PM ET. Attend whichever works for you.</p>
-              </div>
-              {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("calendar")} />}
-            </div>
-            {calendarVariant === "time-picker" && (
-              <div className={`mt-4 flex gap-1.5 overflow-x-auto scrollbar-hide ${bannersHaveCheckbox ? "sm:pl-9" : ""}`}>
-                {timeOptions.map((opt) => (
-                  <ToggleChip key={opt} selected={selectedTime === opt} onClick={() => setSelectedTime(opt)} className="shrink-0 whitespace-nowrap">{opt}</ToggleChip>
-                ))}
-              </div>
-            )}
-            <div className={`mt-4 flex gap-1.5 overflow-x-auto scrollbar-hide ${bannersHaveCheckbox ? "sm:pl-9" : ""}`}>
-              <LinkButton size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">Google Calendar</LinkButton>
-              <LinkButton size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">Microsoft</LinkButton>
-              <LinkButton size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">Other calendars</LinkButton>
-            </div>
-          </div>
-        ),
-      },
-      {
-        id: "survey",
-        content: (
-          <div className="flex items-center rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
-            {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("survey")} asCheckbox />}
-            <a href="#" className="flex-1 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
-              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Complete the intake survey <InlineChevron /></p>
-              <p className="mt-1 leading-[1.2] text-gray-light">Takes about 5 minutes. Helps us tailor sessions to your experience level and goals.</p>
-            </a>
-            {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("survey")} />}
-          </div>
-        ),
-      },
-      {
-        id: "setup",
-        content: (
-          <div className="flex items-center rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
-            {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("setup")} asCheckbox />}
-            <a href="#" className="flex-1 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
-              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Set up your tools <InlineChevron /></p>
-              <p className="mt-1 leading-[1.2] text-gray-light">Install Claude or your AI tool of choice before the first session.</p>
-            </a>
-            {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("setup")} />}
-          </div>
-        ),
-      },
-    ];
-
-    const visible = steps.filter((s) => !dismissed.has(s.id));
-    if (visible.length === 0) return null;
-    return (
-      <div className="mb-4 flex flex-col gap-3">
-        {visible.map((step) => <div key={step.id}>{step.content}</div>)}
-      </div>
-    );
-  }
+  if (phase === "pre-course") return null;
 
   if (phase === "in-progress" && nextSession) {
     const lastCompleted = [...course.sessions].reverse().find((s) => s.status === "completed");
@@ -508,24 +472,11 @@ function ActionBanners({ course, phase, calendarVariant, sessionMaterial, banner
               <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">
                 {sessionMaterial === "session-guide"
                   ? <>Review Session {lastCompleted?.number} <InlineChevron /></>
-                  : <>Complete your session {lastCompleted?.number} homework <InlineChevron /></>}
+                  : <>Complete session {lastCompleted?.number} homework <InlineChevron /></>}
               </p>
               <p className="mt-1 leading-[1.2] text-gray-light">{lastCompleted?.title}</p>
             </a>
             {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("homework")} />}
-          </div>
-        ),
-      },
-      {
-        id: "share",
-        content: (
-          <div className="flex items-center rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
-            {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("share")} asCheckbox />}
-            <a href="#" className="flex-1 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
-              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Share this program <InlineChevron /></p>
-              <p className="mt-1 leading-[1.2] text-gray-light">Know a coworker, boss, friend, or family member who'd love this?</p>
-            </a>
-            {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("share")} />}
           </div>
         ),
       },
@@ -552,19 +503,6 @@ function ActionBanners({ course, phase, calendarVariant, sessionMaterial, banner
               <p className="mt-1 leading-[1.2] text-gray-light">Complete a short course survey to unlock your certificate of completion.</p>
             </a>
             {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("certificate")} />}
-          </div>
-        ),
-      },
-      {
-        id: "share",
-        content: (
-          <div className="flex items-center rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
-            {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("share")} asCheckbox />}
-            <a href="#" className="flex-1 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
-              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Share this program <InlineChevron /></p>
-              <p className="mt-1 leading-[1.2] text-gray-light">Know a coworker, boss, friend, or family member who'd love this?</p>
-            </a>
-            {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("share")} />}
           </div>
         ),
       },
@@ -604,6 +542,12 @@ export default function CourseDetail() {
   const [multipleSessionTimes, setMultipleSessionTimes] = useState(true);
   const [showAllCompleted, setShowAllCompleted] = useState(false);
   const [bannersHaveCheckbox, setBannersHaveCheckbox] = useState(false);
+  const [completedSessionIds, setCompletedSessionIds] = useState<Set<number>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem("completedSessionIds") || "[]")); } catch { return new Set(); }
+  });
+  const [completedSteps, setCompletedSteps] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem("completedSteps") || "[]")); } catch { return new Set(); }
+  });
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [mobilePivotTab, setMobilePivotTab] = useState<"sessions" | "next-steps" | "resources">("next-steps");
 
@@ -649,8 +593,65 @@ export default function CourseDetail() {
 
             return (
               <div className={`${mobilePivotTab !== "sessions" ? "hidden md:block" : ""} pt-6 md:pt-0`}>
+                {/* Getting Started — pre-course only */}
+                {isPreCourse && (
+                  <div>
+                    <p className="mb-2 text-[14px] font-medium leading-[1.2] uppercase tracking-[0.5px] text-gray-light">Getting started</p>
+                    <div>
+                      {[
+                        { id: "calendar", title: "Add all sessions to your calendar", description: "Two session times each day: 11:00 AM ET and 4:00 PM ET. Attend whichever works for you.", buttons: ["Google Calendar", "Microsoft", "Other calendars"] },
+                        { id: "survey", title: "Complete the intake survey", description: "Takes about 5 minutes. Helps us tailor sessions to your experience level and goals.", buttons: null },
+                        { id: "setup", title: "Set up your tools", description: "Install Claude or your AI tool of choice before the first session.", buttons: null },
+                      ].map((item) => {
+                        const isDone = completedSteps.has(item.id);
+                        const markDone = () => { const s = new Set(completedSteps); s.has(item.id) ? s.delete(item.id) : s.add(item.id); setCompletedSteps(s); localStorage.setItem("completedSteps", JSON.stringify([...s])); };
+                        return (
+                        <div key={item.id} className="flex items-start gap-4 py-4">
+                          <div className="flex w-8 shrink-0 flex-col items-center self-stretch">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); markDone(); }}
+                              className={`group mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] cursor-pointer transition-colors ${isDone ? "bg-[#038561] hover:bg-[#038561]/80" : "border-[1.5px] border-gray-stroke bg-white hover:border-[#038561]/40"}`}
+                            >
+                              {isDone ? (
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M2.5 7l3 3 6-6" />
+                                </svg>
+                              ) : (
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#038561] opacity-0 transition-opacity group-hover:opacity-100">
+                                  <path d="M2.5 7l3 3 6-6" />
+                                </svg>
+                              )}
+                            </button>
+                            <div className={`mt-1.5 w-0 flex-1 border-l-[1.5px] border-dashed ${isDone ? "border-[#038561]" : "border-gray-stroke"}`} />
+                          </div>
+                          <div className="min-w-0 flex-1 pb-1" onClick={() => { if (!isDone) markDone(); }}>
+                            {item.buttons ? (
+                              <div>
+                                <p className={`text-[18px] font-medium leading-[1.2] ${isDone ? "text-gray-light" : "text-gray-dark"}`}>{item.title}</p>
+                                <p className="mt-1 leading-[1.2] text-gray-light">{item.description}</p>
+                              </div>
+                            ) : (
+                              <a href="#" className="group block no-underline">
+                                <p className={`text-[18px] font-medium leading-[1.2] ${isDone ? "text-gray-light" : "text-gray-dark"}`}>{item.title} <InlineChevron /></p>
+                                <p className="mt-1 leading-[1.2] text-gray-light">{item.description}</p>
+                              </a>
+                            )}
+                            {item.buttons && (
+                              <div className="-mr-4 mt-3 flex gap-1.5 overflow-x-auto scrollbar-hide sm:-mr-6 sm:pr-6">
+                                {item.buttons.map((label) => (
+                                  <LinkButton key={label} size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">{label}</LinkButton>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 {/* Desktop: Sessions header + "Show all past" text link */}
-                <div className="mb-2 mt-6 hidden items-center justify-between md:mt-8 md:flex">
+                <div className="mb-2 mt-2 hidden items-center justify-between md:flex">
                   <p className="text-[14px] font-medium leading-[1.2] uppercase tracking-[0.5px] text-gray-light">Sessions</p>
                   {completedSessions.length > 1 && (
                     <button onClick={() => setShowAllCompleted(!showAllCompleted)} className="flex cursor-pointer items-center gap-1 font-medium text-[14px] text-[#038561]">
@@ -685,6 +686,8 @@ export default function CourseDetail() {
                         allCompleted={allCompletedPhase}
                         forceStatus={coursePhase === "pre-course" ? (originalIndex === 0 ? "next" : "upcoming") : undefined}
                         sessionMaterial={sessionMaterial}
+                        markedComplete={completedSessionIds.has(session.id)}
+                        onMarkComplete={() => { const s = new Set(completedSessionIds); s.has(session.id) ? s.delete(session.id) : s.add(session.id); setCompletedSessionIds(s); localStorage.setItem("completedSessionIds", JSON.stringify([...s])); }}
                       />
                     );
                   })}
@@ -698,17 +701,52 @@ export default function CourseDetail() {
             <div className="pt-6">
               <p className="mb-2 hidden text-[14px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light md:block">Resources</p>
               <div className="flex flex-col">
-                {course.resources.map((resource, i) => (
+                {!showSessionRecordings && (
+                  <a
+                    href="#"
+                    target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+                  >
+                    <ResourceIcon type="recording" />
+                    <span>Recordings</span>
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
+                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                )}
+                {course.resources.filter(r => !r.secondary).map((resource, i) => (
                   <a
                     key={i}
                     href={resource.url}
-                    target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+                    target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
                   >
                     <ResourceIcon type={resource.icon} />
-                    {resource.label}
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="ml-auto shrink-0 text-gray-xlight">
-                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                    <span>{resource.label}</span>
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
+                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                ))}
+                <a
+                  href="#"
+                  className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+                >
+                  <ResourceIcon type="gift" />
+                  <span>Refer and earn</span>
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
+                    <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </a>
+                {course.resources.filter(r => r.secondary).map((resource, i) => (
+                  <a
+                    key={i}
+                    href={resource.url}
+                    target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 pb-[10px] pt-5 text-[16px] leading-[1.2] text-gray-light no-underline transition-[padding] duration-300 ease-out hover:pl-[4px] hover:text-gray-dark"
+                  >
+                    <ResourceIcon type={resource.icon} bare />
+                    <span>{resource.label}</span>
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
+                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </a>
                 ))}
               </div>
