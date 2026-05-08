@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button, LinkButton } from "../components/Button";
+import { Banner } from "../components/Banner";
 import { ToggleChip } from "../components/ToggleChip";
 import PageShell from "../components/PageShell";
 import slackIcon from "../assets/icons/slack-black.svg";
 import orderHistoryIcon from "../assets/icons/order-history.svg";
 import toolsWrenchRulerIcon from "../assets/icons/tools-wrench-ruler.svg";
 import calendarIcon from "../assets/icons/calendar.svg";
+import calendarUpcomingIcon from "../assets/icons/calendar-upcoming.svg";
 import shareArrowIcon from "../assets/icons/share-arrow.svg";
 import giftIcon from "../assets/icons/gift.svg";
 import playVideoIcon from "../assets/icons/play-video.svg";
@@ -30,15 +32,17 @@ type CourseSession = {
   title: string;
   description: string;
   date: string;
+  dayOfWeek: string;
   duration: string;
   timeSlots: TimeSlot[];
   status: "completed" | "next" | "upcoming";
   materials: SessionMaterial[];
+  startsIn?: string;
 };
 
 type CourseResource = {
   label: string;
-  icon: "slack" | "clock" | "tool" | "recording" | "gift";
+  icon: "slack" | "clock" | "tool" | "recording" | "gift" | "calendar";
   url: string;
   secondary?: boolean;
 };
@@ -65,11 +69,11 @@ const mockCourse: CourseData = {
     { label: "Office hours", icon: "clock", url: "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours?month=2026-05" },
     { label: "Recordings", icon: "recording", url: "https://www.joinleland.com/content/course/urn:course:69d937e10ef66901f15b0902/urn:contentEntry:69e7f8cdcaf10f4eec4940b4" },
     { label: "Slack community", icon: "slack", url: "https://d2fhrl04.na1.hubspotlinks.com/Ctc/UC+113/d2FHRl04/VXc0jX387Xr0N8MJ5mZVMfPKW76My975MX86-N8JCsF23m2nnW7Y8-PT6lZ3kzW79xkfq8jRrQxW2m-6Vs2_6GcMW3t1SkY84ng-4W7j53hc2H4KQ1W4MCrlt7F60D9W7FWYxr539-p0W8VHrTz2drHTLW4v0fV83YbJdTW2dsd7K9jLLd-W3rgjsV3n3hh1W2rBg4f5gjJPZW5m3HQ-3HmFbFW2DKMr-1hxzN7W2DWVHb4bSdrqW8tSF0N6Y39GnW3L1xR83vv7wHW982-rn41KZkXW1MD0nt5KRB7VW77W2NM8b8ldZW1Y2hkj2HHtD-W7hwmss61SslSW8_8BZ63CgmcVW6LKq_j2kyXHKW3TrYvt6lCh8vVTJNFh8kTCFmW5Vmz1_4XBDx3f3MfD_q04" },
-    { label: "Setup guide", icon: "tool", url: "#", secondary: true },
+    { label: "Join a build session", icon: "calendar", url: "#" },
   ],
   sessions: [
     {
-      id: 1, number: 1, title: "Build a Real Product with World-Class Design", duration: "90 min", description: "Create a new product in 90 minutes, without writing a line of code, using a design system that you love.", date: "Apr 21", status: "completed",
+      id: 1, number: 1, title: "Build a Real Product with World-Class Design", duration: "90 min", description: "Create a new product in 90 minutes, without writing a line of code, using a design system that you love.", date: "Apr 21", dayOfWeek: "Tue", status: "completed", startsIn: "3 days",
       timeSlots: [
         { id: 10, time: "11:00 AM", recordingUrl: "#" },
         { id: 11, time: "4:00 PM", recordingUrl: "#" },
@@ -77,7 +81,7 @@ const mockCourse: CourseData = {
       materials: [{ label: "Session guide", url: "#" }],
     },
     {
-      id: 2, number: 2, title: "Automate Communication in Your Voice", duration: "90 min", description: "Connect your communication tools, teach AI how you write, and set it up to manage your inbox.", date: "Apr 24", status: "completed",
+      id: 2, number: 2, title: "Automate Communication in Your Voice", duration: "90 min", description: "Connect your communication tools, teach AI how you write, and set it up to manage your inbox.", date: "Apr 24", dayOfWeek: "Fri", status: "completed",
       timeSlots: [
         { id: 20, time: "11:00 AM", recordingUrl: "#" },
         { id: 21, time: "4:00 PM", recordingUrl: "#" },
@@ -85,7 +89,7 @@ const mockCourse: CourseData = {
       materials: [{ label: "Session guide", url: "#" }],
     },
     {
-      id: 3, number: 3, title: "Design Presentations That Build Themselves", duration: "90 min", description: "Go from research question to polished, animated slide deck in a single session.", date: "Apr 28", status: "next",
+      id: 3, number: 3, title: "Design Presentations That Build Themselves", duration: "90 min", description: "Go from research question to polished, animated slide deck in a single session.", date: "Apr 28", dayOfWeek: "Tue", status: "next",
       timeSlots: [
         { id: 30, time: "11:00 AM", recordingUrl: "#" },
         { id: 31, time: "4:00 PM", recordingUrl: "#" },
@@ -96,17 +100,17 @@ const mockCourse: CourseData = {
       ],
     },
     {
-      id: 4, number: 4, title: "Analyze and Visualize Data Without Writing Formulas", duration: "90 min", description: "Go from data and spreadsheets to dashboards and insights in minutes.", date: "May 1", status: "upcoming",
+      id: 4, number: 4, title: "Analyze and Visualize Data Without Writing Formulas", duration: "90 min", description: "Go from data and spreadsheets to dashboards and insights in minutes.", date: "May 1", dayOfWeek: "Fri", status: "upcoming",
       timeSlots: [{ id: 40, time: "11:00 AM", recordingUrl: "#" }, { id: 41, time: "4:00 PM", recordingUrl: "#" }],
       materials: [{ label: "Session guide", url: "#" }],
     },
     {
-      id: 5, number: 5, title: "Build Custom Workflows That Run While You Sleep", duration: "90 min", description: "Set up automations that run on a schedule, connect your tools, and get things done whether you're at your desk or not.", date: "May 5", status: "upcoming",
+      id: 5, number: 5, title: "Build Custom Workflows That Run While You Sleep", duration: "90 min", description: "Set up automations that run on a schedule, connect your tools, and get things done whether you're at your desk or not.", date: "May 5", dayOfWeek: "Tue", status: "upcoming",
       timeSlots: [{ id: 50, time: "11:00 AM", recordingUrl: "#" }, { id: 51, time: "4:00 PM", recordingUrl: "#" }],
       materials: [{ label: "Session guide", url: "#" }],
     },
     {
-      id: 6, number: 6, title: "Launch Your AI System + Demo Day", duration: "90 min", description: "Cross the finish line with a live, working AI system and show the cohort what you built.", date: "May 8", status: "upcoming",
+      id: 6, number: 6, title: "Launch Your AI System + Demo Day", duration: "90 min", description: "Cross the finish line with a live, working AI system and show the cohort what you built.", date: "May 8", dayOfWeek: "Fri", status: "upcoming",
       timeSlots: [{ id: 60, time: "11:00 AM", recordingUrl: "#" }, { id: 61, time: "4:00 PM", recordingUrl: "#" }],
       materials: [{ label: "Session guide", url: "#" }],
     },
@@ -123,6 +127,7 @@ function ResourceIcon({ type, bare }: { type: CourseResource["icon"]; bare?: boo
     tool: toolsWrenchRulerIcon,
     recording: playVideoIcon,
     gift: giftIcon,
+    calendar: calendarUpcomingIcon,
   };
   const src = iconMap[type];
   if (bare) return <img src={src} alt="" className="h-4 w-4 shrink-0 opacity-60" />;
@@ -206,12 +211,12 @@ function DismissButton({ onDismiss, asCheckbox }: { onDismiss: () => void; asChe
 
 // ─── Session row ─────────────────────────────────────────────────────────────
 
-function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLast, allCompleted, forceStatus, sessionMaterial, markedComplete, onMarkComplete }: { session: CourseSession; showSessionRecordings: boolean; multipleSessionTimes: boolean; isLast: boolean; allCompleted: boolean; forceStatus?: "next" | "upcoming"; sessionMaterial: "homework" | "session-guide"; markedComplete?: boolean; onMarkComplete?: () => void }) {
-  const isCompleted = (session.status === "completed" || allCompleted || !!markedComplete) && !forceStatus;
+function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLast, allCompleted, forceStatus, sessionMaterial, markedComplete, onMarkComplete, disabled, startingSoon }: { session: CourseSession; showSessionRecordings: boolean; multipleSessionTimes: boolean; isLast: boolean; allCompleted: boolean; forceStatus?: "next" | "upcoming"; sessionMaterial: "homework" | "session-guide"; markedComplete?: boolean; onMarkComplete?: () => void; disabled?: boolean; startingSoon?: boolean }) {
+  const isCompleted = (allCompleted || !!markedComplete) && !forceStatus;
   const isNext = (session.status === "next" && !allCompleted && !markedComplete && !forceStatus) || forceStatus === "next";
   const [recordingsOpen, setRecordingsOpen] = useState(false);
   const recordingSlots = session.timeSlots.filter((s) => s.recordingUrl);
-  const hasRecordings = isCompleted && recordingSlots.length > 0 && showSessionRecordings;
+  const hasRecordings = (isCompleted || session.status === "completed") && !forceStatus && !session.startsIn && recordingSlots.length > 0 && showSessionRecordings;
   const rowMaterials = session.materials.filter((m) => m.label !== "Session prep");
   const hasLinks = rowMaterials.length > 0 || hasRecordings;
 
@@ -221,14 +226,15 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
       <div className="flex w-8 shrink-0 flex-col items-center self-stretch">
         <button
           onClick={(e) => { e.stopPropagation(); onMarkComplete?.(); }}
-          className={`group mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] transition-colors ${isCompleted ? "bg-[#038561] hover:bg-[#038561]/80" : isNext ? "border-[1.5px] border-[#038561] bg-white " : "border-[1.5px] border-gray-stroke bg-white hover:border-[#038561]/40"} ${onMarkComplete ? "cursor-pointer" : "cursor-default"}`}
+          disabled={disabled}
+          className={`group mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] transition-colors ${disabled ? "cursor-not-allowed border-[1.5px] border-gray-stroke bg-gray-hover opacity-50" : isCompleted ? "bg-[#038561] hover:bg-[#038561]/80 cursor-pointer" : "border-[1.5px] border-gray-stroke bg-white hover:border-[#038561]/40 cursor-pointer"}`}
         >
-          {isCompleted ? (
+          {!disabled && isCompleted ? (
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M2.5 7l3 3 6-6" />
             </svg>
           ) : (
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-0 transition-opacity group-hover:opacity-100 text-gray-stroke">
+            !disabled && <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-0 transition-opacity group-hover:opacity-100 text-gray-stroke">
               <path d="M2.5 7l3 3 6-6" />
             </svg>
           )}
@@ -241,33 +247,29 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
       {/* Content */}
       <div className="min-w-0 flex-1" onClick={() => { if (!isCompleted) onMarkComplete?.(); }}>
         <div className="flex items-baseline justify-between gap-4">
-          <p className={`text-[18px] font-medium leading-[1.2] ${isCompleted ? "text-gray-light" : isNext ? "text-gray-dark" : "text-gray-light"}`}>
+          <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">
             {session.number}. {session.title}
           </p>
           {session.duration && <p className="shrink-0 leading-[1.2] text-gray-xlight">{session.duration}</p>}
         </div>
-        {multipleSessionTimes ? (() => {
-          const times = session.timeSlots.map((s) => s.time);
-          const formatted = times.length <= 1
-            ? times[0]
-            : times.slice(0, -1).join(", ") + " and " + times[times.length - 1];
-          return <p className="mt-1 leading-[1.2] text-gray-light">{session.date} at {formatted}</p>;
-        })() : (
-          <p className="mt-1 leading-[1.2] text-gray-light">{session.date} at {session.timeSlots[0]?.time}</p>
-        )}
+        <p className="mt-1 leading-[1.2] text-gray-light">
+          {isNext && <span className="mr-1.5 font-medium text-[#D92D20]">Up next</span>}
+          {multipleSessionTimes ? (() => {
+            const times = session.timeSlots.map((s) => s.time);
+            const formatted = times.length <= 1
+              ? times[0]
+              : times.slice(0, -1).join(", ") + " and " + times[times.length - 1];
+            return <>{session.dayOfWeek}, {session.date} at {formatted}</>;
+          })() : <>{session.dayOfWeek}, {session.date} at {session.timeSlots[0]?.time}</>}
+        </p>
 
         {session.description && (
           <p className="mt-2 text-[16px] leading-[1.4] text-gray-xlight">{session.description}</p>
         )}
 
-        {/* Links row — join, session guide, session prep, watch recordings */}
-        {(isNext || rowMaterials.length > 0 || hasRecordings) && (
+        {/* Links row — homework, watch recordings, join/starts-in */}
+        {(isNext || session.startsIn || rowMaterials.length > 0 || hasRecordings) && (
           <div className="mt-3 -mr-4 flex gap-1.5 overflow-x-auto pr-4 scrollbar-hide sm:-mr-6 sm:pr-6">
-            {isNext && (
-              <LinkButton size="sm" variant="primary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">
-                Join session
-              </LinkButton>
-            )}
             {rowMaterials.map((mat, i) => (
               <LinkButton key={i} size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href={mat.url}>
                 {mat.label === "Session guide" && sessionMaterial === "homework" ? "Homework" : mat.label} <ExternalLinkIcon />
@@ -285,7 +287,7 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
                 {recordingSlots.length > 1 && (
                   <svg
                     width="12" height="12" viewBox="0 0 12 12" fill="none"
-                    className={`shrink-0 text-gray-xlight transition-transform duration-200 ${recordingsOpen ? "rotate-180" : ""}`}
+                    className={`shrink-0 text-gray-dark transition-transform duration-200 ${recordingsOpen ? "rotate-180" : ""}`}
                   >
                     <path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -302,6 +304,16 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
                 <PlayIcon /> Watch recording
               </LinkButton>
             ))}
+            {isNext && !startingSoon && !session.startsIn && (
+              <LinkButton size="sm" variant="primary" rounded="rounded-full" className="shrink-0 whitespace-nowrap" href="#">
+                Join session
+              </LinkButton>
+            )}
+            {!isCompleted && isNext && (session.startsIn || startingSoon) && (
+              <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 whitespace-nowrap cursor-not-allowed opacity-60" disabled>
+                Starts in {startingSoon ? "2 hours" : session.startsIn}
+              </Button>
+            )}
           </div>
         )}
 
@@ -385,19 +397,7 @@ function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; 
             Resources
           </p>
           <div className="flex flex-col">
-            {!showSessionRecordings && (
-              <a
-                href="#"
-                target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
-              >
-                <ResourceIcon type="recording" />
-                <span>Recordings</span>
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
-                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </a>
-            )}
-            {course.resources.filter(r => !r.secondary).map((resource, i) => (
+            {course.resources.filter(r => !r.secondary && !(r.icon === "recording" && showSessionRecordings)).map((resource, i) => (
               <a
                 key={i}
                 href={resource.url}
@@ -415,24 +415,11 @@ function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; 
               className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
             >
               <ResourceIcon type="gift" />
-              <span>Refer and earn</span>
+              <span>Refer your friends or team</span>
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
                 <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </a>
-            {course.resources.filter(r => r.secondary).map((resource, i) => (
-              <a
-                key={i}
-                href={resource.url}
-                target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 pb-[10px] pt-5 text-[16px] leading-[1.2] text-gray-light no-underline transition-[padding] duration-300 ease-out hover:pl-[4px] hover:text-gray-dark"
-              >
-                <ResourceIcon type={resource.icon} bare />
-                <span>{resource.label}</span>
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
-                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </a>
-            ))}
           </div>
         </div>
       </div>
@@ -537,19 +524,37 @@ export default function CourseDetail() {
   const course = mockCourse;
   const [coursePhase, setCoursePhase] = useState<CoursePhase>("in-progress");
   const [calendarVariant, setCalendarVariant] = useState<CalendarVariant>("all-sessions");
-  const [sessionMaterial, setSessionMaterial] = useState<"homework" | "session-guide">("homework");
+  const [sessionMaterial, setSessionMaterial] = useState<"homework" | "session-guide">("session-guide");
   const [showSessionRecordings, setShowSessionRecordings] = useState(true);
   const [multipleSessionTimes, setMultipleSessionTimes] = useState(true);
   const [showAllCompleted, setShowAllCompleted] = useState(false);
   const [bannersHaveCheckbox, setBannersHaveCheckbox] = useState(false);
+  const [showActionBanners, setShowActionBanners] = useState(false);
+  const [sessionStartingSoon, setSessionStartingSoon] = useState(false);
   const [completedSessionIds, setCompletedSessionIds] = useState<Set<number>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem("completedSessionIds") || "[]")); } catch { return new Set(); }
   });
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem("completedSteps") || "[]")); } catch { return new Set(); }
   });
+  const [completedPostSteps, setCompletedPostSteps] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem("completedPostSteps") || "[]")); } catch { return new Set(); }
+  });
+  const [showGetStarted, setShowGetStarted] = useState(false);
+  const [showAllPostSteps, setShowAllPostSteps] = useState(false);
+  const [pendingHide, setPendingHide] = useState<Set<string>>(new Set());
+  const addPendingHide = (key: string) => {
+    setPendingHide(prev => new Set([...prev, key]));
+    setTimeout(() => {
+      setPendingHide(prev => { const s = new Set(prev); s.delete(key); return s; });
+    }, 500);
+  };
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const [mobilePivotTab, setMobilePivotTab] = useState<"sessions" | "next-steps" | "resources">("next-steps");
+  const [mobilePivotTab, setMobilePivotTab] = useState<"sessions" | "resources">("sessions");
+
+  useEffect(() => { if (!["calendar", "survey", "setup"].some(id => completedSteps.has(id))) setShowGetStarted(false); }, [completedSteps]);
+  useEffect(() => { if (completedSessionIds.size === 0) setShowAllCompleted(false); }, [completedSessionIds]);
+  useEffect(() => { if (!["survey", "next-steps-call"].some(id => completedPostSteps.has(id))) setShowAllPostSteps(false); }, [completedPostSteps]);
 
   const sidebar = <CourseSidebar course={course} showSessionRecordings={showSessionRecordings} />;
 
@@ -560,14 +565,14 @@ export default function CourseDetail() {
 
           {/* Mobile pivot menu */}
           <div className="sticky top-0 z-10 -mx-4 flex gap-5 overflow-x-auto border-b border-gray-stroke bg-white px-4 scrollbar-hide md:hidden">
-            {(["sessions", "next-steps", "resources"] as const).map((tab) => (
+            {(["sessions", "resources"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setMobilePivotTab(tab)}
                 className={`relative shrink-0 cursor-pointer whitespace-nowrap px-3 py-3 transition-colors ${mobilePivotTab === tab ? "text-gray-dark" : "text-gray-light hover:text-gray-dark"}`}
               >
                 <span className="text-[18px] font-medium">
-                  {tab === "sessions" ? "Sessions" : tab === "next-steps" ? "Next steps" : "Resources"}
+                  {tab === "sessions" ? "Sessions" : "Resources"}
                 </span>
                 {mobilePivotTab === tab && (
                   <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#038561]" />
@@ -577,34 +582,46 @@ export default function CourseDetail() {
           </div>
 
           {/* Action banners — desktop always, mobile only on next-steps tab */}
-          <div className={`${mobilePivotTab !== "next-steps" ? "hidden md:block" : ""} py-6 md:py-0`}>
-            <ActionBanners course={course} phase={coursePhase} calendarVariant={calendarVariant} sessionMaterial={sessionMaterial} bannersHaveCheckbox={bannersHaveCheckbox} />
-          </div>
+          {showActionBanners && (
+            <div className="hidden md:block py-6 md:py-0">
+              <ActionBanners course={course} phase={coursePhase} calendarVariant={calendarVariant} sessionMaterial={sessionMaterial} bannersHaveCheckbox={bannersHaveCheckbox} />
+            </div>
+          )}
 
           {/* Sessions — desktop always, mobile only on sessions tab */}
           {(() => {
             const allCompletedPhase = coursePhase === "post-course";
             const isPreCourse = coursePhase === "pre-course";
-            const completedSessions = isPreCourse ? [] : course.sessions.filter(s => s.status === "completed" || allCompletedPhase);
-            const nonCompletedSessions = isPreCourse ? course.sessions : course.sessions.filter(s => s.status !== "completed" && !allCompletedPhase);
-            const hasHidden = !showAllCompleted && completedSessions.length > 1;
-            const visibleCompleted = hasHidden ? completedSessions.slice(-1) : completedSessions;
-            const displaySessions = [...visibleCompleted, ...nonCompletedSessions];
+            const checkedOffSessions = course.sessions.filter(s => completedSessionIds.has(s.id));
+            const effectiveShowAllCompleted = showAllCompleted && checkedOffSessions.length > 0;
+            const displaySessions = effectiveShowAllCompleted ? course.sessions : course.sessions.filter(s => !completedSessionIds.has(s.id) || pendingHide.has(String(s.id)));
 
             return (
               <div className={`${mobilePivotTab !== "sessions" ? "hidden md:block" : ""} pt-6 md:pt-0`}>
-                {/* Getting Started — pre-course only */}
-                {isPreCourse && (
+                {/* Getting Started */}
+                <div>
+                  {(() => {
+                    const allItems = [
+                      { id: "calendar", title: "Add all sessions to your calendar", description: "Two session times each day: 11:00 AM ET and 4:00 PM ET. Attend whichever works for you.", buttons: ["Google Calendar", "Microsoft", "Other calendars"] },
+                      { id: "survey", title: "Complete the intake survey", description: "Takes about 5 minutes. Helps us tailor sessions to your experience level and goals.", buttons: null },
+                      { id: "setup", title: "Set up your tools", description: "Install Claude or your AI tool of choice before the first session.", buttons: null },
+                    ];
+                    const completedItems = allItems.filter(item => completedSteps.has(item.id));
+                    const effectiveShowGetStarted = showGetStarted && completedItems.length > 0;
+                    const displayItems = effectiveShowGetStarted ? allItems : allItems.filter(item => !completedSteps.has(item.id) || pendingHide.has(item.id));
+                    return (<>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-[14px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">Getting started</p>
+                    {completedItems.length > 0 && (
+                      <button onClick={() => setShowGetStarted(!effectiveShowGetStarted)} className="group flex cursor-pointer items-center gap-1 text-[14px] font-medium text-[#038561]">
+                        <span className="flex items-center gap-1 group-hover:underline">{effectiveShowGetStarted ? "Hide completed" : `Show ${completedItems.length} completed`} <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${effectiveShowGetStarted ? "rotate-180" : ""}`}><path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+                      </button>
+                    )}
+                  </div>
                   <div>
-                    <p className="mb-2 text-[14px] font-medium leading-[1.2] uppercase tracking-[0.5px] text-gray-light">Getting started</p>
-                    <div>
-                      {[
-                        { id: "calendar", title: "Add all sessions to your calendar", description: "Two session times each day: 11:00 AM ET and 4:00 PM ET. Attend whichever works for you.", buttons: ["Google Calendar", "Microsoft", "Other calendars"] },
-                        { id: "survey", title: "Complete the intake survey", description: "Takes about 5 minutes. Helps us tailor sessions to your experience level and goals.", buttons: null },
-                        { id: "setup", title: "Set up your tools", description: "Install Claude or your AI tool of choice before the first session.", buttons: null },
-                      ].map((item) => {
+                    {displayItems.map((item) => {
                         const isDone = completedSteps.has(item.id);
-                        const markDone = () => { const s = new Set(completedSteps); s.has(item.id) ? s.delete(item.id) : s.add(item.id); setCompletedSteps(s); localStorage.setItem("completedSteps", JSON.stringify([...s])); };
+                        const markDone = () => { const s = new Set(completedSteps); if (s.has(item.id)) { s.delete(item.id); } else { s.add(item.id); addPendingHide(item.id); } setCompletedSteps(s); localStorage.setItem("completedSteps", JSON.stringify([...s])); };
                         return (
                         <div key={item.id} className="flex items-start gap-4 py-4">
                           <div className="flex w-8 shrink-0 flex-col items-center self-stretch">
@@ -647,35 +664,24 @@ export default function CourseDetail() {
                         </div>
                         );
                       })}
-                    </div>
                   </div>
-                )}
-                {/* Desktop: Sessions header + "Show all past" text link */}
-                <div className="mb-2 mt-2 hidden items-center justify-between md:flex">
-                  <p className="text-[14px] font-medium leading-[1.2] uppercase tracking-[0.5px] text-gray-light">Sessions</p>
-                  {completedSessions.length > 1 && (
-                    <button onClick={() => setShowAllCompleted(!showAllCompleted)} className="flex cursor-pointer items-center gap-1 font-medium text-[14px] text-[#038561]">
-                      {showAllCompleted ? "Hide past" : "Show all past"}
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${showAllCompleted ? "rotate-180" : ""}`}>
-                        <path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                  </>); })()}
+                </div>
+                {/* Desktop: Sessions header + "See all" text link */}
+                <div className="mb-2 mt-4 flex items-center justify-between border-t border-gray-stroke pt-4">
+                  <p className="text-[14px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">Sessions</p>
+                  {checkedOffSessions.length > 0 && (
+                    <button onClick={() => setShowAllCompleted(!effectiveShowAllCompleted)} className="group flex cursor-pointer items-center gap-1 text-[14px] font-medium text-[#038561]">
+                      <span className="flex items-center gap-1 group-hover:underline">{effectiveShowAllCompleted ? "Hide completed" : `Show ${checkedOffSessions.length} completed`} <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${effectiveShowAllCompleted ? "rotate-180" : ""}`}><path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
                     </button>
                   )}
                 </div>
-                {/* Mobile: "Show all past sessions" text link */}
-                {completedSessions.length > 1 && (
-                  <div className="mb-3 md:hidden">
-                    <button onClick={() => setShowAllCompleted(!showAllCompleted)} className="flex cursor-pointer items-center gap-1 font-medium text-[16px] text-[#038561]">
-                      {showAllCompleted ? "Hide past sessions" : "Show all past sessions"}
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${showAllCompleted ? "rotate-180" : ""}`}>
-                        <path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </button>
-                  </div>
-                )}
                 <div className="mt-0">
                   {displaySessions.map((session, i) => {
                     const originalIndex = course.sessions.indexOf(session);
+                    const forceStatus = coursePhase === "pre-course" ? (originalIndex === 0 ? "next" : "upcoming") : undefined;
+                    const isUpcoming = (session.status === "upcoming" || forceStatus === "upcoming") && !allCompletedPhase && forceStatus !== "next" && !completedSessionIds.has(session.id);
+                    const isNext = (session.status === "next" && !allCompletedPhase && !completedSessionIds.has(session.id)) || forceStatus === "next";
                     return (
                       <SessionRow
                         key={session.id}
@@ -684,14 +690,100 @@ export default function CourseDetail() {
                         multipleSessionTimes={multipleSessionTimes}
                         isLast={i === displaySessions.length - 1}
                         allCompleted={allCompletedPhase}
-                        forceStatus={coursePhase === "pre-course" ? (originalIndex === 0 ? "next" : "upcoming") : undefined}
+                        forceStatus={forceStatus}
                         sessionMaterial={sessionMaterial}
                         markedComplete={completedSessionIds.has(session.id)}
-                        onMarkComplete={() => { const s = new Set(completedSessionIds); s.has(session.id) ? s.delete(session.id) : s.add(session.id); setCompletedSessionIds(s); localStorage.setItem("completedSessionIds", JSON.stringify([...s])); }}
+                        disabled={isUpcoming || (isNext && !!session.startsIn)}
+                        startingSoon={isNext && sessionStartingSoon || undefined}
+                        onMarkComplete={(isUpcoming || (isNext && !!session.startsIn)) ? undefined : () => { const s = new Set(completedSessionIds); if (s.has(session.id)) { s.delete(session.id); } else { s.add(session.id); addPendingHide(String(session.id)); } setCompletedSessionIds(s); localStorage.setItem("completedSessionIds", JSON.stringify([...s])); }}
                       />
                     );
                   })}
                 </div>
+
+                {/* What's next */}
+                {(() => {
+                  const lastSession = course.sessions[course.sessions.length - 1];
+                  const lastSessionStarted = coursePhase === "post-course" || completedSessionIds.has(lastSession.id);
+                  const allPostItems = [
+                    { id: "survey", title: "Complete the post-program survey", description: "Takes about 5 minutes. Helps us improve the program for future cohorts.", lockedUntilLastSession: true },
+                    { id: "next-steps-call", title: "Book a next steps call", description: "A short call with our team to help you figure out where to go from here.", lockedUntilLastSession: false },
+                  ];
+                  const completedPostItems = allPostItems.filter(item => completedPostSteps.has(item.id));
+                  const effectiveShowAllPostSteps = showAllPostSteps && completedPostItems.length > 0;
+                  const displayPostItems = effectiveShowAllPostSteps ? allPostItems : allPostItems.filter(item => !completedPostSteps.has(item.id) || pendingHide.has(item.id));
+                  return (
+                  <div>
+                    <div className="mb-2 mt-4 flex items-center justify-between border-t border-gray-stroke pt-4">
+                      <p className="text-[14px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">What's next</p>
+                      {completedPostItems.length > 0 && (
+                        <button onClick={() => setShowAllPostSteps(!effectiveShowAllPostSteps)} className="group flex cursor-pointer items-center gap-1 text-[14px] font-medium text-[#038561]">
+                          <span className="flex items-center gap-1 group-hover:underline">{effectiveShowAllPostSteps ? "Hide completed" : `Show ${completedPostItems.length} completed`} <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${effectiveShowAllPostSteps ? "rotate-180" : ""}`}><path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+                        </button>
+                      )}
+                    </div>
+                    <div>
+                      {displayPostItems.map((item, i, arr) => {
+                        const isLocked = item.lockedUntilLastSession && !lastSessionStarted;
+                        const isDone = completedPostSteps.has(item.id);
+                        const toggle = () => { if (isLocked) return; const s = new Set(completedPostSteps); if (s.has(item.id)) { s.delete(item.id); } else { s.add(item.id); addPendingHide(item.id); } setCompletedPostSteps(s); localStorage.setItem("completedPostSteps", JSON.stringify([...s])); };
+                        const markDone = () => { if (!isDone) toggle(); };
+                        return (
+                          <div key={item.id} className="flex items-start gap-4 py-4">
+                            <div className="flex w-8 shrink-0 flex-col items-center self-stretch">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); toggle(); }}
+                                disabled={isLocked}
+                                className={`group mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] transition-colors ${isLocked ? "cursor-not-allowed border-[1.5px] border-gray-stroke bg-gray-hover opacity-50" : isDone ? "bg-[#038561] hover:bg-[#038561]/80 cursor-pointer" : "border-[1.5px] border-gray-stroke bg-white hover:border-[#038561]/40 cursor-pointer"}`}
+                              >
+                                {isDone ? (
+                                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M2.5 7l3 3 6-6" />
+                                  </svg>
+                                ) : (
+                                  !isLocked && <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#038561] opacity-0 transition-opacity group-hover:opacity-100">
+                                    <path d="M2.5 7l3 3 6-6" />
+                                  </svg>
+                                )}
+                              </button>
+                              {i < arr.length - 1 && (
+                                <div className={`mt-1.5 w-0 flex-1 border-l-[1.5px] border-dashed ${isDone ? "border-[#038561]" : "border-gray-stroke"}`} />
+                              )}
+                            </div>
+                            <div className={`min-w-0 flex-1 pb-1 ${isLocked ? "" : ""}`} onClick={isLocked ? undefined : markDone}>
+                              {isLocked ? (
+                                <div>
+                                  <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">{item.title}</p>
+                                  <p className="mt-1 leading-[1.2] text-gray-light">Available after session {lastSession.number}</p>
+                                </div>
+                              ) : (
+                              <a href="#" className="group block no-underline">
+                                <p className={`text-[18px] font-medium leading-[1.2] ${isDone ? "text-gray-light" : "text-gray-dark"}`}>{item.title} <InlineChevron /></p>
+                                <p className="mt-1 leading-[1.2] text-gray-light">{item.description}</p>
+                              </a>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <Banner
+                      href="#"
+                      variant="timeline"
+                      decoration={{ type: "emoji", value: "🔥" }}
+                      title="Keep building"
+                      subtext="Join additional build sessions to continue honing your skills."
+                    />
+                    <Banner
+                      href="#"
+                      variant="timeline"
+                      decoration={{ type: "emoji", value: "🚀" }}
+                      title="Join the next level"
+                      subtext="AI Builder Program Level 2: Build AI-Powered Products."
+                    />
+                  </div>
+                  );
+                })()}
               </div>
             );
           })()}
@@ -701,19 +793,7 @@ export default function CourseDetail() {
             <div className="pt-6">
               <p className="mb-2 hidden text-[14px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light md:block">Resources</p>
               <div className="flex flex-col">
-                {!showSessionRecordings && (
-                  <a
-                    href="#"
-                    target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
-                  >
-                    <ResourceIcon type="recording" />
-                    <span>Recordings</span>
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
-                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </a>
-                )}
-                {course.resources.filter(r => !r.secondary).map((resource, i) => (
+                {course.resources.filter(r => !r.secondary && !(r.icon === "recording" && showSessionRecordings)).map((resource, i) => (
                   <a
                     key={i}
                     href={resource.url}
@@ -731,24 +811,11 @@ export default function CourseDetail() {
                   className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
                 >
                   <ResourceIcon type="gift" />
-                  <span>Refer and earn</span>
+                  <span>Refer your friends or team</span>
                   <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
                     <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </a>
-                {course.resources.filter(r => r.secondary).map((resource, i) => (
-                  <a
-                    key={i}
-                    href={resource.url}
-                    target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 pb-[10px] pt-5 text-[16px] leading-[1.2] text-gray-light no-underline transition-[padding] duration-300 ease-out hover:pl-[4px] hover:text-gray-dark"
-                  >
-                    <ResourceIcon type={resource.icon} bare />
-                    <span>{resource.label}</span>
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-xlight">
-                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </a>
-                ))}
               </div>
             </div>
           </div>
@@ -762,7 +829,7 @@ export default function CourseDetail() {
           <div className="mb-2 w-[240px] rounded-xl border border-gray-stroke bg-white px-4 py-3 shadow-lg">
             {/* Toggles */}
             <div className="flex items-center justify-between">
-              <p className="text-[16px] font-medium text-gray-dark">Session recordings</p>
+              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">Session-level recording links</p>
               <button
                 onClick={() => setShowSessionRecordings(!showSessionRecordings)}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showSessionRecordings ? "bg-[#038561]" : "bg-gray-300"}`}
@@ -771,8 +838,8 @@ export default function CourseDetail() {
               </button>
             </div>
 
-            <div className="mt-2 flex items-center justify-between">
-              <p className="text-[16px] font-medium text-gray-dark">Multiple session times</p>
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">Multiple session times</p>
               <button
                 onClick={() => setMultipleSessionTimes(!multipleSessionTimes)}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${multipleSessionTimes ? "bg-[#038561]" : "bg-gray-300"}`}
@@ -781,8 +848,28 @@ export default function CourseDetail() {
               </button>
             </div>
 
-            <div className="mt-2 flex items-center justify-between">
-              <p className="text-[16px] font-medium text-gray-dark">Banners have checkbox</p>
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">Show action banners</p>
+              <button
+                onClick={() => setShowActionBanners(!showActionBanners)}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showActionBanners ? "bg-[#038561]" : "bg-gray-300"}`}
+              >
+                <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showActionBanners ? "translate-x-[18px]" : "translate-x-0.5"}`} />
+              </button>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">Session starting soon</p>
+              <button
+                onClick={() => setSessionStartingSoon(!sessionStartingSoon)}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${sessionStartingSoon ? "bg-[#038561]" : "bg-gray-300"}`}
+              >
+                <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${sessionStartingSoon ? "translate-x-[18px]" : "translate-x-0.5"}`} />
+              </button>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">Banners have checkbox</p>
               <button
                 onClick={() => setBannersHaveCheckbox(!bannersHaveCheckbox)}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${bannersHaveCheckbox ? "bg-[#038561]" : "bg-gray-300"}`}
@@ -797,7 +884,38 @@ export default function CourseDetail() {
               {coursePhases.map(({ value, label }) => (
                 <button
                   key={value}
-                  onClick={() => { setCoursePhase(value); setShowAllCompleted(false); }}
+                  onClick={() => {
+                    setCoursePhase(value);
+                    setShowAllCompleted(false);
+                    setShowGetStarted(false);
+                    setShowAllPostSteps(false);
+                    if (value === "in-progress") {
+                      const sessions = new Set([1, 2]);
+                      const steps = new Set(["calendar", "survey", "setup"]);
+                      setCompletedSessionIds(sessions);
+                      setCompletedSteps(steps);
+                      setCompletedPostSteps(new Set());
+                      localStorage.setItem("completedSessionIds", JSON.stringify([...sessions]));
+                      localStorage.setItem("completedSteps", JSON.stringify([...steps]));
+                      localStorage.setItem("completedPostSteps", JSON.stringify([]));
+                    } else if (value === "post-course") {
+                      const sessions = new Set(course.sessions.map(s => s.id));
+                      const steps = new Set(["calendar", "survey", "setup"]);
+                      setCompletedSessionIds(sessions);
+                      setCompletedSteps(steps);
+                      setCompletedPostSteps(new Set());
+                      localStorage.setItem("completedSessionIds", JSON.stringify([...sessions]));
+                      localStorage.setItem("completedSteps", JSON.stringify([...steps]));
+                      localStorage.setItem("completedPostSteps", JSON.stringify([]));
+                    } else {
+                      setCompletedSessionIds(new Set());
+                      setCompletedSteps(new Set());
+                      setCompletedPostSteps(new Set());
+                      localStorage.setItem("completedSessionIds", JSON.stringify([]));
+                      localStorage.setItem("completedSteps", JSON.stringify([]));
+                      localStorage.setItem("completedPostSteps", JSON.stringify([]));
+                    }
+                  }}
                   className="flex cursor-pointer items-center gap-2.5 text-[16px] leading-[1.2]"
                 >
                   <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${coursePhase === value ? "border-[#038561] bg-[#038561]" : "border-gray-300"}`}>
@@ -814,7 +932,7 @@ export default function CourseDetail() {
             <>
               <p className="mb-2.5 mt-4 text-[14px] font-medium uppercase tracking-[0.5px] text-gray-light">Session materials</p>
               <div className="flex flex-col gap-2">
-                {([{ value: "homework", label: "Homework" }, { value: "session-guide", label: "Session guide" }] as const).map(({ value, label }) => (
+                {([{ value: "session-guide", label: "Session guide" }, { value: "homework", label: "Homework" }] as const).map(({ value, label }) => (
                   <button
                     key={value}
                     onClick={() => setSessionMaterial(value)}
