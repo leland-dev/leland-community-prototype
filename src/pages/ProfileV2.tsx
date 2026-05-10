@@ -384,7 +384,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
       ? (searchParams.get("tab") as "activity" | "about" | "calendar" | "likes" | "more")
       : "activity"
   );
-  const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Courses" | "Content">("All");
+  const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Programs" | "Content">("All");
   const [purchasesExpanded, setPurchasesExpanded] = useState(false);
   const [pastOpen, setPastOpen] = useState(false);
   const [sectionFilter, setSectionFilter] = useState("All");
@@ -1785,7 +1785,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                         My purchases
                       </h2>
                       <div className="mt-4 flex flex-wrap gap-[6px]">
-                        {(["All", "Coaching", "Courses", "Content"] as const).map((tab) => (
+                        {(["All", "Coaching", "Programs", "Content"] as const).map((tab) => (
                           <button
                             key={tab}
                             onClick={() => { setPurchasesFilter(tab); setPurchasesExpanded(false); }}
@@ -1801,7 +1801,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                         const filtered = purchasedOfferings.filter((offering) => {
                           if (purchasesFilter === "All") return true;
                           if (purchasesFilter === "Coaching") return offering.type === "hourly" || offering.type === "hourly-package" || offering.type === "package";
-                          if (purchasesFilter === "Courses") return offering.type === "course";
+                          if (purchasesFilter === "Programs") return offering.type === "course";
                           return offering.type === "content";
                         });
                         const canTruncate = purchasesFilter === "All" && filtered.length > 4;

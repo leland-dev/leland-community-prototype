@@ -6,8 +6,11 @@ import downloadIcon from "../assets/icons/download.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import chatIcon from "../assets/icons/nav-icons/chat-inactive.svg";
 import menuBurgerIcon from "../assets/icons/menu-burger.svg";
+import arrowRightIcon from "../assets/icons/arrow-right.svg";
 import playVideoIcon from "../assets/icons/play-video.svg";
 import slackIcon from "../assets/icons/slack-black.svg";
+import orderHistoryIcon from "../assets/icons/order-history.svg";
+import calendarUpcomingIcon from "../assets/icons/calendar-upcoming.svg";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import eyeClosedIcon from "../assets/icons/eye-closed.svg";
 import browserIcon from "../assets/icons/browser.svg";
@@ -91,13 +94,15 @@ function getMenuItems(type: OfferingType, cohortSelected: boolean, exhausted: bo
   if (type === "course") {
     if (!cohortSelected) {
       return [
-        { icon: browserIcon, label: "Course details" },
+        { icon: browserIcon, label: "Program details" },
       ];
     }
     return [
-      { icon: menuBurgerIcon, label: "Syllabus" },
+      { icon: arrowRightIcon, label: "Details" },
       { icon: playVideoIcon, label: "Recordings" },
-      { icon: slackIcon, label: "Group Slack" },
+      { icon: orderHistoryIcon, label: "Office hours" },
+      { icon: slackIcon, label: "Slack community" },
+      { icon: calendarUpcomingIcon, label: "Join a build session" },
     ];
   }
   // content
