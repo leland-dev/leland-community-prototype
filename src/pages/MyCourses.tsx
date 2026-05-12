@@ -234,6 +234,7 @@ export default function MyCourses() {
                   purchased
                   cohortSelected={course.type === "live" ? course.cohortSelected !== false : true}
                   showImage
+                  href={course.id === 1 ? "/course/1" : undefined}
                 />
               ))}
             </div>

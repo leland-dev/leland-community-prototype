@@ -296,7 +296,7 @@ export default function OfferingCard({
   return (
     <div className="@container">
       {href ? (
-        <a href={href} className="no-underline">{cardContent}</a>
+        <Link to={href} className="no-underline">{cardContent}</Link>
       ) : (
         cardContent
       )}

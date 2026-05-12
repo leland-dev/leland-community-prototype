@@ -1819,7 +1819,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                                   image={offering.image}
                                   purchased
                                   exhausted={!!offering.exhausted}
-                                  href={offering.title === "AI Builder Program Level 1: Use AI to 10x Your Impact" ? "/course/ai-builder-1" : undefined}
+                                  href={offering.title === "AI Builder Program Level 1: Use AI to 10x Your Impact" ? "/course/1" : undefined}
                                 />
                               ))}
                               <AnimatePresence initial={false}>
