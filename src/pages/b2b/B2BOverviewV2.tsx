@@ -775,7 +775,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-gray-stroke">
-                  {bulkActions && <th className="bg-[#fafafa] px-4 py-3 text-left">
+                  {bulkActions && <th className="bg-[#fafafa] pl-4 pr-0 py-3 text-left">
                     <label className="relative flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border border-[#CCCCCC]"
                       style={visibleUsers.length > 0 && visibleUsers.every((u) => selectedEmails.has(u.email)) ? { backgroundColor: "#038561", borderColor: "#038561" } : undefined}>
                       <input
@@ -820,7 +820,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       setSelectedUserV2(applyAccessOverride({ ...baseDetail, cohorts: rowCohorts }, user.email));
                     }}
                   >
-                    {bulkActions && <td className="px-4 py-[14px]" onClick={(e) => e.stopPropagation()}>
+                    {bulkActions && <td className="pl-4 pr-0 py-[14px]" onClick={(e) => e.stopPropagation()}>
                       <label className="relative flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border border-[#CCCCCC]"
                         style={selectedEmails.has(user.email) ? { backgroundColor: "#038561", borderColor: "#038561" } : undefined}>
                         <input
