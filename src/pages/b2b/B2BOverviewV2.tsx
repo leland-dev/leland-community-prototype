@@ -393,6 +393,69 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
   },
 };
 
+// Collect all reviews from userDetailsV2 for the reviews modal
+const allReviews = Object.values(userDetailsV2).flatMap((u) => [
+  ...(u.sessions?.entries ?? [])
+    .filter((s) => s.review)
+    .map((s) => ({ userName: u.name, userInitials: u.initials, userImage: u.image, type: "session" as const, subject: s.coach ?? "Coach", rating: s.review!.rating, text: s.review!.text, date: s.date })),
+  ...(u.cohorts ?? [])
+    .filter((c) => c.review)
+    .map((c) => ({ userName: u.name, userInitials: u.initials, userImage: u.image, type: "program" as const, subject: c.name, rating: c.review!.rating, text: c.review!.text, date: c.startDate ?? "" })),
+]);
+
+function ReviewsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null;
+  return (
+    <div
+      className="fixed inset-0 z-[1010] flex items-end justify-center bg-black/40 sm:items-center"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="relative flex w-full flex-col overflow-hidden rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] max-h-[100dvh] sm:max-h-[85dvh] sm:w-[560px] sm:max-w-[95vw] sm:rounded-2xl">
+        <button onClick={onClose} className="absolute right-0 top-0 p-2 z-10">
+          <div className="flex items-center justify-center rounded-full border border-gray-stroke bg-white p-[10px] text-gray-dark hover:bg-gray-hover">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <line x1="1" y1="1" x2="13" y2="13" /><line x1="13" y1="1" x2="1" y2="13" />
+            </svg>
+          </div>
+        </button>
+        <div className="border-b border-gray-stroke px-6 pb-4 pt-6 shrink-0">
+          <h3 className="text-[24px] font-medium text-gray-dark">Reviews</h3>
+          <p className="mt-1 text-[16px] text-gray-light">{allReviews.length} reviews from users</p>
+        </div>
+        <div className="flex-1 overflow-y-auto divide-y divide-gray-stroke px-6">
+          {allReviews.map((r, i) => (
+            <div key={i} className="py-5">
+              <div className="flex items-start gap-3">
+                {r.userImage ? (
+                  <img src={r.userImage} alt={r.userName} className="h-9 w-9 shrink-0 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-hover text-[13px] font-medium text-gray-dark">{r.userInitials}</div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[16px] font-medium text-gray-dark">{r.userName}</span>
+                    <div className="flex shrink-0 items-center gap-0.5">
+                      {Array.from({ length: 5 }).map((_, j) => (
+                        <svg key={j} width="14" height="14" viewBox="0 0 24 24" fill={j < r.rating ? "#ffcb47" : "none"} stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-0.5 text-[14px] text-gray-light">
+                    {r.type === "session" ? `1:1 session with ${r.subject}` : r.subject}
+                  </div>
+                  <p className="mt-2 text-[16px] leading-[1.5] text-gray-dark">{r.text}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSettings, partnerModel, onSetPartnerModel }: Props) {
   const showVerizon = partnerModel === "per-seat";
   const [page, setPage] = useState(0);
@@ -454,6 +517,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
   };
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [bulkActions, setBulkActions] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const adminRef = useRef<HTMLDivElement>(null);
@@ -613,7 +677,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                   <div className="flex items-baseline gap-1.5">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffcb47" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     <span className="text-[24px] font-medium leading-none text-gray-dark">{rating.score.toFixed(1)}</span>
-                    <span className="text-[13px] text-gray-light">({rating.count})</span>
+                    <button onClick={() => setShowReviews(true)} className="text-[16px] text-gray-light underline hover:opacity-70">({rating.count})</button>
                   </div>
                 ) : (
                   <div className="flex items-baseline justify-between gap-2">
@@ -659,7 +723,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               <span className="text-[24px] font-medium leading-[1.2] text-gray-dark">4.8</span>
             </div>
-            <span className="pb-[2px] text-[14px] leading-[1.5] text-gray-light">(112)</span>
+            <button onClick={() => setShowReviews(true)} className="pb-[2px] text-[16px] leading-[1.5] text-gray-light underline hover:opacity-70">(112)</button>
           </div>
         </div>
       </div>}
@@ -1093,6 +1157,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
       <div className="h-[120px] shrink-0" />
 
       <B2BUserDrawerV2 user={selectedUserV2} onClose={() => setSelectedUserV2(null)} isAlaCarte={partnerModel === "a-la-carte"} onUpdateAccess={handleUpdateAccess} onSwitchCohort={handleSwitchCohort} />
+      <ReviewsModal open={showReviews} onClose={() => setShowReviews(false)} />
 
       {/* Prototype toggle */}
       <div ref={adminRef} className="fixed bottom-24 right-4 z-40 md:bottom-6 md:right-6">
