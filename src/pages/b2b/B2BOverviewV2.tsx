@@ -748,22 +748,22 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     {/* Row 2: three stat columns */}
                     <div className="mt-4 flex gap-4">
                       <div className="flex flex-col gap-1 min-w-0 max-w-[160px] flex-1">
-                        <div className="text-[16px] leading-[1.2] text-gray-dark">1:1 Sessions</div>
+                        <div className="text-[14px] leading-[1.2] text-gray-light">1:1 Sessions</div>
                         {user.sessions != null
-                          ? <span className="text-[14px] text-gray-dark">{user.sessions} <span className="text-gray-light">/ {user.sessionsTotal}</span></span>
-                          : <span className="text-[14px] text-gray-light">—</span>}
+                          ? <span className="text-[16px] text-gray-dark">{user.sessions} <span className="text-gray-light">/ {user.sessionsTotal}</span></span>
+                          : <span className="text-[16px] text-gray-dark">—</span>}
                       </div>
                       <div className="flex flex-col gap-1 min-w-0 max-w-[160px] flex-1">
-                        <div className="text-[16px] leading-[1.2] text-gray-dark">Programs</div>
-                        <span className="text-[14px] text-gray-light">{enrolled.length > 0 ? enrolled.length : "—"}</span>
+                        <div className="text-[14px] leading-[1.2] text-gray-light">Programs</div>
+                        <span className="text-[16px] text-gray-dark">{enrolled.length > 0 ? enrolled.length : "—"}</span>
                       </div>
                       <div className="flex flex-col gap-1 min-w-0 max-w-[160px] flex-1">
-                        <div className="text-[16px] leading-[1.2] text-gray-dark">Leland+ access</div>
+                        <div className="text-[14px] leading-[1.2] text-gray-light">Leland+ access</div>
                         {user.plus === "Granted" && user.plusGranted && user.plusExpiry
-                          ? <span className="text-[14px] text-gray-light">{user.plusGranted.replace(/,\s*\d{4}$/, "")} – {user.plusExpiry.replace(/,\s*\d{4}$/, "")}</span>
+                          ? <span className="text-[16px] text-gray-dark">{user.plusGranted.replace(/,\s*\d{4}$/, "")} – {user.plusExpiry.replace(/,\s*\d{4}$/, "")}</span>
                           : user.plus === "Expired"
-                          ? <span className="text-[14px] text-gray-xlight">Expired</span>
-                          : <span className="text-[14px] text-gray-light">—</span>}
+                          ? <span className="text-[16px] text-gray-dark">Expired</span>
+                          : <span className="text-[16px] text-gray-dark">—</span>}
                       </div>
                     </div>
                   </div>
