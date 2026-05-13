@@ -54,6 +54,10 @@ interface Props {
 }
 
 
+function cohortDateLabel(startDate: string): string {
+  return new Date(startDate) < new Date() ? `Started ${startDate}` : `Starts ${startDate}`;
+}
+
 const ALL_COHORTS_META: { key: string; label: string; image: string; startDate: string; endDate: string; sessions: string; full?: boolean }[] = [
   { key: "ib", label: "Spring '26 IB Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", sessions: "Wednesdays & Fridays, 6–7:30 PM ET · 8 sessions" },
   { key: "pe", label: "Private Equity Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841c0c4dde9ed55e539fe5f.png", startDate: "Jun 2, 2026", endDate: "Jun 30, 2026", sessions: "Tuesdays, 7–8:30 PM ET · 5 sessions" },
@@ -176,7 +180,7 @@ function CohortSelectRow({
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-0.5">
           <div className="text-[16px] font-medium text-gray-dark">{cohort.label}</div>
-          <div className="text-[14px] text-gray-light">{cohort.startDate} – {cohort.endDate}</div>
+          <div className="text-[14px] text-gray-light">{cohortDateLabel(cohort.startDate)}</div>
           <button
             onClick={() => setExpanded(!expanded)}
             className="mt-0.5 w-fit cursor-pointer text-[14px] text-gray-light underline hover:text-gray-dark"
@@ -520,7 +524,7 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, onUpdateAcc
                                     </div>
                                   ) : (
                                     <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[14px] leading-[1.2] text-gray-light">
-                                      <span>{c.startDate} – {c.endDate}</span>
+                                      <span>{cohortDateLabel(c.startDate!)}</span>
                                       <button onClick={(e) => { e.stopPropagation(); setSwitchCohortName(c.name); }} className="cursor-pointer text-[14px] text-gray-xlight underline hover:text-gray-dark">Switch cohort</button>
                                     </div>
                                   )}
