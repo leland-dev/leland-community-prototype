@@ -298,7 +298,6 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, onUpdateAcc
 
   const sessionsUsed = user?.sessions?.entries.filter((s) => s.status !== "unbooked").length ?? 0;
   const sessionsCompleted = user?.sessions?.entries.filter((s) => s.status === "completed").length ?? 0;
-  const hasInvitePending = user?.cohorts?.some((c) => c.status === "invited");
 
 
   return (
