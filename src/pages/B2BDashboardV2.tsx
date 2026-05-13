@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import B2BTopNav from "../components/B2BTopNav";
 import B2BOverviewV2 from "./b2b/B2BOverviewV2";
 import B2BSettings from "./b2b/B2BSettings";
+import B2BUsers from "./b2b/B2BUsers";
 import { B2BModalDispatcher } from "./b2b/B2BModals";
 import { type B2BView, type ModalId } from "./b2b/B2BData";
 import "../styles/b2b.css";
@@ -37,6 +38,7 @@ export default function B2BDashboardV2() {
               onSetPartnerModel={setPartnerModel}
             />
           )}
+          {activeView === "users" && <B2BUsers onOpenModal={setOpenModal} />}
           {activeView === "settings" && <B2BSettings onNavigateDashboard={() => setActiveView("overview")} />}
           <div className="h-[120px] shrink-0" />
         </div>

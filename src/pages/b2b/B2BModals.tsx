@@ -154,6 +154,8 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }:
   lelandPlus: boolean; setLelandPlus: (b: boolean) => void;
 }) {
   const [cohortInvited, setCohortInvited] = useState<Record<string, boolean>>({});
+  const [selectedDates, setSelectedDates] = useState<Record<string, string>>({});
+  const [openPicker, setOpenPicker] = useState<string | null>(null);
 
   return (
     <div className="mb-5 mt-8 rounded-[10px] border border-gray-stroke">
@@ -177,12 +179,40 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }:
         <span className="text-[15px] text-gray-dark">Live courses</span>
         <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
           {COHORTS.map((cohort) => (
-            <div key={cohort} className="flex items-center justify-between gap-4 py-1.5">
-              <span className="text-[14px] text-gray-light">{cohort}</span>
+            <div key={cohort} className="flex items-start justify-between gap-4 py-1.5">
+              <div className="flex flex-col">
+                <span className="text-[14px] text-gray-light">{cohort}</span>
+                {cohortInvited[cohort] && (
+                  <>
+                    {selectedDates[cohort] ? (
+                      <div className="mt-0.5 flex items-center gap-1.5">
+                        <span className="text-[14px] text-gray-light">{selectedDates[cohort]}</span>
+                        <button
+                          onClick={() => setOpenPicker(openPicker === cohort ? null : cohort)}
+                          className="text-[14px] text-gray-xlight underline hover:opacity-70"
+                        >Change</button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setOpenPicker(openPicker === cohort ? null : cohort)}
+                        className="mt-0.5 text-left text-[14px] text-gray-xlight underline hover:opacity-70"
+                      >Select cohort</button>
+                    )}
+                    {openPicker === cohort && (
+                      <CohortDatePicker
+                        program={cohort}
+                        selected={selectedDates[cohort] ?? null}
+                        onSelect={(d) => setSelectedDates((prev) => ({ ...prev, [cohort]: d }))}
+                        onClose={() => setOpenPicker(null)}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
               {cohortInvited[cohort] ? (
-                <div className="flex items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
+                <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
                   <span className="text-[14px] font-medium text-[#038561]">Added</span>
-                  <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: false }))} className="text-[#038561] hover:opacity-70">
+                  <button onClick={() => { setCohortInvited((prev) => ({ ...prev, [cohort]: false })); setSelectedDates((prev) => { const n = { ...prev }; delete n[cohort]; return n; }); }} className="text-[#038561] hover:opacity-70">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 </div>
@@ -196,6 +226,7 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus }:
             </div>
           ))}
         </div>
+        <p className="mt-2 text-[14px] text-gray-xlight">No dates selected? The user will be prompted to choose their own cohort.</p>
       </div>
       <div className="flex items-center justify-between gap-4 border-t border-gray-stroke px-4 py-3">
         <span className="text-[15px] text-gray-dark">Leland+</span>
@@ -224,7 +255,46 @@ const CONTRACT_COHORTS_MODAL = [
   "AI for Finance Professionals",
 ];
 
+const COHORT_DATES: Record<string, string[]> = {
+  "Spring '26 IB Recruiting": ["Mar 3 – May 9, 2026", "Jun 2 – Aug 7, 2026"],
+  "PE Recruiting Bootcamp": ["Apr 7 – Jun 12, 2026", "Sep 8 – Nov 13, 2026"],
+  "AI for Finance": ["Feb 3 – Apr 10, 2026", "May 5 – Jul 10, 2026"],
+  "Spring '26 IB Recruiting Bootcamp": ["Mar 3 – May 9, 2026", "Jun 2 – Aug 7, 2026"],
+  "Private Equity Recruiting Bootcamp": ["Apr 7 – Jun 12, 2026", "Sep 8 – Nov 13, 2026"],
+  "AI for Finance Professionals": ["Feb 3 – Apr 10, 2026", "May 5 – Jul 10, 2026"],
+};
+
+function CohortDatePicker({ program, selected, onSelect, onClose }: {
+  program: string;
+  selected: string | null;
+  onSelect: (date: string) => void;
+  onClose: () => void;
+}) {
+  const dates = COHORT_DATES[program] ?? [];
+  return (
+    <div className="mt-1.5 rounded-[8px] border border-gray-stroke bg-white shadow-sm">
+      {dates.map((d) => (
+        <button
+          key={d}
+          onClick={() => { onSelect(d); onClose(); }}
+          className={`flex w-full items-center gap-2 px-3 py-2 text-left text-[14px] transition-colors first:rounded-t-[8px] last:rounded-b-[8px] hover:bg-[#f5f5f5] ${selected === d ? "font-medium text-primary" : "text-gray-dark"}`}
+        >
+          {selected === d && (
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-primary">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          )}
+          <span className={selected === d ? "" : "pl-[20px]"}>{d}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function PerSeatIncludes() {
+  const [selectedDates, setSelectedDates] = useState<Record<string, string>>({});
+  const [openPicker, setOpenPicker] = useState<string | null>(null);
+
   return (
     <div className="mt-8">
       <div className="mb-2 text-[14px] text-gray-light">This seat includes</div>
@@ -240,9 +310,34 @@ function PerSeatIncludes() {
         </div>
         <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
           {CONTRACT_COHORTS_MODAL.map((cohort) => (
-            <div key={cohort} className="py-1.5 text-[14px] text-gray-light">{cohort}</div>
+            <div key={cohort} className="py-1.5">
+              <div className="text-[14px] text-gray-light">{cohort}</div>
+              {selectedDates[cohort] ? (
+                <div className="mt-0.5 flex items-center gap-1.5">
+                  <span className="text-[14px] text-gray-light">{selectedDates[cohort]}</span>
+                  <button
+                    onClick={() => setOpenPicker(openPicker === cohort ? null : cohort)}
+                    className="text-[14px] text-gray-xlight underline hover:opacity-70"
+                  >Change</button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setOpenPicker(openPicker === cohort ? null : cohort)}
+                  className="mt-0.5 text-[14px] text-gray-xlight underline hover:opacity-70"
+                >Select cohort</button>
+              )}
+              {openPicker === cohort && (
+                <CohortDatePicker
+                  program={cohort}
+                  selected={selectedDates[cohort] ?? null}
+                  onSelect={(d) => setSelectedDates((prev) => ({ ...prev, [cohort]: d }))}
+                  onClose={() => setOpenPicker(null)}
+                />
+              )}
+            </div>
           ))}
         </div>
+        <p className="mt-2 text-[14px] text-gray-xlight">No dates selected? The user will be prompted to choose their own cohort.</p>
       </div>
       <div className="flex items-center justify-between gap-4 border-t border-gray-stroke px-4 py-3">
         <span className="text-[15px] text-gray-dark">Leland+</span>

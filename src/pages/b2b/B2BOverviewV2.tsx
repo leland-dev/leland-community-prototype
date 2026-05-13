@@ -35,17 +35,19 @@ const CONTRACT_COHORTS = [
   { key: "ib", label: "Spring '26 IB Recruiting Bootcamp" },
   { key: "pe", label: "Private Equity Recruiting Bootcamp" },
   { key: "ai", label: "AI for Finance Professionals" },
+  { key: "consulting", label: "Consulting Accelerator" },
 ] as const;
 
-const COHORT_META: Record<CohortKey, { label: string; image: string; startDate: string; endDate: string }> = {
-  ib: { label: "Spring '26 IB Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026" },
-  pe: { label: "Private Equity Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841c0c4dde9ed55e539fe5f.png", startDate: "Apr 7, 2026", endDate: "May 9, 2026" },
-  ai: { label: "AI for Finance Professionals", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Mar 1, 2026", endDate: "Mar 29, 2026" },
+const COHORT_META: Record<CohortKey, { label: string; image: string; startDate: string; endDate: string; sessionsTotal: number }> = {
+  ib: { label: "Spring '26 IB Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", sessionsTotal: 8 },
+  pe: { label: "Private Equity Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841c0c4dde9ed55e539fe5f.png", startDate: "Jun 2, 2026", endDate: "Jun 30, 2026", sessionsTotal: 5 },
+  ai: { label: "AI for Finance Professionals", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Mar 1, 2026", endDate: "Mar 29, 2026", sessionsTotal: 4 },
+  consulting: { label: "Consulting Accelerator", image: "https://leland.imgix.net/bootcamps/6841c0c4dde9ed55e539fe5f.png", startDate: "Jul 7, 2026", endDate: "Aug 4, 2026", sessionsTotal: 6 },
 };
 
-function cohortEntry(key: CohortKey, status: CohortEntry["status"], extra?: Partial<CohortEntry>): CohortEntry {
+function cohortEntry(key: CohortKey, sessionsAttended: number, extra?: Partial<CohortEntry>): CohortEntry {
   const m = COHORT_META[key];
-  return { name: m.label, image: m.image, startDate: m.startDate, endDate: m.endDate, status, ...extra };
+  return { name: m.label, image: m.image, startDate: m.startDate, endDate: m.endDate, sessionsAttended, sessionsTotal: m.sessionsTotal, ...extra };
 }
 
 function tableRowToUserDetailV2(row: typeof users[number]): UserDetailV2 {
@@ -55,8 +57,15 @@ function tableRowToUserDetailV2(row: typeof users[number]): UserDetailV2 {
   for (let i = 0; i < sessionsCompleted; i++) entries.push({ date: "—", status: "completed" });
   for (let i = sessionsCompleted; i < sessionsGranted; i++) entries.push({ date: "—", status: "unbooked" });
   const cohorts: CohortEntry[] = CONTRACT_COHORTS
-    .filter((c) => row.cohortStatuses[c.key])
-    .map((c) => cohortEntry(c.key, row.cohortStatuses[c.key]!));
+    .filter((c) => row.cohortStatuses[c.key] !== undefined)
+    .map((c) => {
+      const status = row.cohortStatuses[c.key];
+      if (status === null) {
+        const m = COHORT_META[c.key];
+        return { name: m.label, image: m.image, pending: true };
+      }
+      return cohortEntry(c.key, status ?? 0);
+    });
   const plus: UserDetailV2["plus"] = row.plus !== "—" && row.plusExpiry
     ? { status: row.plus === "Expired" ? "expired" : "active", expiry: row.plusExpiry }
     : undefined;
@@ -69,22 +78,31 @@ function tableRowToUserDetailV2(row: typeof users[number]): UserDetailV2 {
 }
 
 type CohortKey = typeof CONTRACT_COHORTS[number]["key"];
-type CohortStatus = "invited" | "enrolled" | "completed";
+type CohortStatus = number | null; // number = sessions attended (0 = enrolled, not yet attended); null = granted, no cohort selected
 
-const users = [
-  { initials: "ZP", name: "Zoe Park", email: "zoe.park@kellogg.edu", sessions: 1, sessionsTotal: 3, cohortStatuses: { ib: "enrolled", pe: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Aug 15, 2026", lastActive: "1d ago", lastActiveDays: 1, dateAdded: "Jan 5, 2026", daysAdded: 99 },
-  { initials: "SK", name: "Sarah Kim", email: "sarah.kim@kellogg.edu", sessions: 2, sessionsTotal: 4, cohortStatuses: { ib: "enrolled", pe: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 10, 2026", lastActive: "2h ago", lastActiveDays: 0.08, dateAdded: "Jan 10, 2026", daysAdded: 94 },
-  { initials: "RP", name: "Raj Patel", email: "raj.patel@kellogg.edu", sessions: 1, sessionsTotal: 3, cohortStatuses: { ib: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 10, 2026", lastActive: "Yesterday", lastActiveDays: 1, dateAdded: "Jan 10, 2026", daysAdded: 94 },
-  { initials: "MC", name: "Mia Chen", email: "mia.chen@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: { ib: "enrolled", ai: "enrolled" } as Partial<Record<CohortKey, CohortStatus>>, plus: "—", plusExpiry: null, lastActive: "2d ago", lastActiveDays: 2, dateAdded: "Jan 15, 2026", daysAdded: 89 },
-  { initials: "ET", name: "Evan Torres", email: "evan.torres@kellogg.edu", sessions: 2, sessionsTotal: 4, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 15, 2026", lastActive: "3d ago", lastActiveDays: 3, dateAdded: "Jan 15, 2026", daysAdded: 89 },
-  { initials: "AL", name: "Aisha Lee", email: "aisha.lee@kellogg.edu", sessions: 0, sessionsTotal: 3, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Aug 1, 2026", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 1, 2026", daysAdded: 72 },
-  { initials: "JL", name: "Jordan Lee", email: "jordan.lee@kellogg.edu", sessions: 2, sessionsTotal: 3, cohortStatuses: { pe: "completed" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 20, 2026", lastActive: "4d ago", lastActiveDays: 4, dateAdded: "Jan 20, 2026", daysAdded: 84 },
-  { initials: "PM", name: "Priya Mehta", email: "priya.mehta@kellogg.edu", sessions: 1, sessionsTotal: 2, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 20, 2026", lastActive: "5d ago", lastActiveDays: 5, dateAdded: "Jan 20, 2026", daysAdded: 84 },
-  { initials: "DW", name: "Daniel Wu", email: "daniel.wu@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: { ib: "enrolled" } as Partial<Record<CohortKey, CohortStatus>>, plus: "—", plusExpiry: null, lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Feb 3, 2026", daysAdded: 70 },
-  { initials: "NB", name: "Nina Brooks", email: "nina.brooks@kellogg.edu", sessions: 3, sessionsTotal: 4, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Jul 25, 2026", lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Jan 25, 2026", daysAdded: 79 },
-  { initials: "CR", name: "Carlos Rivera", email: "carlos.rivera@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Expired", plusExpiry: "Apr 10, 2026", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 10, 2026", daysAdded: 63 },
-  { initials: "HS", name: "Hannah Seo", email: "hannah.seo@kellogg.edu", sessions: 1, sessionsTotal: 2, cohortStatuses: { pe: "completed" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusExpiry: "Aug 15, 2026", lastActive: "2w ago", lastActiveDays: 14, dateAdded: "Feb 15, 2026", daysAdded: 58 },
-  { initials: "TO", name: "Tunde Okafor", email: "tunde.okafor@kellogg.edu", sessions: 2, sessionsTotal: 3, cohortStatuses: { ai: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "—", plusExpiry: null, lastActive: "2w ago", lastActiveDays: 14, dateAdded: "Mar 1, 2026", daysAdded: 44 },
+type UserRow = {
+  initials: string; name: string; email: string;
+  sessions: number | null; sessionsTotal: number | null;
+  cohortStatuses: Partial<Record<CohortKey, CohortStatus>>;
+  plus: string; plusGranted?: string; plusExpiry: string | null;
+  lastActive: string; lastActiveDays: number;
+  dateAdded: string; daysAdded: number;
+};
+
+const users: UserRow[] = [
+  { initials: "ZP", name: "Zoe Park", email: "zoe.park@kellogg.edu", sessions: 1, sessionsTotal: 3, cohortStatuses: { ib: 8, pe: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Feb 15, 2026", plusExpiry: "Aug 15, 2026", lastActive: "1d ago", lastActiveDays: 1, dateAdded: "Jan 5, 2026", daysAdded: 99 },
+  { initials: "SK", name: "Sarah Kim", email: "sarah.kim@kellogg.edu", sessions: 2, sessionsTotal: 4, cohortStatuses: { ib: 8, pe: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 10, 2026", plusExpiry: "Jul 10, 2026", lastActive: "2h ago", lastActiveDays: 0.08, dateAdded: "Jan 10, 2026", daysAdded: 94 },
+  { initials: "RP", name: "Raj Patel", email: "raj.patel@kellogg.edu", sessions: 1, sessionsTotal: 3, cohortStatuses: { ib: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 10, 2026", plusExpiry: "Jul 10, 2026", lastActive: "Yesterday", lastActiveDays: 1, dateAdded: "Jan 10, 2026", daysAdded: 94 },
+  { initials: "MC", name: "Mia Chen", email: "mia.chen@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: { ib: 4, ai: 4 } as Partial<Record<CohortKey, CohortStatus>>, plus: "—",  plusExpiry: null, lastActive: "2d ago", lastActiveDays: 2, dateAdded: "Jan 15, 2026", daysAdded: 89 },
+  { initials: "ET", name: "Evan Torres", email: "evan.torres@kellogg.edu", sessions: 2, sessionsTotal: 4, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 15, 2026", plusExpiry: "Jul 15, 2026", lastActive: "3d ago", lastActiveDays: 3, dateAdded: "Jan 15, 2026", daysAdded: 89 },
+  { initials: "AL", name: "Aisha Lee", email: "aisha.lee@kellogg.edu", sessions: 0, sessionsTotal: 3, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Feb 1, 2026", plusExpiry: "Aug 1, 2026", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 1, 2026", daysAdded: 72 },
+  { initials: "JL", name: "Jordan Lee", email: "jordan.lee@kellogg.edu", sessions: 2, sessionsTotal: 3, cohortStatuses: { pe: 0, consulting: null } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 20, 2026", plusExpiry: "Jul 20, 2026", lastActive: "4d ago", lastActiveDays: 4, dateAdded: "Jan 20, 2026", daysAdded: 84 },
+  { initials: "PM", name: "Priya Mehta", email: "priya.mehta@kellogg.edu", sessions: 1, sessionsTotal: 2, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 20, 2026", plusExpiry: "Jul 20, 2026", lastActive: "5d ago", lastActiveDays: 5, dateAdded: "Jan 20, 2026", daysAdded: 84 },
+  { initials: "DW", name: "Daniel Wu", email: "daniel.wu@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: { ib: 3 } as Partial<Record<CohortKey, CohortStatus>>, plus: "—",  plusExpiry: null, lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Feb 3, 2026", daysAdded: 70 },
+  { initials: "NB", name: "Nina Brooks", email: "nina.brooks@kellogg.edu", sessions: 3, sessionsTotal: 4, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 25, 2026", plusExpiry: "Jul 25, 2026", lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Jan 25, 2026", daysAdded: 79 },
+  { initials: "CR", name: "Carlos Rivera", email: "carlos.rivera@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Expired", plusGranted: "Oct 10, 2025", plusExpiry: "Apr 10, 2026", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 10, 2026", daysAdded: 63 },
+  { initials: "HS", name: "Hannah Seo", email: "hannah.seo@kellogg.edu", sessions: 1, sessionsTotal: 2, cohortStatuses: { pe: null, ai: null } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Feb 15, 2026", plusExpiry: "Aug 15, 2026", lastActive: "2w ago", lastActiveDays: 14, dateAdded: "Feb 15, 2026", daysAdded: 58 },
+  { initials: "TO", name: "Tunde Okafor", email: "tunde.okafor@kellogg.edu", sessions: 2, sessionsTotal: 3, cohortStatuses: { ai: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "—",  plusExpiry: null, lastActive: "2w ago", lastActiveDays: 14, dateAdded: "Mar 1, 2026", daysAdded: 44 },
 ];
 
 const PAGE_SIZE = 25;
@@ -101,8 +119,8 @@ const userDetailsV2: Record<string, UserDetailV2> = {
       ],
     },
     cohorts: [
-      cohortEntry("ib", "enrolled", { review: { rating: 5, text: "Incredibly well-structured and the coaches had real recruiting experience. I felt prepared going into every interview." } }),
-      cohortEntry("pe", "invited", { inviteSent: "Mar 25, 2026" }),
+      cohortEntry("ib", 8, { review: { rating: 5, text: "Incredibly well-structured and the coaches had real recruiting experience. I felt prepared going into every interview." } }),
+      cohortEntry("pe", 0),
     ],
     plus: { status: "active", grantedDate: "Feb 15, 2026", expiry: "Aug 15, 2026" },
   },
@@ -118,8 +136,8 @@ const userDetailsV2: Record<string, UserDetailV2> = {
       ],
     },
     cohorts: [
-      cohortEntry("ib", "enrolled", { review: { rating: 5, text: "Exactly what I needed — structured, fast-paced, and the instructors had real deal experience." } }),
-      cohortEntry("pe", "invited", { inviteSent: "Mar 25, 2026" }),
+      cohortEntry("ib", 8, { review: { rating: 5, text: "Exactly what I needed — structured, fast-paced, and the instructors had real deal experience." } }),
+      cohortEntry("pe", 0),
     ],
     plus: { status: "active", expiry: "Jul 10, 2026" },
   },
@@ -134,15 +152,15 @@ const userDetailsV2: Record<string, UserDetailV2> = {
       ],
     },
     cohorts: [
-      cohortEntry("ib", "invited", { inviteSent: "Mar 20, 2026" }),
+      cohortEntry("ib", 0),
     ],
     plus: { status: "active", expiry: "Jul 10, 2026" },
   },
   "mia.chen@kellogg.edu": {
     name: "Mia Chen", email: "mia.chen@kellogg.edu", initials: "MC", image: userImg4, dateAdded: "Jan 15, 2026",
     cohorts: [
-      cohortEntry("ib", "enrolled"),
-      cohortEntry("ai", "enrolled", { review: { rating: 4, text: "Great content, though I wished there was more time for hands-on exercises." } }),
+      cohortEntry("ib", 4),
+      cohortEntry("ai", 4, { review: { rating: 4, text: "Great content, though I wished there was more time for hands-on exercises." } }),
     ],
   },
   "evan.torres@kellogg.edu": {
@@ -181,7 +199,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
       ],
     },
     cohorts: [
-      cohortEntry("pe", "completed"),
+      cohortEntry("pe", 0),
     ],
     plus: { status: "active", expiry: "Jul 20, 2026" },
   },
@@ -199,7 +217,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
   "daniel.wu@kellogg.edu": {
     name: "Daniel Wu", email: "daniel.wu@kellogg.edu", initials: "DW", dateAdded: "Feb 3, 2026",
     cohorts: [
-      cohortEntry("ib", "enrolled"),
+      cohortEntry("ib", 3),
     ],
   },
   "nina.brooks@kellogg.edu": {
@@ -229,7 +247,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
       ],
     },
     cohorts: [
-      cohortEntry("pe", "completed"),
+      cohortEntry("pe", 0),
     ],
     plus: { status: "active", expiry: "Aug 15, 2026" },
   },
@@ -244,15 +262,15 @@ const userDetailsV2: Record<string, UserDetailV2> = {
       ],
     },
     cohorts: [
-      cohortEntry("ai", "invited", { inviteSent: "Apr 1, 2026" }),
+      cohortEntry("ai", 0),
     ],
   },
 };
 
 // Shared Verizon cohort invites for all users
 const verizonCohorts: CohortEntry[] = [
-  cohortEntry("ib", "invited", { inviteSent: "Jun 5, 2026" }),
-  cohortEntry("pe", "invited", { inviteSent: "Jun 5, 2026" }),
+  cohortEntry("ib", 0),
+  cohortEntry("pe", 0),
 ];
 
 const verizonUserDetailsV2: Record<string, UserDetailV2> = {
@@ -379,9 +397,64 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
   const showVerizon = partnerModel === "per-seat";
   const [page, setPage] = useState(0);
   const [selectedUserV2, setSelectedUserV2] = useState<UserDetailV2 | null>(null);
+  const [accessOverrides, setAccessOverrides] = useState<Map<string, { cohortKeys: string[]; sessions: number }>>(new Map());
+
+  const applyAccessOverride = (base: UserDetailV2, email: string): UserDetailV2 => {
+    const override = accessOverrides.get(email);
+    if (!override) return base;
+    const cohorts = override.cohortKeys.map(key => {
+      const existing = base.cohorts?.find(c => {
+        const found = CONTRACT_COHORTS.find(cc => cc.key === key);
+        return found && c.name === found.label;
+      });
+      return existing ?? cohortEntry(key as CohortKey, 0);
+    });
+    return { ...base, cohorts: cohorts.length > 0 ? cohorts : undefined, sessions: base.sessions ? { ...base.sessions, granted: override.sessions } : undefined };
+  };
+
+  const handleSwitchCohort = (email: string, oldCohortName: string, newCohortKey: string) => {
+    const oldKey = CONTRACT_COHORTS.find(c => COHORT_META[c.key].label === oldCohortName)?.key;
+    if (!oldKey) return;
+    const baseUser = users.find(u => u.email === email);
+    const currentOverride = accessOverrides.get(email);
+    const currentKeys = currentOverride?.cohortKeys ??
+      CONTRACT_COHORTS.filter(c => baseUser?.cohortStatuses[c.key] !== undefined).map(c => c.key);
+    const currentSessions = currentOverride?.sessions ?? (baseUser?.sessionsTotal ?? 0);
+    const isEnrolled = currentKeys.includes(oldKey);
+    const newKeys = isEnrolled
+      ? currentKeys.map(k => k === oldKey ? newCohortKey : k)
+      : [...currentKeys, newCohortKey];
+    setAccessOverrides(prev => new Map(prev).set(email, { cohortKeys: newKeys, sessions: currentSessions }));
+    setSelectedUserV2(prev => {
+      if (!prev || prev.email !== email) return prev;
+      const cohorts = isEnrolled
+        ? (prev.cohorts ?? []).map(c => c.name === oldCohortName ? cohortEntry(newCohortKey as CohortKey, c.sessionsAttended ?? 0) : c)
+        : [...(prev.cohorts ?? []), cohortEntry(newCohortKey as CohortKey, 0)];
+      return { ...prev, cohorts };
+    });
+  };
+
+  const handleUpdateAccess = (email: string, cohortKeys: string[], sessions: number) => {
+    setAccessOverrides(prev => new Map(prev).set(email, { cohortKeys, sessions }));
+    setSelectedUserV2(prev => {
+      if (!prev || prev.email !== email) return prev;
+      const cohorts = cohortKeys.map(key => {
+        const existing = prev.cohorts?.find(c => {
+          const found = CONTRACT_COHORTS.find(cc => cc.key === key);
+          return found && c.name === found.label;
+        });
+        return existing ?? cohortEntry(key as CohortKey, 0);
+      });
+      return {
+        ...prev,
+        cohorts: cohorts.length > 0 ? cohorts : undefined,
+        sessions: prev.sessions ? { ...prev.sessions, granted: sessions } : undefined,
+      };
+    });
+  };
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
+  const [bulkActions, setBulkActions] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
-  const [showNonMvp, setShowNonMvp] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const adminRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -411,11 +484,11 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
 
   const isActive = (u: typeof users[number]) =>
     (u.sessions != null && u.sessions > 0) ||
-    Object.values(u.cohortStatuses).some((s) => s === "enrolled" || s === "completed");
+    Object.values(u.cohortStatuses).some((n) => (n ?? 0) > 0);
 
   const hasInvitePending = (u: typeof users[number]) =>
-    Object.values(u.cohortStatuses).some((s) => s === "invited") ||
-    (u.sessionsTotal != null && (u.sessions === 0 || u.sessions === null));
+    (u.sessionsTotal != null && (u.sessions === 0 || u.sessions === null)) ||
+    (Object.keys(u.cohortStatuses).length > 0 && Object.values(u.cohortStatuses).every((n) => (n ?? 0) === 0));
 
   const filteredUsers = users.filter((u) => {
     if (filter === "active") return isActive(u);
@@ -431,12 +504,24 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
   const totalPages = Math.ceil(sortedUsers.length / PAGE_SIZE);
   const pagedUsers = sortedUsers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const visibleUsers = pagedUsers.map((u) => {
-    if (!showVerizon) return u;
-    const vz = verizonUserDetailsV2[u.email];
-    const completedCount = vz?.sessions?.entries.filter((e) => e.status === "completed").length ?? 0;
-    return { ...u, sessions: completedCount, sessionsTotal: 2, cohortStatuses: { ib: "invited", pe: "invited" } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted" as const, plusExpiry: "Dec 31, 2026" };
+    const override = accessOverrides.get(u.email);
+    const base = (() => {
+      if (!showVerizon) return u;
+      const vz = verizonUserDetailsV2[u.email];
+      const completedCount = vz?.sessions?.entries.filter((e) => e.status === "completed").length ?? 0;
+      return { ...u, sessions: completedCount, sessionsTotal: 2, cohortStatuses: { ib: 0, pe: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted" as const, plusExpiry: "Dec 31, 2026" };
+    })();
+    if (!override) return base;
+    const cohortStatuses: Partial<Record<CohortKey, CohortStatus>> = {};
+    override.cohortKeys.forEach(key => {
+      const existing = base.cohortStatuses[key as CohortKey];
+      cohortStatuses[key as CohortKey] = existing ?? 0;
+    });
+    return { ...base, cohortStatuses };
   });
 
+  const [expandedPrograms, setExpandedPrograms] = useState<Set<string>>(new Set());
+  const [tableWraps, setTableWraps] = useState(false);
   const [openMenuEmail, setOpenMenuEmail] = useState<string | null>(null);
   const [menuPos, setMenuPos] = useState<RowMenuPos | null>(null);
   const [openTooltip, setOpenTooltip] = useState<"sessions" | "cohorts" | "seats" | "active" | null>(null);
@@ -502,55 +587,42 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
 
       {/* Offering usage + Recent activity — À la Carte */}
       {partnerModel === "a-la-carte" && (() => {
-        const offerings = [
-          { label: "1:1 Sessions", description: "Personalized coaching with an expert matched to each user's recruiting track.", purchased: 140, used: 102 },
-          { label: "Live Course Seats", description: "Instructor-led group programs covering recruiting strategy, technical skills, and more.", purchased: 80, used: 64 },
-          { label: "Leland+ Licenses", description: "Unlimited access to Leland's full library of guides, templates, and video content.", purchased: 30, used: 18 },
+        const cards = [
+          { label: "Average rating", tooltip: null, value: null, rating: { score: 4.0, count: 1 }, used: null, left: null },
+          { label: "1:1 sessions", tooltip: "Personalized coaching with an expert matched to each user's recruiting track.", value: null, rating: null, used: 15, left: 85 },
+          { label: "Live courses", tooltip: "Instructor-led group programs covering recruiting strategy, technical skills, and more.", value: null, rating: null, used: 32, left: 48 },
+          { label: "Leland+ licenses", tooltip: "Unlimited access to Leland's full library of guides, templates, and video content.", value: null, rating: null, used: 20, left: 180 },
         ];
         return (
-          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.8fr] lg:gap-x-col-gap">
-            {/* Left: combined stats card */}
-            <div className="flex flex-col justify-start gap-5 rounded-lg border border-gray-stroke bg-white p-5">
-              <div>
-                <div className="mb-2 text-[18px] font-normal text-gray-light">Users added</div>
-                <span className="text-[24px] font-medium leading-[1.2] text-gray-dark">64</span>
-              </div>
-              <div className="border-t border-gray-stroke" />
-              <div>
-                <div className="mb-2 text-[18px] font-normal text-gray-light">Average rating</div>
-                <div className="flex items-end gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    <span className="text-[24px] font-medium leading-[1.2] text-gray-dark">4.8</span>
-                  </div>
-                  <span className="text-[14px] leading-[1.5] text-gray-light">(112)</span>
+          <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {cards.map(({ label, tooltip, rating, used, left }) => (
+              <div key={label} className="rounded-lg border border-gray-stroke bg-white p-5">
+                <div className="mb-2 flex items-center gap-1">
+                  {tooltip ? (
+                    <div className="group/tip relative">
+                      <span className="cursor-default border-b border-dashed border-gray-stroke text-[18px] font-normal text-gray-light">{label}</span>
+                      <div className="pointer-events-none absolute bottom-full left-0 z-50 mb-2 w-52 rounded-lg bg-gray-dark px-3 py-2 text-[13px] leading-[1.4] text-white opacity-0 shadow-md transition-opacity group-hover/tip:opacity-100">
+                        {tooltip}
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-[18px] font-normal text-gray-light">{label}</span>
+                  )}
                 </div>
+                {rating ? (
+                  <div className="flex items-baseline gap-1.5">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffcb47" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span className="text-[24px] font-medium leading-none text-gray-dark">{rating.score.toFixed(1)}</span>
+                    <span className="text-[13px] text-gray-light">({rating.count})</span>
+                  </div>
+                ) : (
+                  <div className="flex items-baseline justify-between gap-2">
+                    <div className="text-[24px] font-medium leading-none text-gray-dark">{used} <span className="text-[16px] font-normal text-gray-light">used</span></div>
+                    <span className="rounded-md bg-gray-hover px-2 py-0.5 text-[14px] font-medium text-gray-light">{left} left</span>
+                  </div>
+                )}
               </div>
-            </div>
-            {/* Right: offering utilization */}
-            <div>
-              <div className="overflow-hidden rounded-lg border border-gray-stroke bg-white">
-                {offerings.map(({ label, description, purchased, used }, i) => {
-                  const remaining = purchased - used;
-                  const remainingCls = "text-gray-light";
-                  return (
-                    <div key={label}>
-                    {i > 0 && <div className="mx-5 border-t border-gray-stroke" />}
-                    <div className="flex items-center justify-between gap-6 px-5 py-4">
-                      <div className="min-w-0">
-                        <div className="text-[16px] font-medium text-gray-dark">{label}</div>
-                        <div className="mt-0.5 text-[14px] text-gray-light">{description}</div>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <div className="text-[16px] font-medium text-gray-dark">{used} <span className="font-normal text-gray-light">used</span></div>
-                        <div className={`text-[14px] ${remainingCls}`}>{remaining} remaining</div>
-                      </div>
-                    </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            ))}
           </div>
         );
       })()}
@@ -571,13 +643,13 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             </div>
           </div>
           <div className="flex items-baseline gap-[6px] sm:block">
-            <div className="text-[24px] font-medium leading-none text-gray-dark sm:text-[30px]">289</div>
+            <div className="text-[24px] font-medium leading-none text-gray-dark">289</div>
           </div>
         </div>
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
           <div className="mb-2 text-[18px] font-normal text-gray-light">Seats left</div>
           <div className="flex items-baseline gap-[6px] sm:block">
-            <div className="text-[24px] font-medium leading-none text-gray-dark sm:text-[30px]">75</div>
+            <div className="text-[24px] font-medium leading-none text-gray-dark">75</div>
           </div>
         </div>
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
@@ -585,7 +657,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
           <div className="flex items-end gap-2">
             <div className="flex items-center gap-1.5">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <span className="text-[24px] font-medium leading-[1.2] text-gray-dark sm:text-[30px]">4.8</span>
+              <span className="text-[24px] font-medium leading-[1.2] text-gray-dark">4.8</span>
             </div>
             <span className="pb-[2px] text-[14px] leading-[1.5] text-gray-light">(112)</span>
           </div>
@@ -623,9 +695,9 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             ))}
           </div>
         </div>
-        <div className="relative rounded-lg border border-gray-stroke bg-white shadow-card">
-          {/* Bulk action bar — a la carte only */}
-          {partnerModel === "a-la-carte" && selectedEmails.size > 0 && (
+        <div className="relative overflow-hidden rounded-lg border border-gray-stroke bg-white shadow-card">
+          {/* Bulk action bar */}
+          {bulkActions && selectedEmails.size > 0 && (
             <div className="flex items-center gap-3 rounded-t-lg bg-white px-4 py-3">
               <button onClick={() => setSelectedEmails(new Set())} className="flex h-11 items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
                 {selectedEmails.size} selected
@@ -647,11 +719,63 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             </div>
           )}
           {/* Table */}
-          <div className="overflow-x-auto">
+          {tableWraps && (
+            <div className="divide-y divide-gray-stroke sm:hidden">
+              {visibleUsers.map((user, i) => {
+                const enrolled = CONTRACT_COHORTS.filter((c) => user.cohortStatuses[c.key] !== undefined);
+                return (
+                  <div
+                    key={i}
+                    className="cursor-pointer px-4 py-4 hover:bg-[#fafafa]"
+                    onClick={() => {
+                      const baseDetail = showVerizon ? (verizonUserDetailsV2[user.email] ?? tableRowToUserDetailV2(user)) : (userDetailsV2[user.email] ?? tableRowToUserDetailV2(user));
+                      const rowCohorts = tableRowToUserDetailV2(user).cohorts;
+                      setSelectedUserV2(applyAccessOverride({ ...baseDetail, cohorts: rowCohorts }, user.email));
+                    }}
+                  >
+                    {/* Row 1: avatar + name/email + chevron */}
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-1 items-center gap-3 min-w-0">
+                        <div className="min-w-0">
+                          <div className="text-[16px] font-medium leading-[1.2] text-gray-dark">{user.name}</div>
+                          <div className="truncate text-[14px] leading-[1.2] text-gray-light">{user.email}</div>
+                        </div>
+                      </div>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </div>
+                    {/* Row 2: three stat columns */}
+                    <div className="mt-4 flex gap-4">
+                      <div className="flex flex-col gap-1 min-w-0 max-w-[160px] flex-1">
+                        <div className="text-[16px] leading-[1.2] text-gray-dark">1:1 Sessions</div>
+                        {user.sessions != null
+                          ? <span className="text-[14px] text-gray-dark">{user.sessions} <span className="text-gray-light">/ {user.sessionsTotal}</span></span>
+                          : <span className="text-[14px] text-gray-light">—</span>}
+                      </div>
+                      <div className="flex flex-col gap-1 min-w-0 max-w-[160px] flex-1">
+                        <div className="text-[16px] leading-[1.2] text-gray-dark">Programs</div>
+                        <span className="text-[14px] text-gray-light">{enrolled.length > 0 ? enrolled.length : "—"}</span>
+                      </div>
+                      <div className="flex flex-col gap-1 min-w-0 max-w-[160px] flex-1">
+                        <div className="text-[16px] leading-[1.2] text-gray-dark">Leland+ access</div>
+                        {user.plus === "Granted" && user.plusGranted && user.plusExpiry
+                          ? <span className="text-[14px] text-gray-light">{user.plusGranted.replace(/,\s*\d{4}$/, "")} – {user.plusExpiry.replace(/,\s*\d{4}$/, "")}</span>
+                          : user.plus === "Expired"
+                          ? <span className="text-[14px] text-gray-xlight">Expired</span>
+                          : <span className="text-[14px] text-gray-light">—</span>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <div className={`overflow-x-auto${tableWraps ? " hidden sm:block" : ""}`}>
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-gray-stroke">
-                  {partnerModel === "a-la-carte" && <th className="bg-[#fafafa] px-4 py-3 text-left">
+                  {bulkActions && <th className="bg-[#fafafa] px-4 py-3 text-left">
                     <label className="relative flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border border-[#CCCCCC]"
                       style={visibleUsers.length > 0 && visibleUsers.every((u) => selectedEmails.has(u.email)) ? { backgroundColor: "#038561", borderColor: "#038561" } : undefined}>
                       <input
@@ -677,18 +801,11 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
                     <span className="max-w-[120px] truncate">1:1 Sessions</span>
                   </th>
-                  {CONTRACT_COHORTS.map((c) => (
-                    <th key={c.key} className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
-                      <div className="group relative max-w-[140px] cursor-default">
-                        <div className="truncate">{c.label}</div>
-                        <div className="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden whitespace-nowrap rounded-lg bg-gray-dark px-3 py-2 text-[13px] font-normal text-white shadow-lg group-hover:block">
-                          {c.label}
-                        </div>
-                      </div>
-                    </th>
-                  ))}
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
+                    <div className="max-w-[200px] truncate">Programs</div>
+                  </th>
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+ Access</div></th>
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[120px] truncate">Date added</div></th>
+                  <th className="hidden lg:table-cell bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[120px] truncate">Date added</div></th>
                   <th className="sticky right-0 bg-[#fafafa] px-4 py-3"><div className="pointer-events-none absolute inset-y-0 -left-8 w-8 bg-gradient-to-r from-transparent to-[#fafafa]" /></th>
                 </tr>
               </thead>
@@ -698,10 +815,12 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     key={i}
                     className={`group cursor-pointer hover:bg-[#fafafa] ${i < visibleUsers.length - 1 ? "border-b border-gray-stroke" : ""}`}
                     onClick={() => {
-                      setSelectedUserV2(showVerizon ? (verizonUserDetailsV2[user.email] ?? tableRowToUserDetailV2(user)) : (userDetailsV2[user.email] ?? tableRowToUserDetailV2(user)));
+                      const baseDetail = showVerizon ? (verizonUserDetailsV2[user.email] ?? tableRowToUserDetailV2(user)) : (userDetailsV2[user.email] ?? tableRowToUserDetailV2(user));
+                      const rowCohorts = tableRowToUserDetailV2(user).cohorts;
+                      setSelectedUserV2(applyAccessOverride({ ...baseDetail, cohorts: rowCohorts }, user.email));
                     }}
                   >
-                    {partnerModel === "a-la-carte" && <td className="px-4 py-[14px]" onClick={(e) => e.stopPropagation()}>
+                    {bulkActions && <td className="px-4 py-[14px]" onClick={(e) => e.stopPropagation()}>
                       <label className="relative flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border border-[#CCCCCC]"
                         style={selectedEmails.has(user.email) ? { backgroundColor: "#038561", borderColor: "#038561" } : undefined}>
                         <input
@@ -726,9 +845,9 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     <td className="px-4 py-[14px]">
                       <div className="flex items-center gap-[10px]">
                         {userDetailsV2[user.email]?.image ? (
-                          <img src={userDetailsV2[user.email].image} alt={user.name} className="h-9 w-9 shrink-0 rounded-full object-cover" />
+                          <img src={userDetailsV2[user.email].image} alt={user.name} className="hidden h-9 w-9 shrink-0 rounded-full object-cover lg:block" />
                         ) : (
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[14px] font-semibold text-dark-green">
+                          <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[14px] font-semibold text-dark-green lg:flex">
                             {user.initials}
                           </div>
                         )}
@@ -743,67 +862,75 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                         <div className="text-[16px] font-medium text-gray-dark">{user.sessions} <span className="font-normal text-gray-light">/ {user.sessionsTotal}</span></div>
                       ) : <span className="text-[16px] text-gray-light">—</span>}
                     </td>
-                    {CONTRACT_COHORTS.map((c) => {
-                      const status = user.cohortStatuses[c.key];
-                      return (
-                        <td key={c.key} className="px-4 py-[14px] text-[16px]">
-                          {status === "completed" && <span className="text-gray-dark">Completed</span>}
-                          {status === "enrolled" && <span className="text-gray-dark">Enrolled</span>}
-                          {status === "invited" && <span className="text-gray-xlight">Invited</span>}
-                          {!status && <span className="text-gray-light">—</span>}
-                        </td>
-                      );
-                    })}
                     <td className="px-4 py-[14px]">
-                      {user.plus === "Granted" && user.plusExpiry && (
+                      {(() => {
+                        const enrolled = CONTRACT_COHORTS.filter((c) => user.cohortStatuses[c.key] !== undefined);
+                        const isExpanded = expandedPrograms.has(user.email);
+                        const visible = isExpanded ? enrolled : enrolled.slice(0, 3);
+                        const hidden = enrolled.length - 3;
+                        return (
+                          <div className="flex items-center justify-between gap-3">
+                            {enrolled.length > 0 ? (
+                              <div className="flex flex-col gap-[6px]">
+                                {/* Mobile/tablet: summary count */}
+                                <span className="text-[16px] text-gray-dark lg:hidden">{enrolled.length > 0 ? enrolled.length : "—"}</span>
+                                {/* Desktop: full list */}
+                                <div className="hidden flex-col gap-[6px] lg:flex">
+                                {visible.map((c) => {
+                                  const meta = COHORT_META[c.key];
+                                  const status = user.cohortStatuses[c.key];
+                                  const isPending = status === null;
+                                  return (
+                                    <div key={c.key} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                                      <span className="text-[16px] text-gray-dark">{c.label}</span>
+                                      {isPending
+                                        ? <span className="text-[16px] text-gray-xlight">No cohort selected</span>
+                                        : <span className="text-[16px] text-gray-xlight">{meta.startDate} – {meta.endDate}</span>
+                                      }
+                                    </div>
+                                  );
+                                })}
+                                {!isExpanded && hidden > 0 && (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setExpandedPrograms(prev => new Set(prev).add(user.email)); }}
+                                    className="cursor-pointer text-left text-[14px] text-gray-xlight underline hover:text-gray-dark"
+                                  >
+                                    See {hidden} more
+                                  </button>
+                                )}
+                                {isExpanded && hidden > 0 && (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setExpandedPrograms(prev => { const next = new Set(prev); next.delete(user.email); return next; }); }}
+                                    className="cursor-pointer text-left text-[14px] text-gray-xlight underline hover:text-gray-dark"
+                                  >
+                                    See less
+                                  </button>
+                                )}
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-[16px] text-gray-light">—</span>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </td>
+                    <td className="px-4 py-[14px]">
+                      {user.plus === "Granted" && user.plusGranted && user.plusExpiry && (
                         <span className="text-[16px] text-gray-dark">
-                          Expires {user.plusExpiry.replace(/,\s*\d{4}$/, "")}
+                          {user.plusGranted.replace(/,\s*\d{4}$/, "")} – {user.plusExpiry.replace(/,\s*\d{4}$/, "")}
                         </span>
                       )}
                       {user.plus === "Expired" && <span className="text-[16px] text-gray-xlight">Expired</span>}
                       {user.plus === "—" && <span className="text-[16px] text-gray-light">—</span>}
                     </td>
-                    <td className="px-4 py-[14px] text-[16px] text-gray-light">{user.dateAdded}</td>
+                    <td className="hidden lg:table-cell px-4 py-[14px] text-[16px] text-gray-light">{user.dateAdded}</td>
                     <td className="sticky right-0 bg-white px-4 py-[14px] group-hover:bg-[#fafafa]">
                       <div className="pointer-events-none absolute inset-y-0 -left-8 w-8 bg-gradient-to-r from-transparent to-white group-hover:to-[#fafafa]" />
                       <div className="flex items-center justify-end gap-2">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight">
                           <polyline points="9 18 15 12 9 6" />
                         </svg>
-                        {!showVerizon && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); if (openMenuEmail === user.email) { setOpenMenuEmail(null); setMenuPos(null); } else { setOpenMenuEmail(user.email); setMenuPos({ top: r.bottom + 4, right: window.innerWidth - r.right, isMobile: window.innerWidth < 640 }); } }}
-                          className="flex h-12 w-12 items-center justify-center rounded-full text-gray-xlight hover:bg-gray-hover hover:text-gray-dark"
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
-                          </svg>
-                        </button>
-                        )}
-                        {!showVerizon && (
-                        <RowMenu isOpen={openMenuEmail === user.email} pos={menuPos} onClose={() => { setOpenMenuEmail(null); setMenuPos(null); }}>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); setMenuPos(null); }}
-                            className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover"
-                          >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                            </svg>
-                            Grant access
-                          </button>
-                          {hasInvitePending(user) && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setOpenMenuEmail(null); setMenuPos(null); }}
-                              className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover"
-                            >
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                                <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
-                              </svg>
-                              Resend invite
-                            </button>
-                          )}
-                        </RowMenu>
-                        )}
                       </div>
                     </td>
                   </tr>
@@ -836,8 +963,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
         </div>
       </div>
 
-      {/* Two-column: Offerings + Activity */}
-      {showNonMvp && <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr] lg:gap-x-col-gap">
+      {/* Two-column: Offerings + Activity - removed (non-MVP) */}
+      {false && <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr] lg:gap-x-col-gap">
         {/* Offerings */}
         <div>
           <h2 className="mb-4 text-[20px] font-medium text-gray-dark">Utilization</h2>
@@ -965,7 +1092,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
 
       <div className="h-[120px] shrink-0" />
 
-      <B2BUserDrawerV2 user={selectedUserV2} onClose={() => setSelectedUserV2(null)} />
+      <B2BUserDrawerV2 user={selectedUserV2} onClose={() => setSelectedUserV2(null)} isAlaCarte={partnerModel === "a-la-carte"} onUpdateAccess={handleUpdateAccess} onSwitchCohort={handleSwitchCohort} />
 
       {/* Prototype toggle */}
       <div ref={adminRef} className="fixed bottom-24 right-4 z-40 md:bottom-6 md:right-6">
@@ -992,9 +1119,17 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                 ))}
               </div>
               <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                <span className="text-[16px] font-medium text-gray-dark">Non-MVP content</span>
+                <span className="text-[16px] font-medium text-gray-dark">User table wraps on mobile</span>
                 <div className="relative">
-                  <input type="checkbox" checked={showNonMvp} onChange={() => setShowNonMvp(!showNonMvp)} className="peer sr-only" />
+                  <input type="checkbox" checked={tableWraps} onChange={() => setTableWraps(!tableWraps)} className="peer sr-only" />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                <span className="text-[16px] font-medium text-gray-dark">Bulk actions</span>
+                <div className="relative">
+                  <input type="checkbox" checked={bulkActions} onChange={() => { setBulkActions(!bulkActions); setSelectedEmails(new Set()); }} className="peer sr-only" />
                   <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
                   <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                 </div>

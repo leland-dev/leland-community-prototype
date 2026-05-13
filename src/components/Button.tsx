@@ -25,7 +25,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 export function Button({ size = "md", variant = "primary", rounded = "rounded-lg", className = "", children, ...props }: ButtonProps) {
   return (
     <button
-      className={`inline-flex items-center justify-center gap-1.5 ${rounded} font-medium leading-[1.2] transition-colors ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 ${rounded} font-medium leading-[1.2] transition-colors disabled:opacity-50 disabled:cursor-default ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}
       {...props}
     >
       {children}
