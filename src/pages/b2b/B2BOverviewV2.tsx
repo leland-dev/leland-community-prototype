@@ -834,7 +834,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                         <span className="text-[16px] text-gray-dark">{enrolled.length > 0 ? enrolled.length : "—"}</span>
                       </div>
                       <div className="flex flex-col gap-1 min-w-0 max-w-[160px] flex-1">
-                        <div className="text-[14px] leading-[1.2] text-gray-light">Leland+ access</div>
+                        <div className="text-[14px] leading-[1.2] text-gray-light">Leland+</div>
                         {showLpEngagement ? (() => {
                           const status = lpEngagement(user);
                           if (!status) return <span className="text-[16px] text-gray-dark">—</span>;
@@ -888,7 +888,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
                     <div className="max-w-[200px] truncate">Programs</div>
                   </th>
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+ Access</div></th>
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+</div></th>
                   <th className="hidden"></th>
                   <th className="sticky right-0 bg-[#fafafa] px-4 py-3"><div className="pointer-events-none absolute inset-y-0 -left-8 w-8 bg-gradient-to-r from-transparent to-[#fafafa]" /></th>
                 </tr>
