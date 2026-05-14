@@ -842,10 +842,10 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                           if (status === "Invited") return <span className="text-[16px] text-gray-dark">Invited</span>;
                           return <span className="text-[16px] text-gray-xlight">Expired</span>;
                         })() : (
-                          user.plus === "Granted" && user.plusGranted && user.plusExpiry
-                          ? <span className="text-[16px] text-gray-dark">{user.plusGranted.replace(/,\s*\d{4}$/, "")} – {user.plusExpiry.replace(/,\s*\d{4}$/, "")}</span>
+                          user.plus === "Granted" && user.plusExpiry
+                          ? <span className="text-[16px] text-gray-dark">through {user.plusExpiry}</span>
                           : user.plus === "Expired"
-                          ? <span className="text-[16px] text-gray-dark">Expired</span>
+                          ? <span className="text-[16px] text-gray-xlight">Expired</span>
                           : <span className="text-[16px] text-gray-dark">—</span>
                         )}
                       </div>
@@ -1008,10 +1008,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                         return <span className="inline-flex rounded-full bg-[#f5f5f5] px-2.5 py-1 text-[13px] font-medium text-[#888]">Expired</span>;
                       })() : (
                         <>
-                          {user.plus === "Granted" && user.plusGranted && user.plusExpiry && (
-                            <span className="text-[16px] text-gray-dark">
-                              {user.plusGranted.replace(/,\s*\d{4}$/, "")} – {user.plusExpiry.replace(/,\s*\d{4}$/, "")}
-                            </span>
+                          {user.plus === "Granted" && user.plusExpiry && (
+                            <span className="text-[16px] text-gray-dark">through {user.plusExpiry}</span>
                           )}
                           {user.plus === "Expired" && <span className="text-[16px] text-gray-xlight">Expired</span>}
                           {user.plus === "—" && <span className="text-[16px] text-gray-light">—</span>}
