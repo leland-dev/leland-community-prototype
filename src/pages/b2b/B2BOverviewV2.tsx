@@ -49,6 +49,13 @@ function cohortDateLabel(startDate: string): string {
   return new Date(startDate) < new Date() ? `Started ${startDate}` : `Starts ${startDate}`;
 }
 
+function lpEngagement(user: UserRow): "Active" | "Invited" | "Expired" | null {
+  if (user.plus === "—") return null;
+  if (user.plus === "Expired") return "Expired";
+  if (user.lastActiveDays === 999) return "Invited";
+  return "Active";
+}
+
 function cohortEntry(key: CohortKey, sessionsAttended: number, extra?: Partial<CohortEntry>): CohortEntry {
   const m = COHORT_META[key];
   return { name: m.label, image: m.image, startDate: m.startDate, endDate: m.endDate, sessionsAttended, sessionsTotal: m.sessionsTotal, ...extra };
@@ -521,6 +528,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
   };
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [bulkActions, setBulkActions] = useState(false);
+  const [showLpEngagement, setShowLpEngagement] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -827,11 +835,19 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       </div>
                       <div className="flex flex-col gap-1 min-w-0 max-w-[160px] flex-1">
                         <div className="text-[14px] leading-[1.2] text-gray-light">Leland+ access</div>
-                        {user.plus === "Granted" && user.plusGranted && user.plusExpiry
+                        {showLpEngagement ? (() => {
+                          const status = lpEngagement(user);
+                          if (!status) return <span className="text-[16px] text-gray-dark">—</span>;
+                          if (status === "Active") return <span className="text-[16px] font-medium text-primary">Active</span>;
+                          if (status === "Invited") return <span className="text-[16px] text-gray-light">Invited</span>;
+                          return <span className="text-[16px] text-gray-xlight">Expired</span>;
+                        })() : (
+                          user.plus === "Granted" && user.plusGranted && user.plusExpiry
                           ? <span className="text-[16px] text-gray-dark">{user.plusGranted.replace(/,\s*\d{4}$/, "")} – {user.plusExpiry.replace(/,\s*\d{4}$/, "")}</span>
                           : user.plus === "Expired"
                           ? <span className="text-[16px] text-gray-dark">Expired</span>
-                          : <span className="text-[16px] text-gray-dark">—</span>}
+                          : <span className="text-[16px] text-gray-dark">—</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -984,13 +1000,23 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       })()}
                     </td>
                     <td className="px-4 py-[14px]">
-                      {user.plus === "Granted" && user.plusGranted && user.plusExpiry && (
-                        <span className="text-[16px] text-gray-dark">
-                          {user.plusGranted.replace(/,\s*\d{4}$/, "")} – {user.plusExpiry.replace(/,\s*\d{4}$/, "")}
-                        </span>
+                      {showLpEngagement ? (() => {
+                        const status = lpEngagement(user);
+                        if (!status) return <span className="text-[16px] text-gray-light">—</span>;
+                        if (status === "Active") return <span className="text-[16px] font-medium text-primary">Active</span>;
+                        if (status === "Invited") return <span className="text-[16px] text-gray-light">Invited</span>;
+                        return <span className="text-[16px] text-gray-xlight">Expired</span>;
+                      })() : (
+                        <>
+                          {user.plus === "Granted" && user.plusGranted && user.plusExpiry && (
+                            <span className="text-[16px] text-gray-dark">
+                              {user.plusGranted.replace(/,\s*\d{4}$/, "")} – {user.plusExpiry.replace(/,\s*\d{4}$/, "")}
+                            </span>
+                          )}
+                          {user.plus === "Expired" && <span className="text-[16px] text-gray-xlight">Expired</span>}
+                          {user.plus === "—" && <span className="text-[16px] text-gray-light">—</span>}
+                        </>
                       )}
-                      {user.plus === "Expired" && <span className="text-[16px] text-gray-xlight">Expired</span>}
-                      {user.plus === "—" && <span className="text-[16px] text-gray-light">—</span>}
                     </td>
                     <td className="hidden"></td>
                     <td className="sticky right-0 bg-white px-4 py-[14px] group-hover:bg-[#fafafa]">
@@ -1191,6 +1217,14 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                 <span className="text-[16px] font-medium text-gray-dark">User table wraps on mobile</span>
                 <div className="relative">
                   <input type="checkbox" checked={tableWraps} onChange={() => setTableWraps(!tableWraps)} className="peer sr-only" />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                <span className="text-[16px] font-medium text-gray-dark">Show Leland+ engagement</span>
+                <div className="relative">
+                  <input type="checkbox" checked={showLpEngagement} onChange={() => setShowLpEngagement(!showLpEngagement)} className="peer sr-only" />
                   <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
                   <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                 </div>
