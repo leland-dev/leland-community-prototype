@@ -42,6 +42,7 @@ export interface UserDetailV2 {
     status: "active" | "expired";
     expiry: string;
     grantedDate?: string;
+    resourcesViewed?: number;
   };
 }
 
@@ -49,6 +50,7 @@ interface Props {
   user: UserDetailV2 | null;
   onClose: () => void;
   isAlaCarte?: boolean;
+  showLpEngagement?: boolean;
   onUpdateAccess?: (email: string, cohortKeys: string[], sessions: number) => void;
   onSwitchCohort?: (email: string, oldCohortName: string, newCohortKey: string) => void;
 }
@@ -264,7 +266,7 @@ function AccordionSection({
   );
 }
 
-export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, onUpdateAccess, onSwitchCohort }: Props) {
+export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngagement, onUpdateAccess, onSwitchCohort }: Props) {
   const [switchCohortName, setSwitchCohortName] = useState<string | null>(null);
   const [showUpdateAccess, setShowUpdateAccess] = useState(false);
   const [reminderSent, setReminderSent] = useState(false);
@@ -584,10 +586,16 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, onUpdateAcc
                             {user.plus.status === "active" ? "Active" : "Expired"}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between py-3">
+                        <div className={`flex items-center justify-between py-3 ${showLpEngagement && user.plus.resourcesViewed !== undefined ? "border-b border-gray-stroke" : ""}`}>
                           <span className="text-[16px] text-gray-light">{user.plus.status === "active" ? "Expires" : "Expired"}</span>
                           <span className="text-[16px] text-gray-dark">{user.plus.expiry}</span>
                         </div>
+                        {showLpEngagement && user.plus.resourcesViewed !== undefined && (
+                          <div className="flex items-center justify-between py-3">
+                            <span className="text-[16px] text-gray-light">Resources viewed</span>
+                            <span className="text-[16px] text-gray-dark">{user.plus.resourcesViewed}</span>
+                          </div>
+                        )}
                       </div>
                     </AccordionSection>
                   )}
