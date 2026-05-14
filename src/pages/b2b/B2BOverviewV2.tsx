@@ -873,7 +873,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     <div className="max-w-[200px] truncate">Programs</div>
                   </th>
                   <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+ Access</div></th>
-                  <th className="hidden lg:table-cell bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[120px] truncate">Date added</div></th>
+                  <th className="hidden"></th>
                   <th className="sticky right-0 bg-[#fafafa] px-4 py-3"><div className="pointer-events-none absolute inset-y-0 -left-8 w-8 bg-gradient-to-r from-transparent to-[#fafafa]" /></th>
                 </tr>
               </thead>
@@ -992,7 +992,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       {user.plus === "Expired" && <span className="text-[16px] text-gray-xlight">Expired</span>}
                       {user.plus === "—" && <span className="text-[16px] text-gray-light">—</span>}
                     </td>
-                    <td className="hidden lg:table-cell px-4 py-[14px] text-[16px] text-gray-light">{user.dateAdded}</td>
+                    <td className="hidden"></td>
                     <td className="sticky right-0 bg-white px-4 py-[14px] group-hover:bg-[#fafafa]">
                       <div className="pointer-events-none absolute inset-y-0 -left-8 w-8 bg-gradient-to-r from-transparent to-white group-hover:to-[#fafafa]" />
                       <div className="flex items-center justify-end gap-2">
