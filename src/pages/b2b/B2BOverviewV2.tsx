@@ -1003,9 +1003,9 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       {showLpEngagement ? (() => {
                         const status = lpEngagement(user);
                         if (!status) return <span className="text-[16px] text-gray-light">—</span>;
-                        if (status === "Active") return <span className="text-[16px] font-medium text-primary">Active</span>;
-                        if (status === "Invited") return <span className="text-[16px] text-gray-light">Invited</span>;
-                        return <span className="text-[16px] text-gray-xlight">Expired</span>;
+                        if (status === "Active") return <span className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1 text-[13px] font-medium text-[#038561]">Active</span>;
+                        if (status === "Invited") return <span className="inline-flex rounded-full bg-[#eff6ff] px-2.5 py-1 text-[13px] font-medium text-[#3b82f6]">Invited</span>;
+                        return <span className="inline-flex rounded-full bg-[#f5f5f5] px-2.5 py-1 text-[13px] font-medium text-[#888]">Expired</span>;
                       })() : (
                         <>
                           {user.plus === "Granted" && user.plusGranted && user.plusExpiry && (
