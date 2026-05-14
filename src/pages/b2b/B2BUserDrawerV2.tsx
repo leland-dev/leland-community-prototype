@@ -43,6 +43,7 @@ export interface UserDetailV2 {
     expiry: string;
     grantedDate?: string;
     resourcesViewed?: number;
+    topCategories?: string[];
   };
 }
 
@@ -591,9 +592,19 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                           <span className="text-[16px] text-gray-dark">{user.plus.expiry}</span>
                         </div>
                         {showLpEngagement && user.plus.resourcesViewed !== undefined && (
-                          <div className="flex items-center justify-between py-3">
+                          <div className={`flex items-center justify-between py-3 ${user.plus.topCategories?.length ? "border-b border-gray-stroke" : ""}`}>
                             <span className="text-[16px] text-gray-light">Resources viewed</span>
                             <span className="text-[16px] text-gray-dark">{user.plus.resourcesViewed}</span>
+                          </div>
+                        )}
+                        {showLpEngagement && user.plus.topCategories?.length && (
+                          <div className="py-3">
+                            <span className="text-[16px] text-gray-light">Top categories</span>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {user.plus.topCategories.slice(0, 3).map((cat) => (
+                                <span key={cat} className="inline-flex rounded-full bg-gray-hover px-2.5 py-1 text-[14px] text-gray-dark">{cat}</span>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>

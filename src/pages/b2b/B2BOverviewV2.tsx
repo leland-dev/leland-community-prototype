@@ -133,7 +133,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
       cohortEntry("ib", 8, { review: { rating: 5, text: "Incredibly well-structured and the coaches had real recruiting experience. I felt prepared going into every interview." } }),
       cohortEntry("pe", 0),
     ],
-    plus: { status: "active", grantedDate: "Feb 15, 2026", expiry: "Aug 15, 2026", resourcesViewed: 24 },
+    plus: { status: "active", grantedDate: "Feb 15, 2026", expiry: "Aug 15, 2026", resourcesViewed: 24, topCategories: ["Investment Banking", "Resume & Cover Letters", "Networking"] },
   },
   "sarah.kim@kellogg.edu": {
     name: "Sarah Kim", email: "sarah.kim@kellogg.edu", initials: "SK", image: userImg1, dateAdded: "Jan 10, 2026",
@@ -150,7 +150,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
       cohortEntry("ib", 8, { review: { rating: 5, text: "Exactly what I needed — structured, fast-paced, and the instructors had real deal experience." } }),
       cohortEntry("pe", 0),
     ],
-    plus: { status: "active", expiry: "Jul 10, 2026", resourcesViewed: 31 },
+    plus: { status: "active", expiry: "Jul 10, 2026", resourcesViewed: 31, topCategories: ["Investment Banking", "Private Equity", "Interview Prep"] },
   },
   "raj.patel@kellogg.edu": {
     name: "Raj Patel", email: "raj.patel@kellogg.edu", initials: "RP", image: userImg2, dateAdded: "Jan 10, 2026",
@@ -165,7 +165,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
     cohorts: [
       cohortEntry("ib", 0),
     ],
-    plus: { status: "active", expiry: "Jul 10, 2026", resourcesViewed: 12 },
+    plus: { status: "active", expiry: "Jul 10, 2026", resourcesViewed: 12, topCategories: ["Consulting", "Case Interview Prep"] },
   },
   "mia.chen@kellogg.edu": {
     name: "Mia Chen", email: "mia.chen@kellogg.edu", initials: "MC", image: userImg4, dateAdded: "Jan 15, 2026",
@@ -185,7 +185,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
         { date: "—", status: "unbooked" },
       ],
     },
-    plus: { status: "active", expiry: "Jul 15, 2026", resourcesViewed: 8 },
+    plus: { status: "active", expiry: "Jul 15, 2026", resourcesViewed: 8, topCategories: ["Private Equity", "Financial Modeling"] },
   },
   "aisha.lee@kellogg.edu": {
     name: "Aisha Lee", email: "aisha.lee@kellogg.edu", initials: "AL", image: userImg3, dateAdded: "Feb 1, 2026",
@@ -212,7 +212,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
     cohorts: [
       cohortEntry("pe", 0),
     ],
-    plus: { status: "active", expiry: "Jul 20, 2026", resourcesViewed: 17 },
+    plus: { status: "active", expiry: "Jul 20, 2026", resourcesViewed: 17, topCategories: ["Private Equity", "Networking", "Resume & Cover Letters"] },
   },
   "priya.mehta@kellogg.edu": {
     name: "Priya Mehta", email: "priya.mehta@kellogg.edu", initials: "PM", dateAdded: "Jan 20, 2026",
@@ -242,7 +242,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
         { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Apr 22, 2026", status: "scheduled" },
       ],
     },
-    plus: { status: "active", expiry: "Jul 25, 2026", resourcesViewed: 43 },
+    plus: { status: "active", expiry: "Jul 25, 2026", resourcesViewed: 43, topCategories: ["Investment Banking", "Interview Prep", "Financial Modeling"] },
   },
   "carlos.rivera@kellogg.edu": {
     name: "Carlos Rivera", email: "carlos.rivera@kellogg.edu", initials: "CR", dateAdded: "Feb 10, 2026",
@@ -260,7 +260,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
     cohorts: [
       cohortEntry("pe", 0),
     ],
-    plus: { status: "active", expiry: "Aug 15, 2026", resourcesViewed: 6 },
+    plus: { status: "active", expiry: "Aug 15, 2026", resourcesViewed: 6, topCategories: ["AI & Technology", "Career Strategy"] },
   },
   "tunde.okafor@kellogg.edu": {
     name: "Tunde Okafor", email: "tunde.okafor@kellogg.edu", initials: "TO", dateAdded: "Mar 1, 2026",
