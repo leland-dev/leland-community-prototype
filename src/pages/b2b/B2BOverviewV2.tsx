@@ -843,7 +843,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                           return <span className="text-[16px] text-gray-xlight">Expired</span>;
                         })() : (
                           user.plus === "Granted" && user.plusExpiry
-                          ? <span className="text-[16px] text-gray-dark">through {user.plusExpiry}</span>
+                          ? <span className="text-[16px] text-gray-dark">through {user.plusExpiry.replace(/,\s*\d{4}$/, "")}</span>
                           : user.plus === "Expired"
                           ? <span className="text-[16px] text-gray-xlight">Expired</span>
                           : <span className="text-[16px] text-gray-dark">—</span>
@@ -1009,7 +1009,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       })() : (
                         <>
                           {user.plus === "Granted" && user.plusExpiry && (
-                            <span className="text-[16px] text-gray-dark">through {user.plusExpiry}</span>
+                            <span className="text-[16px] text-gray-dark">through {user.plusExpiry.replace(/,\s*\d{4}$/, "")}</span>
                           )}
                           {user.plus === "Expired" && <span className="text-[16px] text-gray-xlight">Expired</span>}
                           {user.plus === "—" && <span className="text-[16px] text-gray-light">—</span>}
