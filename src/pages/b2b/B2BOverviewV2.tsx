@@ -292,7 +292,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
       { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 22, 2026", status: "scheduled" },
     ]},
     cohorts: verizonCohorts,
-    plus: { status: "active", expiry: "Dec 31, 2026" },
+    plus: { status: "active", expiry: "Dec 31, 2026", resourcesViewed: 18, topCategories: ["Investment Banking", "Resume & Cover Letters", "Networking"] },
   },
   "sarah.kim@kellogg.edu": {
     name: "Sarah Kim", email: "sarah.kim@kellogg.edu", initials: "SK", image: userImg1, dateAdded: "Jan 10, 2026",
@@ -301,7 +301,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
       { coach: "Priya N.", coachImg: coachImg2, coachHeadline: "Ex-McKinsey · KKR Portfolio Ops", date: "Jul 24, 2026", status: "scheduled" },
     ]},
     cohorts: verizonCohorts,
-    plus: { status: "active", expiry: "Dec 31, 2026" },
+    plus: { status: "active", expiry: "Dec 31, 2026", resourcesViewed: 27, topCategories: ["Investment Banking", "Interview Prep", "Financial Modeling"] },
   },
   "raj.patel@kellogg.edu": {
     name: "Raj Patel", email: "raj.patel@kellogg.edu", initials: "RP", image: userImg2, dateAdded: "Jan 10, 2026",
@@ -310,7 +310,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
       { date: "—", status: "unbooked" },
     ]},
     cohorts: verizonCohorts,
-    plus: { status: "active", expiry: "Dec 31, 2026" },
+    plus: { status: "active", expiry: "Dec 31, 2026", resourcesViewed: 9, topCategories: ["Consulting", "Case Interview Prep"] },
   },
   "mia.chen@kellogg.edu": {
     name: "Mia Chen", email: "mia.chen@kellogg.edu", initials: "MC", image: userImg4, dateAdded: "Jan 15, 2026",
@@ -319,7 +319,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
       { date: "—", status: "unbooked" },
     ]},
     cohorts: verizonCohorts,
-    plus: { status: "active", expiry: "Dec 31, 2026" },
+    plus: { status: "active", expiry: "Dec 31, 2026", resourcesViewed: 5, topCategories: ["AI & Technology", "Career Strategy"] },
   },
   "evan.torres@kellogg.edu": {
     name: "Evan Torres", email: "evan.torres@kellogg.edu", initials: "ET", image: userImg5, dateAdded: "Jan 15, 2026",
@@ -328,7 +328,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
       { coach: "Alex Morgan", coachImg: coachImg3, coachHeadline: "Ex-Blackstone PE · Harvard MBA", date: "Jul 21, 2026", status: "completed" },
     ]},
     cohorts: verizonCohorts,
-    plus: { status: "active", expiry: "Dec 31, 2026" },
+    plus: { status: "active", expiry: "Dec 31, 2026", resourcesViewed: 14, topCategories: ["Private Equity", "Financial Modeling"] },
   },
   "aisha.lee@kellogg.edu": {
     name: "Aisha Lee", email: "aisha.lee@kellogg.edu", initials: "AL", image: userImg3, dateAdded: "Feb 1, 2026",
@@ -346,7 +346,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
       { date: "—", status: "unbooked" },
     ]},
     cohorts: verizonCohorts,
-    plus: { status: "active", expiry: "Dec 31, 2026" },
+    plus: { status: "active", expiry: "Dec 31, 2026", resourcesViewed: 11, topCategories: ["Private Equity", "Networking", "Resume & Cover Letters"] },
   },
   "priya.mehta@kellogg.edu": {
     name: "Priya Mehta", email: "priya.mehta@kellogg.edu", initials: "PM", dateAdded: "Jan 20, 2026",
@@ -355,7 +355,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
       { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 28, 2026", status: "scheduled" },
     ]},
     cohorts: verizonCohorts,
-    plus: { status: "active", expiry: "Dec 31, 2026" },
+    plus: { status: "active", expiry: "Dec 31, 2026", resourcesViewed: 7, topCategories: ["Investment Banking", "Interview Prep"] },
   },
   "daniel.wu@kellogg.edu": {
     name: "Daniel Wu", email: "daniel.wu@kellogg.edu", initials: "DW", dateAdded: "Feb 3, 2026",
@@ -364,7 +364,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
       { date: "—", status: "unbooked" },
     ]},
     cohorts: verizonCohorts,
-    plus: { status: "active", expiry: "Dec 31, 2026" },
+    plus: { status: "active", expiry: "Dec 31, 2026", resourcesViewed: 3, topCategories: ["Investment Banking"] },
   },
   "nina.brooks@kellogg.edu": {
     name: "Nina Brooks", email: "nina.brooks@kellogg.edu", initials: "NB", dateAdded: "Jan 25, 2026",
@@ -373,7 +373,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
       { coach: "Jordan Lee", coachImg: coachImg1, coachHeadline: "Ex-Goldman Sachs IB · Wharton MBA", date: "Jul 18, 2026", status: "completed" },
     ]},
     cohorts: verizonCohorts,
-    plus: { status: "active", expiry: "Dec 31, 2026" },
+    plus: { status: "active", expiry: "Dec 31, 2026", resourcesViewed: 38, topCategories: ["Investment Banking", "Interview Prep", "Financial Modeling"] },
   },
   "carlos.rivera@kellogg.edu": {
     name: "Carlos Rivera", email: "carlos.rivera@kellogg.edu", initials: "CR", dateAdded: "Feb 10, 2026",
@@ -391,7 +391,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
       { date: "—", status: "unbooked" },
     ]},
     cohorts: verizonCohorts,
-    plus: { status: "active", expiry: "Dec 31, 2026" },
+    plus: { status: "active", expiry: "Dec 31, 2026", resourcesViewed: 6, topCategories: ["AI & Technology", "Career Strategy"] },
   },
   "tunde.okafor@kellogg.edu": {
     name: "Tunde Okafor", email: "tunde.okafor@kellogg.edu", initials: "TO", dateAdded: "Mar 1, 2026",
@@ -400,7 +400,7 @@ const verizonUserDetailsV2: Record<string, UserDetailV2> = {
       { date: "—", status: "unbooked" },
     ]},
     cohorts: verizonCohorts,
-    plus: { status: "active", expiry: "Dec 31, 2026" },
+    plus: { status: "active", expiry: "Dec 31, 2026", resourcesViewed: 4, topCategories: ["Consulting", "Career Strategy"] },
   },
 };
 
@@ -1003,9 +1003,9 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       {showLpEngagement ? (() => {
                         const status = lpEngagement(user);
                         if (!status) return <span className="text-[16px] text-gray-light">—</span>;
-                        if (status === "Active") return <span className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1 text-[13px] font-medium text-[#038561]">Active</span>;
-                        if (status === "Invited") return <span className="inline-flex rounded-full bg-[#eff6ff] px-2.5 py-1 text-[13px] font-medium text-[#3b82f6]">Invited</span>;
-                        return <span className="inline-flex rounded-full bg-[#f5f5f5] px-2.5 py-1 text-[13px] font-medium text-[#888]">Expired</span>;
+                        if (status === "Active") return <span className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1.5 text-[14px] font-medium leading-none text-[#038561]">Active</span>;
+                        if (status === "Invited") return <span className="inline-flex rounded-full bg-[#eff6ff] px-2.5 py-1.5 text-[14px] font-medium leading-none text-[#3b82f6]">Invited</span>;
+                        return <span className="inline-flex rounded-full bg-[#f5f5f5] px-2.5 py-1.5 text-[14px] font-medium leading-none text-[#888]">Expired</span>;
                       })() : (
                         <>
                           {user.plus === "Granted" && user.plusExpiry && (
@@ -1227,7 +1227,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                   <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                 </div>
               </label>
-              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+<label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
                 <span className="text-[16px] font-medium text-gray-dark">Bulk actions</span>
                 <div className="relative">
                   <input type="checkbox" checked={bulkActions} onChange={() => { setBulkActions(!bulkActions); setSelectedEmails(new Set()); }} className="peer sr-only" />

@@ -602,7 +602,7 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                             <span className="text-[16px] text-gray-light">Top categories</span>
                             <div className="mt-2 flex flex-wrap gap-1.5">
                               {user.plus.topCategories.slice(0, 3).map((cat) => (
-                                <span key={cat} className="inline-flex rounded-full bg-gray-hover px-2.5 py-1 text-[14px] text-gray-dark">{cat}</span>
+                                <span key={cat} className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1.5 text-[14px] font-medium leading-none text-[#038561]">{cat}</span>
                               ))}
                             </div>
                           </div>
