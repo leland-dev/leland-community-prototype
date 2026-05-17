@@ -81,15 +81,51 @@ function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohor
     return found?.key;
   }).filter(Boolean) as string[]);
 
+  const initialSelectedCohorts: Record<string, string> = {};
+  enrolledKeys.forEach(key => {
+    const meta = ALL_COHORTS_META.find(m => m.key === key);
+    if (meta) initialSelectedCohorts[key] = meta.startDate;
+  });
+
   const [sessions, setSessions] = useState(user.sessions?.granted ?? 0);
   const [added, setAdded] = useState<Set<string>>(new Set(enrolledKeys));
+  const [selectedCohorts, setSelectedCohorts] = useState<Record<string, string>>(initialSelectedCohorts);
+  const [selectingProgram, setSelectingProgram] = useState<string | null>(null);
   const hasPlus = !!user.plus;
 
-  const toggle = (key: string) => setAdded(prev => {
-    const next = new Set(prev);
-    next.has(key) ? next.delete(key) : next.add(key);
-    return next;
-  });
+  const handleCohortPicked = (date: string | null) => {
+    if (selectingProgram) {
+      setAdded(prev => { const next = new Set(prev); next.add(selectingProgram); return next; });
+      if (date) setSelectedCohorts(prev => ({ ...prev, [selectingProgram]: date }));
+    }
+    setSelectingProgram(null);
+  };
+
+  if (selectingProgram) return (
+    <div className="flex flex-col px-4 pt-4 pb-4 sm:px-6">
+      <button
+        onClick={() => handleCohortPicked(null)}
+        className="mb-5 flex w-full items-center justify-between rounded-lg bg-gray-hover px-4 py-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]"
+      >
+        Invite the user to select their own dates
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </button>
+      <div className="divide-y divide-gray-stroke">
+        {ALL_COHORTS_META.map(cohort => (
+          <CohortSelectRow
+            key={cohort.key}
+            cohort={cohort}
+            isCurrent={selectedCohorts[selectingProgram] === cohort.startDate}
+            onEnroll={() => handleCohortPicked(cohort.startDate)}
+            enrollLabel="Select"
+            enrolledLabel="Selected"
+          />
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-0 px-4 pt-5 pb-4 sm:px-6">
@@ -121,22 +157,32 @@ function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohor
       {/* Programs */}
       <div className="-mt-px border border-gray-stroke px-5 py-4">
         <div className="mb-3 text-[14px] font-medium text-gray-light">Programs</div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {AVAILABLE_PROGRAMS.map(p => {
             const isAdded = added.has(p.key);
             return (
-              <div key={p.key} className="flex items-center justify-between gap-3">
-                <span className="text-[16px] text-gray-dark">{p.label}</span>
-                <button
-                  onClick={() => toggle(p.key)}
-                  className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-[14px] font-medium transition-colors ${isAdded ? "bg-primary-xlight text-dark-green" : "border border-gray-stroke bg-white text-gray-dark hover:bg-gray-hover"}`}
-                >
-                  {isAdded ? (
-                    <><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1.5 6 4.5 9 10.5 3"/></svg> Added</>
-                  ) : (
-                    <>+ Add</>
+              <div key={p.key} className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-0">
+                  <span className="text-[16px] text-gray-dark">{p.label}</span>
+                  {isAdded && (
+                    <button onClick={() => setSelectingProgram(p.key)} className="text-left text-[14px] text-gray-xlight hover:opacity-70">
+                      {selectedCohorts[p.key] ?? "No cohort selected"}
+                    </button>
                   )}
-                </button>
+                </div>
+                {isAdded ? (
+                  <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
+                    <span className="text-[14px] font-medium leading-none text-[#038561]">Added</span>
+                    <button onClick={() => setAdded(prev => { const n = new Set(prev); n.delete(p.key); return n; })} className="text-[#038561] hover:opacity-70">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => setSelectingProgram(p.key)} className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add
+                  </button>
+                )}
               </div>
             );
           })}
@@ -172,10 +218,14 @@ function CohortSelectRow({
   cohort,
   isCurrent,
   onEnroll,
+  enrollLabel = "Enroll",
+  enrolledLabel = "Enrolled",
 }: {
   cohort: typeof ALL_COHORTS_META[number];
   isCurrent: boolean;
   onEnroll: (key: string) => void;
+  enrollLabel?: string;
+  enrolledLabel?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   return (
@@ -183,7 +233,7 @@ function CohortSelectRow({
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-0.5">
           <div className="text-[16px] font-medium text-gray-dark">{cohort.label}</div>
-          <div className="text-[14px] text-gray-light">{cohortDateLabel(cohort.startDate)}</div>
+          <div className="text-[14px] text-gray-light">{cohort.startDate}</div>
           <button
             onClick={() => setExpanded(!expanded)}
             className="mt-0.5 w-fit cursor-pointer text-[14px] text-gray-light underline hover:text-gray-dark"
@@ -200,7 +250,7 @@ function CohortSelectRow({
           onClick={isCurrent || cohort.full ? undefined : () => onEnroll(cohort.key)}
           disabled={isCurrent || cohort.full}
         >
-          {isCurrent ? "Enrolled" : cohort.full ? "Full" : "Enroll"}
+          {isCurrent ? enrolledLabel : cohort.full ? "Full" : enrollLabel}
         </Button>
       </div>
     </div>

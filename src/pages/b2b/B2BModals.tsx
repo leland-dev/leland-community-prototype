@@ -115,7 +115,7 @@ function ModalCohortSelectRow({ cohort, isEnrolled, onEnroll }: {
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-0.5">
           <div className="text-[16px] font-medium text-gray-dark">{cohort.label}</div>
-          <div className="text-[14px] text-gray-light">{cohortDateLabel(cohort.startDate)}</div>
+          <div className="text-[14px] text-gray-light">{cohort.startDate}</div>
           <button
             onClick={() => setExpanded(!expanded)}
             className="mt-0.5 w-fit cursor-pointer text-[14px] text-gray-light underline hover:text-gray-dark"
