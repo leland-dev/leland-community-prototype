@@ -204,7 +204,7 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, c
   onOpenCohortPicker: (cohort: string) => void;
 }) {
   return (
-    <div className="mb-5 mt-8 rounded-[10px] border border-gray-stroke">
+    <div className="mb-5 rounded-[10px] border border-gray-stroke">
       {/* 1:1 sessions */}
       <div className="flex items-center justify-between gap-4 px-4 py-3">
         <span className="text-[15px] text-gray-dark">1:1 sessions</span>
@@ -213,7 +213,7 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, c
             className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb] disabled:cursor-not-allowed disabled:opacity-30">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
-          <span className={`w-6 text-center text-[15px] font-medium ${sessions > 0 ? "text-primary" : "text-gray-dark"}`}>{sessions}</span>
+          <span className="w-6 text-center text-[15px] font-medium text-gray-dark">{sessions}</span>
           <button onClick={() => setSessions(sessions + 1)}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -226,12 +226,12 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, c
         <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
           {COHORTS.map((cohort) => (
             <div key={cohort} className="flex items-start justify-between gap-4 py-1.5">
-              <div className="flex flex-col">
+              <div className="flex flex-col gap-[2px]">
                 <span className="text-[14px] text-gray-light">{cohort}</span>
                 {cohortInvited[cohort] && (
                   <button
                     onClick={() => onOpenCohortPicker(cohort)}
-                    className="mt-0.5 text-left text-[14px] text-gray-xlight underline hover:opacity-70"
+                    className="text-left text-[14px] text-gray-xlight underline hover:opacity-70"
                   >
                     {selectedDates[cohort] ?? "User selects dates"}
                   </button>
@@ -323,8 +323,8 @@ function PerSeatIncludes({ selectedDates, onOpenCohortPicker }: {
   onOpenCohortPicker: (cohort: string) => void;
 }) {
   return (
-    <div className="mt-8">
-      <div className="mb-2 text-[14px] text-gray-light">This seat includes</div>
+    <div>
+      <p className="mb-5 text-[16px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>
       <div className="mb-5 rounded-[10px] border border-gray-stroke">
         <div className="flex items-center justify-between gap-4 px-4 py-3">
           <span className="text-[15px] text-gray-dark">1:1 sessions</span>
@@ -338,7 +338,7 @@ function PerSeatIncludes({ selectedDates, onOpenCohortPicker }: {
           <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
             {CONTRACT_COHORTS_MODAL.map((cohort) => (
               <div key={cohort} className="flex items-start justify-between gap-4 py-1.5">
-                <div className="flex flex-col gap-0">
+                <div className="flex flex-col gap-[2px]">
                   <span className="text-[14px] text-gray-light">{cohort}</span>
                   <span className="text-[14px] text-gray-xlight">{selectedDates[cohort] ?? "No cohort selected"}</span>
                 </div>
@@ -527,6 +527,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
                 <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
               </div>
             </div>
+            {isAlaCarte && <p className="mt-8 mb-5 text-[16px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>}
             {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} cohortInvited={cohortInvited} setCohortInvited={setCohortInvited} selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} /> : <PerSeatIncludes selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} />}
           </>
         ) : (
@@ -549,6 +550,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
               </svg>
               Download template CSV to get started.
             </button>
+            {isAlaCarte && <p className="mt-8 mb-5 text-[16px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>}
             {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} cohortInvited={cohortInvited} setCohortInvited={setCohortInvited} selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} /> : <PerSeatIncludes selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} />}
           </>
         )}

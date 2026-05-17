@@ -45,9 +45,6 @@ const COHORT_META: Record<CohortKey, { label: string; image: string; startDate: 
   consulting: { label: "Consulting Accelerator", image: "https://leland.imgix.net/bootcamps/6841c0c4dde9ed55e539fe5f.png", startDate: "Jul 7, 2026", endDate: "Aug 4, 2026", sessionsTotal: 6 },
 };
 
-function cohortDateLabel(startDate: string): string {
-  return new Date(startDate) < new Date() ? `Started ${startDate}` : `Starts ${startDate}`;
-}
 
 function lpEngagement(user: UserRow): "Active" | "Invited" | "Expired" | null {
   if (user.plus === "—") return null;
@@ -969,7 +966,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                                       <span className="text-[16px] text-gray-dark">{c.label}</span>
                                       {isPending
                                         ? <span className="text-[16px] text-gray-xlight">No cohort selected</span>
-                                        : <span className="text-[16px] text-gray-xlight">{cohortDateLabel(meta.startDate)}</span>
+                                        : <span className="text-[16px] text-gray-xlight">{meta.startDate}</span>
                                       }
                                     </div>
                                   );

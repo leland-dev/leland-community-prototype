@@ -128,9 +128,9 @@ function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohor
   );
 
   return (
-    <div className="flex flex-col gap-0 px-4 pt-5 pb-4 sm:px-6">
+    <div className="flex min-h-full flex-col px-4 pt-5 pb-0 sm:px-6">
       {/* User card */}
-      <div className="mb-5 flex items-center gap-3 rounded-xl bg-gray-hover px-4 py-3">
+      <div className="mb-8 flex items-center gap-3 rounded-xl bg-gray-hover px-4 py-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[14px] font-medium text-dark-green">
           {user.initials}
         </div>
@@ -140,75 +140,79 @@ function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohor
         </div>
       </div>
 
-      {/* 1:1 Sessions */}
-      <div className="flex items-center justify-between rounded-t-xl border border-gray-stroke px-5 py-4">
-        <span className="text-[16px] text-gray-dark">1:1 sessions</span>
-        <div className="flex items-center gap-3">
-          <button onClick={() => setSessions(s => Math.max(0, s - 1))} className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-gray-stroke text-gray-dark hover:bg-gray-hover">
-            <svg width="12" height="2" viewBox="0 0 12 2" fill="none"><rect width="12" height="2" rx="1" fill="currentColor"/></svg>
-          </button>
-          <span className="w-5 text-center text-[16px] font-medium text-gray-dark">{sessions}</span>
-          <button onClick={() => setSessions(s => s + 1)} className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-gray-stroke text-gray-dark hover:bg-gray-hover">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="5" width="2" height="12" rx="1" fill="currentColor"/><rect y="5" width="12" height="2" rx="1" fill="currentColor"/></svg>
-          </button>
-        </div>
-      </div>
+      <p className="mb-5 text-[16px] font-medium text-gray-dark">When you update access, this user will receive an email.</p>
 
-      {/* Programs */}
-      <div className="-mt-px border border-gray-stroke px-5 py-4">
-        <div className="mb-3 text-[14px] font-medium text-gray-light">Programs</div>
-        <div className="flex flex-col gap-2">
-          {AVAILABLE_PROGRAMS.map(p => {
-            const isAdded = added.has(p.key);
-            return (
-              <div key={p.key} className="flex items-start justify-between gap-3">
-                <div className="flex flex-col gap-0">
-                  <span className="text-[16px] text-gray-dark">{p.label}</span>
-                  {isAdded && (
-                    <button onClick={() => setSelectingProgram(p.key)} className="text-left text-[14px] text-gray-xlight hover:opacity-70">
-                      {selectedCohorts[p.key] ?? "No cohort selected"}
+      {/* Offerings card */}
+      <div className="rounded-[10px] border border-gray-stroke">
+        {/* 1:1 sessions */}
+        <div className="flex items-center justify-between gap-4 px-4 py-3">
+          <span className="text-[15px] text-gray-dark">1:1 sessions</span>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setSessions(s => Math.max(0, s - 1))} disabled={sessions === 0}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb] disabled:cursor-not-allowed disabled:opacity-30">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <span className="w-6 text-center text-[15px] font-medium text-gray-dark">{sessions}</span>
+            <button onClick={() => setSessions(s => s + 1)}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+        {/* Live courses */}
+        <div className="border-t border-gray-stroke px-4 pb-3 pt-3">
+          <span className="text-[15px] text-gray-dark">Live courses</span>
+          <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
+            {AVAILABLE_PROGRAMS.map(p => {
+              const isAdded = added.has(p.key);
+              return (
+                <div key={p.key} className="flex items-start justify-between gap-4 py-1.5">
+                  <div className="flex flex-col gap-[2px]">
+                    <span className="text-[14px] text-gray-light">{p.label}</span>
+                    {isAdded && (
+                      <button onClick={() => setSelectingProgram(p.key)} className="text-left text-[14px] text-gray-xlight underline hover:opacity-70">
+                        {selectedCohorts[p.key] ?? "No cohort selected"}
+                      </button>
+                    )}
+                  </div>
+                  {isAdded ? (
+                    <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
+                      <span className="text-[14px] font-medium text-[#038561]">Added</span>
+                      <button onClick={() => setAdded(prev => { const n = new Set(prev); n.delete(p.key); return n; })} className="text-[#038561] hover:opacity-70">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => setSelectingProgram(p.key)} className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      Add
                     </button>
                   )}
                 </div>
-                {isAdded ? (
-                  <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
-                    <span className="text-[14px] font-medium leading-none text-[#038561]">Added</span>
-                    <button onClick={() => setAdded(prev => { const n = new Set(prev); n.delete(p.key); return n; })} className="text-[#038561] hover:opacity-70">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
-                  </div>
-                ) : (
-                  <button onClick={() => setSelectingProgram(p.key)} className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Add
-                  </button>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
-
-      {/* Leland+ */}
-      <div className="-mt-px rounded-b-xl border border-gray-stroke px-5 py-4">
-        <div className="flex items-center justify-between">
-          <span className="text-[16px] text-gray-dark">Leland+</span>
+        {/* Leland+ */}
+        <div className="flex items-center justify-between gap-4 border-t border-gray-stroke px-4 py-3">
+          <span className="text-[15px] text-gray-dark">Leland+</span>
           {hasPlus ? (
             <span className="flex items-center gap-1.5 text-[14px] text-gray-light">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1.5 6 4.5 9 10.5 3"/></svg>
               {user.plus!.status === "active" ? `Expires ${user.plus!.expiry}` : "Expired"}
             </span>
           ) : (
-            <button className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-gray-stroke bg-white px-3 py-1 text-[14px] font-medium text-gray-dark hover:bg-gray-hover">+ Add</button>
+            <button className="flex items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add
+            </button>
           )}
         </div>
       </div>
 
       {/* Footer */}
-      <div className="sticky bottom-0 border-t border-gray-stroke bg-white px-0 pt-4">
-        <Button size="lg" variant="primary" onClick={() => onDone(Array.from(added), sessions)} className="w-full justify-center">
-          Update access
-        </Button>
+      <div className="mt-auto -mx-4 sm:-mx-6 border-t border-gray-stroke bg-white px-4 sm:px-6 py-[14px]">
+        <Button size="md" variant="primary" onClick={() => onDone(Array.from(added), sessions)} className="w-full justify-center">Update access</Button>
       </div>
     </div>
   );
@@ -326,6 +330,8 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
   useEffect(() => {
     if (!user) return;
     setReminderSent(false);
+    setSwitchCohortName(null);
+    setShowUpdateAccess(false);
     function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
