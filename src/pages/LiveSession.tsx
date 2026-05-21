@@ -150,7 +150,7 @@ type SessionStatus = SessionData["status"];
 
 function VideoEmbed({ status }: { status: SessionStatus }) {
   return (
-    <div className="relative flex h-[620px] w-full items-center justify-center bg-[#111111]">
+    <div className={`relative flex h-[620px] w-full items-center justify-center ${status === "live" ? "bg-[#111111]" : "bg-gray-dark"}`}>
       {/* Simulated meeting room */}
       <div className="flex flex-col items-center gap-4 text-white/60">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
@@ -159,6 +159,9 @@ function VideoEmbed({ status }: { status: SessionStatus }) {
         <p className="text-[16px]">
           {status === "live" ? "Session is live — click Join to enter" : status === "upcoming" ? "Session hasn't started yet" : "Session has ended"}
         </p>
+        {status === "ended" && (
+          <Button size="lg" variant="primary" rounded="rounded-full">Primary post-session CTA</Button>
+        )}
       </div>
 
       {/* Live badge */}
