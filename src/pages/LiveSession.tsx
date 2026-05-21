@@ -7,7 +7,6 @@ import calendarUpcomingIcon from "../assets/icons/calendar-upcoming.svg";
 import stopwatchIcon from "../assets/icons/stopwatch.svg";
 import videoFilledIcon from "../assets/icons/video-filled.svg";
 import linkExternalIcon from "../assets/icons/link-external.svg";
-import bookmarkIcon from "../assets/icons/book-bookmark.svg";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -341,7 +340,6 @@ function SessionSidebar({ session, status: _status }: { session: SessionData; st
         <p className="mb-1 text-[13px] font-medium uppercase tracking-[0.5px] text-gray-xlight">Resources</p>
         <div className="flex flex-col">
           {[
-            { icon: bookmarkIcon, label: "Session guide", href: "#" },
             { icon: orderHistoryIcon, label: "Office hours", href: "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours" },
             { icon: slackIcon, label: "Slack community", href: "#" },
             { icon: calendarUpcomingIcon, label: "Join a build session", href: "#" },
@@ -371,8 +369,9 @@ function SessionSidebar({ session, status: _status }: { session: SessionData; st
 export default function LiveSession() {
   const [activeTab, setActiveTab] = useState<"guide" | "details">("guide");
   const [status, setStatus] = useState<SessionStatus>("live");
-  const [fullWidth, setFullWidth] = useState(true);
+  const [fullWidth, setFullWidth] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const [hideGuide, setHideGuide] = useState(false);
   const session = sessionData;
 
   const sidebar = <SessionSidebar session={session} status={status} />;
@@ -418,7 +417,7 @@ export default function LiveSession() {
 
           {/* Mobile pivot */}
           <div className="sticky top-0 z-10 -mx-4 flex gap-5 border-b border-gray-stroke bg-white px-4 min-[960px]:hidden">
-            {([{ value: "guide", label: "Session guide" }, { value: "details", label: "Resources" }] as const).map(({ value, label }) => (
+            {([{ value: "guide", label: "Overview" }, { value: "details", label: "Resources" }] as const).map(({ value, label }) => (
               <button
                 key={value}
                 onClick={() => setActiveTab(value)}
@@ -428,7 +427,7 @@ export default function LiveSession() {
               >
                 <span className="text-[18px] font-medium">{label}</span>
                 {activeTab === value && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#038561]" />
+                  <div className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-[#038561]" />
                 )}
               </button>
             ))}
@@ -439,47 +438,43 @@ export default function LiveSession() {
 
             {/* Overview */}
             <div className="border-t border-gray-stroke pt-5">
-              <p className="mb-3 text-[13px] font-medium uppercase tracking-[0.5px] text-gray-xlight">Overview</p>
               <p className="leading-[1.6] text-gray-dark">{session.overview}</p>
-              <div className="mt-4">
-                <p className="mb-2 text-[15px] font-medium text-gray-dark">In this session you'll build:</p>
-                <ul className="flex flex-col gap-2">
-                  {session.whatYoullBuild.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5">
-                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="mt-0.5 shrink-0 text-[#038561]" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4 10l4.5 4.5L16 6" />
-                      </svg>
-                      <span className="leading-[1.5] text-gray-dark">{item}</span>
-                    </li>
+            </div>
+
+            {!hideGuide && (
+              <>
+                {/* Build sections */}
+                <div className="mt-8">
+                  <div className="mb-4 flex items-center justify-between">
+                    <p className="text-[18px] font-medium text-gray-dark">Session guide</p>
+                    <a href="#" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[14px] text-gray-light no-underline hover:text-gray-dark">
+                      <span>Open in new tab</span>
+                      <img src={linkExternalIcon} alt="" className="h-3.5 w-3.5 opacity-50" />
+                    </a>
+                  </div>
+                  {session.buildSections.map((section, i) => (
+                    <BuildSectionBlock
+                      key={section.id}
+                      section={section}
+                      defaultOpen={i === 0}
+                    />
                   ))}
-                </ul>
-              </div>
-            </div>
+                </div>
 
-            {/* Build sections */}
-            <div className="mt-5">
-              <p className="mb-0 text-[13px] font-medium uppercase tracking-[0.5px] text-gray-xlight">Session guide</p>
-              {session.buildSections.map((section, i) => (
-                <BuildSectionBlock
-                  key={section.id}
-                  section={section}
-                  defaultOpen={i === 0}
-                />
-              ))}
-            </div>
-
-            {/* Wrap-up */}
-            <div className="mt-6 rounded-[12px] border border-gray-stroke bg-[#F8F8F8] p-5">
-              <p className="mb-3 text-[17px] font-medium text-gray-dark">{session.wrapUp.heading}</p>
-              <ul className="flex flex-col gap-2.5">
-                {session.wrapUp.items.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-gray-light" />
-                    <span className="leading-[1.5] text-gray-dark">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                {/* Wrap-up */}
+                <div className="mt-6 rounded-[12px] border border-gray-stroke bg-[#F8F8F8] p-5">
+                  <p className="mb-3 text-[17px] font-medium text-gray-dark">{session.wrapUp.heading}</p>
+                  <ul className="flex flex-col gap-2.5">
+                    {session.wrapUp.items.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2.5">
+                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-gray-light" />
+                        <span className="leading-[1.5] text-gray-dark">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Details (sidebar) — mobile only on details tab */}
@@ -502,6 +497,17 @@ export default function LiveSession() {
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${fullWidth ? "bg-[#038561]" : "bg-gray-300"}`}
               >
                 <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${fullWidth ? "translate-x-[18px]" : "translate-x-0.5"}`} />
+              </button>
+            </div>
+
+            {/* No session guide toggle */}
+            <div className="mt-3 flex items-center justify-between">
+              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">No session guide</p>
+              <button
+                onClick={() => setHideGuide(!hideGuide)}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${hideGuide ? "bg-[#038561]" : "bg-gray-300"}`}
+              >
+                <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${hideGuide ? "translate-x-[18px]" : "translate-x-0.5"}`} />
               </button>
             </div>
 
