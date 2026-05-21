@@ -25,6 +25,7 @@ interface DemoConfig {
   purchasedProps: { title: string; subtitle: ReactNode; image: string };
   purchasedAltProps?: { label: string; cohortSelected: boolean; title: string; subtitle: ReactNode; image: string };
   exhaustedProps?: { title: string; subtitle: ReactNode; image: string };
+  fullyScheduledProps?: { title: string; subtitle: ReactNode; image: string };
 }
 
 const demos: DemoConfig[] = [
@@ -57,9 +58,14 @@ const demos: DemoConfig[] = [
       subtitle: "45m available to schedule",
       image: pic6,
     },
+    fullyScheduledProps: {
+      title: "1h 20m with Jessica",
+      subtitle: <>Upcoming session Jun 5 <span className="text-[#9B9B9B]">· 0m left</span></>,
+      image: pic6,
+    },
     exhaustedProps: {
       title: "Out of time with Jessica",
-      subtitle: "0m available to schedule",
+      subtitle: "Buy more coaching",
       image: pic6,
     },
   },
@@ -111,7 +117,7 @@ const demos: DemoConfig[] = [
       label: "Purchased · Cohort not yet selected",
       cohortSelected: false,
       title: "GMAT Exam Prep Bootcamp",
-      subtitle: "Next cohort starts June 1",
+      subtitle: "Select a cohort to get started",
       image: bootcampImg1,
     },
   },
@@ -384,9 +390,22 @@ function DemoSection({ demo }: { demo: DemoConfig }) {
               )}
             </div>
           )}
+          {demo.fullyScheduledProps && (
+            <div>
+              <span className="flex items-center gap-1 text-[14px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />Purchased · Fully scheduled</span>
+              <OfferingCard
+                type={demo.type}
+                title={demo.fullyScheduledProps.title}
+                subtitle={demo.fullyScheduledProps.subtitle}
+                image={demo.fullyScheduledProps.image}
+                purchased
+                fullyScheduled
+              />
+            </div>
+          )}
           {demo.exhaustedProps && (
             <div>
-              <span className="flex items-center gap-1 text-[14px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />Purchased · No time remaining</span>
+              <span className="flex items-center gap-1 text-[14px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />Purchased · Sessions complete</span>
               <OfferingCard
                 type={demo.type}
                 title={demo.exhaustedProps.title}
@@ -446,7 +465,7 @@ export default function OfferingCardTest() {
               <OfferingCard
                 type="coach-matching"
                 title="Free 1:1 session with an expert"
-                subtitle="Get matched with an expert to get started"
+                subtitle="Get matched with an expert"
                 image=""
               />
             </div>
@@ -456,7 +475,7 @@ export default function OfferingCardTest() {
                 type="coach-matching"
                 pending
                 title="We're matching you with a coach."
-                subtitle="Hang tight! Matching usually takes 2-3 days."
+                subtitle="Matching usually takes 2-3 days."
                 image=""
               />
             </div>

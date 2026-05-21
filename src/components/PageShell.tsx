@@ -21,6 +21,7 @@ export default function PageShell({
   rightSidebarWidth = 300,
   contentMaxWidth,
   stackRight = false,
+
   children,
 }: PageShellProps) {
   if (variant === "thin") {
@@ -57,10 +58,12 @@ export default function PageShell({
 
   const effectiveMaxWidth = contentMaxWidth ?? 800;
 
-  // stackRight needs a column-first layout on narrow viewports
+  // stackRight needs a column-first layout on narrow viewports.
+  // Right-only layout uses justify-between so extra space falls between the
+  // content and sidebar rather than after the sidebar.
   const rowClass = stackRight
     ? `flex flex-col items-stretch min-[960px]:flex-row min-[960px]:items-start ${leftSidebarMobile ? "md:flex-row" : ""}`
-    : `flex items-start ${leftSidebarMobile ? "flex-col md:flex-row" : ""}`;
+    : `flex items-start ${leftSidebarMobile ? "flex-col md:flex-row" : ""} ${hasRight && !hasLeft ? "justify-between" : ""}`;
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-4 sm:py-10 sm:px-6">
@@ -68,7 +71,7 @@ export default function PageShell({
         {hasLeft && <aside className={leftClass}>{leftSidebar}</aside>}
         <div
           className="min-w-0"
-          style={(hasLeft || hasRight) ? { width: "100%", maxWidth: effectiveMaxWidth } : { flex: "1 1 0%" }}
+          style={(hasLeft || hasRight) ? { flex: "1 1 0%", maxWidth: effectiveMaxWidth } : { flex: "1 1 0%" }}
         >
           {children}
         </div>

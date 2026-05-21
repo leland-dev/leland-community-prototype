@@ -171,7 +171,7 @@ function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohor
                     <span className="text-[14px] text-gray-light">{p.label}</span>
                     {isAdded && (
                       <button onClick={() => setSelectingProgram(p.key)} className="text-left text-[14px] text-gray-xlight underline hover:opacity-70">
-                        {selectedCohorts[p.key] ?? "No cohort selected"}
+                        {selectedCohorts[p.key] ?? "User will select their own cohort"}
                       </button>
                     )}
                   </div>

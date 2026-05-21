@@ -249,7 +249,7 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, c
                     onClick={() => onOpenCohortPicker(cohort)}
                     className="text-left text-[14px] text-gray-xlight underline hover:opacity-70"
                   >
-                    {selectedDates[cohort] ?? "User selects dates"}
+                    {selectedDates[cohort] ?? "User will select their own cohort"}
                   </button>
                 )}
               </div>
@@ -356,7 +356,7 @@ function PerSeatIncludes({ selectedDates, onOpenCohortPicker }: {
               <div key={cohort} className="flex items-start justify-between gap-4 py-1.5">
                 <div className="flex flex-col gap-[2px]">
                   <span className="text-[14px] text-gray-light">{cohort}</span>
-                  <span className="text-[14px] text-gray-xlight">{selectedDates[cohort] ?? "No cohort selected"}</span>
+                  <span className="text-[14px] text-gray-xlight">{selectedDates[cohort] ?? "User will select their own cohort"}</span>
                 </div>
                 {selectedDates[cohort] ? (
                   <button onClick={() => onOpenCohortPicker(cohort)} className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">

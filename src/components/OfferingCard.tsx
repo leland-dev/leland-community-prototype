@@ -28,6 +28,7 @@ interface OfferingCardProps {
   image: string;
   purchased?: boolean;
   exhausted?: boolean;
+  fullyScheduled?: boolean;
   pending?: boolean;
   cohortSelected?: boolean;
   ctaLabel?: string;
@@ -36,9 +37,10 @@ interface OfferingCardProps {
   href?: string;
 }
 
-function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: boolean, exhausted: boolean): { label: string; green?: boolean } {
+function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: boolean, exhausted: boolean, fullyScheduled: boolean): { label: string; green?: boolean } {
   if (purchased) {
     if (type === "hourly" && exhausted) return { label: "Buy coaching" };
+    if (type === "hourly" && fullyScheduled) return { label: "Message" };
     if (type === "hourly") return { label: "Schedule" };
     if (type === "hourly-package") return { label: "Schedule" };
     if (type === "package") return { label: "Schedule" };
@@ -62,7 +64,7 @@ interface MenuItem {
   danger?: boolean;
 }
 
-function getMenuItems(type: OfferingType, cohortSelected: boolean, exhausted: boolean): MenuItem[] {
+function getMenuItems(type: OfferingType, cohortSelected: boolean, exhausted: boolean, fullyScheduled: boolean): MenuItem[] {
   if (type === "coach-matching") {
     return [
       { icon: chatIcon, label: "Message" },
@@ -76,7 +78,9 @@ function getMenuItems(type: OfferingType, cohortSelected: boolean, exhausted: bo
   if (type === "hourly") {
     const items: MenuItem[] = exhausted
       ? [{ icon: chatIcon, label: "Message" }, { icon: eyeClosedIcon, label: "Hide from list" }]
-      : [{ icon: addPlusIcon, label: "Buy coaching" }, { icon: chatIcon, label: "Message" }];
+      : fullyScheduled
+        ? [{ icon: calendarUpcomingIcon, label: "Schedule" }, { icon: addPlusIcon, label: "Buy coaching" }]
+        : [{ icon: addPlusIcon, label: "Buy coaching" }, { icon: chatIcon, label: "Message" }];
     return items;
   }
   if (type === "hourly-package") {
@@ -128,6 +132,7 @@ export default function OfferingCard({
   image,
   purchased = false,
   exhausted = false,
+  fullyScheduled = false,
   pending = false,
   cohortSelected = true,
   ctaLabel,
@@ -142,9 +147,9 @@ export default function OfferingCard({
   const isPersonImage = type === "hourly" || type === "coach-matching" || ((type === "hourly-package" || type === "package") && purchased);
   const cta = pending && type === "coach-matching"
     ? { label: "Matching", green: false, disabled: true }
-    : { ...getDefaultCta(type, purchased, cohortSelected, exhausted), disabled: false };
+    : { ...getDefaultCta(type, purchased, cohortSelected, exhausted, fullyScheduled), disabled: false };
   const label = ctaLabel || cta.label;
-  const menuItems = getMenuItems(type, cohortSelected, exhausted);
+  const menuItems = getMenuItems(type, cohortSelected, exhausted, fullyScheduled);
   const showMenu = purchased || type === "leland-plus";
 
   useEffect(() => {

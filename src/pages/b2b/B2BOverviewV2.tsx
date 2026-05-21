@@ -965,7 +965,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                                     <div key={c.key} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                                       <span className="text-[16px] text-gray-dark">{c.label}</span>
                                       {isPending
-                                        ? <span className="text-[16px] text-gray-xlight">No cohort selected</span>
+                                        ? <span className="text-[16px] text-gray-xlight">User will select their own cohort</span>
                                         : <span className="text-[16px] text-gray-xlight">{meta.startDate}</span>
                                       }
                                     </div>
