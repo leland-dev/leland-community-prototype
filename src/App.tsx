@@ -52,6 +52,7 @@ import CoachEarnings from "./pages/CoachEarnings";
 import CoachReviews from "./pages/CoachReviews";
 import CoachDiscountCodes from "./pages/CoachDiscountCodes";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
+import LiveSession from "./pages/program/session/LiveSession";
 
 export default function App() {
   return (
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/my-courses" element={<MyCourses />} />
+        <Route path="/program/session/:urn" element={<LiveSession />} />
         <Route element={<CoachLayout />}>
           <Route path="/coach/home" element={<CoachHome />} />
           <Route path="/coach/inbox" element={<CoachInbox />} />

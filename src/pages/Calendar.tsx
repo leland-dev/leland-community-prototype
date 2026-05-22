@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import PageShell from "../components/PageShell";
+import { LinkButton } from "../components/Button";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic3 from "../assets/profile photos/pic-3.png";
@@ -25,11 +26,12 @@ const upcomingEvents = [
   {
     day: "MON",
     date: 30,
-    title: "MBA Strategy Live",
-    dateTime: "March 30 at 4:00 PM",
-    duration: "45 minutes",
+    title: "AIBP: Building Your First AI Agent",
+    dateTime: "Today at 2:45 PM",
+    duration: "90 minutes",
     image: pic3,
-    isNow: false,
+    isNow: true,
+    joinHref: "/program/session/mock-live",
   },
   {
     day: "WED",
@@ -220,9 +222,9 @@ export default function Calendar() {
                   {/* Right side: Join button or calendar icon */}
                   <div className="flex shrink-0 items-center self-stretch">
                     {event.isNow ? (
-                      <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                      <LinkButton size="md" variant="primary" href={event.joinHref ?? "#"}>
                         Join
-                      </button>
+                      </LinkButton>
                     ) : (
                       <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
                         <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">

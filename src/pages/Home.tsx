@@ -3244,6 +3244,7 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
           </svg>
         </NavLink>
         <div className="mt-2 flex flex-col -mx-2">
+          <SessionCard size="small" title="AIBP: Building Your First AI Agent" dateTime="Today, 2:45 PM" duration="90 min" image={bootcampImg} type="bootcamp" status="live" joinHref="/program/session/mock-live" />
           <SessionCard size="small" title="Mock Interview" dateTime="Today, 3:00 PM" duration="45 min" image={pic3} type="coach" status="upcoming" startsIn="2h" />
           <SessionCard size="small" title="Resume Review" dateTime="Oct 29, 5:00 PM" duration="45 min" image={pic5} type="coach" status="upcoming" />
         </div>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Button } from "./Button";
+import { Button, LinkButton } from "./Button";
 import { motion, AnimatePresence } from "motion/react";
 import arrowRoundIcon from "../assets/icons/arrow-round.svg";
 import arrowRightIcon from "../assets/icons/arrow-right.svg";
@@ -24,6 +24,7 @@ interface SessionCardProps {
   hideImage?: boolean;
   size?: "large" | "small";
   cta?: React.ReactNode;
+  joinHref?: string;
 }
 
 function getMenuItems(status: string, type: string) {
@@ -87,6 +88,7 @@ export default function SessionCard({
   hideImage,
   size = "large",
   cta,
+  joinHref,
 }: SessionCardProps) {
   const isPast = status === "past";
   const isSmall = size === "small";
@@ -145,7 +147,11 @@ export default function SessionCard({
         {/* Right action area */}
         <div className="flex shrink-0 items-center gap-0 self-stretch">
           {cta ? cta : status === "live" ? (
-            <Button size="md" variant="primary">Join</Button>
+            joinHref ? (
+              <LinkButton size="md" variant="primary" href={joinHref}>Join</LinkButton>
+            ) : (
+              <Button size="md" variant="primary">Join</Button>
+            )
           ) : status === "upcoming" && startsIn ? (
             <div className="hidden @[448px]:block rounded-lg px-4 py-3 text-[16px] font-medium leading-[1.2] bg-[#F5F5F5] text-[#9B9B9B]">
               Starts in {startsIn}

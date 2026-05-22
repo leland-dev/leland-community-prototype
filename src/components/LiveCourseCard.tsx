@@ -130,6 +130,7 @@ function SessionRowSimple({ session, isNext }: { session: Session; index: number
             startsIn={startsInText}
             hasRecording={state === "past-recording"}
             hideImage
+            joinHref={state === "live" ? `/program/session/mock-live` : undefined}
           />
         ))}
       </div>
@@ -159,6 +160,7 @@ function SessionRow({ session, isNext }: { session: Session; isNext: boolean; is
             startsIn={startsInText}
             hasRecording={state === "past-recording"}
             hideImage
+            joinHref={state === "live" ? `/program/session/mock-live` : undefined}
           />
         );
       })}
