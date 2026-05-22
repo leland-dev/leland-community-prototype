@@ -41,6 +41,7 @@ import PostTest from "./pages/PostTest";
 import ProfileCardTest from "./pages/ProfileCardTest";
 import GroupCardTest from "./pages/GroupCardTest";
 import Components from "./pages/Components";
+import CourseDetail from "./pages/CourseDetail";
 import CoachLayout from "./components/CoachLayout";
 import CoachHome from "./pages/CoachHome";
 import CoachProducts from "./pages/CoachProducts";
@@ -74,7 +75,8 @@ export default function App() {
         <Route path="/site" element={<Site />} />
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/calendar" element={<Calendar />} />
-        <Route path="/my-courses" element={<MyCourses />} />
+        <Route path="/my-programs" element={<MyCourses />} />
+        <Route path="/course/:courseId" element={<CourseDetail />} />
         <Route path="/program/session/:urn" element={<LiveSession />} />
         <Route element={<CoachLayout />}>
           <Route path="/coach/home" element={<CoachHome />} />

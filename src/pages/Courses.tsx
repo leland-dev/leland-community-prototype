@@ -290,7 +290,7 @@ function SelfPacedCard({ course }: { course: typeof selfPacedCourses[0] }) {
               <path d="M1 1l5 3-5 3z" />
             </svg>
           </div>
-          <span className="text-[14px] text-gray-light">Premium course</span>
+          <span className="text-[14px] text-gray-light">Premium program</span>
         </div>
         <p className="mt-1.5 text-[18px] font-medium leading-[1.2] text-gray-dark">{course.title}</p>
         <p className="mt-1 text-[16px] text-gray-light">Self-paced · {course.duration}</p>
@@ -397,7 +397,7 @@ export default function Courses() {
     <div>
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">Courses</h1>
+          <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">Programs</h1>
         </div>
         <div className="hidden shrink-0 items-center gap-2 pb-0.5 md:flex">
           <CategoryFilter selected={filterCategory} onSelect={setFilterCategory} />
@@ -415,7 +415,7 @@ export default function Courses() {
         ))}
       </CourseCarousel>
 
-      <CourseCarousel title="Self-paced courses">
+      <CourseCarousel title="Self-paced programs">
         {selfPacedCourses.map((course) => (
           <SelfPacedCard key={course.id} course={course} />
         ))}

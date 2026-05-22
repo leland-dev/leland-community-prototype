@@ -18,11 +18,12 @@ export interface SessionEntry {
 export interface CohortEntry {
   name: string;
   image?: string;
-  startDate: string;
-  endDate: string;
-  status: "completed" | "enrolled" | "invited";
+  startDate?: string;
+  endDate?: string;
+  sessionsAttended?: number;
+  sessionsTotal?: number;
+  pending?: boolean;
   review?: { rating: number; text: string };
-  inviteSent?: string;
 }
 
 export interface UserDetailV2 {
@@ -41,12 +42,237 @@ export interface UserDetailV2 {
     status: "active" | "expired";
     expiry: string;
     grantedDate?: string;
+    resourcesViewed?: number;
+    topCategories?: string[];
   };
 }
 
 interface Props {
   user: UserDetailV2 | null;
   onClose: () => void;
+  isAlaCarte?: boolean;
+  showLpEngagement?: boolean;
+  onUpdateAccess?: (email: string, cohortKeys: string[], sessions: number) => void;
+  onSwitchCohort?: (email: string, oldCohortName: string, newCohortKey: string) => void;
+}
+
+
+function cohortDateLabel(startDate: string): string {
+  return new Date(startDate) < new Date() ? `Started ${startDate}` : `Starts ${startDate}`;
+}
+
+const ALL_COHORTS_META: { key: string; label: string; image: string; startDate: string; endDate: string; sessionCount: number; scheduleDays: string[]; duration: string; full?: boolean }[] = [
+  { key: "ib", label: "Spring '26 IB Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", sessionCount: 8, scheduleDays: ["Wednesdays, 6–7:30 PM ET", "Fridays, 6–7:30 PM ET"], duration: "90-minute sessions" },
+  { key: "pe", label: "Private Equity Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841c0c4dde9ed55e539fe5f.png", startDate: "Jun 2, 2026", endDate: "Jun 30, 2026", sessionCount: 5, scheduleDays: ["Tuesdays, 7–8:30 PM ET"], duration: "90-minute sessions" },
+  { key: "ai", label: "AI for Finance Professionals", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Mar 1, 2026", endDate: "Mar 29, 2026", sessionCount: 4, scheduleDays: ["Thursdays, 6–7 PM ET"], duration: "60-minute sessions", full: true },
+  { key: "consulting", label: "Consulting Accelerator", image: "https://leland.imgix.net/bootcamps/6841c0c4dde9ed55e539fe5f.png", startDate: "Jul 7, 2026", endDate: "Aug 4, 2026", sessionCount: 6, scheduleDays: ["Mondays, 7–8:30 PM ET", "Wednesdays, 7–8:30 PM ET"], duration: "90-minute sessions" },
+];
+
+const AVAILABLE_PROGRAMS = [
+  { key: "ib", label: "Spring '26 IB Recruiting Bootcamp" },
+  { key: "pe", label: "Private Equity Recruiting Bootcamp" },
+  { key: "ai", label: "AI for Finance Professionals" },
+  { key: "consulting", label: "Consulting Accelerator" },
+];
+
+function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohortKeys: string[], sessions: number) => void }) {
+  const enrolledKeys = new Set((user.cohorts ?? []).map(c => {
+    const found = AVAILABLE_PROGRAMS.find(p => p.label === c.name);
+    return found?.key;
+  }).filter(Boolean) as string[]);
+
+  const initialSelectedCohorts: Record<string, string> = {};
+  enrolledKeys.forEach(key => {
+    const meta = ALL_COHORTS_META.find(m => m.key === key);
+    if (meta) initialSelectedCohorts[key] = meta.startDate;
+  });
+
+  const [sessions, setSessions] = useState(user.sessions?.granted ?? 0);
+  const [added, setAdded] = useState<Set<string>>(new Set(enrolledKeys));
+  const [selectedCohorts, setSelectedCohorts] = useState<Record<string, string>>(initialSelectedCohorts);
+  const [selectingProgram, setSelectingProgram] = useState<string | null>(null);
+  const hasPlus = !!user.plus;
+
+  const handleCohortPicked = (date: string | null) => {
+    if (selectingProgram) {
+      setAdded(prev => { const next = new Set(prev); next.add(selectingProgram); return next; });
+      if (date) setSelectedCohorts(prev => ({ ...prev, [selectingProgram]: date }));
+    }
+    setSelectingProgram(null);
+  };
+
+  if (selectingProgram) return (
+    <div className="flex flex-col px-4 pt-4 pb-4 sm:px-6">
+      <button
+        onClick={() => handleCohortPicked(null)}
+        className="mb-5 flex w-full items-center justify-between rounded-lg bg-gray-hover px-4 py-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]"
+      >
+        Invite the user to select their own dates
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </button>
+      <div className="divide-y divide-gray-stroke">
+        {ALL_COHORTS_META.map(cohort => (
+          <CohortSelectRow
+            key={cohort.key}
+            cohort={cohort}
+            isCurrent={selectedCohorts[selectingProgram] === cohort.startDate}
+            onEnroll={() => handleCohortPicked(cohort.startDate)}
+            enrollLabel="Select"
+            enrolledLabel="Selected"
+          />
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex min-h-full flex-col px-4 pt-5 pb-0 sm:px-6">
+      {/* User card */}
+      <div className="mb-8 flex items-center gap-3 rounded-xl bg-gray-hover px-4 py-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[14px] font-medium text-dark-green">
+          {user.initials}
+        </div>
+        <div className="min-w-0">
+          <div className="truncate text-[16px] font-medium text-gray-dark">{user.name}</div>
+          <div className="truncate text-[13px] text-gray-light">{user.email}</div>
+        </div>
+      </div>
+
+      <p className="mb-5 text-[16px] font-medium text-gray-dark">When you update access, this user will receive an email.</p>
+
+      {/* Offerings card */}
+      <div className="rounded-[10px] border border-gray-stroke">
+        {/* 1:1 sessions */}
+        <div className="flex items-center justify-between gap-4 px-4 py-3">
+          <span className="text-[15px] text-gray-dark">1:1 sessions</span>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setSessions(s => Math.max(0, s - 1))} disabled={sessions === 0}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb] disabled:cursor-not-allowed disabled:opacity-30">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <span className="w-6 text-center text-[15px] font-medium text-gray-dark">{sessions}</span>
+            <button onClick={() => setSessions(s => s + 1)}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+        {/* Live courses */}
+        <div className="border-t border-gray-stroke px-4 pb-3 pt-3">
+          <span className="text-[15px] text-gray-dark">Live courses</span>
+          <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
+            {AVAILABLE_PROGRAMS.map(p => {
+              const isAdded = added.has(p.key);
+              return (
+                <div key={p.key} className="flex items-start justify-between gap-4 py-1.5">
+                  <div className="flex flex-col gap-[2px]">
+                    <span className="text-[14px] text-gray-light">{p.label}</span>
+                    {isAdded && (
+                      <button onClick={() => setSelectingProgram(p.key)} className="text-left text-[14px] text-gray-xlight underline hover:opacity-70">
+                        {selectedCohorts[p.key] ?? "User will select their own cohort"}
+                      </button>
+                    )}
+                  </div>
+                  {isAdded ? (
+                    <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
+                      <span className="text-[14px] font-medium text-[#038561]">Added</span>
+                      <button onClick={() => setAdded(prev => { const n = new Set(prev); n.delete(p.key); return n; })} className="text-[#038561] hover:opacity-70">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => setSelectingProgram(p.key)} className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      Add
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        {/* Leland+ */}
+        <div className="flex items-center justify-between gap-4 border-t border-gray-stroke px-4 py-3">
+          <span className="text-[15px] text-gray-dark">Leland+</span>
+          {hasPlus ? (
+            <span className="flex items-center gap-1.5 text-[14px] text-gray-light">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1.5 6 4.5 9 10.5 3"/></svg>
+              {user.plus!.status === "active" ? `Expires ${user.plus!.expiry}` : "Expired"}
+            </span>
+          ) : (
+            <button className="flex items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-auto -mx-4 sm:-mx-6 border-t border-gray-stroke bg-white px-4 sm:px-6 py-[14px]">
+        <Button size="md" variant="primary" onClick={() => onDone(Array.from(added), sessions)} className="w-full justify-center">Update access</Button>
+      </div>
+    </div>
+  );
+}
+
+function CohortSelectRow({
+  cohort,
+  isCurrent,
+  onEnroll,
+  enrollLabel = "Enroll",
+  enrolledLabel = "Enrolled",
+}: {
+  cohort: typeof ALL_COHORTS_META[number];
+  isCurrent: boolean;
+  onEnroll: (key: string) => void;
+  enrollLabel?: string;
+  enrolledLabel?: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="py-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <div className="text-[16px] font-medium text-gray-dark">{cohort.startDate} – {cohort.endDate}</div>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="mt-0.5 w-fit cursor-pointer text-[14px] text-gray-light underline hover:text-gray-dark"
+          >
+            {expanded ? "Hide details" : "View details"}
+          </button>
+          {expanded && (
+            <div className="mt-2 flex flex-col gap-1.5">
+              <div className="flex items-center gap-2 text-[14px] text-gray-light">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                {cohort.sessionCount} sessions
+              </div>
+              {cohort.scheduleDays.map((day, i) => (
+                <div key={i} className="flex items-center gap-2 text-[14px] text-gray-light">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                  {day}
+                </div>
+              ))}
+              <div className="flex items-center gap-2 text-[14px] text-gray-light">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                {cohort.duration}
+              </div>
+            </div>
+          )}
+        </div>
+        <Button
+          size="md"
+          variant={isCurrent || cohort.full ? "secondary" : "primary"}
+          onClick={isCurrent || cohort.full ? undefined : () => onEnroll(cohort.key)}
+          disabled={isCurrent || cohort.full}
+        >
+          {isCurrent ? enrolledLabel : cohort.full ? "Full" : enrollLabel}
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 function StarRating({ rating }: { rating: number }) {
@@ -109,9 +335,17 @@ function AccordionSection({
   );
 }
 
-export default function B2BUserDrawerV2({ user, onClose }: Props) {
+export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngagement, onUpdateAccess, onSwitchCohort }: Props) {
+  const [switchCohortName, setSwitchCohortName] = useState<string | null>(null);
+  const [showUpdateAccess, setShowUpdateAccess] = useState(false);
+  const [reminderSent, setReminderSent] = useState(false);
+  const activeView = switchCohortName ? "switch-cohort" : showUpdateAccess ? "update-access" : "user";
+
   useEffect(() => {
     if (!user) return;
+    setReminderSent(false);
+    setSwitchCohortName(null);
+    setShowUpdateAccess(false);
     function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -141,10 +375,10 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
 
   const sessionsUsed = user?.sessions?.entries.filter((s) => s.status !== "unbooked").length ?? 0;
   const sessionsCompleted = user?.sessions?.entries.filter((s) => s.status === "completed").length ?? 0;
-  const hasInvitePending = user?.cohorts?.some((c) => c.status === "invited");
 
 
   return (
+    <>
     <AnimatePresence>
       {user && (
         <>
@@ -168,10 +402,22 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
 
               {/* Header */}
               <div className="relative flex min-h-12 w-full shrink-0 items-center justify-center border-b border-gray-stroke px-12 py-2">
-                <span className="text-[18px] font-medium text-gray-dark">{user.name}</span>
+                {activeView !== "user" && (
+                  <button
+                    onClick={() => { setSwitchCohortName(null); setShowUpdateAccess(false); }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full hover:bg-gray-hover"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                  </button>
+                )}
+                <span className="text-[18px] font-medium text-gray-dark">
+                  {activeView === "switch-cohort" ? "Select a cohort" : activeView === "update-access" ? "Update access" : user.name}
+                </span>
                 <button
                   onClick={onClose}
-                  className="absolute right-3 flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-hover"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full hover:bg-gray-hover"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -182,23 +428,63 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
               {/* Scrollable body */}
               <div className="flex-1 overflow-x-hidden overflow-y-auto">
 
+                {/* Cohort selection view */}
+                {activeView === "switch-cohort" && (() => {
+                  const switchingPending = user.cohorts?.find(c => c.name === switchCohortName)?.pending ?? false;
+                  return (
+                    <div className="divide-y divide-gray-stroke px-4 sm:px-6">
+                      {ALL_COHORTS_META.map((c) => (
+                        <CohortSelectRow
+                          key={c.key}
+                          cohort={c}
+                          isCurrent={!switchingPending && c.label === switchCohortName}
+                          onEnroll={(newKey) => { onSwitchCohort?.(user.email, switchCohortName!, newKey); setSwitchCohortName(null); }}
+                        />
+                      ))}
+                    </div>
+                  );
+                })()}
+
+                {/* Update access view */}
+                {activeView === "update-access" && (
+                  <UpdateAccessView user={user} onDone={(cohortKeys, sessions) => { onUpdateAccess?.(user.email, cohortKeys, sessions); setShowUpdateAccess(false); }} />
+                )}
+
                 {/* User summary */}
+                {activeView === "user" && (<>
                 <div className="px-4 pb-2 pt-5 sm:px-6">
                   <div className="text-[30px] font-medium text-gray-dark">User details</div>
                   <div className="mt-1 text-[16px] text-gray-light">
                     {user.email}{user.dateAdded ? ` · Added ${user.dateAdded}` : ""}
                   </div>
-                  <div className="mt-5 flex items-center justify-between gap-4 rounded-xl bg-gray-hover px-4 py-3">
-                    <div>
-                      <div className="text-[16px] font-medium leading-[1.2] text-gray-dark">Send reminder</div>
-                      <div className="mt-0.5 text-[14px] leading-[1.4] text-gray-light">Email the user links to benefits they haven't used yet</div>
+                  <div className="mt-5 flex gap-3">
+                    {isAlaCarte && (
+                      <Button size="md" variant="secondary" onClick={() => setShowUpdateAccess(true)} className="flex-1 justify-center border border-gray-stroke bg-white hover:bg-gray-hover">
+                        Grant access
+                      </Button>
+                    )}
+                    <div className="group/remind relative flex-1">
+                      <Button size="md" variant="secondary" disabled={reminderSent} onClick={() => setReminderSent(true)} className="w-full justify-center border border-gray-stroke bg-white hover:bg-gray-hover">
+                        {reminderSent ? (
+                          <>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            Reminder sent
+                          </>
+                        ) : (
+                          <>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
+                            </svg>
+                            Send reminder
+                          </>
+                        )}
+                      </Button>
+                      <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 w-56 -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[13px] leading-[1.4] text-white opacity-0 shadow-md transition-opacity group-hover/remind:opacity-100">
+                        Email the user links to benefits they haven't used yet.
+                      </div>
                     </div>
-                    <Button size="sm" variant="secondary" onClick={() => {}} className="shrink-0 border border-gray-stroke bg-white hover:bg-white/90">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
-                      </svg>
-                      Remind
-                    </Button>
                   </div>
                 </div>
 
@@ -280,56 +566,49 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                     </AccordionSection>
                   )}
 
-                  {/* Live Cohorts */}
-                  {user.cohorts && user.cohorts.length > 0 && (
-                    <AccordionSection
-                      icon={videoIcon}
-                      title="Live courses"
-                      subtitle={(() => {
-                        const enrolled = user.cohorts.filter(c => c.status === "enrolled").length;
-                        const invited = user.cohorts.filter(c => c.status === "invited").length;
-                        const completed = user.cohorts.filter(c => c.status === "completed").length;
-                        return [
-                          enrolled > 0 && `Enrolled: ${enrolled}`,
-                          invited > 0 && `Invited: ${invited}`,
-                          completed > 0 && `Completed: ${completed}`,
-                        ].filter(Boolean).join("  ");
-                      })()}
-                      pill={undefined}
-                    >
-                      <div className="flex flex-col">
-                        <div>
-                        {user.cohorts.map((c, i) => (
-                          <div key={i} className="border-b border-gray-stroke py-3 last:border-0 transition-transform hover:translate-x-0.5 cursor-pointer">
-                            <div className="flex items-start justify-between gap-4">
+                  {/* Programs */}
+                  {user.cohorts && user.cohorts.length > 0 && (() => {
+                    const enrolledCount = user.cohorts.filter(c => !c.pending).length;
+                    const pendingCount = user.cohorts.filter(c => c.pending).length;
+                    const subtitle = enrolledCount > 0
+                      ? `${enrolledCount} enrolled${pendingCount > 0 ? ` · ${pendingCount} pending` : ""}`
+                      : `${pendingCount} pending`;
+                    const switchCohortIsPending = user.cohorts.find(c => c.name === switchCohortName)?.pending ?? false;
+                    return (
+                      <AccordionSection
+                        icon={videoIcon}
+                        title="Programs"
+                        subtitle={subtitle}
+                        pill={undefined}
+                      >
+                        <div className="flex flex-col">
+                          {user.cohorts.map((c, i) => (
+                            <div key={i} className="border-b border-gray-stroke py-3 last:border-0">
                               <div className="flex min-w-0 items-start gap-3">
                                 {c.image && (
-                                  <div className="relative shrink-0">
-                                    <img src={c.image} alt={c.name} className="h-[36px] w-[69px] rounded-[6px] object-cover" />
-                                    {(c.status === "enrolled" || c.status === "completed") && (
-                                      <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary shadow-sm">
-                                        <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                          <polyline points="2 6 5 9 10 3" />
-                                        </svg>
-                                      </div>
-                                    )}
-                                  </div>
+                                  <img src={c.image} alt={c.name} className="h-[36px] w-[69px] shrink-0 rounded-[6px] object-cover aspect-[1200/630]" />
                                 )}
                                 <div className="flex min-w-0 flex-col gap-0.5">
                                   <div className="truncate text-[16px] font-medium leading-[1.2] text-gray-dark">{c.name}</div>
-                                  <div className="text-[14px] leading-[1.2] text-gray-light">{c.startDate} – {c.endDate}</div>
+                                  {c.pending ? (
+                                    <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[14px] leading-[1.2]">
+                                      <span className="text-gray-xlight">User hasn't selected a cohort yet.</span>
+                                      <button onClick={(e) => { e.stopPropagation(); setSwitchCohortName(c.name); }} className="cursor-pointer text-[14px] text-gray-xlight underline hover:text-gray-dark">Choose for them</button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[14px] leading-[1.2] text-gray-light">
+                                      <span>{cohortDateLabel(c.startDate!)}</span>
+                                      <button onClick={(e) => { e.stopPropagation(); setSwitchCohortName(c.name); }} className="cursor-pointer text-[14px] text-gray-xlight underline hover:text-gray-dark">Switch cohort</button>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
-                              <span className={`shrink-0 text-[16px] leading-[1.2] ${c.status === "invited" ? "text-gray-xlight" : "text-gray-dark"}`}>
-                                {c.status === "completed" ? "Completed" : c.status === "invited" ? "Invited" : "Enrolled"}
-                              </span>
                             </div>
-                          </div>
-                        ))}
+                          ))}
                         </div>
-                      </div>
-                    </AccordionSection>
-                  )}
+                      </AccordionSection>
+                    );
+                  })()}
 
                   {/* Reviews */}
                   {reviews.length > 0 && (
@@ -378,20 +657,39 @@ export default function B2BUserDrawerV2({ user, onClose }: Props) {
                             {user.plus.status === "active" ? "Active" : "Expired"}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between py-3">
+                        <div className={`flex items-center justify-between py-3 ${showLpEngagement && user.plus.resourcesViewed !== undefined ? "border-b border-gray-stroke" : ""}`}>
                           <span className="text-[16px] text-gray-light">{user.plus.status === "active" ? "Expires" : "Expired"}</span>
                           <span className="text-[16px] text-gray-dark">{user.plus.expiry}</span>
                         </div>
+                        {showLpEngagement && user.plus.resourcesViewed !== undefined && (
+                          <div className={`flex items-center justify-between py-3 ${user.plus.topCategories?.length ? "border-b border-gray-stroke" : ""}`}>
+                            <span className="text-[16px] text-gray-light">Resources viewed</span>
+                            <span className="text-[16px] text-gray-dark">{user.plus.resourcesViewed}</span>
+                          </div>
+                        )}
+                        {showLpEngagement && user.plus.topCategories?.length && (
+                          <div className="py-3">
+                            <span className="text-[16px] text-gray-light">Top categories</span>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {user.plus.topCategories.slice(0, 3).map((cat) => (
+                                <span key={cat} className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1.5 text-[14px] font-medium leading-none text-[#038561]">{cat}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </AccordionSection>
                   )}
 
                 </div>
+                </>)}
               </div>
+
             </div>
           </motion.div>
         </>
       )}
     </AnimatePresence>
+    </>
   );
 }

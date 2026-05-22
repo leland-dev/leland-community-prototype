@@ -24,7 +24,7 @@ export default function B2BUsers({ onOpenModal }: { onOpenModal: (m: ModalId) =>
       const o = userOfferings.find((x) => x.id === u.id);
       if (!o) return true;
       if (filter === "no-sessions") return o.sessions === "0/2";
-      if (filter === "no-live") return o.liveCourse === "\u2014";
+      if (filter === "no-live") return o.liveCourses.length === 0;
       if (filter === "no-self-study") return o.selfStudy === "\u2014";
       if (filter === "no-lp") return !o.lelandPlus;
       return true;
@@ -50,7 +50,7 @@ export default function B2BUsers({ onOpenModal }: { onOpenModal: (m: ModalId) =>
           <table className="b2b-table w-full border-collapse text-[13px]">
             <thead>
               <tr>
-                {["Name", "Email", "1:1 Sessions", "Live Courses", "Self-Study Courses", "Leland+", "Added", "Actions"].map((h) => (
+                {["Name", "Email", "1:1 Sessions", "Programs", "Self-Study Courses", "Leland+", "Added", "Actions"].map((h) => (
                   <th
                     key={h}
                     className="whitespace-nowrap border-b border-gray-stroke bg-white px-[14px] py-[10px] text-left text-[11px] font-bold uppercase tracking-[0.06em] text-gray-xlight"
@@ -100,7 +100,15 @@ export default function B2BUsers({ onOpenModal }: { onOpenModal: (m: ModalId) =>
                       <span className={`text-[13px] font-semibold ${sessColor}`}>{sess}</span>
                     </td>
                     <td className="border-b border-gray-hover px-[14px] py-[11px]">
-                      {enrollPill(o?.liveCourse || "\u2014")}
+                      {o?.liveCourses.length ? (
+                        <div className="flex flex-col gap-[3px]">
+                          {o.liveCourses.map((c) => (
+                            <span key={c} className="text-[13px] text-gray-dark">{c}</span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-[13px] text-gray-xlight">\u2014</span>
+                      )}
                     </td>
                     <td className="border-b border-gray-hover px-[14px] py-[11px]">
                       {enrollPill(o?.selfStudy || "\u2014")}

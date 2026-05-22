@@ -130,27 +130,11 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
 
         <div className="flex flex-col gap-8">
           <div>
-            <p className="mb-2 text-[14px] font-medium uppercase tracking-[0.1em] text-gray-light">License Summary</p>
-            <div>
-              {[
-                { label: "Total licenses", value: "364" },
-                { label: "Used", value: "289" },
-                { label: "Remaining", value: "75" },
-              ].map(({ label, value }, i, arr) => (
-                <div key={label} className={`flex items-center justify-between py-[14px] ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}>
-                  <span className="text-[16px] text-gray-light">{label}</span>
-                  <span className="text-[16px] font-medium text-gray-dark">{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
           <p className="mb-2 text-[14px] font-medium uppercase tracking-[0.1em] text-gray-light">Support</p>
           <p className="text-[16px] text-gray-light">
             Need help with your account? Reach out to your Leland success team at{" "}
-            <a href="mailto:success@joinleland.com" className="font-medium text-primary">
-              success@joinleland.com
+            <a href="mailto:partnerships@joinleland.com" className="font-medium text-primary">
+              partnerships@joinleland.com
             </a>
           </p>
           </div>

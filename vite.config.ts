@@ -70,6 +70,6 @@ export default defineConfig(({ mode }) => {
   return {
     base: "/",
     plugins: [react(), tailwindcss(), agentApiDevPlugin(apiKey, store)],
-    server: { port: 5174 },
+    server: { port: 5174, host: true },
   };
 });

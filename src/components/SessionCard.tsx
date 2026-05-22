@@ -49,12 +49,14 @@ function getMenuItems(status: string, type: string) {
   if (status === "past") {
     return [
       { icon: arrowRoundIcon, label: "Watch recording" },
+      { icon: textIcon, label: "Session guide" },
       { icon: arrowRightIcon, label: "Browse more events" },
     ];
   }
   if (type === "event") {
     return [
       { icon: calendarPageIcon, label: "Add to calendar" },
+      { icon: textIcon, label: "Session guide" },
       { icon: "cancel", label: "Unenroll", danger: true },
     ];
   }
@@ -152,11 +154,8 @@ export default function SessionCard({
             ) : (
               <Button size="md" variant="primary">Join</Button>
             )
-          ) : status === "upcoming" && startsIn ? (
-            <div className="hidden @[448px]:block rounded-lg px-4 py-3 text-[16px] font-medium leading-[1.2] bg-[#F5F5F5] text-[#9B9B9B]">
-              Starts in {startsIn}
-            </div>
-          ) : isPast && hasRecording && (type === "event" || type === "bootcamp") ? (
+          ) : status === "upcoming" ? null
+          : isPast && hasRecording && (type === "event" || type === "bootcamp") ? (
             <Button size="md" variant="secondary" className="hidden @[448px]:inline-flex">
               <img src={arrowRoundIcon} alt="" className="h-4 w-4" />
               Watch

@@ -3,22 +3,25 @@ import type { ReactNode } from "react";
 type PageShellProps = {
   variant?: "standard" | "thin";
   leftSidebar?: ReactNode;
+  leftSidebarMobile?: boolean;
   rightSidebar?: ReactNode;
   rightSidebarWidth?: number;
   contentMaxWidth?: number;
-  leftMaxWidth?: number;
-  sidebarAlign?: "start" | "between";
+  // When true, the right sidebar stacks below main content at narrow viewports
+  // instead of being hidden.
+  stackRight?: boolean;
   children: ReactNode;
 };
 
 export default function PageShell({
   variant = "standard",
   leftSidebar,
+  leftSidebarMobile = false,
   rightSidebar,
   rightSidebarWidth = 300,
   contentMaxWidth,
-  leftMaxWidth,
-  sidebarAlign = "between",
+  stackRight = false,
+
   children,
 }: PageShellProps) {
   if (variant === "thin") {
@@ -39,39 +42,44 @@ export default function PageShell({
   // NOTE: keep full class strings literal so Tailwind's JIT scanner picks them
   // up. Building arbitrary variants like `min-[1200px]:block` via template
   // strings causes the rule to be silently dropped from the generated CSS.
-  const leftClass = "hidden w-[300px] shrink-0 sticky top-5 self-start min-[960px]:block";
-  const rightClass = hasBoth
-    ? "hidden shrink-0 sticky top-5 self-start min-[1200px]:block"
-    : "hidden shrink-0 sticky top-5 self-start min-[960px]:block";
+  const leftClass = leftSidebarMobile
+    ? "w-full shrink-0 md:w-[300px] md:sticky md:top-5 md:self-start"
+    : "hidden w-[300px] shrink-0 sticky top-5 self-start min-[960px]:block";
 
-  if (leftMaxWidth) {
-    return (
-      <div className="mx-auto max-w-[1280px] px-4 py-8 sm:py-10 sm:px-6">
-        <div className="flex items-start">
-          {hasLeft && <aside className={leftClass}>{leftSidebar}</aside>}
-          <div className="min-w-0" style={{ flex: `0 1 ${leftMaxWidth}px` }}>
-            {children}
-          </div>
-          {hasRight && <div className="hidden min-[960px]:block" style={{ flex: '1 0 40px' }} />}
-          {hasRight && <aside className={rightClass}>{rightSidebar}</aside>}
-        </div>
-      </div>
-    );
-  }
+  // stackRight: always visible, becomes sticky column at the breakpoint.
+  // Default: hidden until the breakpoint.
+  const rightClass = stackRight
+    ? hasBoth
+      ? "w-full shrink-0 min-[1200px]:w-auto min-[1200px]:sticky min-[1200px]:top-5 min-[1200px]:self-start"
+      : "w-full shrink-0 min-[960px]:w-auto min-[960px]:sticky min-[960px]:top-5 min-[960px]:self-start"
+    : hasBoth
+      ? "hidden shrink-0 sticky top-5 self-start min-[1200px]:block"
+      : "hidden shrink-0 sticky top-5 self-start min-[960px]:block";
 
   const effectiveMaxWidth = contentMaxWidth ?? 800;
 
+  // stackRight needs a column-first layout on narrow viewports.
+  // Right-only layout uses justify-between so extra space falls between the
+  // content and sidebar rather than after the sidebar.
+  const rowClass = stackRight
+    ? `flex flex-col items-stretch min-[960px]:flex-row min-[960px]:items-start ${leftSidebarMobile ? "md:flex-row" : ""}`
+    : `flex items-start ${leftSidebarMobile ? "flex-col md:flex-row" : ""} ${hasRight && !hasLeft ? "justify-between" : ""}`;
+
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-4 sm:py-10 sm:px-6">
-      <div className="flex items-start justify-between" style={{ gap: 40 }}>
+      <div className={rowClass} style={{ gap: 40 }}>
         {hasLeft && <aside className={leftClass}>{leftSidebar}</aside>}
         <div
           className="min-w-0"
-          style={(hasLeft || hasRight) ? { width: "100%", maxWidth: effectiveMaxWidth } : { flex: "1 1 0%" }}
+          style={(hasLeft || hasRight) ? { flex: "1 1 0%", maxWidth: effectiveMaxWidth } : { flex: "1 1 0%" }}
         >
           {children}
         </div>
-        {hasRight && <aside className={rightClass} style={{ width: rightSidebarWidth }}>{rightSidebar}</aside>}
+        {hasRight && (
+          <aside className={rightClass} style={stackRight ? undefined : { width: rightSidebarWidth }}>
+            {rightSidebar}
+          </aside>
+        )}
       </div>
     </div>
   );

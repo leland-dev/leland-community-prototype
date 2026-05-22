@@ -56,7 +56,7 @@ export interface UtilRecord {
 export interface UserOffering {
   id: number;
   sessions: string;
-  liveCourse: string;
+  liveCourses: string[];
   selfStudy: string;
   lelandPlus: boolean;
 }
@@ -104,24 +104,24 @@ export const users: User[] = [
 ];
 
 export const userOfferings: UserOffering[] = [
-  { id: 1, sessions: "2/2", liveCourse: "IB Recruiting", selfStudy: "Financial Modeling", lelandPlus: true },
-  { id: 2, sessions: "1/2", liveCourse: "Consulting Recruiting", selfStudy: "\u2014", lelandPlus: true },
-  { id: 3, sessions: "2/2", liveCourse: "\u2014", selfStudy: "Case Prep", lelandPlus: false },
-  { id: 4, sessions: "0/2", liveCourse: "IB Recruiting", selfStudy: "\u2014", lelandPlus: true },
-  { id: 5, sessions: "1/2", liveCourse: "\u2014", selfStudy: "Financial Modeling", lelandPlus: false },
-  { id: 6, sessions: "2/2", liveCourse: "Consulting Recruiting", selfStudy: "Case Prep", lelandPlus: true },
-  { id: 7, sessions: "0/2", liveCourse: "\u2014", selfStudy: "\u2014", lelandPlus: false },
-  { id: 8, sessions: "1/2", liveCourse: "IB Recruiting", selfStudy: "Financial Modeling", lelandPlus: true },
-  { id: 9, sessions: "2/2", liveCourse: "\u2014", selfStudy: "Case Prep", lelandPlus: true },
-  { id: 10, sessions: "0/2", liveCourse: "Consulting Recruiting", selfStudy: "\u2014", lelandPlus: false },
-  { id: 11, sessions: "1/2", liveCourse: "IB Recruiting", selfStudy: "Financial Modeling", lelandPlus: true },
-  { id: 12, sessions: "0/2", liveCourse: "\u2014", selfStudy: "\u2014", lelandPlus: false },
-  { id: 13, sessions: "2/2", liveCourse: "Consulting Recruiting", selfStudy: "Case Prep", lelandPlus: true },
-  { id: 14, sessions: "1/2", liveCourse: "\u2014", selfStudy: "Financial Modeling", lelandPlus: false },
-  { id: 15, sessions: "0/2", liveCourse: "IB Recruiting", selfStudy: "\u2014", lelandPlus: true },
-  { id: 16, sessions: "2/2", liveCourse: "\u2014", selfStudy: "Case Prep", lelandPlus: true },
-  { id: 17, sessions: "1/2", liveCourse: "Consulting Recruiting", selfStudy: "\u2014", lelandPlus: false },
-  { id: 18, sessions: "0/2", liveCourse: "\u2014", selfStudy: "Financial Modeling", lelandPlus: true },
+  { id: 1, sessions: "2/2", liveCourses: ["IB Recruiting Bootcamp", "Consulting Accelerator"], selfStudy: "Financial Modeling", lelandPlus: true },
+  { id: 2, sessions: "1/2", liveCourses: ["Consulting Accelerator"], selfStudy: "\u2014", lelandPlus: true },
+  { id: 3, sessions: "2/2", liveCourses: [], selfStudy: "Case Prep", lelandPlus: false },
+  { id: 4, sessions: "0/2", liveCourses: ["IB Recruiting Bootcamp"], selfStudy: "\u2014", lelandPlus: true },
+  { id: 5, sessions: "1/2", liveCourses: [], selfStudy: "Financial Modeling", lelandPlus: false },
+  { id: 6, sessions: "2/2", liveCourses: ["Consulting Accelerator"], selfStudy: "Case Prep", lelandPlus: true },
+  { id: 7, sessions: "0/2", liveCourses: [], selfStudy: "\u2014", lelandPlus: false },
+  { id: 8, sessions: "1/2", liveCourses: ["IB Recruiting Bootcamp"], selfStudy: "Financial Modeling", lelandPlus: true },
+  { id: 9, sessions: "2/2", liveCourses: ["PE Foundations"], selfStudy: "Case Prep", lelandPlus: true },
+  { id: 10, sessions: "0/2", liveCourses: ["Consulting Accelerator"], selfStudy: "\u2014", lelandPlus: false },
+  { id: 11, sessions: "1/2", liveCourses: ["IB Recruiting Bootcamp"], selfStudy: "Financial Modeling", lelandPlus: true },
+  { id: 12, sessions: "0/2", liveCourses: [], selfStudy: "\u2014", lelandPlus: false },
+  { id: 13, sessions: "2/2", liveCourses: ["Consulting Accelerator", "PE Foundations"], selfStudy: "Case Prep", lelandPlus: true },
+  { id: 14, sessions: "1/2", liveCourses: [], selfStudy: "Financial Modeling", lelandPlus: false },
+  { id: 15, sessions: "0/2", liveCourses: ["IB Recruiting Bootcamp"], selfStudy: "\u2014", lelandPlus: true },
+  { id: 16, sessions: "2/2", liveCourses: ["PE Foundations"], selfStudy: "Case Prep", lelandPlus: true },
+  { id: 17, sessions: "1/2", liveCourses: ["Consulting Accelerator"], selfStudy: "\u2014", lelandPlus: false },
+  { id: 18, sessions: "0/2", liveCourses: [], selfStudy: "Financial Modeling", lelandPlus: true },
 ];
 
 export const offeringLabels: Record<string, { label: string; track: string; dotClass: string; pillClass: string }> = {

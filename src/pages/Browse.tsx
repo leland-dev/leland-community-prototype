@@ -13,7 +13,7 @@ const categories = [
   { name: "Coaching", icon: Users, color: "bg-blue/10 text-blue" },
   { name: "Events", icon: Calendar, color: "bg-orange/10 text-orange" },
   { name: "Bootcamps", icon: Rocket, color: "bg-red/10 text-red" },
-  { name: "Courses", icon: BookOpen, color: "bg-blue/10 text-blue" },
+  { name: "Programs", icon: BookOpen, color: "bg-blue/10 text-blue" },
   { name: "Leland+", icon: Sparkles, color: "bg-primary-xlight text-primary" },
   {
     name: "Graduate Programs",

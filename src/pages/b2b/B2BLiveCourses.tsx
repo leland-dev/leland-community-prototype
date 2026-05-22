@@ -43,8 +43,8 @@ export default function B2BLiveCourses() {
     <>
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-[40px] font-medium text-gray-dark">Live Courses</h1>
-          <p className="mt-2 text-[18px] text-[#707070]">Cohort-based live course enrollment and attendance tracking</p>
+          <h1 className="text-[40px] font-medium text-gray-dark">Live Programs</h1>
+          <p className="mt-2 text-[18px] text-[#707070]">Cohort-based live program enrollment and attendance tracking</p>
         </div>
         <button className="inline-flex items-center gap-[6px] rounded-lg border border-gray-stroke bg-white px-[14px] py-[7px] text-[13px] font-semibold text-gray-dark hover:bg-gray-hover">
           <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +76,7 @@ export default function B2BLiveCourses() {
 
       <Card>
         <SearchToolbar
-          placeholder="Search users or courses..."
+          placeholder="Search users or programs..."
           onSearch={setSearch}
           filters={filters}
           activeFilter={filter}
@@ -86,7 +86,7 @@ export default function B2BLiveCourses() {
           <table className="b2b-table w-full border-collapse text-[13px]">
             <thead>
               <tr>
-                {["User", "Course", "Enrolled", "Status", ""].map((h) => (
+                {["User", "Program", "Enrolled", "Status", ""].map((h) => (
                   <th key={h} className="whitespace-nowrap border-b border-gray-stroke bg-white px-[14px] py-[10px] text-left text-[11px] font-bold uppercase tracking-[0.06em] text-gray-xlight">
                     {h}
                   </th>

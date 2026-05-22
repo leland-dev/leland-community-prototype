@@ -51,7 +51,7 @@ const profileMenuGroups = [
   {
     items: [
       { to: "/profile-v2", icon: profilePhoto, label: "Profile", danger: false, isProfile: true },
-      { to: "/my-courses", icon: myCoursesIcon, label: "My courses", danger: false },
+      { to: "/my-programs", icon: myCoursesIcon, label: "My programs", danger: false },
       { to: null, icon: giftIcon, label: "Refer a friend", danger: false },
       { to: "/settings", icon: settingsIcon, label: "Settings", danger: false },
     ],

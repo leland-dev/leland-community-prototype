@@ -6,8 +6,11 @@ import downloadIcon from "../assets/icons/download.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import chatIcon from "../assets/icons/nav-icons/chat-inactive.svg";
 import menuBurgerIcon from "../assets/icons/menu-burger.svg";
+import arrowRightIcon from "../assets/icons/arrow-right.svg";
 import playVideoIcon from "../assets/icons/play-video.svg";
 import slackIcon from "../assets/icons/slack-black.svg";
+import orderHistoryIcon from "../assets/icons/order-history.svg";
+import calendarUpcomingIcon from "../assets/icons/calendar-upcoming.svg";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import eyeClosedIcon from "../assets/icons/eye-closed.svg";
 import browserIcon from "../assets/icons/browser.svg";
@@ -25,6 +28,7 @@ interface OfferingCardProps {
   image: string;
   purchased?: boolean;
   exhausted?: boolean;
+  fullyScheduled?: boolean;
   pending?: boolean;
   cohortSelected?: boolean;
   ctaLabel?: string;
@@ -33,9 +37,10 @@ interface OfferingCardProps {
   href?: string;
 }
 
-function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: boolean, exhausted: boolean): { label: string; green?: boolean } {
+function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: boolean, exhausted: boolean, fullyScheduled: boolean): { label: string; green?: boolean } {
   if (purchased) {
     if (type === "hourly" && exhausted) return { label: "Buy coaching" };
+    if (type === "hourly" && fullyScheduled) return { label: "Message" };
     if (type === "hourly") return { label: "Schedule" };
     if (type === "hourly-package") return { label: "Schedule" };
     if (type === "package") return { label: "Schedule" };
@@ -45,7 +50,7 @@ function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: b
   }
   if (type === "coach-matching") return { label: "Get matched", green: true };
   if (type === "free-intro") return { label: "Schedule", green: true };
-  if (type === "agent") return { label: "Open chat", green: true };
+  if (type === "agent") return { label: "Open chat" };
   if (type === "hourly") return { label: "Details" };
   if (type === "hourly-package") return { label: "Details" };
   if (type === "package") return { label: "Details" };
@@ -59,7 +64,7 @@ interface MenuItem {
   danger?: boolean;
 }
 
-function getMenuItems(type: OfferingType, cohortSelected: boolean, exhausted: boolean): MenuItem[] {
+function getMenuItems(type: OfferingType, cohortSelected: boolean, exhausted: boolean, fullyScheduled: boolean): MenuItem[] {
   if (type === "coach-matching") {
     return [
       { icon: chatIcon, label: "Message" },
@@ -73,7 +78,9 @@ function getMenuItems(type: OfferingType, cohortSelected: boolean, exhausted: bo
   if (type === "hourly") {
     const items: MenuItem[] = exhausted
       ? [{ icon: chatIcon, label: "Message" }, { icon: eyeClosedIcon, label: "Hide from list" }]
-      : [{ icon: addPlusIcon, label: "Buy coaching" }, { icon: chatIcon, label: "Message" }];
+      : fullyScheduled
+        ? [{ icon: calendarUpcomingIcon, label: "Schedule" }, { icon: addPlusIcon, label: "Buy coaching" }]
+        : [{ icon: addPlusIcon, label: "Buy coaching" }, { icon: chatIcon, label: "Message" }];
     return items;
   }
   if (type === "hourly-package") {
@@ -91,13 +98,15 @@ function getMenuItems(type: OfferingType, cohortSelected: boolean, exhausted: bo
   if (type === "course") {
     if (!cohortSelected) {
       return [
-        { icon: browserIcon, label: "Course details" },
+        { icon: browserIcon, label: "Program details" },
       ];
     }
     return [
-      { icon: menuBurgerIcon, label: "Syllabus" },
+      { icon: arrowRightIcon, label: "Details" },
       { icon: playVideoIcon, label: "Recordings" },
-      { icon: slackIcon, label: "Group Slack" },
+      { icon: orderHistoryIcon, label: "Office hours" },
+      { icon: slackIcon, label: "Slack community" },
+      { icon: calendarUpcomingIcon, label: "Join a build session" },
     ];
   }
   // content
@@ -123,6 +132,7 @@ export default function OfferingCard({
   image,
   purchased = false,
   exhausted = false,
+  fullyScheduled = false,
   pending = false,
   cohortSelected = true,
   ctaLabel,
@@ -137,9 +147,9 @@ export default function OfferingCard({
   const isPersonImage = type === "hourly" || type === "coach-matching" || ((type === "hourly-package" || type === "package") && purchased);
   const cta = pending && type === "coach-matching"
     ? { label: "Matching", green: false, disabled: true }
-    : { ...getDefaultCta(type, purchased, cohortSelected, exhausted), disabled: false };
+    : { ...getDefaultCta(type, purchased, cohortSelected, exhausted, fullyScheduled), disabled: false };
   const label = ctaLabel || cta.label;
-  const menuItems = getMenuItems(type, cohortSelected, exhausted);
+  const menuItems = getMenuItems(type, cohortSelected, exhausted, fullyScheduled);
   const showMenu = purchased || type === "leland-plus";
 
   useEffect(() => {
@@ -182,7 +192,7 @@ export default function OfferingCard({
   }
 
   /* ── Standard inline row layout ── */
-  const cardBody = (
+  const cardContent = (
     <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 py-3 transition-colors hover:bg-[#F5F5F5] ${showMenu ? "pr-1" : "pr-2"}`}>
         {/* Image */}
         {type === "leland-plus" ? (
@@ -229,6 +239,7 @@ export default function OfferingCard({
         <div className="flex shrink-0 items-center gap-0 self-stretch">
           <button
             disabled={cta.disabled}
+            onClick={(e) => e.stopPropagation()}
             className={`hidden @[448px]:flex items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
               cta.disabled
                 ? "bg-[#222222]/5 text-[#9B9B9B] cursor-default"
@@ -242,7 +253,7 @@ export default function OfferingCard({
 
           {/* 3-dot menu */}
           {showMenu && (
-            <div ref={menuRef} className="relative self-stretch">
+            <div ref={menuRef} className="relative self-stretch" onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={(e) => { e.preventDefault(); setMenuOpen(!menuOpen); }}
                 className="group/dots flex w-8 cursor-pointer items-center justify-center self-stretch h-full"
@@ -289,7 +300,11 @@ export default function OfferingCard({
 
   return (
     <div className="@container">
-      {href ? <Link to={href} className="block">{cardBody}</Link> : cardBody}
+      {href ? (
+        <Link to={href} className="no-underline">{cardContent}</Link>
+      ) : (
+        cardContent
+      )}
     </div>
   );
 }
