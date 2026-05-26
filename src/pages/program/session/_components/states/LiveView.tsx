@@ -6,6 +6,7 @@ import MobilePreview from "../blocks/MobilePreview";
 import V1 from "./live/V1";
 import V2 from "./live/V2";
 import V3 from "./live/V3";
+import V4 from "./live/V4";
 
 type VersionEntry = VersionOption & {
   component: ComponentType<{ session: Session }>;
@@ -31,6 +32,12 @@ const VERSIONS: VersionEntry[] = [
     label: "V3 · Classic player",
     description: "Embedded face PIP + Cloudflare-style controls. Resources in the rail.",
     component: V3,
+  },
+  {
+    id: "v4",
+    label: "V4 · Dual feed",
+    description: "Persistent slide signpost beside the live build view (desktop).",
+    component: V4,
   },
 ];
 
