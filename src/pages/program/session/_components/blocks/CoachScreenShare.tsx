@@ -52,74 +52,63 @@ function ProgramSlide() {
       {/* Background */}
       <rect width="1600" height="900" fill="#000000" />
 
-      {/* Lime accent line at the top */}
+      {/* Lime accent line — short, top-left */}
       <line
-        x1="100"
-        y1="80"
-        x2="1500"
-        y2="80"
+        x1="140"
+        y1="180"
+        x2="320"
+        y2="180"
         stroke="#A5E446"
         strokeWidth="3"
-        opacity="0.75"
       />
 
       {/* Meta */}
       <text
         x="140"
-        y="360"
+        y="240"
         fill="#A5E446"
         fontFamily="Menlo, monospace"
-        fontSize="32"
+        fontSize="20"
         fontWeight="500"
-        letterSpacing="5"
+        letterSpacing="3"
       >
-        AI BUILDER PROGRAM / LEVEL 2 / SESSION 1
+        SESSION 1 · LEVEL 2
       </text>
 
       {/* Headline */}
       <text
         x="140"
-        y="520"
+        y="420"
         fill="#FFFFFF"
         fontFamily="-apple-system, system-ui, sans-serif"
-        fontSize="120"
-        fontWeight="700"
+        fontSize="84"
+        fontWeight="600"
         letterSpacing="-1"
       >
         Ship Your First
       </text>
       <text
         x="140"
-        y="650"
+        y="510"
         fill="#FFFFFF"
         fontFamily="-apple-system, system-ui, sans-serif"
-        fontSize="120"
-        fontWeight="700"
+        fontSize="84"
+        fontWeight="600"
         letterSpacing="-1"
       >
         Agent Team
       </text>
 
-      {/* Subtitle */}
+      {/* Subtitle — single line, lighter */}
       <text
         x="140"
-        y="740"
+        y="600"
         fill="#FFFFFF"
-        opacity="0.85"
+        opacity="0.6"
         fontFamily="-apple-system, system-ui, sans-serif"
-        fontSize="36"
+        fontSize="22"
       >
-        Skills vs agents, reasoning loops, trust gradients,
-      </text>
-      <text
-        x="140"
-        y="788"
-        fill="#FFFFFF"
-        opacity="0.85"
-        fontFamily="-apple-system, system-ui, sans-serif"
-        fontSize="36"
-      >
-        and your first two-agent system.
+        Reasoning loops, trust gradients, and your first two-agent system.
       </text>
     </svg>
   );

@@ -347,7 +347,7 @@ function StudioLayout({ session }: { session: Session }) {
             replaced by a placeholder and the floating tile takes over. */}
         <div
           ref={placeholderRef}
-          className="-mx-4 w-auto sticky top-0 z-30 lg:relative lg:top-auto lg:z-auto lg:mx-0 lg:w-full"
+          className="relative -mx-4 w-auto lg:mx-0 lg:w-full"
           style={{
             aspectRatio: isPipped ? undefined : "16 / 9",
             height: isPipped ? 0 : undefined,
@@ -418,10 +418,10 @@ function StudioLayout({ session }: { session: Session }) {
         </div>
       </aside>
 
-      {/* Floating PIP — appears when scrolled past OR when the user has
-          tapped the PIP icon. Sits in the top-right of the left column area
-          (left of the right rail). Includes the same VideoControls so the
-          PIP icon can dock the video back. */}
+      {/* Desktop floating PIP — appears when scrolled past OR when the user
+          has tapped the PIP icon. Sits in the top-right of the left column
+          area (left of the right rail). Includes the same VideoControls so
+          the PIP icon can dock the video back. */}
       <div
         className={`hidden lg:block fixed top-4 z-40 w-[320px] overflow-hidden rounded-2xl bg-black shadow-[0_18px_50px_rgba(0,0,0,0.32)] transition-all duration-300 ease-out ${
           isPip ? "opacity-100 translate-y-0" : "pointer-events-none -translate-y-2 opacity-0"
@@ -437,6 +437,31 @@ function StudioLayout({ session }: { session: Session }) {
         </CoachScreenShare>
         <VideoControls isPipped={isPipped} onTogglePip={togglePip} />
       </div>
+
+      {/* Mobile floating PIP — appears once the inline video has scrolled
+          off. Half the viewport wide, anchored to top-right with a small
+          inset. Tap-the-card toggles back to the full inline player. */}
+      <button
+        type="button"
+        onClick={() => {
+          if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        className={`lg:hidden fixed top-2 right-2 z-40 w-[50vw] overflow-hidden rounded-xl bg-black shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-all duration-300 ease-out ${
+          isPip ? "opacity-100 translate-y-0" : "pointer-events-none -translate-y-2 opacity-0"
+        }`}
+        aria-hidden={!isPip}
+        aria-label="Return to full player"
+        style={{ aspectRatio: "16 / 9" }}
+      >
+        <CoachScreenShare>
+          <CoachFacePip coach={session.coach} position="top-right" size="sm" />
+        </CoachScreenShare>
+        {/* tiny LIVE dot in the corner so it reads as the live stream */}
+        <span className="pointer-events-none absolute right-1.5 top-1.5 flex items-center gap-1 rounded-full bg-[#E2574C] px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-white">
+          <span className="h-1 w-1 rounded-full bg-white" />
+          Live
+        </span>
+      </button>
 
       {/* Mobile-only chat tray. Slides up from bottom when the Chat pivot
           pill is tapped. Uses dvh sizing so the mobile keyboard pushes the

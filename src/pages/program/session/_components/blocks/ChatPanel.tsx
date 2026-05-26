@@ -207,11 +207,18 @@ export default function ChatPanel({ hideHeader }: { hideHeader?: boolean } = {})
         <div className="flex items-center gap-2 rounded-xl border border-gray-stroke bg-white px-3 py-2.5 transition-colors focus-within:border-gray-dark">
           <input
             ref={inputRef}
+            type="text"
+            inputMode="text"
+            autoComplete="off"
+            enterKeyHint="send"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder={inputPlaceholder}
-            className="min-w-0 flex-1 bg-transparent text-[14px] text-gray-dark placeholder:text-gray-light focus:outline-none"
+            // 16px font is required on iOS to prevent Safari's auto-zoom on
+            // focus (which otherwise locks the viewport and makes the input
+            // feel "stuck"). Bumped from 14px → 16px for mobile typeability.
+            className="min-w-0 flex-1 bg-transparent text-[16px] text-gray-dark placeholder:text-gray-light focus:outline-none lg:text-[14px]"
           />
           <button
             type="button"
