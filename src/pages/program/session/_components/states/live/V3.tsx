@@ -337,15 +337,17 @@ function StudioLayout({ session }: { session: Session }) {
 
   return (
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_340px] lg:gap-6">
-      {/* LEFT COLUMN: video → title → tabs+actions row → content */}
-      <div className="flex min-w-0 flex-col gap-4 lg:gap-6">
+      {/* LEFT COLUMN: video → title → tabs+actions row → content.
+          Padded on mobile so the title/tabs/content sit inside 16px gutters,
+          but the video itself breaks out with -mx-4 below to edge-bleed. */}
+      <div className="flex min-w-0 flex-col gap-4 px-4 lg:gap-6 lg:px-0">
         {/* Video slot — on mobile it sticks to the top of the viewport so the
             page scrolls under it. On desktop it sits in normal flow; when
             isPip is on (scroll-off or PIP toggle) the inline player is
             replaced by a placeholder and the floating tile takes over. */}
         <div
           ref={placeholderRef}
-          className="w-full sticky top-0 z-30 lg:relative lg:top-auto lg:z-auto"
+          className="-mx-4 w-auto sticky top-0 z-30 lg:relative lg:top-auto lg:z-auto lg:mx-0 lg:w-full"
           style={{
             aspectRatio: isPipped ? undefined : "16 / 9",
             height: isPipped ? 0 : undefined,
@@ -371,7 +373,7 @@ function StudioLayout({ session }: { session: Session }) {
               by Thumbs + Share — all four pills scrollable together).
             Desktop: tabs left, actions right via justify-between. */}
         <div
-          className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mx-0 lg:overflow-visible lg:justify-between lg:px-0 lg:pb-0"
+          className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mx-0 lg:overflow-visible lg:justify-between lg:px-0 lg:py-0"
         >
           <TabsNav
             tab={chatTrayOpen ? "chat" : tab}

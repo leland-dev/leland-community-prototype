@@ -95,19 +95,19 @@ function StepRow({
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center gap-4 px-5 py-5 text-left transition-colors hover:bg-gray-hover/40"
+        className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-gray-hover/40 lg:gap-4 lg:px-5 lg:py-5"
         aria-expanded={isOpen}
       >
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-hover text-[13px] font-semibold text-gray-dark">
           {index + 1}
         </span>
-        <span className="flex-1 text-[18px] font-medium text-gray-dark">{step.title}</span>
-        <span className="shrink-0 text-[14px] text-gray-light">{step.durationMin} min</span>
+        <span className="min-w-0 flex-1 truncate text-[16px] font-medium text-gray-dark lg:text-[18px]">{step.title}</span>
+        <span className="shrink-0 text-[13px] text-gray-light lg:text-[14px]">{step.durationMin} min</span>
         <ChevronIcon open={isOpen} />
       </button>
 
       {isOpen && (
-        <div className="px-5 pb-6 pl-[68px]">
+        <div className="px-4 pb-5 pl-4 lg:px-5 lg:pb-6 lg:pl-[68px]">
           {step.recommendedModel && (
             <div className="text-[14px] text-gray-light">
               Recommended model:{" "}

@@ -40,11 +40,15 @@ export default function LiveSession() {
   const { session, state } = resolveSession(urn);
 
   // Live state breaks out of PageShell to use the full viewport for studio layout.
+  // No horizontal/vertical padding on mobile so the video can edge-bleed and
+  // sit flush against the nav. Desktop restores the centered max-width layout.
   if (state === "live") {
     return (
-      <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-[1440px] lg:px-4 lg:py-6 sm:px-0">
         <SessionExperience session={session} state={state} />
-        <StateSwitcher activeUrn={urn} />
+        <div className="px-4 sm:px-6 lg:px-0">
+          <StateSwitcher activeUrn={urn} />
+        </div>
       </div>
     );
   }
