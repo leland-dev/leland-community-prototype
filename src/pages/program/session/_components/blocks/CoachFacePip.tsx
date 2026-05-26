@@ -38,13 +38,17 @@ export default function CoachFacePip({
         title={`${coach.name} face cam`}
         src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&playsinline=1&showinfo=0&iv_load_policy=3&disablekb=1&start=45`}
         allow="autoplay; encrypted-media"
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        className="absolute left-1/2 -translate-x-1/2"
         style={{
           border: "none",
           pointerEvents: "none",
-          // Oversize to crop YouTube chrome, similar to CoachScreenShare.
-          width: "calc(100% + 220px)",
-          height: "calc(100% + 220px)",
+          // Bias the crop toward the top of the video frame so the speaker's
+          // head sits in view. Without this the iframe centers vertically and
+          // we end up framing the torso. Wide horizontal oversize keeps
+          // YouTube chrome at left/right cropped out.
+          top: "-10%",
+          width: "calc(100% + 180px)",
+          height: "150%",
         }}
       />
       <div className="pointer-events-none absolute bottom-1 left-1 z-10 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
