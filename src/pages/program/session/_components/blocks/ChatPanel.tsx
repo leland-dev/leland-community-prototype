@@ -159,17 +159,25 @@ export default function ChatPanel({ hideHeader }: { hideHeader?: boolean } = {})
                    hover:[&::-webkit-scrollbar-thumb]:bg-black/15"
         style={{ scrollbarWidth: "thin", scrollbarColor: "transparent transparent" }}
       >
-        <ul className="flex flex-col gap-3">
+        {/* hideHeader is true only when ChatPanel renders inside the mobile
+            BottomTray — use that as the signal to switch to the larger
+            post-comment styling (44px avatars, 17px text). Desktop right rail
+            keeps the compact look. */}
+        <ul className={`flex flex-col ${hideHeader ? "gap-5" : "gap-3"}`}>
           {topLevelMessages.map((m) => {
             const replies = repliesByParent[m.id] ?? [];
             return (
               <li key={m.id}>
-                <MessageRow m={m} onReply={() => startReply(m)} />
+                <MessageRow m={m} onReply={() => startReply(m)} large={hideHeader} />
                 {replies.length > 0 && (
-                  <ul className="mt-2 ml-[22px] flex flex-col gap-3 border-l-2 border-gray-stroke pl-3">
+                  <ul
+                    className={`flex flex-col border-l-2 border-gray-stroke ${
+                      hideHeader ? "mt-3 ml-[28px] gap-4 pl-3" : "mt-2 ml-[22px] gap-3 pl-3"
+                    }`}
+                  >
                     {replies.map((r) => (
                       <li key={r.id}>
-                        <MessageRow m={r} onReply={() => startReply(r)} small />
+                        <MessageRow m={r} onReply={() => startReply(r)} small={!hideHeader} large={hideHeader} />
                       </li>
                     ))}
                   </ul>
@@ -242,25 +250,49 @@ function MessageRow({
   m,
   onReply,
   small = false,
+  large = false,
 }: {
   m: Message;
   onReply: () => void;
   small?: boolean;
+  /** Use the larger post-comment styling — 44px avatar, 17px text. */
+  large?: boolean;
 }) {
-  const avatarSize = small ? "h-6 w-6" : "h-8 w-8";
+  // Three styles:
+  //   - small  → 24px avatar, used for desktop right-rail nested replies
+  //   - large  → 44px avatar + 17px text, matches feed post comments (mobile)
+  //   - normal → 32px avatar, used for desktop right-rail top-level messages
+  const avatarSize = large ? "h-11 w-11" : small ? "h-6 w-6" : "h-8 w-8";
+  const nameClass = large
+    ? "text-[17px] font-medium text-gray-dark"
+    : "text-[14px] font-semibold text-gray-dark";
+  const bodyClass = large
+    ? "mt-0.5 text-[17px] leading-[1.4] text-gray-dark"
+    : "mt-0.5 text-[14px] leading-[1.45] text-gray-dark";
+  const badgeClass = large
+    ? "rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em]"
+    : "rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]";
+  const replyClass = large
+    ? "ml-1 text-[13px] font-medium text-gray-light transition-opacity hover:text-gray-dark"
+    : "ml-1 text-[12px] font-medium text-gray-light opacity-0 transition-opacity hover:text-gray-dark group-hover:opacity-100";
   return (
     <div className="group flex items-start gap-3">
-      <img src={m.avatar} alt="" className={`${avatarSize} shrink-0 rounded-full object-cover`} />
+      <img
+        src={m.avatar}
+        alt=""
+        className={`${avatarSize} shrink-0 rounded-full object-cover`}
+        style={large ? { objectPosition: "50% 15%" } : undefined}
+      />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[14px] font-semibold text-gray-dark">{m.author}</span>
+          <span className={nameClass}>{m.author}</span>
           {m.coach && (
-            <span className="rounded bg-[#038561]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#038561]">
+            <span className={`${badgeClass} bg-[#038561]/10 text-[#038561]`}>
               Coach
             </span>
           )}
           {m.self && (
-            <span className="rounded bg-gray-dark/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-dark">
+            <span className={`${badgeClass} bg-gray-dark/10 text-gray-dark`}>
               You
             </span>
           )}
@@ -268,13 +300,13 @@ function MessageRow({
             <button
               type="button"
               onClick={onReply}
-              className="ml-1 text-[12px] font-medium text-gray-light opacity-0 transition-opacity hover:text-gray-dark group-hover:opacity-100"
+              className={replyClass}
             >
               Reply
             </button>
           )}
         </div>
-        <div className="mt-0.5 text-[14px] leading-[1.45] text-gray-dark">{m.body}</div>
+        <div className={bodyClass}>{m.body}</div>
       </div>
     </div>
   );
