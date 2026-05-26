@@ -3,6 +3,7 @@ import { ThumbsUp, ThumbsDown, Forward } from "lucide-react";
 import type { Session } from "../../../_types";
 import CoachScreenShare from "../../blocks/CoachScreenShare";
 import CoachFaceVideo from "../../blocks/CoachFaceVideo";
+import CoachFacePip from "../../blocks/CoachFacePip";
 import SessionGuide from "../../blocks/SessionGuide";
 import Resources from "../../blocks/Resources";
 import ChatPanel from "../../blocks/ChatPanel";
@@ -228,15 +229,17 @@ function StudioLayout({ session }: { session: Session }) {
             aspectRatio: isCompact ? undefined : "16 / 9",
           }}
         >
-          <CoachScreenShare />
+          <CoachScreenShare>
+            {/* Mobile: face cam composes onto the slide as a small PIP tile,
+                video-call style. Desktop keeps the standalone tile in the
+                right rail (rendered below). */}
+            <CoachFacePip coach={session.coach} position="top-right" className="lg:hidden" />
+          </CoachScreenShare>
           <RateSessionPopup suppressed={isCompact} />
         </div>
 
         {/* Title BELOW the video */}
         <TopBar session={session} />
-
-        {/* MOBILE-ONLY face cam — below the title on mobile. */}
-        {!isDesktop && <CoachFaceVideo coach={session.coach} />}
 
         {/* Tabs row with action buttons right-aligned */}
         <div className="flex flex-wrap items-center justify-between gap-3">

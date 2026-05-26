@@ -5,6 +5,8 @@ type Props = {
   size?: "sm" | "md";
   videoId?: string;
   position?: "top-right" | "bottom-left";
+  /** Extra classes merged into the root — useful for responsive hiding (e.g. `lg:hidden`). */
+  className?: string;
 };
 
 // Same source as the screen share but with `start=45` so it's visibly out of
@@ -18,12 +20,13 @@ export default function CoachFacePip({
   size = "md",
   videoId = DEFAULT_VIDEO_ID,
   position = "bottom-left",
+  className = "",
 }: Props) {
   const dims = size === "sm" ? "h-[64px] w-[104px]" : "h-[104px] w-[170px]";
   const anchor = position === "top-right" ? "top-3 right-3" : "bottom-3 left-3";
   return (
     <div
-      className={`absolute ${anchor} ${dims} overflow-hidden rounded-lg border-2 border-white/30 shadow-[0_8px_24px_rgba(0,0,0,0.35)]`}
+      className={`absolute ${anchor} ${dims} overflow-hidden rounded-lg border-2 border-white/30 shadow-[0_8px_24px_rgba(0,0,0,0.35)] ${className}`}
     >
       <iframe
         title={`${coach.name} face cam`}
