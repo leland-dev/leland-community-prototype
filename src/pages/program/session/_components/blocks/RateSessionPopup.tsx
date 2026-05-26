@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
 // Show first time after this many seconds, then again every REPEAT seconds
-// while hidden so we periodically nudge the user to rate.
-const FIRST_SHOW_DELAY_MS = 8_000;
-const REPEAT_DELAY_MS = 45_000;
+// while hidden so we periodically nudge the user to rate. Long delays so the
+// popup doesn't interrupt testing the rest of the page.
+const FIRST_SHOW_DELAY_MS = 120_000; // 2 min
+const REPEAT_DELAY_MS = 300_000; // 5 min
 const THANK_YOU_HOLD_MS = 1_800;
 
 function Star({

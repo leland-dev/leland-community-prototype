@@ -418,7 +418,7 @@ function StudioLayout({ session }: { session: Session }) {
           }}
         >
           {!isPip && (
-            <div className="absolute inset-0 overflow-hidden rounded-2xl bg-black shadow-lg">
+            <div className="absolute inset-0 overflow-hidden bg-black lg:rounded-2xl lg:shadow-lg">
               <CoachScreenShare>
                 <CoachFacePip coach={session.coach} position="top-right" />
               </CoachScreenShare>
