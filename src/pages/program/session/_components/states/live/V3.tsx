@@ -26,17 +26,26 @@ type Tab = "guide" | "chat";
 function VideoControls({
   isPipped,
   onTogglePip,
+  mobileVisible = true,
 }: {
   isPipped?: boolean;
   onTogglePip?: () => void;
+  /** Mobile-only auto-hide. When false, mobile controls fade out and stop
+   *  intercepting taps so the tap falls through to the video container. */
+  mobileVisible?: boolean;
 }) {
   return (
     <>
       {/* ────────── MOBILE: YouTube-style controls ──────────
           Top row → captions / settings / PIP / fullscreen (chunky 40px tap targets)
           Center  → big play/pause (56px)
-          Bottom  → progress scrubber, LIVE pill, time, volume */}
-      <div className="pointer-events-none absolute inset-0 z-10 lg:hidden">
+          Bottom  → progress scrubber, LIVE pill, time, volume
+          Whole layer fades in on tap and out after a short timeout. */}
+      <div
+        className={`absolute inset-0 z-10 transition-opacity duration-200 ease-out lg:hidden ${
+          mobileVisible ? "pointer-events-none opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
         {/* Top row */}
         <div className="pointer-events-auto absolute inset-x-0 top-0 flex items-center justify-end gap-1 bg-gradient-to-b from-black/65 to-transparent px-2 pb-6 pt-2">
           <button type="button" aria-label="Captions" className="flex h-10 w-10 items-center justify-center rounded-full text-white active:bg-white/20">
@@ -369,6 +378,23 @@ function StudioLayout({ session }: { session: Session }) {
     });
   }
 
+  // Mobile-only auto-hide for the video controls. Default hidden; tap the
+  // video to bring them up, then they fade out after 2.5s of no interaction.
+  // On desktop the controls section uses `hidden lg:flex` and is always on,
+  // so this state only affects mobile.
+  const [controlsVisible, setControlsVisible] = useState(false);
+  const hideTimerRef = useRef<number | null>(null);
+  function showControlsBriefly() {
+    setControlsVisible(true);
+    if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = window.setTimeout(() => setControlsVisible(false), 2500);
+  }
+  useEffect(() => {
+    return () => {
+      if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
+    };
+  }, []);
+
   // Mobile-only: Chat is a pivot tab that pops up a bottom tray.
   const [chatTrayOpen, setChatTrayOpen] = useState(false);
 
@@ -418,11 +444,18 @@ function StudioLayout({ session }: { session: Session }) {
           }}
         >
           {!isPip && (
-            <div className="absolute inset-0 overflow-hidden bg-black lg:rounded-2xl lg:shadow-lg">
+            <div
+              className="absolute inset-0 overflow-hidden bg-black lg:rounded-2xl lg:shadow-lg"
+              onClick={showControlsBriefly}
+            >
               <CoachScreenShare>
                 <CoachFacePip coach={session.coach} position="top-right" />
               </CoachScreenShare>
-              <VideoControls isPipped={isPipped} onTogglePip={togglePip} />
+              <VideoControls
+                isPipped={isPipped}
+                onTogglePip={togglePip}
+                mobileVisible={controlsVisible}
+              />
               <RateSessionPopup suppressed={isPip} />
             </div>
           )}

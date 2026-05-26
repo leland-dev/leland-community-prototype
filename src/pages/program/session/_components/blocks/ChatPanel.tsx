@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { X } from "lucide-react";
+import { X, ArrowUp } from "lucide-react";
+import verifiedIcon from "../../../../../assets/icons/verified.svg";
 import pic1 from "../../../../../assets/profile photos/pic-1.png";
 import pic3 from "../../../../../assets/profile photos/pic-3.png";
 import pic4 from "../../../../../assets/profile photos/pic-4.png";
@@ -232,13 +233,12 @@ export default function ChatPanel({ hideHeader }: { hideHeader?: boolean } = {})
             type="button"
             onClick={send}
             disabled={!canSend}
-            className={`shrink-0 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors ${
-              canSend
-                ? "bg-gray-dark text-white hover:bg-[#444444]"
-                : "bg-gray-dark text-white opacity-40 cursor-not-allowed"
+            aria-label="Send"
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black text-white transition-opacity ${
+              canSend ? "opacity-100 hover:bg-[#222]" : "cursor-not-allowed opacity-40"
             }`}
           >
-            Send
+            <ArrowUp size={18} strokeWidth={2.25} />
           </button>
         </div>
       </div>
@@ -287,9 +287,15 @@ function MessageRow({
         <div className="flex flex-wrap items-center gap-1.5">
           <span className={nameClass}>{m.author}</span>
           {m.coach && (
-            <span className={`${badgeClass} bg-[#038561]/10 text-[#038561]`}>
-              Coach
-            </span>
+            // Mobile (large): use the same little verified badge icon as the
+            // community feed. Desktop right rail keeps the compact "Coach" pill.
+            large ? (
+              <img src={verifiedIcon} alt="Coach" className="h-[14px] w-[14px] shrink-0" />
+            ) : (
+              <span className={`${badgeClass} bg-[#038561]/10 text-[#038561]`}>
+                Coach
+              </span>
+            )
           )}
           {m.self && (
             <span className={`${badgeClass} bg-gray-dark/10 text-gray-dark`}>
