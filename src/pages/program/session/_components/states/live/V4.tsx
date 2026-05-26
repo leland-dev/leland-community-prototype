@@ -16,11 +16,12 @@ import BuildScreen from "../../blocks/BuildScreen";
 import CoachFacePip from "../../blocks/CoachFacePip";
 import CoachFaceVideo from "../../blocks/CoachFaceVideo";
 import SessionGuide from "../../blocks/SessionGuide";
+import Resources from "../../blocks/Resources";
 import ChatPanel from "../../blocks/ChatPanel";
 import RateSessionPopup from "../../blocks/RateSessionPopup";
 import BottomTray from "../../blocks/BottomTray";
 
-type Tab = "guide" | "chat";
+type Tab = "guide" | "resources" | "chat";
 
 // Mocked Cloudflare-style player controls. Overlays the bottom of the video
 // with a gradient for legibility. Most buttons are visual only — the PIP
@@ -336,6 +337,8 @@ function TabContent({ tab }: { tab: Tab }) {
   switch (tab) {
     case "guide":
       return <SessionGuide />;
+    case "resources":
+      return <Resources />;
     case "chat":
       // Chat is rendered in the BottomTray on mobile, not in the tab content
       // area. This case is unreachable in normal use but kept for type safety.
@@ -417,12 +420,16 @@ function StudioLayout({ session }: { session: Session }) {
   }, [isDesktop, tab]);
 
   // On mobile, Chat is a pivot pill that opens the bottom tray instead of
-  // switching the tab content. Resources is also surfaced here on mobile
-  // since the right rail is hidden.
+  // switching the tab content. Resources is surfaced inline on both
+  // breakpoints (no Resources card in the rail anymore).
   const tabs: { id: Tab; label: string }[] = isDesktop
-    ? [{ id: "guide", label: "Session guide" }]
+    ? [
+        { id: "guide", label: "Session guide" },
+        { id: "resources", label: "Resources" },
+      ]
     : [
         { id: "guide", label: "Session guide" },
+        { id: "resources", label: "Resources" },
         { id: "chat", label: "Chat" },
       ];
 
