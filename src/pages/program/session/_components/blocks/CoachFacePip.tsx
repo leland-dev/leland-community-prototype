@@ -22,8 +22,14 @@ export default function CoachFacePip({
   position = "bottom-left",
   className = "",
 }: Props) {
-  const dims = size === "sm" ? "h-[64px] w-[104px]" : "h-[104px] w-[170px]";
-  const anchor = position === "top-right" ? "top-3 right-3" : "bottom-3 left-3";
+  // Mobile gets a smaller near-square tile so it reads as a typical video-
+  // call PIP without dominating the slide. Desktop keeps the landscape tile.
+  const dims =
+    size === "sm"
+      ? "h-[56px] w-[72px] lg:h-[64px] lg:w-[104px]"
+      : "h-[72px] w-[88px] lg:h-[104px] lg:w-[170px]";
+  const anchor =
+    position === "top-right" ? "top-2 right-2 lg:top-3 lg:right-3" : "bottom-2 left-2 lg:bottom-3 lg:left-3";
   return (
     <div
       className={`absolute ${anchor} ${dims} overflow-hidden rounded-lg border-2 border-white/30 shadow-[0_8px_24px_rgba(0,0,0,0.35)] ${className}`}

@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 type Props = {
@@ -31,13 +32,19 @@ export default function BottomTray({ open, title, onClose, children }: Props) {
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  return (
+  // Portal to document.body so the tray escapes <main className="relative z-0">'s
+  // stacking context. Without this, BottomNav (a later sibling of <main> in the
+  // DOM with z: auto) paints OVER the tray's z-50 input, making the chat input
+  // un-tappable on mobile.
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
         aria-hidden={!open}
         onClick={onClose}
-        className={`fixed inset-0 z-40 bg-black/30 transition-opacity duration-200 lg:hidden ${
+        className={`fixed inset-0 z-[60] bg-black/30 transition-opacity duration-200 lg:hidden ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
@@ -46,7 +53,7 @@ export default function BottomTray({ open, title, onClose, children }: Props) {
         role="dialog"
         aria-modal={open}
         aria-hidden={!open}
-        className={`fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-white shadow-[0_-20px_60px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-out lg:hidden ${
+        className={`fixed inset-x-0 bottom-0 z-[70] flex flex-col rounded-t-2xl bg-white shadow-[0_-20px_60px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-out lg:hidden ${
           open ? "translate-y-0" : "translate-y-full"
         }`}
         style={{
@@ -75,6 +82,7 @@ export default function BottomTray({ open, title, onClose, children }: Props) {
         {/* Body */}
         <div className="min-h-0 flex-1">{children}</div>
       </div>
-    </>
+    </>,
+    document.body,
   );
 }
