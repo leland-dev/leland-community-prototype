@@ -30,6 +30,10 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      # GitHub Pages SPA fallback: any unknown path serves index.html so
+      # React Router can take over (e.g. /program/session/mock-live).
+      - run: cp dist/index.html dist/404.html
+
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
