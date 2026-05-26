@@ -11,7 +11,7 @@ type Props = {
 // of step with the slide.
 export default function CoachScreenShare({ children, videoId }: Props) {
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-2xl bg-black">
+    <div className="relative h-full w-full overflow-hidden bg-black lg:rounded-2xl">
       {videoId ? <YouTubeEmbed videoId={videoId} /> : <ProgramSlide />}
       {children}
     </div>

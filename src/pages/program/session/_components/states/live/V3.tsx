@@ -31,48 +31,111 @@ function VideoControls({
   onTogglePip?: () => void;
 }) {
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col gap-1 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-2 pb-1 pt-5 lg:gap-2 lg:px-4 lg:pb-3 lg:pt-12">
-      {/* Buffer / live-edge bar */}
-      <div className="pointer-events-auto relative h-0.5 w-full rounded-full bg-white/15 lg:h-1">
-        <div className="absolute inset-y-0 left-0 w-[78%] rounded-full bg-white/65" />
-        <span className="absolute -top-0.5 -right-1 h-1.5 w-1.5 rounded-full bg-[#E2574C] ring-2 ring-white/30 lg:h-2.5 lg:w-2.5" />
-      </div>
-      {/* Button row */}
-      <div className="pointer-events-auto flex items-center gap-0.5 text-white lg:gap-3">
-        <button type="button" aria-label="Play" className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
-          <Play className="h-2.5 w-2.5 lg:h-4 lg:w-4" fill="white" strokeWidth={0} />
-        </button>
-        <div className="flex items-center gap-0.5 rounded-full bg-[#E2574C] px-1 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] lg:gap-1.5 lg:px-2 lg:text-[10px]">
-          <span className="h-1 w-1 rounded-full bg-white lg:h-1.5 lg:w-1.5" />
-          Live
+    <>
+      {/* ────────── MOBILE: YouTube-style controls ──────────
+          Top row → captions / settings / PIP / fullscreen (chunky 40px tap targets)
+          Center  → big play/pause (56px)
+          Bottom  → progress scrubber, LIVE pill, time, volume */}
+      <div className="pointer-events-none absolute inset-0 z-10 lg:hidden">
+        {/* Top row */}
+        <div className="pointer-events-auto absolute inset-x-0 top-0 flex items-center justify-end gap-1 bg-gradient-to-b from-black/65 to-transparent px-2 pb-6 pt-2">
+          <button type="button" aria-label="Captions" className="flex h-10 w-10 items-center justify-center rounded-full text-white active:bg-white/20">
+            <Captions className="h-5 w-5" />
+          </button>
+          <button type="button" aria-label="Settings" className="flex h-10 w-10 items-center justify-center rounded-full text-white active:bg-white/20">
+            <Settings className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={onTogglePip}
+            aria-label={isPipped ? "Exit picture in picture" : "Picture in picture"}
+            aria-pressed={isPipped}
+            className={`flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors ${
+              isPipped ? "bg-white/25" : "active:bg-white/20"
+            }`}
+          >
+            <PictureInPicture2 className="h-5 w-5" />
+          </button>
+          <button type="button" aria-label="Fullscreen" className="flex h-10 w-10 items-center justify-center rounded-full text-white active:bg-white/20">
+            <Maximize className="h-5 w-5" />
+          </button>
         </div>
-        <button type="button" aria-label="Volume" className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
-          <Volume2 className="h-2.5 w-2.5 lg:h-4 lg:w-4" />
-        </button>
-        <span className="text-[9px] tabular-nums text-white/85 lg:text-[12px]">12:34 / 1:30:00</span>
-        <span className="flex-1" />
-        <button type="button" aria-label="Captions" className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
-          <Captions className="h-2.5 w-2.5 lg:h-4 lg:w-4" />
-        </button>
-        <button type="button" aria-label="Settings" className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
-          <Settings className="h-2.5 w-2.5 lg:h-4 lg:w-4" />
-        </button>
+
+        {/* Center big play */}
         <button
           type="button"
-          onClick={onTogglePip}
-          aria-label={isPipped ? "Exit picture in picture" : "Picture in picture"}
-          aria-pressed={isPipped}
-          className={`flex h-5 w-5 items-center justify-center rounded-full transition-colors lg:h-8 lg:w-8 ${
-            isPipped ? "bg-white/20" : "hover:bg-white/10"
-          }`}
+          aria-label="Play"
+          className="pointer-events-auto absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm transition-transform active:scale-95"
         >
-          <PictureInPicture2 className="h-2.5 w-2.5 lg:h-4 lg:w-4" />
+          <Play className="h-7 w-7 translate-x-[1px]" fill="white" strokeWidth={0} />
         </button>
-        <button type="button" aria-label="Fullscreen" className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
-          <Maximize className="h-2.5 w-2.5 lg:h-4 lg:w-4" />
-        </button>
+
+        {/* Bottom: progress + meta row */}
+        <div className="pointer-events-auto absolute inset-x-0 bottom-0 flex flex-col gap-1.5 bg-gradient-to-t from-black/80 via-black/35 to-transparent px-3 pb-2.5 pt-7">
+          {/* Progress / scrubber */}
+          <div className="relative h-1 w-full rounded-full bg-white/20">
+            <div className="absolute inset-y-0 left-0 w-[78%] rounded-full bg-white" />
+            <span className="absolute top-1/2 left-[78%] h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow" />
+          </div>
+          {/* Meta row */}
+          <div className="flex items-center gap-2 text-white">
+            <div className="flex items-center gap-1 rounded-full bg-[#E2574C] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]">
+              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+              Live
+            </div>
+            <span className="text-[11px] tabular-nums text-white/85">12:34 / 1:30:00</span>
+            <span className="flex-1" />
+            <button type="button" aria-label="Volume" className="flex h-8 w-8 items-center justify-center rounded-full active:bg-white/15">
+              <Volume2 className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* ────────── DESKTOP: original compact bottom bar ────────── */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden flex-col gap-2 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-4 pb-3 pt-12 lg:flex">
+        {/* Buffer / live-edge bar */}
+        <div className="pointer-events-auto relative h-1 w-full rounded-full bg-white/15">
+          <div className="absolute inset-y-0 left-0 w-[78%] rounded-full bg-white/65" />
+          <span className="absolute -top-0.5 -right-1 h-2.5 w-2.5 rounded-full bg-[#E2574C] ring-2 ring-white/30" />
+        </div>
+        {/* Button row */}
+        <div className="pointer-events-auto flex items-center gap-3 text-white">
+          <button type="button" aria-label="Play" className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10">
+            <Play className="h-4 w-4" fill="white" strokeWidth={0} />
+          </button>
+          <div className="flex items-center gap-1.5 rounded-full bg-[#E2574C] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em]">
+            <span className="h-1.5 w-1.5 rounded-full bg-white" />
+            Live
+          </div>
+          <button type="button" aria-label="Volume" className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10">
+            <Volume2 className="h-4 w-4" />
+          </button>
+          <span className="text-[12px] tabular-nums text-white/85">12:34 / 1:30:00</span>
+          <span className="flex-1" />
+          <button type="button" aria-label="Captions" className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10">
+            <Captions className="h-4 w-4" />
+          </button>
+          <button type="button" aria-label="Settings" className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10">
+            <Settings className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onTogglePip}
+            aria-label={isPipped ? "Exit picture in picture" : "Picture in picture"}
+            aria-pressed={isPipped}
+            className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
+              isPipped ? "bg-white/20" : "hover:bg-white/10"
+            }`}
+          >
+            <PictureInPicture2 className="h-4 w-4" />
+          </button>
+          <button type="button" aria-label="Fullscreen" className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10">
+            <Maximize className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
 
