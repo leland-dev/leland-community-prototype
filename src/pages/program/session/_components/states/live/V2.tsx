@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { ThumbsUp, ThumbsDown, Forward } from "lucide-react";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
 import type { Session } from "../../../_types";
+import sharesIcon from "../../../../../../assets/icons/shares.svg";
 import CoachScreenShare from "../../blocks/CoachScreenShare";
 import CoachFaceVideo from "../../blocks/CoachFaceVideo";
 import CoachFacePip from "../../blocks/CoachFacePip";
@@ -42,7 +43,7 @@ function ShareButton() {
       type="button"
       className="flex items-center gap-1.5 rounded-full bg-gray-hover px-4 py-2 text-gray-dark transition-colors hover:bg-gray-hover/60"
     >
-      <Forward size={16} strokeWidth={2} />
+      <img src={sharesIcon} alt="" className="h-4 w-4 [filter:invert(20%)]" />
       <span className="text-[14px] font-semibold">Share</span>
     </button>
   );
