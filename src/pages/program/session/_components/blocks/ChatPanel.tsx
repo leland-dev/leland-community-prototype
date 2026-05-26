@@ -132,10 +132,15 @@ export default function ChatPanel({ hideHeader }: { hideHeader?: boolean } = {})
     ? `Reply to ${replyingTo.author}…`
     : "Say something or ask a question…";
 
+  // When hideHeader is true the panel sits inside a wrapper (BottomTray) that
+  // already supplies its own header + chrome — drop the rounded card frame so
+  // we don't render a second visual "panel" inside the tray.
+  const frameClass = hideHeader
+    ? "flex h-full min-h-0 flex-col bg-white"
+    : "flex h-full min-h-0 flex-col rounded-2xl border border-gray-stroke bg-white";
+
   return (
-    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-gray-stroke bg-white">
-      {/* Header — hidden when ChatPanel is rendered inside a wrapper that
-          already supplies a header (e.g., BottomTray on mobile). */}
+    <div className={frameClass}>
       {!hideHeader && (
         <div className="border-b border-gray-stroke px-5 py-4">
           <div className="text-[16px] font-medium text-gray-dark">Chat</div>

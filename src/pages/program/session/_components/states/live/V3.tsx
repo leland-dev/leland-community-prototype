@@ -31,45 +31,45 @@ function VideoControls({
   onTogglePip?: () => void;
 }) {
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col gap-1.5 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-2.5 pb-1.5 pt-8 lg:gap-2 lg:px-4 lg:pb-3 lg:pt-12">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col gap-1 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-2 pb-1 pt-5 lg:gap-2 lg:px-4 lg:pb-3 lg:pt-12">
       {/* Buffer / live-edge bar */}
       <div className="pointer-events-auto relative h-0.5 w-full rounded-full bg-white/15 lg:h-1">
         <div className="absolute inset-y-0 left-0 w-[78%] rounded-full bg-white/65" />
-        <span className="absolute -top-0.5 -right-1 h-2 w-2 rounded-full bg-[#E2574C] ring-2 ring-white/30 lg:h-2.5 lg:w-2.5" />
+        <span className="absolute -top-0.5 -right-1 h-1.5 w-1.5 rounded-full bg-[#E2574C] ring-2 ring-white/30 lg:h-2.5 lg:w-2.5" />
       </div>
       {/* Button row */}
-      <div className="pointer-events-auto flex items-center gap-1.5 text-white lg:gap-3">
-        <button type="button" aria-label="Play" className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
-          <Play className="h-3 w-3 lg:h-4 lg:w-4" fill="white" strokeWidth={0} />
+      <div className="pointer-events-auto flex items-center gap-0.5 text-white lg:gap-3">
+        <button type="button" aria-label="Play" className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
+          <Play className="h-2.5 w-2.5 lg:h-4 lg:w-4" fill="white" strokeWidth={0} />
         </button>
-        <div className="flex items-center gap-1 rounded-full bg-[#E2574C] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.1em] lg:gap-1.5 lg:px-2 lg:text-[10px]">
+        <div className="flex items-center gap-0.5 rounded-full bg-[#E2574C] px-1 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] lg:gap-1.5 lg:px-2 lg:text-[10px]">
           <span className="h-1 w-1 rounded-full bg-white lg:h-1.5 lg:w-1.5" />
           Live
         </div>
-        <button type="button" aria-label="Volume" className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
-          <Volume2 className="h-3 w-3 lg:h-4 lg:w-4" />
+        <button type="button" aria-label="Volume" className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
+          <Volume2 className="h-2.5 w-2.5 lg:h-4 lg:w-4" />
         </button>
-        <span className="text-[10px] tabular-nums text-white/85 lg:text-[12px]">12:34 / 1:30:00</span>
+        <span className="text-[9px] tabular-nums text-white/85 lg:text-[12px]">12:34 / 1:30:00</span>
         <span className="flex-1" />
-        <button type="button" aria-label="Captions" className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
-          <Captions className="h-3 w-3 lg:h-4 lg:w-4" />
+        <button type="button" aria-label="Captions" className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
+          <Captions className="h-2.5 w-2.5 lg:h-4 lg:w-4" />
         </button>
-        <button type="button" aria-label="Settings" className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
-          <Settings className="h-3 w-3 lg:h-4 lg:w-4" />
+        <button type="button" aria-label="Settings" className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
+          <Settings className="h-2.5 w-2.5 lg:h-4 lg:w-4" />
         </button>
         <button
           type="button"
           onClick={onTogglePip}
           aria-label={isPipped ? "Exit picture in picture" : "Picture in picture"}
           aria-pressed={isPipped}
-          className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors lg:h-8 lg:w-8 ${
+          className={`flex h-5 w-5 items-center justify-center rounded-full transition-colors lg:h-8 lg:w-8 ${
             isPipped ? "bg-white/20" : "hover:bg-white/10"
           }`}
         >
-          <PictureInPicture2 className="h-3 w-3 lg:h-4 lg:w-4" />
+          <PictureInPicture2 className="h-2.5 w-2.5 lg:h-4 lg:w-4" />
         </button>
-        <button type="button" aria-label="Fullscreen" className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
-          <Maximize className="h-3 w-3 lg:h-4 lg:w-4" />
+        <button type="button" aria-label="Fullscreen" className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-white/10 lg:h-8 lg:w-8">
+          <Maximize className="h-2.5 w-2.5 lg:h-4 lg:w-4" />
         </button>
       </div>
     </div>
@@ -202,17 +202,17 @@ function TopBar({ session }: { session: Session }) {
   const timeLabel = startDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 
   return (
-    <div className="flex flex-col gap-2">
-      {/* Program / level / session — bumped to 17px */}
-      <div className="text-[17px] text-gray-light">
+    <div className="flex flex-col gap-1.5 lg:gap-2">
+      {/* Program / level / session */}
+      <div className="text-[14px] text-gray-light lg:text-[17px]">
         AI Builder Program Level 1 · Session {session.number}
       </div>
       {/* Title — big bold */}
-      <h1 className="text-[28px] font-medium leading-[1.05] text-gray-dark sm:text-[32px]">
+      <h1 className="text-[22px] font-medium leading-[1.1] text-gray-dark sm:text-[28px] lg:text-[32px]">
         {session.title}
       </h1>
-      {/* Date · time · duration · attendance — bumped to 17px */}
-      <div className="flex flex-wrap items-center gap-3 text-[17px] text-gray-light">
+      {/* Date · time · duration · attendance */}
+      <div className="flex flex-wrap items-center gap-2 text-[13px] text-gray-light lg:gap-3 lg:text-[17px]">
         <span>
           {dateLabel} · {timeLabel} PT
         </span>
@@ -235,7 +235,7 @@ function TabsNav({
   tabs: { id: Tab; label: string }[];
 }) {
   return (
-    <div className="flex items-center gap-2 text-[14px] font-semibold">
+    <div className="flex shrink-0 items-center gap-2 text-[14px] font-semibold">
       {tabs.map((t) => {
         const active = tab === t.id;
         return (
@@ -243,7 +243,7 @@ function TabsNav({
             key={t.id}
             type="button"
             onClick={() => onChange(t.id)}
-            className={`shrink-0 cursor-pointer rounded-full bg-gray-hover px-4 py-2 transition-all ${
+            className={`shrink-0 cursor-pointer whitespace-nowrap rounded-full bg-gray-hover px-4 py-2 transition-all ${
               active
                 ? "text-gray-dark ring-2 ring-gray-dark"
                 : "text-gray-light hover:text-gray-dark"
@@ -336,9 +336,9 @@ function StudioLayout({ session }: { session: Session }) {
       ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px] lg:gap-6">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_340px] lg:gap-6">
       {/* LEFT COLUMN: video → title → tabs+actions row → content */}
-      <div className="flex min-w-0 flex-col gap-6">
+      <div className="flex min-w-0 flex-col gap-4 lg:gap-6">
         {/* Video slot — on mobile it sticks to the top of the viewport so the
             page scrolls under it. On desktop it sits in normal flow; when
             isPip is on (scroll-off or PIP toggle) the inline player is
