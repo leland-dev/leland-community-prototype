@@ -14,6 +14,7 @@ import sharesIcon from "../../../../../../assets/icons/shares.svg";
 import CoachScreenShare from "../../blocks/CoachScreenShare";
 import BuildScreen from "../../blocks/BuildScreen";
 import CoachFacePip from "../../blocks/CoachFacePip";
+import CoachFaceVideo from "../../blocks/CoachFaceVideo";
 import SessionGuide from "../../blocks/SessionGuide";
 import ChatPanel from "../../blocks/ChatPanel";
 import RateSessionPopup from "../../blocks/RateSessionPopup";
@@ -449,35 +450,16 @@ function StudioLayout({ session }: { session: Session }) {
               className="absolute inset-0 overflow-hidden bg-black lg:rounded-2xl lg:shadow-lg"
               onClick={showControlsBriefly}
             >
-              {/* DESKTOP: dual-pane player.
-                  LEFT (62%) = active build feed (the coach's working app).
-                  RIGHT (38%) = persistent slide signpost — always visible so
-                  viewers can see where we are in the session even when the
-                  coach is heads-down in Claude. Thin 2px gap reads as a
-                  hard divider between two screen shares. */}
-              <div className="hidden h-full w-full lg:flex">
-                <div className="relative h-full" style={{ flex: "0 0 62%" }}>
-                  <BuildScreen />
-                  <CoachFacePip coach={session.coach} position="top-right" size="sm" />
-                  {/* Tiny corner label so the role of this tile is unambiguous */}
-                  <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-white backdrop-blur-sm">
-                    Build · live
-                  </span>
-                </div>
-                {/* 2px gap rendered by the parent bg-black showing through */}
-                <div className="w-[2px] shrink-0 bg-black" />
-                <div className="relative h-full" style={{ flex: "1 1 0" }}>
-                  <CoachScreenShare />
-                  <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-white backdrop-blur-sm">
-                    Signpost
-                  </span>
-                </div>
+              {/* DESKTOP: main canvas is the coach's active app (Claude).
+                  The face cam + slide signpost both live in the right rail
+                  below — not overlaid here. */}
+              <div className="hidden h-full w-full lg:block">
+                <BuildScreen />
               </div>
 
-              {/* MOBILE: keep the simpler single-feed view — slide as the main
-                  canvas with face overlay. Dual-pane doesn't survive at this
-                  width, so we lean on the session-guide tab for signposting
-                  on mobile. */}
+              {/* MOBILE: single-feed fallback (slide + face PIP overlay).
+                  Right rail is hidden, so the slide acts as the main view
+                  and signposting on mobile leans on the session-guide tab. */}
               <div className="relative h-full w-full lg:hidden">
                 <CoachScreenShare>
                   <CoachFacePip coach={session.coach} position="top-right" />
@@ -530,17 +512,28 @@ function StudioLayout({ session }: { session: Session }) {
         className="hidden lg:fixed lg:top-20 lg:block lg:w-[340px]"
         style={{
           height: "calc(100vh - 6.5rem)",
-          // Align right edge with the content's right edge — handles both
-          // narrow viewports (px-4 padding) and wide viewports (centered at
-          // max-w 1440).
           right: "calc(max(0px, (100vw - 1440px) / 2) + 16px)",
         }}
       >
         <div className="flex h-full flex-col gap-3">
-          {/* Resources at top, chat fills the remaining height */}
-          <div className="shrink-0">
-            <CompactResources />
+          {/* Coach face cam — top tile in the rail */}
+          <div
+            className="shrink-0 overflow-hidden rounded-2xl bg-black"
+            style={{ aspectRatio: "16 / 9" }}
+          >
+            <CoachFaceVideo coach={session.coach} fill />
           </div>
+          {/* Slide signpost — the second "screen" the coach is sharing */}
+          <div
+            className="relative shrink-0 overflow-hidden rounded-2xl bg-black"
+            style={{ aspectRatio: "16 / 9" }}
+          >
+            <CoachScreenShare />
+            <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-white backdrop-blur-sm">
+              Signpost
+            </span>
+          </div>
+          {/* Chat fills the remaining height */}
           <div className="min-h-0 flex-1">
             <ChatPanel />
           </div>
@@ -561,18 +554,10 @@ function StudioLayout({ session }: { session: Session }) {
           aspectRatio: "16 / 9",
         }}
       >
-        {/* PIP composes the dual-pane too, so the signpost is still visible
-            when the page has scrolled past the inline player. */}
-        <div className="flex h-full w-full">
-          <div className="relative h-full" style={{ flex: "0 0 62%" }}>
-            <BuildScreen />
-            <CoachFacePip coach={session.coach} position="top-right" size="sm" />
-          </div>
-          <div className="w-[2px] shrink-0 bg-black" />
-          <div className="relative h-full" style={{ flex: "1 1 0" }}>
-            <CoachScreenShare />
-          </div>
-        </div>
+        {/* PIP shows just the build screen — the coach face + slide signpost
+            stay visible in the right rail (which is also fixed) regardless
+            of scroll position, so we don't need to repeat them here. */}
+        <BuildScreen />
         <VideoControls isPipped={isPipped} onTogglePip={togglePip} />
       </div>
 
