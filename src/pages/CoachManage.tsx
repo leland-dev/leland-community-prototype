@@ -17,7 +17,7 @@ const categoryListings = [
   {
     slug: "mba",
     category: "MBA",
-    headline: "MBA Coach | Stanford GSB | 100+ M7 Admits",
+    headline: "MBA Expert | Stanford GSB | 100+ M7 Admits",
   },
   {
     slug: "college",

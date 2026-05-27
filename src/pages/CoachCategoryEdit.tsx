@@ -38,7 +38,7 @@ const categoryData: Record<string, {
   },
   mba: {
     name: "MBA",
-    headline: "MBA Coach | Stanford GSB | 100+ M7 Admits",
+    headline: "MBA Expert | Stanford GSB | 100+ M7 Admits",
     qualifications: "Stanford GSB graduate with deep expertise in MBA admissions. Coached over 100 candidates into M7 programs including HBS, GSB, and Wharton. Specializing in application strategy, essay review, and interview preparation.",
     yearsOfExperience: "6",
     levelOfExperience: "Manager",

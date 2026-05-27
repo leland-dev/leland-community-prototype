@@ -83,7 +83,7 @@ const GROUPS: Record<string, GroupData> = {
     cohortLabel: "Leland Community · Open group",
     tagline: "The MBA admissions community on Leland.",
     description:
-      "Share insights, ask questions, and connect with coaches and peers navigating the MBA admissions process — from GMAT prep to final decisions.",
+      "Share insights, ask questions, and connect with experts and peers navigating the MBA admissions process — from GMAT prep to final decisions.",
     memberCount: 1840,
     sessionCount: 0,
     banner: eventImg1,
@@ -91,9 +91,9 @@ const GROUPS: Record<string, GroupData> = {
     theme: "mba",
     instructor: { name: "David Kim", avatar: pic4, headline: "MBA Admissions Consultant | Ex-Bain, HBS '19" },
     helpfulLinks: [
-      { label: "Browse MBA Coaches", description: "Find an expert to help with your applications", type: "profile" },
+      { label: "Browse MBA Experts", description: "Find an expert to help with your applications", type: "profile" },
       { label: "Free Resources", description: "Essays, timelines, and school profiles", type: "resource" },
-      { label: "Upcoming Events", description: "Free webinars and Q&As from top coaches", type: "booking" },
+      { label: "Upcoming Livestreams", description: "Free webinars and Q&As from top experts", type: "booking" },
       { label: "Community Guidelines", description: "How we keep this space helpful and professional", type: "guide" },
     ],
   },
@@ -110,9 +110,9 @@ const GROUPS: Record<string, GroupData> = {
     theme: "consulting",
     instructor: { name: "Nina Kowalski", avatar: pic7, headline: "Partner at McKinsey & Company | Recruiting Lead" },
     helpfulLinks: [
-      { label: "Browse Consulting Coaches", description: "MBB veterans and recruiting experts", type: "profile" },
+      { label: "Browse Consulting Experts", description: "MBB veterans and recruiting experts", type: "profile" },
       { label: "Case Interview Resources", description: "Frameworks, drills, and practice cases", type: "resource" },
-      { label: "Upcoming Events", description: "Free case prep sessions and recruiting Q&As", type: "booking" },
+      { label: "Upcoming Livestreams", description: "Free case prep sessions and recruiting Q&As", type: "booking" },
       { label: "Community Guidelines", description: "How we keep this space helpful and professional", type: "guide" },
     ],
   },
@@ -127,9 +127,9 @@ const GROUPS: Record<string, GroupData> = {
     banner: eventImg3,
     accentColor: "#1e3a5f",
     theme: "law",
-    instructor: { name: "Rachel Nguyen", avatar: pic9, headline: "1L at Yale Law School | Pre-Law Admissions Coach" },
+    instructor: { name: "Rachel Nguyen", avatar: pic9, headline: "1L at Yale Law School | Pre-Law Admissions Expert" },
     helpfulLinks: [
-      { label: "Browse Law Coaches", description: "Find LSAT tutors and admissions advisors", type: "profile" },
+      { label: "Browse Law Experts", description: "Find LSAT tutors and admissions advisors", type: "profile" },
       { label: "LSAT Resources", description: "Study plans, drill sets, and prep guides", type: "resource" },
       { label: "School Profiles", description: "Rankings, culture, employment outcomes", type: "resource" },
       { label: "Community Guidelines", description: "How we keep this space helpful and professional", type: "guide" },
@@ -219,7 +219,7 @@ const GROUP_POSTS: Record<string, Post[]> = {
       avatar: pic5,
       time: "2d",
       verified: false,
-      headline: "MBA Admissions Coach | Ex-Deloitte | Wharton '22",
+      headline: "MBA Admissions Expert | Ex-Deloitte | Wharton '22",
       feed: "AI Boot Camp",
       body: "After Session 1 I thought this might be a bit too technical for me. After Session 2 I'm building things I didn't think were possible six months ago. For anyone on the fence about whether they're 'technical enough' — you don't need to be. The frameworks they teach work regardless.",
       likes: 42,
@@ -265,7 +265,7 @@ const GROUP_POSTS: Record<string, Post[]> = {
       avatar: pic8,
       time: "5d",
       verified: false,
-      headline: "Management Consultant | Career Coach",
+      headline: "Management Consultant | Career Expert",
       feed: "AI Boot Camp",
       body: "Worth reading before Session 3 — this piece on how product managers at Google and Meta actually use AI in their day-to-day workflow. Spoiler: it's almost nothing like the demo use cases you see on social media. Much more mundane, much more useful.",
       link: {
@@ -288,7 +288,7 @@ const GROUP_POSTS: Record<string, Post[]> = {
       avatar: pic9,
       time: "13h",
       verified: false,
-      headline: "1L at Yale Law School | Pre-Law Admissions Coach",
+      headline: "1L at Yale Law School | Pre-Law Admissions Expert",
       feed: "Law School",
       body: "A lot of people ask me how I chose between law schools. Honestly? I stopped looking at rankings and started asking: where do the students actually seem happy?\n\nVisited three campuses. At two of them, the 2Ls and 3Ls gave very polished answers. At Yale, someone told me \"it's not perfect, but we actually like each other.\" That was enough.\n\nThe rankings will shuffle. The culture won't.",
       likes: 318,
@@ -318,7 +318,7 @@ const GROUP_POSTS: Record<string, Post[]> = {
       avatar: pic11,
       time: "2d",
       verified: true,
-      headline: "Pre-Law Admissions Coach | Yale JD '21",
+      headline: "Pre-Law Admissions Expert | Yale JD '21",
       feed: "Law School",
       body: "The best piece I've read on writing a law school personal statement. It's not about being dramatic — it's about being precise. Why law, why you, why now. That's it.",
       link: {
@@ -374,7 +374,7 @@ const GROUP_POSTS: Record<string, Post[]> = {
       avatar: pic8,
       time: "5d",
       verified: false,
-      headline: "Management Consultant | Career Coach",
+      headline: "Management Consultant | Career Expert",
       feed: "AI BP April 26",
       body: "Worth reading before Session 3 — this piece on how product managers at Google and Meta actually use AI in their day-to-day workflow. Spoiler: it's almost nothing like the demo use cases you see on social media. Much more mundane, much more useful.",
       link: {
@@ -398,14 +398,14 @@ const COHORT_MEMBERS: { name: string; avatar: string; headline: string; role: "s
   { name: "David Kim", avatar: pic4, headline: "MBA Admissions Consultant", role: "coach" },
   { name: "Sarah Chen", avatar: pic3, headline: "Product Manager", role: "member" },
   { name: "Marcus Williams", avatar: pic2, headline: "Stanford GSB '26", role: "member" },
-  { name: "Emma Rodriguez", avatar: pic5, headline: "MBA Coach | Wharton '22", role: "coach" },
+  { name: "Emma Rodriguez", avatar: pic5, headline: "MBA Expert | Wharton '22", role: "coach" },
   { name: "James Liu", avatar: pic6, headline: "Incoming BA at Bain | Booth '25", role: "member" },
   { name: "Nina Kowalski", avatar: pic7, headline: "Partner at McKinsey", role: "member" },
   { name: "Alex Thompson", avatar: pic8, headline: "Management Consultant", role: "member" },
   { name: "Rachel Nguyen", avatar: pic9, headline: "Wharton MBA '24", role: "member" },
   { name: "Michael Chen", avatar: pic10, headline: "Ex-BCG Consultant", role: "member" },
-  { name: "Olivia Park", avatar: pic11, headline: "HBS Admissions Coach", role: "coach" },
-  { name: "Ryan Foster", avatar: pic12, headline: "Career Coach | Ex-McKinsey", role: "coach" },
+  { name: "Olivia Park", avatar: pic11, headline: "HBS Admissions Expert", role: "coach" },
+  { name: "Ryan Foster", avatar: pic12, headline: "Career Expert | Ex-McKinsey", role: "coach" },
   { name: "James Allen", avatar: pic1, headline: "Former Director at Stanford GSB", role: "coach" },
 ];
 
@@ -525,7 +525,7 @@ function MembersTab() {
               <div className="flex items-center gap-1.5">
                 <p className="truncate text-[16px] font-medium leading-tight text-gray-dark">{m.name}</p>
                 {m.role === "coach" && (
-                  <img src={verifiedIconSrc} alt="Coach" className="h-[14px] w-[14px] shrink-0" />
+                  <img src={verifiedIconSrc} alt="Expert" className="h-[14px] w-[14px] shrink-0" />
                 )}
               </div>
               <p className="truncate text-[14px] leading-tight text-[#707070]">{m.headline}</p>
@@ -586,7 +586,7 @@ const SIDEBAR_DATA: Record<GroupTheme, { events: SidebarEvent[]; categories: Sid
       { title: "Management Consulting", image: categoryConsulting, photos: [pic4, pic7, pic8], experts: "240 experts" },
     ],
     coaches: [
-      { name: "Olivia Park", avatar: pic11, headline: "HBS Admissions Coach | Ex-Yale AMS" },
+      { name: "Olivia Park", avatar: pic11, headline: "HBS Admissions Expert | Ex-Yale AMS" },
       { name: "James Allen", avatar: pic1, headline: "Former Director at Stanford GSB" },
       { name: "Priya Patel", avatar: pic3, headline: "HBS MBA '25 | Admissions Consultant" },
     ],
@@ -604,8 +604,8 @@ const SIDEBAR_DATA: Record<GroupTheme, { events: SidebarEvent[]; categories: Sid
     ],
     coaches: [
       { name: "Nina Kowalski", avatar: pic7, headline: "Partner at McKinsey & Company" },
-      { name: "Alex Thompson", avatar: pic8, headline: "Ex-BCG | Career Coach" },
-      { name: "Ryan Foster", avatar: pic12, headline: "Ex-McKinsey | Career Coach" },
+      { name: "Alex Thompson", avatar: pic8, headline: "Ex-BCG | Career Expert" },
+      { name: "Ryan Foster", avatar: pic12, headline: "Ex-McKinsey | Career Expert" },
     ],
   },
   law: {
@@ -620,7 +620,7 @@ const SIDEBAR_DATA: Record<GroupTheme, { events: SidebarEvent[]; categories: Sid
       { title: "Investment Banking", image: categoryIB, photos: [pic1, pic4, pic5], experts: "234 experts" },
     ],
     coaches: [
-      { name: "Rachel Nguyen", avatar: pic9, headline: "1L at Yale Law | Pre-Law Coach" },
+      { name: "Rachel Nguyen", avatar: pic9, headline: "1L at Yale Law | Pre-Law Expert" },
       { name: "Benjamin Shaw", avatar: pic2, headline: "Harvard Law '24 | BigLaw Associate" },
       { name: "Sophia Chen", avatar: pic11, headline: "LSAT Tutor | 180 Score" },
     ],
@@ -663,7 +663,7 @@ function GroupRightSidebar({ group }: { group: GroupData }) {
   const data = SIDEBAR_DATA[group.theme];
   return (
     <div className="flex flex-col gap-6 px-1">
-      <SidebarGroup label="Free events">
+      <SidebarGroup label="Livestreams">
         {data.events.map((e) => (
           <SidebarCard
             key={e.title}
@@ -695,7 +695,7 @@ function GroupRightSidebar({ group }: { group: GroupData }) {
         ))}
       </SidebarGroup>
 
-      <SidebarGroup label="Popular coaches">
+      <SidebarGroup label="Popular experts">
         {data.coaches.map((c) => (
           <SidebarCard
             key={c.name}

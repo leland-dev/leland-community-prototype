@@ -3,7 +3,7 @@ export default function Messaging() {
     <div>
       <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">Messages</h1>
       <p className="mt-2 text-[18px] text-gray-light">
-        Your conversations with coaches and peers.
+        Your conversations with experts and peers.
       </p>
 
       {/* Search conversations */}

@@ -257,7 +257,7 @@ export default function Dashboard() {
           My Content
         </h2>
         <div className="mt-3 flex flex-wrap gap-[6px]">
-          {["All", "Courses", "Resources"].map((tab) => (
+          {["All", "Live programs", "Resources"].map((tab) => (
             <button
               key={tab}
               onClick={() => setContentFilter(tab)}
@@ -380,7 +380,7 @@ export default function Dashboard() {
           {/* My Courses */}
           <section className="mt-12">
             <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
-              My Courses
+              My live programs
             </h2>
             <div className="mt-3 flex flex-col gap-4">
               {[0, 1, 2].map((i) => (

@@ -19,8 +19,8 @@ import browserIcon from "../assets/icons/browser.svg";
 import usersGroupIcon from "../assets/icons/users-group.svg";
 
 const menuItems = [
-  { to: "/events", icon: eventsIcon, label: "Free Events", danger: false, darkIcon: true },
-  { to: "/courses", icon: coursesIcon, label: "Courses", danger: false, darkIcon: true },
+  { to: "/events", icon: eventsIcon, label: "Livestreams", danger: false, darkIcon: true },
+  { to: "/courses", icon: coursesIcon, label: "Live programs", danger: false, darkIcon: true },
   { to: "/plus", icon: lelandPlusIcon, label: "Leland+", danger: false, darkIcon: true },
   { to: "/profile-v2?tab=more", icon: usersGroupIcon, label: "My Groups", danger: false, darkIcon: true },
   { to: null, icon: giftIcon, label: "Refer a friend", danger: false },

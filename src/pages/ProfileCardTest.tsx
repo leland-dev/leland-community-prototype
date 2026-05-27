@@ -11,9 +11,9 @@ import whartonLogo from "../assets/org-logos/wharton.png";
 
 // ─── Variants ──────────────────────────────────────────
 
-type Variant = "Client" | "Coach";
+type Variant = "Client" | "Expert";
 
-const variants: Variant[] = ["Client", "Coach"];
+const variants: Variant[] = ["Client", "Expert"];
 
 const cards: Record<Variant, { description: string; card: ProfileCardData }> = {
   Client: {
@@ -27,8 +27,8 @@ const cards: Record<Variant, { description: string; card: ProfileCardData }> = {
       connections: 182,
     },
   },
-  Coach: {
-    description: "Shown on a coach's profile and as a sidebar preview for customers. Includes credential logos, star rating, session count, and a booking CTA.",
+  Expert: {
+    description: "Shown on an expert's profile and as a sidebar preview for customers. Includes credential logos, star rating, session count, and a booking CTA.",
     card: {
       variant: "coach",
       name: "David Kim",
@@ -51,7 +51,7 @@ const cards: Record<Variant, { description: string; card: ProfileCardData }> = {
 
 export default function ProfileCardTest() {
   useEffect(() => { document.title = "Component: Profile Card"; }, []);
-  const [active, setActive] = useState<Variant>("Coach");
+  const [active, setActive] = useState<Variant>("Expert");
   const { description, card } = cards[active];
 
   return (
@@ -60,7 +60,7 @@ export default function ProfileCardTest() {
       <Link to="/components" className="inline-block rounded-[4px] border border-[#E5E5E5] bg-[#F5F5F5] px-2 py-1 text-[13px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-colors hover:bg-[#EBEBEB]">&lt;COMPONENT&gt;</Link>
       <h1 className="mt-1 text-[40px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Profile Card</h1>
       <p className="mt-2 text-[18px] text-[#707070]">
-        A card displaying a user's identity — avatar, name, headline, and key stats. Two variants: client and coach.
+        A card displaying a user's identity — avatar, name, headline, and key stats. Two variants: client and expert.
       </p>
 
       {/* Variant pills */}

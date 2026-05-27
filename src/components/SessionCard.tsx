@@ -50,7 +50,7 @@ function getMenuItems(status: string, type: string) {
     return [
       { icon: arrowRoundIcon, label: "Watch recording" },
       { icon: textIcon, label: "Session guide" },
-      { icon: arrowRightIcon, label: "Browse more events" },
+      { icon: arrowRightIcon, label: "Browse more livestreams" },
     ];
   }
   if (type === "event") {

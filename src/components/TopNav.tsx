@@ -24,8 +24,8 @@ import lelandLogo from "../assets/Logo.svg";
 /* ── Nav links ── */
 const navLinks = [
   { to: "/", label: "Home", end: true },
-  { to: "/events", label: "Events" },
-  { to: "/courses", label: "Courses" },
+  { to: "/events", label: "Livestreams" },
+  { to: "/courses", label: "Live programs" },
   { to: "/plus", label: "Leland+" },
 ];
 

@@ -112,8 +112,8 @@ export default function SidebarCardsTest() {
           {/* Sidebar preview container */}
           <div className="w-[300px] flex flex-col gap-6">
 
-          {/* Free events */}
-          <SidebarGroup label="Free events">
+          {/* Livestreams */}
+          <SidebarGroup label="Livestreams">
             <SidebarCard
               variant="event"
               live
@@ -158,8 +158,8 @@ export default function SidebarCardsTest() {
             />
           </SidebarGroup>
 
-          {/* Popular Courses */}
-          <SidebarGroup label="Popular courses">
+          {/* Popular Live programs */}
+          <SidebarGroup label="Popular live programs">
             <SidebarCard
               variant="course"
               align="top"
@@ -186,8 +186,8 @@ export default function SidebarCardsTest() {
             />
           </SidebarGroup>
 
-          {/* Popular Coaches */}
-          <SidebarGroup label="Popular coaches">
+          {/* Popular Experts */}
+          <SidebarGroup label="Popular experts">
             <SidebarCard
               variant="coach"
               image={pic1}

@@ -62,7 +62,7 @@ const experts = [
     avatar: pic8,
     rating: 4.96,
     reviews: 38,
-    headline: "Management Consultant | Career Coach for Non-Traditional Backgrounds",
+    headline: "Management Consultant | Career Expert for Non-Traditional Backgrounds",
   },
   {
     name: "Michael Chen",
@@ -153,7 +153,7 @@ export default function HomeSidebar() {
 
       {/* Popular Experts */}
       <section className="mt-8">
-        <SectionHeader title="Popular coaches" />
+        <SectionHeader title="Popular experts" />
         <div className="mt-3 space-y-4">
           {experts.map((expert) => (
             <a key={expert.name} href="#" className="group flex cursor-pointer items-center gap-3">

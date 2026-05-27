@@ -27,7 +27,7 @@ export default function SessionCardTest() {
       <Link to="/components" className="inline-block rounded-[4px] border border-[#E5E5E5] bg-[#F5F5F5] px-2 py-1 text-[13px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-colors hover:bg-[#EBEBEB]">&lt;COMPONENT&gt;</Link>
       <h1 className="mt-1 text-[40px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Session Card</h1>
       <p className="mt-2 text-[18px] text-[#707070]">
-        A global component to display a user's upcoming, live, and past sessions across 1:1 coaching, events, and courses.
+        A global component to display a user's upcoming, live, and past sessions across 1:1 coaching, livestreams, and live programs.
       </p>
 
       {/* Demo container */}
@@ -146,7 +146,7 @@ export default function SessionCardTest() {
               className="cursor-pointer appearance-none rounded-lg border-none bg-[#f5f5f5] pl-3 pr-8 py-2 text-[14px] font-medium text-gray-dark"
             >
               <option value="coach">1:1 Session</option>
-              <option value="event">Event</option>
+              <option value="event">Livestream</option>
               <option value="bootcamp">Bootcamp Session</option>
             </select>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-dark">

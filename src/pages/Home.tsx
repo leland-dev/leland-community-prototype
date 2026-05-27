@@ -321,7 +321,7 @@ export const posts: Post[] = [
     author: "Leland",
     avatar: lelandCompass,
     time: "1h",
-    headline: "Official Leland Events",
+    headline: "Official Leland Livestreams",
     body: "Curious about public policy grad school? Join Sarah Esquivel — Former Associate Director of Admissions at a Top 3 Public Policy School — for a live Ask Me Anything. Bring your questions about applications, programs, and career paths.",
     event: {
       title: "Public Policy Graduate Programs: Ask Me Anything",
@@ -368,7 +368,7 @@ export const posts: Post[] = [
     time: "Now",
     verified: true,
     feed: "Consulting",
-    headline: "Ex-McKinsey | Consulting Recruiting Coach | 400+ Offers",
+    headline: "Ex-McKinsey | Consulting Recruiting Expert | 400+ Offers",
     body: "Going live to answer your consulting recruiting questions — case prep, fit interviews, offer negotiation. Drop your questions in the chat.",
     live: {
       title: "Consulting Recruiting Q&A",
@@ -387,7 +387,7 @@ export const posts: Post[] = [
     author: "Emma Rodriguez",
     avatar: pic5,
     time: "10h",
-    headline: "MBA Admissions Coach | Ex-Deloitte | Wharton '22",
+    headline: "MBA Admissions Expert | Ex-Deloitte | Wharton '22",
     body: "Coaching session with an incredible candidate today. Went from a shaky \"tell me about yourself\" to a compelling 2-minute narrative. Love this work.",
     images: [
       "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&h=750&fit=crop",
@@ -416,7 +416,7 @@ export const posts: Post[] = [
     author: "Rachel Nguyen",
     avatar: pic9,
     time: "13h",
-    headline: "1L at Yale Law School | Pre-Law Admissions Coach",
+    headline: "1L at Yale Law School | Pre-Law Admissions Expert",
     feed: "Law School",
     body: "A lot of people ask me how I chose between law schools. Honestly? I stopped looking at rankings and started asking: where do the students actually seem happy?\n\nVisited three campuses. At two of them, the 2Ls and 3Ls gave very polished answers. At Yale, someone told me \"it's not perfect, but we actually like each other.\" That was enough.\n\nThe rankings will shuffle. The culture won't.",
     likes: 318,
@@ -452,7 +452,7 @@ export const posts: Post[] = [
     avatar: pic8,
     time: "16h",
     verified: true,
-    headline: "Management Consultant | Career Coach for Non-Traditional Backgrounds",
+    headline: "Management Consultant | Career Expert for Non-Traditional Backgrounds",
     body: "Unpopular opinion: you don't need an MBA to break into consulting. I did it with a non-target undergrad and 3 years at a startup. AMA.",
     likes: 234,
     comments: 89,
@@ -497,7 +497,7 @@ export const posts: Post[] = [
     author: "Olivia Park",
     avatar: pic11,
     time: "1d",
-    headline: "MBA Admissions Coach | Former HBS Admissions Reader",
+    headline: "MBA Admissions Expert | Former HBS Admissions Reader",
     body: "New essay guide just dropped for HBS 2027 intake. The prompt changed subtly but the implications are huge for positioning.",
     link: {
       url: "https://example.com/hbs-essay",
@@ -517,7 +517,7 @@ export const posts: Post[] = [
     author: "Ryan Foster",
     avatar: pic12,
     time: "2d",
-    headline: "Career & MBA Coach | 100+ Sessions | Ex-McKinsey",
+    headline: "Career & MBA Expert | 100+ Sessions | Ex-McKinsey",
     body: "Just hit 100 coaching sessions on Leland. What I've learned: every single person has a compelling story — most just need help finding it. The \"I'm not interesting enough\" narrative is almost never true.",
     likes: 178,
     comments: 22,
@@ -1444,7 +1444,7 @@ function OfficeHoursInfoModal({ live, author, avatar, onBuy, onClose }: {
             </div>
 
             <ul className="mt-4 flex flex-col gap-2">
-              {["Live Q&A with the coach", "Ask questions in real time", "Access ends when session ends"].map(item => (
+              {["Live Q&A with the expert", "Ask questions in real time", "Access ends when session ends"].map(item => (
                 <li key={item} className="flex items-center gap-2 text-[14px] text-gray-dark">
                   <svg className="h-4 w-4 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                   {item}
@@ -2015,10 +2015,10 @@ const suggestedExperts = [
   { name: "James Allen",     avatar: pic1,  verified: true, headline: "Former Director of Admissions at Stanford GSB | 200+ M7 Admits" },
   { name: "David Kim",      avatar: pic4,  verified: true, headline: "MBA Admissions Consultant | Ex-Bain, HBS '19 | Ranked Top 4 on P&Q" },
   { name: "Nina Kowalski",  avatar: pic7,  verified: true, headline: "Partner at McKinsey & Company | Consulting Recruiting Lead" },
-  { name: "Alex Thompson",  avatar: pic8,  verified: false, headline: "Career Coach | Ex-Google PM | Tech & MBA Transitions" },
+  { name: "Alex Thompson",  avatar: pic8,  verified: false, headline: "Career Expert | Ex-Google PM | Tech & MBA Transitions" },
   { name: "Michael Chen",   avatar: pic10, verified: true, headline: "Ex-BCG Consultant | Kellogg Adm. Insider | 130+ M7 Admits" },
-  { name: "Lauren Hayes",   avatar: pic13, verified: true, headline: "HBS Admissions Expert | Former Reader | 5.0 Rated Coach" },
-  { name: "Jason Park",     avatar: pic14, verified: false, headline: "Deloitte Strategy Lead | MBA Career Coach | Finance & Consulting" },
+  { name: "Lauren Hayes",   avatar: pic13, verified: true, headline: "HBS Admissions Expert | Former Reader | 5.0 Rated Expert" },
+  { name: "Jason Park",     avatar: pic14, verified: false, headline: "Deloitte Strategy Lead | MBA Career Expert | Finance & Consulting" },
 ];
 
 function CoachCardContent({ avatar, name, verified, headline, price, ctaLabel, showFollow = true, isOnline, p }: {
@@ -2804,7 +2804,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden px-4 pb-3">
                   {selectingEvent ? (
                     <div>
-                      <p className="mb-2 text-[13px] font-medium text-gray-light">Select an event to attach</p>
+                      <p className="mb-2 text-[13px] font-medium text-gray-light">Select a livestream to attach</p>
                       <div className="relative">
                         <div className="overflow-hidden rounded-xl border border-gray-stroke">
                           <img src={UPCOMING_EVENTS[eventIndex].image} alt={UPCOMING_EVENTS[eventIndex].title} className="aspect-[1200/628] w-full object-cover" />
@@ -2850,7 +2850,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
             {!isMVP && (
               <div className="flex flex-wrap gap-2 px-4 pb-4">
                 {([
-                  { label: "Attach your upcoming event", icon: <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />, onClick: () => { setSelectingEvent(true); setEventAttached(false); setEventIndex(0); } },
+                  { label: "Attach your upcoming livestream", icon: <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />, onClick: () => { setSelectingEvent(true); setEventAttached(false); setEventIndex(0); } },
                   { label: "Attach Bootcamp", icon: <><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></>, onClick: undefined as (() => void) | undefined },
                   { label: "Go Live", icon: <><circle cx="12" cy="12" r="3"/><path d="M8.5 8.5a5 5 0 000 7M15.5 8.5a5 5 0 010 7"/><path d="M5.5 5.5a9 9 0 000 13M18.5 5.5a9 9 0 010 13"/></>, onClick: onGoLive ? () => { onClose(); onGoLive(); } : undefined },
                   { label: "Celebrate someone", icon: <><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></>, onClick: undefined as (() => void) | undefined },
@@ -3130,8 +3130,8 @@ export function CategorySubtitle({ photos, experts }: { photos: string[]; expert
 export function HomeRightSidebar() {
   return (
     <div className="flex flex-col gap-6 px-1">
-      {/* Free events */}
-      <SidebarGroup label="Free events">
+      {/* Livestreams */}
+      <SidebarGroup label="Livestreams">
         <SidebarCard
           variant="event"
           live
@@ -3176,8 +3176,8 @@ export function HomeRightSidebar() {
         />
       </SidebarGroup>
 
-      {/* Popular coaches */}
-      <SidebarGroup label="Popular coaches">
+      {/* Popular experts */}
+      <SidebarGroup label="Popular experts">
         <SidebarCard
           variant="coach"
           image={pic1}
@@ -3295,7 +3295,7 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
 const composerPrompts = [
   "What's on your mind?",
   "Does anyone have a good GMAT practice test?",
-  "Who's the best coach for MBA admissions?",
+  "Who's the best expert for MBA admissions?",
   "Any tips for Columbia's essays this cycle?",
   "Looking for case prep resource recommendations...",
   "Share a win with the community!",

@@ -25,7 +25,7 @@ const navItems = [
   { to: "/", active: homeActive, inactive: homeInactive, label: "Home" },
   { to: "/browse", active: browseActive, inactive: browseInactive, label: "Browse" },
   { to: "/search", active: searchActive, inactive: searchInactive, label: "Search" },
-  { to: "/events", active: eventsActive, inactive: eventsInactive, label: "Free Events" },
+  { to: "/events", active: eventsActive, inactive: eventsInactive, label: "Livestreams" },
   { to: "/courses", active: coursesActive, inactive: coursesInactive, label: "Programs" },
   { to: "/plus", active: lelandPlusActive, inactive: lelandPlusInactive, label: "Leland+" },
   { to: "/notifications", active: notificationsActive, inactive: notificationsInactive, label: "Notifications" },
