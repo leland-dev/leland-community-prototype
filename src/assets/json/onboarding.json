@@ -1,0 +1,5016 @@
+{
+    "id": "aqnSr2VC",
+    "type": "quiz",
+    "title": "Applicant Sign Up",
+    "workspace": {
+      "href": "https://api.typeform.com/workspaces/HJcmDL"
+    },
+    "theme": {
+      "href": "https://api.typeform.com/themes/zv4n7I5P"
+    },
+    "settings": {
+      "language": "en",
+      "progress_bar": "percentage",
+      "meta": {
+        "title": "Applicant Sign Up",
+        "allow_indexing": true,
+        "description": "Join the Leland community and we'll send you free resources and match you with the perfect coach.",
+        "image": {
+          "href": "https://images.typeform.com/images/w6DUjngm4buH"
+        }
+      },
+      "hide_navigation": false,
+      "is_public": true,
+      "is_trial": false,
+      "show_progress_bar": true,
+      "show_typeform_branding": false,
+      "are_uploads_public": false,
+      "show_time_to_complete": false,
+      "show_number_of_submissions": false,
+      "show_cookie_consent": false,
+      "show_question_number": true,
+      "hide_required_indicator": false,
+      "show_key_hint_on_choices": true,
+      "autosave_progress": true,
+      "free_form_navigation": false,
+      "use_lead_qualification": false,
+      "pro_subdomain_enabled": false,
+      "google_analytics": "UA-197321329-1",
+      "milestones": [
+        {
+          "field_ref": "76c5d362-fb99-46fb-8bfd-f8232cbafaac",
+          "status": "active"
+        }
+      ],
+      "auto_translate": true,
+      "partial_responses_to_all_integrations": false
+    },
+    "thankyou_screens": [
+      {
+        "id": "9W3gNQsIg6VF",
+        "ref": "1d7d3124-e6b0-4999-96b4-3e17a9fd3b69",
+        "title": "We're browsing thousands of coaches to find the *best options for your budget and goals.* You'll be redirected shortly...\n\nNext up: reach out to 2-3 potential coaches! \n\nDon't be shy, they are excited to talk with you. 🚀",
+        "type": "thankyou_screen",
+        "properties": {
+          "show_button": false,
+          "share_icons": false,
+          "button_mode": "default_redirect",
+          "button_text": "again"
+        }
+      },
+      {
+        "id": "DefaultTyScreen",
+        "ref": "default_tys",
+        "title": "All done! Thanks for your time.",
+        "type": "thankyou_screen",
+        "properties": {
+          "show_button": false,
+          "share_icons": false
+        }
+      }
+    ],
+    "fields": [
+      {
+        "id": "KWYh2Zuo6Tc2",
+        "title": "What is your goal?",
+        "ref": "goal",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "u6BqBHyCRIdg",
+              "ref": "0dbeea9e-3a9a-4834-881d-a7d226d7a277",
+              "label": "Build my career"
+            },
+            {
+              "id": "KfhoJK5PHV9F",
+              "ref": "f9f6aa89-ec48-4ac6-b2ee-fa441d06e9bb",
+              "label": "Get into school"
+            },
+            {
+              "id": "GwvKNomRuDmp",
+              "ref": "a5ea7a46-67ea-4543-b483-ab6d84d068a9",
+              "label": "Take a test"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/datiMNMbKnPE",
+          "properties": {
+            "description": "image"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/datiMNMbKnPE",
+            "properties": {
+              "brightness": 0,
+              "focal_point": {
+                "x": 0,
+                "y": 0
+              },
+              "description": "image"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "5OjkqZk2ao8F",
+        "title": "What are you most interested in?",
+        "ref": "careers",
+        "properties": {
+          "description": "Pick the areas that best fit what you're looking to learn or pursue.",
+          "randomize": false,
+          "allow_multiple_selection": true,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "uaEswYD4K9pO",
+              "ref": "8d0a46e7-d17b-47f6-bc9d-7f059492c412",
+              "label": "AI Automation & Agents"
+            },
+            {
+              "id": "WvhuUUXZTkas",
+              "ref": "74475ba6-fb47-46e6-9e94-b0051b854aac",
+              "label": "Break Into AI Careers"
+            },
+            {
+              "id": "auCPnYWOLNLJ",
+              "ref": "5e9eadca-abe3-4164-8f01-d005ace5fe2d",
+              "label": "Management Consulting"
+            },
+            {
+              "id": "iLt8WnEpdcNK",
+              "ref": "e4131f9c-e890-44ae-85db-e20b497bfd05",
+              "label": "Product Management"
+            },
+            {
+              "id": "O1reNyH95kmY",
+              "ref": "1a2a469e-fec9-4888-a739-4e914540d88d",
+              "label": "Investment Banking"
+            },
+            {
+              "id": "Ju7UOseuDt5E",
+              "ref": "e9baa6d8-1105-4f3e-a476-9db9e788ad4d",
+              "label": "Private Equity"
+            },
+            {
+              "id": "Qagu5DIcMF9k",
+              "ref": "eafbdb5a-42fd-4c1f-b8f4-bbba523cc631",
+              "label": "Venture Capital"
+            },
+            {
+              "id": "6j89yTPGis7N",
+              "ref": "3cbb53dc-7967-4909-94e1-cfd697898d45",
+              "label": "Software Engineering"
+            },
+            {
+              "id": "pssqicn0Xyzj",
+              "ref": "aa99b0d0-ef98-4761-a8a8-3df0dc37ee4d",
+              "label": "Other"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/TkrWnJMxAeLI",
+          "properties": {
+            "description": "image (1)"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/TkrWnJMxAeLI",
+            "properties": {
+              "description": "image (1)"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "xItJeUSoP2aC",
+        "title": "What else are you interested in?",
+        "ref": "other-careers",
+        "properties": {
+          "description": "If you don't find what you are looking for, you can select Career Development.",
+          "randomize": false,
+          "alphabetical_order": false,
+          "choices": [
+            {
+              "id": "wjHGcS1XjsWl",
+              "ref": "6ebbde6e-6db7-4422-b015-5559f0263867",
+              "label": "AI for Data & Analytics"
+            },
+            {
+              "id": "lJeaaNqRyBTF",
+              "ref": "cddefc4d-3503-481c-8970-f6bb59a3de92",
+              "label": "AI for Finance"
+            },
+            {
+              "id": "MrXkYGc5Nd4t",
+              "ref": "258c0912-0d13-4d2a-b5e8-892c3bb08245",
+              "label": "AI for Product Development"
+            },
+            {
+              "id": "O1zVhPBhmuzE",
+              "ref": "e62ae81b-46fc-4941-a5c5-0fdfe4dec886",
+              "label": "AI for Sales & Marketing"
+            },
+            {
+              "id": "b1ZdEZbF5TSt",
+              "ref": "ae05daee-3123-4804-a475-e72cd81a86c9",
+              "label": "AI & ML Engineering"
+            },
+            {
+              "id": "2W2i4eqb3Naw",
+              "ref": "c91c7174-5d85-437e-a372-2e2d083049ea",
+              "label": "AI Strategy & Transformation"
+            },
+            {
+              "id": "HIneImWxgHlI",
+              "ref": "545bd6a4-cebd-4c51-9221-c0b3d2a29bd2",
+              "label": "Art"
+            },
+            {
+              "id": "WdcSRkNwI9lE",
+              "ref": "6d7c4a89-bd88-422d-b165-1b9a934b31cd",
+              "label": "Career Coaching"
+            },
+            {
+              "id": "W8jQYVcdbhvA",
+              "ref": "d0712634-b210-4e7d-a9a7-dce8347f3cdf",
+              "label": "Academia"
+            },
+            {
+              "id": "bRsZpAKBvskg",
+              "ref": "bd2fd0be-fe4d-4a45-bc30-4c0ef81aba97",
+              "label": "Accounting"
+            },
+            {
+              "id": "O6qR4QgytNQu",
+              "ref": "cd2593f5-5cd6-4072-ba55-c0ca47e31795",
+              "label": "Acting"
+            },
+            {
+              "id": "O6Cl9fbyUUlL",
+              "ref": "643fc24a-128e-4af8-b4de-0f3df2e027f8",
+              "label": "Aerospace Engineering"
+            },
+            {
+              "id": "GBZSyoT8Rmx4",
+              "ref": "8b90483b-3204-4b6d-8a93-1ea9b006437f",
+              "label": "Animation & CGI"
+            },
+            {
+              "id": "KFF8dxa5BxsH",
+              "ref": "2162fb37-3fbf-4aec-a553-a02fbda6c6e5",
+              "label": "Architecture"
+            },
+            {
+              "id": "sqo3l5KhDsb1",
+              "ref": "f97c2e98-12c5-4c88-bccc-b4c323dbae56",
+              "label": "Artificial Intelligence"
+            },
+            {
+              "id": "qcWexM6MZzSE",
+              "ref": "fb6ce336-2400-4b15-9f85-b9c419db95ff",
+              "label": "Augmented & Virtual Reality"
+            },
+            {
+              "id": "60rrxct7Fct5",
+              "ref": "3dad27bc-b7b3-49f8-9670-462081ff3de5",
+              "label": "Autonomous Vehicles & Robotics"
+            },
+            {
+              "id": "G6E0XPdvRBot",
+              "ref": "0d7a4800-991b-4c1c-945b-0c214de44849",
+              "label": "Aviation"
+            },
+            {
+              "id": "yOieu7EEOc5A",
+              "ref": "2bac0f24-8ecf-4743-a31f-a9fe710d3073",
+              "label": "Biology"
+            },
+            {
+              "id": "mQk6XzdB46vw",
+              "ref": "90c57bf1-9c1a-4d15-9a49-74c72024fc56",
+              "label": "Biotech & Medical Device"
+            },
+            {
+              "id": "8UwEs0lENXGw",
+              "ref": "6560d6ae-e60a-402c-b458-d50660104053",
+              "label": "Blockchain & Crypto"
+            },
+            {
+              "id": "etMHpTqeJ9yu",
+              "ref": "d442bd7c-6643-4998-b296-1cd054fd1178",
+              "label": "Broadcasting"
+            },
+            {
+              "id": "FDNKZ0bXsnCD",
+              "ref": "595e0d63-3eba-40bd-9b46-c4b00aea3c5c",
+              "label": "Business Analytics & Intelligence"
+            },
+            {
+              "id": "K5ZNPnlaI8WC",
+              "ref": "6c028aae-381f-440d-b57a-d5ff2d69d195",
+              "label": "Business Development & Partnerships"
+            },
+            {
+              "id": "zF1onm3Lx57F",
+              "ref": "71492734-b217-4d7e-ac4e-41ce241fe16e",
+              "label": "Business Operations & Strategy"
+            },
+            {
+              "id": "xGkw3j2hagB2",
+              "ref": "3914445d-ef89-4aa2-8cfe-d1bed8a119de",
+              "label": "Cars"
+            },
+            {
+              "id": "qa08sAN5NDFn",
+              "ref": "5b702b7d-f17f-4c71-a894-762ac49dec45",
+              "label": "Capital Markets & Trading"
+            },
+            {
+              "id": "O9fRFS6zlZWO",
+              "ref": "466bec31-9756-4183-9c7e-ab83c91fbc24",
+              "label": "Chemistry"
+            },
+            {
+              "id": "zonVHrLA5Ey6",
+              "ref": "005ad981-757b-4363-b770-ab3a2fec4376",
+              "label": "Chess & Board Games"
+            },
+            {
+              "id": "FObk9ANR3zdX",
+              "ref": "c2ed9c07-1d5a-4118-bdc0-3432008f2516",
+              "label": "Chief of Staff"
+            },
+            {
+              "id": "nMOCFYQjN7Tp",
+              "ref": "7fd8ca9e-6762-4717-a4e2-69f38bc49909",
+              "label": "Climate Tech & Sustainability"
+            },
+            {
+              "id": "fLXmMwXn8ZFp",
+              "ref": "16aff3a5-48e6-4f33-a223-be19d42899df",
+              "label": "Comedy, Stand-Up & Improv"
+            },
+            {
+              "id": "kGOcwUBfLwCn",
+              "ref": "6192f0aa-684c-4179-90fb-c952d4eff0e1",
+              "label": "Communication & Public Speaking"
+            },
+            {
+              "id": "1wvNXn55Wgeq",
+              "ref": "83056d3b-92b6-430c-91c0-1c5e563d98e4",
+              "label": "Construction Management"
+            },
+            {
+              "id": "3dlb6FsJCsXg",
+              "ref": "a2091241-2ee7-4b42-a614-6bf16b38cebd",
+              "label": "Corporate Development"
+            },
+            {
+              "id": "9nAZRdsu7tzA",
+              "ref": "708931c5-a283-4b42-8419-932af80be790",
+              "label": "Customer Success"
+            },
+            {
+              "id": "MYJ151dfiM13",
+              "ref": "69730eb0-cd3c-415e-831d-ead6b1fb9384",
+              "label": "Customer Support"
+            },
+            {
+              "id": "cejFKvWvdufK",
+              "ref": "7d9d0045-8f26-43e6-a283-19554fa53443",
+              "label": "Cybersecurity"
+            },
+            {
+              "id": "dYXrKBXb4LkB",
+              "ref": "262e66f1-e262-4d94-bcba-43a36c2350c9",
+              "label": "Dance"
+            },
+            {
+              "id": "y1GoTEkuOvTf",
+              "ref": "b2563580-a154-4cac-b27e-7855edc39461",
+              "label": "Data Science"
+            },
+            {
+              "id": "crdRIejOpt9x",
+              "ref": "c48589b6-340d-4e30-a8f7-7a398b8863fe",
+              "label": "Dating"
+            },
+            {
+              "id": "3AXU4hVpJUOv",
+              "ref": "2ac1cd2d-db0e-42e3-b687-64c1fb19c0ad",
+              "label": "Database Design & Development"
+            },
+            {
+              "id": "qsk08UL7opzr",
+              "ref": "6926e2cf-b7e9-40c9-9abf-ac3219ffb247",
+              "label": "Dental Hygienist"
+            },
+            {
+              "id": "4ZZmWFWXhMgb",
+              "ref": "ce05be75-844b-4855-b62c-508c3dcef5d1",
+              "label": "Dentist & Dental Practice"
+            },
+            {
+              "id": "fEmJzjitKK4z",
+              "ref": "cb40497f-2020-4543-8817-09f98c17f695",
+              "label": "Design"
+            },
+            {
+              "id": "NNVVTty9JXym",
+              "ref": "9ab1aee5-7eac-40fa-8497-ddf00ea0985e",
+              "label": "DIY"
+            },
+            {
+              "id": "DWgradOLlStS",
+              "ref": "a40ef00e-07d7-4cd4-b5a6-20ed1ea0369f",
+              "label": "E-Commerce & DTC"
+            },
+            {
+              "id": "wpBUVdItDsIE",
+              "ref": "77bd3663-0866-4440-95e1-106a21b8f21b",
+              "label": "Economic Consulting"
+            },
+            {
+              "id": "C3ssedciKES5",
+              "ref": "5d23cdb9-34eb-4532-b5fd-85d98b20bb27",
+              "label": "Environmental Sciences"
+            },
+            {
+              "id": "ugiawiXwrLFV",
+              "ref": "c4bd4c27-c479-4e2b-8aa1-6df0d528b269",
+              "label": "Equity Research"
+            },
+            {
+              "id": "8fpSfWMvw8XZ",
+              "ref": "030aed91-13d9-4d5c-874b-b55e2f9f84cf",
+              "label": "Esports & Gaming"
+            },
+            {
+              "id": "9Z7ftVhXpCeX",
+              "ref": "d5b5e5b3-71c8-4288-90a7-312d82dae47a",
+              "label": "Executive Coaching"
+            },
+            {
+              "id": "P2FHkxa8hiu9",
+              "ref": "3ceab220-c556-45b1-9105-2ce031f3d45e",
+              "label": "Film & Television"
+            },
+            {
+              "id": "HYF6Ckxv2fOf",
+              "ref": "d6dde6d9-de57-4e16-9afe-bde36d90da7e",
+              "label": "Fitness"
+            },
+            {
+              "id": "5bmxAZXh5pLO",
+              "ref": "ef15c341-aa03-4983-9aaa-3189cb368c33",
+              "label": "FP&A"
+            },
+            {
+              "id": "xIH3Ypu3ALwl",
+              "ref": "3d133e94-2c5a-400f-9cd1-29898ddd1526",
+              "label": "Foreign Service & Intelligence"
+            },
+            {
+              "id": "gJqpousgcSJJ",
+              "ref": "f2fb173a-0cac-49df-9c4f-02fc4957221e",
+              "label": "Game Development"
+            },
+            {
+              "id": "qYeFoy5w3xNg",
+              "ref": "0f7e9a50-d029-445b-b5dd-1d1add324d7c",
+              "label": "General Management"
+            },
+            {
+              "id": "gVZnnYmJl6f0",
+              "ref": "8b741d98-b61e-4f78-b9c2-4920227a13d4",
+              "label": "Health & Fitness"
+            },
+            {
+              "id": "OdNkrSus3Xt6",
+              "ref": "ae48e3dd-e422-4f01-a375-8ff81d47f662",
+              "label": "Healthcare Administration"
+            },
+            {
+              "id": "rforlVRmP3es",
+              "ref": "36ceb9c8-6fec-4ce5-8584-66ab73cd3222",
+              "label": "Hedge Fund"
+            },
+            {
+              "id": "6EdXaMpuE7Hi",
+              "ref": "69bad7e0-1b1b-45e2-a05d-94bbfaecf048",
+              "label": "Hobbies & Skills"
+            },
+            {
+              "id": "U3s7MEia42Ln",
+              "ref": "385e6f90-77d8-4d54-a317-e87bc85abd18",
+              "label": "Human Resources"
+            },
+            {
+              "id": "uqiE4bbgLU4L",
+              "ref": "25e9f189-a6d9-43af-80a6-8c85673ee2cf",
+              "label": "Influencer & Creator"
+            },
+            {
+              "id": "2LwuyvRTwJLZ",
+              "ref": "4e29b973-1c81-43a1-a72c-abffc7b0ed39",
+              "label": "Insurance"
+            },
+            {
+              "id": "IhWtUnpXlMbu",
+              "ref": "4f93fd42-88d8-4863-aa47-e4bd73cd440f",
+              "label": "Interior Design"
+            },
+            {
+              "id": "bIHKy9HtlSfC",
+              "ref": "9e1bc2a7-485b-4122-927b-bb961ef87888",
+              "label": "International Relations"
+            },
+            {
+              "id": "aOND8UtiF3F2",
+              "ref": "7973e2cc-b8ee-4eac-8f38-84a84297c228",
+              "label": "IT Management"
+            },
+            {
+              "id": "NO0wZagzyLlM",
+              "ref": "1a374d10-190a-4db5-a2df-41cb54fa9ee5",
+              "label": "Journalism"
+            },
+            {
+              "id": "VnviupDy5xqx",
+              "ref": "cf85d39a-4346-40f4-9cab-39bd8e4b6be5",
+              "label": "K-12 Tutoring"
+            },
+            {
+              "id": "0H7ZfcYSuNAV",
+              "ref": "20c55f8c-3dd8-4ef9-9617-b80bcd3e42f2",
+              "label": "K-12 Teaching"
+            },
+            {
+              "id": "cazf8XPHhdIN",
+              "ref": "8089405e-31c9-4b3c-a577-90829d736a60",
+              "label": "Leadership Coaching"
+            },
+            {
+              "id": "M0JspeAhzhli",
+              "ref": "5dd2b110-e8f1-4ff7-b7dc-83cb62822968",
+              "label": "Legal Practice"
+            },
+            {
+              "id": "JU7kzAQnjAFP",
+              "ref": "05509ea0-2dac-4036-8147-72f4ba44cf3f",
+              "label": "Life Coaching"
+            },
+            {
+              "id": "dYCNAwm0pMhH",
+              "ref": "d04c7cc3-7d81-4ab5-9732-d541c700c83b",
+              "label": "Luxury & Fashion"
+            },
+            {
+              "id": "SvWwCnLjfeEc",
+              "ref": "89fc8d32-4785-4b50-a67d-55deddeebf81",
+              "label": "Marketing"
+            },
+            {
+              "id": "JOebpbCCH4Vh",
+              "ref": "c0c2c610-1a87-4f5a-8af2-6755670a0104",
+              "label": "Mental Health & Wellness"
+            },
+            {
+              "id": "zfkV3L3L4xFD",
+              "ref": "e40a2dea-2c05-4096-aff6-a806447a31e3",
+              "label": "Military"
+            },
+            {
+              "id": "Z8IwoCi0YHX3",
+              "ref": "85c914e4-f813-4e26-87b2-7707005d9066",
+              "label": "Ministry"
+            },
+            {
+              "id": "h4XtN4oCAEDK",
+              "ref": "994fd66b-8239-4f4f-acb1-9bf8f50757ef",
+              "label": "Mobile Development"
+            },
+            {
+              "id": "009f3ayoCuEQ",
+              "ref": "55c29300-2a99-4988-8088-96af88053ede",
+              "label": "Music"
+            },
+            {
+              "id": "dAO7XVysjN34",
+              "ref": "560b0ff5-1fc9-4926-9785-dcaddaab2506",
+              "label": "No-Code Development"
+            },
+            {
+              "id": "sWxJWzvtjlBl",
+              "ref": "8bdf8560-be20-4c18-99ec-c12fdbbe2306",
+              "label": "Non-Profit Leadership"
+            },
+            {
+              "id": "CXzANomEaU7z",
+              "ref": "7e7a15ca-ad6f-4e6a-9f5f-a606dbb9a426",
+              "label": "Nurse Practitioner"
+            },
+            {
+              "id": "E9NE3XlfJS6a",
+              "ref": "ac0c096f-b015-44e0-8e99-6a451b6a5351",
+              "label": "Nutrition"
+            },
+            {
+              "id": "ISBrQWhaC9cK",
+              "ref": "0c2962af-8847-4214-b3e3-0659357df3f1",
+              "label": "Occupational Therapist"
+            },
+            {
+              "id": "kEzmureTOSzV",
+              "ref": "2ff6c978-8648-41f0-af08-e827982a5051",
+              "label": "Outdoors"
+            },
+            {
+              "id": "hbG5lkf40bEA",
+              "ref": "9733c87b-a390-4436-ba3a-19d2d433fa31",
+              "label": "Pageants"
+            },
+            {
+              "id": "e0BPmgBOI8OQ",
+              "ref": "428b53f7-5ceb-4913-a35d-94441775c258",
+              "label": "Parenting"
+            },
+            {
+              "id": "NDymzkyJzhjo",
+              "ref": "799c0c54-8957-4d7d-9a43-f75491f5f7b2",
+              "label": "Personal & Relationships"
+            },
+            {
+              "id": "B6NK6ijB1gxs",
+              "ref": "96bba556-1893-44bf-8d17-1d399ed6b69a",
+              "label": "Personal Finance"
+            },
+            {
+              "id": "eDZcD7ngwPxJ",
+              "ref": "f735e5d5-be9b-4922-b96f-fb40e0d87044",
+              "label": "Pharmaceutical"
+            },
+            {
+              "id": "a6rvE1Q4JPC9",
+              "ref": "354b7a3b-689c-48ed-ac2e-94c65135f086",
+              "label": "Pharmacist"
+            },
+            {
+              "id": "7kd43VlieXOR",
+              "ref": "321030f0-1b53-480e-bbfb-c539df242c54",
+              "label": "Photography"
+            },
+            {
+              "id": "J2ohZACdML6c",
+              "ref": "866c51a2-1fe7-453c-8dee-aea3295b7542",
+              "label": "Physical Sciences"
+            },
+            {
+              "id": "UYAvyiC0hu49",
+              "ref": "961d0001-9c3b-487f-b131-2ab8a55730c0",
+              "label": "Physical Therapist"
+            },
+            {
+              "id": "HvHimAzRgE7a",
+              "ref": "875abe6f-90fd-49cc-9e3c-3c732f039779",
+              "label": "Physician Assistant"
+            },
+            {
+              "id": "Smsu6EkZTSrm",
+              "ref": "86b5c969-1691-48c3-b116-267e620e297b",
+              "label": "Physician & Medical Practice"
+            },
+            {
+              "id": "cufZUztzrvrr",
+              "ref": "a1e934fd-6b35-4b18-a6d9-9a58e17164e8",
+              "label": "Public Relations"
+            },
+            {
+              "id": "qCzTngO5FOC6",
+              "ref": "cab75b74-4464-4252-8691-0faa8aef7ee7",
+              "label": "Private High School"
+            },
+            {
+              "id": "dJEnJPG6yss0",
+              "ref": "056f7163-d811-4f4e-8710-342db346c6e2",
+              "label": "Product Marketing"
+            },
+            {
+              "id": "svxAbVjpEiZt",
+              "ref": "bf030b9c-e07a-4721-8663-affb42cd013f",
+              "label": "Product Operations"
+            },
+            {
+              "id": "R7QfwYYZsfAa",
+              "ref": "9d101870-eb35-4506-af64-c22891e594c9",
+              "label": "Professional Athletics"
+            },
+            {
+              "id": "LRsNgF8cY6fD",
+              "ref": "82e2d532-567e-4e7a-be86-4cafeb4943ac",
+              "label": "Project Management"
+            },
+            {
+              "id": "cn2QmaAKXsom",
+              "ref": "da609e81-d58d-4aec-8d7c-f28b58779bd1",
+              "label": "Psychologist"
+            },
+            {
+              "id": "kPkIXDC0jIxR",
+              "ref": "1a498c87-6e08-422a-8e5f-9f89cb84fa58",
+              "label": "Poker"
+            },
+            {
+              "id": "3yemgMSjSTSf",
+              "ref": "0854a5f7-7c36-49e6-8981-e62ce9112e39",
+              "label": "Public Service & Administration"
+            },
+            {
+              "id": "kMaP0lBAISFw",
+              "ref": "d6522701-98e1-4678-878b-47b69b08e6e6",
+              "label": "Public Policy"
+            },
+            {
+              "id": "mwxjxQ1jWh2S",
+              "ref": "b0b0d353-8d70-40a5-a92a-6cb2ff39458f",
+              "label": "Publishing & Writing"
+            },
+            {
+              "id": "TCEqwauUAhzu",
+              "ref": "42ff8b34-6f3a-40c9-a7c3-9c18793ae3b6",
+              "label": "Quantum Computing"
+            },
+            {
+              "id": "iew5pi2o8uDD",
+              "ref": "9dcbab16-ac9d-4fbf-93b6-1c193fb9d385",
+              "label": "Real Estate"
+            },
+            {
+              "id": "noxymttXO1vw",
+              "ref": "897862e3-ae9a-40ac-bafa-e8a6293c00db",
+              "label": "Registered Nurse"
+            },
+            {
+              "id": "9deNcL0DREy2",
+              "ref": "9019d7f5-dc4e-45de-bc4f-4fdb8ca69c9c",
+              "label": "Retail & Merchandising"
+            },
+            {
+              "id": "f9Ien0ct6Sug",
+              "ref": "34abb3e3-a465-4520-ae67-e0e1632fc862",
+              "label": "Risk & Compliance"
+            },
+            {
+              "id": "OmMicAe1YWxz",
+              "ref": "9d8fdeb6-342f-4f17-9690-f2b900bcb6ca",
+              "label": "Sales"
+            },
+            {
+              "id": "Gu2qT662igaB",
+              "ref": "8d0fe06f-f0cd-4f5d-86ab-599dfacdf7f5",
+              "label": "Sales Operations"
+            },
+            {
+              "id": "2qrSXaE6z09E",
+              "ref": "382b18f4-fed9-48e0-8021-2b60cd9a08b8",
+              "label": "Search Fund & ETA"
+            },
+            {
+              "id": "PTwi48lLqBJY",
+              "ref": "31464eaa-37d8-426e-8120-b5ef2c9b0a2e",
+              "label": "Site Reliability Engineering"
+            },
+            {
+              "id": "vJaLPVIaZMlZ",
+              "ref": "7fb47aab-71e4-4c0d-ae78-97c0f8e949db",
+              "label": "Skilled Trades"
+            },
+            {
+              "id": "whWUT3y46Z6M",
+              "ref": "adcc46d3-55bc-4172-aa8b-3292a27d3007",
+              "label": "Social Work & Counseling"
+            },
+            {
+              "id": "3t3uRd90RMSb",
+              "ref": "607b856b-fcf2-4b22-8521-442c16cd6f00",
+              "label": "Sports Management"
+            },
+            {
+              "id": "fAFrODAwSATr",
+              "ref": "0d7ed7ad-2d0a-4ed7-9cfb-8903de23c532",
+              "label": "Startup Careers"
+            },
+            {
+              "id": "pPzjhLCZi6Vm",
+              "ref": "840821d3-77a5-4b02-830f-460fce706a72",
+              "label": "Startup Founders"
+            },
+            {
+              "id": "2cqh2yjTWalk",
+              "ref": "d56678d4-8b5d-4b13-b6e1-e42c06f31bb8",
+              "label": "Sorority & Fraternity Admissions"
+            },
+            {
+              "id": "IXsNzaqrgMGC",
+              "ref": "034cde58-d6fa-49b7-af89-6744dcc7133a",
+              "label": "Sports"
+            },
+            {
+              "id": "fdDA9jAFKExs",
+              "ref": "dc01b126-ec61-4975-920e-4b846049afe6",
+              "label": "Talent Acquisition"
+            },
+            {
+              "id": "HfMHQP3pQYS0",
+              "ref": "e90e48e1-46dd-4a30-9f80-d16b39bababf",
+              "label": "Technical Program Management"
+            },
+            {
+              "id": "NfOGpI5WuSlC",
+              "ref": "e591eb3f-76d2-4ca2-9e23-4ca5637e8d78",
+              "label": "Therapist & Therapy Practice"
+            },
+            {
+              "id": "2oSDj5vcyuYx",
+              "ref": "502c60ef-4c66-4cce-9ffc-978079823f58",
+              "label": "Travel Planning"
+            },
+            {
+              "id": "vNmsBph0vplC",
+              "ref": "786f35c3-d711-40b9-ae15-4df82069c0ce",
+              "label": "Veterinarian"
+            },
+            {
+              "id": "i6D5eLiSjU4M",
+              "ref": "13368e93-6f3f-4c39-9e6a-54b5cab7465e",
+              "label": "Video Games"
+            },
+            {
+              "id": "1kbdyut4EuAL",
+              "ref": "819e690f-a1d5-4c82-a426-cce26ddf19c0",
+              "label": "Visual Arts"
+            },
+            {
+              "id": "ww0HCt9XnrQ0",
+              "ref": "422457d2-665e-4dbb-979d-befb0dfea7af",
+              "label": "Wealth Management"
+            },
+            {
+              "id": "kb3cdh7SdIiH",
+              "ref": "60196a67-e151-4ec5-986d-7e2194ac7af3",
+              "label": "Web Development"
+            },
+            {
+              "id": "wysC6ftA3CbH",
+              "ref": "54e0a1fc-7544-46b1-95f8-7db46c482ccf",
+              "label": "Weddings"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "dropdown"
+      },
+      {
+        "id": "cOpAKTHMqI9S",
+        "title": "Which degree are you applying to?",
+        "ref": "schools",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": true,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "kUXlWjXZuFsG",
+              "ref": "4274cf30-9310-45df-98d3-cc860d692bd9",
+              "label": "College (Undergrad)"
+            },
+            {
+              "id": "e8DAjfJtBhun",
+              "ref": "55a1dfa8-79d8-49fa-9ab6-10f0da076d01",
+              "label": "MBA"
+            },
+            {
+              "id": "zyl3HQ8cklg0",
+              "ref": "f6f9825b-861c-448b-b103-bc42b0523bb8",
+              "label": "Master's Programs"
+            },
+            {
+              "id": "mCTs9TTsWVfe",
+              "ref": "2c3ed6f4-c608-4e63-a78a-9de03a5741ea",
+              "label": "Medical School"
+            },
+            {
+              "id": "3EreyuSRqr2v",
+              "ref": "98684408-3a3a-4818-941b-7e4e4375187a",
+              "label": "Law School"
+            },
+            {
+              "id": "nXaeUCXJkZHa",
+              "ref": "c483c2b0-c99c-410d-817d-f54a49ed1798",
+              "label": "Dental School"
+            },
+            {
+              "id": "WpEqyHfZmdvY",
+              "ref": "ded061f6-943e-4c8e-af0b-bb4e14bf395c",
+              "label": "PhD Programs"
+            },
+            {
+              "id": "btKZ3Daq1swj",
+              "ref": "ed88cc4c-22e7-4041-8e7c-993cad286a09",
+              "label": "PA School"
+            },
+            {
+              "id": "J1aijAwQxEyZ",
+              "ref": "6a815835-9bbe-4b24-a5d8-06a97cdf8d0f",
+              "label": "Nursing School"
+            },
+            {
+              "id": "NiMfBN7hMGtF",
+              "ref": "4797544e-7dfe-4ad8-9ed7-10ec60360810",
+              "label": "Pharmacy"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/MTWsuAebdioB",
+          "properties": {
+            "description": "tim"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/MTWsuAebdioB",
+            "properties": {
+              "description": "tim"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "yGrRU6reRwX3",
+        "title": "Which schools are you planning on applying to?",
+        "ref": "a8bde245-4c57-4be4-926c-a2a351f65d1e",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": true,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "j42vrv8KyL3J",
+              "ref": "72cceef9-2c13-41ef-a3e6-611a6dfa1c4e",
+              "label": "Ivy League + Stanford"
+            },
+            {
+              "id": "vUOiRJgkJoOj",
+              "ref": "2f6f49c4-c9a0-416a-9827-63102ba0a144",
+              "label": "Common App"
+            },
+            {
+              "id": "j76KKuy3V838",
+              "ref": "2e7f8573-90b1-4f0f-ab33-8bbc2009701c",
+              "label": "UCs"
+            },
+            {
+              "id": "LA4Kn8bPFJIW",
+              "ref": "a76288d6-ad5b-4e6d-88ff-718f8be902e2",
+              "label": "BYU"
+            },
+            {
+              "id": "1t44lbTFaCz4",
+              "ref": "307b676b-f8a4-482c-a708-89a41b059295",
+              "label": "Top Engineering Schools"
+            },
+            {
+              "id": "8QzM9rIGme0V",
+              "ref": "ca168937-ecb5-4311-9ab6-10bcc3d7feca",
+              "label": "Texas schools (ApplyTexas)"
+            },
+            {
+              "id": "7kHIBb4ojNtw",
+              "ref": "8eda43f1-2bd8-4b48-bdd1-da1f50ce415d",
+              "label": "None of the above"
+            }
+          ]
+        },
+        "validations": {
+          "required": false
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/TOsVGJcedKEW",
+          "properties": {
+            "description": "Screenshot 2026-03-09 at 3.25.28 PM"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/TOsVGJcedKEW",
+            "properties": {
+              "brightness": 0,
+              "focal_point": {
+                "x": 0,
+                "y": 0
+              },
+              "description": "Screenshot 2026-03-09 at 3.25.28 PM"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "Sf7HFKp0FRtT",
+        "title": "Which test are you preparing for?",
+        "ref": "tests",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "RJtlPvEqvVE9",
+              "ref": "9f2a2a9c-fbc1-44f2-a6ff-993e43c39ac7",
+              "label": "ACT"
+            },
+            {
+              "id": "CQVqb2Xe4Biy",
+              "ref": "d705d148-633c-4fc3-aa99-8b72db00ed75",
+              "label": "SAT"
+            },
+            {
+              "id": "zCZOO5Cdbl0T",
+              "ref": "f2833c61-7c0c-4d87-a889-a32568e9976d",
+              "label": "GMAT"
+            },
+            {
+              "id": "gGnTYEBRCcgd",
+              "ref": "2da84839-897e-4b92-81df-3b62bed8e5cd",
+              "label": "GRE"
+            },
+            {
+              "id": "pHSeffYOnUlE",
+              "ref": "1334e1a6-6fa1-4227-94af-d5ad1f2c0401",
+              "label": "LSAT"
+            },
+            {
+              "id": "0On5fr2EBLQL",
+              "ref": "fd941fa1-a2aa-43e8-8e7e-be3c0265888e",
+              "label": "DAT"
+            },
+            {
+              "id": "WIR7J8HL5bRf",
+              "ref": "7d6a9f38-9df2-4db8-a5a8-0e37e3bfaff3",
+              "label": "MCAT"
+            },
+            {
+              "id": "Fcck9Y8rr0T8",
+              "ref": "6f8a0325-ad84-4809-87a7-59b44f50f595",
+              "label": "Other"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/uGgqeAHEXziX",
+          "properties": {
+            "description": "test-prep"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/uGgqeAHEXziX",
+            "properties": {
+              "description": "test-prep"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "eICD86KnlWaE",
+        "title": "Which other test are you preparing for?",
+        "ref": "other-tests",
+        "properties": {
+          "randomize": false,
+          "alphabetical_order": false,
+          "choices": [
+            {
+              "id": "3x2ry5rB0NGk",
+              "ref": "ac3527ac-1b19-4854-9b48-70f3701e14a3",
+              "label": "Cannot Be Found In This List"
+            },
+            {
+              "id": "CYXcDp6pl6kK",
+              "ref": "6de59425-feed-418e-9ef1-0c26fed5ef94",
+              "label": "Executive Assessment"
+            },
+            {
+              "id": "LsFcT9rXJp2Y",
+              "ref": "5186984e-cf2b-4337-a1a8-3650a7e86e2c",
+              "label": "PRAXIS"
+            },
+            {
+              "id": "mNqyYNbE5a68",
+              "ref": "2fe01cfb-e572-485a-8249-b6cc6d10088e",
+              "label": "PCAT"
+            },
+            {
+              "id": "nYOBDopeB84f",
+              "ref": "d275dedb-ae0d-42bd-9011-01999605f81a",
+              "label": "OAT"
+            },
+            {
+              "id": "v4n5pyvdrIMN",
+              "ref": "d2a9df0d-2686-413a-810c-7362896360e1",
+              "label": "TOEFL"
+            },
+            {
+              "id": "gDKPN2mZwRnn",
+              "ref": "f9b517d6-76ac-49ac-887b-35a238952061",
+              "label": "TOEIC"
+            },
+            {
+              "id": "KPdSapmMDRQU",
+              "ref": "71e06d90-fffe-4100-8e45-f5c57388d561",
+              "label": "IELTS"
+            },
+            {
+              "id": "52s9vqC6bBpO",
+              "ref": "2135daa8-4a51-4de7-8e00-eaf6d4cf32ab",
+              "label": "ASVAB (Armed Services)"
+            },
+            {
+              "id": "3aaZxdUusLoT",
+              "ref": "26b640ee-ef57-4905-98f1-c64ac1add475",
+              "label": "FSI (Foreign Service)"
+            },
+            {
+              "id": "s4YEOCRFl3cI",
+              "ref": "0f09afe1-7cfd-46b2-b2eb-3fb301ac7257",
+              "label": "CPA"
+            },
+            {
+              "id": "IM5i4eRvw9Vp",
+              "ref": "6c5de629-abc5-4b82-a751-bb8e9e543850",
+              "label": "CFP"
+            },
+            {
+              "id": "6ALP5ySMOzc3",
+              "ref": "0e521864-ee7a-4eb5-8f19-23df56482a06",
+              "label": "CFA"
+            },
+            {
+              "id": "spByifIbTNEJ",
+              "ref": "bf781481-ac6c-423b-9b11-7aba223ab977",
+              "label": "FRM"
+            },
+            {
+              "id": "yjgpPWMlIia7",
+              "ref": "6287d843-4cd4-41b7-9315-b1e55a32be77",
+              "label": "CISSP"
+            },
+            {
+              "id": "c4cEyJ76fdNQ",
+              "ref": "d6b3ef7e-9bc5-4ea8-aa85-7e3f18a74705",
+              "label": "NCLEX (Nursing)"
+            },
+            {
+              "id": "eTIhT8PFoZr4",
+              "ref": "e9120308-23c6-4b85-afcd-489426d048d0",
+              "label": "Bar Exam"
+            },
+            {
+              "id": "rB1fhpuX1qrj",
+              "ref": "4b1eaf0d-a0b0-422a-8a55-a20619b6567b",
+              "label": "USMILE"
+            },
+            {
+              "id": "Vr34UtyXFPR8",
+              "ref": "fec7f0b9-8881-4539-b7d3-f1fdb9904cc5",
+              "label": "FINRA Exams (Series 7 & SIE)"
+            },
+            {
+              "id": "wcZtrS459tPv",
+              "ref": "5cad992e-68ca-428c-a0b2-28ef88239331",
+              "label": "PMP"
+            },
+            {
+              "id": "g9418n2CcmDz",
+              "ref": "27616857-3d70-4bf4-8771-39a71907ecca",
+              "label": "GED"
+            },
+            {
+              "id": "NROzL0VDdtqB",
+              "ref": "cd33a130-0621-4139-a060-a4166545bcae",
+              "label": "AP Exams"
+            },
+            {
+              "id": "JKlH5M9fehXx",
+              "ref": "dabcc117-8d0b-45e0-bf03-6dcae953d641",
+              "label": "IB Exams"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "dropdown"
+      },
+      {
+        "id": "rUxKrCpJAxWP",
+        "title": "What are you looking to do?",
+        "ref": "f498588e-b553-4b90-8614-7549b8acbe99",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": true,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "0679SB9e33xW",
+              "ref": "e1787be8-31f5-4050-80f5-3d50decb0f69",
+              "label": "Get an internship"
+            },
+            {
+              "id": "ETOuyiDTm6lF",
+              "ref": "42037e30-4914-4b84-bbf0-78f000bedd18",
+              "label": "Get first full-time job"
+            },
+            {
+              "id": "ps05afOfXUmW",
+              "ref": "2ce7bcd4-cb28-4add-9fe0-3f459c1a4456",
+              "label": "Change role, industry, or company"
+            },
+            {
+              "id": "ZquHtLboSsOX",
+              "ref": "440c6f92-f752-4e60-8c20-393986e332b7",
+              "label": "Career & skill development"
+            }
+          ]
+        },
+        "validations": {
+          "required": false
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/eghQJbpahYmI",
+          "properties": {
+            "description": "Test 21"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/eghQJbpahYmI",
+            "properties": {
+              "description": "Test 21"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "TxJLbqngCGRt",
+        "title": "We're excited to help you find the perfect coach or offering. When are you looking for help?",
+        "ref": "apply-timeline",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "2CccdLjXY5zX",
+              "ref": "7c22dcb0-0527-4ef7-b8c8-ff0d0da9ead1",
+              "label": "As soon as possible"
+            },
+            {
+              "id": "JftybLvqeOgT",
+              "ref": "670dd814-33e5-4387-a851-d2115fb2e1af",
+              "label": "In the next 6 months"
+            },
+            {
+              "id": "kvJTmNZCZBhr",
+              "ref": "a411b63a-a32c-42eb-8578-7f7b47bfaed5",
+              "label": "6 - 12 months"
+            },
+            {
+              "id": "4Dz43O7mgT7o",
+              "ref": "338cce17-6055-4829-aa9e-8651b1ddc29a",
+              "label": "12+ months"
+            },
+            {
+              "id": "g1e3pDzJJ9su",
+              "ref": "bf7f85d9-ed04-4366-a743-a3a88d424cdd",
+              "label": "I'm just looking for free resources"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/cFZisdgeISLl",
+          "properties": {
+            "description": "Screenshot 2026-03-11 at 9.41.27 AM"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/cFZisdgeISLl",
+            "properties": {
+              "description": "Screenshot 2026-03-11 at 9.41.27 AM"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "800F8trwm6OH",
+        "title": "Great! What are you looking for help with? ",
+        "ref": "school-services",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": true,
+          "allow_other_choice": true,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "DVTwOfx8HjJH",
+              "ref": "6b26672e-ea33-4587-b535-db269d2fd88d",
+              "label": "Application strategy"
+            },
+            {
+              "id": "FbXFQayJUaps",
+              "ref": "4f0bc338-d58d-4219-9ad4-dcabeac43e79",
+              "label": "Resume"
+            },
+            {
+              "id": "gmIQneu4DelW",
+              "ref": "fe454a72-c1bc-4e20-9d5d-2e6946f28bd8",
+              "label": "Recommendations"
+            },
+            {
+              "id": "W4EljuCraNXJ",
+              "ref": "ba6314a7-cbe2-43ed-90b5-b0d27b65f1dd",
+              "label": "Essays"
+            },
+            {
+              "id": "DioPEb0pF4bu",
+              "ref": "057b8ba1-e85d-427a-af5a-c53e73c555ba",
+              "label": "Interviews"
+            }
+          ]
+        },
+        "validations": {
+          "required": false
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/KkYFOCHzfYoF",
+          "properties": {
+            "description": "reviews"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/KkYFOCHzfYoF",
+            "properties": {
+              "description": "reviews"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "gki06yDr3NdD",
+        "title": "Great! What are you looking for help with? ",
+        "ref": "career-services",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": true,
+          "allow_other_choice": true,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "nZ6W22q06Ph7",
+              "ref": "a6eda965-6923-4908-ab45-50dcf3327e9b",
+              "label": "Skill development"
+            },
+            {
+              "id": "hTXUXZgVzxvK",
+              "ref": "1c4d48d4-abe2-4153-a8ed-c20c7947960b",
+              "label": "LinkedIn review"
+            },
+            {
+              "id": "UYSBSpowhbG6",
+              "ref": "2d1760f5-89a5-4380-a445-a8804ebda2a7",
+              "label": "Resume review"
+            },
+            {
+              "id": "EbigkcFTQtca",
+              "ref": "49433f5b-14a2-4c1a-a048-fa58330f2f56",
+              "label": "Networking strategy"
+            },
+            {
+              "id": "BR1dtQ6goLbE",
+              "ref": "9e40316e-96de-41a3-9348-0fb80cf47176",
+              "label": "Interview prep"
+            },
+            {
+              "id": "FS0j7THye17Q",
+              "ref": "84e63289-580f-4947-8e73-e775c2700852",
+              "label": "Salary negotiation"
+            },
+            {
+              "id": "w4jJzMl8fW38",
+              "ref": "d0dcc2c9-019b-4d70-9559-b976b7373e82",
+              "label": "Promotion strategy"
+            }
+          ]
+        },
+        "validations": {
+          "required": false
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/jtPTqPzMtkJy",
+          "properties": {
+            "description": "reviews"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/jtPTqPzMtkJy",
+            "properties": {
+              "description": "reviews"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "FAbbViId1uFO",
+        "title": "Great! What sections are you looking for help with? ",
+        "ref": "sat-test-services",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": true,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "Ow3BKBjPPWcb",
+              "ref": "c7142cd4-69a7-498a-98e6-d3d582b9b69e",
+              "label": "Math"
+            },
+            {
+              "id": "7vxYVhdRkcX1",
+              "ref": "7b519d6f-1bb2-482c-8198-f6ef9bb54847",
+              "label": "English"
+            },
+            {
+              "id": "ocvIDKqP9NKW",
+              "ref": "6759c59c-f7fe-4289-98e4-8a708a6785a6",
+              "label": "Reading"
+            },
+            {
+              "id": "sJAKm5PyLOF6",
+              "ref": "3915d22f-e132-42f8-a820-634f2d9ccc3d",
+              "label": "Science"
+            },
+            {
+              "id": "twSMNzL8zmPA",
+              "ref": "c47264f8-58c0-42dd-abf5-d62908817b12",
+              "label": "Writing"
+            }
+          ]
+        },
+        "validations": {
+          "required": false
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/XSJXZaykluHc",
+          "properties": {
+            "description": "reviews"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/XSJXZaykluHc",
+            "properties": {
+              "description": "reviews"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "QHoYGZySpwZC",
+        "title": "Great! What sections are you looking for help with? ",
+        "ref": "grad-test-services",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": true,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "eQIRfMglVRZu",
+              "ref": "e3b4ddcf-2ab5-464b-aa5f-5888d470ab09",
+              "label": "Quantitative reasoning"
+            },
+            {
+              "id": "cf6xt0H3Sba0",
+              "ref": "1a1484f4-af7c-4e6d-8909-dd709be258a9",
+              "label": "Verbal reasoning"
+            },
+            {
+              "id": "uTDCkAm7gv8P",
+              "ref": "474d2100-0146-4c53-9d38-c52a49a43f59",
+              "label": "Integrated reasoning"
+            },
+            {
+              "id": "Let1lzS7kMwB",
+              "ref": "1ac41eaa-c2a8-4e64-b561-0cb528e3b462",
+              "label": "Analytical writing"
+            }
+          ]
+        },
+        "validations": {
+          "required": false
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/boLXLkRuolnO",
+          "properties": {
+            "description": "reviews"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/boLXLkRuolnO",
+            "properties": {
+              "description": "reviews"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "rO4UXTEWlMYe",
+        "title": "What's your budget? ",
+        "ref": "budget",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "oLychjwsg6bA",
+              "ref": "f8a1cd7e-0791-45a3-a9d1-b77a64e9e74e",
+              "label": "High (I will pay for the best coaches)"
+            },
+            {
+              "id": "TzTogIPfs6Sy",
+              "ref": "aa5a89f3-ae77-471a-b698-b4d10bde688e",
+              "label": "Medium (Price matters, but I want quality coaching)"
+            },
+            {
+              "id": "1dvqp9ckGx6F",
+              "ref": "c42f6656-df38-4c34-84ba-275b0dbbe9c9",
+              "label": "Low (Price is a major factor, but I still want coaching)"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/YnXKRGGhPIIS",
+          "properties": {
+            "description": "Screenshot 2026-03-11 at 10.50.03 AM"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/YnXKRGGhPIIS",
+            "properties": {
+              "description": "Screenshot 2026-03-11 at 10.50.03 AM"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "Mby5OgSKjlpC",
+        "title": "Which MBA programs do you plan to apply to?",
+        "ref": "mba-schools",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": true,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "hdeSGESlHWWq",
+              "ref": "386875b5-61e2-4a62-8281-8d39c92b10d1",
+              "label": "Stanford"
+            },
+            {
+              "id": "7G7vJesjRP6a",
+              "ref": "bd38b453-3b96-4b3f-bd59-2e0e933950a3",
+              "label": "Harvard"
+            },
+            {
+              "id": "01G3ZkIfkQAS",
+              "ref": "59f2d79d-910e-46fd-a513-daf98c86ef6d",
+              "label": "Wharton (UPenn)"
+            },
+            {
+              "id": "nreJL3kbSZRb",
+              "ref": "d750959c-2e5c-4d2f-86c6-5490ce898b11",
+              "label": "Kellogg (Northwestern)"
+            },
+            {
+              "id": "orHAmb0cjMYs",
+              "ref": "d523a052-99dd-4c15-b24b-834835258b36",
+              "label": "MIT Sloan"
+            },
+            {
+              "id": "GGAymfgtoB7D",
+              "ref": "458953e4-8133-4150-b564-352be85ae4c0",
+              "label": "Booth (UChicago)"
+            },
+            {
+              "id": "bl6vztezOpSO",
+              "ref": "9cfc137e-3d53-408c-8ab2-62c1f08060e9",
+              "label": "Columbia"
+            },
+            {
+              "id": "RU5HFIIHTuGT",
+              "ref": "55485e7d-4fcc-48b5-bbb8-31955de70c3b",
+              "label": "Other top programs"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/TOsVGJcedKEW",
+          "properties": {
+            "description": "Screenshot 2026-03-09 at 3.25.28 PM"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/TOsVGJcedKEW",
+            "properties": {
+              "brightness": 0,
+              "focal_point": {
+                "x": 0,
+                "y": 0
+              },
+              "description": "Screenshot 2026-03-09 at 3.25.28 PM"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "141YxR9hS4Ky",
+        "title": "Which type of MBA program are you applying to? ",
+        "ref": "mba-programs",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "lZr7M5zPU1C5",
+              "ref": "7eabd571-aec1-43c2-88fd-150a140de9fd",
+              "label": "Traditional"
+            },
+            {
+              "id": "sYDuAkty1yC0",
+              "ref": "5d1740c9-2a7d-4295-9d02-d6d01901ffed",
+              "label": "Deferred"
+            },
+            {
+              "id": "X2O9DwgCiBH0",
+              "ref": "0a33a1af-b91f-4563-b235-4c91d05d0763",
+              "label": "Executive"
+            },
+            {
+              "id": "3lLJDkepFNEl",
+              "ref": "c2991761-32d1-43fd-8857-338e8bbea2ec",
+              "label": "Online"
+            },
+            {
+              "id": "B7ZerOGXhFjp",
+              "ref": "23e1afd2-3009-4666-95a2-85381149983d",
+              "label": "Part-time"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/TOsVGJcedKEW",
+          "properties": {
+            "description": "Screenshot 2026-03-09 at 3.25.28 PM"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/TOsVGJcedKEW",
+            "properties": {
+              "brightness": 0,
+              "focal_point": {
+                "x": 0,
+                "y": 0
+              },
+              "description": "Screenshot 2026-03-09 at 3.25.28 PM"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "ukVBQsL6FOnb",
+        "title": "When are you applying?",
+        "ref": "07045f40-3da8-452f-a9db-e2a2fe4cd76d",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "nkU2b97Nxbzg",
+              "ref": "a94b3de9-622f-49d7-ae55-1362e205f68e",
+              "label": "Round 3 — Spring 2026"
+            },
+            {
+              "id": "02750EBEzkFP",
+              "ref": "0bc0875d-bb67-42b1-be39-4a0cf9153266",
+              "label": "Round 1 — Fall 2026"
+            },
+            {
+              "id": "M47jXPTOKpl1",
+              "ref": "71b6bf3a-324b-4f1c-b9ab-e9fe6ce0a3d4",
+              "label": "Round 2 — Winter 2026-27"
+            },
+            {
+              "id": "o9LTXYsKa6is",
+              "ref": "a8dc483d-fa3c-4766-af14-a489d2507d41",
+              "label": "Round 3 — Spring 2027"
+            },
+            {
+              "id": "JXXWbwDV1CJ9",
+              "ref": "66500c7d-081f-4a22-ba1d-212ed1d02e72",
+              "label": "Round 1 — Fall 2027"
+            },
+            {
+              "id": "pgpGJR8Mc32l",
+              "ref": "b13ccd57-1c57-4ec6-8595-57db1914d91e",
+              "label": "Round 2 — Winter 2027-28"
+            },
+            {
+              "id": "9nrTPF6qy06S",
+              "ref": "3289e954-a605-45cc-9551-e5714d048d14",
+              "label": "2028+"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/NIpIOsNopRJg",
+          "properties": {
+            "description": "proven-3"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/NIpIOsNopRJg",
+            "properties": {
+              "description": "proven-3"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "A8XeKRFg76i3",
+        "title": "When are you applying?",
+        "ref": "2a431ecb-c862-4522-b8f8-30d6e644dec8",
+        "properties": {
+          "description": "Deferred applicants who graduate from Oct 2025 — Sept 2026 apply in the Spring of 2026",
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "lggNW3lalb0c",
+              "ref": "0cabbc18-52e3-4456-a8a7-2eb45a8a30e8",
+              "label": "Spring 2026"
+            },
+            {
+              "id": "7oTs6grCqy1r",
+              "ref": "4edf6e95-6c1d-48be-9aca-8e084d999e6b",
+              "label": "Spring 2027"
+            },
+            {
+              "id": "rCyiYlwEaNyd",
+              "ref": "dd62837f-6413-48b1-9db2-480ed5386d1b",
+              "label": "Spring 2028"
+            },
+            {
+              "id": "YOki5p5l7lcD",
+              "ref": "b4035a97-6291-469f-8ec8-961f314b96ee",
+              "label": "2029+"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/NIpIOsNopRJg",
+          "properties": {
+            "description": "proven-3"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/NIpIOsNopRJg",
+            "properties": {
+              "description": "proven-3"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "psYCGAF3q3DT",
+        "title": "When are you applying?",
+        "ref": "a3277c9b-3f57-453e-a83e-c52cfc6da7e5",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "HLuVOMPMR6Vq",
+              "ref": "36fd909d-433a-4326-8cc1-dfcfd605d5f2",
+              "label": "Nov 2026 - Jan 2027 (Next year)"
+            },
+            {
+              "id": "4V2AdAhcJgKw",
+              "ref": "7809cac0-bcde-4002-9afc-68a8cddb1ff2",
+              "label": "Nov 2027 - Jan 2028 (Next year)"
+            },
+            {
+              "id": "PBNp0EQ6Zscm",
+              "ref": "afe37cca-0e31-4916-8c12-b89259140ae6",
+              "label": "2028+"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/NIpIOsNopRJg",
+          "properties": {
+            "description": "proven-3"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/NIpIOsNopRJg",
+            "properties": {
+              "description": "proven-3"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "Lr70sJNMsEln",
+        "title": "When are you applying?",
+        "ref": "bcdff00e-c70a-417e-8bae-547ffac12616",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "tAxPZf2vAJSf",
+              "ref": "5f797b3b-07c4-4e34-8c25-be502c089ffa",
+              "label": "2026"
+            },
+            {
+              "id": "2MCnQPvGEZtB",
+              "ref": "7ba896dc-d7e5-4f99-8b8d-ea0ae50dc459",
+              "label": "2027"
+            },
+            {
+              "id": "FKWjUz0lJEFF",
+              "ref": "a7c9d63b-b012-4e1b-9d54-9d08c6df89b6",
+              "label": "2028"
+            },
+            {
+              "id": "2yVHTDkQv9H0",
+              "ref": "7916ed4d-eb85-496d-b849-65cc465a14f7",
+              "label": "2029+"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/NIpIOsNopRJg",
+          "properties": {
+            "description": "proven-3"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/NIpIOsNopRJg",
+            "properties": {
+              "description": "proven-3"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "qBzfcQsRjIw0",
+        "title": "When are you planning on taking your test?",
+        "ref": "76c5d362-fb99-46fb-8bfd-f8232cbafaac",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "HmNlEwWJmTSb",
+              "ref": "4d359e49-3739-40fb-9962-a75c15f00126",
+              "label": "Within the next 3 months"
+            },
+            {
+              "id": "Hxaf2uudaz3K",
+              "ref": "fae990e6-6d64-4d53-bc3d-b2bfba21903e",
+              "label": "3 - 6 months"
+            },
+            {
+              "id": "Pgiwf5lOQ5vL",
+              "ref": "38134216-9957-48f2-9d2e-08117b97c75b",
+              "label": "6 - 12 months"
+            },
+            {
+              "id": "PLTKsWWIrUBM",
+              "ref": "2e6e68ad-c253-414f-8af3-d727aba9658d",
+              "label": "12 - 24 months"
+            },
+            {
+              "id": "FSBeq0uGo7bd",
+              "ref": "1f523736-7283-4d3c-b94a-4bb45149108f",
+              "label": "24+ months"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/NIpIOsNopRJg",
+          "properties": {
+            "description": "proven-3"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/NIpIOsNopRJg",
+            "properties": {
+              "brightness": 0,
+              "focal_point": {
+                "x": 0,
+                "y": 0
+              },
+              "description": "proven-3"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "t95y6KWFM8xH",
+        "title": "Almost done! We're about to show you Leland's marketplace of 2,000+ coaches, upcoming events, bootcamps, and free resources. ",
+        "ref": "91252e43-2057-4a90-a2dd-1640eed922e1",
+        "properties": {
+          "description": "You are about to join 300,000+ people on Leland.",
+          "button_text": "Continue",
+          "hide_marks": true
+        },
+        "type": "statement"
+      },
+      {
+        "id": "ls1Il5CqNMRc",
+        "title": "With thousands of coaches and resources on Leland, a quick call helps us match you to exactly what you need. When is best for us to reach out?",
+        "ref": "reach-out",
+        "properties": {
+          "description": "Only one more step before we show you the full marketplace.",
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": false,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "NSq5BcyFLN7I",
+              "ref": "c39158ac-5908-4bb3-829b-71e4ddce8cdb",
+              "label": "Call me now"
+            },
+            {
+              "id": "KeHusY4yMruu",
+              "ref": "f5059cb8-4be3-4c17-ab2e-06511b360d02",
+              "label": "Schedule a call"
+            },
+            {
+              "id": "SYRyfjliLlfc",
+              "ref": "2dbd8a47-9f54-4eb4-9dcb-fdee12c2ff64",
+              "label": "I'll explore on my own"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice",
+        "attachment": {
+          "type": "image",
+          "href": "https://images.typeform.com/images/vpZJjrZodbgz",
+          "properties": {
+            "description": "Screenshot 2026-03-11 at 10.00.06 AM"
+          }
+        },
+        "layout": {
+          "type": "stack",
+          "attachment": {
+            "type": "image",
+            "href": "https://images.typeform.com/images/vpZJjrZodbgz",
+            "properties": {
+              "description": "Screenshot 2026-03-11 at 10.00.06 AM"
+            }
+          },
+          "viewport_overrides": {
+            "small": {
+              "type": "split"
+            },
+            "large": {
+              "type": "split",
+              "placement": "right"
+            }
+          }
+        }
+      },
+      {
+        "id": "hVDd7wAr4P5R",
+        "title": "Great! You can schedule a call with an experienced Leland team member using this calendar.",
+        "ref": "sales-calendly1",
+        "properties": {},
+        "application": {
+          "id": "calendly",
+          "application_block_id": "d4861927-f09b-4518-93b0-01a1dd54a105",
+          "installation_id": "abd0f015-9256-4a46-bb9a-47b749560b3d",
+          "iframe_url": "https://api.typeform.com/applications/calendly/installations/abd0f015-9256-4a46-bb9a-47b749560b3d/iframe/d4861927-f09b-4518-93b0-01a1dd54a105",
+          "inputs": [
+            {
+              "value": "{{hidden:first_name}}",
+              "label": "Name",
+              "ref": "name"
+            },
+            {
+              "value": "{{hidden:email}}",
+              "label": "Email",
+              "ref": "email"
+            },
+            {
+              "value": "",
+              "label": "Phone number",
+              "ref": "a1"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "calendly"
+      },
+      {
+        "id": "81f23oqqFcGn",
+        "title": "Great! You can schedule a call with an experienced Leland team member using this calendar.",
+        "ref": "sales-calendly2",
+        "properties": {},
+        "application": {
+          "id": "calendly",
+          "application_block_id": "451f2fb4-ee08-4ca6-93cf-2233c5180b3d",
+          "installation_id": "abd0f015-9256-4a46-bb9a-47b749560b3d",
+          "iframe_url": "https://api.typeform.com/applications/calendly/installations/abd0f015-9256-4a46-bb9a-47b749560b3d/iframe/451f2fb4-ee08-4ca6-93cf-2233c5180b3d",
+          "inputs": [
+            {
+              "value": "{{hidden:first_name}}",
+              "label": "Name",
+              "ref": "name"
+            },
+            {
+              "value": "{{hidden:email}}",
+              "label": "Email",
+              "ref": "email"
+            },
+            {
+              "value": "",
+              "label": "Phone number",
+              "ref": "a1"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "calendly"
+      },
+      {
+        "id": "8Q9JZ1g3Cx1y",
+        "title": "Great! Please enter your phone number so we can reach out.",
+        "ref": "phone-number",
+        "properties": {
+          "description": "Our reps are typically available between 8AM - 5PM PT Monday-Friday. If you request a call outside of those hours, one of our reps will call you at their next availability.",
+          "default_country_code": "US"
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "phone_number"
+      },
+      {
+        "id": "y4SEPHDhl2yC",
+        "title": "Last question—how did you hear about us?",
+        "ref": "how-hear-about-us",
+        "properties": {
+          "randomize": false,
+          "allow_multiple_selection": false,
+          "allow_other_choice": true,
+          "vertical_alignment": true,
+          "choices": [
+            {
+              "id": "R0hWG438hx6O",
+              "ref": "6e003710-7dcd-4480-b8d7-eba73df589a6",
+              "label": "Google"
+            },
+            {
+              "id": "BD9GNWnkb4Vn",
+              "ref": "61469f08-f876-44bb-a564-ab87593e0d66",
+              "label": "LinkedIn"
+            },
+            {
+              "id": "QkOCLguUrIZo",
+              "ref": "56e2ea96-c4bc-45f6-ad30-834cd039d3bc",
+              "label": "Facebook"
+            },
+            {
+              "id": "SFbAbuXS27gm",
+              "ref": "41854ff8-358f-4867-93c7-e0573291d89b",
+              "label": "Instagram"
+            },
+            {
+              "id": "KyNic6WLSw56",
+              "ref": "2c62778d-f890-423c-9a3b-7d2c37bda701",
+              "label": "TikTok"
+            },
+            {
+              "id": "tQxPx0rx8PDa",
+              "ref": "abaee6af-cdf7-4868-8769-d233a36adefb",
+              "label": "TV"
+            },
+            {
+              "id": "LyqkqkI3wYFS",
+              "ref": "0e154b20-d650-4313-820d-52e43f1543c3",
+              "label": "Referred by a friend"
+            },
+            {
+              "id": "cIVNSd23zlpQ",
+              "ref": "fb847487-da48-4d18-9395-804772d3b3fe",
+              "label": "School Club / Campus booth"
+            },
+            {
+              "id": "R0nykLQmJK5y",
+              "ref": "f9fc6237-9395-4195-9835-3e3a3322e4f9",
+              "label": "WeChat"
+            },
+            {
+              "id": "VZvOZUcASY0W",
+              "ref": "dc347eff-3c2d-4aca-b1cb-c093793dc05e",
+              "label": "Reddit"
+            },
+            {
+              "id": "LJG0DWYaqSex",
+              "ref": "5bb7e508-86d6-4d2c-92a6-a43555922fa9",
+              "label": "Xiaohongshu"
+            }
+          ]
+        },
+        "validations": {
+          "required": true
+        },
+        "type": "multiple_choice"
+      }
+    ],
+    "hidden": [
+      "first_name",
+      "last_name",
+      "email",
+      "id",
+      "category",
+      "goal_name"
+    ],
+    "logic": [
+      {
+        "type": "field",
+        "ref": "mba-programs",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "2a431ecb-c862-4522-b8f8-30d6e644dec8"
+              }
+            },
+            "condition": {
+              "op": "is",
+              "vars": [
+                {
+                  "type": "field",
+                  "value": "mba-programs"
+                },
+                {
+                  "type": "choice",
+                  "value": "5d1740c9-2a7d-4295-9d02-d6d01901ffed"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "07045f40-3da8-452f-a9db-e2a2fe4cd76d"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "goal",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "careers"
+              }
+            },
+            "condition": {
+              "op": "is",
+              "vars": [
+                {
+                  "type": "field",
+                  "value": "goal"
+                },
+                {
+                  "type": "choice",
+                  "value": "0dbeea9e-3a9a-4834-881d-a7d226d7a277"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "schools"
+              }
+            },
+            "condition": {
+              "op": "is",
+              "vars": [
+                {
+                  "type": "field",
+                  "value": "goal"
+                },
+                {
+                  "type": "choice",
+                  "value": "f9f6aa89-ec48-4ac6-b2ee-fa441d06e9bb"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "tests"
+              }
+            },
+            "condition": {
+              "op": "is",
+              "vars": [
+                {
+                  "type": "field",
+                  "value": "goal"
+                },
+                {
+                  "type": "choice",
+                  "value": "a5ea7a46-67ea-4543-b483-ab6d84d068a9"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "apply-timeline"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "tests",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "other-tests"
+              }
+            },
+            "condition": {
+              "op": "is",
+              "vars": [
+                {
+                  "type": "field",
+                  "value": "tests"
+                },
+                {
+                  "type": "choice",
+                  "value": "6f8a0325-ad84-4809-87a7-59b44f50f595"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "apply-timeline"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "how-hear-about-us",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "thankyou",
+                "value": "1d7d3124-e6b0-4999-96b4-3e17a9fd3b69"
+              }
+            },
+            "condition": {
+              "op": "is",
+              "vars": [
+                {
+                  "type": "field",
+                  "value": "reach-out"
+                },
+                {
+                  "type": "choice",
+                  "value": "c39158ac-5908-4bb3-829b-71e4ddce8cdb"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "thankyou",
+                "value": "1d7d3124-e6b0-4999-96b4-3e17a9fd3b69"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "schools",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "a8bde245-4c57-4be4-926c-a2a351f65d1e"
+              }
+            },
+            "condition": {
+              "op": "is",
+              "vars": [
+                {
+                  "type": "field",
+                  "value": "schools"
+                },
+                {
+                  "type": "choice",
+                  "value": "4274cf30-9310-45df-98d3-cc860d692bd9"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "apply-timeline"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "reach-out",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "sales-calendly1"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "reach-out"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "f5059cb8-4be3-4c17-ab2e-06511b360d02"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "f8a1cd7e-0791-45a3-a9d1-b77a64e9e74e"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "phone-number"
+              }
+            },
+            "condition": {
+              "op": "is",
+              "vars": [
+                {
+                  "type": "field",
+                  "value": "reach-out"
+                },
+                {
+                  "type": "choice",
+                  "value": "c39158ac-5908-4bb3-829b-71e4ddce8cdb"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "how-hear-about-us"
+              }
+            },
+            "condition": {
+              "op": "is",
+              "vars": [
+                {
+                  "type": "field",
+                  "value": "reach-out"
+                },
+                {
+                  "type": "choice",
+                  "value": "2dbd8a47-9f54-4eb4-9dcb-fdee12c2ff64"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "sales-calendly2"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "budget",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "mba-schools"
+              }
+            },
+            "condition": {
+              "op": "or",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "schools"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "55a1dfa8-79d8-49fa-9ab6-10f0da076d01"
+                    }
+                  ]
+                },
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "MBA"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "bcdff00e-c70a-417e-8bae-547ffac12616"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "goal"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "f9f6aa89-ec48-4ac6-b2ee-fa441d06e9bb"
+                    }
+                  ]
+                },
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "schools"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "4274cf30-9310-45df-98d3-cc860d692bd9"
+                    }
+                  ]
+                },
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "schools"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "55a1dfa8-79d8-49fa-9ab6-10f0da076d01"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "76c5d362-fb99-46fb-8bfd-f8232cbafaac"
+              }
+            },
+            "condition": {
+              "op": "is",
+              "vars": [
+                {
+                  "type": "field",
+                  "value": "goal"
+                },
+                {
+                  "type": "choice",
+                  "value": "a5ea7a46-67ea-4543-b483-ab6d84d068a9"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "mba-schools"
+              }
+            },
+            "condition": {
+              "op": "contains",
+              "vars": [
+                {
+                  "type": "hidden",
+                  "value": "category"
+                },
+                {
+                  "type": "constant",
+                  "value": "MBA"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "bcdff00e-c70a-417e-8bae-547ffac12616"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "goal_name"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "school"
+                    }
+                  ]
+                },
+                {
+                  "op": "not_contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "college"
+                    }
+                  ]
+                },
+                {
+                  "op": "not_contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "MBA"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "76c5d362-fb99-46fb-8bfd-f8232cbafaac"
+              }
+            },
+            "condition": {
+              "op": "contains",
+              "vars": [
+                {
+                  "type": "hidden",
+                  "value": "goal_name"
+                },
+                {
+                  "type": "constant",
+                  "value": "test"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "a3277c9b-3f57-453e-a83e-c52cfc6da7e5"
+              }
+            },
+            "condition": {
+              "op": "or",
+              "vars": [
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "college"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "schools"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "4274cf30-9310-45df-98d3-cc860d692bd9"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "reach-out"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "other-careers",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "apply-timeline"
+              }
+            },
+            "condition": {
+              "op": "or",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "other-careers"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "6ebbde6e-6db7-4422-b015-5559f0263867"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "other-careers"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "cddefc4d-3503-481c-8970-f6bb59a3de92"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "other-careers"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "258c0912-0d13-4d2a-b5e8-892c3bb08245"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "other-careers"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "e62ae81b-46fc-4941-a5c5-0fdfe4dec886"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "other-careers"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "ae05daee-3123-4804-a475-e72cd81a86c9"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "other-careers"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "c91c7174-5d85-437e-a372-2e2d083049ea"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "f498588e-b553-4b90-8614-7549b8acbe99"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "07045f40-3da8-452f-a9db-e2a2fe4cd76d",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "reach-out"
+              }
+            },
+            "condition": {
+              "op": "or",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "f8a1cd7e-0791-45a3-a9d1-b77a64e9e74e"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "aa5a89f3-ae77-471a-b698-b4d10bde688e"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "c42f6656-df38-4c34-84ba-275b0dbbe9c9"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "how-hear-about-us"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "2a431ecb-c862-4522-b8f8-30d6e644dec8",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "reach-out"
+              }
+            },
+            "condition": {
+              "op": "or",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "f8a1cd7e-0791-45a3-a9d1-b77a64e9e74e"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "aa5a89f3-ae77-471a-b698-b4d10bde688e"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "c42f6656-df38-4c34-84ba-275b0dbbe9c9"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "how-hear-about-us"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "bcdff00e-c70a-417e-8bae-547ffac12616",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "reach-out"
+              }
+            },
+            "condition": {
+              "op": "or",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "f8a1cd7e-0791-45a3-a9d1-b77a64e9e74e"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "aa5a89f3-ae77-471a-b698-b4d10bde688e"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "c42f6656-df38-4c34-84ba-275b0dbbe9c9"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "how-hear-about-us"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "a3277c9b-3f57-453e-a83e-c52cfc6da7e5",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "reach-out"
+              }
+            },
+            "condition": {
+              "op": "or",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "f8a1cd7e-0791-45a3-a9d1-b77a64e9e74e"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "aa5a89f3-ae77-471a-b698-b4d10bde688e"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "c42f6656-df38-4c34-84ba-275b0dbbe9c9"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "how-hear-about-us"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "76c5d362-fb99-46fb-8bfd-f8232cbafaac",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "reach-out"
+              }
+            },
+            "condition": {
+              "op": "or",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "f8a1cd7e-0791-45a3-a9d1-b77a64e9e74e"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "aa5a89f3-ae77-471a-b698-b4d10bde688e"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "budget"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "c42f6656-df38-4c34-84ba-275b0dbbe9c9"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "how-hear-about-us"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "careers",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "other-careers"
+              }
+            },
+            "condition": {
+              "op": "is",
+              "vars": [
+                {
+                  "type": "field",
+                  "value": "careers"
+                },
+                {
+                  "type": "choice",
+                  "value": "aa99b0d0-ef98-4761-a8a8-3df0dc37ee4d"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "apply-timeline"
+              }
+            },
+            "condition": {
+              "op": "is",
+              "vars": [
+                {
+                  "type": "field",
+                  "value": "careers"
+                },
+                {
+                  "type": "choice",
+                  "value": "8d0a46e7-d17b-47f6-bc9d-7f059492c412"
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "f498588e-b553-4b90-8614-7549b8acbe99"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "apply-timeline",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "career-services"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "goal"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "0dbeea9e-3a9a-4834-881d-a7d226d7a277"
+                    }
+                  ]
+                },
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "careers"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "8d0a46e7-d17b-47f6-bc9d-7f059492c412"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "school-services"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "goal"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "f9f6aa89-ec48-4ac6-b2ee-fa441d06e9bb"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "sat-test-services"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "tests"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "9f2a2a9c-fbc1-44f2-a6ff-993e43c39ac7"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "sat-test-services"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "tests"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "d705d148-633c-4fc3-aa99-8b72db00ed75"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "grad-test-services"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "tests"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "f2833c61-7c0c-4d87-a889-a32568e9976d"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "grad-test-services"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "tests"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "2da84839-897e-4b92-81df-3b62bed8e5cd"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "mba-schools"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "schools"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "55a1dfa8-79d8-49fa-9ab6-10f0da076d01"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "bcdff00e-c70a-417e-8bae-547ffac12616"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "schools"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "2c3ed6f4-c608-4e63-a78a-9de03a5741ea"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "bcdff00e-c70a-417e-8bae-547ffac12616"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "schools"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "98684408-3a3a-4818-941b-7e4e4375187a"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "76c5d362-fb99-46fb-8bfd-f8232cbafaac"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "goal"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "a5ea7a46-67ea-4543-b483-ab6d84d068a9"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "budget"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "tests"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "6f8a0325-ad84-4809-87a7-59b44f50f595"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "career-services"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "goal_name"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "career"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "school-services"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "goal_name"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "school"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "sat-test-services"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "act"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "sat-test-services"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "sat"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "grad-test-services"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "gmat"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "grad-test-services"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "gre"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "mba-schools"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "schools"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "55a1dfa8-79d8-49fa-9ab6-10f0da076d01"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "bcdff00e-c70a-417e-8bae-547ffac12616"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "medicine"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "bcdff00e-c70a-417e-8bae-547ffac12616"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "law"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "76c5d362-fb99-46fb-8bfd-f8232cbafaac"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "goal_name"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "test"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "bcdff00e-c70a-417e-8bae-547ffac12616"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "goal_name"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "school"
+                    }
+                  ]
+                },
+                {
+                  "op": "not_contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "MBA"
+                    }
+                  ]
+                },
+                {
+                  "op": "not_contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "college"
+                    }
+                  ]
+                },
+                {
+                  "op": "not_contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "medicine"
+                    }
+                  ]
+                },
+                {
+                  "op": "not_contains",
+                  "vars": [
+                    {
+                      "type": "hidden",
+                      "value": "category"
+                    },
+                    {
+                      "type": "constant",
+                      "value": "law"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "bcdff00e-c70a-417e-8bae-547ffac12616"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "schools"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "f6f9825b-861c-448b-b103-bc42b0523bb8"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "bcdff00e-c70a-417e-8bae-547ffac12616"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "schools"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "c483c2b0-c99c-410d-817d-f54a49ed1798"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "bcdff00e-c70a-417e-8bae-547ffac12616"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "schools"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "ded061f6-943e-4c8e-af0b-bb4e14bf395c"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "budget"
+              }
+            },
+            "condition": {
+              "op": "and",
+              "vars": [
+                {
+                  "op": "is_not",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "apply-timeline"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "bf7f85d9-ed04-4366-a743-a3a88d424cdd"
+                    }
+                  ]
+                },
+                {
+                  "op": "is",
+                  "vars": [
+                    {
+                      "type": "field",
+                      "value": "careers"
+                    },
+                    {
+                      "type": "choice",
+                      "value": "8d0a46e7-d17b-47f6-bc9d-7f059492c412"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "how-hear-about-us"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "f498588e-b553-4b90-8614-7549b8acbe99",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "apply-timeline"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "other-tests",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "apply-timeline"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "school-services",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "budget"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "career-services",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "budget"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "sat-test-services",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "budget"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "grad-test-services",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "budget"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "mba-schools",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "mba-programs"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "sales-calendly1",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "how-hear-about-us"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "sales-calendly2",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "how-hear-about-us"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "a8bde245-4c57-4be4-926c-a2a351f65d1e",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "apply-timeline"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "phone-number",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "how-hear-about-us"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      },
+      {
+        "type": "field",
+        "ref": "91252e43-2057-4a90-a2dd-1640eed922e1",
+        "actions": [
+          {
+            "action": "jump",
+            "details": {
+              "to": {
+                "type": "field",
+                "value": "reach-out"
+              }
+            },
+            "condition": {
+              "op": "always",
+              "vars": []
+            }
+          }
+        ]
+      }
+    ],
+    "created_at": "2021-05-31T05:46:10+00:00",
+    "last_updated_at": "2026-04-15T21:32:27+00:00",
+    "published_at": "2021-05-31T05:46:23+00:00",
+    "_links": {
+      "display": "https://joinleland.typeform.com/to/aqnSr2VC",
+      "responses": "https://api.typeform.com/forms/aqnSr2VC/responses"
+    }
+  }

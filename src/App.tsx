@@ -56,6 +56,7 @@ import CoachCategoryEdit from "./pages/CoachCategoryEdit";
 import LiveSession from "./pages/program/session/LiveSession";
 import IncredibleHomePage from "./pages/IncredibleHomePage";
 import IncredibleHomePageBU from "./pages/IncredibleHomePageBU";
+import IncredibleOnboarding from "./pages/IncredibleOnboarding";
 
 export default function App() {
   return (
@@ -67,6 +68,7 @@ export default function App() {
       <Route path="/partner-dashboard" element={<B2BDashboardV2 />} />
       <Route path="/incredible-home-page" element={<IncredibleHomePage />} />
       <Route path="/incredible-home-page-bu" element={<IncredibleHomePageBU />} />
+      <Route path="/incredible-onboarding" element={<IncredibleOnboarding />} />
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
         <Route path="/dashboard" element={<Dashboard />} />

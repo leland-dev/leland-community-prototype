@@ -21,7 +21,8 @@
       "Bash(curl -sS -o /tmp/page.js -w \"HTTP %{http_code}\\\\n\" \"http://localhost:5175/src/pages/IncredibleHomePage.tsx\")",
       "Bash(curl *)",
       "Bash(sed -i '' -e 's/const { ref, overlay } = useSpotlight/const { handlers, overlay } = useSpotlight/g' -e 's/<section ref={ref} /<section {...handlers} /g' /Users/jakelingwall/Documents/GitHub/leland-community-prototype/src/pages/IncredibleHomePage.tsx)",
-      "Bash(grep -n \"useSpotlight\\\\|ref={ref}\\\\|{...handlers}\" /Users/jakelingwall/Documents/GitHub/leland-community-prototype/src/pages/IncredibleHomePage.tsx)"
+      "Bash(grep -n \"useSpotlight\\\\|ref={ref}\\\\|{...handlers}\" /Users/jakelingwall/Documents/GitHub/leland-community-prototype/src/pages/IncredibleHomePage.tsx)",
+      "Bash(python3 *)"
     ]
   }
 }

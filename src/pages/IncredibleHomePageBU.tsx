@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Sparkles,
@@ -366,6 +366,16 @@ export default function IncredibleHomePageBU() {
 /* ───────────────────────────── hero ───────────────────────────── */
 
 function Hero() {
+  const navigate = useNavigate();
+  const goToOnboarding = (q: string) => {
+    const cleaned = (q || "").trim();
+    navigate(
+      cleaned
+        ? `/incredible-onboarding?q=${encodeURIComponent(cleaned)}`
+        : `/incredible-onboarding`,
+    );
+  };
+
   const [rotIndex, setRotIndex] = useState(0);
   const [headlineIndex, setHeadlineIndex] = useState(0);
   const [flyoutOpen, setFlyoutOpen] = useState(false);
@@ -528,7 +538,11 @@ function Hero() {
           {/* Input + flyout share a positioning context so the flyout
               anchors directly under the input box (not the chip row). */}
           <div className="relative">
-            <div
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                goToOnboarding(inputValue);
+              }}
               onMouseEnter={() => setFlyoutOpen(true)}
               onFocus={() => setFlyoutOpen(true)}
               className={`group relative flex items-center gap-3 rounded-2xl border bg-white/95 px-3 py-2.5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] backdrop-blur-md transition-all ${
@@ -544,11 +558,17 @@ function Hero() {
                 placeholder={`Ask Leland AI… e.g. "${ROTATING_AMBITIONS[rotIndex]}"`}
                 className="flex-1 bg-transparent text-[16px] text-gray-dark placeholder:text-[#888] focus:outline-none md:text-[18px]"
               />
-              <Button size="md" variant="primary" rounded="rounded-xl" className="!px-4">
+              <Button
+                type="submit"
+                size="md"
+                variant="primary"
+                rounded="rounded-xl"
+                className="!px-4"
+              >
                 <Send size={16} />
                 <span className="hidden sm:inline">Get started</span>
               </Button>
-            </div>
+            </form>
 
             {/* Flyout — anchored directly under the input box, overlays chips
                 via z-50 so the mouse path from input → flyout never crosses
@@ -585,8 +605,8 @@ function Hero() {
                           <li key={it}>
                             <button
                               onClick={() => {
-                                setInputValue(it);
                                 setFlyoutOpen(false);
+                                goToOnboarding(it);
                               }}
                               className="group flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-[14px] text-white/80 transition-colors hover:bg-white/5 hover:text-white"
                             >
@@ -607,7 +627,14 @@ function Hero() {
                     <Zap size={14} className="text-[#fbbf24]" />
                     Not sure yet?
                   </div>
-                  <Button size="sm" variant="white">
+                  <Button
+                    size="sm"
+                    variant="white"
+                    onClick={() => {
+                      setFlyoutOpen(false);
+                      goToOnboarding("Take the 2-min compass quiz");
+                    }}
+                  >
                     Take the 2-min compass quiz
                   </Button>
                 </div>
@@ -619,7 +646,7 @@ function Hero() {
           {/* Chips → expand into mini-cards on hover. Rendered AFTER the
               input/flyout wrapper so the flyout (z-50) overlays them when open. */}
           <QuickChipGrid
-            setInputValue={setInputValue}
+            setInputValue={goToOnboarding}
             closeFlyout={() => setFlyoutOpen(false)}
           />
         </motion.div>
