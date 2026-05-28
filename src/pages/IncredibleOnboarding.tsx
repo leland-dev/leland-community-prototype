@@ -120,12 +120,39 @@ const SCHOOLS = {
   phd: choiceRefByLabel("schools", "PhD Programs"),
 };
 
+const REACH_OUT = {
+  callNow: choiceRefByLabel("reach-out", "Call me now"),
+  schedule: choiceRefByLabel("reach-out", "Schedule a call"),
+  explore: choiceRefByLabel("reach-out", "I'll explore on my own"),
+};
+
 // Refs we'll address by-ref through the flow (these aren't human-named in the form)
 const WHEN_MBA = "07045f40-3da8-452f-a9db-e2a2fe4cd76d";
 const WHEN_MASTERS = "2a431ecb-c862-4522-b8f8-30d6e644dec8";
 const WHEN_LAW_MED = "a3277c9b-3f57-453e-a83e-c52cfc6da7e5";
 const WHEN_UNDERGRAD = "bcdff00e-c70a-417e-8bae-547ffac12616";
 const WHEN_TEST = "76c5d362-fb99-46fb-8bfd-f8232cbafaac";
+
+// Synthetic fields the typeform doesn't have on its own — we collect them
+// during the chat so we can hand them to ops alongside the typeform answers.
+FIELDS_BY_REF.set("_name", {
+  id: "synthetic-name",
+  ref: "_name",
+  title: "Great! Who am I talking to? What's your full name?",
+  type: "short_text",
+  required: true,
+  allowMultiple: false,
+  choices: [],
+});
+FIELDS_BY_REF.set("_email", {
+  id: "synthetic-email",
+  ref: "_email",
+  title: "Thanks! And the best email to reach you?",
+  type: "email",
+  required: true,
+  allowMultiple: false,
+  choices: [],
+});
 
 /* ─────────────── free-text → choice matching ─────────────── */
 
@@ -290,6 +317,40 @@ function semanticMatchAll(text: string, choices: Choice[]): MatchResult[] {
   }));
 }
 
+/* ─────────────── calendly slot generation ─────────────── */
+
+type Slot = { label: string; iso: string };
+
+function generateCalendlySlots(count = 8): Slot[] {
+  const out: Slot[] = [];
+  const hours = [10, 14, 16]; // 10am, 2pm, 4pm
+  const start = new Date();
+  let dayOffset = 1;
+  while (out.length < count && dayOffset < 14) {
+    const day = new Date(start);
+    day.setDate(day.getDate() + dayOffset);
+    dayOffset += 1;
+    if (day.getDay() === 0 || day.getDay() === 6) continue; // skip weekends
+    for (const h of hours) {
+      const t = new Date(day);
+      t.setHours(h, 0, 0, 0);
+      const dayLabel = t.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+      const timeLabel = t.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+      out.push({ label: `${dayLabel} · ${timeLabel}`, iso: t.toISOString() });
+      if (out.length >= count) break;
+    }
+  }
+  return out;
+}
+
 /* ─────────────── answers + flow ─────────────── */
 
 type AnswerValue = string | string[]; // choice ref(s) or text
@@ -355,7 +416,25 @@ function nextRef(current: string, a: Answers): string | null {
       return "reach-out";
 
     case "reach-out":
-      // Skip phone / calendly for the prototype — go straight to attribution
+      if (
+        a["reach-out"] === REACH_OUT.callNow ||
+        a["reach-out"] === REACH_OUT.schedule
+      ) {
+        return "_name";
+      }
+      return "how-hear-about-us";
+
+    case "_name":
+      return "_email";
+
+    case "_email":
+      if (a["reach-out"] === REACH_OUT.callNow) return "phone-number";
+      if (a["reach-out"] === REACH_OUT.schedule) return "sales-calendly1";
+      return "how-hear-about-us";
+
+    case "phone-number":
+    case "sales-calendly1":
+    case "sales-calendly2":
       return "how-hear-about-us";
 
     case "how-hear-about-us":
@@ -479,7 +558,7 @@ function expectedFlowLength(a: Answers): number {
   while (cur && !seen.has(cur)) {
     seen.add(cur);
     const f = field(cur);
-    if (f && f.type !== "statement" && f.type !== "calendly" && f.type !== "phone_number") {
+    if (f && f.type !== "statement") {
       count += 1;
     }
     cur = nextRef(cur, a);
@@ -834,10 +913,8 @@ export default function IncredibleOnboarding() {
         next = nextRef(next, newAnswers);
         continue;
       }
-      if (f.type === "calendly" || f.type === "phone_number") {
-        next = nextRef(next, newAnswers);
-        continue;
-      }
+      // All other types are interactive (multiple_choice, calendly,
+      // phone_number, short_text, email, …)
       newMsgs.push({ role: "ai", text: f.title });
       if (f.description) newMsgs.push({ role: "ai", text: f.description });
       break;
@@ -892,12 +969,53 @@ export default function IncredibleOnboarding() {
       return;
     }
 
-    // Free-text-type fields: store as-is
+    // Free-text-type fields: validate then store
+    if (currentField.ref === "_name") {
+      const first = trimmed.split(/\s+/)[0];
+      commitAnswer(currentRef, trimmed, {
+        aiAck: `Nice to meet you, ${first}.`,
+      });
+      return;
+    }
+    if (currentField.type === "email" || currentField.ref === "_email") {
+      const looksLikeEmail = /\S+@\S+\.\S+/.test(trimmed);
+      if (!looksLikeEmail) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "user", text: trimmed },
+          {
+            role: "ai",
+            text: "Hmm — that doesn't look like a valid email. Mind double-checking?",
+          },
+        ]);
+        setInput("");
+        return;
+      }
+      commitAnswer(currentRef, trimmed, { aiAck: "Got it — saved." });
+      return;
+    }
+    if (currentField.type === "phone_number") {
+      const digits = trimmed.replace(/\D/g, "");
+      if (digits.length < 7) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "user", text: trimmed },
+          {
+            role: "ai",
+            text: "Hmm — that number looks short. Mind double-checking?",
+          },
+        ]);
+        setInput("");
+        return;
+      }
+      commitAnswer(currentRef, trimmed, {
+        aiAck: "Got it — a Leland teammate will call you within the next 5 minutes.",
+      });
+      return;
+    }
     if (
       currentField.type === "short_text" ||
-      currentField.type === "long_text" ||
-      currentField.type === "email" ||
-      currentField.type === "phone_number"
+      currentField.type === "long_text"
     ) {
       commitAnswer(currentRef, trimmed);
       return;
@@ -1016,6 +1134,13 @@ export default function IncredibleOnboarding() {
                     pending={pending}
                     setPending={setPending}
                     onSubmit={submitAnswer}
+                    onCalendlyPick={(slot) => {
+                      if (!currentRef) return;
+                      commitAnswer(currentRef, slot.iso, {
+                        userBubble: slot.label,
+                        aiAck: `Locked in — see you ${slot.label}. We'll send a calendar invite to your email.`,
+                      });
+                    }}
                     input={input}
                     setInput={setInput}
                     onTextSubmit={onTextSubmit}
@@ -1150,6 +1275,7 @@ function ChatCard({
   pending,
   setPending,
   onSubmit,
+  onCalendlyPick,
   input,
   setInput,
   onTextSubmit,
@@ -1161,12 +1287,31 @@ function ChatCard({
   pending: string[];
   setPending: (s: string[]) => void;
   onSubmit: (v: AnswerValue) => void;
+  onCalendlyPick: (slot: Slot) => void;
   input: string;
   setInput: (s: string) => void;
   onTextSubmit: (text: string) => void;
   scrollRef: React.RefObject<HTMLDivElement>;
   progressLabel: string;
 }) {
+  const isCalendly = currentField?.type === "calendly";
+  const isEmail =
+    currentField?.type === "email" || currentField?.ref === "_email";
+  const isPhone = currentField?.type === "phone_number";
+
+  const inputType = isEmail ? "email" : isPhone ? "tel" : "text";
+  const placeholder = !currentField
+    ? "Anything else I should know?"
+    : currentField.ref === "_name"
+      ? "Your full name"
+      : isEmail
+        ? "you@email.com"
+        : isPhone
+          ? "(555) 555-5555"
+          : currentField.choices.length > 0
+            ? "Or type a reply…"
+            : "Type your answer…";
+
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-card">
       {/* Header */}
@@ -1200,8 +1345,13 @@ function ChatCard({
         </AnimatePresence>
       </div>
 
-      {/* Quick replies */}
-      {currentField && currentField.choices.length > 0 && (
+      {/* Field-specific picker */}
+      {currentField && isCalendly && (
+        <div className="border-t border-gray-stroke/70 px-4 py-3 md:px-6">
+          <CalendlyPicker onPick={onCalendlyPick} />
+        </div>
+      )}
+      {currentField && !isCalendly && currentField.choices.length > 0 && (
         <div className="border-t border-gray-stroke/70 px-4 py-3 md:px-6">
           <QuickReplies
             field={currentField}
@@ -1222,12 +1372,18 @@ function ChatCard({
       >
         <div className="flex flex-1 items-center gap-2 rounded-xl border border-gray-stroke bg-gray-hover px-3 py-2 transition-colors focus-within:border-primary/50 focus-within:bg-white">
           <input
+            type={inputType}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={
-              currentField
-                ? "Or type a reply…"
-                : "Anything else I should know?"
+            placeholder={placeholder}
+            autoComplete={
+              currentField?.ref === "_name"
+                ? "name"
+                : isEmail
+                  ? "email"
+                  : isPhone
+                    ? "tel"
+                    : "off"
             }
             className="flex-1 bg-transparent text-[14px] text-gray-dark placeholder:text-gray-xlight focus:outline-none"
           />
@@ -1245,6 +1401,41 @@ function ChatCard({
         </div>
       </form>
     </div>
+  );
+}
+
+function CalendlyPicker({ onPick }: { onPick: (slot: Slot) => void }) {
+  const slots = useMemo(() => generateCalendlySlots(8), []);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="space-y-2.5"
+    >
+      <div className="flex items-center justify-between text-[12px] text-gray-light">
+        <span className="inline-flex items-center gap-1.5">
+          <Calendar size={12} className="text-primary" />
+          Pick a time — 30 min, Zoom
+        </span>
+        <span>All times your local zone</span>
+      </div>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {slots.map((s) => (
+          <button
+            key={s.iso}
+            onClick={() => onPick(s)}
+            className="group inline-flex items-center justify-between gap-2 rounded-xl border border-gray-stroke bg-white px-3 py-2 text-left text-[13px] font-semibold text-gray-dark transition-colors hover:border-primary/55 hover:bg-primary-xlight"
+          >
+            <span>{s.label}</span>
+            <ArrowRight
+              size={12}
+              className="text-gray-xlight transition-colors group-hover:text-primary"
+            />
+          </button>
+        ))}
+      </div>
+    </motion.div>
   );
 }
 
