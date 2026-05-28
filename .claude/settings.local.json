@@ -13,7 +13,15 @@
       "Bash(git push:*)",
       "Bash(git pull:*)",
       "Bash(git stash:*)",
-      "mcp__plugin_figma_figma__get_design_context"
+      "mcp__plugin_figma_figma__get_design_context",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -sS -o /tmp/incredible.html -w \"HTTP %{http_code}\\\\n\" http://localhost:5175/incredible-home-page)",
+      "Read(//tmp/**)",
+      "Bash(curl -sS -o /tmp/page.js -w \"HTTP %{http_code}\\\\n\" \"http://localhost:5175/src/pages/IncredibleHomePage.tsx\")",
+      "Bash(curl *)",
+      "Bash(sed -i '' -e 's/const { ref, overlay } = useSpotlight/const { handlers, overlay } = useSpotlight/g' -e 's/<section ref={ref} /<section {...handlers} /g' /Users/jakelingwall/Documents/GitHub/leland-community-prototype/src/pages/IncredibleHomePage.tsx)",
+      "Bash(grep -n \"useSpotlight\\\\|ref={ref}\\\\|{...handlers}\" /Users/jakelingwall/Documents/GitHub/leland-community-prototype/src/pages/IncredibleHomePage.tsx)"
     ]
   }
 }
