@@ -75,6 +75,27 @@ const AVAILABLE_PROGRAMS = [
   { key: "consulting", label: "Consulting Accelerator" },
 ];
 
+const PER_SEAT_PROGRAMS = [
+  "Spring '26 IB Recruiting Bootcamp",
+  "Private Equity Recruiting Bootcamp",
+  "AI for Finance Professionals",
+];
+
+const PER_SEAT_PROGRAM_DATES: Record<string, { label: string }[]> = {
+  "Spring '26 IB Recruiting Bootcamp": [
+    { label: "Jan 15 – Mar 20, 2026" },
+    { label: "Apr 7 – Jun 12, 2026" },
+  ],
+  "Private Equity Recruiting Bootcamp": [
+    { label: "Jun 2 – Jun 30, 2026" },
+    { label: "Sep 8 – Nov 13, 2026" },
+  ],
+  "AI for Finance Professionals": [
+    { label: "Mar 1 – Mar 29, 2026" },
+    { label: "Jun 1 – Jun 28, 2026" },
+  ],
+};
+
 function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohortKeys: string[], sessions: number) => void }) {
   const enrolledKeys = new Set((user.cohorts ?? []).map(c => {
     const found = AVAILABLE_PROGRAMS.find(p => p.label === c.name);
@@ -218,6 +239,134 @@ function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohor
   );
 }
 
+function EditAccessView({ user, onDone }: { user: UserDetailV2; onDone: (seats: number) => void }) {
+  const [seats, setSeats] = useState(1);
+  const [selectedDates, setSelectedDates] = useState<Record<string, string>>({});
+  const [selectingProgram, setSelectingProgram] = useState<string | null>(null);
+
+  if (selectingProgram) {
+    const dateOptions = PER_SEAT_PROGRAM_DATES[selectingProgram] ?? [];
+    return (
+      <div className="flex flex-col px-4 pt-4 pb-4 sm:px-6">
+        <button
+          onClick={() => setSelectingProgram(null)}
+          className="mb-5 flex w-full items-center justify-between rounded-lg bg-gray-hover px-4 py-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]"
+        >
+          Invite the user to select their own dates
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+        <div className="divide-y divide-gray-stroke">
+          {dateOptions.map(({ label }) => {
+            const isCurrent = selectedDates[selectingProgram] === label;
+            return (
+              <div key={label} className="flex items-center justify-between py-4">
+                <span className="text-[16px] font-medium text-gray-dark">{label}</span>
+                <Button
+                  size="md"
+                  variant={isCurrent ? "secondary" : "primary"}
+                  onClick={isCurrent ? undefined : () => {
+                    setSelectedDates(prev => ({ ...prev, [selectingProgram]: label }));
+                    setSelectingProgram(null);
+                  }}
+                  disabled={isCurrent}
+                >
+                  {isCurrent ? "Selected" : "Select"}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-full flex-col px-4 pt-5 pb-0 sm:px-6">
+      {/* User card */}
+      <div className="mb-5 flex items-center gap-3 rounded-xl bg-gray-hover px-4 py-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[14px] font-medium text-dark-green">
+          {user.initials}
+        </div>
+        <div className="min-w-0">
+          <div className="truncate text-[16px] font-medium text-gray-dark">{user.name}</div>
+          <div className="truncate text-[13px] text-gray-light">{user.email}</div>
+        </div>
+      </div>
+
+      <p className="mb-5 text-[16px] font-medium text-gray-dark">When you update access, this user will receive an email.</p>
+
+      {/* Seats + includes card */}
+      <div className="rounded-[10px] border border-gray-stroke">
+        {/* Seats counter */}
+        <div className="flex items-center justify-between gap-4 px-4 py-3">
+          <span className="text-[15px] font-medium text-gray-dark">Seats</span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setSeats(s => Math.max(1, s - 1))}
+              disabled={seats <= 1}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb] disabled:cursor-not-allowed disabled:opacity-30"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <span className="w-6 text-center text-[15px] font-medium text-gray-dark">{seats}</span>
+            <button
+              onClick={() => setSeats(s => s + 1)}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+        {/* Offerings — gray background */}
+        <div className="border-t border-gray-stroke bg-gray-hover">
+          {/* 1:1 services */}
+          <div className="flex items-center justify-between px-4 py-2.5">
+            <span className="text-[15px] text-gray-dark">1:1 services</span>
+            <span className="text-[15px] text-gray-light">3 included</span>
+          </div>
+          {/* Live programs */}
+          <div className="border-t border-gray-stroke px-4 pb-3 pt-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[15px] text-gray-dark">Live programs</span>
+              <span className="text-[15px] text-gray-light">{PER_SEAT_PROGRAMS.length} included</span>
+            </div>
+            <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
+              {PER_SEAT_PROGRAMS.map(p => (
+                <div key={p} className="flex items-start justify-between gap-4 py-1.5">
+                  <div className="flex flex-col gap-[2px]">
+                    <span className="text-[14px] text-gray-dark">{p}</span>
+                    <span className="text-[14px] text-gray-light">
+                      {selectedDates[p] ?? "User will select their own cohort"}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setSelectingProgram(p)}
+                    className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#ebebeb] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#e0e0e0]"
+                  >
+                    {selectedDates[p] ? "Change" : "Select dates"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Leland+ */}
+          <div className="flex items-center justify-between border-t border-gray-stroke px-4 py-2.5 pb-3">
+            <span className="text-[15px] text-gray-dark">Leland+</span>
+            <span className="text-[15px] text-gray-light">2 months</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-auto -mx-4 sm:-mx-6 border-t border-gray-stroke bg-white px-4 sm:px-6 py-[14px]">
+        <Button size="md" variant="primary" onClick={() => onDone(seats)} className="w-full justify-center">Update access</Button>
+      </div>
+    </div>
+  );
+}
+
 function CohortSelectRow({
   cohort,
   isCurrent,
@@ -338,14 +487,16 @@ function AccordionSection({
 export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngagement, onUpdateAccess, onSwitchCohort }: Props) {
   const [switchCohortName, setSwitchCohortName] = useState<string | null>(null);
   const [showUpdateAccess, setShowUpdateAccess] = useState(false);
+  const [showEditAccess, setShowEditAccess] = useState(false);
   const [reminderSent, setReminderSent] = useState(false);
-  const activeView = switchCohortName ? "switch-cohort" : showUpdateAccess ? "update-access" : "user";
+  const activeView = switchCohortName ? "switch-cohort" : showUpdateAccess ? "update-access" : showEditAccess ? "edit-access" : "user";
 
   useEffect(() => {
     if (!user) return;
     setReminderSent(false);
     setSwitchCohortName(null);
     setShowUpdateAccess(false);
+    setShowEditAccess(false);
     function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -404,7 +555,7 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
               <div className="relative flex min-h-12 w-full shrink-0 items-center justify-center border-b border-gray-stroke px-12 py-2">
                 {activeView !== "user" && (
                   <button
-                    onClick={() => { setSwitchCohortName(null); setShowUpdateAccess(false); }}
+                    onClick={() => { setSwitchCohortName(null); setShowUpdateAccess(false); setShowEditAccess(false); }}
                     className="absolute left-3 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full hover:bg-gray-hover"
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -413,7 +564,7 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                   </button>
                 )}
                 <span className="text-[18px] font-medium text-gray-dark">
-                  {activeView === "switch-cohort" ? "Select a cohort" : activeView === "update-access" ? "Update access" : user.name}
+                  {activeView === "switch-cohort" ? "Select a cohort" : activeView === "update-access" ? "Update access" : activeView === "edit-access" ? "Edit access" : user.name}
                 </span>
                 <button
                   onClick={onClose}
@@ -445,9 +596,14 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                   );
                 })()}
 
-                {/* Update access view */}
+                {/* Update access view (a la carte) */}
                 {activeView === "update-access" && (
                   <UpdateAccessView user={user} onDone={(cohortKeys, sessions) => { onUpdateAccess?.(user.email, cohortKeys, sessions); setShowUpdateAccess(false); }} />
+                )}
+
+                {/* Edit access view (per-seat) */}
+                {activeView === "edit-access" && (
+                  <EditAccessView user={user} onDone={() => setShowEditAccess(false)} />
                 )}
 
                 {/* User summary */}
@@ -461,6 +617,11 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                     {isAlaCarte && (
                       <Button size="md" variant="secondary" onClick={() => setShowUpdateAccess(true)} className="flex-1 justify-center border border-gray-stroke bg-white hover:bg-gray-hover">
                         Grant access
+                      </Button>
+                    )}
+                    {!isAlaCarte && (
+                      <Button size="md" variant="secondary" onClick={() => setShowEditAccess(true)} className="flex-1 justify-center border border-gray-stroke bg-white hover:bg-gray-hover">
+                        Edit access
                       </Button>
                     )}
                     <div className="group/remind relative flex-1">

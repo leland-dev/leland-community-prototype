@@ -440,18 +440,23 @@ function ReviewsModal({ open, onClose }: { open: boolean; onClose: () => void })
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-hover text-[13px] font-medium text-gray-dark">{r.userInitials}</div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[16px] font-medium text-gray-dark">{r.userName}</span>
-                    <div className="flex shrink-0 items-center gap-0.5">
-                      {Array.from({ length: 5 }).map((_, j) => (
-                        <svg key={j} width="14" height="14" viewBox="0 0 24 24" fill={j < r.rating ? "#ffcb47" : "none"} stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                        </svg>
-                      ))}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-col">
+                      <span className="text-[16px] font-medium text-gray-dark">{r.userName}</span>
+                      <div className="mt-0.5 text-[14px] text-gray-light">
+                        {r.type === "session" ? `1:1 session with ${r.subject}` : r.subject}
+                      </div>
                     </div>
-                  </div>
-                  <div className="mt-0.5 text-[14px] text-gray-light">
-                    {r.type === "session" ? `1:1 session with ${r.subject}` : r.subject}
+                    <div className="flex shrink-0 flex-col items-end gap-0.5">
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }).map((_, j) => (
+                          <svg key={j} width="14" height="14" viewBox="0 0 24 24" fill={j < r.rating ? "#ffcb47" : "none"} stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                          </svg>
+                        ))}
+                      </div>
+                      {r.date && <span className="text-[14px] text-gray-xlight">{r.date}</span>}
+                    </div>
                   </div>
                   <p className="mt-2 text-[16px] leading-[1.5] text-gray-dark">{r.text}</p>
                 </div>

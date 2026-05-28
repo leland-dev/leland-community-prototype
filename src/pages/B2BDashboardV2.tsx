@@ -20,7 +20,7 @@ export default function B2BDashboardV2() {
   }, []);
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-screen flex-col bg-white">
       <B2BTopNav
         onNavigateSettings={() => setActiveView("settings")}
         onNavigateDashboard={() => setActiveView("overview")}
