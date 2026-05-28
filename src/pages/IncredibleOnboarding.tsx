@@ -127,6 +127,169 @@ const WHEN_LAW_MED = "a3277c9b-3f57-453e-a83e-c52cfc6da7e5";
 const WHEN_UNDERGRAD = "bcdff00e-c70a-417e-8bae-547ffac12616";
 const WHEN_TEST = "76c5d362-fb99-46fb-8bfd-f8232cbafaac";
 
+/* ─────────────── free-text → choice matching ─────────────── */
+
+/** Hand-curated synonyms keyed by lowercase choice label. Maps phrasings a
+ *  user might type to the typeform's canonical labels. */
+const CHOICE_SYNONYMS: Record<string, string[]> = {
+  // goal
+  "build my career": ["career", "job", "work", "promotion", "next role", "level up"],
+  "get into school": ["school", "grad school", "graduate", "admission", "apply"],
+  "take a test": ["test", "exam", "standardized test"],
+
+  // careers
+  "ai automation & agents": ["ai", "agents", "agent", "automation", "claude", "gpt", "llm", "ai tools"],
+  "break into ai careers": ["ai career", "ai job", "ai role", "transition to ai", "switch to ai", "ai leader", "become an ai", "ai leadership"],
+  "management consulting": ["consulting", "consultant", "mckinsey", "bcg", "bain", "mbb", "strategy consulting"],
+  "product management": ["pm", "product manager", "product management", "tpm"],
+  "investment banking": ["ib", "investment banking", "banker", "goldman", "morgan stanley", "wall street"],
+  "private equity": ["pe", "private equity", "kkr", "blackstone", "buyout"],
+  "venture capital": ["vc", "venture", "venture capital", "sequoia", "investor"],
+  "software engineering": ["swe", "engineer", "engineering", "software", "dev", "developer", "coding"],
+
+  // schools
+  "college (undergrad)": ["undergrad", "college", "bachelor", "bachelors", "undergraduate"],
+  mba: ["mba", "business school", "b-school", "bschool"],
+  "master's programs": ["masters", "master's", "ms", "ma", "msc", "graduate program"],
+  "medical school": ["med school", "medical", "doctor", "physician", "md", "do school"],
+  "law school": ["law school", "law", "jd", "attorney", "lawyer"],
+  "dental school": ["dental", "dentist", "dds"],
+  "phd programs": ["phd", "doctorate", "doctoral", "research degree"],
+  "pa school": ["pa", "physician assistant"],
+  "nursing school": ["nursing", "nurse", "rn", "bsn"],
+  pharmacy: ["pharmacy", "pharmacist", "pharmd"],
+
+  // tests already match by short label; add aliases
+  gmat: ["gmat", "focus edition"],
+  gre: ["gre"],
+  sat: ["sat"],
+  act: ["act"],
+  lsat: ["lsat"],
+  mcat: ["mcat"],
+  dat: ["dat"],
+
+  // apply-timeline (★ the example case the user called out)
+  "as soon as possible": ["asap", "right now", "right away", "immediately", "currently", "actively", "working on it", "started already", "in progress", "in the middle", "this minute", "now"],
+  "in the next 6 months": ["6 months", "next 6 months", "next six months", "half a year", "few months", "this fall", "this spring", "this summer", "in a few months"],
+  "6 - 12 months": ["6 to 12", "6-12 months", "this year", "by year end", "later this year", "in the next year"],
+  "12+ months": ["12+ months", "more than a year", "long term", "long-term", "long horizon", "future", "eventually", "down the line", "next 2 years", "next two years", "a couple years", "few years"],
+  "i'm just looking for free resources": ["free", "free resources", "no money", "just browsing", "not paying", "not ready to pay"],
+
+  // budget
+  "high (i will pay for the best coaches)": ["high", "premium", "expensive", "best coaches", "top tier", "money no object", "no budget", "no cap", "whatever it takes"],
+  "medium (price matters, but i want quality coaching)": ["medium", "moderate", "balanced", "reasonable", "mid", "fair"],
+  "low (price is a major factor, but i still want coaching)": ["low", "cheap", "budget", "tight", "affordable", "price matters", "limited"],
+
+  // school-services
+  "application strategy": ["strategy", "application strategy", "plan", "game plan", "overall plan"],
+  resume: ["resume", "cv"],
+  recommendations: ["recs", "recommendations", "letters", "letters of rec", "lor"],
+  essays: ["essay", "essays", "writing", "personal statement"],
+  interviews: ["interview", "interviews", "mock interview", "mocks"],
+
+  // career-services
+  "skill development": ["skills", "skill", "learning", "development", "upskill"],
+  "linkedin review": ["linkedin", "li review", "linked in"],
+  "resume review": ["resume review", "cv review"],
+  "networking strategy": ["networking", "network", "outreach"],
+  "interview prep": ["interview prep", "interview", "mock"],
+  "salary negotiation": ["salary", "negotiate", "negotiation", "comp", "compensation", "raise"],
+  "promotion strategy": ["promotion", "promo", "level up", "move up", "advance"],
+
+  // mba-schools
+  stanford: ["stanford", "gsb", "stanford gsb"],
+  harvard: ["harvard", "hbs", "harvard business"],
+  "wharton (upenn)": ["wharton", "penn", "upenn"],
+  "kellogg (northwestern)": ["kellogg", "northwestern"],
+  "mit sloan": ["mit", "sloan"],
+  "booth (uchicago)": ["booth", "uchicago", "chicago booth"],
+  columbia: ["columbia", "cbs", "columbia business"],
+  "other top programs": ["other", "elsewhere", "another"],
+
+  // mba-programs
+  traditional: ["traditional", "regular", "full time", "ft", "full-time"],
+  deferred: ["deferred", "future"],
+  executive: ["executive", "emba"],
+  online: ["online", "remote"],
+  "part-time": ["part time", "pt"],
+
+  // reach-out
+  "call me now": ["call now", "right now", "talk now", "speak now", "phone now"],
+  "schedule a call": ["schedule", "later", "calendar", "book a call", "set up a call", "appointment"],
+  "i'll explore on my own": ["alone", "on my own", "explore", "no call", "don't call", "skip", "myself"],
+};
+
+type MatchResult = {
+  choice: Choice;
+  score: number;
+  confidence: number;
+};
+
+/** Score a single choice against user text. */
+function scoreChoice(text: string, choice: Choice): number {
+  const t = text.toLowerCase().trim();
+  if (!t) return 0;
+  const labelLower = choice.label.toLowerCase();
+  let score = 0;
+
+  // Exact match
+  if (t === labelLower) return 100;
+
+  // Substring containment (either way) — need a reasonable size
+  if (t.length >= 3 && labelLower.includes(t)) score = Math.max(score, 70);
+  if (labelLower.length >= 3 && t.includes(labelLower)) score = Math.max(score, 70);
+
+  // Synonym match (most useful signal for paraphrased input)
+  const syns = CHOICE_SYNONYMS[labelLower] || [];
+  for (const syn of syns) {
+    if (t.includes(syn)) {
+      // Longer synonyms are more confident
+      score = Math.max(score, 55 + Math.min(15, syn.length));
+      break;
+    }
+  }
+
+  // Word overlap fallback
+  const labelWords = labelLower.split(/[\s\W]+/).filter((w) => w.length > 2);
+  const textWords = t.split(/[\s\W]+/).filter((w) => w.length > 2);
+  const overlap = textWords.filter((w) =>
+    labelWords.some((lw) => lw === w || lw.startsWith(w) || w.startsWith(lw)),
+  ).length;
+  if (overlap > 0) score = Math.max(score, 20 + overlap * 10);
+
+  return score;
+}
+
+/** Best single-choice match against the user's free-text. */
+function semanticMatch(text: string, choices: Choice[]): MatchResult | null {
+  const scored = choices
+    .map((c) => ({ choice: c, score: scoreChoice(text, c) }))
+    .sort((a, b) => b.score - a.score);
+  if (!scored.length || scored[0].score === 0) return null;
+  const top = scored[0];
+  const second = scored[1]?.score ?? 0;
+  let confidence: number;
+  if (top.score >= 90) confidence = 0.95;
+  else if (top.score >= 65 && top.score - second >= 15) confidence = 0.85;
+  else if (top.score >= 55 && top.score - second >= 10) confidence = 0.75;
+  else if (top.score >= 40) confidence = 0.55;
+  else if (top.score >= 20) confidence = 0.35;
+  else confidence = 0.15;
+  return { ...top, confidence };
+}
+
+/** All choices that match (for multi-select). */
+function semanticMatchAll(text: string, choices: Choice[]): MatchResult[] {
+  const scored = choices
+    .map((c) => ({ choice: c, score: scoreChoice(text, c) }))
+    .filter((m) => m.score >= 40)
+    .sort((a, b) => b.score - a.score);
+  return scored.map((m) => ({
+    ...m,
+    confidence: m.score >= 65 ? 0.85 : 0.6,
+  }));
+}
+
 /* ─────────────── answers + flow ─────────────── */
 
 type AnswerValue = string | string[]; // choice ref(s) or text
@@ -646,25 +809,20 @@ export default function IncredibleOnboarding() {
     [answers],
   );
 
-  /** Commit an answer (choice ref(s) or text) and walk the flow until we hit
-   *  the next interactive question. */
-  const submitAnswer = (raw: AnswerValue) => {
-    if (!currentRef || !currentField) return;
-
-    // Multi-select with no picks: ignore
-    if (Array.isArray(raw) && raw.length === 0) return;
-
-    // For single-select fields, store as scalar
-    const value: AnswerValue =
-      Array.isArray(raw) && !currentField.allowMultiple ? raw[0] : raw;
-
-    const newAnswers = { ...answers, [currentRef]: value };
-
-    const userLabel = labelFor(currentRef, value);
-    const newMsgs: Msg[] = [...messages, { role: "user", text: userLabel }];
+  /** Commit a value for the given field, optionally with a custom user
+   *  bubble + AI acknowledgement, then walk the flow to the next question. */
+  const commitAnswer = (
+    fieldRef: string,
+    value: AnswerValue,
+    opts?: { userBubble?: string; aiAck?: string },
+  ) => {
+    const newAnswers = { ...answers, [fieldRef]: value };
+    const userText = opts?.userBubble ?? labelFor(fieldRef, value);
+    const newMsgs: Msg[] = [...messages, { role: "user", text: userText }];
+    if (opts?.aiAck) newMsgs.push({ role: "ai", text: opts.aiAck });
 
     // Advance through statement / phone / calendly fields
-    let next: string | null = nextRef(currentRef, newAnswers);
+    let next: string | null = nextRef(fieldRef, newAnswers);
     while (next) {
       const f = field(next);
       if (!f) {
@@ -677,11 +835,9 @@ export default function IncredibleOnboarding() {
         continue;
       }
       if (f.type === "calendly" || f.type === "phone_number") {
-        // Skip for prototype — just note it
         next = nextRef(next, newAnswers);
         continue;
       }
-      // Interactive — show the question and stop
       newMsgs.push({ role: "ai", text: f.title });
       if (f.description) newMsgs.push({ role: "ai", text: f.description });
       break;
@@ -706,13 +862,27 @@ export default function IncredibleOnboarding() {
     setInput("");
   };
 
+  /** Chip click. */
+  const submitAnswer = (raw: AnswerValue) => {
+    if (!currentRef || !currentField) return;
+    if (Array.isArray(raw) && raw.length === 0) return;
+    const value: AnswerValue =
+      Array.isArray(raw) && !currentField.allowMultiple ? raw[0] : raw;
+    commitAnswer(currentRef, value);
+  };
+
+  /** Free-text submit. Tries to map onto the current field's choices using
+   *  a semantic matcher; falls back to a clarifying nudge when the match is
+   *  too weak. */
   const onTextSubmit = (text: string) => {
-    if (!text.trim()) return;
-    if (!currentField) {
-      // Done — just acknowledge follow-ups
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    // No active question — just chit-chat in the floating widget
+    if (!currentRef || !currentField) {
       setMessages((prev) => [
         ...prev,
-        { role: "user", text },
+        { role: "user", text: trimmed },
         {
           role: "ai",
           text: "Got it — I'll bring that up when you start with your expert.",
@@ -721,22 +891,84 @@ export default function IncredibleOnboarding() {
       setInput("");
       return;
     }
+
+    // Free-text-type fields: store as-is
     if (
       currentField.type === "short_text" ||
       currentField.type === "long_text" ||
       currentField.type === "email" ||
       currentField.type === "phone_number"
     ) {
-      submitAnswer(text);
+      commitAnswer(currentRef, trimmed);
       return;
     }
-    // For choice questions, free-text isn't a real answer; just push a clarifying note
+
+    // Choice-type field: try to map free text onto choices
+    if (currentField.choices.length === 0) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", text: trimmed },
+        { role: "ai", text: "Got it — I'll note that." },
+      ]);
+      setInput("");
+      return;
+    }
+
+    if (currentField.allowMultiple) {
+      const matches = semanticMatchAll(trimmed, currentField.choices);
+      if (matches.length > 0) {
+        const labels = matches.map((m) => m.choice.label);
+        const refs = matches.map((m) => m.choice.ref);
+        commitAnswer(currentRef, refs, {
+          userBubble: trimmed,
+          aiAck:
+            matches.length === 1
+              ? `Got it — locking that in as "${labels[0]}".`
+              : `Got it — I read that as: ${labels.join(", ")}.`,
+        });
+        return;
+      }
+      // No good match — nudge
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", text: trimmed },
+        {
+          role: "ai",
+          text:
+            "Not sure how to read that — tap the options below (you can pick more than one).",
+        },
+      ]);
+      setInput("");
+      return;
+    }
+
+    // Single-select
+    const match = semanticMatch(trimmed, currentField.choices);
+    if (match && match.confidence >= 0.7) {
+      commitAnswer(currentRef, match.choice.ref, {
+        userBubble: trimmed,
+        aiAck: `Got it — locking that in as "${match.choice.label}".`,
+      });
+      return;
+    }
+    if (match && match.confidence >= 0.4) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", text: trimmed },
+        {
+          role: "ai",
+          text: `I'm reading that as "${match.choice.label}" — tap the chip to confirm, or pick a different one below.`,
+        },
+      ]);
+      setInput("");
+      return;
+    }
     setMessages((prev) => [
       ...prev,
-      { role: "user", text },
+      { role: "user", text: trimmed },
       {
         role: "ai",
-        text: "Got it — picking one of the options below will lock that in for your plan.",
+        text: "Hmm, not sure which option that maps to — tap one of the chips below to lock it in.",
       },
     ]);
     setInput("");
