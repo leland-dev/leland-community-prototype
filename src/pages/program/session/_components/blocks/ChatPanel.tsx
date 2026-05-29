@@ -32,7 +32,6 @@ const SCRIPT: { delay: number; msg: Message }[] = [
   { delay: 9200, msg: { id: "sys-purchase-1", author: "system", avatar: pic4, system: "purchase", body: "Marcus L. just booked coaching with Tanner Helin" } },
   { delay: 10800, msg: { id: "m4", author: "Marcus L.", avatar: pic4, body: "excited for this one 🔥" } },
   { delay: 13500, msg: { id: "m5", author: "Sarah C.", avatar: pic3, body: "Should the agent's memory live inline or in a separate tool call?" } },
-  { delay: 15800, msg: { id: "sys-hand-1", author: "system", avatar: pic6, system: "hand-raised", body: "Jordan T. raised their hand" } },
   { delay: 17500, msg: { id: "r1", author: "Tanner H.", avatar: pic1, coach: true, replyTo: "m5", body: "Inline is fine for short context — break it out when you need cross-turn recall." } },
   { delay: 20000, msg: { id: "sys-purchase-2", author: "system", avatar: pic3, system: "purchase", body: "Sarah C. just booked coaching with Tanner Helin" } },
   { delay: 22000, msg: { id: "m6", author: "Marcus L.", avatar: pic4, body: "Lost in step 2 — what's the recommended way to wire tools when running locally?" } },
