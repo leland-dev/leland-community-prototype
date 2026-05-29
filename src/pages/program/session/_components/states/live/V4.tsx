@@ -479,15 +479,6 @@ function StudioLayout({ session }: { session: Session }) {
                 onTogglePip={togglePip}
                 mobileVisible={controlsVisible}
               />
-              {/* Share button overlays the video at 16px bottom-right. Sits
-                  above VideoControls (z-20 > z-10) so it stays visible when
-                  the control bar is up. Desktop-only — mobile has its own
-                  YouTube-style controls and doesn't need a separate share. */}
-              <div className="pointer-events-none absolute bottom-4 right-4 z-20 hidden lg:block">
-                <div className="pointer-events-auto">
-                  <ShareButton />
-                </div>
-              </div>
               <RateSessionPopup suppressed={isPip} />
             </div>
           )}
@@ -513,6 +504,11 @@ function StudioLayout({ session }: { session: Session }) {
             }}
             tabs={tabs}
           />
+          {/* Share sits in the row below the video, right-aligned via the
+              parent's lg:justify-between. No thumbs — just share. */}
+          <div className="shrink-0">
+            <ShareButton />
+          </div>
         </div>
 
         <TabContent tab={tab} />
