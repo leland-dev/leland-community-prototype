@@ -76,8 +76,8 @@ import orgAccenture from "../assets/org-logos/accenture.png";
 type Headline = { pre: string; highlight: string; post: string };
 
 const HEADLINES: Headline[] = [
-  { pre: "Do ",            highlight: "Ambitious",  post: " Things." },
   { pre: "Be ",            highlight: "Ambitious",  post: "" },
+  { pre: "Do ",            highlight: "Ambitious",  post: " Things." },
   { pre: "Dream it. ",     highlight: "Do",         post: " it." },
   { pre: "Unlock Your ",   highlight: "Potential",  post: "" },
   { pre: "Why Not ",       highlight: "You",        post: "?" },
