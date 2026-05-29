@@ -23,7 +23,6 @@ import ChatRail from "../../blocks/ChatRail";
 import RateSessionPopup from "../../blocks/RateSessionPopup";
 import BottomTray from "../../blocks/BottomTray";
 import FloatingReactions, { type Reaction } from "../../blocks/FloatingReactions";
-import ReactionBar from "../../blocks/ReactionBar";
 import StageControls from "../../blocks/StageControls";
 import StageInvitePrompt from "../../blocks/StageInvitePrompt";
 import PurchaseToasts from "../../blocks/PurchaseToasts";
@@ -650,9 +649,7 @@ function StudioLayout({ session }: { session: Session }) {
             view + face PIP already carry the active "what's happening" load
             and the slide preview wasn't pulling its weight. */}
         <div className="flex h-full flex-col">
-          <ChatRail
-            chatAboveInput={<ReactionBar onReact={pushReaction} />}
-          />
+          <ChatRail onReact={pushReaction} />
         </div>
       </aside>
 
@@ -706,11 +703,7 @@ function StudioLayout({ session }: { session: Session }) {
           pill is tapped. Uses dvh sizing so the mobile keyboard pushes the
           sheet up gracefully. */}
       <BottomTray open={chatTrayOpen} title="Chat" onClose={() => setChatTrayOpen(false)}>
-        <ChatPanel
-          hideHeader
-          large
-          aboveInput={<ReactionBar onReact={pushReaction} />}
-        />
+        <ChatPanel hideHeader large onReact={pushReaction} />
       </BottomTray>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+// ReactNode kept for TabPill children typing below.
 import pic1 from "../../../../../assets/profile photos/pic-1.png";
 import pic2 from "../../../../../assets/profile photos/pic-2.png";
 import pic3 from "../../../../../assets/profile photos/pic-3.png";
@@ -18,11 +19,12 @@ import Resources from "./Resources";
 type Tab = "chat" | "viewers" | "polls" | "resources";
 
 type Props = {
-  /** Slot rendered above the chat input — V5 uses it for the ReactionBar. */
-  chatAboveInput?: ReactNode;
+  /** Fires a live reaction over the video. Drives the smiley emoji
+   *  picker inside the chat input. */
+  onReact?: (emoji: string) => void;
 };
 
-export default function ChatRail({ chatAboveInput }: Props) {
+export default function ChatRail({ onReact }: Props) {
   const [tab, setTab] = useState<Tab>("chat");
 
   return (
@@ -46,7 +48,7 @@ export default function ChatRail({ chatAboveInput }: Props) {
       {/* Content card — rounded box below the tabs. */}
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white">
         {tab === "chat" && (
-          <ChatPanel hideHeader aboveInput={chatAboveInput} />
+          <ChatPanel hideHeader onReact={onReact} />
         )}
         {tab === "viewers" && <ViewersPane />}
         {tab === "polls" && <PollsPane />}

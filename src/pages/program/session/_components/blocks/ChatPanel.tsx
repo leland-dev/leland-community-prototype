@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { X, ArrowUp, Pin, PinOff, Trash2 } from "lucide-react";
+import { X, ArrowUp, Pin, PinOff, Trash2, Smile } from "lucide-react";
 import verifiedIcon from "../../../../../assets/icons/verified.svg";
 import pic1 from "../../../../../assets/profile photos/pic-1.png";
 import pic3 from "../../../../../assets/profile photos/pic-3.png";
@@ -38,16 +38,20 @@ const SCRIPT: { delay: number; msg: Message }[] = [
   { delay: 25000, msg: { id: "m7", author: "Jordan T.", avatar: pic6, body: "could we slow down on the orchestration step?" } },
 ];
 
+const QUICK_REACTIONS = ["👍", "🎉", "❤️", "😂", "🤯", "🙌"];
+
 export default function ChatPanel({
   hideHeader,
-  aboveInput,
   large = false,
+  onReact,
 }: {
   hideHeader?: boolean;
-  aboveInput?: import("react").ReactNode;
   /** Use mobile-comment style rows (bigger avatars, 16-17px type). When
    *  false (default) the panel uses the desktop-rail compact rows. */
   large?: boolean;
+  /** Fires a live reaction over the video. When provided, the input shows
+   *  a smiley toggle that opens an emoji picker above the input. */
+  onReact?: (emoji: string) => void;
 } = {}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
@@ -66,6 +70,24 @@ export default function ChatPanel({
     });
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, []);
+
+  // Emoji picker (smiley toggle inside the input area). Closes on click
+  // outside; stays open across multiple emoji taps so users can spam.
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const pickerWrapRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!pickerOpen) return;
+    function onClickOutside(e: MouseEvent) {
+      if (
+        pickerWrapRef.current &&
+        !pickerWrapRef.current.contains(e.target as Node)
+      ) {
+        setPickerOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [pickerOpen]);
 
   // Pin + delete state. Only one pinned message at a time. Delete removes
   // the message and any threaded replies under it; if the pinned message
@@ -275,13 +297,27 @@ export default function ChatPanel({
         </div>
       )}
 
-      {/* Optional caller-provided slot rendered above the input — used by
-          V5 to inject the ReactionBar without forking ChatPanel. */}
-      {aboveInput}
+      {/* Input area. No border above — the input itself is the visual
+          frame (grey pill). Emoji picker pops above the row when the
+          smiley toggle is tapped. */}
+      <div ref={pickerWrapRef} className="relative p-3">
+        {pickerOpen && onReact && (
+          <div className="absolute bottom-full right-3 z-10 mb-2 flex items-center gap-0.5 rounded-2xl border border-gray-stroke bg-white px-1.5 py-1.5 shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
+            {QUICK_REACTIONS.map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => onReact(emoji)}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[18px] transition-transform hover:bg-gray-hover active:scale-90"
+                aria-label={`React with ${emoji}`}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
 
-      {/* Input */}
-      <div className="border-t border-gray-stroke p-4">
-        <div className="flex items-center gap-2 rounded-xl border border-gray-stroke bg-white px-3 py-2.5 transition-colors focus-within:border-gray-dark">
+        <div className="flex items-center gap-1 rounded-full bg-gray-hover px-3 py-2 transition-colors focus-within:bg-[#ECECEA]">
           <input
             ref={inputRef}
             type="text"
@@ -293,10 +329,24 @@ export default function ChatPanel({
             onKeyDown={onKeyDown}
             placeholder={inputPlaceholder}
             // 16px font is required on iOS to prevent Safari's auto-zoom on
-            // focus (which otherwise locks the viewport and makes the input
-            // feel "stuck"). Bumped from 14px → 16px for mobile typeability.
-            className="min-w-0 flex-1 bg-transparent text-[16px] text-gray-dark placeholder:text-gray-light focus:outline-none lg:text-[14px]"
+            // focus. Bumped from 14px → 16px for mobile typeability.
+            className="min-w-0 flex-1 bg-transparent px-1 text-[16px] text-gray-dark placeholder:text-gray-light focus:outline-none lg:text-[14px]"
           />
+          {onReact && (
+            <button
+              type="button"
+              onClick={() => setPickerOpen((v) => !v)}
+              aria-label="Open emoji picker"
+              aria-pressed={pickerOpen}
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
+                pickerOpen
+                  ? "bg-gray-stroke text-gray-dark"
+                  : "text-gray-light hover:bg-gray-stroke hover:text-gray-dark"
+              }`}
+            >
+              <Smile size={18} strokeWidth={2} />
+            </button>
+          )}
           <button
             type="button"
             onClick={send}
