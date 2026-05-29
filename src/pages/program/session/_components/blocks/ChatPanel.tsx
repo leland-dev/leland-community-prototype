@@ -32,7 +32,6 @@ const SCRIPT: { delay: number; msg: Message }[] = [
   { delay: 9200, msg: { id: "sys-purchase-1", author: "system", avatar: pic4, system: "purchase", body: "Marcus L. just booked coaching with Tanner Helin" } },
   { delay: 10800, msg: { id: "m4", author: "Marcus L.", avatar: pic4, body: "excited for this one 🔥" } },
   { delay: 13500, msg: { id: "m5", author: "Sarah C.", avatar: pic3, body: "Should the agent's memory live inline or in a separate tool call?" } },
-  { delay: 15800, msg: { id: "sys-hand-1", author: "system", avatar: pic6, system: "hand-raised", body: "Jordan T. raised their hand" } },
   { delay: 17500, msg: { id: "r1", author: "Tanner H.", avatar: pic1, coach: true, replyTo: "m5", body: "Inline is fine for short context — break it out when you need cross-turn recall." } },
   { delay: 20000, msg: { id: "sys-purchase-2", author: "system", avatar: pic3, system: "purchase", body: "Sarah C. just booked coaching with Tanner Helin" } },
   { delay: 22000, msg: { id: "m6", author: "Marcus L.", avatar: pic4, body: "Lost in step 2 — what's the recommended way to wire tools when running locally?" } },
@@ -426,55 +425,24 @@ function MessageRow({
 }
 
 // ── System notice row ─────────────────────────────────────────────
-// Inline card for purchases, hand-raises, joins. Rectangular with a
-// thin colored stripe on the left + a small type label up top, so the
-// notice reads as a branded callout (matches the rest of the platform)
-// rather than an emoji-laden chip.
+// Plain inline text — no card, no stripe, no badge. For purchase
+// events the "Book yours" tail is a text link, not a button. Joined
+// events render as muted single-line text.
 function SystemNotice({ m }: { m: Message }) {
-  const config = m.system === "purchase"
-    ? {
-        stripe: "bg-[#038561]",
-        bg: "bg-[#038561]/8",
-        label: "Just booked",
-        labelClass: "text-[#038561]",
-      }
-    : m.system === "hand-raised"
-      ? {
-          stripe: "bg-[#C99A1A]",
-          bg: "bg-[#FFFBE5]",
-          label: "Hand raised",
-          labelClass: "text-[#876C00]",
-        }
-      : {
-          stripe: "bg-gray-stroke",
-          bg: "bg-gray-hover/70",
-          label: "Joined",
-          labelClass: "text-gray-light",
-        };
-
   return (
-    <div
-      className={`relative overflow-hidden rounded-lg ${config.bg} py-2.5 pl-4 pr-3`}
-    >
-      <span className={`absolute inset-y-0 left-0 w-[3px] ${config.stripe}`} aria-hidden />
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${config.labelClass}`}>
-            {config.label}
-          </div>
-          <div className="mt-1 text-[13px] leading-snug text-gray-dark">
-            {m.body}
-          </div>
-        </div>
-        {m.system === "purchase" && (
+    <div className="px-1 py-1 text-[13px] leading-snug text-gray-light">
+      {m.body}
+      {m.system === "purchase" && (
+        <>
+          .{" "}
           <a
             href="#"
-            className="shrink-0 rounded-md bg-[#038561] px-3 py-1.5 text-[12px] font-semibold text-white no-underline transition-colors hover:bg-[#038561]/90"
+            className="font-semibold text-[#038561] no-underline hover:underline"
           >
             Book yours
           </a>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }

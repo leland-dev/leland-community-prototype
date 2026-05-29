@@ -132,8 +132,8 @@ function ViewersPane() {
                 )}
               </div>
               {v.handRaised && (
-                <span className="shrink-0 rounded-md bg-[#FFFBE5] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#876C00]">
-                  Hand
+                <span className="shrink-0 text-[11px] font-medium text-gray-light">
+                  Hand raised
                 </span>
               )}
             </div>

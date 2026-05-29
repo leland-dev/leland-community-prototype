@@ -30,8 +30,13 @@ export default function CoachFacePip({
     size === "sm"
       ? "h-[56px] w-[72px] lg:h-[64px] lg:w-[104px]"
       : "h-[94px] w-[114px] lg:h-[135px] lg:w-[221px]";
+  // Desktop top-right inset is pushed down so the face clears the new
+  // ~36px black status strip on V5's video. Mobile keeps the tight 8px
+  // inset since there's no strip there.
   const anchor =
-    position === "top-right" ? "top-2 right-2 lg:top-3 lg:right-3" : "bottom-2 left-2 lg:bottom-3 lg:left-3";
+    position === "top-right"
+      ? "top-2 right-2 lg:top-12 lg:right-3"
+      : "bottom-2 left-2 lg:bottom-3 lg:left-3";
   return (
     <div
       className={`absolute ${anchor} ${dims} overflow-hidden rounded-lg border-2 border-white/30 shadow-[0_8px_24px_rgba(0,0,0,0.35)] ${className}`}

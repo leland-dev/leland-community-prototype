@@ -24,6 +24,7 @@ import BottomTray from "../../blocks/BottomTray";
 import FloatingReactions, { type Reaction } from "../../blocks/FloatingReactions";
 import ReactionBar from "../../blocks/ReactionBar";
 import StageControls from "../../blocks/StageControls";
+import StageInvitePrompt from "../../blocks/StageInvitePrompt";
 import PurchaseToasts from "../../blocks/PurchaseToasts";
 
 type Tab = "guide" | "resources" | "chat";
@@ -450,9 +451,66 @@ function StudioLayout({ session }: { session: Session }) {
     return () => window.clearTimeout(timer);
   }, []);
 
-  // Raise-hand toggle. Sticky until the user lowers it. In a real impl this
-  // posts to a stage-request endpoint the coach can see.
+  // Raise-hand + stage state.
+  // - handRaised: the viewer's own raised-hand status.
+  // - ambientRaisedHands: simulated count of OTHER students with hands up.
+  //   Starts at 2 so the counter is meaningful before the user does anything.
+  //   In production this would come over the wire.
+  // - isOnStage: user accepted an invite and is currently a stage participant.
+  // - stageInvitePending: coach has called them up; show the invite prompt.
+  //
+  // Demo flow: raise hand → ~4s later an invite pops → accept → "on stage";
+  // hitting Leave stage drops them back to the audience.
   const [handRaised, setHandRaised] = useState(false);
+  const [ambientRaisedHands] = useState(2);
+  const [isOnStage, setIsOnStage] = useState(false);
+  const [stageInvitePending, setStageInvitePending] = useState(false);
+  const inviteTimerRef = useRef<number | null>(null);
+  const TOTAL_ATTENDEES = 20;
+  const raisedHandCount = ambientRaisedHands + (handRaised ? 1 : 0);
+  const ownQueuePosition = handRaised ? ambientRaisedHands + 1 : undefined;
+
+  function onToggleHand() {
+    setHandRaised((prev) => {
+      const next = !prev;
+      // Cancel any pending invite if user lowers their hand.
+      if (!next && inviteTimerRef.current) {
+        window.clearTimeout(inviteTimerRef.current);
+        inviteTimerRef.current = null;
+        setStageInvitePending(false);
+      }
+      // Schedule a mock invite 4s after raising.
+      if (next && !isOnStage) {
+        if (inviteTimerRef.current) window.clearTimeout(inviteTimerRef.current);
+        inviteTimerRef.current = window.setTimeout(() => {
+          setStageInvitePending(true);
+        }, 4000);
+      }
+      return next;
+    });
+  }
+
+  function acceptStageInvite() {
+    setStageInvitePending(false);
+    setHandRaised(false);
+    setIsOnStage(true);
+    if (inviteTimerRef.current) window.clearTimeout(inviteTimerRef.current);
+  }
+
+  function declineStageInvite() {
+    setStageInvitePending(false);
+    if (inviteTimerRef.current) window.clearTimeout(inviteTimerRef.current);
+  }
+
+  function leaveStage() {
+    setIsOnStage(false);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (inviteTimerRef.current) window.clearTimeout(inviteTimerRef.current);
+    };
+  }, []);
 
   // Mobile-only: Chat is a pivot tab that pops up a bottom tray.
   const [chatTrayOpen, setChatTrayOpen] = useState(false);
@@ -543,11 +601,24 @@ function StudioLayout({ session }: { session: Session }) {
               <div className="hidden lg:block">
                 <StageControls
                   session={session}
+                  participantCount={TOTAL_ATTENDEES}
                   handRaised={handRaised}
-                  onToggleHand={() => setHandRaised((v) => !v)}
+                  onToggleHand={onToggleHand}
+                  raisedHandCount={raisedHandCount}
+                  ownQueuePosition={ownQueuePosition}
+                  isOnStage={isOnStage}
+                  onJoinStage={onToggleHand /* mock: same path as raise hand → invite */}
+                  onLeaveStage={leaveStage}
                   visible={stageVisible}
                 />
               </div>
+              {stageInvitePending && (
+                <StageInvitePrompt
+                  coach={session.coach}
+                  onAccept={acceptStageInvite}
+                  onDecline={declineStageInvite}
+                />
+              )}
               <div className="lg:hidden">
                 <VideoControls
                   isPipped={isPipped}

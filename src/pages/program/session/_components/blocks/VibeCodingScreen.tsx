@@ -205,11 +205,6 @@ export default function VibeCodingScreen() {
           </div>
         </div>
 
-        {/* "Under construction" tape ribbon — bottom corner */}
-        <div className="pointer-events-none absolute bottom-2 right-2 flex items-center gap-1.5 rounded-md bg-[#FFE658] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-black shadow-md lg:bottom-3 lg:right-3 lg:text-[10px]">
-          <span aria-hidden>🚧</span>
-          Under construction
-        </div>
       </div>
 
       <style>{`
