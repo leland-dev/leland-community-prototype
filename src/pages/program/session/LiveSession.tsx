@@ -39,10 +39,11 @@ export default function LiveSession() {
   const { urn } = useParams<{ urn: string }>();
   const { session, state } = resolveSession(urn);
 
-  // Live state breaks out of PageShell to use the full viewport for studio layout.
-  // No horizontal/vertical padding on mobile so the video can edge-bleed and
-  // sit flush against the nav. Desktop restores the centered max-width layout.
-  if (state === "live") {
+  // Live, pre-session, and just-ended all share the V4 studio layout, which
+  // needs the wider 1440 wrapper so the right rail anchors correctly.
+  // Idle keeps the narrower PageShell since it's an unrelated empty state.
+  const usesStudio = state === "live" || state === "pre-session" || state === "just-ended";
+  if (usesStudio) {
     return (
       <div className="mx-auto max-w-[1440px] lg:px-4 lg:py-6 sm:px-0">
         <SessionExperience session={session} state={state} />
