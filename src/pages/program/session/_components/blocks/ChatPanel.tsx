@@ -16,56 +16,51 @@ type Message = {
   coach?: boolean;
   self?: boolean;
   replyTo?: string; // id of the top-level parent message
+  /** When set, render as a centered system notice (not a user message). */
+  system?: "purchase" | "hand-raised" | "joined";
 };
 
-const INITIAL_MESSAGES: Message[] = [
-  {
-    id: "m1",
-    author: "Tanner H.",
-    avatar: pic1,
-    body: "We're starting the build now — make sure Claude is open in another window.",
-    coach: true,
-  },
-  { id: "m2", author: "Sarah C.", avatar: pic3, body: "👋 in from Brooklyn" },
-  {
-    id: "m3",
-    author: "Priya N.",
-    avatar: pic5,
-    body: "Are these prompts in the shared repo yet?",
-  },
-  { id: "m4", author: "Marcus L.", avatar: pic4, body: "excited for this one" },
-  {
-    id: "m5",
-    author: "Marcus L.",
-    avatar: pic4,
-    body: "Lost in step 2 — what's the recommended way to wire tools to Claude when running locally?",
-  },
-  { id: "m6", author: "Jordan T.", avatar: pic6, body: "audio's clear on my end" },
-  {
-    id: "m7",
-    author: "Sarah C.",
-    avatar: pic3,
-    body: "Should the agent's memory live inline or in a separate tool call?",
-  },
-  // Demo reply nested under m7
-  {
-    id: "r1",
-    author: "Tanner H.",
-    avatar: pic1,
-    body: "Inline is fine for short context — break it out when you need cross-turn recall.",
-    coach: true,
-    replyTo: "m7",
-  },
-  { id: "m8", author: "Jordan T.", avatar: pic6, body: "could we slow down on the orchestration step?" },
+// Scripted drip-in. On mount the chat starts empty and these messages
+// land one at a time, mixed with system notices (purchases, hand-raises).
+// In a real session the wire would drive this; the script is here so the
+// prototype feels alive on every refresh.
+const SCRIPT: { delay: number; msg: Message }[] = [
+  { delay: 1200, msg: { id: "m1", author: "Tanner H.", avatar: pic1, coach: true, body: "We're live — make sure Claude Code is open in another window." } },
+  { delay: 3000, msg: { id: "m2", author: "Sarah C.", avatar: pic3, body: "👋 in from Brooklyn" } },
+  { delay: 5200, msg: { id: "sys-join-1", author: "system", avatar: pic6, system: "joined", body: "Jordan T. joined the stream" } },
+  { delay: 7000, msg: { id: "m3", author: "Priya N.", avatar: pic5, body: "Are these prompts in the shared repo yet?" } },
+  { delay: 9200, msg: { id: "sys-purchase-1", author: "system", avatar: pic4, system: "purchase", body: "Marcus L. just booked coaching with Tanner Helin" } },
+  { delay: 10800, msg: { id: "m4", author: "Marcus L.", avatar: pic4, body: "excited for this one 🔥" } },
+  { delay: 13500, msg: { id: "m5", author: "Sarah C.", avatar: pic3, body: "Should the agent's memory live inline or in a separate tool call?" } },
+  { delay: 15800, msg: { id: "sys-hand-1", author: "system", avatar: pic6, system: "hand-raised", body: "Jordan T. raised their hand" } },
+  { delay: 17500, msg: { id: "r1", author: "Tanner H.", avatar: pic1, coach: true, replyTo: "m5", body: "Inline is fine for short context — break it out when you need cross-turn recall." } },
+  { delay: 20000, msg: { id: "sys-purchase-2", author: "system", avatar: pic3, system: "purchase", body: "Sarah C. just booked coaching with Tanner Helin" } },
+  { delay: 22000, msg: { id: "m6", author: "Marcus L.", avatar: pic4, body: "Lost in step 2 — what's the recommended way to wire tools when running locally?" } },
+  { delay: 25000, msg: { id: "m7", author: "Jordan T.", avatar: pic6, body: "could we slow down on the orchestration step?" } },
 ];
 
 export default function ChatPanel({
   hideHeader,
   aboveInput,
 }: { hideHeader?: boolean; aboveInput?: import("react").ReactNode } = {}) {
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+
+  // Drip the scripted demo messages in on mount. Each is staggered by its
+  // `delay`. Cleared on unmount so a re-mount restarts the script.
+  useEffect(() => {
+    const timers: number[] = [];
+    SCRIPT.forEach(({ delay, msg }) => {
+      timers.push(
+        window.setTimeout(() => {
+          setMessages((prev) => [...prev, msg]);
+        }, delay),
+      );
+    });
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, []);
+
   // Pin + delete state. Only one pinned message at a time. Delete removes
   // the message and any threaded replies under it; if the pinned message
   // is deleted, we clear the pin too.
@@ -209,6 +204,15 @@ export default function ChatPanel({
             keeps the compact look. */}
         <ul className={`flex flex-col ${hideHeader ? "gap-5" : "gap-3"}`}>
           {topLevelMessages.map((m) => {
+            // System events (purchases, hand-raises, joins) render as a
+            // centered notice — no avatar, no reply/pin/delete actions.
+            if (m.system) {
+              return (
+                <li key={m.id}>
+                  <SystemNotice m={m} />
+                </li>
+              );
+            }
             const replies = repliesByParent[m.id] ?? [];
             return (
               <li key={m.id}>
@@ -355,15 +359,13 @@ function MessageRow({
         <div className="flex flex-wrap items-center gap-1.5">
           <span className={nameClass}>{m.author}</span>
           {m.coach && (
-            // Mobile (large): use the same little verified badge icon as the
-            // community feed. Desktop right rail keeps the compact "Coach" pill.
-            large ? (
-              <img src={verifiedIcon} alt="Coach" className="h-[14px] w-[14px] shrink-0" />
-            ) : (
-              <span className={`${badgeClass} bg-[#038561]/10 text-[#038561]`}>
-                Coach
-              </span>
-            )
+            // Verified award icon used across the community feed — same
+            // affordance everywhere now (desktop rail + mobile chat).
+            <img
+              src={verifiedIcon}
+              alt="Coach"
+              className={`shrink-0 ${large ? "h-[14px] w-[14px]" : "h-[13px] w-[13px]"}`}
+            />
           )}
           {m.self && (
             <span className={`${badgeClass} bg-gray-dark/10 text-gray-dark`}>
@@ -418,6 +420,41 @@ function MessageRow({
           )}
         </div>
         <div className={bodyClass}>{m.body}</div>
+      </div>
+    </div>
+  );
+}
+
+// ── System notice row ─────────────────────────────────────────────
+// Centered chip for purchases, hand-raises, and joins. Different
+// background tint per event so they read distinctly from chat messages.
+function SystemNotice({ m }: { m: Message }) {
+  const tone =
+    m.system === "purchase"
+      ? "border-[#A5E446]/40 bg-[#A5E446]/10 text-[#3a6500]"
+      : m.system === "hand-raised"
+        ? "border-[#F0D27A] bg-[#FFFBE5] text-[#876C00]"
+        : "border-gray-stroke bg-gray-hover text-gray-light";
+  const icon =
+    m.system === "purchase" ? "💸" : m.system === "hand-raised" ? "✋" : "→";
+
+  return (
+    <div className="my-1 flex items-center justify-center">
+      <div
+        className={`flex max-w-full items-center gap-2 rounded-full border px-3 py-1 text-[12px] font-medium ${tone}`}
+      >
+        <span aria-hidden className="shrink-0">
+          {icon}
+        </span>
+        <span className="truncate">{m.body}</span>
+        {m.system === "purchase" && (
+          <a
+            href="#"
+            className="ml-1 shrink-0 rounded-full bg-[#038561] px-2.5 py-0.5 text-[11px] font-semibold text-white no-underline transition-colors hover:bg-[#038561]/90"
+          >
+            Book yours
+          </a>
+        )}
       </div>
     </div>
   );
