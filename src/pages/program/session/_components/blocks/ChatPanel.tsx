@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { X, ArrowUp } from "lucide-react";
+import { X, ArrowUp, Pin, PinOff, Trash2 } from "lucide-react";
 import verifiedIcon from "../../../../../assets/icons/verified.svg";
 import pic1 from "../../../../../assets/profile photos/pic-1.png";
 import pic3 from "../../../../../assets/profile photos/pic-3.png";
@@ -66,6 +66,17 @@ export default function ChatPanel({
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [draft, setDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  // Pin + delete state. Only one pinned message at a time. Delete removes
+  // the message and any threaded replies under it; if the pinned message
+  // is deleted, we clear the pin too.
+  const [pinnedId, setPinnedId] = useState<string | null>(null);
+  function togglePin(id: string) {
+    setPinnedId((prev) => (prev === id ? null : id));
+  }
+  function deleteMessage(id: string) {
+    setMessages((prev) => prev.filter((m) => m.id !== id && m.replyTo !== id));
+    setPinnedId((prev) => (prev === id ? null : prev));
+  }
   const inputRef = useRef<HTMLInputElement>(null);
   const listEndRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -151,6 +162,35 @@ export default function ChatPanel({
         </div>
       )}
 
+      {/* Pinned message banner — visible when the coach has pinned a message.
+          Always sits at the top of the chat (not in the scrolling list). */}
+      {(() => {
+        const pinned = pinnedId ? messages.find((m) => m.id === pinnedId) : null;
+        if (!pinned) return null;
+        return (
+          <div className="flex items-start gap-2 border-b border-[#E5DBA8] bg-[#FFFBE5] px-4 py-2.5">
+            <Pin size={13} className="mt-1 shrink-0 text-[#876C00]" />
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#876C00]">
+                Pinned
+              </div>
+              <div className="truncate text-[13px] text-gray-dark">
+                <span className="font-semibold">{pinned.author}: </span>
+                {pinned.body}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPinnedId(null)}
+              aria-label="Unpin"
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[#876C00] transition-colors hover:bg-[#F5EAA5]"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        );
+      })()}
+
       {/* Message list */}
       <div
         ref={listRef}
@@ -172,7 +212,14 @@ export default function ChatPanel({
             const replies = repliesByParent[m.id] ?? [];
             return (
               <li key={m.id}>
-                <MessageRow m={m} onReply={() => startReply(m)} large={hideHeader} />
+                <MessageRow
+                  m={m}
+                  onReply={() => startReply(m)}
+                  onPin={() => togglePin(m.id)}
+                  onDelete={() => deleteMessage(m.id)}
+                  isPinned={pinnedId === m.id}
+                  large={hideHeader}
+                />
                 {replies.length > 0 && (
                   <ul
                     className={`flex flex-col border-l-2 border-gray-stroke ${
@@ -181,7 +228,15 @@ export default function ChatPanel({
                   >
                     {replies.map((r) => (
                       <li key={r.id}>
-                        <MessageRow m={r} onReply={() => startReply(r)} small={!hideHeader} large={hideHeader} />
+                        <MessageRow
+                          m={r}
+                          onReply={() => startReply(r)}
+                          onPin={() => togglePin(r.id)}
+                          onDelete={() => deleteMessage(r.id)}
+                          isPinned={pinnedId === r.id}
+                          small={!hideHeader}
+                          large={hideHeader}
+                        />
                       </li>
                     ))}
                   </ul>
@@ -256,11 +311,17 @@ export default function ChatPanel({
 function MessageRow({
   m,
   onReply,
+  onPin,
+  onDelete,
+  isPinned = false,
   small = false,
   large = false,
 }: {
   m: Message;
   onReply: () => void;
+  onPin?: () => void;
+  onDelete?: () => void;
+  isPinned?: boolean;
   small?: boolean;
   /** Use the larger post-comment styling — 44px avatar, 17px text. */
   large?: boolean;
@@ -317,6 +378,43 @@ function MessageRow({
             >
               Reply
             </button>
+          )}
+          {/* Pin / delete action icons. Hidden until hover on desktop (small
+              rail), always visible at "large" (mobile). Nested replies skip
+              these so the row stays compact. */}
+          {!small && (onPin || onDelete) && (
+            <span
+              className={
+                large
+                  ? "ml-auto flex items-center gap-0.5"
+                  : "ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100"
+              }
+            >
+              {onPin && (
+                <button
+                  type="button"
+                  onClick={onPin}
+                  aria-label={isPinned ? "Unpin" : "Pin message"}
+                  className={`flex h-6 w-6 items-center justify-center rounded-md transition-colors ${
+                    isPinned
+                      ? "bg-[#FFFBE5] text-[#876C00]"
+                      : "text-gray-light hover:bg-gray-hover hover:text-gray-dark"
+                  }`}
+                >
+                  {isPinned ? <PinOff size={12} /> : <Pin size={12} />}
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  aria-label="Delete message"
+                  className="flex h-6 w-6 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-[#FDECEC] hover:text-[#D92D20]"
+                >
+                  <Trash2 size={12} />
+                </button>
+              )}
+            </span>
           )}
         </div>
         <div className={bodyClass}>{m.body}</div>

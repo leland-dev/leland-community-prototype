@@ -22,6 +22,7 @@ import BottomTray from "../../blocks/BottomTray";
 import FloatingReactions, { type Reaction } from "../../blocks/FloatingReactions";
 import ReactionBar from "../../blocks/ReactionBar";
 import StageControls from "../../blocks/StageControls";
+import PurchaseToasts from "../../blocks/PurchaseToasts";
 
 type Tab = "guide" | "resources" | "chat";
 
@@ -498,6 +499,7 @@ function StudioLayout({ session }: { session: Session }) {
                 <BuildScreen />
                 <CoachFacePip coach={session.coach} position="top-right" />
                 <FloatingReactions reactions={reactions} />
+                <PurchaseToasts coachName={session.coach.name} />
               </div>
 
               {/* MOBILE: single-feed fallback (slide + face PIP overlay).
