@@ -7,6 +7,7 @@ import V1 from "./live/V1";
 import V2 from "./live/V2";
 import V3 from "./live/V3";
 import V4 from "./live/V4";
+import V5 from "./live/V5";
 
 type VersionEntry = VersionOption & {
   component: ComponentType<{ session: Session }>;
@@ -38,6 +39,12 @@ const VERSIONS: VersionEntry[] = [
     label: "V4 · Dual feed",
     description: "Persistent slide signpost beside the live build view (desktop).",
     component: V4,
+  },
+  {
+    id: "v5",
+    label: "V5 · Chat-only rail",
+    description: "Same build view + face PIP as V4; no slide signpost — rail is just chat.",
+    component: V5,
   },
 ];
 
