@@ -21,6 +21,7 @@ import RateSessionPopup from "../../blocks/RateSessionPopup";
 import BottomTray from "../../blocks/BottomTray";
 import FloatingReactions, { type Reaction } from "../../blocks/FloatingReactions";
 import ReactionBar from "../../blocks/ReactionBar";
+import StageControls from "../../blocks/StageControls";
 
 type Tab = "guide" | "resources" | "chat";
 
@@ -509,11 +510,23 @@ function StudioLayout({ session }: { session: Session }) {
                 <FloatingReactions reactions={reactions} />
               </div>
 
-              <VideoControls
-                isPipped={isPipped}
-                onTogglePip={togglePip}
-                mobileVisible={controlsVisible}
-              />
+              {/* Desktop: meeting-room style stage controls (REC + timer up
+                  top, action bar at bottom). Mobile keeps the existing
+                  YouTube-style media controls. */}
+              <div className="hidden lg:block">
+                <StageControls
+                  session={session}
+                  handRaised={handRaised}
+                  onToggleHand={() => setHandRaised((v) => !v)}
+                />
+              </div>
+              <div className="lg:hidden">
+                <VideoControls
+                  isPipped={isPipped}
+                  onTogglePip={togglePip}
+                  mobileVisible={controlsVisible}
+                />
+              </div>
               <RateSessionPopup suppressed={isPip} />
             </div>
           )}
@@ -566,11 +579,7 @@ function StudioLayout({ session }: { session: Session }) {
         <div className="flex h-full flex-col">
           <ChatPanel
             aboveInput={
-              <ReactionBar
-                onReact={pushReaction}
-                handRaised={handRaised}
-                onToggleHand={() => setHandRaised((v) => !v)}
-              />
+              <ReactionBar onReact={pushReaction} />
             }
           />
         </div>
