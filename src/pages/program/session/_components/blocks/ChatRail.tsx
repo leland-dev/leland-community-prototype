@@ -8,13 +8,14 @@ import pic6 from "../../../../../assets/profile photos/pic-6.png";
 import pic8 from "../../../../../assets/profile photos/pic-8.png";
 import verifiedIcon from "../../../../../assets/icons/verified.svg";
 import ChatPanel from "./ChatPanel";
+import Resources from "./Resources";
 
 // Tabbed rail wrapper for the live session side panel. Holds the chat as
-// the default tab, plus a Viewers list and a Polls pane. The pill chips
-// reuse the same styling as the Session-guide tabs below the video so
-// the whole page feels consistent.
+// the default tab, plus Viewers, Polls, and Resources panes. The pill
+// chips reuse the same styling as the Session-guide tabs below the video
+// so the whole page feels consistent.
 
-type Tab = "chat" | "viewers" | "polls";
+type Tab = "chat" | "viewers" | "polls" | "resources";
 
 type Props = {
   /** Slot rendered above the chat input — V5 uses it for the ReactionBar. */
@@ -27,15 +28,18 @@ export default function ChatRail({ chatAboveInput }: Props) {
   return (
     <div className="flex h-full min-h-0 flex-col rounded-2xl border border-gray-stroke bg-white">
       {/* Tab strip */}
-      <div className="flex shrink-0 items-center gap-1.5 border-b border-gray-stroke px-3 py-2">
+      <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-gray-stroke px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <TabPill active={tab === "chat"} onClick={() => setTab("chat")}>
           Chat
         </TabPill>
         <TabPill active={tab === "viewers"} onClick={() => setTab("viewers")}>
-          Viewers <span className="text-gray-light">47</span>
+          Viewers <span className="text-gray-light">20</span>
         </TabPill>
         <TabPill active={tab === "polls"} onClick={() => setTab("polls")}>
           Polls
+        </TabPill>
+        <TabPill active={tab === "resources"} onClick={() => setTab("resources")}>
+          Resources
         </TabPill>
       </div>
 
@@ -46,6 +50,11 @@ export default function ChatRail({ chatAboveInput }: Props) {
         )}
         {tab === "viewers" && <ViewersPane />}
         {tab === "polls" && <PollsPane />}
+        {tab === "resources" && (
+          <div className="min-h-0 flex-1 overflow-y-auto p-3">
+            <Resources />
+          </div>
+        )}
       </div>
     </div>
   );

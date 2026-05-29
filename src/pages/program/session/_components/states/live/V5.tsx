@@ -17,6 +17,7 @@ import VibeCodingScreen from "../../blocks/VibeCodingScreen";
 import CoachFacePip from "../../blocks/CoachFacePip";
 import SessionGuide from "../../blocks/SessionGuide";
 import Resources from "../../blocks/Resources";
+import SessionCoachCard from "../../blocks/SessionCoachCard";
 import ChatPanel from "../../blocks/ChatPanel";
 import ChatRail from "../../blocks/ChatRail";
 import RateSessionPopup from "../../blocks/RateSessionPopup";
@@ -274,8 +275,6 @@ function ShareButton() {
 
 function TopBar({ session }: { session: Session }) {
   const startDate = new Date(session.startsAt);
-  const endDate = new Date(session.endsAt);
-  const durationMin = Math.round((endDate.getTime() - startDate.getTime()) / 60000);
   const isToday = startDate.toDateString() === new Date().toDateString();
   const dateLabel = isToday
     ? "Today"
@@ -284,21 +283,18 @@ function TopBar({ session }: { session: Session }) {
 
   return (
     <div className="flex flex-col gap-1">
-      {/* Title — tighter to match Leland's session-page title rhythm. */}
-      <h1 className="text-[20px] font-semibold leading-[1.15] text-gray-dark sm:text-[22px] lg:text-[24px]">
+      {/* Title — medium weight per latest design. */}
+      <h1 className="text-[20px] font-medium leading-[1.15] text-gray-dark sm:text-[22px] lg:text-[24px]">
         {session.title}
       </h1>
-      {/* Combined metadata row — program · session # · date · time · duration · attendance */}
+      {/* Compact metadata — program · session # · date · time. Duration and
+          attendance dropped (the player chrome already shows attendees). */}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-gray-light lg:text-[14px]">
         <span>AI Builder Program · Session {session.number}</span>
         <span className="text-gray-stroke">·</span>
         <span>
           {dateLabel} · {timeLabel} PT
         </span>
-        <span className="text-gray-stroke">·</span>
-        <span>{durationMin} min</span>
-        <span className="text-gray-stroke">·</span>
-        <span>124 attending</span>
       </div>
     </div>
   );
@@ -634,31 +630,13 @@ function StudioLayout({ session }: { session: Session }) {
         {/* Title BELOW the video */}
         <TopBar session={session} />
 
-        {/* Tabs + actions row.
-            Mobile: single horizontal-scrolling row (tabs immediately followed
-              by Thumbs + Share — all four pills scrollable together).
-            Desktop: tabs left, actions right via justify-between. */}
-        <div
-          className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mx-0 lg:overflow-visible lg:justify-between lg:px-0 lg:py-0"
-        >
-          <TabsNav
-            tab={chatTrayOpen ? "chat" : tab}
-            onChange={(id) => {
-              // Chat pill on mobile pops a bottom tray instead of changing
-              // the inline tab content.
-              if (id === "chat") setChatTrayOpen(true);
-              else setTab(id);
-            }}
-            tabs={tabs}
-          />
-          {/* Share sits in the row below the video, right-aligned via the
-              parent's lg:justify-between. No thumbs — just share. */}
-          <div className="shrink-0">
-            <ShareButton />
-          </div>
-        </div>
+        {/* Coach attribution row — between title and session guide.
+            Matches Leland's live session host row pattern. */}
+        <SessionCoachCard coach={session.coach} />
 
-        <TabContent tab={tab} />
+        {/* Session guide directly — Resources moved to the right rail as a
+            tab, so no pivot is needed here anymore. */}
+        <SessionGuide />
       </div>
 
       {/* RIGHT COLUMN (desktop only): coach face on top, chat fills the rest.

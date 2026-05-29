@@ -1,7 +1,7 @@
 import React from "react";
 
 type ButtonSize = "tag" | "sm" | "md" | "lg";
-type ButtonVariant = "primary" | "secondary" | "white";
+type ButtonVariant = "primary" | "secondary" | "white" | "dark";
 
 const sizeClasses: Record<ButtonSize, string> = {
   tag: "text-[14px] py-2 px-3",
@@ -14,6 +14,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-[#038561] text-white hover:bg-[#038561]/90",
   secondary: "bg-gray-hover text-gray-dark hover:bg-[#ebebeb]",
   white: "bg-white text-gray-dark hover:bg-gray-hover",
+  dark: "bg-gray-dark text-white hover:bg-[#222]",
 };
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
