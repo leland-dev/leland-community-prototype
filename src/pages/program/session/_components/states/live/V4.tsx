@@ -14,6 +14,7 @@ import sharesIcon from "../../../../../../assets/icons/shares.svg";
 import CoachScreenShare from "../../blocks/CoachScreenShare";
 import BuildScreen from "../../blocks/BuildScreen";
 import CoachFacePip from "../../blocks/CoachFacePip";
+import RailSignpost from "../../blocks/RailSignpost";
 import SessionGuide from "../../blocks/SessionGuide";
 import Resources from "../../blocks/Resources";
 import ChatPanel from "../../blocks/ChatPanel";
@@ -525,16 +526,14 @@ function StudioLayout({ session }: { session: Session }) {
         }}
       >
         <div className="flex h-full flex-col gap-3">
-          {/* Slide signpost — now the top tile in the rail. The face cam
-              moved out of the rail and onto the build canvas as a PIP. */}
+          {/* Slide signpost — purpose-built for the rail's actual rendered
+              size (~340×191) so it stays legible. The full ProgramSlide is
+              too small at this scale. */}
           <div
             className="relative shrink-0 overflow-hidden rounded-2xl bg-black"
             style={{ aspectRatio: "16 / 9" }}
           >
-            <CoachScreenShare />
-            <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-white backdrop-blur-sm">
-              Signpost
-            </span>
+            <RailSignpost session={session} />
           </div>
           {/* Chat fills the remaining height */}
           <div className="min-h-0 flex-1">

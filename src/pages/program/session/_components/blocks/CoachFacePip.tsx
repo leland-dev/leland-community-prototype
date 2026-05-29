@@ -24,10 +24,12 @@ export default function CoachFacePip({
 }: Props) {
   // Mobile gets a smaller near-square tile so it reads as a typical video-
   // call PIP without dominating the slide. Desktop keeps the landscape tile.
+  // Default `md` sizing is 30% larger than the original to read clearly on
+  // top of the build canvas (94×114 mobile, 135×221 desktop).
   const dims =
     size === "sm"
       ? "h-[56px] w-[72px] lg:h-[64px] lg:w-[104px]"
-      : "h-[72px] w-[88px] lg:h-[104px] lg:w-[170px]";
+      : "h-[94px] w-[114px] lg:h-[135px] lg:w-[221px]";
   const anchor =
     position === "top-right" ? "top-2 right-2 lg:top-3 lg:right-3" : "bottom-2 left-2 lg:bottom-3 lg:left-3";
   return (
