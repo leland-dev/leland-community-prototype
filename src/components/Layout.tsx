@@ -91,8 +91,13 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
         <MobileTopNav />
       </div>
 
-      {/* Desktop/Tablet top nav */}
-      <div className="hidden md:block">
+      {/* Desktop/Tablet top nav.
+          sticky must live on the wrapper, not on <header> inside TopNav —
+          the wrapper's parent (this Layout root) is what gives the sticky
+          element room to scroll within. When sticky lived on <header>, its
+          immediate parent (this same wrapper) was already collapsed to the
+          header's height, so there was no scroll room and it never stuck. */}
+      <div className="sticky top-0 z-30 hidden md:block">
         <TopNav />
       </div>
 
