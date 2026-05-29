@@ -114,7 +114,7 @@ export default function TopNav() {
   }, [profileOpen, browseOpen]);
 
   return (
-    <header className="border-b border-gray-stroke bg-white">
+    <header className="sticky top-0 z-30 border-b border-gray-stroke bg-white">
       <div className={`mx-auto flex items-stretch justify-between px-6${isCoachMode ? "" : " max-w-[1280px]"}`}>
         {/* Left: Logo + Nav links */}
         <div className="flex items-stretch gap-1">
