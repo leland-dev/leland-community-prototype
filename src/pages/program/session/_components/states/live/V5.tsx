@@ -18,6 +18,7 @@ import CoachFacePip from "../../blocks/CoachFacePip";
 import SessionGuide from "../../blocks/SessionGuide";
 import Resources from "../../blocks/Resources";
 import ChatPanel from "../../blocks/ChatPanel";
+import ChatRail from "../../blocks/ChatRail";
 import RateSessionPopup from "../../blocks/RateSessionPopup";
 import BottomTray from "../../blocks/BottomTray";
 import FloatingReactions, { type Reaction } from "../../blocks/FloatingReactions";
@@ -402,6 +403,26 @@ function StudioLayout({ session }: { session: Session }) {
     };
   }, []);
 
+  // Desktop hover-based controls (Twitch-style focused player). Visible
+  // while the mouse is moving over the video, auto-hide 1.8s after the
+  // last mouse activity, hide immediately on mouse-leave.
+  const [stageVisible, setStageVisible] = useState(false);
+  const stageHideTimerRef = useRef<number | null>(null);
+  function bumpStageVisibility() {
+    setStageVisible(true);
+    if (stageHideTimerRef.current) window.clearTimeout(stageHideTimerRef.current);
+    stageHideTimerRef.current = window.setTimeout(() => setStageVisible(false), 1800);
+  }
+  function hideStage() {
+    if (stageHideTimerRef.current) window.clearTimeout(stageHideTimerRef.current);
+    setStageVisible(false);
+  }
+  useEffect(() => {
+    return () => {
+      if (stageHideTimerRef.current) window.clearTimeout(stageHideTimerRef.current);
+    };
+  }, []);
+
   // ── Live reactions (V5's "Twitch" feel) ────────────────────────────────
   // Each reaction has a short lifetime — we drop it from state after the
   // animation completes (~3s). State is just an append-only queue.
@@ -494,7 +515,12 @@ function StudioLayout({ session }: { session: Session }) {
                   overlays the build canvas as a small PIP in the top-right
                   corner (out of the right rail now). Slide signpost still
                   lives in the right rail. */}
-              <div className="relative hidden h-full w-full lg:block">
+              <div
+                className="relative hidden h-full w-full lg:block"
+                onMouseEnter={bumpStageVisibility}
+                onMouseMove={bumpStageVisibility}
+                onMouseLeave={hideStage}
+              >
                 <VibeCodingScreen />
                 <CoachFacePip coach={session.coach} position="top-right" />
                 <FloatingReactions reactions={reactions} />
@@ -519,6 +545,7 @@ function StudioLayout({ session }: { session: Session }) {
                   session={session}
                   handRaised={handRaised}
                   onToggleHand={() => setHandRaised((v) => !v)}
+                  visible={stageVisible}
                 />
               </div>
               <div className="lg:hidden">
@@ -578,10 +605,8 @@ function StudioLayout({ session }: { session: Session }) {
             view + face PIP already carry the active "what's happening" load
             and the slide preview wasn't pulling its weight. */}
         <div className="flex h-full flex-col">
-          <ChatPanel
-            aboveInput={
-              <ReactionBar onReact={pushReaction} />
-            }
+          <ChatRail
+            chatAboveInput={<ReactionBar onReact={pushReaction} />}
           />
         </div>
       </aside>

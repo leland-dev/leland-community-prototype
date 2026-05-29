@@ -426,31 +426,50 @@ function MessageRow({
 }
 
 // ── System notice row ─────────────────────────────────────────────
-// Centered chip for purchases, hand-raises, and joins. Different
-// background tint per event so they read distinctly from chat messages.
+// Inline card for purchases, hand-raises, joins. Rectangular with a
+// thin colored stripe on the left + a small type label up top, so the
+// notice reads as a branded callout (matches the rest of the platform)
+// rather than an emoji-laden chip.
 function SystemNotice({ m }: { m: Message }) {
-  const tone =
-    m.system === "purchase"
-      ? "border-[#A5E446]/40 bg-[#A5E446]/10 text-[#3a6500]"
-      : m.system === "hand-raised"
-        ? "border-[#F0D27A] bg-[#FFFBE5] text-[#876C00]"
-        : "border-gray-stroke bg-gray-hover text-gray-light";
-  const icon =
-    m.system === "purchase" ? "💸" : m.system === "hand-raised" ? "✋" : "→";
+  const config = m.system === "purchase"
+    ? {
+        stripe: "bg-[#038561]",
+        bg: "bg-[#038561]/8",
+        label: "Just booked",
+        labelClass: "text-[#038561]",
+      }
+    : m.system === "hand-raised"
+      ? {
+          stripe: "bg-[#C99A1A]",
+          bg: "bg-[#FFFBE5]",
+          label: "Hand raised",
+          labelClass: "text-[#876C00]",
+        }
+      : {
+          stripe: "bg-gray-stroke",
+          bg: "bg-gray-hover/70",
+          label: "Joined",
+          labelClass: "text-gray-light",
+        };
 
   return (
-    <div className="my-1 flex items-center justify-center">
-      <div
-        className={`flex max-w-full items-center gap-2 rounded-full border px-3 py-1 text-[12px] font-medium ${tone}`}
-      >
-        <span aria-hidden className="shrink-0">
-          {icon}
-        </span>
-        <span className="truncate">{m.body}</span>
+    <div
+      className={`relative overflow-hidden rounded-lg ${config.bg} py-2.5 pl-4 pr-3`}
+    >
+      <span className={`absolute inset-y-0 left-0 w-[3px] ${config.stripe}`} aria-hidden />
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${config.labelClass}`}>
+            {config.label}
+          </div>
+          <div className="mt-1 text-[13px] leading-snug text-gray-dark">
+            {m.body}
+          </div>
+        </div>
         {m.system === "purchase" && (
           <a
             href="#"
-            className="ml-1 shrink-0 rounded-full bg-[#038561] px-2.5 py-0.5 text-[11px] font-semibold text-white no-underline transition-colors hover:bg-[#038561]/90"
+            className="shrink-0 rounded-md bg-[#038561] px-3 py-1.5 text-[12px] font-semibold text-white no-underline transition-colors hover:bg-[#038561]/90"
           >
             Book yours
           </a>
