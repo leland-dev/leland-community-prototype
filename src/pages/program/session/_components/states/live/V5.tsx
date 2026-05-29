@@ -638,11 +638,7 @@ function StudioLayout({ session }: { session: Session }) {
         <ChatPanel
           hideHeader
           aboveInput={
-            <ReactionBar
-              onReact={pushReaction}
-              handRaised={handRaised}
-              onToggleHand={() => setHandRaised((v) => !v)}
-            />
+            <ReactionBar onReact={pushReaction} />
           }
         />
       </BottomTray>
