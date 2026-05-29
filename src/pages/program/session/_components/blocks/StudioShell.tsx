@@ -39,7 +39,7 @@ export default function StudioShell({ session, canvas, progress, hideRail = fals
       {/* LEFT COLUMN — canvas → title → tabs+share → tab content.
           Padded on mobile so the title/tabs/content sit inside 16px gutters,
           but the canvas itself breaks out with -mx-4 to edge-bleed. */}
-      <div className="flex min-w-0 flex-col gap-4 px-4 lg:gap-6 lg:px-0">
+      <div className="flex min-w-0 flex-col gap-3 px-4 lg:gap-3 lg:px-0">
         {/* Canvas */}
         <div
           className="relative -mx-4 w-auto lg:mx-0 lg:w-full"
@@ -103,14 +103,13 @@ function TopBar({ session }: { session: Session }) {
   const timeLabel = startDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 
   return (
-    <div className="flex flex-col gap-1.5 lg:gap-2">
-      <div className="text-[14px] text-gray-light lg:text-[17px]">
-        AI Builder Program Level 1 · Session {session.number}
-      </div>
-      <h1 className="text-[22px] font-medium leading-[1.1] text-gray-dark sm:text-[28px] lg:text-[32px]">
+    <div className="flex flex-col gap-1">
+      <h1 className="text-[20px] font-semibold leading-[1.15] text-gray-dark sm:text-[22px] lg:text-[24px]">
         {session.title}
       </h1>
-      <div className="flex flex-wrap items-center gap-2 text-[13px] text-gray-light lg:gap-3 lg:text-[17px]">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-gray-light lg:text-[14px]">
+        <span>AI Builder Program · Session {session.number}</span>
+        <span className="text-gray-stroke">·</span>
         <span>
           {dateLabel} · {timeLabel} PT
         </span>
