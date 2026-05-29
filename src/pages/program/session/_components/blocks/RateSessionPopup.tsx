@@ -19,12 +19,12 @@ function Star({
       width="26"
       height="26"
       viewBox="0 0 24 24"
-      fill={filled ? "#F5B729" : "none"}
+      fill={filled ? "#FFFFFF" : "none"}
       aria-hidden
     >
       <path
         d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.32l-5.8 3.04 1.11-6.46-4.7-4.58 6.49-.94L12 2.5z"
-        stroke={filled || half ? "#F5B729" : "#D5D5D5"}
+        stroke={filled || half ? "#FFFFFF" : "#5C5C57"}
         strokeWidth="1.4"
         strokeLinejoin="round"
       />
@@ -78,7 +78,7 @@ export default function RateSessionPopup({ suppressed }: { suppressed?: boolean 
 
   return (
     <div
-      className={`absolute bottom-6 left-6 z-40 w-[260px] rounded-2xl border border-gray-stroke bg-white p-4 shadow-[0_12px_40px_rgba(0,0,0,0.28)] transition-all duration-300 ${
+      className={`absolute bottom-6 left-6 z-40 w-[260px] rounded-2xl border border-white/10 bg-[#1A1A18] p-4 text-white shadow-[0_18px_50px_rgba(0,0,0,0.45)] transition-all duration-300 ${
         visible && !suppressed
           ? "opacity-100 translate-y-0"
           : "pointer-events-none translate-y-3 opacity-0"
@@ -88,13 +88,13 @@ export default function RateSessionPopup({ suppressed }: { suppressed?: boolean 
       aria-label="Rate this session"
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-[15px] font-semibold text-gray-dark">
+        <h3 className="text-[15px] font-semibold text-white">
           {rated ? "Thanks for the feedback!" : "Rate this session"}
         </h3>
         <button
           type="button"
           onClick={dismiss}
-          className="-mr-1 -mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+          className="-mr-1 -mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
           aria-label="Dismiss"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
