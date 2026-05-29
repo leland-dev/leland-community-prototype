@@ -5,6 +5,7 @@ import { handleAgentChat } from "./src/lib/agentChat";
 import { handleAgentEdit } from "./src/lib/agentEdit";
 import { handleAgentSave } from "./src/lib/agentSave";
 import { handleAgentGet } from "./src/lib/agentGet";
+import { handleClassifyChoice } from "./src/lib/classifyChoice";
 import { FileAgentStore } from "./src/lib/fileAgentStore.node";
 import type { AgentStore } from "./src/lib/agentStore";
 
@@ -15,6 +16,7 @@ const ROUTES: Record<string, RouteHandler> = {
   "/api/agent-chat": handleAgentChat,
   "/api/agent-edit": handleAgentEdit,
   "/api/agent-save": (req, _apiKey, store) => handleAgentSave(req, store),
+  "/api/classify-choice": (req, apiKey) => handleClassifyChoice(req, apiKey),
 };
 
 function agentApiDevPlugin(apiKey: string | undefined, store: AgentStore): Plugin {

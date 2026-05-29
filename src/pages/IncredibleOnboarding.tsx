@@ -799,7 +799,42 @@ function categoryFromAnswers(a: Answers): Category {
 
 /* ─────────────── chat types ─────────────── */
 
-type Msg = { role: "ai" | "user"; text: string };
+type Msg = { role: "ai" | "user"; text: string; isTyping?: boolean };
+
+/* ─────────────── LLM classifier (server-side fallback) ─────────────── */
+
+/** Calls /api/classify-choice, which uses Claude Haiku to map free text onto
+ *  the typeform-style choices. Returns an array of matched choice refs
+ *  (length 1 for single-select; 0+ for multi). Empty array = no match. */
+async function classifyViaLLM(
+  question: string,
+  userText: string,
+  choices: Choice[],
+  multi: boolean,
+  timeoutMs = 6000,
+): Promise<string[]> {
+  try {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch("/api/classify-choice", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        question,
+        userText,
+        choices: choices.map((c) => ({ ref: c.ref, label: c.label })),
+        multi,
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(t);
+    if (!res.ok) return [];
+    const json = (await res.json()) as { refs?: string[] };
+    return Array.isArray(json.refs) ? json.refs : [];
+  } catch {
+    return [];
+  }
+}
 
 /* ─────────────── main page ─────────────── */
 
@@ -1046,50 +1081,105 @@ export default function IncredibleOnboarding() {
         });
         return;
       }
-      // No good match — nudge
-      setMessages((prev) => [
-        ...prev,
-        { role: "user", text: trimmed },
-        {
-          role: "ai",
-          text:
-            "Not sure how to read that — tap the options below (you can pick more than one).",
-        },
-      ]);
-      setInput("");
+      // Heuristic blank — hand off to LLM
+      runLLMFallback(trimmed, true);
       return;
     }
 
-    // Single-select
+    // Single-select — auto-accept on reasonable confidence, LLM otherwise
     const match = semanticMatch(trimmed, currentField.choices);
-    if (match && match.confidence >= 0.7) {
+    if (match && match.confidence >= 0.5) {
       commitAnswer(currentRef, match.choice.ref, {
         userBubble: trimmed,
         aiAck: `Got it — locking that in as "${match.choice.label}".`,
       });
       return;
     }
-    if (match && match.confidence >= 0.4) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "user", text: trimmed },
-        {
-          role: "ai",
-          text: `I'm reading that as "${match.choice.label}" — tap the chip to confirm, or pick a different one below.`,
-        },
-      ]);
-      setInput("");
-      return;
-    }
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", text: trimmed },
-      {
-        role: "ai",
-        text: "Hmm, not sure which option that maps to — tap one of the chips below to lock it in.",
-      },
+    // Heuristic uncertain — hand off to LLM
+    runLLMFallback(trimmed, false);
+  };
+
+  /** When local heuristics aren't confident, ask Claude to classify the user's
+   *  free text against the typeform choices. Shows a typing indicator while we
+   *  wait. Falls back to a polite nudge if the LLM can't classify or the
+   *  request fails. */
+  const runLLMFallback = async (userText: string, multi: boolean) => {
+    if (!currentField || !currentRef) return;
+    const fieldRef = currentRef;
+    const f = currentField;
+    const baseMessages = messages;
+
+    // Optimistically show the user bubble + a typing indicator
+    setMessages([
+      ...baseMessages,
+      { role: "user", text: userText },
+      { role: "ai", text: "…", isTyping: true },
     ]);
     setInput("");
+
+    const refs = await classifyViaLLM(f.title, userText, f.choices, multi);
+
+    if (refs.length === 0) {
+      setMessages([
+        ...baseMessages,
+        { role: "user", text: userText },
+        {
+          role: "ai",
+          text:
+            "Hmm — I couldn't quite read that one. Tap one of the chips below to lock it in.",
+        },
+      ]);
+      return;
+    }
+
+    const labels = refs.map((r) => labelByChoiceRef(f.ref, r));
+    const value: AnswerValue = multi ? refs : refs[0];
+    const ack =
+      multi && labels.length > 1
+        ? `Got it — I read that as: ${labels.join(", ")}.`
+        : `Got it — locking that in as "${labels[0]}".`;
+
+    // Walk the flow — same shape as commitAnswer but starting from baseMessages
+    // so we replace the typing-indicator render in one go.
+    const newAnswers = { ...answers, [fieldRef]: value };
+    const newMsgs: Msg[] = [
+      ...baseMessages,
+      { role: "user", text: userText },
+      { role: "ai", text: ack },
+    ];
+
+    let next: string | null = nextRef(fieldRef, newAnswers);
+    while (next) {
+      const nf = field(next);
+      if (!nf) {
+        next = null;
+        break;
+      }
+      if (nf.type === "statement") {
+        newMsgs.push({ role: "ai", text: nf.title });
+        next = nextRef(next, newAnswers);
+        continue;
+      }
+      newMsgs.push({ role: "ai", text: nf.title });
+      if (nf.description) newMsgs.push({ role: "ai", text: nf.description });
+      break;
+    }
+    if (next === null) {
+      newMsgs.push({
+        role: "ai",
+        text: "Perfect — I've matched experts that fit your plan. Take a look on the right.",
+      });
+      newMsgs.push({
+        role: "ai",
+        text: "I'll be in the corner if you need me.",
+      });
+      setFloatingMinimized(false);
+    }
+
+    setAnswers(newAnswers);
+    setMessages(newMsgs);
+    setCurrentRef(next);
+    setPending([]);
   };
 
   const category = useMemo(() => categoryFromAnswers(answers), [answers]);
@@ -1526,7 +1616,7 @@ function MessageBubble({ msg }: { msg: Msg }) {
           <Sparkles size={13} className="text-white" />
         </div>
         <div className="max-w-[88%] rounded-2xl rounded-tl-md bg-gray-hover px-4 py-2.5 text-[14.5px] leading-snug text-gray-dark">
-          {msg.text}
+          {msg.isTyping ? <TypingDots /> : msg.text}
         </div>
       </motion.div>
     );
@@ -1543,6 +1633,24 @@ function MessageBubble({ msg }: { msg: Msg }) {
         {msg.text}
       </div>
     </motion.div>
+  );
+}
+
+function TypingDots() {
+  return (
+    <span
+      className="inline-flex items-center gap-1 py-0.5"
+      aria-label="Leland AI is thinking"
+    >
+      {[0, 0.18, 0.36].map((delay) => (
+        <motion.span
+          key={delay}
+          animate={{ opacity: [0.25, 1, 0.25] }}
+          transition={{ duration: 1.1, repeat: Infinity, delay }}
+          className="inline-block h-1.5 w-1.5 rounded-full bg-gray-light"
+        />
+      ))}
+    </span>
   );
 }
 
