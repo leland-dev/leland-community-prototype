@@ -77,7 +77,14 @@ function TabPill({
 }
 
 // ── Viewers ──────────────────────────────────────────────
-const VIEWERS = [
+type Viewer = {
+  name: string;
+  avatar: string;
+  coach?: boolean;
+  hostLabel?: string;
+  handRaised?: boolean;
+};
+const VIEWERS: Viewer[] = [
   { name: "Tanner Helin", avatar: pic1, coach: true, hostLabel: "Host" },
   { name: "Sarah C.", avatar: pic3 },
   { name: "Marcus L.", avatar: pic4 },
@@ -89,7 +96,7 @@ const VIEWERS = [
   { name: "Rima F.", avatar: pic5 },
   { name: "Casey W.", avatar: pic6 },
   { name: "Sam T.", avatar: pic4 },
-] as const;
+];
 
 function ViewersPane() {
   return (
