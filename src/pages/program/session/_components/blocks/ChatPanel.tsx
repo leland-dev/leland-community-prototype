@@ -218,7 +218,7 @@ export default function ChatPanel({
       <div
         ref={listRef}
         onScroll={handleScroll}
-        className="flex-1 min-h-0 overflow-y-auto px-4 py-4
+        className="flex-1 min-h-0 overflow-y-auto px-3 py-4
                    [&::-webkit-scrollbar]:w-1.5
                    [&::-webkit-scrollbar-track]:bg-transparent
                    [&::-webkit-scrollbar-thumb]:bg-transparent

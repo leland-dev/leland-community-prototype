@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
-// ReactNode kept for TabPill children typing below.
+import { Plus, X } from "lucide-react";
+import { Button } from "../../../../../components/Button";
 import pic1 from "../../../../../assets/profile photos/pic-1.png";
 import pic2 from "../../../../../assets/profile photos/pic-2.png";
 import pic3 from "../../../../../assets/profile photos/pic-3.png";
@@ -159,7 +160,10 @@ function ViewersPane() {
 }
 
 // ── Polls ────────────────────────────────────────────────
-const POLL = {
+type PollOption = { label: string; votes: number };
+type Poll = { question: string; options: PollOption[]; total: number };
+
+const INITIAL_POLL: Poll = {
   question: "Which agent are you building first?",
   total: 38,
   options: [
@@ -171,49 +175,213 @@ const POLL = {
 };
 
 function PollsPane() {
+  // Two modes: viewing the active poll, or creating a new one. Posting a
+  // new poll replaces the active poll (in production this would be a
+  // separate "history" with the current one on top).
+  const [poll, setPoll] = useState<Poll>(INITIAL_POLL);
+  const [creating, setCreating] = useState(false);
+
+  if (creating) {
+    return (
+      <PollCreator
+        onCancel={() => setCreating(false)}
+        onPost={(next) => {
+          setPoll(next);
+          setCreating(false);
+        }}
+      />
+    );
+  }
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4">
-      <div className="rounded-lg border border-gray-stroke bg-white">
-        <div className="flex items-center justify-between border-b border-gray-stroke px-3 py-2">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#038561]">
-            Live poll
-          </span>
-          <span className="text-[11px] text-gray-light">{POLL.total} votes</span>
-        </div>
-        <div className="px-3 py-3">
-          <h3 className="text-[14px] font-semibold text-gray-dark">{POLL.question}</h3>
-          <ul className="mt-3 flex flex-col gap-2">
-            {POLL.options.map((opt) => {
-              const pct = Math.round((opt.votes / POLL.total) * 100);
-              return (
-                <li key={opt.label}>
-                  <button
-                    type="button"
-                    className="group relative w-full overflow-hidden rounded-md border border-gray-stroke bg-white px-3 py-2 text-left transition-colors hover:bg-gray-hover"
-                  >
-                    <span
-                      className="absolute inset-y-0 left-0 bg-[#038561]/10 transition-all"
-                      style={{ width: `${pct}%` }}
-                      aria-hidden
-                    />
-                    <span className="relative flex items-center justify-between gap-2">
-                      <span className="text-[13px] font-medium text-gray-dark">
-                        {opt.label}
-                      </span>
-                      <span className="text-[12px] tabular-nums text-gray-light">
-                        {pct}%
-                      </span>
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-3">
+      <ActivePoll poll={poll} />
+      <button
+        type="button"
+        onClick={() => setCreating(true)}
+        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-stroke px-3 py-2.5 text-[13px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
+      >
+        <Plus size={14} strokeWidth={2.25} />
+        New poll
+      </button>
+      <p className="mt-2 text-[11px] text-gray-light">
+        Coaches can post a poll any time. Replaces the current one.
+      </p>
+    </div>
+  );
+}
+
+function ActivePoll({ poll }: { poll: Poll }) {
+  return (
+    <div className="rounded-lg border border-gray-stroke bg-white">
+      <div className="flex items-center justify-between border-b border-gray-stroke px-3 py-2">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#038561]">
+          Live poll
+        </span>
+        <span className="text-[11px] text-gray-light">{poll.total} votes</span>
+      </div>
+      <div className="px-3 py-3">
+        <h3 className="text-[14px] font-semibold text-gray-dark">{poll.question}</h3>
+        <ul className="mt-3 flex flex-col gap-2">
+          {poll.options.map((opt) => {
+            const pct = poll.total > 0 ? Math.round((opt.votes / poll.total) * 100) : 0;
+            return (
+              <li key={opt.label}>
+                <button
+                  type="button"
+                  className="group relative w-full overflow-hidden rounded-md border border-gray-stroke bg-white px-3 py-2 text-left transition-colors hover:bg-gray-hover"
+                >
+                  <span
+                    className="absolute inset-y-0 left-0 bg-[#038561]/10 transition-all"
+                    style={{ width: `${pct}%` }}
+                    aria-hidden
+                  />
+                  <span className="relative flex items-center justify-between gap-2">
+                    <span className="text-[13px] font-medium text-gray-dark">
+                      {opt.label}
                     </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+                    <span className="text-[12px] tabular-nums text-gray-light">
+                      {pct}%
+                    </span>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+// ── Poll creator ────────────────────────────────────────────
+// Question + 2–4 option inputs + Cancel/Post. Min 2, max 4 options.
+// Post is disabled until the question and at least 2 options have text.
+
+const MAX_POLL_OPTIONS = 4;
+const MIN_POLL_OPTIONS = 2;
+
+function PollCreator({
+  onCancel,
+  onPost,
+}: {
+  onCancel: () => void;
+  onPost: (poll: Poll) => void;
+}) {
+  const [question, setQuestion] = useState("");
+  const [options, setOptions] = useState<string[]>(["", ""]);
+
+  const trimmedQuestion = question.trim();
+  const filledOptions = options.map((o) => o.trim()).filter(Boolean);
+  const canPost = trimmedQuestion.length > 0 && filledOptions.length >= MIN_POLL_OPTIONS;
+
+  function updateOption(idx: number, value: string) {
+    setOptions((prev) => prev.map((o, i) => (i === idx ? value : o)));
+  }
+  function addOption() {
+    if (options.length < MAX_POLL_OPTIONS) setOptions((prev) => [...prev, ""]);
+  }
+  function removeOption(idx: number) {
+    if (options.length > MIN_POLL_OPTIONS) {
+      setOptions((prev) => prev.filter((_, i) => i !== idx));
+    }
+  }
+  function handlePost() {
+    if (!canPost) return;
+    onPost({
+      question: trimmedQuestion,
+      total: 0,
+      options: filledOptions.map((label) => ({ label, votes: 0 })),
+    });
+  }
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-[14px] font-semibold text-gray-dark">New poll</h3>
+        <button
+          type="button"
+          onClick={onCancel}
+          aria-label="Cancel"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+        >
+          <X size={15} />
+        </button>
       </div>
 
-      <div className="mt-4 text-[12px] text-gray-light">
-        Polls posted by the coach appear here. Tap an option to vote.
+      {/* Question */}
+      <label className="mt-3 block">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-light">
+          Question
+        </span>
+        <input
+          type="text"
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder="What do you want to ask the room?"
+          maxLength={140}
+          className="mt-1.5 w-full rounded-lg bg-gray-hover px-3 py-2 text-[14px] text-gray-dark placeholder:text-gray-light focus:outline-none focus:ring-2 focus:ring-gray-dark/10"
+        />
+      </label>
+
+      {/* Options */}
+      <div className="mt-4">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-light">
+          Options
+        </span>
+        <ul className="mt-1.5 flex flex-col gap-2">
+          {options.map((value, idx) => (
+            <li key={idx} className="flex items-center gap-1.5">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gray-hover text-[12px] font-semibold text-gray-light">
+                {idx + 1}
+              </span>
+              <input
+                type="text"
+                value={value}
+                onChange={(e) => updateOption(idx, e.target.value)}
+                placeholder={`Option ${idx + 1}`}
+                maxLength={80}
+                className="min-w-0 flex-1 rounded-lg bg-gray-hover px-3 py-2 text-[14px] text-gray-dark placeholder:text-gray-light focus:outline-none focus:ring-2 focus:ring-gray-dark/10"
+              />
+              {options.length > MIN_POLL_OPTIONS && (
+                <button
+                  type="button"
+                  onClick={() => removeOption(idx)}
+                  aria-label="Remove option"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+        {options.length < MAX_POLL_OPTIONS && (
+          <button
+            type="button"
+            onClick={addOption}
+            className="mt-2 flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
+          >
+            <Plus size={13} strokeWidth={2.25} />
+            Add option
+          </button>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="mt-auto flex items-center justify-end gap-2 pt-4">
+        <Button size="sm" variant="secondary" rounded="rounded-full" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button
+          size="sm"
+          variant="primary"
+          rounded="rounded-full"
+          disabled={!canPost}
+          onClick={handlePost}
+        >
+          Post poll
+        </Button>
       </div>
     </div>
   );
