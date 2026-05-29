@@ -389,8 +389,8 @@ function MessageRow({
   //   - normal → 28px avatar, desktop right-rail top-level messages
   const avatarSize = large ? "h-9 w-9" : small ? "h-5 w-5" : "h-7 w-7";
   const nameClass = large
-    ? "text-[15px] font-semibold text-gray-dark"
-    : "text-[14px] font-semibold text-gray-dark";
+    ? "text-[15px] font-medium text-gray-dark"
+    : "text-[14px] font-medium text-gray-dark";
   const bodyClass = large
     ? "mt-0.5 text-[15px] leading-[1.4] text-gray-dark"
     : "mt-0.5 text-[14px] leading-[1.45] text-gray-dark";

@@ -83,7 +83,41 @@ function CoachContributorCard() {
   );
 }
 
-export default function Resources() {
+type Props = {
+  /** Compact: just the link list, no coach card, no header, no outer card. */
+  compact?: boolean;
+};
+
+function ResourceList() {
+  return (
+    <ul className="flex flex-col gap-1">
+      {RESOURCES.map((r) => (
+        <li key={r.id}>
+          <a
+            href={r.href}
+            className="group flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-hover/60"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-hover text-gray-dark">
+              {r.icon}
+            </span>
+            <span className="flex-1 text-[15px] font-medium text-gray-dark">{r.label}</span>
+            <span className="shrink-0 text-gray-light transition-colors group-hover:text-gray-dark">
+              <ExternalIcon />
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export default function Resources({ compact = false }: Props = {}) {
+  if (compact) {
+    // Used in the chat-rail Resources tab — the rail already provides
+    // the card/border chrome, so render just the links.
+    return <ResourceList />;
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <CoachContributorCard />
@@ -93,24 +127,9 @@ export default function Resources() {
         <div className="border-b border-gray-stroke px-5 py-4">
           <h2 className="text-[20px] font-medium text-gray-dark">Resources</h2>
         </div>
-        <ul className="flex flex-col gap-1 p-3">
-          {RESOURCES.map((r) => (
-            <li key={r.id}>
-              <a
-                href={r.href}
-                className="group flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-hover/60"
-              >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-hover text-gray-dark">
-                  {r.icon}
-                </span>
-                <span className="flex-1 text-[18px] font-medium text-gray-dark">{r.label}</span>
-                <span className="shrink-0 text-gray-light transition-colors group-hover:text-gray-dark">
-                  <ExternalIcon />
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <div className="p-3">
+          <ResourceList />
+        </div>
       </section>
     </div>
   );

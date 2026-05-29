@@ -638,9 +638,13 @@ function StudioLayout({ session }: { session: Session }) {
           Sticky top-4 effectively pins it to the right hand side as a fixed
           element. Height capped so the chat input is always above the fold. */}
       <aside
-        className="hidden lg:fixed lg:top-20 lg:block lg:w-[340px]"
+        className="hidden lg:fixed lg:block lg:w-[340px]"
         style={{
-          height: "calc(100vh - 6.5rem)",
+          // Top of rail aligns with top of video: ~64px sticky TopNav +
+          // 24px LiveSession lg:py-6 padding = 88px. Height fills viewport
+          // with a 24px breathing gap at the bottom.
+          top: "88px",
+          height: "calc(100vh - 112px)",
           right: "calc(max(0px, (100vw - 1440px) / 2) + 16px)",
         }}
       >

@@ -57,7 +57,7 @@ export default function ChatRail({ onReact }: Props) {
         {tab === "polls" && <PollsPane />}
         {tab === "resources" && (
           <div className="min-h-0 flex-1 overflow-y-auto p-3">
-            <Resources />
+            <Resources compact />
           </div>
         )}
       </div>
