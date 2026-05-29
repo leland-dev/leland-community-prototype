@@ -29,8 +29,11 @@ export default function ChatRail({ onReact }: Props) {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
-      {/* Tab strip — floats above the panel, no card frame around it. */}
-      <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* Tab strip — floats above the panel, no card frame around it.
+          py-1 gives the active pill's ring-2 vertical breathing room so
+          it doesn't get clipped by overflow-x-auto. -my-1 cancels that
+          padding from the outside so layout above/below is unchanged. */}
+      <div className="-my-1 flex shrink-0 items-center gap-1.5 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <TabPill active={tab === "chat"} onClick={() => setTab("chat")}>
           Chat
         </TabPill>
@@ -76,10 +79,10 @@ function TabPill({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[13px] font-semibold transition-all ${
+      className={`flex shrink-0 items-center gap-1 rounded-full bg-gray-hover px-3 py-1.5 text-[13px] font-semibold transition-all ${
         active
-          ? "bg-gray-hover text-gray-dark ring-2 ring-gray-dark"
-          : "text-gray-light hover:bg-gray-hover hover:text-gray-dark"
+          ? "text-gray-dark ring-2 ring-gray-dark"
+          : "text-gray-light hover:text-gray-dark"
       }`}
     >
       {children}
