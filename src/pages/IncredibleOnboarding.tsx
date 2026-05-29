@@ -317,39 +317,10 @@ function semanticMatchAll(text: string, choices: Choice[]): MatchResult[] {
   }));
 }
 
-/* ─────────────── calendly slot generation ─────────────── */
+/* ─────────────── calendly ─────────────── */
 
-type Slot = { label: string; iso: string };
-
-function generateCalendlySlots(count = 8): Slot[] {
-  const out: Slot[] = [];
-  const hours = [10, 14, 16]; // 10am, 2pm, 4pm
-  const start = new Date();
-  let dayOffset = 1;
-  while (out.length < count && dayOffset < 14) {
-    const day = new Date(start);
-    day.setDate(day.getDate() + dayOffset);
-    dayOffset += 1;
-    if (day.getDay() === 0 || day.getDay() === 6) continue; // skip weekends
-    for (const h of hours) {
-      const t = new Date(day);
-      t.setHours(h, 0, 0, 0);
-      const dayLabel = t.toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      });
-      const timeLabel = t.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      });
-      out.push({ label: `${dayLabel} · ${timeLabel}`, iso: t.toISOString() });
-      if (out.length >= count) break;
-    }
-  }
-  return out;
-}
+const CALENDLY_URL =
+  "https://calendly.com/d/4cs-hhf-zsx/meet-with-the-leland-team";
 
 /* ─────────────── answers + flow ─────────────── */
 
@@ -1224,12 +1195,31 @@ export default function IncredibleOnboarding() {
                     pending={pending}
                     setPending={setPending}
                     onSubmit={submitAnswer}
-                    onCalendlyPick={(slot) => {
+                    onCalendlyBooked={(uri) => {
                       if (!currentRef) return;
-                      commitAnswer(currentRef, slot.iso, {
-                        userBubble: slot.label,
-                        aiAck: `Locked in — see you ${slot.label}. We'll send a calendar invite to your email.`,
+                      commitAnswer(currentRef, uri || "scheduled", {
+                        userBubble: "Booked my call ✓",
+                        aiAck:
+                          "Locked in — Calendly sent the confirmation to your email. One last quick question.",
                       });
+                    }}
+                    onCalendlySkip={() => {
+                      if (!currentRef) return;
+                      commitAnswer(currentRef, "skipped", {
+                        userBubble: "I'll book later",
+                        aiAck:
+                          "No worries — we'll follow up with options later. One last quick question.",
+                      });
+                    }}
+                    calendlyPrefill={{
+                      name:
+                        typeof answers["_name"] === "string"
+                          ? (answers["_name"] as string)
+                          : undefined,
+                      email:
+                        typeof answers["_email"] === "string"
+                          ? (answers["_email"] as string)
+                          : undefined,
                     }}
                     input={input}
                     setInput={setInput}
@@ -1365,7 +1355,9 @@ function ChatCard({
   pending,
   setPending,
   onSubmit,
-  onCalendlyPick,
+  onCalendlyBooked,
+  onCalendlySkip,
+  calendlyPrefill,
   input,
   setInput,
   onTextSubmit,
@@ -1377,7 +1369,9 @@ function ChatCard({
   pending: string[];
   setPending: (s: string[]) => void;
   onSubmit: (v: AnswerValue) => void;
-  onCalendlyPick: (slot: Slot) => void;
+  onCalendlyBooked: (eventUri: string) => void;
+  onCalendlySkip: () => void;
+  calendlyPrefill?: { name?: string; email?: string };
   input: string;
   setInput: (s: string) => void;
   onTextSubmit: (text: string) => void;
@@ -1438,7 +1432,12 @@ function ChatCard({
       {/* Field-specific picker */}
       {currentField && isCalendly && (
         <div className="border-t border-gray-stroke/70 px-4 py-3 md:px-6">
-          <CalendlyPicker onPick={onCalendlyPick} />
+          <CalendlyEmbed
+            url={CALENDLY_URL}
+            prefill={calendlyPrefill}
+            onBooked={onCalendlyBooked}
+            onSkip={onCalendlySkip}
+          />
         </div>
       )}
       {currentField && !isCalendly && currentField.choices.length > 0 && (
@@ -1494,8 +1493,85 @@ function ChatCard({
   );
 }
 
-function CalendlyPicker({ onPick }: { onPick: (slot: Slot) => void }) {
-  const slots = useMemo(() => generateCalendlySlots(8), []);
+function CalendlyEmbed({
+  url,
+  prefill,
+  onBooked,
+  onSkip,
+}: {
+  url: string;
+  prefill?: { name?: string; email?: string };
+  onBooked: (eventUri: string) => void;
+  onSkip: () => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Load Calendly's widget.js once, then init the inline widget into our div.
+  useEffect(() => {
+    let cancelled = false;
+    const SCRIPT_SRC = "https://assets.calendly.com/assets/external/widget.js";
+
+    const init = () => {
+      if (cancelled) return;
+      const C = (window as unknown as { Calendly?: any }).Calendly;
+      if (!C || !containerRef.current) return;
+      // Clear any prior render (React strict-mode double-mount, prefill changes)
+      containerRef.current.innerHTML = "";
+      C.initInlineWidget({
+        url,
+        parentElement: containerRef.current,
+        prefill: prefill ?? {},
+        utm: {},
+      });
+    };
+
+    if ((window as unknown as { Calendly?: any }).Calendly) {
+      init();
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (!document.querySelector(`script[src="${SCRIPT_SRC}"]`)) {
+      const s = document.createElement("script");
+      s.src = SCRIPT_SRC;
+      s.async = true;
+      document.head.appendChild(s);
+    }
+
+    // Poll for Calendly to be ready (covers both first-load and races where
+    // the script tag exists but the load event has already fired).
+    const poll = setInterval(() => {
+      if ((window as unknown as { Calendly?: any }).Calendly) {
+        clearInterval(poll);
+        init();
+      }
+    }, 100);
+    const safety = setTimeout(() => clearInterval(poll), 10000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(poll);
+      clearTimeout(safety);
+    };
+  }, [url, prefill?.name, prefill?.email]);
+
+  // Capture the booking event from Calendly's postMessage stream.
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      const d = e.data;
+      if (!d || typeof d !== "object") return;
+      if (typeof d.event !== "string" || !d.event.startsWith("calendly.")) return;
+      if (d.event === "calendly.event_scheduled") {
+        const uri: string =
+          d.payload?.event?.uri ?? d.payload?.invitee?.uri ?? "";
+        onBooked(uri);
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [onBooked]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 4 }}
@@ -1506,25 +1582,20 @@ function CalendlyPicker({ onPick }: { onPick: (slot: Slot) => void }) {
       <div className="flex items-center justify-between text-[12px] text-gray-light">
         <span className="inline-flex items-center gap-1.5">
           <Calendar size={12} className="text-primary" />
-          Pick a time — 30 min, Zoom
+          Pick a time — Calendly will email your confirmation
         </span>
-        <span>All times your local zone</span>
+        <button
+          onClick={onSkip}
+          className="font-semibold text-gray-light transition-colors hover:text-gray-dark"
+        >
+          I&rsquo;ll book later →
+        </button>
       </div>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {slots.map((s) => (
-          <button
-            key={s.iso}
-            onClick={() => onPick(s)}
-            className="group inline-flex items-center justify-between gap-2 rounded-xl border border-gray-stroke bg-white px-3 py-2 text-left text-[13px] font-semibold text-gray-dark transition-colors hover:border-primary/55 hover:bg-primary-xlight"
-          >
-            <span>{s.label}</span>
-            <ArrowRight
-              size={12}
-              className="text-gray-xlight transition-colors group-hover:text-primary"
-            />
-          </button>
-        ))}
-      </div>
+      <div
+        ref={containerRef}
+        className="calendly-inline-widget overflow-hidden rounded-xl border border-gray-stroke bg-white"
+        style={{ minWidth: 320, height: 700 }}
+      />
     </motion.div>
   );
 }
