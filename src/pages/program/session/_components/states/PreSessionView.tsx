@@ -6,5 +6,12 @@ import PreSessionCover from "../blocks/PreSessionCover";
 // canvas → title → tabs+share → tab content; right rail with signpost on
 // top and chat below. The canvas swaps to a countdown cover.
 export default function PreSessionView({ session }: { session: Session }) {
-  return <StudioShell session={session} canvas={<PreSessionCover session={session} />} progress={0} />;
+  return (
+    <StudioShell
+      session={session}
+      canvas={<PreSessionCover session={session} />}
+      progress={0}
+      hideRail
+    />
+  );
 }

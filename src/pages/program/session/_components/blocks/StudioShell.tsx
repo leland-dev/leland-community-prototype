@@ -23,13 +23,19 @@ type Props = {
   canvas: ReactNode;
   /** Signpost progress 0–1 — defaults differ per state (0 pre, 1 ended). */
   progress?: number;
+  /** Drop the right rail (signpost + chat). Used for pre-session where the
+   *  slide preview doesn't exist yet and chat would be empty. */
+  hideRail?: boolean;
 };
 
-export default function StudioShell({ session, canvas, progress }: Props) {
+export default function StudioShell({ session, canvas, progress, hideRail = false }: Props) {
   const [tab, setTab] = useState<Tab>("guide");
 
   return (
-    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_340px] lg:gap-6">
+    <div className={hideRail
+      ? "grid grid-cols-1 gap-3 lg:gap-6"
+      : "grid grid-cols-1 gap-3 lg:grid-cols-[1fr_340px] lg:gap-6"}>
+
       {/* LEFT COLUMN — canvas → title → tabs+share → tab content.
           Padded on mobile so the title/tabs/content sit inside 16px gutters,
           but the canvas itself breaks out with -mx-4 to edge-bleed. */}
@@ -58,26 +64,30 @@ export default function StudioShell({ session, canvas, progress }: Props) {
         <TabContent tab={tab} />
       </div>
 
-      {/* RIGHT COLUMN (desktop only) — signpost on top, chat below. */}
-      <aside
-        className="hidden lg:fixed lg:top-20 lg:block lg:w-[340px]"
-        style={{
-          height: "calc(100vh - 6.5rem)",
-          right: "calc(max(0px, (100vw - 1440px) / 2) + 16px)",
-        }}
-      >
-        <div className="flex h-full flex-col gap-3">
-          <div
-            className="relative shrink-0 overflow-hidden rounded-2xl bg-black"
-            style={{ aspectRatio: "16 / 9" }}
-          >
-            <RailSignpost session={session} progress={progress} />
+      {/* RIGHT COLUMN (desktop only) — signpost on top, chat below.
+          Suppressed when hideRail is set (pre-session has no slide preview
+          and no live chat yet). */}
+      {!hideRail && (
+        <aside
+          className="hidden lg:fixed lg:top-20 lg:block lg:w-[340px]"
+          style={{
+            height: "calc(100vh - 6.5rem)",
+            right: "calc(max(0px, (100vw - 1440px) / 2) + 16px)",
+          }}
+        >
+          <div className="flex h-full flex-col gap-3">
+            <div
+              className="relative shrink-0 overflow-hidden rounded-2xl bg-black"
+              style={{ aspectRatio: "16 / 9" }}
+            >
+              <RailSignpost session={session} progress={progress} />
+            </div>
+            <div className="min-h-0 flex-1">
+              <ChatPanel />
+            </div>
           </div>
-          <div className="min-h-0 flex-1">
-            <ChatPanel />
-          </div>
-        </div>
-      </aside>
+        </aside>
+      )}
     </div>
   );
 }
