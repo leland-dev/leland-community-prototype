@@ -26,9 +26,9 @@ export default function ChatRail({ chatAboveInput }: Props) {
   const [tab, setTab] = useState<Tab>("chat");
 
   return (
-    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-gray-stroke bg-white">
-      {/* Tab strip */}
-      <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-gray-stroke px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex h-full min-h-0 flex-col gap-2">
+      {/* Tab strip — floats above the panel, no card frame around it. */}
+      <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <TabPill active={tab === "chat"} onClick={() => setTab("chat")}>
           Chat
         </TabPill>
@@ -43,8 +43,8 @@ export default function ChatRail({ chatAboveInput }: Props) {
         </TabPill>
       </div>
 
-      {/* Body */}
-      <div className="flex min-h-0 flex-1 flex-col">
+      {/* Content card — rounded box below the tabs. */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white">
         {tab === "chat" && (
           <ChatPanel hideHeader aboveInput={chatAboveInput} />
         )}

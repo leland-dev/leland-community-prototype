@@ -712,9 +712,8 @@ function StudioLayout({ session }: { session: Session }) {
       <BottomTray open={chatTrayOpen} title="Chat" onClose={() => setChatTrayOpen(false)}>
         <ChatPanel
           hideHeader
-          aboveInput={
-            <ReactionBar onReact={pushReaction} />
-          }
+          large
+          aboveInput={<ReactionBar onReact={pushReaction} />}
         />
       </BottomTray>
     </div>

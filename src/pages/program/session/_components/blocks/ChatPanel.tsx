@@ -41,7 +41,14 @@ const SCRIPT: { delay: number; msg: Message }[] = [
 export default function ChatPanel({
   hideHeader,
   aboveInput,
-}: { hideHeader?: boolean; aboveInput?: import("react").ReactNode } = {}) {
+  large = false,
+}: {
+  hideHeader?: boolean;
+  aboveInput?: import("react").ReactNode;
+  /** Use mobile-comment style rows (bigger avatars, 16-17px type). When
+   *  false (default) the panel uses the desktop-rail compact rows. */
+  large?: boolean;
+} = {}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
@@ -197,14 +204,10 @@ export default function ChatPanel({
                    hover:[&::-webkit-scrollbar-thumb]:bg-black/15"
         style={{ scrollbarWidth: "thin", scrollbarColor: "transparent transparent" }}
       >
-        {/* hideHeader is true only when ChatPanel renders inside the mobile
-            BottomTray — use that as the signal to switch to the larger
-            post-comment styling (44px avatars, 17px text). Desktop right rail
-            keeps the compact look. */}
-        <ul className={`flex flex-col ${hideHeader ? "gap-5" : "gap-3"}`}>
+        {/* `large` switches to mobile-comment styling (bigger avatars and
+            16/17px type). Desktop rail keeps the compact rows. */}
+        <ul className={`flex flex-col ${large ? "gap-4" : "gap-2.5"}`}>
           {topLevelMessages.map((m) => {
-            // System events (purchases, hand-raises, joins) render as a
-            // centered notice — no avatar, no reply/pin/delete actions.
             if (m.system) {
               return (
                 <li key={m.id}>
@@ -221,12 +224,12 @@ export default function ChatPanel({
                   onPin={() => togglePin(m.id)}
                   onDelete={() => deleteMessage(m.id)}
                   isPinned={pinnedId === m.id}
-                  large={hideHeader}
+                  large={large}
                 />
                 {replies.length > 0 && (
                   <ul
                     className={`flex flex-col border-l-2 border-gray-stroke ${
-                      hideHeader ? "mt-3 ml-[28px] gap-4 pl-3" : "mt-2 ml-[22px] gap-3 pl-3"
+                      large ? "mt-3 ml-[24px] gap-3 pl-3" : "mt-2 ml-[18px] gap-2.5 pl-3"
                     }`}
                   >
                     {replies.map((r) => (
@@ -237,8 +240,8 @@ export default function ChatPanel({
                           onPin={() => togglePin(r.id)}
                           onDelete={() => deleteMessage(r.id)}
                           isPinned={pinnedId === r.id}
-                          small={!hideHeader}
-                          large={hideHeader}
+                          small={!large}
+                          large={large}
                         />
                       </li>
                     ))}
@@ -329,16 +332,17 @@ function MessageRow({
   /** Use the larger post-comment styling — 44px avatar, 17px text. */
   large?: boolean;
 }) {
-  // Three styles:
-  //   - small  → 24px avatar, used for desktop right-rail nested replies
-  //   - large  → 44px avatar + 17px text, matches feed post comments (mobile)
-  //   - normal → 32px avatar, used for desktop right-rail top-level messages
-  const avatarSize = large ? "h-11 w-11" : small ? "h-6 w-6" : "h-8 w-8";
+  // Three styles (all smaller than the original to read better in the
+  // compact chat rail):
+  //   - small  → 20px avatar, used for desktop right-rail nested replies
+  //   - large  → 36px avatar + 15px text, matches mobile chat tray
+  //   - normal → 28px avatar, desktop right-rail top-level messages
+  const avatarSize = large ? "h-9 w-9" : small ? "h-5 w-5" : "h-7 w-7";
   const nameClass = large
-    ? "text-[17px] font-medium text-gray-dark"
+    ? "text-[15px] font-semibold text-gray-dark"
     : "text-[14px] font-semibold text-gray-dark";
   const bodyClass = large
-    ? "mt-0.5 text-[17px] leading-[1.4] text-gray-dark"
+    ? "mt-0.5 text-[15px] leading-[1.4] text-gray-dark"
     : "mt-0.5 text-[14px] leading-[1.45] text-gray-dark";
   const badgeClass = large
     ? "rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em]"
@@ -425,24 +429,42 @@ function MessageRow({
 }
 
 // ── System notice row ─────────────────────────────────────────────
-// Plain inline text — no card, no stripe, no badge. For purchase
-// events the "Book yours" tail is a text link, not a button. Joined
-// events render as muted single-line text.
+// Purchase events render as a mini banner — avatar + body + Book yours
+// CTA on a subtle green-tinted background (no stripe). Joined events
+// render as a quiet row with avatar + muted text, same scale as a
+// regular chat message so they read as part of the conversation.
 function SystemNotice({ m }: { m: Message }) {
+  if (m.system === "purchase") {
+    return (
+      <div className="flex items-center gap-2.5 rounded-lg bg-[#038561]/8 px-2.5 py-2">
+        <img
+          src={m.avatar}
+          alt=""
+          className="h-7 w-7 shrink-0 rounded-full object-cover"
+          style={{ objectPosition: "50% 15%" }}
+        />
+        <div className="min-w-0 flex-1 text-[14px] leading-snug text-gray-dark">
+          {m.body}
+        </div>
+        <a
+          href="#"
+          className="shrink-0 rounded-full bg-[#038561] px-3 py-1.5 text-[12px] font-semibold text-white no-underline transition-colors hover:bg-[#038561]/90"
+        >
+          Book yours
+        </a>
+      </div>
+    );
+  }
+  // joined / other — sits inline with the conversation
   return (
-    <div className="px-1 py-1 text-[13px] leading-snug text-gray-light">
-      {m.body}
-      {m.system === "purchase" && (
-        <>
-          .{" "}
-          <a
-            href="#"
-            className="font-semibold text-[#038561] no-underline hover:underline"
-          >
-            Book yours
-          </a>
-        </>
-      )}
+    <div className="flex items-center gap-3">
+      <img
+        src={m.avatar}
+        alt=""
+        className="h-7 w-7 shrink-0 rounded-full object-cover"
+        style={{ objectPosition: "50% 15%" }}
+      />
+      <div className="text-[14px] text-gray-light">{m.body}</div>
     </div>
   );
 }
