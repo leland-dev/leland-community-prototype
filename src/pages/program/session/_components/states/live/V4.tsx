@@ -14,7 +14,6 @@ import sharesIcon from "../../../../../../assets/icons/shares.svg";
 import CoachScreenShare from "../../blocks/CoachScreenShare";
 import BuildScreen from "../../blocks/BuildScreen";
 import CoachFacePip from "../../blocks/CoachFacePip";
-import CoachFaceVideo from "../../blocks/CoachFaceVideo";
 import SessionGuide from "../../blocks/SessionGuide";
 import Resources from "../../blocks/Resources";
 import ChatPanel from "../../blocks/ChatPanel";
@@ -457,11 +456,13 @@ function StudioLayout({ session }: { session: Session }) {
               className="absolute inset-0 overflow-hidden bg-black lg:rounded-2xl lg:shadow-lg"
               onClick={showControlsBriefly}
             >
-              {/* DESKTOP: main canvas is the coach's active app (Claude).
-                  The face cam + slide signpost both live in the right rail
-                  below — not overlaid here. */}
-              <div className="hidden h-full w-full lg:block">
+              {/* DESKTOP: main canvas = Claude Code terminal. Coach face
+                  overlays the build canvas as a small PIP in the top-right
+                  corner (out of the right rail now). Slide signpost still
+                  lives in the right rail. */}
+              <div className="relative hidden h-full w-full lg:block">
                 <BuildScreen />
+                <CoachFacePip coach={session.coach} position="top-right" />
               </div>
 
               {/* MOBILE: single-feed fallback (slide + face PIP overlay).
@@ -478,6 +479,15 @@ function StudioLayout({ session }: { session: Session }) {
                 onTogglePip={togglePip}
                 mobileVisible={controlsVisible}
               />
+              {/* Share button overlays the video at 16px bottom-right. Sits
+                  above VideoControls (z-20 > z-10) so it stays visible when
+                  the control bar is up. Desktop-only — mobile has its own
+                  YouTube-style controls and doesn't need a separate share. */}
+              <div className="pointer-events-none absolute bottom-4 right-4 z-20 hidden lg:block">
+                <div className="pointer-events-auto">
+                  <ShareButton />
+                </div>
+              </div>
               <RateSessionPopup suppressed={isPip} />
             </div>
           )}
@@ -503,10 +513,6 @@ function StudioLayout({ session }: { session: Session }) {
             }}
             tabs={tabs}
           />
-          <div className="flex shrink-0 items-center gap-2">
-            <ThumbsPill />
-            <ShareButton />
-          </div>
         </div>
 
         <TabContent tab={tab} />
@@ -523,14 +529,8 @@ function StudioLayout({ session }: { session: Session }) {
         }}
       >
         <div className="flex h-full flex-col gap-3">
-          {/* Coach face cam — top tile in the rail */}
-          <div
-            className="shrink-0 overflow-hidden rounded-2xl bg-black"
-            style={{ aspectRatio: "16 / 9" }}
-          >
-            <CoachFaceVideo coach={session.coach} fill />
-          </div>
-          {/* Slide signpost — the second "screen" the coach is sharing */}
+          {/* Slide signpost — now the top tile in the rail. The face cam
+              moved out of the rail and onto the build canvas as a PIP. */}
           <div
             className="relative shrink-0 overflow-hidden rounded-2xl bg-black"
             style={{ aspectRatio: "16 / 9" }}
