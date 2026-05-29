@@ -1397,9 +1397,20 @@ function ChatCard({
             : "Type your answer…";
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-card">
+    <div
+      className="flex flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-card"
+      // Keep the card to a viewport-aware height so new messages scroll
+      // INSIDE the messages area instead of growing the card down the page.
+      // When the user reaches the Calendly question, drop the cap so the
+      // 700px embed has room to render.
+      style={
+        isCalendly
+          ? undefined
+          : { maxHeight: "min(620px, calc(100svh - 200px))" }
+      }
+    >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-stroke px-5 py-3.5">
+      <div className="flex shrink-0 items-center justify-between border-b border-gray-stroke px-5 py-3.5">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-dark-green to-primary">
             <Sparkles size={15} className="text-white" />
@@ -1416,11 +1427,10 @@ function ChatCard({
         </span>
       </div>
 
-      {/* Messages */}
+      {/* Messages — flex-1 so it fills remaining space and scrolls internally */}
       <div
         ref={scrollRef}
-        className="flex-1 space-y-3 overflow-y-auto px-4 py-4 md:px-6"
-        style={{ height: 340 }}
+        className="min-h-[260px] flex-1 space-y-3 overflow-y-auto px-4 py-4 md:px-6"
       >
         <AnimatePresence initial={false}>
           {messages.map((m, i) => (
@@ -1429,9 +1439,9 @@ function ChatCard({
         </AnimatePresence>
       </div>
 
-      {/* Field-specific picker */}
+      {/* Field-specific picker — shrink-0 so it stays visible */}
       {currentField && isCalendly && (
-        <div className="border-t border-gray-stroke/70 px-4 py-3 md:px-6">
+        <div className="shrink-0 border-t border-gray-stroke/70 px-4 py-3 md:px-6">
           <CalendlyEmbed
             url={CALENDLY_URL}
             prefill={calendlyPrefill}
@@ -1441,7 +1451,7 @@ function ChatCard({
         </div>
       )}
       {currentField && !isCalendly && currentField.choices.length > 0 && (
-        <div className="border-t border-gray-stroke/70 px-4 py-3 md:px-6">
+        <div className="max-h-[180px] shrink-0 overflow-y-auto border-t border-gray-stroke/70 px-4 py-3 md:px-6">
           <QuickReplies
             field={currentField}
             pending={pending}
@@ -1457,7 +1467,7 @@ function ChatCard({
           e.preventDefault();
           onTextSubmit(input);
         }}
-        className="flex items-center gap-2 border-t border-gray-stroke bg-white px-4 py-3 md:px-6"
+        className="flex shrink-0 items-center gap-2 border-t border-gray-stroke bg-white px-4 py-3 md:px-6"
       >
         <div className="flex flex-1 items-center gap-2 rounded-xl border border-gray-stroke bg-gray-hover px-3 py-2 transition-colors focus-within:border-primary/50 focus-within:bg-white">
           <input
@@ -1505,63 +1515,17 @@ function CalendlyEmbed({
   onSkip: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
 
-  // Load Calendly's widget.js once, then init the inline widget into our div.
-  useEffect(() => {
-    let cancelled = false;
-    const SCRIPT_SRC = "https://assets.calendly.com/assets/external/widget.js";
-
-    const init = () => {
-      if (cancelled) return;
-      const C = (window as unknown as { Calendly?: any }).Calendly;
-      if (!C || !containerRef.current) return;
-      // Clear any prior render (React strict-mode double-mount, prefill changes)
-      containerRef.current.innerHTML = "";
-      C.initInlineWidget({
-        url,
-        parentElement: containerRef.current,
-        prefill: prefill ?? {},
-        utm: {},
-      });
-    };
-
-    if ((window as unknown as { Calendly?: any }).Calendly) {
-      init();
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    if (!document.querySelector(`script[src="${SCRIPT_SRC}"]`)) {
-      const s = document.createElement("script");
-      s.src = SCRIPT_SRC;
-      s.async = true;
-      document.head.appendChild(s);
-    }
-
-    // Poll for Calendly to be ready (covers both first-load and races where
-    // the script tag exists but the load event has already fired).
-    const poll = setInterval(() => {
-      if ((window as unknown as { Calendly?: any }).Calendly) {
-        clearInterval(poll);
-        init();
-      }
-    }, 100);
-    const safety = setTimeout(() => clearInterval(poll), 10000);
-
-    return () => {
-      cancelled = true;
-      clearInterval(poll);
-      clearTimeout(safety);
-    };
-  }, [url, prefill?.name, prefill?.email]);
-
-  // Capture the booking event from Calendly's postMessage stream.
+  // Capture booking from Calendly's postMessage stream
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
       const d = e.data;
       if (!d || typeof d !== "object") return;
-      if (typeof d.event !== "string" || !d.event.startsWith("calendly.")) return;
+      if (typeof d.event !== "string" || !d.event.startsWith("calendly."))
+        return;
       if (d.event === "calendly.event_scheduled") {
         const uri: string =
           d.payload?.event?.uri ?? d.payload?.invitee?.uri ?? "";
@@ -1571,6 +1535,69 @@ function CalendlyEmbed({
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, [onBooked]);
+
+  // Load Calendly's widget.js, then init the inline widget into our div.
+  useEffect(() => {
+    let cancelled = false;
+    const SCRIPT_SRC =
+      "https://assets.calendly.com/assets/external/widget.js";
+
+    const init = (): boolean => {
+      if (cancelled) return false;
+      const C = (window as unknown as { Calendly?: any }).Calendly;
+      if (!C || !containerRef.current) return false;
+      try {
+        containerRef.current.innerHTML = "";
+        C.initInlineWidget({
+          url,
+          parentElement: containerRef.current,
+          prefill: prefill ?? {},
+          utm: {},
+        });
+        setStatus("ready");
+        return true;
+      } catch {
+        setStatus("error");
+        return false;
+      }
+    };
+
+    if (init()) return () => { cancelled = true; };
+
+    // Ensure the script is in the DOM
+    let script = document.querySelector<HTMLScriptElement>(
+      `script[src="${SCRIPT_SRC}"]`,
+    );
+    if (!script) {
+      script = document.createElement("script");
+      script.src = SCRIPT_SRC;
+      script.async = true;
+      script.addEventListener("error", () => setStatus("error"));
+      document.head.appendChild(script);
+    }
+
+    const onLoad = () => init();
+    script.addEventListener("load", onLoad);
+
+    // Backup polling — covers the case where the script already loaded
+    // before this effect attached its listener (strict-mode remount, etc).
+    const poll = window.setInterval(() => {
+      if (init()) window.clearInterval(poll);
+    }, 250);
+
+    // Bail out after 10s and show the fallback so the user always has a path.
+    const safety = window.setTimeout(() => {
+      window.clearInterval(poll);
+      setStatus((s) => (s === "ready" ? s : "error"));
+    }, 10_000);
+
+    return () => {
+      cancelled = true;
+      script?.removeEventListener("load", onLoad);
+      window.clearInterval(poll);
+      window.clearTimeout(safety);
+    };
+  }, [url, prefill?.name, prefill?.email]);
 
   return (
     <motion.div
@@ -1591,11 +1618,45 @@ function CalendlyEmbed({
           I&rsquo;ll book later →
         </button>
       </div>
-      <div
-        ref={containerRef}
-        className="calendly-inline-widget overflow-hidden rounded-xl border border-gray-stroke bg-white"
-        style={{ minWidth: 320, height: 700 }}
-      />
+      <div className="relative">
+        <div
+          ref={containerRef}
+          className="calendly-inline-widget overflow-hidden rounded-xl border border-gray-stroke bg-white"
+          data-url={url}
+          style={{ minWidth: 320, height: 700 }}
+        />
+        {status === "loading" && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white">
+            <div className="flex flex-col items-center gap-3 text-gray-light">
+              <TypingDots />
+              <p className="text-[12px]">Loading Calendly…</p>
+            </div>
+          </div>
+        )}
+        {status === "error" && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white p-6 text-center">
+            <p className="text-[14px] font-semibold text-gray-dark">
+              Couldn&rsquo;t load the in-page scheduler.
+            </p>
+            <p className="text-[12.5px] text-gray-light">
+              An ad blocker or network policy may be blocking{" "}
+              <span className="font-mono text-[11.5px]">
+                assets.calendly.com
+              </span>
+              .
+            </p>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-[13px] font-semibold text-white shadow-md transition-colors hover:bg-dark-green"
+            >
+              Open Calendly in a new tab
+              <ArrowRight size={13} />
+            </a>
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 }
