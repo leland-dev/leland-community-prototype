@@ -19,6 +19,8 @@ import Resources from "../../blocks/Resources";
 import ChatPanel from "../../blocks/ChatPanel";
 import RateSessionPopup from "../../blocks/RateSessionPopup";
 import BottomTray from "../../blocks/BottomTray";
+import FloatingReactions, { type Reaction } from "../../blocks/FloatingReactions";
+import ReactionBar from "../../blocks/ReactionBar";
 
 type Tab = "guide" | "resources" | "chat";
 
@@ -399,6 +401,37 @@ function StudioLayout({ session }: { session: Session }) {
     };
   }, []);
 
+  // ── Live reactions (V5's "Twitch" feel) ────────────────────────────────
+  // Each reaction has a short lifetime — we drop it from state after the
+  // animation completes (~3s). State is just an append-only queue.
+  const [reactions, setReactions] = useState<Reaction[]>([]);
+  const reactionIdRef = useRef(0);
+  function pushReaction(emoji: string) {
+    const id = `r-${++reactionIdRef.current}`;
+    setReactions((prev) => [...prev, { id, emoji }]);
+    window.setTimeout(() => {
+      setReactions((prev) => prev.filter((r) => r.id !== id));
+    }, 3000);
+  }
+
+  // Ambient reactions — keeps the stream feeling populated. A random emoji
+  // pops every 1.4–3s on top of whatever the user fires. In real life this
+  // would be driven by other students' real reactions over the wire.
+  useEffect(() => {
+    const pool = ["👍", "🎉", "❤️", "😂", "🤯", "🙌", "🔥"];
+    let timer: number;
+    const tick = () => {
+      pushReaction(pool[Math.floor(Math.random() * pool.length)]);
+      timer = window.setTimeout(tick, 1400 + Math.random() * 1600);
+    };
+    timer = window.setTimeout(tick, 800);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  // Raise-hand toggle. Sticky until the user lowers it. In a real impl this
+  // posts to a stage-request endpoint the coach can see.
+  const [handRaised, setHandRaised] = useState(false);
+
   // Mobile-only: Chat is a pivot tab that pops up a bottom tray.
   const [chatTrayOpen, setChatTrayOpen] = useState(false);
 
@@ -463,6 +496,7 @@ function StudioLayout({ session }: { session: Session }) {
               <div className="relative hidden h-full w-full lg:block">
                 <BuildScreen />
                 <CoachFacePip coach={session.coach} position="top-right" />
+                <FloatingReactions reactions={reactions} />
               </div>
 
               {/* MOBILE: single-feed fallback (slide + face PIP overlay).
@@ -472,6 +506,7 @@ function StudioLayout({ session }: { session: Session }) {
                 <CoachScreenShare>
                   <CoachFacePip coach={session.coach} position="top-right" />
                 </CoachScreenShare>
+                <FloatingReactions reactions={reactions} />
               </div>
 
               <VideoControls
@@ -529,7 +564,15 @@ function StudioLayout({ session }: { session: Session }) {
             view + face PIP already carry the active "what's happening" load
             and the slide preview wasn't pulling its weight. */}
         <div className="flex h-full flex-col">
-          <ChatPanel />
+          <ChatPanel
+            aboveInput={
+              <ReactionBar
+                onReact={pushReaction}
+                handRaised={handRaised}
+                onToggleHand={() => setHandRaised((v) => !v)}
+              />
+            }
+          />
         </div>
       </aside>
 
@@ -583,7 +626,16 @@ function StudioLayout({ session }: { session: Session }) {
           pill is tapped. Uses dvh sizing so the mobile keyboard pushes the
           sheet up gracefully. */}
       <BottomTray open={chatTrayOpen} title="Chat" onClose={() => setChatTrayOpen(false)}>
-        <ChatPanel hideHeader />
+        <ChatPanel
+          hideHeader
+          aboveInput={
+            <ReactionBar
+              onReact={pushReaction}
+              handRaised={handRaised}
+              onToggleHand={() => setHandRaised((v) => !v)}
+            />
+          }
+        />
       </BottomTray>
     </div>
   );

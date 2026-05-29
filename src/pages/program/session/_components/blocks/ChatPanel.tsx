@@ -59,7 +59,10 @@ const INITIAL_MESSAGES: Message[] = [
   { id: "m8", author: "Jordan T.", avatar: pic6, body: "could we slow down on the orchestration step?" },
 ];
 
-export default function ChatPanel({ hideHeader }: { hideHeader?: boolean } = {}) {
+export default function ChatPanel({
+  hideHeader,
+  aboveInput,
+}: { hideHeader?: boolean; aboveInput?: import("react").ReactNode } = {}) {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [draft, setDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
@@ -210,6 +213,10 @@ export default function ChatPanel({ hideHeader }: { hideHeader?: boolean } = {})
           </button>
         </div>
       )}
+
+      {/* Optional caller-provided slot rendered above the input — used by
+          V5 to inject the ReactionBar without forking ChatPanel. */}
+      {aboveInput}
 
       {/* Input */}
       <div className="border-t border-gray-stroke p-4">
