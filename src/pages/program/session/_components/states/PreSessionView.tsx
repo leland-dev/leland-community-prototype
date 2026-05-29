@@ -11,7 +11,6 @@ export default function PreSessionView({ session }: { session: Session }) {
       session={session}
       canvas={<PreSessionCover session={session} />}
       progress={0}
-      hideRail
     />
   );
 }
