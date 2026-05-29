@@ -1,10 +1,9 @@
 import { useMemo } from "react";
 
-// Live reaction stream — anchored to the right edge of the video so it
-// doesn't compete with the slide / build canvas in the middle. Each
-// emoji is small, fades in, drifts up, and fades out softly. Multiple
-// reactions stagger naturally because each instance picks its own
-// random offset, size, and duration.
+// Live reactions — emerge from a right-side gutter and bubble upward
+// with a gentle sine-wave wiggle (left↔right). Each instance picks its
+// own random offset, size, rotation, and duration so a burst feels
+// organic. Ease-in/ease-out at the ends keeps the motion soft.
 
 export type Reaction = {
   id: string;
@@ -17,16 +16,22 @@ type Props = {
 
 export default function FloatingReactions({ reactions }: Props) {
   return (
-    <div className="pointer-events-none absolute bottom-4 right-4 z-20 h-64 w-20 overflow-visible">
+    <div className="pointer-events-none absolute bottom-16 right-3 z-20 h-72 w-24 overflow-visible">
       {reactions.map((r) => (
         <FloatingEmoji key={r.id} emoji={r.emoji} />
       ))}
       <style>{`
-        @keyframes reactFloat {
-          0%   { translate: 0 8px;    opacity: 0; }
-          18%  { translate: 0 0;      opacity: 1; }
-          75%  { translate: 0 -160px; opacity: 1; }
-          100% { translate: 0 -210px; opacity: 0; }
+        /* Wiggle path: y rises steadily; x sweeps left-right-left along the
+           way so the emoji feels alive instead of mechanical. Soft fade-in
+           at the start, soft fade-out toward the top. */
+        @keyframes reactBubble {
+          0%   { translate: 0      6px;    opacity: 0; }
+          10%  { translate: 4px    0;      opacity: 1; }
+          25%  { translate: -10px  -55px;             }
+          45%  { translate: 12px   -120px;            }
+          65%  { translate: -8px   -180px; opacity: 1; }
+          85%  { translate: 6px    -230px;            }
+          100% { translate: -2px   -270px; opacity: 0; }
         }
       `}</style>
     </div>
@@ -34,25 +39,25 @@ export default function FloatingReactions({ reactions }: Props) {
 }
 
 function FloatingEmoji({ emoji }: { emoji: string }) {
-  // Tiny per-instance variation so a burst feels organic. Smaller size
-  // range than before since these now live in a 80px-wide right gutter.
+  // Per-instance variation. Slightly slower than before so the motion
+  // reads as a softer bubble rather than a quick pop.
   const cfg = useMemo(
     () => ({
-      offsetX: Math.random() * 40 - 20, // -20 to +20 px
-      size: 18 + Math.random() * 10, // 18–28 px
-      rotation: Math.random() * 18 - 9, // -9° to +9°
-      duration: 2400 + Math.random() * 600, // 2.4–3.0 s
+      offsetX: Math.random() * 24 - 12, // -12 to +12 px
+      size: 20 + Math.random() * 10, // 20–30 px
+      rotation: Math.random() * 14 - 7, // -7° to +7°
+      duration: 3200 + Math.random() * 900, // 3.2–4.1 s
     }),
     [],
   );
 
   return (
     <span
-      className="absolute bottom-0 right-2 select-none drop-shadow-[0_3px_10px_rgba(0,0,0,0.35)]"
+      className="absolute bottom-0 right-3 select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.28)]"
       style={{
         transform: `translateX(${cfg.offsetX}px) rotate(${cfg.rotation}deg)`,
         fontSize: `${cfg.size}px`,
-        animation: `reactFloat ${cfg.duration}ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards`,
+        animation: `reactBubble ${cfg.duration}ms cubic-bezier(0.32, 0.72, 0.32, 1) forwards`,
       }}
     >
       {emoji}

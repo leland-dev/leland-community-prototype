@@ -89,8 +89,10 @@ export default function StageControls({
 
   return (
     <>
-      {/* ── Top status strip ── always visible. */}
-      <div className="pointer-events-auto absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 bg-black/95 px-4 py-2 text-white">
+      {/* ── Top status strip ── always visible. Light grey matches the
+          pivot chip palette used elsewhere on the page. Top corners
+          rounded so it hugs the rounded video shape. */}
+      <div className="pointer-events-auto absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 bg-gray-hover px-4 py-2 text-gray-dark lg:rounded-t-2xl">
         {/* Left: REC + on-stage chip (if applicable) */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#E2574C]">
@@ -98,22 +100,22 @@ export default function StageControls({
             REC
           </div>
           {isOnStage && (
-            <span className="flex items-center gap-1.5 rounded-full bg-[#A5E446]/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#A5E446]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#A5E446]" />
+            <span className="flex items-center gap-1.5 rounded-full bg-[#038561]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#038561]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#038561]" />
               You're on stage
             </span>
           )}
         </div>
 
         {/* Title centered (hidden below md to avoid crowding) */}
-        <div className="hidden truncate px-4 text-[13px] font-medium text-white/90 md:block">
+        <div className="hidden truncate px-4 text-[13px] font-medium text-gray-dark md:block">
           {session.title}
         </div>
 
         {/* Right cluster: hands chip + participants + timer */}
-        <div className="flex items-center gap-3 text-[12px] text-white/85">
+        <div className="flex items-center gap-3 text-[12px] text-gray-light">
           {raisedHandCount > 0 && (
-            <span className="flex items-center gap-1 rounded-full bg-[#FFD86B]/20 px-2 py-0.5 text-[11px] font-semibold text-[#FFE099]">
+            <span className="flex items-center gap-1 rounded-full bg-[#FFE099] px-2 py-0.5 text-[11px] font-semibold text-[#876C00]">
               <Hand size={12} strokeWidth={2.25} />
               {raisedHandCount} / {participantCount}
             </span>
@@ -129,7 +131,7 @@ export default function StageControls({
 
       {/* ── Bottom control bar ── */}
       <div
-        className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-2 bg-gradient-to-t from-black/80 to-transparent px-3 pb-3 pt-10 transition-opacity duration-200 ease-out ${overlayVisibility}`}
+        className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-2 bg-gradient-to-t from-black/80 to-transparent px-3 pb-3 pt-10 transition-opacity duration-200 ease-out lg:rounded-b-2xl ${overlayVisibility}`}
       >
         {/* Left utility group */}
         <div className="pointer-events-auto flex items-end gap-1">

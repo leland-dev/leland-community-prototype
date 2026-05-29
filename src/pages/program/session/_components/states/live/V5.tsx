@@ -408,12 +408,11 @@ function StudioLayout({ session }: { session: Session }) {
   function bumpStageVisibility() {
     setStageVisible(true);
     if (stageHideTimerRef.current) window.clearTimeout(stageHideTimerRef.current);
-    stageHideTimerRef.current = window.setTimeout(() => setStageVisible(false), 1800);
+    stageHideTimerRef.current = window.setTimeout(() => setStageVisible(false), 2200);
   }
-  function hideStage() {
-    if (stageHideTimerRef.current) window.clearTimeout(stageHideTimerRef.current);
-    setStageVisible(false);
-  }
+  // No onMouseLeave hide — the auto-hide timer above handles dismissal so
+  // brief moves between video and the absolute-positioned StageControls
+  // (which sits on top of the same parent) don't flicker the bar.
   useEffect(() => {
     return () => {
       if (stageHideTimerRef.current) window.clearTimeout(stageHideTimerRef.current);
@@ -564,17 +563,14 @@ function StudioLayout({ session }: { session: Session }) {
             <div
               className="absolute inset-0 overflow-hidden bg-black lg:rounded-2xl lg:shadow-lg"
               onClick={showControlsBriefly}
+              onMouseEnter={bumpStageVisibility}
+              onMouseMove={bumpStageVisibility}
             >
               {/* DESKTOP: main canvas = Claude Code terminal. Coach face
                   overlays the build canvas as a small PIP in the top-right
                   corner (out of the right rail now). Slide signpost still
                   lives in the right rail. */}
-              <div
-                className="relative hidden h-full w-full lg:block"
-                onMouseEnter={bumpStageVisibility}
-                onMouseMove={bumpStageVisibility}
-                onMouseLeave={hideStage}
-              >
+              <div className="relative hidden h-full w-full lg:block">
                 <VibeCodingScreen />
                 <CoachFacePip coach={session.coach} position="top-right" />
                 <FloatingReactions reactions={reactions} />
