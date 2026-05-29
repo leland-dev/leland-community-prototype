@@ -1,9 +1,10 @@
 import { useMemo } from "react";
 
-// Twitch/TikTok-style ambient reactions. The parent owns the queue (so it can
-// also be driven by remote students in a real implementation) and just hands
-// us a list of active reactions to render. Each emoji floats up + fades out
-// over ~2.5s and is then dropped from the queue by the parent.
+// Live reaction stream — anchored to the right edge of the video so it
+// doesn't compete with the slide / build canvas in the middle. Each
+// emoji is small, fades in, drifts up, and fades out softly. Multiple
+// reactions stagger naturally because each instance picks its own
+// random offset, size, and duration.
 
 export type Reaction = {
   id: string;
@@ -16,16 +17,16 @@ type Props = {
 
 export default function FloatingReactions({ reactions }: Props) {
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-64 overflow-hidden">
+    <div className="pointer-events-none absolute bottom-4 right-4 z-20 h-64 w-20 overflow-visible">
       {reactions.map((r) => (
         <FloatingEmoji key={r.id} emoji={r.emoji} />
       ))}
       <style>{`
         @keyframes reactFloat {
-          0%   { translate: 0 0;     opacity: 0; }
-          12%  {                     opacity: 1; }
-          85%  {                     opacity: 1; }
-          100% { translate: 0 -240px; opacity: 0; }
+          0%   { translate: 0 8px;    opacity: 0; }
+          18%  { translate: 0 0;      opacity: 1; }
+          75%  { translate: 0 -160px; opacity: 1; }
+          100% { translate: 0 -210px; opacity: 0; }
         }
       `}</style>
     </div>
@@ -33,26 +34,25 @@ export default function FloatingReactions({ reactions }: Props) {
 }
 
 function FloatingEmoji({ emoji }: { emoji: string }) {
-  // Memo so the random values don't reroll on every render. Each instance
-  // has its own horizontal offset, size, rotation, and duration so a burst
-  // of reactions feels organic rather than mechanical.
+  // Tiny per-instance variation so a burst feels organic. Smaller size
+  // range than before since these now live in a 80px-wide right gutter.
   const cfg = useMemo(
     () => ({
-      offsetX: Math.random() * 140 - 70, // -70 to +70 px around the trigger
-      size: 28 + Math.random() * 18, // 28–46 px
-      rotation: Math.random() * 24 - 12, // -12° to +12°
-      duration: 2200 + Math.random() * 700, // 2.2–2.9 s
+      offsetX: Math.random() * 40 - 20, // -20 to +20 px
+      size: 18 + Math.random() * 10, // 18–28 px
+      rotation: Math.random() * 18 - 9, // -9° to +9°
+      duration: 2400 + Math.random() * 600, // 2.4–3.0 s
     }),
     [],
   );
 
   return (
     <span
-      className="absolute left-1/2 bottom-3 select-none drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
+      className="absolute bottom-0 right-2 select-none drop-shadow-[0_3px_10px_rgba(0,0,0,0.35)]"
       style={{
-        transform: `translateX(calc(-50% + ${cfg.offsetX}px)) rotate(${cfg.rotation}deg)`,
+        transform: `translateX(${cfg.offsetX}px) rotate(${cfg.rotation}deg)`,
         fontSize: `${cfg.size}px`,
-        animation: `reactFloat ${cfg.duration}ms ease-out forwards`,
+        animation: `reactFloat ${cfg.duration}ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards`,
       }}
     >
       {emoji}

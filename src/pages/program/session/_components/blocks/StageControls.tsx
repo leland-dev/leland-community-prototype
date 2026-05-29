@@ -51,17 +51,20 @@ export default function StageControls({
     ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
     : `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 
-  // When hidden, the overlays fade out and stop intercepting taps. The
-  // pointer-events shift is what lets click-through happen — without it, even
-  // an opacity-0 overlay would swallow clicks on the underlying video.
+  // When hidden, the BOTTOM controls fade out and stop intercepting taps.
+  // The TOP status strip stays visible all the time — it's the "always-on"
+  // contextual header (REC + title + viewers + timer) and shouldn't disappear
+  // with the hover-driven controls.
   const overlayVisibility = visible
     ? "opacity-100"
     : "pointer-events-none opacity-0";
 
   return (
     <>
-      {/* ── Top bar overlay ── */}
-      <div className={`pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-3 bg-gradient-to-b from-black/60 to-transparent px-4 pb-8 pt-3 transition-opacity duration-200 ease-out ${overlayVisibility}`}>
+      {/* ── Top status strip ── thin solid black bar so REC / title / viewer
+          count / timer always read against a clean background, not the
+          underlying video. */}
+      <div className="pointer-events-auto absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 bg-black/95 px-4 py-2 text-white">
         {/* REC */}
         <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#E2574C]">
           <span className="h-2 w-2 rounded-full bg-[#E2574C] [animation:stagepulse_1.6s_ease-in-out_infinite]" />
