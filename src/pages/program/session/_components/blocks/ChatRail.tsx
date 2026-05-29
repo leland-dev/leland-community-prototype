@@ -31,10 +31,11 @@ export default function ChatRail({ onReact }: Props) {
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
       {/* Tab strip — floats above the panel, no card frame around it.
-          py-1 gives the active pill's ring-2 vertical breathing room so
-          it doesn't get clipped by overflow-x-auto. -my-1 cancels that
-          padding from the outside so layout above/below is unchanged. */}
-      <div className="-my-1 flex shrink-0 items-center gap-1.5 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          Inset padding (p-1) gives the active pill's ring-2 room to
+          render on all four sides; matching negative margin (-m-1) on
+          the outside cancels it out so the strip's layout footprint is
+          unchanged. */}
+      <div className="-m-1 flex shrink-0 items-center gap-1.5 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <TabPill active={tab === "chat"} onClick={() => setTab("chat")}>
           Chat
         </TabPill>
