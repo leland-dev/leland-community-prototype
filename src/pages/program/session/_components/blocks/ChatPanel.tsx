@@ -420,11 +420,6 @@ function MessageRow({
               className={`shrink-0 ${large ? "h-[14px] w-[14px]" : "h-[13px] w-[13px]"}`}
             />
           )}
-          {m.self && (
-            <span className={`${badgeClass} bg-gray-dark/10 text-gray-dark`}>
-              You
-            </span>
-          )}
           {!m.self && (
             <button
               type="button"
