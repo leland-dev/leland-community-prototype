@@ -55,12 +55,12 @@ const demos: DemoConfig[] = [
     },
     purchasedProps: {
       title: "1h 20m with Jessica",
-      subtitle: "45m available to schedule",
+      subtitle: "45m reserved for upcoming sessions",
       image: pic6,
     },
     fullyScheduledProps: {
       title: "1h 20m with Jessica",
-      subtitle: <>Upcoming session Jun 5 <span className="text-[#9B9B9B]">· 0m left</span></>,
+      subtitle: "1h 20m reserved for upcoming sessions",
       image: pic6,
     },
     exhaustedProps: {
@@ -80,7 +80,7 @@ const demos: DemoConfig[] = [
     },
     purchasedProps: {
       title: "4h 30m with Jessica",
-      subtitle: "45m available to schedule",
+      subtitle: "45m reserved for upcoming sessions",
       image: pic6,
     },
   },
@@ -152,7 +152,7 @@ const defaultOfferings: { type: OfferingType; title: string; subtitle: ReactNode
 
 /* ── Purchased offerings for the live demo ── */
 const purchasedOfferingsDemo: { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string; exhausted?: boolean }[] = [
-  { type: "hourly", title: "1h 20m with Jessica", subtitle: "45m available to schedule", image: pic6 },
+  { type: "hourly", title: "1h 20m with Jessica", subtitle: "45m reserved for upcoming sessions", image: pic6 },
   { type: "hourly", title: "Out of time with Marcus", subtitle: "0m available to schedule", image: pic8, exhausted: true },
   { type: "package", title: "MBA Application Package", subtitle: <>Comprehensive package · <span className="text-[#038561]">Currently active</span></>, image: pic1 },
   { type: "course", title: "GMAT Exam Prep Bootcamp", subtitle: <>Started June 1 <span className="text-[#9B9B9B]">· Next session tomorrow</span></>, image: bootcampImg1 },
