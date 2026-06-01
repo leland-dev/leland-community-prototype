@@ -78,7 +78,7 @@ const mockCourse: CourseData = {
         { id: 10, time: "11:00 AM", recordingUrl: "#" },
         { id: 11, time: "4:00 PM", recordingUrl: "#" },
       ],
-      materials: [{ label: "Session guide", url: "#" }],
+      materials: [{ label: "Session guide", url: "/content-viewer" }],
     },
     {
       id: 2, number: 2, title: "Automate Communication in Your Voice", duration: "90 min", description: "Connect your communication tools, teach AI how you write, and set it up to manage your inbox.", date: "Apr 24", dayOfWeek: "Fri", status: "completed",
