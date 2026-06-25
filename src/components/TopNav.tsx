@@ -19,7 +19,7 @@ import helpIcon from "../assets/icons/help.svg";
 import logOutIcon from "../assets/icons/log out.svg";
 import browserIcon from "../assets/icons/browser.svg";
 import codeIcon from "../assets/icons/code.svg";
-import lelandMark from "../assets/leland-mark.svg";
+import lelandWordmark from "../assets/leland-wordmark.svg";
 
 /* ── Nav links ── */
 const navLinks = [
@@ -119,10 +119,7 @@ export default function TopNav() {
         {/* Left: Logo + Nav links */}
         <div className="flex items-stretch gap-1">
           <NavLink to="/" className="mr-4 flex shrink-0 items-center py-5">
-            <span className="flex items-center gap-2">
-              <img src={lelandMark} alt="" className="h-6 w-6" />
-              <span className="font-serif text-[22px] font-medium tracking-tight text-gray-dark">Leland</span>
-            </span>
+            <img src={lelandWordmark} alt="Leland" className="h-7 w-auto" />
           </NavLink>
 
           {!isCoachMode && (

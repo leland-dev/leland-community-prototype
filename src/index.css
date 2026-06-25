@@ -56,38 +56,61 @@
 }
 
 @theme {
-  /* Primary — dark forest green from the new joinleland palette
-     (was the bright #15b078; new tone is more sophisticated). */
-  --color-primary: #185440;
-  --color-primary-hover: #12422f;
+  /* ── Leland 2026 rebrand palette — sourced from Leonardo kit.json. ──
+     Per Leonardo's color hierarchy: PRIMARY are the surface colors
+     (yellow, blue, cream, tan, slate, white). SECONDARY are accents
+     (rust, forest, lavender). INK is the default for type (black). */
+
+  /* PRIMARY surfaces */
+  --color-yellow: #FFD96F;
+  --color-blue:   #80ACED;
+  --color-cream:  #F3F1E6;
+  --color-tan:    #EBD4B5;
+  --color-slate:  #869AA6;
+
+  /* SECONDARY accents — use sparingly, per kit pairings:
+     rust ↔ yellow/blue, forest ↔ cream/tan, lavender ↔ slate/white */
+  --color-rust:     #B85A2B;
+  --color-forest:   #1F5340;
+  --color-lavender: #9685A8;
+
+  /* INK — default for type, numbers, chart marks */
+  --color-ink:           #000000;
+  --color-ink-primary:   #222222;
+  --color-ink-secondary: #4C4C4C;
+
+  /* Legacy --color-primary kept pointing at forest for backwards
+     compatibility with components that already use it for "verified/
+     active/live" accents. New work should reach for --color-ink (CTAs)
+     or one of the primary surfaces instead. */
+  --color-primary:        #1F5340;
+  --color-primary-hover:  #153e30;
   --color-primary-xlight: #e8f0ec;
-  --color-dark-green: #0e3a2c;
+  --color-dark-green:     #0e3a2c;
 
   /* Grays */
-  --color-gray-dark: #1c1c1a;
-  --color-gray-light: #707070;
-  --color-gray-xlight: #a3a3a3;
+  --color-gray-dark:        #222222; /* Leonardo's ink primary */
+  --color-gray-light:       #707070;
+  --color-gray-xlight:      #a3a3a3;
   --color-gray-extra-light: #9B9B9B;
-  --color-gray-stroke: #e5e5e5;
-  --color-gray-hover: #f5f5f5;
-  --color-cream: #f3f1e6; /* premium cream background tone from joinleland */
+  --color-gray-stroke:      #e5e5e5;
+  --color-gray-hover:       #f5f5f5;
 
-  /* Accent */
+  /* Status / generic */
   --color-orange: #ef8509;
-  --color-red: #D92D20;
-  --color-blue: #3b7dfd;
-  --color-yellow: #F5A622;
-  --color-navy: #212242;
+  --color-red:    #D92D20;
 
   /* Layout */
   --spacing-col-gap: 40px;
 
   /* Shadows */
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --shadow-card:       0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-card-large: 0 2px 12px rgba(0, 0, 0, 0.06);
 
-  /* Font */
-  --font-sans: 'Macan', 'Calibre', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-serif: 'Season', Georgia, 'Times New Roman', serif;
+  /* Fonts — Macan (body sans), Season (heading serif) */
+  --font-sans:  'Macan', 'Calibre', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Season', 'SeasonMix', Georgia, 'Times New Roman', serif;
+  --font-mono:  ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 
 @layer base {
