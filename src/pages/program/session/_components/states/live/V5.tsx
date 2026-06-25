@@ -13,7 +13,6 @@ import type { Session } from "../../../_types";
 import sharesIcon from "../../../../../../assets/icons/shares.svg";
 import CoachScreenShare from "../../blocks/CoachScreenShare";
 import BuildScreen from "../../blocks/BuildScreen";
-import VibeCodingScreen from "../../blocks/VibeCodingScreen";
 import CoachFacePip from "../../blocks/CoachFacePip";
 import SessionGuide from "../../blocks/SessionGuide";
 import Resources from "../../blocks/Resources";
@@ -565,12 +564,10 @@ function StudioLayout({ session }: { session: Session }) {
               onMouseEnter={bumpStageVisibility}
               onMouseMove={bumpStageVisibility}
             >
-              {/* DESKTOP: main canvas = Claude Code terminal. Coach face
-                  overlays the build canvas as a small PIP in the top-right
-                  corner (out of the right rail now). Slide signpost still
-                  lives in the right rail. */}
-              <div className="relative hidden h-full w-full lg:block">
-                <VibeCodingScreen />
+              {/* DESKTOP: main canvas is a clean black screen — placeholder
+                  for whatever the coach is actually sharing. Coach face PIP,
+                  reactions, and purchase toasts overlay on top. */}
+              <div className="relative hidden h-full w-full bg-black lg:block">
                 <CoachFacePip coach={session.coach} position="top-right" />
                 <FloatingReactions reactions={reactions} />
                 <PurchaseToasts coachName={session.coach.name} />
