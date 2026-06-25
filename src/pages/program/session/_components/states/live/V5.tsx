@@ -626,9 +626,31 @@ function StudioLayout({ session }: { session: Session }) {
             Matches Leland's live session host row pattern. */}
         <SessionCoachCard coach={session.coach} />
 
-        {/* Session guide directly — Resources moved to the right rail as a
-            tab, so no pivot is needed here anymore. */}
-        <SessionGuide />
+        {/* MOBILE: tab pills (Session guide / Resources / Chat). Chat
+            pops the BottomTray (YouTube Live pattern) — the others
+            swap the inline content below. Desktop uses the right rail
+            for chat/viewers/polls/resources, so the pill row is hidden. */}
+        <div className="-m-1 flex items-center gap-2 overflow-x-auto p-1 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden">
+          <TabsNav
+            tab={chatTrayOpen ? "chat" : tab}
+            onChange={(id) => {
+              if (id === "chat") setChatTrayOpen(true);
+              else setTab(id);
+            }}
+            tabs={tabs}
+          />
+        </div>
+
+        {/* MOBILE content area — swaps with the active tab. */}
+        <div className="lg:hidden">
+          <TabContent tab={tab} />
+        </div>
+
+        {/* DESKTOP: Session guide renders directly (Resources lives in
+            the right rail as its own tab). */}
+        <div className="hidden lg:block">
+          <SessionGuide />
+        </div>
       </div>
 
       {/* RIGHT COLUMN (desktop only): coach face on top, chat fills the rest.
