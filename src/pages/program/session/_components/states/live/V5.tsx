@@ -564,10 +564,13 @@ function StudioLayout({ session }: { session: Session }) {
               onMouseEnter={bumpStageVisibility}
               onMouseMove={bumpStageVisibility}
             >
-              {/* DESKTOP: main canvas is a clean black screen — placeholder
-                  for whatever the coach is actually sharing. Coach face PIP,
-                  reactions, and purchase toasts overlay on top. */}
-              <div className="relative hidden h-full w-full bg-black lg:block">
+              {/* DESKTOP: calm "Ship Your First Agent Team" slide as the
+                  shared screen — quieter than the previous VibeCodingScreen
+                  mock but still gives the canvas visible content so the
+                  player doesn't feel dead. Coach face PIP, reactions, and
+                  purchase toasts overlay on top. */}
+              <div className="relative hidden h-full w-full lg:block">
+                <CoachScreenShare />
                 <CoachFacePip coach={session.coach} position="top-right" />
                 <FloatingReactions reactions={reactions} />
                 <PurchaseToasts coachName={session.coach.name} />
