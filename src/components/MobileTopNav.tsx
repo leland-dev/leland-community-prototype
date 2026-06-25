@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
-import Logo from "../assets/Logo.svg";
+import lelandMark from "../assets/leland-mark.svg";
 import moreIcon from "../assets/icons/nav-icons/more-active.svg";
 import searchInactive from "../assets/icons/nav-icons/search-inactive.svg";
 import MobileSidebar from "./MobileSidebar";
@@ -39,7 +39,10 @@ export default function MobileTopNav() {
         </button>
 
         {/* Center: logo */}
-        <img src={Logo} alt="Leland" className="h-[22px] w-auto" />
+        <span className="flex items-center gap-1.5">
+          <img src={lelandMark} alt="" className="h-5 w-5" />
+          <span className="font-serif text-[18px] font-medium tracking-tight text-gray-dark">Leland</span>
+        </span>
 
         {/* Right: search */}
         <NavLink
