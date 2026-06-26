@@ -21,8 +21,8 @@ export default function GroupCard({
   size = "large",
 }: GroupCardProps) {
   const isSmall = size === "small";
-  const titleSizeClass = isSmall ? "text-[16px]" : "text-[18px]";
-  const subtitleSizeClass = isSmall ? "text-[14px]" : "text-[16px]";
+  const titleSizeClass = isSmall ? "text-[14px]" : "text-[16px]";
+  const subtitleSizeClass = isSmall ? "text-[12px]" : "text-[14px]";
   const imageSize = isSmall ? "h-[36px] w-[36px]" : "h-[40px] w-[40px]";
 
   return (
@@ -40,7 +40,7 @@ export default function GroupCard({
           />
         ) : (
           <div
-            className={`${imageSize} rounded-[4px] flex items-center justify-center text-white text-[16px] font-bold`}
+            className={`${imageSize} rounded-[4px] flex items-center justify-center text-white text-[14px] font-bold`}
             style={{ backgroundColor: color }}
           >
             {name.charAt(0)}

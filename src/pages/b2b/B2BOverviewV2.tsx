@@ -427,8 +427,8 @@ function ReviewsModal({ open, onClose }: { open: boolean; onClose: () => void })
           </div>
         </button>
         <div className="border-b border-gray-stroke px-6 pb-4 pt-6 shrink-0">
-          <h3 className="text-[24px] font-medium text-gray-dark">Reviews</h3>
-          <p className="mt-1 text-[16px] text-gray-light">{allReviews.length} reviews from users</p>
+          <h3 className="text-[22px] font-medium text-gray-dark">Reviews</h3>
+          <p className="mt-1 text-[14px] text-gray-light">{allReviews.length} reviews from users</p>
         </div>
         <div className="flex-1 overflow-y-auto divide-y divide-gray-stroke px-6">
           {allReviews.map((r, i) => (
@@ -437,13 +437,13 @@ function ReviewsModal({ open, onClose }: { open: boolean; onClose: () => void })
                 {r.userImage ? (
                   <img src={r.userImage} alt={r.userName} className="h-9 w-9 shrink-0 rounded-full object-cover" />
                 ) : (
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-hover text-[13px] font-medium text-gray-dark">{r.userInitials}</div>
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-hover text-[11px] font-medium text-gray-dark">{r.userInitials}</div>
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex flex-col">
-                      <span className="text-[16px] font-medium text-gray-dark">{r.userName}</span>
-                      <div className="mt-0.5 text-[14px] text-gray-light">
+                      <span className="text-[14px] font-medium text-gray-dark">{r.userName}</span>
+                      <div className="mt-0.5 text-[12px] text-gray-light">
                         {r.type === "session" ? `1:1 session with ${r.subject}` : r.subject}
                       </div>
                     </div>
@@ -455,10 +455,10 @@ function ReviewsModal({ open, onClose }: { open: boolean; onClose: () => void })
                           </svg>
                         ))}
                       </div>
-                      {r.date && <span className="text-[14px] text-gray-xlight">{r.date}</span>}
+                      {r.date && <span className="text-[12px] text-gray-xlight">{r.date}</span>}
                     </div>
                   </div>
-                  <p className="mt-2 text-[16px] leading-[1.5] text-gray-dark">{r.text}</p>
+                  <p className="mt-2 text-[14px] leading-[1.5] text-gray-dark">{r.text}</p>
                 </div>
               </div>
             </div>
@@ -612,8 +612,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
       {/* Page header + desktop sticky button */}
       <div className="mb-6 flex items-start justify-between sm:mb-8">
         <div ref={headerRef}>
-          <h1 className="text-[40px] font-medium text-gray-dark">Overview</h1>
-          <p className="mt-2 text-[18px] text-[#707070]">{showVerizon ? "Verizon" : "Kellogg School of Management"}</p>
+          <h1 className="text-[38px] font-medium text-gray-dark">Overview</h1>
+          <p className="mt-2 text-[16px] text-[#707070]">{showVerizon ? "Verizon" : "Kellogg School of Management"}</p>
         </div>
         <div className="sticky hidden gap-2 self-start sm:flex sm:items-center" style={{ top: "28px" }}>
           <Button size="lg" variant="secondary" onClick={onNavigateSettings}>
@@ -652,7 +652,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             exit={{ opacity: 0, scale: 0.85 }}
             transition={{ duration: 0.18 }}
             onClick={() => onOpenModal("invite")}
-            className="fixed right-4 top-[72px] z-30 flex items-center gap-2 rounded-lg bg-[#038561] px-4 py-3 text-[16px] font-medium text-white shadow-md sm:hidden"
+            className="fixed right-4 top-[72px] z-30 flex items-center gap-2 rounded-lg bg-[#038561] px-4 py-3 text-[14px] font-medium text-white shadow-md sm:hidden"
           >
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
@@ -678,25 +678,25 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                 <div className="mb-2 flex items-center gap-1">
                   {tooltip ? (
                     <div className="group/tip relative">
-                      <span className="cursor-default border-b border-dashed border-gray-stroke text-[18px] font-normal text-gray-light">{label}</span>
-                      <div className="pointer-events-none absolute bottom-full left-0 z-50 mb-2 w-52 rounded-lg bg-gray-dark px-3 py-2 text-[13px] leading-[1.4] text-white opacity-0 shadow-md transition-opacity group-hover/tip:opacity-100">
+                      <span className="cursor-default border-b border-dashed border-gray-stroke text-[16px] font-normal text-gray-light">{label}</span>
+                      <div className="pointer-events-none absolute bottom-full left-0 z-50 mb-2 w-52 rounded-lg bg-gray-dark px-3 py-2 text-[11px] leading-[1.4] text-white opacity-0 shadow-md transition-opacity group-hover/tip:opacity-100">
                         {tooltip}
                       </div>
                     </div>
                   ) : (
-                    <span className="text-[18px] font-normal text-gray-light">{label}</span>
+                    <span className="text-[16px] font-normal text-gray-light">{label}</span>
                   )}
                 </div>
                 {rating ? (
                   <div className="flex items-baseline gap-1.5">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffcb47" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    <span className="text-[24px] font-medium leading-none text-gray-dark">{rating.score.toFixed(1)}</span>
-                    <span className="text-[16px] text-gray-light">({rating.count})</span>
+                    <span className="text-[22px] font-medium leading-none text-gray-dark">{rating.score.toFixed(1)}</span>
+                    <span className="text-[14px] text-gray-light">({rating.count})</span>
                   </div>
                 ) : (
                   <div className="flex items-baseline justify-between gap-2">
-                    <div className="text-[24px] font-medium leading-none text-gray-dark">{used} <span className="text-[16px] font-normal text-gray-light">used</span></div>
-                    <span className="rounded-md bg-gray-hover px-2 py-0.5 text-[14px] font-medium text-gray-light">{left} left</span>
+                    <div className="text-[22px] font-medium leading-none text-gray-dark">{used} <span className="text-[14px] font-normal text-gray-light">used</span></div>
+                    <span className="rounded-md bg-gray-hover px-2 py-0.5 text-[12px] font-medium text-gray-light">{left} left</span>
                   </div>
                 )}
               </div>
@@ -708,43 +708,43 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
       {/* Stats row — Per Seat */}
       {partnerModel === "per-seat" && <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-x-5">
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
-          <div className="mb-2 flex items-center gap-1.5 text-[18px] font-normal text-gray-light">
+          <div className="mb-2 flex items-center gap-1.5 text-[16px] font-normal text-gray-light">
             Seats redeemed
             <div className="group relative flex items-center">
               <svg onClick={() => setOpenTooltip(openTooltip === "active" ? null : "active")} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cursor-pointer text-gray-xlight">
                 <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
               </svg>
-              <div className={`pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-[240px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[13px] font-normal leading-[1.4] text-white shadow-lg transition-opacity group-hover:opacity-100 ${openTooltip === "active" ? "opacity-100" : "opacity-0"}`}>
+              <div className={`pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-[240px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[11px] font-normal leading-[1.4] text-white shadow-lg transition-opacity group-hover:opacity-100 ${openTooltip === "active" ? "opacity-100" : "opacity-0"}`}>
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-dark" />
                 Users who completed a session, enrolled in a cohort, or viewed resources in Leland+
               </div>
             </div>
           </div>
           <div className="flex items-baseline gap-[6px] sm:block">
-            <div className="text-[24px] font-medium leading-none text-gray-dark">289</div>
+            <div className="text-[22px] font-medium leading-none text-gray-dark">289</div>
           </div>
         </div>
         <div className="rounded-lg border border-gray-stroke bg-white p-5">
-          <div className="mb-2 text-[18px] font-normal text-gray-light">Seats left</div>
+          <div className="mb-2 text-[16px] font-normal text-gray-light">Seats left</div>
           <div className="flex items-baseline gap-[6px] sm:block">
-            <div className="text-[24px] font-medium leading-none text-gray-dark">75</div>
+            <div className="text-[22px] font-medium leading-none text-gray-dark">75</div>
           </div>
         </div>
         <div onClick={() => setShowReviews(true)} className="cursor-pointer rounded-lg border border-gray-stroke bg-white p-5 hover:bg-gray-hover">
-          <div className="mb-2 text-[18px] font-normal text-gray-light">Average rating</div>
+          <div className="mb-2 text-[16px] font-normal text-gray-light">Average rating</div>
           <div className="flex items-end gap-2">
             <div className="flex items-center gap-1.5">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <span className="text-[24px] font-medium leading-[1.2] text-gray-dark">4.8</span>
+              <span className="text-[22px] font-medium leading-[1.2] text-gray-dark">4.8</span>
             </div>
-            <span className="pb-[2px] text-[16px] leading-[1.5] text-gray-light">(112)</span>
+            <span className="pb-[2px] text-[14px] leading-[1.5] text-gray-light">(112)</span>
           </div>
         </div>
       </div>}
 
       {/* Users table */}
       <div className="mt-8">
-        <h2 className="mb-3 text-[24px] font-medium text-gray-dark">Users</h2>
+        <h2 className="mb-3 text-[22px] font-medium text-gray-dark">Users</h2>
         {/* Search + filters toolbar */}
         <div className="mb-3 flex flex-wrap items-center gap-3">
           <div className="flex w-full items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3 sm:w-auto sm:max-w-[280px] sm:flex-1">
@@ -752,7 +752,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input
-              className="flex-1 border-none bg-transparent text-[16px] leading-[1.2] text-gray-dark outline-none placeholder:text-gray-xlight"
+              className="flex-1 border-none bg-transparent text-[14px] leading-[1.2] text-gray-dark outline-none placeholder:text-gray-xlight"
               placeholder="Search by name or email"
             />
           </div>
@@ -762,7 +762,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               <button
                 key={f}
                 onClick={() => handleFilter(f)}
-                className={`shrink-0 cursor-pointer rounded-full bg-[#f5f5f5] px-3.5 py-2.5 text-[14px] font-medium leading-[1.2] text-[#222222] transition-colors ${
+                className={`shrink-0 cursor-pointer rounded-full bg-[#f5f5f5] px-3.5 py-2.5 text-[12px] font-medium leading-[1.2] text-[#222222] transition-colors ${
                   filter === f
                     ? "ring-[1.5px] ring-inset ring-[#222222]"
                     : "hover:bg-[#ebebeb]"
@@ -777,7 +777,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
           {/* Bulk action bar */}
           {bulkActions && selectedEmails.size > 0 && (
             <div className="flex items-center gap-3 rounded-t-lg bg-white px-4 py-3">
-              <button onClick={() => setSelectedEmails(new Set())} className="flex h-11 items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+              <button onClick={() => setSelectedEmails(new Set())} className="flex h-11 items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
                 {selectedEmails.size} selected
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -786,7 +786,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               <div className="flex gap-3">
                 <button
                   onClick={() => { onOpenModal("invite"); }}
-                  className="flex h-11 items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 text-[16px] font-medium text-gray-dark hover:bg-[#ebebeb]"
+                  className="flex h-11 items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -815,8 +815,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     <div className="flex items-center gap-2">
                       <div className="flex flex-1 items-center gap-3 min-w-0">
                         <div className="min-w-0">
-                          <div className="text-[16px] font-medium leading-[1.2] text-gray-dark">{user.name}</div>
-                          <div className="truncate text-[14px] leading-[1.2] text-gray-light">{user.email}</div>
+                          <div className="text-[14px] font-medium leading-[1.2] text-gray-dark">{user.name}</div>
+                          <div className="truncate text-[12px] leading-[1.2] text-gray-light">{user.email}</div>
                         </div>
                       </div>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
@@ -826,29 +826,29 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     {/* Row 2: three stat columns */}
                     <div className="mt-4 flex gap-4">
                       <div className="flex flex-col gap-1 min-w-0 max-w-[160px] flex-1">
-                        <div className="text-[14px] leading-[1.2] text-gray-light">1:1 Sessions</div>
+                        <div className="text-[12px] leading-[1.2] text-gray-light">1:1 Sessions</div>
                         {user.sessions != null
-                          ? <span className="text-[16px] text-gray-dark">{user.sessions} <span className="text-gray-light">/ {user.sessionsTotal}</span></span>
-                          : <span className="text-[16px] text-gray-dark">—</span>}
+                          ? <span className="text-[14px] text-gray-dark">{user.sessions} <span className="text-gray-light">/ {user.sessionsTotal}</span></span>
+                          : <span className="text-[14px] text-gray-dark">—</span>}
                       </div>
                       <div className="flex flex-col gap-1 min-w-0 max-w-[160px] flex-1">
-                        <div className="text-[14px] leading-[1.2] text-gray-light">Programs</div>
-                        <span className="text-[16px] text-gray-dark">{enrolled.length > 0 ? enrolled.length : "—"}</span>
+                        <div className="text-[12px] leading-[1.2] text-gray-light">Programs</div>
+                        <span className="text-[14px] text-gray-dark">{enrolled.length > 0 ? enrolled.length : "—"}</span>
                       </div>
                       <div className="flex flex-col gap-1 min-w-0 max-w-[160px] flex-1">
-                        <div className="text-[14px] leading-[1.2] text-gray-light">Leland+</div>
+                        <div className="text-[12px] leading-[1.2] text-gray-light">Leland+</div>
                         {showLpEngagement ? (() => {
                           const status = lpEngagement(user);
-                          if (!status) return <span className="text-[16px] text-gray-dark">—</span>;
-                          if (status === "Active") return <span className="text-[16px] text-gray-dark">Active</span>;
-                          if (status === "Invited") return <span className="text-[16px] text-gray-dark">Invited</span>;
-                          return <span className="text-[16px] text-gray-xlight">Expired</span>;
+                          if (!status) return <span className="text-[14px] text-gray-dark">—</span>;
+                          if (status === "Active") return <span className="text-[14px] text-gray-dark">Active</span>;
+                          if (status === "Invited") return <span className="text-[14px] text-gray-dark">Invited</span>;
+                          return <span className="text-[14px] text-gray-xlight">Expired</span>;
                         })() : (
                           user.plus === "Granted" && user.plusExpiry
-                          ? <span className="text-[16px] text-gray-dark">through {user.plusExpiry.replace(/,\s*\d{4}$/, "")}</span>
+                          ? <span className="text-[14px] text-gray-dark">through {user.plusExpiry.replace(/,\s*\d{4}$/, "")}</span>
                           : user.plus === "Expired"
-                          ? <span className="text-[16px] text-gray-xlight">Expired</span>
-                          : <span className="text-[16px] text-gray-dark">—</span>
+                          ? <span className="text-[14px] text-gray-xlight">Expired</span>
+                          : <span className="text-[14px] text-gray-dark">—</span>
                         )}
                       </div>
                     </div>
@@ -883,14 +883,14 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       )}
                     </label>
                   </th>}
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">User</div></th>
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[14px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">User</div></th>
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[14px] font-medium leading-[1.2] text-gray-dark">
                     <span className="max-w-[120px] truncate">1:1 Sessions</span>
                   </th>
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark">
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[14px] font-medium leading-[1.2] text-gray-dark">
                     <div className="max-w-[200px] truncate">Programs</div>
                   </th>
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[16px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+</div></th>
+                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[14px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+</div></th>
                   <th className="hidden"></th>
                   <th className="sticky right-0 bg-[#fafafa] px-4 py-3"><div className="pointer-events-none absolute inset-y-0 -left-8 w-8 bg-gradient-to-r from-transparent to-[#fafafa]" /></th>
                 </tr>
@@ -933,20 +933,20 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                         {userDetailsV2[user.email]?.image ? (
                           <img src={userDetailsV2[user.email].image} alt={user.name} className="hidden h-9 w-9 shrink-0 rounded-full object-cover lg:block" />
                         ) : (
-                          <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[14px] font-semibold text-dark-green lg:flex">
+                          <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[12px] font-semibold text-dark-green lg:flex">
                             {user.initials}
                           </div>
                         )}
                         <div>
-                          <div className="text-[16px] font-medium text-gray-dark">{user.name}</div>
-                          <div className="text-[14px] text-gray-light">{user.email}</div>
+                          <div className="text-[14px] font-medium text-gray-dark">{user.name}</div>
+                          <div className="text-[12px] text-gray-light">{user.email}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-[14px]">
                       {user.sessions != null ? (
-                        <div className="text-[16px] font-medium text-gray-dark">{user.sessions} <span className="font-normal text-gray-light">/ {user.sessionsTotal}</span></div>
-                      ) : <span className="text-[16px] text-gray-light">—</span>}
+                        <div className="text-[14px] font-medium text-gray-dark">{user.sessions} <span className="font-normal text-gray-light">/ {user.sessionsTotal}</span></div>
+                      ) : <span className="text-[14px] text-gray-light">—</span>}
                     </td>
                     <td className="px-4 py-[14px]">
                       {(() => {
@@ -959,7 +959,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                             {enrolled.length > 0 ? (
                               <div className="flex flex-col gap-[6px]">
                                 {/* Mobile/tablet: summary count */}
-                                <span className="text-[16px] text-gray-dark lg:hidden">{enrolled.length > 0 ? enrolled.length : "—"}</span>
+                                <span className="text-[14px] text-gray-dark lg:hidden">{enrolled.length > 0 ? enrolled.length : "—"}</span>
                                 {/* Desktop: full list */}
                                 <div className="hidden flex-col gap-[6px] lg:flex">
                                 {visible.map((c) => {
@@ -968,10 +968,10 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                                   const isPending = status === null;
                                   return (
                                     <div key={c.key} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                                      <span className="text-[16px] text-gray-dark">{c.label}</span>
+                                      <span className="text-[14px] text-gray-dark">{c.label}</span>
                                       {isPending
-                                        ? <span className="text-[16px] text-gray-xlight">User will select their own cohort</span>
-                                        : <span className="text-[16px] text-gray-xlight">{meta.startDate}</span>
+                                        ? <span className="text-[14px] text-gray-xlight">User will select their own cohort</span>
+                                        : <span className="text-[14px] text-gray-xlight">{meta.startDate}</span>
                                       }
                                     </div>
                                   );
@@ -979,7 +979,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                                 {!isExpanded && hidden > 0 && (
                                   <button
                                     onClick={(e) => { e.stopPropagation(); setExpandedPrograms(prev => new Set(prev).add(user.email)); }}
-                                    className="cursor-pointer text-left text-[14px] text-gray-xlight underline hover:text-gray-dark"
+                                    className="cursor-pointer text-left text-[12px] text-gray-xlight underline hover:text-gray-dark"
                                   >
                                     See {hidden} more
                                   </button>
@@ -987,7 +987,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                                 {isExpanded && hidden > 0 && (
                                   <button
                                     onClick={(e) => { e.stopPropagation(); setExpandedPrograms(prev => { const next = new Set(prev); next.delete(user.email); return next; }); }}
-                                    className="cursor-pointer text-left text-[14px] text-gray-xlight underline hover:text-gray-dark"
+                                    className="cursor-pointer text-left text-[12px] text-gray-xlight underline hover:text-gray-dark"
                                   >
                                     See less
                                   </button>
@@ -995,7 +995,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-[16px] text-gray-light">—</span>
+                              <span className="text-[14px] text-gray-light">—</span>
                             )}
                           </div>
                         );
@@ -1004,17 +1004,17 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     <td className="px-4 py-[14px]">
                       {showLpEngagement ? (() => {
                         const status = lpEngagement(user);
-                        if (!status) return <span className="text-[16px] text-gray-light">—</span>;
-                        if (status === "Active") return <span className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1.5 text-[14px] font-medium leading-none text-[#038561]">Active</span>;
-                        if (status === "Invited") return <span className="inline-flex rounded-full bg-[#eff6ff] px-2.5 py-1.5 text-[14px] font-medium leading-none text-[#3b82f6]">Invited</span>;
-                        return <span className="inline-flex rounded-full bg-[#f5f5f5] px-2.5 py-1.5 text-[14px] font-medium leading-none text-[#888]">Expired</span>;
+                        if (!status) return <span className="text-[14px] text-gray-light">—</span>;
+                        if (status === "Active") return <span className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1.5 text-[12px] font-medium leading-none text-[#038561]">Active</span>;
+                        if (status === "Invited") return <span className="inline-flex rounded-full bg-[#eff6ff] px-2.5 py-1.5 text-[12px] font-medium leading-none text-[#3b82f6]">Invited</span>;
+                        return <span className="inline-flex rounded-full bg-[#f5f5f5] px-2.5 py-1.5 text-[12px] font-medium leading-none text-[#888]">Expired</span>;
                       })() : (
                         <>
                           {user.plus === "Granted" && user.plusExpiry && (
-                            <span className="text-[16px] text-gray-dark">through {user.plusExpiry.replace(/,\s*\d{4}$/, "")}</span>
+                            <span className="text-[14px] text-gray-dark">through {user.plusExpiry.replace(/,\s*\d{4}$/, "")}</span>
                           )}
-                          {user.plus === "Expired" && <span className="text-[16px] text-gray-xlight">Expired</span>}
-                          {user.plus === "—" && <span className="text-[16px] text-gray-light">—</span>}
+                          {user.plus === "Expired" && <span className="text-[14px] text-gray-xlight">Expired</span>}
+                          {user.plus === "—" && <span className="text-[14px] text-gray-light">—</span>}
                         </>
                       )}
                     </td>
@@ -1034,7 +1034,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
           </div>
           {/* Pagination */}
           <div className="flex items-center justify-between border-t border-gray-stroke px-4 py-3">
-            <span className="text-[14px] text-gray-light">
+            <span className="text-[12px] text-gray-light">
               {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, sortedUsers.length)} of {sortedUsers.length} users
             </span>
             <div className="flex items-center gap-1">
@@ -1061,7 +1061,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
       {false && <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr] lg:gap-x-col-gap">
         {/* Offerings */}
         <div>
-          <h2 className="mb-4 text-[20px] font-medium text-gray-dark">Utilization</h2>
+          <h2 className="mb-4 text-[18px] font-medium text-gray-dark">Utilization</h2>
           <div className="rounded-lg border border-gray-stroke bg-white p-2 shadow-card">
             {/* 1:1 Coaching */}
             <div
@@ -1069,14 +1069,14 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               onClick={() => onNavigate("utilization")}
             >
               <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <h3 className="text-[16px] font-medium text-gray-dark">1:1 Coaching</h3>
+                <h3 className="text-[14px] font-medium text-gray-dark">1:1 Coaching</h3>
                 <div className="flex items-center gap-2">
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-stroke">
                     <div className="h-full rounded-full bg-primary" style={{ width: `${(102/140)*100}%` }} />
                   </div>
-                  <span className="shrink-0 text-[14px] text-gray-light">102 / 140 sessions used</span>
+                  <span className="shrink-0 text-[12px] text-gray-light">102 / 140 sessions used</span>
                 </div>
-                <div className="text-[14px] text-gray-xlight">Individual coach matching for personalized guidance</div>
+                <div className="text-[12px] text-gray-xlight">Individual coach matching for personalized guidance</div>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenModal("invite"); }}
@@ -1094,14 +1094,14 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               onClick={() => onNavigate("live-courses")}
             >
               <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <h3 className="text-[16px] font-medium text-gray-dark">Live courses</h3>
+                <h3 className="text-[14px] font-medium text-gray-dark">Live courses</h3>
                 <div className="flex items-center gap-2">
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-stroke">
                     <div className="h-full rounded-full bg-red" style={{ width: `${(64/66)*100}%` }} />
                   </div>
-                  <span className="shrink-0 text-[14px] text-gray-light">64 / 66 seats used</span>
+                  <span className="shrink-0 text-[12px] text-gray-light">64 / 66 seats used</span>
                 </div>
-                <div className="text-[14px] text-gray-xlight">Cohort-based programs with live instruction and feedback</div>
+                <div className="text-[12px] text-gray-xlight">Cohort-based programs with live instruction and feedback</div>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenModal("invite"); }}
@@ -1119,14 +1119,14 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               onClick={() => onNavigate("leland-plus")}
             >
               <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <h3 className="text-[16px] font-medium text-gray-dark">Leland+</h3>
+                <h3 className="text-[14px] font-medium text-gray-dark">Leland+</h3>
                 <div className="flex items-center gap-2">
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-stroke">
                     <div className="h-full rounded-full bg-primary" style={{ width: `${(6/30)*100}%` }} />
                   </div>
-                  <span className="shrink-0 text-[14px] text-gray-light">6 / 30 licenses used</span>
+                  <span className="shrink-0 text-[12px] text-gray-light">6 / 30 licenses used</span>
                 </div>
-                <div className="text-[14px] text-gray-xlight">On-demand access to courses, examples, and tools</div>
+                <div className="text-[12px] text-gray-xlight">On-demand access to courses, examples, and tools</div>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenModal("invite"); }}
@@ -1142,7 +1142,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
 
         {/* Recent activity */}
         <div>
-          <h2 className="mb-4 text-[20px] font-medium text-gray-dark">Recent activity</h2>
+          <h2 className="mb-4 text-[18px] font-medium text-gray-dark">Recent activity</h2>
           <div className="flex flex-col">
             {activity.map((item, i) => (
               <div key={i} className="flex items-center gap-3 rounded-lg p-3 hover:bg-gray-hover">
@@ -1172,11 +1172,11 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                   )}
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-                  <div className="truncate text-[16px]">
+                  <div className="truncate text-[14px]">
                     <span className="font-medium">{item.name}</span> {item.action}{" "}
                     <span className="font-medium">{item.target}</span>
                   </div>
-                  <div className="text-[14px] text-gray-light">{item.time} &middot; {item.category}</div>
+                  <div className="text-[12px] text-gray-light">{item.time} &middot; {item.category}</div>
                 </div>
               </div>
             ))}
@@ -1201,20 +1201,20 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               className="absolute bottom-full right-0 mb-2 w-[260px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg"
             >
               <div className="p-2">
-              <div className="px-2 pb-2 pt-1 text-[14px] font-medium uppercase tracking-wider text-[#9b9b9b]">Partner model</div>
+              <div className="px-2 pb-2 pt-1 text-[12px] font-medium uppercase tracking-wider text-[#9b9b9b]">Partner model</div>
               <div className="mx-2 mb-1 flex rounded-lg bg-[#f5f5f5] p-[3px]">
                 {(["per-seat", "a-la-carte"] as const).map((opt) => (
                   <button
                     key={opt}
                     onClick={() => onSetPartnerModel(opt)}
-                    className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[14px] font-medium transition-colors ${partnerModel === opt ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
+                    className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors ${partnerModel === opt ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
                   >
                     <span className="whitespace-nowrap">{opt === "per-seat" ? "Per Seat" : "À la Carte"}</span>
                   </button>
                 ))}
               </div>
               <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                <span className="text-[16px] font-medium text-gray-dark">User table wraps on mobile</span>
+                <span className="text-[14px] font-medium text-gray-dark">User table wraps on mobile</span>
                 <div className="relative">
                   <input type="checkbox" checked={tableWraps} onChange={() => setTableWraps(!tableWraps)} className="peer sr-only" />
                   <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
@@ -1222,7 +1222,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                 </div>
               </label>
               <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                <span className="text-[16px] font-medium text-gray-dark">Show Leland+ engagement</span>
+                <span className="text-[14px] font-medium text-gray-dark">Show Leland+ engagement</span>
                 <div className="relative">
                   <input type="checkbox" checked={showLpEngagement} onChange={() => setShowLpEngagement(!showLpEngagement)} className="peer sr-only" />
                   <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
@@ -1230,7 +1230,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                 </div>
               </label>
 <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                <span className="text-[16px] font-medium text-gray-dark">Bulk actions</span>
+                <span className="text-[14px] font-medium text-gray-dark">Bulk actions</span>
                 <div className="relative">
                   <input type="checkbox" checked={bulkActions} onChange={() => { setBulkActions(!bulkActions); setSelectedEmails(new Set()); }} className="peer sr-only" />
                   <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />

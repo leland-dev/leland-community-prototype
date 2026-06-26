@@ -28,8 +28,8 @@ export default function Components() {
 
   return (
     <PageShell>
-      <h1 className="text-[40px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Shared Components</h1>
-      <p className="mt-1 text-[18px] text-[#707070]">
+      <h1 className="text-[38px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Shared Components</h1>
+      <p className="mt-1 text-[16px] text-[#707070]">
         A library of reusable components used across the product.
       </p>
 
@@ -51,8 +51,8 @@ export default function Components() {
             </div>
           </div>
           <div className="flex flex-col gap-1 px-5 py-4">
-            <span className="text-[18px] font-medium text-gray-dark">Session Card</span>
-            <span className="text-[16px] text-[#707070]">Displays a user's upcoming, live, and past sessions across 1:1 coaching, events, and courses.</span>
+            <span className="text-[16px] font-medium text-gray-dark">Session Card</span>
+            <span className="text-[14px] text-[#707070]">Displays a user's upcoming, live, and past sessions across 1:1 coaching, events, and courses.</span>
           </div>
         </Link>
 
@@ -85,8 +85,8 @@ export default function Components() {
             </div>
           </div>
           <div className="flex flex-col gap-1 px-5 py-4">
-            <span className="text-[18px] font-medium text-gray-dark">Sidebar Cards</span>
-            <span className="text-[16px] text-[#707070]">Reusable card components displayed in the right sidebar across various pages.</span>
+            <span className="text-[16px] font-medium text-gray-dark">Sidebar Cards</span>
+            <span className="text-[14px] text-[#707070]">Reusable card components displayed in the right sidebar across various pages.</span>
           </div>
         </Link>
 
@@ -126,8 +126,8 @@ export default function Components() {
             </div>
           </div>
           <div className="flex flex-col gap-1 px-5 py-4">
-            <span className="text-[18px] font-medium text-gray-dark">Post</span>
-            <span className="text-[16px] text-[#707070]">The core content unit of the community feed — supports text, image, link, event, milestone, and live post types.</span>
+            <span className="text-[16px] font-medium text-gray-dark">Post</span>
+            <span className="text-[14px] text-[#707070]">The core content unit of the community feed — supports text, image, link, event, milestone, and live post types.</span>
           </div>
         </Link>
 
@@ -146,8 +146,8 @@ export default function Components() {
             </div>
           </div>
           <div className="flex flex-col gap-1 px-5 py-4">
-            <span className="text-[18px] font-medium text-gray-dark">Offering Card</span>
-            <span className="text-[16px] text-[#707070]">Displays a coach's available offerings, and the same offerings in their purchased state for customers.</span>
+            <span className="text-[16px] font-medium text-gray-dark">Offering Card</span>
+            <span className="text-[14px] text-[#707070]">Displays a coach's available offerings, and the same offerings in their purchased state for customers.</span>
           </div>
         </Link>
         <Link
@@ -180,8 +180,8 @@ export default function Components() {
             </SessionLayoutProvider>
           </div>
           <div className="flex flex-col gap-1 px-5 py-4">
-            <span className="text-[18px] font-medium text-gray-dark">Course Block</span>
-            <span className="text-[16px] text-[#707070]">Displays an enrolled course — live cohort or self-paced — with sessions, status, and actions.</span>
+            <span className="text-[16px] font-medium text-gray-dark">Course Block</span>
+            <span className="text-[14px] text-[#707070]">Displays an enrolled course — live cohort or self-paced — with sessions, status, and actions.</span>
           </div>
         </Link>
 
@@ -208,8 +208,8 @@ export default function Components() {
             </div>
           </div>
           <div className="flex flex-col gap-1 px-5 py-4">
-            <span className="text-[18px] font-medium text-gray-dark">Profile Card</span>
-            <span className="text-[16px] text-[#707070]">Displays a user's identity — avatar, name, headline, and stats. Two variants: client and coach.</span>
+            <span className="text-[16px] font-medium text-gray-dark">Profile Card</span>
+            <span className="text-[14px] text-[#707070]">Displays a user's identity — avatar, name, headline, and stats. Two variants: client and coach.</span>
           </div>
         </Link>
 
@@ -229,8 +229,8 @@ export default function Components() {
             </div>
           </div>
           <div className="flex flex-col gap-1 px-5 py-4">
-            <span className="text-[18px] font-medium text-gray-dark">Group Card</span>
-            <span className="text-[16px] text-[#707070]">Displays a user's group membership with name, member count, and recent activity.</span>
+            <span className="text-[16px] font-medium text-gray-dark">Group Card</span>
+            <span className="text-[14px] text-[#707070]">Displays a user's group membership with name, member count, and recent activity.</span>
           </div>
         </Link>
       </div>

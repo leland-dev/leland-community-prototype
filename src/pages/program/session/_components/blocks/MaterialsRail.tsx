@@ -16,9 +16,9 @@ export default function MaterialsRail({ chapters, currentChapterId, compact }: P
   return (
     <div className="flex h-full flex-col rounded-2xl border border-gray-stroke bg-white">
       <div className="border-b border-gray-stroke px-5 py-4">
-        <div className="text-[12px] font-medium uppercase tracking-[0.12em] text-gray-light">Materials</div>
+        <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-gray-light">Materials</div>
         {!compact && (
-          <div className="mt-1 text-[18px] font-medium text-gray-dark">Session guide</div>
+          <div className="mt-1 text-[16px] font-medium text-gray-dark">Session guide</div>
         )}
       </div>
       <ol className="flex-1 overflow-auto">
@@ -35,7 +35,7 @@ export default function MaterialsRail({ chapters, currentChapterId, compact }: P
                 <span className="absolute left-0 top-0 h-full w-[3px] bg-[#038561]" aria-hidden />
               )}
               <div
-                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-medium ${
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-medium ${
                   isCurrent
                     ? "bg-[#038561] text-white"
                     : "border border-gray-stroke text-gray-light"
@@ -44,10 +44,10 @@ export default function MaterialsRail({ chapters, currentChapterId, compact }: P
                 {i + 1}
               </div>
               <div className="min-w-0 flex-1">
-                <div className={`text-[15px] leading-snug ${isCurrent ? "font-medium text-gray-dark" : "text-gray-dark"}`}>
+                <div className={`text-[13px] leading-snug ${isCurrent ? "font-medium text-gray-dark" : "text-gray-dark"}`}>
                   {c.title}
                 </div>
-                <div className="mt-1 text-[12px] text-gray-light">
+                <div className="mt-1 text-[10px] text-gray-light">
                   {isCurrent ? (
                     <span className="font-semibold uppercase tracking-[0.12em] text-[#038561]">Now</span>
                   ) : (

@@ -78,10 +78,10 @@ const experts = [
 function SectionHeader({ title }: { title: string }) {
   return (
     <div className="flex items-center justify-between">
-      <h3 className="text-[14px] font-medium uppercase tracking-[0.1em] text-gray-light">
+      <h3 className="text-[12px] font-medium uppercase tracking-[0.1em] text-gray-light">
         {title}
       </h3>
-      <button className="cursor-pointer text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark">
+      <button className="cursor-pointer text-[12px] font-medium text-gray-light transition-colors hover:text-gray-dark">
         See all
       </button>
     </div>
@@ -90,7 +90,7 @@ function SectionHeader({ title }: { title: string }) {
 
 function HashIcon() {
   return (
-    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gray-hover text-[14px] font-semibold text-gray-light">
+    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gray-hover text-[12px] font-semibold text-gray-light">
       #
     </span>
   );
@@ -109,10 +109,10 @@ export default function HomeSidebar() {
             <a key={event.title} href="#" className="group flex cursor-pointer items-start gap-3">
               <div className="h-12 w-12 shrink-0 rounded-lg bg-gray-hover" />
               <div className="min-w-0">
-                <p className="text-[15px] font-medium leading-tight text-gray-dark group-hover:underline">
+                <p className="text-[13px] font-medium leading-tight text-gray-dark group-hover:underline">
                   {event.title}
                 </p>
-                <p className="mt-0.5 text-[14px] text-gray-light">
+                <p className="mt-0.5 text-[12px] text-gray-light">
                   {event.live ? (
                     <>
                       <span className="font-medium text-[#D92D20]">{event.subtitle}</span>
@@ -139,10 +139,10 @@ export default function HomeSidebar() {
             <a key={topic.name} href="#" className="group flex cursor-pointer items-center gap-3">
               <HashIcon />
               <div className="min-w-0">
-                <p className="text-[15px] font-medium leading-tight text-gray-dark group-hover:underline">
+                <p className="text-[13px] font-medium leading-tight text-gray-dark group-hover:underline">
                   {topic.name}
                 </p>
-                <p className="text-[14px] text-gray-light">
+                <p className="text-[12px] text-gray-light">
                   {topic.posts} posts today
                 </p>
               </div>
@@ -166,15 +166,15 @@ export default function HomeSidebar() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[15px] font-medium leading-tight text-gray-dark group-hover:underline">
+                  <span className="text-[13px] font-medium leading-tight text-gray-dark group-hover:underline">
                     {expert.name}
                   </span>
                   <img src={verifiedIcon} alt="Verified" className="h-[13px] w-[13px] shrink-0" />
-                  <span className="text-[13px] text-gray-light">
+                  <span className="text-[11px] text-gray-light">
                     · ★ {expert.rating} ({expert.reviews})
                   </span>
                 </div>
-                <p className="truncate text-[14px] leading-tight text-gray-light">
+                <p className="truncate text-[12px] leading-tight text-gray-light">
                   {expert.headline}
                 </p>
               </div>

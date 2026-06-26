@@ -92,9 +92,9 @@ export default function CourseBlockTest() {
     <SessionLayoutProvider>
       <PageShell variant="thin">
         {/* Page header */}
-        <Link to="/components" className="inline-block rounded-[4px] border border-[#E5E5E5] bg-[#F5F5F5] px-2 py-1 text-[13px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-colors hover:bg-[#EBEBEB]">&lt;COMPONENT&gt;</Link>
-        <h1 className="mt-1 text-[40px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Course Block</h1>
-        <p className="mt-1 text-[18px] text-[#707070]">
+        <Link to="/components" className="inline-block rounded-[4px] border border-[#E5E5E5] bg-[#F5F5F5] px-2 py-1 text-[11px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-colors hover:bg-[#EBEBEB]">&lt;COMPONENT&gt;</Link>
+        <h1 className="mt-1 text-[38px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Course Block</h1>
+        <p className="mt-1 text-[16px] text-[#707070]">
           Displays an enrolled course with its sessions, status, and actions. Supports live cohort and self-paced course types, with default and boxed display variants.
         </p>
 
@@ -104,22 +104,22 @@ export default function CourseBlockTest() {
             <div className="flex flex-col gap-10">
               {/* Active */}
               <div>
-                <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.1em] text-[#9B9B9B]">Active · Session live now</p>
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#9B9B9B]">Active · Session live now</p>
                 <LiveCourseCard course={activeCourse} />
               </div>
               {/* No cohort */}
               <div>
-                <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.1em] text-[#9B9B9B]">No cohort selected</p>
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#9B9B9B]">No cohort selected</p>
                 <LiveCourseCard course={noCohortCourse} />
               </div>
               {/* Completed */}
               <div>
-                <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.1em] text-[#9B9B9B]">Completed</p>
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#9B9B9B]">Completed</p>
                 <LiveCourseCard course={completedCourse} />
               </div>
               {/* Boxed */}
               <div>
-                <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.1em] text-[#9B9B9B]">Boxed variant</p>
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#9B9B9B]">Boxed variant</p>
                 <div className="flex flex-col gap-8">
                   <LiveCourseCard course={activeCourse} boxed />
                   <LiveCourseCard course={noCohortCourse} boxed />
@@ -132,8 +132,8 @@ export default function CourseBlockTest() {
 
         {/* Demo */}
         <div className="mt-14 mb-16">
-          <h2 className="text-[24px] font-medium text-gray-dark">Demo</h2>
-          <p className="mt-1 mb-4 text-[18px] text-[#707070]">Toggle the options below to preview all possible states of the component.</p>
+          <h2 className="text-[22px] font-medium text-gray-dark">Demo</h2>
+          <p className="mt-1 mb-4 text-[16px] text-[#707070]">Toggle the options below to preview all possible states of the component.</p>
 
           <div className="flex flex-wrap items-center gap-2">
             {/* State toggle */}
@@ -142,7 +142,7 @@ export default function CourseBlockTest() {
                 <button
                   key={s}
                   onClick={() => setSandboxState(s)}
-                  className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[14px] font-medium transition-colors ${
+                  className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors ${
                     sandboxState === s ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"
                   }`}
                 >
@@ -157,7 +157,7 @@ export default function CourseBlockTest() {
                 <button
                   key={String(b)}
                   onClick={() => setSandboxBoxed(b)}
-                  className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[14px] font-medium transition-colors ${
+                  className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors ${
                     sandboxBoxed === b ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"
                   }`}
                 >

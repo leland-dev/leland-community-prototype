@@ -11,7 +11,7 @@ export default function CoachCalendar() {
 
   return (
     <div>
-      <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">Calendar</h1>
+      <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">Calendar</h1>
       <div className="mt-8 flex flex-col gap-4">
         {[0, 1, 2, 3, 4].map((i) => (
           <div key={i} className="h-[160px] rounded-xl bg-[#F5F5F5]" style={dashedBorderStyle} />

@@ -438,13 +438,13 @@ function LockedTabState({ tab, onRequestJoin }: { tab: Tab; onRequestJoin: () =>
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
       </div>
-      <p className="mt-4 text-[17px] font-medium text-gray-dark">Join this group to see {label}</p>
-      <p className="mt-1 max-w-[360px] text-[15px] text-[#707070]">
+      <p className="mt-4 text-[15px] font-medium text-gray-dark">Join this group to see {label}</p>
+      <p className="mt-1 max-w-[360px] text-[13px] text-[#707070]">
         Group {label} are only visible to members.
       </p>
       <button
         onClick={onRequestJoin}
-        className="mt-5 cursor-pointer rounded-lg bg-[#F0F0F0] px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#E8E8E8]"
+        className="mt-5 cursor-pointer rounded-lg bg-[#F0F0F0] px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#E8E8E8]"
       >
         Request to join
       </button>
@@ -477,7 +477,7 @@ function ActivityTab({ posts: initialPosts }: { posts: Post[] }) {
         />
         <button
           onClick={() => setComposeOpen(true)}
-          className="flex-1 rounded-full bg-gray-hover px-4 py-[10px] text-left text-[16px] text-gray-light transition-shadow hover:shadow-[0_0_0_1.5px_#111111]"
+          className="flex-1 rounded-full bg-gray-hover px-4 py-[10px] text-left text-[14px] text-gray-light transition-shadow hover:shadow-[0_0_0_1.5px_#111111]"
         >
           Create post
         </button>
@@ -485,8 +485,8 @@ function ActivityTab({ posts: initialPosts }: { posts: Post[] }) {
 
       {posts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-[18px] font-medium text-gray-dark">No posts yet</p>
-          <p className="mt-1 text-[16px] text-[#707070]">Be the first to post in this group.</p>
+          <p className="text-[16px] font-medium text-gray-dark">No posts yet</p>
+          <p className="mt-1 text-[14px] text-[#707070]">Be the first to post in this group.</p>
         </div>
       ) : (
         <div className="divide-y divide-[#F0F0F0]">
@@ -523,17 +523,17 @@ function MembersTab() {
             <img src={m.avatar} alt={m.name} className="h-10 w-10 shrink-0 rounded-full object-cover" />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <p className="truncate text-[16px] font-medium leading-tight text-gray-dark">{m.name}</p>
+                <p className="truncate text-[14px] font-medium leading-tight text-gray-dark">{m.name}</p>
                 {m.role === "coach" && (
                   <img src={verifiedIconSrc} alt="Expert" className="h-[14px] w-[14px] shrink-0" />
                 )}
               </div>
-              <p className="truncate text-[14px] leading-tight text-[#707070]">{m.headline}</p>
+              <p className="truncate text-[12px] leading-tight text-[#707070]">{m.headline}</p>
             </div>
             {m.role !== "self" && (
               <button
                 onClick={(e) => { e.stopPropagation(); setFollowed(prev => { const next = new Set(prev); next.has(m.name) ? next.delete(m.name) : next.add(m.name); return next; }); }}
-                className="flex shrink-0 items-center gap-1 rounded-[8px] bg-[#F0F0F0] px-3 py-1.5 text-[13px] font-medium text-gray-dark transition-colors hover:bg-[#E8E8E8]"
+                className="flex shrink-0 items-center gap-1 rounded-[8px] bg-[#F0F0F0] px-3 py-1.5 text-[11px] font-medium text-gray-dark transition-colors hover:bg-[#E8E8E8]"
               >
                 {followed.has(m.name) && (
                   <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -674,7 +674,7 @@ function GroupRightSidebar({ group }: { group: GroupData }) {
             subtitle={e.live ? <><span className="font-medium text-[#FB5A42]">Live now</span>{e.subtitle.replace(/^Live now/, "")}</> : e.subtitle}
             right={
               e.live ? (
-                <div className="rounded-[8px] bg-[#038561] px-[14px] py-2 text-[14px] font-medium text-white" style={{ lineHeight: 1.2 }}>
+                <div className="rounded-[8px] bg-[#038561] px-[14px] py-2 text-[12px] font-medium text-white" style={{ lineHeight: 1.2 }}>
                   Join
                 </div>
               ) : undefined
@@ -744,9 +744,9 @@ export default function Group() {
     return (
       <PageShell>
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <p className="text-[20px] font-medium text-gray-dark">Group not found</p>
-          <p className="mt-2 text-[16px] text-[#707070]">This group page hasn't been built yet.</p>
-          <Link to="/" className="mt-6 text-[16px] font-medium text-[#038561] hover:underline">
+          <p className="text-[18px] font-medium text-gray-dark">Group not found</p>
+          <p className="mt-2 text-[14px] text-[#707070]">This group page hasn't been built yet.</p>
+          <Link to="/" className="mt-6 text-[14px] font-medium text-[#038561] hover:underline">
             ← Back to feed
           </Link>
         </div>
@@ -773,7 +773,7 @@ export default function Group() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`shrink-0 cursor-pointer border-b-2 px-3 pt-4 pb-4 text-[16px] font-medium transition-colors ${
+                      className={`shrink-0 cursor-pointer border-b-2 px-3 pt-4 pb-4 text-[14px] font-medium transition-colors ${
                         activeTab === tab.id
                           ? "border-[#038561] text-gray-dark"
                           : "border-transparent text-[#707070] hover:text-gray-dark"
@@ -796,7 +796,7 @@ export default function Group() {
         {/* Group icon + CTA row — mirrors coach profile "no header" layout */}
         <div className="mb-4 flex items-start justify-between">
           <div
-            className="flex h-[88px] w-[88px] md:h-[132px] md:w-[132px] shrink-0 items-center justify-center rounded-lg text-white text-[32px] md:text-[48px] font-bold"
+            className="flex h-[88px] w-[88px] md:h-[132px] md:w-[132px] shrink-0 items-center justify-center rounded-lg text-white text-[30px] md:text-[46px] font-bold"
             style={{ backgroundColor: group.accentColor }}
           >
             {group.name.charAt(0)}
@@ -804,7 +804,7 @@ export default function Group() {
           <div className="flex items-center pb-1">
             <button
               onClick={() => setIsJoined(!isJoined)}
-              className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[15px] md:text-[16px] font-medium transition-colors ${
+              className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[13px] md:text-[14px] font-medium transition-colors ${
                 isJoined
                   ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
                   : "bg-[#038561] text-white hover:bg-[#038561]/90"
@@ -817,11 +817,11 @@ export default function Group() {
         </div>
 
         {/* Group name + tagline */}
-        <h1 className="text-[22px] md:text-[24px] font-medium leading-tight text-gray-dark">{group.name}</h1>
-        <p className="mt-1 mb-[6px] text-[16px] md:text-[18px] leading-[1.3] text-[#707070]">{group.tagline}</p>
+        <h1 className="text-[20px] md:text-[22px] font-medium leading-tight text-gray-dark">{group.name}</h1>
+        <p className="mt-1 mb-[6px] text-[14px] md:text-[16px] leading-[1.3] text-[#707070]">{group.tagline}</p>
 
         {/* Face pile + stats */}
-        <div className="mt-3 flex items-center gap-2.5 text-[16px] text-[#707070]">
+        <div className="mt-3 flex items-center gap-2.5 text-[14px] text-[#707070]">
           <div className="flex -space-x-1.5">
             {COHORT_MEMBERS.slice(0, 4).map((m) => (
               <img
@@ -844,7 +844,7 @@ export default function Group() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`cursor-pointer border-b-2 px-3 pt-4 pb-2 md:pb-4 text-[16px] font-medium transition-colors ${
+              className={`cursor-pointer border-b-2 px-3 pt-4 pb-2 md:pb-4 text-[14px] font-medium transition-colors ${
                 activeTab === tab.id
                   ? "border-[#038561] text-gray-dark"
                   : "border-transparent text-[#707070] hover:text-gray-dark"

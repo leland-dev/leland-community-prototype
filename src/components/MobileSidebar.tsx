@@ -87,12 +87,12 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                 alt="Jane Doe"
                 className="h-10 w-10 rounded-full object-cover"
               />
-              <p className="mt-3 text-[16px] font-semibold text-gray-dark">Jane Doe</p>
+              <p className="mt-3 text-[14px] font-semibold text-gray-dark">Jane Doe</p>
               <p className="text-sm text-gray-light">jane@example.com</p>
               <NavLink
                 to="/profile-v2"
                 onClick={onClose}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#222222]/5 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#222222]/5 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
               >
                 View profile
                 <img src={arrowRightIcon} alt="" className="h-5 w-5" />
@@ -108,7 +108,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                       key={label}
                       to={to}
                       onClick={onClose}
-                      className="flex items-center gap-[10px] px-5 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                      className="flex items-center gap-[10px] px-5 py-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                     >
                       {icon && <img src={icon} alt={label} className={`h-6 w-6 shrink-0${darkIcon ? " brightness-0" : ""}`} />}
                       {label}
@@ -117,7 +117,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                     <button
                       key={label}
                       onClick={onClose}
-                      className={`flex w-full items-center gap-[10px] px-5 py-3 text-[16px] font-medium transition-colors hover:bg-gray-hover ${
+                      className={`flex w-full items-center gap-[10px] px-5 py-3 text-[14px] font-medium transition-colors hover:bg-gray-hover ${
                         danger ? "text-[#D92D20]" : "text-gray-dark"
                       }`}
                     >
@@ -130,10 +130,10 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
 
               {/* Design toggles — for mocking alternate UI versions */}
               <div className="border-t border-gray-stroke py-2">
-                <p className="px-5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#A0A0A0]">Design toggles</p>
+                <p className="px-5 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0A0A0]">Design toggles</p>
                 <button
                   onClick={toggleDarkMode}
-                  className="flex w-full items-center justify-between gap-[10px] px-5 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                  className="flex w-full items-center justify-between gap-[10px] px-5 py-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                 >
                   <span>Dark Mode</span>
                   <span

@@ -69,7 +69,7 @@ export default function BottomTray({ open, title, onClose, children }: Props) {
         </div>
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-gray-stroke px-4 py-3">
-          <div className="text-[16px] font-medium text-gray-dark">{title ?? "Chat"}</div>
+          <div className="text-[14px] font-medium text-gray-dark">{title ?? "Chat"}</div>
           <button
             type="button"
             onClick={onClose}

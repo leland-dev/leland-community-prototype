@@ -34,7 +34,7 @@ export default function ActionItems({ state }: { state: SessionState }) {
   const items = itemsForState(state);
   return (
     <section className="rounded-2xl border border-gray-stroke bg-white p-5">
-      <div className="text-[12px] font-medium uppercase tracking-[0.12em] text-gray-light">
+      <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-gray-light">
         Action items
       </div>
       <ul className="mt-3 flex flex-col gap-3">
@@ -54,10 +54,10 @@ export default function ActionItems({ state }: { state: SessionState }) {
               )}
             </span>
             <div className="min-w-0 flex-1">
-              <div className={`text-[14px] ${it.done ? "text-gray-light line-through" : "text-gray-dark"}`}>
+              <div className={`text-[12px] ${it.done ? "text-gray-light line-through" : "text-gray-dark"}`}>
                 {it.label}
               </div>
-              {it.hint && <div className="text-[12px] text-gray-light">{it.hint}</div>}
+              {it.hint && <div className="text-[10px] text-gray-light">{it.hint}</div>}
             </div>
           </li>
         ))}

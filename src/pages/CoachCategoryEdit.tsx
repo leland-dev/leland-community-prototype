@@ -108,8 +108,8 @@ export default function CoachCategoryEdit() {
   if (!data) {
     return (
       <div>
-        <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">Category not found</h1>
-        <p className="mt-2 text-[16px] text-[#707070]">
+        <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">Category not found</h1>
+        <p className="mt-2 text-[14px] text-[#707070]">
           <Link to="/coach/manage" className="text-[#038561] underline">Back to Manage</Link>
         </p>
       </div>
@@ -125,24 +125,24 @@ export default function CoachCategoryEdit() {
     });
   };
 
-  const inputClass = "w-full rounded-lg border border-[#E5E5E5] px-4 py-3 text-[16px] text-gray-dark placeholder:text-[#999999] outline-none transition-colors focus:border-[#222222]";
+  const inputClass = "w-full rounded-lg border border-[#E5E5E5] px-4 py-3 text-[14px] text-gray-dark placeholder:text-[#999999] outline-none transition-colors focus:border-[#222222]";
 
   return (
     <div>
       {/* Breadcrumb */}
-      <div className="mb-2 text-[14px] text-[#707070]">
+      <div className="mb-2 text-[12px] text-[#707070]">
         <Link to="/coach/manage" className="transition-colors hover:text-gray-dark">Manage</Link>
         <span className="mx-2">/</span>
         <span className="text-gray-dark">{data.name}</span>
       </div>
 
-      <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">{data.name}</h1>
+      <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">{data.name}</h1>
 
       {/* Form fields */}
       <div className="mt-8 flex flex-col gap-6">
         {/* Headline */}
         <div>
-          <label className="mb-2 block text-[16px] font-medium text-gray-dark">Headline</label>
+          <label className="mb-2 block text-[14px] font-medium text-gray-dark">Headline</label>
           <input
             type="text"
             value={headline}
@@ -154,7 +154,7 @@ export default function CoachCategoryEdit() {
 
         {/* Qualifications */}
         <div>
-          <label className="mb-2 block text-[16px] font-medium text-gray-dark">Qualifications</label>
+          <label className="mb-2 block text-[14px] font-medium text-gray-dark">Qualifications</label>
           <textarea
             value={qualifications}
             onChange={(e) => setQualifications(e.target.value)}
@@ -167,7 +167,7 @@ export default function CoachCategoryEdit() {
         {/* Years of experience + Level of experience (side by side) */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-[16px] font-medium text-gray-dark">Years of experience</label>
+            <label className="mb-2 block text-[14px] font-medium text-gray-dark">Years of experience</label>
             <input
               type="text"
               value={yearsOfExperience}
@@ -177,7 +177,7 @@ export default function CoachCategoryEdit() {
             />
           </div>
           <div>
-            <label className="mb-2 block text-[16px] font-medium text-gray-dark">Level of experience</label>
+            <label className="mb-2 block text-[14px] font-medium text-gray-dark">Level of experience</label>
             <select
               value={levelOfExperience}
               onChange={(e) => setLevelOfExperience(e.target.value)}
@@ -192,7 +192,7 @@ export default function CoachCategoryEdit() {
 
         {/* Video link */}
         <div>
-          <label className="mb-2 block text-[16px] font-medium text-gray-dark">Video link</label>
+          <label className="mb-2 block text-[14px] font-medium text-gray-dark">Video link</label>
           <input
             type="text"
             value={videoLink}
@@ -204,7 +204,7 @@ export default function CoachCategoryEdit() {
 
         {/* Services */}
         <div>
-          <h2 className="text-[24px] font-medium text-gray-dark">Select your areas of expertise in this category</h2>
+          <h2 className="text-[22px] font-medium text-gray-dark">Select your areas of expertise in this category</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             {data.allServices.map((service) => {
               const active = selectedServices.has(service);
@@ -212,7 +212,7 @@ export default function CoachCategoryEdit() {
                 <button
                   key={service}
                   onClick={() => toggleService(service)}
-                  className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-colors ${
+                  className={`cursor-pointer rounded-full border px-4 py-2 text-[12px] font-medium transition-colors ${
                     active
                       ? "border-[#222222] bg-[#222222]/5 text-gray-dark"
                       : "border-[#E5E5E5] text-gray-dark hover:bg-[#F5F5F5]"
@@ -230,8 +230,8 @@ export default function CoachCategoryEdit() {
       <div className="my-10 border-t border-[#E5E5E5]" />
 
       {/* Products */}
-      <h2 className="text-[24px] font-medium text-gray-dark">Products</h2>
-      <p className="mt-1 text-[16px] text-[#707070]">Offerings available in this category.</p>
+      <h2 className="text-[22px] font-medium text-gray-dark">Products</h2>
+      <p className="mt-1 text-[14px] text-[#707070]">Offerings available in this category.</p>
       <div className="mt-4 flex flex-col gap-1">
         {offerings.map((o) => (
           <OfferingCard

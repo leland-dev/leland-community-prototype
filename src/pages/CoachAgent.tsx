@@ -142,11 +142,11 @@ export default function CoachAgent() {
   if (!agent || !assets) {
     return (
       <div className="mx-auto max-w-[600px] px-4 py-16 text-center">
-        <p className="text-[18px] font-medium text-gray-dark">Agent not found</p>
-        <p className="mt-2 text-[16px] text-[#707070]">We couldn't find an agent with that link.</p>
+        <p className="text-[16px] font-medium text-gray-dark">Agent not found</p>
+        <p className="mt-2 text-[14px] text-[#707070]">We couldn't find an agent with that link.</p>
         <Link
           to="/coach-profile"
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
         >
           Back to coach profile
         </Link>
@@ -279,8 +279,8 @@ export default function CoachAgent() {
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[16px] font-semibold text-gray-dark">{agent.agentName}</p>
-          <p className="truncate text-[14px] text-[#707070]">
+          <p className="truncate text-[14px] font-semibold text-gray-dark">{agent.agentName}</p>
+          <p className="truncate text-[12px] text-[#707070]">
             AI agent · curated by{" "}
             <Link to={agent.coachProfileHref} className="underline decoration-[0.5px] underline-offset-2 hover:text-gray-dark">
               {agent.coachName}
@@ -289,7 +289,7 @@ export default function CoachAgent() {
         </div>
         <Link
           to={agent.coachProfileHref}
-          className="hidden shrink-0 cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08] md:inline-flex md:items-center"
+          className="hidden shrink-0 cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08] md:inline-flex md:items-center"
         >
           Book 1:1 with {agent.coachName.split(" ")[0]}
         </Link>
@@ -297,11 +297,11 @@ export default function CoachAgent() {
 
       {/* Error banner */}
       {errorBanner && (
-        <div className="border-b border-[#F5C6CB] bg-[#FDECEA] px-4 py-2 text-[14px] text-[#9F2F2F] md:px-6">
+        <div className="border-b border-[#F5C6CB] bg-[#FDECEA] px-4 py-2 text-[12px] text-[#9F2F2F] md:px-6">
           {errorBanner}
           <button
             onClick={() => setErrorBanner(null)}
-            className="ml-3 cursor-pointer text-[13px] font-medium underline"
+            className="ml-3 cursor-pointer text-[11px] font-medium underline"
           >
             Dismiss
           </button>
@@ -320,8 +320,8 @@ export default function CoachAgent() {
               </span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[14px] font-medium text-gray-dark">{agent.agentName}</p>
-              <div className="mt-1.5 rounded-2xl rounded-tl-sm bg-[#F5F5F5] px-4 py-3 text-[16px] leading-snug text-gray-dark whitespace-pre-wrap">
+              <p className="text-[12px] font-medium text-gray-dark">{agent.agentName}</p>
+              <div className="mt-1.5 rounded-2xl rounded-tl-sm bg-[#F5F5F5] px-4 py-3 text-[14px] leading-snug text-gray-dark whitespace-pre-wrap">
                 {agent.greeting}
               </div>
             </div>
@@ -334,7 +334,7 @@ export default function CoachAgent() {
                 <button
                   key={s}
                   onClick={() => sendMessage(s)}
-                  className="cursor-pointer rounded-full border border-gray-stroke bg-white px-3.5 py-2 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                  className="cursor-pointer rounded-full border border-gray-stroke bg-white px-3.5 py-2 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                 >
                   {s}
                 </button>
@@ -350,14 +350,14 @@ export default function CoachAgent() {
                   {m.attachments && m.attachments.length > 0 && (
                     <div className="flex flex-wrap justify-end gap-1.5">
                       {m.attachments.map((a, j) => (
-                        <span key={j} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-stroke bg-white px-2.5 py-1.5 text-[12px] font-medium text-gray-dark">
+                        <span key={j} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-stroke bg-white px-2.5 py-1.5 text-[10px] font-medium text-gray-dark">
                           <FileIcon />
                           <span className="max-w-[160px] truncate">{a.name}</span>
                         </span>
                       ))}
                     </div>
                   )}
-                  <div className="rounded-2xl rounded-tr-sm bg-[#222222] px-4 py-3 text-[16px] leading-snug text-white whitespace-pre-wrap">
+                  <div className="rounded-2xl rounded-tr-sm bg-[#222222] px-4 py-3 text-[14px] leading-snug text-white whitespace-pre-wrap">
                     {m.content}
                   </div>
                 </div>
@@ -371,7 +371,7 @@ export default function CoachAgent() {
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="rounded-2xl rounded-tl-sm bg-[#F5F5F5] px-4 py-3 text-[16px] leading-snug text-gray-dark whitespace-pre-wrap">
+                  <div className="rounded-2xl rounded-tl-sm bg-[#F5F5F5] px-4 py-3 text-[14px] leading-snug text-gray-dark whitespace-pre-wrap">
                     {m.content}
                   </div>
                 </div>
@@ -390,7 +390,7 @@ export default function CoachAgent() {
               </div>
               <div className="min-w-0 flex-1">
                 {streamingText ? (
-                  <div className="rounded-2xl rounded-tl-sm bg-[#F5F5F5] px-4 py-3 text-[16px] leading-snug text-gray-dark whitespace-pre-wrap">
+                  <div className="rounded-2xl rounded-tl-sm bg-[#F5F5F5] px-4 py-3 text-[14px] leading-snug text-gray-dark whitespace-pre-wrap">
                     {streamingText}
                     <span className="ml-0.5 inline-block h-4 w-[2px] animate-pulse bg-[#9B9B9B] align-text-bottom" />
                   </div>
@@ -413,20 +413,20 @@ export default function CoachAgent() {
               <div className="flex items-start gap-3">
                 <img src={assets.coachAvatar} alt={agent.coachName} className="h-10 w-10 shrink-0 rounded-full object-cover" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[15px] font-medium text-gray-dark">Want to take this further with {agent.coachName.split(" ")[0]}?</p>
-                  <p className="mt-1 text-[14px] text-[#707070]">
+                  <p className="text-[13px] font-medium text-gray-dark">Want to take this further with {agent.coachName.split(" ")[0]}?</p>
+                  <p className="mt-1 text-[12px] text-[#707070]">
                     I can take you most of the way, but the judgment calls — your specific story, your specific tradeoffs — are where {agent.coachName.split(" ")[0]} really shines. A 1:1 might be the right next step.
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Link
                       to={agent.coachProfileHref}
-                      className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#038561] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#038561]/90"
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#038561] px-4 py-2.5 text-[12px] font-medium text-white transition-colors hover:bg-[#038561]/90"
                     >
                       Book 1:1 with {agent.coachName.split(" ")[0]}
                     </Link>
                     <Link
                       to={agent.coachProfileHref}
-                      className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
                     >
                       See all offerings
                     </Link>
@@ -445,7 +445,7 @@ export default function CoachAgent() {
           {pendingAttachments.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-1.5">
               {pendingAttachments.map((a, idx) => (
-                <span key={idx} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-stroke bg-[#F5F5F5] py-1.5 pl-2.5 pr-1.5 text-[13px] font-medium text-gray-dark">
+                <span key={idx} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-stroke bg-[#F5F5F5] py-1.5 pl-2.5 pr-1.5 text-[11px] font-medium text-gray-dark">
                   <FileIcon />
                   <span className="max-w-[200px] truncate">{a.name}</span>
                   <button
@@ -499,7 +499,7 @@ export default function CoachAgent() {
                 }
               }}
               placeholder={`Message ${agent.coachName.split(" ")[0]}'s agent…`}
-              className="max-h-[180px] flex-1 resize-none bg-transparent py-1.5 text-[16px] leading-snug text-gray-dark placeholder:text-[#9B9B9B] focus:outline-none"
+              className="max-h-[180px] flex-1 resize-none bg-transparent py-1.5 text-[14px] leading-snug text-gray-dark placeholder:text-[#9B9B9B] focus:outline-none"
               disabled={streaming}
             />
             <Button
@@ -513,7 +513,7 @@ export default function CoachAgent() {
               <SendIcon />
             </Button>
           </form>
-          <p className="mt-2 text-center text-[12px] text-[#9B9B9B]">
+          <p className="mt-2 text-center text-[10px] text-[#9B9B9B]">
             Attach an essay (.md / .txt) or a PDF (deck, document) for review. Curated by {agent.coachName}.
           </p>
         </div>

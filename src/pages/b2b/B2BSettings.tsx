@@ -37,8 +37,8 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
       <div className="mb-8">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-[40px] font-medium text-gray-dark">Admin Settings</h1>
-            <p className="mt-2 text-[18px] text-[#707070]">Manage permissions, licenses, and account configuration</p>
+            <h1 className="text-[38px] font-medium text-gray-dark">Admin Settings</h1>
+            <p className="mt-2 text-[16px] text-[#707070]">Manage permissions, licenses, and account configuration</p>
           </div>
           <div className="hidden sm:block">
             <Button size="lg" variant="secondary" onClick={onNavigateDashboard}>
@@ -56,7 +56,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
       <div className="grid grid-cols-1 items-start gap-8 sm:grid-cols-[1fr_280px] sm:gap-x-col-gap">
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-[24px] font-medium leading-[1.2] text-gray-dark">Admins</h2>
+            <h2 className="text-[22px] font-medium leading-[1.2] text-gray-dark">Admins</h2>
             <Button size="md" variant="secondary" className="shrink-0" onClick={() => setAddAdminOpen(true)}>
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
@@ -71,7 +71,7 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
             <input
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="flex-1 border-none bg-transparent text-[16px] leading-[1.2] text-gray-dark outline-none placeholder:text-gray-xlight"
+              className="flex-1 border-none bg-transparent text-[14px] leading-[1.2] text-gray-dark outline-none placeholder:text-gray-xlight"
               placeholder="Search by name or email"
             />
           </div>
@@ -85,8 +85,8 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
                   <div className="flex min-w-0 flex-1 items-center gap-[10px]">
                     <Avatar initials={admin.initials} size={36} />
                     <div className="min-w-0 leading-[1.2]">
-                      <div className="truncate text-[16px] font-medium text-gray-dark">{admin.name}</div>
-                      <div className="truncate text-[14px] text-gray-light">{admin.email}</div>
+                      <div className="truncate text-[14px] font-medium text-gray-dark">{admin.name}</div>
+                      <div className="truncate text-[12px] text-gray-light">{admin.email}</div>
                     </div>
                   </div>
                   <button
@@ -99,11 +99,11 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
                   </button>
                 </div>
               )) : (
-                <div className="px-4 py-8 text-center text-[16px] text-gray-light">No results found</div>
+                <div className="px-4 py-8 text-center text-[14px] text-gray-light">No results found</div>
               )}
             </div>
             <div className="flex items-center justify-between border-t border-gray-stroke px-4 py-3">
-              <span className="text-[14px] text-gray-light">
+              <span className="text-[12px] text-gray-light">
                 {filteredAdmins.length === 0
                   ? "0 users"
                   : `${page * PAGE_SIZE + 1}–${Math.min((page + 1) * PAGE_SIZE, filteredAdmins.length)} of ${filteredAdmins.length} users`}
@@ -130,8 +130,8 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
 
         <div className="flex flex-col gap-8">
           <div>
-          <p className="mb-2 text-[14px] font-medium uppercase tracking-[0.1em] text-gray-light">Support</p>
-          <p className="text-[16px] text-gray-light">
+          <p className="mb-2 text-[12px] font-medium uppercase tracking-[0.1em] text-gray-light">Support</p>
+          <p className="text-[14px] text-gray-light">
             Need help with your account? Reach out to your Leland success team at{" "}
             <a href="mailto:partnerships@joinleland.com" className="font-medium text-primary">
               partnerships@joinleland.com
@@ -159,15 +159,15 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
               initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
               className="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-[0_20px_60px_rgba(0,0,0,0.15)] sm:inset-auto sm:left-1/2 sm:w-[400px] sm:-translate-x-1/2 sm:-translate-y-1/2"
             >
-              <h2 className="text-[20px] font-medium leading-[1.2] text-gray-dark">Remove admin?</h2>
-              <p className="mt-2 text-[16px] leading-[1.5] text-gray-light">
+              <h2 className="text-[18px] font-medium leading-[1.2] text-gray-dark">Remove admin?</h2>
+              <p className="mt-2 text-[14px] leading-[1.5] text-gray-light">
                 <span className="font-medium text-gray-dark">{confirmDelete.name}</span> will no longer have access to this dashboard.
               </p>
               <div className="mt-6 flex gap-3">
                 <Button size="md" variant="secondary" onClick={() => setConfirmDelete(null)} className="flex-1">Cancel</Button>
                 <button
                   onClick={() => { setAdmins((prev) => prev.filter((a) => a.email !== confirmDelete?.email)); setConfirmDelete(null); }}
-                  className="flex-1 rounded-lg bg-[#D92D20] py-2.5 px-4 text-[16px] font-medium leading-[1.2] text-white hover:bg-[#b91c10] transition-colors"
+                  className="flex-1 rounded-lg bg-[#D92D20] py-2.5 px-4 text-[14px] font-medium leading-[1.2] text-white hover:bg-[#b91c10] transition-colors"
                 >
                   Remove
                 </button>

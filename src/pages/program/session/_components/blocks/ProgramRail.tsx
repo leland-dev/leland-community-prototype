@@ -8,8 +8,8 @@ export default function ProgramRail({ sessions }: Props) {
   return (
     <section className="rounded-2xl border border-gray-stroke bg-white">
       <div className="border-b border-gray-stroke px-5 py-4">
-        <div className="text-[12px] font-medium uppercase tracking-[0.12em] text-gray-light">Program</div>
-        <h2 className="mt-1 text-[20px] font-medium text-gray-dark">AI Bootcamp · Spring 2026</h2>
+        <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-gray-light">Program</div>
+        <h2 className="mt-1 text-[18px] font-medium text-gray-dark">AI Bootcamp · Spring 2026</h2>
       </div>
       <ul className="divide-y divide-gray-stroke">
         {sessions.map((s) => {
@@ -21,7 +21,7 @@ export default function ProgramRail({ sessions }: Props) {
               className={`flex items-center gap-3 px-5 py-3 ${isCurrent ? "bg-[#F3FBF6]" : ""}`}
             >
               <div
-                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-medium ${
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-medium ${
                   isCurrent
                     ? "bg-[#038561] text-white"
                     : isDone
@@ -32,7 +32,7 @@ export default function ProgramRail({ sessions }: Props) {
                 {isDone ? "✓" : s.number}
               </div>
               <div className="min-w-0 flex-1">
-                <div className={`text-[15px] ${isCurrent ? "font-medium text-gray-dark" : isDone ? "text-gray-light" : "text-gray-dark"}`}>
+                <div className={`text-[13px] ${isCurrent ? "font-medium text-gray-dark" : isDone ? "text-gray-light" : "text-gray-dark"}`}>
                   {s.title}
                 </div>
                 {isCurrent && (
@@ -45,7 +45,7 @@ export default function ProgramRail({ sessions }: Props) {
                 )}
               </div>
               {isCurrent && (
-                <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-[#038561]">
+                <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#038561]">
                   Now
                 </span>
               )}

@@ -6,6 +6,7 @@ type PageShellProps = {
   leftSidebarMobile?: boolean;
   rightSidebar?: ReactNode;
   rightSidebarWidth?: number;
+  rightSidebarTop?: number;
   contentMaxWidth?: number;
   // When true, the right sidebar stacks below main content at narrow viewports
   // instead of being hidden.
@@ -19,6 +20,7 @@ export default function PageShell({
   leftSidebarMobile = false,
   rightSidebar,
   rightSidebarWidth = 300,
+  rightSidebarTop,
   contentMaxWidth,
   stackRight = false,
 
@@ -76,7 +78,7 @@ export default function PageShell({
           {children}
         </div>
         {hasRight && (
-          <aside className={rightClass} style={stackRight ? undefined : { width: rightSidebarWidth }}>
+          <aside className={rightClass} style={{ ...(!stackRight ? { width: rightSidebarWidth } : {}), ...(rightSidebarTop != null ? { top: rightSidebarTop } : {}) }}>
             {rightSidebar}
           </aside>
         )}

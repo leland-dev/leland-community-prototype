@@ -61,7 +61,7 @@ export default function BottomNav() {
                     alt={label}
                     className="h-[22px] w-[22px]"
                   />
-                  <span className="text-[12px] font-medium leading-tight">{label}</span>
+                  <span className="text-[10px] font-medium leading-tight">{label}</span>
                 </>
               )}
             </NavLink>
@@ -85,7 +85,7 @@ export default function BottomNav() {
                   alt="Profile"
                   className={`h-[22px] w-[22px] rounded-full object-cover ${isActive ? "ring-2 ring-gray-dark" : ""}`}
                 />
-                <span className="text-[12px] font-medium leading-tight">Profile</span>
+                <span className="text-[10px] font-medium leading-tight">Profile</span>
               </>
             )}
           </NavLink>

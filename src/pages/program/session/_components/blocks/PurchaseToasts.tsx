@@ -82,14 +82,14 @@ function ToastCard({ toast, coachName }: { toast: Toast; coachName: string }) {
       style={{ animation: "purchaseToastIn 280ms ease-out both" }}
     >
       <img src={toast.avatar} alt="" className="h-7 w-7 rounded-full object-cover" />
-      <div className="text-[12px] leading-tight">
+      <div className="text-[10px] leading-tight">
         <span className="font-semibold">{toast.name}</span>
         <span className="text-white/80"> just booked coaching with </span>
         <span className="font-semibold">{coachName}</span>
       </div>
       <a
         href="#"
-        className="ml-1 shrink-0 rounded-full bg-[#038561] px-3 py-1.5 text-[11px] font-semibold text-white no-underline transition-colors hover:bg-[#038561]/90"
+        className="ml-1 shrink-0 rounded-full bg-[#038561] px-3 py-1.5 text-[10px] font-semibold text-white no-underline transition-colors hover:bg-[#038561]/90"
       >
         Book yours
       </a>

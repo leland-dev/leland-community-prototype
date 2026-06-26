@@ -12,7 +12,7 @@ interface SidebarGroupProps {
 
 export function SidebarGroup({ label, href, hideChevron, children }: SidebarGroupProps) {
   const header = (
-    <div className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+    <div className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
       {label}
       {!hideChevron && (
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
@@ -112,10 +112,10 @@ export default function SidebarCard({
 
       {/* Center: title + subtitle */}
       <div className={`flex min-w-0 flex-1 flex-col ${variant === "category" ? "gap-[2px]" : "gap-[4px]"}`}>
-        <p className="line-clamp-2 text-[16px] font-medium leading-[1.2] text-gray-dark group-hover:underline group-hover:decoration-[1px] group-hover:underline-offset-[2px]">{title}</p>
-        <p className="truncate text-[14px] font-normal leading-none text-[#707070]">{subtitle}</p>
+        <p className="line-clamp-2 text-[14px] font-medium leading-[1.2] text-gray-dark group-hover:underline group-hover:decoration-[1px] group-hover:underline-offset-[2px]">{title}</p>
+        <p className="truncate text-[12px] font-normal leading-none text-[#707070]">{subtitle}</p>
         {reviews && (
-          <p className="truncate text-[14px] font-normal leading-none text-[#707070]">
+          <p className="truncate text-[12px] font-normal leading-none text-[#707070]">
             <ReviewRow rating={reviews.rating} count={reviews.count} />
           </p>
         )}

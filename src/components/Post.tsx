@@ -154,7 +154,7 @@ export function LikeButton({ initialCount }: { initialCount: number }) {
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
         </motion.svg>
         <motion.span
-          className="text-[15px] font-normal"
+          className="text-[13px] font-normal"
           animate={liked ? { scale: [1, 1.4, 1] } : { scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
@@ -189,7 +189,7 @@ function ShareDropdown({ postId, onClose }: { postId: number; onClose: () => voi
         className="absolute top-full right-0 z-50 mt-1 w-56 rounded-2xl border border-gray-stroke bg-white shadow-lg"
       >
         <div className="px-2 py-2">
-          <button onClick={copyLink} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+          <button onClick={copyLink} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
             {copied ? (
               <svg className="h-5 w-5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
             ) : (
@@ -197,11 +197,11 @@ function ShareDropdown({ postId, onClose }: { postId: number; onClose: () => voi
             )}
             {copied ? "Copied!" : "Copy link"}
           </button>
-          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
             <svg className="h-5 w-5 shrink-0 rounded-[3px]" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
             LinkedIn
           </a>
-          <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+          <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
             <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
             Twitter / X
           </a>
@@ -257,7 +257,7 @@ export function RepostButton({ initialCount }: { initialCount: number }) {
           transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
         />
         <motion.span
-          className="text-[15px] font-normal"
+          className="text-[13px] font-normal"
           animate={reposted && burst ? { scale: [1, 1.4, 1] } : { scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
@@ -277,17 +277,17 @@ export function RepostButton({ initialCount }: { initialCount: number }) {
               className="absolute bottom-full left-0 z-50 mb-2 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
             >
               <div className="px-2 py-2">
-                <button onClick={triggerRepost} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+                <button onClick={triggerRepost} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
                   <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                   Repost with your thoughts
                 </button>
                 {reposted ? (
-                  <button onClick={() => { setReposted(false); setOpen(false); }} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+                  <button onClick={() => { setReposted(false); setOpen(false); }} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
                     <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg>
                     Undo repost
                   </button>
                 ) : (
-                  <button onClick={triggerRepost} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+                  <button onClick={triggerRepost} className="flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
                     <img src={repostsIcon} alt="" className="h-5 w-5 shrink-0 [filter:invert(44%)]" />
                     Repost to feed
                   </button>
@@ -327,7 +327,7 @@ export function PostActionBar({
         className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover"
       >
         <img src={commentsIcon} alt="Comment" className="h-[22px] w-[22px] [filter:invert(44%)]" />
-        {comments > 0 && <span className="text-[15px] font-normal">{formatCount(comments)}</span>}
+        {comments > 0 && <span className="text-[13px] font-normal">{formatCount(comments)}</span>}
       </button>
       <RepostButton initialCount={reposts} />
       <div className="relative">
@@ -372,14 +372,14 @@ function PostHeaderRow({ author, time, verified, headline }: {
           <Link
             to={verified ? "/coach-profile" : "/profile-v2"}
             onClick={(e) => e.stopPropagation()}
-            className="cursor-pointer text-[17px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50"
+            className="cursor-pointer text-[15px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50"
           >
             {author}
           </Link>
           {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
-          <span className="shrink-0 text-[17px] leading-tight text-gray-xlight">{time}</span>
+          <span className="shrink-0 text-[15px] leading-tight text-gray-xlight">{time}</span>
         </div>
-        {headline && <p className="truncate text-[15px] leading-tight text-[#707070]">{headline}</p>}
+        {headline && <p className="truncate text-[13px] leading-tight text-[#707070]">{headline}</p>}
       </div>
       <div ref={menuRef} className="relative shrink-0">
         <button
@@ -412,7 +412,7 @@ function PostHeaderRow({ author, time, verified, headline }: {
                     <button
                       key={label}
                       onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }}
-                      className={`flex w-full items-center gap-[10px] rounded-lg px-3 py-2.5 text-left text-[16px] font-medium transition-colors hover:bg-gray-hover ${danger ? "text-[#D92D20]" : "text-gray-dark"}`}
+                      className={`flex w-full items-center gap-[10px] rounded-lg px-3 py-2.5 text-left text-[14px] font-medium transition-colors hover:bg-gray-hover ${danger ? "text-[#D92D20]" : "text-gray-dark"}`}
                     >
                       {label}
                     </button>
@@ -522,8 +522,8 @@ export function LinkCard({ link }: { link: LinkPost["link"] }) {
         <img src={link.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
       </div>
       <div className="px-4 py-3">
-        <p className="text-[13px] text-gray-light">{link.domain}</p>
-        <p className="mt-0.5 text-[15px] font-medium text-gray-dark leading-snug">{link.title}</p>
+        <p className="text-[11px] text-gray-light">{link.domain}</p>
+        <p className="mt-0.5 text-[13px] font-medium text-gray-dark leading-snug">{link.title}</p>
       </div>
     </a>
   );
@@ -536,15 +536,15 @@ export function EventCard({ event }: { event: EventPost["event"] }) {
     <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
       <img src={event.image} alt={event.title} className="aspect-[1200/628] w-full object-cover" />
       <div className="px-4 py-4">
-        <p className="text-[17px] font-medium leading-snug text-gray-dark">{event.title}</p>
+        <p className="text-[15px] font-medium leading-snug text-gray-dark">{event.title}</p>
         <div className="mt-2 space-y-1">
-          <div className="flex items-center gap-2 text-[15px] text-gray-light">
+          <div className="flex items-center gap-2 text-[13px] text-gray-light">
             <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
             </svg>
             {event.date}
           </div>
-          <div className="flex items-center gap-2 text-[15px] text-gray-light">
+          <div className="flex items-center gap-2 text-[13px] text-gray-light">
             <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
             </svg>
@@ -552,7 +552,7 @@ export function EventCard({ event }: { event: EventPost["event"] }) {
           </div>
           {(event.registered !== undefined || event.spotsLeft !== undefined) && (
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-[15px] text-gray-light">
+              <div className="flex items-center gap-2 text-[13px] text-gray-light">
                 <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
@@ -561,7 +561,7 @@ export function EventCard({ event }: { event: EventPost["event"] }) {
                   {event.spotsLeft !== undefined && <> ({event.spotsLeft} spots left)</>}
                 </span>
               </div>
-              <button className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
+              <button className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
                 Register for free
               </button>
             </div>
@@ -628,23 +628,23 @@ export function MilestoneCard({
             {milestone.schoolLogo ? (
               <img src={milestone.schoolLogo} alt={milestone.school} className="relative z-0 h-20 w-20 shrink-0 rounded-full object-cover ring-2 ring-white" />
             ) : (
-              <div className="relative z-0 flex h-20 w-20 shrink-0 items-center justify-center rounded-full text-[26px] font-bold text-white ring-2 ring-white" style={{ backgroundColor: milestone.schoolColor }}>
+              <div className="relative z-0 flex h-20 w-20 shrink-0 items-center justify-center rounded-full text-[24px] font-bold text-white ring-2 ring-white" style={{ backgroundColor: milestone.schoolColor }}>
                 {milestone.schoolInitial}
               </div>
             )}
             <div className="relative z-10 -ml-6 shrink-0">
               <img src={milestone.clientAvatar} alt={milestone.clientName} className="h-20 w-20 rounded-full object-cover ring-2 ring-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)]" />
-              <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-white text-[16px] shadow-sm">🎉</span>
+              <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-white text-[14px] shadow-sm">🎉</span>
             </div>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-medium uppercase tracking-wide text-gray-light">Admitted</p>
-            <p className="mt-0.5 text-[17px] font-medium leading-tight text-gray-dark">{milestone.school}</p>
-            <p className="text-[14px] text-gray-light">{milestone.program}</p>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-light">Admitted</p>
+            <p className="mt-0.5 text-[15px] font-medium leading-tight text-gray-dark">{milestone.school}</p>
+            <p className="text-[12px] text-gray-light">{milestone.program}</p>
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); onCongratulate?.(); }}
-            className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
+            className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
           >
             Say congratulations
           </button>
@@ -692,7 +692,7 @@ function LiveCommentsFeed() {
             exit={{ opacity: 0, transition: { duration: 0.25 } }}
             transition={{ duration: 0.35, ease: "easeOut" }}
           >
-            <span className="rounded-lg bg-black/40 px-2 py-0.5 text-[11px] leading-snug text-white/90 backdrop-blur-sm">
+            <span className="rounded-lg bg-black/40 px-2 py-0.5 text-[10px] leading-snug text-white/90 backdrop-blur-sm">
               {c.text}
             </span>
           </motion.div>
@@ -720,21 +720,21 @@ export function LiveCard({ live, author, avatar }: { live: LivePost["live"]; aut
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
           </span>
-          <span className="text-[13px] font-semibold tracking-wide text-gray-dark">LIVE</span>
+          <span className="text-[11px] font-semibold tracking-wide text-gray-dark">LIVE</span>
         </div>
         <div className="absolute right-3 top-3 flex items-center gap-1 text-white/90">
           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" /></svg>
-          <span className="text-[12px] font-medium drop-shadow">{live.viewers.toLocaleString()} watching</span>
+          <span className="text-[10px] font-medium drop-shadow">{live.viewers.toLocaleString()} watching</span>
         </div>
       </div>
       <div className="flex items-center justify-between gap-3 px-4 py-4">
         <div className="min-w-0">
-          <p className="text-[17px] font-medium leading-snug text-gray-dark">{live.title}</p>
-          <p className="mt-1 text-[14px] text-gray-light">{live.topic}</p>
+          <p className="text-[15px] font-medium leading-snug text-gray-dark">{live.title}</p>
+          <p className="mt-1 text-[12px] text-gray-light">{live.topic}</p>
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
-          className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
+          className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
         >
           Join live
         </button>
@@ -769,34 +769,34 @@ export function LiveCard({ live, author, avatar }: { live: LivePost["live"]; aut
                       </span>
                     </div>
                     <div>
-                      <p className="text-[17px] font-semibold text-white">{author}</p>
-                      <p className="text-[13px] text-white/70">{live.viewers.toLocaleString()} watching now</p>
+                      <p className="text-[15px] font-semibold text-white">{author}</p>
+                      <p className="text-[11px] text-white/70">{live.viewers.toLocaleString()} watching now</p>
                     </div>
                   </div>
-                  <h2 className="mt-4 text-[22px] font-bold text-white">Join Office Hours</h2>
-                  <p className="mt-1 text-[14px] leading-snug text-white/70">
+                  <h2 className="mt-4 text-[20px] font-bold text-white">Join Office Hours</h2>
+                  <p className="mt-1 text-[12px] leading-snug text-white/70">
                     {author} is live and answering questions in real time.
                   </p>
                 </div>
                 <div className="px-6 py-5">
                   <div className="rounded-xl border border-gray-stroke bg-gray-50 px-4 py-3">
-                    <p className="text-[13px] text-gray-light">Session</p>
-                    <p className="mt-0.5 text-[15px] font-semibold text-gray-dark">{live.title}</p>
-                    <p className="text-[13px] text-gray-light">{live.topic}</p>
+                    <p className="text-[11px] text-gray-light">Session</p>
+                    <p className="mt-0.5 text-[13px] font-semibold text-gray-dark">{live.title}</p>
+                    <p className="text-[11px] text-gray-light">{live.topic}</p>
                   </div>
                   <div className="mt-3 flex items-center justify-between rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
                     <div>
-                      <p className="text-[13px] text-gray-light">Access fee</p>
-                      <p className="text-[15px] font-semibold text-gray-dark">One-time ticket</p>
+                      <p className="text-[11px] text-gray-light">Access fee</p>
+                      <p className="text-[13px] font-semibold text-gray-dark">One-time ticket</p>
                     </div>
-                    <p className="text-[24px] font-bold text-gray-dark">$5</p>
+                    <p className="text-[22px] font-bold text-gray-dark">$5</p>
                   </div>
                 </div>
                 <div className="flex flex-col gap-2 px-6 pb-6">
-                  <button onClick={() => setShowModal(false)} className="w-full cursor-pointer rounded-xl bg-primary py-3 text-[16px] font-bold text-white transition-colors hover:bg-primary-hover">
+                  <button onClick={() => setShowModal(false)} className="w-full cursor-pointer rounded-xl bg-primary py-3 text-[14px] font-bold text-white transition-colors hover:bg-primary-hover">
                     Buy ticket · $5
                   </button>
-                  <button onClick={() => setShowModal(false)} className="w-full cursor-pointer py-2 text-[14px] text-gray-light transition-colors hover:text-gray-dark">
+                  <button onClick={() => setShowModal(false)} className="w-full cursor-pointer py-2 text-[12px] text-gray-light transition-colors hover:text-gray-dark">
                     Maybe later
                   </button>
                 </div>
@@ -876,7 +876,7 @@ export default function Post({
             verified={post.verified}
             headline={post.headline}
           />
-          <p className="mt-1 text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
+          <p className="mt-1 text-[15px] leading-[1.4] text-gray-dark">{post.body}</p>
 
           {/* Type-specific attachment */}
           <div className={post.type !== "text" ? "pb-1" : ""} onClick={(e) => e.stopPropagation()}>

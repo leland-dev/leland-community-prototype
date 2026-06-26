@@ -20,14 +20,14 @@ export default function RailSignpost({ session, progress = 0.35 }: Props) {
       {/* Lime accent tick + meta */}
       <div>
         <div className="h-[2px] w-10 bg-[#A5E446]" />
-        <div className="mt-3 font-mono text-[11px] font-medium tracking-[0.18em] text-[#A5E446]">
+        <div className="mt-3 font-mono text-[10px] font-medium tracking-[0.18em] text-[#A5E446]">
           SESSION {session.number} · LEVEL 1
         </div>
       </div>
 
       {/* Title */}
       <div className="-mt-2">
-        <h3 className="text-[18px] font-semibold leading-[1.15] tracking-tight">
+        <h3 className="text-[16px] font-semibold leading-[1.15] tracking-tight">
           {session.title}
         </h3>
       </div>

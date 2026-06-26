@@ -95,7 +95,7 @@ export default function StageControls({
       <div className="pointer-events-auto absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 bg-gray-hover px-4 py-2 text-gray-dark lg:rounded-t-2xl">
         {/* Left: REC + on-stage chip (if applicable) */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#E2574C]">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#E2574C]">
             <span className="h-2 w-2 rounded-full bg-[#E2574C] [animation:stagepulse_1.6s_ease-in-out_infinite]" />
             REC
           </div>
@@ -108,14 +108,14 @@ export default function StageControls({
         </div>
 
         {/* Title centered (hidden below md to avoid crowding) */}
-        <div className="hidden truncate px-4 text-[13px] font-medium text-gray-dark md:block">
+        <div className="hidden truncate px-4 text-[11px] font-medium text-gray-dark md:block">
           {session.title}
         </div>
 
         {/* Right cluster: hands chip + participants + timer */}
-        <div className="flex items-center gap-3 text-[12px] text-gray-light">
+        <div className="flex items-center gap-3 text-[10px] text-gray-light">
           {raisedHandCount > 0 && (
-            <span className="flex items-center gap-1 rounded-full bg-[#FFE099] px-2 py-0.5 text-[11px] font-semibold text-[#876C00]">
+            <span className="flex items-center gap-1 rounded-full bg-[#FFE099] px-2 py-0.5 text-[10px] font-semibold text-[#876C00]">
               <Hand size={12} strokeWidth={2.25} />
               {raisedHandCount} / {participantCount}
             </span>
@@ -267,7 +267,7 @@ function MoreMenu({ onClose }: { onClose: () => void }) {
             // Toggle items stay open; one-shots dismiss.
             if (item.toggled === undefined) onClose();
           }}
-          className="flex w-full items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-white/90 transition-colors hover:bg-white/10"
+          className="flex w-full items-center gap-2.5 px-3 py-2 text-[11px] font-medium text-white/90 transition-colors hover:bg-white/10"
         >
           <span className="flex h-5 w-5 shrink-0 items-center justify-center text-white/70">
             {item.icon}

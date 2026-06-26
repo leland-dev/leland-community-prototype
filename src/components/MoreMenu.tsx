@@ -77,7 +77,7 @@ export default function MoreMenu() {
             <div className="px-2 py-2">
               <button
                 onClick={toggleExtraLinks}
-                className="flex w-full items-center justify-between rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                className="flex w-full items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
               >
                 <span>Show extra links</span>
                 <div
@@ -105,7 +105,7 @@ export default function MoreMenu() {
                         setOpen(false);
                       }
                     }}
-                    className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium transition-colors ${
+                    className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium transition-colors ${
                       item.danger
                         ? "text-[#D92D20] hover:bg-gray-hover"
                         : "text-gray-dark hover:bg-gray-hover"
@@ -135,7 +135,7 @@ export default function MoreMenu() {
           alt="More"
           className="h-[22px] w-[22px] shrink-0"
         />
-        <span className="hidden text-[18px] font-medium lg:block">More</span>
+        <span className="hidden text-[16px] font-medium lg:block">More</span>
       </button>
     </div>
   );

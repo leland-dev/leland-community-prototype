@@ -36,12 +36,12 @@ export default function StageInvitePrompt({ coach, onAccept, onDecline }: Props)
             <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#038561]">
               Invitation to stage
             </div>
-            <div className="mt-0.5 text-[15px] font-semibold leading-tight text-gray-dark">
+            <div className="mt-0.5 text-[13px] font-semibold leading-tight text-gray-dark">
               {coach.name} wants to bring you up
             </div>
           </div>
         </div>
-        <p className="mt-3 text-[13px] leading-snug text-gray-light">
+        <p className="mt-3 text-[11px] leading-snug text-gray-light">
           You'll be unmuted and visible to everyone watching. Step down any time.
         </p>
         <div className="mt-4 flex items-center justify-end gap-2">

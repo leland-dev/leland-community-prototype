@@ -4,10 +4,10 @@ type ButtonSize = "tag" | "sm" | "md" | "lg";
 type ButtonVariant = "primary" | "secondary" | "white" | "dark";
 
 const sizeClasses: Record<ButtonSize, string> = {
-  tag: "text-[14px] py-2 px-3",
-  sm: "text-[14px] py-2.5 px-3.5",
-  md: "text-[16px] py-3 px-4",
-  lg: "text-[16px] py-3.5 px-5",
+  tag: "text-[12px] py-2 px-3",
+  sm: "text-[12px] py-2.5 px-3.5",
+  md: "text-[14px] py-3 px-4",
+  lg: "text-[14px] py-3.5 px-5",
 };
 
 const variantClasses: Record<ButtonVariant, string> = {

@@ -103,7 +103,7 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
                   )}
                 </div>
                 <span
-                  className="text-[18px] leading-[1.5]"
+                  className="text-[16px] leading-[1.5]"
                   style={{ color: state === 2 ? "#000" : state === 1 ? "#333" : "#9B9B9B" }}
                 >
                   {label}
@@ -158,7 +158,7 @@ function CategoryScreen({ onSelect }: { onSelect: (label: string) => void }) {
       <div className="flex w-full max-w-[1200px] items-center gap-16">
         <DecorativeGrid />
         <div className="flex w-full max-w-[560px] flex-col gap-6">
-          <h2 className="text-[36px] font-medium leading-[1.1] text-gray-dark">
+          <h2 className="text-[34px] font-medium leading-[1.1] text-gray-dark">
             Which aligns best with your goals?
           </h2>
           <div className="flex flex-col gap-3">
@@ -168,7 +168,7 @@ function CategoryScreen({ onSelect }: { onSelect: (label: string) => void }) {
                 onClick={() => onSelect(label)}
                 className="flex items-center justify-between rounded-xl border border-gray-stroke px-5 py-5 text-left transition-colors hover:border-gray-dark"
               >
-                <span className="text-[16px] font-medium" style={{ color: muted ? "#707070" : "#333" }}>
+                <span className="text-[14px] font-medium" style={{ color: muted ? "#707070" : "#333" }}>
                   {label}
                 </span>
                 <div className="ml-4 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 border-gray-stroke" />
@@ -197,14 +197,14 @@ function DetailsScreen({ category, onBack, onChangeCategory }: { category: strin
         {/* Right panel */}
         <div className="flex w-full max-w-[560px] flex-col justify-between">
           <div className="my-auto flex flex-col gap-8">
-            <h2 className="text-[36px] font-medium leading-[1.1] text-gray-dark">
+            <h2 className="text-[34px] font-medium leading-[1.1] text-gray-dark">
               Browse hundreds of carefully-vetted coaches and resources
             </h2>
 
             <div className="flex flex-col gap-4">
               {/* Selected category card */}
               <div className="flex items-center justify-between rounded-xl border-2 border-gray-dark bg-white px-5 py-5">
-                <span className="text-[16px] font-medium text-gray-dark">{category}</span>
+                <span className="text-[14px] font-medium text-gray-dark">{category}</span>
                 <div className="ml-4 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 border-primary">
                   <div className="h-[8px] w-[8px] rounded-full bg-primary" />
                 </div>
@@ -220,7 +220,7 @@ function DetailsScreen({ category, onBack, onChangeCategory }: { category: strin
                         <div className="my-1 w-px flex-1 bg-gray-stroke" />
                       )}
                     </div>
-                    <span className="pb-3 text-[16px] text-gray-light">{point}</span>
+                    <span className="pb-3 text-[14px] text-gray-light">{point}</span>
                   </div>
                 ))}
               </div>
@@ -231,17 +231,17 @@ function DetailsScreen({ category, onBack, onChangeCategory }: { category: strin
               <div className="flex gap-3">
                 <button
                   onClick={onBack}
-                  className="flex items-center gap-2 rounded-lg bg-gray-hover px-6 py-4 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-stroke"
+                  className="flex items-center gap-2 rounded-lg bg-gray-hover px-6 py-4 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-stroke"
                 >
                   <ArrowLeft size={20} />
                   Back
                 </button>
-                <button className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gray-dark px-6 py-4 text-[16px] font-medium text-white transition-colors hover:bg-black">
+                <button className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gray-dark px-6 py-4 text-[14px] font-medium text-white transition-colors hover:bg-black">
                   Continue
                   <ArrowRight size={20} />
                 </button>
               </div>
-              <p className="text-[16px] text-gray-light">
+              <p className="text-[14px] text-gray-light">
                 Not quite right?{" "}
                 <button onClick={onChangeCategory} className="font-medium text-gray-dark underline-offset-2 hover:underline">
                   Change category
@@ -277,13 +277,13 @@ function ChangeCategoryScreen({ onSelect, onBack }: { onSelect: (label: string) 
         <div className="flex h-full w-full max-w-[560px] flex-col gap-5 self-start overflow-y-auto">
           <button
             onClick={onBack}
-            className="flex w-fit items-center gap-2 rounded-lg bg-gray-hover px-4 py-2 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-stroke"
+            className="flex w-fit items-center gap-2 rounded-lg bg-gray-hover px-4 py-2 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-stroke"
           >
             <ArrowLeft size={16} />
             Back
           </button>
 
-          <h2 className="text-[36px] font-medium leading-[1.1] text-gray-dark">
+          <h2 className="text-[34px] font-medium leading-[1.1] text-gray-dark">
             All categories
           </h2>
 
@@ -295,7 +295,7 @@ function ChangeCategoryScreen({ onSelect, onBack }: { onSelect: (label: string) 
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search categories..."
-              className="flex-1 bg-transparent text-[18px] text-gray-dark placeholder:text-gray-xlight focus:outline-none"
+              className="flex-1 bg-transparent text-[16px] text-gray-dark placeholder:text-gray-xlight focus:outline-none"
               autoFocus
             />
           </div>
@@ -306,7 +306,7 @@ function ChangeCategoryScreen({ onSelect, onBack }: { onSelect: (label: string) 
               <button
                 key={cat}
                 onClick={() => onSelect(cat)}
-                className="rounded-lg px-3 py-3 text-left text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                className="rounded-lg px-3 py-3 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
               >
                 {cat}
               </button>
@@ -432,7 +432,7 @@ export default function Site() {
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
                     placeholder="What could you use help with?"
-                    className="flex-1 bg-transparent text-[18px] text-gray-dark placeholder:text-gray-xlight focus:outline-none"
+                    className="flex-1 bg-transparent text-[16px] text-gray-dark placeholder:text-gray-xlight focus:outline-none"
                   />
                   <button
                     onClick={handleSubmit}
@@ -456,7 +456,7 @@ export default function Site() {
                   {goalTags.map((tag) => (
                     <button
                       key={tag}
-                      className="shrink-0 rounded-lg border border-white/30 px-3 py-1.5 text-[14px] font-medium text-white transition-colors hover:bg-white/10"
+                      className="shrink-0 rounded-lg border border-white/30 px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-white/10"
                       style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(2px)" }}
                     >
                       {tag}
@@ -470,7 +470,7 @@ export default function Site() {
             <div className="mt-10 md:absolute md:bottom-4 md:left-0 md:mt-0 md:w-full">
               <div className="mx-auto w-full max-w-[1328px] px-4 md:px-6">
                 <p
-                  className="text-[14px] font-medium uppercase tracking-[1.4px]"
+                  className="text-[12px] font-medium uppercase tracking-[1.4px]"
                   style={{ color: "rgba(255,255,255,0.6)" }}
                 >
                   Popular Categories
@@ -486,7 +486,7 @@ export default function Site() {
                 {categories.map((cat) => (
                   <button
                     key={cat}
-                    className="shrink-0 rounded-lg border border-gray-hover bg-gray-hover px-4 py-2 text-[14px] font-medium text-gray-dark transition-colors hover:border-gray-stroke hover:bg-white"
+                    className="shrink-0 rounded-lg border border-gray-hover bg-gray-hover px-4 py-2 text-[12px] font-medium text-gray-dark transition-colors hover:border-gray-stroke hover:bg-white"
                   >
                     {cat}
                   </button>

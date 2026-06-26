@@ -193,8 +193,8 @@ export default function MyCourses() {
   const noInProgressPlaceholder = (
     <div className="flex flex-col items-center justify-center gap-5 rounded-xl bg-[#F5F5F5] py-16 text-center">
       <div className="flex flex-col gap-2">
-        <h2 className="text-[24px] font-medium text-gray-dark">Nothing in progress</h2>
-        <p className="max-w-xs text-[16px] text-[#707070]">Programs you enroll in will appear here.</p>
+        <h2 className="text-[22px] font-medium text-gray-dark">Nothing in progress</h2>
+        <p className="max-w-xs text-[14px] text-[#707070]">Programs you enroll in will appear here.</p>
       </div>
       <LinkButton href="/courses" size="lg" variant="primary">Browse courses</LinkButton>
     </div>
@@ -217,7 +217,7 @@ export default function MyCourses() {
   return (
     <PageShell variant={showSidebar ? "standard" : "thin"} rightSidebar={showSidebar ? suggestedCoursesSection : undefined}>
       <div className="pb-20 leading-[1.2]">
-        <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">My Programs</h1>
+        <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">My Programs</h1>
 
         <div className="mt-8">
           {activeCourses.length === 0 ? (
@@ -243,7 +243,7 @@ export default function MyCourses() {
 
         {completedCourses.length > 0 && (
           <div className="mt-10">
-            <h2 className="text-[24px] font-medium leading-[1.2] text-gray-dark">Past programs</h2>
+            <h2 className="text-[22px] font-medium leading-[1.2] text-gray-dark">Past programs</h2>
             <div className="mt-4 flex flex-col gap-1">
               {completedCourses.map((course) => (
                 <OfferingCard
@@ -264,8 +264,8 @@ export default function MyCourses() {
         {!showSidebar && activeCourses.length + completedCourses.length <= 1 && (
           <div className="mt-10">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-[24px] font-medium leading-[1.2] text-gray-dark">Explore programs</h2>
-              <a href="/browse" className="flex items-center gap-1 text-[15px] font-medium text-[#038561] hover:opacity-80">
+              <h2 className="text-[22px] font-medium leading-[1.2] text-gray-dark">Explore programs</h2>
+              <a href="/browse" className="flex items-center gap-1 text-[13px] font-medium text-[#038561] hover:opacity-80">
                 See all
                 <img src={arrowRightSmIcon} alt="" className="h-4 w-4 opacity-70" />
               </a>
@@ -288,7 +288,7 @@ export default function MyCourses() {
       <div className="fixed bottom-6 right-6 z-50">
         {optionsOpen && (
           <div className="mb-2 w-[240px] rounded-xl border border-gray-stroke bg-white px-4 py-3 shadow-lg">
-            <p className="mb-2.5 text-[14px] font-medium uppercase tracking-[0.5px] text-gray-light">Page variant</p>
+            <p className="mb-2.5 text-[12px] font-medium uppercase tracking-[0.5px] text-gray-light">Page variant</p>
             <div className="flex flex-col gap-2">
               {([
                 { value: "default", label: "Default" },
@@ -299,7 +299,7 @@ export default function MyCourses() {
                 <button
                   key={value}
                   onClick={() => setVariant(value)}
-                  className="flex cursor-pointer items-center gap-2.5 text-[16px] leading-[1.2]"
+                  className="flex cursor-pointer items-center gap-2.5 text-[14px] leading-[1.2]"
                 >
                   <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${variant === value ? "border-[#038561] bg-[#038561]" : "border-gray-300"}`}>
                     {variant === value && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
@@ -310,7 +310,7 @@ export default function MyCourses() {
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">Suggested programs sidebar</p>
+              <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Suggested programs sidebar</p>
               <button
                 onClick={() => setShowSidebar(!showSidebar)}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showSidebar ? "bg-[#038561]" : "bg-gray-300"}`}

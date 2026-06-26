@@ -100,7 +100,7 @@ function CategoryFilter({
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[15px] whitespace-nowrap transition-colors ${
+        className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] whitespace-nowrap transition-colors ${
           selected
             ? "border-gray-dark bg-gray-dark text-white"
             : "border-gray-stroke bg-white text-gray-dark hover:border-gray-dark hover:bg-gray-hover"
@@ -126,7 +126,7 @@ function CategoryFilter({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search categories..."
-              className="w-full bg-transparent text-[14px] text-gray-dark placeholder:text-gray-xlight outline-none"
+              className="w-full bg-transparent text-[12px] text-gray-dark placeholder:text-gray-xlight outline-none"
             />
           </div>
           {/* List */}
@@ -134,19 +134,19 @@ function CategoryFilter({
             {selected && (
               <button
                 onClick={() => { onSelect(null); setOpen(false); }}
-                className="flex w-full items-center px-3 py-2 text-left text-[14px] text-gray-light hover:bg-gray-hover"
+                className="flex w-full items-center px-3 py-2 text-left text-[12px] text-gray-light hover:bg-gray-hover"
               >
                 Clear filter
               </button>
             )}
             {filtered.length === 0 && (
-              <p className="px-3 py-2 text-[14px] text-gray-xlight">No results</p>
+              <p className="px-3 py-2 text-[12px] text-gray-xlight">No results</p>
             )}
             {filtered.map((dept) => (
               <button
                 key={dept.label}
                 onClick={() => { onSelect(dept.label); setOpen(false); }}
-                className={`flex w-full items-center justify-between px-3 py-2 text-left text-[14px] transition-colors hover:bg-gray-hover ${
+                className={`flex w-full items-center justify-between px-3 py-2 text-left text-[12px] transition-colors hover:bg-gray-hover ${
                   dept.label === selected ? "font-medium text-gray-dark" : "text-gray-light"
                 }`}
               >
@@ -178,7 +178,7 @@ function FilterToggle({
   return (
     <button
       onClick={onClick}
-      className={`rounded-full border px-3 py-1.5 text-[15px] whitespace-nowrap transition-colors ${
+      className={`rounded-full border px-3 py-1.5 text-[13px] whitespace-nowrap transition-colors ${
         active
           ? "border-gray-dark bg-gray-dark text-white"
           : "border-gray-stroke bg-white text-gray-dark hover:border-gray-dark hover:bg-gray-hover"
@@ -267,10 +267,10 @@ function LiveCohortCard({ cohort }: { cohort: typeof liveCohorts[0] }) {
               />
             ))}
           </div>
-          <span className="text-[14px] text-gray-light">{cohort.enrolled} enrolled</span>
+          <span className="text-[12px] text-gray-light">{cohort.enrolled} enrolled</span>
         </div>
-        <p className="mt-1.5 text-[18px] font-medium leading-[1.2] text-gray-dark">{cohort.title}</p>
-        <p className="mt-1 text-[16px] text-gray-light">Live cohort · {cohort.duration}</p>
+        <p className="mt-1.5 text-[16px] font-medium leading-[1.2] text-gray-dark">{cohort.title}</p>
+        <p className="mt-1 text-[14px] text-gray-light">Live cohort · {cohort.duration}</p>
       </div>
     </div>
   );
@@ -290,10 +290,10 @@ function SelfPacedCard({ course }: { course: typeof selfPacedCourses[0] }) {
               <path d="M1 1l5 3-5 3z" />
             </svg>
           </div>
-          <span className="text-[14px] text-gray-light">Premium program</span>
+          <span className="text-[12px] text-gray-light">Premium program</span>
         </div>
-        <p className="mt-1.5 text-[18px] font-medium leading-[1.2] text-gray-dark">{course.title}</p>
-        <p className="mt-1 text-[16px] text-gray-light">Self-paced · {course.duration}</p>
+        <p className="mt-1.5 text-[16px] font-medium leading-[1.2] text-gray-dark">{course.title}</p>
+        <p className="mt-1 text-[14px] text-gray-light">Self-paced · {course.duration}</p>
       </div>
     </div>
   );
@@ -334,8 +334,8 @@ function CourseCarousel({
     <section className="mt-10">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-[22px] font-medium text-gray-dark">{title}</h2>
-          {subtitle && <p className="mt-0.5 text-[16px] text-gray-light">{subtitle}</p>}
+          <h2 className="text-[20px] font-medium text-gray-dark">{title}</h2>
+          {subtitle && <p className="mt-0.5 text-[14px] text-gray-light">{subtitle}</p>}
         </div>
         <div className="hidden shrink-0 items-center gap-1.5 pt-0.5 md:flex">
           <button
@@ -397,7 +397,7 @@ export default function Courses() {
     <div>
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">Programs</h1>
+          <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">Programs</h1>
         </div>
         <div className="hidden shrink-0 items-center gap-2 pb-0.5 md:flex">
           <CategoryFilter selected={filterCategory} onSelect={setFilterCategory} />

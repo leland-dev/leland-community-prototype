@@ -16,7 +16,7 @@ const pillStyles: Record<string, string> = {
 export function Pill({ variant, children }: { variant: string; children: ReactNode }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-[10px] py-1 text-[11px] font-medium ${pillStyles[variant] || pillStyles.gray}`}
+      className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-[10px] py-1 text-[10px] font-medium ${pillStyles[variant] || pillStyles.gray}`}
     >
       {children}
     </span>
@@ -40,14 +40,14 @@ export function StatCard({
 }) {
   return (
     <div className="rounded-xl border border-gray-stroke bg-white p-[18px_20px]">
-      <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.07em] text-gray-xlight">
+      <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.07em] text-gray-xlight">
         {label}
       </div>
-      <div className={`text-[28px] font-bold leading-none ${valueColor || "text-gray-dark"}`}>
+      <div className={`text-[26px] font-bold leading-none ${valueColor || "text-gray-dark"}`}>
         {value}
       </div>
       {sub && (
-        <div className={`mt-1 text-[12px] ${subColor || "text-gray-light"}`}>{sub}</div>
+        <div className={`mt-1 text-[10px] ${subColor || "text-gray-light"}`}>{sub}</div>
       )}
     </div>
   );
@@ -67,7 +67,7 @@ export function ProgressBar({
       <div className="h-[6px] flex-1 overflow-hidden rounded-[3px] bg-gray-stroke">
         <div className={`h-full rounded-[3px] ${color}`} style={{ width: `${percent}%` }} />
       </div>
-      <span className="w-9 text-right text-[12px] font-semibold text-gray-light">
+      <span className="w-9 text-right text-[10px] font-semibold text-gray-light">
         {percent}%
       </span>
     </div>
@@ -89,7 +89,7 @@ export function Avatar({
 }) {
   return (
     <div
-      className={`flex shrink-0 items-center justify-center rounded-full text-[12px] font-bold ${bg} ${color}`}
+      className={`flex shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${bg} ${color}`}
       style={{ width: size, height: size, fontSize: size * 0.4 }}
     >
       {initials}
@@ -129,7 +129,7 @@ export function SearchToolbar({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35" />
         </svg>
         <input
-          className="w-full rounded-lg border border-gray-stroke bg-gray-hover py-[7px] pl-8 pr-[10px] text-[13px] text-gray-dark outline-none focus:border-primary focus:bg-white"
+          className="w-full rounded-lg border border-gray-stroke bg-gray-hover py-[7px] pl-8 pr-[10px] text-[11px] text-gray-dark outline-none focus:border-primary focus:bg-white"
           placeholder={placeholder}
           onChange={(e) => onSearch(e.target.value)}
         />
@@ -139,7 +139,7 @@ export function SearchToolbar({
           <button
             key={f.key}
             onClick={() => onFilter(f.key)}
-            className={`rounded-full border px-3 py-[5px] text-[12px] font-medium transition-colors ${
+            className={`rounded-full border px-3 py-[5px] text-[10px] font-medium transition-colors ${
               activeFilter === f.key
                 ? "border-dark-green bg-dark-green text-white"
                 : "border-gray-stroke bg-white text-gray-light hover:bg-gray-hover"
@@ -176,7 +176,7 @@ export function ActionMenu({ items }: { items: { label: string; danger?: boolean
           e.stopPropagation();
           setOpen(!open);
         }}
-        className="rounded-md border border-gray-stroke bg-gray-hover px-[9px] py-1 text-[16px] font-bold leading-none tracking-[1px] text-gray-xlight hover:bg-gray-stroke hover:text-gray-dark"
+        className="rounded-md border border-gray-stroke bg-gray-hover px-[9px] py-1 text-[14px] font-bold leading-none tracking-[1px] text-gray-xlight hover:bg-gray-stroke hover:text-gray-dark"
       >
         &middot;&middot;&middot;
       </button>
@@ -192,7 +192,7 @@ export function ActionMenu({ items }: { items: { label: string; danger?: boolean
                   setOpen(false);
                   item.onClick?.();
                 }}
-                className={`flex w-full items-center gap-[9px] px-[14px] py-[9px] text-left text-[13px] ${
+                className={`flex w-full items-center gap-[9px] px-[14px] py-[9px] text-left text-[11px] ${
                   item.danger
                     ? "text-red hover:bg-[#fee6e3]"
                     : "text-gray-dark hover:bg-gray-hover"

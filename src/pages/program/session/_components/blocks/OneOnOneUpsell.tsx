@@ -10,13 +10,13 @@ export default function OneOnOneUpsell({ programUrn }: Props) {
   if (programUrn.startsWith("aibp")) return null;
   return (
     <section className="rounded-2xl border border-gray-stroke bg-white p-5">
-      <div className="text-[12px] font-medium uppercase tracking-[0.12em] text-gray-light">
+      <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-gray-light">
         Want personal feedback?
       </div>
-      <h3 className="mt-2 text-[18px] font-medium leading-tight text-gray-dark">
+      <h3 className="mt-2 text-[16px] font-medium leading-tight text-gray-dark">
         Book a 1:1 with a coach
       </h3>
-      <p className="mt-1 text-[13px] text-gray-light">
+      <p className="mt-1 text-[11px] text-gray-light">
         Walk through your build, get unstuck, or prep for the next session.
       </p>
       <div className="mt-4">

@@ -27,7 +27,7 @@ export default function VersionToggle() {
       {open ? (
         <div className="absolute bottom-14 right-0 w-[200px] rounded-xl border border-gray-200 bg-white shadow-xl overflow-hidden">
           <div className="px-3 py-2 border-b border-gray-100">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Prototype</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Prototype</p>
           </div>
           {versions.map((v) => (
             <button
@@ -38,10 +38,10 @@ export default function VersionToggle() {
               }`}
             >
               <div>
-                <p className={`text-[14px] font-medium ${version === v.value ? "text-gray-900" : "text-gray-700"}`}>
+                <p className={`text-[12px] font-medium ${version === v.value ? "text-gray-900" : "text-gray-700"}`}>
                   {v.label}
                 </p>
-                <p className="text-[12px] text-gray-400">{v.description}</p>
+                <p className="text-[10px] text-gray-400">{v.description}</p>
               </div>
               {version === v.value ? (
                 <div className="h-2 w-2 rounded-full bg-green-500 shrink-0" />

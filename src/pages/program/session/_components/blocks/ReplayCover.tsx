@@ -9,7 +9,7 @@ export default function ReplayCover() {
       <BuildScreen />
 
       {/* Replay chip */}
-      <div className="pointer-events-none absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white backdrop-blur-sm">
+      <div className="pointer-events-none absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-white backdrop-blur-sm">
         <span className="h-1.5 w-1.5 rounded-full bg-[#A5E446]" />
         Replay
       </div>

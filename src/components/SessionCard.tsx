@@ -97,8 +97,8 @@ export default function SessionCard({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const titleSizeClass = isSmall ? "text-[16px]" : "text-[18px]";
-  const subtitleSizeClass = isSmall ? "text-[14px]" : "text-[16px]";
+  const titleSizeClass = isSmall ? "text-[14px]" : "text-[16px]";
+  const subtitleSizeClass = isSmall ? "text-[12px]" : "text-[14px]";
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -184,7 +184,7 @@ export default function SessionCard({
                     {menuItems.map(({ icon, label, danger }) => (
                       <button
                         key={label}
-                        className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium transition-colors ${
+                        className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium transition-colors ${
                           danger
                             ? "text-[#D92D20] hover:bg-gray-hover"
                             : "text-gray-dark hover:bg-gray-hover"

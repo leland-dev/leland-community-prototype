@@ -418,7 +418,7 @@ function Hero() {
           <span className="flex h-2 w-2 rounded-full bg-[#15b078]">
             <span className="absolute h-2 w-2 animate-ping rounded-full bg-[#15b078] opacity-75" />
           </span>
-          <span className="text-[13px] font-medium tracking-wide text-white/70">
+          <span className="text-[11px] font-medium tracking-wide text-white/70">
             8,217 ambitions started this week
           </span>
         </div>
@@ -439,7 +439,7 @@ function Hero() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="mb-7 inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/[0.07] px-3 py-1.5 pr-5 text-[13px] text-white/85 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.5)] backdrop-blur-md"
+          className="mb-7 inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/[0.07] px-3 py-1.5 pr-5 text-[11px] text-white/85 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.5)] backdrop-blur-md"
         >
           <div className="flex -space-x-2">
             {[pic1, pic2, pic3, pic4, pic5].map((p, i) => (
@@ -556,7 +556,7 @@ function Hero() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={`Ask Leland AI… e.g. "${ROTATING_AMBITIONS[rotIndex]}"`}
-                className="flex-1 bg-transparent text-[16px] text-gray-dark placeholder:text-[#888] focus:outline-none md:text-[18px]"
+                className="flex-1 bg-transparent text-[14px] text-gray-dark placeholder:text-[#888] focus:outline-none md:text-[16px]"
               />
               <Button
                 type="submit"
@@ -583,12 +583,12 @@ function Hero() {
                   className="absolute left-1/2 top-[calc(100%+6px)] z-50 w-[min(94vw,1040px)] -translate-x-1/2 rounded-2xl border border-white/15 bg-[#0c1f17]/97 p-5 text-left shadow-2xl backdrop-blur-xl md:p-6"
                 >
                 <div className="mb-4 flex items-center justify-between">
-                  <p className="text-[13px] font-medium uppercase tracking-[0.16em] text-white/55">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-white/55">
                     Pick a path — Leland AI takes it from there
                   </p>
                   <button
                     onClick={() => setFlyoutOpen(false)}
-                    className="text-[12px] text-white/50 hover:text-white"
+                    className="text-[10px] text-white/50 hover:text-white"
                   >
                     Close
                   </button>
@@ -598,7 +598,7 @@ function Hero() {
                     <div key={g.title}>
                       <div className="mb-2 flex items-center gap-2">
                         <g.icon size={16} className={g.accent} />
-                        <p className="text-[14px] font-semibold text-white">{g.title}</p>
+                        <p className="text-[12px] font-semibold text-white">{g.title}</p>
                       </div>
                       <ul className="space-y-1">
                         {g.items.map((it) => (
@@ -608,7 +608,7 @@ function Hero() {
                                 setFlyoutOpen(false);
                                 goToOnboarding(it);
                               }}
-                              className="group flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-[14px] text-white/80 transition-colors hover:bg-white/5 hover:text-white"
+                              className="group flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-[12px] text-white/80 transition-colors hover:bg-white/5 hover:text-white"
                             >
                               <span>{it}</span>
                               <ArrowRight
@@ -623,7 +623,7 @@ function Hero() {
                   ))}
                 </div>
                 <div className="mt-5 flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-                  <div className="flex items-center gap-2 text-[13px] text-white/75">
+                  <div className="flex items-center gap-2 text-[11px] text-white/75">
                     <Zap size={14} className="text-[#fbbf24]" />
                     Not sure yet?
                   </div>
@@ -658,7 +658,7 @@ function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.8 }}
-        className="relative z-10 flex justify-center pb-3 text-[11px] uppercase tracking-[0.28em] text-white/40"
+        className="relative z-10 flex justify-center pb-3 text-[10px] uppercase tracking-[0.28em] text-white/40"
       >
         <motion.span
           animate={{ y: [0, 4, 0] }}
@@ -754,7 +754,7 @@ function QuickChipCard({
     >
       <button
         onClick={() => setInputValue(chip.label)}
-        className={`relative z-10 flex w-full items-center justify-center gap-2 rounded-full border bg-white/15 px-4 py-2.5 text-[14px] font-semibold text-white shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-md transition-all ${
+        className={`relative z-10 flex w-full items-center justify-center gap-2 rounded-full border bg-white/15 px-4 py-2.5 text-[12px] font-semibold text-white shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-md transition-all ${
           isHover
             ? "scale-[1.04] border-white/70 bg-white/25"
             : "border-white/40 hover:border-white/70 hover:bg-white/25"
@@ -775,10 +775,10 @@ function QuickChipCard({
             className="absolute left-1/2 top-[calc(100%+8px)] z-50 -translate-x-1/2 rounded-2xl border border-white/20 bg-[#0d2620]/95 p-4 text-left shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-xl"
           >
             <div className="mb-3 rounded-xl border border-white/15 bg-white/[0.06] px-3 py-2">
-              <p className="text-[12px] font-semibold leading-tight text-[#9ff2c8]">
+              <p className="text-[10px] font-semibold leading-tight text-[#9ff2c8]">
                 {chip.stat}
               </p>
-              <p className="mt-1 text-[12px] leading-snug text-white/80">
+              <p className="mt-1 text-[10px] leading-snug text-white/80">
                 {chip.blurb}
               </p>
             </div>
@@ -787,7 +787,7 @@ function QuickChipCard({
                 <li key={opt}>
                   <button
                     onClick={() => setInputValue(opt)}
-                    className="group/opt flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-[13px] text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+                    className="group/opt flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-[11px] text-white/85 transition-colors hover:bg-white/10 hover:text-white"
                   >
                     <span>{opt}</span>
                     <ArrowRight
@@ -800,7 +800,7 @@ function QuickChipCard({
             </ul>
             <button
               onClick={() => setInputValue(chip.label)}
-              className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#15b078] px-3 py-2 text-[13px] font-semibold text-white shadow-md transition-colors hover:bg-[#12a06c]"
+              className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#15b078] px-3 py-2 text-[11px] font-semibold text-white shadow-md transition-colors hover:bg-[#12a06c]"
             >
               Start this path
               <ArrowRight size={13} />
@@ -927,13 +927,13 @@ function LivePeekStrip() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-70" />
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
             </span>
-            <h2 className="text-[20px] font-medium text-white md:text-[24px]">
+            <h2 className="text-[18px] font-medium text-white md:text-[22px]">
               Live on Leland right now
             </h2>
           </div>
           <Link
             to="/events"
-            className="text-[13px] font-medium text-white/60 hover:text-white"
+            className="text-[11px] font-medium text-white/60 hover:text-white"
           >
             See all live →
           </Link>
@@ -951,23 +951,23 @@ function renderLiveCard(l: typeof LIVE_NOW[number]) {
       <div className="relative aspect-[16/10] overflow-hidden rounded-xl">
         <img src={l.cover} alt="" className="h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-red-500 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+        <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-red-500 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
           <span className="h-1.5 w-1.5 rounded-full bg-white" />
           Live
         </div>
-        <div className="absolute right-3 top-3 rounded-md bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+        <div className="absolute right-3 top-3 rounded-md bg-black/55 px-2 py-1 text-[10px] font-medium text-white backdrop-blur-sm">
           {l.watching.toLocaleString()} watching
         </div>
         <div className="absolute bottom-3 left-3 right-3">
-          <p className="text-[11px] uppercase tracking-wider text-white/75">{l.tag}</p>
-          <p className="mt-1 line-clamp-2 text-[16px] font-medium leading-tight text-white">
+          <p className="text-[10px] uppercase tracking-wider text-white/75">{l.tag}</p>
+          <p className="mt-1 line-clamp-2 text-[14px] font-medium leading-tight text-white">
             {l.title}
           </p>
         </div>
       </div>
       <div className="mt-3 flex items-center gap-2.5">
         <img src={l.avatar} alt="" className="h-7 w-7 rounded-full object-cover" />
-        <p className="text-[13px] text-white/70">{l.host}</p>
+        <p className="text-[11px] text-white/70">{l.host}</p>
       </div>
     </>
   );
@@ -1089,12 +1089,12 @@ function WhatYouCanDo() {
               >
                 <i.icon size={20} className="text-white" />
               </div>
-              <h3 className="relative text-[20px] font-medium text-white">{i.title}</h3>
+              <h3 className="relative text-[18px] font-medium text-white">{i.title}</h3>
               <p
-                className="relative mt-2 text-[14px] leading-snug text-white/70"
+                className="relative mt-2 text-[12px] leading-snug text-white/70"
                 dangerouslySetInnerHTML={{ __html: i.desc }}
               />
-              <button className="relative mt-5 inline-flex items-center gap-1.5 text-[13px] font-medium text-[#9ff2c8] hover:text-white">
+              <button className="relative mt-5 inline-flex items-center gap-1.5 text-[11px] font-medium text-[#9ff2c8] hover:text-white">
                 {i.cta}
                 <ArrowRight size={14} />
               </button>
@@ -1120,7 +1120,7 @@ function SectionHeader({
   return (
     <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-end">
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#9ff2c8]/80">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9ff2c8]/80">
           {eyebrow}
         </p>
         <h2
@@ -1129,7 +1129,7 @@ function SectionHeader({
         >
           {title}
         </h2>
-        {sub && <p className="mt-2 max-w-[640px] text-[15px] text-white/65">{sub}</p>}
+        {sub && <p className="mt-2 max-w-[640px] text-[13px] text-white/65">{sub}</p>}
       </div>
       {right}
     </div>
@@ -1151,7 +1151,7 @@ function BuilderCarousel() {
           right={
             <Link
               to="/courses"
-              className="text-[13px] font-medium text-white/60 hover:text-white"
+              className="text-[11px] font-medium text-white/60 hover:text-white"
             >
               All bootcamps →
             </Link>
@@ -1165,16 +1165,16 @@ function BuilderCarousel() {
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <img src={c.cover} alt="" className="h-full w-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                  <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-gray-dark">
+                  <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-semibold text-gray-dark">
                     {c.pill}
                   </div>
                 </div>
                 <div className="p-4">
-                  <p className="text-[15px] font-medium text-white">{c.title}</p>
-                  <p className="mt-1 line-clamp-2 text-[13px] text-white/65">
+                  <p className="text-[13px] font-medium text-white">{c.title}</p>
+                  <p className="mt-1 line-clamp-2 text-[11px] text-white/65">
                     {c.sub}
                   </p>
-                  <div className="mt-3 flex items-center justify-between text-[12px] text-white/55">
+                  <div className="mt-3 flex items-center justify-between text-[10px] text-white/55">
                     <span>{c.stat}</span>
                     <span className="inline-flex items-center gap-1 text-[#9ff2c8]">
                       Enroll <ArrowRight size={12} />
@@ -1206,7 +1206,7 @@ function ExpertsCarousel() {
           right={
             <Link
               to="/browse"
-              className="text-[13px] font-medium text-white/60 hover:text-white"
+              className="text-[11px] font-medium text-white/60 hover:text-white"
             >
               Browse all 1,800+ experts →
             </Link>
@@ -1221,19 +1221,19 @@ function ExpertsCarousel() {
                   <img src={c.avatar} alt="" className="h-full w-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
                   <div className="absolute inset-x-3 bottom-3">
-                    <p className="text-[11px] uppercase tracking-wider text-white/65">
+                    <p className="text-[10px] uppercase tracking-wider text-white/65">
                       {c.sub}
                     </p>
-                    <p className="mt-0.5 text-[16px] font-medium text-white">{c.name}</p>
-                    <p className="mt-0.5 text-[13px] text-white/75">{c.role}</p>
+                    <p className="mt-0.5 text-[14px] font-medium text-white">{c.name}</p>
+                    <p className="mt-0.5 text-[11px] text-white/75">{c.role}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between p-3">
-                  <span className="inline-flex items-center gap-1 text-[12px] text-white/65">
+                  <span className="inline-flex items-center gap-1 text-[10px] text-white/65">
                     <Star size={12} className="fill-[#fbbf24] text-[#fbbf24]" />
                     4.9 · 120 reviews
                   </span>
-                  <span className="text-[13px] font-medium text-white">{c.price}</span>
+                  <span className="text-[11px] font-medium text-white">{c.price}</span>
                 </div>
               </div>
             )}
@@ -1272,10 +1272,10 @@ function CommunitiesGrid() {
               <div className={`absolute inset-0 bg-gradient-to-t ${c.color}`} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute inset-x-3 bottom-3">
-                <p className="text-[14px] font-medium leading-tight text-white">
+                <p className="text-[12px] font-medium leading-tight text-white">
                   {c.title}
                 </p>
-                <p className="mt-0.5 text-[11px] text-white/80">{c.members}</p>
+                <p className="mt-0.5 text-[10px] text-white/80">{c.members}</p>
               </div>
             </motion.div>
           ))}
@@ -1293,7 +1293,7 @@ function SocialProofMarquee() {
   return (
     <section className="relative py-14">
       <div className="mx-auto mb-6 max-w-[1400px] px-6 text-center md:px-12">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/55">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/55">
           Leland alums landed at
         </p>
       </div>
@@ -1351,10 +1351,10 @@ function AmbitionsWall() {
               <div className="relative flex h-full flex-col justify-between">
                 <span className="text-3xl drop-shadow-md">{t.icon}</span>
                 <div>
-                  <p className="text-[18px] font-medium leading-tight text-white">
+                  <p className="text-[16px] font-medium leading-tight text-white">
                     {t.label}
                   </p>
-                  <p className="mt-1 inline-flex items-center gap-1 text-[12px] text-white/80 opacity-0 transition-opacity group-hover:opacity-100">
+                  <p className="mt-1 inline-flex items-center gap-1 text-[10px] text-white/80 opacity-0 transition-opacity group-hover:opacity-100">
                     Start this path <ArrowRight size={12} />
                   </p>
                 </div>
@@ -1387,10 +1387,10 @@ function Testimonials() {
               transition={{ type: "spring", stiffness: 300, damping: 24 }}
               className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm"
             >
-              <span className="absolute right-4 top-2 select-none font-serif text-[88px] leading-none text-white/10">
+              <span className="absolute right-4 top-2 select-none font-serif text-[86px] leading-none text-white/10">
                 &ldquo;
               </span>
-              <p className="relative text-[18px] font-medium leading-snug text-white">
+              <p className="relative text-[16px] font-medium leading-snug text-white">
                 {t.quote}
               </p>
               <div className="relative mt-6 flex items-center gap-3">
@@ -1400,8 +1400,8 @@ function Testimonials() {
                   className="h-10 w-10 rounded-full object-cover"
                 />
                 <div>
-                  <p className="text-[14px] font-medium text-white">{t.name}</p>
-                  <p className="text-[12px] text-white/60">{t.role}</p>
+                  <p className="text-[12px] font-medium text-white">{t.name}</p>
+                  <p className="text-[10px] text-white/60">{t.role}</p>
                 </div>
               </div>
             </motion.div>
@@ -1435,7 +1435,7 @@ function StatsBar() {
               >
                 {s.v}
               </p>
-              <p className="mt-2 text-[13px] text-white/65">{s.l}</p>
+              <p className="mt-2 text-[11px] text-white/65">{s.l}</p>
             </div>
           ))}
         </div>
@@ -1464,7 +1464,7 @@ function FinalCTA() {
           transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
         />
         <div className="relative">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#9ff2c8]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#9ff2c8]">
             Make it real
           </p>
           <h2
@@ -1473,7 +1473,7 @@ function FinalCTA() {
           >
             What will you do?
           </h2>
-          <p className="mx-auto mt-4 max-w-[640px] text-[16px] text-white/75 md:text-[18px]">
+          <p className="mx-auto mt-4 max-w-[640px] text-[14px] text-white/75 md:text-[16px]">
             You don&rsquo;t have to do it alone. Leland&rsquo;s AI, experts,
             and community are here to make whatever you&rsquo;re after — real.
           </p>
@@ -1484,7 +1484,7 @@ function FinalCTA() {
               value={val}
               onChange={(e) => setVal(e.target.value)}
               placeholder="Type your ambition…"
-              className="flex-1 bg-transparent text-[16px] text-gray-dark placeholder:text-[#888] focus:outline-none"
+              className="flex-1 bg-transparent text-[14px] text-gray-dark placeholder:text-[#888] focus:outline-none"
             />
             <Button size="md" variant="primary" rounded="rounded-xl">
               Start
@@ -1492,7 +1492,7 @@ function FinalCTA() {
             </Button>
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-[12px] text-white/55">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-[10px] text-white/55">
             <span>Free to start</span>
             <span className="h-1 w-1 rounded-full bg-white/30" />
             <span>No credit card</span>
@@ -1525,7 +1525,7 @@ function Footer() {
             style={{ filter: "brightness(0) invert(1)" }}
           />
         </div>
-        <p className="text-[12px] text-white/45">
+        <p className="text-[10px] text-white/45">
           © 2026 Leland · Built for the ambitious.
         </p>
       </div>

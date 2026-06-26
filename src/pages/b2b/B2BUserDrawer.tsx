@@ -18,7 +18,7 @@ function ExpandableText({ text, className }: { text: string; className?: string 
       {overflows && (
         <button
           onClick={() => setExpanded((e) => !e)}
-          className="mt-1 text-[14px] font-medium text-primary hover:underline"
+          className="mt-1 text-[12px] font-medium text-primary hover:underline"
         >
           {expanded ? "Read less" : "Read more"}
         </button>
@@ -105,11 +105,11 @@ function InviteBanner({ message, inviteSent, variant = "yellow" }: { message: st
   const styles = isRed ? "border-red/30 bg-red/5" : "border-[#ede9c8] bg-[#fdfbf0]";
   return (
     <div className={`rounded-lg border px-4 py-3 ${styles}`}>
-      <div className={`font-medium text-gray-dark ${isRed ? "text-[16px]" : "text-[14px]"}`}>{message}</div>
+      <div className={`font-medium text-gray-dark ${isRed ? "text-[14px]" : "text-[12px]"}`}>{message}</div>
       {inviteSent && (
-        <div className="mt-0.5 text-[13px] text-gray-light">Last invite sent {inviteSent}</div>
+        <div className="mt-0.5 text-[11px] text-gray-light">Last invite sent {inviteSent}</div>
       )}
-      <button className={`mt-2 flex items-center gap-1 font-medium hover:underline ${isRed ? "text-[16px] text-red" : "text-[13px] text-primary"}`}>
+      <button className={`mt-2 flex items-center gap-1 font-medium hover:underline ${isRed ? "text-[14px] text-red" : "text-[11px] text-primary"}`}>
         Resend invite
         {isRed && (
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -155,7 +155,7 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
           >
             {/* Header */}
             <div className="relative flex min-h-12 w-full shrink-0 items-center justify-center border-b border-gray-stroke px-12 py-2">
-              <span className="text-[18px] font-medium text-gray-dark">User details</span>
+              <span className="text-[16px] font-medium text-gray-dark">User details</span>
               <button
                 onClick={onClose}
                 className="absolute right-3 flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-hover"
@@ -171,8 +171,8 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
               <div className="flex flex-col gap-6">
 
               <div>
-                <div className="text-[30px] font-medium text-gray-dark">{user.name}</div>
-                <div className="mt-1 text-[14px] text-gray-light">
+                <div className="text-[28px] font-medium text-gray-dark">{user.name}</div>
+                <div className="mt-1 text-[12px] text-gray-light">
                   {user.email}{user.dateAdded ? ` · Added ${user.dateAdded}` : ""}
                 </div>
               </div>
@@ -186,13 +186,13 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
                     const completed = user.coaching.sessions.filter(s => s.status !== "scheduled").length;
                     return (
                       <div className="mb-4 rounded-lg border border-gray-stroke bg-white p-5">
-                        <div className="mb-2 text-[18px] font-normal text-gray-light">Sessions completed</div>
+                        <div className="mb-2 text-[16px] font-normal text-gray-light">Sessions completed</div>
                         <div className="flex items-baseline gap-[6px]">
-                          <span className="text-[24px] font-medium leading-none text-gray-dark">{completed}</span>
-                          <span className="text-[18px] font-medium text-gray-dark">of</span>
-                          <span className="text-[24px] font-medium leading-none text-gray-dark">{user.coaching.granted}</span>
+                          <span className="text-[22px] font-medium leading-none text-gray-dark">{completed}</span>
+                          <span className="text-[16px] font-medium text-gray-dark">of</span>
+                          <span className="text-[22px] font-medium leading-none text-gray-dark">{user.coaching.granted}</span>
                         </div>
-                        <div className="mt-[6px] text-[14px] text-gray-light">{scheduled} scheduled</div>
+                        <div className="mt-[6px] text-[12px] text-gray-light">{scheduled} scheduled</div>
                       </div>
                     );
                   })()}
@@ -221,7 +221,7 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
                               <SidebarCard variant="coach" image={s.coachImg} title={s.coach} subtitle={s.coachHeadline ?? ""} />
                               <div className="mt-1 flex flex-col gap-[6px] px-2">
                                 <StarRating rating={s.review.rating} />
-                                <ExpandableText text={s.review.text} className="text-[16px] italic text-gray-light" />
+                                <ExpandableText text={s.review.text} className="text-[14px] italic text-gray-light" />
                               </div>
                             </>
                           ),
@@ -237,7 +237,7 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
                               {idx < allItems.length - 1 && <div className="mt-1 w-px flex-1 bg-gray-stroke" />}
                             </div>
                             <div className="min-w-0 flex-1 py-3">
-                              <div className="mb-1 flex items-center gap-2 text-[14px]">
+                              <div className="mb-1 flex items-center gap-2 text-[12px]">
                                 <span className="text-gray-light">{item.label}</span>
                                 <span className="text-gray-xlight">{item.date}</span>
                               </div>
@@ -258,11 +258,11 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
               {/* Sessions fallback — only if no detailed coaching data */}
               {user.sessionsGranted != null && !user.coaching && (
                 <div className="rounded-lg border border-gray-stroke bg-white p-5">
-                  <div className="mb-2 text-[18px] font-normal text-gray-light">Sessions completed</div>
+                  <div className="mb-2 text-[16px] font-normal text-gray-light">Sessions completed</div>
                   <div className="flex items-baseline gap-[6px]">
-                    <span className="text-[24px] font-medium leading-none text-gray-dark">{user.sessionsUsed ?? 0}</span>
-                    <span className="text-[18px] font-medium text-gray-dark">of</span>
-                    <span className="text-[24px] font-medium leading-none text-gray-dark">{user.sessionsGranted}</span>
+                    <span className="text-[22px] font-medium leading-none text-gray-dark">{user.sessionsUsed ?? 0}</span>
+                    <span className="text-[16px] font-medium text-gray-dark">of</span>
+                    <span className="text-[22px] font-medium leading-none text-gray-dark">{user.sessionsGranted}</span>
                   </div>
                 </div>
               )}
@@ -275,11 +275,11 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
                     const total = user.liveCourses!.length;
                     return (
                       <div className="mb-4 rounded-lg border border-gray-stroke bg-white p-5">
-                        <div className="mb-2 text-[18px] font-normal text-gray-light">Cohorts joined</div>
+                        <div className="mb-2 text-[16px] font-normal text-gray-light">Cohorts joined</div>
                         <div className="flex items-baseline gap-[6px]">
-                          <span className="text-[24px] font-medium leading-none text-gray-dark">{enrolled}</span>
-                          <span className="text-[18px] font-medium text-gray-dark">of</span>
-                          <span className="text-[24px] font-medium leading-none text-gray-dark">{total}</span>
+                          <span className="text-[22px] font-medium leading-none text-gray-dark">{enrolled}</span>
+                          <span className="text-[16px] font-medium text-gray-dark">of</span>
+                          <span className="text-[22px] font-medium leading-none text-gray-dark">{total}</span>
                         </div>
                       </div>
                     );
@@ -296,16 +296,16 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
                         content: (
                           <>
                             <div className="py-[10px]">
-                              <div className="text-[16px] font-medium text-gray-dark">{course.cohort}</div>
-                              <div className="mt-[2px] text-[14px] text-gray-xlight">{course.startDate} – {course.endDate}</div>
+                              <div className="text-[14px] font-medium text-gray-dark">{course.cohort}</div>
+                              <div className="mt-[2px] text-[12px] text-gray-xlight">{course.startDate} – {course.endDate}</div>
                             </div>
                             {course.status === "invited" && (
-                              <button className="mt-1 rounded-lg bg-gray-hover px-3 py-2 text-[14px] font-medium text-gray-dark hover:bg-gray-stroke">Resend invite</button>
+                              <button className="mt-1 rounded-lg bg-gray-hover px-3 py-2 text-[12px] font-medium text-gray-dark hover:bg-gray-stroke">Resend invite</button>
                             )}
                             {course.review && (
                               <div className="mt-1 flex flex-col gap-[6px]">
                                 <StarRating rating={course.review.rating} />
-                                <ExpandableText text={course.review.text} className="text-[16px] italic text-gray-light" />
+                                <ExpandableText text={course.review.text} className="text-[14px] italic text-gray-light" />
                               </div>
                             )}
                           </>
@@ -321,7 +321,7 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
                               {idx < allItems.length - 1 && <div className="mt-1 w-px flex-1 bg-gray-stroke" />}
                             </div>
                             <div className="min-w-0 flex-1 py-3">
-                              <div className="mb-1 flex items-center gap-2 text-[14px]">
+                              <div className="mb-1 flex items-center gap-2 text-[12px]">
                                 <span className="text-gray-light">{item.label}</span>
                                 <span className="text-gray-xlight">{item.date}</span>
                               </div>
@@ -338,12 +338,12 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
               {/* Cohorts fallback — only if no detailed live course data */}
               {user.cohortStatuses && Object.keys(user.cohortStatuses).length > 0 && !(user.liveCourses?.length) && (
                 <div className="rounded-lg border border-gray-stroke bg-white p-5">
-                  <div className="mb-3 text-[18px] font-normal text-gray-light">Live courses</div>
+                  <div className="mb-3 text-[16px] font-normal text-gray-light">Live courses</div>
                   <div className="flex flex-col gap-3">
                     {Object.entries(user.cohortStatuses).map(([cohort, status]) => (
                       <div key={cohort} className="flex items-center justify-between gap-4">
-                        <span className="text-[16px] text-gray-dark">{cohort}</span>
-                        <span className={`shrink-0 text-[14px] ${status === "invited" ? "text-gray-xlight" : "text-gray-dark"}`}>
+                        <span className="text-[14px] text-gray-dark">{cohort}</span>
+                        <span className={`shrink-0 text-[12px] ${status === "invited" ? "text-gray-xlight" : "text-gray-dark"}`}>
                           {status === "completed" ? "Completed" : status === "enrolled" ? "Enrolled" : "Invited"}
                         </span>
                       </div>
@@ -355,18 +355,18 @@ export default function B2BUserDrawer({ user, onClose }: Props) {
               {/* Leland+ access */}
               {user.plusAccess && user.plusAccess.status !== "—" && (
                 <div className="rounded-lg border border-gray-stroke bg-white p-5">
-                  <div className="mb-2 text-[18px] font-normal text-gray-light">Leland+ access</div>
+                  <div className="mb-2 text-[16px] font-normal text-gray-light">Leland+ access</div>
                   {user.plusAccess.status === "Granted" ? (
                     <div>
-                      <div className="text-[24px] font-medium leading-none text-gray-dark">Active</div>
+                      <div className="text-[22px] font-medium leading-none text-gray-dark">Active</div>
                       {user.plusAccess.expiry && (
-                        <div className="mt-[6px] text-[14px] text-gray-light">
+                        <div className="mt-[6px] text-[12px] text-gray-light">
                           Expires {user.plusAccess.expiry.replace(/,\s*\d{4}$/, "")}
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="text-[24px] font-medium leading-none text-gray-xlight">Expired</div>
+                    <div className="text-[22px] font-medium leading-none text-gray-xlight">Expired</div>
                   )}
                 </div>
               )}

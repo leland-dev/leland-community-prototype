@@ -88,7 +88,7 @@ export default function RateSessionPopup({ suppressed }: { suppressed?: boolean 
       aria-label="Rate this session"
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-[15px] font-semibold text-white">
+        <h3 className="text-[13px] font-semibold text-white">
           {rated ? "Thanks for the feedback!" : "Rate this session"}
         </h3>
         <button

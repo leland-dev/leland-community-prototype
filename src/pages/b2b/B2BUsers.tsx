@@ -34,8 +34,8 @@ export default function B2BUsers({ onOpenModal }: { onOpenModal: (m: ModalId) =>
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-[40px] font-medium text-gray-dark">Users</h1>
-        <p className="mt-[2px] text-[18px] text-[#707070]">18 members associated with this account</p>
+        <h1 className="text-[38px] font-medium text-gray-dark">Users</h1>
+        <p className="mt-[2px] text-[16px] text-[#707070]">18 members associated with this account</p>
       </div>
 
       <Card>
@@ -47,13 +47,13 @@ export default function B2BUsers({ onOpenModal }: { onOpenModal: (m: ModalId) =>
           onFilter={setFilter}
         />
         <div className="overflow-x-auto">
-          <table className="b2b-table w-full border-collapse text-[13px]">
+          <table className="b2b-table w-full border-collapse text-[11px]">
             <thead>
               <tr>
                 {["Name", "Email", "1:1 Sessions", "Programs", "Self-Study Courses", "Leland+", "Added", "Actions"].map((h) => (
                   <th
                     key={h}
-                    className="whitespace-nowrap border-b border-gray-stroke bg-white px-[14px] py-[10px] text-left text-[11px] font-bold uppercase tracking-[0.06em] text-gray-xlight"
+                    className="whitespace-nowrap border-b border-gray-stroke bg-white px-[14px] py-[10px] text-left text-[10px] font-bold uppercase tracking-[0.06em] text-gray-xlight"
                   >
                     {h}
                   </th>
@@ -69,21 +69,21 @@ export default function B2BUsers({ onOpenModal }: { onOpenModal: (m: ModalId) =>
 
                 const enrollPill = (val: string) =>
                   val === "\u2014" ? (
-                    <span className="inline-flex rounded-full bg-gray-hover px-[10px] py-1 text-[11px] font-medium text-gray-light">
+                    <span className="inline-flex rounded-full bg-gray-hover px-[10px] py-1 text-[10px] font-medium text-gray-light">
                       Not Enrolled
                     </span>
                   ) : (
-                    <span className="inline-flex rounded-full bg-primary-xlight px-[10px] py-1 text-[11px] font-medium text-dark-green">
+                    <span className="inline-flex rounded-full bg-primary-xlight px-[10px] py-1 text-[10px] font-medium text-dark-green">
                       {val}
                     </span>
                   );
 
                 const lpCell = o?.lelandPlus ? (
-                  <span className="inline-flex rounded-full bg-primary-xlight px-[10px] py-1 text-[11px] font-medium text-dark-green">
+                  <span className="inline-flex rounded-full bg-primary-xlight px-[10px] py-1 text-[10px] font-medium text-dark-green">
                     Activated
                   </span>
                 ) : (
-                  <span className="inline-flex rounded-full bg-gray-hover px-[10px] py-1 text-[11px] font-medium text-gray-light">
+                  <span className="inline-flex rounded-full bg-gray-hover px-[10px] py-1 text-[10px] font-medium text-gray-light">
                     Not Activated
                   </span>
                 );
@@ -93,28 +93,28 @@ export default function B2BUsers({ onOpenModal }: { onOpenModal: (m: ModalId) =>
                     <td className="border-b border-gray-hover px-[14px] py-[11px] font-medium text-gray-dark">
                       {u.name}
                     </td>
-                    <td className="border-b border-gray-hover px-[14px] py-[11px] text-[12px] text-gray-light">
+                    <td className="border-b border-gray-hover px-[14px] py-[11px] text-[10px] text-gray-light">
                       {u.email}
                     </td>
                     <td className="border-b border-gray-hover px-[14px] py-[11px]">
-                      <span className={`text-[13px] font-semibold ${sessColor}`}>{sess}</span>
+                      <span className={`text-[11px] font-semibold ${sessColor}`}>{sess}</span>
                     </td>
                     <td className="border-b border-gray-hover px-[14px] py-[11px]">
                       {o?.liveCourses.length ? (
                         <div className="flex flex-col gap-[3px]">
                           {o.liveCourses.map((c) => (
-                            <span key={c} className="text-[13px] text-gray-dark">{c}</span>
+                            <span key={c} className="text-[11px] text-gray-dark">{c}</span>
                           ))}
                         </div>
                       ) : (
-                        <span className="text-[13px] text-gray-xlight">\u2014</span>
+                        <span className="text-[11px] text-gray-xlight">\u2014</span>
                       )}
                     </td>
                     <td className="border-b border-gray-hover px-[14px] py-[11px]">
                       {enrollPill(o?.selfStudy || "\u2014")}
                     </td>
                     <td className="border-b border-gray-hover px-[14px] py-[11px]">{lpCell}</td>
-                    <td className="border-b border-gray-hover px-[14px] py-[11px] text-[12px] text-gray-xlight">
+                    <td className="border-b border-gray-hover px-[14px] py-[11px] text-[10px] text-gray-xlight">
                       {u.added}
                     </td>
                     <td className="border-b border-gray-hover px-[14px] py-[11px]">

@@ -59,11 +59,11 @@ function FeedPost({ body, image, time, likes, comments, reposts }: {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="cursor-pointer text-[17px] leading-tight font-medium text-gray-dark">Alex Ward</span>
+                <span className="cursor-pointer text-[15px] leading-tight font-medium text-gray-dark">Alex Ward</span>
                 <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />
-                <span className="shrink-0 text-[17px] leading-tight text-gray-xlight">{time}</span>
+                <span className="shrink-0 text-[15px] leading-tight text-gray-xlight">{time}</span>
               </div>
-              <p className="truncate text-[15px] leading-tight text-[#707070]">Former Director of Programs and Admissions at Stanford GSB</p>
+              <p className="truncate text-[13px] leading-tight text-[#707070]">Former Director of Programs and Admissions at Stanford GSB</p>
             </div>
             <button className="cursor-pointer pl-2 text-[#424242] opacity-40 transition-opacity hover:opacity-100">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -73,7 +73,7 @@ function FeedPost({ body, image, time, likes, comments, reposts }: {
               </svg>
             </button>
           </div>
-          <p className="mt-1 text-[17px] leading-[1.4] text-gray-dark">{body}</p>
+          <p className="mt-1 text-[15px] leading-[1.4] text-gray-dark">{body}</p>
           {image && (
             <div className="mt-3 overflow-hidden rounded-xl">
               <img
@@ -89,20 +89,20 @@ function FeedPost({ body, image, time, likes, comments, reposts }: {
       <div className="mt-1 flex items-center gap-2 pl-[44px]">
         <button className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-[#424242] transition-colors hover:bg-gray-hover">
           <img src={likesIcon} alt="Like" className="h-[22px] w-[22px]" />
-          {likes > 0 && <span className="text-[15px] font-normal">{formatCount(likes)}</span>}
+          {likes > 0 && <span className="text-[13px] font-normal">{formatCount(likes)}</span>}
         </button>
         <button className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-[#424242] transition-colors hover:bg-gray-hover">
           <img src={commentsIcon} alt="Comment" className="h-[22px] w-[22px]" />
-          {comments > 0 && <span className="text-[15px] font-normal">{formatCount(comments)}</span>}
+          {comments > 0 && <span className="text-[13px] font-normal">{formatCount(comments)}</span>}
         </button>
         <button className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-[#424242] transition-colors hover:bg-gray-hover">
           <img src={repostsIcon} alt="Repost" className="h-[22px] w-[22px]" />
-          {reposts > 0 && <span className="text-[15px] font-normal">{formatCount(reposts)}</span>}
+          {reposts > 0 && <span className="text-[13px] font-normal">{formatCount(reposts)}</span>}
         </button>
         <button className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-[#424242] transition-colors hover:bg-gray-hover">
           <img src={sharesIcon} alt="Share" className="h-[22px] w-[22px]" />
         </button>
-        <button className="ml-auto cursor-pointer rounded-[100px] bg-[#222222]/5 px-[14px] py-1.5 text-[15px] font-medium text-[#424242] transition-colors hover:bg-[#222222]/[0.08]">
+        <button className="ml-auto cursor-pointer rounded-[100px] bg-[#222222]/5 px-[14px] py-1.5 text-[13px] font-medium text-[#424242] transition-colors hover:bg-[#222222]/[0.08]">
           Free intro call
         </button>
       </div>
@@ -148,7 +148,7 @@ export default function Profile() {
                 <img src={mailIcon} alt="Message" className="h-[20px] w-[20px]" />
               </button>
             )}
-            <button className="cursor-pointer rounded-[10px] bg-gray-hover px-5 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-stroke">
+            <button className="cursor-pointer rounded-[10px] bg-gray-hover px-5 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-stroke">
               Follow
             </button>
           </div>
@@ -159,20 +159,20 @@ export default function Profile() {
       <div>
         {/* Name with verified badge */}
         <div className="flex items-center gap-2">
-          <h1 className="text-[26px] font-bold text-gray-dark">Alex Ward</h1>
+          <h1 className="text-[24px] font-bold text-gray-dark">Alex Ward</h1>
           {isVerifiedExpert && (
             <img src={verifiedIcon} alt="Verified" className="mt-[2px] h-[19px] w-[19px]" />
           )}
         </div>
 
         {/* Headline - gray text */}
-        <h2 className="mt-1 text-[18px] leading-tight text-gray-600">
+        <h2 className="mt-1 text-[16px] leading-tight text-gray-600">
           Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB AdComm
         </h2>
 
         {/* Compact Inline Badges (when large badges are off) */}
         {!largeBadges && (
-          <div className="mt-3 flex flex-wrap items-center gap-[20px] text-[16px]">
+          <div className="mt-3 flex flex-wrap items-center gap-[20px] text-[14px]">
             {/* Atlassian */}
             <div className="flex items-center gap-[6px]">
               <img src={atlassianLogo} alt="Atlassian" className="h-[18px] w-[18px] rounded" />
@@ -206,21 +206,21 @@ export default function Profile() {
               onClick={() => setActiveTab("reviews")}
             >
               <img src={starIcon} alt="Star" className="mb-[2px] h-[15px] w-[15px]" />
-              <span className="text-[18px] font-medium text-gray-dark">4.99</span>
-              <span className="text-[16px] text-gray-600">24 reviews</span>
+              <span className="text-[16px] font-medium text-gray-dark">4.99</span>
+              <span className="text-[14px] text-gray-600">24 reviews</span>
             </div>
           )}
           <div className="flex items-baseline gap-1">
-            <span className="text-[18px] font-medium text-gray-dark">12</span>
-            <span className="text-[16px] text-gray-600">posts</span>
+            <span className="text-[16px] font-medium text-gray-dark">12</span>
+            <span className="text-[14px] text-gray-600">posts</span>
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-[18px] font-medium text-gray-dark">245</span>
-            <span className="text-[16px] text-gray-600">followers</span>
+            <span className="text-[16px] font-medium text-gray-dark">245</span>
+            <span className="text-[14px] text-gray-600">followers</span>
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-[18px] font-medium text-gray-dark">8.2K</span>
-            <span className="text-[16px] text-gray-600">impressions</span>
+            <span className="text-[16px] font-medium text-gray-dark">8.2K</span>
+            <span className="text-[14px] text-gray-600">impressions</span>
           </div>
         </div>
 
@@ -235,8 +235,8 @@ export default function Profile() {
                     <div className="flex items-center gap-[6px]">
                       <img src={wreathImg} alt="Wreath Left" className="h-auto w-[21px]" />
                       <div className="text-center">
-                        <p className="text-[17px] font-medium leading-[100%] text-gray-dark">Customer</p>
-                        <p className="text-[17px] font-medium leading-[100%] text-gray-dark">Favorite</p>
+                        <p className="text-[15px] font-medium leading-[100%] text-gray-dark">Customer</p>
+                        <p className="text-[15px] font-medium leading-[100%] text-gray-dark">Favorite</p>
                       </div>
                       <img src={wreathImg} alt="Wreath Right" className="h-auto w-[21px] scale-x-[-1]" />
                     </div>
@@ -247,12 +247,12 @@ export default function Profile() {
               {/* Atlassian badge */}
               <div className="flex h-full shrink-0 flex-col overflow-hidden rounded-lg border border-gray-stroke bg-white">
                 <div className="w-full bg-[#F5F5F5] px-2 pb-1 pt-[2px] text-center">
-                  <span className="text-[13px] font-medium tracking-[0.05em] text-gray-500">WORKS AT</span>
+                  <span className="text-[11px] font-medium tracking-[0.05em] text-gray-500">WORKS AT</span>
                 </div>
                 <div className="flex flex-1 items-center justify-center px-3">
                   <div className="flex items-center gap-[6px]">
                     <img src={atlassianLogo} alt="Atlassian" className="h-[16px] w-[16px] rounded" />
-                    <span className="text-[17px] font-medium leading-[100%] text-gray-dark">Atlassian</span>
+                    <span className="text-[15px] font-medium leading-[100%] text-gray-dark">Atlassian</span>
                   </div>
                 </div>
               </div>
@@ -260,12 +260,12 @@ export default function Profile() {
               {/* Stanford GSB badge */}
               <div className="flex h-full shrink-0 flex-col overflow-hidden rounded-lg border border-gray-stroke bg-white">
                 <div className="w-full bg-[#F5F5F5] px-2 pb-1 pt-[2px] text-center">
-                  <span className="text-[13px] font-medium tracking-[0.05em] text-gray-500">STUDIED AT</span>
+                  <span className="text-[11px] font-medium tracking-[0.05em] text-gray-500">STUDIED AT</span>
                 </div>
                 <div className="flex flex-1 items-center justify-center px-3">
                   <div className="flex items-center gap-[6px]">
                     <img src={gsbLogo} alt="Stanford GSB" className="h-[16px] w-[16px] rounded" />
-                    <span className="text-[17px] font-medium leading-[100%] text-gray-dark">Stanford GSB</span>
+                    <span className="text-[15px] font-medium leading-[100%] text-gray-dark">Stanford GSB</span>
                   </div>
                 </div>
               </div>
@@ -294,14 +294,14 @@ export default function Profile() {
             <div className="flex items-center gap-3">
               <img src={workTogetherImg} alt="Work together" className="h-12 w-auto object-contain" />
               <div className="flex flex-col gap-[2px]">
-                <p className="text-[18px] font-medium leading-tight text-gray-dark">Work with Alex</p>
-                <p className="text-[16px] leading-tight">
+                <p className="text-[16px] font-medium leading-tight text-gray-dark">Work with Alex</p>
+                <p className="text-[14px] leading-tight">
                   <span className="text-[#038561]">Available today</span>
                   <span className="text-gray-600"> · Responds within 3h</span>
                 </p>
               </div>
             </div>
-            <button className="shrink-0 rounded-[10px] bg-[#038561] px-4 py-2 text-[15px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+            <button className="shrink-0 rounded-[10px] bg-[#038561] px-4 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#038561]/90">
               Free intro call
             </button>
           </div>
@@ -316,7 +316,7 @@ export default function Profile() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
-              className={`relative flex-1 py-3 text-[17px] font-medium capitalize transition-colors ${
+              className={`relative flex-1 py-3 text-[15px] font-medium capitalize transition-colors ${
                 activeTab === tab
                   ? "text-gray-dark"
                   : "text-gray-light hover:text-gray-dark"
@@ -400,22 +400,22 @@ export default function Profile() {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {/* Free Intro Call */}
                 <div className="flex flex-col items-center rounded-xl border border-gray-stroke bg-[#F5F5F5] px-8 py-10 text-center">
-                  <h3 className="text-[20px] font-semibold text-gray-dark">Free 15-minute intro call</h3>
-                  <p className="mt-3 text-[16px] text-gray-600">
+                  <h3 className="text-[18px] font-semibold text-gray-dark">Free 15-minute intro call</h3>
+                  <p className="mt-3 text-[14px] text-gray-600">
                     Get to know Alex and make a plan for working together.
                   </p>
-                  <button className="mt-6 rounded-[10px] bg-[#038561] px-6 py-3 text-[15px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                  <button className="mt-6 rounded-[10px] bg-[#038561] px-6 py-3 text-[13px] font-medium text-white transition-colors hover:bg-[#038561]/90">
                     Schedule free intro call
                   </button>
                 </div>
 
                 {/* Custom Hourly */}
                 <div className="flex flex-col items-center rounded-xl border border-gray-stroke bg-[#F5F5F5] px-8 py-10 text-center">
-                  <h3 className="text-[20px] font-semibold text-gray-dark">Custom hourly coaching</h3>
-                  <p className="mt-3 text-[16px] text-gray-600">
+                  <h3 className="text-[18px] font-semibold text-gray-dark">Custom hourly coaching</h3>
+                  <p className="mt-3 text-[14px] text-gray-600">
                     Get help with Editing, School Selection, and more.
                   </p>
-                  <button className="mt-6 rounded-[10px] border border-gray-stroke bg-white px-6 py-3 text-[15px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
+                  <button className="mt-6 rounded-[10px] border border-gray-stroke bg-white px-6 py-3 text-[13px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
                     Get started for $259/hr
                   </button>
                 </div>
@@ -438,25 +438,25 @@ export default function Profile() {
             <div className="space-y-8">
               {/* About Section */}
               <div>
-                <h3 className="mb-3 text-[20px] font-bold text-gray-dark">About</h3>
-                <p className="text-[17px] leading-relaxed text-gray-dark">
+                <h3 className="mb-3 text-[18px] font-bold text-gray-dark">About</h3>
+                <p className="text-[15px] leading-relaxed text-gray-dark">
                   Product Manager at Stripe with a background in consulting and engineering. Currently pursuing my MBA at HBS while preparing for a career pivot into VC. Passionate about fintech, developer tools, and building products that scale.
                 </p>
               </div>
 
               {/* Experience Section */}
               <div>
-                <h3 className="mb-4 text-[20px] font-bold text-gray-dark">Experience</h3>
+                <h3 className="mb-4 text-[18px] font-bold text-gray-dark">Experience</h3>
                 <div className="space-y-6">
                   <div className="flex gap-4">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                      <span className="text-[20px] font-semibold text-gray-dark">💳</span>
+                      <span className="text-[18px] font-semibold text-gray-dark">💳</span>
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-[18px] font-semibold text-gray-dark">Product Manager</h4>
-                      <p className="text-[16px] text-gray-light">Stripe</p>
-                      <p className="mt-1 text-[15px] text-gray-light">2022 – Present</p>
-                      <p className="mt-3 text-[16px] leading-relaxed text-gray-dark">
+                      <h4 className="text-[16px] font-semibold text-gray-dark">Product Manager</h4>
+                      <p className="text-[14px] text-gray-light">Stripe</p>
+                      <p className="mt-1 text-[13px] text-gray-light">2022 – Present</p>
+                      <p className="mt-3 text-[14px] leading-relaxed text-gray-dark">
                         Led payments SDK developer experience, driving 40% reduction in integration time across 1,200+ partners.
                       </p>
                     </div>
@@ -464,13 +464,13 @@ export default function Profile() {
 
                   <div className="flex gap-4">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                      <span className="text-[20px] font-semibold text-gray-dark">📦</span>
+                      <span className="text-[18px] font-semibold text-gray-dark">📦</span>
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-[18px] font-semibold text-gray-dark">Associate Product Manager</h4>
-                      <p className="text-[16px] text-gray-light">Dropbox</p>
-                      <p className="mt-1 text-[15px] text-gray-light">2020 – 2022</p>
-                      <p className="mt-3 text-[16px] leading-relaxed text-gray-dark">
+                      <h4 className="text-[16px] font-semibold text-gray-dark">Associate Product Manager</h4>
+                      <p className="text-[14px] text-gray-light">Dropbox</p>
+                      <p className="mt-1 text-[13px] text-gray-light">2020 – 2022</p>
+                      <p className="mt-3 text-[14px] leading-relaxed text-gray-dark">
                         Worked on Paper collaboration product, shipped 3 major features used by 2M+ teams.
                       </p>
                     </div>
@@ -478,13 +478,13 @@ export default function Profile() {
 
                   <div className="flex gap-4">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                      <span className="text-[20px] font-semibold text-gray-dark">🏢</span>
+                      <span className="text-[18px] font-semibold text-gray-dark">🏢</span>
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-[18px] font-semibold text-gray-dark">Business Analyst</h4>
-                      <p className="text-[16px] text-gray-light">Accenture</p>
-                      <p className="mt-1 text-[15px] text-gray-light">2018 – 2020</p>
-                      <p className="mt-3 text-[16px] leading-relaxed text-gray-dark">
+                      <h4 className="text-[16px] font-semibold text-gray-dark">Business Analyst</h4>
+                      <p className="text-[14px] text-gray-light">Accenture</p>
+                      <p className="mt-1 text-[13px] text-gray-light">2018 – 2020</p>
+                      <p className="mt-3 text-[14px] leading-relaxed text-gray-dark">
                         Strategy consulting across fintech and retail clients.
                       </p>
                     </div>
@@ -494,27 +494,27 @@ export default function Profile() {
 
               {/* Education Section */}
               <div>
-                <h3 className="mb-4 text-[20px] font-bold text-gray-dark">Education</h3>
+                <h3 className="mb-4 text-[18px] font-bold text-gray-dark">Education</h3>
                 <div className="space-y-6">
                   <div className="flex gap-4">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                      <span className="text-[20px] font-semibold text-gray-dark">🎓</span>
+                      <span className="text-[18px] font-semibold text-gray-dark">🎓</span>
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-[18px] font-semibold text-gray-dark">Harvard Business School</h4>
-                      <p className="text-[16px] text-gray-light">MBA</p>
-                      <p className="mt-1 text-[15px] text-gray-light">2024 – 2026</p>
+                      <h4 className="text-[16px] font-semibold text-gray-dark">Harvard Business School</h4>
+                      <p className="text-[14px] text-gray-light">MBA</p>
+                      <p className="mt-1 text-[13px] text-gray-light">2024 – 2026</p>
                     </div>
                   </div>
 
                   <div className="flex gap-4">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                      <span className="text-[20px] font-semibold text-gray-dark">🎓</span>
+                      <span className="text-[18px] font-semibold text-gray-dark">🎓</span>
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-[18px] font-semibold text-gray-dark">MIT</h4>
-                      <p className="text-[16px] text-gray-light">B.S. in Computer Science and Engineering</p>
-                      <p className="mt-1 text-[15px] text-gray-light">2014 – 2018</p>
+                      <h4 className="text-[16px] font-semibold text-gray-dark">MIT</h4>
+                      <p className="text-[14px] text-gray-light">B.S. in Computer Science and Engineering</p>
+                      <p className="mt-1 text-[13px] text-gray-light">2014 – 2018</p>
                     </div>
                   </div>
                 </div>
@@ -530,7 +530,7 @@ export default function Profile() {
       <div className="flex flex-col gap-3">
         {/* Verified Expert Toggle */}
         <div className="flex items-center gap-3">
-          <span className="text-[14px] font-medium text-gray-dark">Verified Expert</span>
+          <span className="text-[12px] font-medium text-gray-dark">Verified Expert</span>
           <button
             onClick={() => setIsVerifiedExpert(!isVerifiedExpert)}
             className={`relative h-6 w-11 rounded-full transition-colors ${
@@ -547,7 +547,7 @@ export default function Profile() {
 
         {/* Large Badges Toggle */}
         <div className="flex items-center gap-3">
-          <span className="text-[14px] font-medium text-gray-dark">Large Badges</span>
+          <span className="text-[12px] font-medium text-gray-dark">Large Badges</span>
           <button
             onClick={() => setLargeBadges(!largeBadges)}
             className={`relative h-6 w-11 rounded-full transition-colors ${

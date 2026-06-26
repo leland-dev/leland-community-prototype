@@ -71,11 +71,11 @@ function CoachContributorCard() {
       />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[18px] font-semibold text-gray-dark">Contributed by Tanner H.</span>
+          <span className="text-[16px] font-semibold text-gray-dark">Contributed by Tanner H.</span>
           <Star size={16} fill="#F5B729" stroke="#F5B729" />
-          <span className="text-[14px] text-gray-light">5.0 (59)</span>
+          <span className="text-[12px] text-gray-light">5.0 (59)</span>
         </div>
-        <p className="mt-1 text-[14px] text-gray-light">
+        <p className="mt-1 text-[12px] text-gray-light">
           Go from "I use chatbots" to "I manage agents" in &lt;3 weeks
         </p>
       </div>
@@ -100,7 +100,7 @@ function ResourceList() {
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-hover text-gray-dark">
               {r.icon}
             </span>
-            <span className="flex-1 text-[15px] font-medium text-gray-dark">{r.label}</span>
+            <span className="flex-1 text-[13px] font-medium text-gray-dark">{r.label}</span>
             <span className="shrink-0 text-gray-light transition-colors group-hover:text-gray-dark">
               <ExternalIcon />
             </span>
@@ -125,7 +125,7 @@ export default function Resources({ compact = false }: Props = {}) {
       <section className="rounded-2xl border border-gray-stroke bg-white">
         {/* Header — matches SessionGuide */}
         <div className="border-b border-gray-stroke px-5 py-4">
-          <h2 className="text-[20px] font-medium text-gray-dark">Resources</h2>
+          <h2 className="text-[18px] font-medium text-gray-dark">Resources</h2>
         </div>
         <div className="p-3">
           <ResourceList />

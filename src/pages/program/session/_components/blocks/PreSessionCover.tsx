@@ -32,10 +32,10 @@ export default function PreSessionCover({ session }: { session: Session }) {
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 overflow-hidden bg-[#E8E8E5] text-gray-dark">
       <div className="flex flex-col items-center gap-2">
-        <div className="text-[12px] uppercase tracking-[0.18em] text-gray-light lg:text-[13px]">
+        <div className="text-[10px] uppercase tracking-[0.18em] text-gray-light lg:text-[11px]">
           Starts in
         </div>
-        <div className="font-semibold leading-none tabular-nums text-gray-dark text-[40px] sm:text-[52px] lg:text-[72px]">
+        <div className="font-semibold leading-none tabular-nums text-gray-dark text-[38px] sm:text-[50px] lg:text-[70px]">
           {segments.join(" ")}
         </div>
       </div>

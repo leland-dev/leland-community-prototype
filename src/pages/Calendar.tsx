@@ -159,7 +159,7 @@ export default function Calendar() {
 
   const popularEventsSection = (
     <>
-      <NavLink to="/events" className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+      <NavLink to="/events" className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
         Popular events
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
           <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -174,8 +174,8 @@ export default function Calendar() {
               className="h-[36px] w-[55px] shrink-0 rounded-[4px] object-cover"
             />
             <div className="min-w-0">
-              <p className="truncate text-[16px] font-medium text-gray-dark group-hover:opacity-70">{event.title}</p>
-              <p className="truncate text-[14px]">
+              <p className="truncate text-[14px] font-medium text-gray-dark group-hover:opacity-70">{event.title}</p>
+              <p className="truncate text-[12px]">
                 <span className={event.subtitleColor}>{event.subtitle}</span>
                 <span className="text-gray-light"> · {event.meta}</span>
               </p>
@@ -189,10 +189,10 @@ export default function Calendar() {
   return (
     <PageShell rightSidebar={popularEventsSection}>
         {/* Header — spans full width above both columns */}
-        <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">
+        <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">
           Calendar
         </h1>
-        <p className="mt-2 text-[18px] text-gray-light">
+        <p className="mt-2 text-[16px] text-gray-light">
           Everything on your schedule, between 1:1 coaching sessions, events, and courses.
         </p>
 
@@ -213,8 +213,8 @@ export default function Calendar() {
 
                   {/* Event details */}
                   <div className="min-w-0 flex-1">
-                    <p className="text-[18px] font-medium text-gray-dark">{event.title}</p>
-                    <p className="text-[16px] text-[#707070]">
+                    <p className="text-[16px] font-medium text-gray-dark">{event.title}</p>
+                    <p className="text-[14px] text-[#707070]">
                       {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
                     </p>
                   </div>
@@ -227,10 +227,10 @@ export default function Calendar() {
                       </LinkButton>
                     ) : (
                       <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
-                        <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">
+                        <div className="w-full bg-[#F5F5F5] text-center text-[10px] font-medium uppercase tracking-[0.05em] text-[#707070]">
                           {event.day}
                         </div>
-                        <div className="w-full pt-0.5 pb-1 text-center text-[19px] font-medium leading-tight text-[#707070]">
+                        <div className="w-full pt-0.5 pb-1 text-center text-[17px] font-medium leading-tight text-[#707070]">
                           {event.date}
                         </div>
                       </div>
@@ -243,7 +243,7 @@ export default function Calendar() {
             {/* View past sessions */}
             <button
               onClick={() => setPastOpen(!pastOpen)}
-              className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+              className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
             >
               {pastOpen ? "Hide past sessions" : "View past sessions"}
               <svg
@@ -271,14 +271,14 @@ export default function Calendar() {
                       className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover opacity-50 transition-opacity group-hover:opacity-100"
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[18px] font-medium text-[#707070]">{event.title}</p>
-                      <p className="text-[16px] text-[#707070]">
+                      <p className="text-[16px] font-medium text-[#707070]">{event.title}</p>
+                      <p className="text-[14px] text-[#707070]">
                         {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
                       </p>
                     </div>
                     {event.hasRecording && (
                       <div className="flex shrink-0 items-center self-stretch">
-                        <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
+                        <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
                           <img src={arrowRoundIcon} alt="" className="h-5 w-5" />
                           Rewatch
                         </button>

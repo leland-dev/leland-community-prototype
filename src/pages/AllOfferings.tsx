@@ -120,8 +120,8 @@ export default function AllOfferingsModal({ coachId = "samantha", open, onClose 
                 className="h-10 w-10 rounded-[4px] object-cover"
               />
               <div className="flex flex-col leading-tight">
-                <span className="text-[18px] font-medium text-gray-dark">{coachConfig.name}</span>
-                <span className="text-[16px] text-[#707070]">All offerings</span>
+                <span className="text-[16px] font-medium text-gray-dark">{coachConfig.name}</span>
+                <span className="text-[14px] text-[#707070]">All offerings</span>
               </div>
               <div className="min-w-0 flex-1" />
 
@@ -137,11 +137,11 @@ export default function AllOfferingsModal({ coachId = "samantha", open, onClose 
             <div className="px-6 py-6">
                 {/* Offerings header + category dropdown */}
                 <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-[24px] font-medium text-gray-dark">Offerings</h2>
+                  <h2 className="text-[22px] font-medium text-gray-dark">Offerings</h2>
                   <div ref={categoryRef} className="relative">
                     <button
                       onClick={() => setCategoryOpen(!categoryOpen)}
-                      className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#ebebeb]"
+                      className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-medium text-[#222222] transition-colors hover:bg-[#ebebeb]"
                     >
                       {categoryFilter === "All" ? "All categories" : categoryFilter}
                       <img src={chevronDownIcon} alt="" className={`h-[14px] w-[14px] transition-transform ${categoryOpen ? "rotate-180" : ""}`} />
@@ -159,7 +159,7 @@ export default function AllOfferingsModal({ coachId = "samantha", open, onClose 
                             <button
                               key={value}
                               onClick={() => { setCategoryFilter(value); setCategoryOpen(false); }}
-                              className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${categoryFilter === value ? "bg-gray-hover" : ""}`}
+                              className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${categoryFilter === value ? "bg-gray-hover" : ""}`}
                             >
                               {label}
                               {categoryFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
@@ -206,7 +206,7 @@ export default function AllOfferingsModal({ coachId = "samantha", open, onClose 
 
                   return (
                     <div key={section.id} className={sIdx > 0 ? "mt-10" : ""}>
-                      <h2 className="mb-4 text-[24px] font-medium text-gray-dark">
+                      <h2 className="mb-4 text-[22px] font-medium text-gray-dark">
                         {section.label}
                       </h2>
                       <div className="flex flex-col gap-1">
@@ -249,7 +249,7 @@ export default function AllOfferingsModal({ coachId = "samantha", open, onClose 
                         <div className="mt-2">
                           <button
                             onClick={() => toggleSection(section.id)}
-                            className="flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                            className="flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
                           >
                             {isExpanded ? "See less" : `See ${hiddenCount} more`}
                             <ChevronDownIcon className={`transition-transform ${isExpanded ? "rotate-180" : ""}`} />

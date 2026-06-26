@@ -126,7 +126,7 @@ function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohor
     <div className="flex flex-col px-4 pt-4 pb-4 sm:px-6">
       <button
         onClick={() => handleCohortPicked(null)}
-        className="mb-5 flex w-full items-center justify-between rounded-lg bg-gray-hover px-4 py-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]"
+        className="mb-5 flex w-full items-center justify-between rounded-lg bg-gray-hover px-4 py-3.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]"
       >
         Invite the user to select their own dates
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
@@ -152,28 +152,28 @@ function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohor
     <div className="flex min-h-full flex-col px-4 pt-5 pb-0 sm:px-6">
       {/* User card */}
       <div className="mb-8 flex items-center gap-3 rounded-xl bg-gray-hover px-4 py-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[14px] font-medium text-dark-green">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[12px] font-medium text-dark-green">
           {user.initials}
         </div>
         <div className="min-w-0">
-          <div className="truncate text-[16px] font-medium text-gray-dark">{user.name}</div>
-          <div className="truncate text-[13px] text-gray-light">{user.email}</div>
+          <div className="truncate text-[14px] font-medium text-gray-dark">{user.name}</div>
+          <div className="truncate text-[11px] text-gray-light">{user.email}</div>
         </div>
       </div>
 
-      <p className="mb-5 text-[16px] font-medium text-gray-dark">When you update access, this user will receive an email.</p>
+      <p className="mb-5 text-[14px] font-medium text-gray-dark">When you update access, this user will receive an email.</p>
 
       {/* Offerings card */}
       <div className="rounded-[10px] border border-gray-stroke">
         {/* 1:1 sessions */}
         <div className="flex items-center justify-between gap-4 px-4 py-3">
-          <span className="text-[15px] text-gray-dark">1:1 sessions</span>
+          <span className="text-[13px] text-gray-dark">1:1 sessions</span>
           <div className="flex items-center gap-1">
             <button onClick={() => setSessions(s => Math.max(0, s - 1))} disabled={sessions === 0}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb] disabled:cursor-not-allowed disabled:opacity-30">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
-            <span className="w-6 text-center text-[15px] font-medium text-gray-dark">{sessions}</span>
+            <span className="w-6 text-center text-[13px] font-medium text-gray-dark">{sessions}</span>
             <button onClick={() => setSessions(s => s + 1)}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -182,29 +182,29 @@ function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohor
         </div>
         {/* Live courses */}
         <div className="border-t border-gray-stroke px-4 pb-3 pt-3">
-          <span className="text-[15px] text-gray-dark">Live courses</span>
+          <span className="text-[13px] text-gray-dark">Live courses</span>
           <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
             {AVAILABLE_PROGRAMS.map(p => {
               const isAdded = added.has(p.key);
               return (
                 <div key={p.key} className="flex items-start justify-between gap-4 py-1.5">
                   <div className="flex flex-col gap-[2px]">
-                    <span className="text-[14px] text-gray-light">{p.label}</span>
+                    <span className="text-[12px] text-gray-light">{p.label}</span>
                     {isAdded && (
-                      <button onClick={() => setSelectingProgram(p.key)} className="text-left text-[14px] text-gray-xlight underline hover:opacity-70">
+                      <button onClick={() => setSelectingProgram(p.key)} className="text-left text-[12px] text-gray-xlight underline hover:opacity-70">
                         {selectedCohorts[p.key] ?? "User will select their own cohort"}
                       </button>
                     )}
                   </div>
                   {isAdded ? (
                     <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
-                      <span className="text-[14px] font-medium text-[#038561]">Added</span>
+                      <span className="text-[12px] font-medium text-[#038561]">Added</span>
                       <button onClick={() => setAdded(prev => { const n = new Set(prev); n.delete(p.key); return n; })} className="text-[#038561] hover:opacity-70">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                       </button>
                     </div>
                   ) : (
-                    <button onClick={() => setSelectingProgram(p.key)} className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+                    <button onClick={() => setSelectingProgram(p.key)} className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[12px] font-medium text-gray-dark hover:bg-[#ebebeb]">
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                       Add
                     </button>
@@ -216,14 +216,14 @@ function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohor
         </div>
         {/* Leland+ */}
         <div className="flex items-center justify-between gap-4 border-t border-gray-stroke px-4 py-3">
-          <span className="text-[15px] text-gray-dark">Leland+</span>
+          <span className="text-[13px] text-gray-dark">Leland+</span>
           {hasPlus ? (
-            <span className="flex items-center gap-1.5 text-[14px] text-gray-light">
+            <span className="flex items-center gap-1.5 text-[12px] text-gray-light">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1.5 6 4.5 9 10.5 3"/></svg>
               {user.plus!.status === "active" ? `Expires ${user.plus!.expiry}` : "Expired"}
             </span>
           ) : (
-            <button className="flex items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+            <button className="flex items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[12px] font-medium text-gray-dark hover:bg-[#ebebeb]">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Add
             </button>
@@ -250,7 +250,7 @@ function EditAccessView({ user, onDone }: { user: UserDetailV2; onDone: (seats: 
       <div className="flex flex-col px-4 pt-4 pb-4 sm:px-6">
         <button
           onClick={() => setSelectingProgram(null)}
-          className="mb-5 flex w-full items-center justify-between rounded-lg bg-gray-hover px-4 py-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]"
+          className="mb-5 flex w-full items-center justify-between rounded-lg bg-gray-hover px-4 py-3.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]"
         >
           Invite the user to select their own dates
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
@@ -262,7 +262,7 @@ function EditAccessView({ user, onDone }: { user: UserDetailV2; onDone: (seats: 
             const isCurrent = selectedDates[selectingProgram] === label;
             return (
               <div key={label} className="flex items-center justify-between py-4">
-                <span className="text-[16px] font-medium text-gray-dark">{label}</span>
+                <span className="text-[14px] font-medium text-gray-dark">{label}</span>
                 <Button
                   size="md"
                   variant={isCurrent ? "secondary" : "primary"}
@@ -286,22 +286,22 @@ function EditAccessView({ user, onDone }: { user: UserDetailV2; onDone: (seats: 
     <div className="flex min-h-full flex-col px-4 pt-5 pb-0 sm:px-6">
       {/* User card */}
       <div className="mb-5 flex items-center gap-3 rounded-xl bg-gray-hover px-4 py-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[14px] font-medium text-dark-green">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[12px] font-medium text-dark-green">
           {user.initials}
         </div>
         <div className="min-w-0">
-          <div className="truncate text-[16px] font-medium text-gray-dark">{user.name}</div>
-          <div className="truncate text-[13px] text-gray-light">{user.email}</div>
+          <div className="truncate text-[14px] font-medium text-gray-dark">{user.name}</div>
+          <div className="truncate text-[11px] text-gray-light">{user.email}</div>
         </div>
       </div>
 
-      <p className="mb-5 text-[16px] font-medium text-gray-dark">When you update access, this user will receive an email.</p>
+      <p className="mb-5 text-[14px] font-medium text-gray-dark">When you update access, this user will receive an email.</p>
 
       {/* Seats + includes card */}
       <div className="rounded-[10px] border border-gray-stroke">
         {/* Seats counter */}
         <div className="flex items-center justify-between gap-4 px-4 py-3">
-          <span className="text-[15px] font-medium text-gray-dark">Seats</span>
+          <span className="text-[13px] font-medium text-gray-dark">Seats</span>
           <div className="flex items-center gap-1">
             <button
               onClick={() => setSeats(s => Math.max(1, s - 1))}
@@ -310,7 +310,7 @@ function EditAccessView({ user, onDone }: { user: UserDetailV2; onDone: (seats: 
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
-            <span className="w-6 text-center text-[15px] font-medium text-gray-dark">{seats}</span>
+            <span className="w-6 text-center text-[13px] font-medium text-gray-dark">{seats}</span>
             <button
               onClick={() => setSeats(s => s + 1)}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]"
@@ -323,27 +323,27 @@ function EditAccessView({ user, onDone }: { user: UserDetailV2; onDone: (seats: 
         <div className="border-t border-gray-stroke bg-gray-hover">
           {/* 1:1 services */}
           <div className="flex items-center justify-between px-4 py-2.5">
-            <span className="text-[15px] text-gray-dark">1:1 services</span>
-            <span className="text-[15px] text-gray-light">3 included</span>
+            <span className="text-[13px] text-gray-dark">1:1 services</span>
+            <span className="text-[13px] text-gray-light">3 included</span>
           </div>
           {/* Live programs */}
           <div className="border-t border-gray-stroke px-4 pb-3 pt-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[15px] text-gray-dark">Live programs</span>
-              <span className="text-[15px] text-gray-light">{PER_SEAT_PROGRAMS.length} included</span>
+              <span className="text-[13px] text-gray-dark">Live programs</span>
+              <span className="text-[13px] text-gray-light">{PER_SEAT_PROGRAMS.length} included</span>
             </div>
             <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
               {PER_SEAT_PROGRAMS.map(p => (
                 <div key={p} className="flex items-start justify-between gap-4 py-1.5">
                   <div className="flex flex-col gap-[2px]">
-                    <span className="text-[14px] text-gray-dark">{p}</span>
-                    <span className="text-[14px] text-gray-light">
+                    <span className="text-[12px] text-gray-dark">{p}</span>
+                    <span className="text-[12px] text-gray-light">
                       {selectedDates[p] ?? "User will select their own cohort"}
                     </span>
                   </div>
                   <button
                     onClick={() => setSelectingProgram(p)}
-                    className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#ebebeb] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#e0e0e0]"
+                    className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#ebebeb] px-3 py-1.5 text-[12px] font-medium text-gray-dark hover:bg-[#e0e0e0]"
                   >
                     {selectedDates[p] ? "Change" : "Select dates"}
                   </button>
@@ -353,8 +353,8 @@ function EditAccessView({ user, onDone }: { user: UserDetailV2; onDone: (seats: 
           </div>
           {/* Leland+ */}
           <div className="flex items-center justify-between border-t border-gray-stroke px-4 py-2.5 pb-3">
-            <span className="text-[15px] text-gray-dark">Leland+</span>
-            <span className="text-[15px] text-gray-light">2 months</span>
+            <span className="text-[13px] text-gray-dark">Leland+</span>
+            <span className="text-[13px] text-gray-light">2 months</span>
           </div>
         </div>
       </div>
@@ -385,26 +385,26 @@ function CohortSelectRow({
     <div className="py-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-0.5">
-          <div className="text-[16px] font-medium text-gray-dark">{cohort.startDate} – {cohort.endDate}</div>
+          <div className="text-[14px] font-medium text-gray-dark">{cohort.startDate} – {cohort.endDate}</div>
           <button
             onClick={() => setExpanded(!expanded)}
-            className="mt-0.5 w-fit cursor-pointer text-[14px] text-gray-light underline hover:text-gray-dark"
+            className="mt-0.5 w-fit cursor-pointer text-[12px] text-gray-light underline hover:text-gray-dark"
           >
             {expanded ? "Hide details" : "View details"}
           </button>
           {expanded && (
             <div className="mt-2 flex flex-col gap-1.5">
-              <div className="flex items-center gap-2 text-[14px] text-gray-light">
+              <div className="flex items-center gap-2 text-[12px] text-gray-light">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 {cohort.sessionCount} sessions
               </div>
               {cohort.scheduleDays.map((day, i) => (
-                <div key={i} className="flex items-center gap-2 text-[14px] text-gray-light">
+                <div key={i} className="flex items-center gap-2 text-[12px] text-gray-light">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
                   {day}
                 </div>
               ))}
-              <div className="flex items-center gap-2 text-[14px] text-gray-light">
+              <div className="flex items-center gap-2 text-[12px] text-gray-light">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 {cohort.duration}
               </div>
@@ -475,7 +475,7 @@ function AccordionSection({
     <div className="rounded-[12px] border border-gray-stroke">
       <div className="flex items-center justify-between gap-4 overflow-hidden rounded-t-[11px] border-b border-gray-stroke bg-gray-hover px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
-          <div className="shrink-0 text-[14px] font-medium text-gray-light">{title}</div>
+          <div className="shrink-0 text-[12px] font-medium text-gray-light">{title}</div>
         </div>
         {pill && <div className="shrink-0">{pill}</div>}
       </div>
@@ -563,7 +563,7 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                     </svg>
                   </button>
                 )}
-                <span className="text-[18px] font-medium text-gray-dark">
+                <span className="text-[16px] font-medium text-gray-dark">
                   {activeView === "switch-cohort" ? "Select a cohort" : activeView === "update-access" ? "Update access" : activeView === "edit-access" ? "Edit access" : user.name}
                 </span>
                 <button
@@ -609,8 +609,8 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                 {/* User summary */}
                 {activeView === "user" && (<>
                 <div className="px-4 pb-2 pt-5 sm:px-6">
-                  <div className="text-[30px] font-medium text-gray-dark">User details</div>
-                  <div className="mt-1 text-[16px] text-gray-light">
+                  <div className="text-[28px] font-medium text-gray-dark">User details</div>
+                  <div className="mt-1 text-[14px] text-gray-light">
                     {user.email}{user.dateAdded ? ` · Added ${user.dateAdded}` : ""}
                   </div>
                   <div className="mt-5 flex gap-3">
@@ -642,7 +642,7 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                           </>
                         )}
                       </Button>
-                      <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 w-56 -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[13px] leading-[1.4] text-white opacity-0 shadow-md transition-opacity group-hover/remind:opacity-100">
+                      <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 w-56 -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[11px] leading-[1.4] text-white opacity-0 shadow-md transition-opacity group-hover/remind:opacity-100">
                         Email the user links to benefits they haven't used yet.
                       </div>
                     </div>
@@ -672,11 +672,11 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                           />
                         </div>
                         <div className="group relative flex shrink-0 cursor-pointer items-center gap-1">
-                          <span className="text-[14px] leading-none text-gray-light">{sessionsCompleted} of {user.sessions.granted} completed</span>
+                          <span className="text-[12px] leading-none text-gray-light">{sessionsCompleted} of {user.sessions.granted} completed</span>
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight">
                             <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
                           </svg>
-                          <div className="pointer-events-none absolute bottom-full right-0 mb-2 w-[200px] rounded-lg bg-gray-dark px-3 py-2 text-[13px] leading-[1.4] text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                          <div className="pointer-events-none absolute bottom-full right-0 mb-2 w-[200px] rounded-lg bg-gray-dark px-3 py-2 text-[11px] leading-[1.4] text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
                             Sessions are calculated based on time used.
                             <div className="absolute right-2 top-full border-4 border-transparent border-t-gray-dark" />
                           </div>
@@ -704,21 +704,21 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                               )}
                               <div className="flex min-w-0 flex-col gap-0.5">
                                 {s.coach ? (
-                                  <div className="truncate text-[16px] font-medium leading-[1.2] text-gray-dark">
+                                  <div className="truncate text-[14px] font-medium leading-[1.2] text-gray-dark">
                                     With {`${s.coach.split(" ")[0]} ${s.coach.split(" ")[1]?.[0] ?? ""}.`}
                                   </div>
                                 ) : (
-                                  <div className="truncate text-[16px] font-medium leading-[1.2] text-gray-dark">Not yet scheduled</div>
+                                  <div className="truncate text-[14px] font-medium leading-[1.2] text-gray-dark">Not yet scheduled</div>
                                 )}
-                                {s.coachHeadline && <div className="truncate text-[14px] leading-[1.2] text-gray-light">{s.coachHeadline}</div>}
+                                {s.coachHeadline && <div className="truncate text-[12px] leading-[1.2] text-gray-light">{s.coachHeadline}</div>}
                               </div>
                             </div>
                             {s.status !== "unbooked" && (
                               <div className="flex shrink-0 flex-col gap-0.5 text-right">
-                                <div className="text-[16px] leading-[1.2] text-gray-dark">
+                                <div className="text-[14px] leading-[1.2] text-gray-dark">
                                   {s.status === "completed" ? "Completed" : "Scheduled"}
                                 </div>
-                                {s.date !== "—" && <div className="text-[14px] leading-[1.2] text-gray-light">{s.date}</div>}
+                                {s.date !== "—" && <div className="text-[12px] leading-[1.2] text-gray-light">{s.date}</div>}
                               </div>
                             )}
                           </div>
@@ -750,16 +750,16 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                                   <img src={c.image} alt={c.name} className="h-[36px] w-[69px] shrink-0 rounded-[6px] object-cover aspect-[1200/630]" />
                                 )}
                                 <div className="flex min-w-0 flex-col gap-0.5">
-                                  <div className="truncate text-[16px] font-medium leading-[1.2] text-gray-dark">{c.name}</div>
+                                  <div className="truncate text-[14px] font-medium leading-[1.2] text-gray-dark">{c.name}</div>
                                   {c.pending ? (
-                                    <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[14px] leading-[1.2]">
+                                    <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[12px] leading-[1.2]">
                                       <span className="text-gray-xlight">User hasn't selected a cohort yet.</span>
-                                      <button onClick={(e) => { e.stopPropagation(); setSwitchCohortName(c.name); }} className="cursor-pointer text-[14px] text-gray-xlight underline hover:text-gray-dark">Choose for them</button>
+                                      <button onClick={(e) => { e.stopPropagation(); setSwitchCohortName(c.name); }} className="cursor-pointer text-[12px] text-gray-xlight underline hover:text-gray-dark">Choose for them</button>
                                     </div>
                                   ) : (
-                                    <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[14px] leading-[1.2] text-gray-light">
+                                    <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[12px] leading-[1.2] text-gray-light">
                                       <span>{cohortDateLabel(c.startDate!)}</span>
-                                      <button onClick={(e) => { e.stopPropagation(); setSwitchCohortName(c.name); }} className="cursor-pointer text-[14px] text-gray-xlight underline hover:text-gray-dark">Switch cohort</button>
+                                      <button onClick={(e) => { e.stopPropagation(); setSwitchCohortName(c.name); }} className="cursor-pointer text-[12px] text-gray-xlight underline hover:text-gray-dark">Switch cohort</button>
                                     </div>
                                   )}
                                 </div>
@@ -782,10 +782,10 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                         {reviews.map((r, i) => (
                           <div key={i} className="border-b border-gray-stroke py-4 last:border-0">
                             <StarRating rating={r.review.rating} />
-                            <p className="mt-1.5 text-[16px] leading-[1.5] text-gray-dark">"{r.review.text}"</p>
+                            <p className="mt-1.5 text-[14px] leading-[1.5] text-gray-dark">"{r.review.text}"</p>
                             <div className="mt-3 flex min-w-0 items-center gap-2">
                               {r.coachImg && <img src={r.coachImg} alt={r.coachName} className="h-5 w-5 shrink-0 rounded-full object-cover" />}
-                              <span className="truncate text-[16px] text-gray-light">
+                              <span className="truncate text-[14px] text-gray-light">
                                 {r.contextPrefix}{r.coachName && r.coachHref ? (
                                   <a href={r.coachHref} target="_blank" rel="noreferrer" className="hover:underline">{r.coachName}</a>
                                 ) : null}{r.contextSuffix ?? r.attribution}
@@ -808,32 +808,32 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                       <div className="flex flex-col">
                         {user.plus.grantedDate && (
                           <div className="flex items-center justify-between border-b border-gray-stroke py-3">
-                            <span className="text-[16px] text-gray-light">Access granted</span>
-                            <span className="text-[16px] text-gray-dark">{user.plus.grantedDate}</span>
+                            <span className="text-[14px] text-gray-light">Access granted</span>
+                            <span className="text-[14px] text-gray-dark">{user.plus.grantedDate}</span>
                           </div>
                         )}
                         <div className="flex items-center justify-between border-b border-gray-stroke py-3">
-                          <span className="text-[16px] text-gray-light">Status</span>
-                          <span className={`text-[16px] ${user.plus.status === "active" ? "text-gray-dark" : "text-gray-xlight"}`}>
+                          <span className="text-[14px] text-gray-light">Status</span>
+                          <span className={`text-[14px] ${user.plus.status === "active" ? "text-gray-dark" : "text-gray-xlight"}`}>
                             {user.plus.status === "active" ? "Active" : "Expired"}
                           </span>
                         </div>
                         <div className={`flex items-center justify-between py-3 ${showLpEngagement && user.plus.resourcesViewed !== undefined ? "border-b border-gray-stroke" : ""}`}>
-                          <span className="text-[16px] text-gray-light">{user.plus.status === "active" ? "Expires" : "Expired"}</span>
-                          <span className="text-[16px] text-gray-dark">{user.plus.expiry}</span>
+                          <span className="text-[14px] text-gray-light">{user.plus.status === "active" ? "Expires" : "Expired"}</span>
+                          <span className="text-[14px] text-gray-dark">{user.plus.expiry}</span>
                         </div>
                         {showLpEngagement && user.plus.resourcesViewed !== undefined && (
                           <div className={`flex items-center justify-between py-3 ${user.plus.topCategories?.length ? "border-b border-gray-stroke" : ""}`}>
-                            <span className="text-[16px] text-gray-light">Resources viewed</span>
-                            <span className="text-[16px] text-gray-dark">{user.plus.resourcesViewed}</span>
+                            <span className="text-[14px] text-gray-light">Resources viewed</span>
+                            <span className="text-[14px] text-gray-dark">{user.plus.resourcesViewed}</span>
                           </div>
                         )}
                         {showLpEngagement && user.plus.topCategories?.length && (
                           <div className="py-3">
-                            <span className="text-[16px] text-gray-light">Top categories</span>
+                            <span className="text-[14px] text-gray-light">Top categories</span>
                             <div className="mt-2 flex flex-wrap gap-1.5">
                               {user.plus.topCategories.slice(0, 3).map((cat) => (
-                                <span key={cat} className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1.5 text-[14px] font-medium leading-none text-[#038561]">{cat}</span>
+                                <span key={cat} className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1.5 text-[12px] font-medium leading-none text-[#038561]">{cat}</span>
                               ))}
                             </div>
                           </div>

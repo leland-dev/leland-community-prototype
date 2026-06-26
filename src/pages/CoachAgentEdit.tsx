@@ -45,34 +45,34 @@ function CurrentContextPanel({ agent }: { agent: AgentDef }) {
   return (
     <div className="flex flex-col gap-5 p-5 md:p-6">
       <div>
-        <h3 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9B9B9B]">Scope</h3>
-        <p className="mt-1.5 text-[15px] leading-relaxed text-gray-dark">{agent.scope}</p>
+        <h3 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9B9B9B]">Scope</h3>
+        <p className="mt-1.5 text-[13px] leading-relaxed text-gray-dark">{agent.scope}</p>
       </div>
       <div>
-        <h3 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9B9B9B]">Playbook</h3>
-        <ol className="mt-1.5 list-decimal pl-5 text-[15px] leading-relaxed text-gray-dark">
+        <h3 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9B9B9B]">Playbook</h3>
+        <ol className="mt-1.5 list-decimal pl-5 text-[13px] leading-relaxed text-gray-dark">
           {agent.playbook.map((p, i) => (
             <li key={i} className="mb-1">{p}</li>
           ))}
         </ol>
       </div>
       <div>
-        <h3 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9B9B9B]">Handoff triggers</h3>
-        <ul className="mt-1.5 list-disc pl-5 text-[15px] leading-relaxed text-gray-dark">
+        <h3 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9B9B9B]">Handoff triggers</h3>
+        <ul className="mt-1.5 list-disc pl-5 text-[13px] leading-relaxed text-gray-dark">
           {agent.handoffTriggers.map((t, i) => (
             <li key={i} className="mb-1">{t}</li>
           ))}
         </ul>
       </div>
       <div>
-        <h3 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9B9B9B]">Greeting</h3>
-        <p className="mt-1.5 rounded-lg bg-[#F5F5F5] p-3 text-[15px] leading-relaxed text-gray-dark">{agent.greeting}</p>
+        <h3 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9B9B9B]">Greeting</h3>
+        <p className="mt-1.5 rounded-lg bg-[#F5F5F5] p-3 text-[13px] leading-relaxed text-gray-dark">{agent.greeting}</p>
       </div>
       <div>
-        <h3 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9B9B9B]">Starter prompts</h3>
+        <h3 className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9B9B9B]">Starter prompts</h3>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           {agent.starters.map((s, i) => (
-            <span key={i} className="rounded-full border border-gray-stroke bg-white px-3 py-1.5 text-[13px] font-medium text-gray-dark">
+            <span key={i} className="rounded-full border border-gray-stroke bg-white px-3 py-1.5 text-[11px] font-medium text-gray-dark">
               {s}
             </span>
           ))}
@@ -107,13 +107,13 @@ function ProposedUpdateCard({
           </svg>
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[15px] font-semibold text-gray-dark">Proposed update</p>
-          <p className="mt-0.5 text-[14px] text-gray-dark">{proposal.summary}</p>
+          <p className="text-[13px] font-semibold text-gray-dark">Proposed update</p>
+          <p className="mt-0.5 text-[12px] text-gray-dark">{proposal.summary}</p>
         </div>
       </div>
 
       {fields.length === 0 ? (
-        <p className="mt-3 text-[13px] italic text-[#707070]">(No field changes — clarification only.)</p>
+        <p className="mt-3 text-[11px] italic text-[#707070]">(No field changes — clarification only.)</p>
       ) : (
         <div className="mt-3 flex flex-col gap-3">
           {fields.map((key) => (
@@ -161,15 +161,15 @@ function FieldDiff({
 
   return (
     <div className="rounded-lg border border-gray-stroke bg-white p-3">
-      <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#3B7DFD]">{FIELD_LABELS[fieldKey]}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#3B7DFD]">{FIELD_LABELS[fieldKey]}</p>
       <div className="mt-2 grid gap-2 md:grid-cols-2">
         <div>
-          <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-[#9B9B9B]">Before</p>
-          <div className="text-[13px] leading-relaxed text-[#707070]">{renderValue(before)}</div>
+          <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-[#9B9B9B]">Before</p>
+          <div className="text-[11px] leading-relaxed text-[#707070]">{renderValue(before)}</div>
         </div>
         <div>
-          <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-[#038561]">After</p>
-          <div className="text-[13px] leading-relaxed text-gray-dark">{renderValue(after)}</div>
+          <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-[#038561]">After</p>
+          <div className="text-[11px] leading-relaxed text-gray-dark">{renderValue(after)}</div>
         </div>
       </div>
     </div>
@@ -227,10 +227,10 @@ export default function CoachAgentEdit() {
   if (!agent || !assets) {
     return (
       <div className="mx-auto max-w-[600px] px-4 py-16 text-center">
-        <p className="text-[18px] font-medium text-gray-dark">Agent not found</p>
+        <p className="text-[16px] font-medium text-gray-dark">Agent not found</p>
         <Link
           to="/coach-profile"
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
         >
           Back to coach profile
         </Link>
@@ -337,29 +337,29 @@ export default function CoachAgentEdit() {
         </Link>
         <img src={assets.coachAvatar} alt={agent.coachName} className="h-9 w-9 shrink-0 rounded-full object-cover" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[16px] font-semibold text-gray-dark">Edit · {agent.agentName}</p>
-          <p className="truncate text-[13px] text-[#707070]">
+          <p className="truncate text-[14px] font-semibold text-gray-dark">Edit · {agent.agentName}</p>
+          <p className="truncate text-[11px] text-[#707070]">
             Updates are saved to the live agent. Currently editing as {agent.coachName}.
           </p>
         </div>
         <Link
           to={`/agent/${agent.slug}`}
-          className="hidden shrink-0 cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08] md:inline-flex md:items-center"
+          className="hidden shrink-0 cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08] md:inline-flex md:items-center"
         >
           Preview chat
         </Link>
       </div>
 
       {error && (
-        <div className="border-b border-[#F5C6CB] bg-[#FDECEA] px-4 py-2 text-[14px] text-[#9F2F2F] md:px-6">
+        <div className="border-b border-[#F5C6CB] bg-[#FDECEA] px-4 py-2 text-[12px] text-[#9F2F2F] md:px-6">
           {error}
-          <button onClick={() => setError(null)} className="ml-3 cursor-pointer text-[13px] font-medium underline">
+          <button onClick={() => setError(null)} className="ml-3 cursor-pointer text-[11px] font-medium underline">
             Dismiss
           </button>
         </div>
       )}
       {savedAt && Date.now() - savedAt < 3000 && (
-        <div className="border-b border-[#A7E3CB] bg-[#E8F8F0] px-4 py-2 text-[14px] text-[#0F6E4D] md:px-6">
+        <div className="border-b border-[#A7E3CB] bg-[#E8F8F0] px-4 py-2 text-[12px] text-[#0F6E4D] md:px-6">
           Saved.
         </div>
       )}
@@ -369,7 +369,7 @@ export default function CoachAgentEdit() {
         {/* Current context panel */}
         <div className="flex-1 min-h-0 overflow-y-auto border-b border-gray-stroke md:border-b-0 md:border-r">
           <div className="px-5 pt-5 md:px-6 md:pt-6">
-            <h2 className="text-[14px] font-semibold uppercase tracking-[0.08em] text-[#9B9B9B]">Current context</h2>
+            <h2 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9B9B9B]">Current context</h2>
           </div>
           <CurrentContextPanel agent={agent} />
         </div>
@@ -379,7 +379,7 @@ export default function CoachAgentEdit() {
           <div ref={threadRef} className="flex-1 overflow-y-auto px-4 py-5 md:px-6">
             <div className="mx-auto flex max-w-[680px] flex-col gap-4">
               {messages.length === 0 && !thinking && (
-                <div className="rounded-2xl border border-dashed border-gray-stroke bg-[#FAFAFA] p-4 text-[14px] leading-relaxed text-[#707070]">
+                <div className="rounded-2xl border border-dashed border-gray-stroke bg-[#FAFAFA] p-4 text-[12px] leading-relaxed text-[#707070]">
                   <p className="text-gray-dark"><span className="font-semibold">Edit your agent.</span> Tell me what to change about how this agent coaches.</p>
                   <p className="mt-2">You can:</p>
                   <ul className="mt-1 list-disc pl-5">
@@ -393,7 +393,7 @@ export default function CoachAgentEdit() {
               {messages.map((m, i) => (
                 <div key={i} className={m.role === "user" ? "flex justify-end" : "flex"}>
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-snug whitespace-pre-wrap ${
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-[13px] leading-snug whitespace-pre-wrap ${
                       m.role === "user"
                         ? "rounded-tr-sm bg-[#222222] text-white"
                         : "rounded-tl-sm bg-[#F5F5F5] text-gray-dark"
@@ -470,14 +470,14 @@ export default function CoachAgentEdit() {
                     }
                   }}
                   placeholder="Tell the editor what to change…"
-                  className="max-h-[200px] flex-1 resize-none bg-transparent py-1.5 text-[15px] leading-snug text-gray-dark placeholder:text-[#9B9B9B] focus:outline-none"
+                  className="max-h-[200px] flex-1 resize-none bg-transparent py-1.5 text-[13px] leading-snug text-gray-dark placeholder:text-[#9B9B9B] focus:outline-none"
                   disabled={thinking}
                 />
                 <Button type="submit" size="sm" variant="primary" disabled={!input.trim() || thinking} className="!px-3" aria-label="Send">
                   <SendIcon />
                 </Button>
               </form>
-              <p className="mt-2 text-center text-[12px] text-[#9B9B9B]">
+              <p className="mt-2 text-center text-[10px] text-[#9B9B9B]">
                 Attach a .md or .txt file to seed the agent's context, or describe changes in chat.
               </p>
             </div>

@@ -202,7 +202,7 @@ function LiveDemo() {
       <div className="flex gap-[6px]">
         <button
           onClick={() => { setPurchased(false); setExpanded(false); }}
-          className={`cursor-pointer rounded-full px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+          className={`cursor-pointer rounded-full px-[14px] py-[6px] text-[12px] font-medium text-[#222222] ${
             !purchased ? "border-[1.5px] border-[#222222] bg-[#f5f5f5]" : "border-[1.5px] border-transparent bg-[#f5f5f5] transition-colors hover:bg-[#ebebeb]"
           }`}
         >
@@ -210,7 +210,7 @@ function LiveDemo() {
         </button>
         <button
           onClick={() => { setPurchased(true); setExpanded(false); }}
-          className={`cursor-pointer rounded-full px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+          className={`cursor-pointer rounded-full px-[14px] py-[6px] text-[12px] font-medium text-[#222222] ${
             purchased ? "border-[1.5px] border-[#222222] bg-[#f5f5f5]" : "border-[1.5px] border-transparent bg-[#f5f5f5] transition-colors hover:bg-[#ebebeb]"
           }`}
         >
@@ -225,7 +225,7 @@ function LiveDemo() {
       >
         <div className="rounded-[24px] bg-white px-6 py-5" style={{ boxShadow: "0 20px 24px -4px rgba(16, 24, 40, 0.08)" }}>
           {/* Section heading */}
-          <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>
+          <h2 className="text-[22px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>
             {purchased ? "My purchases" : "Offerings"}
           </h2>
 
@@ -236,7 +236,7 @@ function LiveDemo() {
                 <button
                   key={tab}
                   onClick={() => { setFilter(tab); setExpanded(false); }}
-                  className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+                  className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-medium text-[#222222] ${
                     activeFilter === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
                   }`}
                 >
@@ -248,7 +248,7 @@ function LiveDemo() {
               <div ref={categoryRef} className="relative">
                 <button
                   onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                  className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#ebebeb]"
+                  className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-medium text-[#222222] transition-colors hover:bg-[#ebebeb]"
                 >
                   {category === "All" ? "All categories" : category}
                   <img src={chevronDownIcon} alt="" className={`h-[14px] w-[14px] transition-transform ${categoryDropdownOpen ? "rotate-180" : ""}`} />
@@ -266,7 +266,7 @@ function LiveDemo() {
                         <button
                           key={value}
                           onClick={() => { setCategory(value); setCategoryDropdownOpen(false); }}
-                          className={`flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${category === value ? "bg-gray-hover" : ""}`}
+                          className={`flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${category === value ? "bg-gray-hover" : ""}`}
                         >
                           {label}
                           {category === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
@@ -324,7 +324,7 @@ function LiveDemo() {
             );
           })() : (
             <div className="mt-4 flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[#D0D0D0] py-10 text-center">
-              <p className="text-[16px] text-[#9B9B9B]">No memberships available yet</p>
+              <p className="text-[14px] text-[#9B9B9B]">No memberships available yet</p>
             </div>
           )}
 
@@ -334,13 +334,13 @@ function LiveDemo() {
               {activeFilter === "All" && filtered.length > 4 ? (
                 <button
                   onClick={() => setExpanded(!expanded)}
-                  className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                  className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
                 >
                   {expanded ? "See less" : "See all"}
                   <img src={chevronDownIcon} alt="" className={`h-[16px] w-[16px] transition-transform ${expanded ? "rotate-180" : ""}`} />
                 </button>
               ) : <div />}
-              <div className="flex items-center gap-2 text-[15px] text-[#9b9b9b]">
+              <div className="flex items-center gap-2 text-[13px] text-[#9b9b9b]">
                 <img src={shieldIcon} alt="" className="w-[12px]" />
                 <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
               </div>
@@ -355,8 +355,8 @@ function LiveDemo() {
 function DemoSection({ demo }: { demo: DemoConfig }) {
   return (
     <section className="mt-10">
-      <h2 className="text-[24px] font-medium text-gray-dark">{demo.heading}</h2>
-      <p className="mt-1 text-[18px] text-[#707070]">{demo.description}</p>
+      <h2 className="text-[22px] font-medium text-gray-dark">{demo.heading}</h2>
+      <p className="mt-1 text-[16px] text-[#707070]">{demo.description}</p>
 
       <div
         className="mt-4 rounded-[32px] bg-[#F0F0F0] p-3"
@@ -364,7 +364,7 @@ function DemoSection({ demo }: { demo: DemoConfig }) {
       >
         <div className="flex flex-col gap-4 rounded-[24px] bg-white px-6 py-5" style={{ boxShadow: "0 20px 24px -4px rgba(16, 24, 40, 0.08)" }}>
           <div>
-            <span className="text-[14px] uppercase tracking-[0.05em] text-[#707070]">Default</span>
+            <span className="text-[12px] uppercase tracking-[0.05em] text-[#707070]">Default</span>
             <OfferingCard
               type={demo.type}
               title={demo.defaultProps.title}
@@ -374,9 +374,9 @@ function DemoSection({ demo }: { demo: DemoConfig }) {
           </div>
           {demo.type !== "free-intro" && (
             <div>
-              <span className="flex items-center gap-1 text-[14px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />Purchased{demo.purchasedAltProps ? " · Cohort enrolled" : ""}</span>
+              <span className="flex items-center gap-1 text-[12px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />Purchased{demo.purchasedAltProps ? " · Cohort enrolled" : ""}</span>
               {demo.type === "hourly-package" ? (
-                <div className="mt-1 flex items-center justify-center rounded-[12px] bg-[#F0F0F0] px-4 py-5 text-[16px] text-[#707070]" style={{ backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")` }}>
+                <div className="mt-1 flex items-center justify-center rounded-[12px] bg-[#F0F0F0] px-4 py-5 text-[14px] text-[#707070]" style={{ backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")` }}>
                   Shows Hourly Coaching card once purchased
                 </div>
               ) : (
@@ -392,7 +392,7 @@ function DemoSection({ demo }: { demo: DemoConfig }) {
           )}
           {demo.fullyScheduledProps && (
             <div>
-              <span className="flex items-center gap-1 text-[14px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />Purchased · Fully scheduled</span>
+              <span className="flex items-center gap-1 text-[12px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />Purchased · Fully scheduled</span>
               <OfferingCard
                 type={demo.type}
                 title={demo.fullyScheduledProps.title}
@@ -405,7 +405,7 @@ function DemoSection({ demo }: { demo: DemoConfig }) {
           )}
           {demo.exhaustedProps && (
             <div>
-              <span className="flex items-center gap-1 text-[14px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />Purchased · Sessions complete</span>
+              <span className="flex items-center gap-1 text-[12px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />Purchased · Sessions complete</span>
               <OfferingCard
                 type={demo.type}
                 title={demo.exhaustedProps.title}
@@ -418,7 +418,7 @@ function DemoSection({ demo }: { demo: DemoConfig }) {
           )}
           {demo.purchasedAltProps && (
             <div>
-              <span className="flex items-center gap-1 text-[14px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />{demo.purchasedAltProps.label}</span>
+              <span className="flex items-center gap-1 text-[12px] uppercase tracking-[0.05em] text-[#707070]"><img src={checkIcon} alt="" className="h-3 w-3 opacity-50" />{demo.purchasedAltProps.label}</span>
               <OfferingCard
                 type={demo.type}
                 title={demo.purchasedAltProps.title}
@@ -441,9 +441,9 @@ export default function OfferingCardTest() {
   return (
     <PageShell variant="thin">
       {/* Page header */}
-      <Link to="/components" className="inline-block rounded-[4px] border border-[#E5E5E5] bg-[#F5F5F5] px-2 py-1 text-[13px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-colors hover:bg-[#EBEBEB]">&lt;COMPONENT&gt;</Link>
-      <h1 className="mt-1 text-[40px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Offering Card</h1>
-      <p className="mt-1 text-[18px] text-[#707070]">
+      <Link to="/components" className="inline-block rounded-[4px] border border-[#E5E5E5] bg-[#F5F5F5] px-2 py-1 text-[11px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-colors hover:bg-[#EBEBEB]">&lt;COMPONENT&gt;</Link>
+      <h1 className="mt-1 text-[38px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Offering Card</h1>
+      <p className="mt-1 text-[16px] text-[#707070]">
         Displays a coach's available offerings on their profile, and the same offerings in their purchased state on the customer's profile and dashboard.
       </p>
 
@@ -453,15 +453,15 @@ export default function OfferingCardTest() {
 
       {/* Coach Matching */}
       <section className="mt-10">
-        <h2 className="text-[24px] font-medium text-gray-dark">Coach Matching</h2>
-        <p className="mt-1 text-[18px] text-[#707070]">Prompts the user to get matched with a coach, then shows a pending state while matching is in progress.</p>
+        <h2 className="text-[22px] font-medium text-gray-dark">Coach Matching</h2>
+        <p className="mt-1 text-[16px] text-[#707070]">Prompts the user to get matched with a coach, then shows a pending state while matching is in progress.</p>
         <div
           className="mt-4 rounded-[32px] bg-[#F0F0F0] p-3"
           style={{ backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='32' ry='32' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")` }}
         >
           <div className="flex flex-col gap-4 rounded-[24px] bg-white px-6 py-5" style={{ boxShadow: "0 20px 24px -4px rgba(16, 24, 40, 0.08)" }}>
             <div>
-              <span className="text-[14px] uppercase tracking-[0.05em] text-[#707070]">Initial state</span>
+              <span className="text-[12px] uppercase tracking-[0.05em] text-[#707070]">Initial state</span>
               <OfferingCard
                 type="coach-matching"
                 title="Free 1:1 session with an expert"
@@ -470,7 +470,7 @@ export default function OfferingCardTest() {
               />
             </div>
             <div>
-              <span className="text-[14px] uppercase tracking-[0.05em] text-[#707070]">Pending state</span>
+              <span className="text-[12px] uppercase tracking-[0.05em] text-[#707070]">Pending state</span>
               <OfferingCard
                 type="coach-matching"
                 pending
@@ -485,15 +485,15 @@ export default function OfferingCardTest() {
 
       {/* Leland+ Membership */}
       <section className="mt-10">
-        <h2 className="text-[24px] font-medium text-gray-dark">Leland+ Membership</h2>
-        <p className="mt-1 text-[18px] text-[#707070]">An active Leland+ subscription displayed in the customer's purchases.</p>
+        <h2 className="text-[22px] font-medium text-gray-dark">Leland+ Membership</h2>
+        <p className="mt-1 text-[16px] text-[#707070]">An active Leland+ subscription displayed in the customer's purchases.</p>
         <div
           className="mt-4 rounded-[32px] bg-[#F0F0F0] p-3"
           style={{ backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='32' ry='32' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")` }}
         >
           <div className="flex flex-col gap-4 rounded-[24px] bg-white px-6 py-5" style={{ boxShadow: "0 20px 24px -4px rgba(16, 24, 40, 0.08)" }}>
             <div>
-              <span className="text-[14px] uppercase tracking-[0.05em] text-[#707070]">Purchased</span>
+              <span className="text-[12px] uppercase tracking-[0.05em] text-[#707070]">Purchased</span>
               <OfferingCard
                 type="leland-plus"
                 title="Leland+ Membership"

@@ -83,7 +83,7 @@ export default function Sidebar() {
                     alt={label}
                     className={`h-[22px] w-[22px] shrink-0 ${isProfile ? `rounded-full object-cover${isActive ? " ring-[1.5px] ring-black" : ""}` : ""}`}
                   />
-                  <span className="hidden text-[18px] font-medium lg:block">{label}</span>
+                  <span className="hidden text-[16px] font-medium lg:block">{label}</span>
                 </>
               )}
             </NavLink>

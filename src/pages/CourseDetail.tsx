@@ -247,7 +247,7 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
       {/* Content */}
       <div className="min-w-0 flex-1" onClick={() => { if (!isCompleted) onMarkComplete?.(); }}>
         <div className="flex items-baseline justify-between gap-4">
-          <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">
+          <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">
             {session.number}. {session.title}
           </p>
           {session.duration && <p className="shrink-0 leading-[1.2] text-gray-xlight">{session.duration}</p>}
@@ -264,7 +264,7 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
         </p>
 
         {session.description && (
-          <p className="mt-2 text-[16px] leading-[1.4] text-gray-xlight">{session.description}</p>
+          <p className="mt-2 text-[14px] leading-[1.4] text-gray-xlight">{session.description}</p>
         )}
 
         {/* Links row — homework, watch recordings, join/starts-in */}
@@ -373,19 +373,19 @@ function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; 
         </div>
 
         <div className="min-[428px]:min-w-0 min-[428px]:flex-1 px-4 pt-4 pb-0 min-[428px]:px-0 min-[428px]:py-0 md:px-0 md:pt-4 md:pb-0">
-          <h1 className="text-[24px] font-medium leading-[1.1] text-gray-dark min-[428px]:line-clamp-2 md:line-clamp-none">
+          <h1 className="text-[22px] font-medium leading-[1.1] text-gray-dark min-[428px]:line-clamp-2 md:line-clamp-none">
             {course.title}
           </h1>
         </div>
 
         <div className="mt-5 px-4 min-[428px]:w-full min-[428px]:px-0 md:mt-5 md:w-auto md:px-0">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[16px]">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[14px]">
             <span className="flex items-center gap-x-2">
               <img src={calendarIcon} alt="" className="h-4 w-4 shrink-0" />
               <span className="font-medium text-gray-dark">{course.sessionCount} sessions</span>
               <span className="text-gray-light">{course.cohortDates}</span>
             </span>
-            <button className="text-left text-[16px] text-gray-xlight underline">Switch cohorts</button>
+            <button className="text-left text-[14px] text-gray-xlight underline">Switch cohorts</button>
           </div>
         </div>
       </div>
@@ -393,7 +393,7 @@ function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; 
       <div>
         {/* Resources — hidden on mobile, shown in Resources tab instead */}
         <div className="mt-4 hidden md:mt-6 md:block">
-          <p className="mb-2 text-[14px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">
+          <p className="mb-2 text-[12px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">
             Resources
           </p>
           <div className="flex flex-col">
@@ -401,7 +401,7 @@ function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; 
               <a
                 key={i}
                 href={resource.url}
-                target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+                target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[14px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
               >
                 <ResourceIcon type={resource.icon} />
                 <span>{resource.label}</span>
@@ -412,7 +412,7 @@ function CourseSidebar({ course, showSessionRecordings }: { course: CourseData; 
             ))}
             <a
               href="#"
-              className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+              className="flex w-full items-center gap-3 py-[10px] text-[14px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
             >
               <ResourceIcon type="gift" />
               <span>Refer your friends or team</span>
@@ -456,7 +456,7 @@ function ActionBanners({ course, phase, calendarVariant, sessionMaterial, banner
           <div className="flex items-center rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
             {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("homework")} asCheckbox />}
             <a href="#" className="flex-1 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
-              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">
+              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">
                 {sessionMaterial === "session-guide"
                   ? <>Review Session {lastCompleted?.number} <InlineChevron /></>
                   : <>Complete session {lastCompleted?.number} homework <InlineChevron /></>}
@@ -486,7 +486,7 @@ function ActionBanners({ course, phase, calendarVariant, sessionMaterial, banner
           <div className="flex items-center rounded-xl border border-gray-stroke bg-white p-5 shadow-card">
             {bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("certificate")} asCheckbox />}
             <a href="#" className="flex-1 no-underline transition-transform duration-300 ease-out hover:translate-x-1">
-              <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">Get your certificate <InlineChevron /></p>
+              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">Get your certificate <InlineChevron /></p>
               <p className="mt-1 leading-[1.2] text-gray-light">Complete a short course survey to unlock your certificate of completion.</p>
             </a>
             {!bannersHaveCheckbox && <DismissButton onDismiss={() => dismiss("certificate")} />}
@@ -571,7 +571,7 @@ export default function CourseDetail() {
                 onClick={() => setMobilePivotTab(tab)}
                 className={`relative shrink-0 cursor-pointer whitespace-nowrap px-3 py-3 transition-colors ${mobilePivotTab === tab ? "text-gray-dark" : "text-gray-light hover:text-gray-dark"}`}
               >
-                <span className="text-[18px] font-medium">
+                <span className="text-[16px] font-medium">
                   {tab === "sessions" ? "Sessions" : "Resources"}
                 </span>
                 {mobilePivotTab === tab && (
@@ -611,9 +611,9 @@ export default function CourseDetail() {
                     const displayItems = effectiveShowGetStarted ? allItems : allItems.filter(item => !completedSteps.has(item.id) || pendingHide.has(item.id));
                     return (<>
                   <div className="mb-2 flex items-center justify-between">
-                    <p className="text-[14px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">Getting started</p>
+                    <p className="text-[12px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">Getting started</p>
                     {completedItems.length > 0 && (
-                      <button onClick={() => setShowGetStarted(!effectiveShowGetStarted)} className="group flex cursor-pointer items-center gap-1 text-[14px] font-medium text-[#038561]">
+                      <button onClick={() => setShowGetStarted(!effectiveShowGetStarted)} className="group flex cursor-pointer items-center gap-1 text-[12px] font-medium text-[#038561]">
                         <span className="flex items-center gap-1 group-hover:underline">{effectiveShowGetStarted ? "Hide completed" : `Show ${completedItems.length} completed`} <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${effectiveShowGetStarted ? "rotate-180" : ""}`}><path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
                       </button>
                     )}
@@ -644,12 +644,12 @@ export default function CourseDetail() {
                           <div className="min-w-0 flex-1 pb-1" onClick={() => { if (!isDone) markDone(); }}>
                             {item.buttons ? (
                               <div>
-                                <p className={`text-[18px] font-medium leading-[1.2] ${isDone ? "text-gray-light" : "text-gray-dark"}`}>{item.title}</p>
+                                <p className={`text-[16px] font-medium leading-[1.2] ${isDone ? "text-gray-light" : "text-gray-dark"}`}>{item.title}</p>
                                 <p className="mt-1 leading-[1.2] text-gray-light">{item.description}</p>
                               </div>
                             ) : (
                               <a href="#" className="group block no-underline">
-                                <p className={`text-[18px] font-medium leading-[1.2] ${isDone ? "text-gray-light" : "text-gray-dark"}`}>{item.title} <InlineChevron /></p>
+                                <p className={`text-[16px] font-medium leading-[1.2] ${isDone ? "text-gray-light" : "text-gray-dark"}`}>{item.title} <InlineChevron /></p>
                                 <p className="mt-1 leading-[1.2] text-gray-light">{item.description}</p>
                               </a>
                             )}
@@ -669,9 +669,9 @@ export default function CourseDetail() {
                 </div>
                 {/* Desktop: Sessions header + "See all" text link */}
                 <div className="mb-2 mt-4 flex items-center justify-between border-t border-gray-stroke pt-4">
-                  <p className="text-[14px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">Sessions</p>
+                  <p className="text-[12px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">Sessions</p>
                   {checkedOffSessions.length > 0 && (
-                    <button onClick={() => setShowAllCompleted(!effectiveShowAllCompleted)} className="group flex cursor-pointer items-center gap-1 text-[14px] font-medium text-[#038561]">
+                    <button onClick={() => setShowAllCompleted(!effectiveShowAllCompleted)} className="group flex cursor-pointer items-center gap-1 text-[12px] font-medium text-[#038561]">
                       <span className="flex items-center gap-1 group-hover:underline">{effectiveShowAllCompleted ? "Hide completed" : `Show ${checkedOffSessions.length} completed`} <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${effectiveShowAllCompleted ? "rotate-180" : ""}`}><path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
                     </button>
                   )}
@@ -715,9 +715,9 @@ export default function CourseDetail() {
                   return (
                   <div>
                     <div className="mb-2 mt-4 flex items-center justify-between border-t border-gray-stroke pt-4">
-                      <p className="text-[14px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">What's next</p>
+                      <p className="text-[12px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">What's next</p>
                       {completedPostItems.length > 0 && (
-                        <button onClick={() => setShowAllPostSteps(!effectiveShowAllPostSteps)} className="group flex cursor-pointer items-center gap-1 text-[14px] font-medium text-[#038561]">
+                        <button onClick={() => setShowAllPostSteps(!effectiveShowAllPostSteps)} className="group flex cursor-pointer items-center gap-1 text-[12px] font-medium text-[#038561]">
                           <span className="flex items-center gap-1 group-hover:underline">{effectiveShowAllPostSteps ? "Hide completed" : `Show ${completedPostItems.length} completed`} <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${effectiveShowAllPostSteps ? "rotate-180" : ""}`}><path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
                         </button>
                       )}
@@ -753,12 +753,12 @@ export default function CourseDetail() {
                             <div className={`min-w-0 flex-1 pb-1 ${isLocked ? "" : ""}`} onClick={isLocked ? undefined : markDone}>
                               {isLocked ? (
                                 <div>
-                                  <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">{item.title}</p>
+                                  <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">{item.title}</p>
                                   <p className="mt-1 leading-[1.2] text-gray-light">Available after session {lastSession.number}</p>
                                 </div>
                               ) : (
                               <a href="#" className="group block no-underline">
-                                <p className={`text-[18px] font-medium leading-[1.2] ${isDone ? "text-gray-light" : "text-gray-dark"}`}>{item.title} <InlineChevron /></p>
+                                <p className={`text-[16px] font-medium leading-[1.2] ${isDone ? "text-gray-light" : "text-gray-dark"}`}>{item.title} <InlineChevron /></p>
                                 <p className="mt-1 leading-[1.2] text-gray-light">{item.description}</p>
                               </a>
                               )}
@@ -791,13 +791,13 @@ export default function CourseDetail() {
           {/* Resources — mobile only on resources tab */}
           <div className={`md:hidden ${mobilePivotTab !== "resources" ? "hidden" : ""}`}>
             <div className="pt-6">
-              <p className="mb-2 hidden text-[14px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light md:block">Resources</p>
+              <p className="mb-2 hidden text-[12px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light md:block">Resources</p>
               <div className="flex flex-col">
                 {course.resources.filter(r => !r.secondary && !(r.icon === "recording" && showSessionRecordings)).map((resource, i) => (
                   <a
                     key={i}
                     href={resource.url}
-                    target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+                    target="_blank" rel="noopener noreferrer" className="flex w-full items-center gap-3 py-[10px] text-[14px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
                   >
                     <ResourceIcon type={resource.icon} />
                     <span>{resource.label}</span>
@@ -808,7 +808,7 @@ export default function CourseDetail() {
                 ))}
                 <a
                   href="#"
-                  className="flex w-full items-center gap-3 py-[10px] text-[16px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
+                  className="flex w-full items-center gap-3 py-[10px] text-[14px] font-medium leading-[1.2] text-gray-dark no-underline transition-[padding] duration-300 ease-out hover:pl-[4px]"
                 >
                   <ResourceIcon type="gift" />
                   <span>Refer your friends or team</span>
@@ -829,7 +829,7 @@ export default function CourseDetail() {
           <div className="mb-2 w-[240px] rounded-xl border border-gray-stroke bg-white px-4 py-3 shadow-lg">
             {/* Toggles */}
             <div className="flex items-center justify-between">
-              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">Session-level recording links</p>
+              <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Session-level recording links</p>
               <button
                 onClick={() => setShowSessionRecordings(!showSessionRecordings)}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showSessionRecordings ? "bg-[#038561]" : "bg-gray-300"}`}
@@ -839,7 +839,7 @@ export default function CourseDetail() {
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">Multiple session times</p>
+              <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Multiple session times</p>
               <button
                 onClick={() => setMultipleSessionTimes(!multipleSessionTimes)}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${multipleSessionTimes ? "bg-[#038561]" : "bg-gray-300"}`}
@@ -849,7 +849,7 @@ export default function CourseDetail() {
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">Show action banners</p>
+              <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Show action banners</p>
               <button
                 onClick={() => setShowActionBanners(!showActionBanners)}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showActionBanners ? "bg-[#038561]" : "bg-gray-300"}`}
@@ -859,7 +859,7 @@ export default function CourseDetail() {
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">Session starting soon</p>
+              <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Session starting soon</p>
               <button
                 onClick={() => setSessionStartingSoon(!sessionStartingSoon)}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${sessionStartingSoon ? "bg-[#038561]" : "bg-gray-300"}`}
@@ -869,7 +869,7 @@ export default function CourseDetail() {
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-              <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">Banners have checkbox</p>
+              <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Banners have checkbox</p>
               <button
                 onClick={() => setBannersHaveCheckbox(!bannersHaveCheckbox)}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${bannersHaveCheckbox ? "bg-[#038561]" : "bg-gray-300"}`}
@@ -879,7 +879,7 @@ export default function CourseDetail() {
             </div>
 
             {/* Course phase */}
-            <p className="mb-2.5 mt-4 text-[14px] font-medium uppercase tracking-[0.5px] text-gray-light">Course phase</p>
+            <p className="mb-2.5 mt-4 text-[12px] font-medium uppercase tracking-[0.5px] text-gray-light">Course phase</p>
             <div className="flex flex-col gap-2">
               {coursePhases.map(({ value, label }) => (
                 <button
@@ -916,7 +916,7 @@ export default function CourseDetail() {
                       localStorage.setItem("completedPostSteps", JSON.stringify([]));
                     }
                   }}
-                  className="flex cursor-pointer items-center gap-2.5 text-[16px] leading-[1.2]"
+                  className="flex cursor-pointer items-center gap-2.5 text-[14px] leading-[1.2]"
                 >
                   <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${coursePhase === value ? "border-[#038561] bg-[#038561]" : "border-gray-300"}`}>
                     {coursePhase === value && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
@@ -930,13 +930,13 @@ export default function CourseDetail() {
 
             {/* Session materials */}
             <>
-              <p className="mb-2.5 mt-4 text-[14px] font-medium uppercase tracking-[0.5px] text-gray-light">Session materials</p>
+              <p className="mb-2.5 mt-4 text-[12px] font-medium uppercase tracking-[0.5px] text-gray-light">Session materials</p>
               <div className="flex flex-col gap-2">
                 {([{ value: "session-guide", label: "Session guide" }, { value: "homework", label: "Homework" }] as const).map(({ value, label }) => (
                   <button
                     key={value}
                     onClick={() => setSessionMaterial(value)}
-                    className="flex cursor-pointer items-center gap-2.5 text-[16px] leading-[1.2]"
+                    className="flex cursor-pointer items-center gap-2.5 text-[14px] leading-[1.2]"
                   >
                     <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${sessionMaterial === value ? "border-[#038561] bg-[#038561]" : "border-gray-300"}`}>
                       {sessionMaterial === value && <span className="h-1.5 w-1.5 rounded-full bg-white" />}

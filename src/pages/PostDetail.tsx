@@ -162,12 +162,12 @@ function AuthorRow({ post }: { post: Post }) {
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-[17px] font-medium leading-tight text-gray-dark">{post.author}</span>
+          <span className="text-[15px] font-medium leading-tight text-gray-dark">{post.author}</span>
           {post.verified ? <img src={verifiedIconSrc} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
-          <span className="shrink-0 text-[17px] leading-tight text-gray-xlight">{post.time}</span>
+          <span className="shrink-0 text-[15px] leading-tight text-gray-xlight">{post.time}</span>
         </div>
         {post.headline ? (
-          <p className="truncate text-[15px] leading-tight text-[#707070]">{post.headline}</p>
+          <p className="truncate text-[13px] leading-tight text-[#707070]">{post.headline}</p>
         ) : null}
       </div>
     </div>
@@ -284,8 +284,8 @@ function PostMedia({ post, onImageClick }: { post: Post; onImageClick?: (idx: nu
       <a href={post.link.url} target="_blank" rel="noreferrer" className="mt-3 block overflow-hidden rounded-xl border border-gray-stroke">
         <img src={post.link.image} alt="" className="h-[200px] w-full object-cover" />
         <div className="px-3 py-2.5">
-          <p className="text-[11px] uppercase tracking-wide text-gray-light">{post.link.domain}</p>
-          <p className="mt-0.5 text-[15px] font-semibold text-gray-dark">{post.link.title}</p>
+          <p className="text-[10px] uppercase tracking-wide text-gray-light">{post.link.domain}</p>
+          <p className="mt-0.5 text-[13px] font-semibold text-gray-dark">{post.link.title}</p>
         </div>
       </a>
     );
@@ -297,26 +297,26 @@ function PostMedia({ post, onImageClick }: { post: Post; onImageClick?: (idx: nu
       <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
         <div className="relative">
           <img src={event.image} alt="" className="h-[200px] w-full object-cover" />
-          <span className="absolute left-3 top-3 rounded-full bg-gray-100/90 px-2.5 py-0.5 text-[12px] font-semibold text-gray-dark backdrop-blur-sm">
+          <span className="absolute left-3 top-3 rounded-full bg-gray-100/90 px-2.5 py-0.5 text-[10px] font-semibold text-gray-dark backdrop-blur-sm">
             {event.format}
           </span>
         </div>
         <div className="px-4 py-4">
-          <h3 className="text-[17px] font-semibold text-gray-dark">{event.title}</h3>
+          <h3 className="text-[15px] font-semibold text-gray-dark">{event.title}</h3>
           <div className="mt-2 flex flex-col gap-1">
-            <div className="flex items-center gap-2 text-[14px] text-gray-light">
+            <div className="flex items-center gap-2 text-[12px] text-gray-light">
               <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               {event.date}
             </div>
-            <div className="flex items-center gap-2 text-[14px] text-gray-light">
+            <div className="flex items-center gap-2 text-[12px] text-gray-light">
               <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               {event.time}
             </div>
           </div>
           {event.spotsLeft != null ? (
-            <p className="mt-2 text-[13px] text-gray-light">{event.spotsLeft} spots remaining</p>
+            <p className="mt-2 text-[11px] text-gray-light">{event.spotsLeft} spots remaining</p>
           ) : null}
-          <button className="mt-3 w-full rounded-lg bg-gray-100 py-2.5 text-[15px] font-medium text-gray-dark hover:bg-gray-200">
+          <button className="mt-3 w-full rounded-lg bg-gray-100 py-2.5 text-[13px] font-medium text-gray-dark hover:bg-gray-200">
             Register for free
           </button>
         </div>
@@ -331,7 +331,7 @@ function PostMedia({ post, onImageClick }: { post: Post; onImageClick?: (idx: nu
         <div className="flex items-center gap-4">
           <div className="relative flex shrink-0 items-center">
             <div
-              className="relative z-0 flex h-14 w-14 items-center justify-center rounded-full text-[22px] font-bold text-white ring-2 ring-white"
+              className="relative z-0 flex h-14 w-14 items-center justify-center rounded-full text-[20px] font-bold text-white ring-2 ring-white"
               style={{ backgroundColor: milestone.schoolColor }}
             >
               {milestone.schoolInitial}
@@ -341,9 +341,9 @@ function PostMedia({ post, onImageClick }: { post: Post; onImageClick?: (idx: nu
             </div>
           </div>
           <div>
-            <p className="text-[13px] font-medium uppercase tracking-wide text-gray-light">Admitted</p>
-            <p className="text-[17px] font-semibold text-gray-dark">{milestone.school}</p>
-            <p className="text-[14px] text-gray-light">{milestone.program}</p>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-light">Admitted</p>
+            <p className="text-[15px] font-semibold text-gray-dark">{milestone.school}</p>
+            <p className="text-[12px] text-gray-light">{milestone.program}</p>
           </div>
         </div>
       </div>
@@ -365,7 +365,7 @@ function StatsRow({ post, onCommentFocus }: { post: Post; onCommentFocus: () => 
         className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover"
       >
         <img src={commentsIcon} alt="Comment" className="h-[22px] w-[22px] [filter:invert(44%)]" />
-        {post.comments > 0 && <span className="text-[15px] font-normal">{post.comments.toLocaleString()}</span>}
+        {post.comments > 0 && <span className="text-[13px] font-normal">{post.comments.toLocaleString()}</span>}
       </button>
       {/* Repost */}
       <FeedRepostButton initialCount={post.reposts} />
@@ -410,7 +410,7 @@ function ReplyInput({ onPost, onCancel }: { onPost: (text: string) => void; onCa
           }}
           placeholder="Write a reply…"
           rows={1}
-          className="flex-1 resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[16px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
+          className="flex-1 resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[14px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
           onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && text.trim()) { onPost(text.trim()); } }}
         />
         <AnimatePresence>
@@ -420,7 +420,7 @@ function ReplyInput({ onPost, onCancel }: { onPost: (text: string) => void; onCa
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.85 }}
               onClick={() => { onPost(text.trim()); }}
-              className="shrink-0 rounded-[8px] bg-gray-dark px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#222]"
+              className="shrink-0 rounded-[8px] bg-gray-dark px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#222]"
             >
               Reply
             </motion.button>
@@ -485,7 +485,7 @@ function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number
 
       <button
         onClick={handleClick}
-        className={`flex items-center gap-1 text-[13px] transition-colors ${liked ? "text-red-500" : "text-gray-light hover:text-gray-dark"}`}
+        className={`flex items-center gap-1 text-[11px] transition-colors ${liked ? "text-red-500" : "text-gray-light hover:text-gray-dark"}`}
       >
         <motion.svg
           className="h-3.5 w-3.5"
@@ -559,19 +559,19 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
         />
         <div className="min-w-0 flex-1 pb-2">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-[17px] font-medium text-gray-dark">{comment.author}</span>
-            <span className="text-[17px] leading-tight text-gray-xlight">· {comment.time}</span>
+            <span className="text-[15px] font-medium text-gray-dark">{comment.author}</span>
+            <span className="text-[15px] leading-tight text-gray-xlight">· {comment.time}</span>
           </div>
           {comment.headline ? (
-            <p className="truncate text-[15px] leading-tight text-[#707070]">{comment.headline}</p>
+            <p className="truncate text-[13px] leading-tight text-[#707070]">{comment.headline}</p>
           ) : null}
-          <p className="mt-0.5 text-[17px] leading-[1.4] text-gray-dark">{comment.text}</p>
+          <p className="mt-0.5 text-[15px] leading-[1.4] text-gray-dark">{comment.text}</p>
           <div className="mt-2 flex items-center gap-4">
             <HeartButton liked={liked} count={comment.likes + (liked ? 1 : 0)} onToggle={() => setLiked(l => !l)} />
             {depth === 0 ? (
               <button
                 onClick={() => setShowReply(s => !s)}
-                className="text-[13px] text-gray-light transition-colors hover:text-gray-dark"
+                className="text-[11px] text-gray-light transition-colors hover:text-gray-dark"
               >
                 Reply
               </button>
@@ -683,7 +683,7 @@ export default function PostDetail() {
   if (!post) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray-light">
-        <p className="text-[17px]">Post not found.</p>
+        <p className="text-[15px]">Post not found.</p>
         <button onClick={() => navigate(-1)} className="mt-4 text-primary hover:underline">
           ← Go back
         </button>
@@ -717,7 +717,7 @@ export default function PostDetail() {
         {/* Post */}
         <div className="pb-2">
           <AuthorRow post={post} />
-          <p className="mt-1 pl-[56px] text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
+          <p className="mt-1 pl-[56px] text-[15px] leading-[1.4] text-gray-dark">{post.body}</p>
           <div className="pl-[56px]"><PostMedia post={post} onImageClick={post.type === "image" ? setLightboxIndex : undefined} /></div>
           <div className="pl-[56px]"><StatsRow post={post} onCommentFocus={() => commentInputRef.current?.focus()} /></div>
         </div>
@@ -741,7 +741,7 @@ export default function PostDetail() {
               }}
               placeholder="Add a comment…"
               rows={1}
-              className="flex-1 resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[16px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
+              className="flex-1 resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[14px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
               onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
             />
             <AnimatePresence>
@@ -751,7 +751,7 @@ export default function PostDetail() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.85 }}
                   onClick={submitComment}
-                  className="shrink-0 rounded-[8px] bg-gray-dark px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#222]"
+                  className="shrink-0 rounded-[8px] bg-gray-dark px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#222]"
                 >
                   Post
                 </motion.button>

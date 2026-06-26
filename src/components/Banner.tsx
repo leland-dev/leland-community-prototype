@@ -36,7 +36,7 @@ export function Banner({ title, subtext, href, decoration, variant = "card", cla
 
   const decorationNode = decoration && (
     decoration.type === "emoji" ? (
-      <span className="shrink-0 text-[24px] leading-none">{decoration.value}</span>
+      <span className="shrink-0 text-[22px] leading-none">{decoration.value}</span>
     ) : (
       <img src={decoration.src} alt={decoration.alt ?? ""} className="h-6 w-6 shrink-0" />
     )
@@ -49,7 +49,7 @@ export function Banner({ title, subtext, href, decoration, variant = "card", cla
           {decorationNode}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[18px] font-medium leading-[1.2] text-gray-dark">
+          <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">
             {title} <InlineChevron />
           </p>
           {subtext && (
@@ -67,11 +67,11 @@ export function Banner({ title, subtext, href, decoration, variant = "card", cla
     >
       {decorationNode}
       <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-        <p className="shrink-0 text-[16px] font-medium leading-[1.2] text-gray-dark">
+        <p className="shrink-0 text-[14px] font-medium leading-[1.2] text-gray-dark">
           {title} <InlineChevron />
         </p>
         {subtext && (
-          <p className="text-[16px] leading-[1.2] text-gray-light">{subtext}</p>
+          <p className="text-[14px] leading-[1.2] text-gray-light">{subtext}</p>
         )}
       </div>
     </a>

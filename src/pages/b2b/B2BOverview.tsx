@@ -37,7 +37,7 @@ function FunnelStep({
             : "border-gray-stroke bg-white"
       }`}
     >
-      <div className={`mb-[10px] flex items-center gap-[6px] text-[11px] font-bold uppercase tracking-[0.07em] ${highlight ? "text-dark-green" : "text-gray-xlight"}`}>
+      <div className={`mb-[10px] flex items-center gap-[6px] text-[10px] font-bold uppercase tracking-[0.07em] ${highlight ? "text-dark-green" : "text-gray-xlight"}`}>
         <span
           className={`inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
             highlight ? "bg-[rgba(24,84,64,0.15)] text-dark-green" : "bg-gray-hover text-gray-xlight"
@@ -48,15 +48,15 @@ function FunnelStep({
         {label}
       </div>
       {extra || (
-        num && <div className={`text-[30px] font-bold leading-none ${highlight ? "text-dark-green" : "text-gray-dark"}`}>
+        num && <div className={`text-[28px] font-bold leading-none ${highlight ? "text-dark-green" : "text-gray-dark"}`}>
           {num}
         </div>
       )}
-      <div className={`mt-1 text-[12px] ${highlight ? "text-dark-green opacity-70" : "text-gray-light"}`}>
+      <div className={`mt-1 text-[10px] ${highlight ? "text-dark-green opacity-70" : "text-gray-light"}`}>
         {sub}
       </div>
       <div
-        className={`mt-2 inline-block rounded-full px-2 py-[2px] text-[11px] font-bold ${
+        className={`mt-2 inline-block rounded-full px-2 py-[2px] text-[10px] font-bold ${
           highlight ? "bg-[rgba(21,176,120,0.2)] text-primary" : "bg-primary-xlight text-dark-green"
         }`}
       >
@@ -68,7 +68,7 @@ function FunnelStep({
 
 function FunnelArrow() {
   return (
-    <div className="flex items-center justify-center text-[16px] text-[#D1D5DB]">&rsaquo;</div>
+    <div className="flex items-center justify-center text-[14px] text-[#D1D5DB]">&rsaquo;</div>
   );
 }
 
@@ -82,13 +82,13 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
     <>
       {/* Page header */}
       <div className="mb-5">
-        <h1 className="text-[40px] font-medium text-gray-dark">Overview</h1>
-        <p className="mt-2 text-[18px] text-[#707070]">Kellogg School of Management &middot; Contract Jan 2025 &ndash; Jun 2026</p>
+        <h1 className="text-[38px] font-medium text-gray-dark">Overview</h1>
+        <p className="mt-2 text-[16px] text-[#707070]">Kellogg School of Management &middot; Contract Jan 2025 &ndash; Jun 2026</p>
       </div>
 
       {/* ── 1:1 Sessions Section ── */}
       <div className="b2b-section-divider mb-5 mt-7 flex items-center gap-3">
-        <h2 className="whitespace-nowrap text-[15px] font-medium text-gray-dark">1:1 Sessions</h2>
+        <h2 className="whitespace-nowrap text-[13px] font-medium text-gray-dark">1:1 Sessions</h2>
       </div>
 
       {/* Funnel */}
@@ -109,8 +109,8 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
           pct="84% utilization"
           extra={
             <div className="flex items-baseline gap-2">
-              <span className="text-[30px] font-bold leading-none text-dark-green">251</span>
-              <span className="text-[18px] font-bold text-gray-xlight">/ 300</span>
+              <span className="text-[28px] font-bold leading-none text-dark-green">251</span>
+              <span className="text-[16px] font-bold text-gray-xlight">/ 300</span>
             </div>
           }
           onClick={() => goToUtil("completed")}
@@ -122,14 +122,14 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
         <Card
           header={
             <div>
-              <h2 className="text-[14px] font-medium text-gray-dark">Coaching Session Utilization</h2>
-              <p className="text-[12px] text-gray-light">Completed sessions by track</p>
+              <h2 className="text-[12px] font-medium text-gray-dark">Coaching Session Utilization</h2>
+              <p className="text-[10px] text-gray-light">Completed sessions by track</p>
             </div>
           }
           headerRight={
             <button
               onClick={() => onNavigate("utilization")}
-              className="inline-flex items-center gap-[6px] rounded-lg border border-gray-stroke bg-white px-[10px] py-[5px] text-[12px] font-semibold text-gray-dark hover:bg-gray-hover"
+              className="inline-flex items-center gap-[6px] rounded-lg border border-gray-stroke bg-white px-[10px] py-[5px] text-[10px] font-semibold text-gray-dark hover:bg-gray-hover"
             >
               Details
             </button>
@@ -145,19 +145,19 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
                 key={track.name}
                 className={`flex items-center gap-3 py-3 ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}
               >
-                <div className="flex w-[180px] shrink-0 items-center gap-2 text-[13px] font-medium">
+                <div className="flex w-[180px] shrink-0 items-center gap-2 text-[11px] font-medium">
                   <span className={`h-[7px] w-[7px] shrink-0 rounded-full ${track.dotColor}`} />
                   {track.name}
                 </div>
                 <ProgressBar percent={track.pct} color={track.barColor} />
-                <span className="w-[70px] shrink-0 text-right text-[12px] text-gray-light">{track.counts}</span>
+                <span className="w-[70px] shrink-0 text-right text-[10px] text-gray-light">{track.counts}</span>
               </div>
             ))}
             <div className="mt-1 flex items-center justify-between border-t border-gray-stroke pt-3">
-              <span className="text-[12px] text-gray-xlight">Total sessions</span>
-              <span className="text-[13px] font-bold text-gray-dark">
+              <span className="text-[10px] text-gray-xlight">Total sessions</span>
+              <span className="text-[11px] font-bold text-gray-dark">
                 191 / 250{" "}
-                <span className="text-[11px] font-bold text-primary">76%</span>
+                <span className="text-[10px] font-bold text-primary">76%</span>
               </span>
             </div>
           </div>
@@ -166,21 +166,21 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
 
       {/* ── Leland+ Section ── */}
       <div className="b2b-section-divider mb-5 mt-7 flex items-center gap-3">
-        <h2 className="whitespace-nowrap text-[15px] font-medium text-gray-dark">Leland+</h2>
+        <h2 className="whitespace-nowrap text-[13px] font-medium text-gray-dark">Leland+</h2>
       </div>
 
       <div className="mb-1 grid grid-cols-2 gap-4">
         <Card
           header={
             <div>
-              <h2 className="text-[14px] font-medium text-gray-dark">Activation &amp; Engagement</h2>
-              <p className="text-[12px] text-gray-light">Seats granted vs. activated</p>
+              <h2 className="text-[12px] font-medium text-gray-dark">Activation &amp; Engagement</h2>
+              <p className="text-[10px] text-gray-light">Seats granted vs. activated</p>
             </div>
           }
           headerRight={
             <button
               onClick={() => onNavigate("leland-plus")}
-              className="inline-flex items-center gap-[6px] rounded-lg border border-gray-stroke bg-white px-[10px] py-[5px] text-[12px] font-semibold text-gray-dark hover:bg-gray-hover"
+              className="inline-flex items-center gap-[6px] rounded-lg border border-gray-stroke bg-white px-[10px] py-[5px] text-[10px] font-semibold text-gray-dark hover:bg-gray-hover"
             >
               Details
             </button>
@@ -189,18 +189,18 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
           <div className="p-5">
             <div className="mb-4 grid grid-cols-3 gap-[10px]">
               {[
-                { value: <>42<span className="text-[13px] font-normal text-gray-light">/50</span></>, label: "Seats Activated", color: "text-dark-green" },
+                { value: <>42<span className="text-[11px] font-normal text-gray-light">/50</span></>, label: "Seats Activated", color: "text-dark-green" },
                 { value: "84%", label: "Activation Rate", color: "text-primary" },
                 { value: "12.4", label: "Avg Resources/User", color: "text-dark-green" },
               ].map((s) => (
                 <div key={s.label} className="rounded-[9px] bg-gray-hover p-3 text-center">
-                  <div className={`text-[22px] font-bold ${s.color}`}>{s.value}</div>
+                  <div className={`text-[20px] font-bold ${s.color}`}>{s.value}</div>
                   <div className="mt-[3px] text-[10px] uppercase tracking-[0.06em] text-gray-xlight">{s.label}</div>
                 </div>
               ))}
             </div>
             <div className="border-t border-gray-stroke pt-3">
-              <div className="mb-[10px] text-[11px] font-bold uppercase tracking-[0.07em] text-gray-xlight">Top content categories</div>
+              <div className="mb-[10px] text-[10px] font-bold uppercase tracking-[0.07em] text-gray-xlight">Top content categories</div>
               {[
                 { name: "Finance & PE", dotColor: "bg-orange", barColor: "bg-orange", pct: 68 },
                 { name: "Consulting", dotColor: "bg-blue", barColor: "bg-blue", pct: 54 },
@@ -210,7 +210,7 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
                   key={cat.name}
                   className={`flex items-center gap-3 py-[7px] ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}
                 >
-                  <div className="flex w-[140px] shrink-0 items-center gap-2 text-[12px] font-medium">
+                  <div className="flex w-[140px] shrink-0 items-center gap-2 text-[10px] font-medium">
                     <span className={`h-[7px] w-[7px] shrink-0 rounded-full ${cat.dotColor}`} />
                     {cat.name}
                   </div>
@@ -224,7 +224,7 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
 
       {/* ── Live Courses Section ── */}
       <div className="b2b-section-divider mb-5 mt-7 flex items-center gap-3">
-        <h2 className="whitespace-nowrap text-[15px] font-medium text-gray-dark">Live Courses</h2>
+        <h2 className="whitespace-nowrap text-[13px] font-medium text-gray-dark">Live Courses</h2>
       </div>
 
       <div className="mb-5 grid grid-cols-3 gap-4">
@@ -232,8 +232,8 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
         <Card
           header={
             <div>
-              <h2 className="text-[14px] font-medium text-gray-dark">AI Mastery</h2>
-              <p className="text-[12px] text-gray-light">Live course</p>
+              <h2 className="text-[12px] font-medium text-gray-dark">AI Mastery</h2>
+              <p className="text-[10px] text-gray-light">Live course</p>
             </div>
           }
           headerRight={<Pill variant="green">Active</Pill>}
@@ -241,11 +241,11 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
           <div className="p-5">
             <div className="mb-4 grid grid-cols-2 gap-[10px]">
               <div className="rounded-[9px] bg-gray-hover p-3 text-center">
-                <div className="text-[22px] font-bold text-dark-green">24<span className="text-[13px] font-normal text-gray-light">/30</span></div>
+                <div className="text-[20px] font-bold text-dark-green">24<span className="text-[11px] font-normal text-gray-light">/30</span></div>
                 <div className="mt-[3px] text-[10px] uppercase tracking-[0.06em] text-gray-xlight">Enrolled</div>
               </div>
               <div className="rounded-[9px] bg-gray-hover p-3 text-center">
-                <div className="text-[22px] font-bold text-primary">80%</div>
+                <div className="text-[20px] font-bold text-primary">80%</div>
                 <div className="mt-[3px] text-[10px] uppercase tracking-[0.06em] text-gray-xlight">Completion</div>
               </div>
             </div>
@@ -255,11 +255,11 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
               { label: "Not enrolled", dotColor: "bg-[#D1D5DB]", count: "6", countColor: "text-gray-light" },
             ].map((row, i, arr) => (
               <div key={row.label} className={`flex items-center py-[7px] ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}>
-                <div className="flex items-center gap-2 text-[12px] font-medium">
+                <div className="flex items-center gap-2 text-[10px] font-medium">
                   <span className={`h-[7px] w-[7px] shrink-0 rounded-full ${row.dotColor}`} />
                   {row.label}
                 </div>
-                <div className={`ml-auto text-[12px] font-semibold ${row.countColor}`}>{row.count}</div>
+                <div className={`ml-auto text-[10px] font-semibold ${row.countColor}`}>{row.count}</div>
               </div>
             ))}
           </div>
@@ -269,8 +269,8 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
         <Card
           header={
             <div>
-              <h2 className="text-[14px] font-medium text-gray-dark">Consulting Recruiting</h2>
-              <p className="text-[12px] text-gray-light">Live course</p>
+              <h2 className="text-[12px] font-medium text-gray-dark">Consulting Recruiting</h2>
+              <p className="text-[10px] text-gray-light">Live course</p>
             </div>
           }
           headerRight={<Pill variant="purple">Active</Pill>}
@@ -278,11 +278,11 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
           <div className="p-5">
             <div className="mb-4 grid grid-cols-2 gap-[10px]">
               <div className="rounded-[9px] bg-gray-hover p-3 text-center">
-                <div className="text-[22px] font-bold text-dark-green">18<span className="text-[13px] font-normal text-gray-light">/25</span></div>
+                <div className="text-[20px] font-bold text-dark-green">18<span className="text-[11px] font-normal text-gray-light">/25</span></div>
                 <div className="mt-[3px] text-[10px] uppercase tracking-[0.06em] text-gray-xlight">Enrolled</div>
               </div>
               <div className="rounded-[9px] bg-gray-hover p-3 text-center">
-                <div className="text-[22px] font-bold text-primary">72%</div>
+                <div className="text-[20px] font-bold text-primary">72%</div>
                 <div className="mt-[3px] text-[10px] uppercase tracking-[0.06em] text-gray-xlight">Completion</div>
               </div>
             </div>
@@ -292,11 +292,11 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
               { label: "Not enrolled", dotColor: "bg-[#D1D5DB]", count: "7", countColor: "text-gray-light" },
             ].map((row, i, arr) => (
               <div key={row.label} className={`flex items-center py-[7px] ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}>
-                <div className="flex items-center gap-2 text-[12px] font-medium">
+                <div className="flex items-center gap-2 text-[10px] font-medium">
                   <span className={`h-[7px] w-[7px] shrink-0 rounded-full ${row.dotColor}`} />
                   {row.label}
                 </div>
-                <div className={`ml-auto text-[12px] font-semibold ${row.countColor}`}>{row.count}</div>
+                <div className={`ml-auto text-[10px] font-semibold ${row.countColor}`}>{row.count}</div>
               </div>
             ))}
           </div>
@@ -306,8 +306,8 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
         <Card
           header={
             <div>
-              <h2 className="text-[14px] font-medium text-gray-dark">IB Recruiting</h2>
-              <p className="text-[12px] text-gray-light">Live course</p>
+              <h2 className="text-[12px] font-medium text-gray-dark">IB Recruiting</h2>
+              <p className="text-[10px] text-gray-light">Live course</p>
             </div>
           }
           headerRight={<Pill variant="orange">Starting Soon</Pill>}
@@ -315,11 +315,11 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
           <div className="p-5">
             <div className="mb-4 grid grid-cols-2 gap-[10px]">
               <div className="rounded-[9px] bg-gray-hover p-3 text-center">
-                <div className="text-[22px] font-bold text-dark-green">12<span className="text-[13px] font-normal text-gray-light">/20</span></div>
+                <div className="text-[20px] font-bold text-dark-green">12<span className="text-[11px] font-normal text-gray-light">/20</span></div>
                 <div className="mt-[3px] text-[10px] uppercase tracking-[0.06em] text-gray-xlight">Enrolled</div>
               </div>
               <div className="rounded-[9px] bg-gray-hover p-3 text-center">
-                <div className="text-[22px] font-bold text-orange">Mar 15</div>
+                <div className="text-[20px] font-bold text-orange">Mar 15</div>
                 <div className="mt-[3px] text-[10px] uppercase tracking-[0.06em] text-gray-xlight">Start Date</div>
               </div>
             </div>
@@ -328,16 +328,16 @@ export default function B2BOverview({ onNavigate, onSetUtilFilter }: Props) {
               { label: "Remaining seats", dotColor: "bg-[#D1D5DB]", count: "8", countColor: "text-gray-light" },
             ].map((row, i, arr) => (
               <div key={row.label} className={`flex items-center py-[7px] ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}>
-                <div className="flex items-center gap-2 text-[12px] font-medium">
+                <div className="flex items-center gap-2 text-[10px] font-medium">
                   <span className={`h-[7px] w-[7px] shrink-0 rounded-full ${row.dotColor}`} />
                   {row.label}
                 </div>
-                <div className={`ml-auto text-[12px] font-semibold ${row.countColor}`}>{row.count}</div>
+                <div className={`ml-auto text-[10px] font-semibold ${row.countColor}`}>{row.count}</div>
               </div>
             ))}
             <div className="mt-2 border-t border-gray-stroke pt-[10px]">
-              <span className="text-[12px] text-gray-xlight">Next session: </span>
-              <span className="text-[12px] font-bold text-gray-dark">Mar 15 &middot; Cohort 4</span>
+              <span className="text-[10px] text-gray-xlight">Next session: </span>
+              <span className="text-[10px] font-bold text-gray-dark">Mar 15 &middot; Cohort 4</span>
             </div>
           </div>
         </Card>

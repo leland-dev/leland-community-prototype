@@ -46,7 +46,7 @@ export default function MobilePreview({ url, onClose }: Props) {
           className="block h-full w-full border-0 bg-white"
         />
       </div>
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-medium text-gray-dark shadow">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-medium text-gray-dark shadow">
         Mobile preview · 393 × 813
       </div>
     </div>

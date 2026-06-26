@@ -181,7 +181,7 @@ export default function ChatPanel({
     <div className={frameClass}>
       {!hideHeader && (
         <div className="border-b border-gray-stroke px-5 py-4">
-          <div className="text-[16px] font-medium text-gray-dark">Chat</div>
+          <div className="text-[14px] font-medium text-gray-dark">Chat</div>
         </div>
       )}
 
@@ -197,7 +197,7 @@ export default function ChatPanel({
               <div className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#876C00]">
                 Pinned
               </div>
-              <div className="truncate text-[13px] text-gray-dark">
+              <div className="truncate text-[11px] text-gray-dark">
                 <span className="font-semibold">{pinned.author}: </span>
                 {pinned.body}
               </div>
@@ -281,10 +281,10 @@ export default function ChatPanel({
         <div className="flex items-start gap-2 border-t border-gray-stroke bg-[#FAFAFA] px-4 py-2">
           <span className="mt-1.5 inline-block h-3 w-[3px] shrink-0 rounded-full bg-[#038561]" />
           <div className="min-w-0 flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#038561]">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#038561]">
               Replying to {replyingTo.author}
             </div>
-            <div className="truncate text-[12px] text-gray-light">{replyingTo.body}</div>
+            <div className="truncate text-[10px] text-gray-light">{replyingTo.body}</div>
           </div>
           <button
             type="button"
@@ -308,7 +308,7 @@ export default function ChatPanel({
                 key={emoji}
                 type="button"
                 onClick={() => onReact(emoji)}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[18px] transition-transform hover:bg-gray-hover active:scale-90"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[16px] transition-transform hover:bg-gray-hover active:scale-90"
                 aria-label={`React with ${emoji}`}
               >
                 {emoji}
@@ -330,7 +330,7 @@ export default function ChatPanel({
             placeholder={inputPlaceholder}
             // 16px font is required on iOS to prevent Safari's auto-zoom on
             // focus. Bumped from 14px → 16px for mobile typeability.
-            className="min-w-0 flex-1 bg-transparent px-1 text-[16px] text-gray-dark placeholder:text-gray-light focus:outline-none lg:text-[14px]"
+            className="min-w-0 flex-1 bg-transparent px-1 text-[14px] text-gray-dark placeholder:text-gray-light focus:outline-none lg:text-[12px]"
           />
           {onReact && (
             <button
@@ -389,17 +389,17 @@ function MessageRow({
   //   - normal → 28px avatar, desktop right-rail top-level messages
   const avatarSize = large ? "h-9 w-9" : small ? "h-5 w-5" : "h-7 w-7";
   const nameClass = large
-    ? "text-[15px] font-medium text-gray-dark"
-    : "text-[14px] font-medium text-gray-dark";
+    ? "text-[13px] font-medium text-gray-dark"
+    : "text-[12px] font-medium text-gray-dark";
   const bodyClass = large
-    ? "mt-0.5 text-[15px] leading-[1.4] text-gray-dark"
-    : "mt-0.5 text-[14px] leading-[1.45] text-gray-dark";
+    ? "mt-0.5 text-[13px] leading-[1.4] text-gray-dark"
+    : "mt-0.5 text-[12px] leading-[1.45] text-gray-dark";
   const badgeClass = large
-    ? "rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em]"
+    ? "rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]"
     : "rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]";
   const replyClass = large
-    ? "ml-1 text-[13px] font-medium text-gray-light transition-opacity hover:text-gray-dark"
-    : "ml-1 text-[12px] font-medium text-gray-light opacity-0 transition-opacity hover:text-gray-dark group-hover:opacity-100";
+    ? "ml-1 text-[11px] font-medium text-gray-light transition-opacity hover:text-gray-dark"
+    : "ml-1 text-[10px] font-medium text-gray-light opacity-0 transition-opacity hover:text-gray-dark group-hover:opacity-100";
   return (
     <div className="group flex items-start gap-3">
       <img
@@ -488,12 +488,12 @@ function SystemNotice({ m }: { m: Message }) {
           className="h-7 w-7 shrink-0 rounded-full object-cover"
           style={{ objectPosition: "50% 15%" }}
         />
-        <div className="min-w-0 flex-1 text-[14px] leading-snug text-gray-dark">
+        <div className="min-w-0 flex-1 text-[12px] leading-snug text-gray-dark">
           {m.body}
         </div>
         <a
           href="#"
-          className="shrink-0 rounded-full bg-[#038561] px-3 py-1.5 text-[12px] font-semibold text-white no-underline transition-colors hover:bg-[#038561]/90"
+          className="shrink-0 rounded-full bg-[#038561] px-3 py-1.5 text-[10px] font-semibold text-white no-underline transition-colors hover:bg-[#038561]/90"
         >
           Book yours
         </a>
@@ -509,7 +509,7 @@ function SystemNotice({ m }: { m: Message }) {
         className="h-7 w-7 shrink-0 rounded-full object-cover"
         style={{ objectPosition: "50% 15%" }}
       />
-      <div className="text-[14px] text-gray-light">{m.body}</div>
+      <div className="text-[12px] text-gray-light">{m.body}</div>
     </div>
   );
 }

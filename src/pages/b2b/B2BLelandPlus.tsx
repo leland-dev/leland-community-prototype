@@ -31,12 +31,12 @@ export default function B2BLelandPlus({ onOpenModal }: { onOpenModal: (m: ModalI
     <>
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-[40px] font-medium text-gray-dark">Leland+</h1>
-          <p className="mt-[2px] text-[18px] text-[#707070]">Subscription access to courses, guides, templates &amp; resources</p>
+          <h1 className="text-[38px] font-medium text-gray-dark">Leland+</h1>
+          <p className="mt-[2px] text-[16px] text-[#707070]">Subscription access to courses, guides, templates &amp; resources</p>
         </div>
         <button
           onClick={() => onOpenModal("grant")}
-          className="inline-flex items-center gap-[6px] rounded-lg border border-primary bg-primary px-[14px] py-[7px] text-[13px] font-semibold text-white hover:bg-primary-hover"
+          className="inline-flex items-center gap-[6px] rounded-lg border border-primary bg-primary px-[14px] py-[7px] text-[11px] font-semibold text-white hover:bg-primary-hover"
         >
           <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
@@ -50,7 +50,7 @@ export default function B2BLelandPlus({ onOpenModal }: { onOpenModal: (m: ModalI
         <div className="flex flex-col gap-3">
           <StatCard
             label="Seats Activated"
-            value={<>42 <span className="text-[16px] font-bold text-gray-light">/ 50</span></>}
+            value={<>42 <span className="text-[14px] font-bold text-gray-light">/ 50</span></>}
             sub="84% activation rate"
             subColor="text-primary"
           />
@@ -59,8 +59,8 @@ export default function B2BLelandPlus({ onOpenModal }: { onOpenModal: (m: ModalI
         </div>
 
         <Card
-          header={<h2 className="text-[14px] font-medium text-gray-dark">Content Engagement by Category</h2>}
-          headerRight={<span className="text-[12px] text-gray-xlight">Last 30 days</span>}
+          header={<h2 className="text-[12px] font-medium text-gray-dark">Content Engagement by Category</h2>}
+          headerRight={<span className="text-[10px] text-gray-xlight">Last 30 days</span>}
         >
           <div className="p-5">
             {[
@@ -74,12 +74,12 @@ export default function B2BLelandPlus({ onOpenModal }: { onOpenModal: (m: ModalI
                 key={cat.name}
                 className={`flex items-center gap-3 py-3 ${i < arr.length - 1 ? "border-b border-gray-stroke" : ""}`}
               >
-                <div className="flex w-[180px] shrink-0 items-center gap-2 text-[13px] font-medium">
+                <div className="flex w-[180px] shrink-0 items-center gap-2 text-[11px] font-medium">
                   <span className={`h-[7px] w-[7px] shrink-0 rounded-full ${cat.dotColor}`} />
                   {cat.name}
                 </div>
                 <ProgressBar percent={cat.pct} color={cat.barColor} />
-                <span className="w-[70px] shrink-0 text-right text-[12px] text-gray-light">{cat.views}</span>
+                <span className="w-[70px] shrink-0 text-right text-[10px] text-gray-light">{cat.views}</span>
               </div>
             ))}
           </div>
@@ -88,9 +88,9 @@ export default function B2BLelandPlus({ onOpenModal }: { onOpenModal: (m: ModalI
 
       {/* Per-user table */}
       <Card
-        header={<h2 className="text-[14px] font-medium text-gray-dark">Per-User Breakdown</h2>}
+        header={<h2 className="text-[12px] font-medium text-gray-dark">Per-User Breakdown</h2>}
         headerRight={
-          <button className="inline-flex items-center gap-[6px] rounded-lg border border-gray-stroke bg-white px-[10px] py-[5px] text-[12px] font-semibold text-gray-dark hover:bg-gray-hover">
+          <button className="inline-flex items-center gap-[6px] rounded-lg border border-gray-stroke bg-white px-[10px] py-[5px] text-[10px] font-semibold text-gray-dark hover:bg-gray-hover">
             Export
           </button>
         }
@@ -103,11 +103,11 @@ export default function B2BLelandPlus({ onOpenModal }: { onOpenModal: (m: ModalI
           onFilter={setFilter}
         />
         <div className="overflow-x-auto">
-          <table className="b2b-table w-full border-collapse text-[13px]">
+          <table className="b2b-table w-full border-collapse text-[11px]">
             <thead>
               <tr>
                 {["User", "Status", "Granted", "Activated", "Resources Accessed", "Top Category", "Last Active", ""].map((h) => (
-                  <th key={h} className="whitespace-nowrap border-b border-gray-stroke bg-white px-[14px] py-[10px] text-left text-[11px] font-bold uppercase tracking-[0.06em] text-gray-xlight">
+                  <th key={h} className="whitespace-nowrap border-b border-gray-stroke bg-white px-[14px] py-[10px] text-left text-[10px] font-bold uppercase tracking-[0.06em] text-gray-xlight">
                     {h}
                   </th>
                 ))}
@@ -118,25 +118,25 @@ export default function B2BLelandPlus({ onOpenModal }: { onOpenModal: (m: ModalI
                 <tr key={i}>
                   <td className="border-b border-gray-hover px-[14px] py-[11px]">
                     <div className="font-medium text-gray-dark">{r.name}</div>
-                    <div className="text-[12px] text-gray-light">{r.email}</div>
+                    <div className="text-[10px] text-gray-light">{r.email}</div>
                   </td>
                   <td className="border-b border-gray-hover px-[14px] py-[11px]">
                     <Pill variant={r.status === "Active" ? "green" : "orange"}>{r.status}</Pill>
                   </td>
-                  <td className="border-b border-gray-hover px-[14px] py-[11px] text-[12px] text-gray-xlight">{r.granted}</td>
-                  <td className="border-b border-gray-hover px-[14px] py-[11px] text-[12px] text-gray-xlight">{r.activated}</td>
+                  <td className="border-b border-gray-hover px-[14px] py-[11px] text-[10px] text-gray-xlight">{r.granted}</td>
+                  <td className="border-b border-gray-hover px-[14px] py-[11px] text-[10px] text-gray-xlight">{r.activated}</td>
                   <td className="border-b border-gray-hover px-[14px] py-[11px]">
                     <span className="font-semibold">{r.resources}</span>
-                    <span className="text-[12px] text-gray-xlight"> resources</span>
+                    <span className="text-[10px] text-gray-xlight"> resources</span>
                   </td>
                   <td className="border-b border-gray-hover px-[14px] py-[11px]">
                     {r.topCategoryPill ? (
                       <Pill variant={r.topCategoryPill}>{r.topCategory}</Pill>
                     ) : (
-                      <span className="text-[12px] text-gray-xlight">{r.topCategory}</span>
+                      <span className="text-[10px] text-gray-xlight">{r.topCategory}</span>
                     )}
                   </td>
-                  <td className="border-b border-gray-hover px-[14px] py-[11px] text-[12px] text-gray-xlight">{r.lastActive}</td>
+                  <td className="border-b border-gray-hover px-[14px] py-[11px] text-[10px] text-gray-xlight">{r.lastActive}</td>
                   <td className="border-b border-gray-hover px-[14px] py-[11px]">
                     <ActionMenu
                       items={

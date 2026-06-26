@@ -40,7 +40,7 @@ export default function SubNavItem({
     >
       <button
         onClick={onClick}
-        className={`px-3 py-1.5 text-[15px] whitespace-nowrap transition-colors ${
+        className={`px-3 py-1.5 text-[13px] whitespace-nowrap transition-colors ${
           isActive ? "font-medium text-gray-dark" : "font-normal text-gray-light hover:text-gray-dark"
         }`}
       >
@@ -67,7 +67,7 @@ export default function SubNavItem({
                         onSubCategoryClick?.(cat);
                         setOpen(false);
                       }}
-                      className={`flex w-full rounded-lg px-3 py-2 text-left text-[14px] transition-colors ${
+                      className={`flex w-full rounded-lg px-3 py-2 text-left text-[12px] transition-colors ${
                         cat === activeSubCategory
                           ? "font-medium text-gray-dark"
                           : "font-normal text-gray-light hover:bg-gray-hover hover:text-gray-dark"

@@ -44,7 +44,7 @@ export default function CoachLayout() {
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[18px] font-medium transition-colors ${
+                `flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[16px] font-medium transition-colors ${
                   isActive
                     ? "bg-[#222222]/5 text-gray-dark"
                     : "text-gray-dark hover:bg-gray-hover"
@@ -59,7 +59,7 @@ export default function CoachLayout() {
 
         {/* Categories section */}
         <div className="mt-2 border-t border-gray-stroke pt-3">
-          <p className="px-3 pb-1 text-[12px] font-semibold uppercase tracking-[0.08em] text-[#999999]">
+          <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#999999]">
             Categories
           </p>
           <nav className="flex flex-col gap-1">
@@ -68,7 +68,7 @@ export default function CoachLayout() {
                 key={to}
                 to={to}
                 className={({ isActive }) =>
-                  `flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[18px] font-medium transition-colors ${
+                  `flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[16px] font-medium transition-colors ${
                     isActive
                       ? "bg-[#222222]/5 text-gray-dark"
                       : "text-gray-dark hover:bg-gray-hover"
@@ -83,7 +83,7 @@ export default function CoachLayout() {
                 <span className="truncate">{label}</span>
               </NavLink>
             ))}
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[18px] font-medium text-[#999999] transition-colors hover:bg-gray-hover hover:text-[#707070]">
+            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[16px] font-medium text-[#999999] transition-colors hover:bg-gray-hover hover:text-[#707070]">
               <img src={addPlusIcon} alt="" className="h-6 w-6 shrink-0 opacity-40" />
               Add category
             </button>

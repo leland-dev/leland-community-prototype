@@ -6,7 +6,7 @@
 // clash with a bright app on top of the player.
 export default function BuildScreen() {
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#0E0E0D] font-mono text-[12px] text-[#D6D5CE]">
+    <div className="relative h-full w-full overflow-hidden bg-[#0E0E0D] font-mono text-[10px] text-[#D6D5CE]">
       {/* Window chrome */}
       <div className="flex h-7 shrink-0 items-center gap-1.5 border-b border-white/10 bg-[#1A1A18] px-3">
         <span className="h-2 w-2 rounded-full bg-[#FF5F57]" />

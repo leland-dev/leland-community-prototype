@@ -28,7 +28,7 @@ export default function Notifications() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">
+        <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">
           Notifications
         </h1>
         <div className="relative" ref={menuRef}>
@@ -55,7 +55,7 @@ export default function Notifications() {
                 <div className="px-2 py-2">
                   <button
                     onClick={() => setMenuOpen(false)}
-                    className="flex w-full cursor-pointer items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                    className="flex w-full cursor-pointer items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                   >
                     <img src={checkIcon} alt="" className="h-6 w-6 shrink-0" />
                     Mark all as read
@@ -63,7 +63,7 @@ export default function Notifications() {
                   <Link
                     to="/settings?tab=notifications"
                     onClick={() => setMenuOpen(false)}
-                    className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                    className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                   >
                     <img src={settingsIcon} alt="" className="h-6 w-6 shrink-0" />
                     Notification settings

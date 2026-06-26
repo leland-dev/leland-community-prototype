@@ -77,7 +77,7 @@ function HashIcon() {
 
 function StarRating({ rating, count }: { rating: number; count: number }) {
   return (
-    <span className="inline-flex items-center gap-1 text-[16px] font-normal text-[#707070] align-middle">
+    <span className="inline-flex items-center gap-1 text-[14px] font-normal text-[#707070] align-middle">
       <span className="text-[#707070]">·</span>
       <svg width="14" height="14" viewBox="0 0 14 14" fill="#FFCB47" className="shrink-0">
         <path d="M7 1l1.8 3.65L13 5.3l-3 2.84.7 4.02L7 10.36 3.3 12.16l.7-4.02-3-2.84 4.2-.65L7 1z" />
@@ -94,9 +94,9 @@ export default function SidebarCardsTest() {
   return (
     <PageShell variant="thin">
       {/* Page header */}
-      <Link to="/components" className="inline-block rounded-[4px] border border-[#E5E5E5] bg-[#F5F5F5] px-2 py-1 text-[13px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-colors hover:bg-[#EBEBEB]">&lt;COMPONENT&gt;</Link>
-      <h1 className="mt-1 text-[40px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Sidebar Cards</h1>
-      <p className="mt-2 text-[18px] text-[#707070]">
+      <Link to="/components" className="inline-block rounded-[4px] border border-[#E5E5E5] bg-[#F5F5F5] px-2 py-1 text-[11px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-colors hover:bg-[#EBEBEB]">&lt;COMPONENT&gt;</Link>
+      <h1 className="mt-1 text-[38px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Sidebar Cards</h1>
+      <p className="mt-2 text-[16px] text-[#707070]">
         Reusable card components displayed in the right sidebar across various pages.
       </p>
 

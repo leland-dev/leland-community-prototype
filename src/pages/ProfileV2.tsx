@@ -568,10 +568,10 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
               transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               className="fixed top-0 left-0 right-0 z-30 border-b border-gray-stroke bg-white"
             >
-              <div className="mx-auto flex max-w-[1280px] items-stretch gap-4 px-6 py-2 transition-all duration-300 md:py-0">
+              <div className="mx-auto flex max-w-[1280px] items-stretch gap-4 px-6 transition-all duration-300">
                 {/* Left: photo + name + rate — click to scroll to top */}
                 <div
-                  className="flex shrink-0 cursor-pointer items-center gap-2.5"
+                  className="flex shrink-0 cursor-pointer items-center gap-2.5 py-3"
                   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
                   <img
@@ -579,8 +579,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     alt={profileName}
                     className="h-10 w-10 rounded-[4px] object-cover"
                   />
-                  <div className="flex flex-col text-[16px] leading-tight md:text-[16px]">
-                    <span className="text-[18px] font-medium text-gray-dark md:text-[16px]">{profileName}</span>
+                  <div className="flex flex-col text-[14px] leading-tight md:text-[14px]">
+                    <span className="text-[16px] font-medium text-gray-dark md:text-[14px]">{profileName}</span>
                     <span className="text-[#707070]">$150/hr</span>
                   </div>
                 </div>
@@ -599,9 +599,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                         key={section.id}
                         data-section={section.id}
                         onClick={() => scrollToSection(section.id)}
-                        className={`shrink-0 cursor-pointer border-b-2 px-3 pt-4 pb-4 text-[16px] font-medium transition-colors ${
+                        className={`shrink-0 cursor-pointer border-b-2 px-3 py-3 text-[15px] font-medium transition-colors ${
                           activeSection === section.id
-                            ? "border-[#038561] text-gray-dark"
+                            ? "border-gray-dark text-gray-dark"
                             : "border-transparent text-gray-light hover:text-gray-dark"
                         }`}
                       >
@@ -610,7 +610,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     ))}
                   </div>
                   <div className="flex items-center pl-4 md:hidden">
-                    <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                    <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#038561]/90">
                       Free intro call
                     </button>
                   </div>
@@ -709,7 +709,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
               </SidebarGroup>
             </div>
           ) : (
-            <div className="flex flex-col gap-6 transition-[padding] duration-300" style={{ paddingTop: stickyNavVisible ? 56 : 0 }}>
+            <div className="flex flex-col gap-6">
               {/* Video + Availability + CTA buttons */}
               <div className="flex flex-col" style={{ gap: 14 }}>
                 {/* Coach video — desktop sidebar */}
@@ -729,24 +729,24 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                         </svg>
                       </div>
                       <div>
-                        <p className="text-[16px] font-medium leading-tight text-white">Get to know me</p>
-                        <p className="text-[14px] leading-tight text-white/70">1:40</p>
+                        <p className="text-[14px] font-medium leading-tight text-white">Get to know me</p>
+                        <p className="text-[12px] leading-tight text-white/70">1:40</p>
                       </div>
                     </div>
                   </div>
                 )}
                 <div className="flex items-center justify-between rounded-lg border border-[#E5E5E5] bg-white px-5 py-4" style={{ boxShadow: "0px 1px 2px 0px rgba(16,24,40,0.05)" }}>
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[16px] leading-none font-medium text-gray-dark">Available today at 5:30pm</span>
-                    <span className="text-[16px] leading-none text-[#707070]">Usually responds within 12 hours</span>
+                    <span className="text-[14px] leading-none font-medium text-gray-dark">Available today at 5:30pm</span>
+                    <span className="text-[14px] leading-none text-[#707070]">Usually responds within 12 hours</span>
                   </div>
                   <span className="h-[12px] w-[12px] shrink-0 rounded-full bg-[#038561] animate-[pulse-ring_2.4s_ease-out_infinite]" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <button className="w-full cursor-pointer rounded-lg bg-[#038561] px-4 py-3 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                  <button className="w-full cursor-pointer rounded-full bg-leland-brand-primary px-4 py-[14px] text-[15px] font-medium text-gray-dark transition-colors hover:bg-leland-brand-primary/90">
                     Schedule a free intro call
                   </button>
-                  <button className="w-full cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                  <button className="w-full cursor-pointer rounded-full bg-[#222222]/5 px-4 py-[14px] text-[15px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                     Book a session
                   </button>
                 </div>
@@ -766,25 +766,25 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                       className="h-9 w-9 shrink-0 rounded-[4px] object-cover"
                     />
                     <div className="min-w-0">
-                      <p className="text-[16px] font-medium text-gray-dark">Note from {profileName.split(" ")[0]}</p>
+                      <p className="text-[14px] font-semibold text-gray-dark">Note from {profileName.split(" ")[0]}</p>
                       <div className="relative mt-0.5">
                         <motion.div
                           initial={false}
-                          animate={{ height: coachNoteExpanded ? "auto" : 66 }}
+                          animate={{ height: coachNoteExpanded ? "auto" : 58 }}
                           transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
                           className="overflow-hidden"
                         >
-                          <p className="text-[16px] leading-snug text-[#707070]">
+                          <p className="text-[14px] leading-snug text-[#707070]">
                             If you're looking for AI coaching, from fundamentals to building out more advanced agents and workflows, I'm taking on a few new folks for 1:1 productivity coaching for both your professional and personal life. Keeping up with the pace of development alone requires dedication. But we can bring your information together and rewire how you work. If you're looking for MBA application support, essay-writing, or other coaching, message me directly through Leland and I'll get right back to you.
                           </p>
                         </motion.div>
                         {!coachNoteExpanded && (
-                          <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[16px] leading-snug font-medium text-[#038561]">
+                          <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[14px] leading-snug font-medium text-[#038561]">
                             Read more
                           </span>
                         )}
                         {coachNoteExpanded && (
-                          <span className="mt-1 inline-block text-[16px] font-medium text-[#038561]">
+                          <span className="mt-1 inline-block text-[14px] font-medium text-[#038561]">
                             Read less
                           </span>
                         )}
@@ -799,23 +799,18 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     <img src={airplaneIcon} alt="" className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[16px] font-medium text-gray-dark">Questions?</p>
-                    <p className="mt-0.5 text-[16px] leading-snug text-[#707070]">
+                    <p className="text-[14px] font-semibold text-gray-dark">Questions?</p>
+                    <p className="mt-0.5 text-[14px] leading-snug text-[#707070]">
                       You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-[#038561]">Send a message</span>
                     </p>
                   </div>
                 </div>
 
-                {/* Guarantee — always at bottom */}
-                <div className="flex items-center justify-center gap-2 py-3 text-[14px] text-[#9b9b9b]">
-                  <img src={shieldIcon} alt="" className="w-[12px]" />
-                  <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
-                </div>
               </div>
 
             </div>
           )
-        ) : undefined} rightSidebarWidth={isCustomerProfile ? 300 : 340}>
+        ) : undefined} rightSidebarWidth={isCustomerProfile ? 300 : 340} rightSidebarTop={stickyNavVisible ? 76 : 20}>
         <div>
           {/* Cover image */}
           {showCoverImage && (
@@ -841,7 +836,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             </div>
             <div className={`flex items-center gap-2 ${showCoverImage ? "pb-1" : showGrayHeader ? "pb-[90px]" : "pb-1"}`}>
               {viewingOwnProfile ? (
-                <Link to="/settings?tab=account" className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
+                <Link to="/settings?tab=account" className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-colors ${
                   showCoverImage || !showGrayHeader
                     ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
                     : "border border-[#222222]/10 bg-white text-gray-dark hover:border-[#222222]/20"
@@ -853,7 +848,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 <>
                   <button
                     onClick={() => setIsFollowing(!isFollowing)}
-                    className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
+                    className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2.5 text-[14px] font-semibold transition-colors ${
                       isCustomerProfile
                         ? "bg-[#038561] text-white hover:bg-[#038561]/90"
                         : showCoverImage || !showGrayHeader
@@ -892,7 +887,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                             <button
                               key={item.label}
                               onClick={() => setMoreMenuOpen(false)}
-                              className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-[15px] font-medium transition-colors hover:bg-gray-hover ${
+                              className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-gray-hover ${
                                 "text-gray-dark"
                               }`}
                             >
@@ -914,20 +909,20 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
           {/* Name + Supercoach badge */}
           <div className={`flex items-center ${isCustomerProfile ? "gap-2" : sectionFilter === "All" ? "gap-2 mb-2" : "gap-1 mb-1"}`}>
-            <h1 className={`font-medium ${isCustomerProfile ? "text-[24px] text-gray-dark" : sectionFilter === "All" ? "text-[24px] text-[#333333]" : "text-[18px] text-gray-dark"}`}>{profileName}</h1>
+            <h1 className={`font-medium ${isCustomerProfile ? "text-[22px] text-gray-dark" : sectionFilter === "All" ? "font-serif text-[26px] text-[#333333]" : "text-[16px] text-gray-dark"}`}>{profileName}</h1>
             {!isCustomerProfile && (
               <img src={verifiedIcon} alt="Verified" className="mt-[2px] h-[16px] w-[16px]" />
             )}
             {showSupercoach && !isCustomerProfile && (
               <>
-                <span className="ml-1 text-[18px] text-[#999999]">·</span>
-                <span className="text-[18px] text-[#707070]"><span className="text-[16px]">🏆</span> Supercoach</span>
+                <span className="ml-1 text-[16px] text-[#999999]">·</span>
+                <span className="text-[16px] text-[#707070]"><span className="text-[14px]">🏆</span> Supercoach</span>
               </>
             )}
           </div>
 
           {/* Headline */}
-          <p className={`mb-[6px] leading-[1.3] ${isCustomerProfile ? "text-[18px] font-normal text-[#707070]" : "text-[24px] font-medium text-[#333333]"} ${!isCustomerProfile && sectionFilter === "All" ? "hidden" : ""}`}>
+          <p className={`mb-[6px] leading-[1.3] ${isCustomerProfile ? "text-[16px] font-normal text-[#707070]" : "font-serif text-[26px] font-medium text-[#333333]"} ${!isCustomerProfile && sectionFilter === "All" ? "hidden" : ""}`}>
             {isCustomerProfile
               ? "Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB"
               : sectionFilter === "College"
@@ -939,7 +934,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           </p>
 
           {/* Credentials row */}
-          {!isCustomerProfile && <div className="mb-1 flex flex-wrap items-center gap-x-[20px] gap-y-[2px] text-[16px] text-[#707070] md:mb-4">
+          {!isCustomerProfile && <div className="mb-1 flex flex-wrap items-center gap-x-[20px] gap-y-[2px] text-[14px] text-[#707070] md:mb-4">
             {/* Atlassian */}
             <div className="flex items-center gap-[6px]">
               <img src={atlassianLogo} alt="Atlassian" className="h-[18px] w-[18px] rounded" />
@@ -969,12 +964,12 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           {isCustomerProfile && (
             <div className="mt-3 flex flex-wrap items-center gap-4 md:hidden">
               <div className="flex items-baseline gap-1">
-                <span className="text-[18px] font-medium text-gray-dark">245</span>
-                <span className="text-[16px] text-[#707070]">followers</span>
+                <span className="text-[16px] font-medium text-gray-dark">245</span>
+                <span className="text-[14px] text-[#707070]">followers</span>
               </div>
               <div className="flex items-baseline gap-1">
-                <span className="text-[18px] font-medium text-gray-dark">8.2K</span>
-                <span className="text-[16px] text-[#707070]">impressions</span>
+                <span className="text-[16px] font-medium text-gray-dark">8.2K</span>
+                <span className="text-[14px] text-[#707070]">impressions</span>
               </div>
             </div>
           )}
@@ -983,18 +978,18 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           {isCustomerProfile && (
             <div className="mt-4 mb-2 hidden items-center gap-6 md:flex">
               <div className="flex flex-col gap-[2px]">
-                <span className="text-[20px] font-medium leading-none text-gray-dark">245</span>
-                <span className="text-[16px] leading-tight text-[#707070]">Followers</span>
+                <span className="text-[18px] font-medium leading-none text-gray-dark">245</span>
+                <span className="text-[14px] leading-tight text-[#707070]">Followers</span>
               </div>
               <div className="h-[24px] w-px shrink-0 bg-gray-200" />
               <div className="flex flex-col gap-[2px]">
-                <span className="text-[20px] font-medium leading-none text-gray-dark">1.6k</span>
-                <span className="text-[16px] leading-tight text-[#707070]">Likes</span>
+                <span className="text-[18px] font-medium leading-none text-gray-dark">1.6k</span>
+                <span className="text-[14px] leading-tight text-[#707070]">Likes</span>
               </div>
               <div className="h-[24px] w-px shrink-0 bg-gray-200" />
               <div className="flex flex-col gap-[2px]">
-                <span className="text-[20px] font-medium leading-none text-gray-dark">8.2k</span>
-                <span className="text-[16px] leading-tight text-[#707070]">Impressions</span>
+                <span className="text-[18px] font-medium leading-none text-gray-dark">8.2k</span>
+                <span className="text-[14px] leading-tight text-[#707070]">Impressions</span>
               </div>
             </div>
           )}
@@ -1007,7 +1002,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 <>
                   <div className="hidden items-center gap-[2px] md:flex">
                     <img src={wreathImg} alt="" className="h-[45px] w-[21px]" />
-                    <span className="text-center text-[18px] font-medium leading-[110%] text-gray-dark">Customer<br/>Favorite</span>
+                    <span className="text-center text-[16px] font-semibold leading-[110%] text-gray-dark">Customer<br/>Favorite</span>
                     <img src={wreathImg} alt="" className="h-[45px] w-[21px] scale-x-[-1]" />
                   </div>
                   <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
@@ -1019,28 +1014,28 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 onClick={() => scrollToSection("reviews")}
               >
                 <div className="flex items-center gap-1">
-                  <span className="text-[18px] font-medium leading-none text-gray-dark md:text-[20px]">4.9</span>
+                  <span className="text-[16px] font-semibold leading-none text-gray-dark md:text-[18px]">4.9</span>
                   <img src={starIcon} alt="" className="h-[16px] w-[16px]" />
                 </div>
-                <span className="text-[16px] leading-tight text-[#707070]">52 Reviews</span>
+                <span className="text-[14px] leading-tight text-[#707070]">52 Reviews</span>
               </div>
               <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
               {/* Minutes coached */}
               <div className="flex flex-col md:gap-[2px]">
-                <span className="text-[18px] font-medium leading-none text-gray-dark md:text-[20px]">6.6k</span>
-                <span className="text-[16px] leading-tight text-[#707070]">Min coached</span>
+                <span className="text-[16px] font-semibold leading-none text-gray-dark md:text-[18px]">6.6k</span>
+                <span className="text-[14px] leading-tight text-[#707070]">Min coached</span>
               </div>
               <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
               {/* Followers */}
               <div className="flex flex-col md:gap-[2px]">
-                <span className="text-[18px] font-medium leading-none text-gray-dark md:text-[20px]">84</span>
-                <span className="text-[16px] leading-tight text-[#707070]">Followers</span>
+                <span className="text-[16px] font-semibold leading-none text-gray-dark md:text-[18px]">84</span>
+                <span className="text-[14px] leading-tight text-[#707070]">Followers</span>
               </div>
               <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
               {/* Likes */}
               <div className="flex flex-col md:gap-[2px]">
-                <span className="text-[18px] font-medium leading-none text-gray-dark md:text-[20px]">1.6k</span>
-                <span className="text-[16px] leading-tight text-[#707070]">Likes</span>
+                <span className="text-[16px] font-semibold leading-none text-gray-dark md:text-[18px]">1.6k</span>
+                <span className="text-[14px] leading-tight text-[#707070]">Likes</span>
               </div>
               <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
               {/* Impressions — desktop only */}
@@ -1048,8 +1043,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 className="hidden cursor-pointer flex-col gap-[2px] transition-opacity hover:opacity-70 md:flex"
                 onClick={() => scrollToSection("activity")}
               >
-                <span className="text-[20px] font-medium leading-none text-gray-dark">8.5k</span>
-                <span className="text-[16px] leading-tight text-[#707070]">Impressions</span>
+                <span className="text-[18px] font-semibold leading-none text-gray-dark">8.5k</span>
+                <span className="text-[14px] leading-tight text-[#707070]">Impressions</span>
               </div>
             </div>
           )}
@@ -1062,7 +1057,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           {isCustomerProfile && (
             <div className="mt-3 flex flex-col gap-3 md:hidden">
               {viewingOwnProfile ? (
-                <Link to="/settings?tab=account" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                <Link to="/settings?tab=account" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                   <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
                   Edit profile
                 </Link>
@@ -1070,7 +1065,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsFollowing(!isFollowing)}
-                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#038561] px-6 py-3 text-[18px] font-medium text-white transition-colors hover:bg-[#038561]/90"
+                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#038561] px-6 py-3 text-[16px] font-semibold text-white transition-colors hover:bg-[#038561]/90"
                   >
                     {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px] brightness-0 invert" />}
                     {isFollowing ? "Following" : "Follow"}
@@ -1099,7 +1094,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                             <button
                               key={item.label}
                               onClick={() => setMoreMenuOpen(false)}
-                              className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-[15px] font-medium transition-colors hover:bg-gray-hover ${
+                              className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-gray-hover ${
                                 "text-gray-dark"
                               }`}
                             >
@@ -1121,10 +1116,10 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             <div className="mt-4 flex flex-col md:hidden">
               {/* CTA buttons */}
               <div className="flex flex-col gap-2">
-                <button className="w-full cursor-pointer rounded-lg bg-[#038561] px-4 py-[14px] text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                <button className="w-full cursor-pointer rounded-full bg-leland-brand-primary px-4 py-[14px] text-[15px] font-medium text-gray-dark transition-colors hover:bg-leland-brand-primary/90">
                   Schedule free intro call
                 </button>
-                <button className="w-full cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-[14px] text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                <button className="w-full cursor-pointer rounded-full bg-[#222222]/5 px-4 py-[14px] text-[15px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                   Book a session
                 </button>
               </div>
@@ -1138,8 +1133,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                       <img src={wreathSmallImg} alt="" className="w-8" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[16px] font-medium text-gray-dark">Customer Favorite</p>
-                      <p className="text-[16px] leading-snug text-[#707070]">In the top 10% of MBA experts on Leland</p>
+                      <p className="text-[14px] font-medium text-gray-dark">Customer Favorite</p>
+                      <p className="text-[14px] leading-snug text-[#707070]">In the top 10% of MBA experts on Leland</p>
                     </div>
                   </div>
                 )}
@@ -1150,8 +1145,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     <img src={calendarIcon} alt="" className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[16px] font-medium text-gray-dark">Available today at 5:30 PM</p>
-                    <p className="text-[16px] leading-snug text-[#707070]">Usually responds within 12h</p>
+                    <p className="text-[14px] font-medium text-gray-dark">Available today at 5:30 PM</p>
+                    <p className="text-[14px] leading-snug text-[#707070]">Usually responds within 12h</p>
                   </div>
                 </div>
 
@@ -1167,25 +1162,25 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                       className="mt-0.5 h-9 w-9 shrink-0 rounded-[4px] object-cover"
                     />
                     <div className="min-w-0">
-                      <p className="text-[16px] font-medium text-gray-dark">Note from {profileName.split(" ")[0]}</p>
+                      <p className="text-[14px] font-semibold text-gray-dark">Note from {profileName.split(" ")[0]}</p>
                       <div className="relative">
                         <motion.div
                           initial={false}
-                          animate={{ height: coachNoteExpanded ? "auto" : 66 }}
+                          animate={{ height: coachNoteExpanded ? "auto" : 58 }}
                           transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
                           className="overflow-hidden"
                         >
-                          <p className="text-[16px] leading-snug text-[#707070]">
+                          <p className="text-[14px] leading-snug text-[#707070]">
                             If you're looking for AI coaching, from fundamentals to building out more advanced agents and workflows, I'm taking on a few new folks for 1:1 productivity coaching for both your professional and personal life. Keeping up with the pace of development alone requires dedication. But we can bring your information together and rewire how you work. If you're looking for MBA application support, essay-writing, or other coaching, message me directly through Leland and I'll get right back to you.
                           </p>
                         </motion.div>
                         {!coachNoteExpanded && (
-                          <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[16px] leading-snug font-medium text-[#038561]">
+                          <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[14px] leading-snug font-medium text-[#038561]">
                             Read more
                           </span>
                         )}
                         {coachNoteExpanded && (
-                          <span className="mt-1 inline-block text-[16px] font-medium text-[#038561]">
+                          <span className="mt-1 inline-block text-[14px] font-medium text-[#038561]">
                             Read less
                           </span>
                         )}
@@ -1200,8 +1195,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     <img src={airplaneIcon} alt="" className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[16px] font-medium text-gray-dark">Questions?</p>
-                    <p className="text-[16px] leading-snug text-[#707070]">
+                    <p className="text-[14px] font-semibold text-gray-dark">Questions?</p>
+                    <p className="text-[14px] leading-snug text-[#707070]">
                       You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-[#038561]">Send a message</span>
                     </p>
                   </div>
@@ -1225,8 +1220,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                           </svg>
                         </div>
                         <div>
-                          <p className="text-[16px] font-medium leading-tight text-white">Get to know me</p>
-                          <p className="text-[14px] leading-tight text-white/70">1:40</p>
+                          <p className="text-[14px] font-medium leading-tight text-white">Get to know me</p>
+                          <p className="text-[12px] leading-tight text-white/70">1:40</p>
                         </div>
                       </div>
                     </div>
@@ -1239,7 +1234,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           {/* Mobile inline CTA — coach viewing own profile */}
           {!isCustomerProfile && viewingOwnProfile && (
             <div className="mt-3 md:hidden">
-              <Link to="/settings?tab=account" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[18px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+              <Link to="/settings?tab=account" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                 <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
                 Edit profile
               </Link>
@@ -1265,8 +1260,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 </div>
               </div>
               <div>
-                <p className="text-[16px] font-medium text-gray-dark">Get to know {profileName.split(" ")[0]}</p>
-                <p className="text-[16px] text-[#707070]">1:40</p>
+                <p className="text-[14px] font-medium text-gray-dark">Get to know {profileName.split(" ")[0]}</p>
+                <p className="text-[14px] text-[#707070]">1:40</p>
               </div>
             </div>
           )}
@@ -1284,12 +1279,12 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                   /* Inline category variant: "Offerings for {category}" */
                   <>
                   <div ref={setSectionRef("offerings")} className="scroll-mt-[60px] mb-4">
-                    <h2 className="mb-[18px] flex items-center gap-0 text-[24px] leading-[1.1] font-medium text-gray-dark">
+                    <h2 className="mb-[18px] flex items-center gap-0 text-[22px] leading-[1.1] font-medium text-gray-dark">
                       Offerings for{" "}
                       <span ref={categoryRef} className="relative ml-[6px]">
                         <button
                           onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                          className="group inline-flex cursor-pointer items-center gap-1 text-[24px] font-medium text-[#707070] transition-colors hover:text-[#222222]"
+                          className="group inline-flex cursor-pointer items-center gap-1 text-[22px] font-medium text-[#707070] transition-colors hover:text-[#222222]"
                         >
                           <span className="inline-block pb-[3px] -mb-[3px] bg-[length:4px_4px] bg-[position:0_100%] bg-repeat-x [background-image:radial-gradient(circle,#9B9B9B_1px,transparent_1px)]">
                             {sectionFilter === "All" ? "all categories" : (CATEGORY_ALIASES[sectionFilter] ?? sectionFilter)}
@@ -1309,7 +1304,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                                 <button
                                   key={value}
                                   onClick={() => { setSectionFilter(value); setCategoryDropdownOpen(false); }}
-                                  className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                                  className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
                                 >
                                   {label}
                                   {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
@@ -1326,7 +1321,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                       <button
                         key={tab}
                         onClick={() => setOfferingsType(tab)}
-                        className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+                        className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] ${
                           offeringsType === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
                         }`}
                       >
@@ -1339,7 +1334,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                   <>
                     <h2
                       ref={setSectionRef("offerings")}
-                      className="scroll-mt-[60px] mb-4 text-[24px] font-medium text-gray-dark"
+                      className="scroll-mt-[60px] mb-4 text-[22px] font-semibold text-gray-dark"
                     >
                       Offerings
                     </h2>
@@ -1350,7 +1345,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                           <button
                             key={tab}
                             onClick={() => setOfferingsType(tab)}
-                            className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+                            className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] ${
                               offeringsType === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
                             }`}
                           >
@@ -1361,7 +1356,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                       <div ref={categoryRef} className="relative">
                         <button
                           onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                          className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#ebebeb]"
+                          className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] transition-colors hover:bg-[#ebebeb]"
                         >
                           {sectionFilter === "All" ? "All categories" : sectionFilter}
                           <img src={chevronDownIcon} alt="" className={`h-[14px] w-[14px] transition-transform ${categoryDropdownOpen ? "rotate-180" : ""}`} />
@@ -1379,7 +1374,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                                 <button
                                   key={value}
                                   onClick={() => { setSectionFilter(value); setCategoryDropdownOpen(false); }}
-                                  className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                                  className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
                                 >
                                   {label}
                                   {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
@@ -1426,7 +1421,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[#D0D0D0] py-10 text-center">
-                      <p className="text-[16px] text-[#9B9B9B]">No memberships available yet</p>
+                      <p className="text-[14px] text-[#9B9B9B]">No memberships available yet</p>
                     </div>
                   );
                 })()}
@@ -1435,11 +1430,11 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 <div className="mt-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
                   <button
                     onClick={() => setAllOfferingsOpen(true)}
-                    className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                    className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
                   >
                     See all offerings
                   </button>
-                  <div className="flex items-center gap-2 text-[15px] text-[#9b9b9b]">
+                  <div className="flex items-center gap-2 text-[13px] text-[#9b9b9b]">
                     <img src={shieldIcon} alt="" className="w-[12px]" />
                     <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
                   </div>
@@ -1449,12 +1444,12 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             <div className="my-[36px] border-t border-gray-200" />
             {inlineCategory ? (
               <div className="mb-4">
-                <h2 className="mb-[12px] flex items-center gap-0 text-[24px] leading-[1.1] font-medium text-gray-dark">
+                <h2 className="mb-[12px] flex items-center gap-0 text-[22px] leading-[1.1] font-medium text-gray-dark">
                   Events for{" "}
                   <span ref={eventsCategoryRef} className="relative ml-[6px]">
                     <button
                       onClick={() => setEventsCategoryOpen(!eventsCategoryOpen)}
-                      className="group inline-flex cursor-pointer items-center gap-1 text-[24px] font-medium text-[#707070] transition-colors hover:text-[#222222]"
+                      className="group inline-flex cursor-pointer items-center gap-1 text-[22px] font-medium text-[#707070] transition-colors hover:text-[#222222]"
                     >
                       <span className="inline-block pb-[3px] -mb-[3px] bg-[length:4px_4px] bg-[position:0_100%] bg-repeat-x [background-image:radial-gradient(circle,#9B9B9B_1px,transparent_1px)]">
                         {sectionFilter === "All" ? "all categories" : (CATEGORY_ALIASES[sectionFilter] ?? sectionFilter)}
@@ -1474,7 +1469,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                             <button
                               key={value}
                               onClick={() => { setSectionFilter(value); setEventsCategoryOpen(false); }}
-                              className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                              className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
                             >
                               {label}
                               {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
@@ -1488,11 +1483,11 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
               </div>
             ) : (
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-[24px] font-medium text-gray-dark">Events</h2>
+                <h2 className="text-[22px] font-semibold text-gray-dark">Events</h2>
                 <div ref={eventsCategoryRef} className="relative">
                   <button
                     onClick={() => setEventsCategoryOpen(!eventsCategoryOpen)}
-                    className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#ebebeb]"
+                    className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] transition-colors hover:bg-[#ebebeb]"
                   >
                     {sectionFilter === "All" ? "All categories" : sectionFilter}
                     <img src={chevronDownIcon} alt="" className={`h-[14px] w-[14px] transition-transform ${eventsCategoryOpen ? "rotate-180" : ""}`} />
@@ -1510,7 +1505,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                           <button
                             key={value}
                             onClick={() => { setSectionFilter(value); setEventsCategoryOpen(false); }}
-                            className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                            className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
                           >
                             {label}
                             {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
@@ -1527,7 +1522,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
               <div className="h-[100px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
               <div className="h-[100px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
             </div>
-            <button className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+            <button className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
               See 2 more
               <img src={chevronDownIcon} alt="" className="h-[16px] w-[16px]" />
             </button>
@@ -1539,7 +1534,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             <div className="my-[36px] border-t border-gray-200" />
             <h2
               ref={setSectionRef("activity")}
-              className="scroll-mt-[60px] mb-4 text-[24px] font-medium text-gray-dark"
+              className="scroll-mt-[60px] mb-4 text-[22px] font-semibold text-gray-dark"
             >
               Activity
             </h2>
@@ -1548,7 +1543,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
               <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
               <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
             </div>
-            <button className="mt-4 cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+            <button className="mt-4 cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
               See all
             </button>
           </div>
@@ -1560,7 +1555,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
               <>
                 <h2
                   ref={setSectionRef("about-samantha")}
-                  className="scroll-mt-[60px] mb-4 text-[24px] font-medium text-gray-dark"
+                  className="scroll-mt-[60px] mb-4 text-[22px] font-semibold text-gray-dark"
                 >
                   {sectionFilter} Qualifications
                 </h2>
@@ -1573,11 +1568,11 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             ) : (
               <span ref={setSectionRef("about-samantha")} className="scroll-mt-[60px]" />
             )}
-            <h2 className="mb-4 text-[24px] font-medium text-gray-dark">About {coachConfig.firstName}</h2>
+            <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">About {coachConfig.firstName}</h2>
             <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
 
             <div className="my-[36px] border-t border-gray-200" />
-            <h2 className="mb-4 text-[24px] font-medium text-gray-dark">Why do I coach?</h2>
+            <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">Why do I coach?</h2>
             <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
           </div>
 
@@ -1586,7 +1581,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             <div className="my-[36px] border-t border-gray-200" />
             <h2
               ref={setSectionRef("work-experience")}
-              className="scroll-mt-[60px] mb-4 text-[24px] font-medium text-gray-dark"
+              className="scroll-mt-[60px] mb-4 text-[22px] font-semibold text-gray-dark"
             >
               Work Experience
             </h2>
@@ -1600,7 +1595,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             </div>
 
             <div className="my-[36px] border-t border-gray-200" />
-            <h2 className="mb-4 text-[24px] font-medium text-gray-dark">Education</h2>
+            <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">Education</h2>
             <div className="flex flex-col gap-4">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="flex gap-4">
@@ -1625,8 +1620,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
               ))}
             </div>
             <div className="flex flex-col items-start justify-between gap-1 md:flex-row md:items-end">
-              <p className="text-[28px] font-medium text-gray-dark">5.0 average review</p>
-              <p className="text-[16px] font-normal text-[#9b9b9b]">52 reviews</p>
+              <p className="text-[26px] font-semibold text-gray-dark">5.0 average review</p>
+              <p className="text-[14px] font-normal text-[#9b9b9b]">52 reviews</p>
             </div>
 
             <div className="my-5 border-t border-gray-200" />
@@ -1635,7 +1630,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             <div className="flex flex-col gap-4 md:grid md:grid-cols-5">
               {/* Overall rating distribution */}
               <div className="md:col-span-1">
-                <p className="mb-1 text-[16px] font-medium text-gray-dark">Overall rating</p>
+                <p className="mb-1 text-[14px] font-medium text-gray-dark">Overall rating</p>
                 <div className="flex flex-col gap-1">
                   {[
                     { star: 5, count: 48 },
@@ -1645,7 +1640,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     { star: 1, count: 0 },
                   ].map((row) => (
                     <div key={row.star} className="flex items-center gap-1.5">
-                      <span className="w-[10px] shrink-0 text-[12px] text-[#707070]">{row.star}</span>
+                      <span className="w-[10px] shrink-0 text-[10px] text-[#707070]">{row.star}</span>
                       <div className="h-[4px] flex-1 overflow-hidden rounded-full bg-[#e5e5e5]">
                         <div
                           className="h-full rounded-full bg-gray-dark"
@@ -1683,8 +1678,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 ].map((item) => (
                   <div key={item.label} className="flex w-[60vw] shrink-0 flex-col justify-between rounded-lg border border-gray-200 p-4 md:w-auto md:shrink md:rounded-none md:border-0 md:border-l md:p-0 md:pl-4">
                   <div>
-                    <p className="text-[16px] font-medium text-gray-dark">{item.label}</p>
-                    <p className="text-[24px] font-medium text-gray-dark">{item.score.toFixed(1)}</p>
+                    <p className="text-[14px] font-medium text-gray-dark">{item.label}</p>
+                    <p className="text-[22px] font-semibold text-gray-dark">{item.score.toFixed(1)}</p>
                   </div>
                   <div className="mt-3 text-gray-dark">{item.icon}</div>
                 </div>
@@ -1696,7 +1691,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
             {/* Successful clients at */}
             <div className="mb-6">
-              <p className="mb-1.5 text-[16px] font-medium text-gray-dark">Successful clients at</p>
+              <p className="mb-1.5 text-[14px] font-medium text-gray-dark">Successful clients at</p>
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex flex-wrap items-center gap-[4px]">
                   {[clientLogo1, clientLogo2, clientLogo3, clientLogo4, facebookLogo, googleLogo, instagramLogo, salesforceLogo, coinbaseLogo, mckinseyLogo, bainLogo, lekLogo, nikeLogo, goldmanSachsLogo].map((logo, i) => (
@@ -1704,10 +1699,10 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                       <img src={logo} alt="" className="h-full w-full object-cover" />
                     </div>
                   ))}
-                  <span className="flex h-[32px] items-center rounded-[2px] bg-[#f5f5f5] px-2 text-[14px] font-medium text-[#707070]">+12</span>
+                  <span className="flex h-[32px] items-center rounded-[2px] bg-[#f5f5f5] px-2 text-[12px] font-medium text-[#707070]">+12</span>
                 </div>
                 <div className="hidden flex-1 md:block" />
-                <button className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                <button className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                   See all
                 </button>
               </div>
@@ -1723,7 +1718,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             </div>
 
             {/* See all reviews */}
-            <button className="mt-6 cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+            <button className="mt-6 cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
               See all 52 reviews
             </button>
           </div>
@@ -1744,7 +1739,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                           : "text-gray-light hover:text-gray-dark"
                       }`}
                     >
-                      <span className="text-[18px] font-medium">{tab === "activity" ? "Overview" : tab === "about" ? "Activity" : tab === "calendar" ? "Calendar" : tab === "likes" ? "Likes" : "More"}</span>
+                      <span className="text-[16px] font-medium">{tab === "activity" ? "Overview" : tab === "about" ? "Activity" : tab === "calendar" ? "Calendar" : tab === "likes" ? "Likes" : "More"}</span>
                       {customerTab === tab && (
                         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#038561]" />
                       )}
@@ -1760,7 +1755,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                   <>
                     {/* Upcoming sessions */}
                     <section>
-                      <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>
+                      <h2 className="text-[22px] font-semibold text-gray-dark" style={{ fontWeight: 500 }}>
                         Upcoming sessions
                       </h2>
                       <div className="mt-3">
@@ -1772,7 +1767,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
                         <button
                           onClick={() => setCustomerTab("calendar")}
-                          className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                          className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
                         >
                           See full calendar
                         </button>
@@ -1781,7 +1776,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
                     {/* My Purchases */}
                     <section className="mt-12">
-                      <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>
+                      <h2 className="text-[22px] font-semibold text-gray-dark" style={{ fontWeight: 500 }}>
                         My purchases
                       </h2>
                       <div className="mt-4 flex flex-wrap gap-[6px]">
@@ -1789,7 +1784,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                           <button
                             key={tab}
                             onClick={() => { setPurchasesFilter(tab); setPurchasesExpanded(false); }}
-                            className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+                            className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] ${
                               purchasesFilter === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
                             }`}
                           >
@@ -1847,7 +1842,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                             {canTruncate && (
                               <button
                                 onClick={() => setPurchasesExpanded(!purchasesExpanded)}
-                                className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                                className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
                               >
                                 {purchasesExpanded ? "See less" : "See all"}
                                 <img src={chevronDownIcon} alt="" className={`h-[16px] w-[16px] transition-transform ${purchasesExpanded ? "rotate-180" : ""}`} />
@@ -1860,10 +1855,10 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
                     {/* My Goals */}
                     <section className="mt-12">
-                      <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>
+                      <h2 className="text-[22px] font-semibold text-gray-dark" style={{ fontWeight: 500 }}>
                         My Goals
                       </h2>
-                      <p className="text-[18px] text-[#707070]">Track your progress toward what matters most.</p>
+                      <p className="text-[16px] text-[#707070]">Track your progress toward what matters most.</p>
                       <div className="scrollbar-hide -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
                         {[0, 1].map((i) => (
                           <div key={i} className="h-[100px] w-[200px] shrink-0 snap-start rounded-xl bg-[#F5F5F5]" style={dashedBorderStyle} />
@@ -1888,7 +1883,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
                 {viewingOwnProfile && customerTab === "calendar" && (
                   <section>
-                    <h2 className="mb-3 text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>
+                    <h2 className="mb-3 text-[22px] font-semibold text-gray-dark" style={{ fontWeight: 500 }}>
                       Upcoming sessions
                     </h2>
                     <div>
@@ -1900,7 +1895,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
                       <button
                         onClick={() => setPastOpen(!pastOpen)}
-                        className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                        className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
                       >
                         {pastOpen ? "Hide past sessions" : "View past sessions"}
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${pastOpen ? "rotate-180" : ""}`}>
@@ -1923,7 +1918,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                               ))}
                             </div>
                             <button
-                              className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                              className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
                             >
                               Load more
                             </button>
@@ -1951,8 +1946,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                   <div className="flex flex-col gap-8">
                     {/* About */}
                     <section>
-                      <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>About</h2>
-                      <div className="mt-3 text-[18px] text-[#444]" style={{ lineHeight: "130%" }}>
+                      <h2 className="text-[22px] font-semibold text-gray-dark" style={{ fontWeight: 500 }}>About</h2>
+                      <div className="mt-3 text-[16px] text-[#444]" style={{ lineHeight: "130%" }}>
                         <p>
                           Product manager at Atlassian with 6+ years of experience building enterprise SaaS tools. Previously led growth initiatives at two early-stage startups, taking one from beta to 50K monthly active users. Yale graduate with a background in computer science and behavioral economics.
                         </p>
@@ -1967,14 +1962,14 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                         </LinkButton>
                         <div className="flex items-center gap-1.5">
                           <img src={eyeClosedIcon} alt="" className="h-[16px] w-[16px] shrink-0 brightness-0 opacity-45" />
-                          <span className="text-[16px] text-gray-light">Visible to experts you work with</span>
+                          <span className="text-[14px] text-gray-light">Visible to experts you work with</span>
                         </div>
                       </div>
                     </section>
 
                     {/* Groups */}
                     <section>
-                      <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Groups</h2>
+                      <h2 className="text-[22px] font-semibold text-gray-dark" style={{ fontWeight: 500 }}>Groups</h2>
                       <div className="mt-3 flex flex-col gap-1">
                         <GroupCard
                           name="AI BP April 26"
@@ -2055,7 +2050,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             >
               {!isCustomerProfile && (
                 <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                  <span className="text-[16px] font-medium text-gray-dark">Customer favorite</span>
+                  <span className="text-[14px] font-medium text-gray-dark">Customer favorite</span>
                   <div className="relative">
                     <input
                       type="checkbox"
@@ -2070,7 +2065,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
               )}
               {!isCustomerProfile && (
                 <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                  <span className="text-[16px] font-medium text-gray-dark">Coach video</span>
+                  <span className="text-[14px] font-medium text-gray-dark">Coach video</span>
                   <div className="relative">
                     <input
                       type="checkbox"
@@ -2084,7 +2079,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 </label>
               )}
               <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${showCoverImage ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
-                <span className="text-[16px] font-medium text-gray-dark">Gray header</span>
+                <span className="text-[14px] font-medium text-gray-dark">Gray header</span>
                 <div className="relative">
                   <input
                     type="checkbox"
@@ -2097,7 +2092,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 </div>
               </label>
               <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                <span className="text-[16px] font-medium text-gray-dark">Cover image</span>
+                <span className="text-[14px] font-medium text-gray-dark">Cover image</span>
                 <div className="relative">
                   <input
                     type="checkbox"
@@ -2111,7 +2106,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
               </label>
               {!isCustomerProfile && (
                 <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                  <span className="text-[16px] font-medium text-gray-dark">Coach note</span>
+                  <span className="text-[14px] font-medium text-gray-dark">Coach note</span>
                   <div className="relative">
                     <input
                       type="checkbox"
@@ -2126,7 +2121,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
               )}
               {!isCustomerProfile && (
                 <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                  <span className="text-[16px] font-medium text-gray-dark">Inline category selector</span>
+                  <span className="text-[14px] font-medium text-gray-dark">Inline category selector</span>
                   <div className="relative">
                     <input
                       type="checkbox"
@@ -2141,7 +2136,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
               )}
               {!isCustomerProfile && (
                 <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                  <span className="text-[16px] font-medium text-gray-dark">Supercoach</span>
+                  <span className="text-[14px] font-medium text-gray-dark">Supercoach</span>
                   <div className="relative">
                     <input
                       type="checkbox"
@@ -2155,7 +2150,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 </label>
               )}
               <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                <span className="text-[16px] font-medium text-gray-dark">Show sidebar</span>
+                <span className="text-[14px] font-medium text-gray-dark">Show sidebar</span>
                 <div className="relative">
                   <input
                     type="checkbox"
@@ -2168,7 +2163,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 </div>
               </label>
               <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                <span className="text-[16px] font-medium text-gray-dark">Viewing own profile</span>
+                <span className="text-[14px] font-medium text-gray-dark">Viewing own profile</span>
                 <div className="relative">
                   <input
                     type="checkbox"

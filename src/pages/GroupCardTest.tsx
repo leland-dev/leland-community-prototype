@@ -13,9 +13,9 @@ export default function GroupCardTest() {
   return (
     <PageShell variant="thin">
       {/* Page header */}
-      <Link to="/components" className="inline-block rounded-[4px] border border-[#E5E5E5] bg-[#F5F5F5] px-2 py-1 text-[13px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-colors hover:bg-[#EBEBEB]">&lt;COMPONENT&gt;</Link>
-      <h1 className="mt-1 text-[40px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Group Card</h1>
-      <p className="mt-2 text-[18px] text-[#707070]">
+      <Link to="/components" className="inline-block rounded-[4px] border border-[#E5E5E5] bg-[#F5F5F5] px-2 py-1 text-[11px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-colors hover:bg-[#EBEBEB]">&lt;COMPONENT&gt;</Link>
+      <h1 className="mt-1 text-[38px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Group Card</h1>
+      <p className="mt-2 text-[16px] text-[#707070]">
         A compact card component for displaying a user's group memberships with name, member count, and recent activity.
       </p>
 
@@ -53,19 +53,19 @@ export default function GroupCardTest() {
 
       {/* Sandbox controls */}
       <div className="mt-10">
-        <h2 className="text-[24px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Sandbox</h2>
-        <p className="mt-1 text-[16px] text-[#707070]">Toggle properties to preview different configurations.</p>
+        <h2 className="text-[22px] font-medium text-gray-dark" style={{ fontWeight: 500 }}>Sandbox</h2>
+        <p className="mt-1 text-[14px] text-[#707070]">Toggle properties to preview different configurations.</p>
 
         <div className="mt-6 flex flex-col gap-6">
           {/* Size */}
           <div>
-            <label className="text-[14px] font-medium uppercase tracking-[0.08em] text-[#9B9B9B]">Size</label>
+            <label className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#9B9B9B]">Size</label>
             <div className="mt-2 flex gap-2">
               {(["large", "small"] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => setSandboxSize(s)}
-                  className={`rounded-lg px-4 py-2 text-[14px] font-medium capitalize transition-colors ${
+                  className={`rounded-lg px-4 py-2 text-[12px] font-medium capitalize transition-colors ${
                     sandboxSize === s
                       ? "bg-gray-dark text-white"
                       : "bg-[#F5F5F5] text-gray-dark hover:bg-[#EBEBEB]"

@@ -23,7 +23,7 @@ function ThumbsPill() {
         aria-label="Thumbs up"
       >
         <ThumbsUp size={16} strokeWidth={2} />
-        <span className="text-[14px] font-semibold">3</span>
+        <span className="text-[12px] font-semibold">3</span>
       </button>
       <span className="h-5 w-px bg-gray-stroke" aria-hidden />
       <button
@@ -44,7 +44,7 @@ function ShareButton() {
       className="flex items-center gap-1.5 rounded-full bg-gray-hover px-4 py-2 text-gray-dark transition-colors hover:bg-gray-hover/60"
     >
       <img src={sharesIcon} alt="" className="h-4 w-4 [filter:invert(20%)]" />
-      <span className="text-[14px] font-semibold">Share</span>
+      <span className="text-[12px] font-semibold">Share</span>
     </button>
   );
 }
@@ -62,15 +62,15 @@ function TopBar({ session }: { session: Session }) {
   return (
     <div className="flex flex-col gap-2">
       {/* Program / level / session — bumped to 17px */}
-      <div className="text-[17px] text-gray-light">
+      <div className="text-[15px] text-gray-light">
         AI Builder Program Level 1 · Session {session.number}
       </div>
       {/* Title — big bold */}
-      <h1 className="text-[28px] font-medium leading-[1.05] text-gray-dark sm:text-[32px]">
+      <h1 className="text-[26px] font-medium leading-[1.05] text-gray-dark sm:text-[30px]">
         {session.title}
       </h1>
       {/* Date · time · duration · attendance — bumped to 17px */}
-      <div className="flex flex-wrap items-center gap-3 text-[17px] text-gray-light">
+      <div className="flex flex-wrap items-center gap-3 text-[15px] text-gray-light">
         <span>
           {dateLabel} · {timeLabel} PT
         </span>
@@ -93,7 +93,7 @@ function TabsNav({
   tabs: { id: Tab; label: string }[];
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 text-[14px] font-semibold">
+    <div className="flex flex-wrap items-center gap-2 text-[12px] font-semibold">
       {tabs.map((t) => {
         const active = tab === t.id;
         return (

@@ -81,7 +81,7 @@ function TabPill({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`flex shrink-0 items-center gap-1 rounded-full bg-gray-hover px-3 py-1.5 text-[13px] font-semibold transition-all ${
+      className={`flex shrink-0 items-center gap-1 rounded-full bg-gray-hover px-3 py-1.5 text-[11px] font-semibold transition-all ${
         active
           ? "text-gray-dark ring-2 ring-gray-dark"
           : "text-gray-light hover:text-gray-dark"
@@ -117,7 +117,7 @@ const VIEWERS: Viewer[] = [
 function ViewersPane() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-light">
+      <div className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-light">
         47 watching · 1 on stage
       </div>
       <ul className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
@@ -132,7 +132,7 @@ function ViewersPane() {
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1">
-                  <span className="truncate text-[13px] font-medium text-gray-dark">
+                  <span className="truncate text-[11px] font-medium text-gray-dark">
                     {v.name}
                   </span>
                   {v.coach && (
@@ -144,11 +144,11 @@ function ViewersPane() {
                   )}
                 </div>
                 {v.hostLabel && (
-                  <div className="text-[11px] text-gray-light">{v.hostLabel}</div>
+                  <div className="text-[10px] text-gray-light">{v.hostLabel}</div>
                 )}
               </div>
               {v.handRaised && (
-                <span className="shrink-0 text-[11px] font-medium text-gray-light">
+                <span className="shrink-0 text-[10px] font-medium text-gray-light">
                   Hand raised
                 </span>
               )}
@@ -200,12 +200,12 @@ function PollsPane() {
       <button
         type="button"
         onClick={() => setCreating(true)}
-        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-stroke px-3 py-2.5 text-[13px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
+        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-stroke px-3 py-2.5 text-[11px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
       >
         <Plus size={14} strokeWidth={2.25} />
         New poll
       </button>
-      <p className="mt-2 text-[11px] text-gray-light">
+      <p className="mt-2 text-[10px] text-gray-light">
         Coaches can post a poll any time. Replaces the current one.
       </p>
     </div>
@@ -219,10 +219,10 @@ function ActivePoll({ poll }: { poll: Poll }) {
         <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#038561]">
           Live poll
         </span>
-        <span className="text-[11px] text-gray-light">{poll.total} votes</span>
+        <span className="text-[10px] text-gray-light">{poll.total} votes</span>
       </div>
       <div className="px-3 py-3">
-        <h3 className="text-[14px] font-semibold text-gray-dark">{poll.question}</h3>
+        <h3 className="text-[12px] font-semibold text-gray-dark">{poll.question}</h3>
         <ul className="mt-3 flex flex-col gap-2">
           {poll.options.map((opt) => {
             const pct = poll.total > 0 ? Math.round((opt.votes / poll.total) * 100) : 0;
@@ -238,10 +238,10 @@ function ActivePoll({ poll }: { poll: Poll }) {
                     aria-hidden
                   />
                   <span className="relative flex items-center justify-between gap-2">
-                    <span className="text-[13px] font-medium text-gray-dark">
+                    <span className="text-[11px] font-medium text-gray-dark">
                       {opt.label}
                     </span>
-                    <span className="text-[12px] tabular-nums text-gray-light">
+                    <span className="text-[10px] tabular-nums text-gray-light">
                       {pct}%
                     </span>
                   </span>
@@ -299,7 +299,7 @@ function PollCreator({
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-[14px] font-semibold text-gray-dark">New poll</h3>
+        <h3 className="text-[12px] font-semibold text-gray-dark">New poll</h3>
         <button
           type="button"
           onClick={onCancel}
@@ -312,7 +312,7 @@ function PollCreator({
 
       {/* Question */}
       <label className="mt-3 block">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-light">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-light">
           Question
         </span>
         <input
@@ -321,19 +321,19 @@ function PollCreator({
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="What do you want to ask the room?"
           maxLength={140}
-          className="mt-1.5 w-full rounded-lg bg-gray-hover px-3 py-2 text-[14px] text-gray-dark placeholder:text-gray-light focus:outline-none focus:ring-2 focus:ring-gray-dark/10"
+          className="mt-1.5 w-full rounded-lg bg-gray-hover px-3 py-2 text-[12px] text-gray-dark placeholder:text-gray-light focus:outline-none focus:ring-2 focus:ring-gray-dark/10"
         />
       </label>
 
       {/* Options */}
       <div className="mt-4">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-light">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-light">
           Options
         </span>
         <ul className="mt-1.5 flex flex-col gap-2">
           {options.map((value, idx) => (
             <li key={idx} className="flex items-center gap-1.5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gray-hover text-[12px] font-semibold text-gray-light">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gray-hover text-[10px] font-semibold text-gray-light">
                 {idx + 1}
               </span>
               <input
@@ -342,7 +342,7 @@ function PollCreator({
                 onChange={(e) => updateOption(idx, e.target.value)}
                 placeholder={`Option ${idx + 1}`}
                 maxLength={80}
-                className="min-w-0 flex-1 rounded-lg bg-gray-hover px-3 py-2 text-[14px] text-gray-dark placeholder:text-gray-light focus:outline-none focus:ring-2 focus:ring-gray-dark/10"
+                className="min-w-0 flex-1 rounded-lg bg-gray-hover px-3 py-2 text-[12px] text-gray-dark placeholder:text-gray-light focus:outline-none focus:ring-2 focus:ring-gray-dark/10"
               />
               {options.length > MIN_POLL_OPTIONS && (
                 <button
@@ -361,7 +361,7 @@ function PollCreator({
           <button
             type="button"
             onClick={addOption}
-            className="mt-2 flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
+            className="mt-2 flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[10px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
           >
             <Plus size={13} strokeWidth={2.25} />
             Add option

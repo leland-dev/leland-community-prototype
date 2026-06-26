@@ -119,7 +119,7 @@ export default function TopNav() {
         {/* Left: Logo + Nav links */}
         <div className="flex items-stretch gap-1">
           <NavLink to="/" className="mr-4 flex shrink-0 items-center py-5">
-            <img src={lelandWordmark} alt="Leland" className="h-7 w-auto" />
+            <img src={lelandWordmark} alt="Leland" className="h-6 w-auto" />
           </NavLink>
 
           {!isCoachMode && (
@@ -132,7 +132,7 @@ export default function TopNav() {
               >
                 {({ isActive }) => (
                   <>
-                    <span className={`flex items-center rounded-lg px-3 py-2 text-[18px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                    <span className={`flex items-center rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-gray-hover" : ""}`}>
                       Home
                     </span>
                     {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
@@ -144,7 +144,7 @@ export default function TopNav() {
               <div ref={browseRef} className="relative flex self-stretch items-center">
                 <button
                   onClick={() => setBrowseOpen(!browseOpen)}
-                  className="flex items-center gap-1 rounded-lg px-3 py-2 text-[18px] font-medium whitespace-nowrap text-[#222222] hover:bg-gray-hover"
+                  className="flex items-center gap-1 rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222] hover:bg-gray-hover"
                 >
                   Browse
                   <svg
@@ -179,7 +179,7 @@ export default function TopNav() {
                             key={to}
                             to={to}
                             onClick={() => setBrowseOpen(false)}
-                            className="flex w-full items-center justify-between rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                            className="flex w-full items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                           >
                             {label}
                             <svg
@@ -215,7 +215,7 @@ export default function TopNav() {
                 >
                   {({ isActive }) => (
                     <>
-                      <span className={`flex items-center rounded-lg px-3 py-2 text-[18px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                      <span className={`flex items-center rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-gray-hover" : ""}`}>
                         {label}
                       </span>
                       {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
@@ -242,7 +242,7 @@ export default function TopNav() {
                     onFocus={() => setSearchFocused(true)}
                     onBlur={() => setSearchFocused(false)}
                     placeholder="Search..."
-                    className="w-40 bg-transparent text-[18px] font-medium text-[#222222] placeholder:font-normal placeholder:text-[#999999] outline-none"
+                    className="w-40 bg-transparent text-[15px] font-medium text-[#222222] placeholder:font-normal placeholder:text-[#999999] outline-none"
                   />
                 </form>
                 {searchFocused && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
@@ -315,7 +315,7 @@ export default function TopNav() {
                             key={label}
                             to={to}
                             onClick={() => setProfileOpen(false)}
-                            className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium transition-colors ${
+                            className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium transition-colors ${
                               danger
                                 ? "text-[#D92D20] hover:bg-gray-hover"
                                 : "text-gray-dark hover:bg-gray-hover"
@@ -334,7 +334,7 @@ export default function TopNav() {
                           <button
                             key={label}
                             onClick={() => setProfileOpen(false)}
-                            className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium transition-colors ${
+                            className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium transition-colors ${
                               danger
                                 ? "text-[#D92D20] hover:bg-gray-hover"
                                 : "text-gray-dark hover:bg-gray-hover"
@@ -352,10 +352,10 @@ export default function TopNav() {
 
                   {/* Admin controls */}
                   <div className="border-t border-gray-stroke px-2 py-2">
-                    <p className="px-3 pb-1 pt-2 text-[12px] font-semibold uppercase tracking-wide text-[#999999]">
+                    <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-[#999999]">
                       Admin Controls
                     </p>
-                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
                       Search bar
                       <button
                         type="button"
@@ -369,7 +369,7 @@ export default function TopNav() {
                         />
                       </button>
                     </label>
-                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
                       Sub-nav
                       <button
                         type="button"
@@ -383,7 +383,7 @@ export default function TopNav() {
                         />
                       </button>
                     </label>
-                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover">
+                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
                       Dark mode
                       <button
                         type="button"
@@ -400,7 +400,7 @@ export default function TopNav() {
                     <NavLink
                       to="/partner-dashboard"
                       onClick={() => setProfileOpen(false)}
-                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover"
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
                     >
                       <img src={browserIcon} alt="Partner dashboard" className="h-6 w-6 shrink-0" />
                       Partner dashboard
@@ -408,7 +408,7 @@ export default function TopNav() {
                     <NavLink
                       to="/components"
                       onClick={() => setProfileOpen(false)}
-                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark hover:bg-gray-hover"
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
                     >
                       <img src={codeIcon} alt="Components" className="h-6 w-6 shrink-0" />
                       Components

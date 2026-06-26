@@ -33,12 +33,12 @@ export default function SessionCoachCard({
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className="text-[15px] font-semibold text-gray-dark">{coach.name}</span>
+          <span className="text-[13px] font-semibold text-gray-dark">{coach.name}</span>
           <Star size={13} className="fill-[#F5B729] text-[#F5B729]" />
-          <span className="text-[13px] font-medium text-gray-dark">{rating.toFixed(1)}</span>
-          <span className="text-[13px] text-gray-light">({ratingCount})</span>
+          <span className="text-[11px] font-medium text-gray-dark">{rating.toFixed(1)}</span>
+          <span className="text-[11px] text-gray-light">({ratingCount})</span>
         </div>
-        <div className="truncate text-[13px] text-gray-light">{subtitle}</div>
+        <div className="truncate text-[11px] text-gray-light">{subtitle}</div>
       </div>
       <div className="flex shrink-0 items-center gap-2">
         <Button size="sm" variant="secondary" rounded="rounded-full">

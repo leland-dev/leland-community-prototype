@@ -81,7 +81,7 @@ export default function B2BTopNav({
                   {isOnSettings ? (
                     <button
                       onClick={() => { setProfileOpen(false); onNavigateDashboard?.(); }}
-                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                     >
                       <img src={layoutGridIcon} alt="Overview" className="h-6 w-6 shrink-0" />
                       Overview
@@ -89,7 +89,7 @@ export default function B2BTopNav({
                   ) : (
                     <button
                       onClick={() => { setProfileOpen(false); onNavigateSettings?.(); }}
-                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                     >
                       <img src={settingsIcon} alt="Admin Settings" className="h-6 w-6 shrink-0" />
                       Admin Settings
@@ -107,7 +107,7 @@ export default function B2BTopNav({
                           key={label}
                           to={to}
                           onClick={() => setProfileOpen(false)}
-                          className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium transition-colors ${
+                          className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium transition-colors ${
                             danger
                               ? "text-[#D92D20] hover:bg-gray-hover"
                               : "text-gray-dark hover:bg-gray-hover"
@@ -126,7 +126,7 @@ export default function B2BTopNav({
                         <button
                           key={label}
                           onClick={() => setProfileOpen(false)}
-                          className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium transition-colors ${
+                          className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium transition-colors ${
                             danger
                               ? "text-[#D92D20] hover:bg-gray-hover"
                               : "text-gray-dark hover:bg-gray-hover"

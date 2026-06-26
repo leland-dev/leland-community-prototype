@@ -643,7 +643,7 @@ export function FeedLikeButton({ initialCount }: { initialCount: number }) {
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
         </motion.svg>
         <motion.span
-          className="text-[15px] font-normal"
+          className="text-[13px] font-normal"
           animate={liked ? { scale: [1, 1.4, 1] } : { scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
@@ -699,7 +699,7 @@ export function ShareDropdown({ postId, onClose }: { postId: number; onClose: ()
         {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1.5 w-12 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
         <div className={isMobile ? "px-3 pt-1 pb-3" : "px-2 py-2"}>
           {/* Copy link */}
-          <button onClick={copyLink} className={`flex w-full items-center gap-3 rounded-lg font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"}`}>
+          <button onClick={copyLink} className={`flex w-full items-center gap-3 rounded-lg font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
             {copied ? (
               <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0 text-primary`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             ) : (
@@ -708,12 +708,12 @@ export function ShareDropdown({ postId, onClose }: { postId: number; onClose: ()
             {copied ? "Copied!" : "Copy link"}
           </button>
           {/* LinkedIn */}
-          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className={`flex w-full items-center gap-3 rounded-lg font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"}`}>
+          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className={`flex w-full items-center gap-3 rounded-lg font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
             <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0 rounded-[3px]`} viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
             LinkedIn
           </a>
           {/* Twitter/X */}
-          <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className={`flex w-full items-center gap-3 rounded-lg font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"}`}>
+          <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className={`flex w-full items-center gap-3 rounded-lg font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
             <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             Twitter / X
           </a>
@@ -781,7 +781,7 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
           transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
         />
         <motion.span
-          className="text-[15px] font-normal"
+          className="text-[13px] font-normal"
           animate={reposted && burst ? { scale: [1, 1.4, 1] } : { scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
@@ -812,17 +812,17 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
             >
               {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1.5 w-12 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
               <div className={isMobile ? "px-3 pt-1 pb-3" : "px-2 py-2"}>
-                <button onClick={triggerRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"}`}>
+                <button onClick={triggerRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
                   <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   Repost with your thoughts
                 </button>
                 {reposted ? (
-                  <button onClick={undoRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"}`}>
+                  <button onClick={undoRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
                     <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
                     Undo repost
                   </button>
                 ) : (
-                  <button onClick={triggerRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"}`}>
+                  <button onClick={triggerRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
                     <img src={repostsIcon} alt="Repost" className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0 [filter:invert(44%)]`} />
                     Repost to feed
                   </button>
@@ -849,7 +849,7 @@ function ActionBar({ likes, comments, reposts, postId }: { likes: number; commen
       {/* Comment */}
       <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`/post/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
         <img src={commentsIcon} alt="Comment" className="h-[22px] w-[22px] [filter:invert(44%)]" />
-        {comments > 0 && <span className="text-[15px] font-normal">{formatCount(comments)}</span>}
+        {comments > 0 && <span className="text-[13px] font-normal">{formatCount(comments)}</span>}
       </button>
       {/* Repost */}
       <FeedRepostButton initialCount={reposts} />
@@ -933,23 +933,23 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
           <Link
             to={isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `${verified ? "/coach-profile" : "/profile-v2"}`}
             onClick={(e) => e.stopPropagation()}
-            className="cursor-pointer truncate text-[17px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50"
+            className="cursor-pointer truncate text-[15px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50"
           >{author}</Link>
           {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
-          <span className="shrink-0 text-[17px] leading-tight text-gray-xlight">{time}</span>
+          <span className="shrink-0 text-[15px] leading-tight text-gray-xlight">{time}</span>
         </div>
         {groupPoster ? (
           <div className="mt-[3px] flex items-center gap-1.5">
             {!groupPoster.overlay && (
               <img src={groupPoster.avatar} alt={groupPoster.name} className="h-[18px] w-[18px] rounded-full object-cover shrink-0" />
             )}
-            <Link to="/profile-v2?type=customer" onClick={(e) => e.stopPropagation()} className="text-[15px] leading-tight text-[#707070] hover:underline hover:decoration-[1px] hover:underline-offset-[2px]">
+            <Link to="/profile-v2?type=customer" onClick={(e) => e.stopPropagation()} className="text-[13px] leading-tight text-[#707070] hover:underline hover:decoration-[1px] hover:underline-offset-[2px]">
               {groupPoster.name}
             </Link>
-            {groupPoster.headline && <span className="truncate text-[15px] leading-tight text-[#a3a3a3]">· {groupPoster.headline}</span>}
+            {groupPoster.headline && <span className="truncate text-[13px] leading-tight text-[#a3a3a3]">· {groupPoster.headline}</span>}
           </div>
         ) : headline ? (
-          <p className="truncate text-[15px] leading-tight text-[#707070]">{headline}</p>
+          <p className="truncate text-[13px] leading-tight text-[#707070]">{headline}</p>
         ) : null}
       </div>
       <div className="flex shrink-0 items-start gap-1">
@@ -957,7 +957,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
           <Link
             to={`/groups/${FEEDS.find(f => f.label === feed)?.id ?? feed.toLowerCase().replace(/\s+/g, "-")}`}
             onClick={(e) => e.stopPropagation()}
-            className="mt-0.5 text-[15px] leading-none text-gray-xlight hover:text-[#707070] transition-colors"
+            className="mt-0.5 text-[13px] leading-none text-gray-xlight hover:text-[#707070] transition-colors"
           >
             {feed}
           </Link>
@@ -996,7 +996,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
                         <button
                           key={label}
                           onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onClick?.(); }}
-                          className={`flex w-full items-center gap-3 rounded-lg text-left font-medium transition-colors hover:bg-gray-hover ${isMobile ? "p-4 text-[17px]" : "p-3 text-[16px]"} ${
+                          className={`flex w-full items-center gap-3 rounded-lg text-left font-medium transition-colors hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"} ${
                             danger ? "text-[#D92D20]" : "text-gray-dark"
                           }`}
                         >
@@ -1153,8 +1153,8 @@ function LinkCard({ link }: { link: LinkPost["link"] }) {
         />
       </div>
       <div className="px-4 py-3">
-        <p className="text-[13px] text-gray-light">{link.domain}</p>
-        <p className="mt-0.5 text-[15px] font-medium text-gray-dark leading-snug">{link.title}</p>
+        <p className="text-[11px] text-gray-light">{link.domain}</p>
+        <p className="mt-0.5 text-[13px] font-medium text-gray-dark leading-snug">{link.title}</p>
       </div>
     </a>
   );
@@ -1167,15 +1167,15 @@ function EventCard({ event }: { event: EventPost["event"] }) {
         <img src={event.image} alt={event.title} className="aspect-[1200/628] w-full object-cover" />
       </div>
       <div className="px-4 py-4">
-        <p className="text-[17px] font-medium leading-snug text-gray-dark">{event.title}</p>
+        <p className="text-[15px] font-medium leading-snug text-gray-dark">{event.title}</p>
         <div className="mt-2 space-y-1">
-          <div className="flex items-center gap-2 text-[15px] text-gray-light">
+          <div className="flex items-center gap-2 text-[13px] text-gray-light">
             <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
             <span>{event.date}</span>
           </div>
-          <div className="flex items-center gap-2 text-[15px] text-gray-light">
+          <div className="flex items-center gap-2 text-[13px] text-gray-light">
             <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
@@ -1183,7 +1183,7 @@ function EventCard({ event }: { event: EventPost["event"] }) {
           </div>
           {(event.registered !== undefined || event.spotsLeft !== undefined) && (
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-[15px] text-gray-light">
+              <div className="flex items-center gap-2 text-[13px] text-gray-light">
                 <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
@@ -1192,7 +1192,7 @@ function EventCard({ event }: { event: EventPost["event"] }) {
                   {event.spotsLeft !== undefined ? <> ({event.spotsLeft} spots remaining)</> : null}
                 </span>
               </div>
-              <button className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
+              <button className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
                 Register for free
               </button>
             </div>
@@ -1279,7 +1279,7 @@ function MilestoneCard({ milestone, postId, authorName }: { milestone: Milestone
               />
             ) : (
               <div
-                className="relative z-0 flex h-20 w-20 shrink-0 items-center justify-center rounded-full text-[26px] font-bold text-white ring-2 ring-white"
+                className="relative z-0 flex h-20 w-20 shrink-0 items-center justify-center rounded-full text-[24px] font-bold text-white ring-2 ring-white"
                 style={{ backgroundColor: milestone.schoolColor }}
               >
                 {milestone.schoolInitial}
@@ -1291,7 +1291,7 @@ function MilestoneCard({ milestone, postId, authorName }: { milestone: Milestone
                 alt={milestone.clientName}
                 className="h-20 w-20 rounded-full object-cover ring-2 ring-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)]"
               />
-              <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-white text-[16px] shadow-sm">
+              <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-white text-[14px] shadow-sm">
                 🎉
               </span>
             </div>
@@ -1299,9 +1299,9 @@ function MilestoneCard({ milestone, postId, authorName }: { milestone: Milestone
 
           {/* Text */}
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-medium uppercase tracking-wide text-gray-light">Admitted</p>
-            <p className="mt-0.5 text-[17px] font-medium leading-tight text-gray-dark">{milestone.school}</p>
-            <p className="text-[14px] text-gray-light">{milestone.program}</p>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-light">Admitted</p>
+            <p className="mt-0.5 text-[15px] font-medium leading-tight text-gray-dark">{milestone.school}</p>
+            <p className="text-[12px] text-gray-light">{milestone.program}</p>
           </div>
 
           {/* CTA bottom-aligned */}
@@ -1311,7 +1311,7 @@ function MilestoneCard({ milestone, postId, authorName }: { milestone: Milestone
               primeKeyboard();
               navigate(`/post/${postId}`, { state: { focusInput: true, prefillComment: `@${authorName} Congratulations! 🎉` } });
             }}
-            className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
+            className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
           >
             Say congratulations
           </button>
@@ -1417,12 +1417,12 @@ function OfficeHoursInfoModal({ live, author, avatar, onBuy, onClose }: {
                 </span>
               </div>
               <div>
-                <p className="text-[17px] font-semibold text-white">{author}</p>
-                <p className="text-[13px] text-white/70">{live.viewers.toLocaleString()} watching now</p>
+                <p className="text-[15px] font-semibold text-white">{author}</p>
+                <p className="text-[11px] text-white/70">{live.viewers.toLocaleString()} watching now</p>
               </div>
             </div>
-            <h2 className="mt-4 text-[22px] font-bold text-white">Join Office Hours</h2>
-            <p className="mt-1 text-[14px] leading-snug text-white/70">
+            <h2 className="mt-4 text-[20px] font-bold text-white">Join Office Hours</h2>
+            <p className="mt-1 text-[12px] leading-snug text-white/70">
               {author} is holding a live session open to anyone. Ask your questions directly and get real-time answers.
             </p>
           </div>
@@ -1430,22 +1430,22 @@ function OfficeHoursInfoModal({ live, author, avatar, onBuy, onClose }: {
           {/* Body */}
           <div className="px-6 py-5">
             <div className="rounded-xl border border-gray-stroke bg-gray-50 px-4 py-3">
-              <p className="text-[13px] text-gray-light">Session</p>
-              <p className="mt-0.5 text-[15px] font-semibold text-gray-dark">{live.title}</p>
-              <p className="text-[13px] text-gray-light">{live.topic}</p>
+              <p className="text-[11px] text-gray-light">Session</p>
+              <p className="mt-0.5 text-[13px] font-semibold text-gray-dark">{live.title}</p>
+              <p className="text-[11px] text-gray-light">{live.topic}</p>
             </div>
 
             <div className="mt-3 flex items-center justify-between rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
               <div>
-                <p className="text-[13px] text-gray-light">Access fee</p>
-                <p className="text-[15px] font-semibold text-gray-dark">One-time ticket</p>
+                <p className="text-[11px] text-gray-light">Access fee</p>
+                <p className="text-[13px] font-semibold text-gray-dark">One-time ticket</p>
               </div>
-              <p className="text-[24px] font-bold text-gray-dark">$5</p>
+              <p className="text-[22px] font-bold text-gray-dark">$5</p>
             </div>
 
             <ul className="mt-4 flex flex-col gap-2">
               {["Live Q&A with the expert", "Ask questions in real time", "Access ends when session ends"].map(item => (
-                <li key={item} className="flex items-center gap-2 text-[14px] text-gray-dark">
+                <li key={item} className="flex items-center gap-2 text-[12px] text-gray-dark">
                   <svg className="h-4 w-4 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                   {item}
                 </li>
@@ -1457,11 +1457,11 @@ function OfficeHoursInfoModal({ live, author, avatar, onBuy, onClose }: {
           <div className="flex flex-col gap-2 px-6 pb-6">
             <button
               onClick={onBuy}
-              className="w-full cursor-pointer rounded-xl bg-primary py-3 text-[16px] font-bold text-white transition-colors hover:bg-primary-hover"
+              className="w-full cursor-pointer rounded-xl bg-primary py-3 text-[14px] font-bold text-white transition-colors hover:bg-primary-hover"
             >
               Buy ticket · $5
             </button>
-            <button onClick={onClose} className="w-full cursor-pointer py-2 text-[14px] text-gray-light transition-colors hover:text-gray-dark">
+            <button onClick={onClose} className="w-full cursor-pointer py-2 text-[12px] text-gray-light transition-colors hover:text-gray-dark">
               Maybe later
             </button>
           </div>
@@ -1492,7 +1492,7 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
           {/* Left — checkout form */}
           <div className="flex-1 overflow-y-auto px-8 py-8" style={{ maxHeight: "90vh" }}>
             <div className="flex items-center justify-between">
-              <h2 className="text-[24px] font-bold text-gray-dark">Checkout</h2>
+              <h2 className="text-[22px] font-bold text-gray-dark">Checkout</h2>
               <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-dark hover:bg-gray-200">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
@@ -1501,17 +1501,17 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
             {/* Service row */}
             <div className="mt-6 flex items-center justify-between rounded-xl border border-gray-stroke px-4 py-3">
               <div>
-                <p className="text-[15px] font-semibold text-gray-dark">Office Hours · Consulting Q&A</p>
-                <p className="text-[13px] text-gray-light">One time purchase</p>
+                <p className="text-[13px] font-semibold text-gray-dark">Office Hours · Consulting Q&A</p>
+                <p className="text-[11px] text-gray-light">One time purchase</p>
               </div>
               <div className="text-right">
-                <p className="text-[17px] font-bold text-gray-dark">$5.00</p>
-                <button className="text-[13px] text-primary hover:underline">See payment plans</button>
+                <p className="text-[15px] font-bold text-gray-dark">$5.00</p>
+                <button className="text-[11px] text-primary hover:underline">See payment plans</button>
               </div>
             </div>
 
             {/* Payment structure */}
-            <p className="mt-6 text-[15px] font-semibold text-gray-dark">Payment Structure</p>
+            <p className="mt-6 text-[13px] font-semibold text-gray-dark">Payment Structure</p>
             <div className="mt-3 flex flex-col gap-2">
               {[
                 { id: "single", label: "Single payment", sub: "Pay the full amount today" },
@@ -1526,48 +1526,48 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
                     {paymentPlan === opt.id ? <span className="h-2 w-2 rounded-full bg-primary" /> : null}
                   </span>
                   <div>
-                    <p className="text-[15px] font-medium text-gray-dark">{opt.label}</p>
-                    <p className="text-[13px] text-gray-light">{opt.sub}</p>
+                    <p className="text-[13px] font-medium text-gray-dark">{opt.label}</p>
+                    <p className="text-[11px] text-gray-light">{opt.sub}</p>
                   </div>
                 </label>
               ))}
             </div>
 
             {/* Payment information */}
-            <p className="mt-6 text-[15px] font-semibold text-gray-dark">Payment Information</p>
+            <p className="mt-6 text-[13px] font-semibold text-gray-dark">Payment Information</p>
             <div className="mt-3 rounded-xl border border-gray-stroke p-4">
               <div className="flex flex-col gap-3">
                 <div>
-                  <label className="text-[12px] font-medium text-gray-light">Card number</label>
-                  <input className="mt-1 w-full rounded-lg border border-gray-stroke px-3 py-2 text-[15px] text-gray-dark outline-none focus:border-primary" placeholder="1234 5678 9012 3456" />
+                  <label className="text-[10px] font-medium text-gray-light">Card number</label>
+                  <input className="mt-1 w-full rounded-lg border border-gray-stroke px-3 py-2 text-[13px] text-gray-dark outline-none focus:border-primary" placeholder="1234 5678 9012 3456" />
                 </div>
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="text-[12px] font-medium text-gray-light">Expiry</label>
-                    <input className="mt-1 w-full rounded-lg border border-gray-stroke px-3 py-2 text-[15px] text-gray-dark outline-none focus:border-primary" placeholder="MM / YY" />
+                    <label className="text-[10px] font-medium text-gray-light">Expiry</label>
+                    <input className="mt-1 w-full rounded-lg border border-gray-stroke px-3 py-2 text-[13px] text-gray-dark outline-none focus:border-primary" placeholder="MM / YY" />
                   </div>
                   <div className="flex-1">
-                    <label className="text-[12px] font-medium text-gray-light">CVC</label>
-                    <input className="mt-1 w-full rounded-lg border border-gray-stroke px-3 py-2 text-[15px] text-gray-dark outline-none focus:border-primary" placeholder="123" />
+                    <label className="text-[10px] font-medium text-gray-light">CVC</label>
+                    <input className="mt-1 w-full rounded-lg border border-gray-stroke px-3 py-2 text-[13px] text-gray-dark outline-none focus:border-primary" placeholder="123" />
                   </div>
                 </div>
               </div>
               <div className="mt-3 flex justify-end">
-                <span className="flex items-center gap-1.5 rounded-md border border-gray-stroke px-2 py-1 text-[11px] text-gray-light">
+                <span className="flex items-center gap-1.5 rounded-md border border-gray-stroke px-2 py-1 text-[10px] text-gray-light">
                   Powered by <span className="font-bold text-gray-dark">stripe</span>
                 </span>
               </div>
             </div>
 
             {/* Terms */}
-            <p className="mt-6 text-[15px] font-semibold text-gray-dark">Terms</p>
+            <p className="mt-6 text-[13px] font-semibold text-gray-dark">Terms</p>
             <ul className="mt-3 flex flex-col gap-2">
               {[
                 "The Leland Experience Guarantee protects you with every booking.",
                 "Refund policy: Refunds are available within 14 days of purchase.",
                 "Expiration terms: access is valid for the duration of this session.",
               ].map((t, i) => (
-                <li key={i} className="flex items-start gap-2 text-[13px] text-gray-light">
+                <li key={i} className="flex items-start gap-2 text-[11px] text-gray-light">
                   <svg className="mt-0.5 h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
                   {t} <button className="ml-1 text-primary hover:underline">Learn more.</button>
                 </li>
@@ -1577,36 +1577,36 @@ function CheckoutModal({ onClose }: { onClose: () => void }) {
 
           {/* Right — summary */}
           <div className="flex w-[260px] shrink-0 flex-col border-l border-gray-stroke bg-gray-50 px-6 py-8">
-            <div className="flex items-center justify-between text-[15px]">
+            <div className="flex items-center justify-between text-[13px]">
               <span className="text-gray-light">Subtotal</span>
               <span className="font-medium text-gray-dark">$5.00</span>
             </div>
-            <div className="mt-4 border-t border-gray-stroke pt-4 flex items-center justify-between text-[15px]">
+            <div className="mt-4 border-t border-gray-stroke pt-4 flex items-center justify-between text-[13px]">
               <span className="text-gray-light">Discount</span>
               {discountOpen ? (
                 <input
                   autoFocus
                   value={discountCode}
                   onChange={e => setDiscountCode(e.target.value)}
-                  className="w-24 rounded-lg border border-gray-stroke px-2 py-1 text-[13px] outline-none focus:border-primary"
+                  className="w-24 rounded-lg border border-gray-stroke px-2 py-1 text-[11px] outline-none focus:border-primary"
                   placeholder="Code"
                 />
               ) : (
                 <button onClick={() => setDiscountOpen(true)} className="font-semibold text-primary hover:underline">Use code</button>
               )}
             </div>
-            <div className="mt-4 border-t border-gray-stroke pt-4 flex items-center justify-between text-[17px]">
+            <div className="mt-4 border-t border-gray-stroke pt-4 flex items-center justify-between text-[15px]">
               <span className="font-semibold text-gray-dark">Total</span>
               <span className="font-bold text-gray-dark">${total.toFixed(2)}</span>
             </div>
 
             <button
               onClick={onClose}
-              className="mt-6 w-full cursor-pointer rounded-xl bg-primary py-3 text-[15px] font-bold text-white transition-colors hover:bg-primary-hover"
+              className="mt-6 w-full cursor-pointer rounded-xl bg-primary py-3 text-[13px] font-bold text-white transition-colors hover:bg-primary-hover"
             >
               Confirm payment
             </button>
-            <p className="mt-3 text-center text-[12px] text-gray-light">Secured by Stripe</p>
+            <p className="mt-3 text-center text-[10px] text-gray-light">Secured by Stripe</p>
           </div>
         </div>
       </motion.div>
@@ -1638,7 +1638,7 @@ function LiveCard({ live, author, avatar }: { live: LivePost["live"]; author: st
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
           </span>
-          <span className="text-[13px] font-semibold tracking-wide text-gray-dark">LIVE</span>
+          <span className="text-[11px] font-semibold tracking-wide text-gray-dark">LIVE</span>
         </div>
 
         {/* Viewer count — top right, no border */}
@@ -1646,7 +1646,7 @@ function LiveCard({ live, author, avatar }: { live: LivePost["live"]; author: st
           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
           </svg>
-          <span className="text-[12px] font-medium drop-shadow">{live.viewers.toLocaleString()} watching</span>
+          <span className="text-[10px] font-medium drop-shadow">{live.viewers.toLocaleString()} watching</span>
         </div>
 
       </div>
@@ -1654,12 +1654,12 @@ function LiveCard({ live, author, avatar }: { live: LivePost["live"]; author: st
       {/* Info row */}
       <div className="flex items-center justify-between gap-3 px-4 py-4">
         <div className="min-w-0">
-          <p className="text-[17px] font-medium leading-snug text-gray-dark">{live.title}</p>
-          <p className="mt-1 text-[14px] text-gray-light">{live.topic}</p>
+          <p className="text-[15px] font-medium leading-snug text-gray-dark">{live.title}</p>
+          <p className="mt-1 text-[12px] text-gray-light">{live.topic}</p>
         </div>
         <button
           onClick={() => setModal("info")}
-          className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
+          className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
         >
           Join live
         </button>
@@ -1913,7 +1913,7 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
         {isGroupPost ? (
           <>
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-[8px] text-[17px] font-bold text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-[8px] text-[15px] font-bold text-white"
               style={{ backgroundColor: post.groupColor ?? "#2563EB" }}
             >
               {post.author.charAt(0)}
@@ -1977,7 +1977,7 @@ export function FeedPost({ post, onUpdate }: { post: Post; onUpdate?: (id: numbe
         {/* Right column: content */}
         <div className="min-w-0 flex-1">
           <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} onEdit={onUpdate ? () => setEditOpen(true) : undefined} />
-          <p className="mt-1 text-[17px] leading-[1.4] text-gray-dark">{post.body}</p>
+          <p className="mt-1 text-[15px] leading-[1.4] text-gray-dark">{post.body}</p>
           <div className={post.type !== "text" ? "pb-1" : ""} onClick={e => e.stopPropagation()}>
             {post.type === "image" && (
               <ImageGallery
@@ -2042,7 +2042,7 @@ function CoachCardContent({ avatar, name, verified, headline, price, ctaLabel, s
           className="h-[175px] w-[175px] shrink-0 rounded-xl object-cover"
           style={{ objectPosition: "50% 15%" }}
         />
-        <div className="absolute right-3 top-3 rounded-lg bg-gray-100 px-2.5 py-1 text-[13px] font-medium text-gray-dark">
+        <div className="absolute right-3 top-3 rounded-lg bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-dark">
           {price ?? "$150/hr"}
         </div>
       </div>
@@ -2051,34 +2051,34 @@ function CoachCardContent({ avatar, name, verified, headline, price, ctaLabel, s
       <div className="p-4">
         {/* Name + rating */}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-          <span className="text-[17px] font-medium text-gray-dark">{name}</span>
+          <span className="text-[15px] font-medium text-gray-dark">{name}</span>
           {verified ? <img src={verifiedIcon} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
           {p ? (
             <>
               <span className="flex items-center gap-0.5">
                 <span className="text-yellow-400">★</span>
-                <span className="text-[15px] text-gray-dark">{p.rating.toFixed(1)}</span>
+                <span className="text-[13px] text-gray-dark">{p.rating.toFixed(1)}</span>
               </span>
-              <span className="text-[15px] text-[#C0C0C0]">{p.reviews} reviews</span>
+              <span className="text-[13px] text-[#C0C0C0]">{p.reviews} reviews</span>
             </>
           ) : null}
         </div>
 
         {/* Headline */}
         {headline ? (
-          <p className="mt-2 line-clamp-2 text-[15px] leading-snug text-gray-dark">{headline}</p>
+          <p className="mt-2 line-clamp-2 text-[13px] leading-snug text-gray-dark">{headline}</p>
         ) : null}
 
         {/* Successful clients */}
         {p && p.successfulClients.length > 0 ? (
           <div className="mt-3">
-            <p className="text-[14px] text-gray-light">Successful clients at:</p>
+            <p className="text-[12px] text-gray-light">Successful clients at:</p>
             <div className="mt-1.5 flex items-center gap-1.5">
               {p.successfulClients.slice(0, 5).map((c, i) => (
                 <OrgLogo key={i} logo={c.logo} name={c.name} size={26} />
               ))}
               {p.successfulClientsMore ? (
-                <span className="ml-0.5 text-[12px] text-gray-light">+{p.successfulClientsMore}</span>
+                <span className="ml-0.5 text-[10px] text-gray-light">+{p.successfulClientsMore}</span>
               ) : null}
             </div>
           </div>
@@ -2086,7 +2086,7 @@ function CoachCardContent({ avatar, name, verified, headline, price, ctaLabel, s
 
         {/* CTAs */}
         <div className="mt-4 flex gap-2">
-          <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-dark py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-[#333]">
+          <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-dark py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-[#333]">
             {isOnline ? (
               <>
                 <style>{`@keyframes talk-now-blink { 0%,100%{background-color:#4b5563} 50%{background-color:#4ade80} }`}</style>
@@ -2163,7 +2163,7 @@ function SuggestedExperts() {
   return (
     <div className="py-5">
       <div className="flex items-center justify-between">
-        <p className="text-[17px] font-medium text-gray-dark">Suggested experts</p>
+        <p className="text-[15px] font-medium text-gray-dark">Suggested experts</p>
         <div className="flex items-center gap-1.5">
           <NavBtn dir={-1} label="Scroll left" />
           <NavBtn dir={1} label="Scroll right" />
@@ -2513,7 +2513,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-stroke">
               <div className="w-8" />
-              <span className="text-[15px] font-semibold text-gray-dark">
+              <span className="text-[13px] font-semibold text-gray-dark">
                 {cropQueue.length > 0 ? `Crop photo (${images.length + 1} of ${images.length + 1 + cropQueue.length})` : "Crop photo"}
               </span>
               <button onClick={cancelCrop} className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-stroke bg-white text-gray-dark transition-colors hover:bg-gray-hover">
@@ -2588,12 +2588,12 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
               <div className="flex items-center gap-2">
                 {(["free", "1:1", "4:5", "16:9"] as const).map(r => (
                   <button key={r} onClick={() => applyRatioPreset(r)}
-                    className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-colors ${cropRatio === r ? "bg-gray-200 text-gray-dark" : "text-gray-light hover:bg-gray-hover"}`}>
+                    className={`px-3.5 py-1.5 rounded-full text-[11px] font-medium transition-colors ${cropRatio === r ? "bg-gray-200 text-gray-dark" : "text-gray-light hover:bg-gray-hover"}`}>
                     {r === "free" ? "Original" : r}
                   </button>
                 ))}
               </div>
-              <button onClick={applyCrop} className="rounded-[8px] bg-gray-dark px-4 py-1.5 text-[14px] font-semibold text-white hover:opacity-90 transition-opacity">
+              <button onClick={applyCrop} className="rounded-[8px] bg-gray-dark px-4 py-1.5 text-[12px] font-semibold text-white hover:opacity-90 transition-opacity">
                 {cropQueue.length > 0 ? "Next →" : "Apply"}
               </button>
             </div>
@@ -2610,7 +2610,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                 {!isEditing && (
                   <button
                     onClick={() => setFeedDropdownOpen(o => !o)}
-                    className="flex items-center gap-1 rounded-lg border border-gray-stroke bg-[#F5F5F5] pl-3 pr-2 py-1.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#EBEBEB]"
+                    className="flex items-center gap-1 rounded-lg border border-gray-stroke bg-[#F5F5F5] pl-3 pr-2 py-1.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-[#EBEBEB]"
                   >
                     {selectedFeed.label}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
@@ -2623,7 +2623,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                 <button
                   onClick={submitPost}
                   disabled={(!text.trim() && images.length === 0) || overLimit || posting}
-                  className="flex items-center gap-1.5 rounded-lg bg-gray-dark px-5 py-2 text-[15px] font-semibold text-white transition-opacity disabled:opacity-40 enabled:hover:opacity-90"
+                  className="flex items-center gap-1.5 rounded-lg bg-gray-dark px-5 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-40 enabled:hover:opacity-90"
                 >
                   {posting && (
                     <motion.span
@@ -2666,7 +2666,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                       className="fixed inset-x-0 bottom-0 z-[10001] rounded-t-2xl border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)] shadow-lg"
                     >
                       <div className="mx-auto mt-2.5 mb-1 h-1.5 w-12 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />
-                      <p className="px-5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#A0A0A0]">Post Audience</p>
+                      <p className="px-5 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0A0A0]">Post Audience</p>
                       <div className="p-2 pt-1">
                         {FEEDS.map(feed => {
                           const isSelected = selectedFeed.id === feed.id;
@@ -2674,7 +2674,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                             <button
                               key={feed.id}
                               onClick={() => selectFeed(feed)}
-                              className={`flex w-full items-center justify-between rounded-lg px-4 py-4 text-[17px] font-medium text-gray-dark transition-colors active:bg-[#EBEBEB] ${isSelected ? "bg-[#F5F5F5]" : ""}`}
+                              className={`flex w-full items-center justify-between rounded-lg px-4 py-4 text-[15px] font-medium text-gray-dark transition-colors active:bg-[#EBEBEB] ${isSelected ? "bg-[#F5F5F5]" : ""}`}
                             >
                               <span>{feed.label}</span>
                               <span
@@ -2701,11 +2701,11 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
               {!isMobileModal && <div className="flex items-center gap-3 mb-3">
                 <img src={profilePhoto} alt="Your profile" className="h-10 w-10 shrink-0 rounded-full object-cover" />
                 <div className="flex items-center gap-2">
-                  <span className="text-[17px] font-medium text-gray-dark leading-none">Jamie Allen</span>
+                  <span className="text-[15px] font-medium text-gray-dark leading-none">Jamie Allen</span>
                   {!isEditing && <div ref={feedDropdownRef} className="relative">
                     <button
                       onClick={() => setFeedDropdownOpen(o => !o)}
-                      className="flex items-center gap-1 rounded-lg border border-gray-stroke bg-[#F5F5F5] pl-2.5 pr-1.5 py-1 text-[13px] font-medium text-gray-dark transition-colors hover:bg-[#EBEBEB]"
+                      className="flex items-center gap-1 rounded-lg border border-gray-stroke bg-[#F5F5F5] pl-2.5 pr-1.5 py-1 text-[11px] font-medium text-gray-dark transition-colors hover:bg-[#EBEBEB]"
                     >
                       {selectedFeed.label}
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
@@ -2723,7 +2723,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                           className="absolute left-0 top-full z-50 mt-1 w-52 rounded-xl border border-gray-stroke bg-white shadow-lg"
                         >
                           <div className="px-3 pb-1.5 pt-2.5">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#A0A0A0]">Post Audience</p>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0A0A0]">Post Audience</p>
                           </div>
                           <div className="p-1.5 pt-0">
                             {FEEDS.map(feed => {
@@ -2732,7 +2732,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                                 <button
                                   key={feed.id}
                                   onClick={() => selectFeed(feed)}
-                                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-[14px] font-medium transition-colors ${
+                                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-[12px] font-medium transition-colors ${
                                     isSelected ? "bg-[#F5F5F5] text-gray-dark" : "text-gray-dark hover:bg-[#F5F5F5]"
                                   }`}
                                 >
@@ -2756,14 +2756,14 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
               <div className={`relative ${isMobileModal ? "flex-1 min-w-0" : "pl-[52px]"}`}>
                 {text === "" && (
                   <span
-                    className={`pointer-events-none absolute text-[17px] text-gray-light leading-relaxed transition-opacity duration-200 ${isMobileModal ? "left-0" : "left-[52px]"}`}
+                    className={`pointer-events-none absolute text-[15px] text-gray-light leading-relaxed transition-opacity duration-200 ${isMobileModal ? "left-0" : "left-[52px]"}`}
                     style={{ opacity: placeholderVisible ? 1 : 0, top: 7 }}
                   >
                     {composerPrompts[placeholderIdx]}
                   </span>
                 )}
                 <textarea ref={textareaRef} autoFocus value={text} onChange={autoGrow} rows={4}
-                  className={`w-full resize-none bg-transparent text-[17px] text-gray-dark focus:outline-none leading-relaxed ${isMobileModal ? "h-full" : ""}`}
+                  className={`w-full resize-none bg-transparent text-[15px] text-gray-dark focus:outline-none leading-relaxed ${isMobileModal ? "h-full" : ""}`}
                   style={isMobileModal ? { padding: 0, paddingTop: 7, minHeight: 0 } : { minHeight: "180px", padding: 0, paddingTop: 7 }} />
               </div>
             </div>
@@ -2785,7 +2785,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                         </button>
                         <button
                           onClick={() => { setCropOriginalUrl(images[idx].original); setCropBox({ x: 0, y: 0, w: 1, h: 1 }); setCropRatio("free"); setCropRotation(0); setImgBounds(null); setCropReCropIndex(idx); setCropMode(true); }}
-                          className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80">
+                          className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80">
                           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M6.13 1L6 16a2 2 0 002 2h15"/><path d="M1 6.13l15-.13a2 2 0 012 2v15"/>
                           </svg>
@@ -2804,13 +2804,13 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden px-4 pb-3">
                   {selectingEvent ? (
                     <div>
-                      <p className="mb-2 text-[13px] font-medium text-gray-light">Select a livestream to attach</p>
+                      <p className="mb-2 text-[11px] font-medium text-gray-light">Select a livestream to attach</p>
                       <div className="relative">
                         <div className="overflow-hidden rounded-xl border border-gray-stroke">
                           <img src={UPCOMING_EVENTS[eventIndex].image} alt={UPCOMING_EVENTS[eventIndex].title} className="aspect-[1200/628] w-full object-cover" />
                           <div className="px-4 py-3">
-                            <p className="text-[15px] font-semibold text-gray-dark">{UPCOMING_EVENTS[eventIndex].title}</p>
-                            <div className="mt-1 flex items-center gap-2 text-[13px] text-gray-light">
+                            <p className="text-[13px] font-semibold text-gray-dark">{UPCOMING_EVENTS[eventIndex].title}</p>
+                            <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-light">
                               <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                               <span>{UPCOMING_EVENTS[eventIndex].date}</span><span>·</span><span>{UPCOMING_EVENTS[eventIndex].time}</span>
                             </div>
@@ -2823,8 +2823,8 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                         {UPCOMING_EVENTS.map((_, i) => <button key={i} onClick={() => setEventIndex(i)} className={`h-1.5 w-1.5 rounded-full transition-colors ${i === eventIndex ? "bg-gray-dark" : "bg-gray-stroke"}`} />)}
                       </div>
                       <div className="mt-3 flex justify-end gap-2">
-                        <button onClick={() => setSelectingEvent(false)} className="rounded-lg px-4 py-2 text-[14px] font-medium text-gray-light hover:text-gray-dark transition-colors">Cancel</button>
-                        <button onClick={() => { setEventAttached(true); setSelectingEvent(false); }} className="rounded-lg bg-gray-dark px-4 py-2 text-[14px] font-semibold text-white hover:opacity-90 transition-opacity">Attach</button>
+                        <button onClick={() => setSelectingEvent(false)} className="rounded-lg px-4 py-2 text-[12px] font-medium text-gray-light hover:text-gray-dark transition-colors">Cancel</button>
+                        <button onClick={() => { setEventAttached(true); setSelectingEvent(false); }} className="rounded-lg bg-gray-dark px-4 py-2 text-[12px] font-semibold text-white hover:opacity-90 transition-opacity">Attach</button>
                       </div>
                     </div>
                   ) : (
@@ -2834,8 +2834,8 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                       </button>
                       <img src={UPCOMING_EVENTS[eventIndex].image} alt={UPCOMING_EVENTS[eventIndex].title} className="aspect-[1200/628] w-full object-cover" />
                       <div className="px-4 py-3">
-                        <p className="text-[15px] font-semibold text-gray-dark">{UPCOMING_EVENTS[eventIndex].title}</p>
-                        <div className="mt-1 flex items-center gap-2 text-[13px] text-gray-light">
+                        <p className="text-[13px] font-semibold text-gray-dark">{UPCOMING_EVENTS[eventIndex].title}</p>
+                        <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-light">
                           <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                           <span>{UPCOMING_EVENTS[eventIndex].date}</span><span>·</span><span>{UPCOMING_EVENTS[eventIndex].time}</span>
                         </div>
@@ -2856,7 +2856,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                   { label: "Celebrate someone", icon: <><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></>, onClick: undefined as (() => void) | undefined },
                   { label: "Available now", icon: <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>, onClick: undefined as (() => void) | undefined },
                 ] as { label: string; icon: React.ReactNode; onClick: (() => void) | undefined }[]).map(({ label, icon, onClick }) => (
-                  <button key={label} onClick={onClick} className="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-[13px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
+                  <button key={label} onClick={onClick} className="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-[11px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{icon}</svg>
                     {label}
                   </button>
@@ -2878,7 +2878,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                   <ImageIcon size={24} strokeWidth={1.75} />
                 </button>
                 {images.length > 0 && (
-                  <span className="text-[13px] font-medium text-gray-light">{images.length}/4</span>
+                  <span className="text-[11px] font-medium text-gray-light">{images.length}/4</span>
                 )}
                 <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelect} />
                 {charCount > 0 && (
@@ -2901,7 +2901,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                     title={images.length >= 4 ? "Maximum 4 images" : "Add photo"}>
                     <ImageIcon size={24} strokeWidth={1.5} />
                     {images.length > 0 && (
-                      <span className="text-[13px] font-medium">{images.length}/4</span>
+                      <span className="text-[11px] font-medium">{images.length}/4</span>
                     )}
                   </button>
                   <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelect} />
@@ -2920,7 +2920,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                   )}
                   <button onClick={submitPost}
                     disabled={(!text.trim() && images.length === 0) || overLimit || posting}
-                    className="flex items-center gap-1.5 rounded-[8px] bg-gray-dark px-6 py-2 text-[15px] font-semibold text-white transition-opacity disabled:opacity-40 enabled:hover:opacity-90">
+                    className="flex items-center gap-1.5 rounded-[8px] bg-gray-dark px-6 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-40 enabled:hover:opacity-90">
                     {posting && (
                       <motion.span
                         className="inline-block h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white"
@@ -2997,7 +2997,7 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
           <>
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-stroke">
-              <h2 className="text-[17px] font-semibold text-gray-dark">Go Live</h2>
+              <h2 className="text-[15px] font-semibold text-gray-dark">Go Live</h2>
               <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-stroke bg-white text-gray-dark hover:bg-gray-hover transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
@@ -3006,29 +3006,29 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
             {/* Camera preview */}
             <div className="mx-5 mt-5 aspect-video overflow-hidden rounded-xl bg-[#111] flex flex-col items-center justify-center gap-3">
               <img src={profilePhoto} alt="You" className="h-20 w-20 rounded-full object-cover opacity-60 ring-2 ring-white/20" />
-              <p className="text-[13px] text-white/50">Camera preview</p>
+              <p className="text-[11px] text-white/50">Camera preview</p>
             </div>
 
             {/* Title input */}
             <div className="px-5 mt-4">
-              <label className="text-[13px] font-medium text-gray-light">Stream title</label>
+              <label className="text-[11px] font-medium text-gray-light">Stream title</label>
               <input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="What are you talking about today?"
-                className="mt-1.5 w-full rounded-lg border border-gray-stroke px-3 py-2.5 text-[15px] text-gray-dark outline-none focus:border-gray-dark transition-colors"
+                className="mt-1.5 w-full rounded-lg border border-gray-stroke px-3 py-2.5 text-[13px] text-gray-dark outline-none focus:border-gray-dark transition-colors"
               />
             </div>
 
             {/* Topic chips */}
             <div className="px-5 mt-4">
-              <label className="text-[13px] font-medium text-gray-light">Topic</label>
+              <label className="text-[11px] font-medium text-gray-light">Topic</label>
               <div className="mt-2 flex flex-wrap gap-2">
                 {LIVE_TOPICS.map(t => (
                   <button
                     key={t}
                     onClick={() => setSelectedTopic(t === selectedTopic ? null : t)}
-                    className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${t === selectedTopic ? "bg-gray-dark text-white" : "bg-gray-100 text-gray-dark hover:bg-gray-200"}`}
+                    className={`rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors ${t === selectedTopic ? "bg-gray-dark text-white" : "bg-gray-100 text-gray-dark hover:bg-gray-200"}`}
                   >
                     {t}
                   </button>
@@ -3041,7 +3041,7 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
               <button
                 onClick={() => setStage("live")}
                 disabled={!title.trim()}
-                className="w-full rounded-lg bg-red-500 py-3 text-[16px] font-semibold text-white transition-opacity disabled:opacity-40 hover:opacity-90"
+                className="w-full rounded-lg bg-red-500 py-3 text-[14px] font-semibold text-white transition-opacity disabled:opacity-40 hover:opacity-90"
               >
                 <span className="mr-2">●</span> Go Live
               </button>
@@ -3057,13 +3057,13 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
             {/* Top bar */}
             <div className="relative z-10 flex items-center justify-between px-4 pt-4">
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1.5 rounded-full bg-red-500 px-3 py-1 text-[13px] font-semibold text-white">
+                <span className="flex items-center gap-1.5 rounded-full bg-red-500 px-3 py-1 text-[11px] font-semibold text-white">
                   <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                   LIVE
                 </span>
-                <span className="rounded-full bg-black/40 px-2.5 py-1 text-[13px] text-white backdrop-blur-sm">{formatTime(elapsed)}</span>
+                <span className="rounded-full bg-black/40 px-2.5 py-1 text-[11px] text-white backdrop-blur-sm">{formatTime(elapsed)}</span>
               </div>
-              <span className="flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-[13px] text-white backdrop-blur-sm">
+              <span className="flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-[11px] text-white backdrop-blur-sm">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 {viewers.toLocaleString()}
               </span>
@@ -3071,8 +3071,8 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 
             {/* Title */}
             <div className="relative z-10 px-4 mt-3">
-              <p className="text-[15px] font-semibold text-white drop-shadow">{title}</p>
-              {selectedTopic ? <span className="mt-1 inline-block rounded-full bg-white/20 px-2 py-0.5 text-[12px] text-white/80 backdrop-blur-sm">{selectedTopic}</span> : null}
+              <p className="text-[13px] font-semibold text-white drop-shadow">{title}</p>
+              {selectedTopic ? <span className="mt-1 inline-block rounded-full bg-white/20 px-2 py-0.5 text-[10px] text-white/80 backdrop-blur-sm">{selectedTopic}</span> : null}
             </div>
 
             {/* Live comments */}
@@ -3080,8 +3080,8 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
               <AnimatePresence>
                 {visibleComments.map((c, i) => (
                   <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
-                    <div className="h-6 w-6 shrink-0 rounded-full bg-white/20 flex items-center justify-center text-[11px] text-white font-semibold">{c.user[0].toUpperCase()}</div>
-                    <span className="rounded-full bg-black/50 px-3 py-1 text-[13px] text-white backdrop-blur-sm"><span className="font-semibold">{c.user}</span> {c.text}</span>
+                    <div className="h-6 w-6 shrink-0 rounded-full bg-white/20 flex items-center justify-center text-[10px] text-white font-semibold">{c.user[0].toUpperCase()}</div>
+                    <span className="rounded-full bg-black/50 px-3 py-1 text-[11px] text-white backdrop-blur-sm"><span className="font-semibold">{c.user}</span> {c.text}</span>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -3089,11 +3089,11 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 
             {/* Bottom bar */}
             <div className="relative z-10 flex items-center justify-between px-4 pb-5 pt-3 bg-gradient-to-t from-black/60 to-transparent">
-              <button className="flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-[14px] font-medium text-white backdrop-blur-sm hover:bg-white/30 transition-colors">
+              <button className="flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-[12px] font-medium text-white backdrop-blur-sm hover:bg-white/30 transition-colors">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 Comment
               </button>
-              <button onClick={onClose} className="rounded-full bg-red-500/90 px-5 py-2 text-[14px] font-semibold text-white hover:bg-red-600 transition-colors">
+              <button onClick={onClose} className="rounded-full bg-red-500/90 px-5 py-2 text-[12px] font-semibold text-white hover:bg-red-600 transition-colors">
                 End stream
               </button>
             </div>
@@ -3224,11 +3224,11 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
         </div>
         {/* Body */}
         <div className="px-4 pt-12 pb-4">
-          <p className="text-[19px] font-medium leading-tight text-gray-dark">Jamie Allen</p>
-          <p className="mt-0.5 text-[15px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
+          <p className="text-[17px] font-medium leading-tight text-gray-dark">Jamie Allen</p>
+          <p className="mt-0.5 text-[13px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
           <button
             onClick={onCreatePost}
-            className="mt-4 w-full cursor-pointer rounded-lg bg-gray-dark py-2 text-center text-[14px] font-medium text-white transition-opacity hover:opacity-85"
+            className="mt-4 w-full cursor-pointer rounded-lg bg-gray-dark py-2 text-center text-[12px] font-medium text-white transition-opacity hover:opacity-85"
           >
             Create post
           </button>
@@ -3237,7 +3237,7 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
 
       {/* Upcoming Sessions + My Purchases + Create post */}
       <div className="px-1">
-        <NavLink to="/profile-v2?tab=calendar" className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+        <NavLink to="/profile-v2?tab=calendar" className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
           Upcoming Sessions
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -3249,7 +3249,7 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
           <SessionCard size="small" title="Resume Review" dateTime="Oct 29, 5:00 PM" duration="45 min" image={pic5} type="coach" status="upcoming" />
         </div>
 
-        <NavLink to="/profile-v2" className="mt-5 flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+        <NavLink to="/profile-v2" className="mt-5 flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
           My Purchases
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -3260,7 +3260,7 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
           <OfferingCard type="package" title="MBA Application Package" subtitle={<span>Comprehensive package · <span className="text-[#038561]">Active</span></span>} image={pic3} purchased showImage size="small" />
         </div>
 
-        <NavLink to="/profile-v2?tab=more" className="mt-5 flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+        <NavLink to="/profile-v2?tab=more" className="mt-5 flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
           My Groups
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -3438,7 +3438,7 @@ export default function Home() {
         />
         <button
           onClick={() => setComposeOpen(true)}
-          className="flex-1 rounded-full bg-gray-hover px-4 py-[10px] text-left text-[16px] text-gray-light transition-shadow hover:shadow-[0_0_0_1.5px_#111111]"
+          className="flex-1 rounded-full bg-gray-hover px-4 py-[10px] text-left text-[14px] text-gray-light transition-shadow hover:shadow-[0_0_0_1.5px_#111111]"
         >
           Create post
         </button>

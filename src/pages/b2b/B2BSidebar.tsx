@@ -19,7 +19,7 @@ export default function B2BSidebar({
           <button
             key={item.key}
             onClick={() => onNavigate(item.key)}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-[18px] font-medium text-gray-dark transition-all ${
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-[16px] font-medium text-gray-dark transition-all ${
               activeView === item.key
                 ? "bg-[#222222]/5"
                 : "hover:bg-gray-hover"
@@ -33,11 +33,11 @@ export default function B2BSidebar({
       <div className="mx-4 flex flex-col items-center pb-6">
         <div className="flex w-full items-center gap-[6px]">
           <div className="h-px flex-1 bg-gray-stroke" />
-          <span className="whitespace-nowrap text-[14px] font-normal uppercase tracking-[0.1em] text-[#9B9B9B]">Provisioned for</span>
+          <span className="whitespace-nowrap text-[12px] font-normal uppercase tracking-[0.1em] text-[#9B9B9B]">Provisioned for</span>
           <div className="h-px flex-1 bg-gray-stroke" />
         </div>
         {showVerizon ? (
-          <span className="mt-5 text-[22px] font-bold tracking-tight text-[#CD040B]">Verizon</span>
+          <span className="mt-5 text-[20px] font-bold tracking-tight text-[#CD040B]">Verizon</span>
         ) : (
           <img src={kelloggLogo} alt="Kellogg School of Management" className="mt-5 max-h-16 max-w-[60%]" />
         )}

@@ -17,7 +17,7 @@ export default function ReactionBar({ onReact }: Props) {
           key={emoji}
           type="button"
           onClick={() => onReact(emoji)}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[18px] transition-transform hover:bg-gray-hover active:scale-90"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[16px] transition-transform hover:bg-gray-hover active:scale-90"
           aria-label={`React with ${emoji}`}
         >
           {emoji}

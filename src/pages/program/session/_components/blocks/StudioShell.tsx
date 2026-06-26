@@ -104,10 +104,10 @@ function TopBar({ session }: { session: Session }) {
 
   return (
     <div className="flex flex-col gap-1">
-      <h1 className="text-[20px] font-semibold leading-[1.15] text-gray-dark sm:text-[22px] lg:text-[24px]">
+      <h1 className="text-[18px] font-semibold leading-[1.15] text-gray-dark sm:text-[20px] lg:text-[22px]">
         {session.title}
       </h1>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-gray-light lg:text-[14px]">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-gray-light lg:text-[12px]">
         <span>AI Builder Program · Session {session.number}</span>
         <span className="text-gray-stroke">·</span>
         <span>
@@ -128,7 +128,7 @@ function TabsNav({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
     { id: "resources", label: "Resources" },
   ];
   return (
-    <div className="flex shrink-0 items-center gap-2 text-[14px] font-semibold">
+    <div className="flex shrink-0 items-center gap-2 text-[12px] font-semibold">
       {tabs.map((t) => {
         const active = tab === t.id;
         return (
@@ -165,7 +165,7 @@ function ShareButton() {
       className="flex items-center gap-1.5 rounded-full bg-gray-hover px-4 py-2 text-gray-dark transition-colors hover:bg-gray-hover/60"
     >
       <img src={sharesIcon} alt="" className="h-4 w-4 [filter:invert(20%)]" />
-      <span className="text-[14px] font-semibold">Share</span>
+      <span className="text-[12px] font-semibold">Share</span>
     </button>
   );
 }

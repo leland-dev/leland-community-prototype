@@ -113,7 +113,7 @@ function SessionRowSimple({ session, isNext }: { session: Session; index: number
       {/* Left OR bracket connector */}
       <div className="flex shrink-0 flex-col items-end justify-center py-5 pl-2">
         <div className="h-[30px] w-2 border-l border-t border-dashed border-[#9b9b9b]" />
-        <span className="py-2 text-[14px] font-medium uppercase tracking-[0.1em] text-[#9b9b9b]">or</span>
+        <span className="py-2 text-[12px] font-medium uppercase tracking-[0.1em] text-[#9b9b9b]">or</span>
         <div className="h-[30px] w-2 border-l border-b border-dashed border-[#9b9b9b]" />
       </div>
       {/* Session cards */}
@@ -200,7 +200,7 @@ function SelectCohortModal({ open, onClose, onSelect }: { open: boolean; onClose
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-stroke px-5 py-4">
-              <h2 className="text-[18px] font-medium text-gray-dark">Select a cohort</h2>
+              <h2 className="text-[16px] font-medium text-gray-dark">Select a cohort</h2>
               <button
                 onClick={onClose}
                 className="flex h-8 w-8 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover"
@@ -216,17 +216,17 @@ function SelectCohortModal({ open, onClose, onSelect }: { open: boolean; onClose
               {mockCohorts.map((cohort) => (
                 <div key={cohort.id} className="flex items-center justify-between gap-4 px-5 py-4">
                   <div className="flex flex-col gap-1">
-                    <p className="text-[16px] font-medium leading-[1.2] text-gray-dark">{cohort.dates}</p>
-                    <p className="text-[14px] leading-[1.3] text-gray-light">{cohort.days} · {cohort.time}</p>
+                    <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">{cohort.dates}</p>
+                    <p className="text-[12px] leading-[1.3] text-gray-light">{cohort.days} · {cohort.time}</p>
                     {cohort.urgencyTag && (
-                      <span className="mt-0.5 inline-flex w-fit items-center rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-[14px] font-medium text-[#92400E]">
+                      <span className="mt-0.5 inline-flex w-fit items-center rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-[12px] font-medium text-[#92400E]">
                         {cohort.urgencyTag}
                       </span>
                     )}
                   </div>
                   <button
                     onClick={() => { onSelect(); onClose(); }}
-                    className="shrink-0 rounded-lg bg-gray-dark px-4 py-2 text-[15px] font-medium leading-[1.2] text-white transition-colors hover:bg-[#444444]"
+                    className="shrink-0 rounded-lg bg-gray-dark px-4 py-2 text-[13px] font-medium leading-[1.2] text-white transition-colors hover:bg-[#444444]"
                   >
                     Enroll
                   </button>
@@ -236,7 +236,7 @@ function SelectCohortModal({ open, onClose, onSelect }: { open: boolean; onClose
 
             {/* Footer */}
             <div className="border-t border-gray-stroke px-5 py-4">
-              <p className="text-[14px] text-gray-light">
+              <p className="text-[12px] text-gray-light">
                 Don't see a time that works?{" "}
                 <a href="#" className="font-medium text-gray-dark underline">Get notified about future cohorts</a>
               </p>
@@ -290,7 +290,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
     <div ref={calendarRef} className="relative">
       <button
         onClick={() => setCalendarOpen((o) => !o)}
-        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-stroke bg-white px-3 py-2 text-[14px] font-medium leading-[1.2] text-gray-dark transition-colors hover:bg-gray-hover"
+        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-stroke bg-white px-3 py-2 text-[12px] font-medium leading-[1.2] text-gray-dark transition-colors hover:bg-gray-hover"
       >
         <img src={calendarIcon} alt="" className="h-4 w-4 shrink-0" />
         Add all to calendar
@@ -305,10 +305,10 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
             className="absolute left-0 top-full z-50 mt-2 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
           >
             <div className="px-2 py-2">
-              <button className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
+              <button className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
                 Google Calendar
               </button>
-              <button className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
+              <button className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
                 iCal
               </button>
             </div>
@@ -347,8 +347,8 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
         className={`flex w-full cursor-pointer items-center gap-3 bg-white px-4 py-3${boxed ? " border-t border-gray-stroke" : ""}`}
       >
         <span className="flex-1 text-left leading-[1.2]">
-          <span className="text-[16px] font-medium text-gray-dark">{course.sessions.length} Sessions</span>
-          <span className="ml-2 text-[16px] font-normal text-gray-light">{course.cohortDates}</span>
+          <span className="text-[14px] font-medium text-gray-dark">{course.sessions.length} Sessions</span>
+          <span className="ml-2 text-[14px] font-normal text-gray-light">{course.cohortDates}</span>
         </span>
         <svg
           width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -367,7 +367,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
               {!isCompleted && nextSession && (
                 <button
                   onClick={() => setCohortModalOpen(true)}
-                  className="ml-auto inline-flex items-center py-2 text-[14px] text-gray-light underline transition-colors hover:text-gray-dark"
+                  className="ml-auto inline-flex items-center py-2 text-[12px] text-gray-light underline transition-colors hover:text-gray-dark"
                 >
                   Switch cohort
                 </button>
@@ -398,7 +398,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
             className={`aspect-[120/63] w-full rounded-lg object-cover${isCompleted ? " opacity-50" : ""}`}
           />
           {isCompleted && (
-            <span className="absolute bottom-2 left-2 rounded-md bg-white px-2 py-1 text-[14px] font-medium text-gray-dark shadow-sm">
+            <span className="absolute bottom-2 left-2 rounded-md bg-white px-2 py-1 text-[12px] font-medium text-gray-dark shadow-sm">
               Complete
             </span>
           )}
@@ -407,8 +407,8 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
         <div className="flex min-w-0 flex-1 flex-col gap-1 md:flex-[1_0_0] md:gap-0">
           <div className="flex md:flex-1 md:items-center">
             <div>
-              <p className="text-[14px] font-medium uppercase tracking-[1.4px] text-gray-light">Live cohort</p>
-              <p className="mt-1 line-clamp-2 text-[20px] font-medium leading-[1.2] text-gray-dark md:line-clamp-1 md:text-[24px]">{course.title}</p>
+              <p className="text-[12px] font-medium uppercase tracking-[1.4px] text-gray-light">Live cohort</p>
+              <p className="mt-1 line-clamp-2 text-[18px] font-medium leading-[1.2] text-gray-dark md:line-clamp-1 md:text-[22px]">{course.title}</p>
             </div>
           </div>
           {/* Buttons: desktop only */}
@@ -427,7 +427,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
           {header}
           {nextAction && (
             <button className="flex w-full items-center justify-between border-t border-gray-stroke bg-primary-xlight px-4 py-3 text-left transition-colors hover:brightness-95">
-              <span className="text-[16px] font-medium text-gray-dark">{nextAction}</span>
+              <span className="text-[14px] font-medium text-gray-dark">{nextAction}</span>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-dark-green">
                 <polyline points="9 18 15 12 9 6" />
               </svg>
@@ -442,7 +442,7 @@ export default function LiveCourseCard({ course, boxed }: { course: LiveCourse; 
             <div className="mt-4 overflow-hidden rounded-xl border border-gray-stroke">
               {nextAction && (
                 <button className="flex w-full items-center justify-between border-t border-gray-stroke px-4 py-3 text-left transition-colors hover:bg-gray-hover">
-                  <span className="text-[14px] font-medium text-primary">{nextAction}</span>
+                  <span className="text-[12px] font-medium text-primary">{nextAction}</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-primary">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>

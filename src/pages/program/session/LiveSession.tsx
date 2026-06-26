@@ -12,7 +12,7 @@ const MOCK_URNS: { urn: string; label: string }[] = [
 
 function StateSwitcher({ activeUrn }: { activeUrn?: string }) {
   return (
-    <div className="mt-6 flex flex-wrap items-center gap-2 text-[12px] text-gray-light">
+    <div className="mt-6 flex flex-wrap items-center gap-2 text-[10px] text-gray-light">
       <span className="font-medium uppercase tracking-[0.12em]">Preview state:</span>
       {MOCK_URNS.map((m) => {
         const active = activeUrn === m.urn;

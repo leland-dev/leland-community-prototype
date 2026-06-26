@@ -174,11 +174,11 @@ export default function OfferingCard({
           className="hidden @[380px]:block ml-3 w-[64px] shrink-0 object-contain"
         />
         <div className="flex min-w-0 flex-1 flex-col gap-[2px] py-4 pl-3">
-          <p className="truncate text-[18px] leading-tight font-medium text-gray-dark">{title}</p>
-          <p className="truncate text-[16px] leading-tight text-[#707070]">{subtitle}</p>
+          <p className="truncate text-[16px] leading-tight font-semibold text-gray-dark">{title}</p>
+          <p className="truncate text-[14px] leading-tight text-[#707070]">{subtitle}</p>
         </div>
         <div className="flex shrink-0 items-center pr-2 py-4">
-          <button className="hidden @[448px]:flex cursor-pointer items-center gap-2 rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+          <button className="hidden @[448px]:flex cursor-pointer items-center gap-2 rounded-lg bg-[#038561] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#038561]/90">
             {label}
           </button>
         </div>
@@ -227,10 +227,10 @@ export default function OfferingCard({
 
         {/* Title + subtitle */}
         <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
-          <p className={`truncate ${isSmall ? "text-[16px]" : "text-[18px]"} leading-tight font-medium text-gray-dark`}>
+          <p className={`truncate ${isSmall ? "text-[14px]" : "text-[16px]"} leading-tight font-semibold text-gray-dark`}>
             {title}
           </p>
-          <p className={`truncate ${isSmall ? "text-[14px]" : "text-[16px]"} leading-tight text-[#707070]`}>
+          <p className={`truncate ${isSmall ? "text-[12px]" : "text-[14px]"} leading-tight text-[#707070]`}>
             {subtitle}
           </p>
         </div>
@@ -240,12 +240,12 @@ export default function OfferingCard({
           <button
             disabled={cta.disabled}
             onClick={(e) => e.stopPropagation()}
-            className={`hidden @[448px]:flex items-center gap-2 rounded-lg px-4 py-2.5 text-[16px] font-medium transition-colors ${
+            className={`hidden @[448px]:flex items-center gap-2 rounded-lg px-4 py-2.5 text-[14px] transition-colors ${
               cta.disabled
-                ? "bg-[#222222]/5 text-[#9B9B9B] cursor-default"
+                ? "bg-[#222222]/5 text-[#9B9B9B] cursor-default font-medium"
                 : cta.green
-                  ? "cursor-pointer bg-[#038561] text-white hover:bg-[#038561]/90"
-                  : "cursor-pointer bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
+                  ? "cursor-pointer bg-[#038561] text-white hover:bg-[#038561]/90 font-medium"
+                  : "cursor-pointer bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08] font-semibold"
             }`}
           >
             {label}
@@ -274,7 +274,7 @@ export default function OfferingCard({
                       {menuItems.map(({ icon, label: menuLabel, danger }) => (
                         <button
                           key={menuLabel}
-                          className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[16px] font-medium transition-colors ${
+                          className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium transition-colors ${
                             danger
                               ? "text-[#D92D20] hover:bg-gray-hover"
                               : "text-gray-dark hover:bg-gray-hover"

@@ -50,7 +50,7 @@ export default function B2BMobileSidebar({ open, onClose, activeView, onNavigate
                 alt="Katie Brown"
                 className="h-10 w-10 rounded-full object-cover"
               />
-              <p className="mt-3 text-[16px] font-semibold text-gray-dark">Katie Brown</p>
+              <p className="mt-3 text-[14px] font-semibold text-gray-dark">Katie Brown</p>
               <p className="text-sm text-gray-light">katie.brown@kellogg.edu</p>
             </div>
 
@@ -60,7 +60,7 @@ export default function B2BMobileSidebar({ open, onClose, activeView, onNavigate
                 <button
                   key={item.key}
                   onClick={() => handleNav(item.key)}
-                  className={`flex w-full items-center gap-[10px] px-5 py-3 text-[16px] font-medium transition-colors ${
+                  className={`flex w-full items-center gap-[10px] px-5 py-3 text-[14px] font-medium transition-colors ${
                     activeView === item.key
                       ? "bg-[#222222]/5 text-gray-dark"
                       : "text-gray-dark hover:bg-gray-hover"
@@ -73,7 +73,7 @@ export default function B2BMobileSidebar({ open, onClose, activeView, onNavigate
               {activeView === "settings" ? (
                 <button
                   onClick={() => { handleNav("overview"); }}
-                  className="flex w-full items-center gap-[10px] px-5 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                  className="flex w-full items-center gap-[10px] px-5 py-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                 >
                   <img src={layoutGridIcon} alt="" className="h-6 w-6 shrink-0" />
                   Overview
@@ -81,7 +81,7 @@ export default function B2BMobileSidebar({ open, onClose, activeView, onNavigate
               ) : (
                 <button
                   onClick={() => { onNavigateSettings(); onClose(); }}
-                  className="flex w-full items-center gap-[10px] px-5 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                  className="flex w-full items-center gap-[10px] px-5 py-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                 >
                   <img src={settingsIcon} alt="" className="h-6 w-6 shrink-0" />
                   Admin Settings
@@ -93,11 +93,11 @@ export default function B2BMobileSidebar({ open, onClose, activeView, onNavigate
             <div className="mx-4 flex flex-col items-center py-6">
               <div className="flex w-full items-center gap-[6px]">
                 <div className="h-px flex-1 bg-gray-stroke" />
-                <span className="whitespace-nowrap text-[14px] font-normal uppercase tracking-[0.1em] text-[#9B9B9B]">Provisioned for</span>
+                <span className="whitespace-nowrap text-[12px] font-normal uppercase tracking-[0.1em] text-[#9B9B9B]">Provisioned for</span>
                 <div className="h-px flex-1 bg-gray-stroke" />
               </div>
               {showVerizon ? (
-                <span className="mt-5 text-[22px] font-bold tracking-tight text-[#CD040B]">Verizon</span>
+                <span className="mt-5 text-[20px] font-bold tracking-tight text-[#CD040B]">Verizon</span>
               ) : (
                 <img src={kelloggLogo} alt="Kellogg School of Management" className="mt-5 max-h-16 max-w-[60%]" />
               )}

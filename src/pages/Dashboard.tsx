@@ -155,16 +155,16 @@ export default function Dashboard() {
         </div>
         {/* Body */}
         <div className="px-4 pb-5 pt-12">
-          <p className="text-[19px] font-medium leading-tight text-gray-dark">Jamie Allen</p>
-          <p className="mt-0.5 text-[15px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
+          <p className="text-[17px] font-medium leading-tight text-gray-dark">Jamie Allen</p>
+          <p className="mt-0.5 text-[13px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
           <div className="mt-3 flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <img src={orgGoogle} alt="Google" className="h-[20px] w-[20px] shrink-0 rounded-[4px] object-contain" />
-              <span className="text-[14px] text-gray-light">Product Manager at Google</span>
+              <span className="text-[12px] text-gray-light">Product Manager at Google</span>
             </div>
             <div className="flex items-center gap-2">
               <img src={orgHBS} alt="HBS" className="h-[20px] w-[20px] shrink-0 rounded-[4px] object-contain" />
-              <span className="text-[14px] text-gray-light">Studied at Harvard Business School</span>
+              <span className="text-[12px] text-gray-light">Studied at Harvard Business School</span>
             </div>
           </div>
         </div>
@@ -179,7 +179,7 @@ export default function Dashboard() {
   if (layoutVersion === 2) {
     rightSidebarContent = (
       <div className="pt-6">
-        <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+        <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
           Upcoming Sessions
         </h2>
         <div className="mt-3">
@@ -187,21 +187,21 @@ export default function Dashboard() {
             {upcomingEvents.map((event, i) => (
               <div key={i} className="flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
                 <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
-                  <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">
+                  <div className="w-full bg-[#F5F5F5] text-center text-[10px] font-medium uppercase tracking-[0.05em] text-[#707070]">
                     {event.day}
                   </div>
-                  <div className="w-full pt-0.5 pb-1 text-center text-[19px] font-medium leading-tight text-[#707070]">
+                  <div className="w-full pt-0.5 pb-1 text-center text-[17px] font-medium leading-tight text-[#707070]">
                     {event.date}
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[16px] font-medium text-gray-dark">{event.title}</p>
-                  <p className="text-[14px] text-[#707070]">
+                  <p className="text-[14px] font-medium text-gray-dark">{event.title}</p>
+                  <p className="text-[12px] text-[#707070]">
                     {event.dateTime}
                   </p>
                 </div>
                 {event.isNow && (
-                  <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                  <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#038561]/90">
                     Join
                   </button>
                 )}
@@ -211,7 +211,7 @@ export default function Dashboard() {
 
           <button
             onClick={() => setPastOpen(!pastOpen)}
-            className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+            className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
           >
             {pastOpen ? "Hide past sessions" : "View past sessions"}
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${pastOpen ? "rotate-180" : ""}`}>
@@ -224,21 +224,21 @@ export default function Dashboard() {
               {pastEvents.map((event, i) => (
                 <div key={i} className="group flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
                   <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white opacity-50 shadow-[0_1px_2px_0_rgba(16,24,40,0.05)] transition-opacity group-hover:opacity-100">
-                    <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">
+                    <div className="w-full bg-[#F5F5F5] text-center text-[10px] font-medium uppercase tracking-[0.05em] text-[#707070]">
                       {event.dateTime.split(" ")[0].toUpperCase().slice(0, 3)}
                     </div>
-                    <div className="w-full pt-0.5 pb-1 text-center text-[19px] font-medium leading-tight text-[#707070]">
+                    <div className="w-full pt-0.5 pb-1 text-center text-[17px] font-medium leading-tight text-[#707070]">
                       {event.dateTime.match(/\w+ (\d+)/)?.[1]}
                     </div>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[16px] font-medium text-[#707070]">{event.title}</p>
-                    <p className="text-[14px] text-[#707070]">
+                    <p className="text-[14px] font-medium text-[#707070]">{event.title}</p>
+                    <p className="text-[12px] text-[#707070]">
                       {event.dateTime}
                     </p>
                   </div>
                   {event.hasRecording && (
-                    <button className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
+                    <button className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
                       <img src={arrowRoundIcon} alt="" className="h-5 w-5" />
                       Rewatch
                     </button>
@@ -253,7 +253,7 @@ export default function Dashboard() {
   } else if (layoutVersion === 3) {
     rightSidebarContent = (
       <div className="pt-6">
-        <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+        <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
           My Content
         </h2>
         <div className="mt-3 flex flex-wrap gap-[6px]">
@@ -261,7 +261,7 @@ export default function Dashboard() {
             <button
               key={tab}
               onClick={() => setContentFilter(tab)}
-              className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+              className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-medium text-[#222222] ${
                 contentFilter === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
               }`}
             >
@@ -286,7 +286,7 @@ export default function Dashboard() {
       <div className="flex flex-wrap gap-[6px]">
         <button
           onClick={() => setActiveTab("dashboard")}
-          className={`flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+          className={`flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-medium text-[#222222] ${
             activeTab === "dashboard" ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
           }`}
         >
@@ -295,7 +295,7 @@ export default function Dashboard() {
         </button>
         <button
           onClick={() => setActiveTab("activity")}
-          className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[14px] font-medium text-[#222222] ${
+          className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-medium text-[#222222] ${
             activeTab === "activity" ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
           }`}
         >
@@ -307,7 +307,7 @@ export default function Dashboard() {
         <>
           {/* Upcoming Sessions */}
           <section className="mt-8">
-            <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+            <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
               Upcoming Sessions
             </h2>
             <div className="mt-3">
@@ -316,22 +316,22 @@ export default function Dashboard() {
                   <div key={i} className="flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
                     <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[18px] font-medium text-gray-dark">{event.title}</p>
-                      <p className="text-[16px] text-[#707070]">
+                      <p className="text-[16px] font-medium text-gray-dark">{event.title}</p>
+                      <p className="text-[14px] text-[#707070]">
                         {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center self-stretch">
                       {event.isNow ? (
-                        <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                        <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#038561]/90">
                           Join
                         </button>
                       ) : (
                         <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
-                          <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">
+                          <div className="w-full bg-[#F5F5F5] text-center text-[10px] font-medium uppercase tracking-[0.05em] text-[#707070]">
                             {event.day}
                           </div>
-                          <div className="w-full pt-0.5 pb-1 text-center text-[19px] font-medium leading-tight text-[#707070]">
+                          <div className="w-full pt-0.5 pb-1 text-center text-[17px] font-medium leading-tight text-[#707070]">
                             {event.date}
                           </div>
                         </div>
@@ -343,7 +343,7 @@ export default function Dashboard() {
 
               <button
                 onClick={() => setPastOpen(!pastOpen)}
-                className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
               >
                 {pastOpen ? "Hide past sessions" : "View past sessions"}
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${pastOpen ? "rotate-180" : ""}`}>
@@ -357,14 +357,14 @@ export default function Dashboard() {
                     <div key={i} className="group flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
                       <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover opacity-50 transition-opacity group-hover:opacity-100" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-[18px] font-medium text-[#707070]">{event.title}</p>
-                        <p className="text-[16px] text-[#707070]">
+                        <p className="text-[16px] font-medium text-[#707070]">{event.title}</p>
+                        <p className="text-[14px] text-[#707070]">
                           {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
                         </p>
                       </div>
                       {event.hasRecording && (
                         <div className="flex shrink-0 items-center self-stretch">
-                          <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
+                          <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
                             <img src={arrowRoundIcon} alt="" className="h-5 w-5" />
                             Rewatch
                           </button>
@@ -379,7 +379,7 @@ export default function Dashboard() {
 
           {/* My Courses */}
           <section className="mt-12">
-            <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+            <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
               My live programs
             </h2>
             <div className="mt-3 flex flex-col gap-4">
@@ -391,7 +391,7 @@ export default function Dashboard() {
 
           {/* My Goals */}
           <section className="mt-12">
-            <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+            <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
               My Goals
             </h2>
             <div className="scrollbar-hide -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
@@ -421,13 +421,13 @@ export default function Dashboard() {
 
   const v2v3Content = (
     <>
-      <h1 className="text-[32px] font-medium text-gray-dark md:text-[40px]">
+      <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">
         Welcome back, Alex
       </h1>
 
       {/* My Goals */}
       <section className="mt-8">
-        <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+        <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
           My Goals
         </h2>
         <div className="scrollbar-hide -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
@@ -445,7 +445,7 @@ export default function Dashboard() {
       {/* Upcoming Sessions — V3 shows inline */}
       {layoutVersion === 3 && (
         <section className="mt-12">
-          <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+          <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
             Upcoming Sessions
           </h2>
           <div className="mt-3">
@@ -454,22 +454,22 @@ export default function Dashboard() {
                 <div key={i} className="flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
                   <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[18px] font-medium text-gray-dark">{event.title}</p>
-                    <p className="text-[16px] text-[#707070]">
+                    <p className="text-[16px] font-medium text-gray-dark">{event.title}</p>
+                    <p className="text-[14px] text-[#707070]">
                       {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center self-stretch">
                     {event.isNow ? (
-                      <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                      <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#038561]/90">
                         Join
                       </button>
                     ) : (
                       <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
-                        <div className="w-full bg-[#F5F5F5] text-center text-[12px] font-medium uppercase tracking-[0.05em] text-[#707070]">
+                        <div className="w-full bg-[#F5F5F5] text-center text-[10px] font-medium uppercase tracking-[0.05em] text-[#707070]">
                           {event.day}
                         </div>
-                        <div className="w-full pt-0.5 pb-1 text-center text-[19px] font-medium leading-tight text-[#707070]">
+                        <div className="w-full pt-0.5 pb-1 text-center text-[17px] font-medium leading-tight text-[#707070]">
                           {event.date}
                         </div>
                       </div>
@@ -481,7 +481,7 @@ export default function Dashboard() {
 
             <button
               onClick={() => setPastOpen(!pastOpen)}
-              className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+              className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
             >
               {pastOpen ? "Hide past sessions" : "View past sessions"}
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${pastOpen ? "rotate-180" : ""}`}>
@@ -495,14 +495,14 @@ export default function Dashboard() {
                   <div key={i} className="group flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
                     <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover opacity-50 transition-opacity group-hover:opacity-100" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[18px] font-medium text-[#707070]">{event.title}</p>
-                      <p className="text-[16px] text-[#707070]">
+                      <p className="text-[16px] font-medium text-[#707070]">{event.title}</p>
+                      <p className="text-[14px] text-[#707070]">
                         {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
                       </p>
                     </div>
                     {event.hasRecording && (
                       <div className="flex shrink-0 items-center self-stretch">
-                        <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[16px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
+                        <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
                           <img src={arrowRoundIcon} alt="" className="h-5 w-5" />
                           Rewatch
                         </button>
@@ -518,7 +518,7 @@ export default function Dashboard() {
 
       {/* My Courses */}
       <section className="mt-12">
-        <h2 className="text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+        <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
           My Courses
         </h2>
         <div className="mt-3 flex flex-col gap-4">
@@ -530,7 +530,7 @@ export default function Dashboard() {
 
       {/* My Experts — V2 and V3 show inline */}
       <section className="mt-12">
-        <a href="#" className="flex items-center gap-1.5 text-[14px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
+        <a href="#" className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
           My Experts
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -565,25 +565,25 @@ export default function Dashboard() {
               transition={{ duration: 0.15 }}
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
-              <div className="mb-1.5 px-2 pt-1 text-[11px] font-medium uppercase tracking-wider text-[#9b9b9b]">
+              <div className="mb-1.5 px-2 pt-1 text-[10px] font-medium uppercase tracking-wider text-[#9b9b9b]">
                 Layout
               </div>
               <div className="mx-2 mb-2 flex rounded-lg bg-[#f5f5f5] p-[3px]">
                 <button
                   onClick={() => setLayoutVersion(1)}
-                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[14px] font-medium transition-colors ${layoutVersion === 1 ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
+                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[12px] font-medium transition-colors ${layoutVersion === 1 ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
                 >
                   V1
                 </button>
                 <button
                   onClick={() => setLayoutVersion(2)}
-                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[14px] font-medium transition-colors ${layoutVersion === 2 ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
+                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[12px] font-medium transition-colors ${layoutVersion === 2 ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
                 >
                   V2
                 </button>
                 <button
                   onClick={() => setLayoutVersion(3)}
-                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[14px] font-medium transition-colors ${layoutVersion === 3 ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
+                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[12px] font-medium transition-colors ${layoutVersion === 3 ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
                 >
                   V3
                 </button>

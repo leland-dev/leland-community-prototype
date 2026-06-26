@@ -81,10 +81,10 @@ export default function B2BUtilization({
     <>
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-[40px] font-medium text-gray-dark">1:1 Sessions</h1>
-          <p className="mt-2 text-[18px] text-[#707070]">Session-level tracking for all submitted users</p>
+          <h1 className="text-[38px] font-medium text-gray-dark">1:1 Sessions</h1>
+          <p className="mt-2 text-[16px] text-[#707070]">Session-level tracking for all submitted users</p>
         </div>
-        <button className="inline-flex items-center gap-[6px] rounded-lg border border-gray-stroke bg-white px-[14px] py-[7px] text-[13px] font-semibold text-gray-dark hover:bg-gray-hover">
+        <button className="inline-flex items-center gap-[6px] rounded-lg border border-gray-stroke bg-white px-[14px] py-[7px] text-[11px] font-semibold text-gray-dark hover:bg-gray-hover">
           <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
@@ -95,7 +95,7 @@ export default function B2BUtilization({
       <div className="mb-5 grid grid-cols-4 gap-4">
         <StatCard
           label="Sessions Completed"
-          value={<>251 <span className="text-[16px] font-bold text-gray-light">/ 300</span></>}
+          value={<>251 <span className="text-[14px] font-bold text-gray-light">/ 300</span></>}
           sub="84% utilization"
           subColor="text-primary"
         />
@@ -124,7 +124,7 @@ export default function B2BUtilization({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35" />
             </svg>
             <input
-              className="w-full rounded-lg border border-gray-stroke bg-gray-hover py-[7px] pl-8 pr-[10px] text-[13px] text-gray-dark outline-none focus:border-primary focus:bg-white"
+              className="w-full rounded-lg border border-gray-stroke bg-gray-hover py-[7px] pl-8 pr-[10px] text-[11px] text-gray-dark outline-none focus:border-primary focus:bg-white"
               placeholder="Search users..."
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -134,7 +134,7 @@ export default function B2BUtilization({
               <button
                 key={f.key}
                 onClick={() => onSetUtilFilter(f.key)}
-                className={`rounded-full border px-3 py-[5px] text-[12px] font-medium transition-colors ${
+                className={`rounded-full border px-3 py-[5px] text-[10px] font-medium transition-colors ${
                   utilFilter === f.key
                     ? "border-dark-green bg-dark-green text-white"
                     : "border-gray-stroke bg-white text-gray-light hover:bg-gray-hover"
@@ -145,7 +145,7 @@ export default function B2BUtilization({
             ))}
           </div>
           <select
-            className="ml-auto h-8 w-auto rounded-lg border border-gray-stroke bg-white px-[10px] py-[5px] text-[12px] text-gray-dark outline-none focus:border-primary"
+            className="ml-auto h-8 w-auto rounded-lg border border-gray-stroke bg-white px-[10px] py-[5px] text-[10px] text-gray-dark outline-none focus:border-primary"
             value={adminFilter}
             onChange={(e) => setAdminFilter(e.target.value)}
           >
@@ -156,7 +156,7 @@ export default function B2BUtilization({
           </select>
           <button
             onClick={handleEmailAll}
-            className="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-lg border border-gray-stroke bg-white px-[10px] py-[5px] text-[12px] font-semibold text-gray-dark hover:bg-gray-hover"
+            className="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-lg border border-gray-stroke bg-white px-[10px] py-[5px] text-[10px] font-semibold text-gray-dark hover:bg-gray-hover"
           >
             <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -167,13 +167,13 @@ export default function B2BUtilization({
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="b2b-table w-full border-collapse text-[13px]">
+          <table className="b2b-table w-full border-collapse text-[11px]">
             <thead>
               <tr>
                 {["", "User", "Track", "Granted", "Coach", "Matched", "Session Status", "Rating", "Last Active", ""].map((h, i) => (
                   <th
                     key={i}
-                    className="whitespace-nowrap border-b border-gray-stroke bg-white px-[14px] py-[10px] text-left text-[11px] font-bold uppercase tracking-[0.06em] text-gray-xlight"
+                    className="whitespace-nowrap border-b border-gray-stroke bg-white px-[14px] py-[10px] text-left text-[10px] font-bold uppercase tracking-[0.06em] text-gray-xlight"
                     style={i === 0 ? { width: 20 } : undefined}
                   >
                     {h}
@@ -193,7 +193,7 @@ export default function B2BUtilization({
                       className="b2b-util-expand cursor-pointer"
                       onClick={() => toggleRow(u.id)}
                     >
-                      <td className="border-b border-gray-hover px-[14px] py-[11px] text-[12px] text-gray-xlight">
+                      <td className="border-b border-gray-hover px-[14px] py-[11px] text-[10px] text-gray-xlight">
                         {expanded ? "\u25bc" : "\u25b6"}
                       </td>
                       <td className="border-b border-gray-hover px-[14px] py-[11px] font-medium text-gray-dark">
@@ -201,23 +201,23 @@ export default function B2BUtilization({
                       </td>
                       <td className="border-b border-gray-hover px-[14px] py-[11px]">
                         {u.offering === "\u2014" ? (
-                          <span className="text-[12px] text-gray-xlight">&mdash;</span>
+                          <span className="text-[10px] text-gray-xlight">&mdash;</span>
                         ) : d ? (
-                          <span className="flex items-center gap-[5px] text-[12px] font-medium">
+                          <span className="flex items-center gap-[5px] text-[10px] font-medium">
                             <span className={`h-[7px] w-[7px] shrink-0 rounded-full ${d.dotClass}`} />
                             {d.track}
                           </span>
                         ) : (
-                          <span className="text-[12px] text-gray-xlight">&mdash;</span>
+                          <span className="text-[10px] text-gray-xlight">&mdash;</span>
                         )}
                       </td>
-                      <td className="border-b border-gray-hover px-[14px] py-[11px] text-[12px] text-gray-light">
+                      <td className="border-b border-gray-hover px-[14px] py-[11px] text-[10px] text-gray-light">
                         {u.granted}
                       </td>
-                      <td className="border-b border-gray-hover px-[14px] py-[11px] text-[12px] text-gray-light">
+                      <td className="border-b border-gray-hover px-[14px] py-[11px] text-[10px] text-gray-light">
                         {u.coach}
                       </td>
-                      <td className="border-b border-gray-hover px-[14px] py-[11px] text-[12px] text-gray-xlight">
+                      <td className="border-b border-gray-hover px-[14px] py-[11px] text-[10px] text-gray-xlight">
                         {u.matched}
                       </td>
                       <td className="border-b border-gray-hover px-[14px] py-[11px]">
@@ -226,16 +226,16 @@ export default function B2BUtilization({
                       <td className="border-b border-gray-hover px-[14px] py-[11px]">
                         {u.rating ? (
                           <>
-                            <span className="text-[12px] tracking-[1px] text-yellow">
+                            <span className="text-[10px] tracking-[1px] text-yellow">
                               {"\u2605".repeat(Math.round(u.rating))}
                             </span>{" "}
-                            <span className="text-[12px] text-gray-xlight">{u.rating}</span>
+                            <span className="text-[10px] text-gray-xlight">{u.rating}</span>
                           </>
                         ) : (
-                          <span className="text-[12px] text-gray-xlight">&mdash;</span>
+                          <span className="text-[10px] text-gray-xlight">&mdash;</span>
                         )}
                       </td>
-                      <td className="border-b border-gray-hover px-[14px] py-[11px] text-[12px] text-gray-xlight">
+                      <td className="border-b border-gray-hover px-[14px] py-[11px] text-[10px] text-gray-xlight">
                         {u.lastActive}
                       </td>
                       <td
@@ -257,10 +257,10 @@ export default function B2BUtilization({
                       <tr className="bg-gray-hover">
                         <td colSpan={10} className="px-[14px] py-3 pl-[42px]">
                           <div className="flex max-w-[720px] gap-3">
-                            <div className="flex-1 rounded-lg border border-gray-stroke bg-white p-[12px_14px] text-[12px] leading-[1.5] text-gray-light">
+                            <div className="flex-1 rounded-lg border border-gray-stroke bg-white p-[12px_14px] text-[10px] leading-[1.5] text-gray-light">
                               <strong className="text-gray-dark">Session Summary:</strong> {u.summary}
                             </div>
-                            <div className="flex-1 rounded-lg border border-gray-stroke bg-white p-[12px_14px] text-[12px] leading-[1.5] text-gray-light">
+                            <div className="flex-1 rounded-lg border border-gray-stroke bg-white p-[12px_14px] text-[10px] leading-[1.5] text-gray-light">
                               <strong className="text-gray-dark">Review Rating:</strong>{" "}
                               {u.review || <span className="text-gray-xlight">No review submitted yet.</span>}
                             </div>

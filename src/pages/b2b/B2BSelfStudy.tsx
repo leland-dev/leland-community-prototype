@@ -43,10 +43,10 @@ export default function B2BSelfStudy() {
     <>
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-[40px] font-medium text-gray-dark">Self-Study Courses</h1>
-          <p className="mt-[2px] text-[18px] text-[#707070]">Online course access tracking for all enrolled users</p>
+          <h1 className="text-[38px] font-medium text-gray-dark">Self-Study Courses</h1>
+          <p className="mt-[2px] text-[16px] text-[#707070]">Online course access tracking for all enrolled users</p>
         </div>
-        <button className="inline-flex items-center gap-[6px] rounded-lg border border-gray-stroke bg-white px-[14px] py-[7px] text-[13px] font-semibold text-gray-dark hover:bg-gray-hover">
+        <button className="inline-flex items-center gap-[6px] rounded-lg border border-gray-stroke bg-white px-[14px] py-[7px] text-[11px] font-semibold text-gray-dark hover:bg-gray-hover">
           <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
@@ -57,12 +57,12 @@ export default function B2BSelfStudy() {
       <div className="mb-5 grid grid-cols-4 gap-4">
         <StatCard
           label="Students Enrolled"
-          value={<>74 <span className="text-[16px] font-bold text-gray-light">/ 89</span></>}
+          value={<>74 <span className="text-[14px] font-bold text-gray-light">/ 89</span></>}
           sub="83% enrollment rate"
         />
         <StatCard
           label="Total Completions"
-          value={<>45 <span className="text-[16px] font-bold text-gray-light">/ 74</span></>}
+          value={<>45 <span className="text-[14px] font-bold text-gray-light">/ 74</span></>}
           sub="61% completion rate"
           subColor="text-primary"
         />
@@ -83,11 +83,11 @@ export default function B2BSelfStudy() {
           onFilter={setFilter}
         />
         <div className="overflow-x-auto">
-          <table className="b2b-table w-full border-collapse text-[13px]">
+          <table className="b2b-table w-full border-collapse text-[11px]">
             <thead>
               <tr>
                 {["User", "Course", "Enrolled", "Status", ""].map((h) => (
-                  <th key={h} className="whitespace-nowrap border-b border-gray-stroke bg-white px-[14px] py-[10px] text-left text-[11px] font-bold uppercase tracking-[0.06em] text-gray-xlight">
+                  <th key={h} className="whitespace-nowrap border-b border-gray-stroke bg-white px-[14px] py-[10px] text-left text-[10px] font-bold uppercase tracking-[0.06em] text-gray-xlight">
                     {h}
                   </th>
                 ))}
@@ -100,13 +100,13 @@ export default function B2BSelfStudy() {
                     <div className="flex items-center gap-2">
                       <Avatar initials={r.initials} bg={r.bg} color="text-white" size={28} />
                       <div>
-                        <div className="text-[13px] font-medium">{r.name}</div>
-                        <div className="text-[11px] text-gray-xlight">{r.email}</div>
+                        <div className="text-[11px] font-medium">{r.name}</div>
+                        <div className="text-[10px] text-gray-xlight">{r.email}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="border-b border-gray-hover px-[14px] py-[11px] text-[13px]">{r.course}</td>
-                  <td className="border-b border-gray-hover px-[14px] py-[11px] text-[12px] text-gray-xlight">{r.enrolled}</td>
+                  <td className="border-b border-gray-hover px-[14px] py-[11px] text-[11px]">{r.course}</td>
+                  <td className="border-b border-gray-hover px-[14px] py-[11px] text-[10px] text-gray-xlight">{r.enrolled}</td>
                   <td className="border-b border-gray-hover px-[14px] py-[11px]">
                     <Pill variant={statusPillMap[r.status] || "gray"}>{r.status}</Pill>
                   </td>

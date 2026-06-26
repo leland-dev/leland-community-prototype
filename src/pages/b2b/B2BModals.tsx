@@ -54,8 +54,8 @@ function B2BModal({
           </div>
         </button>
         <div className="border-b border-gray-stroke px-6 pb-4 pt-5">
-          <h3 className="text-[16px] font-medium text-gray-dark">{title}</h3>
-          {subtitle && <p className="mt-[2px] text-[12px] text-gray-light">{subtitle}</p>}
+          <h3 className="text-[14px] font-medium text-gray-dark">{title}</h3>
+          {subtitle && <p className="mt-[2px] text-[10px] text-gray-light">{subtitle}</p>}
         </div>
         <div className="px-6 py-5">{children}</div>
         <div className="flex justify-end gap-[10px] border-t border-gray-stroke bg-gray-hover px-6 py-[14px]">
@@ -70,18 +70,18 @@ function B2BModal({
 function FormGroup({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <div className="mb-4">
-      <label className="mb-[5px] block text-[12px] font-semibold text-gray-dark">{label}</label>
+      <label className="mb-[5px] block text-[10px] font-semibold text-gray-dark">{label}</label>
       {children}
-      {hint && <div className="mt-1 text-[11px] text-gray-xlight">{hint}</div>}
+      {hint && <div className="mt-1 text-[10px] text-gray-xlight">{hint}</div>}
     </div>
   );
 }
 
-const inputCls = "w-full rounded-lg border border-gray-stroke bg-white px-3 py-2 text-[13px] text-gray-dark outline-none focus:border-primary";
+const inputCls = "w-full rounded-lg border border-gray-stroke bg-white px-3 py-2 text-[11px] text-gray-dark outline-none focus:border-primary";
 const selectCls = inputCls;
 
 function Btn({ variant, children, onClick, className }: { variant: "primary" | "secondary"; children: ReactNode; onClick?: () => void; className?: string }) {
-  const base = "inline-flex items-center gap-[6px] rounded-lg px-6 py-4 text-[16px] font-medium leading-[1.2] transition-all";
+  const base = "inline-flex items-center gap-[6px] rounded-lg px-6 py-4 text-[14px] font-medium leading-[1.2] transition-all";
   const cls =
     variant === "primary"
       ? `${base} bg-[#038561] text-white`
@@ -114,26 +114,26 @@ function ModalCohortSelectRow({ cohort, isEnrolled, onEnroll }: {
     <div className="py-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-0.5">
-          <div className="text-[16px] font-medium text-gray-dark">{cohort.startDate} – {cohort.endDate}</div>
+          <div className="text-[14px] font-medium text-gray-dark">{cohort.startDate} – {cohort.endDate}</div>
           <button
             onClick={() => setExpanded(!expanded)}
-            className="mt-0.5 w-fit cursor-pointer text-[14px] text-gray-light underline hover:text-gray-dark"
+            className="mt-0.5 w-fit cursor-pointer text-[12px] text-gray-light underline hover:text-gray-dark"
           >
             {expanded ? "Hide details" : "View details"}
           </button>
           {expanded && (
             <div className="mt-2 flex flex-col gap-1.5">
-              <div className="flex items-center gap-2 text-[14px] text-gray-light">
+              <div className="flex items-center gap-2 text-[12px] text-gray-light">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 {cohort.sessionCount} sessions
               </div>
               {cohort.scheduleDays.map((day, i) => (
-                <div key={i} className="flex items-center gap-2 text-[14px] text-gray-light">
+                <div key={i} className="flex items-center gap-2 text-[12px] text-gray-light">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
                   {day}
                 </div>
               ))}
-              <div className="flex items-center gap-2 text-[14px] text-gray-light">
+              <div className="flex items-center gap-2 text-[12px] text-gray-light">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 {cohort.duration}
               </div>
@@ -207,7 +207,7 @@ const chevronDown = (
   </div>
 );
 
-const selectCls2 = "h-[48px] w-full appearance-none rounded-[8px] border border-gray-stroke bg-white px-4 pr-10 text-[16px] outline-none focus:border-primary";
+const selectCls2 = "h-[48px] w-full appearance-none rounded-[8px] border border-gray-stroke bg-white px-4 pr-10 text-[14px] outline-none focus:border-primary";
 
 const COHORTS = ["Spring '26 IB Recruiting", "PE Recruiting Bootcamp", "AI for Finance"];
 
@@ -223,13 +223,13 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, c
     <div className="mb-5 rounded-[10px] border border-gray-stroke">
       {/* 1:1 sessions */}
       <div className="flex items-center justify-between gap-4 px-4 py-3">
-        <span className="text-[15px] text-gray-dark">1:1 sessions</span>
+        <span className="text-[13px] text-gray-dark">1:1 sessions</span>
         <div className="flex items-center gap-1">
           <button onClick={() => setSessions(Math.max(0, sessions - 1))} disabled={sessions === 0}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb] disabled:cursor-not-allowed disabled:opacity-30">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
-          <span className="w-6 text-center text-[15px] font-medium text-gray-dark">{sessions}</span>
+          <span className="w-6 text-center text-[13px] font-medium text-gray-dark">{sessions}</span>
           <button onClick={() => setSessions(sessions + 1)}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -238,16 +238,16 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, c
       </div>
       {/* Live courses group */}
       <div className="border-t border-gray-stroke px-4 pb-3 pt-3">
-        <span className="text-[15px] text-gray-dark">Live courses</span>
+        <span className="text-[13px] text-gray-dark">Live courses</span>
         <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
           {COHORTS.map((cohort) => (
             <div key={cohort} className="flex items-start justify-between gap-4 py-1.5">
               <div className="flex flex-col gap-[2px]">
-                <span className="text-[14px] text-gray-light">{cohort}</span>
+                <span className="text-[12px] text-gray-light">{cohort}</span>
                 {cohortInvited[cohort] && (
                   <button
                     onClick={() => onOpenCohortPicker(cohort)}
-                    className="text-left text-[14px] text-gray-xlight underline hover:opacity-70"
+                    className="text-left text-[12px] text-gray-xlight underline hover:opacity-70"
                   >
                     {selectedDates[cohort] ?? "User will select their own cohort"}
                   </button>
@@ -255,14 +255,14 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, c
               </div>
               {cohortInvited[cohort] ? (
                 <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
-                  <span className="text-[14px] font-medium text-[#038561]">Added</span>
+                  <span className="text-[12px] font-medium text-[#038561]">Added</span>
                   <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: false }))} className="text-[#038561] hover:opacity-70">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 </div>
               ) : (
                 <button onClick={() => onOpenCohortPicker(cohort)}
-                  className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+                  className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[12px] font-medium text-gray-dark hover:bg-[#ebebeb]">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   Add
                 </button>
@@ -272,17 +272,17 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, c
         </div>
       </div>
       <div className="flex items-center justify-between gap-4 border-t border-gray-stroke px-4 py-3">
-        <span className="text-[15px] text-gray-dark">Leland+</span>
+        <span className="text-[13px] text-gray-dark">Leland+</span>
         {lelandPlus ? (
           <div className="flex items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
-            <span className="text-[14px] font-medium text-[#038561]">3 months granted</span>
+            <span className="text-[12px] font-medium text-[#038561]">3 months granted</span>
             <button onClick={() => setLelandPlus(false)} className="ml-1 text-[#038561] hover:opacity-70">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
         ) : (
           <button onClick={() => setLelandPlus(true)}
-            className="flex items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+            className="flex items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[12px] font-medium text-gray-dark hover:bg-[#ebebeb]">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Add
           </button>
@@ -320,7 +320,7 @@ function CohortDatePicker({ program, selected, onSelect, onClose }: {
         <button
           key={d}
           onClick={() => { onSelect(d); onClose(); }}
-          className={`flex w-full items-center gap-2 px-3 py-2 text-left text-[14px] transition-colors first:rounded-t-[8px] last:rounded-b-[8px] hover:bg-[#f5f5f5] ${selected === d ? "font-medium text-primary" : "text-gray-dark"}`}
+          className={`flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] transition-colors first:rounded-t-[8px] last:rounded-b-[8px] hover:bg-[#f5f5f5] ${selected === d ? "font-medium text-primary" : "text-gray-dark"}`}
         >
           {selected === d && (
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-primary">
@@ -340,30 +340,30 @@ function PerSeatIncludes({ selectedDates, onOpenCohortPicker }: {
 }) {
   return (
     <div>
-      <p className="mb-5 text-[16px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>
+      <p className="mb-5 text-[14px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>
       <div className="mb-5 rounded-[10px] border border-gray-stroke">
         <div className="flex items-center justify-between gap-4 px-4 py-3">
-          <span className="text-[15px] text-gray-dark">1:1 sessions</span>
-          <span className="text-[15px] font-medium text-gray-dark">2 included</span>
+          <span className="text-[13px] text-gray-dark">1:1 sessions</span>
+          <span className="text-[13px] font-medium text-gray-dark">2 included</span>
         </div>
         <div className="border-t border-gray-stroke px-4 pb-3 pt-3">
           <div className="flex items-center justify-between">
-            <span className="text-[15px] text-gray-dark">Live courses</span>
-            <span className="text-[15px] font-medium text-gray-dark">{CONTRACT_COHORTS_MODAL.length} included</span>
+            <span className="text-[13px] text-gray-dark">Live courses</span>
+            <span className="text-[13px] font-medium text-gray-dark">{CONTRACT_COHORTS_MODAL.length} included</span>
           </div>
           <div className="ml-3 mt-2 border-l-2 border-gray-stroke pl-3">
             {CONTRACT_COHORTS_MODAL.map((cohort) => (
               <div key={cohort} className="flex items-start justify-between gap-4 py-1.5">
                 <div className="flex flex-col gap-[2px]">
-                  <span className="text-[14px] text-gray-light">{cohort}</span>
-                  <span className="text-[14px] text-gray-xlight">{selectedDates[cohort] ?? "User will select their own cohort"}</span>
+                  <span className="text-[12px] text-gray-light">{cohort}</span>
+                  <span className="text-[12px] text-gray-xlight">{selectedDates[cohort] ?? "User will select their own cohort"}</span>
                 </div>
                 {selectedDates[cohort] ? (
-                  <button onClick={() => onOpenCohortPicker(cohort)} className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+                  <button onClick={() => onOpenCohortPicker(cohort)} className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[12px] font-medium text-gray-dark hover:bg-[#ebebeb]">
                     Change
                   </button>
                 ) : (
-                  <button onClick={() => onOpenCohortPicker(cohort)} className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]">
+                  <button onClick={() => onOpenCohortPicker(cohort)} className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-[12px] font-medium text-gray-dark hover:bg-[#ebebeb]">
                     Select dates
                   </button>
                 )}
@@ -372,8 +372,8 @@ function PerSeatIncludes({ selectedDates, onOpenCohortPicker }: {
           </div>
         </div>
         <div className="flex items-center justify-between gap-4 border-t border-gray-stroke px-4 py-3">
-          <span className="text-[15px] text-gray-dark">Leland+</span>
-          <span className="text-[15px] font-medium text-gray-dark">6 months included</span>
+          <span className="text-[13px] text-gray-dark">Leland+</span>
+          <span className="text-[13px] font-medium text-gray-dark">6 months included</span>
         </div>
       </div>
     </div>
@@ -448,7 +448,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <span className="text-[18px] font-medium text-gray-dark">Select cohort</span>
+        <span className="text-[16px] font-medium text-gray-dark">Select cohort</span>
         <button onClick={onClose} className="absolute right-0 top-0 p-2">
           <div className="flex items-center justify-center rounded-full border border-gray-stroke bg-white p-[10px] text-gray-dark hover:bg-gray-hover">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -461,7 +461,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
       <div className="flex-1 overflow-y-auto px-6 py-5">
         <button
           onClick={() => handleCohortPicked(null)}
-          className="mb-5 flex w-full items-center justify-between rounded-lg bg-gray-hover px-4 py-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]"
+          className="mb-5 flex w-full items-center justify-between rounded-lg bg-gray-hover px-4 py-3.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]"
         >
           Invite the user to select their own dates
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
@@ -490,10 +490,10 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
             <polyline points="20 6 9 17 4 12"/>
           </svg>
         </div>
-        <h3 className="mb-3 text-[30px] font-medium text-gray-dark">
+        <h3 className="mb-3 text-[28px] font-medium text-gray-dark">
           {isAlaCarte ? "Access granted!" : mode === "bulk" ? "Invites sent!" : "Invite sent!"}
         </h3>
-        <p className="text-[18px] leading-[1.5] text-gray-light">{successMessage}</p>
+        <p className="text-[16px] leading-[1.5] text-gray-light">{successMessage}</p>
       </div>
       <div className="border-t border-gray-stroke px-6 py-[14px]">
         <Btn variant="primary" onClick={onClose} className="w-full justify-center">Sounds good</Btn>
@@ -504,7 +504,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
   return modalWrapper(
     <>
       <div className="px-6 pb-4 pt-6">
-        <h3 className="text-[30px] font-medium text-gray-dark">{isAlaCarte ? "Grant access" : "Add users"}</h3>
+        <h3 className="text-[28px] font-medium text-gray-dark">{isAlaCarte ? "Grant access" : "Add users"}</h3>
       </div>
 
       {/* Body */}
@@ -515,7 +515,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
             <button
               key={m}
               onClick={() => setMode(m)}
-              className={`rounded-full px-4 py-[6px] text-[14px] font-medium transition-colors ${
+              className={`rounded-full px-4 py-[6px] text-[12px] font-medium transition-colors ${
                 mode === m
                   ? "border-2 border-gray-dark bg-[#f5f5f5] text-gray-dark"
                   : "border border-transparent bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]"
@@ -529,21 +529,21 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
         {mode === "individual" ? (
           <>
             <div className="mb-5">
-              <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Email address</label>
-              <input value={email} onChange={(e) => setEmail(e.target.value)} className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" type="email" />
-              <p className="mt-[6px] text-[14px] text-gray-light">If this email already has a Leland account, they'll be linked automatically.</p>
+              <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">Email address</label>
+              <input value={email} onChange={(e) => setEmail(e.target.value)} className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[14px] text-gray-dark outline-none focus:border-primary" type="email" />
+              <p className="mt-[6px] text-[12px] text-gray-light">If this email already has a Leland account, they'll be linked automatically.</p>
             </div>
             <div className="mb-5 grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">First name</label>
-                <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
+                <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">First name</label>
+                <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[14px] text-gray-dark outline-none focus:border-primary" />
               </div>
               <div>
-                <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Last name</label>
-                <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
+                <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">Last name</label>
+                <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[14px] text-gray-dark outline-none focus:border-primary" />
               </div>
             </div>
-            {isAlaCarte && <p className="mt-8 mb-5 text-[16px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>}
+            {isAlaCarte && <p className="mt-8 mb-5 text-[14px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>}
             {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} cohortInvited={cohortInvited} setCohortInvited={setCohortInvited} selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} /> : <PerSeatIncludes selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} />}
           </>
         ) : (
@@ -554,11 +554,11 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
                 <line x1="12" y1="12" x2="12" y2="21" />
                 <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3" />
               </svg>
-              <span className="text-[15px] font-semibold text-gray-dark">Click to upload CSV</span>
-              <span className="text-[14px] text-gray-light">One email address per row</span>
+              <span className="text-[13px] font-semibold text-gray-dark">Click to upload CSV</span>
+              <span className="text-[12px] text-gray-light">One email address per row</span>
               <input type="file" accept=".csv" className="hidden" />
             </label>
-            <button className="mb-5 flex items-center gap-1.5 text-[14px] font-medium text-primary hover:underline">
+            <button className="mb-5 flex items-center gap-1.5 text-[12px] font-medium text-primary hover:underline">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                 <polyline points="7 10 12 15 17 10" />
@@ -566,19 +566,19 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
               </svg>
               Download template CSV to get started.
             </button>
-            {isAlaCarte && <p className="mt-8 mb-5 text-[16px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>}
+            {isAlaCarte && <p className="mt-8 mb-5 text-[14px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>}
             {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} cohortInvited={cohortInvited} setCohortInvited={setCohortInvited} selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} /> : <PerSeatIncludes selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} />}
           </>
         )}
 
         <div className="mt-6">
-          <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">
+          <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">
             Notes <span className="text-gray-light">(optional)</span>
           </label>
           <textarea
             rows={3}
             placeholder="Add a note for this user..."
-            className="w-full resize-none rounded-[8px] border border-gray-stroke bg-white px-4 py-3 text-[16px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-primary"
+            className="w-full resize-none rounded-[8px] border border-gray-stroke bg-white px-4 py-3 text-[14px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-primary"
           />
         </div>
       </div>
@@ -637,8 +637,8 @@ export function AddAdminModal({ open, onClose, onAdd, existingEmails = [] }: { o
             <polyline points="20 6 9 17 4 12"/>
           </svg>
         </div>
-        <h3 className="mb-3 text-[30px] font-medium text-gray-dark">Invite sent!</h3>
-        <p className="text-[18px] leading-[1.5] text-gray-light">An email has been sent to {email || "the new admin"}.</p>
+        <h3 className="mb-3 text-[28px] font-medium text-gray-dark">Invite sent!</h3>
+        <p className="text-[16px] leading-[1.5] text-gray-light">An email has been sent to {email || "the new admin"}.</p>
       </div>
       <div className="border-t border-gray-stroke px-6 py-[14px]">
         <Btn variant="primary" onClick={onClose} className="w-full justify-center">Sounds good</Btn>
@@ -649,31 +649,31 @@ export function AddAdminModal({ open, onClose, onAdd, existingEmails = [] }: { o
   return modalWrapper(
     <>
       <div className="px-6 pb-4 pt-6">
-        <h3 className="text-[30px] font-medium text-gray-dark">Add admin</h3>
+        <h3 className="text-[28px] font-medium text-gray-dark">Add admin</h3>
       </div>
       <div className="flex-1 overflow-y-auto px-6 pb-2">
         <div className="mb-5">
-          <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Email address</label>
+          <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">Email address</label>
           <input
             value={email}
             onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
-            className={`h-[48px] w-full rounded-[8px] border bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary ${emailError ? "border-[#D92D20]" : "border-gray-stroke"}`}
+            className={`h-[48px] w-full rounded-[8px] border bg-white px-4 text-[14px] text-gray-dark outline-none focus:border-primary ${emailError ? "border-[#D92D20]" : "border-gray-stroke"}`}
             type="email"
             placeholder="admin@kellogg.edu"
           />
           {emailError
-            ? <p className="mt-[6px] text-[14px] text-[#D92D20]">This email is already an admin on this account.</p>
-            : <p className="mt-[6px] text-[14px] text-gray-light">If this email already has a Leland account, they'll be linked automatically.</p>
+            ? <p className="mt-[6px] text-[12px] text-[#D92D20]">This email is already an admin on this account.</p>
+            : <p className="mt-[6px] text-[12px] text-gray-light">If this email already has a Leland account, they'll be linked automatically.</p>
           }
         </div>
         <div className="mb-5 grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">First name</label>
-            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
+            <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">First name</label>
+            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[14px] text-gray-dark outline-none focus:border-primary" />
           </div>
           <div>
-            <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">Last name</label>
-            <input value={lastName} onChange={(e) => setLastName(e.target.value)} className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[16px] text-gray-dark outline-none focus:border-primary" />
+            <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">Last name</label>
+            <input value={lastName} onChange={(e) => setLastName(e.target.value)} className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[14px] text-gray-dark outline-none focus:border-primary" />
           </div>
         </div>
       </div>
@@ -749,13 +749,13 @@ export function BulkImportModal({ open, onClose }: { open: boolean; onClose: () 
       }
     >
       <div className="mb-4 cursor-pointer rounded-[9px] border-2 border-dashed border-gray-stroke bg-gray-hover p-8 text-center">
-        <div className="mb-[10px] text-[28px]">&#128194;</div>
+        <div className="mb-[10px] text-[26px]">&#128194;</div>
         <div className="mb-1 font-semibold text-gray-dark">Drop CSV file here or click to browse</div>
-        <div className="text-[12px] text-gray-xlight">Columns: first_name, last_name, email, offering (optional)</div>
+        <div className="text-[10px] text-gray-xlight">Columns: first_name, last_name, email, offering (optional)</div>
       </div>
       <div>
-        <div className="mb-[6px] text-[12px] font-semibold text-gray-dark">CSV format example:</div>
-        <pre className="overflow-x-auto rounded-[7px] bg-gray-hover px-3 py-[10px] text-[11px] text-gray-light">
+        <div className="mb-[6px] text-[10px] font-semibold text-gray-dark">CSV format example:</div>
+        <pre className="overflow-x-auto rounded-[7px] bg-gray-hover px-3 py-[10px] text-[10px] text-gray-light">
 {`first_name,last_name,email,offering
 Alex,Chen,a-chen@kellogg.edu,coaching-ib
 Maya,Rodriguez,m-rodriguez@kellogg.edu,leland-plus`}
@@ -820,7 +820,7 @@ export function GrantAccessModal({ open, onClose }: { open: boolean; onClose: ()
       </FormGroup>
       <OfferingFields offering={offering} />
       <div className="mb-0">
-        <label className="mb-[5px] block text-[12px] font-semibold text-gray-dark">Note to User (optional)</label>
+        <label className="mb-[5px] block text-[10px] font-semibold text-gray-dark">Note to User (optional)</label>
         <textarea className={inputCls} rows={2} placeholder="e.g. Use this for your recruiting season..." />
       </div>
     </B2BModal>
@@ -855,8 +855,8 @@ export function GetMoreModal({ open, onClose, offering }: { open: boolean; onClo
           </div>
         </button>
         <div className="px-6 pb-8 pt-6">
-          <h3 className="text-[30px] font-medium text-gray-dark">Expand your plan or request more access</h3>
-          <p className="mt-2 text-[18px] leading-[1.5] text-gray-light">
+          <h3 className="text-[28px] font-medium text-gray-dark">Expand your plan or request more access</h3>
+          <p className="mt-2 text-[16px] leading-[1.5] text-gray-light">
             {offering
               ? `Need more ${offering}? We'll get you set up.`
               : "Need more capacity or interested in additional services? We'll get you set up."}
@@ -864,7 +864,7 @@ export function GetMoreModal({ open, onClose, offering }: { open: boolean; onClo
         </div>
         <div className="px-6 pb-2">
           <div className="mb-5">
-            <label className="mb-[6px] block text-[16px] font-normal text-gray-dark">What do you need?</label>
+            <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">What do you need?</label>
             <textarea
               rows={4}
               value={message}
@@ -872,9 +872,9 @@ export function GetMoreModal({ open, onClose, offering }: { open: boolean; onClo
               placeholder={offering
                 ? `e.g. We'd like to add 20 more ${offering} to our contract.`
                 : "e.g. We'd like to add more coaching sessions and explore live course access."}
-              className="w-full resize-none rounded-[8px] border border-gray-stroke bg-white px-4 py-3 text-[16px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-primary"
+              className="w-full resize-none rounded-[8px] border border-gray-stroke bg-white px-4 py-3 text-[14px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-primary"
             />
-            <p className="mt-2 text-[14px] text-gray-light">Your account manager will follow up to discuss options.</p>
+            <p className="mt-2 text-[12px] text-gray-light">Your account manager will follow up to discuss options.</p>
           </div>
         </div>
         <div className="flex items-center justify-between border-t border-gray-stroke px-6 py-[14px]">
@@ -922,8 +922,8 @@ export function EmailModal({
         <div className="b2b-scroll flex max-h-[140px] flex-col gap-1 overflow-y-auto rounded-lg border border-gray-stroke bg-gray-hover p-2">
           {recipients.map((r, i) => (
             <div key={i} className="flex items-center justify-between rounded-md border border-gray-stroke bg-white px-[6px] py-1">
-              <span className="text-[12px] font-medium text-gray-dark">{r.name}</span>
-              <span className="text-[11px] text-gray-xlight">{r.email}</span>
+              <span className="text-[10px] font-medium text-gray-dark">{r.name}</span>
+              <span className="text-[10px] text-gray-xlight">{r.email}</span>
             </div>
           ))}
         </div>
@@ -932,7 +932,7 @@ export function EmailModal({
         <input className={inputCls} placeholder="e.g. Schedule your coaching session on Leland" />
       </FormGroup>
       <div>
-        <label className="mb-[5px] block text-[12px] font-semibold text-gray-dark">Message</label>
+        <label className="mb-[5px] block text-[10px] font-semibold text-gray-dark">Message</label>
         <textarea className={`${inputCls} resize-y`} rows={5} placeholder="Write your message..." />
       </div>
     </B2BModal>

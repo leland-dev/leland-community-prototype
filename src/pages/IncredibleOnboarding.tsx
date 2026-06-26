@@ -1301,19 +1301,19 @@ function TopNav({
           <img src={lelandLogo} alt="Leland" className="h-[18px]" />
         </Link>
         <div className="hidden items-center gap-2 sm:flex">
-          <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-gray-light">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-light">
             {category}
           </span>
           {!done && progress && (
             <>
               <span className="text-gray-xlight">·</span>
-              <span className="text-[12px] text-gray-light">{progress}</span>
+              <span className="text-[10px] text-gray-light">{progress}</span>
             </>
           )}
         </div>
         <Link
           to="/incredible-home-page-bu"
-          className="inline-flex items-center gap-1 text-[13px] font-medium text-gray-light hover:text-gray-dark"
+          className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-light hover:text-gray-dark"
         >
           <X size={14} />
           Exit
@@ -1325,7 +1325,7 @@ function TopNav({
 
 function GoalPill({ category, goal }: { category: string; goal: string }) {
   return (
-    <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-primary/25 bg-primary-xlight px-3 py-1.5 text-[12px] font-semibold text-dark-green">
+    <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-primary/25 bg-primary-xlight px-3 py-1.5 text-[10px] font-semibold text-dark-green">
       <Sparkles size={13} className="shrink-0 text-primary" />
       <span className="shrink-0">{category}</span>
       <span className="text-primary/50">·</span>
@@ -1338,7 +1338,7 @@ function GoalPill({ category, goal }: { category: string; goal: string }) {
 
 function HelperTip() {
   return (
-    <div className="inline-flex items-center gap-1.5 text-[12.5px] text-gray-light">
+    <div className="inline-flex items-center gap-1.5 text-[10.5px] text-gray-light">
       <Lightbulb size={14} className="text-yellow" />
       <span>
         The more specifics you share, the sharper Leland gets at matching you.
@@ -1416,13 +1416,13 @@ function ChatCard({
             <Sparkles size={15} className="text-white" />
           </div>
           <div>
-            <p className="text-[14px] font-semibold leading-tight text-gray-dark">
+            <p className="text-[12px] font-semibold leading-tight text-gray-dark">
               Leland AI
             </p>
-            <p className="text-[11px] text-gray-light">Mapping your plan</p>
+            <p className="text-[10px] text-gray-light">Mapping your plan</p>
           </div>
         </div>
-        <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-gray-light">
+        <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-gray-light">
           {progressLabel}
         </span>
       </div>
@@ -1484,7 +1484,7 @@ function ChatCard({
                     ? "tel"
                     : "off"
             }
-            className="flex-1 bg-transparent text-[14px] text-gray-dark placeholder:text-gray-xlight focus:outline-none"
+            className="flex-1 bg-transparent text-[12px] text-gray-dark placeholder:text-gray-xlight focus:outline-none"
           />
           <Button
             type="submit"
@@ -1606,7 +1606,7 @@ function CalendlyEmbed({
       transition={{ duration: 0.25 }}
       className="space-y-2.5"
     >
-      <div className="flex items-center justify-between text-[12px] text-gray-light">
+      <div className="flex items-center justify-between text-[10px] text-gray-light">
         <span className="inline-flex items-center gap-1.5">
           <Calendar size={12} className="text-primary" />
           Pick a time — Calendly will email your confirmation
@@ -1629,18 +1629,18 @@ function CalendlyEmbed({
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white">
             <div className="flex flex-col items-center gap-3 text-gray-light">
               <TypingDots />
-              <p className="text-[12px]">Loading Calendly…</p>
+              <p className="text-[10px]">Loading Calendly…</p>
             </div>
           </div>
         )}
         {status === "error" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white p-6 text-center">
-            <p className="text-[14px] font-semibold text-gray-dark">
+            <p className="text-[12px] font-semibold text-gray-dark">
               Couldn&rsquo;t load the in-page scheduler.
             </p>
-            <p className="text-[12.5px] text-gray-light">
+            <p className="text-[10.5px] text-gray-light">
               An ad blocker or network policy may be blocking{" "}
-              <span className="font-mono text-[11.5px]">
+              <span className="font-mono text-[10px]">
                 assets.calendly.com
               </span>
               .
@@ -1649,7 +1649,7 @@ function CalendlyEmbed({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-[13px] font-semibold text-white shadow-md transition-colors hover:bg-dark-green"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-[11px] font-semibold text-white shadow-md transition-colors hover:bg-dark-green"
             >
               Open Calendly in a new tab
               <ArrowRight size={13} />
@@ -1701,7 +1701,7 @@ function QuickReplies({
             <button
               key={c.ref}
               onClick={() => toggle(c.ref)}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors ${
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors ${
                 isMulti && sel
                   ? "border-primary bg-primary text-white shadow-sm"
                   : "border-primary/30 bg-primary-xlight text-dark-green hover:border-primary/55 hover:bg-primary/15"
@@ -1715,7 +1715,7 @@ function QuickReplies({
       </div>
       {isMulti && (
         <div className="flex items-center justify-between">
-          <span className="text-[12px] text-gray-light">
+          <span className="text-[10px] text-gray-light">
             {pending.length} selected{f.required && pending.length === 0 ? " · required" : ""}
           </span>
           <Button
@@ -1747,7 +1747,7 @@ function MessageBubble({ msg }: { msg: Msg }) {
         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-dark-green to-primary">
           <Sparkles size={13} className="text-white" />
         </div>
-        <div className="max-w-[88%] rounded-2xl rounded-tl-md bg-gray-hover px-4 py-2.5 text-[14.5px] leading-snug text-gray-dark">
+        <div className="max-w-[88%] rounded-2xl rounded-tl-md bg-gray-hover px-4 py-2.5 text-[12.5px] leading-snug text-gray-dark">
           {msg.isTyping ? <TypingDots /> : msg.text}
         </div>
       </motion.div>
@@ -1761,7 +1761,7 @@ function MessageBubble({ msg }: { msg: Msg }) {
       transition={{ duration: 0.22 }}
       className="flex justify-end"
     >
-      <div className="max-w-[88%] rounded-2xl rounded-tr-md bg-primary px-4 py-2.5 text-[14.5px] leading-snug text-white">
+      <div className="max-w-[88%] rounded-2xl rounded-tr-md bg-primary px-4 py-2.5 text-[12.5px] leading-snug text-white">
         {msg.text}
       </div>
     </motion.div>
@@ -1809,16 +1809,16 @@ function MatchedPlanPanel({
       <div className="border-b border-gray-stroke bg-gradient-to-r from-primary-xlight to-white px-5 py-4 md:px-6">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-dark-green">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-dark-green">
               Your plan · {category}
             </p>
-            <h2 className="mt-1 text-[20px] font-semibold leading-tight text-gray-dark md:text-[22px]">
+            <h2 className="mt-1 text-[18px] font-semibold leading-tight text-gray-dark md:text-[20px]">
               Matched experts for your goal
             </h2>
           </div>
           <button
             onClick={onMessage}
-            className="hidden items-center gap-1.5 rounded-full border border-gray-stroke bg-white px-3 py-1.5 text-[12px] font-semibold text-gray-dark transition-colors hover:border-primary/40 hover:text-dark-green sm:inline-flex"
+            className="hidden items-center gap-1.5 rounded-full border border-gray-stroke bg-white px-3 py-1.5 text-[10px] font-semibold text-gray-dark transition-colors hover:border-primary/40 hover:text-dark-green sm:inline-flex"
           >
             <MessageCircle size={13} />
             Message Leland AI
@@ -1837,14 +1837,14 @@ function MatchedPlanPanel({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Link
             to="/browse"
-            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-primary hover:text-dark-green"
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary hover:text-dark-green"
           >
             See all 1,800+ experts in {category}
             <ArrowRight size={13} />
           </Link>
           <button
             onClick={() => setShowRawJson(!showRawJson)}
-            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-gray-light hover:text-gray-dark"
+            className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-gray-light hover:text-gray-dark"
           >
             <Code size={12} />
             {showRawJson ? "Hide" : "View"} typeform response
@@ -1858,7 +1858,7 @@ function MatchedPlanPanel({
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="mt-3 overflow-x-auto rounded-xl border border-gray-stroke bg-[#0c1f17] p-3 text-[11px] leading-snug text-[#9ff2c8]"
+              className="mt-3 overflow-x-auto rounded-xl border border-gray-stroke bg-[#0c1f17] p-3 text-[10px] leading-snug text-[#9ff2c8]"
             >
               {JSON.stringify(response, null, 2)}
             </motion.pre>
@@ -1886,7 +1886,7 @@ function AnswerSummary({ answers }: { answers: Answers }) {
       {rows.map((r) => (
         <span
           key={r.key}
-          className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-white px-2.5 py-1 text-[11.5px] font-semibold text-dark-green"
+          className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-white px-2.5 py-1 text-[10px] font-semibold text-dark-green"
         >
           <CheckCircle2 size={11} className="text-primary" />
           <span className="text-gray-light">{r.label}:</span>
@@ -1918,17 +1918,17 @@ function MatchedExpertCard({ expert }: { expert: Expert }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate text-[14px] font-semibold text-gray-dark">
+            <p className="truncate text-[12px] font-semibold text-gray-dark">
               {expert.name}
             </p>
-            <p className="truncate text-[12px] text-gray-light">{expert.role}</p>
+            <p className="truncate text-[10px] text-gray-light">{expert.role}</p>
           </div>
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-gray-hover px-1.5 py-1 text-[11px] font-semibold text-gray-dark">
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-gray-hover px-1.5 py-1 text-[10px] font-semibold text-gray-dark">
             <Star size={11} className="fill-yellow text-yellow" />
             {expert.rating.toFixed(1)}
           </span>
         </div>
-        <p className="mt-1 text-[11px] uppercase tracking-wider text-gray-light">
+        <p className="mt-1 text-[10px] uppercase tracking-wider text-gray-light">
           {expert.sub}
         </p>
         <div className="mt-2 flex items-center gap-2">
@@ -1936,11 +1936,11 @@ function MatchedExpertCard({ expert }: { expert: Expert }) {
             size="sm"
             variant="primary"
             rounded="rounded-lg"
-            className="!py-1.5 !text-[12px]"
+            className="!py-1.5 !text-[10px]"
           >
             Book a call
           </Button>
-          <span className="text-[12px] font-semibold text-gray-dark">
+          <span className="text-[10px] font-semibold text-gray-dark">
             {expert.price}
           </span>
         </div>
@@ -1960,7 +1960,7 @@ function RightNowCard({ live }: { live: LiveSession }) {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red opacity-70" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-red" />
           </span>
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-light">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-light">
             Right now on Leland
           </span>
         </div>
@@ -1972,14 +1972,14 @@ function RightNowCard({ live }: { live: LiveSession }) {
         <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-red px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
           <span className="h-1.5 w-1.5 rounded-full bg-white" /> Live
         </span>
-        <span className="absolute right-3 top-3 rounded-md bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+        <span className="absolute right-3 top-3 rounded-md bg-black/55 px-2 py-1 text-[10px] font-medium text-white backdrop-blur-sm">
           {live.watching.toLocaleString()} watching
         </span>
         <div className="absolute inset-x-3 bottom-3">
-          <p className="text-[10.5px] uppercase tracking-wider text-white/80">
+          <p className="text-[10px] uppercase tracking-wider text-white/80">
             {live.tag}
           </p>
-          <p className="mt-0.5 line-clamp-2 text-[14px] font-semibold leading-tight text-white">
+          <p className="mt-0.5 line-clamp-2 text-[12px] font-semibold leading-tight text-white">
             {live.title}
           </p>
         </div>
@@ -1991,7 +1991,7 @@ function RightNowCard({ live }: { live: LiveSession }) {
             alt=""
             className="h-7 w-7 rounded-full object-cover"
           />
-          <p className="text-[12px] text-gray-light">{live.host}</p>
+          <p className="text-[10px] text-gray-light">{live.host}</p>
         </div>
         <Button size="sm" variant="primary" rounded="rounded-lg">
           Join
@@ -2011,12 +2011,12 @@ function ExpertsCard({
   return (
     <div className="rounded-2xl border border-gray-stroke bg-white p-4 shadow-card">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-light">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-light">
           Top experts · {category}
         </p>
         <Link
           to="/browse"
-          className="text-[11.5px] font-semibold text-primary hover:text-dark-green"
+          className="text-[10px] font-semibold text-primary hover:text-dark-green"
         >
           See all
         </Link>
@@ -2030,12 +2030,12 @@ function ExpertsCard({
               className="h-10 w-10 shrink-0 rounded-full object-cover"
             />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13.5px] font-semibold text-gray-dark">
+              <p className="truncate text-[11.5px] font-semibold text-gray-dark">
                 {e.name}
               </p>
-              <p className="truncate text-[12px] text-gray-light">{e.role}</p>
+              <p className="truncate text-[10px] text-gray-light">{e.role}</p>
             </div>
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-gray-hover px-1.5 py-1 text-[11px] font-semibold text-gray-dark">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-gray-hover px-1.5 py-1 text-[10px] font-semibold text-gray-dark">
               <Star size={11} className="fill-yellow text-yellow" />
               {e.rating.toFixed(1)}
             </span>
@@ -2062,13 +2062,13 @@ function CohortCard({ cohort }: { cohort: Cohort }) {
         </span>
       </div>
       <div className="p-4">
-        <p className="text-[14px] font-semibold leading-tight text-gray-dark">
+        <p className="text-[12px] font-semibold leading-tight text-gray-dark">
           {cohort.title}
         </p>
-        <p className="mt-1 line-clamp-2 text-[12.5px] leading-snug text-gray-light">
+        <p className="mt-1 line-clamp-2 text-[10.5px] leading-snug text-gray-light">
           {cohort.blurb}
         </p>
-        <div className="mt-3 flex items-center justify-between text-[11.5px] text-gray-light">
+        <div className="mt-3 flex items-center justify-between text-[10px] text-gray-light">
           <span>{cohort.startsIn}</span>
           <span className="font-semibold text-dark-green">{cohort.seats}</span>
         </div>
@@ -2100,16 +2100,16 @@ function SignUpBanner() {
         <Mail size={20} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[15.5px] font-semibold text-gray-dark md:text-[16px]">
+        <p className="text-[13.5px] font-semibold text-gray-dark md:text-[14px]">
           Save your plan and matched experts.
         </p>
-        <p className="mt-0.5 text-[13px] text-gray-light">
+        <p className="mt-0.5 text-[11px] text-gray-light">
           Sign up — we&rsquo;ll sync your plan, expert intros, and live sessions
           to your inbox.
         </p>
       </div>
       {sent ? (
-        <div className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-white px-4 py-2.5 text-[13px] font-semibold text-dark-green">
+        <div className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-white px-4 py-2.5 text-[11px] font-semibold text-dark-green">
           <CheckCircle2 size={15} className="text-primary" />
           Saved — check your inbox.
         </div>
@@ -2126,7 +2126,7 @@ function SignUpBanner() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@email.com"
-            className="min-w-0 flex-1 rounded-xl border border-gray-stroke bg-white px-3 py-2.5 text-[14px] text-gray-dark placeholder:text-gray-xlight focus:border-primary/55 focus:outline-none md:w-[260px]"
+            className="min-w-0 flex-1 rounded-xl border border-gray-stroke bg-white px-3 py-2.5 text-[12px] text-gray-dark placeholder:text-gray-xlight focus:border-primary/55 focus:outline-none md:w-[260px]"
           />
           <Button
             type="submit"
@@ -2156,12 +2156,12 @@ function FeedPreview({
   return (
     <section className="mt-8">
       <div className="mb-3 flex items-baseline justify-between">
-        <h2 className="text-[18px] font-semibold text-gray-dark md:text-[20px]">
+        <h2 className="text-[16px] font-semibold text-gray-dark md:text-[18px]">
           What people in {category} are talking about
         </h2>
         <Link
           to="/"
-          className="text-[12.5px] font-semibold text-gray-light hover:text-gray-dark"
+          className="text-[10.5px] font-semibold text-gray-light hover:text-gray-dark"
         >
           See full feed →
         </Link>
@@ -2185,21 +2185,21 @@ function FeedPostCard({ post }: { post: FeedPost }) {
           className="h-9 w-9 rounded-full object-cover"
         />
         <div className="min-w-0">
-          <p className="truncate text-[13.5px] font-semibold text-gray-dark">
+          <p className="truncate text-[11.5px] font-semibold text-gray-dark">
             {post.author}
           </p>
-          <p className="text-[11.5px] text-gray-light">
+          <p className="text-[10px] text-gray-light">
             {post.tag} · {post.time}
           </p>
         </div>
       </div>
-      <h3 className="mt-3 line-clamp-2 text-[15px] font-semibold leading-snug text-gray-dark">
+      <h3 className="mt-3 line-clamp-2 text-[13px] font-semibold leading-snug text-gray-dark">
         {post.headline}
       </h3>
-      <p className="mt-1.5 line-clamp-3 flex-1 text-[13px] leading-snug text-gray-light">
+      <p className="mt-1.5 line-clamp-3 flex-1 text-[11px] leading-snug text-gray-light">
         {post.excerpt}
       </p>
-      <div className="mt-3 flex items-center gap-4 text-[12px] text-gray-light">
+      <div className="mt-3 flex items-center gap-4 text-[10px] text-gray-light">
         <span className="inline-flex items-center gap-1">
           <Heart size={12} />
           {post.likes}
@@ -2253,10 +2253,10 @@ function FloatingChat({
             <Sparkles size={13} className="text-white" />
           </div>
           <div className="text-left">
-            <p className="text-[13.5px] font-semibold leading-tight">
+            <p className="text-[11.5px] font-semibold leading-tight">
               Leland AI
             </p>
-            <p className="text-[11px] text-white/75">
+            <p className="text-[10px] text-white/75">
               {minimized ? "Click to continue" : "Here when you need me"}
             </p>
           </div>
@@ -2302,7 +2302,7 @@ function FloatingChat({
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask anything…"
-                  className="min-w-0 flex-1 bg-transparent text-[13.5px] text-gray-dark placeholder:text-gray-xlight focus:outline-none"
+                  className="min-w-0 flex-1 bg-transparent text-[11.5px] text-gray-dark placeholder:text-gray-xlight focus:outline-none"
                 />
                 <Button
                   type="submit"
@@ -2329,7 +2329,7 @@ function FloatingChat({
 function Footer() {
   return (
     <footer className="border-t border-gray-stroke bg-white">
-      <div className="mx-auto flex h-12 max-w-[1280px] items-center justify-between px-5 text-[11.5px] text-gray-light md:px-8">
+      <div className="mx-auto flex h-12 max-w-[1280px] items-center justify-between px-5 text-[10px] text-gray-light md:px-8">
         <span>© 2026 Leland</span>
         <span>Need help? Message a human.</span>
       </div>

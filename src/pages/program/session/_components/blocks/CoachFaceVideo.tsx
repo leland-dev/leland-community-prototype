@@ -35,7 +35,7 @@ export default function CoachFaceVideo({ coach, videoId = DEFAULT_VIDEO_ID, fill
         <span className="h-1 w-1 rounded-full bg-[#E2574C] animate-pulse" />
         Live
       </div>
-      <div className="pointer-events-none absolute bottom-2 left-2 z-10 text-[11px] font-medium text-white/95 drop-shadow">
+      <div className="pointer-events-none absolute bottom-2 left-2 z-10 text-[10px] font-medium text-white/95 drop-shadow">
         {coach.name}
       </div>
     </div>

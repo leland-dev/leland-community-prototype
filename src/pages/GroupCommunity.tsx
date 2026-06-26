@@ -116,7 +116,7 @@ function GroupCommLeft({ onCreatePost }: { onCreatePost: () => void }) {
         <div className="relative h-[56px]" style={{ backgroundColor: GROUP.accentColor }}>
           <div className="absolute -bottom-6 left-4">
             <div
-              className="flex h-[52px] w-[52px] items-center justify-center rounded-xl border-[3px] border-white text-[24px] shadow-sm"
+              className="flex h-[52px] w-[52px] items-center justify-center rounded-xl border-[3px] border-white text-[22px] shadow-sm"
               style={{ backgroundColor: GROUP.accentColor }}
             >
               {GROUP.emoji}
@@ -126,20 +126,20 @@ function GroupCommLeft({ onCreatePost }: { onCreatePost: () => void }) {
 
         {/* Body */}
         <div className="px-4 pb-4 pt-10">
-          <p className="text-[19px] font-medium leading-tight text-gray-dark">{GROUP.name}</p>
-          <p className="mt-0.5 text-[15px] leading-snug text-gray-light">{GROUP.tagline}</p>
+          <p className="text-[17px] font-medium leading-tight text-gray-dark">{GROUP.name}</p>
+          <p className="mt-0.5 text-[13px] leading-snug text-gray-light">{GROUP.tagline}</p>
 
           {/* Stats */}
           <div className="mt-3 flex items-center gap-4 border-t border-gray-100 pt-3">
             <div className="flex items-baseline gap-1">
-              <span className="text-[15px] font-medium text-gray-dark">{GROUP.memberCount.toLocaleString()}</span>
-              <span className="text-[13px] text-gray-light">members</span>
+              <span className="text-[13px] font-medium text-gray-dark">{GROUP.memberCount.toLocaleString()}</span>
+              <span className="text-[11px] text-gray-light">members</span>
             </div>
           </div>
 
           <button
             onClick={onCreatePost}
-            className="mt-3 w-full rounded-[10px] bg-gray-dark py-2.5 text-[15px] font-medium text-white transition-opacity hover:opacity-85"
+            className="mt-3 w-full rounded-[10px] bg-gray-dark py-2.5 text-[13px] font-medium text-white transition-opacity hover:opacity-85"
           >
             Create post
           </button>
@@ -248,7 +248,7 @@ export default function GroupCommunity() {
         <img src={profilePhoto} alt="Your profile" className="h-10 w-10 shrink-0 rounded-full object-cover" />
         <button
           onClick={() => setComposeOpen(true)}
-          className="flex-1 rounded-full bg-gray-hover px-4 py-[10px] text-left text-[16px] text-gray-light transition-shadow hover:shadow-[0_0_0_1.5px_#111111]"
+          className="flex-1 rounded-full bg-gray-hover px-4 py-[10px] text-left text-[14px] text-gray-light transition-shadow hover:shadow-[0_0_0_1.5px_#111111]"
         >
           Create post
         </button>

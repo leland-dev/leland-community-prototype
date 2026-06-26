@@ -10,7 +10,7 @@ export default function VibeCodingScreen() {
   return (
     <div className="relative flex h-full w-full bg-black">
       {/* ── LEFT: Claude Code terminal (1/3) ── */}
-      <div className="flex h-full w-[33%] flex-col bg-[#0E0E0D] font-mono text-[10px] leading-[1.55] text-[#D6D5CE] lg:text-[11px]">
+      <div className="flex h-full w-[33%] flex-col bg-[#0E0E0D] font-mono text-[10px] leading-[1.55] text-[#D6D5CE] lg:text-[10px]">
         {/* Window chrome */}
         <div className="flex h-6 shrink-0 items-center gap-1 border-b border-white/10 bg-[#1A1A18] px-2 lg:h-7">
           <span className="h-1.5 w-1.5 rounded-full bg-[#FF5F57]" />
@@ -102,25 +102,25 @@ export default function VibeCodingScreen() {
 
         {/* Site header */}
         <div className="flex shrink-0 items-center justify-between px-6 py-3 lg:px-8 lg:py-4">
-          <div className="flex items-center gap-1 text-[16px] font-bold tracking-tight text-gray-dark lg:text-[18px]">
-            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#A5E446] text-[10px] text-black lg:h-6 lg:w-6 lg:text-[11px]">
+          <div className="flex items-center gap-1 text-[14px] font-bold tracking-tight text-gray-dark lg:text-[16px]">
+            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#A5E446] text-[10px] text-black lg:h-6 lg:w-6 lg:text-[10px]">
               v
             </span>
             vibe.live
           </div>
-          <nav className="hidden items-center gap-4 text-[11px] font-medium text-[#5C5C57] sm:flex lg:gap-5 lg:text-[12px]">
+          <nav className="hidden items-center gap-4 text-[10px] font-medium text-[#5C5C57] sm:flex lg:gap-5 lg:text-[10px]">
             <span>Browse</span>
             <span>Streams</span>
             <span>Programs</span>
             <span>Pricing</span>
           </nav>
           <div className="flex items-center gap-2">
-            <button type="button" className="text-[11px] font-medium text-[#5C5C57] lg:text-[12px]">
+            <button type="button" className="text-[10px] font-medium text-[#5C5C57] lg:text-[10px]">
               Sign in
             </button>
             <button
               type="button"
-              className="rounded-md bg-gray-dark px-2.5 py-1 text-[11px] font-semibold text-white lg:px-3 lg:py-1.5 lg:text-[12px]"
+              className="rounded-md bg-gray-dark px-2.5 py-1 text-[10px] font-semibold text-white lg:px-3 lg:py-1.5 lg:text-[10px]"
             >
               Get started
             </button>
@@ -129,10 +129,10 @@ export default function VibeCodingScreen() {
 
         {/* Hero */}
         <div className="flex flex-1 flex-col items-start gap-3 px-6 pb-4 pt-2 lg:px-8 lg:pb-6">
-          <span className="rounded-full bg-[#A5E446]/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#3a6500] lg:text-[11px]">
+          <span className="rounded-full bg-[#A5E446]/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#3a6500] lg:text-[10px]">
             Now live · 47 watching
           </span>
-          <h1 className="max-w-[80%] text-[22px] font-semibold leading-[1.05] tracking-tight text-gray-dark sm:text-[28px] lg:text-[40px]">
+          <h1 className="max-w-[80%] text-[20px] font-semibold leading-[1.05] tracking-tight text-gray-dark sm:text-[26px] lg:text-[38px]">
             The world's coders,
             <br />
             live
@@ -141,13 +141,13 @@ export default function VibeCodingScreen() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="rounded-full bg-gray-dark px-3.5 py-2 text-[11px] font-semibold text-white lg:px-4 lg:py-2.5 lg:text-[13px]"
+              className="rounded-full bg-gray-dark px-3.5 py-2 text-[10px] font-semibold text-white lg:px-4 lg:py-2.5 lg:text-[11px]"
             >
               Watch builds →
             </button>
             <button
               type="button"
-              className="rounded-full bg-transparent px-3.5 py-2 text-[11px] font-semibold text-gray-dark ring-1 ring-gray-stroke lg:px-4 lg:py-2.5 lg:text-[13px]"
+              className="rounded-full bg-transparent px-3.5 py-2 text-[10px] font-semibold text-gray-dark ring-1 ring-gray-stroke lg:px-4 lg:py-2.5 lg:text-[11px]"
             >
               Start streaming
             </button>
@@ -186,7 +186,7 @@ export default function VibeCodingScreen() {
                 <div className="px-2 py-1.5 lg:px-2.5 lg:py-2">
                   {t.filled ? (
                     <>
-                      <div className="truncate text-[10px] font-semibold text-gray-dark lg:text-[11px]">
+                      <div className="truncate text-[10px] font-semibold text-gray-dark lg:text-[10px]">
                         {t.title}
                       </div>
                       <div className="truncate text-[9px] text-[#7A7A75] lg:text-[10px]">

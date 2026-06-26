@@ -39,16 +39,16 @@ function CountdownBlock({ targetIso }: { targetIso: string }) {
     <div className="flex items-baseline gap-2 text-gray-dark">
       {d > 0 && (
         <>
-          <span className="text-[48px] font-medium leading-none tabular-nums">{d}</span>
-          <span className="pr-1 text-[14px] uppercase tracking-[0.12em] text-gray-light">d</span>
+          <span className="text-[46px] font-medium leading-none tabular-nums">{d}</span>
+          <span className="pr-1 text-[12px] uppercase tracking-[0.12em] text-gray-light">d</span>
         </>
       )}
-      <span className="text-[48px] font-medium leading-none tabular-nums">{pad(h)}</span>
-      <span className="pr-1 text-[14px] uppercase tracking-[0.12em] text-gray-light">h</span>
-      <span className="text-[48px] font-medium leading-none tabular-nums">{pad(m)}</span>
-      <span className="pr-1 text-[14px] uppercase tracking-[0.12em] text-gray-light">m</span>
-      <span className="text-[48px] font-medium leading-none tabular-nums">{pad(s)}</span>
-      <span className="text-[14px] uppercase tracking-[0.12em] text-gray-light">s</span>
+      <span className="text-[46px] font-medium leading-none tabular-nums">{pad(h)}</span>
+      <span className="pr-1 text-[12px] uppercase tracking-[0.12em] text-gray-light">h</span>
+      <span className="text-[46px] font-medium leading-none tabular-nums">{pad(m)}</span>
+      <span className="pr-1 text-[12px] uppercase tracking-[0.12em] text-gray-light">m</span>
+      <span className="text-[46px] font-medium leading-none tabular-nums">{pad(s)}</span>
+      <span className="text-[12px] uppercase tracking-[0.12em] text-gray-light">s</span>
     </div>
   );
 }
@@ -67,11 +67,11 @@ export default function StatusHero({ state, session }: Props) {
     <div className="rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-3">
-          <div className="text-[12px] font-medium uppercase tracking-[0.12em] text-gray-light">
+          <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-gray-light">
             AI Bootcamp Program · Session {session.number}
           </div>
-          <h1 className="text-[40px] font-medium leading-[1.05] text-gray-dark">{headline}</h1>
-          <div className="text-[18px] text-gray-light">
+          <h1 className="text-[38px] font-medium leading-[1.05] text-gray-dark">{headline}</h1>
+          <div className="text-[16px] text-gray-light">
             {state === "pre-session" && (
               <>{session.title} · starts {formatRelative(startsAtMs - Date.now())}</>
             )}
@@ -105,7 +105,7 @@ export default function StatusHero({ state, session }: Props) {
 
       {state === "pre-session" && (
         <div className="mt-8 border-t border-gray-stroke pt-6">
-          <div className="text-[12px] font-medium uppercase tracking-[0.12em] text-gray-light">
+          <div className="text-[10px] font-medium uppercase tracking-[0.12em] text-gray-light">
             Session starts in
           </div>
           <div className="mt-3">

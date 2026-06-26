@@ -100,7 +100,7 @@ function VideoControls({
               <span className="h-1.5 w-1.5 rounded-full bg-white" />
               Live
             </div>
-            <span className="text-[11px] tabular-nums text-white/85">12:34 / 1:30:00</span>
+            <span className="text-[10px] tabular-nums text-white/85">12:34 / 1:30:00</span>
             <span className="flex-1" />
             <button type="button" aria-label="Volume" className="flex h-8 w-8 items-center justify-center rounded-full active:bg-white/15">
               <Volume2 className="h-4 w-4" />
@@ -128,7 +128,7 @@ function VideoControls({
           <button type="button" aria-label="Volume" className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10">
             <Volume2 className="h-4 w-4" />
           </button>
-          <span className="text-[12px] tabular-nums text-white/85">12:34 / 1:30:00</span>
+          <span className="text-[10px] tabular-nums text-white/85">12:34 / 1:30:00</span>
           <span className="flex-1" />
           <button type="button" aria-label="Captions" className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10">
             <Captions className="h-4 w-4" />
@@ -167,7 +167,7 @@ function CompactResources() {
   return (
     <section className="overflow-hidden rounded-2xl border border-gray-stroke bg-white">
       <div className="border-b border-gray-stroke px-4 py-3">
-        <h2 className="text-[15px] font-medium text-gray-dark">Resources</h2>
+        <h2 className="text-[13px] font-medium text-gray-dark">Resources</h2>
       </div>
       <ul className="flex flex-col gap-0.5 p-2">
         {rows.map((r) => (
@@ -179,7 +179,7 @@ function CompactResources() {
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gray-hover text-gray-dark">
                 {r.icon}
               </span>
-              <span className="flex-1 text-[14px] font-medium text-gray-dark">{r.label}</span>
+              <span className="flex-1 text-[12px] font-medium text-gray-dark">{r.label}</span>
               <span className="shrink-0 text-gray-light transition-colors group-hover:text-gray-dark">
                 <ExternalChevron />
               </span>
@@ -245,7 +245,7 @@ function ThumbsPill() {
         aria-label="Thumbs up"
       >
         <ThumbsUp size={16} strokeWidth={2} />
-        <span className="text-[14px] font-semibold">3</span>
+        <span className="text-[12px] font-semibold">3</span>
       </button>
       <span className="h-5 w-px bg-gray-stroke" aria-hidden />
       <button
@@ -266,7 +266,7 @@ function ShareButton() {
       className="flex items-center gap-1.5 rounded-full bg-gray-hover px-4 py-2 text-gray-dark transition-colors hover:bg-gray-hover/60"
     >
       <img src={sharesIcon} alt="" className="h-4 w-4 [filter:invert(20%)]" />
-      <span className="text-[14px] font-semibold">Share</span>
+      <span className="text-[12px] font-semibold">Share</span>
     </button>
   );
 }
@@ -282,12 +282,12 @@ function TopBar({ session }: { session: Session }) {
   return (
     <div className="flex flex-col gap-1">
       {/* Title — medium weight per latest design. */}
-      <h1 className="text-[20px] font-medium leading-[1.15] text-gray-dark sm:text-[22px] lg:text-[24px]">
+      <h1 className="text-[18px] font-medium leading-[1.15] text-gray-dark sm:text-[20px] lg:text-[22px]">
         {session.title}
       </h1>
       {/* Compact metadata — program · session # · date · time. Duration and
           attendance dropped (the player chrome already shows attendees). */}
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-gray-light lg:text-[14px]">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-gray-light lg:text-[12px]">
         <span>AI Builder Program · Session {session.number}</span>
         <span className="text-gray-stroke">·</span>
         <span>
@@ -308,7 +308,7 @@ function TabsNav({
   tabs: { id: Tab; label: string }[];
 }) {
   return (
-    <div className="flex shrink-0 items-center gap-2 text-[14px] font-semibold">
+    <div className="flex shrink-0 items-center gap-2 text-[12px] font-semibold">
       {tabs.map((t) => {
         const active = tab === t.id;
         return (

@@ -98,18 +98,18 @@ function StepRow({
         className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-gray-hover/40 lg:gap-4 lg:px-5 lg:py-5"
         aria-expanded={isOpen}
       >
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-hover text-[13px] font-semibold text-gray-dark">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-hover text-[11px] font-semibold text-gray-dark">
           {index + 1}
         </span>
-        <span className="min-w-0 flex-1 truncate text-[16px] font-medium text-gray-dark lg:text-[18px]">{step.title}</span>
-        <span className="shrink-0 text-[13px] text-gray-light lg:text-[14px]">{step.durationMin} min</span>
+        <span className="min-w-0 flex-1 truncate text-[14px] font-medium text-gray-dark lg:text-[16px]">{step.title}</span>
+        <span className="shrink-0 text-[11px] text-gray-light lg:text-[12px]">{step.durationMin} min</span>
         <ChevronIcon open={isOpen} />
       </button>
 
       {isOpen && (
         <div className="px-4 pb-5 pl-4 lg:px-5 lg:pb-6 lg:pl-[68px]">
           {step.recommendedModel && (
-            <div className="text-[14px] text-gray-light">
+            <div className="text-[12px] text-gray-light">
               Recommended model:{" "}
               <span className="font-semibold text-gray-dark">{step.recommendedModel}</span>
             </div>
@@ -117,8 +117,8 @@ function StepRow({
           {step.substeps && (
             <ol className="mt-4 flex flex-col gap-3">
               {step.substeps.map((s, i) => (
-                <li key={i} className="flex items-start gap-4 text-[15px] leading-snug text-gray-dark">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-hover text-[12px] font-medium text-gray-light">
+                <li key={i} className="flex items-start gap-4 text-[13px] leading-snug text-gray-dark">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-hover text-[10px] font-medium text-gray-light">
                     {i + 1}
                   </span>
                   <span className="flex-1">{s}</span>
@@ -128,10 +128,10 @@ function StepRow({
           )}
           {step.examplePrompt && (
             <div className="mt-5 rounded-xl bg-gray-hover/60 p-4">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-light">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-light">
                 Example prompts
               </div>
-              <pre className="mt-2 whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-gray-dark">
+              <pre className="mt-2 whitespace-pre-wrap font-mono text-[11px] leading-relaxed text-gray-dark">
                 "{step.examplePrompt}"
               </pre>
             </div>
@@ -158,10 +158,10 @@ export default function SessionGuide() {
     <section className="rounded-2xl border border-gray-stroke bg-white">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-stroke px-5 py-4">
-        <h2 className="text-[20px] font-medium text-gray-dark">Session guide</h2>
+        <h2 className="text-[18px] font-medium text-gray-dark">Session guide</h2>
         <a
           href="#"
-          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-gray-dark hover:opacity-80"
+          className="inline-flex items-center gap-1.5 text-[11px] font-medium text-gray-dark hover:opacity-80"
         >
           Open in new tab
           <svg width="13" height="13" viewBox="0 0 12 12" fill="none" aria-hidden>
@@ -186,10 +186,10 @@ export default function SessionGuide() {
       {/* Summary card */}
       <div className="border-t border-gray-stroke p-5">
         <div className="rounded-xl bg-gray-hover/60 p-5">
-          <h3 className="text-[16px] font-semibold text-gray-dark">You shipped something today</h3>
+          <h3 className="text-[14px] font-semibold text-gray-dark">You shipped something today</h3>
           <ul className="mt-3 flex flex-col gap-2">
             {SHIPPED_ITEMS.map((item, i) => (
-              <li key={i} className="flex items-start gap-3 text-[14px] leading-snug text-gray-dark">
+              <li key={i} className="flex items-start gap-3 text-[12px] leading-snug text-gray-dark">
                 <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gray-light" />
                 <span className="flex-1">{item}</span>
               </li>

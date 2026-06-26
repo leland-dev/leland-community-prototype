@@ -1,23 +1,34 @@
 @import "tailwindcss";
 
-/* ── Macan — primary sans (matches joinleland.com production) ── */
+/* ── Macan — primary sans (2026 rebrand webfonts) ── */
 @font-face {
   font-family: 'Macan';
-  src: url('./assets/fonts/Macan/Macan-Regular.woff2') format('woff2');
+  src: url('./assets/fonts/Macan/Webfonts/Macan-Regular.woff2') format('woff2'),
+       url('./assets/fonts/Macan/Webfonts/Macan-Regular.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Macan';
+  src: url('./assets/fonts/Macan/Webfonts/Macan-Book.woff2') format('woff2'),
+       url('./assets/fonts/Macan/Webfonts/Macan-Book.woff') format('woff');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Macan';
-  src: url('./assets/fonts/Macan/Macan-Medium.woff2') format('woff2');
+  src: url('./assets/fonts/Macan/Webfonts/Macan-Medium.woff2') format('woff2'),
+       url('./assets/fonts/Macan/Webfonts/Macan-Medium.woff') format('woff');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Macan';
-  src: url('./assets/fonts/Macan/Macan-SemiBold.woff2') format('woff2');
+  src: url('./assets/fonts/Macan/Webfonts/Macan-SemiBold.woff2') format('woff2'),
+       url('./assets/fonts/Macan/Webfonts/Macan-SemiBold.woff') format('woff');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -60,6 +71,9 @@
      Per Leonardo's color hierarchy: PRIMARY are the surface colors
      (yellow, blue, cream, tan, slate, white). SECONDARY are accents
      (rust, forest, lavender). INK is the default for type (black). */
+
+  /* Brand */
+  --color-leland-brand-primary: #FFD96F;
 
   /* PRIMARY surfaces */
   --color-yellow: #FFD96F;
