@@ -8,6 +8,7 @@ import V2 from "./live/V2";
 import V3 from "./live/V3";
 import V4 from "./live/V4";
 import V5 from "./live/V5";
+import V6 from "./live/V6";
 
 type VersionEntry = VersionOption & {
   component: ComponentType<{ session: Session }>;
@@ -45,6 +46,12 @@ const VERSIONS: VersionEntry[] = [
     label: "V5 · Chat-only rail",
     description: "Same build view + face PIP as V4; no slide signpost — rail is just chat.",
     component: V5,
+  },
+  {
+    id: "v6",
+    label: "V6 · Info-first tray",
+    description: "Mobile lands on an Info pane (title + coach inside the tray); tabs over to Chat after 5s.",
+    component: V6,
   },
 ];
 

@@ -7,6 +7,10 @@ type Props = {
   lowTop: number;
   /** Viewport-pixel top for the HIGH snap (taller tray, just below the video). */
   highTop: number;
+  /** When true (default), 4s after the tray first opens it auto-pops to
+   *  HIGH to draw the user's eye to the live chat. V6 disables this
+   *  because its own pivot-switch animation does that job. */
+  autoExpand?: boolean;
   children: ReactNode;
 };
 
@@ -15,7 +19,13 @@ type Props = {
 // the page chrome (title + coach card + tab pills). HIGH = top sits below
 // the video, covering everything else. Drag handle uses pointer events so
 // it works for both touch and mouse.
-export default function BottomTray({ open, lowTop, highTop, children }: Props) {
+export default function BottomTray({
+  open,
+  lowTop,
+  highTop,
+  autoExpand = true,
+  children,
+}: Props) {
   const [snap, setSnap] = useState<"low" | "high">("low");
   const [dragTop, setDragTop] = useState<number | null>(null);
   const startYRef = useRef(0);
@@ -26,14 +36,14 @@ export default function BottomTray({ open, lowTop, highTop, children }: Props) {
   // and never re-fires (one-shot per component lifetime).
   const didAutoExpandRef = useRef(false);
   useEffect(() => {
-    if (!open || didAutoExpandRef.current) return;
+    if (!open || !autoExpand || didAutoExpandRef.current) return;
     const t = window.setTimeout(() => {
       if (didAutoExpandRef.current) return;
       didAutoExpandRef.current = true;
       setSnap("high");
     }, 4000);
     return () => window.clearTimeout(t);
-  }, [open]);
+  }, [open, autoExpand]);
 
   useEffect(() => {
     if (!open) return;
