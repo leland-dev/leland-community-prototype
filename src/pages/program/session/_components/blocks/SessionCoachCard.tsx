@@ -24,31 +24,33 @@ export default function SessionCoachCard({
   subtitle = "AI Builder Lead Instructor · 12 cohorts · 200+ builders coached",
 }: Props) {
   return (
-    <div className="flex items-center gap-3">
-      <img
-        src={coach.avatarUrl}
-        alt={coach.name}
-        className="h-10 w-10 shrink-0 rounded-full object-cover"
-        style={{ objectPosition: "50% 15%" }}
-      />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5 whitespace-nowrap">
-          <span className="truncate text-[15px] font-semibold text-gray-dark">
-            {coach.name}
-          </span>
-          <Star size={13} className="shrink-0 fill-[#F5B729] text-[#F5B729]" />
-          <span className="shrink-0 text-[13px] font-medium text-gray-dark">
-            {rating.toFixed(1)}
-          </span>
-          <span className="shrink-0 text-[13px] text-gray-light">
-            ({ratingCount})
-          </span>
+    <div className="flex flex-col gap-3">
+      {/* Coach identity — full name + credential, no truncation. */}
+      <div className="flex items-start gap-3">
+        <img
+          src={coach.avatarUrl}
+          alt={coach.name}
+          className="h-10 w-10 shrink-0 rounded-full object-cover"
+          style={{ objectPosition: "50% 15%" }}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+            <span className="text-[15px] font-semibold text-gray-dark">
+              {coach.name}
+            </span>
+            <Star size={13} className="shrink-0 fill-[#F5B729] text-[#F5B729]" />
+            <span className="shrink-0 text-[13px] font-medium text-gray-dark">
+              {rating.toFixed(1)}
+            </span>
+            <span className="shrink-0 text-[13px] text-gray-light">
+              ({ratingCount})
+            </span>
+          </div>
+          <div className="text-[13px] text-gray-light">{subtitle}</div>
         </div>
-        <div className="truncate text-[13px] text-gray-light">{subtitle}</div>
       </div>
-      <div className="flex shrink-0 items-center gap-2">
-        {/* Follow — icon-only circle, frees up width so the name + meta
-            stay legible on mobile. */}
+      {/* Actions on their own line below the coach info. */}
+      <div className="flex items-center gap-2">
         <button
           type="button"
           aria-label="Follow"

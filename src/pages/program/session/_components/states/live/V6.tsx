@@ -8,8 +8,11 @@ import {
   Settings,
   Maximize,
   PictureInPicture2,
+  Star,
+  UserPlus,
 } from "lucide-react";
-import type { Session } from "../../../_types";
+import { Button } from "../../../../../../components/Button";
+import type { Session, Coach } from "../../../_types";
 import sharesIcon from "../../../../../../assets/icons/shares.svg";
 import CoachScreenShare from "../../blocks/CoachScreenShare";
 import BuildScreen from "../../blocks/BuildScreen";
@@ -432,7 +435,67 @@ function InfoPane({ session }: { session: Session }) {
           </span>
         </div>
       </div>
-      <SessionCoachCard coach={session.coach} />
+      <InfoCoachCard coach={session.coach} />
+    </div>
+  );
+}
+
+// V6 coach card — stacked layout. Avatar + name + credential on top,
+// then a row of review stars with the numeric rating, then the Follow /
+// Free intro call CTAs underneath. Gives the name room to breathe
+// instead of the truncated "Ta..." we got when the buttons shared a
+// row on mobile.
+function InfoCoachCard({ coach }: { coach: Coach }) {
+  const rating = 4.9;
+  const ratingCount = 179;
+  const subtitle =
+    "AI Builder Lead Instructor · 12 cohorts · 200+ builders coached";
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-start gap-3">
+        <img
+          src={coach.avatarUrl}
+          alt={coach.name}
+          className="h-12 w-12 shrink-0 rounded-full object-cover"
+          style={{ objectPosition: "50% 15%" }}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="text-[16px] font-semibold text-gray-dark">
+            {coach.name}
+          </div>
+          <div className="text-[13px] leading-snug text-gray-light">
+            {subtitle}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-0.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star
+              key={i}
+              size={15}
+              className="fill-[#F5B729] text-[#F5B729]"
+            />
+          ))}
+        </div>
+        <span className="text-[13px] font-medium text-gray-dark">
+          {rating.toFixed(1)}
+        </span>
+        <span className="text-[13px] text-gray-light">
+          · {ratingCount} reviews
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button size="sm" variant="secondary" rounded="rounded-full">
+          <span className="inline-flex items-center gap-1.5">
+            <UserPlus size={15} strokeWidth={2.25} />
+            Follow
+          </span>
+        </Button>
+        <Button size="sm" variant="dark" rounded="rounded-full">
+          Free intro call
+        </Button>
+      </div>
     </div>
   );
 }
@@ -882,6 +945,7 @@ function StudioLayout({ session }: { session: Session }) {
         lowTop={trayTops.low}
         highTop={trayTops.high}
         autoExpand={false}
+        showDragHandle={false}
       >
         <MobileChatTrayContent session={session} onReact={pushReaction} />
       </BottomTray>

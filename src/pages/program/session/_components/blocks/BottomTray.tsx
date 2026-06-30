@@ -11,6 +11,9 @@ type Props = {
    *  HIGH to draw the user's eye to the live chat. V6 disables this
    *  because its own pivot-switch animation does that job. */
   autoExpand?: boolean;
+  /** When true (default), shows the draggable grip at the top. V6 hides
+   *  it because the panel is no longer presented as a draggable tray. */
+  showDragHandle?: boolean;
   children: ReactNode;
 };
 
@@ -24,6 +27,7 @@ export default function BottomTray({
   lowTop,
   highTop,
   autoExpand = true,
+  showDragHandle = true,
   children,
 }: Props) {
   const [snap, setSnap] = useState<"low" | "high">("low");
@@ -99,18 +103,22 @@ export default function BottomTray({
       }}
     >
       {/* Drag handle — chunky tap target with touch-action:none so the
-          browser doesn't steal the vertical swipe for page scroll. */}
-      <div
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-        className="flex shrink-0 cursor-grab touch-none justify-center py-2.5 active:cursor-grabbing"
-        aria-label="Drag to expand or collapse"
-      >
-        <span className="h-1 w-10 rounded-full bg-gray-stroke" />
-      </div>
-      <div className="min-h-0 flex-1">{children}</div>
+          browser doesn't steal the vertical swipe for page scroll. Hidden
+          when showDragHandle is false (V6 renders as a stacked panel
+          rather than a draggable tray). */}
+      {showDragHandle && (
+        <div
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          className="flex shrink-0 cursor-grab touch-none justify-center py-2.5 active:cursor-grabbing"
+          aria-label="Drag to expand or collapse"
+        >
+          <span className="h-1 w-10 rounded-full bg-gray-stroke" />
+        </div>
+      )}
+      <div className={`min-h-0 flex-1 ${showDragHandle ? "" : "pt-2"}`}>{children}</div>
     </div>,
     document.body,
   );
