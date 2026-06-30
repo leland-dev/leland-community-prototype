@@ -38,8 +38,6 @@ export default function MobilePreview({ url, onClose }: Props) {
         className="relative overflow-hidden rounded-[40px] border-[10px] border-gray-dark bg-black shadow-[0_30px_80px_rgba(0,0,0,0.45)]"
         style={{ width: 393, height: 813 }}
       >
-        {/* Subtle notch / status bar accent */}
-        <div className="pointer-events-none absolute left-1/2 top-1.5 z-10 h-1.5 w-24 -translate-x-1/2 rounded-full bg-black/60" />
         <iframe
           src={url}
           title="Mobile preview"
