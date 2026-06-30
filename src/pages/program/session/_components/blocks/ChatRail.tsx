@@ -114,7 +114,7 @@ const VIEWERS: Viewer[] = [
   { name: "Sam T.", avatar: pic4 },
 ];
 
-function ViewersPane() {
+export function ViewersPane() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-light">

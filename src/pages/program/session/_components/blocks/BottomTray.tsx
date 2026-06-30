@@ -1,88 +1,92 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
 
 type Props = {
   open: boolean;
-  title?: string;
-  onClose: () => void;
+  /** Viewport-pixel top for the LOW snap (smaller tray, below the page chrome). */
+  lowTop: number;
+  /** Viewport-pixel top for the HIGH snap (taller tray, just below the video). */
+  highTop: number;
   children: ReactNode;
 };
 
-// Slide-up bottom sheet for mobile. Height uses dvh so it adapts when the
-// mobile keyboard opens — the sheet shrinks, the chat input stays just above
-// the keyboard. Locks body scroll while open.
-export default function BottomTray({ open, title, onClose, children }: Props) {
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open]);
+// Mobile chat tray. Persistent overlay (not a modal) with two snap points
+// the user drags between via the handle bar at the top. LOW = top sits below
+// the page chrome (title + coach card + tab pills). HIGH = top sits below
+// the video, covering everything else. Drag handle uses pointer events so
+// it works for both touch and mouse.
+export default function BottomTray({ open, lowTop, highTop, children }: Props) {
+  const [snap, setSnap] = useState<"low" | "high">("low");
+  const [dragTop, setDragTop] = useState<number | null>(null);
+  const startYRef = useRef(0);
+  const startTopRef = useRef(0);
 
-  // ESC to close
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") setSnap("low");
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open]);
 
-  // Portal to document.body so the tray escapes <main className="relative z-0">'s
-  // stacking context. Without this, BottomNav (a later sibling of <main> in the
-  // DOM with z: auto) paints OVER the tray's z-50 input, making the chat input
-  // un-tappable on mobile.
+  function onPointerDown(e: React.PointerEvent) {
+    startYRef.current = e.clientY;
+    startTopRef.current = snap === "low" ? lowTop : highTop;
+    setDragTop(startTopRef.current);
+    (e.currentTarget as Element).setPointerCapture(e.pointerId);
+  }
+  function onPointerMove(e: React.PointerEvent) {
+    if (dragTop === null) return;
+    const dy = e.clientY - startYRef.current;
+    const next = Math.max(highTop, Math.min(lowTop, startTopRef.current + dy));
+    setDragTop(next);
+  }
+  function onPointerUp(e: React.PointerEvent) {
+    if (dragTop === null) return;
+    const mid = (highTop + lowTop) / 2;
+    setSnap(dragTop < mid ? "high" : "low");
+    setDragTop(null);
+    try {
+      (e.currentTarget as Element).releasePointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  }
+
   if (typeof document === "undefined") return null;
 
+  const top = dragTop ?? (snap === "low" ? lowTop : highTop);
+
   return createPortal(
-    <>
-      {/* Backdrop */}
+    <div
+      role="dialog"
+      aria-modal="false"
+      aria-hidden={!open}
+      className="fixed inset-x-0 bottom-0 z-40 flex flex-col rounded-t-2xl bg-white shadow-[0_-18px_50px_rgba(0,0,0,0.18)] lg:hidden"
+      style={{
+        top,
+        transform: open ? "translateY(0)" : "translateY(100%)",
+        transition:
+          dragTop === null
+            ? "top 280ms cubic-bezier(0.2,0.7,0.2,1), transform 300ms ease-out"
+            : "transform 300ms ease-out",
+      }}
+    >
+      {/* Drag handle — chunky tap target with touch-action:none so the
+          browser doesn't steal the vertical swipe for page scroll. */}
       <div
-        aria-hidden={!open}
-        onClick={onClose}
-        className={`fixed inset-0 z-[60] bg-black/30 transition-opacity duration-200 lg:hidden ${
-          open ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
-      />
-      {/* Sheet */}
-      <div
-        role="dialog"
-        aria-modal={open}
-        aria-hidden={!open}
-        className={`fixed inset-x-0 bottom-0 z-[70] flex flex-col rounded-t-2xl bg-white shadow-[0_-20px_60px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-out lg:hidden ${
-          open ? "translate-y-0" : "translate-y-full"
-        }`}
-        style={{
-          // dvh = dynamic viewport height, shrinks with the mobile keyboard so
-          // the sheet (and its input) stay visible above the keyboard.
-          height: "85dvh",
-          maxHeight: "720px",
-        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        className="flex shrink-0 cursor-grab touch-none justify-center py-2.5 active:cursor-grabbing"
+        aria-label="Drag to expand or collapse"
       >
-        {/* Drag handle */}
-        <div className="flex shrink-0 justify-center pt-2.5 pb-1">
-          <span className="h-1 w-10 rounded-full bg-gray-stroke" />
-        </div>
-        {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-stroke px-4 py-3">
-          <div className="text-[14px] font-medium text-gray-dark">{title ?? "Chat"}</div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="-mr-1 flex h-8 w-8 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
-            aria-label="Close"
-          >
-            <X size={18} />
-          </button>
-        </div>
-        {/* Body */}
-        <div className="min-h-0 flex-1">{children}</div>
+        <span className="h-1 w-10 rounded-full bg-gray-stroke" />
       </div>
-    </>,
+      <div className="min-h-0 flex-1">{children}</div>
+    </div>,
     document.body,
   );
 }

@@ -18,7 +18,7 @@ import SessionGuide from "../../blocks/SessionGuide";
 import Resources from "../../blocks/Resources";
 import SessionCoachCard from "../../blocks/SessionCoachCard";
 import ChatPanel from "../../blocks/ChatPanel";
-import ChatRail from "../../blocks/ChatRail";
+import ChatRail, { ViewersPane } from "../../blocks/ChatRail";
 import RateSessionPopup from "../../blocks/RateSessionPopup";
 import BottomTray from "../../blocks/BottomTray";
 import FloatingReactions, { type Reaction } from "../../blocks/FloatingReactions";
@@ -345,8 +345,69 @@ function TabContent({ tab }: { tab: Tab }) {
 }
 
 
+// Mobile tray pivot — slim two-pill control (Chat / Viewers) at the top of
+// the BottomTray, with the chat panel or viewers list below. Mobile-only;
+// desktop uses the fuller ChatRail with chat/viewers/polls/resources tabs.
+function MobileChatTrayContent({
+  onReact,
+}: {
+  onReact?: (emoji: string) => void;
+}) {
+  const [pivot, setPivot] = useState<"chat" | "viewers">("chat");
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="-m-1 flex shrink-0 items-center gap-1.5 px-3 pb-2 pt-1 [scrollbar-width:none]">
+        <PivotPill active={pivot === "chat"} onClick={() => setPivot("chat")}>
+          Chat
+        </PivotPill>
+        <PivotPill
+          active={pivot === "viewers"}
+          onClick={() => setPivot("viewers")}
+        >
+          Viewers <span className="text-gray-light">20</span>
+        </PivotPill>
+      </div>
+      <div className="min-h-0 flex-1 border-t border-gray-stroke">
+        {pivot === "chat" ? (
+          <ChatPanel hideHeader large onReact={onReact} />
+        ) : (
+          <ViewersPane />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PivotPill({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`flex shrink-0 items-center gap-1 rounded-full bg-gray-hover px-3.5 py-1.5 text-[12px] font-semibold transition-all ${
+        active
+          ? "text-gray-dark ring-2 ring-gray-dark"
+          : "text-gray-light hover:text-gray-dark"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 function StudioLayout({ session }: { session: Session }) {
-  const [tab, setTab] = useState<Tab>("guide");
+  // Mobile default: Chat. On desktop the page-level tabs only include
+  // Session guide / Resources (chat lives in the right rail), so the
+  // initial value is overridden below if desktop boots up first.
+  const [tab, setTab] = useState<Tab>("chat");
 
   // Two triggers for the floating PIP:
   //   - scrolledPast: original video has fully scrolled out of view
@@ -505,16 +566,17 @@ function StudioLayout({ session }: { session: Session }) {
     };
   }, []);
 
-  // Mobile-only: Chat is a pivot tab that pops up a bottom tray.
-  const [chatTrayOpen, setChatTrayOpen] = useState(false);
-
-  // Mobile vs desktop drives whether Chat is a tab.
-  const [isDesktop, setIsDesktop] = useState(true);
+  // Mobile vs desktop drives whether Chat is a tab. Initialize from the
+  // real viewport so the first render doesn't flip Chat → Guide on mobile
+  // before the matchMedia listener has a chance to correct isDesktop.
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.matchMedia("(min-width: 1024px)").matches;
+  });
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mql = window.matchMedia("(min-width: 1024px)");
     const update = () => setIsDesktop(mql.matches);
-    update();
     mql.addEventListener("change", update);
     return () => mql.removeEventListener("change", update);
   }, []);
@@ -524,19 +586,55 @@ function StudioLayout({ session }: { session: Session }) {
     if (isDesktop && tab === "chat") setTab("guide");
   }, [isDesktop, tab]);
 
-  // On mobile, Chat is a pivot pill that opens the bottom tray instead of
-  // switching the tab content. Resources is surfaced inline on both
-  // breakpoints (no Resources card in the rail anymore).
+  // Mobile tabs: Chat first and default. The Chat tab triggers the
+  // BottomTray overlay rather than swapping the inline content area;
+  // Session guide / Resources render inline. Desktop keeps chat in the
+  // right rail, so the page-level row only has the two non-chat tabs.
   const tabs: { id: Tab; label: string }[] = isDesktop
     ? [
         { id: "guide", label: "Session guide" },
         { id: "resources", label: "Resources" },
       ]
     : [
+        { id: "chat", label: "Chat" },
         { id: "guide", label: "Session guide" },
         { id: "resources", label: "Resources" },
-        { id: "chat", label: "Chat" },
       ];
+
+  // Tray snap measurement. HIGH = just below the video; LOW = just below
+  // the tab-pills row (which sits below the coach card). We measure once
+  // on mount + a couple of debounced re-measures so fonts/images don't
+  // throw off the position, and again on resize.
+  const trayLowAnchorRef = useRef<HTMLDivElement>(null);
+  const [trayTops, setTrayTops] = useState({ high: 280, low: 440 });
+  useEffect(() => {
+    if (isDesktop) return;
+    function measure() {
+      // Re-anchor only when the page is parked at the top so the
+      // viewport positions reflect natural layout, not a scrolled-up
+      // chrome. The tray is position:fixed, so we want viewport coords.
+      if (window.scrollY > 4) return;
+      const videoEl = placeholderRef.current;
+      const anchorEl = trayLowAnchorRef.current;
+      const high = videoEl?.getBoundingClientRect().bottom;
+      const low = anchorEl?.getBoundingClientRect().top;
+      setTrayTops({
+        high: high !== undefined ? Math.max(96, high + 8) : 280,
+        low: low !== undefined ? Math.max(160, low) : 440,
+      });
+    }
+    measure();
+    const t1 = window.setTimeout(measure, 80);
+    const t2 = window.setTimeout(measure, 320);
+    window.addEventListener("resize", measure);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.removeEventListener("resize", measure);
+    };
+  }, [isDesktop]);
+
+  const chatTrayOpen = !isDesktop && tab === "chat";
 
   return (
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_340px] lg:gap-6">
@@ -629,22 +727,23 @@ function StudioLayout({ session }: { session: Session }) {
             Matches Leland's live session host row pattern. */}
         <SessionCoachCard coach={session.coach} />
 
-        {/* MOBILE: tab pills (Session guide / Resources / Chat). Chat
-            pops the BottomTray (YouTube Live pattern) — the others
-            swap the inline content below. Desktop uses the right rail
-            for chat/viewers/polls/resources, so the pill row is hidden. */}
+        {/* MOBILE: tab pills (Chat / Session guide / Resources). Chat
+            is the first tab and the default — it overlays the content
+            with the BottomTray. Session guide / Resources close the
+            tray and swap inline content below. Desktop hides this row
+            because chat lives in the right rail. */}
         <div className="-m-1 flex items-center gap-2 overflow-x-auto p-1 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden">
-          <TabsNav
-            tab={chatTrayOpen ? "chat" : tab}
-            onChange={(id) => {
-              if (id === "chat") setChatTrayOpen(true);
-              else setTab(id);
-            }}
-            tabs={tabs}
-          />
+          <TabsNav tab={tab} onChange={setTab} tabs={tabs} />
         </div>
 
-        {/* MOBILE content area — swaps with the active tab. */}
+        {/* Anchor — marks where the BottomTray's LOW snap top should
+            sit (right below the tab pills row). Zero-height so it
+            doesn't reserve any layout space. */}
+        <div ref={trayLowAnchorRef} aria-hidden className="h-0 lg:hidden" />
+
+        {/* MOBILE content area — swaps with the active non-chat tab.
+            When tab === 'chat' the tray is the primary view, so the
+            content area renders nothing. */}
         <div className="lg:hidden">
           <TabContent tab={tab} />
         </div>
@@ -725,11 +824,16 @@ function StudioLayout({ session }: { session: Session }) {
         </span>
       </button>
 
-      {/* Mobile-only chat tray. Slides up from bottom when the Chat pivot
-          pill is tapped. Uses dvh sizing so the mobile keyboard pushes the
-          sheet up gracefully. */}
-      <BottomTray open={chatTrayOpen} title="Chat" onClose={() => setChatTrayOpen(false)}>
-        <ChatPanel hideHeader large onReact={pushReaction} />
+      {/* Mobile chat tray. Persistent overlay (not a modal) when the
+          Chat tab is active. Drag handle at the top toggles between LOW
+          (below the tab pills) and HIGH (below the video) snaps. Inside:
+          Chat | Viewers pivot, with the chat list as the default view. */}
+      <BottomTray
+        open={chatTrayOpen}
+        lowTop={trayTops.low}
+        highTop={trayTops.high}
+      >
+        <MobileChatTrayContent onReact={pushReaction} />
       </BottomTray>
     </div>
   );

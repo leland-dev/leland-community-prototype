@@ -591,7 +591,7 @@ function StudioLayout({ session }: { session: Session }) {
       {/* Mobile-only chat tray. Slides up from bottom when the Chat pivot
           pill is tapped. Uses dvh sizing so the mobile keyboard pushes the
           sheet up gracefully. */}
-      <BottomTray open={chatTrayOpen} title="Chat" onClose={() => setChatTrayOpen(false)}>
+      <BottomTray open={chatTrayOpen} lowTop={420} highTop={260}>
         <ChatPanel hideHeader />
       </BottomTray>
     </div>
