@@ -21,6 +21,20 @@ export default function BottomTray({ open, lowTop, highTop, children }: Props) {
   const startYRef = useRef(0);
   const startTopRef = useRef(0);
 
+  // Auto-expand once: 4s after the tray first opens it pops up to HIGH
+  // to draw the user's eye to the live chat. Cancelled by any user drag
+  // and never re-fires (one-shot per component lifetime).
+  const didAutoExpandRef = useRef(false);
+  useEffect(() => {
+    if (!open || didAutoExpandRef.current) return;
+    const t = window.setTimeout(() => {
+      if (didAutoExpandRef.current) return;
+      didAutoExpandRef.current = true;
+      setSnap("high");
+    }, 4000);
+    return () => window.clearTimeout(t);
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -31,6 +45,7 @@ export default function BottomTray({ open, lowTop, highTop, children }: Props) {
   }, [open]);
 
   function onPointerDown(e: React.PointerEvent) {
+    didAutoExpandRef.current = true;
     startYRef.current = e.clientY;
     startTopRef.current = snap === "low" ? lowTop : highTop;
     setDragTop(startTopRef.current);
@@ -63,7 +78,7 @@ export default function BottomTray({ open, lowTop, highTop, children }: Props) {
       role="dialog"
       aria-modal="false"
       aria-hidden={!open}
-      className="fixed inset-x-0 bottom-0 z-40 flex flex-col rounded-t-2xl bg-white shadow-[0_-18px_50px_rgba(0,0,0,0.18)] lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex flex-col rounded-t-2xl bg-white shadow-[0_-4px_14px_rgba(0,0,0,0.06)] lg:hidden"
       style={{
         top,
         transform: open ? "translateY(0)" : "translateY(100%)",

@@ -727,26 +727,12 @@ function StudioLayout({ session }: { session: Session }) {
             Matches Leland's live session host row pattern. */}
         <SessionCoachCard coach={session.coach} />
 
-        {/* MOBILE: tab pills (Chat / Session guide / Resources). Chat
-            is the first tab and the default — it overlays the content
-            with the BottomTray. Session guide / Resources close the
-            tray and swap inline content below. Desktop hides this row
-            because chat lives in the right rail. */}
-        <div className="-m-1 flex items-center gap-2 overflow-x-auto p-1 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden">
-          <TabsNav tab={tab} onChange={setTab} tabs={tabs} />
-        </div>
-
         {/* Anchor — marks where the BottomTray's LOW snap top should
-            sit (right below the tab pills row). Zero-height so it
-            doesn't reserve any layout space. */}
+            sit on mobile (right below the coach card). Zero-height so
+            it doesn't reserve any layout space. The mobile chat tray
+            is the primary view on this breakpoint; there are no
+            page-level tabs above it. */}
         <div ref={trayLowAnchorRef} aria-hidden className="h-0 lg:hidden" />
-
-        {/* MOBILE content area — swaps with the active non-chat tab.
-            When tab === 'chat' the tray is the primary view, so the
-            content area renders nothing. */}
-        <div className="lg:hidden">
-          <TabContent tab={tab} />
-        </div>
 
         {/* DESKTOP: Session guide renders directly (Resources lives in
             the right rail as its own tab). */}
