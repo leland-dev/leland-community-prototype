@@ -356,7 +356,7 @@ function MobileChatTrayContent({
   const [pivot, setPivot] = useState<"chat" | "viewers">("chat");
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="-m-1 flex shrink-0 items-center gap-1.5 px-3 pb-2 pt-1 [scrollbar-width:none]">
+      <div className="-m-1 flex shrink-0 items-center gap-1.5 px-3 pb-4 pt-1 [scrollbar-width:none]">
         <PivotPill active={pivot === "chat"} onClick={() => setPivot("chat")}>
           Chat
         </PivotPill>
