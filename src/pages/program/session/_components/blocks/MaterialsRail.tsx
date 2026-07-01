@@ -32,12 +32,12 @@ export default function MaterialsRail({ chapters, currentChapterId, compact }: P
               }`}
             >
               {isCurrent && (
-                <span className="absolute left-0 top-0 h-full w-[3px] bg-[#038561]" aria-hidden />
+                <span className="absolute left-0 top-0 h-full w-[3px] bg-[#FFD96F]" aria-hidden />
               )}
               <div
                 className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-medium ${
                   isCurrent
-                    ? "bg-[#038561] text-white"
+                    ? "bg-[#FFD96F] text-[#222222]"
                     : "border border-gray-stroke text-gray-light"
                 }`}
               >
@@ -49,7 +49,7 @@ export default function MaterialsRail({ chapters, currentChapterId, compact }: P
                 </div>
                 <div className="mt-1 text-[10px] text-gray-light">
                   {isCurrent ? (
-                    <span className="font-semibold uppercase tracking-[0.12em] text-[#038561]">Now</span>
+                    <span className="font-semibold uppercase tracking-[0.12em] text-gray-dark">Now</span>
                   ) : (
                     <>{fmtOffset(c.startOffsetSec)}</>
                   )}

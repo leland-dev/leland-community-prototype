@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Image as ImageIcon } from "lucide-react";
 import { useVersion } from "../contexts/VersionContext";
+import { useBookmarks } from "../contexts/BookmarksContext";
+import { useSavedToast } from "../contexts/SavedToastContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -86,6 +88,10 @@ interface PostBase {
   comments: number;
   reposts: number;
   shares: number;
+  // Simple-repost attribution. When set, this feed entry is a re-surfaced
+  // repost ("↻ You reposted"); repostOfId points at the original post.
+  repostedBy?: string;
+  repostOfId?: number;
 }
 
 interface TextPost extends PostBase {
@@ -150,8 +156,28 @@ interface LivePost extends PostBase {
   };
 }
 
-export type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost | LivePost;
-export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, LivePost };
+// Compact, read-only snapshot of the post being quoted, embedded inside a
+// QuotePost card and the quote composer preview.
+export interface QuotedSnapshot {
+  id: number;
+  author: string;
+  avatar: string;
+  time: string;
+  verified?: boolean;
+  body: string;
+  image?: string;
+}
+
+// "Repost with your thoughts" — a new post carrying the reposter's commentary
+// plus an embedded snapshot of the original.
+interface QuotePost extends PostBase {
+  type: "quote";
+  body: string;
+  quoted: QuotedSnapshot;
+}
+
+export type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost | LivePost | QuotePost;
+export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, LivePost, QuotePost };
 
 // ─── Sample data ──────────────────────────────────────
 
@@ -221,7 +247,7 @@ export const posts: Post[] = [
     shares: 0,
   },
   {
-    id: 20,
+    id: 21,
     type: "image",
     author: "Jackson Ringger",
     avatar: pic6,
@@ -654,7 +680,16 @@ export function FeedLikeButton({ initialCount }: { initialCount: number }) {
   );
 }
 
-export function ShareDropdown({ postId, onClose }: { postId: number; onClose: () => void }) {
+const SHARE_USERS = [
+  { name: "Alex Smith", avatar: pic2 },
+  { name: "Jane Doe", avatar: pic3 },
+  { name: "Marcus W.", avatar: pic4 },
+  { name: "Priya P.", avatar: pic5 },
+  { name: "Sarah C.", avatar: pic6 },
+];
+
+export function ShareDropdown({ post, onClose }: { post: Post; onClose: () => void }) {
+  const postId = post.id;
   const [copied, setCopied] = useState(false);
   const isMobile = useIsMobile();
   useLockBodyScroll(isMobile);
@@ -693,30 +728,88 @@ export function ShareDropdown({ postId, onClose }: { postId: number; onClose: ()
         className={
           isMobile
             ? "fixed inset-x-0 bottom-0 z-[70] rounded-t-2xl border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)] shadow-lg"
-            : "absolute top-full right-0 z-50 mt-1 w-56 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+            : "absolute top-full right-0 z-50 mt-1 w-[380px] max-w-[92vw] rounded-2xl border border-gray-stroke bg-white shadow-lg"
         }
       >
-        {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1.5 w-12 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
-        <div className={isMobile ? "px-3 pt-1 pb-3" : "px-2 py-2"}>
-          {/* Copy link */}
-          <button onClick={copyLink} className={`flex w-full items-center gap-3 rounded-lg font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
-            {copied ? (
-              <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0 text-primary`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            ) : (
-              <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            )}
-            {copied ? "Copied!" : "Copy link"}
-          </button>
-          {/* LinkedIn */}
-          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className={`flex w-full items-center gap-3 rounded-lg font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
-            <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0 rounded-[3px]`} viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-            LinkedIn
-          </a>
-          {/* Twitter/X */}
-          <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className={`flex w-full items-center gap-3 rounded-lg font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
-            <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            Twitter / X
-          </a>
+        {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1 w-10 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
+        <div className={isMobile ? "px-4 pb-5 pt-1" : "px-4 py-4"}>
+          {/* Post preview */}
+          <div className="mb-4 flex gap-3 rounded-2xl border border-gray-stroke p-3">
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-hover">
+              {post.avatar ? <img src={post.avatar} alt={post.author} className="h-full w-full object-cover" /> : null}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span className="truncate text-[14px] font-semibold text-gray-dark">{post.author}</span>
+                {post.verified && <img src={verifiedIcon} alt="" className="h-[13px] w-[13px] shrink-0" />}
+                <span className="shrink-0 text-[13px] text-gray-xlight">· {post.time}</span>
+              </div>
+              <p className="mt-0.5 line-clamp-4 text-[13px] leading-snug text-gray-light">{post.body}</p>
+            </div>
+          </div>
+
+          {/* Row 1 — send to people on Leland */}
+          <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-1 scrollbar-hide">
+            <button onClick={onClose} className="flex shrink-0 flex-col items-center gap-1.5">
+              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full border border-gray-stroke text-gray-dark">
+                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+              </span>
+              <span className="text-[12px] text-gray-dark">Message</span>
+            </button>
+            {SHARE_USERS.map((u) => (
+              <button key={u.name} onClick={onClose} className="flex shrink-0 flex-col items-center gap-1.5">
+                <img src={u.avatar} alt={u.name} className="h-[54px] w-[54px] rounded-full object-cover" />
+                <span className="max-w-[60px] truncate text-[12px] text-gray-dark">{u.name}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="my-3 border-t border-gray-stroke" />
+
+          {/* Row 2 — actions. Fixed-width items + truncated labels keep the row
+              evenly spaced regardless of label length. */}
+          <div className="flex gap-6">
+            <button onClick={copyLink} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
+              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full border border-gray-stroke text-gray-dark">
+                {copied ? (
+                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                ) : (
+                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                )}
+              </span>
+              <span className="w-full truncate text-center text-[12px] text-gray-dark">{copied ? "Copied!" : "Copy Link"}</span>
+            </button>
+            <button onClick={onClose} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
+              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full border border-gray-stroke text-gray-dark">
+                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/></svg>
+              </span>
+              <span className="w-full truncate text-center text-[12px] text-gray-dark">Share via…</span>
+            </button>
+            <button onClick={onClose} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
+              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full border border-gray-stroke text-gray-dark">
+                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4v11"/><path d="m8 11 4 4 4-4"/><path d="M20 15v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3"/></svg>
+              </span>
+              <span className="w-full truncate text-center text-[12px] text-gray-dark">Download</span>
+            </button>
+          </div>
+
+          <div className="my-3 border-t border-gray-stroke" />
+
+          {/* Row 3 — external apps */}
+          <div className="-mx-1 flex gap-6 overflow-x-auto px-1 pb-1 scrollbar-hide">
+            <a href={`sms:&body=${encodeURIComponent(postUrl)}`} onClick={onClose} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
+              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-[#34C759] text-white"><svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.34 1.26 4.45 3.28 5.9-.14 1.13-.72 2.4-1.53 3.35 1.6-.2 3.1-.83 4.22-1.6 1.24.35 2.6.55 4.03.55 5.5 0 10-3.6 10-8s-4.5-8-10-8z"/></svg></span>
+              <span className="w-full truncate text-center text-[12px] text-gray-dark">Messages</span>
+            </a>
+            <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
+              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-[#0A66C2] text-white"><svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></span>
+              <span className="w-full truncate text-center text-[12px] text-gray-dark">LinkedIn</span>
+            </a>
+            <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
+              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-black text-white"><svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>
+              <span className="w-full truncate text-center text-[12px] text-gray-dark">Twitter</span>
+            </a>
+          </div>
         </div>
       </motion.div>
     </>
@@ -724,8 +817,8 @@ export function ShareDropdown({ postId, onClose }: { postId: number; onClose: ()
   return isMobile ? createPortal(content, document.body) : content;
 }
 
-export function FeedRepostButton({ initialCount }: { initialCount: number }) {
-  const [reposted, setReposted] = useState(false);
+export function FeedRepostButton({ initialCount, initialReposted = false, onRepost, onUndoRepost, onQuote }: { initialCount: number; initialReposted?: boolean; onRepost?: () => void; onUndoRepost?: () => void; onQuote?: () => void }) {
+  const [reposted, setReposted] = useState(initialReposted);
   const [burst, setBurst] = useState(false);
   const [open, setOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -736,13 +829,20 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
       setReposted(true);
       setBurst(true);
       setTimeout(() => setBurst(false), 700);
+      onRepost?.();
     }
     setOpen(false);
   };
 
   const undoRepost = () => {
     setReposted(false);
+    onUndoRepost?.();
     setOpen(false);
+  };
+
+  const handleQuote = () => {
+    setOpen(false);
+    onQuote?.();
   };
 
   return (
@@ -770,16 +870,25 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
 
       <button
         onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${reposted ? "text-[#138462]" : "text-gray-light"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${reposted ? "text-[#FFD96F]" : "text-gray-light"}`}
       >
-        <motion.img
-          src={repostsIcon}
-          alt="Repost"
+        <motion.svg
           className="h-[22px] w-[22px]"
-          style={{ filter: reposted ? "invert(27%) sepia(60%) saturate(600%) hue-rotate(122deg) brightness(90%)" : "invert(44%)" }}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
           animate={reposted && burst ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1], rotate: [0, 360] } : { scale: 1, rotate: 0 }}
           transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
-        />
+        >
+          <path d="M22.008 12L20.006 14L18.005 12" />
+          <path d="M6.341 6.344C7.79 4.896 9.791 4 12.002 4C16.423 4 20.007 7.582 20.007 12.002C20.007 12.61 19.933 13.2 19.805 13.769" />
+          <path d="M1.992 12L3.994 10L5.995 12" />
+          <path d="M17.658 17.6555C16.209 19.1035 14.208 19.9995 11.997 19.9995C7.576 19.9995 3.992 16.4175 3.992 11.9975C3.992 11.3895 4.066 10.7995 4.194 10.2305" />
+        </motion.svg>
         <motion.span
           className="text-[13px] font-normal"
           animate={reposted && burst ? { scale: [1, 1.4, 1] } : { scale: 1 }}
@@ -810,9 +919,9 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
                   : "absolute bottom-full left-0 z-50 mb-2 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
               }
             >
-              {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1.5 w-12 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
+              {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1 w-10 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
               <div className={isMobile ? "px-3 pt-1 pb-3" : "px-2 py-2"}>
-                <button onClick={triggerRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
+                <button onClick={handleQuote} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
                   <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   Repost with your thoughts
                 </button>
@@ -823,7 +932,7 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
                   </button>
                 ) : (
                   <button onClick={triggerRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
-                    <img src={repostsIcon} alt="Repost" className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0 [filter:invert(44%)]`} />
+                    <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
                     Repost to feed
                   </button>
                 )}
@@ -839,7 +948,92 @@ export function FeedRepostButton({ initialCount }: { initialCount: number }) {
   );
 }
 
-function ActionBar({ likes, comments, reposts, postId }: { likes: number; comments: number; reposts: number; shares: number; postId: number; authorName: string }) {
+// Bookmark (save) button — the fifth action. Saving fires a small dark-pill
+// toast (matching the app's popup pattern) and adds the post to the profile's
+// "Liked & Saved" tab via the bookmarks store. Saved state shows a filled
+// yellow bookmark.
+export function FeedBookmarkButton({ post }: { post: Post }) {
+  const { isSaved, toggleBookmark } = useBookmarks();
+  const { setActive: setToastActive } = useSavedToast();
+  const navigate = useNavigate();
+  const saved = isSaved(post.id);
+  const [toast, setToast] = useState(false);
+  const toastTimer = useRef<number | null>(null);
+
+  const hideToast = () => {
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    setToast(false);
+    setToastActive(false);
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const willSave = !saved;
+    toggleBookmark(post);
+    if (willSave) {
+      setToast(true);
+      setToastActive(true);
+      if (toastTimer.current) window.clearTimeout(toastTimer.current);
+      toastTimer.current = window.setTimeout(hideToast, 5000);
+    }
+  };
+
+  useEffect(() => () => { if (toastTimer.current) window.clearTimeout(toastTimer.current); setToastActive(false); }, [setToastActive]);
+
+  return (
+    <>
+      <button
+        onClick={handleClick}
+        aria-label={saved ? "Remove from saved" : "Save"}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${saved ? "text-[#FFD96F]" : "text-gray-light"}`}
+      >
+        <motion.svg
+          className="h-[22px] w-[22px]"
+          viewBox="0 0 24 24"
+          fill={saved ? "currentColor" : "none"}
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          animate={saved ? { scale: [1, 0.7, 1.25, 1] } : { scale: 1 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+        >
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+        </motion.svg>
+      </button>
+      {createPortal(
+        <AnimatePresence>
+          {toast ? (
+            <motion.div
+              initial={{ y: "130%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "130%" }}
+              transition={{ type: "spring", stiffness: 480, damping: 34, mass: 0.8 }}
+              onClick={() => { hideToast(); navigate("/profile-v2?tab=saved"); }}
+              role="button"
+              className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+56px)] z-40 flex cursor-pointer items-center justify-between bg-[#FFD96F] px-5 py-3.5 text-[#111111] md:bottom-0"
+            >
+              <div className="flex items-center gap-2.5">
+                <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+                <span className="text-[15px] font-semibold">Saved to your profile</span>
+              </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); hideToast(); }}
+                aria-label="Dismiss"
+                className="-mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#111111] transition-colors hover:bg-black/10"
+              >
+                <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>,
+        document.body,
+      )}
+    </>
+  );
+}
+
+function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRepost, onQuote }: { post: Post; likes: number; comments: number; reposts: number; shares: number; postId: number; authorName: string; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void }) {
   const navigate = useNavigate();
   const [shareOpen, setShareOpen] = useState(false);
 
@@ -848,20 +1042,28 @@ function ActionBar({ likes, comments, reposts, postId }: { likes: number; commen
       <FeedLikeButton initialCount={likes} />
       {/* Comment */}
       <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`/post/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
-        <img src={commentsIcon} alt="Comment" className="h-[22px] w-[22px] [filter:invert(44%)]" />
+        <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 21C13.486 21.0018 14.9492 20.6339 16.2576 19.9293L20.3676 20.9755C20.4517 20.9969 20.5398 20.9961 20.6234 20.9731C20.707 20.9502 20.7832 20.9058 20.8445 20.8445C20.9058 20.7832 20.9501 20.707 20.9731 20.6234C20.9961 20.5398 20.9969 20.4517 20.9755 20.3676L19.9293 16.2576C20.8609 14.5226 21.1978 12.5299 20.8882 10.5851C20.5786 8.64022 19.6396 6.85061 18.2152 5.49065C16.7909 4.13068 14.9598 3.27543 13.0027 3.05604C11.0457 2.83664 9.07066 3.26522 7.38054 4.27604C5.69042 5.28687 4.3785 6.82414 3.64594 8.65215C2.91338 10.4802 2.80062 12.498 3.32495 14.3962C3.84928 16.2945 4.98176 17.9684 6.54873 19.1612C8.1157 20.354 10.0307 21 12 21Z" /></svg>
         {comments > 0 && <span className="text-[13px] font-normal">{formatCount(comments)}</span>}
       </button>
       {/* Repost */}
-      <FeedRepostButton initialCount={reposts} />
+      <FeedRepostButton
+        initialCount={reposts}
+        initialReposted={Boolean(post.repostedBy)}
+        onRepost={() => onRepost?.(post)}
+        onUndoRepost={() => onUndoRepost?.(post)}
+        onQuote={() => onQuote?.(post)}
+      />
       {/* Share */}
       <div className="relative">
         <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
-          <img src={sharesIcon} alt="Share" className="h-[22px] w-[22px] [filter:invert(44%)]" />
+          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5.323 19.8781L19.752 13.1791C20.75 12.7161 20.75 11.2821 19.752 10.8191L5.323 4.12205C4.288 3.64205 3.193 4.66005 3.58 5.74305L5.813 11.9971L3.58 18.2581C3.193 19.3401 4.288 20.3581 5.323 19.8781Z" /><path d="M5.81 12H20.5" /></svg>
         </button>
         <AnimatePresence>
-          {shareOpen ? <ShareDropdown postId={postId} onClose={() => setShareOpen(false)} /> : null}
+          {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
         </AnimatePresence>
       </div>
+      {/* Bookmark / save — fifth action */}
+      <FeedBookmarkButton post={post} />
     </div>
   );
 }
@@ -933,7 +1135,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
           <Link
             to={isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `${verified ? "/coach-profile" : "/profile-v2"}`}
             onClick={(e) => e.stopPropagation()}
-            className="cursor-pointer truncate text-[15px] leading-tight font-medium text-gray-dark underline decoration-white decoration-[0.75px] underline-offset-2 transition-[text-decoration-color] duration-200 hover:decoration-gray-light/50"
+            className="cursor-pointer truncate text-[15px] leading-tight font-medium text-gray-dark"
           >{author}</Link>
           {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
           <span className="shrink-0 text-[15px] leading-tight text-gray-xlight">{time}</span>
@@ -990,7 +1192,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
                         : "absolute right-0 top-7 z-50 w-48 rounded-2xl border border-gray-stroke bg-white shadow-lg"
                     }
                   >
-                    {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1.5 w-12 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
+                    {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1 w-10 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
                     <div className={isMobile ? "px-3 pt-1 pb-3" : "px-2 py-2"}>
                       {menuItems.map(({ label, icon, danger, onClick }) => (
                         <button
@@ -1957,17 +2159,51 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
 
 // ─── Post component ───────────────────────────────────
 
-export function FeedPost({ post, onUpdate }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void }) {
+// Compact embed of the post a quote is quoting. Read-only; the parent decides
+// click behavior (in the feed it navigates to the original).
+function QuotedPostCard({ quoted }: { quoted: QuotedSnapshot }) {
+  const body = quoted.body.length > 220 ? `${quoted.body.slice(0, 220).trimEnd()}…` : quoted.body;
+  return (
+    <div className="mt-2 overflow-hidden rounded-2xl border border-gray-stroke">
+      <div className="flex flex-col gap-2 p-3">
+        <div className="flex items-center gap-2">
+          {quoted.avatar
+            ? <img src={quoted.avatar} alt={quoted.author} className="h-6 w-6 shrink-0 rounded-full object-cover" />
+            : <div className="h-6 w-6 shrink-0 rounded-full bg-gray-hover" />}
+          <span className="truncate text-[14px] font-medium text-gray-dark">{quoted.author}</span>
+          {quoted.verified && <img src={verifiedIcon} alt="Verified" className="h-[13px] w-[13px] shrink-0" />}
+          <span className="shrink-0 text-[13px] text-gray-xlight">{quoted.time}</span>
+        </div>
+        {body && <p className="whitespace-pre-wrap text-[14px] leading-[1.4] text-gray-dark">{body}</p>}
+        {quoted.image && <img src={quoted.image} alt="" className="mt-1 max-h-64 w-full rounded-xl object-cover" />}
+      </div>
+    </div>
+  );
+}
+
+export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void }) {
   const navigate = useNavigate();
   const [editOpen, setEditOpen] = useState(false);
 
+  // A re-surfaced simple repost points its click-through and repost state at
+  // the original. A quote post is local-only (no /post route), so its card
+  // click goes to the quoted original instead.
+  const canonicalId = post.repostOfId ?? post.id;
+  const navId = post.type === "quote" ? post.quoted.id : canonicalId;
+
   return (
     <div className="pt-5 pb-[14px]">
+      {post.repostedBy && (
+        <div className="mb-2 flex items-center gap-1.5 pl-[44px] text-[13px] font-medium text-gray-light">
+          <img src={repostsIcon} alt="" className="h-4 w-4 [filter:invert(44%)]" />
+          <span>{post.repostedBy === "You" ? "You reposted" : `${post.repostedBy} reposted`}</span>
+        </div>
+      )}
       <div
         className="flex gap-3 cursor-pointer"
         onClick={(e) => {
           const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-          navigate(`/post/${post.id}`, { state: { sourceY: rect.top } });
+          navigate(`/post/${navId}`, { state: { sourceY: rect.top } });
         }}
       >
         {/* Left column: avatar with hover card */}
@@ -1990,11 +2226,16 @@ export function FeedPost({ post, onUpdate }: { post: Post; onUpdate?: (id: numbe
             {post.type === "event" && <EventCard event={post.event} />}
             {post.type === "milestone" && <MilestoneCard milestone={post.milestone} postId={post.id} authorName={post.milestone.clientName} />}
             {post.type === "live" && <LiveCard live={post.live} author={post.author} avatar={post.avatar} />}
+            {post.type === "quote" && (
+              <div onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.quoted.id}`); }}>
+                <QuotedPostCard quoted={post.quoted} />
+              </div>
+            )}
           </div>
         </div>
       </div>
       <div className="mt-1" onClick={e => e.stopPropagation()}>
-        <ActionBar likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} postId={post.id} authorName={post.author} />
+        <ActionBar post={post} likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} postId={post.id} authorName={post.author} onRepost={onRepost} onUndoRepost={onUndoRepost} onQuote={onQuote} />
       </div>
       {editOpen && (
         <ComposeModal
@@ -2222,8 +2463,9 @@ export const FEEDS = [
   { id: "ai-bp-apr-26", label: "AI BP April 26" },
 ];
 
-export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string, images: ImageEntry[]) => void; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; editPost?: Post; onGoLive?: () => void; isMVP?: boolean }) {
+export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string, images: ImageEntry[]) => void; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; editPost?: Post; quotePost?: Post; onGoLive?: () => void; isMVP?: boolean }) {
   const isEditing = editPost != null;
+  const isQuoting = quotePost != null;
   const isMobileModal = useIsMobile();
   useLockBodyScroll(true);
 
@@ -2679,9 +2921,9 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                               <span>{feed.label}</span>
                               <span
                                 aria-hidden
-                                className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isSelected ? "border-[#038561]" : "border-gray-stroke"}`}
+                                className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isSelected ? "border-gray-dark" : "border-gray-stroke"}`}
                               >
-                                <span className={`h-[10px] w-[10px] rounded-full bg-[#038561] transition-transform duration-150 ${isSelected ? "scale-100" : "scale-0"}`} />
+                                <span className={`h-[10px] w-[10px] rounded-full bg-[#FFD96F] transition-transform duration-150 ${isSelected ? "scale-100" : "scale-0"}`} />
                               </span>
                             </button>
                           );
@@ -2692,8 +2934,10 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                   document.body
                 )}
 
-            {/* Compose area */}
-            <div className={`${isMobileModal ? "flex-1 min-h-0 flex gap-3 px-4 pt-4" : "px-4 pt-4 pb-3 pr-14"}`}>
+            {/* Compose area. In quote mode the composer sizes to its content so
+                the quoted preview sits directly under the comment instead of
+                being pushed to the bottom of the sheet by a full-height field. */}
+            <div className={`${isMobileModal ? (isQuoting ? "flex gap-3 px-4 pt-4" : "flex-1 min-h-0 flex gap-3 px-4 pt-4") : "px-4 pt-4 pb-3 pr-14"}`}>
               {isMobileModal && (
                 <img src={profilePhoto} alt="Your profile" className="h-10 w-10 shrink-0 rounded-full object-cover" />
               )}
@@ -2762,11 +3006,28 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, onGoLive, is
                     {composerPrompts[placeholderIdx]}
                   </span>
                 )}
-                <textarea ref={textareaRef} autoFocus value={text} onChange={autoGrow} rows={4}
-                  className={`w-full resize-none bg-transparent text-[15px] text-gray-dark focus:outline-none leading-relaxed ${isMobileModal ? "h-full" : ""}`}
+                <textarea ref={textareaRef} autoFocus value={text} onChange={autoGrow} rows={isQuoting ? 3 : 4}
+                  className={`w-full resize-none bg-transparent text-[15px] text-gray-dark focus:outline-none leading-relaxed ${isMobileModal && !isQuoting ? "h-full" : ""}`}
                   style={isMobileModal ? { padding: 0, paddingTop: 7, minHeight: 0 } : { minHeight: "180px", padding: 0, paddingTop: 7 }} />
               </div>
             </div>
+
+            {/* Quoted post preview — shown when reposting with thoughts. */}
+            {isQuoting && (
+              <div className="px-4 pb-3">
+                <QuotedPostCard
+                  quoted={{
+                    id: quotePost.id,
+                    author: quotePost.author,
+                    avatar: quotePost.avatar,
+                    time: quotePost.time,
+                    verified: quotePost.verified,
+                    body: quotePost.body,
+                    image: quotePost.type === "image" ? quotePost.images[0] : undefined,
+                  }}
+                />
+              </div>
+            )}
 
             {/* Image gallery preview */}
             <AnimatePresence>
@@ -3257,7 +3518,7 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
         </NavLink>
         <div className="mt-2 flex flex-col -mx-2">
           <OfferingCard type="hourly" title="1h 20m with Jessica" subtitle="45m available to schedule" image={pic6} purchased showImage size="small" />
-          <OfferingCard type="package" title="MBA Application Package" subtitle={<span>Comprehensive package · <span className="text-[#038561]">Active</span></span>} image={pic3} purchased showImage size="small" />
+          <OfferingCard type="package" title="MBA Application Package" subtitle={<span>Comprehensive package · <span className="text-gray-dark">Active</span></span>} image={pic3} purchased showImage size="small" />
         </div>
 
         <NavLink to="/profile-v2?tab=more" className="mt-5 flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
@@ -3319,6 +3580,12 @@ export default function Home() {
   useSetLeftSidebar(<HomeSidebar onCreatePost={() => setComposeOpen(true)} />);
   useSetRightSidebar(<HomeRightSidebar />);
   const [feedPosts, setFeedPosts] = useState<Post[]>(posts);
+  // The post the user is quoting ("repost with your thoughts"); drives the
+  // quote composer modal.
+  const [quoteTarget, setQuoteTarget] = useState<Post | null>(null);
+  // When the full-width save toast is up, lift the FAB above it so the toast's
+  // dismiss (X) stays tappable.
+  const { active: savedToastActive } = useSavedToast();
 
   useEffect(() => {
     const onScroll = () => {
@@ -3426,6 +3693,56 @@ export default function Home() {
     setFeedPosts(prev => [newPost, ...prev]);
   };
 
+  // Simple repost: re-surface the post at the top of the feed, attributed to
+  // the current user. No new post is created — it's the original content with
+  // a "You reposted" header. The clone uses the negated canonical id so undo
+  // can find and remove it, and repost state stays tied to the original.
+  const handleRepost = (post: Post) => {
+    const canonicalId = post.repostOfId ?? post.id;
+    const cloneId = -canonicalId;
+    setFeedPosts(prev =>
+      prev.some(p => p.id === cloneId)
+        ? prev
+        : [{ ...post, id: cloneId, repostedBy: "You", repostOfId: canonicalId } as Post, ...prev],
+    );
+  };
+
+  const handleUndoRepost = (post: Post) => {
+    const canonicalId = post.repostOfId ?? post.id;
+    setFeedPosts(prev => prev.filter(p => p.id !== -canonicalId));
+  };
+
+  // Quote ("repost with your thoughts"): create a new post owned by the current
+  // user, carrying their commentary plus an embedded snapshot of the original.
+  const handleQuotePost = (text: string) => {
+    if (!quoteTarget) return;
+    const q = quoteTarget;
+    const quote: QuotePost = {
+      id: Date.now(),
+      type: "quote",
+      author: "Jamie Allen",
+      avatar: profilePhoto,
+      time: "just now",
+      verified: true,
+      headline: "Interactive Lead at Airbnb",
+      likes: 0,
+      comments: 0,
+      reposts: 0,
+      shares: 0,
+      body: text,
+      quoted: {
+        id: q.id,
+        author: q.author,
+        avatar: q.avatar,
+        time: q.time,
+        verified: q.verified,
+        body: q.body,
+        image: q.type === "image" ? q.images[0] : undefined,
+      },
+    };
+    setFeedPosts(prev => [quote, ...prev]);
+  };
+
   return (
     <div className="-mt-3 md:mt-0">
       {/* Post composer — hidden on mobile (composer lives in the floating
@@ -3472,7 +3789,7 @@ export default function Home() {
       <div className="divide-y divide-gray-stroke/50">
         {feedPosts.map((post, i) => (
           <div key={post.id}>
-            <FeedPost post={post} onUpdate={handleEdit} />
+            <FeedPost post={post} onUpdate={handleEdit} onRepost={handleRepost} onUndoRepost={handleUndoRepost} onQuote={setQuoteTarget} />
             {i === 3 && <SuggestedExperts />}
           </div>
         ))}
@@ -3485,9 +3802,10 @@ export default function Home() {
         <button
           onClick={() => setComposeOpen(true)}
           aria-label="Create post"
-          className={`fixed bottom-[calc(env(safe-area-inset-bottom)+24px)] right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#038561] text-white shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden ${navHidden ? "translate-y-0" : "-translate-y-[62px]"}`}
+          style={{ transform: `translateY(${savedToastActive ? -114 : navHidden ? 0 : -58}px)` }}
+          className="fixed bottom-[calc(env(safe-area-inset-bottom)+16px)] right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFD96F] text-[#222222] shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
         </button>,
@@ -3495,6 +3813,7 @@ export default function Home() {
       )}
 
       {composeOpen ? <ComposeModal onClose={() => setComposeOpen(false)} onPost={handlePost} onGoLive={() => setGoLiveOpen(true)} isMVP={version === "A"} /> : null}
+      {quoteTarget ? <ComposeModal quotePost={quoteTarget} onClose={() => setQuoteTarget(null)} onPost={handleQuotePost} isMVP={version === "A"} /> : null}
       {goLiveOpen ? <GoLiveModal onClose={() => setGoLiveOpen(false)} /> : null}
     </div>
   );

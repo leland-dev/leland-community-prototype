@@ -110,7 +110,7 @@ export default function CoachCategoryEdit() {
       <div>
         <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">Category not found</h1>
         <p className="mt-2 text-[14px] text-[#707070]">
-          <Link to="/coach/manage" className="text-[#038561] underline">Back to Manage</Link>
+          <Link to="/coach/manage" className="text-gray-dark underline">Back to Manage</Link>
         </p>
       </div>
     );

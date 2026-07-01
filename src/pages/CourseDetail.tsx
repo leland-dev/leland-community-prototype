@@ -189,7 +189,7 @@ function DismissButton({ onDismiss, asCheckbox }: { onDismiss: () => void; asChe
           className="peer sr-only"
           onChange={(e) => { if (e.target.checked) { setTimeout(onDismiss, 300); } }}
         />
-        <span className="flex h-5 w-5 items-center justify-center rounded border-[1.5px] border-gray-300 transition-colors peer-checked:border-[#038561] peer-checked:bg-[#038561]">
+        <span className="flex h-5 w-5 items-center justify-center rounded border-[1.5px] border-gray-300 transition-colors peer-checked:border-gray-dark peer-checked:bg-[#FFD96F]">
           <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2 6l3 3 5-5" />
           </svg>
@@ -227,7 +227,7 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
         <button
           onClick={(e) => { e.stopPropagation(); onMarkComplete?.(); }}
           disabled={disabled}
-          className={`group mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] transition-colors ${disabled ? "cursor-not-allowed border-[1.5px] border-gray-stroke bg-gray-hover opacity-50" : isCompleted ? "bg-[#038561] hover:bg-[#038561]/80 cursor-pointer" : "border-[1.5px] border-gray-stroke bg-white hover:border-[#038561]/40 cursor-pointer"}`}
+          className={`group mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] transition-colors ${disabled ? "cursor-not-allowed border-[1.5px] border-gray-stroke bg-gray-hover opacity-50" : isCompleted ? "bg-[#FFD96F] hover:bg-[#FFD96F]/80 cursor-pointer" : "border-[1.5px] border-gray-stroke bg-white hover:border-gray-dark/40 cursor-pointer"}`}
         >
           {!disabled && isCompleted ? (
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -240,7 +240,7 @@ function SessionRow({ session, showSessionRecordings, multipleSessionTimes, isLa
           )}
         </button>
         {!isLast && (
-          <div className={`mt-1.5 w-0 flex-1 border-l-[1.5px] border-dashed ${isCompleted ? "border-[#038561]" : "border-gray-stroke"}`} />
+          <div className={`mt-1.5 w-0 flex-1 border-l-[1.5px] border-dashed ${isCompleted ? "border-gray-dark" : "border-gray-stroke"}`} />
         )}
       </div>
 
@@ -575,7 +575,7 @@ export default function CourseDetail() {
                   {tab === "sessions" ? "Sessions" : "Resources"}
                 </span>
                 {mobilePivotTab === tab && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#038561]" />
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#FFD96F]" />
                 )}
               </button>
             ))}
@@ -613,7 +613,7 @@ export default function CourseDetail() {
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-[12px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">Getting started</p>
                     {completedItems.length > 0 && (
-                      <button onClick={() => setShowGetStarted(!effectiveShowGetStarted)} className="group flex cursor-pointer items-center gap-1 text-[12px] font-medium text-[#038561]">
+                      <button onClick={() => setShowGetStarted(!effectiveShowGetStarted)} className="group flex cursor-pointer items-center gap-1 text-[12px] font-medium text-gray-dark">
                         <span className="flex items-center gap-1 group-hover:underline">{effectiveShowGetStarted ? "Hide completed" : `Show ${completedItems.length} completed`} <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${effectiveShowGetStarted ? "rotate-180" : ""}`}><path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
                       </button>
                     )}
@@ -627,19 +627,19 @@ export default function CourseDetail() {
                           <div className="flex w-8 shrink-0 flex-col items-center self-stretch">
                             <button
                               onClick={(e) => { e.stopPropagation(); markDone(); }}
-                              className={`group mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] cursor-pointer transition-colors ${isDone ? "bg-[#038561] hover:bg-[#038561]/80" : "border-[1.5px] border-gray-stroke bg-white hover:border-[#038561]/40"}`}
+                              className={`group mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] cursor-pointer transition-colors ${isDone ? "bg-[#FFD96F] hover:bg-[#FFD96F]/80" : "border-[1.5px] border-gray-stroke bg-white hover:border-gray-dark/40"}`}
                             >
                               {isDone ? (
                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                   <path d="M2.5 7l3 3 6-6" />
                                 </svg>
                               ) : (
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#038561] opacity-0 transition-opacity group-hover:opacity-100">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark opacity-0 transition-opacity group-hover:opacity-100">
                                   <path d="M2.5 7l3 3 6-6" />
                                 </svg>
                               )}
                             </button>
-                            <div className={`mt-1.5 w-0 flex-1 border-l-[1.5px] border-dashed ${isDone ? "border-[#038561]" : "border-gray-stroke"}`} />
+                            <div className={`mt-1.5 w-0 flex-1 border-l-[1.5px] border-dashed ${isDone ? "border-gray-dark" : "border-gray-stroke"}`} />
                           </div>
                           <div className="min-w-0 flex-1 pb-1" onClick={() => { if (!isDone) markDone(); }}>
                             {item.buttons ? (
@@ -671,7 +671,7 @@ export default function CourseDetail() {
                 <div className="mb-2 mt-4 flex items-center justify-between border-t border-gray-stroke pt-4">
                   <p className="text-[12px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">Sessions</p>
                   {checkedOffSessions.length > 0 && (
-                    <button onClick={() => setShowAllCompleted(!effectiveShowAllCompleted)} className="group flex cursor-pointer items-center gap-1 text-[12px] font-medium text-[#038561]">
+                    <button onClick={() => setShowAllCompleted(!effectiveShowAllCompleted)} className="group flex cursor-pointer items-center gap-1 text-[12px] font-medium text-gray-dark">
                       <span className="flex items-center gap-1 group-hover:underline">{effectiveShowAllCompleted ? "Hide completed" : `Show ${checkedOffSessions.length} completed`} <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${effectiveShowAllCompleted ? "rotate-180" : ""}`}><path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
                     </button>
                   )}
@@ -717,7 +717,7 @@ export default function CourseDetail() {
                     <div className="mb-2 mt-4 flex items-center justify-between border-t border-gray-stroke pt-4">
                       <p className="text-[12px] font-medium leading-[1.5] uppercase tracking-[0.5px] text-gray-light">What's next</p>
                       {completedPostItems.length > 0 && (
-                        <button onClick={() => setShowAllPostSteps(!effectiveShowAllPostSteps)} className="group flex cursor-pointer items-center gap-1 text-[12px] font-medium text-[#038561]">
+                        <button onClick={() => setShowAllPostSteps(!effectiveShowAllPostSteps)} className="group flex cursor-pointer items-center gap-1 text-[12px] font-medium text-gray-dark">
                           <span className="flex items-center gap-1 group-hover:underline">{effectiveShowAllPostSteps ? "Hide completed" : `Show ${completedPostItems.length} completed`} <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 transition-transform duration-200 ${effectiveShowAllPostSteps ? "rotate-180" : ""}`}><path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
                         </button>
                       )}
@@ -734,20 +734,20 @@ export default function CourseDetail() {
                               <button
                                 onClick={(e) => { e.stopPropagation(); toggle(); }}
                                 disabled={isLocked}
-                                className={`group mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] transition-colors ${isLocked ? "cursor-not-allowed border-[1.5px] border-gray-stroke bg-gray-hover opacity-50" : isDone ? "bg-[#038561] hover:bg-[#038561]/80 cursor-pointer" : "border-[1.5px] border-gray-stroke bg-white hover:border-[#038561]/40 cursor-pointer"}`}
+                                className={`group mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] transition-colors ${isLocked ? "cursor-not-allowed border-[1.5px] border-gray-stroke bg-gray-hover opacity-50" : isDone ? "bg-[#FFD96F] hover:bg-[#FFD96F]/80 cursor-pointer" : "border-[1.5px] border-gray-stroke bg-white hover:border-gray-dark/40 cursor-pointer"}`}
                               >
                                 {isDone ? (
                                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M2.5 7l3 3 6-6" />
                                   </svg>
                                 ) : (
-                                  !isLocked && <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#038561] opacity-0 transition-opacity group-hover:opacity-100">
+                                  !isLocked && <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark opacity-0 transition-opacity group-hover:opacity-100">
                                     <path d="M2.5 7l3 3 6-6" />
                                   </svg>
                                 )}
                               </button>
                               {i < arr.length - 1 && (
-                                <div className={`mt-1.5 w-0 flex-1 border-l-[1.5px] border-dashed ${isDone ? "border-[#038561]" : "border-gray-stroke"}`} />
+                                <div className={`mt-1.5 w-0 flex-1 border-l-[1.5px] border-dashed ${isDone ? "border-gray-dark" : "border-gray-stroke"}`} />
                               )}
                             </div>
                             <div className={`min-w-0 flex-1 pb-1 ${isLocked ? "" : ""}`} onClick={isLocked ? undefined : markDone}>
@@ -832,7 +832,7 @@ export default function CourseDetail() {
               <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Session-level recording links</p>
               <button
                 onClick={() => setShowSessionRecordings(!showSessionRecordings)}
-                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showSessionRecordings ? "bg-[#038561]" : "bg-gray-300"}`}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showSessionRecordings ? "bg-[#FFD96F]" : "bg-gray-300"}`}
               >
                 <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showSessionRecordings ? "translate-x-[18px]" : "translate-x-0.5"}`} />
               </button>
@@ -842,7 +842,7 @@ export default function CourseDetail() {
               <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Multiple session times</p>
               <button
                 onClick={() => setMultipleSessionTimes(!multipleSessionTimes)}
-                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${multipleSessionTimes ? "bg-[#038561]" : "bg-gray-300"}`}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${multipleSessionTimes ? "bg-[#FFD96F]" : "bg-gray-300"}`}
               >
                 <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${multipleSessionTimes ? "translate-x-[18px]" : "translate-x-0.5"}`} />
               </button>
@@ -852,7 +852,7 @@ export default function CourseDetail() {
               <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Show action banners</p>
               <button
                 onClick={() => setShowActionBanners(!showActionBanners)}
-                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showActionBanners ? "bg-[#038561]" : "bg-gray-300"}`}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showActionBanners ? "bg-[#FFD96F]" : "bg-gray-300"}`}
               >
                 <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showActionBanners ? "translate-x-[18px]" : "translate-x-0.5"}`} />
               </button>
@@ -862,7 +862,7 @@ export default function CourseDetail() {
               <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Session starting soon</p>
               <button
                 onClick={() => setSessionStartingSoon(!sessionStartingSoon)}
-                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${sessionStartingSoon ? "bg-[#038561]" : "bg-gray-300"}`}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${sessionStartingSoon ? "bg-[#FFD96F]" : "bg-gray-300"}`}
               >
                 <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${sessionStartingSoon ? "translate-x-[18px]" : "translate-x-0.5"}`} />
               </button>
@@ -872,7 +872,7 @@ export default function CourseDetail() {
               <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Banners have checkbox</p>
               <button
                 onClick={() => setBannersHaveCheckbox(!bannersHaveCheckbox)}
-                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${bannersHaveCheckbox ? "bg-[#038561]" : "bg-gray-300"}`}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${bannersHaveCheckbox ? "bg-[#FFD96F]" : "bg-gray-300"}`}
               >
                 <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${bannersHaveCheckbox ? "translate-x-[18px]" : "translate-x-0.5"}`} />
               </button>
@@ -918,7 +918,7 @@ export default function CourseDetail() {
                   }}
                   className="flex cursor-pointer items-center gap-2.5 text-[14px] leading-[1.2]"
                 >
-                  <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${coursePhase === value ? "border-[#038561] bg-[#038561]" : "border-gray-300"}`}>
+                  <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${coursePhase === value ? "border-gray-dark bg-[#FFD96F]" : "border-gray-300"}`}>
                     {coursePhase === value && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
                   </span>
                   <span className={coursePhase === value ? "font-medium text-gray-dark" : "text-gray-light"}>
@@ -938,7 +938,7 @@ export default function CourseDetail() {
                     onClick={() => setSessionMaterial(value)}
                     className="flex cursor-pointer items-center gap-2.5 text-[14px] leading-[1.2]"
                   >
-                    <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${sessionMaterial === value ? "border-[#038561] bg-[#038561]" : "border-gray-300"}`}>
+                    <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${sessionMaterial === value ? "border-gray-dark bg-[#FFD96F]" : "border-gray-300"}`}>
                       {sessionMaterial === value && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
                     </span>
                     <span className={sessionMaterial === value ? "font-medium text-gray-dark" : "text-gray-light"}>

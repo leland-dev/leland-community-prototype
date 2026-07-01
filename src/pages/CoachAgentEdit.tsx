@@ -168,7 +168,7 @@ function FieldDiff({
           <div className="text-[11px] leading-relaxed text-[#707070]">{renderValue(before)}</div>
         </div>
         <div>
-          <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-[#038561]">After</p>
+          <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-dark">After</p>
           <div className="text-[11px] leading-relaxed text-gray-dark">{renderValue(after)}</div>
         </div>
       </div>

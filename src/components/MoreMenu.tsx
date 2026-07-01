@@ -82,7 +82,7 @@ export default function MoreMenu() {
                 <span>Show extra links</span>
                 <div
                   className={`relative h-[22px] w-[40px] rounded-full transition-colors ${
-                    showExtraLinks ? "bg-[#038561]" : "bg-gray-300"
+                    showExtraLinks ? "bg-[#FFD96F]" : "bg-gray-300"
                   }`}
                 >
                   <div

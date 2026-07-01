@@ -652,7 +652,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             exit={{ opacity: 0, scale: 0.85 }}
             transition={{ duration: 0.18 }}
             onClick={() => onOpenModal("invite")}
-            className="fixed right-4 top-[72px] z-30 flex items-center gap-2 rounded-lg bg-[#038561] px-4 py-3 text-[14px] font-medium text-white shadow-md sm:hidden"
+            className="fixed right-4 top-[72px] z-30 flex items-center gap-2 rounded-lg bg-[#FFD96F] px-4 py-3 text-[14px] font-medium text-[#222222] shadow-md sm:hidden"
           >
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
@@ -1005,7 +1005,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       {showLpEngagement ? (() => {
                         const status = lpEngagement(user);
                         if (!status) return <span className="text-[14px] text-gray-light">—</span>;
-                        if (status === "Active") return <span className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1.5 text-[12px] font-medium leading-none text-[#038561]">Active</span>;
+                        if (status === "Active") return <span className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1.5 text-[12px] font-medium leading-none text-gray-dark">Active</span>;
                         if (status === "Invited") return <span className="inline-flex rounded-full bg-[#eff6ff] px-2.5 py-1.5 text-[12px] font-medium leading-none text-[#3b82f6]">Invited</span>;
                         return <span className="inline-flex rounded-full bg-[#f5f5f5] px-2.5 py-1.5 text-[12px] font-medium leading-none text-[#888]">Expired</span>;
                       })() : (
@@ -1217,7 +1217,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                 <span className="text-[14px] font-medium text-gray-dark">User table wraps on mobile</span>
                 <div className="relative">
                   <input type="checkbox" checked={tableWraps} onChange={() => setTableWraps(!tableWraps)} className="peer sr-only" />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
                   <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                 </div>
               </label>
@@ -1225,7 +1225,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                 <span className="text-[14px] font-medium text-gray-dark">Show Leland+ engagement</span>
                 <div className="relative">
                   <input type="checkbox" checked={showLpEngagement} onChange={() => setShowLpEngagement(!showLpEngagement)} className="peer sr-only" />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
                   <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                 </div>
               </label>
@@ -1233,7 +1233,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                 <span className="text-[14px] font-medium text-gray-dark">Bulk actions</span>
                 <div className="relative">
                   <input type="checkbox" checked={bulkActions} onChange={() => { setBulkActions(!bulkActions); setSelectedEmails(new Set()); }} className="peer sr-only" />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
                   <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                 </div>
               </label>

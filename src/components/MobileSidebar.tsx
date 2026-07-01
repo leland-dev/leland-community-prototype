@@ -13,7 +13,6 @@ import settingsIcon from "../assets/icons/settings.svg";
 import arrowRoundIcon from "../assets/icons/arrow-round.svg";
 import switchIcon from "../assets/icons/switch.svg";
 import helpIcon from "../assets/icons/help.svg";
-import logOutIcon from "../assets/icons/log out.svg";
 import arrowRightIcon from "../assets/icons/arrow-right.svg";
 import browserIcon from "../assets/icons/browser.svg";
 import usersGroupIcon from "../assets/icons/users-group.svg";
@@ -29,7 +28,6 @@ const menuItems = [
   { to: "/coach/home", icon: switchIcon, label: "Switch to coaching", danger: false },
   { to: "/partner-dashboard", icon: browserIcon, label: "Partner dashboard", danger: false },
   { to: null, icon: helpIcon, label: "Help", danger: false },
-  { to: null, icon: logOutIcon, label: "Log out", danger: true },
 ];
 
 interface MobileSidebarProps {
@@ -110,7 +108,15 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                       onClick={onClose}
                       className="flex items-center gap-[10px] px-5 py-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                     >
-                      {icon && <img src={icon} alt={label} className={`h-6 w-6 shrink-0${darkIcon ? " brightness-0" : ""}`} />}
+                      {danger ? (
+                        <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                          <polyline points="16 17 21 12 16 7" />
+                          <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                      ) : icon ? (
+                        <img src={icon} alt={label} className={`h-6 w-6 shrink-0${darkIcon ? " brightness-0" : ""}`} />
+                      ) : null}
                       {label}
                     </NavLink>
                   ) : (
@@ -121,16 +127,23 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                         danger ? "text-[#D92D20]" : "text-gray-dark"
                       }`}
                     >
-                      {icon && <img src={icon} alt={label} className={`h-6 w-6 shrink-0${darkIcon ? " brightness-0" : ""}`} />}
+                      {danger ? (
+                        <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                          <polyline points="16 17 21 12 16 7" />
+                          <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                      ) : icon ? (
+                        <img src={icon} alt={label} className={`h-6 w-6 shrink-0${darkIcon ? " brightness-0" : ""}`} />
+                      ) : null}
                       {label}
                     </button>
                   )
                 )}
               </div>
 
-              {/* Design toggles — for mocking alternate UI versions */}
+              {/* Dark mode toggle + log out */}
               <div className="border-t border-gray-stroke py-2">
-                <p className="px-5 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A0A0A0]">Design toggles</p>
                 <button
                   onClick={toggleDarkMode}
                   className="flex w-full items-center justify-between gap-[10px] px-5 py-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
@@ -138,13 +151,24 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                   <span>Dark Mode</span>
                   <span
                     aria-hidden
-                    className={`relative inline-flex h-[26px] w-[44px] shrink-0 items-center rounded-full transition-colors ${darkMode ? "bg-[#038561]" : "bg-[#E5E5E5]"}`}
+                    className={`relative inline-flex h-[26px] w-[44px] shrink-0 items-center rounded-full transition-colors ${darkMode ? "bg-[#FFD96F]" : "bg-[#E5E5E5]"}`}
                   >
                     <span
                       className="absolute h-[22px] w-[22px] rounded-full bg-white shadow-sm transition-transform"
                       style={{ transform: `translateX(${darkMode ? 20 : 2}px)` }}
                     />
                   </span>
+                </button>
+                <button
+                  onClick={onClose}
+                  className="flex w-full items-center gap-[10px] px-5 py-3 text-[14px] font-medium text-[#D92D20] transition-colors hover:bg-gray-hover"
+                >
+                  <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  Log out
                 </button>
               </div>
             </div>

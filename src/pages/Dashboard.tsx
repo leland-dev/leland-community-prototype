@@ -201,7 +201,7 @@ export default function Dashboard() {
                   </p>
                 </div>
                 {event.isNow && (
-                  <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                  <button className="cursor-pointer rounded-lg bg-[#FFD96F] px-4 py-2.5 text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90">
                     Join
                   </button>
                 )}
@@ -323,7 +323,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex shrink-0 items-center self-stretch">
                       {event.isNow ? (
-                        <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                        <button className="cursor-pointer rounded-lg bg-[#FFD96F] px-4 py-2.5 text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90">
                           Join
                         </button>
                       ) : (
@@ -461,7 +461,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex shrink-0 items-center self-stretch">
                     {event.isNow ? (
-                      <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                      <button className="cursor-pointer rounded-lg bg-[#FFD96F] px-4 py-2.5 text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90">
                         Join
                       </button>
                     ) : (

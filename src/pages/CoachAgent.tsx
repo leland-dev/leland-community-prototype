@@ -420,7 +420,7 @@ export default function CoachAgent() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Link
                       to={agent.coachProfileHref}
-                      className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#038561] px-4 py-2.5 text-[12px] font-medium text-white transition-colors hover:bg-[#038561]/90"
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#FFD96F] px-4 py-2.5 text-[12px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90"
                     >
                       Book 1:1 with {agent.coachName.split(" ")[0]}
                     </Link>

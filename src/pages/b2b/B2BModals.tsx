@@ -84,7 +84,7 @@ function Btn({ variant, children, onClick, className }: { variant: "primary" | "
   const base = "inline-flex items-center gap-[6px] rounded-lg px-6 py-4 text-[14px] font-medium leading-[1.2] transition-all";
   const cls =
     variant === "primary"
-      ? `${base} bg-[#038561] text-white`
+      ? `${base} bg-[#FFD96F] text-[#222222]`
       : `${base} bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]`;
   return (
     <button className={`${cls} ${className ?? ""}`} onClick={onClick}>
@@ -255,8 +255,8 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, c
               </div>
               {cohortInvited[cohort] ? (
                 <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
-                  <span className="text-[12px] font-medium text-[#038561]">Added</span>
-                  <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: false }))} className="text-[#038561] hover:opacity-70">
+                  <span className="text-[12px] font-medium text-gray-dark">Added</span>
+                  <button onClick={() => setCohortInvited((prev) => ({ ...prev, [cohort]: false }))} className="text-gray-dark hover:opacity-70">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 </div>
@@ -275,8 +275,8 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, c
         <span className="text-[13px] text-gray-dark">Leland+</span>
         {lelandPlus ? (
           <div className="flex items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
-            <span className="text-[12px] font-medium text-[#038561]">3 months granted</span>
-            <button onClick={() => setLelandPlus(false)} className="ml-1 text-[#038561] hover:opacity-70">
+            <span className="text-[12px] font-medium text-gray-dark">3 months granted</span>
+            <button onClick={() => setLelandPlus(false)} className="ml-1 text-gray-dark hover:opacity-70">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>

@@ -89,7 +89,7 @@ function ToastCard({ toast, coachName }: { toast: Toast; coachName: string }) {
       </div>
       <a
         href="#"
-        className="ml-1 shrink-0 rounded-full bg-[#038561] px-3 py-1.5 text-[10px] font-semibold text-white no-underline transition-colors hover:bg-[#038561]/90"
+        className="ml-1 shrink-0 rounded-full bg-[#FFD96F] px-3 py-1.5 text-[10px] font-semibold text-[#222222] no-underline transition-colors hover:bg-[#FFD96F]/90"
       >
         Book yours
       </a>

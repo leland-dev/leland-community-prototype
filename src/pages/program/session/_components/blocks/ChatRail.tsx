@@ -216,7 +216,7 @@ function ActivePoll({ poll }: { poll: Poll }) {
   return (
     <div className="rounded-lg border border-gray-stroke bg-white">
       <div className="flex items-center justify-between border-b border-gray-stroke px-3 py-2">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#038561]">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-dark">
           Live poll
         </span>
         <span className="text-[10px] text-gray-light">{poll.total} votes</span>
@@ -233,7 +233,7 @@ function ActivePoll({ poll }: { poll: Poll }) {
                   className="group relative w-full overflow-hidden rounded-md border border-gray-stroke bg-white px-3 py-2 text-left transition-colors hover:bg-gray-hover"
                 >
                   <span
-                    className="absolute inset-y-0 left-0 bg-[#038561]/10 transition-all"
+                    className="absolute inset-y-0 left-0 bg-[#FFD96F]/10 transition-all"
                     style={{ width: `${pct}%` }}
                     aria-hidden
                   />

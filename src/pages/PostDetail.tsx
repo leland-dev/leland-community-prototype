@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 
 import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
-import { posts, type Post, FeedLikeButton, FeedRepostButton, ShareDropdown, HomeRightSidebar } from "./Home";
+import { posts, type Post, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar } from "./Home";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import verifiedIconSrc from "../assets/icons/verified.svg";
@@ -26,7 +26,7 @@ import pic12 from "../assets/profile photos/pic-12.png";
 
 // ─── Types ────────────────────────────────────────────
 
-interface CommentData {
+export interface CommentData {
   id: number;
   author: string;
   avatar: string;
@@ -149,17 +149,55 @@ function getCommentsForPost(postId: number): CommentData[] {
   return COMMENT_SEEDS.slice(0, count).map(c => offsetIds(c, postId * 1000));
 }
 
+// Session-scoped comment store. Comments live here (keyed by post) rather than
+// in PostDetail's local state so that replies composed on the focused reply
+// page — and inline comments — persist across navigation instead of being
+// wiped when PostDetail remounts and re-seeds.
+const commentStore = new Map<number, CommentData[]>();
+
+function insertReply(list: CommentData[], parentId: number, reply: CommentData): CommentData[] {
+  return list.map(c =>
+    c.id === parentId
+      ? { ...c, replies: [reply, ...(c.replies ?? [])] }
+      : c.replies
+        ? { ...c, replies: insertReply(c.replies, parentId, reply) }
+        : c,
+  );
+}
+
+export function getPostComments(postId: number): CommentData[] {
+  if (!commentStore.has(postId)) commentStore.set(postId, getCommentsForPost(postId));
+  return commentStore.get(postId)!;
+}
+
+export function addPostComment(postId: number, comment: CommentData): void {
+  commentStore.set(postId, [comment, ...getPostComments(postId)]);
+}
+
+export function addPostReply(postId: number, parentId: number, reply: CommentData): void {
+  commentStore.set(postId, insertReply(getPostComments(postId), parentId, reply));
+}
+
 // ─── Sub-components ───────────────────────────────────
 
 function AuthorRow({ post }: { post: Post }) {
   return (
     <div className="flex items-start gap-3">
-      <img
-        src={post.avatar}
-        alt={post.author}
-        className="h-11 w-11 shrink-0 rounded-full object-cover"
-        style={{ objectPosition: "50% 15%" }}
-      />
+      {post.avatar ? (
+        <img
+          src={post.avatar}
+          alt={post.author}
+          className="h-11 w-11 shrink-0 rounded-full object-cover"
+          style={{ objectPosition: "50% 15%" }}
+        />
+      ) : (
+        <div
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[18px] font-semibold text-white"
+          style={{ backgroundColor: post.groupColor ?? "#2563EB" }}
+        >
+          {post.author.charAt(0)}
+        </div>
+      )}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="text-[15px] font-medium leading-tight text-gray-dark">{post.author}</span>
@@ -170,6 +208,18 @@ function AuthorRow({ post }: { post: Post }) {
           <p className="truncate text-[13px] leading-tight text-[#707070]">{post.headline}</p>
         ) : null}
       </div>
+      {/* Follow — icon-only, top-right across from the author. */}
+      <button
+        type="button"
+        aria-label="Follow"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-hover text-gray-dark transition-colors hover:bg-[#ebebeb]"
+      >
+        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M19 8v6M22 11h-6" />
+        </svg>
+      </button>
     </div>
   );
 }
@@ -357,14 +407,14 @@ function StatsRow({ post, onCommentFocus }: { post: Post; onCommentFocus: () => 
   const [shareOpen, setShareOpen] = useState(false);
 
   return (
-    <div className="mt-2 flex items-center gap-2 py-1.5">
+    <div className="mt-2 flex items-center justify-between px-2 py-1.5">
       <FeedLikeButton initialCount={post.likes} />
       {/* Comment */}
       <button
         onClick={onCommentFocus}
         className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover"
       >
-        <img src={commentsIcon} alt="Comment" className="h-[22px] w-[22px] [filter:invert(44%)]" />
+        <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 21C13.486 21.0018 14.9492 20.6339 16.2576 19.9293L20.3676 20.9755C20.4517 20.9969 20.5398 20.9961 20.6234 20.9731C20.707 20.9502 20.7832 20.9058 20.8445 20.8445C20.9058 20.7832 20.9501 20.707 20.9731 20.6234C20.9961 20.5398 20.9969 20.4517 20.9755 20.3676L19.9293 16.2576C20.8609 14.5226 21.1978 12.5299 20.8882 10.5851C20.5786 8.64022 19.6396 6.85061 18.2152 5.49065C16.7909 4.13068 14.9598 3.27543 13.0027 3.05604C11.0457 2.83664 9.07066 3.26522 7.38054 4.27604C5.69042 5.28687 4.3785 6.82414 3.64594 8.65215C2.91338 10.4802 2.80062 12.498 3.32495 14.3962C3.84928 16.2945 4.98176 17.9684 6.54873 19.1612C8.1157 20.354 10.0307 21 12 21Z" /></svg>
         {post.comments > 0 && <span className="text-[13px] font-normal">{post.comments.toLocaleString()}</span>}
       </button>
       {/* Repost */}
@@ -375,61 +425,19 @@ function StatsRow({ post, onCommentFocus }: { post: Post; onCommentFocus: () => 
           onClick={() => setShareOpen(o => !o)}
           className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover"
         >
-          <img src={sharesIcon} alt="Share" className="h-[22px] w-[22px] [filter:invert(44%)]" />
+          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5.323 19.8781L19.752 13.1791C20.75 12.7161 20.75 11.2821 19.752 10.8191L5.323 4.12205C4.288 3.64205 3.193 4.66005 3.58 5.74305L5.813 11.9971L3.58 18.2581C3.193 19.3401 4.288 20.3581 5.323 19.8781Z" /><path d="M5.81 12H20.5" /></svg>
         </button>
         <AnimatePresence>
-          {shareOpen ? <ShareDropdown postId={post.id} onClose={() => setShareOpen(false)} /> : null}
+          {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
         </AnimatePresence>
       </div>
+      {/* Save */}
+      <FeedBookmarkButton post={post} />
     </div>
   );
 }
 
 // ─── Comment components ───────────────────────────────
-
-function ReplyInput({ onPost, onCancel }: { onPost: (text: string) => void; onCancel: () => void }) {
-  const [text, setText] = useState("");
-  return (
-    <div
-      className="mt-3 flex gap-3"
-      onBlur={e => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node) && !text.trim()) {
-          onCancel();
-        }
-      }}
-    >
-      <img src={profilePhoto} alt="You" className="h-9 w-9 shrink-0 rounded-full object-cover" />
-      <div className="flex flex-1 items-center gap-2">
-        <textarea
-          autoFocus
-          value={text}
-          onChange={e => {
-            setText(e.target.value);
-            e.target.style.height = "auto";
-            e.target.style.height = `${e.target.scrollHeight}px`;
-          }}
-          placeholder="Write a reply…"
-          rows={1}
-          className="flex-1 resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[14px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
-          onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && text.trim()) { onPost(text.trim()); } }}
-        />
-        <AnimatePresence>
-          {text.trim() ? (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.85 }}
-              onClick={() => { onPost(text.trim()); }}
-              className="shrink-0 rounded-[8px] bg-gray-dark px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#222]"
-            >
-              Reply
-            </motion.button>
-          ) : null}
-        </AnimatePresence>
-      </div>
-    </div>
-  );
-}
 
 const HEART_PARTICLES = [
   { angle: -80,  r: 22, color: "#ff4757", size: 5 },
@@ -485,10 +493,10 @@ function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number
 
       <button
         onClick={handleClick}
-        className={`flex items-center gap-1 text-[11px] transition-colors ${liked ? "text-red-500" : "text-gray-light hover:text-gray-dark"}`}
+        className={`flex items-center gap-1 text-[13px] transition-colors ${liked ? "text-red-500" : "text-gray-light hover:text-gray-dark"}`}
       >
         <motion.svg
-          className="h-3.5 w-3.5"
+          className="h-[20px] w-[20px]"
           viewBox="0 0 24 24"
           fill={liked ? "currentColor" : "none"}
           stroke="currentColor"
@@ -512,23 +520,10 @@ function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number
   );
 }
 
-function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: number }) {
+function CommentItem({ comment, depth = 0, postId }: { comment: CommentData; depth?: number; postId: number }) {
+  const navigate = useNavigate();
   const [liked, setLiked] = useState(false);
-  const [showReply, setShowReply] = useState(false);
-  const [replies, setReplies] = useState<CommentData[]>(comment.replies ?? []);
-
-  const addReply = (text: string) => {
-    const newReply: CommentData = {
-      id: Date.now(),
-      author: "You",
-      avatar: profilePhoto,
-      time: "just now",
-      text,
-      likes: 0,
-    };
-    setReplies(r => [newReply, ...r]);
-    setShowReply(false);
-  };
+  const replies = comment.replies ?? [];
 
   return (
     <div className="relative">
@@ -570,14 +565,13 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
             <HeartButton liked={liked} count={comment.likes + (liked ? 1 : 0)} onToggle={() => setLiked(l => !l)} />
             {depth === 0 ? (
               <button
-                onClick={() => setShowReply(s => !s)}
-                className="text-[11px] text-gray-light transition-colors hover:text-gray-dark"
+                onClick={() => navigate(`/reply/${postId}`, { state: { target: { kind: "comment", comment } } })}
+                className="text-[13px] font-medium text-gray-light transition-colors hover:text-gray-dark"
               >
                 Reply
               </button>
             ) : null}
           </div>
-          {showReply ? <ReplyInput onPost={addReply} onCancel={() => setShowReply(false)} /> : null}
         </div>
       </motion.div>
 
@@ -604,7 +598,7 @@ function CommentItem({ comment, depth = 0 }: { comment: CommentData; depth?: num
                 style={{ left: 21, top: 34, bottom: 0 }}
               />
             )}
-            <CommentItem comment={r} depth={depth + 1} />
+            <CommentItem comment={r} depth={depth + 1} postId={postId} />
           </div>
         );
       })}
@@ -635,6 +629,23 @@ export default function PostDetail() {
   const { focusInput = false, prefillComment = "", focusImage } = (location.state as { sourceY?: number; focusInput?: boolean; prefillComment?: string; focusImage?: number }) ?? {};
   const post = posts.find(p => p.id === Number(postId));
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Mirror BottomNav's scroll-hide so the comment input slides down to the
+  // bottom in unison with the nav as it slides out of view.
+  const [navHidden, setNavHidden] = useState(false);
+  const lastNavY = useRef(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastNavY.current;
+      if (y < 80) setNavHidden(false);
+      else if (delta > 6) setNavHidden(true);
+      else if (delta < -6) setNavHidden(false);
+      lastNavY.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Only scroll to top on initial mount when not arriving via Comment tap —
   // otherwise we fight the scroll that brings the comment input above the
@@ -674,7 +685,7 @@ export default function PostDetail() {
 
   const [commentText, setCommentText] = useState(prefillComment);
   const [comments, setComments] = useState<CommentData[]>(() =>
-    post ? getCommentsForPost(post.id) : []
+    post ? getPostComments(post.id) : []
   );
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(
     typeof focusImage === "number" ? focusImage : null
@@ -701,73 +712,77 @@ export default function PostDetail() {
       text: commentText.trim(),
       likes: 0,
     };
-    setComments(c => [newComment, ...c]);
+    addPostComment(post.id, newComment);
+    setComments(getPostComments(post.id));
     setCommentText("");
   };
 
   return (
-    <>
-    <motion.div
-      initial={{ y: 16, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-    >
+    <div className="slide-in-page">
+    <motion.div initial={false}>
       {/* Content — full width */}
-      <div className="min-w-0">
-        {/* Post */}
-        <div className="pb-2">
+      {/* Content — full width; leave room at the bottom for the fixed input + nav */}
+      <div className="min-w-0 pb-36">
+        {/* Post — full width. Body/media/actions stack below the author header
+            (avatar + name + description), no left indent. */}
+        <div className="border-b border-gray-stroke pb-3">
           <AuthorRow post={post} />
-          <p className="mt-1 pl-[56px] text-[15px] leading-[1.4] text-gray-dark">{post.body}</p>
-          <div className="pl-[56px]"><PostMedia post={post} onImageClick={post.type === "image" ? setLightboxIndex : undefined} /></div>
-          <div className="pl-[56px]"><StatsRow post={post} onCommentFocus={() => commentInputRef.current?.focus()} /></div>
-        </div>
-
-        {/* Comment input — sits inline where the comment will land in the thread */}
-        <div className="flex gap-3 py-2">
-          <img
-            src={profilePhoto}
-            alt="You"
-            className="h-9 w-9 shrink-0 rounded-full object-cover"
-          />
-          <div className="flex flex-1 items-center gap-2">
-            <textarea
-              ref={commentInputRef}
-              autoFocus={focusInput}
-              value={commentText}
-              onChange={e => {
-                setCommentText(e.target.value);
-                e.target.style.height = "auto";
-                e.target.style.height = `${e.target.scrollHeight}px`;
-              }}
-              placeholder="Add a comment…"
-              rows={1}
-              className="flex-1 resize-none overflow-hidden rounded-xl border border-gray-stroke px-3 py-2.5 text-[14px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
-              onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
-            />
-            <AnimatePresence>
-              {commentText.trim() ? (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.85 }}
-                  onClick={submitComment}
-                  className="shrink-0 rounded-[8px] bg-gray-dark px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#222]"
-                >
-                  Post
-                </motion.button>
-              ) : null}
-            </AnimatePresence>
-          </div>
+          <p className="mt-3 whitespace-pre-wrap text-[15px] leading-[1.5] text-gray-dark">{post.body}</p>
+          <PostMedia post={post} onImageClick={post.type === "image" ? setLightboxIndex : undefined} />
+          <StatsRow post={post} onCommentFocus={() => navigate(`/reply/${post.id}`, { state: { target: { kind: "post" } } })} />
         </div>
 
         {/* Comments */}
         <div className="mt-1">
           {comments.map(c => (
-            <CommentItem key={c.id} comment={c} />
+            <CommentItem key={c.id} comment={c} postId={post.id} />
           ))}
         </div>
       </div>
     </motion.div>
+
+    {/* Comment input — anchored to the bottom of the screen, above the tab bar.
+        Rendered outside the animated container so `position: fixed` is
+        viewport-relative (a transformed ancestor would otherwise scope it). */}
+    <div
+      style={{ bottom: navHidden ? "env(safe-area-inset-bottom)" : "calc(env(safe-area-inset-bottom) + 56px)" }}
+      className="fixed inset-x-0 z-30 border-t border-gray-stroke bg-white px-4 py-2.5 transition-[bottom] duration-200 ease-out"
+    >
+      <div className="mx-auto flex max-w-[600px] items-center gap-2">
+        <img
+          src={profilePhoto}
+          alt="You"
+          className="h-9 w-9 shrink-0 rounded-full object-cover"
+        />
+        <textarea
+          ref={commentInputRef}
+          autoFocus={focusInput}
+          value={commentText}
+          onChange={e => {
+            setCommentText(e.target.value);
+            e.target.style.height = "auto";
+            e.target.style.height = `${e.target.scrollHeight}px`;
+          }}
+          placeholder="Add a comment…"
+          rows={1}
+          className="scrollbar-hide max-h-24 flex-1 resize-none overflow-y-auto rounded-xl border border-gray-stroke px-3 py-2.5 text-[14px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
+          onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
+        />
+        <AnimatePresence>
+          {commentText.trim() ? (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.85 }}
+              onClick={submitComment}
+              className="shrink-0 rounded-[8px] bg-gray-dark px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#222]"
+            >
+              Post
+            </motion.button>
+          ) : null}
+        </AnimatePresence>
+      </div>
+    </div>
 
     <AnimatePresence>
       {lightboxIndex !== null && post.type === "image" && (
@@ -779,6 +794,6 @@ export default function PostDetail() {
         />
       )}
     </AnimatePresence>
-    </>
+    </div>
   );
 }

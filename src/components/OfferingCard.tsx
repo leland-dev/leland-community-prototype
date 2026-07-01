@@ -178,7 +178,7 @@ export default function OfferingCard({
           <p className="truncate text-[14px] leading-tight text-[#707070]">{subtitle}</p>
         </div>
         <div className="flex shrink-0 items-center pr-2 py-4">
-          <button className="hidden @[448px]:flex cursor-pointer items-center gap-2 rounded-lg bg-[#038561] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+          <button className="hidden @[448px]:flex cursor-pointer items-center gap-2 rounded-lg bg-[#FFD96F] px-4 py-2.5 text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90">
             {label}
           </button>
         </div>
@@ -244,7 +244,7 @@ export default function OfferingCard({
               cta.disabled
                 ? "bg-[#222222]/5 text-[#9B9B9B] cursor-default font-medium"
                 : cta.green
-                  ? "cursor-pointer bg-[#038561] text-white hover:bg-[#038561]/90 font-medium"
+                  ? "cursor-pointer bg-[#FFD96F] text-[#222222] hover:bg-[#FFD96F]/90 font-medium"
                   : "cursor-pointer bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08] font-semibold"
             }`}
           >

@@ -674,7 +674,7 @@ function GroupRightSidebar({ group }: { group: GroupData }) {
             subtitle={e.live ? <><span className="font-medium text-[#FB5A42]">Live now</span>{e.subtitle.replace(/^Live now/, "")}</> : e.subtitle}
             right={
               e.live ? (
-                <div className="rounded-[8px] bg-[#038561] px-[14px] py-2 text-[12px] font-medium text-white" style={{ lineHeight: 1.2 }}>
+                <div className="rounded-[8px] bg-[#FFD96F] px-[14px] py-2 text-[12px] font-medium text-[#222222]" style={{ lineHeight: 1.2 }}>
                   Join
                 </div>
               ) : undefined
@@ -746,7 +746,7 @@ export default function Group() {
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <p className="text-[18px] font-medium text-gray-dark">Group not found</p>
           <p className="mt-2 text-[14px] text-[#707070]">This group page hasn't been built yet.</p>
-          <Link to="/" className="mt-6 text-[14px] font-medium text-[#038561] hover:underline">
+          <Link to="/" className="mt-6 text-[14px] font-medium text-gray-dark hover:underline">
             ← Back to feed
           </Link>
         </div>
@@ -775,7 +775,7 @@ export default function Group() {
                       onClick={() => setActiveTab(tab.id)}
                       className={`shrink-0 cursor-pointer border-b-2 px-3 pt-4 pb-4 text-[14px] font-medium transition-colors ${
                         activeTab === tab.id
-                          ? "border-[#038561] text-gray-dark"
+                          ? "border-gray-dark text-gray-dark"
                           : "border-transparent text-[#707070] hover:text-gray-dark"
                       }`}
                     >
@@ -807,7 +807,7 @@ export default function Group() {
               className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[13px] md:text-[14px] font-medium transition-colors ${
                 isJoined
                   ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
-                  : "bg-[#038561] text-white hover:bg-[#038561]/90"
+                  : "bg-[#FFD96F] text-[#222222] hover:bg-[#FFD96F]/90"
               }`}
             >
               {isJoined && <CheckIcon />}
@@ -846,7 +846,7 @@ export default function Group() {
               onClick={() => setActiveTab(tab.id)}
               className={`cursor-pointer border-b-2 px-3 pt-4 pb-2 md:pb-4 text-[14px] font-medium transition-colors ${
                 activeTab === tab.id
-                  ? "border-[#038561] text-gray-dark"
+                  ? "border-gray-dark text-gray-dark"
                   : "border-transparent text-[#707070] hover:text-gray-dark"
               }`}
             >

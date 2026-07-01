@@ -82,6 +82,7 @@ import stanford2 from "../assets/placeholder post assets/stanford-post/39a9980b5
 import stanford3 from "../assets/placeholder post assets/stanford-post/989ac1d56cf981c783808b83154d8a25.jpg";
 import stanford4 from "../assets/placeholder post assets/stanford-post/eb80edada3b3db7955379d433ca2861a.jpg";
 import { FeedPost, type Post } from "./Home";
+import { useBookmarks } from "../contexts/BookmarksContext";
 
 const CATEGORY_ALIASES: Record<string, string> = {
   MBA: "MBA Admissions",
@@ -153,7 +154,7 @@ const purchasedOfferings: PurchasedOffering[] = [
   {
     type: "package",
     title: "MBA Application Package",
-    subtitle: <>Comprehensive package · <span className="text-[#038561]">Currently active</span></>,
+    subtitle: <>Comprehensive package · <span className="text-gray-dark">Currently active</span></>,
     image: pic7,
   },
   {
@@ -379,9 +380,10 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
   const [showGrayHeader, setShowGrayHeader] = useState(false);
   const [searchParams] = useSearchParams();
   const isCustomerProfile = !coach;
-  const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes" | "more">(
-    (["activity", "about", "calendar", "likes", "more"] as const).includes(searchParams.get("tab") as any)
-      ? (searchParams.get("tab") as "activity" | "about" | "calendar" | "likes" | "more")
+  const { savedPosts } = useBookmarks();
+  const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes" | "saved" | "more">(
+    (["activity", "about", "calendar", "saved", "likes", "more"] as const).includes(searchParams.get("tab") as any)
+      ? (searchParams.get("tab") as "activity" | "about" | "calendar" | "likes" | "saved" | "more")
       : "activity"
   );
   const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Programs" | "Content">("All");
@@ -409,6 +411,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
   const sectionRefs = useRef<Record<string, HTMLHeadingElement | null>>({});
   const groupRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const navScrollRef = useRef<HTMLDivElement>(null);
+  const customerTabStripRef = useRef<HTMLDivElement>(null);
 
   const setSectionRef = useCallback(
     (id: string) => (el: HTMLHeadingElement | null) => {
@@ -474,6 +477,18 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
       activeBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     }
   }, [activeSection]);
+
+  // Bring the selected customer tab into view (e.g. tapping "Saved" when it's
+  // clipped at the right edge). Scroll the strip horizontally only, so the
+  // sticky tab bar never nudges the page vertically.
+  useEffect(() => {
+    const strip = customerTabStripRef.current;
+    if (!strip) return;
+    const active = strip.querySelector<HTMLElement>(`[data-tab="${customerTab}"]`);
+    if (!active) return;
+    const target = active.offsetLeft - (strip.clientWidth - active.clientWidth) / 2;
+    strip.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, [customerTab]);
 
   // Close admin dropdown on outside click
   useEffect(() => {
@@ -610,7 +625,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     ))}
                   </div>
                   <div className="flex items-center pl-4 md:hidden">
-                    <button className="cursor-pointer rounded-lg bg-[#038561] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                    <button className="cursor-pointer rounded-lg bg-[#FFD96F] px-4 py-2.5 text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90">
                       Free intro call
                     </button>
                   </div>
@@ -740,7 +755,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     <span className="text-[14px] leading-none font-medium text-gray-dark">Available today at 5:30pm</span>
                     <span className="text-[14px] leading-none text-[#707070]">Usually responds within 12 hours</span>
                   </div>
-                  <span className="h-[12px] w-[12px] shrink-0 rounded-full bg-[#038561] animate-[pulse-ring_2.4s_ease-out_infinite]" />
+                  <span className="h-[12px] w-[12px] shrink-0 rounded-full bg-[#FFD96F] animate-[pulse-ring_2.4s_ease-out_infinite]" />
                 </div>
                 <div className="flex flex-col gap-2">
                   <button className="w-full cursor-pointer rounded-full bg-leland-brand-primary px-4 py-[14px] text-[15px] font-medium text-gray-dark transition-colors hover:bg-leland-brand-primary/90">
@@ -779,12 +794,12 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                           </p>
                         </motion.div>
                         {!coachNoteExpanded && (
-                          <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[14px] leading-snug font-medium text-[#038561]">
+                          <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[14px] leading-snug font-medium text-gray-dark">
                             Read more
                           </span>
                         )}
                         {coachNoteExpanded && (
-                          <span className="mt-1 inline-block text-[14px] font-medium text-[#038561]">
+                          <span className="mt-1 inline-block text-[14px] font-medium text-gray-dark">
                             Read less
                           </span>
                         )}
@@ -795,13 +810,13 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
                 {/* Message section */}
                 <div className={`flex gap-3 border-b border-[#E5E5E5] py-6 ${!showCoachNote ? "border-t" : ""}`}>
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5] icon-tile">
                     <img src={airplaneIcon} alt="" className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-[14px] font-semibold text-gray-dark">Questions?</p>
                     <p className="mt-0.5 text-[14px] leading-snug text-[#707070]">
-                      You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-[#038561]">Send a message</span>
+                      You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-gray-dark">Send a message</span>
                     </p>
                   </div>
                 </div>
@@ -836,11 +851,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
             </div>
             <div className={`flex items-center gap-2 ${showCoverImage ? "pb-1" : showGrayHeader ? "pb-[90px]" : "pb-1"}`}>
               {viewingOwnProfile ? (
-                <Link to="/settings?tab=account" className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-colors ${
-                  showCoverImage || !showGrayHeader
-                    ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
-                    : "border border-[#222222]/10 bg-white text-gray-dark hover:border-[#222222]/20"
-                }`}>
+                <Link to="/settings?tab=account" className="flex cursor-pointer items-center gap-2 rounded-lg bg-gray-hover px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]">
                   <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
                   Edit profile
                 </Link>
@@ -850,7 +861,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     onClick={() => setIsFollowing(!isFollowing)}
                     className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2.5 text-[14px] font-semibold transition-colors ${
                       isCustomerProfile
-                        ? "bg-[#038561] text-white hover:bg-[#038561]/90"
+                        ? "bg-[#FFD96F] text-[#222222] hover:bg-[#FFD96F]/90"
                         : showCoverImage || !showGrayHeader
                           ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
                           : "border border-[#222222]/10 bg-white text-gray-dark hover:border-[#222222]/20"
@@ -909,7 +920,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
           {/* Name + Supercoach badge */}
           <div className={`flex items-center ${isCustomerProfile ? "gap-2" : sectionFilter === "All" ? "gap-2 mb-2" : "gap-1 mb-1"}`}>
-            <h1 className={`font-medium ${isCustomerProfile ? "text-[22px] text-gray-dark" : sectionFilter === "All" ? "font-serif text-[26px] text-[#333333]" : "text-[16px] text-gray-dark"}`}>{profileName}</h1>
+            <h1 className={`font-medium text-gray-dark ${isCustomerProfile ? "text-[22px]" : sectionFilter === "All" ? "font-serif text-[26px]" : "text-[16px]"}`}>{profileName}</h1>
             {!isCustomerProfile && (
               <img src={verifiedIcon} alt="Verified" className="mt-[2px] h-[16px] w-[16px]" />
             )}
@@ -1053,70 +1064,15 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
           {/* Customer Favorite — mobile banner (hidden for now) */}
 
-          {/* Mobile inline CTA — customer profile only */}
-          {isCustomerProfile && (
-            <div className="mt-3 flex flex-col gap-3 md:hidden">
-              {viewingOwnProfile ? (
-                <Link to="/settings?tab=account" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
-                  <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
-                  Edit profile
-                </Link>
-              ) : (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsFollowing(!isFollowing)}
-                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#038561] px-6 py-3 text-[16px] font-semibold text-white transition-colors hover:bg-[#038561]/90"
-                  >
-                    {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px] brightness-0 invert" />}
-                    {isFollowing ? "Following" : "Follow"}
-                  </button>
-                  <div ref={moreMenuRef} className="relative">
-                    <button
-                      onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-                      className="flex cursor-pointer items-center justify-center rounded-full bg-[#222222]/5 px-4 py-3 transition-colors hover:bg-[#222222]/[0.08]"
-                    >
-                      <img src={dotsHorizontalIcon} alt="More" className="h-[20px] w-[20px]" />
-                    </button>
-                    <AnimatePresence>
-                      {moreMenuOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 6 }}
-                          transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-                          className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
-                        >
-                          {[
-                            { icon: shareArrowIcon, label: "Share" },
-                            { icon: airplaneIcon, label: "Message" },
-                            { icon: reportFlagIcon, label: "Report" },
-                          ].map((item) => (
-                            <button
-                              key={item.label}
-                              onClick={() => setMoreMenuOpen(false)}
-                              className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-gray-hover ${
-                                "text-gray-dark"
-                              }`}
-                            >
-                              <img src={item.icon} alt="" className="h-[20px] w-[20px] shrink-0 brightness-0" />
-                              {item.label}
-                            </button>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Mobile inline CTA removed — the top-right header button is the
+              only Follow/Edit action on the customer profile. */}
 
           {/* Mobile sidebar content — coach profile: Availability, CTAs, Customer Favorite, Coach note, Video, Questions */}
           {!isCustomerProfile && !viewingOwnProfile && (
             <div className="mt-4 flex flex-col md:hidden">
               {/* CTA buttons */}
               <div className="flex flex-col gap-2">
-                <button className="w-full cursor-pointer rounded-full bg-leland-brand-primary px-4 py-[14px] text-[15px] font-medium text-gray-dark transition-colors hover:bg-leland-brand-primary/90">
+                <button className="w-full cursor-pointer rounded-full bg-leland-brand-primary px-4 py-[14px] text-[15px] font-medium text-[#111111] transition-colors hover:bg-leland-brand-primary/90">
                   Schedule free intro call
                 </button>
                 <button className="w-full cursor-pointer rounded-full bg-[#222222]/5 px-4 py-[14px] text-[15px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
@@ -1141,7 +1097,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
                 {/* Availability */}
                 <div className="flex gap-4 py-4">
-                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5] icon-tile">
                     <img src={calendarIcon} alt="" className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
@@ -1175,12 +1131,12 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                           </p>
                         </motion.div>
                         {!coachNoteExpanded && (
-                          <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[14px] leading-snug font-medium text-[#038561]">
+                          <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[14px] leading-snug font-medium text-gray-dark">
                             Read more
                           </span>
                         )}
                         {coachNoteExpanded && (
-                          <span className="mt-1 inline-block text-[14px] font-medium text-[#038561]">
+                          <span className="mt-1 inline-block text-[14px] font-medium text-gray-dark">
                             Read less
                           </span>
                         )}
@@ -1191,13 +1147,13 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
                 {/* Questions */}
                 <div className="flex gap-4 py-4">
-                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5] icon-tile">
                     <img src={airplaneIcon} alt="" className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-[14px] font-semibold text-gray-dark">Questions?</p>
                     <p className="text-[14px] leading-snug text-[#707070]">
-                      You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-[#038561]">Send a message</span>
+                      You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-gray-dark">Send a message</span>
                     </p>
                   </div>
                 </div>
@@ -1728,10 +1684,11 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           {isCustomerProfile && (
             <>
               {viewingOwnProfile ? (
-                <div className="sticky top-0 z-10 mt-5 flex gap-5 border-b border-gray-stroke bg-white overflow-x-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {(["activity", "about", "calendar", "likes", "more"] as const).map((tab) => (
+                <div ref={customerTabStripRef} className="sticky top-0 z-10 mt-2 flex gap-5 border-b border-gray-stroke bg-white overflow-x-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {(["activity", "about", "calendar", "saved", "likes", "more"] as const).map((tab) => (
                     <button
                       key={tab}
+                      data-tab={tab}
                       onClick={() => setCustomerTab(tab)}
                       className={`relative cursor-pointer px-3 py-3 transition-colors ${
                         customerTab === tab
@@ -1739,9 +1696,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                           : "text-gray-light hover:text-gray-dark"
                       }`}
                     >
-                      <span className="text-[16px] font-medium">{tab === "activity" ? "Overview" : tab === "about" ? "Activity" : tab === "calendar" ? "Calendar" : tab === "likes" ? "Likes" : "More"}</span>
+                      <span className="text-[16px] font-medium">{tab === "activity" ? "Overview" : tab === "about" ? "Activity" : tab === "calendar" ? "Calendar" : tab === "likes" ? "Liked" : tab === "saved" ? "Saved" : "More"}</span>
                       {customerTab === tab && (
-                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#038561]" />
+                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#FFD96F]" />
                       )}
                     </button>
                   ))}
@@ -1750,7 +1707,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 <div className="mt-7 border-b border-gray-stroke" />
               )}
 
-              <div className="mt-6">
+              <div className="mt-3">
                 {customerTab === "activity" && viewingOwnProfile && (
                   <>
                     {/* Upcoming sessions */}
@@ -1930,7 +1887,6 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 )}
 
                 {viewingOwnProfile && customerTab === "likes" && (
-                  <>
                   <div className="flex flex-col gap-4">
                     {[...Array(8)].map((_, i) => (
                       <div key={i} className="flex gap-3">
@@ -1939,7 +1895,24 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                       </div>
                     ))}
                   </div>
-                  </>
+                )}
+
+                {/* Saved — its own tab. Posts bookmarked from the feed; the
+                    yellow bookmark icon on each post is enough to differentiate. */}
+                {viewingOwnProfile && customerTab === "saved" && (
+                  savedPosts.length > 0 ? (
+                    <div className="flex flex-col divide-y divide-gray-stroke/50">
+                      {savedPosts.map((post) => (
+                        <FeedPost key={post.id} post={post} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 py-16 text-center">
+                      <svg className="h-8 w-8 text-gray-xlight" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+                      <p className="text-[15px] font-medium text-gray-dark">Nothing saved yet</p>
+                      <p className="text-[13px] text-gray-light">Tap the bookmark on a post to save it here.</p>
+                    </div>
+                  )
                 )}
 
                 {viewingOwnProfile && customerTab === "more" && (
@@ -2058,7 +2031,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                       onChange={() => setShowCustomerFavorite(!showCustomerFavorite)}
                       className="peer sr-only"
                     />
-                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
                     <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                   </div>
                 </label>
@@ -2073,7 +2046,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                       onChange={() => setShowCoachVideo(!showCoachVideo)}
                       className="peer sr-only"
                     />
-                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
                     <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                   </div>
                 </label>
@@ -2087,7 +2060,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     onChange={() => !showCoverImage && setShowGrayHeader(!showGrayHeader)}
                     className="peer sr-only"
                   />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
                   <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                 </div>
               </label>
@@ -2100,7 +2073,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     onChange={() => setShowCoverImage(!showCoverImage)}
                     className="peer sr-only"
                   />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
                   <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                 </div>
               </label>
@@ -2114,7 +2087,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                       onChange={() => setShowCoachNote(!showCoachNote)}
                       className="peer sr-only"
                     />
-                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
                     <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                   </div>
                 </label>
@@ -2129,7 +2102,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                       onChange={() => setInlineCategory(!inlineCategory)}
                       className="peer sr-only"
                     />
-                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
                     <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                   </div>
                 </label>
@@ -2144,7 +2117,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                       onChange={() => setShowSupercoach(!showSupercoach)}
                       className="peer sr-only"
                     />
-                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
                     <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                   </div>
                 </label>
@@ -2158,7 +2131,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     onChange={() => setShowSidebar(!showSidebar)}
                     className="peer sr-only"
                   />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
                   <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                 </div>
               </label>
@@ -2171,7 +2144,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                     onChange={() => setViewingOwnProfile(!viewingOwnProfile)}
                     className="peer sr-only"
                   />
-                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
                   <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
                 </div>
               </label>

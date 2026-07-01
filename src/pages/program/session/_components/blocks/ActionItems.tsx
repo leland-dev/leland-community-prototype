@@ -43,7 +43,7 @@ export default function ActionItems({ state }: { state: SessionState }) {
             <span
               className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
                 it.done
-                  ? "border-[#038561] bg-[#038561] text-white"
+                  ? "border-gray-dark bg-[#FFD96F] text-[#222222]"
                   : "border-gray-stroke bg-white"
               }`}
             >

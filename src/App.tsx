@@ -2,6 +2,8 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { VersionProvider } from "./contexts/VersionContext";
 import { DarkModeProvider } from "./contexts/DarkModeContext";
+import { BookmarksProvider } from "./contexts/BookmarksContext";
+import { SavedToastProvider } from "./contexts/SavedToastContext";
 import Layout from "./components/Layout";
 import { ContextLayout } from "./components/Layout";
 
@@ -26,6 +28,7 @@ import Events from "./pages/Events";
 import Courses from "./pages/Courses";
 import LelandPlus from "./pages/LelandPlus";
 import PostDetail from "./pages/PostDetail";
+import ReplyCompose from "./pages/ReplyCompose";
 import AccountSettings from "./pages/AccountSettings";
 import Calendar from "./pages/Calendar";
 import MyCourses from "./pages/MyCourses";
@@ -62,6 +65,8 @@ export default function App() {
   return (
     <VersionProvider>
     <DarkModeProvider>
+    <BookmarksProvider>
+    <SavedToastProvider>
     <ScrollToTop />
     <Routes>
       <Route path="/b2b-dashboard" element={<B2BDashboard />} />
@@ -69,6 +74,7 @@ export default function App() {
       <Route path="/incredible-home-page" element={<IncredibleHomePage />} />
       <Route path="/incredible-home-page-bu" element={<IncredibleHomePageBU />} />
       <Route path="/incredible-onboarding" element={<IncredibleOnboarding />} />
+      <Route path="/reply/:postId" element={<ReplyCompose />} />
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
         <Route path="/dashboard" element={<Dashboard />} />
@@ -121,6 +127,8 @@ export default function App() {
         </Route>
       </Route>
     </Routes>
+    </SavedToastProvider>
+    </BookmarksProvider>
     </DarkModeProvider>
     </VersionProvider>
   );

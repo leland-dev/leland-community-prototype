@@ -95,7 +95,7 @@ const demos: DemoConfig[] = [
     },
     purchasedProps: {
       title: "MBA Application Package",
-      subtitle: <>Comprehensive package · <span className="text-[#038561]">Currently active</span></>,
+      subtitle: <>Comprehensive package · <span className="text-gray-dark">Currently active</span></>,
       image: pic1,
     },
   },
@@ -154,7 +154,7 @@ const defaultOfferings: { type: OfferingType; title: string; subtitle: ReactNode
 const purchasedOfferingsDemo: { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string; exhausted?: boolean }[] = [
   { type: "hourly", title: "1h 20m with Jessica", subtitle: "45m reserved for upcoming sessions", image: pic6 },
   { type: "hourly", title: "Out of time with Marcus", subtitle: "0m available to schedule", image: pic8, exhausted: true },
-  { type: "package", title: "MBA Application Package", subtitle: <>Comprehensive package · <span className="text-[#038561]">Currently active</span></>, image: pic1 },
+  { type: "package", title: "MBA Application Package", subtitle: <>Comprehensive package · <span className="text-gray-dark">Currently active</span></>, image: pic1 },
   { type: "course", title: "GMAT Exam Prep Bootcamp", subtitle: <>Started June 1 <span className="text-[#9B9B9B]">· Next session tomorrow</span></>, image: bootcampImg1 },
   { type: "content", title: "How I Got Into Stanford GSB", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>, image: lelandPlusImg1 },
 ];

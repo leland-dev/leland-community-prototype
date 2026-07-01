@@ -279,9 +279,9 @@ export default function ChatPanel({
       {/* "Replying to" context bar */}
       {replyingTo && (
         <div className="flex items-start gap-2 border-t border-gray-stroke bg-[#FAFAFA] px-4 py-2">
-          <span className="mt-1.5 inline-block h-3 w-[3px] shrink-0 rounded-full bg-[#038561]" />
+          <span className="mt-1.5 inline-block h-3 w-[3px] shrink-0 rounded-full bg-[#FFD96F]" />
           <div className="min-w-0 flex-1">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#038561]">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-dark">
               Replying to {replyingTo.author}
             </div>
             <div className="truncate text-[10px] text-gray-light">{replyingTo.body}</div>
@@ -481,7 +481,7 @@ function MessageRow({
 function SystemNotice({ m }: { m: Message }) {
   if (m.system === "purchase") {
     return (
-      <div className="flex items-center gap-2.5 rounded-lg bg-[#038561]/8 px-2.5 py-2">
+      <div className="flex items-center gap-2.5 rounded-lg bg-[#FFD96F]/8 px-2.5 py-2">
         <img
           src={m.avatar}
           alt=""
@@ -493,7 +493,7 @@ function SystemNotice({ m }: { m: Message }) {
         </div>
         <a
           href="#"
-          className="shrink-0 rounded-full bg-[#038561] px-3 py-1.5 text-[10px] font-semibold text-white no-underline transition-colors hover:bg-[#038561]/90"
+          className="shrink-0 rounded-full bg-[#FFD96F] px-3 py-1.5 text-[10px] font-semibold text-[#222222] no-underline transition-colors hover:bg-[#FFD96F]/90"
         >
           Book yours
         </a>

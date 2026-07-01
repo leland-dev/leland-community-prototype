@@ -38,7 +38,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)] transition-transform duration-200 ease-out ${hidden ? "translate-y-full" : "translate-y-0"}`}
+      className={`fixed bottom-0 left-0 right-0 z-50 bg-white pb-[env(safe-area-inset-bottom)] transition-transform duration-200 ease-out ${hidden ? "translate-y-full" : "translate-y-0"}`}
     >
       <ul className="flex items-center justify-around px-2 py-1">
         {navItems.map(({ to, active, inactive, label }) => (

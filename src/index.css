@@ -121,9 +121,11 @@
   --shadow-card:       0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-card-large: 0 2px 12px rgba(0, 0, 0, 0.06);
 
-  /* Fonts — Macan (body sans), Season (heading serif) */
+  /* Fonts — Macan everywhere (2026 rebrand). --font-serif is kept as a token
+     name for backwards compatibility but now points at Macan so headings that
+     used the serif render in Macan too. */
   --font-sans:  'Macan', 'Calibre', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-serif: 'Season', 'SeasonMix', Georgia, 'Times New Roman', serif;
+  --font-serif: 'Macan', 'Calibre', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono:  ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 
@@ -141,9 +143,25 @@
   display: none;
 }
 
+/* Push navigation: a detail screen (post, focused reply) slides in from the
+   right so it reads as a page pushed on top of the current one. No
+   animation-fill-mode, so the transform reverts to none once it lands —
+   important so fixed children (comment bar, FAB) stay viewport-anchored. */
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.slide-in-page {
+  animation: slide-in-from-right 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
 @keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0px rgba(3,133,97,0.2); }
-  100% { box-shadow: 0 0 0 10px rgba(3,133,97,0); }
+  0% { box-shadow: 0 0 0 0px rgba(255,217,111,0.35); }
+  100% { box-shadow: 0 0 0 10px rgba(255,217,111,0); }
 }
 
 /* iOS-style activity indicator: 8 rounded blades arranged radially. Each
@@ -196,6 +214,10 @@ html {
 
 body {
   overscroll-behavior-y: contain;
+  /* Prevent a horizontal scroll flash while a detail page slides in from the
+     right (.slide-in-page). `clip` doesn't create a scroll container, so it
+     won't break position: sticky the way overflow-x: hidden would. */
+  overflow-x: clip;
 }
 
 body {
@@ -215,12 +237,25 @@ html.dark body {
 }
 html.dark .bg-white { background-color: #111; }
 html.dark .bg-gray-hover { background-color: #1a1a1a; }
+/* Hover/active highlight in dark mode. The `:hover` variant compiles to a
+   separate class, so the static override above doesn't reach it — without this
+   the highlight falls back to the light #f5f5f5 and reads as a white block. */
+html.dark .hover\:bg-gray-hover:hover { background-color: #262626; }
 html.dark .bg-gray-100 { background-color: #1a1a1a; }
 html.dark .bg-\[\#F5F5F5\],
 html.dark .bg-\[\#F0F0F0\],
 html.dark .bg-\[\#f5f5f5\],
 html.dark .bg-\[\#FAFAFA\] { background-color: #1a1a1a; }
 html.dark .text-gray-dark { color: #ededed; }
+/* Faint light-tint pills/outlines (e.g. coach profile Follow / More / Book a
+   session) render as invisible near-black in dark mode — give them a clearly
+   visible dark grey. */
+html.dark .bg-\[\#222222\]\/5 { background-color: #262626; }
+html.dark .border-\[\#222222\]\/10 { border-color: #333333; }
+/* Small icon tiles: visible dark-grey box + light icon. Scoped to .icon-tile so
+   it doesn't collide with the header/nav <img> invert rule. */
+html.dark .icon-tile { background-color: #242424; }
+html.dark .icon-tile img { filter: invert(0.92); }
 html.dark .text-gray-light { color: #9a9a9a; }
 html.dark .text-gray-xlight { color: #6e6e6e; }
 html.dark .text-\[\#707070\] { color: #9a9a9a; }
@@ -229,13 +264,17 @@ html.dark .text-\[\#A0A0A0\] { color: #7e7e7e; }
 html.dark .border-gray-stroke,
 html.dark .border-\[\#E5E5E5\],
 html.dark .border-gray-200 { border-color: #2a2a2a; }
-html.dark .divide-gray-stroke > * + *,
-html.dark .divide-gray-stroke\/50 > * + * { border-color: #2a2a2a; }
+html.dark .bg-gray-200 { background-color: #2a2a2a; }
+html.dark .divide-gray-stroke > *,
+html.dark .divide-gray-stroke\/50 > * { border-color: #2a2a2a; }
 
 /* Invert icon <img>s so they read on a dark background. Excludes avatars
    (rounded-full), category thumbnails (rounded-[4px]), and the Leland logo
    so brand/image content is preserved. */
-html.dark :is(nav, header, aside) img:not([class*="rounded-full"]):not([class*="rounded-\[4px\]"]):not([alt="Leland"]):not([alt="Your profile"]):not([alt="Profile"]):not([alt="You"]),
+html.dark :is(nav, header, aside, a) img:not([class*="rounded-full"]):not([class*="rounded-\[4px\]"]):not([alt="Leland"]):not([alt="Your profile"]):not([alt="Profile"]):not([alt="You"]),
 html.dark button img:not([class*="rounded-full"]):not([class*="rounded-\[4px\]"]):not([alt="Leland"]):not([alt="Your profile"]):not([alt="Profile"]):not([alt="You"]) {
   filter: invert(0.92);
 }
+/* brightness-0 icons (forced black in light mode) then invert cleanly to light
+   in dark mode — the combination above handles both NavLink (<a>) and <button>
+   icons, so no menu icon is left black on the dark panel. */

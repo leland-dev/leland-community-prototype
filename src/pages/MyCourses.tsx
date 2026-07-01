@@ -265,7 +265,7 @@ export default function MyCourses() {
           <div className="mt-10">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-[22px] font-medium leading-[1.2] text-gray-dark">Explore programs</h2>
-              <a href="/browse" className="flex items-center gap-1 text-[13px] font-medium text-[#038561] hover:opacity-80">
+              <a href="/browse" className="flex items-center gap-1 text-[13px] font-medium text-gray-dark hover:opacity-80">
                 See all
                 <img src={arrowRightSmIcon} alt="" className="h-4 w-4 opacity-70" />
               </a>
@@ -301,7 +301,7 @@ export default function MyCourses() {
                   onClick={() => setVariant(value)}
                   className="flex cursor-pointer items-center gap-2.5 text-[14px] leading-[1.2]"
                 >
-                  <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${variant === value ? "border-[#038561] bg-[#038561]" : "border-gray-300"}`}>
+                  <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${variant === value ? "border-gray-dark bg-[#FFD96F]" : "border-gray-300"}`}>
                     {variant === value && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
                   </span>
                   <span className={variant === value ? "font-medium text-gray-dark" : "text-gray-light"}>{label}</span>
@@ -313,7 +313,7 @@ export default function MyCourses() {
               <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Suggested programs sidebar</p>
               <button
                 onClick={() => setShowSidebar(!showSidebar)}
-                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showSidebar ? "bg-[#038561]" : "bg-gray-300"}`}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showSidebar ? "bg-[#FFD96F]" : "bg-gray-300"}`}
               >
                 <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showSidebar ? "translate-x-[18px]" : "translate-x-0.5"}`} />
               </button>

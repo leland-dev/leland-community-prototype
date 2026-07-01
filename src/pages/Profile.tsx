@@ -296,12 +296,12 @@ export default function Profile() {
               <div className="flex flex-col gap-[2px]">
                 <p className="text-[16px] font-medium leading-tight text-gray-dark">Work with Alex</p>
                 <p className="text-[14px] leading-tight">
-                  <span className="text-[#038561]">Available today</span>
+                  <span className="text-gray-dark">Available today</span>
                   <span className="text-gray-600"> · Responds within 3h</span>
                 </p>
               </div>
             </div>
-            <button className="shrink-0 rounded-[10px] bg-[#038561] px-4 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+            <button className="shrink-0 rounded-[10px] bg-[#FFD96F] px-4 py-2 text-[13px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90">
               Free intro call
             </button>
           </div>
@@ -404,7 +404,7 @@ export default function Profile() {
                   <p className="mt-3 text-[14px] text-gray-600">
                     Get to know Alex and make a plan for working together.
                   </p>
-                  <button className="mt-6 rounded-[10px] bg-[#038561] px-6 py-3 text-[13px] font-medium text-white transition-colors hover:bg-[#038561]/90">
+                  <button className="mt-6 rounded-[10px] bg-[#FFD96F] px-6 py-3 text-[13px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90">
                     Schedule free intro call
                   </button>
                 </div>
@@ -534,7 +534,7 @@ export default function Profile() {
           <button
             onClick={() => setIsVerifiedExpert(!isVerifiedExpert)}
             className={`relative h-6 w-11 rounded-full transition-colors ${
-              isVerifiedExpert ? "bg-[#038561]" : "bg-gray-300"
+              isVerifiedExpert ? "bg-[#FFD96F]" : "bg-gray-300"
             }`}
           >
             <div
@@ -551,7 +551,7 @@ export default function Profile() {
           <button
             onClick={() => setLargeBadges(!largeBadges)}
             className={`relative h-6 w-11 rounded-full transition-colors ${
-              largeBadges ? "bg-[#038561]" : "bg-gray-300"
+              largeBadges ? "bg-[#FFD96F]" : "bg-gray-300"
             }`}
           >
             <div

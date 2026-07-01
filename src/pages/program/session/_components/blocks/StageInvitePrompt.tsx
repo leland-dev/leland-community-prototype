@@ -33,7 +33,7 @@ export default function StageInvitePrompt({ coach, onAccept, onDecline }: Props)
             style={{ objectPosition: "50% 15%" }}
           />
           <div className="min-w-0 flex-1">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#038561]">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-dark">
               Invitation to stage
             </div>
             <div className="mt-0.5 text-[13px] font-semibold leading-tight text-gray-dark">

@@ -98,7 +98,7 @@ function ToggleRow({ label, enabled, onToggle }: { label: string; enabled: boole
           onChange={onToggle}
           className="peer sr-only"
         />
-        <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#038561]" />
+        <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
         <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
       </div>
     </label>
@@ -240,7 +240,7 @@ export default function AccountSettings() {
                                           onChange={() => setEmailFrequency((prev) => ({ ...prev, [nt.key]: option }))}
                                           className="peer sr-only"
                                         />
-                                        <div className="h-5 w-5 rounded-full border border-[#CCCCCC] transition-colors peer-checked:border-[#000000]/15 peer-checked:bg-[#038561]" />
+                                        <div className="h-5 w-5 rounded-full border border-[#CCCCCC] transition-colors peer-checked:border-[#000000]/15 peer-checked:bg-[#FFD96F]" />
                                         <div className="absolute h-[7px] w-[7px] rounded-full bg-transparent transition-colors peer-checked:bg-white" />
                                       </div>
                                       <span className="text-[14px] font-medium text-gray-dark">{option}</span>
@@ -324,7 +324,7 @@ export default function AccountSettings() {
                                           onChange={() => setEmailFrequency((prev) => ({ ...prev, [nt.key]: option }))}
                                           className="peer sr-only"
                                         />
-                                        <div className="h-5 w-5 rounded-full border border-[#CCCCCC] transition-colors peer-checked:border-[#000000]/15 peer-checked:bg-[#038561]" />
+                                        <div className="h-5 w-5 rounded-full border border-[#CCCCCC] transition-colors peer-checked:border-[#000000]/15 peer-checked:bg-[#FFD96F]" />
                                         <div className="absolute h-[7px] w-[7px] rounded-full bg-transparent transition-colors peer-checked:bg-white" />
                                       </div>
                                       <span className="text-[14px] font-medium text-gray-dark">{option}</span>
@@ -401,14 +401,14 @@ export default function AccountSettings() {
                   <div className="flex items-center justify-between rounded-lg bg-[#F5F5F5] px-4 py-3.5">
                     <span className="text-[14px] text-gray-light">Send me SMS reminders for my upcoming sessions</span>
                     <button onClick={() => setSmsReminders(!smsReminders)} className="relative h-[26px] w-[44px] shrink-0 cursor-pointer">
-                      <div className={`h-full w-full rounded-full transition-colors ${smsReminders ? "bg-[#038561]" : "bg-[#E5E5E5]"}`} />
+                      <div className={`h-full w-full rounded-full transition-colors ${smsReminders ? "bg-[#FFD96F]" : "bg-[#E5E5E5]"}`} />
                       <div className={`absolute top-[2px] h-[22px] w-[22px] rounded-full bg-white shadow-sm transition-transform ${smsReminders ? "left-[20px]" : "left-[2px]"}`} />
                     </button>
                   </div>
                   <div className="flex items-center justify-between rounded-lg bg-[#F5F5F5] px-4 py-3.5">
                     <span className="text-[14px] text-gray-light">Text me about relevant events and special offers</span>
                     <button onClick={() => setSmsOffers(!smsOffers)} className="relative h-[26px] w-[44px] shrink-0 cursor-pointer">
-                      <div className={`h-full w-full rounded-full transition-colors ${smsOffers ? "bg-[#038561]" : "bg-[#E5E5E5]"}`} />
+                      <div className={`h-full w-full rounded-full transition-colors ${smsOffers ? "bg-[#FFD96F]" : "bg-[#E5E5E5]"}`} />
                       <div className={`absolute top-[2px] h-[22px] w-[22px] rounded-full bg-white shadow-sm transition-transform ${smsOffers ? "left-[20px]" : "left-[2px]"}`} />
                     </button>
                   </div>
@@ -447,7 +447,7 @@ export default function AccountSettings() {
                     <h3 className="text-[16px] font-semibold text-gray-dark">Generate session summaries</h3>
                   </div>
                   <button onClick={() => setSessionSummaries(!sessionSummaries)} className="relative mt-0.5 h-[26px] w-[44px] shrink-0 cursor-pointer">
-                    <div className={`h-full w-full rounded-full transition-colors ${sessionSummaries ? "bg-[#038561]" : "bg-[#E5E5E5]"}`} />
+                    <div className={`h-full w-full rounded-full transition-colors ${sessionSummaries ? "bg-[#FFD96F]" : "bg-[#E5E5E5]"}`} />
                     <div className={`absolute top-[2px] h-[22px] w-[22px] rounded-full bg-white shadow-sm transition-transform ${sessionSummaries ? "left-[20px]" : "left-[2px]"}`} />
                   </button>
                 </div>

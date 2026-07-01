@@ -198,8 +198,8 @@ function UpdateAccessView({ user, onDone }: { user: UserDetailV2; onDone: (cohor
                   </div>
                   {isAdded ? (
                     <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#e6f4ef] pl-3 pr-2 py-1.5">
-                      <span className="text-[12px] font-medium text-[#038561]">Added</span>
-                      <button onClick={() => setAdded(prev => { const n = new Set(prev); n.delete(p.key); return n; })} className="text-[#038561] hover:opacity-70">
+                      <span className="text-[12px] font-medium text-gray-dark">Added</span>
+                      <button onClick={() => setAdded(prev => { const n = new Set(prev); n.delete(p.key); return n; })} className="text-gray-dark hover:opacity-70">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                       </button>
                     </div>
@@ -833,7 +833,7 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                             <span className="text-[14px] text-gray-light">Top categories</span>
                             <div className="mt-2 flex flex-wrap gap-1.5">
                               {user.plus.topCategories.slice(0, 3).map((cat) => (
-                                <span key={cat} className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1.5 text-[12px] font-medium leading-none text-[#038561]">{cat}</span>
+                                <span key={cat} className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1.5 text-[12px] font-medium leading-none text-gray-dark">{cat}</span>
                               ))}
                             </div>
                           </div>

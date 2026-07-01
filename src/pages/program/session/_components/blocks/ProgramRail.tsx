@@ -23,7 +23,7 @@ export default function ProgramRail({ sessions }: Props) {
               <div
                 className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-medium ${
                   isCurrent
-                    ? "bg-[#038561] text-white"
+                    ? "bg-[#FFD96F] text-[#222222]"
                     : isDone
                     ? "bg-gray-hover text-gray-light"
                     : "border border-gray-stroke text-gray-light"
@@ -38,14 +38,14 @@ export default function ProgramRail({ sessions }: Props) {
                 {isCurrent && (
                   <div className="mt-1 h-[4px] w-full rounded-full bg-gray-stroke">
                     <div
-                      className="h-full rounded-full bg-[#038561]"
+                      className="h-full rounded-full bg-[#FFD96F]"
                       style={{ width: `${s.progressPct ?? 0}%` }}
                     />
                   </div>
                 )}
               </div>
               {isCurrent && (
-                <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#038561]">
+                <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-gray-dark">
                   Now
                 </span>
               )}
