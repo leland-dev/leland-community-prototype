@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { motion } from "motion/react";
 
 import homeActive from "../assets/icons/nav-icons/home-active.svg";
 import homeInactive from "../assets/icons/nav-icons/home-inactive.svg";
@@ -21,17 +22,16 @@ const navItems = [
 ];
 
 export default function BottomNav() {
-  const [hidden, setHidden] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const lastY = useRef(0);
 
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
       const delta = y - lastY.current;
-      // Ignore tiny jitters; always show near the top
-      if (y < 80) setHidden(false);
-      else if (delta > 6) setHidden(true);
-      else if (delta < -6) setHidden(false);
+      if (y < 80) setScrolled(false);
+      else if (delta > 6) setScrolled(true);
+      else if (delta < -6) setScrolled(false);
       lastY.current = y;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -39,8 +39,11 @@ export default function BottomNav() {
   }, []);
 
   return (
-    <nav
-      className={`fixed bottom-4 left-4 right-4 z-30 transition-all duration-200 ease-out ${hidden ? "translate-y-[calc(100%+24px)]" : "translate-y-0"}`}
+    <motion.nav
+      className="fixed bottom-4 left-4 right-4 z-30"
+      style={{ originX: 0.5, originY: 1 }}
+      animate={{ scale: scrolled ? 0.8 : 1 }}
+      transition={{ type: "tween", duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
     >
       <div className="mx-auto max-w-md rounded-full border border-[#222222]/5 bg-[#F5F5F5]/50 p-1 backdrop-blur-[16px]">
         <ul className="flex items-center gap-0">
@@ -68,6 +71,6 @@ export default function BottomNav() {
 
         </ul>
       </div>
-    </nav>
+    </motion.nav>
   );
 }
