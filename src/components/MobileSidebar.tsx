@@ -1,60 +1,18 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { useExtraLinks } from "./ExtraLinksContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
-import { useIsCoachMode } from "../hooks/useIsCoachMode";
 import profilePhoto from "../assets/profile photos/profile photo.png";
-
-import eventsIcon from "../assets/icons/nav-icons/calendar-inactive.svg";
-import coursesIcon from "../assets/icons/nav-icons/courses-inactive.svg";
-import lelandPlusIcon from "../assets/icons/nav-icons/leland-plus-inactive.svg";
-import giftIcon from "../assets/icons/gift.svg";
-import settingsIcon from "../assets/icons/settings.svg";
-import arrowRoundIcon from "../assets/icons/arrow-round.svg";
-import switchIcon from "../assets/icons/switch.svg";
-import helpIcon from "../assets/icons/help.svg";
-import arrowRightIcon from "../assets/icons/arrow-right.svg";
-import browserIcon from "../assets/icons/browser.svg";
-import usersGroupIcon from "../assets/icons/users-group.svg";
-
-const menuItems = [
-  { to: "/events", icon: eventsIcon, label: "Livestreams", danger: false, darkIcon: true },
-  { to: "/courses", icon: coursesIcon, label: "Live programs", danger: false, darkIcon: true },
-  { to: "/plus", icon: lelandPlusIcon, label: "Leland+", danger: false, darkIcon: true },
-  { to: "/profile-v2?tab=more", icon: usersGroupIcon, label: "My Groups", danger: false, darkIcon: true },
-  { to: null, icon: giftIcon, label: "Refer a friend", danger: false },
-  { to: null, icon: settingsIcon, label: "Settings", danger: false },
-  { to: null, icon: arrowRoundIcon, label: "Order History", danger: false },
-  { to: "/coach/home", icon: switchIcon, label: "Switch to coaching", danger: false },
-  { to: "/partner-dashboard", icon: browserIcon, label: "Partner dashboard", danger: false },
-  { to: null, icon: helpIcon, label: "Help", danger: false },
-];
 
 interface MobileSidebarProps {
   open: boolean;
   onClose: () => void;
 }
 
-const extraPaths = new Set(["/events", "/courses", "/plus"]);
-
 export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
-  const { showExtraLinks } = useExtraLinks();
-  const isCoachMode = useIsCoachMode();
-
-  const baseItems = isCoachMode
-    ? menuItems.map((item) =>
-        item.label === "Switch to coaching"
-          ? { ...item, to: "/", label: "Switch to customer view" }
-          : item
-      )
-    : menuItems;
-
-  const visibleMenuItems = showExtraLinks
-    ? baseItems
-    : baseItems.filter((item) => !extraPaths.has(item.to ?? ""));
-
-  // Design toggles — wired to DarkModeContext so the rest of the app can react.
   const { dark: darkMode, toggle: toggleDarkMode } = useDarkMode();
+  const [browseOpen, setBrowseOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
 
   return (
     <AnimatePresence>
@@ -79,74 +37,165 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
             className="fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col bg-white"
           >
             {/* Profile header */}
-            <div className="px-5 pb-5 pt-6">
-              <img
-                src={profilePhoto}
-                alt="Jane Doe"
-                className="h-10 w-10 rounded-full object-cover"
-              />
-              <p className="mt-3 text-[14px] font-semibold text-gray-dark">Jane Doe</p>
-              <p className="text-sm text-gray-light">jane@example.com</p>
+            <div className="px-6 pt-6 pb-4">
               <NavLink
                 to="/profile-v2"
                 onClick={onClose}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#222222]/5 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                className="flex items-center gap-3"
               >
-                View profile
-                <img src={arrowRightIcon} alt="" className="h-5 w-5" />
+                <img
+                  src={profilePhoto}
+                  alt="Jane Doe"
+                  className="h-12 w-12 rounded-full object-cover"
+                />
+                <div>
+                  <p className="text-[18px] font-medium text-gray-dark">Jane Doe</p>
+                  <p className="text-[15px] text-gray-light">View profile</p>
+                </div>
               </NavLink>
             </div>
 
-            {/* Menu links */}
+            {/* Nav links */}
             <div className="flex-1 overflow-y-auto">
-              <div className="border-t border-gray-stroke py-2">
-                {visibleMenuItems.map(({ to, icon, label, danger, darkIcon }) =>
-                  to ? (
-                    <NavLink
-                      key={label}
-                      to={to}
-                      onClick={onClose}
-                      className="flex items-center gap-[10px] px-5 py-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+              <nav className="px-6 py-2">
+                {/* Browse — expandable */}
+                <button
+                  onClick={() => setBrowseOpen((v) => !v)}
+                  className="flex w-full items-center justify-between py-3 text-[22px] font-normal text-gray-dark transition-colors hover:text-black"
+                >
+                  Browse
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={`transition-transform ${browseOpen ? "rotate-90" : ""}`}
+                  >
+                    <polyline points="7 5 13 10 7 15" />
+                  </svg>
+                </button>
+                <AnimatePresence initial={false}>
+                  {browseOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
                     >
-                      {danger ? (
-                        <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                          <polyline points="16 17 21 12 16 7" />
-                          <line x1="21" y1="12" x2="9" y2="12" />
-                        </svg>
-                      ) : icon ? (
-                        <img src={icon} alt={label} className={`h-6 w-6 shrink-0${darkIcon ? " brightness-0" : ""}`} />
-                      ) : null}
-                      {label}
-                    </NavLink>
-                  ) : (
-                    <button
-                      key={label}
-                      onClick={onClose}
-                      className={`flex w-full items-center gap-[10px] px-5 py-3 text-[14px] font-medium transition-colors hover:bg-gray-hover ${
-                        danger ? "text-[#D92D20]" : "text-gray-dark"
-                      }`}
+                      <div className="pb-1 pl-3">
+                        <NavLink to="/coaches" onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">Find a Coach</NavLink>
+                        <NavLink to="/events" onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">Livestreams</NavLink>
+                        <NavLink to="/courses" onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">Live Programs</NavLink>
+                        <NavLink to="/plus" onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">Leland+</NavLink>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Dashboard */}
+                <NavLink
+                  to="/"
+                  onClick={onClose}
+                  className="block py-3 text-[22px] font-normal text-gray-dark transition-colors hover:text-black"
+                >
+                  Dashboard
+                </NavLink>
+
+                {/* Livestreams */}
+                <NavLink
+                  to="/events"
+                  onClick={onClose}
+                  className="block py-3 text-[22px] font-normal text-gray-dark transition-colors hover:text-black"
+                >
+                  Livestreams
+                </NavLink>
+
+                {/* Live Programs */}
+                <NavLink
+                  to="/courses"
+                  onClick={onClose}
+                  className="block py-3 text-[22px] font-normal text-gray-dark transition-colors hover:text-black"
+                >
+                  Live Programs
+                </NavLink>
+
+                {/* Leland+ */}
+                <NavLink
+                  to="/plus"
+                  onClick={onClose}
+                  className="block py-3 text-[22px] font-normal text-gray-dark transition-colors hover:text-black"
+                >
+                  Leland+
+                </NavLink>
+
+                {/* Account — expandable */}
+                <button
+                  onClick={() => setAccountOpen((v) => !v)}
+                  className="flex w-full items-center justify-between py-3 text-[22px] font-normal text-gray-dark transition-colors hover:text-black"
+                >
+                  Account
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={`transition-transform ${accountOpen ? "rotate-90" : ""}`}
+                  >
+                    <polyline points="7 5 13 10 7 15" />
+                  </svg>
+                </button>
+                <AnimatePresence initial={false}>
+                  {accountOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
                     >
-                      {danger ? (
-                        <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                          <polyline points="16 17 21 12 16 7" />
-                          <line x1="21" y1="12" x2="9" y2="12" />
-                        </svg>
-                      ) : icon ? (
-                        <img src={icon} alt={label} className={`h-6 w-6 shrink-0${darkIcon ? " brightness-0" : ""}`} />
-                      ) : null}
-                      {label}
-                    </button>
-                  )
-                )}
+                      <div className="pb-1 pl-3">
+                        <NavLink to="/profile-v2" onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">Settings</NavLink>
+                        <NavLink to="/profile-v2?tab=more" onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">My Groups</NavLink>
+                        <button onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">Order History</button>
+                        <button onClick={onClose} className="block py-2 text-[16px] text-[#D92D20] hover:text-red-700">Log out</button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </nav>
+
+              {/* Secondary links */}
+              <div className="border-t border-gray-stroke px-6 py-3">
+                <NavLink
+                  to="/"
+                  onClick={onClose}
+                  className="block py-2 text-[16px] text-gray-dark transition-colors hover:text-black"
+                >
+                  Home
+                </NavLink>
+                <NavLink
+                  to="/coach/home"
+                  onClick={onClose}
+                  className="block py-2 text-[16px] text-gray-dark transition-colors hover:text-black"
+                >
+                  View Expert Dashboard
+                </NavLink>
               </div>
 
-              {/* Dark mode toggle + log out */}
-              <div className="border-t border-gray-stroke py-2">
+              {/* Design toggle — dark mode + log out */}
+              <div className="border-t border-gray-stroke px-6 py-3">
                 <button
                   onClick={toggleDarkMode}
-                  className="flex w-full items-center justify-between gap-[10px] px-5 py-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                  className="flex w-full items-center justify-between py-2 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
                 >
                   <span>Dark Mode</span>
                   <span

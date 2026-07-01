@@ -206,6 +206,8 @@ body,
 }
 
 html {
+  scrollbar-gutter: stable;
+  overflow-x: hidden;
   /* Disable iOS Safari's native pull-to-refresh. Feed/post pages have their
      own in-app pull-to-refresh; on every other page, pulling past the top
      should do nothing (no browser reload, no spinner above the URL bar). */

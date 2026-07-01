@@ -3802,7 +3802,7 @@ export default function Home() {
         <button
           onClick={() => setComposeOpen(true)}
           aria-label="Create post"
-          style={{ transform: `translateY(${savedToastActive ? -114 : navHidden ? 0 : -58}px)` }}
+          style={{ transform: `translateY(${savedToastActive ? -114 : navHidden ? 0 : -76}px)` }}
           className="fixed bottom-[calc(env(safe-area-inset-bottom)+16px)] right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFD96F] text-[#222222] shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">

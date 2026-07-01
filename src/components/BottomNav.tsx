@@ -3,18 +3,18 @@ import { NavLink } from "react-router-dom";
 
 import homeActive from "../assets/icons/nav-icons/home-active.svg";
 import homeInactive from "../assets/icons/nav-icons/home-inactive.svg";
-import browseActive from "../assets/icons/nav-icons/browse-active.svg";
-import browseInactive from "../assets/icons/nav-icons/browse-inactive.svg";
 import chatActive from "../assets/icons/nav-icons/chat-active.svg";
 import chatInactive from "../assets/icons/nav-icons/chat-inactive.svg";
+import calendarActive from "../assets/icons/nav-icons/calendar-active.svg";
+import calendarInactive from "../assets/icons/nav-icons/calendar-inactive.svg";
 import notificationsActive from "../assets/icons/nav-icons/notifications-active.svg";
 import notificationsInactive from "../assets/icons/nav-icons/notifications-inactive.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 
 const navItems = [
   { to: "/", active: homeActive, inactive: homeInactive, label: "Home" },
-  { to: "/browse", active: browseActive, inactive: browseInactive, label: "Browse" },
   { to: "/messages", active: chatActive, inactive: chatInactive, label: "Inbox" },
+  { to: "/events", active: calendarActive, inactive: calendarInactive, label: "Calendar" },
   { to: "/notifications", active: notificationsActive, inactive: notificationsInactive, label: "Notifications" },
 ];
 
@@ -38,59 +38,53 @@ export default function BottomNav() {
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 z-50 bg-white pb-[env(safe-area-inset-bottom)] transition-transform duration-200 ease-out ${hidden ? "translate-y-full" : "translate-y-0"}`}
+      className={`fixed bottom-4 left-4 right-4 z-30 transition-all duration-200 ease-out ${hidden ? "translate-y-[calc(100%+24px)]" : "translate-y-0"}`}
     >
-      <ul className="flex items-center justify-around px-2 py-1">
-        {navItems.map(({ to, active, inactive, label }) => (
-          <li key={to}>
+      <div className="mx-auto max-w-md rounded-full border border-[#222222]/5 bg-[#F5F5F5]/50 p-1 backdrop-blur-[16px]">
+        <ul className="flex items-center gap-0">
+          {navItems.map(({ to, active, inactive, label }) => (
+            <li key={to} className="flex-1">
+              <NavLink
+                to={to}
+                end={to === "/"}
+                className={({ isActive }) =>
+                  `flex items-center justify-center rounded-full px-6 py-4 transition-colors ${
+                    isActive ? "bg-[#222222]/[0.07]" : "active:bg-[#222222]/[0.07]"
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <img
+                    src={isActive ? active : inactive}
+                    alt={label}
+                    className="h-6 w-6"
+                  />
+                )}
+              </NavLink>
+            </li>
+          ))}
+
+          {/* Profile — last item */}
+          <li className="flex-1">
             <NavLink
-              to={to}
-              end={to === "/"}
+              to="/profile-v2"
               className={({ isActive }) =>
-                `flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 transition-colors ${
-                  isActive
-                    ? "text-gray-dark"
-                    : "text-gray-light active:bg-gray-hover"
+                `flex items-center justify-center rounded-full px-6 py-4 transition-colors ${
+                  isActive ? "bg-[#222222]/[0.07]" : "active:bg-[#222222]/[0.07]"
                 }`
               }
             >
               {({ isActive }) => (
-                <>
-                  <img
-                    src={isActive ? active : inactive}
-                    alt={label}
-                    className="h-[22px] w-[22px]"
-                  />
-                  <span className="text-[10px] font-medium leading-tight">{label}</span>
-                </>
-              )}
-            </NavLink>
-          </li>
-        ))}
-        <li>
-          <NavLink
-            to="/profile-v2"
-            className={({ isActive }) =>
-              `flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 transition-colors ${
-                isActive
-                  ? "text-gray-dark"
-                  : "text-gray-light active:bg-gray-hover"
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
                 <img
                   src={profilePhoto}
                   alt="Profile"
-                  className={`h-[22px] w-[22px] rounded-full object-cover ${isActive ? "ring-2 ring-gray-dark" : ""}`}
+                  className={`h-7 w-7 rounded-full object-cover ${isActive ? "ring-2 ring-gray-dark" : ""}`}
                 />
-                <span className="text-[10px] font-medium leading-tight">Profile</span>
-              </>
-            )}
-          </NavLink>
-        </li>
-      </ul>
+              )}
+            </NavLink>
+          </li>
+        </ul>
+      </div>
     </nav>
   );
 }
