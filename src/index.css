@@ -125,7 +125,7 @@
      name for backwards compatibility but now points at Macan so headings that
      used the serif render in Macan too. */
   --font-sans:  'Macan', 'Calibre', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-serif: 'Macan', 'Calibre', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Season', 'Georgia', 'Times New Roman', serif;
   --font-mono:  ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 

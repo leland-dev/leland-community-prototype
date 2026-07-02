@@ -1,201 +1,181 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
+import groupImg1 from "../assets/placeholder images/group images/18603db620e37b489d2d52da4c9c1f86.jpg";
+import groupImg2 from "../assets/placeholder images/group images/419a6944d25e95be7012699559c7b0be.jpg";
+
+// Menu icons
+import settingsIcon from "../assets/icons/settings.svg";
+import orderHistoryIcon from "../assets/icons/order-history.svg";
+import logOutIcon from "../assets/icons/log out.svg";
+import lightningIcon from "../assets/icons/lightning.svg";
+import calendarPageIcon from "../assets/icons/calendar-page.svg";
+import storeIcon from "../assets/icons/store.svg";
+import moneyIcon from "../assets/icons/money.svg";
+import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
 
 interface MobileSidebarProps {
   open: boolean;
   onClose: () => void;
 }
 
+const sectionHeader =
+  "px-5 pt-2 pb-1 text-[16px] font-semibold text-gray-dark";
+
+const menuItemClass =
+  "flex items-center gap-3 px-5 py-[10px] text-[16px] font-medium text-[#4c4c4c] transition-colors hover:bg-gray-hover";
+
+const groups = [
+  { name: "AI BP April 26", image: groupImg1, to: "/groups/ai-bp-apr-26" },
+  { name: "MBA Admissions 2027", image: groupImg2, to: "/groups/mba-admissions-2027" },
+];
+
+const expertItems = [
+  { icon: lightningIcon, label: "Opportunities", to: "/coach/opportunities" },
+  { icon: calendarPageIcon, label: "Calendar", to: "/coach/calendar" },
+  { icon: storeIcon, label: "Offerings", to: "/coach/offerings" },
+  { icon: moneyIcon, label: "Earnings", to: "/coach/earnings" },
+];
+
+const accountItems = [
+  { icon: settingsIcon, label: "Settings", to: "/profile-v2" },
+  { icon: orderHistoryIcon, label: "Order History", to: null },
+];
+
 export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const { dark: darkMode, toggle: toggleDarkMode } = useDarkMode();
-  const [browseOpen, setBrowseOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) setAdminOpen(false);
+  }, [open]);
 
   return (
-    <AnimatePresence>
-      {open && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black/40"
-            onClick={onClose}
+    <motion.div
+      className="flex h-full w-[280px] flex-col overflow-y-auto pb-[120px] scrollbar-hide bg-white"
+      animate={{ scale: open ? 1 : 0.95, opacity: open ? 1 : 0 }}
+      transition={{ duration: 0.4, ease: [0.42, 0, 0.58, 1] }}
+      style={{ transformOrigin: "left center" }}
+      aria-hidden={!open}
+    >
+      {/* Profile header */}
+      <div className="px-5 pt-6 pb-4">
+        <NavLink
+          to="/profile-v2"
+          onClick={onClose}
+          className="flex items-center gap-3"
+        >
+          <img
+            src={profilePhoto}
+            alt="Jane Doe"
+            className="h-12 w-12 rounded-full object-cover"
           />
+          <div>
+            <p className="text-[18px] font-medium text-gray-dark">Jane Doe</p>
+            <p className="text-[15px] text-gray-light">View profile</p>
+          </div>
+        </NavLink>
+      </div>
 
-          {/* Sidebar panel */}
-          <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
-            className="fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col bg-white"
+      {/* My Groups */}
+      <div className="pt-2">
+        <p className={sectionHeader}>My Groups</p>
+        {groups.map((group) => (
+          <NavLink
+            key={group.to}
+            to={group.to}
+            onClick={onClose}
+            className={menuItemClass}
           >
-            {/* Profile header */}
-            <div className="px-6 pt-6 pb-4">
-              <NavLink
-                to="/profile-v2"
-                onClick={onClose}
-                className="flex items-center gap-3"
-              >
-                <img
-                  src={profilePhoto}
-                  alt="Jane Doe"
-                  className="h-12 w-12 rounded-full object-cover"
-                />
-                <div>
-                  <p className="text-[18px] font-medium text-gray-dark">Jane Doe</p>
-                  <p className="text-[15px] text-gray-light">View profile</p>
-                </div>
-              </NavLink>
-            </div>
+            <img
+              src={group.image}
+              alt={group.name}
+              className="h-6 w-6 rounded object-cover"
+            />
+            <span>{group.name}</span>
+          </NavLink>
+        ))}
+      </div>
 
-            {/* Nav links */}
-            <div className="flex-1 overflow-y-auto">
-              <nav className="px-6 py-2">
-                {/* Browse — expandable */}
-                <button
-                  onClick={() => setBrowseOpen((v) => !v)}
-                  className="flex w-full items-center justify-between py-3 text-[22px] font-normal text-gray-dark transition-colors hover:text-black"
-                >
-                  Browse
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`transition-transform ${browseOpen ? "rotate-90" : ""}`}
-                  >
-                    <polyline points="7 5 13 10 7 15" />
-                  </svg>
-                </button>
-                <AnimatePresence initial={false}>
-                  {browseOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="pb-1 pl-3">
-                        <NavLink to="/coaches" onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">Find a Coach</NavLink>
-                        <NavLink to="/events" onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">Livestreams</NavLink>
-                        <NavLink to="/courses" onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">Live Programs</NavLink>
-                        <NavLink to="/plus" onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">Leland+</NavLink>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+      {/* Expert Tools */}
+      <div className="pt-4">
+        <p className={sectionHeader}>Expert Tools</p>
+        {expertItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={onClose}
+            className={menuItemClass}
+          >
+            <img src={item.icon} alt="" className="h-6 w-6 opacity-80" aria-hidden />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+      </div>
 
-                {/* Dashboard */}
-                <NavLink
-                  to="/"
-                  onClick={onClose}
-                  className="block py-3 text-[22px] font-normal text-gray-dark transition-colors hover:text-black"
-                >
-                  Dashboard
-                </NavLink>
+      {/* Account */}
+      <div className="pt-4">
+        <p className={sectionHeader}>Account</p>
+        {accountItems.map((item) =>
+          item.to ? (
+            <NavLink
+              key={item.label}
+              to={item.to}
+              onClick={onClose}
+              className={menuItemClass}
+            >
+              <img src={item.icon} alt="" className="h-6 w-6 opacity-80" aria-hidden />
+              <span>{item.label}</span>
+            </NavLink>
+          ) : (
+            <button
+              key={item.label}
+              onClick={onClose}
+              className={`${menuItemClass} w-full`}
+            >
+              <img src={item.icon} alt="" className="h-6 w-6 opacity-80" aria-hidden />
+              <span>{item.label}</span>
+            </button>
+          )
+        )}
 
-                {/* Livestreams */}
-                <NavLink
-                  to="/events"
-                  onClick={onClose}
-                  className="block py-3 text-[22px] font-normal text-gray-dark transition-colors hover:text-black"
-                >
-                  Livestreams
-                </NavLink>
-
-                {/* Live Programs */}
-                <NavLink
-                  to="/courses"
-                  onClick={onClose}
-                  className="block py-3 text-[22px] font-normal text-gray-dark transition-colors hover:text-black"
-                >
-                  Live Programs
-                </NavLink>
-
-                {/* Leland+ */}
-                <NavLink
-                  to="/plus"
-                  onClick={onClose}
-                  className="block py-3 text-[22px] font-normal text-gray-dark transition-colors hover:text-black"
-                >
-                  Leland+
-                </NavLink>
-
-                {/* Account — expandable */}
-                <button
-                  onClick={() => setAccountOpen((v) => !v)}
-                  className="flex w-full items-center justify-between py-3 text-[22px] font-normal text-gray-dark transition-colors hover:text-black"
-                >
-                  Account
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`transition-transform ${accountOpen ? "rotate-90" : ""}`}
-                  >
-                    <polyline points="7 5 13 10 7 15" />
-                  </svg>
-                </button>
-                <AnimatePresence initial={false}>
-                  {accountOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="pb-1 pl-3">
-                        <NavLink to="/profile-v2" onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">Settings</NavLink>
-                        <NavLink to="/profile-v2?tab=more" onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">My Groups</NavLink>
-                        <button onClick={onClose} className="block py-2 text-[16px] text-gray-dark hover:text-black">Order History</button>
-                        <button onClick={onClose} className="block py-2 text-[16px] text-[#D92D20] hover:text-red-700">Log out</button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </nav>
-
-              {/* Secondary links */}
-              <div className="border-t border-gray-stroke px-6 py-3">
-                <NavLink
-                  to="/"
-                  onClick={onClose}
-                  className="block py-2 text-[16px] text-gray-dark transition-colors hover:text-black"
-                >
-                  Home
-                </NavLink>
-                <NavLink
-                  to="/coach/home"
-                  onClick={onClose}
-                  className="block py-2 text-[16px] text-gray-dark transition-colors hover:text-black"
-                >
-                  View Expert Dashboard
-                </NavLink>
-              </div>
-
-              {/* Design toggle — dark mode + log out */}
-              <div className="border-t border-gray-stroke px-6 py-3">
+        {/* Admin Tools accordion */}
+        <button
+          onClick={() => setAdminOpen((v) => !v)}
+          className={`${menuItemClass} w-full`}
+        >
+          <img src={dotsHorizontalIcon} alt="" className="h-6 w-6 opacity-80 shrink-0" aria-hidden />
+          <span className="flex-1 text-left">Admin Tools</span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`shrink-0 transition-transform ${adminOpen ? "rotate-180" : ""}`}
+            aria-hidden
+          >
+            <polyline points="4 6 8 10 12 6" />
+          </svg>
+        </button>
+        <AnimatePresence initial={false}>
+          {adminOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="pl-5 pr-5">
                 <button
                   onClick={toggleDarkMode}
-                  className="flex w-full items-center justify-between py-2 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                  className="flex w-full items-center justify-between gap-3 py-[10px] pl-9 text-[16px] font-medium text-[#4c4c4c] transition-colors hover:bg-gray-hover"
                 >
                   <span>Dark Mode</span>
                   <span
@@ -208,22 +188,20 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                     />
                   </span>
                 </button>
-                <button
-                  onClick={onClose}
-                  className="flex w-full items-center gap-[10px] px-5 py-3 text-[14px] font-medium text-[#D92D20] transition-colors hover:bg-gray-hover"
-                >
-                  <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <polyline points="16 17 21 12 16 7" />
-                    <line x1="21" y1="12" x2="9" y2="12" />
-                  </svg>
-                  Log out
-                </button>
               </div>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Log out */}
+        <button
+          onClick={onClose}
+          className="flex w-full items-center gap-3 px-5 py-[10px] text-[16px] font-medium text-[#D92D20] transition-colors hover:bg-gray-hover"
+        >
+          <img src={logOutIcon} alt="" className="h-6 w-6 opacity-80" aria-hidden />
+          <span>Log out</span>
+        </button>
+      </div>
+    </motion.div>
   );
 }

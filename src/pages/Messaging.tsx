@@ -1,7 +1,7 @@
 export default function Messaging() {
   return (
     <div>
-      <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">Messages</h1>
+      <h1 className="font-serif text-[36px] font-medium text-gray-dark">Messages</h1>
       <p className="mt-2 text-[16px] text-gray-light">
         Your conversations with experts and peers.
       </p>

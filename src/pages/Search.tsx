@@ -6,7 +6,7 @@ export default function Search() {
   useEffect(() => { document.title = "Leland Prototype | Search"; }, []);
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-dark">Search</h1>
+      <h1 className="font-serif text-[36px] font-medium text-gray-dark">Search</h1>
       <p className="mt-2 text-[16px] text-gray-light">
         Find experts, programs, livestreams, and more.
       </p>

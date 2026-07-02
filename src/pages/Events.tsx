@@ -1,6 +1,9 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useMemo } from "react";
 import { SubNavContext } from "../components/SubNavContext";
 import SubNavItem from "../components/SubNavItem";
+import { useSetNavTheme } from "../components/NavThemeContext";
+
+const HERO_BG = "#222222";
 
 const departments = [
   {
@@ -70,6 +73,11 @@ export default function Events() {
   const [activeSubCategory, setActiveSubCategory] = useState<string | null>(null);
   const { setContent } = useContext(SubNavContext);
 
+  // On mobile, make the top nav transparent with light icons so it blends
+  // into the dark hero section.
+  const navTheme = useMemo(() => ({ bg: HERO_BG, light: true, hideWordmark: false }), []);
+  useSetNavTheme(navTheme);
+
   useEffect(() => {
     setContent(
       <>
@@ -91,13 +99,28 @@ export default function Events() {
 
   return (
     <div>
-      <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">Livestreams</h1>
-      <p className="mt-2 text-[16px] text-gray-light">
+      {/* Mobile hero — full-bleed dark section behind the nav.
+          Negative margins cancel the PageShell px-4 py-4 and main pt-14. */}
+      <div
+        className="-mx-4 -mt-[72px] mb-6 flex flex-col items-center px-4 pb-12 pt-[88px] text-center md:hidden"
+        style={{ backgroundColor: HERO_BG }}
+      >
+        <h1 className="font-serif text-[48px] font-medium leading-[1.1] text-white">
+          Join a free{"\n"}livestream
+        </h1>
+        <p className="mt-3 text-[17px] text-white">
+          Hosted by top experts
+        </p>
+      </div>
+
+      {/* Desktop h1 — hidden on mobile since the hero replaces it */}
+      <h1 className="hidden font-serif text-[36px] font-medium text-gray-dark md:block">Livestreams</h1>
+      <p className="mt-2 hidden text-[16px] text-gray-light md:block">
         Live sessions, workshops, and Q&amp;As from top experts.
       </p>
 
       <div className="mt-8 space-y-3">
-        {[1, 2, 3, 4, 5].map((i) => (
+        {Array.from({ length: 15 }, (_, i) => i + 1).map((i) => (
           <div key={i} className="flex items-center gap-4 rounded-lg border border-gray-stroke p-4">
             <div className="flex h-14 w-14 shrink-0 animate-pulse flex-col items-center justify-center rounded-lg bg-gray-stroke" />
             <div className="min-w-0 flex-1 space-y-2">

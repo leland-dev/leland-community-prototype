@@ -3796,21 +3796,17 @@ export default function Home() {
       </div>
 
       {/* Mobile floating compose button — sits 16px above bottom nav,
-          slides down to bottom-16 when nav hides on scroll. Portaled so
-          it escapes the main stacking context and sits above the nav. */}
-      {createPortal(
-        <button
-          onClick={() => setComposeOpen(true)}
-          aria-label="Create post"
-          style={{ transform: `translateY(${savedToastActive ? -114 : navHidden ? 0 : -58}px)` }}
-          className="fixed bottom-[calc(env(safe-area-inset-bottom)+16px)] right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFD96F] text-[#222222] shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-        </button>,
-        document.body
-      )}
+          slides down to bottom-16 when nav hides on scroll. */}
+      <button
+        onClick={() => setComposeOpen(true)}
+        aria-label="Create post"
+        style={{ transform: `translateY(${savedToastActive ? -114 : navHidden ? 0 : -58}px)` }}
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+16px)] right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFD96F] text-[#222222] shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      </button>
 
       {composeOpen ? <ComposeModal onClose={() => setComposeOpen(false)} onPost={handlePost} onGoLive={() => setGoLiveOpen(true)} isMVP={version === "A"} /> : null}
       {quoteTarget ? <ComposeModal quotePost={quoteTarget} onClose={() => setQuoteTarget(null)} onPost={handleQuotePost} isMVP={version === "A"} /> : null}
