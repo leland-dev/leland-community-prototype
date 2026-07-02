@@ -47,22 +47,22 @@ export default function MobileTopNav() {
             <img
               src={moreIcon}
               alt="Menu"
-              className="h-[20px] w-[20px]"
+              className="h-[23px] w-[23px]"
             />
           </button>
         )}
 
         {/* Center: Leland icon + wordmark. Wordmark animates away on scroll. */}
-        <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-[6px]">
+        <NavLink to="/" className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-[6px]">
           <img
             src={logoIcon}
             alt="Leland"
-            className="h-[20px] w-auto"
+            className="h-[23px] w-auto"
           />
           <motion.img
             src={logoWordmark}
             alt=""
-            className="h-[17px] w-auto"
+            className="h-[20px] w-auto"
             animate={{
               opacity: scrolled ? 0 : 1,
               width: scrolled ? 0 : "auto",
@@ -70,7 +70,7 @@ export default function MobileTopNav() {
             }}
             transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
           />
-        </div>
+        </NavLink>
 
         {/* Right: profile */}
         <NavLink
@@ -80,7 +80,7 @@ export default function MobileTopNav() {
           <img
             src={profilePhoto}
             alt="Profile"
-            className="h-7 w-7 rounded-full object-cover"
+            className="h-8 w-8 rounded-full object-cover"
           />
         </NavLink>
       </header>
