@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 
 import homeActive from "../assets/icons/nav-icons/home-active.svg";
@@ -20,8 +21,24 @@ const navItems = [
 ];
 
 export default function BottomNav() {
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastY.current;
+      if (y < 80) setHidden(false);
+      else if (delta > 6) setHidden(true);
+      else if (delta < -6) setHidden(false);
+      lastY.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)]">
+    <nav className={`fixed bottom-0 left-0 right-0 z-30 border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)] transition-transform duration-200 ease-out ${hidden ? "translate-y-full" : "translate-y-0"}`}>
       <ul className="flex items-center">
         {navItems.map(({ to, active, inactive, label }) => (
           <li key={to} className="flex-1">

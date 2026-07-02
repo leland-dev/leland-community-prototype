@@ -3571,6 +3571,8 @@ export default function Home() {
   const { version } = useVersion();
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
+  const lastScrollY = useRef(0);
   const isMobile = useIsMobile();
   // Pull-to-refresh state
   const [pullY, setPullY] = useState(0);
@@ -3584,6 +3586,19 @@ export default function Home() {
   // When the full-width save toast is up, lift the FAB above it so the toast's
   // dismiss (X) stays tappable.
   const { active: savedToastActive } = useSavedToast();
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastScrollY.current;
+      if (y < 80) setNavHidden(false);
+      else if (delta > 6) setNavHidden(true);
+      else if (delta < -6) setNavHidden(false);
+      lastScrollY.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Pull-to-refresh: drag down from the top of the feed to trigger a refresh.
   // Only on mobile, and only when scrollY === 0. Drag is dampened for an
@@ -3787,7 +3802,7 @@ export default function Home() {
         <button
           onClick={() => setComposeOpen(true)}
           aria-label="Create post"
-          style={{ transform: `translateY(${savedToastActive ? -114 : -58}px)` }}
+          style={{ transform: `translateY(${savedToastActive ? -114 : navHidden ? 0 : -58}px)` }}
           className="fixed bottom-[calc(env(safe-area-inset-bottom)+16px)] right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFD96F] text-[#222222] shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
