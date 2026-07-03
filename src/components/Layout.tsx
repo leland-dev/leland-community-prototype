@@ -110,7 +110,7 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
         document.body.style.width = "";
         document.body.style.top = "";
         window.scrollTo(0, savedScrollY.current);
-      }, 400);
+      }, 300);
       return () => clearTimeout(timer);
     }
   }, [sidebarOpen]);
@@ -168,7 +168,7 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
           Important: no transform when closed so fixed children (nav bars)
           remain viewport-fixed. */}
       <div
-        className={`relative z-10 min-h-full bg-white transition-all duration-[400ms] ease-in-out ${
+        className={`relative z-10 min-h-full bg-white transition-all duration-[300ms] ease-in-out ${
           sidebarOpen ? "rounded-[12px] shadow-2xl" : ""
         }`}
         style={{

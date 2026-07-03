@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
+import { useExpertMode } from "../contexts/ExpertModeContext";
 import { Button } from "./Button";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import groupImg1 from "../assets/placeholder images/group images/18603db620e37b489d2d52da4c9c1f86.jpg";
@@ -29,7 +30,7 @@ interface MobileSidebarProps {
 }
 
 const sectionHeaderBase =
-  "px-5 pt-2 pb-1 text-[16px] font-semibold";
+  "px-5 pt-2 pb-1 text-[16px]";
 
 const menuItemBase =
   "flex items-center gap-3 px-5 py-[10px] text-[16px] font-normal transition-colors";
@@ -41,7 +42,6 @@ const groups = [
 
 const expertItems = [
   { icon: lightningIcon, label: "Opportunities", to: "/coach/opportunities", external: false },
-  { icon: calendarPageIcon, label: "Calendar", to: "/coach/calendar", external: false },
   { icon: storeIcon, label: "Offerings", to: "/coach/offerings", external: true },
   { icon: moneyIcon, label: "Earnings", to: "/coach/earnings", external: true },
 ];
@@ -54,15 +54,15 @@ const myLelandItems = [
 
 export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const { dark: darkMode, toggle: toggleDarkMode } = useDarkMode();
+  const { expert: expertMode, toggle: toggleExpertMode } = useExpertMode();
   const [accountOpen, setAccountOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
-  const [expertMode, setExpertMode] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const textColor = darkMode ? "text-white" : "text-[#4c4c4c]";
   const headerColor = darkMode ? "text-white/50" : "text-gray-dark";
   const hoverBg = darkMode ? "hover:bg-white/10" : "hover:bg-gray-hover";
-  const sectionHeader = `${sectionHeaderBase} ${headerColor}`;
+  const sectionHeader = `${sectionHeaderBase} ${headerColor} ${darkMode ? "font-medium" : "font-semibold"}`;
   const menuItemClass = `${menuItemBase} ${textColor} ${hoverBg}`;
   const iconClass = darkMode ? "h-6 w-6" : "h-6 w-6 opacity-80";
 
@@ -100,7 +100,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
       ref={scrollRef}
       className={`flex h-full w-[280px] flex-col overflow-y-auto pb-[120px] scrollbar-hide ${darkMode ? "bg-[#131313]" : "bg-white"}`}
       animate={{ scale: open ? 1 : 0.95, opacity: open ? 1 : 0 }}
-      transition={{ duration: 0.4, ease: [0.42, 0, 0.58, 1] }}
+      transition={{ duration: 0.3, ease: [0.42, 0, 0.58, 1] }}
       style={{ transformOrigin: "left center" }}
       aria-hidden={!open}
     >
@@ -273,7 +273,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
             >
               <div className={`relative ml-[31px] border-l-[1.5px] ${darkMode ? "border-white/20" : "border-[#E5E5E5]"} pl-[25px] pr-5`}>
                 <button
-                  onClick={() => setExpertMode((v) => !v)}
+                  onClick={toggleExpertMode}
                   className={`flex w-full items-center justify-between gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
                 >
                   <span>Expert</span>

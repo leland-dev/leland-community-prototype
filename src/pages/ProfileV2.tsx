@@ -397,7 +397,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
     isCustomerProfile
       ? navScrolled
         ? { bg: "white", light: false, hideWordmark: false }
-        : { bg: "#222222", light: true, hideWordmark: false, bgGradient: true, slideIn: true }
+        : { bg: "#111111", light: true, hideWordmark: false, bgGradient: true, slideIn: true }
       : { bg: "white", light: false, hideWordmark: false }
   );
   const [navDotsOpen, setNavDotsOpen] = useState(false);
@@ -722,7 +722,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
       <motion.div
         initial={isCustomerProfile ? { x: "100%" } : false}
         animate={{ x: 0 }}
-        transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
       >
       <PageShell rightSidebar={showSidebar ? (
           isCustomerProfile ? (
@@ -912,7 +912,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 className="h-[20vh] w-full object-cover md:h-[220px] md:rounded-[6px]"
               />
               <div className="absolute inset-0 bg-black/25 md:rounded-[6px]" />
-              <div className="absolute inset-0 bg-gradient-to-t from-transparent to-[#222222] md:rounded-[6px]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-transparent to-[#111111] md:rounded-[6px]" />
             </div>
           ) : (
             showCoverImage && (

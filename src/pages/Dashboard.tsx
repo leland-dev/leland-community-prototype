@@ -1,11 +1,13 @@
 import { useState, useMemo, type ReactNode } from "react";
 import { useDarkMode } from "../contexts/DarkModeContext";
+import { useExpertMode } from "../contexts/ExpertModeContext";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useSetLayoutVariant } from "../components/LayoutVariantContext";
 import { useSetNavTheme } from "../components/NavThemeContext";
 import SessionCard from "../components/SessionCard";
 import OfferingCard, { type OfferingType } from "../components/OfferingCard";
+import { LinkButton } from "../components/Button";
 import chevronDownIcon from "../assets/icons/chevron-down.svg";
 import calendarPageIcon from "../assets/icons/calendar-page.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
@@ -79,7 +81,8 @@ const purchasedOfferings: PurchasedOffering[] = [
 export default function Dashboard() {
   useSetLayoutVariant("thin");
   const { dark: darkMode } = useDarkMode();
-  const heroBg = darkMode ? "#333333" : HERO_BG;
+  const { expert: expertMode } = useExpertMode();
+  const heroBg = darkMode ? "#5E6E79" : HERO_BG;
   const navTheme = useMemo(() => ({ bg: heroBg, light: darkMode, hideWordmark: false }), [heroBg, darkMode]);
   useSetNavTheme(navTheme);
 
@@ -100,19 +103,31 @@ export default function Dashboard() {
     <div>
       {/* Mobile hero */}
       <div
-        className="-mx-4 -mt-[72px] mb-0 flex min-h-[40vh] flex-col justify-end px-4 pb-6 md:hidden"
+        className="-mx-4 -mt-[72px] mb-0 px-4 pt-[150px] pb-6 md:hidden"
         style={{ backgroundColor: heroBg }}
       >
         <h1 className="font-serif text-[36px] font-medium leading-[1.2] text-gray-dark">
           You have {upcomingEvents.length}<br />upcoming sessions.
         </h1>
         <p className="mt-3 flex items-center gap-2 text-[16px] text-gray-dark">
-          <img src={calendarPageIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
+          <img src={pic8} alt="" className="h-[18px] w-[18px] shrink-0 rounded-full object-cover" />
           Next session in 2h with
           <Link to="/messages" className="-ml-1 underline decoration-dotted underline-offset-2 text-gray-dark">
             Alex
           </Link>
         </p>
+        {expertMode && (
+          <LinkButton
+            href="/coach/calendar"
+            size="sm"
+            variant="dark"
+            rounded="rounded-full"
+            className="mt-3 !px-5 !text-[14px]"
+          >
+            <img src={calendarPageIcon} alt="" className="h-[16px] w-[16px] shrink-0 invert" />
+            Edit availability
+          </LinkButton>
+        )}
       </div>
 
       {/* Desktop h1 */}

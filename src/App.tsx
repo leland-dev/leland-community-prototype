@@ -4,6 +4,7 @@ import { VersionProvider } from "./contexts/VersionContext";
 import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { BookmarksProvider } from "./contexts/BookmarksContext";
 import { SavedToastProvider } from "./contexts/SavedToastContext";
+import { ExpertModeProvider } from "./contexts/ExpertModeContext";
 import Layout from "./components/Layout";
 import { ContextLayout } from "./components/Layout";
 
@@ -65,6 +66,7 @@ export default function App() {
   return (
     <VersionProvider>
     <DarkModeProvider>
+    <ExpertModeProvider>
     <BookmarksProvider>
     <SavedToastProvider>
     <ScrollToTop />
@@ -129,6 +131,7 @@ export default function App() {
     </Routes>
     </SavedToastProvider>
     </BookmarksProvider>
+    </ExpertModeProvider>
     </DarkModeProvider>
     </VersionProvider>
   );

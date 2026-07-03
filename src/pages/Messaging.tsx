@@ -16,7 +16,7 @@ export default function Messaging() {
       </div>
 
       {/* Conversation list skeleton */}
-      <div className="mt-4 divide-y divide-gray-hover">
+      <div className="mt-4">
         {[
           { unread: true, time: "2m" },
           { unread: true, time: "1h" },

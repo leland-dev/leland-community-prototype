@@ -234,10 +234,10 @@ body {
    canvas. Keeps brand accent (green) intact. */
 html.dark,
 html.dark body {
-  background-color: #0b0b0b;
+  background-color: #111111;
   color: #e8e8e8;
 }
-html.dark .bg-white { background-color: #111; }
+html.dark .bg-white { background-color: #111111; }
 html.dark .bg-gray-hover { background-color: #1a1a1a; }
 /* Hover/active highlight in dark mode. The `:hover` variant compiles to a
    separate class, so the static override above doesn't reach it — without this

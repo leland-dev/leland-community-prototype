@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSetLayoutVariant } from "../components/LayoutVariantContext";
+import { useDarkMode } from "../contexts/DarkModeContext";
 import verifiedIcon from "../assets/icons/verified.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
 import likesIcon from "../assets/icons/likes.svg";
@@ -112,6 +113,7 @@ function FeedPost({ body, image, time, likes, comments, reposts }: {
 
 export default function Profile() {
   useSetLayoutVariant("thin");
+  const { dark: darkMode } = useDarkMode();
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
   const [activeTab, setActiveTab] = useState<"activity" | "offerings" | "reviews" | "about">("activity");
   const [isVerifiedExpert, setIsVerifiedExpert] = useState(true);
@@ -138,7 +140,7 @@ export default function Profile() {
           <img
             src={pic1}
             alt="Alex Ward"
-            className="h-[140px] w-[140px] rounded-full border-[5px] border-white object-cover"
+            className={`h-[140px] w-[140px] rounded-full border-[5px] object-cover ${darkMode ? "border-[#131313]" : "border-white"}`}
           />
 
           {/* Action Buttons */}

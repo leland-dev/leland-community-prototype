@@ -7,6 +7,7 @@ import logoIcon from "../assets/logos/leland-logo-split/Icon.svg";
 import logoWordmark from "../assets/logos/leland-logo-split/Wordmark.svg";
 import { useNavTheme, useNavRightSlot } from "./NavThemeContext";
 import { useMobileSidebar } from "./MobileSidebarContext";
+import { useDarkMode } from "../contexts/DarkModeContext";
 
 export default function MobileTopNav() {
   const [scrolled, setScrolled] = useState(false);
@@ -15,11 +16,14 @@ export default function MobileTopNav() {
   const navTheme = useNavTheme();
   const { setOpen: setSidebarOpen } = useMobileSidebar();
   const rightSlot = useNavRightSlot();
+  const { dark: darkMode } = useDarkMode();
   // On a post detail page the left slot becomes a Back button (returns the
   // user to wherever they came from) instead of the menu.
   const isPostDetail = location.pathname.startsWith("/post/");
-
-  const isLight = navTheme.light;
+  // In dark mode, override nav to #111111 only when the page uses the default (white) nav theme.
+  // Pages that set their own bg (profile, dashboard) keep their custom color.
+  const darkNav = darkMode && navTheme.bg === "white";
+  const isLight = darkNav || navTheme.light;
   const showWordmark = !navTheme.hideWordmark;
 
   useEffect(() => {
@@ -59,9 +63,11 @@ export default function MobileTopNav() {
             : ""
       }`}
       style={{
-        background: navTheme.bgGradient
-          ? `linear-gradient(to bottom, ${navTheme.bg}, transparent)`
-          : navTheme.bg,
+        background: darkNav
+          ? "#111111"
+          : navTheme.bgGradient
+            ? `linear-gradient(to bottom, ${navTheme.bg}, transparent)`
+            : navTheme.bg,
       }}
     >
       {/* Left: menu — or Back button on a post detail page */}
