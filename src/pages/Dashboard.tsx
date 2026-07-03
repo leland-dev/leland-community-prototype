@@ -1,4 +1,5 @@
 import { useState, useMemo, type ReactNode } from "react";
+import { useDarkMode } from "../contexts/DarkModeContext";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useSetLayoutVariant } from "../components/LayoutVariantContext";
@@ -77,7 +78,9 @@ const purchasedOfferings: PurchasedOffering[] = [
 
 export default function Dashboard() {
   useSetLayoutVariant("thin");
-  const navTheme = useMemo(() => ({ bg: HERO_BG, light: false, hideWordmark: false }), []);
+  const { dark: darkMode } = useDarkMode();
+  const heroBg = darkMode ? "#333333" : HERO_BG;
+  const navTheme = useMemo(() => ({ bg: heroBg, light: darkMode, hideWordmark: false }), [heroBg, darkMode]);
   useSetNavTheme(navTheme);
 
   const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Programs" | "Content">("All");
@@ -98,7 +101,7 @@ export default function Dashboard() {
       {/* Mobile hero */}
       <div
         className="-mx-4 -mt-[72px] mb-0 flex min-h-[40vh] flex-col justify-end px-4 pb-6 md:hidden"
-        style={{ backgroundColor: HERO_BG }}
+        style={{ backgroundColor: heroBg }}
       >
         <h1 className="font-serif text-[36px] font-medium leading-[1.2] text-gray-dark">
           You have {upcomingEvents.length}<br />upcoming sessions.

@@ -271,10 +271,10 @@ html.dark .divide-gray-stroke > *,
 html.dark .divide-gray-stroke\/50 > * { border-color: #2a2a2a; }
 
 /* Invert icon <img>s so they read on a dark background. Excludes avatars
-   (rounded-full), category thumbnails (rounded-[4px]), and the Leland logo
-   so brand/image content is preserved. */
-html.dark :is(nav, header, aside, a) img:not([class*="rounded-full"]):not([class*="rounded-\[4px\]"]):not([alt="Leland"]):not([alt="Your profile"]):not([alt="Profile"]):not([alt="You"]),
-html.dark button img:not([class*="rounded-full"]):not([class*="rounded-\[4px\]"]):not([alt="Leland"]):not([alt="Your profile"]):not([alt="Profile"]):not([alt="You"]) {
+   (rounded-full), category thumbnails (rounded-[4px]), photos (object-cover),
+   and the Leland logo so brand/image content is preserved. */
+html.dark :is(nav, header, aside, a) img:not([class*="rounded-full"]):not([class*="rounded-\[4px\]"]):not([class*="object-cover"]):not([alt="Leland"]):not([alt="Your profile"]):not([alt="Profile"]):not([alt="You"]),
+html.dark button img:not([class*="rounded-full"]):not([class*="rounded-\[4px\]"]):not([class*="object-cover"]):not([alt="Leland"]):not([alt="Your profile"]):not([alt="Profile"]):not([alt="You"]) {
   filter: invert(0.92);
 }
 /* brightness-0 icons (forced black in light mode) then invert cleanly to light

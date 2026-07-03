@@ -18,6 +18,8 @@ interface NavTheme {
   themeColor?: string;
   /** Fade bg to transparent at the bottom (for blending into cover images) */
   bgGradient?: boolean;
+  /** Slide the nav in from the right on mount */
+  slideIn?: boolean;
 }
 
 const defaultTheme: NavTheme = { bg: "white", light: false, hideWordmark: false };

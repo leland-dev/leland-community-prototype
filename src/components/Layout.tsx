@@ -28,6 +28,7 @@ import { SubNavStyleProvider, useSubNavStyle } from "./SubNavStyleContext";
 import { SessionLayoutProvider } from "./SessionLayoutContext";
 import { NavThemeProvider, useNavTheme } from "./NavThemeContext";
 import { MobileSidebarProvider, useMobileSidebar } from "./MobileSidebarContext";
+import { useDarkMode } from "../contexts/DarkModeContext";
 
 /**
  * Layout — nav chrome (TopNav, MobileTopNav, BottomNav) + context providers + <Outlet />
@@ -79,6 +80,7 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   const [canScrollRight, setCanScrollRight] = useState(false);
   const { open: sidebarOpen, setOpen: setSidebarOpen } = useMobileSidebar();
   const navTheme = useNavTheme();
+  const { dark: darkMode } = useDarkMode();
 
   // Keep height/overflow constrained while the close animation plays out,
   // so the content doesn't snap to full height mid-transition.
@@ -155,7 +157,7 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="relative min-h-full overflow-x-clip bg-white">
+    <div className={`relative min-h-full overflow-x-clip ${darkMode ? "bg-[#131313]" : "bg-white"}`}>
       {/* Sidebar — always mounted, sits behind the content block.
           Uses scale + fade for a subtle entrance/exit. */}
       <div className="fixed left-0 top-0 bottom-0 z-0 md:hidden">

@@ -397,7 +397,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
     isCustomerProfile
       ? navScrolled
         ? { bg: "white", light: false, hideWordmark: false }
-        : { bg: "#222222", light: true, hideWordmark: false, bgGradient: true }
+        : { bg: "#222222", light: true, hideWordmark: false, bgGradient: true, slideIn: true }
       : { bg: "white", light: false, hideWordmark: false }
   );
   const [navDotsOpen, setNavDotsOpen] = useState(false);
@@ -719,6 +719,11 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
       )}
 
       {/* Main content area */}
+      <motion.div
+        initial={isCustomerProfile ? { x: "100%" } : false}
+        animate={{ x: 0 }}
+        transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+      >
       <PageShell rightSidebar={showSidebar ? (
           isCustomerProfile ? (
             <div className="flex flex-col gap-6 px-1">
@@ -1857,6 +1862,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           <div className="h-[120px]" />
         </div>
       </PageShell>
+      </motion.div>
 
       {/* Profile photo lightbox */}
       <AnimatePresence>

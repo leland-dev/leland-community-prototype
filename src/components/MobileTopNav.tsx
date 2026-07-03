@@ -33,16 +33,24 @@ export default function MobileTopNav() {
   // Icon filter: invert to white when light theme is active
   const iconFilter = isLight ? "brightness-0 invert" : "";
 
+  const slideIn = navTheme.slideIn;
+
   return (
     <>
     {/* Solid strip behind the status bar so iOS Safari picks up the color */}
     {navTheme.bgGradient && (
-      <div
+      <motion.div
         className="fixed left-0 right-0 top-0 z-30"
         style={{ height: "env(safe-area-inset-top, 0px)", backgroundColor: navTheme.bg }}
+        initial={slideIn ? { x: "100%" } : false}
+        animate={{ x: 0 }}
+        transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
       />
     )}
-    <header
+    <motion.header
+      initial={slideIn ? { x: "100%" } : false}
+      animate={{ x: 0 }}
+      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
       className={`fixed left-0 right-0 top-0 z-30 flex h-14 items-center justify-between px-4 transition-all duration-200 ease-out ${
         isLight
           ? ""
@@ -126,7 +134,7 @@ export default function MobileTopNav() {
           />
         </NavLink>
       )}
-    </header>
+    </motion.header>
     </>
   );
 }
