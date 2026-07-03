@@ -17,7 +17,7 @@ import clientLogo1 from "../assets/logos/Rectangle 3012.png";
 import clientLogo2 from "../assets/logos/Rectangle 3013.png";
 import clientLogo3 from "../assets/logos/Rectangle 3017.png";
 import clientLogo4 from "../assets/logos/Rectangle 3018.png";
-import coverImage from "../assets/img/cpver-image 1.jpg";
+import coverImage from "../assets/img/cover-image-2.png";
 import workTogetherImg from "../assets/img/work-together.png";
 
 // Sample post images

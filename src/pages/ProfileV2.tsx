@@ -3,6 +3,7 @@ import { Button, LinkButton } from "../components/Button";
 import { Link, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
+import { useDarkMode } from "../contexts/DarkModeContext";
 import PageShell from "../components/PageShell";
 import SessionCard from "../components/SessionCard";
 import OfferingCard, { type OfferingType } from "../components/OfferingCard";
@@ -52,7 +53,7 @@ import categoryAI from "../assets/placeholder images/category images/AI-automati
 import categoryFinance from "../assets/placeholder images/category images/investment-banking.png";
 
 import coachCoverImage from "../assets/img/cover-2.avif";
-import customerCoverImage from "../assets/img/cpver-image 1.jpg";
+import customerCoverImage from "../assets/img/cover-image-2.png";
 import atlassianLogo from "../assets/logos/atlassian.png";
 import yaleLogo from "../assets/logos/yale.png";
 import clientLogo1 from "../assets/logos/Rectangle 3012.png";
@@ -365,6 +366,7 @@ function CategorySubtitle({ photos, experts }: { photos: string[]; experts: stri
 
 export default function ProfileV2({ coach = false, coachId = "samantha" }: { coach?: boolean; coachId?: string }) {
   const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
+  const { dark: darkMode } = useDarkMode();
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
   const [isFollowing, setIsFollowing] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -926,7 +928,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
           {/* Profile photo + CTA buttons */}
           <div className={`${isCustomerProfile ? "-mt-[80px] md:pl-4 items-end" : showCoverImage ? "-mt-[80px] pl-4 items-start" : showGrayHeader ? "-mt-[100px] items-start" : "mt-0 items-start"} mb-4 flex justify-between ${isCustomerProfile || showCoverImage || showGrayHeader ? "md:items-end" : ""} ${isCustomerProfile && !showCoverImage ? "md:mt-0 md:pl-0" : ""}`}>
-            <div className={`group relative z-20 cursor-pointer border-[4px] border-white bg-white md:rounded-lg ${isCustomerProfile ? "rounded-full" : "rounded-lg"}`} onClick={() => setLightboxOpen(true)}>
+            <div className={`group relative z-20 cursor-pointer border-[4px] md:rounded-lg ${darkMode ? "border-[#131313] bg-[#131313]" : "border-white bg-white"} ${isCustomerProfile ? "rounded-full" : "rounded-lg"}`} onClick={() => setLightboxOpen(true)}>
               <div className={`relative overflow-hidden md:rounded-[4px] ${isCustomerProfile ? "rounded-full" : "rounded-[4px]"}`}>
                 <motion.img
                   layoutId="profile-photo"
@@ -1747,19 +1749,19 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           {/* Customer profile tabs */}
           {isCustomerProfile && (
             <>
-                <div ref={customerTabStripRef} className="sticky top-0 z-10 -mx-4 mt-2 flex border-b border-gray-stroke bg-white">
-                  {(viewingOwnProfile ? ["about", "saved", "likes", "more"] as const : ["about", "likes", "more"] as const).map((tab) => (
+                <div ref={customerTabStripRef} className="sticky top-14 z-10 -mx-4 mt-2 flex border-b border-gray-stroke bg-white md:top-0">
+                  {(viewingOwnProfile ? ["about", "more", "saved", "likes"] as const : ["about", "more", "likes"] as const).map((tab) => (
                     <button
                       key={tab}
                       data-tab={tab}
                       onClick={() => setCustomerTab(tab)}
                       className={`flex-1 cursor-pointer py-3 text-center transition-colors ${
                         customerTab === tab
-                          ? "border-b-2 border-gray-dark text-gray-dark"
+                          ? `border-b-2 text-gray-dark ${darkMode ? "border-white" : "border-gray-dark"}`
                           : "border-b-2 border-transparent text-gray-light hover:text-gray-dark"
                       }`}
                     >
-                      <span className={`text-[16px] ${customerTab === tab ? "font-semibold" : "font-medium"}`}>{tab === "about" ? "Activity" : tab === "likes" ? "Liked" : tab === "saved" ? "Saved" : "About"}</span>
+                      <span className={`text-[16px] ${customerTab === tab ? "font-semibold" : "font-medium"}`}>{tab === "about" ? "Activity" : tab === "likes" ? "Likes" : tab === "saved" ? "Saved" : "About"}</span>
                     </button>
                   ))}
                 </div>
@@ -1806,8 +1808,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                   <div className="flex flex-col gap-8">
                     {/* About */}
                     <section>
-                      <h2 className="text-[22px] font-semibold text-gray-dark" style={{ fontWeight: 500 }}>About</h2>
-                      <div className="mt-3 text-[16px] text-[#444]" style={{ lineHeight: "130%" }}>
+                      <div className={`text-[16px] ${darkMode ? "text-[#d4d4d4]" : "text-[#444]"}`} style={{ lineHeight: "130%" }}>
                         <p>
                           Product manager at Atlassian with 6+ years of experience building enterprise SaaS tools. Previously led growth initiatives at two early-stage startups, taking one from beta to 50K monthly active users. Yale graduate with a background in computer science and behavioral economics.
                         </p>
