@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 
 import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
+import { useSetNavBackHandler } from "../components/NavThemeContext";
 import { posts, type Post, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar } from "./Home";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
@@ -610,10 +611,27 @@ function CommentItem({ comment, depth = 0, postId }: { comment: CommentData; dep
 
 export default function PostDetail() {
   const navigate = useNavigate();
+
+  // Plays the reverse of the entrance animation before actually navigating
+  // away, so the page slides back out to the right instead of just vanishing.
+  const [isExiting, setIsExiting] = useState(false);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const handleBack = useCallback(() => setIsExiting(true), []);
+  useSetNavBackHandler(handleBack);
+
+  useEffect(() => {
+    if (!isExiting) return;
+    const el = pageRef.current;
+    if (!el) { navigate(-1); return; }
+    const onAnimationEnd = () => navigate(-1);
+    el.addEventListener("animationend", onAnimationEnd, { once: true });
+    return () => el.removeEventListener("animationend", onAnimationEnd);
+  }, [isExiting, navigate]);
+
   useSetLeftSidebar(
     <div className="flex justify-end">
       <button
-        onClick={() => navigate(-1)}
+        onClick={handleBack}
         aria-label="Go back"
         className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-dark transition-colors hover:bg-gray-50"
       >
@@ -695,7 +713,7 @@ export default function PostDetail() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray-light">
         <p className="text-[15px]">Post not found.</p>
-        <button onClick={() => navigate(-1)} className="mt-4 text-primary hover:underline">
+        <button onClick={handleBack} className="mt-4 text-primary hover:underline">
           ← Go back
         </button>
       </div>
@@ -718,7 +736,7 @@ export default function PostDetail() {
   };
 
   return (
-    <div className="slide-in-page">
+    <div ref={pageRef} className={isExiting ? "slide-out-page" : "slide-in-page"}>
     <motion.div initial={false}>
       {/* Content — full width */}
       {/* Content — full width; leave room at the bottom for the fixed input + nav */}

@@ -29,6 +29,8 @@ interface NavThemeContextValue {
   setTheme: (t: NavTheme) => void;
   rightSlot: ReactNode | null;
   setRightSlot: (slot: ReactNode | null) => void;
+  backHandler: (() => void) | null;
+  setBackHandler: (fn: (() => void) | null) => void;
 }
 
 const NavThemeContext = createContext<NavThemeContextValue>({
@@ -36,11 +38,14 @@ const NavThemeContext = createContext<NavThemeContextValue>({
   setTheme: () => {},
   rightSlot: null,
   setRightSlot: () => {},
+  backHandler: null,
+  setBackHandler: () => {},
 });
 
 export function NavThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<NavTheme>(defaultTheme);
   const [rightSlot, setRightSlot] = useState<ReactNode | null>(null);
+  const [backHandler, setBackHandler] = useState<(() => void) | null>(null);
 
   const stableSetTheme = useCallback(
     (t: NavTheme) => setTheme(t),
@@ -52,8 +57,13 @@ export function NavThemeProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const stableSetBackHandler = useCallback(
+    (fn: (() => void) | null) => setBackHandler(() => fn),
+    [],
+  );
+
   return (
-    <NavThemeContext.Provider value={{ theme, setTheme: stableSetTheme, rightSlot, setRightSlot: stableSetRightSlot }}>
+    <NavThemeContext.Provider value={{ theme, setTheme: stableSetTheme, rightSlot, setRightSlot: stableSetRightSlot, backHandler, setBackHandler: stableSetBackHandler }}>
       {children}
     </NavThemeContext.Provider>
   );
@@ -83,4 +93,19 @@ export function useSetNavTheme(t: NavTheme) {
     setTheme(t);
     return () => setTheme(defaultTheme);
   }, [t.bg, t.light, t.hideWordmark, t.themeColor, t.bgGradient, setTheme]);
+}
+
+export function useNavBackHandler() {
+  return useContext(NavThemeContext).backHandler;
+}
+
+/** Lets a page intercept the top nav's back button — e.g. to play an exit
+ *  animation before actually navigating away. */
+export function useSetNavBackHandler(fn: (() => void) | null) {
+  const { setBackHandler } = useContext(NavThemeContext);
+
+  useEffect(() => {
+    setBackHandler(fn);
+    return () => setBackHandler(null);
+  }, [fn, setBackHandler]);
 }

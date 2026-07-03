@@ -135,6 +135,14 @@
   }
 }
 
+/* iOS Safari zooms the viewport on focus when an input's font-size is under
+   16px. Force 16px on mobile so text-sm/text-xs inputs don't trigger it. */
+@media (max-width: 767px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -157,6 +165,21 @@
 }
 .slide-in-page {
   animation: slide-in-from-right 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Reverse of the above, played on the way out when the user taps back —
+   fill-mode forwards so the page stays off-screen until it actually
+   unmounts (navigation happens on animationend), instead of snapping back. */
+@keyframes slide-out-to-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+.slide-out-page {
+  animation: slide-out-to-right 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }
 
 @keyframes pulse-ring {

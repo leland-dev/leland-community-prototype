@@ -179,6 +179,15 @@ interface QuotePost extends PostBase {
 export type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost | LivePost | QuotePost;
 export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, LivePost, QuotePost };
 
+function shuffle<T>(items: T[]): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 // ─── Sample data ──────────────────────────────────────
 
 export const posts: Post[] = [
@@ -3632,6 +3641,7 @@ export default function Home() {
         setRefreshing(true);
         setPullY(56);
         window.setTimeout(() => {
+          setFeedPosts(prev => shuffle(prev));
           setRefreshing(false);
           setPullY(0);
           current = 0;

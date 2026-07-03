@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigationType } from "react-router-dom";
 import { useEffect } from "react";
 import { VersionProvider } from "./contexts/VersionContext";
 import { DarkModeProvider } from "./contexts/DarkModeContext";
@@ -8,9 +8,28 @@ import { ExpertModeProvider } from "./contexts/ExpertModeContext";
 import Layout from "./components/Layout";
 import { ContextLayout } from "./components/Layout";
 
+// Remembers each route's scroll position and restores it (smoothly) when the
+// user navigates back to it — but only on a "POP" (back/forward or
+// navigate(-1)), so forward navigation still lands at the top of the page.
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  const navigationType = useNavigationType();
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem(`scrollY:${pathname}`);
+    if (navigationType === "POP" && saved !== null) {
+      window.scrollTo({ top: Number(saved), behavior: "smooth" });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, navigationType]);
+
+  useEffect(() => {
+    const onScroll = () => sessionStorage.setItem(`scrollY:${pathname}`, String(window.scrollY));
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [pathname]);
+
   return null;
 }
 

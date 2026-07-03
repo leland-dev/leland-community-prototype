@@ -5,7 +5,7 @@ import moreIcon from "../assets/icons/nav-icons/more-active.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import logoIcon from "../assets/logos/leland-logo-split/Icon.svg";
 import logoWordmark from "../assets/logos/leland-logo-split/Wordmark.svg";
-import { useNavTheme, useNavRightSlot } from "./NavThemeContext";
+import { useNavTheme, useNavRightSlot, useNavBackHandler } from "./NavThemeContext";
 import { useMobileSidebar } from "./MobileSidebarContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
 
@@ -16,6 +16,7 @@ export default function MobileTopNav() {
   const navTheme = useNavTheme();
   const { setOpen: setSidebarOpen } = useMobileSidebar();
   const rightSlot = useNavRightSlot();
+  const backHandler = useNavBackHandler();
   const { dark: darkMode } = useDarkMode();
   // On a post detail page the left slot becomes a Back button (returns the
   // user to wherever they came from) instead of the menu.
@@ -73,7 +74,7 @@ export default function MobileTopNav() {
       {/* Left: menu — or Back button on a post detail page */}
       {isPostDetail ? (
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => (backHandler ? backHandler() : navigate(-1))}
           aria-label="Go back"
           className={`flex h-8 w-8 items-center justify-center ${isLight ? "text-white" : "text-gray-dark"}`}
         >
