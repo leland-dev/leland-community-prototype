@@ -1,608 +1,221 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useMemo, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import PageShell from "../components/PageShell";
-import { posts, FeedPost } from "./Home";
-import arrowRoundIcon from "../assets/icons/arrow-round.svg";
-import lockIcon from "../assets/icons/lock.svg";
-
-import profilePhoto from "../assets/profile photos/profile photo.png";
+import { useSetLayoutVariant } from "../components/LayoutVariantContext";
+import { useSetNavTheme } from "../components/NavThemeContext";
+import SessionCard from "../components/SessionCard";
+import OfferingCard, { type OfferingType } from "../components/OfferingCard";
+import chevronDownIcon from "../assets/icons/chevron-down.svg";
+import calendarPageIcon from "../assets/icons/calendar-page.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
-import pic3 from "../assets/profile photos/pic-3.png";
-import pic4 from "../assets/profile photos/pic-4.png";
-import pic5 from "../assets/profile photos/pic-5.png";
+import pic2 from "../assets/profile photos/pic-2.png";
 import pic6 from "../assets/profile photos/pic-6.png";
+import pic7 from "../assets/profile photos/pic-7.png";
+import pic8 from "../assets/profile photos/pic-8.png";
+import pic9 from "../assets/profile photos/pic-9.png";
+import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
+import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
+import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
+import aiBuilderCourseImg from "../assets/placeholder images/ai-builder-course.avif";
+import lelandPlusImg1 from "../assets/placeholder images/leland-plus-images/3cf6e985-7397-4e50-8e06-ef9a8f40491c.webp";
 
-import orgGoogle from "../assets/org-logos/google.png";
-import orgHBS from "../assets/org-logos/hbs.png";
+const HERO_BG = "#F3F1E6";
 
-// ─── Data ────────────────────────────────────────────────────────────────────
+const dashedBorderStyle = {
+  backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")`,
+};
 
 const upcomingEvents = [
-  {
-    day: "MON",
-    date: 30,
-    title: "1:1 Session with Jessica",
-    dateTime: "March 30 at 2:00 PM",
-    duration: "45 minutes",
-    image: profilePhoto,
-    isNow: true,
-  },
-  {
-    day: "MON",
-    date: 30,
-    title: "MBA Strategy Live",
-    dateTime: "March 30 at 4:00 PM",
-    duration: "45 minutes",
-    image: pic3,
-    isNow: false,
-  },
-  {
-    day: "WED",
-    date: 1,
-    title: "Intro Call with Samantha",
-    dateTime: "April 1 at 11:00 AM",
-    duration: "30 minutes",
-    image: pic1,
-    isNow: false,
-  },
-  {
-    day: "THU",
-    date: 2,
-    title: "GMAT Exam Prep Bootcamp",
-    dateTime: "April 2 at 6:00 PM",
-    duration: "60 minutes",
-    image: pic4,
-    isNow: false,
-  },
+  { title: "1:1 Session with Jessica", dateTime: "Monday, Mar 30 at 2:00 PM", duration: "45m", image: pic6, type: "coach" as const, status: "live" as const },
+  { title: "MBA Strategy Live", dateTime: "Monday, Mar 30 at 4:00 PM", duration: "45m", image: eventImg1, type: "event" as const, status: "upcoming" as const, startsIn: "2h" },
+  { title: "Intro Call with Samantha", dateTime: "Wednesday, Apr 1 at 11:00 AM", duration: "30m", image: pic8, type: "coach" as const, status: "upcoming" as const, startsIn: "2d" },
 ];
 
-const pastEvents = [
+interface PurchasedOffering {
+  type: OfferingType;
+  title: string;
+  subtitle: ReactNode;
+  image: string;
+  exhausted?: boolean;
+  href?: string;
+}
+
+const purchasedOfferings: PurchasedOffering[] = [
   {
-    title: "1:1 Session with Marcus",
-    dateTime: "March 28 at 10:00 AM",
-    duration: "45 minutes",
-    image: pic3,
-    hasRecording: false,
+    type: "hourly",
+    title: "1h 20m with Marcus",
+    subtitle: "45m available to schedule",
+    image: pic9,
   },
   {
-    title: "Resume Review Workshop",
-    dateTime: "March 27 at 3:00 PM",
-    duration: "60 minutes",
-    image: pic4,
-    hasRecording: true,
-  },
-  {
-    title: "1:1 Session with Jessica",
-    dateTime: "March 26 at 2:00 PM",
-    duration: "45 minutes",
-    image: profilePhoto,
-    hasRecording: false,
-  },
-  {
-    title: "MBA Admissions Strategy",
-    dateTime: "March 25 at 1:00 PM",
-    duration: "45 minutes",
-    image: pic5,
-    hasRecording: true,
-  },
-  {
-    title: "Intro Call with David",
-    dateTime: "March 24 at 11:00 AM",
-    duration: "30 minutes",
-    image: pic1,
-    hasRecording: false,
-  },
-  {
-    title: "GMAT Prep Live Session",
-    dateTime: "March 21 at 4:00 PM",
-    duration: "60 minutes",
+    type: "hourly",
+    title: "Out of time with Jessica",
+    subtitle: "0m available to schedule",
     image: pic6,
-    hasRecording: true,
+    exhausted: true,
   },
   {
-    title: "Career Pivot Workshop",
-    dateTime: "March 19 at 12:00 PM",
-    duration: "45 minutes",
-    image: pic3,
-    hasRecording: false,
+    type: "package",
+    title: "MBA Application Package",
+    subtitle: <>Comprehensive package · <span className="text-gray-dark">Currently active</span></>,
+    image: pic7,
   },
   {
-    title: "1:1 Session with Jessica",
-    dateTime: "March 17 at 2:00 PM",
-    duration: "45 minutes",
-    image: profilePhoto,
-    hasRecording: false,
+    type: "course",
+    title: "AI Builder Program Level 1: Use AI to 10x Your Impact",
+    subtitle: <>Started May 12 <span className="text-[#9B9B9B]">· Next session tomorrow</span></>,
+    image: aiBuilderCourseImg,
+    href: "/course/1",
+  },
+  {
+    type: "content",
+    title: "How I Got Into Stanford GSB",
+    subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>,
+    image: lelandPlusImg1,
   },
 ];
-
-// ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
-  const [pastOpen, setPastOpen] = useState(false);
-  const [layoutVersion, setLayoutVersion] = useState<1 | 2 | 3>(1);
-  const [contentFilter, setContentFilter] = useState("All");
-  const [activeTab, setActiveTab] = useState<"dashboard" | "activity">("dashboard");
-  const dashedBorder = { backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")` };
-  const [adminOpen, setAdminOpen] = useState(false);
-  const adminRef = useRef<HTMLDivElement>(null);
+  useSetLayoutVariant("thin");
+  const navTheme = useMemo(() => ({ bg: HERO_BG, light: false, hideWordmark: false }), []);
+  useSetNavTheme(navTheme);
 
-  useEffect(() => {
-    if (!adminOpen) return;
-    const handleClick = (e: MouseEvent) => {
-      if (adminRef.current && !adminRef.current.contains(e.target as Node)) {
-        setAdminOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [adminOpen]);
+  const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Programs" | "Content">("All");
+  const [purchasesExpanded, setPurchasesExpanded] = useState(false);
 
-  // ─── V1: left sidebar with profile card ───────────────────────────────────
+  const filtered = purchasedOfferings.filter((offering) => {
+    if (purchasesFilter === "All") return true;
+    if (purchasesFilter === "Coaching") return offering.type === "hourly" || offering.type === "hourly-package" || offering.type === "package";
+    if (purchasesFilter === "Programs") return offering.type === "course";
+    return offering.type === "content";
+  });
+  const canTruncate = purchasesFilter === "All" && filtered.length > 4;
+  const alwaysVisible = canTruncate ? filtered.slice(0, 4) : filtered;
+  const overflow = canTruncate ? filtered.slice(4) : [];
 
-  const profileCardSidebar = (
-    <div className="pt-6">
-      <Link to="/profile-v2" className="group block overflow-hidden rounded-2xl bg-white border border-gray-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
-        {/* Banner */}
-        <div className="relative h-[56px] bg-gray-100">
-          <div className="absolute -bottom-10 left-4">
-            <img
-              src={profilePhoto}
-              alt="Jamie"
-              className="h-[80px] w-[80px] rounded-full border-[3px] border-white object-cover shadow-sm"
-            />
-          </div>
-        </div>
-        {/* Body */}
-        <div className="px-4 pb-5 pt-12">
-          <p className="text-[17px] font-medium leading-tight text-gray-dark">Jamie Allen</p>
-          <p className="mt-0.5 text-[13px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
-          <div className="mt-3 flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <img src={orgGoogle} alt="Google" className="h-[20px] w-[20px] shrink-0 rounded-[4px] object-contain" />
-              <span className="text-[12px] text-gray-light">Product Manager at Google</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <img src={orgHBS} alt="HBS" className="h-[20px] w-[20px] shrink-0 rounded-[4px] object-contain" />
-              <span className="text-[12px] text-gray-light">Studied at Harvard Business School</span>
-            </div>
-          </div>
-        </div>
-      </Link>
-    </div>
-  );
+  return (
+    <div>
+      {/* Mobile hero */}
+      <div
+        className="-mx-4 -mt-[72px] mb-0 flex min-h-[40vh] flex-col justify-end px-4 pb-6 md:hidden"
+        style={{ backgroundColor: HERO_BG }}
+      >
+        <h1 className="font-serif text-[36px] font-medium leading-[1.2] text-gray-dark">
+          You have {upcomingEvents.length}<br />upcoming sessions.
+        </h1>
+        <p className="mt-3 flex items-center gap-2 text-[16px] text-gray-dark">
+          <img src={calendarPageIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
+          Next session in 2h with
+          <Link to="/messages" className="-ml-1 underline decoration-dotted underline-offset-2 text-gray-dark">
+            Alex
+          </Link>
+        </p>
+      </div>
 
-  // ─── V2/V3: right sidebar content (unchanged) ────────────────────────────
+      {/* Desktop h1 */}
+      <h1 className="hidden font-serif text-[36px] font-medium text-gray-dark md:block">
+        Dashboard
+      </h1>
 
-  let rightSidebarContent: React.ReactNode = undefined;
-
-  if (layoutVersion === 2) {
-    rightSidebarContent = (
-      <div className="pt-6">
-        <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
-          Upcoming Sessions
-        </h2>
-        <div className="mt-3">
+      {/* Upcoming sessions */}
+      <section className="mt-6">
+        <div>
           <div className="flex flex-col gap-1">
             {upcomingEvents.map((event, i) => (
-              <div key={i} className="flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
-                <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
-                  <div className="w-full bg-[#F5F5F5] text-center text-[10px] font-medium uppercase tracking-[0.05em] text-[#707070]">
-                    {event.day}
-                  </div>
-                  <div className="w-full pt-0.5 pb-1 text-center text-[17px] font-medium leading-tight text-[#707070]">
-                    {event.date}
-                  </div>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[14px] font-medium text-gray-dark">{event.title}</p>
-                  <p className="text-[12px] text-[#707070]">
-                    {event.dateTime}
-                  </p>
-                </div>
-                {event.isNow && (
-                  <button className="cursor-pointer rounded-lg bg-[#FFD96F] px-4 py-2.5 text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90">
-                    Join
-                  </button>
-                )}
-              </div>
+              <SessionCard key={i} {...event} />
             ))}
           </div>
-
-          <button
-            onClick={() => setPastOpen(!pastOpen)}
-            className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+          <Link
+            to="/calendar"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
           >
-            {pastOpen ? "Hide past sessions" : "View past sessions"}
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${pastOpen ? "rotate-180" : ""}`}>
-              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-
-          {pastOpen && (
-            <div className="mt-2 flex flex-col gap-1">
-              {pastEvents.map((event, i) => (
-                <div key={i} className="group flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
-                  <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white opacity-50 shadow-[0_1px_2px_0_rgba(16,24,40,0.05)] transition-opacity group-hover:opacity-100">
-                    <div className="w-full bg-[#F5F5F5] text-center text-[10px] font-medium uppercase tracking-[0.05em] text-[#707070]">
-                      {event.dateTime.split(" ")[0].toUpperCase().slice(0, 3)}
-                    </div>
-                    <div className="w-full pt-0.5 pb-1 text-center text-[17px] font-medium leading-tight text-[#707070]">
-                      {event.dateTime.match(/\w+ (\d+)/)?.[1]}
-                    </div>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[14px] font-medium text-[#707070]">{event.title}</p>
-                    <p className="text-[12px] text-[#707070]">
-                      {event.dateTime}
-                    </p>
-                  </div>
-                  {event.hasRecording && (
-                    <button className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
-                      <img src={arrowRoundIcon} alt="" className="h-5 w-5" />
-                      Rewatch
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+            See full calendar
+          </Link>
         </div>
-      </div>
-    );
-  } else if (layoutVersion === 3) {
-    rightSidebarContent = (
-      <div className="pt-6">
-        <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
-          My Content
+      </section>
+
+      {/* My Purchases */}
+      <section className="mt-12">
+        <h2 className="text-[22px] text-gray-dark" style={{ fontWeight: 500 }}>
+          My purchases
         </h2>
-        <div className="mt-3 flex flex-wrap gap-[6px]">
-          {["All", "Live programs", "Resources"].map((tab) => (
+        <div className="mt-4 flex flex-wrap gap-[6px]">
+          {(["All", "Coaching", "Programs", "Content"] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setContentFilter(tab)}
-              className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-medium text-[#222222] ${
-                contentFilter === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
+              onClick={() => { setPurchasesFilter(tab); setPurchasesExpanded(false); }}
+              className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] ${
+                purchasesFilter === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
               }`}
             >
               {tab}
             </button>
           ))}
         </div>
-        <div className="mt-4 flex flex-col gap-4">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-[60px] rounded-lg bg-[#F5F5F5]" style={dashedBorder} />
+        <div className="mt-4 flex flex-col gap-1">
+          {alwaysVisible.map((offering) => (
+            <OfferingCard
+              key={offering.title}
+              type={offering.type}
+              title={offering.title}
+              subtitle={offering.subtitle}
+              image={offering.image}
+              purchased
+              exhausted={!!offering.exhausted}
+              href={offering.href}
+            />
           ))}
-        </div>
-      </div>
-    );
-  }
-
-  // ─── V1 main content (tabbed) ─────────────────────────────────────────────
-
-  const v1Content = (
-    <>
-      {/* Tab bar */}
-      <div className="flex flex-wrap gap-[6px]">
-        <button
-          onClick={() => setActiveTab("dashboard")}
-          className={`flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-medium text-[#222222] ${
-            activeTab === "dashboard" ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
-          }`}
-        >
-          <img src={lockIcon} alt="" className="h-[14px] w-[14px]" />
-          Dashboard
-        </button>
-        <button
-          onClick={() => setActiveTab("activity")}
-          className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-medium text-[#222222] ${
-            activeTab === "activity" ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
-          }`}
-        >
-          Activity
-        </button>
-      </div>
-
-      {activeTab === "dashboard" ? (
-        <>
-          {/* Upcoming Sessions */}
-          <section className="mt-8">
-            <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
-              Upcoming Sessions
-            </h2>
-            <div className="mt-3">
-              <div className="flex flex-col gap-1">
-                {upcomingEvents.map((event, i) => (
-                  <div key={i} className="flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
-                    <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[16px] font-medium text-gray-dark">{event.title}</p>
-                      <p className="text-[14px] text-[#707070]">
-                        {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 items-center self-stretch">
-                      {event.isNow ? (
-                        <button className="cursor-pointer rounded-lg bg-[#FFD96F] px-4 py-2.5 text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90">
-                          Join
-                        </button>
-                      ) : (
-                        <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
-                          <div className="w-full bg-[#F5F5F5] text-center text-[10px] font-medium uppercase tracking-[0.05em] text-[#707070]">
-                            {event.day}
-                          </div>
-                          <div className="w-full pt-0.5 pb-1 text-center text-[17px] font-medium leading-tight text-[#707070]">
-                            {event.date}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={() => setPastOpen(!pastOpen)}
-                className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+          <AnimatePresence initial={false}>
+            {purchasesExpanded && overflow.map((offering, i) => (
+              <motion.div
+                key={offering.title}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1], delay: i * 0.03 }}
+                className="overflow-hidden"
               >
-                {pastOpen ? "Hide past sessions" : "View past sessions"}
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${pastOpen ? "rotate-180" : ""}`}>
-                  <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-
-              {pastOpen && (
-                <div className="mt-2 flex flex-col gap-1">
-                  {pastEvents.map((event, i) => (
-                    <div key={i} className="group flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
-                      <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover opacity-50 transition-opacity group-hover:opacity-100" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[16px] font-medium text-[#707070]">{event.title}</p>
-                        <p className="text-[14px] text-[#707070]">
-                          {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
-                        </p>
-                      </div>
-                      {event.hasRecording && (
-                        <div className="flex shrink-0 items-center self-stretch">
-                          <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
-                            <img src={arrowRoundIcon} alt="" className="h-5 w-5" />
-                            Rewatch
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* My Courses */}
-          <section className="mt-12">
-            <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
-              My live programs
-            </h2>
-            <div className="mt-3 flex flex-col gap-4">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="h-[160px] rounded-xl bg-[#F5F5F5]" style={dashedBorder} />
-              ))}
-            </div>
-          </section>
-
-          {/* My Goals */}
-          <section className="mt-12">
-            <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
-              My Goals
-            </h2>
-            <div className="scrollbar-hide -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
-              {[0, 1].map((i) => (
-                <div key={i} className="h-[100px] w-[200px] shrink-0 snap-start rounded-xl bg-[#F5F5F5]" style={dashedBorder} />
-              ))}
-              <button className="flex h-[100px] w-[200px] shrink-0 cursor-pointer snap-start items-center justify-center rounded-xl border-none bg-[#F5F5F5] transition-colors hover:bg-[#EEEEEE]" style={dashedBorder}>
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                  <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
-          </section>
-        </>
-      ) : (
-        /* Activity tab */
-        <div className="mt-4 divide-y divide-gray-200">
-          {posts.map((post) => (
-            <FeedPost key={post.id} post={post} />
-          ))}
+                <OfferingCard
+                  type={offering.type}
+                  title={offering.title}
+                  subtitle={offering.subtitle}
+                  image={offering.image}
+                  purchased
+                  exhausted={!!offering.exhausted}
+                  href={offering.href}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
-      )}
-    </>
-  );
-
-  // ─── V2/V3 main content (unchanged) ───────────────────────────────────────
-
-  const v2v3Content = (
-    <>
-      <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">
-        Welcome back, Alex
-      </h1>
+        {canTruncate && (
+          <button
+            onClick={() => setPurchasesExpanded(!purchasesExpanded)}
+            className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+          >
+            {purchasesExpanded ? "See less" : "See all"}
+            <img src={chevronDownIcon} alt="" className={`h-[16px] w-[16px] transition-transform ${purchasesExpanded ? "rotate-180" : ""}`} />
+          </button>
+        )}
+      </section>
 
       {/* My Goals */}
-      <section className="mt-8">
-        <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
+      <section className="mt-12">
+        <h2 className="text-[22px] text-gray-dark" style={{ fontWeight: 500 }}>
           My Goals
         </h2>
+        <p className="text-[16px] text-[#707070]">Track your progress toward what matters most.</p>
         <div className="scrollbar-hide -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
           {[0, 1].map((i) => (
-            <div key={i} className="h-[100px] w-[200px] shrink-0 snap-start rounded-xl bg-[#F5F5F5]" style={dashedBorder} />
+            <div key={i} className="h-[100px] w-[200px] shrink-0 snap-start rounded-xl bg-[#F5F5F5]" style={dashedBorderStyle} />
           ))}
-          <button className="flex h-[100px] w-[200px] shrink-0 cursor-pointer snap-start items-center justify-center rounded-xl border-none bg-[#F5F5F5] transition-colors hover:bg-[#EEEEEE]" style={dashedBorder}>
+          <button className="flex h-[100px] w-[200px] shrink-0 cursor-pointer snap-start items-center justify-center rounded-xl border-none bg-[#F5F5F5] transition-colors hover:bg-[#EEEEEE]" style={dashedBorderStyle}>
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
               <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
             </svg>
           </button>
         </div>
       </section>
-
-      {/* Upcoming Sessions — V3 shows inline */}
-      {layoutVersion === 3 && (
-        <section className="mt-12">
-          <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
-            Upcoming Sessions
-          </h2>
-          <div className="mt-3">
-            <div className="flex flex-col gap-1">
-              {upcomingEvents.map((event, i) => (
-                <div key={i} className="flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
-                  <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[16px] font-medium text-gray-dark">{event.title}</p>
-                    <p className="text-[14px] text-[#707070]">
-                      {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 items-center self-stretch">
-                    {event.isNow ? (
-                      <button className="cursor-pointer rounded-lg bg-[#FFD96F] px-4 py-2.5 text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90">
-                        Join
-                      </button>
-                    ) : (
-                      <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
-                        <div className="w-full bg-[#F5F5F5] text-center text-[10px] font-medium uppercase tracking-[0.05em] text-[#707070]">
-                          {event.day}
-                        </div>
-                        <div className="w-full pt-0.5 pb-1 text-center text-[17px] font-medium leading-tight text-[#707070]">
-                          {event.date}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setPastOpen(!pastOpen)}
-              className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
-            >
-              {pastOpen ? "Hide past sessions" : "View past sessions"}
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${pastOpen ? "rotate-180" : ""}`}>
-                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-
-            {pastOpen && (
-              <div className="mt-2 flex flex-col gap-1">
-                {pastEvents.map((event, i) => (
-                  <div key={i} className="group flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]">
-                    <img src={event.image} alt="" className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover opacity-50 transition-opacity group-hover:opacity-100" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[16px] font-medium text-[#707070]">{event.title}</p>
-                      <p className="text-[14px] text-[#707070]">
-                        {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
-                      </p>
-                    </div>
-                    {event.hasRecording && (
-                      <div className="flex shrink-0 items-center self-stretch">
-                        <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
-                          <img src={arrowRoundIcon} alt="" className="h-5 w-5" />
-                          Rewatch
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* My Courses */}
-      <section className="mt-12">
-        <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">
-          My Courses
-        </h2>
-        <div className="mt-3 flex flex-col gap-4">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-[160px] rounded-xl bg-[#F5F5F5]" style={dashedBorder} />
-          ))}
-        </div>
-      </section>
-
-      {/* My Experts — V2 and V3 show inline */}
-      <section className="mt-12">
-        <a href="#" className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
-          My Experts
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
-            <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </a>
-        <div className="mt-3 flex flex-col gap-4">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-[60px] rounded-lg bg-[#F5F5F5]" style={dashedBorder} />
-          ))}
-        </div>
-      </section>
-    </>
-  );
-
-  return (
-    <>
-      <PageShell
-        leftSidebar={layoutVersion === 1 ? profileCardSidebar : undefined}
-        rightSidebar={layoutVersion !== 1 ? rightSidebarContent : undefined}
-      >
-        {layoutVersion === 1 ? v1Content : v2v3Content}
-      </PageShell>
-
-      {/* ── Admin controls ── */}
-      <div ref={adminRef} className="fixed bottom-24 right-4 z-40 md:bottom-6 md:right-6">
-        <AnimatePresence>
-          {adminOpen && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 4 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 4 }}
-              transition={{ duration: 0.15 }}
-              className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
-            >
-              <div className="mb-1.5 px-2 pt-1 text-[10px] font-medium uppercase tracking-wider text-[#9b9b9b]">
-                Layout
-              </div>
-              <div className="mx-2 mb-2 flex rounded-lg bg-[#f5f5f5] p-[3px]">
-                <button
-                  onClick={() => setLayoutVersion(1)}
-                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[12px] font-medium transition-colors ${layoutVersion === 1 ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
-                >
-                  V1
-                </button>
-                <button
-                  onClick={() => setLayoutVersion(2)}
-                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[12px] font-medium transition-colors ${layoutVersion === 2 ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
-                >
-                  V2
-                </button>
-                <button
-                  onClick={() => setLayoutVersion(3)}
-                  className={`flex-1 cursor-pointer rounded-md py-1.5 text-[12px] font-medium transition-colors ${layoutVersion === 3 ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
-                >
-                  V3
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <button
-          onClick={() => setAdminOpen(!adminOpen)}
-          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 md:bg-[#222222]/5 md:shadow-none md:border-0 transition-colors hover:bg-gray-50 md:hover:bg-[#222222]/[0.08]"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="3" cy="8" r="1.5" fill="#707070" />
-            <circle cx="8" cy="8" r="1.5" fill="#707070" />
-            <circle cx="13" cy="8" r="1.5" fill="#707070" />
-          </svg>
-        </button>
-      </div>
-    </>
+    </div>
   );
 }

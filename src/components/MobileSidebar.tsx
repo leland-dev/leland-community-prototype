@@ -17,8 +17,9 @@ import calendarPageIcon from "../assets/icons/calendar-page.svg";
 import storeIcon from "../assets/icons/store.svg";
 import moneyIcon from "../assets/icons/money.svg";
 import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
+import lteSignalIcon from "../assets/icons/lte-signal.svg";
 import myCoursesIcon from "../assets/icons/my-courses.svg";
-import plusIcon from "../assets/icons/plus-icon.svg";
+import bookOpenIcon from "../assets/icons/book-open.svg";
 import arrowDiagonalIcon from "../assets/icons/arrow-diagonal.svg";
 import expertBanner from "../assets/img/Expert-Banner.png";
 
@@ -46,8 +47,9 @@ const expertItems = [
 ];
 
 const myLelandItems = [
+  { icon: lteSignalIcon, label: "Free Livestreams", to: "/events", external: true },
   { icon: myCoursesIcon, label: "Live Programs", to: "/courses", external: true },
-  { icon: plusIcon, label: "Leland+", to: "/plus", external: true },
+  { icon: bookOpenIcon, label: "Leland+", to: "/plus", external: true },
 ];
 
 export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {

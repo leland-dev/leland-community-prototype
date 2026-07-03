@@ -920,7 +920,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
 
           {/* Name + Supercoach badge */}
           <div className={`flex items-center ${isCustomerProfile ? "gap-2" : sectionFilter === "All" ? "gap-2 mb-2" : "gap-1 mb-1"}`}>
-            <h1 className={`font-medium text-gray-dark ${isCustomerProfile ? "text-[22px]" : sectionFilter === "All" ? "font-serif text-[26px]" : "text-[16px]"}`}>{profileName}</h1>
+            <h1 className={`font-medium text-gray-dark ${isCustomerProfile ? "font-serif text-[36px] leading-[1.2]" : sectionFilter === "All" ? "font-serif text-[26px]" : "text-[16px]"}`}>{profileName}</h1>
             {!isCustomerProfile && (
               <img src={verifiedIcon} alt="Verified" className="mt-[2px] h-[16px] w-[16px]" />
             )}

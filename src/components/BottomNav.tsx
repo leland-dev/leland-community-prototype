@@ -5,17 +5,17 @@ import homeActive from "../assets/icons/nav-icons/home-active.svg";
 import homeInactive from "../assets/icons/nav-icons/home-inactive.svg";
 import searchActive from "../assets/icons/nav-icons/search-active.svg";
 import searchInactive from "../assets/icons/nav-icons/search-inactive.svg";
+import browseActive from "../assets/icons/nav-icons/browse-active.svg";
+import browseInactive from "../assets/icons/nav-icons/browse-inactive.svg";
 import chatActive from "../assets/icons/nav-icons/chat-active.svg";
 import chatInactive from "../assets/icons/nav-icons/chat-inactive.svg";
-import livestreamsActive from "../assets/icons/nav-icons/livestreams-active.svg";
-import livestreamsInactive from "../assets/icons/nav-icons/livestreams-inactive.svg";
 import notificationsActive from "../assets/icons/nav-icons/notifications-active.svg";
 import notificationsInactive from "../assets/icons/nav-icons/notifications-inactive.svg";
 
 const navItems = [
   { to: "/", active: homeActive, inactive: homeInactive, label: "Home" },
   { to: "/search", active: searchActive, inactive: searchInactive, label: "Search" },
-  { to: "/events", active: livestreamsActive, inactive: livestreamsInactive, label: "Livestreams" },
+  { to: "/dashboard", active: browseActive, inactive: browseInactive, label: "Dashboard" },
   { to: "/notifications", active: notificationsActive, inactive: notificationsInactive, label: "Notifications" },
   { to: "/messages", active: chatActive, inactive: chatInactive, label: "Messages" },
 ];

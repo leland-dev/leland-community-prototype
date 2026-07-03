@@ -27,12 +27,12 @@ import GroupCommunity from "./pages/GroupCommunity";
 import Events from "./pages/Events";
 import Courses from "./pages/Courses";
 import LelandPlus from "./pages/LelandPlus";
+import Dashboard from "./pages/Dashboard";
 import PostDetail from "./pages/PostDetail";
 import ReplyCompose from "./pages/ReplyCompose";
 import AccountSettings from "./pages/AccountSettings";
 import Calendar from "./pages/Calendar";
 import MyCourses from "./pages/MyCourses";
-import Dashboard from "./pages/Dashboard";
 import Site from "./pages/Site";
 import B2BDashboard from "./pages/B2BDashboard";
 import B2BDashboardV2 from "./pages/B2BDashboardV2";
@@ -77,7 +77,6 @@ export default function App() {
       <Route path="/reply/:postId" element={<ReplyCompose />} />
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
-        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile-v2" element={<ProfileV2 />} />
         <Route path="/coach-profile" element={<ProfileV2 coach coachId="samantha" />} />
         <Route path="/coach-profile-john" element={<ProfileV2 coach coachId="john" />} />
@@ -117,6 +116,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/messages" element={<Messaging />} />
           <Route path="/profile" element={<Profile />} />
