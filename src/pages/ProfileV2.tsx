@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo, type ReactNode } from "react";
 import { Button, LinkButton } from "../components/Button";
 import { Link, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
@@ -83,6 +83,7 @@ import stanford3 from "../assets/placeholder post assets/stanford-post/989ac1d56
 import stanford4 from "../assets/placeholder post assets/stanford-post/eb80edada3b3db7955379d433ca2861a.jpg";
 import { FeedPost, type Post } from "./Home";
 import { useBookmarks } from "../contexts/BookmarksContext";
+import { useSetNavTheme, useSetNavRightSlot } from "../components/NavThemeContext";
 
 const CATEGORY_ALIASES: Record<string, string> = {
   MBA: "MBA Admissions",
@@ -381,10 +382,80 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
   const [searchParams] = useSearchParams();
   const isCustomerProfile = !coach;
   const { savedPosts } = useBookmarks();
-  const [customerTab, setCustomerTab] = useState<"activity" | "about" | "calendar" | "likes" | "saved" | "more">(
-    (["activity", "about", "calendar", "saved", "likes", "more"] as const).includes(searchParams.get("tab") as any)
-      ? (searchParams.get("tab") as "activity" | "about" | "calendar" | "likes" | "saved" | "more")
-      : "activity"
+  const [navScrolled, setNavScrolled] = useState(false);
+  useEffect(() => {
+    if (!isCustomerProfile) return;
+    const onScroll = () => {
+      // Switch to white bg once scrolled past the cover image area
+      setNavScrolled(window.scrollY > window.innerHeight * 0.2 - 56);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isCustomerProfile]);
+  useSetNavTheme(
+    isCustomerProfile
+      ? navScrolled
+        ? { bg: "white", light: false, hideWordmark: false }
+        : { bg: "#222222", light: true, hideWordmark: false, bgGradient: true }
+      : { bg: "white", light: false, hideWordmark: false }
+  );
+  const [navDotsOpen, setNavDotsOpen] = useState(false);
+  const navDotsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!navDotsOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (navDotsRef.current && !navDotsRef.current.contains(e.target as Node)) {
+        setNavDotsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [navDotsOpen]);
+  useSetNavRightSlot(
+    isCustomerProfile
+      ? useMemo(() => (
+          <div ref={navDotsRef} className="relative flex h-8 w-8 items-center justify-center">
+            <button
+              onClick={() => setNavDotsOpen((o) => !o)}
+              className="flex h-8 w-8 cursor-pointer items-center justify-center"
+            >
+              <img src={dotsHorizontalIcon} alt="More" className={`h-[30px] w-[30px] ${navScrolled ? "" : "brightness-0 invert"}`} />
+            </button>
+            <AnimatePresence>
+              {navDotsOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+                  className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                >
+                  {[
+                    { icon: shareArrowIcon, label: "Share" },
+                    { icon: airplaneIcon, label: "Message" },
+                    { icon: reportFlagIcon, label: "Report" },
+                  ].map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={() => setNavDotsOpen(false)}
+                      className="flex w-full items-center gap-2.5 px-4 py-2.5 text-[13px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                    >
+                      <img src={item.icon} alt="" className="h-[20px] w-[20px] shrink-0 brightness-0" />
+                      {item.label}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ), [navDotsOpen, navScrolled])
+      : null
+  );
+  const [customerTab, setCustomerTab] = useState<"about" | "likes" | "saved" | "more">(
+    (["about", "saved", "likes", "more"] as const).includes(searchParams.get("tab") as any)
+      ? (searchParams.get("tab") as "about" | "likes" | "saved" | "more")
+      : "about"
   );
   const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Programs" | "Content">("All");
   const [purchasesExpanded, setPurchasesExpanded] = useState(false);
@@ -828,18 +899,30 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
         ) : undefined} rightSidebarWidth={isCustomerProfile ? 300 : 340} rightSidebarTop={stickyNavVisible ? 76 : 20}>
         <div>
           {/* Cover image */}
-          {showCoverImage && (
-            <img
-              src={isCustomerProfile ? customerCoverImage : coachCoverImage}
-              alt="Cover"
-              className="h-[220px] w-full rounded-[6px] object-cover"
-            />
+          {isCustomerProfile ? (
+            <div className={`relative -mx-4 -mt-[72px] md:mx-0 md:mt-0 ${showCoverImage ? "" : "md:hidden"}`}>
+              <img
+                src={customerCoverImage}
+                alt="Cover"
+                className="h-[20vh] w-full object-cover md:h-[220px] md:rounded-[6px]"
+              />
+              <div className="absolute inset-0 bg-black/25 md:rounded-[6px]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-transparent to-[#222222] md:rounded-[6px]" />
+            </div>
+          ) : (
+            showCoverImage && (
+              <img
+                src={coachCoverImage}
+                alt="Cover"
+                className="h-[220px] w-full rounded-[6px] object-cover"
+              />
+            )
           )}
 
           {/* Profile photo + CTA buttons */}
-          <div className={`${showCoverImage ? "-mt-[80px] pl-4" : showGrayHeader ? "-mt-[100px]" : "mt-0"} mb-4 flex items-start justify-between ${showCoverImage || showGrayHeader ? "md:items-end" : ""}`}>
-            <div className="group relative z-20 cursor-pointer rounded-lg border-[4px] border-white bg-white" onClick={() => setLightboxOpen(true)}>
-              <div className="relative overflow-hidden rounded-[4px]">
+          <div className={`${isCustomerProfile ? "-mt-[80px] md:pl-4 items-end" : showCoverImage ? "-mt-[80px] pl-4 items-start" : showGrayHeader ? "-mt-[100px] items-start" : "mt-0 items-start"} mb-4 flex justify-between ${isCustomerProfile || showCoverImage || showGrayHeader ? "md:items-end" : ""} ${isCustomerProfile && !showCoverImage ? "md:mt-0 md:pl-0" : ""}`}>
+            <div className={`group relative z-20 cursor-pointer border-[4px] border-white bg-white md:rounded-lg ${isCustomerProfile ? "rounded-full" : "rounded-lg"}`} onClick={() => setLightboxOpen(true)}>
+              <div className={`relative overflow-hidden md:rounded-[4px] ${isCustomerProfile ? "rounded-full" : "rounded-[4px]"}`}>
                 <motion.img
                   layoutId="profile-photo"
                   src={profilePhoto}
@@ -849,28 +932,34 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
               </div>
             </div>
-            <div className={`flex items-center gap-2 ${showCoverImage ? "pb-1" : showGrayHeader ? "pb-[90px]" : "pb-1"}`}>
+            <div className={`flex items-center gap-2 ${showCoverImage || isCustomerProfile ? "pb-1" : showGrayHeader ? "pb-[90px]" : "pb-1"} ${isCustomerProfile && !showCoverImage ? "md:pb-1" : ""}`}>
               {viewingOwnProfile ? (
-                <Link to="/settings?tab=account" className="flex cursor-pointer items-center gap-2 rounded-lg bg-gray-hover px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]">
+                <Link to="/settings?tab=account" className="flex cursor-pointer items-center gap-2 rounded-xl bg-[#F5F5F5] px-5 py-2.5 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#ebebeb]">
                   <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
-                  Edit profile
+                  Edit
                 </Link>
               ) : (
                 <>
+                  {/* Mail button — mobile only for customer profile */}
+                  {isCustomerProfile && (
+                    <button className="flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-xl bg-[#F5F5F5] transition-colors hover:bg-[#ebebeb] md:hidden">
+                      <img src={mailIcon} alt="Mail" className="h-[20px] w-[20px]" />
+                    </button>
+                  )}
                   <button
                     onClick={() => setIsFollowing(!isFollowing)}
-                    className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2.5 text-[14px] font-semibold transition-colors ${
+                    className={`flex cursor-pointer items-center gap-1.5 transition-colors ${
                       isCustomerProfile
-                        ? "bg-[#FFD96F] text-[#222222] hover:bg-[#FFD96F]/90"
+                        ? "rounded-xl bg-[#F5F5F5] px-5 py-2.5 text-[15px] font-semibold text-gray-dark hover:bg-[#ebebeb] md:rounded-lg md:bg-[#FFD96F] md:px-4 md:text-[14px] md:text-[#222222] md:hover:bg-[#FFD96F]/90"
                         : showCoverImage || !showGrayHeader
-                          ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
-                          : "border border-[#222222]/10 bg-white text-gray-dark hover:border-[#222222]/20"
+                          ? "rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark hover:bg-[#222222]/[0.08]"
+                          : "rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-dark hover:border-[#222222]/20"
                     }`}
                   >
-                    {isFollowing && <img src={checkIcon} alt="" className={`h-[18px] w-[18px] ${isCustomerProfile ? "brightness-0 invert" : ""}`} />}
+                    {isFollowing && <img src={checkIcon} alt="" className={`h-[18px] w-[18px] ${isCustomerProfile ? "md:brightness-0 md:invert" : ""}`} />}
                     {isFollowing ? "Following" : "Follow"}
                   </button>
-                  <div ref={moreMenuRef} className="relative">
+                  <div ref={moreMenuRef} className={`relative ${isCustomerProfile ? "hidden md:block" : ""}`}>
                     <button
                       onClick={() => setMoreMenuOpen(!moreMenuOpen)}
                       className={`flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-lg transition-colors ${
@@ -918,12 +1007,10 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           {/* Name → stats wrapper (padded when cover image is on) */}
           <div className={showCoverImage ? "pl-4" : ""}>
 
-          {/* Name + Supercoach badge */}
-          <div className={`flex items-center ${isCustomerProfile ? "gap-2" : sectionFilter === "All" ? "gap-2 mb-2" : "gap-1 mb-1"}`}>
-            <h1 className={`font-medium text-gray-dark ${isCustomerProfile ? "font-serif text-[36px] leading-[1.2]" : sectionFilter === "All" ? "font-serif text-[26px]" : "text-[16px]"}`}>{profileName}</h1>
-            {!isCustomerProfile && (
-              <img src={verifiedIcon} alt="Verified" className="mt-[2px] h-[16px] w-[16px]" />
-            )}
+          {/* Name + Verified badge + Supercoach badge */}
+          <div className={`flex items-center ${sectionFilter === "All" ? "gap-2 mb-2" : "gap-1 mb-1"}`}>
+            <h1 className={`font-medium text-gray-dark ${sectionFilter === "All" ? "font-serif text-[26px]" : "text-[16px]"}`}>{profileName}</h1>
+            {!isCustomerProfile && <img src={verifiedIcon} alt="Verified" className="mt-[2px] h-[16px] w-[16px]" />}
             {showSupercoach && !isCustomerProfile && (
               <>
                 <span className="ml-1 text-[16px] text-[#999999]">·</span>
@@ -933,9 +1020,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           </div>
 
           {/* Headline */}
-          <p className={`mb-[6px] leading-[1.3] ${isCustomerProfile ? "text-[16px] font-normal text-[#707070]" : "font-serif text-[26px] font-medium text-[#333333]"} ${!isCustomerProfile && sectionFilter === "All" ? "hidden" : ""}`}>
+          <p className={`mb-[6px] font-serif text-[26px] font-medium leading-[1.3] text-[#333333] ${sectionFilter === "All" ? "hidden" : ""}`}>
             {isCustomerProfile
-              ? "Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB"
+              ? <>Experienced Product Leader at LinkedIn <span className="font-normal text-[#9B9B9B]">|</span> Ex-Meta <span className="font-normal text-[#9B9B9B]">|</span> Stanford GSB</>
               : sectionFilter === "College"
                 ? <>College Admissions Expert <span className="font-normal text-[#9B9B9B]">|</span> Yale Grad <span className="font-normal text-[#9B9B9B]">|</span> 50+ Ivy League Admits</>
                 : sectionFilter === "MBA"
@@ -945,7 +1032,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           </p>
 
           {/* Credentials row */}
-          {!isCustomerProfile && <div className="mb-1 flex flex-wrap items-center gap-x-[20px] gap-y-[2px] text-[14px] text-[#707070] md:mb-4">
+          <div className="mb-1 flex flex-wrap items-center gap-x-[20px] gap-y-[2px] text-[14px] text-[#707070] md:mb-4">
             {/* Atlassian */}
             <div className="flex items-center gap-[6px]">
               <img src={atlassianLogo} alt="Atlassian" className="h-[18px] w-[18px] rounded" />
@@ -968,45 +1055,16 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 <img src={clientLogo4} alt="" className="h-[18px] w-[18px] rounded border border-white" />
               </div>
             </div>}
-          </div>}
+          </div>
 
-
-          {/* Stats row — mobile: v1-style flat inline (customer profile only) */}
+          {/* Bio — customer profile only */}
           {isCustomerProfile && (
-            <div className="mt-3 flex flex-wrap items-center gap-4 md:hidden">
-              <div className="flex items-baseline gap-1">
-                <span className="text-[16px] font-medium text-gray-dark">245</span>
-                <span className="text-[14px] text-[#707070]">followers</span>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-[16px] font-medium text-gray-dark">8.2K</span>
-                <span className="text-[14px] text-[#707070]">impressions</span>
-              </div>
-            </div>
+            <p className="mt-1 mb-2 text-[15px] leading-[1.4] text-gray-dark">
+              Building products that matter. Passionate about AI, design, and helping others break into tech.
+            </p>
           )}
 
-          {/* Desktop stats row — customer profile */}
-          {isCustomerProfile && (
-            <div className="mt-4 mb-2 hidden items-center gap-6 md:flex">
-              <div className="flex flex-col gap-[2px]">
-                <span className="text-[18px] font-medium leading-none text-gray-dark">245</span>
-                <span className="text-[14px] leading-tight text-[#707070]">Followers</span>
-              </div>
-              <div className="h-[24px] w-px shrink-0 bg-gray-200" />
-              <div className="flex flex-col gap-[2px]">
-                <span className="text-[18px] font-medium leading-none text-gray-dark">1.6k</span>
-                <span className="text-[14px] leading-tight text-[#707070]">Likes</span>
-              </div>
-              <div className="h-[24px] w-px shrink-0 bg-gray-200" />
-              <div className="flex flex-col gap-[2px]">
-                <span className="text-[18px] font-medium leading-none text-gray-dark">8.2k</span>
-                <span className="text-[14px] leading-tight text-[#707070]">Impressions</span>
-              </div>
-            </div>
-          )}
-
-          {/* Stats row — coach profile */}
-          {!isCustomerProfile && (
+          {/* Stats row */}
             <div className="mt-4 mb-2 flex flex-wrap items-center gap-x-6 gap-y-3 md:mt-0">
               {/* Customer Favorite — desktop only (mobile gets its own banner below) */}
               {showCustomerFavorite && (
@@ -1019,7 +1077,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                   <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
                 </>
               )}
-              {/* Reviews */}
+              {/* Reviews — coach only */}
+              {!isCustomerProfile && (<>
               <div
                 className="flex cursor-pointer flex-col md:gap-[2px] transition-opacity hover:opacity-70"
                 onClick={() => scrollToSection("reviews")}
@@ -1031,6 +1090,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 <span className="text-[14px] leading-tight text-[#707070]">52 Reviews</span>
               </div>
               <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
+              </>)}
               {/* Minutes coached */}
               <div className="flex flex-col md:gap-[2px]">
                 <span className="text-[16px] font-semibold leading-none text-gray-dark md:text-[18px]">6.6k</span>
@@ -1058,7 +1118,6 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
                 <span className="text-[14px] leading-tight text-[#707070]">Impressions</span>
               </div>
             </div>
-          )}
 
           </div>{/* end name → stats wrapper */}
 
@@ -1683,207 +1742,30 @@ export default function ProfileV2({ coach = false, coachId = "samantha" }: { coa
           {/* Customer profile tabs */}
           {isCustomerProfile && (
             <>
-              {viewingOwnProfile ? (
-                <div ref={customerTabStripRef} className="sticky top-0 z-10 mt-2 flex gap-5 border-b border-gray-stroke bg-white overflow-x-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {(["activity", "about", "calendar", "saved", "likes", "more"] as const).map((tab) => (
+                <div ref={customerTabStripRef} className="sticky top-0 z-10 -mx-4 mt-2 flex border-b border-gray-stroke bg-white">
+                  {(viewingOwnProfile ? ["about", "saved", "likes", "more"] as const : ["about", "likes", "more"] as const).map((tab) => (
                     <button
                       key={tab}
                       data-tab={tab}
                       onClick={() => setCustomerTab(tab)}
-                      className={`relative cursor-pointer px-3 py-3 transition-colors ${
+                      className={`flex-1 cursor-pointer py-3 text-center transition-colors ${
                         customerTab === tab
-                          ? "text-gray-dark"
-                          : "text-gray-light hover:text-gray-dark"
+                          ? "border-b-2 border-gray-dark text-gray-dark"
+                          : "border-b-2 border-transparent text-gray-light hover:text-gray-dark"
                       }`}
                     >
-                      <span className="text-[16px] font-medium">{tab === "activity" ? "Overview" : tab === "about" ? "Activity" : tab === "calendar" ? "Calendar" : tab === "likes" ? "Liked" : tab === "saved" ? "Saved" : "More"}</span>
-                      {customerTab === tab && (
-                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#FFD96F]" />
-                      )}
+                      <span className={`text-[16px] ${customerTab === tab ? "font-semibold" : "font-medium"}`}>{tab === "about" ? "Activity" : tab === "likes" ? "Liked" : tab === "saved" ? "Saved" : "About"}</span>
                     </button>
                   ))}
                 </div>
-              ) : (
-                <div className="mt-7 border-b border-gray-stroke" />
-              )}
 
               <div className="mt-3">
-                {customerTab === "activity" && viewingOwnProfile && (
-                  <>
-                    {/* Upcoming sessions */}
-                    <section>
-                      <h2 className="text-[22px] font-semibold text-gray-dark" style={{ fontWeight: 500 }}>
-                        Upcoming sessions
-                      </h2>
-                      <div className="mt-3">
-                        <div className="flex flex-col gap-1">
-                          {upcomingEvents.slice(0, 3).map((event, i) => (
-                            <SessionCard key={i} {...event} />
-                          ))}
-                        </div>
-
-                        <button
-                          onClick={() => setCustomerTab("calendar")}
-                          className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
-                        >
-                          See full calendar
-                        </button>
-                      </div>
-                    </section>
-
-                    {/* My Purchases */}
-                    <section className="mt-12">
-                      <h2 className="text-[22px] font-semibold text-gray-dark" style={{ fontWeight: 500 }}>
-                        My purchases
-                      </h2>
-                      <div className="mt-4 flex flex-wrap gap-[6px]">
-                        {(["All", "Coaching", "Programs", "Content"] as const).map((tab) => (
-                          <button
-                            key={tab}
-                            onClick={() => { setPurchasesFilter(tab); setPurchasesExpanded(false); }}
-                            className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] ${
-                              purchasesFilter === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
-                            }`}
-                          >
-                            {tab}
-                          </button>
-                        ))}
-                      </div>
-                      {(() => {
-                        const filtered = purchasedOfferings.filter((offering) => {
-                          if (purchasesFilter === "All") return true;
-                          if (purchasesFilter === "Coaching") return offering.type === "hourly" || offering.type === "hourly-package" || offering.type === "package";
-                          if (purchasesFilter === "Programs") return offering.type === "course";
-                          return offering.type === "content";
-                        });
-                        const canTruncate = purchasesFilter === "All" && filtered.length > 4;
-                        const alwaysVisible = canTruncate ? filtered.slice(0, 4) : filtered;
-                        const overflow = canTruncate ? filtered.slice(4) : [];
-                        return (
-                          <>
-                            <div className="mt-4 flex flex-col gap-1">
-                              {alwaysVisible.map((offering) => (
-                                <OfferingCard
-                                  key={offering.title}
-                                  type={offering.type}
-                                  title={offering.title}
-                                  subtitle={offering.subtitle}
-                                  image={offering.image}
-                                  purchased
-                                  exhausted={!!offering.exhausted}
-                                  href={offering.title === "AI Builder Program Level 1: Use AI to 10x Your Impact" ? "/course/1" : undefined}
-                                />
-                              ))}
-                              <AnimatePresence initial={false}>
-                                {purchasesExpanded && overflow.map((offering, i) => (
-                                  <motion.div
-                                    key={offering.title}
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: "auto" }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1], delay: i * 0.03 }}
-                                    className="overflow-hidden"
-                                  >
-                                    <OfferingCard
-                                      type={offering.type}
-                                      title={offering.title}
-                                      subtitle={offering.subtitle}
-                                      image={offering.image}
-                                      purchased
-                                      exhausted={!!offering.exhausted}
-                                    />
-                                  </motion.div>
-                                ))}
-                              </AnimatePresence>
-                            </div>
-                            {canTruncate && (
-                              <button
-                                onClick={() => setPurchasesExpanded(!purchasesExpanded)}
-                                className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
-                              >
-                                {purchasesExpanded ? "See less" : "See all"}
-                                <img src={chevronDownIcon} alt="" className={`h-[16px] w-[16px] transition-transform ${purchasesExpanded ? "rotate-180" : ""}`} />
-                              </button>
-                            )}
-                          </>
-                        );
-                      })()}
-                    </section>
-
-                    {/* My Goals */}
-                    <section className="mt-12">
-                      <h2 className="text-[22px] font-semibold text-gray-dark" style={{ fontWeight: 500 }}>
-                        My Goals
-                      </h2>
-                      <p className="text-[16px] text-[#707070]">Track your progress toward what matters most.</p>
-                      <div className="scrollbar-hide -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
-                        {[0, 1].map((i) => (
-                          <div key={i} className="h-[100px] w-[200px] shrink-0 snap-start rounded-xl bg-[#F5F5F5]" style={dashedBorderStyle} />
-                        ))}
-                        <button className="flex h-[100px] w-[200px] shrink-0 cursor-pointer snap-start items-center justify-center rounded-xl border-none bg-[#F5F5F5] transition-colors hover:bg-[#EEEEEE]" style={dashedBorderStyle}>
-                          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                            <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
-                          </svg>
-                        </button>
-                      </div>
-                    </section>
-                  </>
-                )}
-
                 {(viewingOwnProfile ? customerTab === "about" : true) && (
                   <div className="divide-y divide-gray-stroke/50">
                     {customerPosts.map((post) => (
                       <FeedPost key={post.id} post={post} />
                     ))}
                   </div>
-                )}
-
-                {viewingOwnProfile && customerTab === "calendar" && (
-                  <section>
-                    <h2 className="mb-3 text-[22px] font-semibold text-gray-dark" style={{ fontWeight: 500 }}>
-                      Upcoming sessions
-                    </h2>
-                    <div>
-                      <div className="flex flex-col gap-1">
-                        {upcomingEvents.map((event, i) => (
-                          <SessionCard key={i} {...event} />
-                        ))}
-                      </div>
-
-                      <button
-                        onClick={() => setPastOpen(!pastOpen)}
-                        className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
-                      >
-                        {pastOpen ? "Hide past sessions" : "View past sessions"}
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${pastOpen ? "rotate-180" : ""}`}>
-                          <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
-
-                      <AnimatePresence initial={false}>
-                        {pastOpen && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                            className="overflow-hidden"
-                          >
-                            <div className="mt-2 flex flex-col gap-1">
-                              {pastEvents.map((event, i) => (
-                                <SessionCard key={i} {...event} status="past" />
-                              ))}
-                            </div>
-                            <button
-                              className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
-                            >
-                              Load more
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </section>
                 )}
 
                 {viewingOwnProfile && customerTab === "likes" && (

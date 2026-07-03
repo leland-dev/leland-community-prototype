@@ -26,7 +26,7 @@ import {
 } from "./ContentMaxWidthContext";
 import { SubNavStyleProvider, useSubNavStyle } from "./SubNavStyleContext";
 import { SessionLayoutProvider } from "./SessionLayoutContext";
-import { NavThemeProvider } from "./NavThemeContext";
+import { NavThemeProvider, useNavTheme } from "./NavThemeContext";
 import { MobileSidebarProvider, useMobileSidebar } from "./MobileSidebarContext";
 
 /**
@@ -78,6 +78,7 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const { open: sidebarOpen, setOpen: setSidebarOpen } = useMobileSidebar();
+  const navTheme = useNavTheme();
 
   // Keep height/overflow constrained while the close animation plays out,
   // so the content doesn't snap to full height mid-transition.
@@ -112,16 +113,25 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
     }
   }, [sidebarOpen]);
 
-  // Update iOS status bar color when sidebar opens/closes.
-  // Safari doesn't reliably respond to content-attribute changes on the
-  // existing meta tag, so we remove it and insert a fresh element.
+  // Update iOS status bar / theme-color.
+  // Safari is picky: we update the existing tag's content in-place, then
+  // force a re-parse by briefly removing and re-appending it.
   useEffect(() => {
-    document.querySelectorAll('meta[name="theme-color"]').forEach((el) => el.remove());
-    const meta = document.createElement("meta");
-    meta.name = "theme-color";
-    meta.content = sidebarOpen ? "#f5f5f5" : "#ffffff";
+    const color = sidebarOpen
+      ? "#f5f5f5"
+      : navTheme.themeColor ?? (navTheme.bg === "white" || navTheme.bg === "transparent" ? "#ffffff" : navTheme.bg);
+
+    let meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "theme-color";
+      document.head.appendChild(meta);
+    }
+    // Update content, then remove + re-append to force Safari to re-read it
+    meta.content = color;
+    meta.remove();
     document.head.appendChild(meta);
-  }, [sidebarOpen]);
+  }, [sidebarOpen, navTheme.bg, navTheme.themeColor]);
 
   useEffect(() => {
     const el = scrollRef.current;

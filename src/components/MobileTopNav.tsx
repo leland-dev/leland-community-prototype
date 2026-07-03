@@ -5,7 +5,7 @@ import moreIcon from "../assets/icons/nav-icons/more-active.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import logoIcon from "../assets/logos/leland-logo-split/Icon.svg";
 import logoWordmark from "../assets/logos/leland-logo-split/Wordmark.svg";
-import { useNavTheme } from "./NavThemeContext";
+import { useNavTheme, useNavRightSlot } from "./NavThemeContext";
 import { useMobileSidebar } from "./MobileSidebarContext";
 
 export default function MobileTopNav() {
@@ -14,6 +14,7 @@ export default function MobileTopNav() {
   const navigate = useNavigate();
   const navTheme = useNavTheme();
   const { setOpen: setSidebarOpen } = useMobileSidebar();
+  const rightSlot = useNavRightSlot();
   // On a post detail page the left slot becomes a Back button (returns the
   // user to wherever they came from) instead of the menu.
   const isPostDetail = location.pathname.startsWith("/post/");
@@ -33,6 +34,14 @@ export default function MobileTopNav() {
   const iconFilter = isLight ? "brightness-0 invert" : "";
 
   return (
+    <>
+    {/* Solid strip behind the status bar so iOS Safari picks up the color */}
+    {navTheme.bgGradient && (
+      <div
+        className="fixed left-0 right-0 top-0 z-30"
+        style={{ height: "env(safe-area-inset-top, 0px)", backgroundColor: navTheme.bg }}
+      />
+    )}
     <header
       className={`fixed left-0 right-0 top-0 z-30 flex h-14 items-center justify-between px-4 transition-all duration-200 ease-out ${
         isLight
@@ -41,7 +50,11 @@ export default function MobileTopNav() {
             ? "shadow-[0_1px_4px_rgba(0,0,0,0.08)]"
             : ""
       }`}
-      style={{ backgroundColor: navTheme.bg }}
+      style={{
+        background: navTheme.bgGradient
+          ? `linear-gradient(to bottom, ${navTheme.bg}, transparent)`
+          : navTheme.bg,
+      }}
     >
       {/* Left: menu — or Back button on a post detail page */}
       {isPostDetail ? (
@@ -100,17 +113,20 @@ export default function MobileTopNav() {
         )}
       </button>
 
-      {/* Right: profile */}
-      <NavLink
-        to="/profile-v2"
-        className="flex h-8 w-8 items-center justify-center"
-      >
-        <img
-          src={profilePhoto}
-          alt="Profile"
-          className="h-8 w-8 rounded-full object-cover"
-        />
-      </NavLink>
+      {/* Right: custom slot or default profile photo */}
+      {rightSlot ?? (
+        <NavLink
+          to="/profile-v2"
+          className="flex h-8 w-8 items-center justify-center"
+        >
+          <img
+            src={profilePhoto}
+            alt="Profile"
+            className="h-8 w-8 rounded-full object-cover"
+          />
+        </NavLink>
+      )}
     </header>
+    </>
   );
 }
