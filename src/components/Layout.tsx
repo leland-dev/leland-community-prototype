@@ -1,4 +1,5 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useOutlet, useLocation, useNavigationType } from "react-router-dom";
+import { AnimatePresence, motion } from "motion/react";
 import { useRef, useState, useEffect } from "react";
 import TopNav from "./TopNav";
 import BottomNav from "./BottomNav";
@@ -159,6 +160,62 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Directional page slide: a detail screen (post) pushes in from the right while
+// the feed slides out to the left; pressing back (a POP) reverses it. The
+// exiting page is taken out of flow by `mode="popLayout"` so the incoming page
+// keeps normal document scroll. `transformTemplate` returns `none` once a page
+// settles at x:0 so it never leaves a transform on the wrapper — that would
+// otherwise re-anchor any `position: fixed` children to the wrapper instead of
+// the viewport.
+const slideVariants = {
+  enter: (dir: number) => ({ x: dir > 0 ? "100%" : dir < 0 ? "-35%" : "0%" }),
+  center: { x: 0 },
+  exit: (dir: number) => ({ x: dir > 0 ? "-35%" : dir < 0 ? "100%" : "0%" }),
+};
+
+function AnimatedOutlet() {
+  const location = useLocation();
+  const outlet = useOutlet();
+  const navType = useNavigationType();
+
+  // Only slide for depth navigation (into / out of a post). Lateral moves
+  // between bottom-nav tabs swap instantly (dir 0) — sliding those felt like
+  // unwanted horizontal drift.
+  const prevPathRef = useRef(location.pathname);
+  const prevPath = prevPathRef.current;
+  useEffect(() => {
+    prevPathRef.current = location.pathname;
+  }, [location.pathname]);
+  const isDepth =
+    location.pathname.startsWith("/post/") || prevPath.startsWith("/post/");
+  const dir = !isDepth ? 0 : navType === "POP" ? -1 : 1;
+
+  return (
+    <div className="relative">
+      <AnimatePresence mode="popLayout" custom={dir} initial={false}>
+        <motion.div
+          key={location.pathname}
+          custom={dir}
+          variants={slideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ duration: 0.32, ease: [0.32, 0.72, 0, 1] }}
+          transformTemplate={(latest, generated) =>
+            parseFloat(String(latest.x)) === 0 ? "none" : generated
+          }
+          // Opaque page surface so a sliding page fully occludes the one behind
+          // it — otherwise the outgoing feed's text bleeds through the incoming
+          // post during the push. min-h keeps short pages covering the viewport.
+          className="min-h-[calc(100dvh-136px)] bg-white"
+        >
+          {outlet}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
+
 /**
  * ContextLayout — reads sidebar/variant contexts, wraps <Outlet /> in <PageShell>.
  * Sits as a nested route element inside <Layout />.
@@ -176,7 +233,7 @@ export function ContextLayout() {
       rightSidebar={rightSidebar}
       contentMaxWidth={contentMaxWidth}
     >
-      <Outlet />
+      <AnimatedOutlet />
     </PageShell>
   );
 }

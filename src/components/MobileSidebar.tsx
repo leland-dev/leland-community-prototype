@@ -210,7 +210,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                 </button>
                 <button
                   onClick={onClose}
-                  className="flex w-full items-center gap-[10px] px-5 py-3 text-[14px] font-medium text-[#D92D20] transition-colors hover:bg-gray-hover"
+                  className="flex w-full items-center gap-[10px] py-2 text-[14px] font-medium text-[#D92D20] transition-colors hover:bg-gray-hover"
                 >
                   <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

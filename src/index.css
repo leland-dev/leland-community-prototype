@@ -143,20 +143,25 @@
   display: none;
 }
 
-/* Push navigation: a detail screen (post, focused reply) slides in from the
-   right so it reads as a page pushed on top of the current one. No
-   animation-fill-mode, so the transform reverts to none once it lands —
-   important so fixed children (comment bar, FAB) stay viewport-anchored. */
-@keyframes slide-in-from-right {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+/* Suppress the browser's default (blue) focus ring on tappable chrome — it
+   reads as an errant blue circle around round icon buttons (e.g. the save
+   bookmark). Inputs keep their own focus:border / focus:ring styling. */
+button:focus,
+a:focus,
+[role="button"]:focus,
+[tabindex]:focus {
+  outline: none;
 }
-.slide-in-page {
-  animation: slide-in-from-right 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+
+/* Liquid-glass chrome (bottom nav + floating comment input share this recipe:
+   the light `bg-[#F5F5F5]/50 backdrop-blur-[16px] border-[#222222]/5` classes).
+   On dark mode the light 50%-tint read as heavy frosted glass — drop it to a
+   faint tint so the blur alone carries the effect, reading as liquid glass. */
+html.dark .bg-\[\#F5F5F5\]\/50 {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+html.dark .border-\[\#222222\]\/5 {
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 @keyframes pulse-ring {
@@ -216,9 +221,9 @@ html {
 
 body {
   overscroll-behavior-y: contain;
-  /* Prevent a horizontal scroll flash while a detail page slides in from the
-     right (.slide-in-page). `clip` doesn't create a scroll container, so it
-     won't break position: sticky the way overflow-x: hidden would. */
+  /* Prevent a horizontal scroll flash while pages slide during push
+     navigation. `clip` doesn't create a scroll container, so it won't break
+     position: sticky the way overflow-x: hidden would. */
   overflow-x: clip;
 }
 

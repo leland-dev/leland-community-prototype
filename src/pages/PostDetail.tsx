@@ -718,10 +718,9 @@ export default function PostDetail() {
   };
 
   return (
-    <div className="slide-in-page">
-    <motion.div initial={false}>
-      {/* Content — full width */}
-      {/* Content — full width; leave room at the bottom for the fixed input + nav */}
+    <>
+    <div>
+      {/* Content — full width; leave room at the bottom for the floating input + nav */}
       <div className="min-w-0 pb-36">
         {/* Post — full width. Body/media/actions stack below the author header
             (avatar + name + description), no left indent. */}
@@ -739,14 +738,14 @@ export default function PostDetail() {
           ))}
         </div>
       </div>
-    </motion.div>
+    </div>
 
-    {/* Comment input — anchored to the bottom of the screen, above the tab bar.
-        Rendered outside the animated container so `position: fixed` is
-        viewport-relative (a transformed ancestor would otherwise scope it). */}
+    {/* Comment input — a floating rounded box that sits above the bottom nav,
+        matching the floating-pill nav. Drops down flush when the nav hides on
+        scroll. */}
     <div
-      style={{ bottom: navHidden ? "env(safe-area-inset-bottom)" : "calc(env(safe-area-inset-bottom) + 56px)" }}
-      className="fixed inset-x-0 z-30 border-t border-gray-stroke bg-white px-4 py-2.5 transition-[bottom] duration-200 ease-out"
+      style={{ bottom: navHidden ? "calc(env(safe-area-inset-bottom) + 16px)" : "calc(env(safe-area-inset-bottom) + 94px)" }}
+      className="fixed inset-x-4 z-30 mx-auto max-w-[640px] rounded-2xl border border-gray-stroke bg-white px-3 py-2 shadow-lg transition-[bottom] duration-200 ease-out"
     >
       <div className="mx-auto flex max-w-[600px] items-center gap-2">
         <img
@@ -765,7 +764,7 @@ export default function PostDetail() {
           }}
           placeholder="Add a comment…"
           rows={1}
-          className="scrollbar-hide max-h-24 flex-1 resize-none overflow-y-auto rounded-xl border border-gray-stroke px-3 py-2.5 text-[14px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
+          className="scrollbar-hide max-h-24 flex-1 resize-none overflow-y-auto bg-transparent px-1 py-2 text-[14px] text-gray-dark outline-none placeholder:text-gray-light"
           onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
         />
         <AnimatePresence>
@@ -794,6 +793,6 @@ export default function PostDetail() {
         />
       )}
     </AnimatePresence>
-    </div>
+    </>
   );
 }

@@ -1011,16 +1011,17 @@ export function FeedBookmarkButton({ post }: { post: Post }) {
               transition={{ type: "spring", stiffness: 480, damping: 34, mass: 0.8 }}
               onClick={() => { hideToast(); navigate("/profile-v2?tab=saved"); }}
               role="button"
-              className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+56px)] z-40 flex cursor-pointer items-center justify-between bg-[#FFD96F] px-5 py-3.5 text-[#111111] md:bottom-0"
+              className="fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+94px)] z-20 mx-auto flex max-w-[440px] cursor-pointer items-center justify-between rounded-2xl border border-gray-stroke bg-gray-hover px-4 py-3 text-gray-dark shadow-lg"
             >
               <div className="flex items-center gap-2.5">
                 <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
                 <span className="text-[15px] font-semibold">Saved to your profile</span>
+                <span className="text-[15px] font-semibold underline">View</span>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); hideToast(); }}
                 aria-label="Dismiss"
-                className="-mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#111111] transition-colors hover:bg-black/10"
+                className="-mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-black/10 hover:text-gray-dark"
               >
                 <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
@@ -1041,7 +1042,7 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
     <div className="mt-1 flex items-center gap-[24px] pl-[44px]">
       <FeedLikeButton initialCount={likes} />
       {/* Comment */}
-      <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`/post/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
+      <button onClick={() => navigate(`/post/${postId}`)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
         <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 21C13.486 21.0018 14.9492 20.6339 16.2576 19.9293L20.3676 20.9755C20.4517 20.9969 20.5398 20.9961 20.6234 20.9731C20.707 20.9502 20.7832 20.9058 20.8445 20.8445C20.9058 20.7832 20.9501 20.707 20.9731 20.6234C20.9961 20.5398 20.9969 20.4517 20.9755 20.3676L19.9293 16.2576C20.8609 14.5226 21.1978 12.5299 20.8882 10.5851C20.5786 8.64022 19.6396 6.85061 18.2152 5.49065C16.7909 4.13068 14.9598 3.27543 13.0027 3.05604C11.0457 2.83664 9.07066 3.26522 7.38054 4.27604C5.69042 5.28687 4.3785 6.82414 3.64594 8.65215C2.91338 10.4802 2.80062 12.498 3.32495 14.3962C3.84928 16.2945 4.98176 17.9684 6.54873 19.1612C8.1157 20.354 10.0307 21 12 21Z" /></svg>
         {comments > 0 && <span className="text-[13px] font-normal">{formatCount(comments)}</span>}
       </button>
@@ -3802,7 +3803,7 @@ export default function Home() {
         <button
           onClick={() => setComposeOpen(true)}
           aria-label="Create post"
-          style={{ transform: `translateY(${savedToastActive ? -114 : navHidden ? 0 : -76}px)` }}
+          style={{ transform: `translateY(${savedToastActive ? -140 : navHidden ? 0 : -76}px)` }}
           className="fixed bottom-[calc(env(safe-area-inset-bottom)+16px)] right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFD96F] text-[#222222] shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">

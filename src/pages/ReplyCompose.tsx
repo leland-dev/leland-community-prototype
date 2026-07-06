@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "motion/react";
 
 import { posts } from "./Home";
 import { addPostComment, addPostReply, type CommentData } from "./PostDetail";
@@ -24,6 +25,12 @@ export default function ReplyCompose() {
   const [text, setText] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const canReply = text.trim().length > 0;
+
+  // Slide-out-then-navigate: the page slides off to the right, then we run the
+  // pending navigation. Enter animation is x:100% → 0; leaving flips it back.
+  const [leaving, setLeaving] = useState(false);
+  const pendingNav = useRef<() => void>(() => navigate(-1));
+  const close = () => { pendingNav.current = () => navigate(-1); setLeaving(true); };
 
   useEffect(() => {
     const id = requestAnimationFrame(() => inputRef.current?.focus());
@@ -63,7 +70,8 @@ export default function ReplyCompose() {
     } else {
       addPostComment(post.id, reply);
     }
-    navigate(`/post/${post.id}`, { replace: true });
+    pendingNav.current = () => navigate(`/post/${post.id}`, { replace: true });
+    setLeaving(true);
   };
 
   const Avatar = ({ src, name, color }: { src?: string; name: string; color?: string }) =>
@@ -79,11 +87,19 @@ export default function ReplyCompose() {
     );
 
   return (
-    <div className="slide-in-page min-h-screen bg-white">
-      {/* Header — back + Reply, mirrors the platform's compose chrome. */}
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-stroke bg-white px-3 py-2.5 pt-[calc(env(safe-area-inset-top)+10px)]">
+    <motion.div
+      initial={{ x: "100%" }}
+      animate={{ x: leaving ? "100%" : 0 }}
+      transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+      onAnimationComplete={() => { if (leaving) pendingNav.current(); }}
+      style={{ height: "100dvh" }}
+      className="fixed left-0 right-0 top-0 z-[60] flex flex-col bg-white"
+    >
+      {/* Header — back + Reply. Kept out of the scroll area (flex-col + dvh
+          height) so the Reply button stays visible when the keyboard opens. */}
+      <div className="flex shrink-0 items-center justify-between border-b border-gray-stroke bg-white px-3 py-2.5 pt-[calc(env(safe-area-inset-top)+10px)]">
         <button
-          onClick={() => navigate(-1)}
+          onClick={close}
           aria-label="Back"
           className="flex h-9 w-9 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover"
         >
@@ -102,7 +118,7 @@ export default function ReplyCompose() {
         </button>
       </div>
 
-      <div className="mx-auto max-w-[600px] px-4">
+      <div className="mx-auto w-full max-w-[600px] flex-1 overflow-y-auto px-4">
         {/* Target being replied to, with a thread connector dropping to the reply. */}
         <div className="flex gap-3 pt-4">
           <div className="flex flex-col items-center">
@@ -141,6 +157,6 @@ export default function ReplyCompose() {
           />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
