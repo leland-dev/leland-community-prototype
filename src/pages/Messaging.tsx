@@ -1,6 +1,17 @@
+import { motion } from "motion/react";
+import { useNavigationType } from "react-router-dom";
+import ConversationListItem from "../components/ConversationListItem";
+import { conversations } from "../lib/conversations";
+
 export default function Messaging() {
+  const navigationType = useNavigationType();
+
   return (
-    <div>
+    <motion.div
+      initial={navigationType === "POP" ? { x: "-100%" } : false}
+      animate={{ x: 0 }}
+      transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+    >
       <h1 className="font-serif text-[36px] font-medium text-gray-dark">Messages</h1>
       <p className="mt-2 text-[16px] text-gray-light">
         Your conversations with experts and peers.
@@ -15,37 +26,12 @@ export default function Messaging() {
         />
       </div>
 
-      {/* Conversation list skeleton */}
+      {/* Conversation list */}
       <div className="mt-4">
-        {[
-          { unread: true, time: "2m" },
-          { unread: true, time: "1h" },
-          { unread: false, time: "3h" },
-          { unread: false, time: "1d" },
-          { unread: false, time: "3d" },
-        ].map((conv, i) => (
-          <div
-            key={i}
-            className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-gray-hover"
-          >
-            <div className="h-12 w-12 shrink-0 animate-pulse rounded-full bg-gray-stroke" />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between">
-                <div
-                  className={`h-3.5 w-28 animate-pulse rounded ${
-                    conv.unread ? "bg-gray-xlight" : "bg-gray-stroke"
-                  }`}
-                />
-                <span className="text-xs text-gray-xlight">{conv.time}</span>
-              </div>
-              <div className="mt-1.5 h-3 w-4/5 animate-pulse rounded bg-gray-hover" />
-            </div>
-            {conv.unread && (
-              <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />
-            )}
-          </div>
+        {conversations.map((conversation) => (
+          <ConversationListItem key={conversation.id} conversation={conversation} />
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

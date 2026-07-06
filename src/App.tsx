@@ -5,6 +5,8 @@ import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { BookmarksProvider } from "./contexts/BookmarksContext";
 import { SavedToastProvider } from "./contexts/SavedToastContext";
 import { ExpertModeProvider } from "./contexts/ExpertModeContext";
+import { PageExitProvider } from "./contexts/PageExitContext";
+import PageExitOverlay from "./components/PageExitOverlay";
 import Layout from "./components/Layout";
 import { ContextLayout } from "./components/Layout";
 
@@ -38,6 +40,8 @@ import Browse from "./pages/Browse";
 import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
 import Messaging from "./pages/Messaging";
+import ConversationDetail from "./pages/ConversationDetail";
+import ConversationRelationship from "./pages/ConversationRelationship";
 import Profile from "./pages/Profile";
 import ProfileV2 from "./pages/ProfileV2";
 import CoachAgent from "./pages/CoachAgent";
@@ -89,6 +93,7 @@ export default function App() {
     <BookmarksProvider>
     <SavedToastProvider>
     <ScrollToTop />
+    <PageExitProvider>
     <Routes>
       <Route path="/b2b-dashboard" element={<B2BDashboard />} />
       <Route path="/partner-dashboard" element={<B2BDashboardV2 />} />
@@ -96,6 +101,8 @@ export default function App() {
       <Route path="/incredible-home-page-bu" element={<IncredibleHomePageBU />} />
       <Route path="/incredible-onboarding" element={<IncredibleOnboarding />} />
       <Route path="/reply/:postId" element={<ReplyCompose />} />
+      <Route path="/messages/:conversationId" element={<ConversationDetail />} />
+      <Route path="/messages/:conversationId/relationship" element={<ConversationRelationship />} />
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
         <Route path="/profile-v2" element={<ProfileV2 />} />
@@ -148,6 +155,8 @@ export default function App() {
         </Route>
       </Route>
     </Routes>
+    <PageExitOverlay />
+    </PageExitProvider>
     </SavedToastProvider>
     </BookmarksProvider>
     </ExpertModeProvider>
