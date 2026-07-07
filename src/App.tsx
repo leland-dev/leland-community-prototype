@@ -5,6 +5,7 @@ import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { BookmarksProvider } from "./contexts/BookmarksContext";
 import { SavedToastProvider } from "./contexts/SavedToastContext";
 import { ExpertModeProvider } from "./contexts/ExpertModeContext";
+import { ProfileBarModeProvider } from "./contexts/ProfileBarModeContext";
 import { PageExitProvider } from "./contexts/PageExitContext";
 import PageExitOverlay from "./components/PageExitOverlay";
 import Layout from "./components/Layout";
@@ -92,6 +93,7 @@ export default function App() {
     <ExpertModeProvider>
     <BookmarksProvider>
     <SavedToastProvider>
+    <ProfileBarModeProvider>
     <ScrollToTop />
     <PageExitProvider>
     <Routes>
@@ -157,6 +159,7 @@ export default function App() {
     </Routes>
     <PageExitOverlay />
     </PageExitProvider>
+    </ProfileBarModeProvider>
     </SavedToastProvider>
     </BookmarksProvider>
     </ExpertModeProvider>

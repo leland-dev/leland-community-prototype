@@ -7,6 +7,7 @@ import { Image as ImageIcon } from "lucide-react";
 import { useVersion } from "../contexts/VersionContext";
 import { useBookmarks } from "../contexts/BookmarksContext";
 import { useSavedToast } from "../contexts/SavedToastContext";
+import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -44,6 +45,12 @@ import orgBCG       from "../assets/org-logos/bcg.png";
 import orgDeloitte  from "../assets/org-logos/deloitte.png";
 import orgGoogle    from "../assets/org-logos/google.png";
 import orgOpenAI    from "../assets/org-logos/openai.png";
+// Company favicons for the "Minimal" profile-bar mode.
+import logoMeta       from "../assets/logos/facebook.png";
+import logoGoogle     from "../assets/logos/google.png";
+import logoSalesforce from "../assets/logos/salesforce.png";
+import logoCoinbase   from "../assets/logos/coinbase.png";
+import logoMcKinsey   from "../assets/logos/mckinsey.png";
 
 import commentsIcon from "../assets/icons/comments.svg";
 import repostsIcon from "../assets/icons/reposts.svg";
@@ -84,6 +91,9 @@ interface PostBase {
   groupId?: string;
   groupColor?: string;
   groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean };
+  // Small company favicon shown next to the poster's name in the "Minimal"
+  // profile-bar mode (Admin Tools → Profile bar → Min).
+  companyLogo?: string;
   likes: number;
   comments: number;
   reposts: number;
@@ -216,6 +226,7 @@ export const posts: Post[] = [
     groupId: "ai-bp-apr-26",
     groupColor: "#2563EB",
     groupPoster: { name: "Sarah Chen", avatar: pic3, headline: "Product Manager", overlay: true },
+    companyLogo: logoGoogle,
     time: "30m",
     feed: "AI BP April 26",
     body: "Does anyone have a good mental model for deciding when to use RAG vs just stuffing more context into the prompt?\n\nI've been going back and forth on this for my week 2 project. At some point the context window is big enough that RAG feels like over-engineering — but I also don't want to pay for 200K tokens every call.",
@@ -232,6 +243,7 @@ export const posts: Post[] = [
     time: "20m",
     verified: true,
     headline: "AI BP Instructor · Ex-Meta PM",
+    companyLogo: logoMeta,
     feed: "AI BP April 26",
     body: "Reviewed every week 2 submission this morning ☕️ The standouts had one thing in common — they didn't just automate a task, they redesigned the workflow first. Tools second.",
     images: [bootcampInstructorImg],
@@ -248,6 +260,7 @@ export const posts: Post[] = [
     time: "12m",
     verified: false,
     headline: "Ops Lead at Notion",
+    companyLogo: logoSalesforce,
     feed: "AI BP April 26",
     body: "Quick Q for cohort 1 — for the week 2 project, did anyone find a good way to handle rate limits when chaining multiple Claude calls?\n\nI've got a little script that pulls meeting notes, summarizes them, and then drafts follow-up emails. Works great on one meeting, blows up on five. Considering just adding a sleep() but that feels dumb. Open to ideas before I over-engineer this.",
     likes: 18,
@@ -263,6 +276,7 @@ export const posts: Post[] = [
     time: "32m",
     verified: false,
     headline: "Strategy @ Airbnb",
+    companyLogo: logoCoinbase,
     feed: "AI BP April 26",
     body: "Wild — asked Claude to rewrite our team's weekly status update template and this is what it came back with. Three years of 'what shipped / what's blocked' and nobody thought to add the third column. Trying it at standup Monday. 👀",
     images: [bootcampImg],
@@ -279,6 +293,7 @@ export const posts: Post[] = [
     time: "45m",
     verified: false,
     headline: "Product Manager",
+    companyLogo: logoGoogle,
     feed: "AI BP April 26",
     body: "Session 1 was last night and I already feel like a different person.\n\nI'd always thought of AI as a black box that either works or doesn't. Turns out the way you ask is almost everything. We rewrote the same prompt three different ways and the outputs were completely different — one was useless, one was okay, one was exactly what I needed.\n\nSix weeks ago I would have called that magic. Now I know it's just structure. Can't believe I waited this long to learn this.",
     likes: 47,
@@ -294,6 +309,7 @@ export const posts: Post[] = [
     time: "2h",
     verified: true,
     headline: "Former Director of Programs and Admissions at Stanford GSB",
+    companyLogo: logoMcKinsey,
     body: "Just wrapped up my first week at McKinsey. The learning curve is steep but the people are incredible. Grateful for the Leland community that helped me prep for case interviews — couldn't have done it without you all.",
     likes: 142,
     comments: 18,
@@ -602,18 +618,18 @@ function primeKeyboard() {
 }
 
 const FEED_REPOST_PARTICLES = [
-  { angle: -80,  r: 28, color: "#138462", size: 6 },
-  { angle: -40,  r: 32, color: "#1aad80", size: 5 },
-  { angle: -10,  r: 25, color: "#0d6b50", size: 7 },
-  { angle: 20,   r: 30, color: "#138462", size: 5 },
-  { angle: 55,   r: 28, color: "#1aad80", size: 6 },
-  { angle: 90,   r: 32, color: "#138462", size: 5 },
-  { angle: 130,  r: 25, color: "#0d6b50", size: 7 },
-  { angle: 160,  r: 30, color: "#1aad80", size: 5 },
-  { angle: 200,  r: 28, color: "#138462", size: 6 },
-  { angle: 240,  r: 25, color: "#0d6b50", size: 5 },
-  { angle: 270,  r: 32, color: "#1aad80", size: 6 },
-  { angle: 310,  r: 28, color: "#138462", size: 5 },
+  { angle: -80,  r: 28, color: "#4F86DB", size: 6 },
+  { angle: -40,  r: 32, color: "#80ACED", size: 5 },
+  { angle: -10,  r: 25, color: "#A6C5F0", size: 7 },
+  { angle: 20,   r: 30, color: "#4F86DB", size: 5 },
+  { angle: 55,   r: 28, color: "#80ACED", size: 6 },
+  { angle: 90,   r: 32, color: "#4F86DB", size: 5 },
+  { angle: 130,  r: 25, color: "#A6C5F0", size: 7 },
+  { angle: 160,  r: 30, color: "#80ACED", size: 5 },
+  { angle: 200,  r: 28, color: "#4F86DB", size: 6 },
+  { angle: 240,  r: 25, color: "#A6C5F0", size: 5 },
+  { angle: 270,  r: 32, color: "#80ACED", size: 6 },
+  { angle: 310,  r: 28, color: "#4F86DB", size: 5 },
 ];
 
 const FEED_HEART_PARTICLES = [
@@ -689,14 +705,6 @@ export function FeedLikeButton({ initialCount }: { initialCount: number }) {
   );
 }
 
-const SHARE_USERS = [
-  { name: "Alex Smith", avatar: pic2 },
-  { name: "Jane Doe", avatar: pic3 },
-  { name: "Marcus W.", avatar: pic4 },
-  { name: "Priya P.", avatar: pic5 },
-  { name: "Sarah C.", avatar: pic6 },
-];
-
 export function ShareDropdown({ post, onClose }: { post: Post; onClose: () => void }) {
   const postId = post.id;
   const [copied, setCopied] = useState(false);
@@ -757,25 +765,7 @@ export function ShareDropdown({ post, onClose }: { post: Post; onClose: () => vo
             </div>
           </div>
 
-          {/* Row 1 — send to people on Leland */}
-          <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-1 scrollbar-hide">
-            <button onClick={onClose} className="flex shrink-0 flex-col items-center gap-1.5">
-              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full border border-gray-stroke text-gray-dark">
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-              </span>
-              <span className="text-[12px] text-gray-dark">Message</span>
-            </button>
-            {SHARE_USERS.map((u) => (
-              <button key={u.name} onClick={onClose} className="flex shrink-0 flex-col items-center gap-1.5">
-                <img src={u.avatar} alt={u.name} className="h-[54px] w-[54px] rounded-full object-cover" />
-                <span className="max-w-[60px] truncate text-[12px] text-gray-dark">{u.name}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="my-3 border-t border-gray-stroke" />
-
-          {/* Row 2 — actions. Fixed-width items + truncated labels keep the row
+          {/* Actions. Fixed-width items + truncated labels keep the row
               evenly spaced regardless of label length. */}
           <div className="flex gap-6">
             <button onClick={copyLink} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
@@ -879,7 +869,7 @@ export function FeedRepostButton({ initialCount, initialReposted = false, onRepo
 
       <button
         onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${reposted ? "text-[#FFD96F]" : "text-gray-light"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${reposted ? "text-[#4F86DB]" : "text-gray-light"}`}
       >
         <motion.svg
           className="h-[22px] w-[22px]"
@@ -1020,7 +1010,7 @@ export function FeedBookmarkButton({ post }: { post: Post }) {
               transition={{ type: "spring", stiffness: 480, damping: 34, mass: 0.8 }}
               onClick={() => { hideToast(); navigate("/profile-v2?tab=saved"); }}
               role="button"
-              className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+56px)] z-40 flex cursor-pointer items-center justify-between bg-[#FFD96F] px-5 py-3.5 text-[#111111] md:bottom-0"
+              className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+61px)] z-20 flex cursor-pointer items-center justify-between bg-[#FFD96F] px-5 py-3.5 text-[#111111] md:bottom-0"
             >
               <div className="flex items-center gap-2.5">
                 <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
@@ -1036,7 +1026,7 @@ export function FeedBookmarkButton({ post }: { post: Post }) {
             </motion.div>
           ) : null}
         </AnimatePresence>,
-        document.body,
+        document.getElementById("saved-toast-root") ?? document.body,
       )}
     </>
   );
@@ -1047,7 +1037,7 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
   const [shareOpen, setShareOpen] = useState(false);
 
   return (
-    <div className="mt-1 flex items-center gap-[24px] pl-[44px]">
+    <div className="mt-1 flex items-center justify-between pl-[44px] pr-1">
       <FeedLikeButton initialCount={likes} />
       {/* Comment */}
       <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`/post/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
@@ -1065,7 +1055,7 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
       {/* Share */}
       <div className="relative">
         <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
-          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5.323 19.8781L19.752 13.1791C20.75 12.7161 20.75 11.2821 19.752 10.8191L5.323 4.12205C4.288 3.64205 3.193 4.66005 3.58 5.74305L5.813 11.9971L3.58 18.2581C3.193 19.3401 4.288 20.3581 5.323 19.8781Z" /><path d="M5.81 12H20.5" /></svg>
+          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 15V4" /><path d="m8 8 4-4 4 4" /><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" /></svg>
         </button>
         <AnimatePresence>
           {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
@@ -1077,11 +1067,23 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
   );
 }
 
-function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, groupId, groupPoster, onEdit }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; onEdit?: () => void}) {
+function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, groupId, groupPoster, companyLogo, onEdit }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; companyLogo?: string; onEdit?: () => void}) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [following, setFollowing] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  // Set when Follow is tapped from the menu, so the sheet dismisses only after
+  // the check's pop-in animation actually completes (not on a fixed timer).
+  const justFollowedRef = useRef(false);
   const isMobile = useIsMobile();
   useLockBodyScroll(menuOpen && isMobile);
+
+  const { mode: profileBarMode } = useProfileBarMode();
+  // The title/description line the older profile-bar versions surface.
+  const displayHeadline = groupPoster?.headline ?? headline;
+  // Mode 3 demonstrates an older post: show an absolute date instead of a
+  // relative timestamp. (Absolute "Aug 12" vs. relative "3d" is the open
+  // question — this shows the absolute-date treatment.)
+  const displayTime = profileBarMode === 3 ? "Aug 12" : time;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -1103,6 +1105,13 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
       danger: false,
       onClick: onEdit,
     }] : []),
+    {
+      label: "Follow",
+      follow: true,
+      icon: null,
+      danger: false,
+      onClick: undefined as (() => void) | undefined,
+    },
     {
       label: "Delete post",
       icon: (
@@ -1140,39 +1149,30 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
   return (
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
+        {/* Person leads: for a member's group post we surface the person, not
+            the group; the group is shown as a small badge on the avatar. Pure
+            group announcements (no groupPoster) still read as the group. */}
         <div className="flex min-w-0 items-center gap-2">
           <Link
-            to={isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `${verified ? "/coach-profile" : "/profile-v2"}`}
+            to={groupPoster ? "/profile-v2?type=customer" : isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `${verified ? "/coach-profile" : "/profile-v2"}`}
             onClick={(e) => e.stopPropagation()}
             className="cursor-pointer truncate text-[15px] leading-tight font-medium text-gray-dark"
-          >{author}</Link>
+          >{groupPoster ? groupPoster.name : author}</Link>
+          {/* Minimal mode: company favicon sits next to the name (in place of
+              the title line the other modes show). */}
+          {profileBarMode === 1 && companyLogo ? (
+            <img src={companyLogo} alt="" className="h-[18px] w-[18px] shrink-0 rounded-[4px] object-contain" />
+          ) : null}
           {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
-          <span className="shrink-0 text-[15px] leading-tight text-gray-xlight">{time}</span>
+          <span className="shrink-0 text-[13px] leading-tight text-gray-xlight">{displayTime}</span>
         </div>
-        {groupPoster ? (
-          <div className="mt-[3px] flex items-center gap-1.5">
-            {!groupPoster.overlay && (
-              <img src={groupPoster.avatar} alt={groupPoster.name} className="h-[18px] w-[18px] rounded-full object-cover shrink-0" />
-            )}
-            <Link to="/profile-v2?type=customer" onClick={(e) => e.stopPropagation()} className="text-[13px] leading-tight text-[#707070] hover:underline hover:decoration-[1px] hover:underline-offset-[2px]">
-              {groupPoster.name}
-            </Link>
-            {groupPoster.headline && <span className="truncate text-[13px] leading-tight text-[#a3a3a3]">· {groupPoster.headline}</span>}
-          </div>
-        ) : headline ? (
-          <p className="truncate text-[13px] leading-tight text-[#707070]">{headline}</p>
+        {/* Title / description line — surfaced in the "Title" (2) and "Dated"
+            (3) profile-bar modes; hidden in "Minimal" (1). */}
+        {profileBarMode !== 1 && displayHeadline ? (
+          <p className="mt-0.5 truncate text-[13px] leading-tight text-gray-light">{displayHeadline}</p>
         ) : null}
       </div>
       <div className="flex shrink-0 items-start gap-1">
-        {feed && !isGroupPost && !groupPoster && (
-          <Link
-            to={`/groups/${FEEDS.find(f => f.label === feed)?.id ?? feed.toLowerCase().replace(/\s+/g, "-")}`}
-            onClick={(e) => e.stopPropagation()}
-            className="mt-0.5 text-[13px] leading-none text-gray-xlight hover:text-[#707070] transition-colors"
-          >
-            {feed}
-          </Link>
-        )}
       <div ref={menuRef} className="relative">
         <button
           onClick={(e) => { e.stopPropagation(); setMenuOpen(o => !o); }}
@@ -1194,7 +1194,11 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
                     drag={isMobile ? "y" : false}
                     dragConstraints={{ top: 0, bottom: 0 }}
                     dragElastic={{ top: 0, bottom: 0.6 }}
-                    onDragEnd={(_, info) => { if (isMobile && (info.offset.y > 100 || info.velocity.y > 400)) setMenuOpen(false); }}
+                    // Require real downward travel to dismiss — a fast tap on a
+                    // menu item (e.g. Follow) releases with high velocity but ~0
+                    // offset, which would otherwise slam the sheet shut before
+                    // the follow animation could play.
+                    onDragEnd={(_, info) => { if (isMobile && (info.offset.y > 80 || (info.velocity.y > 500 && info.offset.y > 24))) setMenuOpen(false); }}
                     className={
                       isMobile
                         ? "fixed inset-x-0 bottom-0 z-[70] rounded-t-2xl border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)] shadow-lg"
@@ -1203,18 +1207,93 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
                   >
                     {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1 w-10 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
                     <div className={isMobile ? "px-3 pt-1 pb-3" : "px-2 py-2"}>
-                      {menuItems.map(({ label, icon, danger, onClick }) => (
-                        <button
-                          key={label}
-                          onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onClick?.(); }}
-                          className={`flex w-full items-center gap-3 rounded-lg text-left font-medium transition-colors hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"} ${
-                            danger ? "text-[#D92D20]" : "text-gray-dark"
-                          }`}
-                        >
-                          {icon}
-                          {label}
-                        </button>
-                      ))}
+                      {menuItems.map((item) => {
+                        const { label, icon, danger, onClick } = item;
+                        const itemClass = `flex w-full items-center gap-3 rounded-lg text-left font-medium transition-colors hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`;
+                        const sz = isMobile ? 22 : 16;
+                        if ((item as { follow?: boolean }).follow) {
+                          // Tapping Follow flips the icon to a check + the label
+                          // to "Following". The sheet stays put and dismisses
+                          // only once the check's pop-in has FULLY settled
+                          // (onAnimationComplete + a short linger) — never on a
+                          // fixed timer that can fire mid-spring. Unfollowing
+                          // just toggles back in place.
+                          const onFollowTap = (e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            if (following) { setFollowing(false); return; }
+                            justFollowedRef.current = true;
+                            setFollowing(true);
+                          };
+                          const iconSpring = { type: "spring" as const, stiffness: 620, damping: 26 };
+                          return (
+                            <motion.button
+                              key="follow"
+                              whileTap={{ scale: 0.96 }}
+                              onClick={onFollowTap}
+                              className={`${itemClass} text-gray-dark`}
+                            >
+                              <span className="relative shrink-0" style={{ width: sz, height: sz }}>
+                                <AnimatePresence initial={false} mode="popLayout">
+                                  {following ? (
+                                    <motion.svg
+                                      key="check"
+                                      initial={{ scale: 0, opacity: 0 }}
+                                      animate={{ scale: 1, opacity: 1 }}
+                                      exit={{ scale: 0, opacity: 0 }}
+                                      transition={iconSpring}
+                                      onAnimationComplete={() => {
+                                        if (justFollowedRef.current) {
+                                          justFollowedRef.current = false;
+                                          window.setTimeout(() => setMenuOpen(false), 450);
+                                        }
+                                      }}
+                                      className="absolute inset-0 h-full w-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
+                                    >
+                                      <polyline points="20 6 9 17 4 12" />
+                                    </motion.svg>
+                                  ) : (
+                                    <motion.svg
+                                      key="plus"
+                                      initial={{ scale: 0, opacity: 0 }}
+                                      animate={{ scale: 1, opacity: 1 }}
+                                      exit={{ scale: 0, opacity: 0 }}
+                                      transition={iconSpring}
+                                      className="absolute inset-0 h-full w-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
+                                    >
+                                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>
+                                    </motion.svg>
+                                  )}
+                                </AnimatePresence>
+                              </span>
+                              <span className="relative inline-flex" style={{ perspective: 500 }}>
+                                <AnimatePresence mode="wait" initial={false}>
+                                  <motion.span
+                                    key={following ? "following" : "follow"}
+                                    initial={{ rotateX: -90, opacity: 0 }}
+                                    animate={{ rotateX: 0, opacity: 1 }}
+                                    exit={{ rotateX: 90, opacity: 0 }}
+                                    transition={{ duration: 0.16, ease: "easeOut" }}
+                                    className="inline-block"
+                                    style={{ transformOrigin: "center", backfaceVisibility: "hidden" }}
+                                  >
+                                    {following ? "Following" : "Follow"}
+                                  </motion.span>
+                                </AnimatePresence>
+                              </span>
+                            </motion.button>
+                          );
+                        }
+                        return (
+                          <button
+                            key={label}
+                            onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onClick?.(); }}
+                            className={`${itemClass} ${danger ? "text-[#D92D20]" : "text-gray-dark"}`}
+                          >
+                            {icon}
+                            {label}
+                          </button>
+                        );
+                      })}
                     </div>
                   </motion.div>
                 </>
@@ -2122,21 +2201,30 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
         }}
       >
         {isGroupPost ? (
-          <>
+          post.groupPoster ? (
+            // Member's group post: person photo leads, group as a small badge.
+            <>
+              <img
+                src={post.groupPoster.avatar}
+                alt={post.groupPoster.name}
+                className="h-10 w-10 rounded-full object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)]"
+              />
+              <div
+                className="absolute -bottom-1.5 -right-1.5 flex h-[20px] w-[20px] items-center justify-center rounded-[6px] border-2 border-white text-[10px] font-bold text-white"
+                style={{ backgroundColor: post.groupColor ?? "#2563EB" }}
+              >
+                {post.author.charAt(0)}
+              </div>
+            </>
+          ) : (
+            // Group announcement: the group itself.
             <div
               className="flex h-10 w-10 items-center justify-center rounded-[8px] text-[15px] font-bold text-white"
               style={{ backgroundColor: post.groupColor ?? "#2563EB" }}
             >
               {post.author.charAt(0)}
             </div>
-            {post.groupPoster?.overlay && (
-              <img
-                src={post.groupPoster.avatar}
-                alt={post.groupPoster.name}
-                className="absolute -bottom-1.5 -right-1.5 h-[22px] w-[22px] rounded-full border-2 border-white object-cover shadow-sm"
-              />
-            )}
-          </>
+          )
         ) : isEvent ? (
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black">
             <img src={post.avatar} alt={post.author} className="h-5 w-5 brightness-0 invert" />
@@ -2148,7 +2236,7 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
             className="h-10 w-10 rounded-full object-cover shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)]"
           />
         )}
-        <div className={`absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10 ${isGroupPost ? "rounded-[8px]" : "rounded-full"}`} />
+        <div className={`absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10 ${isGroupPost && !post.groupPoster ? "rounded-[8px]" : "rounded-full"}`} />
       </div>
 
       <AnimatePresence>
@@ -2193,6 +2281,7 @@ function QuotedPostCard({ quoted }: { quoted: QuotedSnapshot }) {
 export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void }) {
   const navigate = useNavigate();
   const [editOpen, setEditOpen] = useState(false);
+  const { mode: profileBarMode } = useProfileBarMode();
 
   // A re-surfaced simple repost points its click-through and repost state at
   // the original. A quote post is local-only (no /post route), so its card
@@ -2221,8 +2310,11 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { 
         </div>
         {/* Right column: content */}
         <div className="min-w-0 flex-1">
-          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} onEdit={onUpdate ? () => setEditOpen(true) : undefined} />
-          <p className="mt-1 text-[15px] leading-[1.4] text-gray-dark">{post.body}</p>
+          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} companyLogo={post.companyLogo} onEdit={onUpdate ? () => setEditOpen(true) : undefined} />
+          {/* Minimal mode has no title line, so the body tucks up tight to the
+              identity row (negative margin trims the line-height leading); the
+              title modes give the body a touch more air. */}
+          <p className={`${profileBarMode === 1 ? "-mt-1.5" : "mt-1.5"} text-[15px] leading-[1.4] text-gray-dark`}>{post.body}</p>
           <div className={post.type !== "text" ? "pb-1" : ""} onClick={e => e.stopPropagation()}>
             {post.type === "image" && (
               <ImageGallery
@@ -3805,12 +3897,13 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Mobile floating compose button — sits 16px above bottom nav,
-          slides down to bottom-16 when nav hides on scroll. */}
+      {/* Mobile floating compose button — sits 24px above the bottom nav
+          (matching its 24px inset from the right edge), and slides down when
+          the nav hides on scroll. */}
       <button
         onClick={() => setComposeOpen(true)}
         aria-label="Create post"
-        style={{ transform: `translateY(${savedToastActive ? -114 : navHidden ? 0 : -58}px)` }}
+        style={{ transform: `translateY(${savedToastActive ? -122 : navHidden ? 0 : -66}px)` }}
         className="fixed bottom-[calc(env(safe-area-inset-bottom)+16px)] right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFD96F] text-[#222222] shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">

@@ -40,6 +40,10 @@ export default function MobileTopNav() {
 
   const slideIn = navTheme.slideIn;
 
+  // Post detail is its own surface — it renders its own header ("Post" + a
+  // 3-dot menu) inside the sliding page, so the shared nav steps aside here.
+  if (isPostDetail) return null;
+
   return (
     <>
     {/* Solid strip behind the status bar so iOS Safari picks up the color */}
