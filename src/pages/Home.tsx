@@ -8,6 +8,7 @@ import { useVersion } from "../contexts/VersionContext";
 import { useBookmarks } from "../contexts/BookmarksContext";
 import { useSavedToast } from "../contexts/SavedToastContext";
 import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
+import { useDarkMode } from "../contexts/DarkModeContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -201,40 +202,6 @@ function shuffle<T>(items: T[]): T[] {
 // ─── Sample data ──────────────────────────────────────
 
 export const posts: Post[] = [
-  {
-    id: 20,
-    type: "text",
-    author: "AI BP April 26",
-    avatar: "",
-    isGroupPost: true,
-    groupId: "ai-bp-apr-26",
-    groupColor: "#2563EB",
-    headline: "Build AI-powered workflows for your career",
-    time: "1h",
-    feed: "AI BP April 26",
-    body: "Welcome to week 3, cohort! 👋\n\nThis week's focus: deploying your first real AI workflow to production. Office hours are Thursday at 5pm PT — bring your projects, questions, and anything that broke over the weekend.\n\nAlso a reminder: the week 2 project submissions are due tonight at midnight. 18 of you have already submitted — great work. If you're stuck, post in the group and someone will help.",
-    likes: 24,
-    comments: 8,
-    reposts: 2,
-    shares: 1,
-  },
-  {
-    id: 22,
-    type: "text",
-    author: "AI BP April 26",
-    avatar: "",
-    groupId: "ai-bp-apr-26",
-    groupColor: "#2563EB",
-    groupPoster: { name: "Sarah Chen", avatar: pic3, headline: "Product Manager", overlay: true },
-    companyLogo: logoGoogle,
-    time: "30m",
-    feed: "AI BP April 26",
-    body: "Does anyone have a good mental model for deciding when to use RAG vs just stuffing more context into the prompt?\n\nI've been going back and forth on this for my week 2 project. At some point the context window is big enough that RAG feels like over-engineering — but I also don't want to pay for 200K tokens every call.",
-    likes: 19,
-    comments: 22,
-    reposts: 3,
-    shares: 1,
-  },
   {
     id: 23,
     type: "image",
@@ -1086,13 +1053,17 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
   const displayTime = profileBarMode === 3 ? "Aug 12" : time;
 
   useEffect(() => {
-    if (!menuOpen) return;
+    // Desktop only: close the dropdown on an outside click. On mobile the menu
+    // is a portaled bottom sheet (outside menuRef), so this handler would fire
+    // on every item tap — including Follow — and slam the sheet shut before its
+    // animation plays. The mobile sheet dismisses via its own backdrop instead.
+    if (!menuOpen || isMobile) return;
     const handler = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [menuOpen]);
+  }, [menuOpen, isMobile]);
 
   const menuItems = [
     ...(onEdit ? [{
@@ -1160,10 +1131,10 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
           >{groupPoster ? groupPoster.name : author}</Link>
           {/* Minimal mode: company favicon sits next to the name (in place of
               the title line the other modes show). */}
+          {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
           {profileBarMode === 1 && companyLogo ? (
             <img src={companyLogo} alt="" className="h-[18px] w-[18px] shrink-0 rounded-[4px] object-contain" />
           ) : null}
-          {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
           <span className="shrink-0 text-[13px] leading-tight text-gray-xlight">{displayTime}</span>
         </div>
         {/* Title / description line — surfaced in the "Title" (2) and "Dated"
@@ -3687,6 +3658,7 @@ export default function Home() {
   // When the full-width save toast is up, lift the FAB above it so the toast's
   // dismiss (X) stays tappable.
   const { active: savedToastActive } = useSavedToast();
+  const { dark: darkMode } = useDarkMode();
 
   useEffect(() => {
     const onScroll = () => {
@@ -3904,7 +3876,7 @@ export default function Home() {
         onClick={() => setComposeOpen(true)}
         aria-label="Create post"
         style={{ transform: `translateY(${savedToastActive ? -122 : navHidden ? 0 : -66}px)` }}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom)+16px)] right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFD96F] text-[#222222] shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden"
+        className={`fixed bottom-[calc(env(safe-area-inset-bottom)+16px)] right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden ${darkMode ? "bg-[#FFD96F] text-[#222222]" : "bg-[#222222] text-white"}`}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 5v14M5 12h14" />

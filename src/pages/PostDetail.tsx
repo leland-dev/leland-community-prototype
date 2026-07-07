@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, useNavigationType } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 
 import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetNavBackHandler } from "../components/NavThemeContext";
 import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
+import { usePageExit } from "../contexts/PageExitContext";
+import { PUSH_TRANSITION } from "../lib/pushTransition";
 import { posts, type Post, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar } from "./Home";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
@@ -224,20 +226,21 @@ function AuthorRow({ post }: { post: Post }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="text-[15px] font-medium leading-tight text-gray-dark">{name}</span>
+          {post.verified ? <img src={verifiedIconSrc} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
           {profileBarMode === 1 && post.companyLogo ? (
             <img src={post.companyLogo} alt="" className="h-[18px] w-[18px] shrink-0 rounded-[4px] object-contain" />
           ) : null}
-          {post.verified ? <img src={verifiedIconSrc} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
           <span className="shrink-0 text-[13px] leading-tight text-gray-xlight">{displayTime}</span>
         </div>
         {profileBarMode !== 1 && displayHeadline ? (
           <p className="mt-0.5 truncate text-[13px] leading-tight text-gray-light">{displayHeadline}</p>
         ) : null}
       </div>
-      {/* Follow — snappy, staged morph: press down (whileTap) → the pill snaps
-          to a grey circle (width + color spring) → the check pops into the
-          circle (delayed spring). Width animates as a real CSS value (not the
-          `layout` transform), so the label never stretches. */}
+      {/* Follow — snappy, staged morph, symmetric both ways: the outgoing
+          content (label or check) shrinks/fades away fast, the pill grows +
+          color shifts on a spring, then the new content pops/eases in after a
+          short delay. Width animates as a real CSS value (not `layout`), so the
+          label never stretches. */}
       <motion.button
         type="button"
         onClick={() => setFollowing((f) => !f)}
@@ -254,7 +257,7 @@ function AuthorRow({ post }: { post: Post }) {
               key="check"
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
+              exit={{ scale: 0, opacity: 0, transition: { duration: 0.09, ease: "easeIn" } }}
               transition={{ type: "spring", stiffness: 900, damping: 19, delay: 0.12 }}
               className="h-[18px] w-[18px] text-gray-dark"
               viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -266,8 +269,8 @@ function AuthorRow({ post }: { post: Post }) {
               key="follow"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.08 }}
+              exit={{ opacity: 0, transition: { duration: 0.06 } }}
+              transition={{ duration: 0.12, delay: 0.12 }}
               className="whitespace-nowrap text-[#111111]"
             >
               Follow
@@ -458,11 +461,21 @@ function PostMedia({ post, onImageClick }: { post: Post; onImageClick?: (idx: nu
   return null;
 }
 
+// Compact view-count formatting (e.g. 2632 → "2.6K", 14500 → "15K").
+function formatViews(n: number): string {
+  if (n < 1000) return `${n}`;
+  const k = n / 1000;
+  return `${k >= 10 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, "")}K`;
+}
+
 function StatsRow({ post, onCommentFocus }: { post: Post; onCommentFocus: () => void }) {
   const [shareOpen, setShareOpen] = useState(false);
 
+  // -mx-2 cancels the buttons' px-2 so the heart glyph lines up flush with the
+  // paragraph/metadata left edge, and the bookmark with the right edge;
+  // justify-between then spaces the icons evenly across that span.
   return (
-    <div className="mt-2 flex items-center justify-between px-2 py-1.5">
+    <div className="mt-2 -mx-2 flex items-center justify-between py-1.5">
       <FeedLikeButton initialCount={post.likes} />
       {/* Comment */}
       <button
@@ -671,15 +684,17 @@ function PostHeaderBar({ onBack }: { onBack: () => void }) {
   ];
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-30 flex h-14 items-center justify-between bg-white px-4 md:hidden">
-      <button onClick={onBack} aria-label="Go back" className="flex h-8 w-8 items-center justify-center text-gray-dark">
+    <header className="sticky top-0 z-20 -mx-4 -mt-4 flex items-center gap-2 border-b border-gray-stroke bg-white px-3 py-2.5 pt-[calc(env(safe-area-inset-top)+10px)] md:hidden">
+      <button onClick={onBack} aria-label="Go back" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover">
         <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M15 18l-6-6 6-6" />
         </svg>
       </button>
-      <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[16px] font-semibold text-gray-dark">Post</span>
-      <div ref={menuRef} className="relative">
-        <button onClick={() => setMenuOpen(o => !o)} aria-label="Post options" className="flex h-8 w-8 items-center justify-center text-gray-dark">
+      <div className="flex min-w-0 flex-1 items-center justify-center">
+        <p className="text-[15px] font-semibold leading-tight text-gray-dark">Post</p>
+      </div>
+      <div ref={menuRef} className="relative shrink-0">
+        <button onClick={() => setMenuOpen(o => !o)} aria-label="Post options" className="flex h-9 w-9 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover">
           <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.9" /><circle cx="12" cy="12" r="1.9" /><circle cx="19" cy="12" r="1.9" /></svg>
         </button>
         <AnimatePresence>
@@ -689,7 +704,7 @@ function PostHeaderBar({ onBack }: { onBack: () => void }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -4 }}
               transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
-              className="absolute right-0 top-9 z-50 w-44 rounded-2xl border border-gray-stroke bg-white p-1.5 shadow-lg"
+              className="absolute right-0 top-full z-50 mt-1 w-44 rounded-2xl border border-gray-stroke bg-white p-1.5 shadow-lg"
             >
               {items.map(it => (
                 <button
@@ -708,40 +723,73 @@ function PostHeaderBar({ onBack }: { onBack: () => void }) {
   );
 }
 
+/** The post's visual surface (sticky header + post + comments). Shared by the
+ *  live page and the frozen exit copy so the back-slide looks identical. */
+function PostSurface({ post, comments, onBack, onImageClick }: {
+  post: Post;
+  comments: CommentData[];
+  onBack: () => void;
+  onImageClick?: (i: number) => void;
+}) {
+  const navigate = useNavigate();
+  return (
+    <>
+      <PostHeaderBar onBack={onBack} />
+      <div className="min-w-0 pb-36">
+        <div className="border-b border-gray-stroke pt-4 pb-3">
+          <AuthorRow post={post} />
+          <p className="mt-3 whitespace-pre-wrap text-[15px] leading-[1.5] text-gray-dark">{post.body}</p>
+          <PostMedia post={post} onImageClick={post.type === "image" ? onImageClick : undefined} />
+          {/* Metadata — time · date · views, below the body/media, above the actions. */}
+          <div className="mt-3 flex flex-wrap items-center gap-x-1.5 text-[14px] leading-tight text-gray-light">
+            <span>9:41 AM</span>
+            <span aria-hidden>·</span>
+            <span>Jul 7, 2026</span>
+            <span aria-hidden>·</span>
+            <span>
+              <span className="font-semibold text-gray-dark">{formatViews(post.likes * 24 + post.comments * 18 + post.reposts * 40)}</span> Views
+            </span>
+          </div>
+          <StatsRow post={post} onCommentFocus={() => navigate(`/reply/${post.id}`, { state: { target: { kind: "post" } } })} />
+        </div>
+        <div className="mt-1">
+          {comments.map(c => (
+            <CommentItem key={c.id} comment={c} postId={post.id} />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/** Non-interactive comment bar shown only in the frozen exit copy, so the bar
+ *  slides off to the right with the surface on back (matches the live bar). */
+function PostComposerStatic() {
+  return (
+    <div
+      style={{ bottom: "calc(env(safe-area-inset-bottom) + 60px)" }}
+      className="fixed inset-x-0 z-40 bg-white px-4 py-2.5 shadow-[0_-6px_16px_-6px_rgba(0,0,0,0.08)]"
+    >
+      <div className="mx-auto flex max-w-[600px] items-center gap-2">
+        <img src={profilePhoto} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
+        <div className="flex-1 rounded-xl border border-gray-stroke px-3 py-2.5 text-[14px] text-gray-light">Add a comment…</div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────
 
 export default function PostDetail() {
   const navigate = useNavigate();
 
-  // Plays the reverse of the entrance animation before actually navigating
-  // away, so the page slides back out to the right instead of just vanishing.
-  const [isExiting, setIsExiting] = useState(false);
-  const pageRef = useRef<HTMLDivElement>(null);
-  const handleBack = useCallback(() => setIsExiting(true), []);
-  useSetNavBackHandler(handleBack);
-
-  useEffect(() => {
-    if (!isExiting) return;
-    const el = pageRef.current;
-    if (!el) { navigate(-1); return; }
-    const onAnimationEnd = () => navigate(-1);
-    el.addEventListener("animationend", onAnimationEnd, { once: true });
-    return () => el.removeEventListener("animationend", onAnimationEnd);
-  }, [isExiting, navigate]);
-
-  useSetLeftSidebar(
-    <div className="flex justify-end">
-      <button
-        onClick={handleBack}
-        aria-label="Go back"
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-dark transition-colors hover:bg-gray-50"
-      >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
-      </button>
-    </div>
-  );
+  // Framer push transition — mirrors the messages → conversation interaction
+  // exactly. Entrance: the whole surface (sticky header + content) slides in
+  // from the right (from the left when revealed via a back/POP). Back: hand a
+  // frozen copy of the surface to a persistent overlay and navigate at once, so
+  // the feed is revealed underneath as the post slides off — no pause-then-pop.
+  const navigationType = useNavigationType();
+  const { startExit } = usePageExit();
   useSetRightSidebar(<HomeRightSidebar />);
   const { postId } = useParams<{ postId: string }>();
   const location = useLocation();
@@ -810,6 +858,35 @@ export default function PostDetail() {
     typeof focusImage === "number" ? focusImage : null
   );
 
+  // Back: hand a frozen copy of the surface (+ its comment bar) to the
+  // persistent PageExit overlay and navigate immediately, so the outgoing post
+  // and the revealed feed animate in the same frame.
+  const handleBack = useCallback(() => {
+    if (post) {
+      startExit(
+        <>
+          <PostSurface post={post} comments={comments} onBack={() => {}} />
+          <PostComposerStatic />
+        </>
+      );
+    }
+    navigate(-1);
+  }, [post, comments, startExit, navigate]);
+  useSetNavBackHandler(handleBack);
+  useSetLeftSidebar(
+    <div className="flex justify-end">
+      <button
+        onClick={handleBack}
+        aria-label="Go back"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-dark transition-colors hover:bg-gray-50"
+      >
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+    </div>
+  );
+
   if (!post) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray-light">
@@ -837,42 +914,28 @@ export default function PostDetail() {
   };
 
   return (
-    <div ref={pageRef} className={isExiting ? "slide-out-page" : "slide-in-page"}>
-    {/* Post's own top bar — lives inside the sliding page so header + content
-        slide in as one piece. On mobile only (desktop uses the sidebars). */}
-    <PostHeaderBar onBack={handleBack} />
-    <motion.div initial={false}>
-      {/* Content — full width; mobile top padding clears the fixed PostHeaderBar
-          (desktop has no mobile header, so md:pt-0). */}
-      <div className="min-w-0 pb-36 pt-14 md:pt-0">
-        {/* Post — full width. Body/media/actions stack below the author header
-            (avatar + name + description), no left indent. */}
-        <div className="border-b border-gray-stroke pb-3">
-          <AuthorRow post={post} />
-          <p className="mt-3 whitespace-pre-wrap text-[15px] leading-[1.5] text-gray-dark">{post.body}</p>
-          <PostMedia post={post} onImageClick={post.type === "image" ? setLightboxIndex : undefined} />
-          <StatsRow post={post} onCommentFocus={() => navigate(`/reply/${post.id}`, { state: { target: { kind: "post" } } })} />
-        </div>
-
-        {/* Comments */}
-        <div className="mt-1">
-          {comments.map(c => (
-            <CommentItem key={c.id} comment={c} postId={post.id} />
-          ))}
-        </div>
-      </div>
+    <>
+    {/* Entrance: the whole surface slides in from the right (left on POP) as one
+        piece. Exit is handled by the PageExit overlay (see handleBack). */}
+    <motion.div
+      initial={navigationType === "POP" ? { x: "-100%" } : { x: "100%" }}
+      animate={{ x: 0 }}
+      transition={PUSH_TRANSITION}
+      className="min-h-[100dvh] bg-white"
+    >
+      <PostSurface post={post} comments={comments} onBack={handleBack} onImageClick={setLightboxIndex} />
     </motion.div>
 
-    {/* Comment input — portaled into the layout's stacking context (outside
-        this page's slide transform) so it stays viewport-anchored, sits ABOVE
-        the bottom nav (covering its shadow), and eases in with the page rather
-        than sliding + snapping with it. */}
+    {/* Comment input — portaled above the bottom nav (covering its shadow),
+        and slid IN FROM THE RIGHT in lockstep with the surface (not up from the
+        nav). On back it unmounts instantly and the frozen copy in the exit
+        overlay carries the slide-off. */}
     {createPortal(
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-        style={{ bottom: navHidden ? "env(safe-area-inset-bottom)" : "calc(env(safe-area-inset-bottom) + 61px)" }}
+        initial={navigationType === "POP" ? { x: "-100%" } : { x: "100%" }}
+        animate={{ x: 0 }}
+        transition={PUSH_TRANSITION}
+        style={{ bottom: navHidden ? "env(safe-area-inset-bottom)" : "calc(env(safe-area-inset-bottom) + 60px)" }}
         className="fixed inset-x-0 z-40 bg-white px-4 py-2.5 shadow-[0_-6px_16px_-6px_rgba(0,0,0,0.08)] transition-[bottom] duration-200 ease-out"
       >
         <div className="mx-auto flex max-w-[600px] items-center gap-2">
@@ -923,6 +986,6 @@ export default function PostDetail() {
         />
       )}
     </AnimatePresence>
-    </div>
+    </>
   );
 }
