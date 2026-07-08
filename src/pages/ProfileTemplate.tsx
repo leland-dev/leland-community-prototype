@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import ProfileV2, { COACH_CONFIGS } from "./ProfileV2";
 import customerPhoto from "../assets/profile photos/profile photo.png";
+import { useIsMobile } from "../hooks/useIsMobile";
 
 // Maps a /profile/{firstname-lastname} slug to a coach config id. A slug that
 // isn't a known coach renders the customer profile.
@@ -42,8 +43,10 @@ export default function ProfileTemplate() {
   const [customerFavorite, setCustomerFavorite] = useState(true);
   const [coachNote, setCoachNote] = useState(true);
   const [video, setVideo] = useState(true);
+  const [supercoach, setSupercoach] = useState(false);
+  const [offeringsTab, setOfferingsTab] = useState(false);
+  const [myProfile, setMyProfile] = useState(false);
   const coachId = initialCoachId ?? "samantha";
-  const mode = expert ? "coach" : "customer";
 
   // Identity (name + photo) is fixed per profile and stays constant across the
   // Expert toggle. Coaches come from their config; other slugs derive a name
@@ -63,13 +66,29 @@ export default function ProfileTemplate() {
     return () => document.removeEventListener("mousedown", onClick);
   }, [menuOpen]);
 
+  // Mirror BottomNav's hide-on-scroll so the admin button can drop down to fill
+  // the space when the bottom nav slides away (mobile only — no nav on desktop).
+  const isMobile = useIsMobile();
+  const [navHidden, setNavHidden] = useState(false);
+  const lastScrollY = useRef(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastScrollY.current;
+      if (y < 80) setNavHidden(false);
+      else if (delta > 6) setNavHidden(true);
+      else if (delta < -6) setNavHidden(false);
+      lastScrollY.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <>
-      {/* key on mode forces a clean remount when Expert flips, so ProfileV2's
-          per-mount state (and conditional hooks) stay consistent. The coach
-          sub-toggles are plain props, so they update live without remounting. */}
+      {/* No remount on Expert flip — ProfileV2 reconciles so the hero content
+          can animate (checkmark, reviews, coach block) as it shifts. */}
       <ProfileV2
-        key={mode}
         unified
         coach={expert}
         coachId={coachId}
@@ -78,10 +97,17 @@ export default function ProfileTemplate() {
         customerFavorite={customerFavorite}
         coachNote={coachNote}
         coachVideo={video}
+        supercoach={supercoach}
+        offeringsTab={offeringsTab}
+        ownProfile={myProfile}
       />
 
       {/* Admin tool */}
-      <div ref={menuRef} className="fixed bottom-24 right-4 z-40 md:bottom-6 md:right-6">
+      <div
+        ref={menuRef}
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-40 transition-transform duration-200 ease-out md:bottom-6 md:right-6"
+        style={{ transform: isMobile && navHidden ? "translateY(56px)" : "translateY(0)" }}
+      >
         <AnimatePresence>
           {menuOpen && (
             <motion.div
@@ -92,23 +118,26 @@ export default function ProfileTemplate() {
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
               <AdminToggle label="Expert" checked={expert} onChange={() => setExpert((v) => !v)} />
+              <AdminToggle label="My profile" checked={myProfile} onChange={() => setMyProfile((v) => !v)} />
               <div className="my-1 border-t border-gray-100" />
               {/* Coach-specific toggles stay visible but disabled when Expert is off */}
               <AdminToggle label="Customer favorite" checked={customerFavorite} onChange={() => setCustomerFavorite((v) => !v)} disabled={!expert} />
               <AdminToggle label="Coach note" checked={coachNote} onChange={() => setCoachNote((v) => !v)} disabled={!expert} />
               <AdminToggle label="Video" checked={video} onChange={() => setVideo((v) => !v)} disabled={!expert} />
+              <AdminToggle label="SuperCoach" checked={supercoach} onChange={() => setSupercoach((v) => !v)} disabled={!expert} />
+              <AdminToggle label="Offerings tab" checked={offeringsTab} onChange={() => setOfferingsTab((v) => !v)} disabled={!expert} />
             </motion.div>
           )}
         </AnimatePresence>
         <button
           onClick={() => setMenuOpen((o) => !o)}
           aria-label="Admin controls"
-          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white shadow-md transition-colors hover:bg-gray-50 md:border-0 md:bg-[#222222]/5 md:shadow-none md:hover:bg-[#222222]/[0.08]"
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-colors hover:bg-[#B1B1B1]/30"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="3" cy="8" r="1.5" fill="#707070" />
-            <circle cx="8" cy="8" r="1.5" fill="#707070" />
-            <circle cx="13" cy="8" r="1.5" fill="#707070" />
+            <circle cx="3" cy="8" r="1.5" fill="#222222" />
+            <circle cx="8" cy="8" r="1.5" fill="#222222" />
+            <circle cx="13" cy="8" r="1.5" fill="#222222" />
           </svg>
         </button>
       </div>

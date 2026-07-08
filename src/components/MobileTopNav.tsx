@@ -21,6 +21,9 @@ export default function MobileTopNav() {
   // On a post detail page the left slot becomes a Back button (returns the
   // user to wherever they came from) instead of the menu.
   const isPostDetail = location.pathname.startsWith("/post/");
+  // The profile template (/profile/:slug) also uses a Back button instead of
+  // the sidebar menu.
+  const isProfileTemplate = location.pathname.startsWith("/profile/");
   // In dark mode, override nav to #111111 only when the page uses the default (white) nav theme.
   // Pages that set their own bg (profile, dashboard) keep their custom color.
   const darkNav = darkMode && navTheme.bg === "white";
@@ -75,8 +78,8 @@ export default function MobileTopNav() {
             : navTheme.bg,
       }}
     >
-      {/* Left: menu — or Back button on a post detail page */}
-      {isPostDetail ? (
+      {/* Left: menu — or Back button on a post detail / profile template page */}
+      {isPostDetail || isProfileTemplate ? (
         <button
           onClick={() => (backHandler ? backHandler() : navigate(-1))}
           aria-label="Go back"

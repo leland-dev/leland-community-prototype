@@ -23,6 +23,7 @@ import pic10 from "../assets/profile photos/pic-10.png";
 import pic11 from "../assets/profile photos/pic-11.png";
 import mailIcon from "../assets/icons/mail.svg";
 import shareArrowIcon from "../assets/icons/share-arrow.svg";
+import shareArrowFilledIcon from "../assets/icons/share-arrow-filled.svg";
 import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
 import reportFlagIcon from "../assets/icons/report-flag.svg";
 import lockIcon from "../assets/icons/lock.svg";
@@ -37,6 +38,7 @@ import verifiedIcon from "../assets/icons/verified.svg";
 import shieldIcon from "../assets/icons/shield-light.svg";
 import airplaneIcon from "../assets/icons/airplane.svg";
 import calendarIcon from "../assets/icons/calendar.svg";
+import calendarPageIcon from "../assets/icons/calendar-page.svg";
 import chevronDownIcon from "../assets/icons/chevron-down.svg";
 import bookBookmarkIcon from "../assets/icons/book-bookmark.svg";
 import piggyBankIcon from "../assets/icons/Piggy bank, Coin.1.svg";
@@ -364,7 +366,7 @@ function CategorySubtitle({ photos, experts }: { photos: string[]; experts: stri
   );
 }
 
-export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, customerFavorite, coachNote, coachVideo }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean }) {
+export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean }) {
   const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
   const { dark: darkMode } = useDarkMode();
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
@@ -381,7 +383,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   const [showSupercoach, setShowSupercoach] = useState(false);
   // In the unified template, coaches use a tabbed layout (About first) instead
   // of the long scroll; this tracks the active tab.
-  const [coachTab, setCoachTab] = useState<"about" | "activity" | "likes">("about");
+  const [coachTab, setCoachTab] = useState<"about" | "offerings" | "activity" | "likes">("about");
   const [showCoverImage, setShowCoverImage] = useState(unified ? true : false);
   const [showGrayHeader, setShowGrayHeader] = useState(false);
   const [searchParams] = useSearchParams();
@@ -392,6 +394,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   const effCustomerFavorite = unified ? Boolean(customerFavorite) : showCustomerFavorite;
   const effCoachNote = unified ? Boolean(coachNote) : showCoachNote;
   const effCoachVideo = unified ? Boolean(coachVideo) : showCoachVideo;
+  const effShowSupercoach = unified ? Boolean(supercoach) : showSupercoach;
   // In the unified template the hero + top nav (cover image, round photo,
   // Follow/Message CTAs, nav theming) use the customer treatment for BOTH
   // coach and customer, so they function identically. Content logic below
@@ -416,56 +419,17 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
         : { bg: "#111111", light: true, hideWordmark: false, bgGradient: true, slideIn: !unified }
       : { bg: "white", light: false, hideWordmark: false }
   );
-  const [navDotsOpen, setNavDotsOpen] = useState(false);
-  const navDotsRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!navDotsOpen) return;
-    const handleClick = (e: MouseEvent) => {
-      if (navDotsRef.current && !navDotsRef.current.contains(e.target as Node)) {
-        setNavDotsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [navDotsOpen]);
   useSetNavRightSlot(
     heroCustomer
       ? useMemo(() => (
-          <div ref={navDotsRef} className="relative flex h-8 w-8 items-center justify-center">
-            <button
-              onClick={() => setNavDotsOpen((o) => !o)}
-              className="flex h-8 w-8 cursor-pointer items-center justify-center"
-            >
-              <img src={dotsHorizontalIcon} alt="More" className={`h-[30px] w-[30px] ${navScrolled ? "" : "brightness-0 invert"}`} />
-            </button>
-            <AnimatePresence>
-              {navDotsOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
-                >
-                  {[
-                    { icon: shareArrowIcon, label: "Share" },
-                    { icon: airplaneIcon, label: "Message" },
-                    { icon: reportFlagIcon, label: "Report" },
-                  ].map((item) => (
-                    <button
-                      key={item.label}
-                      onClick={() => setNavDotsOpen(false)}
-                      className="flex w-full items-center gap-2.5 px-4 py-2.5 text-[13px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
-                    >
-                      <img src={item.icon} alt="" className="h-[20px] w-[20px] shrink-0 brightness-0" />
-                      {item.label}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        ), [navDotsOpen, navScrolled])
+          <button
+            type="button"
+            aria-label="Share"
+            className="flex h-8 w-8 cursor-pointer items-center justify-center"
+          >
+            <img src={shareArrowFilledIcon} alt="Share" className={`h-[22px] w-[22px] ${navScrolled ? "brightness-0" : "brightness-0 invert"}`} />
+          </button>
+        ), [navScrolled])
       : null
   );
   const [customerTab, setCustomerTab] = useState<"about" | "likes" | "saved" | "more">(
@@ -478,7 +442,20 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   const [pastOpen, setPastOpen] = useState(false);
   const [sectionFilter, setSectionFilter] = useState("All");
   const [offeringsType, setOfferingsType] = useState("All");
-  const [viewingOwnProfile, setViewingOwnProfile] = useState(unified ? false : isCustomerProfile);
+  const [viewingOwnProfileState, setViewingOwnProfileState] = useState(unified ? false : isCustomerProfile);
+  // In the unified template "My profile" is driven by the wrapper's admin toggle.
+  const viewingOwnProfile = unified ? Boolean(ownProfile) : viewingOwnProfileState;
+  // "Offerings tab" (coach + unified only) promotes Offerings to its own tab.
+  const showOfferingsTab = unified && !isCustomerProfile && Boolean(offeringsTab);
+  // Where the coach's Offerings section renders vs the rest (Events → Reviews):
+  // scroll layout shows both; the template splits Offerings into its own tab
+  // when the toggle is on, otherwise Offerings stays at the top of About.
+  const showOfferingsSection = !unified || (showOfferingsTab ? coachTab === "offerings" : coachTab === "about");
+  const showRestSections = !unified || coachTab === "about";
+  // If the Offerings tab is turned off while it's the active tab, fall back to About.
+  useEffect(() => {
+    if (!showOfferingsTab && coachTab === "offerings") setCoachTab("about");
+  }, [showOfferingsTab, coachTab]);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [eventsCategoryOpen, setEventsCategoryOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -502,6 +479,20 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   const groupRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const navScrollRef = useRef<HTMLDivElement>(null);
   const customerTabStripRef = useRef<HTMLDivElement>(null);
+  const tabAnchorRef = useRef<HTMLDivElement>(null);
+  // On tab switch, scroll so the (sticky) tab strip pins just under the 56px top
+  // nav, showing the new tab's content from the top. Measures a NON-sticky
+  // anchor placed right above the strip — the strip's own rect is unreliable
+  // once it's pinned (its top is always 56, so the target would equal the
+  // current scroll = no-op). rAF lets the new tab content commit first.
+  const scrollTabsIntoView = () => {
+    requestAnimationFrame(() => {
+      const el = tabAnchorRef.current;
+      if (!el) return;
+      const y = el.getBoundingClientRect().top + window.scrollY - 56;
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    });
+  };
 
   const setSectionRef = useCallback(
     (id: string) => (el: HTMLHeadingElement | null) => {
@@ -639,7 +630,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === "o") setViewingOwnProfile(p => !p);
+      if (e.key === "o") setViewingOwnProfileState(p => !p);
       if (e.key === "i") setShowCoverImage(p => !p);
       if (e.key === "g") setShowGrayHeader(p => !p);
       if (!isCustomerProfile) {
@@ -668,8 +659,19 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
         <img src={wreathSmallImg} alt="" className="w-8" />
       </div>
       <div className="min-w-0">
-        <p className="text-[14px] font-medium text-gray-dark">Customer Favorite</p>
+        <p className="text-[14px] font-semibold text-gray-dark">Customer Favorite</p>
         <p className="text-[14px] leading-snug text-[#707070]">In the top 10% of MBA experts on Leland</p>
+      </div>
+    </div>
+  );
+  const supercoachRow = (
+    <div className="flex gap-4 py-4">
+      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center text-[26px] leading-none">
+        🏆
+      </div>
+      <div className="min-w-0">
+        <p className="text-[14px] font-semibold text-gray-dark">Super Coach</p>
+        <p className="text-[14px] leading-snug text-[#707070]">Recognized for consistently outstanding coaching outcomes.</p>
       </div>
     </div>
   );
@@ -742,6 +744,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
         <AnimatePresence>
           {stickyNavVisible && !isCustomerProfile && !unified && (
             <motion.div
+              key="sticky-coach"
               initial={{ y: "-100%" }}
               animate={{ y: 0 }}
               exit={{ y: "-100%" }}
@@ -795,6 +798,68 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                     </button>
                   </div>
                 </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Unified template — same sticky bar for coach & customer (no pivot
+              tabs). CTA is "Free intro call" for coaches, "Follow" for customers. */}
+          {stickyNavVisible && unified && (
+            <motion.div
+              key="sticky-unified"
+              initial={{ y: "-100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-100%" }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+              className="fixed top-0 left-0 right-0 z-30 bg-white"
+            >
+              {/* Clicking anywhere in the bar (except the CTA) scrolls to top */}
+              <div
+                className="mx-auto flex h-14 max-w-[1280px] cursor-pointer items-center gap-4 px-4"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              >
+                {/* Left: photo + name (+ rate for coaches) */}
+                <div className="flex min-w-0 shrink items-center gap-2.5">
+                  <img
+                    src={profilePhoto}
+                    alt={profileName}
+                    className="h-10 w-10 shrink-0 rounded-full object-cover"
+                  />
+                  <div className="flex min-w-0 flex-col text-[14px] leading-tight">
+                    <span className="truncate text-[16px] font-medium text-gray-dark md:text-[14px]">{profileName}</span>
+                    {!isCustomerProfile && <span className="text-[#707070]">$150/hr</span>}
+                  </div>
+                </div>
+
+                {/* Spacer */}
+                <div className="min-w-0 flex-1" />
+
+                {/* Right: CTA — stops propagation so it doesn't scroll to top.
+                    Own profile → gray Edit; coach → Free intro call; else Follow. */}
+                {viewingOwnProfile ? (
+                  <Link
+                    to="/settings?tab=account"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-[#222222]/5 px-[18px] py-2.5 text-[14px] font-medium text-gray-dark no-underline transition-colors hover:bg-[#222222]/[0.08]"
+                  >
+                    <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
+                    Edit
+                  </Link>
+                ) : isCustomerProfile ? (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setIsFollowing(!isFollowing); }}
+                    className="shrink-0 cursor-pointer rounded-full bg-[#222222]/5 px-[18px] py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                  >
+                    {isFollowing ? "Following" : "Follow"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="shrink-0 cursor-pointer rounded-full bg-[#FFD96F] px-[18px] py-2.5 text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90"
+                  >
+                    Free intro call
+                  </button>
+                )}
               </div>
             </motion.div>
           )}
@@ -1113,8 +1178,23 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               category is selected). */}
           <div className={`flex items-center ${unified || sectionFilter === "All" ? "gap-2 mb-2" : "gap-1 mb-1"}`}>
             <h1 className={`font-medium text-gray-dark ${unified || sectionFilter === "All" ? "font-serif text-[26px]" : "text-[16px]"}`}>{profileName}</h1>
-            {!isCustomerProfile && <img src={verifiedIcon} alt="Verified" className="mt-[2px] h-[16px] w-[16px]" />}
-            {showSupercoach && !isCustomerProfile && (
+            <AnimatePresence>
+              {!isCustomerProfile && (
+                <motion.img
+                  key="verified"
+                  src={verifiedIcon}
+                  alt="Verified"
+                  className="mt-[2px] h-[19px] w-[19px]"
+                  initial={unified ? { opacity: 0, scale: 0.4 } : false}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.4 }}
+                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                />
+              )}
+            </AnimatePresence>
+            {/* Inline badge — non-unified only; the template shows Super Coach as
+                a row in the About tab instead. */}
+            {effShowSupercoach && !isCustomerProfile && !unified && (
               <>
                 <span className="ml-1 text-[16px] text-[#999999]">·</span>
                 <span className="text-[16px] text-[#707070]"><span className="text-[14px]">🏆</span> Supercoach</span>
@@ -1191,49 +1271,68 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
                 </>
               )}
-              {/* Reviews — coach only */}
-              {!isCustomerProfile && (<>
-              <div
-                className="flex cursor-pointer flex-col md:gap-[2px] transition-opacity hover:opacity-70"
-                onClick={() => scrollToSection("reviews")}
+              {/* Reviews — coach only. popLayout pops it out of flow on exit so
+                  the trailing stats (which carry `layout`) glide to fill. */}
+              <AnimatePresence mode="popLayout">
+              {!isCustomerProfile && (
+              <motion.div
+                key="reviews"
+                layout
+                initial={unified ? { opacity: 0, scale: 0.85 } : false}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85 }}
+                transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+                className="flex items-center gap-x-6"
               >
-                <div className="flex items-center gap-1">
-                  <span className="text-[16px] font-semibold leading-none text-gray-dark md:text-[18px]">4.9</span>
-                  <img src={starIcon} alt="" className="h-[16px] w-[16px]" />
+                <div
+                  className="flex cursor-pointer flex-col md:gap-[2px] transition-opacity hover:opacity-70"
+                  onClick={() => scrollToSection("reviews")}
+                >
+                  <div className="flex items-center gap-1">
+                    <span className="text-[16px] font-semibold leading-none text-gray-dark md:text-[18px]">4.9</span>
+                    <img src={starIcon} alt="" className="h-[16px] w-[16px]" />
+                  </div>
+                  <span className="text-[14px] leading-tight text-[#707070]">52 Reviews</span>
                 </div>
-                <span className="text-[14px] leading-tight text-[#707070]">52 Reviews</span>
-              </div>
-              <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
-              </>)}
+                <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
+              </motion.div>
+              )}
+              </AnimatePresence>
               {/* Minutes coached */}
-              <div className="flex flex-col md:gap-[2px]">
+              <motion.div layout className="flex flex-col md:gap-[2px]">
                 <span className="text-[16px] font-semibold leading-none text-gray-dark md:text-[18px]">6.6k</span>
                 <span className="text-[14px] leading-tight text-[#707070]">Min coached</span>
-              </div>
-              <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
+              </motion.div>
+              <motion.div layout className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
               {/* Followers */}
-              <div className="flex flex-col md:gap-[2px]">
+              <motion.div layout className="flex flex-col md:gap-[2px]">
                 <span className="text-[16px] font-semibold leading-none text-gray-dark md:text-[18px]">84</span>
                 <span className="text-[14px] leading-tight text-[#707070]">Followers</span>
-              </div>
-              <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
+              </motion.div>
+              <motion.div layout className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
               {/* Likes */}
-              <div className="flex flex-col md:gap-[2px]">
+              <motion.div layout className="flex flex-col md:gap-[2px]">
                 <span className="text-[16px] font-semibold leading-none text-gray-dark md:text-[18px]">1.6k</span>
                 <span className="text-[14px] leading-tight text-[#707070]">Likes</span>
-              </div>
-              <div className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
+              </motion.div>
+              <motion.div layout className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
               {/* Impressions — desktop only */}
-              <div
+              <motion.div
+                layout
                 className="hidden cursor-pointer flex-col gap-[2px] transition-opacity hover:opacity-70 md:flex"
                 onClick={() => scrollToSection("activity")}
               >
                 <span className="text-[18px] font-semibold leading-none text-gray-dark">8.5k</span>
                 <span className="text-[14px] leading-tight text-[#707070]">Impressions</span>
-              </div>
+              </motion.div>
             </div>
 
           </div>{/* end name → stats wrapper */}
+
+          {/* Sticky-nav sentinel — unified template triggers the bar once the
+              hero (name/stats) scrolls off, so the bar is already showing by the
+              time the tab bar pins (no gap, bar stays put on tab switches). */}
+          {unified && <div ref={heroSentinelRef} />}
 
           {/* Customer Favorite — mobile banner (hidden for now) */}
 
@@ -1242,12 +1341,23 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
 
           {/* Mobile sidebar content — coach profile: Availability, CTAs, Customer Favorite, Coach note, Video, Questions.
               In the unified template this block is promoted above the tab bar on
-              all widths (the coach CTA sidebar is dropped in favor of it). */}
+              all widths (the coach CTA sidebar is dropped in favor of it). Height
+              animates on the template so everything below slides as it appears. */}
+          <AnimatePresence initial={false}>
           {!isCustomerProfile && !viewingOwnProfile && (
-            <div className={`mt-4 flex flex-col ${unified ? "" : "md:hidden"}`}>
+            <motion.div
+              key="coach-info"
+              initial={unified ? { opacity: 0, height: 0 } : false}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+              className="overflow-hidden"
+            >
+            <div className={`${unified ? "mt-3" : "mt-4"} flex flex-col ${unified ? "" : "md:hidden"}`}>
               {/* CTA buttons */}
               <div className="flex flex-col gap-2">
-                <button className="w-full cursor-pointer rounded-full bg-leland-brand-primary px-4 py-[14px] text-[15px] font-medium text-[#111111] transition-colors hover:bg-leland-brand-primary/90">
+                <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-leland-brand-primary px-4 py-[14px] text-[15px] font-medium text-[#111111] transition-colors hover:bg-leland-brand-primary/90">
+                  {unified && <img src={calendarPageIcon} alt="" className="h-5 w-5" style={{ filter: "none" }} />}
                   Schedule free intro call
                 </button>
                 {/* Book a session — hidden in the unified template for now */}
@@ -1262,20 +1372,32 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   template Customer Favorite / Coach note / Video move to the top
                   of the About tab, so only Availability (+ Questions on
                   non-unified) stay in the hero. */}
-              <div className="mt-2 flex flex-col">
+              <div className={`${unified ? "mt-3" : "mt-2"} flex flex-col`}>
                 {/* Customer Favorite */}
                 {!unified && effCustomerFavorite && customerFavoriteRow}
 
-                {/* Availability */}
-                <div className="flex gap-4 py-4">
-                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5] icon-tile">
-                    <img src={calendarIcon} alt="" className="h-5 w-5" />
+                {/* Availability — unified template shows a compact, centered line
+                    directly under the CTA (no response-time, no icon tile) with a
+                    pulsing "live" dot. */}
+                {unified ? (
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span className="relative flex h-[7px] w-[7px] shrink-0">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#80ACED] opacity-75" />
+                      <span className="relative inline-flex h-[7px] w-[7px] rounded-full bg-[#80ACED]" />
+                    </span>
+                    <p className="text-[14px] font-medium text-[#4C4C4C]">Available today at 5:30 PM</p>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[14px] font-medium text-gray-dark">Available today at 5:30 PM</p>
-                    <p className="text-[14px] leading-snug text-[#707070]">Usually responds within 12h</p>
+                ) : (
+                  <div className="flex gap-4 py-4">
+                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5] icon-tile">
+                      <img src={calendarIcon} alt="" className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-medium text-gray-dark">Available today at 5:30 PM</p>
+                      <p className="text-[14px] leading-snug text-[#707070]">Usually responds within 12h</p>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Coach note */}
                 {!unified && effCoachNote && coachNoteRow}
@@ -1299,10 +1421,13 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                 {!unified && effCoachVideo && coachVideoRow}
               </div>
             </div>
+            </motion.div>
           )}
+          </AnimatePresence>
 
-          {/* Mobile inline CTA — coach viewing own profile */}
-          {!isCustomerProfile && viewingOwnProfile && (
+          {/* Mobile inline CTA — coach viewing own profile. Hidden in the unified
+              template, which relies on the header Edit profile button instead. */}
+          {!isCustomerProfile && viewingOwnProfile && !unified && (
             <div className="mt-3 md:hidden">
               <Link to="/settings?tab=account" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                 <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
@@ -1337,45 +1462,61 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
           )}
 
 
-          {/* Hero sentinel for sticky nav detection */}
-          <div ref={heroSentinelRef} />
+          {/* Hero sentinel for sticky nav detection (non-unified position). */}
+          {!unified && <div ref={heroSentinelRef} />}
 
-          {/* Unified template — coach tab bar (About first, then Activity, Likes) */}
+          {/* Unified template — coach tab bar. Offerings sits between About and
+              Activity, but only when the "Offerings tab" admin toggle is on. */}
           {!isCustomerProfile && unified && (
-            <div className="sticky top-14 z-10 -mx-4 mt-4 flex border-b border-gray-stroke bg-white md:top-0">
-              {(["about", "activity", "likes"] as const).map((tab) => (
+            <>
+            <div ref={tabAnchorRef} aria-hidden className="mt-3 h-0" />
+            <div className="sticky top-14 z-10 -mx-4 flex border-b border-gray-stroke bg-white md:top-0">
+              {(showOfferingsTab
+                ? (["about", "offerings", "activity", "likes"] as const)
+                : (["about", "activity", "likes"] as const)
+              ).map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setCoachTab(tab)}
+                  onClick={() => { setCoachTab(tab); scrollTabsIntoView(); }}
                   className={`flex-1 cursor-pointer py-3 text-center transition-colors ${
                     coachTab === tab
                       ? `border-b-2 text-gray-dark ${darkMode ? "border-white" : "border-gray-dark"}`
                       : "border-b-2 border-transparent text-gray-light hover:text-gray-dark"
                   }`}
                 >
-                  <span className={`text-[16px] ${coachTab === tab ? "font-semibold" : "font-medium"}`}>
-                    {tab === "about" ? "About" : tab === "activity" ? "Activity" : "Likes"}
+                  <span className="text-[16px] font-medium">
+                    {tab === "about" ? "About" : tab === "offerings" ? "Offerings" : tab === "activity" ? "Activity" : "Likes"}
                   </span>
                 </button>
               ))}
             </div>
+            </>
           )}
 
           {/* Coach detail sections (Offerings → Reviews). In the unified template
-              these live inside the "About" tab; otherwise they scroll inline. */}
-          {!isCustomerProfile && (!unified || coachTab === "about") && (<>
-          {/* Unified template — Customer Favorite / Coach note / Video sit at the
-              top of the About tab (moved out of the hero). */}
-          {unified && (effCustomerFavorite || effCoachNote || effCoachVideo) && (
+              these live inside the "About" tab (Offerings optionally in its own
+              tab); otherwise they scroll inline. */}
+          {!isCustomerProfile && (showOfferingsSection || showRestSections) && (<>
+          {/* Unified template — Customer Favorite / Super Coach / Coach note /
+              Video sit at the top of the About tab (moved out of the hero). */}
+          {unified && coachTab === "about" && (effCustomerFavorite || effShowSupercoach || effCoachNote || effCoachVideo) && (
             <div className="mt-2 flex flex-col">
               {effCustomerFavorite && customerFavoriteRow}
+              {effShowSupercoach && supercoachRow}
               {effCoachNote && coachNoteRow}
               {effCoachVideo && coachVideoRow}
             </div>
           )}
-          {/* ── Offerings group: Offerings + Free Events + Resources ── */}
+          {/* ── Offerings section (its own tab when "Offerings tab" is on) ── */}
+          {showOfferingsSection && (
           <div ref={setGroupRef("offerings")} data-group="offerings">
-            <div className="my-[16px] border-t border-gray-200 md:my-[36px]" />
+            {/* In its own tab the leading divider would sit awkwardly under the
+                tab bar — use plain top spacing there instead of a border. */}
+            {showOfferingsTab && coachTab === "offerings" ? (
+              <div className="mt-4" />
+            ) : (
+              <div className="my-[16px] border-t border-gray-200 md:my-[36px]" />
+            )}
 
                 {inlineCategory ? (
                   /* Inline category variant: "Offerings for {category}" */
@@ -1541,7 +1682,11 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                     <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
                   </div>
                 </div>
+          </div>
+          )}
 
+          {/* ── Rest of the coach detail (Events → Reviews) — lives in the About tab ── */}
+          {showRestSections && (<>
             {/* Events */}
             <div className="my-[36px] border-t border-gray-200" />
             {inlineCategory ? (
@@ -1628,8 +1773,6 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               See 2 more
               <img src={chevronDownIcon} alt="" className="h-[16px] w-[16px]" />
             </button>
-
-          </div>
 
           {/* ── Activity group — omitted in the unified template's About tab ── */}
           {!unified && (
@@ -1827,6 +1970,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             </button>
           </div>
           </>)}
+          </>)}
 
           {/* Unified template — coach Activity tab (feed of the coach's posts) */}
           {!isCustomerProfile && unified && coachTab === "activity" && (
@@ -1855,19 +1999,20 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
           {/* Customer profile tabs */}
           {isCustomerProfile && (
             <>
-                <div ref={customerTabStripRef} className="sticky top-14 z-10 -mx-4 mt-2 flex border-b border-gray-stroke bg-white md:top-0">
+                {unified && <div ref={tabAnchorRef} aria-hidden className="mt-2 h-0" />}
+                <div ref={customerTabStripRef} className={`sticky top-14 z-10 -mx-4 ${unified ? "" : "mt-2"} flex border-b border-gray-stroke bg-white md:top-0`}>
                   {(viewingOwnProfile ? ["about", "more", "saved", "likes"] as const : ["about", "more", "likes"] as const).map((tab) => (
                     <button
                       key={tab}
                       data-tab={tab}
-                      onClick={() => setCustomerTab(tab)}
+                      onClick={() => { setCustomerTab(tab); if (unified) scrollTabsIntoView(); }}
                       className={`flex-1 cursor-pointer py-3 text-center transition-colors ${
                         customerTab === tab
                           ? `border-b-2 text-gray-dark ${darkMode ? "border-white" : "border-gray-dark"}`
                           : "border-b-2 border-transparent text-gray-light hover:text-gray-dark"
                       }`}
                     >
-                      <span className={`text-[16px] ${customerTab === tab ? "font-semibold" : "font-medium"}`}>{tab === "about" ? "Activity" : tab === "likes" ? "Likes" : tab === "saved" ? "Saved" : "About"}</span>
+                      <span className={`text-[16px] ${customerTab === tab ? (unified ? "font-medium" : "font-semibold") : "font-medium"}`}>{tab === "about" ? "Activity" : tab === "likes" ? "Likes" : tab === "saved" ? "Saved" : "About"}</span>
                     </button>
                   ))}
                 </div>
@@ -2140,8 +2285,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                 <div className="relative">
                   <input
                     type="checkbox"
-                    checked={viewingOwnProfile}
-                    onChange={() => setViewingOwnProfile(!viewingOwnProfile)}
+                    checked={viewingOwnProfileState}
+                    onChange={() => setViewingOwnProfileState(!viewingOwnProfileState)}
                     className="peer sr-only"
                   />
                   <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
