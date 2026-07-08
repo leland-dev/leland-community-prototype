@@ -462,7 +462,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   // when no longer viewing own profile), fall back to About.
   useEffect(() => {
     if (!showOfferingsTab && coachTab === "offerings") setCoachTab("about");
-    if (!viewingOwnProfile && coachTab === "saved") setCoachTab("about");
+    if (!viewingOwnProfile && (coachTab === "saved" || coachTab === "likes")) setCoachTab("about");
   }, [showOfferingsTab, viewingOwnProfile, coachTab]);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [eventsCategoryOpen, setEventsCategoryOpen] = useState(false);
@@ -1519,9 +1519,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                 "about" as const,
                 ...(showOfferingsTab ? ["offerings" as const] : []),
                 "activity" as const,
-                // Saved appears only when viewing your own profile, like the customer view.
-                ...(viewingOwnProfile ? ["saved" as const] : []),
-                "likes" as const,
+                // Saved + Likes appear only when viewing your own profile.
+                ...(viewingOwnProfile ? (["saved", "likes"] as const) : []),
               ]).map((tab) => (
                 <button
                   key={tab}
@@ -2066,7 +2065,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             <>
                 {unified && <div ref={tabAnchorRef} aria-hidden className="mt-2 h-0" />}
                 <div ref={customerTabStripRef} className={`sticky top-14 z-10 -mx-4 ${unified ? "" : "mt-2"} flex border-b border-gray-stroke bg-white md:top-0`}>
-                  {(viewingOwnProfile ? ["about", "more", "saved", "likes"] as const : ["about", "more", "likes"] as const).map((tab) => (
+                  {(viewingOwnProfile ? ["about", "more", "saved", "likes"] as const : unified ? ["about", "more"] as const : ["about", "more", "likes"] as const).map((tab) => (
                     <button
                       key={tab}
                       data-tab={tab}
