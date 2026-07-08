@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import moreIcon from "../assets/icons/nav-icons/more-active.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import logoIcon from "../assets/logos/leland-logo-split/Icon.svg";
+import logoWordmark from "../assets/logos/leland-logo-split/Wordmark.svg";
 import { useNavTheme, useNavRightSlot, useNavBackHandler } from "./NavThemeContext";
 import { useMobileSidebar } from "./MobileSidebarContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
@@ -24,6 +25,7 @@ export default function MobileTopNav() {
   // Pages that set their own bg (profile, dashboard) keep their custom color.
   const darkNav = darkMode && navTheme.bg === "white";
   const isLight = darkNav || navTheme.light;
+  const showWordmark = !navTheme.hideWordmark;
 
   useEffect(() => {
     const onScroll = () => {
@@ -98,8 +100,7 @@ export default function MobileTopNav() {
         </button>
       )}
 
-      {/* Center: just the Leland logomark — no wordmark, so nothing animates
-          in/out when the nav mounts (e.g. when the feed is revealed on back).
+      {/* Center: Leland icon + wordmark. Wordmark animates away on scroll.
           If already on the homepage, tapping scrolls to top instead of navigating. */}
       <button
         onClick={() => {
@@ -109,13 +110,26 @@ export default function MobileTopNav() {
             navigate("/");
           }
         }}
-        className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center"
+        className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-[6px]"
       >
         <img
           src={logoIcon}
           alt="Leland"
           className={`h-[23px] w-auto ${iconFilter}`}
         />
+        {showWordmark && (
+          <motion.img
+            src={logoWordmark}
+            alt=""
+            className={`h-[20px] w-auto ${iconFilter}`}
+            animate={{
+              opacity: scrolled ? 0 : 1,
+              width: scrolled ? 0 : "auto",
+              marginLeft: scrolled ? 0 : undefined,
+            }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+          />
+        )}
       </button>
 
       {/* Right: custom slot or default profile photo */}
