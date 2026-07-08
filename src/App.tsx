@@ -44,6 +44,7 @@ import ConversationDetail from "./pages/ConversationDetail";
 import ConversationRelationship from "./pages/ConversationRelationship";
 import Profile from "./pages/Profile";
 import ProfileV2 from "./pages/ProfileV2";
+import ProfileTemplate from "./pages/ProfileTemplate";
 import CoachAgent from "./pages/CoachAgent";
 import CoachAgentEdit from "./pages/CoachAgentEdit";
 import Group from "./pages/Group";
@@ -106,6 +107,7 @@ export default function App() {
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
         <Route path="/profile-v2" element={<ProfileV2 />} />
+        <Route path="/profile/:slug" element={<ProfileTemplate />} />
         <Route path="/coach-profile" element={<ProfileV2 coach coachId="samantha" />} />
         <Route path="/coach-profile-john" element={<ProfileV2 coach coachId="john" />} />
         <Route path="/agent/:agentSlug" element={<CoachAgent />} />
