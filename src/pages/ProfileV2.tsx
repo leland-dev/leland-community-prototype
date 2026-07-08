@@ -1342,12 +1342,14 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               </motion.div>
               )}
               </AnimatePresence>
-              {/* Minutes coached */}
+              {/* Minutes coached — hidden on the template's customer (Expert off) view */}
+              {(!unified || !isCustomerProfile) && (<>
               <motion.div layout className="flex flex-col md:gap-[2px]">
                 <span className="text-[16px] font-semibold leading-none text-gray-dark md:text-[18px]">6.6k</span>
-                <span className="text-[14px] leading-tight text-[#707070]">Min coached</span>
+                <span className="text-[14px] leading-tight text-[#707070]">{unified && !isCustomerProfile ? "Expert mins" : "Min coached"}</span>
               </motion.div>
               <motion.div layout className="hidden h-[24px] w-px shrink-0 bg-gray-200 md:block" />
+              </>)}
               {/* Followers */}
               <motion.div layout className="flex flex-col md:gap-[2px]">
                 <span className="text-[16px] font-semibold leading-none text-gray-dark md:text-[18px]">84</span>
