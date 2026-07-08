@@ -2084,7 +2084,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                 </div>
 
               <div className="mt-3">
-                {(viewingOwnProfile ? customerTab === "about" : true) && (
+                {customerTab === "about" && (
                   <div className="divide-y divide-gray-stroke/50">
                     {customerPosts.map((post) => (
                       <FeedPost
@@ -2124,7 +2124,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   )
                 )}
 
-                {viewingOwnProfile && customerTab === "more" && (
+                {customerTab === "more" && (
                   <div className="flex flex-col gap-8">
                     {/* About */}
                     <section>
@@ -2136,16 +2136,19 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                           Outside of work, I'm passionate about mentoring aspiring PMs and helping career switchers break into tech. I also run a small book club focused on product strategy and organizational design.
                         </p>
                       </div>
-                      <div className="mt-4 flex items-center justify-between">
-                        <LinkButton size="md" variant="secondary" href="/settings?tab=account">
-                          <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
-                          Edit bio
-                        </LinkButton>
-                        <div className="flex items-center gap-1.5">
-                          <img src={eyeClosedIcon} alt="" className="h-[16px] w-[16px] shrink-0 brightness-0 opacity-45" />
-                          <span className="text-[14px] text-gray-light">Visible to experts you work with</span>
+                      {/* Edit bio + visibility — only when viewing your own profile */}
+                      {viewingOwnProfile && (
+                        <div className="mt-4 flex items-center justify-between">
+                          <LinkButton size="md" variant="secondary" href="/settings?tab=account">
+                            <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
+                            Edit bio
+                          </LinkButton>
+                          <div className="flex items-center gap-1.5">
+                            <img src={eyeClosedIcon} alt="" className="h-[16px] w-[16px] shrink-0 brightness-0 opacity-45" />
+                            <span className="text-[14px] text-gray-light">Visible to experts you work with</span>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </section>
 
                     {/* Groups */}
