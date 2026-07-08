@@ -835,7 +835,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   />
                   <div className="flex min-w-0 flex-col text-[14px] leading-tight">
                     <span className="truncate text-[16px] font-medium text-gray-dark md:text-[14px]">{profileName}</span>
-                    {!isCustomerProfile && <span className="text-[#707070]">$150/hr</span>}
+                    {!isCustomerProfile && <span className="truncate text-[#707070]">Available today</span>}
                   </div>
                 </div>
 
