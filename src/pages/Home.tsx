@@ -3,6 +3,7 @@ import { Button } from "../components/Button";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { nameToSlug } from "../lib/profileSlug";
 import { Image as ImageIcon } from "lucide-react";
 import { useVersion } from "../contexts/VersionContext";
 import { useBookmarks } from "../contexts/BookmarksContext";
@@ -1125,7 +1126,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
             group announcements (no groupPoster) still read as the group. */}
         <div className="flex min-w-0 items-center gap-2">
           <Link
-            to={groupPoster ? "/profile-v2?type=customer" : isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `${verified ? "/coach-profile" : "/profile-v2"}`}
+            to={groupPoster ? `/profile/${nameToSlug(groupPoster.name)}` : isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `/profile/${nameToSlug(author)}`}
             onClick={(e) => e.stopPropagation()}
             className="cursor-pointer truncate text-[15px] leading-tight font-medium text-gray-dark"
           >{groupPoster ? groupPoster.name : author}</Link>
@@ -2168,7 +2169,7 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
         onClick={(e) => {
           e.stopPropagation();
           if (isGroupPost) navigate(`/groups/${post.groupId ?? "ai-bp-apr-26"}`);
-          else if (!isEvent) navigate(`${post.verified ? "/coach-profile" : "/profile-v2"}`);
+          else if (!isEvent) navigate(`/profile/${nameToSlug(post.groupPoster?.name ?? post.author)}`);
         }}
       >
         {isGroupPost ? (

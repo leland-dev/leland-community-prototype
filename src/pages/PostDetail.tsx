@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 
-import { useParams, useNavigate, useLocation, useNavigationType } from "react-router-dom";
+import { useParams, useNavigate, useLocation, useNavigationType, Link } from "react-router-dom";
+import { nameToSlug } from "../lib/profileSlug";
 import { motion, AnimatePresence } from "motion/react";
 
 import { useSetRightSidebar } from "../components/RightSidebarContext";
@@ -194,11 +195,16 @@ function AuthorRow({ post }: { post: Post }) {
   const avatarSrc = gp?.avatar ?? post.avatar;
   const displayHeadline = gp?.headline ?? post.headline;
   const displayTime = profileBarMode === 3 ? "Aug 12" : post.time;
+  // Pure group announcements point at the group; people (incl. group posters)
+  // link to their profile template.
+  const profileTo = post.isGroupPost && !gp
+    ? `/groups/${post.groupId ?? "ai-bp-apr-26"}`
+    : `/profile/${nameToSlug(name)}`;
   return (
     // Minimal mode is a single name line, so center it against the avatar; the
     // title modes are two lines, so they top-align.
     <div className={`flex gap-3 ${profileBarMode === 1 ? "items-center" : "items-start"}`}>
-      <div className="relative shrink-0">
+      <Link to={profileTo} className="relative block shrink-0">
         {avatarSrc ? (
           <img
             src={avatarSrc}
@@ -222,10 +228,10 @@ function AuthorRow({ post }: { post: Post }) {
             {post.author.charAt(0)}
           </div>
         ) : null}
-      </div>
+      </Link>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-[15px] font-medium leading-tight text-gray-dark">{name}</span>
+          <Link to={profileTo} className="text-[15px] font-medium leading-tight text-gray-dark hover:underline">{name}</Link>
           {post.verified ? <img src={verifiedIconSrc} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
           {profileBarMode === 1 && post.companyLogo ? (
             <img src={post.companyLogo} alt="" className="h-[18px] w-[18px] shrink-0 rounded-[4px] object-contain" />

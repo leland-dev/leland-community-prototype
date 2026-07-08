@@ -24,6 +24,8 @@ import pic11 from "../assets/profile photos/pic-11.png";
 import mailIcon from "../assets/icons/mail.svg";
 import shareArrowIcon from "../assets/icons/share-arrow.svg";
 import shareArrowFilledIcon from "../assets/icons/share-arrow-filled.svg";
+import logoIcon from "../assets/logos/leland-logo-split/Icon.svg";
+import logoWordmark from "../assets/logos/leland-logo-split/Wordmark.svg";
 import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
 import reportFlagIcon from "../assets/icons/report-flag.svg";
 import lockIcon from "../assets/icons/lock.svg";
@@ -366,7 +368,7 @@ function CategorySubtitle({ photos, experts }: { photos: string[]; experts: stri
   );
 }
 
-export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean }) {
+export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, onBack }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; onBack?: () => void }) {
   const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
   const { dark: darkMode } = useDarkMode();
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
@@ -383,7 +385,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   const [showSupercoach, setShowSupercoach] = useState(false);
   // In the unified template, coaches use a tabbed layout (About first) instead
   // of the long scroll; this tracks the active tab.
-  const [coachTab, setCoachTab] = useState<"about" | "offerings" | "activity" | "likes">("about");
+  const [coachTab, setCoachTab] = useState<"about" | "offerings" | "activity" | "saved" | "likes">("about");
   const [showCoverImage, setShowCoverImage] = useState(unified ? true : false);
   const [showGrayHeader, setShowGrayHeader] = useState(false);
   const [searchParams] = useSearchParams();
@@ -402,11 +404,15 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   const heroCustomer = isCustomerProfile || unified;
   const { savedPosts } = useBookmarks();
   const [navScrolled, setNavScrolled] = useState(false);
+  // Small-threshold scroll flag that drives the wordmark animating away, like
+  // the shared MobileTopNav (independent of the cover-based navScrolled).
+  const [navWordmarkHidden, setNavWordmarkHidden] = useState(false);
   useEffect(() => {
     if (!heroCustomer) return;
     const onScroll = () => {
       // Switch to white bg once scrolled past the cover image area
       setNavScrolled(window.scrollY > window.innerHeight * 0.2 - 56);
+      setNavWordmarkHidden(window.scrollY > 1);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -452,10 +458,12 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   // when the toggle is on, otherwise Offerings stays at the top of About.
   const showOfferingsSection = !unified || (showOfferingsTab ? coachTab === "offerings" : coachTab === "about");
   const showRestSections = !unified || coachTab === "about";
-  // If the Offerings tab is turned off while it's the active tab, fall back to About.
+  // If a coach tab disappears while it's active (Offerings toggled off, or Saved
+  // when no longer viewing own profile), fall back to About.
   useEffect(() => {
     if (!showOfferingsTab && coachTab === "offerings") setCoachTab("about");
-  }, [showOfferingsTab, coachTab]);
+    if (!viewingOwnProfile && coachTab === "saved") setCoachTab("about");
+  }, [showOfferingsTab, viewingOwnProfile, coachTab]);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [eventsCategoryOpen, setEventsCategoryOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -1062,11 +1070,47 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
           )
         ) : undefined} rightSidebarWidth={isCustomerProfile || unified ? 300 : 340} rightSidebarTop={stickyNavVisible ? 76 : 20}>
         <div>
-          {/* Cover image */}
+          {/* Unified template — self-rendered mobile top nav that slides in/out
+              with the page (the shared fixed nav is hidden on /profile). It
+              overlays the cover: transparent + white icons over the cover, solid
+              + dark icons once scrolled. */}
+          {unified && (
+            <div
+              className="absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)] transition-colors md:hidden"
+              style={{ backgroundColor: navScrolled ? (darkMode ? "#111111" : "#ffffff") : "transparent" }}
+            >
+              <button
+                onClick={onBack}
+                aria-label="Go back"
+                className={`flex h-8 w-8 items-center justify-center ${navScrolled ? "text-gray-dark" : "text-white"}`}
+              >
+                <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <div className="flex items-center gap-[6px]">
+                <img src={logoIcon} alt="Leland" className={`h-[23px] w-auto ${!navScrolled || darkMode ? "brightness-0 invert" : ""}`} />
+                <motion.img
+                  src={logoWordmark}
+                  alt=""
+                  className={`h-[20px] w-auto ${!navScrolled || darkMode ? "brightness-0 invert" : ""}`}
+                  animate={{ opacity: navWordmarkHidden ? 0 : 1, width: navWordmarkHidden ? 0 : "auto", marginLeft: navWordmarkHidden ? 0 : undefined }}
+                  transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                />
+              </div>
+              <button aria-label="Share" className="flex h-8 w-8 items-center justify-center">
+                <img src={shareArrowFilledIcon} alt="Share" className={`h-[22px] w-[22px] ${!navScrolled || darkMode ? "brightness-0 invert" : "brightness-0"}`} />
+              </button>
+            </div>
+          )}
+
+          {/* Cover image. In the template the cover pulls up past PageShell's
+              top padding so it (and the #111 backing behind the status bar)
+              reaches the very top — no white gap above the cover. */}
           {heroCustomer ? (
-            <div className={`relative -mx-4 -mt-[72px] md:mx-0 md:mt-0 ${showCoverImage ? "" : "md:hidden"}`}>
+            <div className={`relative -mx-4 md:mx-0 ${unified ? "-mt-4 bg-[#111111] sm:-mt-10 md:mt-0" : "-mt-[72px] md:mt-0"} ${showCoverImage ? "" : "md:hidden"}`}>
               <img
-                src={customerCoverImage}
+                src={unified && cover ? cover : customerCoverImage}
                 alt="Cover"
                 className="h-[20vh] w-full object-cover md:h-[220px] md:rounded-[6px]"
               />
@@ -1471,10 +1515,14 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             <>
             <div ref={tabAnchorRef} aria-hidden className="mt-3 h-0" />
             <div className="sticky top-14 z-10 -mx-4 flex border-b border-gray-stroke bg-white md:top-0">
-              {(showOfferingsTab
-                ? (["about", "offerings", "activity", "likes"] as const)
-                : (["about", "activity", "likes"] as const)
-              ).map((tab) => (
+              {([
+                "about" as const,
+                ...(showOfferingsTab ? ["offerings" as const] : []),
+                "activity" as const,
+                // Saved appears only when viewing your own profile, like the customer view.
+                ...(viewingOwnProfile ? ["saved" as const] : []),
+                "likes" as const,
+              ]).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => { setCoachTab(tab); scrollTabsIntoView(); }}
@@ -1485,7 +1533,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   }`}
                 >
                   <span className="text-[16px] font-medium">
-                    {tab === "about" ? "About" : tab === "offerings" ? "Offerings" : tab === "activity" ? "Activity" : "Likes"}
+                    {tab === "about" ? "Profile" : tab === "offerings" ? "Offerings" : tab === "activity" ? "Activity" : tab === "saved" ? "Saved" : "Likes"}
                   </span>
                 </button>
               ))}
@@ -1984,6 +2032,23 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             </div>
           )}
 
+          {/* Unified template — coach Saved tab (own profile only; bookmarked posts) */}
+          {!isCustomerProfile && unified && coachTab === "saved" && (
+            savedPosts.length > 0 ? (
+              <div className="mt-3 flex flex-col divide-y divide-gray-stroke/50">
+                {savedPosts.map((post) => (
+                  <FeedPost key={post.id} post={post} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2 py-16 text-center">
+                <svg className="h-8 w-8 text-gray-xlight" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+                <p className="text-[15px] font-medium text-gray-dark">Nothing saved yet</p>
+                <p className="text-[13px] text-gray-light">Tap the bookmark on a post to save it here.</p>
+              </div>
+            )
+          )}
+
           {/* Unified template — coach Likes tab (placeholder) */}
           {!isCustomerProfile && unified && coachTab === "likes" && (
             <div className="mt-4 flex flex-col gap-4">
@@ -2012,7 +2077,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                           : "border-b-2 border-transparent text-gray-light hover:text-gray-dark"
                       }`}
                     >
-                      <span className={`text-[16px] ${customerTab === tab ? (unified ? "font-medium" : "font-semibold") : "font-medium"}`}>{tab === "about" ? "Activity" : tab === "likes" ? "Likes" : tab === "saved" ? "Saved" : "About"}</span>
+                      <span className={`text-[16px] ${customerTab === tab ? (unified ? "font-medium" : "font-semibold") : "font-medium"}`}>{tab === "about" ? "Activity" : tab === "likes" ? "Likes" : tab === "saved" ? "Saved" : unified ? "Profile" : "About"}</span>
                     </button>
                   ))}
                 </div>

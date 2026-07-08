@@ -81,10 +81,12 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   const { open: sidebarOpen, setOpen: setSidebarOpen } = useMobileSidebar();
   const navTheme = useNavTheme();
   const { dark: darkMode } = useDarkMode();
-  // Post detail is its own surface: it hides the shared mobile top nav and
-  // renders its own header inside the sliding page, so the mobile top padding
-  // (which normally clears the shared nav) is dropped here.
-  const isPostDetail = useLocation().pathname.startsWith("/post/");
+  // Post detail and the profile template are their own surfaces: they hide the
+  // shared mobile top nav and render their own nav inside the sliding page, so
+  // the mobile top padding (which normally clears the shared nav) is dropped.
+  const pathname = useLocation().pathname;
+  const isPostDetail = pathname.startsWith("/post/");
+  const isOwnSurface = isPostDetail || pathname.startsWith("/profile/");
 
   // Keep height/overflow constrained while the close animation plays out,
   // so the content doesn't snap to full height mid-transition.
@@ -256,7 +258,7 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Main content area */}
-        <main className={`relative z-0 pb-20 md:pt-0 md:pb-0 ${isPostDetail ? "pt-0" : "pt-14"}`}>
+        <main className={`relative z-0 pb-20 md:pt-0 md:pb-0 ${isOwnSurface ? "pt-0" : "pt-14"}`}>
           {children}
         </main>
 

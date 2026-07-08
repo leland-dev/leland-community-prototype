@@ -43,9 +43,9 @@ export default function MobileTopNav() {
 
   const slideIn = navTheme.slideIn;
 
-  // Post detail is its own surface — it renders its own header ("Post" + a
-  // 3-dot menu) inside the sliding page, so the shared nav steps aside here.
-  if (isPostDetail) return null;
+  // Post detail and the profile template are their own surfaces — they render
+  // their own nav inside the sliding page, so the shared nav steps aside here.
+  if (isPostDetail || isProfileTemplate) return null;
 
   return (
     <>
@@ -138,7 +138,7 @@ export default function MobileTopNav() {
       {/* Right: custom slot or default profile photo */}
       {rightSlot ?? (
         <NavLink
-          to="/profile-v2"
+          to="/profile/june-allen?me=1"
           className="flex h-8 w-8 items-center justify-center"
         >
           <img

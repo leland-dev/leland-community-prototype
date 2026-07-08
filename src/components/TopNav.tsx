@@ -50,7 +50,7 @@ const browseCategories = [
 const profileMenuGroups = [
   {
     items: [
-      { to: "/profile-v2", icon: profilePhoto, label: "Profile", danger: false, isProfile: true },
+      { to: "/profile/june-allen?me=1", icon: profilePhoto, label: "Profile", danger: false, isProfile: true },
       { to: "/my-programs", icon: myCoursesIcon, label: "My programs", danger: false },
       { to: null, icon: giftIcon, label: "Refer a friend", danger: false },
       { to: "/settings", icon: settingsIcon, label: "Settings", danger: false },

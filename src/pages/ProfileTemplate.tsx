@@ -1,16 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
-import ProfileV2, { COACH_CONFIGS } from "./ProfileV2";
+import ProfileV2 from "./ProfileV2";
 import customerPhoto from "../assets/profile photos/profile photo.png";
 import { useIsMobile } from "../hooks/useIsMobile";
-
-// Maps a /profile/{firstname-lastname} slug to a coach config id. A slug that
-// isn't a known coach renders the customer profile.
-const SLUG_TO_COACH: Record<string, string> = {
-  "samantha-parker": "samantha",
-  "john-koelliker": "john",
-};
+import { getProfilePerson } from "../lib/profilePeople";
 
 // "june-allen" → "June Allen"
 function prettifySlug(slug: string | undefined) {
@@ -36,24 +30,28 @@ function AdminToggle({ label, checked, onChange, disabled = false }: { label: st
 
 export default function ProfileTemplate() {
   const { slug } = useParams<{ slug: string }>();
-  const initialCoachId = slug ? SLUG_TO_COACH[slug] : undefined;
+  const [searchParams] = useSearchParams();
+  // ?me=1 → the signed-in user's own profile: Expert off, My profile on.
+  const isMe = searchParams.get("me") === "1";
+  // Resolve the person from the feed/coach registry: their verified status
+  // defaults the Expert toggle, and we pull their name, photo, and cover.
+  const person = getProfilePerson(slug);
 
-  // "Expert" turns on coach mode. Sub-toggles are coach-only and default on.
-  const [expert, setExpert] = useState(Boolean(initialCoachId));
+  // "Expert" turns on coach mode (default = whether this person is verified).
+  const [expert, setExpert] = useState(isMe ? false : Boolean(person?.expert));
   const [customerFavorite, setCustomerFavorite] = useState(true);
   const [coachNote, setCoachNote] = useState(true);
   const [video, setVideo] = useState(true);
   const [supercoach, setSupercoach] = useState(false);
   const [offeringsTab, setOfferingsTab] = useState(false);
-  const [myProfile, setMyProfile] = useState(false);
-  const coachId = initialCoachId ?? "samantha";
+  const [myProfile, setMyProfile] = useState(isMe);
+  const coachId = person?.coachId ?? "samantha";
 
-  // Identity (name + photo) is fixed per profile and stays constant across the
-  // Expert toggle. Coaches come from their config; other slugs derive a name
-  // from the slug and use the default customer photo.
-  const config = initialCoachId ? COACH_CONFIGS[initialCoachId] : undefined;
-  const displayName = config?.name ?? prettifySlug(slug);
-  const displayPhoto = config?.photo ?? customerPhoto;
+  // Identity (name + photo + cover) is fixed per profile and stays constant
+  // across the Expert toggle. Unknown slugs fall back to a prettified name.
+  const displayName = person?.name ?? prettifySlug(slug);
+  const displayPhoto = person?.avatar ?? customerPhoto;
+  const cover = person?.cover;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -84,16 +82,54 @@ export default function ProfileTemplate() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // iOS Safari paints the status-bar / top safe-area region with the document
+  // (html/body) background color, not theme-color — so force it dark while on
+  // the profile. The white page content still covers the visible area below.
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.backgroundColor;
+    const prevBody = body.style.backgroundColor;
+    html.style.backgroundColor = "#111111";
+    body.style.backgroundColor = "#111111";
+    return () => {
+      html.style.backgroundColor = prevHtml;
+      body.style.backgroundColor = prevBody;
+    };
+  }, []);
+
+  // Push-in / push-out page transition. On back we play the reverse slide, then
+  // navigate away on animationend (the CSS animation has no fill-mode, so the
+  // transform reverts to none once it lands — keeping the fixed admin button
+  // and portaled sticky bar viewport-anchored).
+  const navigate = useNavigate();
+  const [isExiting, setIsExiting] = useState(false);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const handleBack = () => setIsExiting(true);
+  useEffect(() => {
+    if (!isExiting) return;
+    const el = pageRef.current;
+    if (!el) { navigate(-1); return; }
+    const onEnd = () => navigate(-1);
+    el.addEventListener("animationend", onEnd, { once: true });
+    return () => el.removeEventListener("animationend", onEnd);
+  }, [isExiting, navigate]);
+
   return (
     <>
-      {/* No remount on Expert flip — ProfileV2 reconciles so the hero content
-          can animate (checkmark, reviews, coach block) as it shifts. */}
+      {/* Slides in from the right on entry, out to the right on back. The
+          profile renders its own top nav (inside ProfileV2), so the nav slides
+          with the page. No remount on Expert flip — ProfileV2 reconciles so the
+          hero content can animate as it shifts. */}
+      <div ref={pageRef} className={isExiting ? "slide-out-page" : "slide-in-page"}>
       <ProfileV2
         unified
+        onBack={handleBack}
         coach={expert}
         coachId={coachId}
         name={displayName}
         photo={displayPhoto}
+        cover={cover}
         customerFavorite={customerFavorite}
         coachNote={coachNote}
         coachVideo={video}
@@ -101,6 +137,7 @@ export default function ProfileTemplate() {
         offeringsTab={offeringsTab}
         ownProfile={myProfile}
       />
+      </div>
 
       {/* Admin tool */}
       <div
