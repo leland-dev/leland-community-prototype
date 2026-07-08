@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import TopNav from "./TopNav";
@@ -81,6 +81,10 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   const { open: sidebarOpen, setOpen: setSidebarOpen } = useMobileSidebar();
   const navTheme = useNavTheme();
   const { dark: darkMode } = useDarkMode();
+  // Post detail is its own surface: it hides the shared mobile top nav and
+  // renders its own header inside the sliding page, so the mobile top padding
+  // (which normally clears the shared nav) is dropped here.
+  const isPostDetail = useLocation().pathname.startsWith("/post/");
 
   // Keep height/overflow constrained while the close animation plays out,
   // so the content doesn't snap to full height mid-transition.
@@ -252,9 +256,15 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Main content area */}
-        <main className="relative z-0 pt-14 pb-20 md:pt-0 md:pb-0">
+        <main className={`relative z-0 pb-20 md:pt-0 md:pb-0 ${isPostDetail ? "pt-0" : "pt-14"}`}>
           {children}
         </main>
+
+        {/* Portal target for the "Saved" toast. Lives inside this z-10 content
+            block so the toast's z-index competes with the bottom nav (z-30) in
+            the same stacking context — letting it slide up from behind the nav
+            instead of painting over it. */}
+        <div id="saved-toast-root" />
 
         {/* Mobile bottom nav */}
         <div className="md:hidden">

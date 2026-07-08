@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useExpertMode } from "../contexts/ExpertModeContext";
+import { useProfileBarMode, type ProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { Button } from "./Button";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import groupImg1 from "../assets/placeholder images/group images/18603db620e37b489d2d52da4c9c1f86.jpg";
@@ -55,6 +56,7 @@ const myLelandItems = [
 export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const { dark: darkMode, toggle: toggleDarkMode } = useDarkMode();
   const { expert: expertMode, toggle: toggleExpertMode } = useExpertMode();
+  const { mode: profileBarMode, setMode: setProfileBarMode } = useProfileBarMode();
   const [accountOpen, setAccountOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -286,6 +288,36 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                   <span>Dark Mode</span>
                   {toggleSwitch(darkMode)}
                 </button>
+                <div className="flex w-full items-center justify-between gap-3 py-[10px] text-[16px] font-normal">
+                  <span className={textColor}>Profile bar</span>
+                  <div
+                    className={`flex shrink-0 overflow-hidden rounded-full p-[2px] ${
+                      darkMode ? "bg-white/15" : "bg-[#E5E5E5]"
+                    }`}
+                  >
+                    {([1, 2, 3] as ProfileBarMode[]).map((m) => {
+                      const active = profileBarMode === m;
+                      const label = m === 1 ? "Min" : m === 2 ? "Title" : "Date";
+                      return (
+                        <button
+                          key={m}
+                          onClick={() => setProfileBarMode(m)}
+                          className={`rounded-full px-[10px] py-[3px] text-[12px] font-medium transition-colors ${
+                            active
+                              ? darkMode
+                                ? "bg-white text-[#131313]"
+                                : "bg-[#222222] text-white"
+                              : darkMode
+                                ? "text-white/70"
+                                : "text-[#4c4c4c]"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}

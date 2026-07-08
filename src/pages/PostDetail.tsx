@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, useNavigationType } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 
 import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetNavBackHandler } from "../components/NavThemeContext";
+import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
+import { usePageExit } from "../contexts/PageExitContext";
+import { PUSH_TRANSITION } from "../lib/pushTransition";
 import { posts, type Post, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar } from "./Home";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
@@ -182,45 +185,99 @@ export function addPostReply(postId: number, parentId: number, reply: CommentDat
 // ─── Sub-components ───────────────────────────────────
 
 function AuthorRow({ post }: { post: Post }) {
+  const [following, setFollowing] = useState(false);
+  const { mode: profileBarMode } = useProfileBarMode();
+  // Person leads: a member's group post surfaces the person + a small group
+  // badge; a pure group announcement stays the group.
+  const gp = post.groupPoster;
+  const name = gp?.name ?? post.author;
+  const avatarSrc = gp?.avatar ?? post.avatar;
+  const displayHeadline = gp?.headline ?? post.headline;
+  const displayTime = profileBarMode === 3 ? "Aug 12" : post.time;
   return (
-    <div className="flex items-start gap-3">
-      {post.avatar ? (
-        <img
-          src={post.avatar}
-          alt={post.author}
-          className="h-11 w-11 shrink-0 rounded-full object-cover"
-          style={{ objectPosition: "50% 15%" }}
-        />
-      ) : (
-        <div
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[18px] font-semibold text-white"
-          style={{ backgroundColor: post.groupColor ?? "#2563EB" }}
-        >
-          {post.author.charAt(0)}
-        </div>
-      )}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="text-[15px] font-medium leading-tight text-gray-dark">{post.author}</span>
-          {post.verified ? <img src={verifiedIconSrc} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
-          <span className="shrink-0 text-[15px] leading-tight text-gray-xlight">{post.time}</span>
-        </div>
-        {post.headline ? (
-          <p className="truncate text-[13px] leading-tight text-[#707070]">{post.headline}</p>
+    // Minimal mode is a single name line, so center it against the avatar; the
+    // title modes are two lines, so they top-align.
+    <div className={`flex gap-3 ${profileBarMode === 1 ? "items-center" : "items-start"}`}>
+      <div className="relative shrink-0">
+        {avatarSrc ? (
+          <img
+            src={avatarSrc}
+            alt={name}
+            className="h-11 w-11 rounded-full object-cover"
+            style={{ objectPosition: "50% 15%" }}
+          />
+        ) : (
+          <div
+            className="flex h-11 w-11 items-center justify-center rounded-xl text-[18px] font-semibold text-white"
+            style={{ backgroundColor: post.groupColor ?? "#2563EB" }}
+          >
+            {post.author.charAt(0)}
+          </div>
+        )}
+        {gp ? (
+          <div
+            className="absolute -bottom-1.5 -right-1.5 flex h-[22px] w-[22px] items-center justify-center rounded-[6px] border-2 border-white text-[11px] font-bold text-white"
+            style={{ backgroundColor: post.groupColor ?? "#2563EB" }}
+          >
+            {post.author.charAt(0)}
+          </div>
         ) : null}
       </div>
-      {/* Follow — icon-only, top-right across from the author. */}
-      <button
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="text-[15px] font-medium leading-tight text-gray-dark">{name}</span>
+          {post.verified ? <img src={verifiedIconSrc} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
+          {profileBarMode === 1 && post.companyLogo ? (
+            <img src={post.companyLogo} alt="" className="h-[18px] w-[18px] shrink-0 rounded-[4px] object-contain" />
+          ) : null}
+          <span className="shrink-0 text-[13px] leading-tight text-gray-xlight">{displayTime}</span>
+        </div>
+        {profileBarMode !== 1 && displayHeadline ? (
+          <p className="mt-0.5 truncate text-[13px] leading-tight text-gray-light">{displayHeadline}</p>
+        ) : null}
+      </div>
+      {/* Follow — snappy, staged morph, symmetric both ways: the outgoing
+          content (label or check) shrinks/fades away fast, the pill grows +
+          color shifts on a spring, then the new content pops/eases in after a
+          short delay. Width animates as a real CSS value (not `layout`), so the
+          label never stretches. */}
+      <motion.button
         type="button"
-        aria-label="Follow"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-hover text-gray-dark transition-colors hover:bg-[#ebebeb]"
+        onClick={() => setFollowing((f) => !f)}
+        whileTap={{ scale: 0.9 }}
+        initial={false}
+        animate={{ width: following ? 36 : 73, backgroundColor: following ? "#F0F0F0" : "#FFD96F" }}
+        transition={{ type: "spring", stiffness: 700, damping: 34, mass: 0.7 }}
+        aria-label={following ? "Following" : "Follow"}
+        className="relative flex h-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-[13px] font-semibold"
       >
-        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M19 8v6M22 11h-6" />
-        </svg>
-      </button>
+        <AnimatePresence mode="wait" initial={false}>
+          {following ? (
+            <motion.svg
+              key="check"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0, transition: { duration: 0.09, ease: "easeIn" } }}
+              transition={{ type: "spring", stiffness: 900, damping: 19, delay: 0.12 }}
+              className="h-[18px] w-[18px] text-gray-dark"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><polyline points="16 11 18 13 22 9" />
+            </motion.svg>
+          ) : (
+            <motion.span
+              key="follow"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.06 } }}
+              transition={{ duration: 0.12, delay: 0.12 }}
+              className="whitespace-nowrap text-[#111111]"
+            >
+              Follow
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </motion.button>
     </div>
   );
 }
@@ -404,11 +461,21 @@ function PostMedia({ post, onImageClick }: { post: Post; onImageClick?: (idx: nu
   return null;
 }
 
+// Compact view-count formatting (e.g. 2632 → "2.6K", 14500 → "15K").
+function formatViews(n: number): string {
+  if (n < 1000) return `${n}`;
+  const k = n / 1000;
+  return `${k >= 10 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, "")}K`;
+}
+
 function StatsRow({ post, onCommentFocus }: { post: Post; onCommentFocus: () => void }) {
   const [shareOpen, setShareOpen] = useState(false);
 
+  // -mx-2 cancels the buttons' px-2 so the heart glyph lines up flush with the
+  // paragraph/metadata left edge, and the bookmark with the right edge;
+  // justify-between then spaces the icons evenly across that span.
   return (
-    <div className="mt-2 flex items-center justify-between px-2 py-1.5">
+    <div className="mt-2 -mx-2 flex items-center justify-between py-1.5">
       <FeedLikeButton initialCount={post.likes} />
       {/* Comment */}
       <button
@@ -426,7 +493,7 @@ function StatsRow({ post, onCommentFocus }: { post: Post; onCommentFocus: () => 
           onClick={() => setShareOpen(o => !o)}
           className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover"
         >
-          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5.323 19.8781L19.752 13.1791C20.75 12.7161 20.75 11.2821 19.752 10.8191L5.323 4.12205C4.288 3.64205 3.193 4.66005 3.58 5.74305L5.813 11.9971L3.58 18.2581C3.193 19.3401 4.288 20.3581 5.323 19.8781Z" /><path d="M5.81 12H20.5" /></svg>
+          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 15V4" /><path d="m8 8 4-4 4 4" /><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" /></svg>
         </button>
         <AnimatePresence>
           {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
@@ -528,19 +595,6 @@ function CommentItem({ comment, depth = 0, postId }: { comment: CommentData; dep
 
   return (
     <div className="relative">
-      {/*
-        Vertical thread line: sits at the parent avatar's horizontal center (x=21),
-        starts just below the avatar bottom (top=56: pt-3=12 + h-11=44),
-        and extends to the bottom of the wrapper (through all replies).
-        A white trim on the last reply covers it below that reply's avatar center.
-      */}
-      {replies.length > 0 && (
-        <div
-          className="pointer-events-none absolute w-px bg-gray-200"
-          style={{ left: 21, top: 56, bottom: 0 }}
-        />
-      )}
-
       {/* Comment row */}
       <motion.div
         initial={{ opacity: 0, y: 6 }}
@@ -576,33 +630,150 @@ function CommentItem({ comment, depth = 0, postId }: { comment: CommentData; dep
         </div>
       </motion.div>
 
-      {/*
-        Replies: each indented 54px (= w-11 avatar + gap-3 = 44+12 - 2px slight inset).
-        Each reply gets an L-connector absolutely positioned within the reply wrapper:
-          - left: 21 → aligns with the outer thread line (parent avatar center)
-          - width: 33 → extends right to x=54, where the reply avatar starts
-          - height: 34 → reply avatar center (pt-3=12 + h-11/2=22)
-          - border-l + border-b + rounded-bl → rounded 90° bend from vertical to horizontal
-        The last reply also gets a white trim to stop the vertical thread line at avatar center.
-      */}
-      {replies.map((r, i) => {
-        const isLast = i === replies.length - 1;
-        return (
-          <div key={r.id} className="relative" style={{ paddingLeft: 54 }}>
-            <div
-              className="pointer-events-none absolute border-l border-b border-gray-200 rounded-bl-[6px]"
-              style={{ left: 21, top: 0, width: 33, height: 34 }}
-            />
-            {isLast && (
-              <div
-                className="pointer-events-none absolute w-px bg-white"
-                style={{ left: 21, top: 34, bottom: 0 }}
-              />
-            )}
-            <CommentItem comment={r} depth={depth + 1} postId={postId} />
+      {/* Replies sit at the SAME left margin as their parent — no indent. A
+          thin vertical line runs down the avatar column (x≈21), linking the
+          parent avatar to each reply avatar. The opaque avatars sit on top of
+          it, so the line only shows in the gaps between them; a white trim on
+          the last reply stops the line at that avatar's center. */}
+      {replies.length > 0 ? (
+        <>
+          <div
+            className="pointer-events-none absolute w-px bg-gray-200"
+            style={{ left: 21, top: 56, bottom: 0 }}
+          />
+          {replies.map((r, i) => (
+            <div key={r.id} className="relative">
+              {i === replies.length - 1 ? (
+                <div
+                  className="pointer-events-none absolute w-px bg-white"
+                  style={{ left: 21, top: 34, bottom: 0 }}
+                />
+              ) : null}
+              <CommentItem comment={r} depth={depth + 1} postId={postId} />
+            </div>
+          ))}
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+// ─── Post header (own surface) ────────────────────────
+
+/** The post page's own top bar: back · "Post" · overflow menu. Rendered inside
+ *  the sliding page so it slides in as one piece with the content. */
+function PostHeaderBar({ onBack }: { onBack: () => void }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [following, setFollowing] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
+
+  const items: { label: string; danger?: boolean; onClick: () => void }[] = [
+    { label: following ? "Following" : "Follow", onClick: () => setFollowing(f => !f) },
+    { label: "Copy link", onClick: () => setMenuOpen(false) },
+    { label: "Not interested", onClick: () => setMenuOpen(false) },
+    { label: "Report post", danger: true, onClick: () => setMenuOpen(false) },
+  ];
+
+  return (
+    <header className="sticky top-0 z-20 -mx-4 -mt-4 flex items-center gap-2 border-b border-gray-stroke bg-white px-3 py-2.5 pt-[calc(env(safe-area-inset-top)+10px)] md:hidden">
+      <button onClick={onBack} aria-label="Go back" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover">
+        <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
+      <div className="flex min-w-0 flex-1 items-center justify-center">
+        <p className="text-[15px] font-semibold leading-tight text-gray-dark">Post</p>
+      </div>
+      <div ref={menuRef} className="relative shrink-0">
+        <button onClick={() => setMenuOpen(o => !o)} aria-label="Post options" className="flex h-9 w-9 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover">
+          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.9" /><circle cx="12" cy="12" r="1.9" /><circle cx="19" cy="12" r="1.9" /></svg>
+        </button>
+        <AnimatePresence>
+          {menuOpen ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -4 }}
+              transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+              className="absolute right-0 top-full z-50 mt-1 w-44 rounded-2xl border border-gray-stroke bg-white p-1.5 shadow-lg"
+            >
+              {items.map(it => (
+                <button
+                  key={it.label}
+                  onClick={it.onClick}
+                  className={`flex w-full items-center rounded-lg p-2.5 text-left text-[14px] font-medium transition-colors hover:bg-gray-hover ${it.danger ? "text-[#D92D20]" : "text-gray-dark"}`}
+                >
+                  {it.label}
+                </button>
+              ))}
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </div>
+    </header>
+  );
+}
+
+/** The post's visual surface (sticky header + post + comments). Shared by the
+ *  live page and the frozen exit copy so the back-slide looks identical. */
+function PostSurface({ post, comments, onBack, onImageClick }: {
+  post: Post;
+  comments: CommentData[];
+  onBack: () => void;
+  onImageClick?: (i: number) => void;
+}) {
+  const navigate = useNavigate();
+  return (
+    <>
+      <PostHeaderBar onBack={onBack} />
+      <div className="min-w-0 pb-36">
+        <div className="border-b border-gray-stroke pt-4 pb-3">
+          <AuthorRow post={post} />
+          <p className="mt-3 whitespace-pre-wrap text-[15px] leading-[1.5] text-gray-dark">{post.body}</p>
+          <PostMedia post={post} onImageClick={post.type === "image" ? onImageClick : undefined} />
+          {/* Metadata — time · date · views, below the body/media, above the actions. */}
+          <div className="mt-3 flex flex-wrap items-center gap-x-1.5 text-[14px] leading-tight text-gray-light">
+            <span>9:41 AM</span>
+            <span aria-hidden>·</span>
+            <span>Jul 7, 2026</span>
+            <span aria-hidden>·</span>
+            <span>
+              <span className="font-semibold text-gray-dark">{formatViews(post.likes * 24 + post.comments * 18 + post.reposts * 40)}</span> Views
+            </span>
           </div>
-        );
-      })}
+          <StatsRow post={post} onCommentFocus={() => navigate(`/reply/${post.id}`, { state: { target: { kind: "post" } } })} />
+        </div>
+        <div className="mt-1">
+          {comments.map(c => (
+            <CommentItem key={c.id} comment={c} postId={post.id} />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/** Non-interactive comment bar shown only in the frozen exit copy, so the bar
+ *  slides off to the right with the surface on back (matches the live bar). */
+function PostComposerStatic() {
+  return (
+    <div
+      style={{ bottom: "calc(env(safe-area-inset-bottom) + 60px)" }}
+      className="fixed inset-x-0 z-40 bg-white px-4 py-2.5 shadow-[0_-6px_16px_-6px_rgba(0,0,0,0.08)]"
+    >
+      <div className="mx-auto flex max-w-[600px] items-center gap-2">
+        <img src={profilePhoto} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
+        <div className="flex-1 rounded-xl border border-gray-stroke px-3 py-2.5 text-[14px] text-gray-light">Add a comment…</div>
+      </div>
     </div>
   );
 }
@@ -612,35 +783,13 @@ function CommentItem({ comment, depth = 0, postId }: { comment: CommentData; dep
 export default function PostDetail() {
   const navigate = useNavigate();
 
-  // Plays the reverse of the entrance animation before actually navigating
-  // away, so the page slides back out to the right instead of just vanishing.
-  const [isExiting, setIsExiting] = useState(false);
-  const pageRef = useRef<HTMLDivElement>(null);
-  const handleBack = useCallback(() => setIsExiting(true), []);
-  useSetNavBackHandler(handleBack);
-
-  useEffect(() => {
-    if (!isExiting) return;
-    const el = pageRef.current;
-    if (!el) { navigate(-1); return; }
-    const onAnimationEnd = () => navigate(-1);
-    el.addEventListener("animationend", onAnimationEnd, { once: true });
-    return () => el.removeEventListener("animationend", onAnimationEnd);
-  }, [isExiting, navigate]);
-
-  useSetLeftSidebar(
-    <div className="flex justify-end">
-      <button
-        onClick={handleBack}
-        aria-label="Go back"
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-dark transition-colors hover:bg-gray-50"
-      >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
-      </button>
-    </div>
-  );
+  // Framer push transition — mirrors the messages → conversation interaction
+  // exactly. Entrance: the whole surface (sticky header + content) slides in
+  // from the right (from the left when revealed via a back/POP). Back: hand a
+  // frozen copy of the surface to a persistent overlay and navigate at once, so
+  // the feed is revealed underneath as the post slides off — no pause-then-pop.
+  const navigationType = useNavigationType();
+  const { startExit } = usePageExit();
   useSetRightSidebar(<HomeRightSidebar />);
   const { postId } = useParams<{ postId: string }>();
   const location = useLocation();
@@ -709,6 +858,35 @@ export default function PostDetail() {
     typeof focusImage === "number" ? focusImage : null
   );
 
+  // Back: hand a frozen copy of the surface (+ its comment bar) to the
+  // persistent PageExit overlay and navigate immediately, so the outgoing post
+  // and the revealed feed animate in the same frame.
+  const handleBack = useCallback(() => {
+    if (post) {
+      startExit(
+        <>
+          <PostSurface post={post} comments={comments} onBack={() => {}} />
+          <PostComposerStatic />
+        </>
+      );
+    }
+    navigate(-1);
+  }, [post, comments, startExit, navigate]);
+  useSetNavBackHandler(handleBack);
+  useSetLeftSidebar(
+    <div className="flex justify-end">
+      <button
+        onClick={handleBack}
+        aria-label="Go back"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-dark transition-colors hover:bg-gray-50"
+      >
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+    </div>
+  );
+
   if (!post) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray-light">
@@ -736,71 +914,67 @@ export default function PostDetail() {
   };
 
   return (
-    <div ref={pageRef} className={isExiting ? "slide-out-page" : "slide-in-page"}>
-    <motion.div initial={false}>
-      {/* Content — full width */}
-      {/* Content — full width; leave room at the bottom for the fixed input + nav */}
-      <div className="min-w-0 pb-36">
-        {/* Post — full width. Body/media/actions stack below the author header
-            (avatar + name + description), no left indent. */}
-        <div className="border-b border-gray-stroke pb-3">
-          <AuthorRow post={post} />
-          <p className="mt-3 whitespace-pre-wrap text-[15px] leading-[1.5] text-gray-dark">{post.body}</p>
-          <PostMedia post={post} onImageClick={post.type === "image" ? setLightboxIndex : undefined} />
-          <StatsRow post={post} onCommentFocus={() => navigate(`/reply/${post.id}`, { state: { target: { kind: "post" } } })} />
-        </div>
-
-        {/* Comments */}
-        <div className="mt-1">
-          {comments.map(c => (
-            <CommentItem key={c.id} comment={c} postId={post.id} />
-          ))}
-        </div>
-      </div>
+    <>
+    {/* Entrance: the whole surface slides in from the right (left on POP) as one
+        piece. Exit is handled by the PageExit overlay (see handleBack). */}
+    <motion.div
+      initial={navigationType === "POP" ? { x: "-100%" } : { x: "100%" }}
+      animate={{ x: 0 }}
+      transition={PUSH_TRANSITION}
+      className="min-h-[100dvh] bg-white"
+    >
+      <PostSurface post={post} comments={comments} onBack={handleBack} onImageClick={setLightboxIndex} />
     </motion.div>
 
-    {/* Comment input — anchored to the bottom of the screen, above the tab bar.
-        Rendered outside the animated container so `position: fixed` is
-        viewport-relative (a transformed ancestor would otherwise scope it). */}
-    <div
-      style={{ bottom: navHidden ? "env(safe-area-inset-bottom)" : "calc(env(safe-area-inset-bottom) + 56px)" }}
-      className="fixed inset-x-0 z-30 border-t border-gray-stroke bg-white px-4 py-2.5 transition-[bottom] duration-200 ease-out"
-    >
-      <div className="mx-auto flex max-w-[600px] items-center gap-2">
-        <img
-          src={profilePhoto}
-          alt="You"
-          className="h-9 w-9 shrink-0 rounded-full object-cover"
-        />
-        <textarea
-          ref={commentInputRef}
-          autoFocus={focusInput}
-          value={commentText}
-          onChange={e => {
-            setCommentText(e.target.value);
-            e.target.style.height = "auto";
-            e.target.style.height = `${e.target.scrollHeight}px`;
-          }}
-          placeholder="Add a comment…"
-          rows={1}
-          className="scrollbar-hide max-h-24 flex-1 resize-none overflow-y-auto rounded-xl border border-gray-stroke px-3 py-2.5 text-[14px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
-          onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
-        />
-        <AnimatePresence>
-          {commentText.trim() ? (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.85 }}
-              onClick={submitComment}
-              className="shrink-0 rounded-[8px] bg-gray-dark px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#222]"
-            >
-              Post
-            </motion.button>
-          ) : null}
-        </AnimatePresence>
-      </div>
-    </div>
+    {/* Comment input — portaled above the bottom nav (covering its shadow),
+        and slid IN FROM THE RIGHT in lockstep with the surface (not up from the
+        nav). On back it unmounts instantly and the frozen copy in the exit
+        overlay carries the slide-off. */}
+    {createPortal(
+      <motion.div
+        initial={navigationType === "POP" ? { x: "-100%" } : { x: "100%" }}
+        animate={{ x: 0 }}
+        transition={PUSH_TRANSITION}
+        style={{ bottom: navHidden ? "env(safe-area-inset-bottom)" : "calc(env(safe-area-inset-bottom) + 60px)" }}
+        className="fixed inset-x-0 z-40 bg-white px-4 py-2.5 shadow-[0_-6px_16px_-6px_rgba(0,0,0,0.08)] transition-[bottom] duration-200 ease-out"
+      >
+        <div className="mx-auto flex max-w-[600px] items-center gap-2">
+          <img
+            src={profilePhoto}
+            alt="You"
+            className="h-9 w-9 shrink-0 rounded-full object-cover"
+          />
+          <textarea
+            ref={commentInputRef}
+            autoFocus={focusInput}
+            value={commentText}
+            onChange={e => {
+              setCommentText(e.target.value);
+              e.target.style.height = "auto";
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
+            placeholder="Add a comment…"
+            rows={1}
+            className="scrollbar-hide max-h-24 flex-1 resize-none overflow-y-auto rounded-xl border border-gray-stroke px-3 py-2.5 text-[14px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
+            onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
+          />
+          <AnimatePresence>
+            {commentText.trim() ? (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85 }}
+                onClick={submitComment}
+                className="shrink-0 rounded-[8px] bg-gray-dark px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#222]"
+              >
+                Post
+              </motion.button>
+            ) : null}
+          </AnimatePresence>
+        </div>
+      </motion.div>,
+      document.getElementById("saved-toast-root") ?? document.body,
+    )}
 
     <AnimatePresence>
       {lightboxIndex !== null && post.type === "image" && (
@@ -812,6 +986,6 @@ export default function PostDetail() {
         />
       )}
     </AnimatePresence>
-    </div>
+    </>
   );
 }
