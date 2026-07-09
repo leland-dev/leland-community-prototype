@@ -11,6 +11,8 @@ type PageShellProps = {
   // When true, the right sidebar stacks below main content at narrow viewports
   // instead of being hidden.
   stackRight?: boolean;
+  // Override the outer vertical padding classes (defaults to "py-4 sm:py-10").
+  paddingYClassName?: string;
   children: ReactNode;
 };
 
@@ -23,6 +25,7 @@ export default function PageShell({
   rightSidebarTop,
   contentMaxWidth,
   stackRight = false,
+  paddingYClassName = "py-4 sm:py-10",
 
   children,
 }: PageShellProps) {
@@ -68,7 +71,7 @@ export default function PageShell({
     : `flex items-start ${leftSidebarMobile ? "flex-col md:flex-row" : ""} ${hasRight && !hasLeft ? "justify-between" : ""}`;
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 py-4 sm:py-10 sm:px-6">
+    <div className={`mx-auto max-w-[1280px] px-4 sm:px-6 ${paddingYClassName}`}>
       <div className={rowClass} style={{ gap: 40 }}>
         {hasLeft && <aside className={leftClass}>{leftSidebar}</aside>}
         <div

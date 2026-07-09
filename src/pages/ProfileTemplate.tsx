@@ -28,6 +28,25 @@ function AdminToggle({ label, checked, onChange, disabled = false }: { label: st
   );
 }
 
+function AdminSelect({ label, value, options, onChange }: { label: string; value: string; options: { value: string; label: string }[]; onChange: (v: string) => void }) {
+  return (
+    <div className="px-2 py-2">
+      <span className="text-[14px] font-medium text-gray-dark">{label}</span>
+      <div className="mt-1.5 grid grid-cols-2 gap-1">
+        {options.map((o) => (
+          <button
+            key={o.value}
+            onClick={() => onChange(o.value)}
+            className={`cursor-pointer rounded-md px-2 py-1.5 text-[12px] font-medium transition-colors ${value === o.value ? "bg-gray-dark text-white" : "bg-[#f5f5f5] text-gray-dark hover:bg-[#ebebeb]"}`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ProfileTemplate() {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
@@ -40,10 +59,11 @@ export default function ProfileTemplate() {
   // "Expert" turns on coach mode (default = whether this person is verified).
   const [expert, setExpert] = useState(isMe ? false : Boolean(person?.expert));
   const [customerFavorite, setCustomerFavorite] = useState(true);
-  const [coachNote, setCoachNote] = useState(true);
-  const [video, setVideo] = useState(true);
+  const [coachNote, setCoachNote] = useState(false);
+  const [video, setVideo] = useState(false);
   const [supercoach, setSupercoach] = useState(false);
-  const [offeringsTab, setOfferingsTab] = useState(false);
+  const [altReviews, setAltReviews] = useState(true);
+  const [coverMode, setCoverMode] = useState<"default" | "dark" | "beige" | "none">("default");
   const [myProfile, setMyProfile] = useState(isMe);
   const coachId = person?.coachId ?? "samantha";
 
@@ -64,6 +84,23 @@ export default function ProfileTemplate() {
     return () => document.removeEventListener("mousedown", onClick);
   }, [menuOpen]);
 
+  // Admin hotkeys: v = Video, e = Expert, n = Coach note, f = Customer favorite.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      switch (e.key.toLowerCase()) {
+        case "v": setVideo((v) => !v); break;
+        case "e": setExpert((v) => !v); break;
+        case "n": setCoachNote((v) => !v); break;
+        case "f": setCustomerFavorite((v) => !v); break;
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   // Mirror BottomNav's hide-on-scroll so the admin button can drop down to fill
   // the space when the bottom nav slides away (mobile only — no nav on desktop).
   const isMobile = useIsMobile();
@@ -83,20 +120,22 @@ export default function ProfileTemplate() {
   }, []);
 
   // iOS Safari paints the status-bar / top safe-area region with the document
-  // (html/body) background color, not theme-color — so force it dark while on
-  // the profile. The white page content still covers the visible area below.
+  // (html/body) background color, not theme-color — so force it to match the
+  // cover treatment while on the profile (beige cover → beige status bar,
+  // otherwise dark). The white page content still covers the visible area below.
+  const statusBarBg = coverMode === "beige" ? "#F3F1E6" : coverMode === "none" ? "#ffffff" : "#111111";
   useEffect(() => {
     const html = document.documentElement;
     const body = document.body;
     const prevHtml = html.style.backgroundColor;
     const prevBody = body.style.backgroundColor;
-    html.style.backgroundColor = "#111111";
-    body.style.backgroundColor = "#111111";
+    html.style.backgroundColor = statusBarBg;
+    body.style.backgroundColor = statusBarBg;
     return () => {
       html.style.backgroundColor = prevHtml;
       body.style.backgroundColor = prevBody;
     };
-  }, []);
+  }, [statusBarBg]);
 
   // Push-in / push-out page transition. On back we play the reverse slide, then
   // navigate away on animationend (the CSS animation has no fill-mode, so the
@@ -134,7 +173,9 @@ export default function ProfileTemplate() {
         coachNote={coachNote}
         coachVideo={video}
         supercoach={supercoach}
-        offeringsTab={offeringsTab}
+        offeringsTab
+        altReviews={altReviews}
+        coverMode={coverMode}
         ownProfile={myProfile}
       />
       </div>
@@ -162,7 +203,19 @@ export default function ProfileTemplate() {
               <AdminToggle label="Coach note" checked={coachNote} onChange={() => setCoachNote((v) => !v)} disabled={!expert} />
               <AdminToggle label="Video" checked={video} onChange={() => setVideo((v) => !v)} disabled={!expert} />
               <AdminToggle label="SuperCoach" checked={supercoach} onChange={() => setSupercoach((v) => !v)} disabled={!expert} />
-              <AdminToggle label="Offerings tab" checked={offeringsTab} onChange={() => setOfferingsTab((v) => !v)} disabled={!expert} />
+              <AdminToggle label="Alt reviews" checked={altReviews} onChange={() => setAltReviews((v) => !v)} disabled={!expert} />
+              <div className="my-1 border-t border-gray-100" />
+              <AdminSelect
+                label="Cover image"
+                value={coverMode}
+                onChange={(v) => setCoverMode(v as "default" | "dark" | "beige" | "none")}
+                options={[
+                  { value: "default", label: "Default" },
+                  { value: "dark", label: "Dark" },
+                  { value: "beige", label: "Beige" },
+                  { value: "none", label: "None" },
+                ]}
+              />
             </motion.div>
           )}
         </AnimatePresence>
