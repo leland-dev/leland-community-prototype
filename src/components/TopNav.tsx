@@ -19,6 +19,7 @@ import helpIcon from "../assets/icons/help.svg";
 import logOutIcon from "../assets/icons/log out.svg";
 import browserIcon from "../assets/icons/browser.svg";
 import codeIcon from "../assets/icons/code.svg";
+import compassIcon from "../assets/leland-compass.svg";
 import lelandWordmark from "../assets/leland-wordmark.svg";
 
 /* ── Nav links ── */
@@ -412,6 +413,30 @@ export default function TopNav() {
                     >
                       <img src={codeIcon} alt="Components" className="h-6 w-6 shrink-0" />
                       Components
+                    </NavLink>
+                    <NavLink
+                      to="/onboarding"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+                    >
+                      <img src={compassIcon} alt="Onboarding" className="h-6 w-6 shrink-0" />
+                      Onboarding flow
+                    </NavLink>
+                    <NavLink
+                      to="/onboarding-minimal"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+                    >
+                      <img src={compassIcon} alt="Onboarding (minimal)" className="h-6 w-6 shrink-0" />
+                      Onboarding flow (minimal)
+                    </NavLink>
+                    <NavLink
+                      to="/onboarding-minimal-v2"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+                    >
+                      <img src={compassIcon} alt="Onboarding (minimal v2)" className="h-6 w-6 shrink-0" />
+                      Onboarding flow (minimal v2)
                     </NavLink>
                   </div>
 

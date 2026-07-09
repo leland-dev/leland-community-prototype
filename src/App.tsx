@@ -87,6 +87,9 @@ import LiveSession from "./pages/program/session/LiveSession";
 import IncredibleHomePage from "./pages/IncredibleHomePage";
 import IncredibleHomePageBU from "./pages/IncredibleHomePageBU";
 import IncredibleOnboarding from "./pages/IncredibleOnboarding";
+import Onboarding from "./pages/onboarding/Onboarding";
+import MinimalOnboarding from "./pages/onboarding/MinimalOnboarding";
+import MinimalOnboardingV2 from "./pages/onboarding/MinimalOnboardingV2";
 
 export default function App() {
   return (
@@ -104,6 +107,9 @@ export default function App() {
       <Route path="/incredible-home-page" element={<IncredibleHomePage />} />
       <Route path="/incredible-home-page-bu" element={<IncredibleHomePageBU />} />
       <Route path="/incredible-onboarding" element={<IncredibleOnboarding />} />
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/onboarding-minimal" element={<MinimalOnboarding />} />
+      <Route path="/onboarding-minimal-v2" element={<MinimalOnboardingV2 />} />
       <Route path="/reply/:postId" element={<ReplyCompose />} />
       <Route path="/messages/:conversationId" element={<ConversationDetail />} />
       <Route path="/messages/:conversationId/relationship" element={<ConversationRelationship />} />

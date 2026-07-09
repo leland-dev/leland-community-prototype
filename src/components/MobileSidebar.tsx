@@ -318,6 +318,27 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                     })}
                   </div>
                 </div>
+                <NavLink
+                  to="/onboarding"
+                  onClick={onClose}
+                  className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
+                >
+                  <span>Onboarding flow</span>
+                </NavLink>
+                <NavLink
+                  to="/onboarding-minimal"
+                  onClick={onClose}
+                  className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
+                >
+                  <span>Onboarding flow (minimal)</span>
+                </NavLink>
+                <NavLink
+                  to="/onboarding-minimal-v2"
+                  onClick={onClose}
+                  className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
+                >
+                  <span>Onboarding flow (minimal v2)</span>
+                </NavLink>
               </div>
             </motion.div>
           )}

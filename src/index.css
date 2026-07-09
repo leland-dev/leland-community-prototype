@@ -303,3 +303,9 @@ html.dark button img:not([class*="rounded-full"]):not([class*="rounded-\[4px\]"]
 /* brightness-0 icons (forced black in light mode) then invert cleanly to light
    in dark mode — the combination above handles both NavLink (<a>) and <button>
    icons, so no menu icon is left black on the dark panel. */
+
+/* Onboarding opener — org-logo marquee (transform-only, GPU-friendly). */
+@keyframes leland-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
