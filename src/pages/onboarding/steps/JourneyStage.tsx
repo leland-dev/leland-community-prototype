@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { ArrowLeft, Check } from "lucide-react";
 
-import { StepHeading } from "./flowUI";
+import { StepHeading, ProgressDots } from "./flowUI";
 
 /* ─────────────────────────────────────────────────────────────────────────
  * JourneyStage (v2) — "Where are you at?" A vertical stepper of journey stages
@@ -27,10 +27,12 @@ export default function JourneyStage({
   onBack,
   onContinue,
   onSkip,
+  step,
 }: {
   onBack?: () => void;
   onContinue: () => void;
   onSkip?: () => void;
+  step?: { index: number; total: number };
 }) {
   const [choice, setChoice] = useState<Choice>(null);
   const selectedIndex = typeof choice === "number" ? choice : -1;
@@ -38,8 +40,8 @@ export default function JourneyStage({
 
   return (
     <div className="flex h-full flex-col">
-      {/* top chrome: back + skip */}
-      <div className="flex shrink-0 items-center justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-1">
+      {/* top chrome: back · dots · skip */}
+      <div className="relative flex shrink-0 items-center justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-1">
         {onBack ? (
           <button
             onClick={onBack}
@@ -51,14 +53,21 @@ export default function JourneyStage({
         ) : (
           <span className="h-9 w-9" />
         )}
+        {step ? (
+          <div className="pointer-events-none absolute left-1/2 -translate-x-1/2">
+            <ProgressDots index={step.index} total={step.total} />
+          </div>
+        ) : null}
         {onSkip ? (
           <button
             onClick={onSkip}
-            className="rounded-full px-3 py-1.5 text-[15px] font-medium text-gray-light transition-colors hover:bg-black/[0.05] hover:text-gray-dark"
+            className="px-2 py-1.5 text-[15px] font-medium text-gray-light transition-colors hover:text-gray-dark"
           >
             Skip
           </button>
-        ) : null}
+        ) : (
+          <span className="h-9 w-9" />
+        )}
       </div>
 
       {/* scrollable content */}

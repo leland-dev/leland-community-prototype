@@ -51,6 +51,19 @@ export default function MinimalOnboarding() {
   const logoVisible = stage === "loading" || stage === "opener";
   const logoDocked = stage === "opener";
 
+  // Tint the mobile status bar to match the sky while the clouds are up, so it
+  // blends edge-to-edge instead of showing a white bar; restore white after.
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+    if (meta) meta.content = cloudsVisible ? "#8fb2d9" : "#ffffff";
+  }, [cloudsVisible]);
+  useEffect(() => {
+    return () => {
+      const meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+      if (meta) meta.content = "#ffffff";
+    };
+  }, []);
+
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-white">
       {/* ── cloud background (loading + opener) ── */}

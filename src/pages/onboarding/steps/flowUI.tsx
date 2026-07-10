@@ -1,7 +1,71 @@
-import { Check } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
 import { Button } from "../../../components/Button";
 
 /* Shared presentational primitives for the member flow (screens 2–8). */
+
+/** Persistent step chrome — back · dots · skip. Lives in the shell (above the
+ *  swapped content) so it stays put across step transitions. */
+export function StepChrome({
+  onBack,
+  onSkip,
+  step,
+}: {
+  onBack?: () => void;
+  onSkip?: () => void;
+  step?: { index: number; total: number };
+}) {
+  return (
+    <div className="relative flex shrink-0 items-center justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-1">
+      {onBack ? (
+        <button
+          onClick={onBack}
+          className="flex h-9 w-9 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-black/[0.05]"
+          aria-label="Back"
+        >
+          <ArrowLeft size={19} />
+        </button>
+      ) : (
+        <span className="h-9 w-9" />
+      )}
+      {step ? (
+        <div className="pointer-events-none absolute left-1/2 -translate-x-1/2">
+          <ProgressDots index={step.index} total={step.total} />
+        </div>
+      ) : null}
+      {onSkip ? (
+        <button
+          onClick={onSkip}
+          className="px-2 py-1.5 text-[15px] font-medium text-gray-light transition-colors hover:text-gray-dark"
+        >
+          Skip
+        </button>
+      ) : (
+        <span className="h-9 w-9" />
+      )}
+    </div>
+  );
+}
+
+/** Step dots — one per question screen, current emphasized. Interstitials are
+ *  excluded by callers (they simply don't render this). */
+export function ProgressDots({ index, total }: { index: number; total: number }) {
+  return (
+    <div
+      className="flex items-center gap-1.5"
+      role="group"
+      aria-label={`Step ${index} of ${total}`}
+    >
+      {Array.from({ length: total }).map((_, i) => (
+        <span
+          key={i}
+          className={`h-1.5 rounded-full transition-all ${
+            i === index - 1 ? "w-4 bg-gray-dark" : "w-1.5 bg-gray-stroke"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
 
 /** Sharp, pointed 5-point star (matches the production homepage IconStar look —
  *  more angular than lucide's rounded star). Color via text-* (currentColor). */
@@ -37,7 +101,7 @@ export function StepHeading({
 }) {
   return (
     <div className="mb-6">
-      <h2 className="font-serif text-[28px] leading-[1.12] text-gray-dark md:text-[32px]">
+      <h2 className="text-balance font-serif text-[28px] leading-[1.12] text-gray-dark md:text-[32px]">
         {title}
       </h2>
       {subtitle ? (

@@ -255,7 +255,7 @@ export default function Opener({
               onClick={onExpert}
               className={`mt-1 text-[14px] font-medium ${expertText} ${linkClass}`}
             >
-              Experts
+              Are you an expert?
             </motion.button>
           </div>
         ) : (

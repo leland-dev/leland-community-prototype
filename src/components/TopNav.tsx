@@ -419,24 +419,24 @@ export default function TopNav() {
                       onClick={() => setProfileOpen(false)}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
                     >
-                      <img src={compassIcon} alt="Onboarding" className="h-6 w-6 shrink-0" />
-                      Onboarding flow
+                      <img src={compassIcon} alt="Onboarding v1" className="h-6 w-6 shrink-0" />
+                      Onboarding v1
                     </NavLink>
                     <NavLink
                       to="/onboarding-minimal"
                       onClick={() => setProfileOpen(false)}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
                     >
-                      <img src={compassIcon} alt="Onboarding (minimal)" className="h-6 w-6 shrink-0" />
-                      Onboarding flow (minimal)
+                      <img src={compassIcon} alt="Onboarding v2" className="h-6 w-6 shrink-0" />
+                      Onboarding v2
                     </NavLink>
                     <NavLink
                       to="/onboarding-minimal-v2"
                       onClick={() => setProfileOpen(false)}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
                     >
-                      <img src={compassIcon} alt="Onboarding (minimal v2)" className="h-6 w-6 shrink-0" />
-                      Onboarding flow (minimal v2)
+                      <img src={compassIcon} alt="Onboarding v3" className="h-6 w-6 shrink-0" />
+                      Onboarding v3
                     </NavLink>
                   </div>
 

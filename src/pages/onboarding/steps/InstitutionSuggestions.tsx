@@ -61,26 +61,30 @@ function expertCountFor(name: string): number {
   return 14 + (h % 220); // 14–233
 }
 
+// Each logo stands on its own — no tile, border, or circle. Contained so
+// nothing is cropped.
 function Logo({ name, k }: { name: string; k: string }) {
   const url = logoFor(k);
   if (url) {
     return (
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white p-1.5 ring-1 ring-black/[0.06]">
-        <img src={url} alt="" className="h-full w-full object-contain" />
-      </span>
+      <img
+        src={url}
+        alt=""
+        className="h-12 w-12 shrink-0 object-contain"
+      />
     );
   }
   return (
-    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gray-hover text-[16px] font-semibold text-gray-dark ring-1 ring-black/[0.06]">
+    <span className="flex h-12 w-12 shrink-0 items-center justify-center text-[18px] font-semibold text-gray-dark">
       {name.charAt(0)}
     </span>
   );
 }
 
-export default function InstitutionSuggestions(props: {
-  onBack?: () => void;
+export default function InstitutionSuggestions({
+  onContinue,
+}: {
   onContinue: () => void;
-  onSkip?: () => void;
 }) {
   const items = useMemo<FollowItem[]>(
     () =>
@@ -95,11 +99,11 @@ export default function InstitutionSuggestions(props: {
 
   return (
     <FollowList
-      title="Follow schools & companies"
+      title="What places interest you?"
       purpose="personalize your feed"
       searchPlaceholder="Search schools & companies"
       items={items}
-      {...props}
+      onContinue={onContinue}
     />
   );
 }

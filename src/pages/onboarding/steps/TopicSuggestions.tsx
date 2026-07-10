@@ -61,6 +61,7 @@ export default function TopicSuggestions(props: {
   onBack?: () => void;
   onContinue: () => void;
   onSkip?: () => void;
+  step?: { index: number; total: number };
 }) {
   const items = useMemo<FollowItem[]>(
     () =>
@@ -76,10 +77,12 @@ export default function TopicSuggestions(props: {
   return (
     <FollowList
       title="What are you into?"
-      purpose="tailor your feed"
+      purpose="continue"
       doneText="Great — we'll tune your feed to these."
       searchPlaceholder="Search topics"
       items={items}
+      minFollows={3}
+      ctaVerb="Pick"
       {...props}
     />
   );

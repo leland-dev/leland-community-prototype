@@ -79,6 +79,7 @@ export default function ExpertSuggestions(props: {
   onBack?: () => void;
   onContinue: () => void;
   onSkip?: () => void;
+  step?: { index: number; total: number };
 }) {
   const items = useMemo<FollowItem[]>(
     () =>
@@ -98,6 +99,7 @@ export default function ExpertSuggestions(props: {
       doneText="Nice — you'll see their posts in your feed."
       searchPlaceholder="Search experts"
       items={items}
+      minFollows={1}
       {...props}
     />
   );

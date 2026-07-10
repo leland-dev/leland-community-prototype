@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { motion } from "motion/react";
-import { ArrowLeft, Check, Plus, Search } from "lucide-react";
+import { Check, Plus, Search } from "lucide-react";
 
 import { StepHeading } from "./flowUI";
 
@@ -22,24 +22,23 @@ export type FollowItem = {
 export default function FollowList({
   title,
   purpose,
-  doneText = "Nice — your feed's taking shape.",
+  doneText = "Nice, your feed's taking shape.",
   searchPlaceholder,
   items,
   minFollows = 3,
-  onBack,
+  ctaVerb = "Follow",
   onContinue,
-  onSkip,
 }: {
   title: string;
-  /** completes the sentence "Follow N or more to {purpose}." */
+  /** completes the sentence "{ctaVerb} N or more to {purpose}." */
   purpose: string;
   doneText?: string;
   searchPlaceholder: string;
   items: FollowItem[];
   minFollows?: number;
-  onBack?: () => void;
+  /** verb used in the countdown copy — "Follow" (default) or "Pick". */
+  ctaVerb?: string;
   onContinue: () => void;
-  onSkip?: () => void;
 }) {
   const [followed, setFollowed] = useState<string[]>([]);
   const [query, setQuery] = useState("");
@@ -58,34 +57,11 @@ export default function FollowList({
 
   return (
     <div className="flex h-full flex-col">
-      {/* top chrome: back + skip */}
-      <div className="flex shrink-0 items-center justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-1">
-        {onBack ? (
-          <button
-            onClick={onBack}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-black/[0.05]"
-            aria-label="Back"
-          >
-            <ArrowLeft size={19} />
-          </button>
-        ) : (
-          <span className="h-9 w-9" />
-        )}
-        {onSkip ? (
-          <button
-            onClick={onSkip}
-            className="rounded-full px-3 py-1.5 text-[15px] font-medium text-gray-light transition-colors hover:bg-black/[0.05] hover:text-gray-dark"
-          >
-            Skip
-          </button>
-        ) : null}
-      </div>
-
       {/* fixed header: title + search */}
-      <div className="shrink-0 px-6 pb-3">
+      <div className="shrink-0 px-6 pb-3 pt-2">
         <StepHeading
           title={title}
-          subtitle={enough ? doneText : `Follow ${remaining} or more to ${purpose}.`}
+          subtitle={enough ? doneText : `${ctaVerb} ${remaining} or more to ${purpose}.`}
         />
         <div className="relative">
           <Search
@@ -126,22 +102,17 @@ export default function FollowList({
                 </div>
                 <button
                   onClick={() => toggle(item.id)}
-                  className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-[14px] font-semibold transition-colors ${
+                  aria-label={active ? `Following ${item.title}` : `Follow ${item.title}`}
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
                     active
-                      ? "border border-gray-stroke bg-white text-gray-dark"
-                      : "bg-gray-dark text-white hover:bg-[#333]"
+                      ? "bg-gray-dark text-white"
+                      : "bg-[#f4f4f4] text-gray-dark hover:bg-[#e9e9e9]"
                   }`}
                 >
                   {active ? (
-                    <>
-                      <Check size={15} strokeWidth={2.5} />
-                      Following
-                    </>
+                    <Check size={19} strokeWidth={2.75} />
                   ) : (
-                    <>
-                      <Plus size={15} strokeWidth={2.5} />
-                      Follow
-                    </>
+                    <Plus size={19} strokeWidth={2.75} />
                   )}
                 </button>
               </motion.div>
@@ -156,7 +127,7 @@ export default function FollowList({
       </div>
 
       {/* Continue — bottom-anchored, fades up over the list */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[440px] bg-gradient-to-t from-white via-white/95 to-transparent px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-8">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[440px] bg-gradient-to-t from-white via-white/95 to-transparent px-6 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+1.5rem)] pt-8">
         <button
           onClick={onContinue}
           disabled={!enough}
@@ -166,7 +137,7 @@ export default function FollowList({
               : "cursor-not-allowed bg-gray-dark/30 text-white"
           }`}
         >
-          {enough ? "Continue" : `Follow ${remaining} more`}
+          {enough ? "Continue" : `${ctaVerb} ${remaining} more`}
         </button>
       </div>
     </div>

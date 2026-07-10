@@ -289,7 +289,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                   {toggleSwitch(darkMode)}
                 </button>
                 <div className="flex w-full items-center justify-between gap-3 py-[10px] text-[16px] font-normal">
-                  <span className={textColor}>Profile bar</span>
+                  <span className={`${textColor} shrink-0 whitespace-nowrap`}>Profile bar</span>
                   <div
                     className={`flex shrink-0 overflow-hidden rounded-full p-[2px] ${
                       darkMode ? "bg-white/15" : "bg-[#E5E5E5]"
@@ -302,7 +302,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                         <button
                           key={m}
                           onClick={() => setProfileBarMode(m)}
-                          className={`rounded-full px-[10px] py-[3px] text-[12px] font-medium transition-colors ${
+                          className={`rounded-full px-2 py-[3px] text-[11px] font-medium transition-colors ${
                             active
                               ? darkMode
                                 ? "bg-white text-[#131313]"
@@ -323,21 +323,21 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                   onClick={onClose}
                   className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
                 >
-                  <span>Onboarding flow</span>
+                  <span>Onboarding v1</span>
                 </NavLink>
                 <NavLink
                   to="/onboarding-minimal"
                   onClick={onClose}
                   className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
                 >
-                  <span>Onboarding flow (minimal)</span>
+                  <span>Onboarding v2</span>
                 </NavLink>
                 <NavLink
                   to="/onboarding-minimal-v2"
                   onClick={onClose}
                   className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
                 >
-                  <span>Onboarding flow (minimal v2)</span>
+                  <span>Onboarding v3</span>
                 </NavLink>
               </div>
             </motion.div>

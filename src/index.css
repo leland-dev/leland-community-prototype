@@ -309,3 +309,39 @@ html.dark button img:not([class*="rounded-full"]):not([class*="rounded-\[4px\]"]
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
+
+/* Phone field — neutralize the browser's blue autofill tint (keep it white). */
+input[name="phone"]:-webkit-autofill,
+input[name="phone"]:-webkit-autofill:hover,
+input[name="phone"]:-webkit-autofill:focus {
+  -webkit-text-fill-color: #222222;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+  caret-color: #222222;
+  transition: background-color 9999s ease-out;
+}
+
+/* Yellow "beam" that sweeps once around the phone input on completion. */
+@property --leland-beam-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes leland-beam-spin {
+  to {
+    --leland-beam-angle: 360deg;
+  }
+}
+.leland-beam {
+  padding: 2px;
+  border-radius: 0.75rem;
+  background: conic-gradient(
+    from var(--leland-beam-angle),
+    transparent 0deg 250deg,
+    #ffd96f 300deg 345deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: leland-beam-spin 1.05s linear;
+}
