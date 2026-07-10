@@ -90,6 +90,8 @@ import IncredibleOnboarding from "./pages/IncredibleOnboarding";
 import Onboarding from "./pages/onboarding/Onboarding";
 import MinimalOnboarding from "./pages/onboarding/MinimalOnboarding";
 import MinimalOnboardingV2 from "./pages/onboarding/MinimalOnboardingV2";
+import ContentViewer from "./pages/ContentViewer";
+import LelandKitTest from "./pages/LelandKitTest";
 
 export default function App() {
   return (
@@ -113,6 +115,7 @@ export default function App() {
       <Route path="/reply/:postId" element={<ReplyCompose />} />
       <Route path="/messages/:conversationId" element={<ConversationDetail />} />
       <Route path="/messages/:conversationId/relationship" element={<ConversationRelationship />} />
+      <Route path="/content-viewer/:lessonId?/:sectionId?" element={<ContentViewer />} />
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
         <Route path="/profile-v2" element={<ProfileV2 />} />
@@ -143,6 +146,7 @@ export default function App() {
           <Route path="/coach/discount-codes" element={<CoachDiscountCodes />} />
         </Route>
         <Route path="/components" element={<Components />} />
+        <Route path="/components/leland" element={<LelandKitTest />} />
         <Route path="/components/session-card" element={<SessionCardTest />} />
         <Route path="/components/sidebar-cards" element={<SidebarCardsTest />} />
         <Route path="/components/offering-card" element={<OfferingCardTest />} />

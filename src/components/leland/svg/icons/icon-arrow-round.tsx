@@ -1,0 +1,45 @@
+import type { FC, SVGProps } from 'react';
+
+export const IconArrowRound: FC<SVGProps<SVGSVGElement>> = ({ ...props }) => {
+  return (
+    <svg
+      {...props}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M11.9941 5H4.99414"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      ></path>
+      <path
+        d="M11.9971 5C16.4154 5 19.9971 8.58172 19.9971 13C19.9971 17.4183 16.4154 21 11.9971 21C7.57879 21 3.99707 17.4183 3.99707 13"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      ></path>
+      <path
+        d="M7.99414 2L4.99414 5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      ></path>
+      <path
+        d="M7.99414 8L4.99414 5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      ></path>
+    </svg>
+  );
+};

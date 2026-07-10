@@ -1,0 +1,21 @@
+import type { FC, SVGProps } from 'react';
+
+export const IconLocation: FC<SVGProps<SVGSVGElement>> = ({ ...props }) => {
+  return (
+    <svg
+      {...props}
+      viewBox="0 0 14 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M6.99984 16.5C6.99984 16.5 1.1665 11.7083 1.1665 7.33333C1.1665 4.11167 3.77817 1.5 6.99984 1.5C10.2215 1.5 12.8332 4.11167 12.8332 7.33333C12.8332 11.7083 6.99984 16.5 6.99984 16.5Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      ></path>
+    </svg>
+  );
+};

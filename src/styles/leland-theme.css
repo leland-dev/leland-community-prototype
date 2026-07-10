@@ -1,0 +1,194 @@
+/*
+ * Leland production design tokens, ported from the monorepo
+ * (packages/config/tailwind-config.js + brand-tokens.css) for reference in
+ * prototype builds. Additive only: everything is namespaced (leland-*,
+ * heading-*, subtext-*, paragraph-*, eyebrow, font-macan) so existing
+ * prototype tokens and pages are unaffected.
+ *
+ * Class parity with production: bg-leland-primary, text-leland-gray-dark,
+ * text-heading-2xl, leland-heading-base, shadow-border, etc.
+ *
+ * Deliberately NOT ported (would restyle existing prototype pages):
+ * - the base text-* size overrides (production text-base = 0.875rem/14px!)
+ * - the default font-family (production sans = Macan; use font-macan here)
+ * - the fontWeight restriction (normal/medium/semibold/bold only)
+ */
+
+@theme {
+  /* ── Brand palette (brand-tokens.css values) ─────────────────────────── */
+  --color-leland-primary: rgb(255 217 111);
+  --color-leland-primary-hover: rgb(248 205 87);
+  --color-leland-primary-light: rgb(255 236 185);
+  --color-leland-primary-extra-light: rgb(255 248 228);
+  /* Text/icon color that sits on the primary (yellow) button */
+  --color-leland-on-primary-text: rgb(34 34 34);
+
+  --color-leland-success: rgb(3 112 82);
+  --color-leland-success-hover: rgb(2 74 54);
+  --color-leland-success-light: rgb(192 232 221);
+  --color-leland-success-extra-light: rgb(229 245 241);
+
+  --color-leland-gray-dark: rgb(34 34 34);
+  --color-leland-gray-light: rgb(76 76 76);
+  --color-leland-gray-extra-light: rgb(118 118 118);
+  --color-leland-gray-stroke: rgb(229 229 229);
+  /* Carries its own alpha (gray-dark @ 5%) so it works on non-white bgs */
+  --color-leland-gray-hover: rgba(34, 34, 34, 0.05);
+  --color-leland-gray-solid-hover: rgb(244 244 244);
+  --color-leland-gray-overlay: rgba(0, 0, 0, 0.5);
+
+  --color-leland-white: rgb(255 255 255);
+  --color-leland-dark-green: rgb(24 84 64);
+  --color-leland-black: rgb(34 34 34);
+  --color-leland-black-hover: rgb(76 76 76);
+
+  --color-leland-red: rgb(217 45 32);
+  --color-leland-red-hover: rgb(243 57 44);
+  --color-leland-red-light: rgb(254 230 227);
+  --color-leland-red-light-hover: rgba(254, 230, 227, 0.6);
+
+  --color-leland-orange: rgb(239 133 9);
+  --color-leland-orange-dark: rgb(198 107 0);
+  --color-leland-orange-light: rgb(253 240 225);
+  --color-leland-orange-light-hover: rgb(251 232 210);
+
+  --color-leland-blue: rgb(59 125 253);
+  --color-leland-blue-hover: rgb(41 108 239);
+  --color-leland-blue-light: rgb(239 245 255);
+  --color-leland-blue-light-hover: rgb(224 236 255);
+  --color-leland-blue-brand: rgb(128 172 237);
+
+  --color-leland-purple: rgb(45 37 166);
+  --color-leland-purple-hover: rgb(65 56 204);
+  --color-leland-purple-light: rgb(246 246 254);
+
+  --color-leland-yellow: rgb(255 203 71);
+  --color-leland-yellow-hover: rgb(235 172 12);
+
+  --color-leland-beige: rgb(243 241 230);
+  --color-leland-rust: rgb(159 91 52);
+  --color-leland-tan: rgb(235 212 181);
+  --color-leland-slate: rgb(134 154 166);
+
+  /* ── Brand fonts (production sans = Macan; condensed = Season) ───────── */
+  --font-macan: "Macan", ui-sans-serif, system-ui, sans-serif;
+  --font-season: "Season", ui-serif, serif;
+
+  /* ── Type scale (named sizes; used by the leland-* classes below) ────── */
+  --text-heading-sm: 0.75rem;
+  --text-heading-sm--line-height: 120%;
+  --text-heading-base: 0.875rem;
+  --text-heading-base--line-height: 120%;
+  --text-heading-lg: 1rem;
+  --text-heading-lg--line-height: 120%;
+  --text-heading-xl: 1.125rem;
+  --text-heading-xl--line-height: 120%;
+  --text-heading-2xl: 1.375rem;
+  --text-heading-2xl--line-height: 120%;
+  --text-heading-3xl: 1.75rem;
+  --text-heading-3xl--line-height: 120%;
+  --text-heading-4xl: 2.125rem;
+  --text-heading-4xl--line-height: 110%;
+  --text-heading-5xl: 2.875rem;
+  --text-heading-5xl--line-height: 100%;
+  --text-heading-6xl: 3.875rem;
+  --text-heading-6xl--line-height: 95%;
+
+  --text-subtext-sm: 0.75rem;
+  --text-subtext-sm--line-height: 120%;
+  --text-subtext-base: 0.875rem;
+  --text-subtext-base--line-height: 120%;
+  --text-subtext-lg: 1rem;
+  --text-subtext-lg--line-height: 120%;
+  --text-subtext-xl: 1.125rem;
+  --text-subtext-xl--line-height: 120%;
+  --text-subtext-2xl: 1.375rem;
+  --text-subtext-2xl--line-height: 120%;
+  --text-subtext-3xl: 1.75rem;
+  --text-subtext-3xl--line-height: 120%;
+
+  --text-paragraph-sm: 0.75rem;
+  --text-paragraph-sm--line-height: 150%;
+  --text-paragraph-base: 0.875rem;
+  --text-paragraph-base--line-height: 150%;
+  --text-paragraph-lg: 1rem;
+  --text-paragraph-lg--line-height: 150%;
+  --text-paragraph-xl: 1.125rem;
+  --text-paragraph-xl--line-height: 150%;
+
+  --text-eyebrow: 0.75rem;
+  --text-eyebrow--line-height: 120%;
+  --text-eyebrow--letter-spacing: 0.1em;
+
+  /* ── Shadows / misc ──────────────────────────────────────────────────── */
+  --shadow-border: 0 0 0 1px;
+  --shadow-bottomBorder: inset 0 -2px 0 0;
+}
+
+/* Macan/Season @font-face declarations live in src/index.css (the repo's
+   2026-rebrand webfonts under src/assets/fonts) — not duplicated here. */
+
+/* ── Production text-style classes (leland-heading-base etc.) ──────────── */
+@utility leland-heading-sm { @apply text-heading-sm font-medium; }
+@utility leland-heading-base { @apply text-heading-base font-medium; }
+@utility leland-heading-lg { @apply text-heading-lg font-medium; }
+@utility leland-heading-xl { @apply text-heading-xl font-medium; }
+@utility leland-heading-2xl { @apply text-heading-2xl font-medium; }
+@utility leland-heading-3xl { @apply text-heading-3xl font-medium; }
+@utility leland-heading-4xl { @apply text-heading-4xl font-medium; }
+@utility leland-heading-5xl { @apply text-heading-5xl font-medium; }
+@utility leland-heading-6xl { @apply text-heading-6xl font-medium; }
+@utility leland-subtext-sm { @apply text-subtext-sm font-normal; }
+@utility leland-subtext-base { @apply text-subtext-base font-normal; }
+@utility leland-subtext-lg { @apply text-subtext-lg font-normal; }
+@utility leland-subtext-xl { @apply text-subtext-xl font-normal; }
+@utility leland-subtext-2xl { @apply text-subtext-2xl font-normal; }
+@utility leland-subtext-3xl { @apply text-subtext-3xl font-normal; }
+@utility leland-paragraph-sm { @apply text-paragraph-sm font-normal; }
+@utility leland-paragraph-base { @apply text-paragraph-base font-normal; }
+@utility leland-paragraph-lg { @apply text-paragraph-lg font-normal; }
+@utility leland-paragraph-xl { @apply text-paragraph-xl font-normal; }
+@utility leland-eyebrow { @apply text-eyebrow font-normal uppercase; }
+
+/* ── Text links (brand-tokens.css) ─────────────────────────────────────── */
+:is(.link, .link--primary, .link--neutral) {
+  color: rgb(34 34 34);
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: rgb(34 34 34);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+:is(.link, .link--primary, .link--neutral):hover {
+  color: rgb(34 34 34);
+}
+.link--destructive {
+  color: rgb(217 45 32);
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: rgb(217 45 32);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+.link--destructive:hover {
+  color: rgb(217 45 32);
+}
+.link--hover-underline {
+  text-decoration-line: none;
+}
+.link--hover-underline:hover {
+  text-decoration-line: underline;
+}
+
+/* Gray buttons carry no border in their resting state (brand-tokens.css) */
+.btn--gray-borderless {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* Primary tags use the success palette (brand-tokens.css) */
+.tag--primary {
+  background-color: rgb(229 245 241);
+  color: rgb(3 112 82);
+  border-color: rgb(229 245 241);
+}

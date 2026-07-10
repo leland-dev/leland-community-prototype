@@ -1,0 +1,29 @@
+import type { FC, SVGProps } from 'react';
+
+export const IconEmail: FC<SVGProps<SVGSVGElement>> = ({ ...props }) => {
+  return (
+    <svg
+      {...props}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M4.636 5.04688H19.363C20.267 5.04688 21 5.77988 21 6.68388V17.3199C21 18.2239 20.267 18.9559 19.364 18.9559H4.636C3.733 18.9569 3 18.2239 3 17.3199V6.68388C3 5.77988 3.733 5.04688 4.636 5.04688Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      ></path>
+      <path
+        d="M3.11914 6.0765L10.8131 11.5795C11.5081 12.0765 12.4421 12.0775 13.1381 11.5815L20.8761 6.0625"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      ></path>
+    </svg>
+  );
+};

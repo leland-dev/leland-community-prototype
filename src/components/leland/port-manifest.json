@@ -1,0 +1,54 @@
+{
+  "description": "Tracks what has been ported from the leland monorepo (leland-dev/leland-applicant-web) into this prototype's design system. The weekly design-system-sync routine diffs each entry's monorepo sourcePaths between lastSyncedMonorepoCommit and main HEAD, ports any changes per SYNC.md, and bumps lastSyncedMonorepoCommit. When porting NEW components by hand, add an entry here so the routine picks them up.",
+  "lastSyncedMonorepoCommit": "43d7282ba6efc2b2573f3f23f93dbbbf918e987d",
+  "ports": [
+    {
+      "target": "src/styles/leland-theme.css",
+      "sourcePaths": [
+        "packages/config/tailwind-config.js",
+        "packages/config/brand-tokens.css"
+      ],
+      "notes": "Tailwind v3 preset translated to v4 @theme. Base text-* scale overrides and default font-family deliberately not ported (see SYNC.md)."
+    },
+    {
+      "target": "src/components/leland/Button.tsx",
+      "sourcePaths": [
+        "packages/ui-library/src/components/button/base-button.tsx",
+        "packages/ui-library/src/components/button/button.tsx",
+        "packages/ui-library/src/components/button/constants.ts",
+        "packages/ui-library/src/components/button/button-utils.ts"
+      ],
+      "notes": "Flattened into one file. next/link -> react-router-dom; tooltipContent dropped; text-sm/base -> explicit rem sizes."
+    },
+    {
+      "target": "src/components/leland/Tag.tsx",
+      "sourcePaths": [
+        "packages/ui-library/src/components/tag/tag.tsx",
+        "packages/ui-library/src/components/tag/constants.ts"
+      ],
+      "notes": "Flattened into one file. text-sm/base -> explicit rem sizes."
+    },
+    {
+      "target": "src/components/leland/ProgressBar.tsx",
+      "sourcePaths": [
+        "packages/ui-library/src/components/chart/ProgressBar.tsx",
+        "packages/ui-library/src/components/chart/constants.ts"
+      ],
+      "notes": "@radix-ui/react-progress replaced with plain divs + aria attributes."
+    },
+    {
+      "target": "src/components/leland/util.ts",
+      "sourcePaths": [
+        "packages/ui-library/src/util/font.ts",
+        "packages/ui-library/src/util/breakpoints.ts",
+        "packages/ui-library/src/types/utils.ts"
+      ],
+      "notes": "FontWeight, Breakpoints, PickEnum only."
+    },
+    {
+      "target": "src/components/leland/svg/",
+      "sourcePaths": ["packages/ui-library/src/svg/"],
+      "notes": "Copied verbatim (generated, dependency-free). New/changed icons copy 1:1 including the index barrels."
+    }
+  ]
+}

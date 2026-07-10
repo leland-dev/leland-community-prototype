@@ -1,0 +1,29 @@
+import type { FC, SVGProps } from 'react';
+
+export const IconX: FC<SVGProps<SVGSVGElement>> = ({ ...props }) => {
+  return (
+    <svg
+      {...props}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M18 6L6 18"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      ></path>
+      <path
+        d="M6 6L18 18"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      ></path>
+    </svg>
+  );
+};

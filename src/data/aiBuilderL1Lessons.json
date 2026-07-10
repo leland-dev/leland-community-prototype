@@ -1,0 +1,300 @@
+[
+  {
+    "id": "lesson-1",
+    "number": 1,
+    "title": "Build a real product with world-class design",
+    "subtitle": "Vibe code a portfolio website, extract design DNA from a site you love, turn it into a reusable design skill, and publish your styled portfolio live at a shareable URL.",
+    "durationMin": 90,
+    "sections": [
+      {
+        "id": "welcome",
+        "title": "Welcome",
+        "kind": "html",
+        "src": "/lessons/lesson-1/welcome.html"
+      },
+      {
+        "id": "intro",
+        "title": "Session intro",
+        "durationMin": 10,
+        "kind": "html",
+        "src": "/lessons/lesson-1/intro.html"
+      },
+      {
+        "id": "concepts",
+        "title": "Opening concepts",
+        "durationMin": 10,
+        "kind": "html",
+        "src": "/lessons/lesson-1/concepts.html"
+      },
+      {
+        "id": "build-1",
+        "title": "Begin vibe coding your AI portfolio",
+        "durationMin": 13,
+        "kind": "html",
+        "src": "/lessons/lesson-1/build-1.html"
+      },
+      {
+        "id": "build-2",
+        "title": "Extract design DNA from an inspiration website",
+        "durationMin": 13,
+        "kind": "html",
+        "src": "/lessons/lesson-1/build-2.html"
+      },
+      {
+        "id": "build-3",
+        "title": "Convert design DNA to a skill",
+        "durationMin": 13,
+        "kind": "html",
+        "src": "/lessons/lesson-1/build-3.html"
+      },
+      {
+        "id": "build-4",
+        "title": "Design your custom portfolio",
+        "durationMin": 20,
+        "kind": "html",
+        "src": "/lessons/lesson-1/build-4.html"
+      },
+      {
+        "id": "share",
+        "title": "Share what you built",
+        "durationMin": 3,
+        "kind": "html",
+        "src": "/lessons/lesson-1/share.html"
+      },
+      {
+        "id": "wrap",
+        "title": "Summary & next steps",
+        "durationMin": 3,
+        "kind": "html",
+        "src": "/lessons/lesson-1/wrap.html"
+      }
+    ]
+  },
+  {
+    "id": "lesson-2",
+    "number": 2,
+    "title": "Automate Communication in Your Voice",
+    "subtitle": "Connect your real tools, teach Claude how you write, and set up your first automation that runs on its own.",
+    "durationMin": 90,
+    "sections": [
+      {
+        "id": "welcome",
+        "title": "Welcome",
+        "kind": "html",
+        "src": "/lessons/lesson-2/welcome.html"
+      },
+      {
+        "id": "intro",
+        "title": "Session intro",
+        "durationMin": 5,
+        "kind": "html",
+        "src": "/lessons/lesson-2/intro.html"
+      },
+      {
+        "id": "concepts",
+        "title": "Core frameworks",
+        "durationMin": 2,
+        "kind": "html",
+        "src": "/lessons/lesson-2/concepts.html"
+      },
+      {
+        "id": "build-1",
+        "title": "Connect your tools",
+        "durationMin": 15,
+        "kind": "html",
+        "src": "/lessons/lesson-2/build-1.html"
+      },
+      {
+        "id": "build-2",
+        "title": "Create your email voice guide",
+        "durationMin": 20,
+        "kind": "html",
+        "src": "/lessons/lesson-2/build-2.html"
+      },
+      {
+        "id": "build-3",
+        "title": "Set up a scheduled email manager",
+        "durationMin": 20,
+        "kind": "html",
+        "src": "/lessons/lesson-2/build-3.html"
+      },
+      {
+        "id": "build-4",
+        "title": "Scope your first custom workflow",
+        "durationMin": 20,
+        "kind": "html",
+        "src": "/lessons/lesson-2/build-4.html"
+      },
+      {
+        "id": "build-5",
+        "title": "Add your builds to your portfolio",
+        "durationMin": 5,
+        "kind": "html",
+        "src": "/lessons/lesson-2/build-5.html"
+      },
+      {
+        "id": "share",
+        "title": "Share what you built",
+        "durationMin": 3,
+        "kind": "html",
+        "src": "/lessons/lesson-2/share.html"
+      },
+      {
+        "id": "wrap",
+        "title": "Summary & next steps",
+        "durationMin": 5,
+        "kind": "html",
+        "src": "/lessons/lesson-2/wrap.html"
+      }
+    ]
+  },
+  {
+    "id": "lesson-3",
+    "number": 3,
+    "title": "Analyze data and design presentations",
+    "subtitle": "Go from raw spreadsheet to polished, shareable presentation - analyze your data, find the story, structure it, and build the deck.",
+    "durationMin": 90,
+    "sections": [
+      {
+        "id": "welcome",
+        "title": "Welcome",
+        "kind": "html",
+        "src": "/lessons/lesson-3/welcome.html"
+      },
+      {
+        "id": "intro",
+        "title": "Session intro",
+        "durationMin": 5,
+        "kind": "html",
+        "src": "/lessons/lesson-3/intro.html"
+      },
+      {
+        "id": "build-1",
+        "title": "Analyze your data in a spreadsheet",
+        "durationMin": 15,
+        "kind": "html",
+        "src": "/lessons/lesson-3/build-1.html"
+      },
+      {
+        "id": "build-2",
+        "title": "Build charts that tell a story",
+        "durationMin": 15,
+        "kind": "html",
+        "src": "/lessons/lesson-3/build-2.html"
+      },
+      {
+        "id": "build-3",
+        "title": "Structure your presentation",
+        "durationMin": 10,
+        "kind": "html",
+        "src": "/lessons/lesson-3/build-3.html"
+      },
+      {
+        "id": "build-4",
+        "title": "Build your slide deck",
+        "durationMin": 20,
+        "kind": "html",
+        "src": "/lessons/lesson-3/build-4.html"
+      },
+      {
+        "id": "build-5",
+        "title": "Export and add to your portfolio",
+        "durationMin": 15,
+        "kind": "html",
+        "src": "/lessons/lesson-3/build-5.html"
+      },
+      {
+        "id": "share",
+        "title": "Share what you built",
+        "durationMin": 5,
+        "kind": "html",
+        "src": "/lessons/lesson-3/share.html"
+      },
+      {
+        "id": "wrap",
+        "title": "Summary & next steps",
+        "durationMin": 5,
+        "kind": "html",
+        "src": "/lessons/lesson-3/wrap.html"
+      }
+    ]
+  },
+  {
+    "id": "lesson-4",
+    "number": 4,
+    "title": "Launch Your Custom AI System",
+    "subtitle": "Build an AI context file, expand your skills library, organize your folder, and cap it off with Demo Day.",
+    "durationMin": 90,
+    "sections": [
+      {
+        "id": "welcome",
+        "title": "Welcome",
+        "kind": "html",
+        "src": "/lessons/lesson-4/welcome.html"
+      },
+      {
+        "id": "intro",
+        "title": "Session intro",
+        "durationMin": 5,
+        "kind": "html",
+        "src": "/lessons/lesson-4/intro.html"
+      },
+      {
+        "id": "build-1",
+        "title": "Craft an AI context file",
+        "durationMin": 15,
+        "kind": "html",
+        "src": "/lessons/lesson-4/build-1.html"
+      },
+      {
+        "id": "build-2",
+        "title": "Create and add skills to upgrade your AI system",
+        "durationMin": 20,
+        "kind": "html",
+        "src": "/lessons/lesson-4/build-2.html"
+      },
+      {
+        "id": "build-3",
+        "title": "Organize a folder",
+        "durationMin": 15,
+        "kind": "html",
+        "src": "/lessons/lesson-4/build-3.html"
+      },
+      {
+        "id": "demo-day",
+        "title": "Demo Day",
+        "durationMin": 15,
+        "kind": "html",
+        "src": "/lessons/lesson-4/demo-day.html"
+      },
+      {
+        "id": "build-4",
+        "title": "Update your portfolio",
+        "durationMin": 15,
+        "kind": "html",
+        "src": "/lessons/lesson-4/build-4.html"
+      },
+      {
+        "id": "build-5",
+        "title": "Share what you learned and get your certificate",
+        "durationMin": 10,
+        "kind": "html",
+        "src": "/lessons/lesson-4/build-5.html"
+      },
+      {
+        "id": "share",
+        "title": "Share what you built",
+        "durationMin": 5,
+        "kind": "html",
+        "src": "/lessons/lesson-4/share.html"
+      },
+      {
+        "id": "wrap",
+        "title": "Summary & next steps",
+        "durationMin": 5,
+        "kind": "html",
+        "src": "/lessons/lesson-4/wrap.html"
+      }
+    ]
+  }
+]
