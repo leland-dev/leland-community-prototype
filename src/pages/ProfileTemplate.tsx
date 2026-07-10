@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import ProfileV2 from "./ProfileV2";
 import customerPhoto from "../assets/profile photos/profile photo.png";
+import { GraduationCap, Briefcase, Wrench } from "lucide-react";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { getProfilePerson } from "../lib/profilePeople";
 
@@ -48,7 +49,7 @@ function AdminSelect({ label, value, options, onChange }: { label: string; value
 }
 
 export default function ProfileTemplate() {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, category } = useParams<{ slug: string; category?: string }>();
   const [searchParams] = useSearchParams();
   // ?me=1 → the signed-in user's own profile: Expert off, My profile on.
   const isMe = searchParams.get("me") === "1";
@@ -72,6 +73,17 @@ export default function ProfileTemplate() {
   const displayName = person?.name ?? prettifySlug(slug);
   const displayPhoto = person?.avatar ?? customerPhoto;
   const cover = person?.cover;
+
+  // Categories this expert coaches for. The "high-level" profile (no category
+  // in the URL) lets the visitor pick one; each links to a category-specific
+  // variant at /profile/:slug/:category.
+  const categories = [
+    { slug: "mba", label: "MBA Admissions", Icon: GraduationCap },
+    { slug: "management-consulting", label: "Management Consulting", Icon: Briefcase },
+    { slug: "product-management", label: "Product Management", Icon: Wrench },
+  ];
+  // High-level = an expert profile with no category selected yet.
+  const highLevel = expert && !category;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -177,6 +189,9 @@ export default function ProfileTemplate() {
         altReviews={altReviews}
         coverMode={coverMode}
         ownProfile={myProfile}
+        highLevel={highLevel}
+        categories={categories}
+        onSelectCategory={(c) => navigate(`/profile/${slug}/${c}`)}
       />
       </div>
 

@@ -117,6 +117,7 @@ export default function App() {
         {/* Standalone pages using PageShell directly */}
         <Route path="/profile-v2" element={<ProfileV2 />} />
         <Route path="/profile/:slug" element={<ProfileTemplate />} />
+        <Route path="/profile/:slug/:category" element={<ProfileTemplate />} />
         <Route path="/coach-profile" element={<ProfileV2 coach coachId="samantha" />} />
         <Route path="/coach-profile-john" element={<ProfileV2 coach coachId="john" />} />
         <Route path="/agent/:agentSlug" element={<CoachAgent />} />

@@ -399,7 +399,7 @@ function CategorySubtitle({ photos, experts }: { photos: string[]; experts: stri
   );
 }
 
-export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = false, coverMode = "default", onBack }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; onBack?: () => void }) {
+export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = false, coverMode = "default", highLevel = false, categories = [], onSelectCategory, onBack }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categories?: { slug: string; label: string; Icon?: React.ElementType }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void }) {
   const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
   const { dark: darkMode } = useDarkMode();
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
@@ -493,10 +493,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   const showOfferingsSection = !unified || (showOfferingsTab ? (coachTab === "offerings" || coachTab === "about") : coachTab === "about");
   const showRestSections = !unified || coachTab === "about";
   // The coach CTA sidebar (video, availability, CTAs, note, Questions) shows for
-  // the non-unified coach page and, now, the unified template when viewing a
-  // coach who isn't the signed-in user. Otherwise the discovery sidebar (For
-  // you / Happening now / Find an expert) shows.
-  const showCoachSidebar = !isCustomerProfile && (!unified || !viewingOwnProfile);
+  // every coach profile — including when viewing your own — so the desktop
+  // sidebar stays consistent. Customer profiles get the discovery sidebar.
+  const showCoachSidebar = !isCustomerProfile;
   // On the unified template the coach sidebar only mounts at the sidebar
   // breakpoint (≥960px), so the inline (mobile) copies of the video, note,
   // availability, and CTA are hidden there to avoid duplication.
@@ -512,14 +511,37 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   // Whether the self-rendered mobile nav icons should be light (white). Only the
   // dark/image covers are dark enough for white icons; beige & none get dark ones.
   const navIconsLight = navScrolled ? darkMode : coverMode === "default" || coverMode === "dark";
+  // Category-specific coach profile (a category is selected). The name shrinks
+  // and the headline becomes the large serif heading; Super Coach moves inline
+  // next to the name (so it's dropped from the badge list here).
+  const categoryMode = unified && !isCustomerProfile && !highLevel;
   // Badges shown at the top of the Profile tab (max 3). Customer favorite is
   // controlled by its admin toggle.
   const displayedBadges: ProfileBadge[] = [
     ...(effCustomerFavorite ? [BADGE_LIBRARY.customerFavorite] : []),
-    ...(effShowSupercoach ? [BADGE_LIBRARY.superCoach] : []),
+    ...(effShowSupercoach && !categoryMode ? [BADGE_LIBRARY.superCoach] : []),
     BADGE_LIBRARY.admissionsStaff,
     BADGE_LIBRARY.risingStar,
   ].slice(0, 3);
+
+  // High-level profile: large category selection buttons (each links to the
+  // coach's category-specific profile variant).
+  const categoryButtons = (
+    <div className="grid grid-cols-2 gap-3">
+      {categories.map((c) => {
+        const Icon = c.Icon;
+        return (
+          <button
+            key={c.slug}
+            onClick={() => onSelectCategory?.(c.slug)}
+            className="flex min-h-[116px] flex-col justify-between rounded-2xl border border-gray-stroke bg-white p-4 text-left transition-colors hover:bg-gray-hover">
+            {Icon ? <Icon size={26} strokeWidth={1.75} className="text-gray-dark" /> : <span className="h-[26px]" />}
+            <span className="text-[15px] font-medium leading-tight text-gray-dark">{c.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
   // If a coach tab disappears while it's active (Offerings toggled off, or Saved
   // when no longer viewing own profile), fall back to About.
   useEffect(() => {
@@ -1221,7 +1243,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   {heroCustomer && (
                     <button
                       aria-label={`Message ${profileName.split(" ")[0]}`}
-                      className="mb-1 flex cursor-pointer items-center justify-center rounded-full bg-[#F5F5F5] p-2 transition-colors hover:bg-[#ebebeb]"
+                      className="mb-1 flex cursor-pointer items-center justify-center rounded-full bg-[#F5F5F5] p-2 transition-colors hover:bg-[#ebebeb] md:hidden"
                     >
                       <img src={airplaneIcon} alt="" className="h-[18px] w-[18px]" />
                     </button>
@@ -1292,8 +1314,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
           {/* Name + Verified badge + Supercoach badge. In the unified template the
               name always keeps the large serif styling (it never shrinks when a
               category is selected). */}
-          <div className={`flex items-center ${unified || sectionFilter === "All" ? "gap-2 mb-2" : "gap-1 mb-1"}`}>
-            <h1 className={`font-medium text-gray-dark ${unified || sectionFilter === "All" ? "font-serif text-[26px]" : "text-[16px]"}`}>{profileName}</h1>
+          <div className={`flex items-center ${categoryMode ? "gap-1.5 mb-1" : unified || sectionFilter === "All" ? "gap-2 mb-2" : "gap-1 mb-1"}`}>
+            <h1 className={`font-medium text-gray-dark ${categoryMode ? "text-[16px]" : unified || sectionFilter === "All" ? "font-serif text-[26px]" : "text-[16px]"}`}>{profileName}</h1>
             <AnimatePresence>
               {!isCustomerProfile && (
                 <motion.img
@@ -1308,9 +1330,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                 />
               )}
             </AnimatePresence>
-            {/* Inline badge — non-unified only; the template shows Super Coach as
-                a row in the About tab instead. */}
-            {effShowSupercoach && !isCustomerProfile && !unified && (
+            {/* Inline Super Coach — non-unified, and the category-specific
+                template (where it sits next to the smaller name). */}
+            {effShowSupercoach && !isCustomerProfile && (!unified || categoryMode) && (
               <>
                 <span className="ml-1 text-[16px] text-[#999999]">·</span>
                 <span className="text-[16px] text-[#707070]"><span className="text-[14px]">🏆</span> Supercoach</span>
@@ -1318,21 +1340,21 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             )}
           </div>
 
-          {/* Alt reviews — a 5-star row directly beneath the name, with the
-              rating + review count inline (same text size). */}
-          {!isCustomerProfile && altReviews && (
-            <div
-              className="mb-2 flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-70"
-              onClick={() => scrollToSection("reviews")}
-            >
-              <div className="flex items-center gap-[1px]">
-                {[...Array(5)].map((_, i) => (
-                  <img key={i} src={starIcon} alt="" className="h-[16px] w-[16px]" />
-                ))}
-              </div>
-              <span className="text-[15px] font-semibold leading-none text-gray-dark">4.9</span>
-              <span className="text-[15px] leading-none text-[#707070]">52 Reviews</span>
-            </div>
+          {/* Headline — sits directly under the name. Large serif in the
+              category-specific coach view; body text (bio) for customers. The
+              high-level profile hides it (no category yet). */}
+          {(isCustomerProfile || (unified && !highLevel)) && (
+            <p className={categoryMode ? "mb-2 font-serif text-[26px] font-medium leading-[1.3] text-gray-dark" : "mb-2 text-[15px] leading-[1.4] text-gray-dark"}>
+              {isCustomerProfile ? (
+                "Building products that matter. Passionate about AI, design, and helping others break into tech."
+              ) : sectionFilter === "College" ? (
+                <>College Admissions Expert | Yale Grad | 50+ Ivy League Admits</>
+              ) : sectionFilter === "MBA" ? (
+                <>MBA Coach | Stanford GSB | 100+ M7 Admits</>
+              ) : (
+                <>Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB</>
+              )}
+            </p>
           )}
 
           {/* Headline — large serif variant. Hidden in the unified template,
@@ -1349,7 +1371,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
           </p>
 
           {/* Credentials row */}
-          <div className="mb-2 flex flex-wrap items-center gap-x-[20px] gap-y-[2px] text-[14px] leading-tight text-[#707070] md:mb-4">
+          <div className="mb-3 flex flex-wrap items-center gap-x-[20px] gap-y-[2px] text-[14px] leading-tight text-[#707070]">
             {/* Atlassian */}
             <div className="flex items-center gap-[6px]">
               <img src={atlassianLogo} alt="Atlassian" className="h-[18px] w-[18px] rounded" />
@@ -1374,25 +1396,24 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             </div>}
           </div>
 
-          {/* Bio — customer profile shows a bio here; in the unified template
-              coaches show their (category-aware) headline in this same slot and
-              body-text style, so the name above stays the large heading. */}
-          {(isCustomerProfile || unified) && (
-            <p className="mt-1 mb-2 text-[15px] leading-[1.4] text-gray-dark">
-              {isCustomerProfile ? (
-                "Building products that matter. Passionate about AI, design, and helping others break into tech."
-              ) : sectionFilter === "College" ? (
-                <>College Admissions Expert | Yale Grad | 50+ Ivy League Admits</>
-              ) : sectionFilter === "MBA" ? (
-                <>MBA Coach | Stanford GSB | 100+ M7 Admits</>
-              ) : (
-                <>Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB</>
-              )}
-            </p>
+          {/* Reviews — a 5-star row below the featured companies. */}
+          {!isCustomerProfile && altReviews && (
+            <div
+              className="mb-3 flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-70 md:mb-4"
+              onClick={() => scrollToSection("reviews")}
+            >
+              <div className="flex items-center gap-[1px]">
+                {[...Array(5)].map((_, i) => (
+                  <img key={i} src={starIcon} alt="" className="h-[16px] w-[16px]" />
+                ))}
+              </div>
+              <span className="text-[15px] font-semibold leading-none text-gray-dark">4.9</span>
+              <span className="text-[15px] leading-none text-[#707070]">52 Reviews</span>
+            </div>
           )}
 
           {/* Stats row */}
-            <div className="mt-3 mb-1 flex flex-wrap items-center gap-x-6 gap-y-3 md:mt-0 md:mb-2">
+            <div className="mb-1 flex flex-wrap items-center gap-x-6 gap-y-3 md:mb-2">
               {/* Customer Favorite — desktop only (mobile gets its own banner below) */}
               {showLegacyCustomerFavorite && effCustomerFavorite && (
                 <>
@@ -1877,40 +1898,53 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                        centered header in the hero-name style. Full-bleed on
                        mobile, contained + rounded on desktop. */
                     <div className="-mx-4 bg-[#F3F1E6] px-4 py-12 md:mx-0 md:rounded-2xl md:px-8 md:py-16">
-                      <h2 ref={setSectionRef("offerings")} className="scroll-mt-[60px] mb-6 text-center font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[42px]">
+                      <h2 ref={setSectionRef("offerings")} className={`scroll-mt-[60px] text-center font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[42px] ${highLevel ? "mb-2" : "mb-6"}`}>
                         Work with {profileName.split(" ")[0]}
                       </h2>
-                      <div className="flex flex-col gap-3">
-                        {[...Array(4)].map((_, i) => (
-                          <div key={i} className="h-[92px] rounded-xl bg-[#222222]/5" style={dashedBorderStyle} />
-                        ))}
-                      </div>
+                      {highLevel && (
+                        <p className="mb-6 text-center text-[15px] text-[#4C4C4C]">Select a category that you're looking for help in.</p>
+                      )}
+                      {highLevel ? (
+                        categoryButtons
+                      ) : (
+                        <div className="flex flex-col gap-3">
+                          {[...Array(4)].map((_, i) => (
+                            <div key={i} className="h-[92px] rounded-xl bg-[#222222]/5" style={dashedBorderStyle} />
+                          ))}
+                        </div>
+                      )}
                       <div className="mt-6 flex flex-col items-center gap-3">
                         <div className="flex items-center gap-2 text-[13px] text-[#9b9b9b]">
                           <img src={shieldIcon} alt="" className="w-[12px]" />
                           <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
                         </div>
-                        <Button
-                          size="lg"
-                          variant="white"
-                          rounded="rounded-full"
-                          className="shadow-[0_0_0_1px_rgba(34,34,34,0.1),0_1px_3px_rgba(16,24,40,0.04)]"
-                          onClick={() => { setCoachTab("offerings"); scrollTabsIntoView(); }}
-                        >
-                          See all offerings
-                        </Button>
+                        {!highLevel && (
+                          <Button
+                            size="lg"
+                            variant="white"
+                            rounded="rounded-full"
+                            className="shadow-[0_0_0_1px_rgba(34,34,34,0.1),0_1px_3px_rgba(16,24,40,0.04)]"
+                            onClick={() => { setCoachTab("offerings"); scrollTabsIntoView(); }}
+                          >
+                            See all offerings
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ) : (
                     <>
                       <h2 ref={setSectionRef("offerings")} className="scroll-mt-[60px] mb-4 text-[22px] font-semibold text-gray-dark">
-                        Offerings
+                        {highLevel ? "Select a category you're looking for help with:" : "Offerings"}
                       </h2>
-                      <div className="flex flex-col gap-3">
-                        {[...Array(12)].map((_, i) => (
-                          <div key={i} className="h-[92px] rounded-xl bg-[#222222]/5" style={dashedBorderStyle} />
-                        ))}
-                      </div>
+                      {highLevel ? (
+                        categoryButtons
+                      ) : (
+                        <div className="flex flex-col gap-3">
+                          {[...Array(12)].map((_, i) => (
+                            <div key={i} className="h-[92px] rounded-xl bg-[#222222]/5" style={dashedBorderStyle} />
+                          ))}
+                        </div>
+                      )}
                     </>
                   )
                 )}
