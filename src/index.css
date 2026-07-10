@@ -104,7 +104,7 @@
 
   /* Grays */
   --color-gray-dark:        #222222; /* Leonardo's ink primary */
-  --color-gray-light:       #707070;
+  --color-gray-light:       #4C4C4C;
   --color-gray-xlight:      #a3a3a3;
   --color-gray-extra-light: #767676;
   --color-gray-stroke:      #e5e5e5;
@@ -185,6 +185,11 @@
 @keyframes pulse-ring {
   0% { box-shadow: 0 0 0 0px rgba(255,217,111,0.35); }
   100% { box-shadow: 0 0 0 10px rgba(255,217,111,0); }
+}
+
+@keyframes pulse-ring-blue {
+  0% { box-shadow: 0 0 0 0px rgba(128,172,237,0.4); }
+  100% { box-shadow: 0 0 0 10px rgba(128,172,237,0); }
 }
 
 /* iOS-style activity indicator: 8 rounded blades arranged radially. Each

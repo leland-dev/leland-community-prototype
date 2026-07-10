@@ -13,6 +13,8 @@ type PageShellProps = {
   stackRight?: boolean;
   // Override the outer vertical padding classes (defaults to "py-4 sm:py-10").
   paddingYClassName?: string;
+  // Override the outer horizontal padding classes (defaults to "px-4 sm:px-6").
+  paddingXClassName?: string;
   children: ReactNode;
 };
 
@@ -26,6 +28,7 @@ export default function PageShell({
   contentMaxWidth,
   stackRight = false,
   paddingYClassName = "py-4 sm:py-10",
+  paddingXClassName = "px-4 sm:px-6",
 
   children,
 }: PageShellProps) {
@@ -71,7 +74,7 @@ export default function PageShell({
     : `flex items-start ${leftSidebarMobile ? "flex-col md:flex-row" : ""} ${hasRight && !hasLeft ? "justify-between" : ""}`;
 
   return (
-    <div className={`mx-auto max-w-[1280px] px-4 sm:px-6 ${paddingYClassName}`}>
+    <div className={`mx-auto max-w-[1280px] ${paddingXClassName} ${paddingYClassName}`}>
       <div className={rowClass} style={{ gap: 40 }}>
         {hasLeft && <aside className={leftClass}>{leftSidebar}</aside>}
         <div

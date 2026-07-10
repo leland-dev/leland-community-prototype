@@ -41,6 +41,8 @@ import airplaneIcon from "../assets/icons/airplane.svg";
 import calendarIcon from "../assets/icons/calendar.svg";
 import calendarPageThinIcon from "../assets/icons/calendar-page-thin.svg";
 import chevronDownIcon from "../assets/icons/chevron-down.svg";
+import chevronRightIcon from "../assets/icons/chevron-right.svg";
+import timeClockHourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import bookBookmarkIcon from "../assets/icons/book-bookmark.svg";
 import piggyBankIcon from "../assets/icons/Piggy bank, Coin.1.svg";
 import stopwatchIcon from "../assets/icons/stopwatch.svg";
@@ -128,7 +130,7 @@ type ProfileBadge = { icon?: string; emoji?: string; headline: string; subheadli
 
 const BADGE_LIBRARY: Record<string, ProfileBadge> = {
   customerFavorite: { icon: badgeCustomerFavorite, headline: "Customer favorite", subheadline: "In the top 10% of MBA experts on Leland" },
-  superCoach: { emoji: "🏆", headline: "Super Coach", subheadline: "Recognized for consistently outstanding coaching outcomes." },
+  superCoach: { emoji: "🏆", headline: "Top Expert", subheadline: "Recognized for consistently outstanding coaching outcomes." },
   quickResponder: { icon: badgeQuickResponder, headline: "Quick responder", subheadline: "Usually responds within an hour" },
   risingStar: { icon: badgeRisingStar, headline: "Rising star", subheadline: "Fast-growing favorite on Leland" },
   experience: { icon: badgeCalendarExperience, headline: "10 years of experience", subheadline: "Proven track record of success" },
@@ -399,7 +401,7 @@ function CategorySubtitle({ photos, experts }: { photos: string[]; experts: stri
   );
 }
 
-export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = false, coverMode = "default", highLevel = false, categories = [], onSelectCategory, onBack }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categories?: { slug: string; label: string; Icon?: React.ElementType }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void }) {
+export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void }) {
   const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
   const { dark: darkMode } = useDarkMode();
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
@@ -511,35 +513,44 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   // Whether the self-rendered mobile nav icons should be light (white). Only the
   // dark/image covers are dark enough for white icons; beige & none get dark ones.
   const navIconsLight = navScrolled ? darkMode : coverMode === "default" || coverMode === "dark";
+  // Desktop cover action buttons ride on the cover — consistent across all
+  // cover modes: a low-opacity black frosted background with white icons.
+  const coverActionBg = "bg-black/40 hover:bg-black/45";
   // Category-specific coach profile (a category is selected). The name shrinks
   // and the headline becomes the large serif heading; Super Coach moves inline
   // next to the name (so it's dropped from the badge list here).
   const categoryMode = unified && !isCustomerProfile && !highLevel;
   // Badges shown at the top of the Profile tab (max 3). Customer favorite is
-  // controlled by its admin toggle.
-  const displayedBadges: ProfileBadge[] = [
-    ...(effCustomerFavorite ? [BADGE_LIBRARY.customerFavorite] : []),
-    ...(effShowSupercoach && !categoryMode ? [BADGE_LIBRARY.superCoach] : []),
-    BADGE_LIBRARY.admissionsStaff,
-    BADGE_LIBRARY.risingStar,
-  ].slice(0, 3);
+  // controlled by its admin toggle, and only shows on category-specific
+  // profiles (hidden on the high-level profile).
+  const showCustomerFavoriteBadge = effCustomerFavorite && !highLevel;
+  const displayedBadges: ProfileBadge[] = (
+    mvp
+      ? // MVP shows only the Customer favorite badge.
+        (showCustomerFavoriteBadge ? [BADGE_LIBRARY.customerFavorite] : [])
+      : [
+          ...(showCustomerFavoriteBadge ? [BADGE_LIBRARY.customerFavorite] : []),
+          ...(effShowSupercoach && !categoryMode ? [BADGE_LIBRARY.superCoach] : []),
+          BADGE_LIBRARY.admissionsStaff,
+          BADGE_LIBRARY.risingStar,
+        ]
+  ).slice(0, 3);
 
   // High-level profile: large category selection buttons (each links to the
   // coach's category-specific profile variant).
-  const categoryButtons = (
-    <div className="grid grid-cols-2 gap-3">
-      {categories.map((c) => {
-        const Icon = c.Icon;
-        return (
-          <button
-            key={c.slug}
-            onClick={() => onSelectCategory?.(c.slug)}
-            className="flex min-h-[116px] flex-col justify-between rounded-2xl border border-gray-stroke bg-white p-4 text-left transition-colors hover:bg-gray-hover">
-            {Icon ? <Icon size={26} strokeWidth={1.75} className="text-gray-dark" /> : <span className="h-[26px]" />}
-            <span className="text-[15px] font-medium leading-tight text-gray-dark">{c.label}</span>
-          </button>
-        );
-      })}
+  // capped: cards centered and capped at 500px (used in the "Work with …" band).
+  const renderCategoryButtons = (capped = false) => (
+    <div className={`flex flex-col ${capped ? "items-center gap-1.5 my-5" : "gap-3"}`}>
+      {categories.map((c) => (
+        <button
+          key={c.slug}
+          onClick={() => onSelectCategory?.(c.slug)}
+          className={`flex w-full items-center gap-3 rounded-2xl border border-gray-stroke bg-white px-5 py-4 text-left transition-colors hover:bg-gray-hover ${capped ? "max-w-[500px]" : ""}`}>
+          {c.icon && <img src={c.icon} alt="" className="h-7 w-7 shrink-0" />}
+          <span className="min-w-0 flex-1 text-[16px] font-semibold text-gray-dark">{c.label}</span>
+          <img src={chevronRightIcon} alt="" className="h-5 w-5 shrink-0" />
+        </button>
+      ))}
     </div>
   );
   // If a coach tab disappears while it's active (Offerings toggled off, or Saved
@@ -547,7 +558,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   useEffect(() => {
     if (!showOfferingsTab && coachTab === "offerings") setCoachTab("about");
     if (!viewingOwnProfile && (coachTab === "saved" || coachTab === "likes")) setCoachTab("about");
-  }, [showOfferingsTab, viewingOwnProfile, coachTab]);
+    if (mvp && coachTab === "activity") setCoachTab("about");
+  }, [showOfferingsTab, viewingOwnProfile, coachTab, mvp]);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [eventsCategoryOpen, setEventsCategoryOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -688,6 +700,19 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
     return () => document.removeEventListener("mousedown", handleClick);
   }, [categoryDropdownOpen]);
 
+  // Category nav dropdown (Offerings tab on a category-specific profile) — picks
+  // another category and links to that category's page.
+  const [catNavOpen, setCatNavOpen] = useState(false);
+  const catNavRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!catNavOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (catNavRef.current && !catNavRef.current.contains(e.target as Node)) setCatNavOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [catNavOpen]);
+
   useEffect(() => {
     if (!eventsCategoryOpen) return;
     const handleClick = (e: MouseEvent) => {
@@ -771,18 +796,11 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
       <div className="min-w-0">
         <p className="text-[14px] font-semibold leading-tight text-gray-dark">Note from {profileName.split(" ")[0]}</p>
         <div className="relative mt-0.5">
-          <motion.div
-            initial={false}
-            animate={{ height: coachNoteExpanded ? "auto" : 58 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-            className="overflow-hidden"
-          >
-            <p className="text-[14px] leading-tight text-[#4C4C4C]">
-              If you're looking for AI coaching, from fundamentals to building out more advanced agents and workflows, I'm taking on a few new folks for 1:1 productivity coaching for both your professional and personal life. Keeping up with the pace of development alone requires dedication. But we can bring your information together and rewire how you work. If you're looking for MBA application support, essay-writing, or other coaching, message me directly through Leland and I'll get right back to you.
-            </p>
-          </motion.div>
+          <p className={`text-[14px] leading-tight text-gray-light ${coachNoteExpanded ? "" : "line-clamp-3"}`}>
+            If you're looking for AI coaching, from fundamentals to building out more advanced agents and workflows, I'm taking on a few new folks for 1:1 productivity coaching for both your professional and personal life. Keeping up with the pace of development alone requires dedication. But we can bring your information together and rewire how you work. If you're looking for MBA application support, essay-writing, or other coaching, message me directly through Leland and I'll get right back to you.
+          </p>
           {!coachNoteExpanded && (
-            <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[14px] leading-snug font-medium text-gray-dark">
+            <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[14px] leading-tight font-medium text-gray-dark">
               Read more
             </span>
           )}
@@ -912,7 +930,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   />
                   <div className="flex min-w-0 flex-col text-[14px] leading-tight">
                     <span className="truncate text-[16px] font-medium text-gray-dark md:text-[14px]">{profileName}</span>
-                    {!isCustomerProfile && <span className="truncate text-[#707070]">Available today</span>}
+                    {!isCustomerProfile && <span className="truncate text-[#707070]">Available tomorrow</span>}
                   </div>
                 </div>
 
@@ -968,7 +986,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
         animate={{ x: 0 }}
         transition={{ duration: 0.15, ease: "easeOut" }}
       >
-      <PageShell paddingYClassName="py-4 sm:pb-10 sm:pt-6" rightSidebar={showSidebar ? (
+      <PageShell paddingYClassName="py-4 sm:pb-10 sm:pt-6" paddingXClassName="px-4 sm:px-6 lg:px-16" rightSidebar={showSidebar ? (
           !showCoachSidebar ? (
             <div className="flex flex-col gap-6 px-1">
               <SidebarGroup label="For you" hideChevron>
@@ -1071,11 +1089,11 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   </div>
                 )}
                 <div className="flex items-center justify-between rounded-lg border border-[#E5E5E5] bg-white px-5 py-4" style={{ boxShadow: "0px 1px 2px 0px rgba(16,24,40,0.05)" }}>
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[14px] leading-none font-medium text-gray-dark">Available today at 5:30pm</span>
-                    <span className="text-[14px] leading-none text-[#707070]">Usually responds within 12 hours</span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[14px] font-semibold leading-tight text-gray-dark">Available tomorrow</span>
+                    <span className="text-[14px] leading-tight text-[#4C4C4C]">Starting at 5:30 PM MT</span>
                   </div>
-                  <span className="h-[12px] w-[12px] shrink-0 rounded-full bg-[#80ACED] animate-[pulse-ring_2.4s_ease-out_infinite]" />
+                  <span className="h-[12px] w-[12px] shrink-0 rounded-full bg-[#80ACED] animate-[pulse-ring-blue_2.4s_ease-out_infinite]" />
                 </div>
                 <div className="flex flex-col gap-2">
                   <button className="w-full cursor-pointer rounded-full bg-leland-brand-primary px-4 py-[14px] text-[15px] font-medium text-gray-dark transition-colors hover:bg-leland-brand-primary/90">
@@ -1109,7 +1127,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                           transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
                           className="overflow-hidden"
                         >
-                          <p className="text-[14px] leading-snug text-[#707070]">
+                          <p className="text-[14px] leading-snug text-gray-light">
                             If you're looking for AI coaching, from fundamentals to building out more advanced agents and workflows, I'm taking on a few new folks for 1:1 productivity coaching for both your professional and personal life. Keeping up with the pace of development alone requires dedication. But we can bring your information together and rewire how you work. If you're looking for MBA application support, essay-writing, or other coaching, message me directly through Leland and I'll get right back to you.
                           </p>
                         </motion.div>
@@ -1135,8 +1153,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   </div>
                   <div className="min-w-0">
                     <p className="text-[14px] font-semibold text-gray-dark">Questions?</p>
-                    <p className="mt-0.5 text-[14px] leading-snug text-[#707070]">
-                      You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-gray-dark">Send a message</span>
+                    <p className="mt-0.5 text-[14px] leading-snug text-gray-light">
+                      You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">Send a message</span>
                     </p>
                   </div>
                 </div>
@@ -1194,13 +1212,40 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   <img
                     src={unified && cover ? cover : customerCoverImage}
                     alt="Cover"
-                    className="h-[20vh] w-full object-cover md:h-[220px] md:rounded-[6px]"
+                    className="block aspect-[3/1] w-full object-cover md:rounded-[6px]"
                   />
                   <div className="absolute inset-0 bg-black/25 md:rounded-[6px]" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-transparent to-[#111111] md:rounded-[6px]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-transparent to-[#111111] md:hidden" />
                 </>
               ) : (
-                <div className="h-[20vh] w-full md:h-[220px] md:rounded-[6px]" style={{ backgroundColor: coverBg }} />
+                <div className="aspect-[3/1] w-full md:rounded-[6px]" style={{ backgroundColor: coverBg }} />
+              )}
+
+              {/* Desktop floating cover actions — frosted-glass round buttons in
+                  the top corners (back on the left, share on the right), mirroring
+                  the mobile top nav. */}
+              {unified && (
+                <>
+                  {/* Back — hidden on the high-level profile (nothing to go back
+                      to yet); shown on category-specific variants. */}
+                  {!highLevel && (
+                  <button
+                    onClick={onBack}
+                    aria-label="Go back"
+                    className={`absolute left-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-colors md:flex ${coverActionBg}`}
+                  >
+                    <svg className="h-[18px] w-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+                  )}
+                  <button
+                    aria-label="Share"
+                    className={`absolute right-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-colors md:flex ${coverActionBg}`}
+                  >
+                    <img src={shareArrowFilledIcon} alt="" className="h-[17px] w-[17px] brightness-0 invert" />
+                  </button>
+                </>
               )}
             </div>
           ) : (
@@ -1208,7 +1253,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               <img
                 src={coachCoverImage}
                 alt="Cover"
-                className="h-[220px] w-full rounded-[6px] object-cover"
+                className="block aspect-[3/1] w-full rounded-[6px] object-cover"
               />
             )
           )}
@@ -1241,26 +1286,40 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   {/* Message — icon-only circle next to Follow (matches Follow's
                       style with reduced padding to form a circle). */}
                   {heroCustomer && (
-                    <button
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      iconOnly
                       aria-label={`Message ${profileName.split(" ")[0]}`}
-                      className="mb-1 flex cursor-pointer items-center justify-center rounded-full bg-[#F5F5F5] p-2 transition-colors hover:bg-[#ebebeb] md:hidden"
+                      className="mb-1 lg:hidden"
                     >
                       <img src={airplaneIcon} alt="" className="h-[18px] w-[18px]" />
-                    </button>
+                    </Button>
                   )}
-                  <button
-                    onClick={() => setIsFollowing(!isFollowing)}
-                    className={`flex cursor-pointer items-center gap-1.5 transition-colors ${
-                      heroCustomer
-                        ? "mb-1 rounded-full bg-[#F5F5F5] px-6 py-2 text-[15px] font-semibold text-gray-dark hover:bg-[#ebebeb]"
-                        : showCoverImage || !showGrayHeader
+                  {heroCustomer ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      rounded="rounded-full"
+                      onClick={() => setIsFollowing(!isFollowing)}
+                      className="mb-1 text-[15px] font-semibold"
+                    >
+                      {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
+                      {isFollowing ? "Following" : "Follow"}
+                    </Button>
+                  ) : (
+                    <button
+                      onClick={() => setIsFollowing(!isFollowing)}
+                      className={`flex cursor-pointer items-center gap-1.5 transition-colors ${
+                        showCoverImage || !showGrayHeader
                           ? "rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark hover:bg-[#222222]/[0.08]"
                           : "rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-dark hover:border-[#222222]/20"
-                    }`}
-                  >
-                    {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
-                    {isFollowing ? "Following" : "Follow"}
-                  </button>
+                      }`}
+                    >
+                      {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
+                      {isFollowing ? "Following" : "Follow"}
+                    </button>
+                  )}
                   <div ref={moreMenuRef} className={`relative ${heroCustomer ? "hidden" : ""}`}>
                     <button
                       onClick={() => setMoreMenuOpen(!moreMenuOpen)}
@@ -1317,7 +1376,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
           <div className={`flex items-center ${categoryMode ? "gap-1.5 mb-1" : unified || sectionFilter === "All" ? "gap-2 mb-2" : "gap-1 mb-1"}`}>
             <h1 className={`font-medium text-gray-dark ${categoryMode ? "text-[16px]" : unified || sectionFilter === "All" ? "font-serif text-[26px]" : "text-[16px]"}`}>{profileName}</h1>
             <AnimatePresence>
-              {!isCustomerProfile && (
+              {!isCustomerProfile && !mvp && (
                 <motion.img
                   key="verified"
                   src={verifiedIcon}
@@ -1335,7 +1394,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             {effShowSupercoach && !isCustomerProfile && (!unified || categoryMode) && (
               <>
                 <span className="ml-1 text-[16px] text-[#999999]">·</span>
-                <span className="text-[16px] text-[#707070]"><span className="text-[14px]">🏆</span> Supercoach</span>
+                <span className="text-[16px] text-gray-light"><span className="text-[14px]">🏆</span> Top Expert</span>
               </>
             )}
           </div>
@@ -1347,6 +1406,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             <p className={categoryMode ? "mb-2 font-serif text-[26px] font-medium leading-[1.3] text-gray-dark" : "mb-2 text-[15px] leading-[1.4] text-gray-dark"}>
               {isCustomerProfile ? (
                 "Building products that matter. Passionate about AI, design, and helping others break into tech."
+              ) : unified ? (
+                categoryHeadline ?? "Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB"
               ) : sectionFilter === "College" ? (
                 <>College Admissions Expert | Yale Grad | 50+ Ivy League Admits</>
               ) : sectionFilter === "MBA" ? (
@@ -1371,7 +1432,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
           </p>
 
           {/* Credentials row */}
-          <div className="mb-3 flex flex-wrap items-center gap-x-[20px] gap-y-[2px] text-[14px] leading-tight text-[#707070]">
+          <div className="mb-3 flex flex-wrap items-center gap-x-[20px] gap-y-[2px] text-[14px] leading-tight text-gray-light">
             {/* Atlassian */}
             <div className="flex items-center gap-[6px]">
               <img src={atlassianLogo} alt="Atlassian" className="h-[18px] w-[18px] rounded" />
@@ -1385,7 +1446,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             </div>
 
             {/* Successful clients at */}
-            {!isCustomerProfile && <div className="hidden items-center gap-[6px] md:flex">
+            {!isCustomerProfile && <div className="hidden items-center gap-[6px] sm:flex">
               <span>Successful clients at</span>
               <div className="flex items-center -space-x-[2px]">
                 <img src={clientLogo1} alt="" className="h-[18px] w-[18px] rounded border border-white" />
@@ -1462,7 +1523,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                 <span className="text-[16px] font-semibold leading-none text-gray-dark">84</span>
                 <span className="text-[14px] leading-tight text-[#707070]">Followers</span>
               </motion.div>
-              {/* Likes */}
+              {/* Likes + Impressions — hidden in MVP mode. */}
+              {!mvp && (<>
               <motion.div layout className="flex flex-col gap-[2px]">
                 <span className="text-[16px] font-semibold leading-none text-gray-dark">1.6k</span>
                 <span className="text-[14px] leading-tight text-[#707070]">Likes</span>
@@ -1476,6 +1538,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                 <span className="text-[16px] font-semibold leading-none text-gray-dark">8.5k</span>
                 <span className="text-[14px] leading-tight text-[#707070]">Impressions</span>
               </motion.div>
+              </>)}
             </div>
 
           </div>{/* end name → stats wrapper */}
@@ -1558,7 +1621,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   <div className="min-w-0">
                     <p className="text-[14px] font-semibold text-gray-dark">Questions?</p>
                     <p className="text-[14px] leading-snug text-[#707070]">
-                      You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-gray-dark">Send a message</span>
+                      You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">Send a message</span>
                     </p>
                   </div>
                 </div>
@@ -1620,7 +1683,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             <div className="sticky top-14 z-10 -mx-4 flex border-b border-gray-stroke bg-white md:top-0 md:mx-0">
               {([
                 "about" as const,
-                "activity" as const,
+                // Activity is hidden in MVP mode.
+                ...(mvp ? [] : (["activity"] as const)),
                 ...(showOfferingsTab ? ["offerings" as const] : []),
                 // Saved + Likes appear only when viewing your own profile.
                 ...(viewingOwnProfile ? (["saved", "likes"] as const) : []),
@@ -1647,19 +1711,15 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               these live inside the "About" tab (Offerings optionally in its own
               tab); otherwise they scroll inline. */}
           {!isCustomerProfile && (showOfferingsSection || showRestSections) && (<>
-          {/* Unified template — Customer Favorite / Super Coach / Coach note /
-              Video sit at the top of the About tab (moved out of the hero). */}
-          {unified && coachTab === "about" && ((showLegacyCustomerFavorite && effCustomerFavorite) || effCoachNote) && (
+          {/* Legacy inline mobile Customer Favorite row (hidden for now). */}
+          {unified && coachTab === "about" && showLegacyCustomerFavorite && effCustomerFavorite && (
             <div className="mt-2 flex flex-col">
-              {/* Legacy inline mobile Customer Favorite row (hidden for now). */}
-              {showLegacyCustomerFavorite && effCustomerFavorite && <div className="md:hidden">{customerFavoriteRow}</div>}
-              {/* Note moves to the desktop coach sidebar, so hide the inline copy there. */}
-              {effCoachNote && <div className={hideForCoachSidebar}>{coachNoteRow}</div>}
+              <div className="md:hidden">{customerFavoriteRow}</div>
             </div>
           )}
           {/* Badges — up to 3, shown at the top of the Profile tab above the bio. */}
           {unified && coachTab === "about" && displayedBadges.length > 0 && (
-            <div className="mt-6 flex flex-col gap-6 md:mt-4">
+            <div className="mt-6 flex flex-col gap-6">
               {displayedBadges.map((badge) => (
                 <div key={badge.headline} className="flex items-center gap-3">
                   {badge.emoji ? (
@@ -1690,6 +1750,22 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                 <p className="whitespace-pre-line text-[15px] leading-[1.6] text-gray-dark">
                   {BIO_PLACEHOLDER}
                 </p>
+                {categories.length > 0 && (
+                  <p className="mt-4 mb-4 text-[15px] leading-[1.6] text-gray-extra-light">
+                    {coachConfig.firstName} can help with{" "}
+                    {categories.map((c, i) => (
+                      <span key={c.slug}>
+                        <span
+                          onClick={() => onSelectCategory?.(c.slug)}
+                          className="cursor-pointer text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px]"
+                        >
+                          {c.label}
+                        </span>
+                        {i < categories.length - 2 ? ", " : i === categories.length - 2 ? ", and " : "."}
+                      </span>
+                    ))}
+                  </p>
+                )}
                 <motion.div
                   initial={false}
                   animate={{ opacity: bioExpanded ? 0 : 1 }}
@@ -1697,7 +1773,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   className="pointer-events-none absolute inset-x-0 bottom-0 h-[3.2em] bg-gradient-to-t from-white to-transparent"
                 />
               </motion.div>
-              <Button size="md" variant="secondary" className="mt-3 mb-8" onClick={() => setBioExpanded((v) => !v)}>
+              <Button size="md" variant="secondary" className="mt-3 mb-8 font-semibold" onClick={() => setBioExpanded((v) => !v)}>
                 {bioExpanded ? "Read less" : "Read more"}
                 <img src={chevronDownIcon} alt="" className={`h-4 w-4 transition-transform ${bioExpanded ? "rotate-180" : ""}`} />
               </Button>
@@ -1708,6 +1784,11 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
           {unified && coachTab === "about" && effCoachVideo && (
             <div className={hideForCoachSidebar}>{coachVideoRow}</div>
           )}
+          {/* Coach note — on mobile it sits below the video; on desktop (≥960)
+              it lives in the coach sidebar instead. */}
+          {unified && coachTab === "about" && effCoachNote && (
+            <div className={hideForCoachSidebar}>{coachNoteRow}</div>
+          )}
           {/* ── Offerings section (its own tab when "Offerings tab" is on) ── */}
           {showOfferingsSection && (
           <div ref={setGroupRef("offerings")} data-group="offerings">
@@ -1716,8 +1797,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             {showOfferingsTab ? (
               /* Template: the offerings preview (Profile tab) is a self-contained
                  band and the Offerings tab sits right under the tab bar, so just
-                 use plain spacing rather than a border divider. */
-              <div className="mt-4" />
+                 use plain spacing rather than a border divider. The Offerings tab
+                 gets a bit more top padding. */
+              <div className={coachTab === "offerings" ? "pt-6" : "mt-4"} />
             ) : (
               <div className="my-[16px] border-t border-gray-200 md:my-[36px]" />
             )}
@@ -1897,7 +1979,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                     /* Preview band — beige background, tripled vertical padding,
                        centered header in the hero-name style. Full-bleed on
                        mobile, contained + rounded on desktop. */
-                    <div className="-mx-4 bg-[#F3F1E6] px-4 py-12 md:mx-0 md:rounded-2xl md:px-8 md:py-16">
+                    <div className="-mx-4 bg-[#F3F1E6] px-4 pt-8 pb-4 md:mx-0 md:rounded-2xl md:px-8 md:pt-10 md:pb-4">
                       <h2 ref={setSectionRef("offerings")} className={`scroll-mt-[60px] text-center font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[42px] ${highLevel ? "mb-2" : "mb-6"}`}>
                         Work with {profileName.split(" ")[0]}
                       </h2>
@@ -1905,7 +1987,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                         <p className="mb-6 text-center text-[15px] text-[#4C4C4C]">Select a category that you're looking for help in.</p>
                       )}
                       {highLevel ? (
-                        categoryButtons
+                        renderCategoryButtons(true)
                       ) : (
                         <div className="flex flex-col gap-3">
                           {[...Array(4)].map((_, i) => (
@@ -1913,37 +1995,95 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                           ))}
                         </div>
                       )}
-                      <div className="mt-6 flex flex-col items-center gap-3">
-                        <div className="flex items-center gap-2 text-[13px] text-[#9b9b9b]">
-                          <img src={shieldIcon} alt="" className="w-[12px]" />
-                          <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
-                        </div>
+                      <div className="mt-6 flex flex-col items-center">
                         {!highLevel && (
                           <Button
                             size="lg"
                             variant="white"
                             rounded="rounded-full"
-                            className="shadow-[0_0_0_1px_rgba(34,34,34,0.1),0_1px_3px_rgba(16,24,40,0.04)]"
+                            className="mb-8 shadow-[0_0_0_1px_rgba(34,34,34,0.1),0_1px_3px_rgba(16,24,40,0.04)]"
                             onClick={() => { setCoachTab("offerings"); scrollTabsIntoView(); }}
                           >
                             See all offerings
                           </Button>
                         )}
+                        <div className="flex items-center gap-2 text-[13px] text-gray-light">
+                          <svg width="12" height="13" viewBox="0 0 12 13" fill="none" className="shrink-0">
+                            <path d="M11.5 6.86766C11.5 9.53215 8.30667 11.5115 6.78383 12.3062C6.54161 12.4333 6.2735 12.4998 6.00146 12.5C5.72942 12.5002 5.4612 12.4343 5.21876 12.3076C3.69696 11.5136 0.5 9.52946 0.5 6.86766V3.01955C0.502443 2.84529 0.566835 2.67795 0.681057 2.54903C0.79528 2.4201 0.951455 2.33849 1.12019 2.31954C2.57901 2.20573 3.97762 1.67467 5.15754 0.786543C5.40103 0.600486 5.69646 0.5 5.99999 0.5C6.30351 0.5 6.59894 0.600486 6.84243 0.786543C8.02235 1.67467 9.42096 2.20573 10.8798 2.31954C11.0485 2.33848 11.2047 2.42009 11.3189 2.54902C11.4332 2.67794 11.4976 2.84528 11.5 3.01955V6.86766Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-gray-dark">Leland Experience Guarantee</span></span>
+                        </div>
                       </div>
                     </div>
                   ) : (
                     <>
-                      <h2 ref={setSectionRef("offerings")} className="scroll-mt-[60px] mb-4 text-[22px] font-semibold text-gray-dark">
-                        {highLevel ? "Select a category you're looking for help with:" : "Offerings"}
-                      </h2>
+                      <div className="mb-4 flex items-center justify-between gap-3">
+                        <h2 ref={setSectionRef("offerings")} className={`scroll-mt-[60px] ${highLevel ? "mt-4 text-[14px] font-medium text-gray-extra-light" : "text-[22px] font-semibold text-gray-dark"}`}>
+                          {highLevel ? "Select a category you're looking for help with:" : "Offerings"}
+                        </h2>
+                        {!highLevel && (
+                          <div ref={catNavRef} className="relative shrink-0">
+                            <button
+                              onClick={() => setCatNavOpen(!catNavOpen)}
+                              className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] transition-colors hover:bg-[#ebebeb]"
+                            >
+                              {categoryLabel ?? "All categories"}
+                              <img src={chevronDownIcon} alt="" className={`h-[14px] w-[14px] transition-transform ${catNavOpen ? "rotate-180" : ""}`} />
+                            </button>
+                            <AnimatePresence>
+                              {catNavOpen && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 6 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: 6 }}
+                                  transition={{ duration: 0.15, ease: "easeOut" }}
+                                  className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                                >
+                                  {categories.map((c) => (
+                                    <button
+                                      key={c.slug}
+                                      onClick={() => { onSelectCategory?.(c.slug); setCatNavOpen(false); }}
+                                      className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${c.label === categoryLabel ? "bg-gray-hover" : ""}`}
+                                    >
+                                      {c.label}
+                                      {c.label === categoryLabel && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        )}
+                      </div>
                       {highLevel ? (
-                        categoryButtons
+                        renderCategoryButtons(false)
                       ) : (
-                        <div className="flex flex-col gap-3">
-                          {[...Array(12)].map((_, i) => (
-                            <div key={i} className="h-[92px] rounded-xl bg-[#222222]/5" style={dashedBorderStyle} />
-                          ))}
-                        </div>
+                        <>
+                          {/* Custom hourly banner — top of the offerings list. */}
+                          <div className="mb-4 flex items-center justify-between gap-4 py-5">
+                            <div className="flex min-w-0 items-center gap-3">
+                              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
+                                <img src={timeClockHourglassIcon} alt="" className="h-6 w-6" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-[16px] font-medium text-gray-dark">
+                                  <span className="font-semibold">Custom hourly</span> <span className="text-[#9B9B9B]">·</span> <span className="text-[#1B8A54]">$399/hr</span>
+                                </p>
+                                <p className="mt-1 text-[14px] text-gray-light">
+                                  Get help with Application Strategy, Cover Letters, and <span className="cursor-pointer underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">more</span>.
+                                </p>
+                              </div>
+                            </div>
+                            <Button size="md" variant="dark" className="shrink-0 font-semibold">
+                              Buy coaching
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            {[...Array(12)].map((_, i) => (
+                              <div key={i} className="h-[280px] rounded-xl bg-[#222222]/5" style={dashedBorderStyle} />
+                            ))}
+                          </div>
+                        </>
                       )}
                     </>
                   )
@@ -2040,6 +2180,25 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               See 2 more
               <img src={chevronDownIcon} alt="" className="h-[16px] w-[16px]" />
             </button>
+
+          {/* ── {coach}'s {category} qualifications + Why I coach (template) ── */}
+          {unified && (<>
+            {/* Qualifications — hidden on the high-level profile (no category). */}
+            {!highLevel && (<>
+              <div className="my-[36px] border-t border-gray-200" />
+              <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">
+                {coachConfig.firstName}'s {categoryLabel ? `${categoryLabel} ` : ""}qualifications
+              </h2>
+              <div className="flex flex-col gap-4">
+                <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+              </div>
+            </>)}
+
+            <div className="my-[36px] border-t border-gray-200" />
+            <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">Why I coach</h2>
+            <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+          </>)}
 
           {/* ── Activity group — omitted in the unified template's About tab ── */}
           {!unified && (
@@ -2544,7 +2703,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               )}
               {!isCustomerProfile && (
                 <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-                  <span className="text-[14px] font-medium text-gray-dark">Supercoach</span>
+                  <span className="text-[14px] font-medium text-gray-dark">Top Expert</span>
                   <div className="relative">
                     <input
                       type="checkbox"

@@ -3,9 +3,11 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import ProfileV2 from "./ProfileV2";
 import customerPhoto from "../assets/profile photos/profile photo.png";
-import { GraduationCap, Briefcase, Wrench } from "lucide-react";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { getProfilePerson } from "../lib/profilePeople";
+import mbaIcon from "../assets/icons/category-icons/mba.svg";
+import consultingIcon from "../assets/icons/category-icons/consulting.svg";
+import productManagementIcon from "../assets/icons/category-icons/product-management.svg";
 
 // "june-allen" → "June Allen"
 function prettifySlug(slug: string | undefined) {
@@ -60,10 +62,11 @@ export default function ProfileTemplate() {
   // "Expert" turns on coach mode (default = whether this person is verified).
   const [expert, setExpert] = useState(isMe ? false : Boolean(person?.expert));
   const [customerFavorite, setCustomerFavorite] = useState(true);
-  const [coachNote, setCoachNote] = useState(false);
-  const [video, setVideo] = useState(false);
-  const [supercoach, setSupercoach] = useState(false);
-  const [altReviews, setAltReviews] = useState(true);
+  const [coachNote, setCoachNote] = useState(true);
+  const [video, setVideo] = useState(true);
+  const [supercoach, setSupercoach] = useState(true);
+  const [altReviews, setAltReviews] = useState(false);
+  const [mvp, setMvp] = useState(true);
   const [coverMode, setCoverMode] = useState<"default" | "dark" | "beige" | "none">("default");
   const [myProfile, setMyProfile] = useState(isMe);
   const coachId = person?.coachId ?? "samantha";
@@ -78,12 +81,15 @@ export default function ProfileTemplate() {
   // in the URL) lets the visitor pick one; each links to a category-specific
   // variant at /profile/:slug/:category.
   const categories = [
-    { slug: "mba", label: "MBA Admissions", Icon: GraduationCap },
-    { slug: "management-consulting", label: "Management Consulting", Icon: Briefcase },
-    { slug: "product-management", label: "Product Management", Icon: Wrench },
+    { slug: "mba", label: "MBA", icon: mbaIcon, headline: "MBA Admissions Coach | Stanford GSB | 100+ M7 Admits" },
+    { slug: "management-consulting", label: "Management Consulting", icon: consultingIcon, headline: "Ex-McKinsey Consultant | Wharton MBA | Case Prep Pro" },
+    { slug: "product-management", label: "Product Management", icon: productManagementIcon, headline: "Senior PM at LinkedIn | Ex-Meta | Breaking Into Tech" },
   ];
   // High-level = an expert profile with no category selected yet.
   const highLevel = expert && !category;
+  const currentCategory = categories.find((c) => c.slug === category);
+  const categoryLabel = currentCategory?.label;
+  const categoryHeadline = currentCategory?.headline;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -96,7 +102,8 @@ export default function ProfileTemplate() {
     return () => document.removeEventListener("mousedown", onClick);
   }, [menuOpen]);
 
-  // Admin hotkeys: v = Video, e = Expert, n = Coach note, f = Customer favorite.
+  // Admin hotkeys: v = Video, e = Expert, n = Coach note, f = Customer favorite,
+  // s = Super Coach.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
@@ -107,6 +114,7 @@ export default function ProfileTemplate() {
         case "e": setExpert((v) => !v); break;
         case "n": setCoachNote((v) => !v); break;
         case "f": setCustomerFavorite((v) => !v); break;
+        case "s": setSupercoach((v) => !v); break;
       }
     };
     window.addEventListener("keydown", onKey);
@@ -187,11 +195,14 @@ export default function ProfileTemplate() {
         supercoach={supercoach}
         offeringsTab
         altReviews={altReviews}
+        mvp={mvp}
         coverMode={coverMode}
         ownProfile={myProfile}
         highLevel={highLevel}
+        categoryLabel={categoryLabel}
+        categoryHeadline={categoryHeadline}
         categories={categories}
-        onSelectCategory={(c) => navigate(`/profile/${slug}/${c}`)}
+        onSelectCategory={(c) => navigate(c ? `/profile/${slug}/${c}` : `/profile/${slug}`)}
       />
       </div>
 
@@ -214,10 +225,11 @@ export default function ProfileTemplate() {
               <AdminToggle label="My profile" checked={myProfile} onChange={() => setMyProfile((v) => !v)} />
               <div className="my-1 border-t border-gray-100" />
               {/* Coach-specific toggles stay visible but disabled when Expert is off */}
+              <AdminToggle label="MVP" checked={mvp} onChange={() => setMvp((v) => !v)} disabled={!expert} />
               <AdminToggle label="Customer favorite" checked={customerFavorite} onChange={() => setCustomerFavorite((v) => !v)} disabled={!expert} />
               <AdminToggle label="Coach note" checked={coachNote} onChange={() => setCoachNote((v) => !v)} disabled={!expert} />
               <AdminToggle label="Video" checked={video} onChange={() => setVideo((v) => !v)} disabled={!expert} />
-              <AdminToggle label="SuperCoach" checked={supercoach} onChange={() => setSupercoach((v) => !v)} disabled={!expert} />
+              <AdminToggle label="Top Expert" checked={supercoach} onChange={() => setSupercoach((v) => !v)} disabled={!expert} />
               <AdminToggle label="Alt reviews" checked={altReviews} onChange={() => setAltReviews((v) => !v)} disabled={!expert} />
               <div className="my-1 border-t border-gray-100" />
               <AdminSelect
