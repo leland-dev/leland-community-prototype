@@ -37,6 +37,22 @@
       "notes": "@radix-ui/react-progress replaced with plain divs + aria attributes."
     },
     {
+      "target": "src/components/leland/Menu.tsx",
+      "sourcePaths": [
+        "packages/ui-library/src/components/menu/menu.tsx",
+        "packages/ui-library/src/components/menu/menu-item.tsx"
+      ],
+      "notes": "Flattened into one file. next/link -> react-router-dom; text-base -> explicit rem; z-dropdown utility in leland-theme.css."
+    },
+    {
+      "target": "src/components/leland/Modal.tsx",
+      "sourcePaths": [
+        "packages/ui-library/src/components/modal/modal.tsx",
+        "packages/ui-library/src/components/modal/constants.ts"
+      ],
+      "notes": "Flattened into one file. Deprecated ModalProvider/useControlledModalState not ported. text-lg -> 1rem, min-w-100 -> 25rem; z-modal utility in leland-theme.css."
+    },
+    {
       "target": "src/components/leland/util.ts",
       "sourcePaths": [
         "packages/ui-library/src/util/font.ts",

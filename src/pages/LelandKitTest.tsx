@@ -5,13 +5,75 @@ import {
   Button,
   ButtonColor,
   ButtonSize,
+  Menu,
+  Modal,
+  ModalContent,
+  ModalSize,
   ProgressBar,
   ProgressBarColor,
   Tag,
   TagColor,
+  withModal,
+  type ModalProps,
 } from "../components/leland";
+import {
+  BrandLelandApp,
+  BrandLelandLogoSilhouette,
+  BrandLelandPlusIcon,
+  BrandLelandSilhouette,
+  BrandLelandYellow,
+} from "../components/leland/svg/brands";
 import * as LelandIcons from "../components/leland/svg/icons";
-import { IconArrowRight, IconSearch } from "../components/leland/svg/icons";
+import {
+  IconArrowRight,
+  IconDownload,
+  IconPencil,
+  IconSearch,
+  IconShare,
+  IconTrash,
+} from "../components/leland/svg/icons";
+
+const LOGOS: Array<[string, React.FC<React.SVGProps<SVGSVGElement>>]> = [
+  ["BrandLelandLogoSilhouette (wordmark)", BrandLelandLogoSilhouette],
+  ["BrandLelandSilhouette (icon)", BrandLelandSilhouette],
+  ["BrandLelandYellow", BrandLelandYellow],
+  ["BrandLelandApp", BrandLelandApp],
+  ["BrandLelandPlusIcon", BrandLelandPlusIcon],
+];
+
+const DemoModal = withModal(function DemoModal(props: ModalProps) {
+  return (
+    <Modal {...props}>
+      <ModalContent
+        size={ModalSize.SMALL}
+        header="Production modal"
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              label="Cancel"
+              buttonColor={ButtonColor.SECONDARY}
+              size={ButtonSize.SMALL}
+              rounded
+              onClick={() => props.onOpenChange(false)}
+            />
+            <Button
+              label="Confirm"
+              buttonColor={ButtonColor.PRIMARY}
+              size={ButtonSize.SMALL}
+              rounded
+              onClick={() => props.onOpenChange(false)}
+            />
+          </div>
+        }
+      >
+        <p className="leland-paragraph-lg p-6">
+          The production Modal: radix dialog, header/footer slots, sizes, and
+          the withModal HOC pattern (parent owns the open state).
+        </p>
+      </ModalContent>
+    </Modal>
+  );
+});
 
 const SWATCHES: Array<[string, string]> = [
   ["leland-primary", "bg-leland-primary"],
@@ -62,6 +124,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function LelandKitTest() {
   const [iconQuery, setIconQuery] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
   const icons = Object.entries(LelandIcons).filter(([name]) =>
     name.toLowerCase().includes(iconQuery.toLowerCase()),
   );
@@ -116,6 +179,53 @@ export default function LelandKitTest() {
           <Button label="Selected" buttonColor={ButtonColor.SECONDARY} selected rounded />
           <Button label="Disabled" buttonColor={ButtonColor.PRIMARY} disabled rounded />
         </div>
+      </Section>
+
+      <Section title="Logos">
+        <div className="flex flex-wrap items-end gap-10">
+          {LOGOS.map(([name, Logo]) => (
+            <div key={name} className="flex flex-col items-center gap-2">
+              <Logo className="h-8 w-auto text-leland-gray-dark" />
+              <span className="text-[11px] text-leland-gray-light">{name}</span>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Menu">
+        <div className="flex items-center gap-4">
+          <Menu
+            itemSections={[
+              [
+                { label: "Edit", LeftIcon: IconPencil, onSelect: () => {} },
+                { label: "Share", LeftIcon: IconShare, onSelect: () => {} },
+                {
+                  label: "Download",
+                  LeftIcon: IconDownload,
+                  items: [
+                    [
+                      { label: "As PDF", onSelect: () => {} },
+                      { label: "As CSV", onSelect: () => {} },
+                    ],
+                  ],
+                },
+              ],
+              [{ label: "Delete", LeftIcon: IconTrash, onSelect: () => {} }],
+            ]}
+          >
+            <Button label="Open menu" buttonColor={ButtonColor.SECONDARY} rounded />
+          </Menu>
+        </div>
+      </Section>
+
+      <Section title="Modal">
+        <Button
+          label="Open modal"
+          buttonColor={ButtonColor.SECONDARY}
+          rounded
+          onClick={() => setModalOpen(true)}
+        />
+        <DemoModal open={modalOpen} onOpenChange={setModalOpen} />
       </Section>
 
       <Section title="Tags">

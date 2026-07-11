@@ -125,6 +125,14 @@
   --shadow-bottomBorder: inset 0 -2px 0 0;
 }
 
+/* ── Production z-index scale (layered surfaces) ───────────────────────── */
+@utility z-navbar { z-index: 1000; }
+@utility z-modal { z-index: 1010; }
+@utility z-takeoverModal { z-index: 1011; }
+@utility z-dropdown { z-index: 1012; }
+@utility z-toast { z-index: 1013; }
+@utility z-tooltip { z-index: 1014; }
+
 /* Macan/Season @font-face declarations live in src/index.css (the repo's
    2026-rebrand webfonts under src/assets/fonts) — not duplicated here. */
 
