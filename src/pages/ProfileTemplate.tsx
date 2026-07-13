@@ -65,7 +65,8 @@ export default function ProfileTemplate() {
   const [coachNote, setCoachNote] = useState(true);
   const [video, setVideo] = useState(true);
   const [supercoach, setSupercoach] = useState(true);
-  const [altReviews, setAltReviews] = useState(false);
+  const [altReviews, setAltReviews] = useState(true);
+  const [altSchedule, setAltSchedule] = useState(false);
   const [mvp, setMvp] = useState(true);
   const [coverMode, setCoverMode] = useState<"default" | "dark" | "beige" | "none">("default");
   const [myProfile, setMyProfile] = useState(isMe);
@@ -195,6 +196,7 @@ export default function ProfileTemplate() {
         supercoach={supercoach}
         offeringsTab
         altReviews={altReviews}
+        altSchedule={altSchedule}
         mvp={mvp}
         coverMode={coverMode}
         ownProfile={myProfile}
@@ -231,6 +233,7 @@ export default function ProfileTemplate() {
               <AdminToggle label="Video" checked={video} onChange={() => setVideo((v) => !v)} disabled={!expert} />
               <AdminToggle label="Top Expert" checked={supercoach} onChange={() => setSupercoach((v) => !v)} disabled={!expert} />
               <AdminToggle label="Alt reviews" checked={altReviews} onChange={() => setAltReviews((v) => !v)} disabled={!expert} />
+              <AdminToggle label="Alt schedule" checked={altSchedule} onChange={() => setAltSchedule((v) => !v)} disabled={!expert} />
               <div className="my-1 border-t border-gray-100" />
               <AdminSelect
                 label="Cover image"

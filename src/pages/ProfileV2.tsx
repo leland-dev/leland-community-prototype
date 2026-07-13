@@ -401,7 +401,134 @@ function CategorySubtitle({ photos, experts }: { photos: string[]; experts: stri
   );
 }
 
-export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void }) {
+// Alt schedule — a few days of upcoming open slots. Uneven column lengths are
+// intentional (mirrors the real calendar, where days book up differently).
+const ALT_SCHEDULE_DAYS: { label: string; date: string; times: string[] }[] = [
+  { label: "Today", date: "Jul 13", times: ["3:00 PM", "3:30 PM", "4:00 PM", "5:30 PM"] },
+  { label: "Tomorrow", date: "Jul 14", times: ["8:00 AM", "8:30 AM", "9:00 AM", "9:30 AM", "10:00 AM", "11:00 AM"] },
+  { label: "Wed", date: "Jul 15", times: ["8:00 AM", "8:30 AM", "9:00 AM", "10:00 AM"] },
+  { label: "Thu", date: "Jul 16", times: ["9:00 AM", "9:30 AM", "10:30 AM", "11:00 AM", "1:00 PM"] },
+  { label: "Fri", date: "Jul 17", times: ["8:30 AM", "9:00 AM", "9:30 AM", "10:00 AM"] },
+  { label: "Mon", date: "Jul 20", times: ["8:00 AM", "8:30 AM", "9:30 AM", "10:00 AM", "10:30 AM"] },
+];
+
+const ALT_SCHEDULE_DURATIONS = [15, 30, 45, 60];
+
+// Interactive availability preview shown in the desktop sidebar when the "Alt
+// schedule" ops tool is on. A thin-column rework of the booking modal: pick a
+// duration, then a slot across the expert's next open days.
+function AltScheduleWidget() {
+  const [duration, setDuration] = useState(30);
+  const [durationOpen, setDurationOpen] = useState(false);
+  const [startIdx, setStartIdx] = useState(0);
+  const [selected, setSelected] = useState<{ day: number; time: string } | null>(null);
+  const VISIBLE = 3;
+  const maxStart = Math.max(0, ALT_SCHEDULE_DAYS.length - VISIBLE);
+  const visibleDays = ALT_SCHEDULE_DAYS.slice(startIdx, startIdx + VISIBLE);
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-[#E5E5E5] bg-white" style={{ boxShadow: "0px 1px 2px 0px rgba(16,24,40,0.05)" }}>
+      {/* Header — duration is an inline dotted-underline dropdown; day paging
+          arrows sit across from the title */}
+      <div className="flex items-center justify-between gap-3 px-4 pb-3 pt-4">
+        <span className="flex items-center gap-2 text-[14px] font-semibold leading-tight text-gray-dark">
+          <span className="h-[10px] w-[10px] shrink-0 rounded-full bg-[#80ACED] animate-[pulse-ring-blue_2.4s_ease-out_infinite]" />
+          <span>
+            Book a{" "}
+            <span className="relative inline-block">
+              <button
+                onClick={() => setDurationOpen((o) => !o)}
+                className="cursor-pointer font-semibold text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px]"
+              >
+                {`${duration} minute`}
+              </button>
+              {durationOpen && (
+                <div className="absolute left-0 top-full z-20 mt-1.5 w-[128px] overflow-hidden rounded-lg border border-[#E5E5E5] bg-white shadow-lg">
+                  {ALT_SCHEDULE_DURATIONS.map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => { setDuration(d); setDurationOpen(false); }}
+                      className={`block w-full cursor-pointer px-3 py-2 text-left text-[14px] transition-colors hover:bg-[#f5f5f5] ${d === duration ? "font-semibold text-gray-dark" : "font-normal text-[#4C4C4C]"}`}
+                    >
+                      {d} minutes
+                    </button>
+                  ))}
+                </div>
+              )}
+            </span>
+            {" "}session
+          </span>
+        </span>
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            onClick={() => setStartIdx((i) => Math.max(0, i - 1))}
+            disabled={startIdx === 0}
+            aria-label="Previous days"
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-gray-dark transition-colors hover:bg-[#f5f5f5] disabled:cursor-default disabled:opacity-30"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <button
+            onClick={() => setStartIdx((i) => Math.min(maxStart, i + 1))}
+            disabled={startIdx >= maxStart}
+            aria-label="Next days"
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-gray-dark transition-colors hover:bg-[#f5f5f5] disabled:cursor-default disabled:opacity-30"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Calendar — day columns scroll past a set height */}
+      <div className="border-t border-[#E5E5E5] px-4 py-3">
+        <div className="max-h-[248px] overflow-y-auto">
+          <div className="flex gap-1.5">
+            {visibleDays.map((day, i) => {
+              const dayIdx = startIdx + i;
+              return (
+                <div key={day.date} className="flex flex-1 flex-col gap-1.5">
+                  <div className="sticky top-0 z-10 bg-white pb-1.5 text-center">
+                    <p className="text-[14px] font-semibold leading-tight text-gray-dark">{day.label}</p>
+                    <p className="text-[11px] leading-tight text-[#9B9B9B]">{day.date}</p>
+                  </div>
+                  {day.times.slice(0, 4).map((t) => {
+                    const isSel = selected?.day === dayIdx && selected?.time === t;
+                    return (
+                      <button
+                        key={t}
+                        onClick={() => setSelected({ day: dayIdx, time: t })}
+                        className={`flex items-center justify-center gap-0.5 rounded-md px-1 py-3.5 text-[14px] font-medium leading-none transition-colors ${isSel ? "border border-gray-dark bg-white text-gray-dark" : "bg-[#F7F7F7] text-gray-dark hover:bg-[#efefef]"}`}
+                      >
+                        {isSel && (
+                          <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                        )}
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Selected slot summary */}
+      {selected && (
+        <div className="flex items-center gap-2 border-t border-[#E5E5E5] px-4 py-3">
+          <svg className="h-4 w-4 shrink-0 text-[#707070]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+          </svg>
+          <span className="text-[13px] font-medium text-gray-dark">
+            {ALT_SCHEDULE_DAYS[selected.day].label}, {ALT_SCHEDULE_DAYS[selected.day].date} at {selected.time}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = false, altSchedule = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; altSchedule?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void }) {
   const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
   const { dark: darkMode } = useDarkMode();
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
@@ -1088,13 +1215,17 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                     </div>
                   </div>
                 )}
-                <div className="flex items-center justify-between rounded-lg border border-[#E5E5E5] bg-white px-5 py-4" style={{ boxShadow: "0px 1px 2px 0px rgba(16,24,40,0.05)" }}>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[14px] font-semibold leading-tight text-gray-dark">Available tomorrow</span>
-                    <span className="text-[14px] leading-tight text-[#4C4C4C]">Starting at 5:30 PM MT</span>
+                {altSchedule ? (
+                  <AltScheduleWidget />
+                ) : (
+                  <div className="flex items-center justify-between rounded-lg border border-[#E5E5E5] bg-white px-5 py-4" style={{ boxShadow: "0px 1px 2px 0px rgba(16,24,40,0.05)" }}>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[14px] font-semibold leading-tight text-gray-dark">Available tomorrow</span>
+                      <span className="text-[14px] leading-tight text-[#4C4C4C]">Starting at 5:30 PM MT</span>
+                    </div>
+                    <span className="h-[12px] w-[12px] shrink-0 rounded-full bg-[#80ACED] animate-[pulse-ring-blue_2.4s_ease-out_infinite]" />
                   </div>
-                  <span className="h-[12px] w-[12px] shrink-0 rounded-full bg-[#80ACED] animate-[pulse-ring-blue_2.4s_ease-out_infinite]" />
-                </div>
+                )}
                 <div className="flex flex-col gap-2">
                   <button className="w-full cursor-pointer rounded-full bg-leland-brand-primary px-4 py-[14px] text-[15px] font-medium text-gray-dark transition-colors hover:bg-leland-brand-primary/90">
                     Schedule a free intro call
@@ -1283,15 +1414,14 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                 </Link>
               ) : (
                 <>
-                  {/* Message — icon-only circle next to Follow (matches Follow's
-                      style with reduced padding to form a circle). */}
+                  {/* Message — icon-only circle next to Follow on all sizes. */}
                   {heroCustomer && (
                     <Button
                       size="sm"
                       variant="secondary"
                       iconOnly
                       aria-label={`Message ${profileName.split(" ")[0]}`}
-                      className="mb-1 lg:hidden"
+                      className="mb-1"
                     >
                       <img src={airplaneIcon} alt="" className="h-[18px] w-[18px]" />
                     </Button>
@@ -1515,7 +1645,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               {(!unified || !isCustomerProfile) && (<>
               <motion.div layout className="flex flex-col gap-[2px]">
                 <span className="text-[16px] font-semibold leading-none text-gray-dark">6.6k</span>
-                <span className="text-[14px] leading-tight text-[#707070]">{unified && !isCustomerProfile ? "Coaching mins" : "Min coached"}</span>
+                <span className="text-[14px] leading-tight text-[#707070]">{unified && !isCustomerProfile ? "Expert mins" : "Min coached"}</span>
               </motion.div>
               </>)}
               {/* Followers */}
