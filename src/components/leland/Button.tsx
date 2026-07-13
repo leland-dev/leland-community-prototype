@@ -251,23 +251,18 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ? `hidden ${breakpointToTailwind(hideLabelBelow)}:inline`
         : '';
 
-    const content = (
-      <button
-        type="button"
-        {...props}
-        className={`${getButtonStyles({
-          buttonColor,
-          size,
-          width,
-          fontWeight,
-          rounded,
-          selected,
-          roundedSide,
-        })} ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${useSolidHover ? 'hover:bg-leland-gray-solid-hover' : ''}`}
-        aria-label={label}
-        disabled={disabled}
-        ref={ref}
-      >
+    const buttonClassName = `${getButtonStyles({
+      buttonColor,
+      size,
+      width,
+      fontWeight,
+      rounded,
+      selected,
+      roundedSide,
+    })} ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-gray-dark ${useSolidHover ? 'hover:bg-leland-gray-solid-hover' : ''}`;
+
+    const innerContent = (
+      <>
         {CustomLeftIcon ? (
           <CustomLeftIcon iconClassName={ButtonSizeToIconStyles[size]} />
         ) : LeftIcon ? (
@@ -281,9 +276,60 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ) : RightIcon ? (
           <RightIcon className={ButtonSizeToIconStyles[size]} />
         ) : null}
+      </>
+    );
+
+    // When `href` is set the control is a link: render a single styled anchor
+    // rather than a <button> wrapped in a <Link>, which nests two focusable
+    // controls with an ambiguous role (WCAG 4.1.2). Identifying attributes
+    // (id, data-*, aria-*) still reach the DOM.
+    if (href) {
+      const { id, ...rest } = props;
+      const passthroughProps = Object.fromEntries(
+        Object.entries(rest).filter(
+          ([key]) => key.startsWith('data-') || key.startsWith('aria-'),
+        ),
+      );
+      // A disabled link must not navigate or take focus (WCAG 4.1.2).
+      if (disabled) {
+        return (
+          <span
+            {...passthroughProps}
+            id={id}
+            className={buttonClassName}
+            role="link"
+            aria-label={label}
+            aria-disabled
+          >
+            {innerContent}
+          </span>
+        );
+      }
+      return (
+        <Link
+          {...passthroughProps}
+          id={id}
+          to={href}
+          className={buttonClassName}
+          aria-label={label}
+        >
+          {innerContent}
+        </Link>
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        {...props}
+        className={buttonClassName}
+        aria-label={label}
+        disabled={disabled}
+        ref={ref}
+      >
+        {innerContent}
       </button>
     );
-    return href ? <Link to={href}>{content}</Link> : content;
   },
 );
 Button.displayName = 'Button';

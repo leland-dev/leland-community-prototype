@@ -124,7 +124,7 @@ const MenuItem = forwardRef<HTMLDivElement, InternalMenuItemProps>(
       [alignSubmenuWithParent, parentMenuRef, triggerRef, childRefs],
     );
 
-    const itemClassName = `flex w-full group cursor-pointer select-none items-center justify-between gap-x-2.5 whitespace-nowrap rounded-md p-2.5 text-[0.875rem] leading-tight text-leland-gray-dark outline-none hover:bg-leland-gray-hover focus:bg-leland-gray-hover active:bg-leland-gray-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 ${selected ? "bg-leland-gray-hover" : ""} ${FontWeightToStyles[fontWeight]}`;
+    const itemClassName = `flex w-full group cursor-pointer select-none items-center justify-between gap-x-2.5 whitespace-nowrap rounded-md p-2.5 text-[0.875rem] leading-tight text-leland-gray-dark outline-none hover:bg-leland-gray-hover focus:bg-leland-gray-hover active:bg-leland-gray-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-gray-dark data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 ${selected ? "bg-leland-gray-hover" : ""} ${FontWeightToStyles[fontWeight]}`;
 
     const menuItem = (
       <>
@@ -141,7 +141,7 @@ const MenuItem = forwardRef<HTMLDivElement, InternalMenuItemProps>(
         {CustomRightIcon ? (
           <CustomRightIcon iconClassName={iconStyles} />
         ) : RightIcon ? (
-          <RightIcon className={iconStyles} aria-label={label} />
+          <RightIcon className={iconStyles} />
         ) : null}
       </>
     );
@@ -251,7 +251,6 @@ export interface MenuProps {
   header?: string;
   maxItems?: number;
   includeLeftIconPlaceholder?: boolean | null;
-  contentClassName?: string;
 }
 
 // Approximate rendered height of a MenuItem in pixels — used to compute a
@@ -275,7 +274,6 @@ export const Menu: FC<MenuProps> = ({
   header,
   maxItems,
   includeLeftIconPlaceholder = null,
-  contentClassName = "",
 }) => {
   const itemSections = useMemo(
     () => rawItemSections.filter((section) => section.length > 0),
@@ -327,7 +325,7 @@ export const Menu: FC<MenuProps> = ({
       modal={!fillParentWidth && !openOnHover}
     >
       <DropdownMenuTrigger
-        className="rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+        className="rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-gray-dark"
         asChild={asChild}
         onMouseEnter={onMouseEnter}
         ref={containerRef}
@@ -336,7 +334,7 @@ export const Menu: FC<MenuProps> = ({
       </DropdownMenuTrigger>
       <Container>
         <DropdownMenuContent
-          className={`min-w-48 rounded-md border border-leland-gray-stroke bg-leland-white p-2 shadow-md z-dropdown${contentClassName ? ` ${contentClassName}` : ""}`}
+          className="min-w-48 rounded-md border border-leland-gray-stroke bg-leland-white p-2 shadow-md z-dropdown"
           collisionPadding={
             !ignoreCollisions
               ? { top: 80, bottom: 80, left: 20, right: 20 }

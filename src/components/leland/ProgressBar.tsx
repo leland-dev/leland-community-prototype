@@ -5,6 +5,8 @@ import { type FC } from 'react';
 
 export enum ProgressBarColor {
   Primary = 'primary',
+  // Dark is from the monorepo feature/course-viewer branch (pending merge);
+  // prod main only has Primary.
   Dark = 'dark',
 }
 
@@ -16,11 +18,14 @@ const ProgressBarColorToStyles: Record<ProgressBarColor, string> = {
 export type ProgressBarProps = {
   value: number;
   color?: ProgressBarColor;
+  /** Accessible name for the progress bar (role=progressbar). */
+  label?: string;
 };
 
 export const ProgressBar: FC<ProgressBarProps> = ({
   value,
   color = ProgressBarColor.Primary,
+  label,
 }) => {
   return (
     <div
@@ -28,6 +33,8 @@ export const ProgressBar: FC<ProgressBarProps> = ({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={value}
+      aria-label={label ?? 'Progress'}
+      aria-valuetext={`${value}%`}
       className="h-2 w-full rounded-full bg-leland-gray-stroke duration-700"
     >
       <div

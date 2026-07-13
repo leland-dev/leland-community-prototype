@@ -19,7 +19,7 @@
   --color-leland-primary: rgb(255 217 111);
   --color-leland-primary-hover: rgb(248 205 87);
   --color-leland-primary-light: rgb(255 236 185);
-  --color-leland-primary-extra-light: rgb(255 248 228);
+  --color-leland-primary-extra-light: rgb(255 245 220);
   /* Text/icon color that sits on the primary (yellow) button */
   --color-leland-on-primary-text: rgb(34 34 34);
 
@@ -32,6 +32,9 @@
   --color-leland-gray-light: rgb(76 76 76);
   --color-leland-gray-extra-light: rgb(118 118 118);
   --color-leland-gray-stroke: rgb(229 229 229);
+  /* Control borders (inputs, checkboxes) — gray-stroke is too light for
+     WCAG 1.4.11's 3:1 boundary requirement. */
+  --color-leland-gray-stroke-dark: rgb(148 148 148);
   /* Carries its own alpha (gray-dark @ 5%) so it works on non-white bgs */
   --color-leland-gray-hover: rgba(34, 34, 34, 0.05);
   --color-leland-gray-solid-hover: rgb(244 244 244);
@@ -46,16 +49,19 @@
   --color-leland-red-hover: rgb(243 57 44);
   --color-leland-red-light: rgb(254 230 227);
   --color-leland-red-light-hover: rgba(254, 230, 227, 0.6);
+  --color-leland-red-dark: rgb(155 34 25);
 
   --color-leland-orange: rgb(239 133 9);
   --color-leland-orange-dark: rgb(198 107 0);
   --color-leland-orange-light: rgb(253 240 225);
   --color-leland-orange-light-hover: rgb(251 232 210);
 
-  --color-leland-blue: rgb(59 125 253);
-  --color-leland-blue-hover: rgb(41 108 239);
-  --color-leland-blue-light: rgb(239 245 255);
-  --color-leland-blue-light-hover: rgb(224 236 255);
+  /* Blue rebranded to the brand blue (PR #6923) */
+  --color-leland-blue: rgb(128 172 237);
+  --color-leland-blue-hover: rgb(100 155 223);
+  --color-leland-blue-light: rgb(226 236 251);
+  --color-leland-blue-light-hover: rgb(210 224 248);
+  --color-leland-blue-dark: rgb(44 66 161);
   --color-leland-blue-brand: rgb(128 172 237);
 
   --color-leland-purple: rgb(45 37 166);
@@ -64,10 +70,13 @@
 
   --color-leland-yellow: rgb(255 203 71);
   --color-leland-yellow-hover: rgb(235 172 12);
+  --color-leland-yellow-dark: rgb(148 55 12);
 
   --color-leland-beige: rgb(243 241 230);
   --color-leland-rust: rgb(159 91 52);
   --color-leland-tan: rgb(235 212 181);
+  --color-leland-tan-light: rgb(245 234 218);
+  --color-leland-tan-dark: rgb(126 69 46);
   --color-leland-slate: rgb(134 154 166);
 
   /* ── Brand fonts (production sans = Macan; condensed = Season) ───────── */
@@ -194,9 +203,14 @@
   box-shadow: none;
 }
 
-/* Primary tags use the success palette (brand-tokens.css) */
-.tag--primary {
-  background-color: rgb(229 245 241);
-  color: rgb(3 112 82);
-  border-color: rgb(229 245 241);
+/* Reduced-motion baseline (WCAG 2.3.3, from brand-tokens.css) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

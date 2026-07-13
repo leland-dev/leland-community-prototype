@@ -1,6 +1,8 @@
 // Ported from @leland/ui-library (components/tag) — 1:1 except text-sm/base
 // swapped for explicit sizes (the monorepo overrides the Tailwind base scale:
 // sm=12px, base=14px; the prototype keeps defaults).
+// Palette carries monorepo PR #6923 (tag color redesign: GREEN/BEIGE replace
+// PRIMARY/ORANGE/PURPLE) — slightly ahead of prod main until that PR merges.
 import { type FC, type SVGProps } from 'react';
 
 import { FontWeight, FontWeightToStyles, type PickEnum } from './util';
@@ -8,12 +10,11 @@ import { FontWeight, FontWeightToStyles, type PickEnum } from './util';
 export enum TagColor {
   TRANSPARENT = 'TRANSPARENT',
   GRAY = 'GRAY',
-  PRIMARY = 'PRIMARY',
-  ORANGE = 'ORANGE',
+  GREEN = 'GREEN',
   YELLOW = 'YELLOW',
   BLUE = 'BLUE',
   RED = 'RED',
-  PURPLE = 'PURPLE',
+  BEIGE = 'BEIGE',
   WHITE = 'WHITE',
   BLACK = 'BLACK',
 }
@@ -41,24 +42,24 @@ const TagColorToStyles: Record<
 > = {
   [TagColor.TRANSPARENT]: (hoverable, selected) =>
     `border ${selected ? 'border-leland-black' : 'border-leland-gray-stroke'} ${hoverable ? 'hover:opacity-50' : ''}`,
+  // gray-solid-hover (opaque #F4F4F4), not gray-hover: gray-hover is gray-dark @
+  // 5% alpha, so a gray tag on any non-white surface reads as transparent.
   [TagColor.GRAY]: (hoverable, selected) =>
-    `bg-leland-gray-hover text-leland-gray-light border ${selected ? 'border-leland-black' : 'border-leland-gray-hover'} ${hoverable ? 'hover:bg-leland-gray-stroke' : ''}`,
-  [TagColor.PRIMARY]: (hoverable, selected) =>
-    `tag--primary border ${selected ? 'border-leland-black' : ''} ${hoverable ? 'hover:bg-leland-primary-light' : ''}`,
-  [TagColor.ORANGE]: (hoverable, selected) =>
-    `bg-leland-orange-light text-leland-orange border ${selected ? 'border-leland-black' : 'border-leland-orange-light'} ${hoverable ? 'hover:bg-leland-orange-light-hover' : ''}`,
-  [TagColor.YELLOW]: (hoverable, selected) =>
-    `bg-leland-primary-extra-light text-leland-gray-dark border ${selected ? 'border-leland-black' : 'border-leland-primary-extra-light'} ${hoverable ? 'hover:bg-leland-primary-light' : ''}`,
+    `bg-leland-gray-solid-hover text-leland-gray-light border ${selected ? 'border-leland-black' : 'border-transparent'} ${hoverable ? 'hover:bg-leland-gray-stroke' : ''}`,
+  [TagColor.GREEN]: (hoverable, selected) =>
+    `bg-leland-success-extra-light text-leland-dark-green border ${selected ? 'border-leland-black' : 'border-transparent'} ${hoverable ? 'hover:bg-leland-success-extra-light' : ''}`,
+  [TagColor.YELLOW]: (_hoverable, selected) =>
+    `bg-leland-primary-extra-light text-leland-yellow-dark border ${selected ? 'border-leland-black' : 'border-transparent'}`,
   [TagColor.BLUE]: (hoverable, selected) =>
-    `bg-leland-blue-light text-leland-blue border ${selected ? 'border-leland-black' : 'border-leland-blue-light'} ${hoverable ? 'hover:bg-leland-blue-light-hover' : ''}`,
+    `bg-leland-blue-light text-leland-blue-dark border ${selected ? 'border-leland-black' : 'border-transparent'} ${hoverable ? 'hover:bg-leland-blue-light' : ''}`,
   [TagColor.RED]: (hoverable, selected) =>
-    `bg-leland-red-light text-leland-red border ${selected ? 'border-leland-black' : 'border-leland-red-light'} ${hoverable ? 'hover:bg-leland-red-light-hover' : ''}`,
-  [TagColor.PURPLE]: (hoverable, selected) =>
-    `bg-leland-purple text-leland-white border ${selected ? 'border-leland-black' : 'border-leland-purple'} ${hoverable ? 'hover:bg-leland-purple-hover' : ''}`,
+    `bg-leland-red-light text-leland-red-dark border ${selected ? 'border-leland-black' : 'border-transparent'} ${hoverable ? 'hover:bg-leland-red-light' : ''}`,
+  [TagColor.BEIGE]: (_hoverable, selected) =>
+    `bg-leland-tan-light text-leland-tan-dark border ${selected ? 'border-leland-black' : 'border-transparent'}`,
   [TagColor.WHITE]: (hoverable, selected) =>
-    `bg-leland-white text-leland-black border ${selected ? 'border-leland-black' : 'border-leland-white'} ${hoverable ? 'hover:bg-leland-gray-stroke' : ''}`,
+    `bg-white text-leland-black border ${selected ? 'border-leland-black' : 'border-leland-gray-stroke'} ${hoverable ? 'hover:bg-leland-gray-stroke' : ''}`,
   [TagColor.BLACK]: (hoverable, selected) =>
-    `bg-leland-black text-leland-white border ${selected ? 'border-leland-black' : 'border-leland-black'} ${hoverable ? 'hover:bg-leland-black-hover' : ''}`,
+    `bg-leland-black text-leland-white border ${selected ? 'border-leland-black' : 'border-transparent'} ${hoverable ? 'hover:bg-leland-black' : ''}`,
 };
 
 interface TagSizePaddingProps {
