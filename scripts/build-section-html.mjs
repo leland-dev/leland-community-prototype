@@ -46,6 +46,9 @@ const BASE_CHROME_CSS = `
 .dirB-rail { display: none !important; }
 #sg-rail-toggle { display: none !important; }
 .dirB-body { grid-template-columns: 1fr !important; }
+/* Tool-track switcher (Claude/Gemini/Codex/... pills) hidden — the viewer
+   presents a single track; content defaults to the guide's primary track. */
+.track-switcher { display: none !important; }
 `;
 // Welcome page: hero only. Sections stay in the data (keeps the
 // "N builds · model" meta line accurate) but are hidden, as is the
