@@ -7,6 +7,10 @@ import { Link, useParams } from "react-router-dom";
 
 import { CourseFeedbackModal } from "../components/CourseFeedbackModal";
 import {
+  IconLeftSidebarClose,
+  IconLeftSidebarOpen,
+} from "../components/icons/left-sidebar";
+import {
   BrandLelandLogoSilhouette,
   Button,
   ButtonColor,
@@ -17,7 +21,6 @@ import {
   IconChevronRight,
   IconHelp,
   IconShare,
-  IconWindowSidebarLeft,
   IconWrite,
   IconX,
   Menu,
@@ -170,13 +173,13 @@ function CourseViewerSidebar({
           className="flex size-10 shrink-0 items-center justify-center p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
           aria-label="Close sidebar"
         >
-          <IconWindowSidebarLeft className="size-6" aria-hidden />
+          <IconLeftSidebarClose className="size-6" aria-hidden />
         </button>
         {SIDEBAR_TABS.map(({ id, label }) => (
           <Button
             key={id}
             label={label}
-            buttonColor={ButtonColor.SECONDARY_NEUTRAL}
+            buttonColor={ButtonColor.WHITE}
             size={ButtonSize.SMALL}
             rounded
             selected={tab === id}
@@ -478,7 +481,7 @@ export default function ContentViewer() {
             aria-label="Open sidebar"
             className="fixed left-0 top-[100px] z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-white p-4 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
           >
-            <IconWindowSidebarLeft className="size-[22px]" aria-hidden />
+            <IconLeftSidebarOpen className="size-6" aria-hidden />
           </button>
         )}
 
