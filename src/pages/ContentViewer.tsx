@@ -177,7 +177,7 @@ function CourseViewerSidebar({
   return (
     <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-leland-beige">
       {/* Pivot menu + collapse toggle (at the panel edge it controls) */}
-      <div className="flex items-center gap-1.5 px-4 pt-4">
+      <div className="flex items-center gap-1.5 px-6 pt-4">
         {options.hidePivotMenu
           ? null
           : SIDEBAR_TABS.map(({ id, label }) => (
