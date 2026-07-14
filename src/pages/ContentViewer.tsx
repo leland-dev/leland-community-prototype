@@ -142,6 +142,41 @@ function SectionContent({ section }: { section: Section }) {
   );
 }
 
+// ─── Live program placeholder data ───────────────────────────────────────────
+
+type LiveSession = {
+  number: number;
+  title: string;
+  description: string;
+  date: Date;
+  timeSlots: string[];
+  durationMin: number;
+};
+
+// Placeholder schedule — swap for real cohort data
+const LIVE_SESSION_DATES = [
+  new Date(2026, 3, 21),
+  new Date(2026, 3, 24),
+  new Date(2026, 3, 28),
+  new Date(2026, 4, 1),
+];
+
+const LIVE_SESSIONS: LiveSession[] = LESSONS.map((l, i) => ({
+  number: i + 1,
+  title: l.title,
+  description: l.subtitle,
+  date: LIVE_SESSION_DATES[i] ?? LIVE_SESSION_DATES[0],
+  timeSlots: ["11:00 AM PT", "4:00 PM PT"],
+  durationMin: 90,
+}));
+
+const formatSessionDate = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+
 // ─── Sidebar (mirrors CourseViewerSidebar.client.tsx) ────────────────────────
 
 const SIDEBAR_TABS = [
@@ -158,16 +193,23 @@ function CourseViewerSidebar({
   currentSectionId,
   isCompleted,
   onToggle,
+  tab,
+  onTabChange,
+  selectedSessionNumber,
+  onSelectSession,
 }: {
   lesson: Lesson;
   lessonIdx: number;
   currentSectionId: string;
   isCompleted: (sectionId: string) => boolean;
   onToggle: () => void;
+  tab: SidebarTab;
+  onTabChange: (tab: SidebarTab) => void;
+  selectedSessionNumber: number | null;
+  onSelectSession: (n: number | null) => void;
 }) {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
-  const [tab, setTab] = useState<SidebarTab>('lessons');
   const { options, toggleOption } = usePrototypeOptions();
 
   const entries = lesson.sections;
@@ -184,7 +226,7 @@ function CourseViewerSidebar({
               <button
                 key={id}
                 type="button"
-                onClick={() => setTab(id)}
+                onClick={() => onTabChange(id)}
                 className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
               >
                 <Tag
@@ -274,29 +316,35 @@ function CourseViewerSidebar({
             </div>
           </>
         ) : tab === 'live' ? (
-          /* Placeholder content — swap for real session data */
           <div className="flex flex-col gap-4 px-6">
             <div className="flex flex-col gap-1">
               <p className="leland-heading-lg font-semibold text-leland-gray-dark">
                 Cohort 3 · Apr 21 – May 8
               </p>
               <p className="leland-paragraph-sm text-leland-gray-light">
-                {LESSONS.length} live sessions · 90 min each
+                {LIVE_SESSIONS.length} live sessions · 90 min each
               </p>
             </div>
             <div className="flex flex-col gap-2">
-              {LESSONS.map((l, idx) => (
-                <div
-                  key={l.id}
-                  className="flex flex-col gap-0.5 rounded-lg border border-leland-gray-stroke bg-white p-3"
+              {LIVE_SESSIONS.map((session) => (
+                <button
+                  key={session.number}
+                  type="button"
+                  onClick={() => onSelectSession(session.number)}
+                  className={`flex flex-col gap-0.5 rounded-lg border bg-white p-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
+                    selectedSessionNumber === session.number
+                      ? "border-leland-gray-dark"
+                      : "border-leland-gray-stroke hover:bg-leland-gray-hover"
+                  }`}
                 >
                   <p className="leland-heading-base text-leland-gray-dark">
-                    Session {idx + 1}: {l.title}
+                    Session {session.number}: {session.title}
                   </p>
                   <p className="leland-paragraph-sm text-leland-gray-light">
-                    Tue 11:00 AM · 90 min
+                    {formatSessionDate(session.date)} · {session.durationMin}{" "}
+                    min
                   </p>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -425,6 +473,197 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   );
 });
 
+// ─── Live program: calendar + session detail (main content area) ─────────────
+
+const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+
+function monthGrid(year: number, month: number): Array<Date | null> {
+  const first = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells: Array<Date | null> = Array(first.getDay()).fill(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
+  return cells;
+}
+
+function LiveProgramCalendar({
+  onSelectSession,
+}: {
+  onSelectSession: (n: number) => void;
+}) {
+  // Cohort spans Apr–May 2026
+  const [month, setMonth] = useState(3);
+  const year = 2026;
+  const monthLabel = new Date(year, month, 1).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+
+  const sessionByDay = new Map(
+    LIVE_SESSIONS.filter((s) => s.date.getMonth() === month).map((s) => [
+      s.date.getDate(),
+      s,
+    ]),
+  );
+
+  return (
+    <div className="mx-auto flex h-full w-full max-w-2xl flex-col gap-8 overflow-y-auto px-8 py-10">
+      <div className="flex flex-col gap-1">
+        <p className="leland-eyebrow text-leland-gray-light">Live program</p>
+        <h1 className="leland-heading-3xl font-semibold text-leland-gray-dark">
+          Cohort 3 schedule
+        </h1>
+        <p className="leland-paragraph-lg text-leland-gray-light">
+          Four live sessions, Apr 21 – May 8. Click a session for details and
+          available times.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-leland-gray-stroke bg-white p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <p className="leland-heading-lg font-semibold text-leland-gray-dark">
+            {monthLabel}
+          </p>
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => setMonth(3)}
+              disabled={month === 3}
+              aria-label="Previous month"
+              className="flex size-8 items-center justify-center rounded-full text-leland-gray-dark hover:bg-leland-gray-hover disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconChevronLeft className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setMonth(4)}
+              disabled={month === 4}
+              aria-label="Next month"
+              className="flex size-8 items-center justify-center rounded-full text-leland-gray-dark hover:bg-leland-gray-hover disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconChevronRight className="size-4" />
+            </button>
+          </div>
+        </div>
+        <div className="grid grid-cols-7 gap-y-1 text-center">
+          {WEEKDAY_LABELS.map((d, i) => (
+            <span
+              key={`${d}-${i}`}
+              className="leland-heading-sm py-1 text-leland-gray-extra-light"
+            >
+              {d}
+            </span>
+          ))}
+          {monthGrid(2026, month).map((date, i) => {
+            const session = date ? sessionByDay.get(date.getDate()) : undefined;
+            return (
+              <div key={i} className="flex justify-center py-0.5">
+                {date == null ? (
+                  <span className="size-9" />
+                ) : session ? (
+                  <button
+                    type="button"
+                    onClick={() => onSelectSession(session.number)}
+                    title={`Session ${session.number}: ${session.title}`}
+                    className="flex size-9 items-center justify-center rounded-full bg-leland-primary leland-heading-base font-semibold text-leland-on-primary-text hover:bg-leland-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-gray-dark"
+                  >
+                    {date.getDate()}
+                  </button>
+                ) : (
+                  <span className="flex size-9 items-center justify-center leland-paragraph-base text-leland-gray-dark">
+                    {date.getDate()}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {LIVE_SESSIONS.map((session) => (
+          <button
+            key={session.number}
+            type="button"
+            onClick={() => onSelectSession(session.number)}
+            className="flex items-center justify-between gap-3 rounded-lg border border-leland-gray-stroke bg-white px-4 py-3 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+          >
+            <div className="min-w-0">
+              <p className="leland-heading-base font-semibold text-leland-gray-dark">
+                Session {session.number}: {session.title}
+              </p>
+              <p className="leland-paragraph-sm text-leland-gray-light">
+                {formatSessionDate(session.date)} · {session.durationMin} min
+              </p>
+            </div>
+            <IconChevronRight className="size-5 shrink-0 text-leland-gray-extra-light" />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SessionDetailView({
+  session,
+  onBack,
+}: {
+  session: LiveSession;
+  onBack: () => void;
+}) {
+  return (
+    <div className="mx-auto flex h-full w-full max-w-2xl flex-col gap-6 overflow-y-auto px-8 py-10">
+      <div>
+        <Button
+          label="Back to schedule"
+          buttonColor={ButtonColor.TERTIARY}
+          LeftIcon={IconChevronLeft}
+          onClick={onBack}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <p className="leland-eyebrow text-leland-gray-light">
+          Session {session.number}
+        </p>
+        <h1 className="leland-heading-3xl font-semibold text-leland-gray-dark">
+          {session.title}
+        </h1>
+        <p className="leland-subtext-lg text-leland-gray-light">
+          {formatSessionDate(session.date)} · {session.durationMin} min
+        </p>
+      </div>
+      <p className="leland-paragraph-lg text-leland-gray-dark">
+        {session.description}
+      </p>
+
+      <div className="flex flex-col gap-3">
+        <p className="leland-heading-base font-semibold uppercase tracking-wide text-leland-gray-light">
+          Available times
+        </p>
+        {session.timeSlots.map((slot) => (
+          <div
+            key={slot}
+            className="flex items-center justify-between gap-3 rounded-lg border border-leland-gray-stroke bg-white px-4 py-3"
+          >
+            <div>
+              <p className="leland-heading-base font-semibold text-leland-gray-dark">
+                {formatSessionDate(session.date)} · {slot}
+              </p>
+              <p className="leland-paragraph-sm text-leland-gray-light">
+                {session.durationMin} minutes
+              </p>
+            </div>
+            <Button
+              label="Add to calendar"
+              buttonColor={ButtonColor.SECONDARY}
+              rounded
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Section nav (mirrors CourseViewerSectionNav.client.tsx) ─────────────────
 
 // Matches production ButtonSize.LARGE (p-4, 14px) at semibold weight
@@ -486,7 +725,14 @@ function CourseViewerSectionNav({
 export default function ContentViewer() {
   const params = useParams<{ lessonId?: string; sectionId?: string }>();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>("lessons");
+  const [selectedSessionNumber, setSelectedSessionNumber] = useState<
+    number | null
+  >(null);
   const { completed, markComplete } = useCompletion();
+
+  const selectedSession =
+    LIVE_SESSIONS.find((s) => s.number === selectedSessionNumber) ?? null;
 
   const lessonIdx = Math.max(
     0,
@@ -581,6 +827,13 @@ export default function ContentViewer() {
             currentSectionId={section.id}
             isCompleted={isCompleted}
             onToggle={() => setSidebarOpen(false)}
+            tab={sidebarTab}
+            onTabChange={(tab) => {
+              setSidebarTab(tab);
+              if (tab !== "live") setSelectedSessionNumber(null);
+            }}
+            selectedSessionNumber={selectedSessionNumber}
+            onSelectSession={setSelectedSessionNumber}
           />
         ) : (
           <button
@@ -592,19 +845,39 @@ export default function ContentViewer() {
           </button>
         )}
 
-        {/* Main content + section nav */}
+        {/* Main content + section nav. The Live program tab takes over the
+            main area (calendar → session detail); lesson sections otherwise. */}
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <div className="relative min-h-0 flex-1 overflow-hidden">
-            <SectionContent
-              key={`${lesson.id}/${section.id}`}
-              section={section}
-            />
-          </div>
-          <CourseViewerSectionNav
-            prevSectionLink={prevSection ? sectionUrl(lesson, prevSection) : null}
-            nextSectionLink={nextSection ? sectionUrl(lesson, nextSection) : null}
-            onNext={() => markComplete(lesson.id, section.id)}
-          />
+          {sidebarTab === "live" ? (
+            <div className="min-h-0 flex-1 overflow-hidden">
+              {selectedSession ? (
+                <SessionDetailView
+                  session={selectedSession}
+                  onBack={() => setSelectedSessionNumber(null)}
+                />
+              ) : (
+                <LiveProgramCalendar onSelectSession={setSelectedSessionNumber} />
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="relative min-h-0 flex-1 overflow-hidden">
+                <SectionContent
+                  key={`${lesson.id}/${section.id}`}
+                  section={section}
+                />
+              </div>
+              <CourseViewerSectionNav
+                prevSectionLink={
+                  prevSection ? sectionUrl(lesson, prevSection) : null
+                }
+                nextSectionLink={
+                  nextSection ? sectionUrl(lesson, nextSection) : null
+                }
+                onNext={() => markComplete(lesson.id, section.id)}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>
