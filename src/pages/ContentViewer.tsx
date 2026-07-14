@@ -176,15 +176,8 @@ function CourseViewerSidebar({
 
   return (
     <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-leland-beige">
-      {/* Collapse toggle + pivot menu */}
+      {/* Pivot menu + collapse toggle (at the panel edge it controls) */}
       <div className="flex items-center gap-1.5 px-4 pt-4">
-        <button
-          onClick={onToggle}
-          className="flex size-10 shrink-0 items-center justify-center p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-          aria-label="Close sidebar"
-        >
-          <IconLeftSidebarClose className="size-6" aria-hidden />
-        </button>
         {options.hidePivotMenu
           ? null
           : SIDEBAR_TABS.map(({ id, label }) => (
@@ -203,6 +196,13 @@ function CourseViewerSidebar({
                 />
               </button>
             ))}
+        <button
+          onClick={onToggle}
+          className="ml-auto flex size-10 shrink-0 items-center justify-center p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+          aria-label="Close sidebar"
+        >
+          <IconLeftSidebarClose className="size-6" aria-hidden />
+        </button>
       </div>
 
       {/* Scrollable main content — horizontal padding lives on the inner
