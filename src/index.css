@@ -351,3 +351,20 @@ input[name="phone"]:-webkit-autofill:focus {
   mask-composite: exclude;
   animation: leland-beam-spin 1.05s linear;
 }
+
+/* Thin scrollbar for the course viewer sidebar — tinted to sit quietly on
+   the beige panel; flush against the panel edge. */
+.sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 34, 34, 0.18) transparent;
+}
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(34, 34, 34, 0.18);
+  border-radius: 3px;
+}

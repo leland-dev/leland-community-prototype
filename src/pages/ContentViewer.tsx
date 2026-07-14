@@ -213,12 +213,13 @@ function CourseViewerSidebar({
                     totalCount > 0 ? (completedCount / totalCount) * 100 : 0
                   }
                   color={ProgressBarColor.Dark}
+                  trackClassName="bg-white"
                 />
               </div>
             </div>
 
             {/* Section list */}
-            <div className="relative min-h-0 flex-1 overflow-y-auto pl-4 pr-1">
+            <div className="sidebar-scrollbar relative min-h-0 flex-1 overflow-y-auto pl-4">
               <div className="flex flex-col gap-1">
                 {entries.map((entry, idx) => {
                   const isActive = entry.id === currentSectionId;

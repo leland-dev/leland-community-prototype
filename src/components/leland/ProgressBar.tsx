@@ -20,12 +20,19 @@ export type ProgressBarProps = {
   color?: ProgressBarColor;
   /** Accessible name for the progress bar (role=progressbar). */
   label?: string;
+  /**
+   * PROTOTYPE addition: track color override for non-white surfaces (the
+   * production default gray-stroke track washes out on e.g. the beige
+   * sidebar). Not in the monorepo component.
+   */
+  trackClassName?: string;
 };
 
 export const ProgressBar: FC<ProgressBarProps> = ({
   value,
   color = ProgressBarColor.Primary,
   label,
+  trackClassName = 'bg-leland-gray-stroke',
 }) => {
   return (
     <div
@@ -35,7 +42,7 @@ export const ProgressBar: FC<ProgressBarProps> = ({
       aria-valuenow={value}
       aria-label={label ?? 'Progress'}
       aria-valuetext={`${value}%`}
-      className="h-2 w-full rounded-full bg-leland-gray-stroke duration-700"
+      className={`h-2 w-full rounded-full duration-700 ${trackClassName}`}
     >
       <div
         className={`h-full rounded-full transition-[width] duration-500 ease-in-out ${ProgressBarColorToStyles[color]}`}
