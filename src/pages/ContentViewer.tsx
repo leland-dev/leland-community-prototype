@@ -10,6 +10,7 @@ import {
   BrandLelandLogoSilhouette,
   Button,
   ButtonColor,
+  ButtonSize,
   IconCheck,
   IconChevronDown,
   IconChevronLeft,
@@ -132,6 +133,15 @@ function SectionContent({ section }: { section: Section }) {
 
 // ─── Sidebar (mirrors CourseViewerSidebar.client.tsx) ────────────────────────
 
+const SIDEBAR_TABS = [
+  { id: 'lessons', label: 'Lessons' },
+  { id: 'details', label: 'Program details' },
+  { id: 'live', label: 'Live sessions' },
+  { id: 'more', label: 'More' },
+] as const;
+
+type SidebarTab = (typeof SIDEBAR_TABS)[number]['id'];
+
 function CourseViewerSidebar({
   lesson,
   lessonIdx,
@@ -146,6 +156,7 @@ function CourseViewerSidebar({
   onToggle: () => void;
 }) {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [tab, setTab] = useState<SidebarTab>('lessons');
 
   const entries = lesson.sections;
   const completedCount = entries.filter((e) => isCompleted(e.id)).length;
@@ -153,6 +164,21 @@ function CourseViewerSidebar({
 
   return (
     <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-leland-beige">
+      {/* Pivot menu */}
+      <div className="flex flex-wrap gap-1.5 px-4 pt-4">
+        {SIDEBAR_TABS.map(({ id, label }) => (
+          <Button
+            key={id}
+            label={label}
+            buttonColor={ButtonColor.SECONDARY_NEUTRAL}
+            size={ButtonSize.SMALL}
+            rounded
+            selected={tab === id}
+            onClick={() => setTab(id)}
+          />
+        ))}
+      </div>
+
       {/* Scrollable main content */}
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden px-4 pt-6">
         {/* Toggle + lesson badge */}
@@ -169,60 +195,113 @@ function CourseViewerSidebar({
           </span>
         </button>
 
-        {/* Lesson title + progress */}
-        <div className="flex flex-col gap-4 px-2">
-          <p className="leland-heading-2xl font-semibold text-leland-gray-dark">
-            {lesson.title}
-          </p>
-          <div className="flex flex-col gap-2">
-            <p className="leland-paragraph-sm text-leland-gray-light">
-              {completedCount} of {totalCount} complete
+        {tab === 'lessons' ? (
+          <>
+            {/* Lesson title + progress */}
+            <div className="flex flex-col gap-4 px-2">
+              <p className="leland-heading-2xl font-semibold text-leland-gray-dark">
+                {lesson.title}
+              </p>
+              <div className="flex flex-col gap-2">
+                <p className="leland-paragraph-sm text-leland-gray-light">
+                  {completedCount} of {totalCount} complete
+                </p>
+                <ProgressBar
+                  value={
+                    totalCount > 0 ? (completedCount / totalCount) * 100 : 0
+                  }
+                  color={ProgressBarColor.Dark}
+                />
+              </div>
+            </div>
+
+            {/* Section list */}
+            <div className="relative min-h-0 flex-1 overflow-y-auto">
+              <div className="flex flex-col gap-1">
+                {entries.map((entry, idx) => {
+                  const isActive = entry.id === currentSectionId;
+                  const completed = isCompleted(entry.id);
+                  return (
+                    <Link
+                      key={entry.id}
+                      to={`/content-viewer/${lesson.id}/${entry.id}`}
+                      className={`flex items-center gap-2.5 rounded-lg p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary${isActive ? " bg-leland-gray-hover" : ""}`}
+                    >
+                      <span
+                        className={`flex size-8 shrink-0 items-center justify-center rounded-full ${
+                          completed
+                            ? "bg-leland-gray-dark"
+                            : isActive
+                              ? "border-[1.5px] border-leland-gray-extra-light bg-white"
+                              : "border border-leland-gray-stroke bg-white"
+                        }`}
+                      >
+                        {completed ? (
+                          <IconCheck className="size-3.5 text-white" />
+                        ) : (
+                          <span className="leland-heading-base text-leland-gray-light">
+                            {idx + 1}
+                          </span>
+                        )}
+                      </span>
+                      <span className="leland-paragraph-base min-w-0 flex-1 font-medium text-leland-gray-dark">
+                        {entry.title}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-leland-beige to-transparent" />
+            </div>
+          </>
+        ) : tab === 'details' ? (
+          /* Placeholder content — swap for real program data */
+          <div className="flex flex-col gap-4 px-2">
+            <p className="leland-heading-2xl font-semibold text-leland-gray-dark">
+              {COURSE_TITLE}
             </p>
-            <ProgressBar
-              value={totalCount > 0 ? (completedCount / totalCount) * 100 : 0}
-              color={ProgressBarColor.Dark}
+            <p className="leland-paragraph-base text-leland-gray-light">
+              Use AI to 10x your impact: build a real product, automate your
+              communication, analyze data, and launch your own custom AI
+              system — in four hands-on lessons.
+            </p>
+            <div className="flex flex-col gap-1 leland-paragraph-base text-leland-gray-dark">
+              <p>Cohort 3 · Apr 21 – May 8</p>
+              <p>{LESSONS.length} lessons · 90 min each</p>
+            </div>
+          </div>
+        ) : tab === 'live' ? (
+          /* Placeholder content — swap for real session data */
+          <div className="flex flex-col gap-2 px-2">
+            {LESSONS.map((l, idx) => (
+              <div
+                key={l.id}
+                className="flex flex-col gap-0.5 rounded-lg border border-leland-gray-stroke bg-white p-3"
+              >
+                <p className="leland-heading-base text-leland-gray-dark">
+                  Session {idx + 1}: {l.title}
+                </p>
+                <p className="leland-paragraph-sm text-leland-gray-light">
+                  Tue 11:00 AM · 90 min
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          /* Placeholder content — swap for real links */
+          <div className="flex flex-col gap-1 px-2">
+            <Button
+              label="Get help"
+              buttonColor={ButtonColor.REVEAL}
+              LeftIcon={IconHelp}
+            />
+            <Button
+              label="Share this course"
+              buttonColor={ButtonColor.REVEAL}
+              LeftIcon={IconShare}
             />
           </div>
-        </div>
-
-        {/* Section list */}
-        <div className="relative min-h-0 flex-1 overflow-y-auto">
-          <div className="flex flex-col gap-1">
-            {entries.map((entry, idx) => {
-              const isActive = entry.id === currentSectionId;
-              const completed = isCompleted(entry.id);
-              return (
-                <Link
-                  key={entry.id}
-                  to={`/content-viewer/${lesson.id}/${entry.id}`}
-                  className={`flex items-center gap-2.5 rounded-lg p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary${isActive ? " bg-leland-gray-hover" : ""}`}
-                >
-                  <span
-                    className={`flex size-8 shrink-0 items-center justify-center rounded-full ${
-                      completed
-                        ? "bg-leland-gray-dark"
-                        : isActive
-                          ? "border-[1.5px] border-leland-gray-extra-light bg-white"
-                          : "border border-leland-gray-stroke bg-white"
-                    }`}
-                  >
-                    {completed ? (
-                      <IconCheck className="size-3.5 text-white" />
-                    ) : (
-                      <span className="leland-heading-base text-leland-gray-light">
-                        {idx + 1}
-                      </span>
-                    )}
-                  </span>
-                  <span className="leland-paragraph-base min-w-0 flex-1 font-medium text-leland-gray-dark">
-                    {entry.title}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-leland-beige to-transparent" />
-        </div>
+        )}
       </div>
 
       {/* Bottom actions — full-width section */}
@@ -339,93 +418,91 @@ export default function ContentViewer() {
   );
 
   return (
-    <div className="flex h-screen flex-col bg-white text-leland-gray-dark">
-      {/* Top header */}
-      <header className="flex shrink-0 items-center gap-2 border-b border-leland-gray-stroke py-3 pl-6 pr-4">
-        {/* Left: logo + breadcrumb */}
-        <div className="flex min-w-0 flex-1 items-center">
-          <BrandLelandLogoSilhouette className="h-5 w-auto shrink-0 text-leland-gray-dark" />
-          {/* Back to course */}
-          <Link
-            to={COURSE_HOME}
-            className="group leland-heading-base font-semibold ml-4 shrink-0 whitespace-nowrap px-1 py-3 text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary rounded-sm"
-          >
-            /{" "}
-            <span className="group-hover:underline group-hover:decoration-dotted group-hover:decoration-[1.5px] group-hover:underline-offset-4">
-              {COURSE_TITLE}
-            </span>
-          </Link>
+    // Sidebar spans the full window height; the header only spans the
+    // content column to its right.
+    <div className="flex h-screen bg-white text-leland-gray-dark">
+      {sidebarOpen ? (
+        <CourseViewerSidebar
+          lesson={lesson}
+          lessonIdx={lessonIdx}
+          currentSectionId={section.id}
+          isCompleted={isCompleted}
+          onToggle={() => setSidebarOpen(false)}
+        />
+      ) : (
+        <button
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open sidebar"
+          className="fixed left-0 top-[100px] z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-white p-4 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+        >
+          <IconWindowSidebarLeft className="size-[22px]" aria-hidden />
+        </button>
+      )}
 
-          <Menu asChild itemSections={lessonMenuSections}>
-            <button className="group leland-subtext-base ml-2 flex shrink-0 items-center gap-2 rounded-sm px-1 py-3 text-leland-gray-dark outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
+      {/* Header + content + section nav */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="flex shrink-0 items-center gap-2 border-b border-leland-gray-stroke py-3 pl-6 pr-4">
+          {/* Left: logo + breadcrumb */}
+          <div className="flex min-w-0 flex-1 items-center">
+            <BrandLelandLogoSilhouette className="h-5 w-auto shrink-0 text-leland-gray-dark" />
+            {/* Back to course */}
+            <Link
+              to={COURSE_HOME}
+              className="group leland-heading-base font-semibold ml-4 shrink-0 whitespace-nowrap px-1 py-3 text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary rounded-sm"
+            >
+              /{" "}
               <span className="group-hover:underline group-hover:decoration-dotted group-hover:decoration-[1.5px] group-hover:underline-offset-4">
-                Lesson {lessonIdx + 1}
+                {COURSE_TITLE}
               </span>
-              <IconChevronDown className="size-5" />
-            </button>
-          </Menu>
-        </div>
+            </Link>
 
-        {/* Right: actions + close */}
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center">
-            <Button
-              label="Get help"
-              buttonColor={ButtonColor.REVEAL}
-              rounded
-              LeftIcon={IconHelp}
-            />
-            <Button
-              label="Share"
-              buttonColor={ButtonColor.REVEAL}
-              rounded
-              LeftIcon={IconShare}
-            />
+            <Menu asChild itemSections={lessonMenuSections}>
+              <button className="group leland-subtext-base ml-2 flex shrink-0 items-center gap-2 rounded-sm px-1 py-3 text-leland-gray-dark outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
+                <span className="group-hover:underline group-hover:decoration-dotted group-hover:decoration-[1.5px] group-hover:underline-offset-4">
+                  Lesson {lessonIdx + 1}
+                </span>
+                <IconChevronDown className="size-5" />
+              </button>
+            </Menu>
           </div>
-          <Link
-            to={COURSE_HOME}
-            aria-label="Back to course"
-            className="inline-flex items-center justify-center rounded-full border border-leland-gray-stroke bg-white p-3 text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-          >
-            <IconX className="size-5" />
-          </Link>
-        </div>
-      </header>
 
-      {/* Body */}
-      <div className="flex min-h-0 flex-1">
-        {sidebarOpen ? (
-          <CourseViewerSidebar
-            lesson={lesson}
-            lessonIdx={lessonIdx}
-            currentSectionId={section.id}
-            isCompleted={isCompleted}
-            onToggle={() => setSidebarOpen(false)}
-          />
-        ) : (
-          <button
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open sidebar"
-            className="fixed left-0 top-[100px] z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-white p-4 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-          >
-            <IconWindowSidebarLeft className="size-[22px]" aria-hidden />
-          </button>
-        )}
-
-        {/* Main content + section nav */}
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <div className="relative min-h-0 flex-1 overflow-hidden">
-            <SectionContent
-              key={`${lesson.id}/${section.id}`}
-              section={section}
-            />
+          {/* Right: actions + close */}
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center">
+              <Button
+                label="Get help"
+                buttonColor={ButtonColor.REVEAL}
+                rounded
+                LeftIcon={IconHelp}
+              />
+              <Button
+                label="Share"
+                buttonColor={ButtonColor.REVEAL}
+                rounded
+                LeftIcon={IconShare}
+              />
+            </div>
+            <Link
+              to={COURSE_HOME}
+              aria-label="Back to course"
+              className="inline-flex items-center justify-center rounded-full border border-leland-gray-stroke bg-white p-3 text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+            >
+              <IconX className="size-5" />
+            </Link>
           </div>
-          <CourseViewerSectionNav
-            prevSectionLink={prevSection ? sectionUrl(lesson, prevSection) : null}
-            nextSectionLink={nextSection ? sectionUrl(lesson, nextSection) : null}
-            onNext={() => markComplete(lesson.id, section.id)}
+        </header>
+
+        <div className="relative min-h-0 flex-1 overflow-hidden">
+          <SectionContent
+            key={`${lesson.id}/${section.id}`}
+            section={section}
           />
         </div>
+        <CourseViewerSectionNav
+          prevSectionLink={prevSection ? sectionUrl(lesson, prevSection) : null}
+          nextSectionLink={nextSection ? sectionUrl(lesson, nextSection) : null}
+          onNext={() => markComplete(lesson.id, section.id)}
+        />
       </div>
     </div>
   );
