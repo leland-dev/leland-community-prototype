@@ -191,7 +191,6 @@ function CourseViewerSidebar({
                   text={label}
                   tagColor={TagColor.WHITE}
                   size={TagSize.SMALL}
-                  hoverable
                   selected={tab === id}
                 />
               </button>
