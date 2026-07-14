@@ -54,13 +54,10 @@ const CourseFeedbackModalImpl = ({
         <div className="flex flex-col gap-4 p-6">
           {feedbackType === null ? (
             <>
-              <p className="leland-paragraph-base text-leland-gray-light">
-                What would you like to share?
-              </p>
               <div className="flex flex-col gap-3">
                 <button
                   onClick={() => setFeedbackType("review")}
-                  className="flex items-center gap-3 rounded-lg bg-leland-beige px-5 py-5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary hover:bg-leland-gray-hover"
+                  className="flex items-center gap-3 rounded-lg border border-leland-gray-stroke bg-white px-5 py-5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary hover:bg-leland-gray-hover"
                 >
                   <IconStar className="size-5 shrink-0 text-leland-gray-dark" />
                   <div>
@@ -74,7 +71,7 @@ const CourseFeedbackModalImpl = ({
                 </button>
                 <button
                   onClick={() => setFeedbackType("issue")}
-                  className="flex items-center gap-3 rounded-lg bg-leland-beige px-5 py-5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary hover:bg-leland-gray-hover"
+                  className="flex items-center gap-3 rounded-lg border border-leland-gray-stroke bg-white px-5 py-5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary hover:bg-leland-gray-hover"
                 >
                   <IconFlag className="size-5 shrink-0 text-leland-gray-dark" />
                   <div>
