@@ -573,7 +573,7 @@ export default function ContentViewer() {
       </header>
 
       {/* Body */}
-      <div className="flex min-h-0 flex-1">
+      <div className="relative flex min-h-0 flex-1">
         {sidebarOpen ? (
           <CourseViewerSidebar
             lesson={lesson}
@@ -586,7 +586,7 @@ export default function ContentViewer() {
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Open sidebar"
-            className="fixed left-0 top-[100px] z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-white p-4 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            className="absolute left-0 top-6 z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-leland-beige p-4 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
           >
             <IconLeftSidebarOpen className="size-6" aria-hidden />
           </button>
