@@ -14,7 +14,6 @@ import {
   BrandLelandLogoSilhouette,
   Button,
   ButtonColor,
-  ButtonSize,
   IconCheck,
   IconChevronDown,
   IconChevronLeft,
@@ -30,6 +29,9 @@ import {
   ModalSize,
   ProgressBar,
   ProgressBarColor,
+  Tag,
+  TagColor,
+  TagSize,
   withModal,
   type MenuItemSection,
   type ModalProps,
@@ -145,7 +147,7 @@ function SectionContent({ section }: { section: Section }) {
 const SIDEBAR_TABS = [
   { id: 'lessons', label: 'Lessons' },
   { id: 'live', label: 'Live program' },
-  { id: 'resources', label: 'Resources' },
+  { id: 'resources', label: 'More' },
 ] as const;
 
 type SidebarTab = (typeof SIDEBAR_TABS)[number]['id'];
@@ -186,15 +188,20 @@ function CourseViewerSidebar({
         {options.hidePivotMenu
           ? null
           : SIDEBAR_TABS.map(({ id, label }) => (
-              <Button
+              <button
                 key={id}
-                label={label}
-                buttonColor={ButtonColor.WHITE}
-                size={ButtonSize.SMALL}
-                rounded
-                selected={tab === id}
+                type="button"
                 onClick={() => setTab(id)}
-              />
+                className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+              >
+                <Tag
+                  text={label}
+                  tagColor={TagColor.WHITE}
+                  size={TagSize.SMALL}
+                  hoverable
+                  selected={tab === id}
+                />
+              </button>
             ))}
       </div>
 
