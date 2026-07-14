@@ -16,6 +16,9 @@ const PROTO = '/Users/madeleinepimentel/dev/leland-community-prototype';
 const OUT_PUBLIC = join(PROTO, 'public/lessons');
 const OUT_MANIFEST = join(PROTO, 'src/data/aiBuilderL1Lessons.json');
 
+// Bump when regenerating so browsers refetch cached lesson iframes.
+const CONTENT_VERSION = 2;
+
 function dataUri(path, mime) {
   return `data:${mime};base64,${readFileSync(path).toString('base64')}`;
 }
@@ -102,7 +105,12 @@ for (const n of [1, 2, 3, 4]) {
 
   writeFileSync(join(dir, 'welcome.html'), buildPage(raw, { extraCss: WELCOME_CSS, extraJs: '' }));
   const manifestSections = [
-    { id: 'welcome', title: 'Welcome', kind: 'html', src: `/lessons/lesson-${n}/welcome.html` },
+    {
+      id: 'welcome',
+      title: 'Welcome',
+      kind: 'html',
+      src: `/lessons/lesson-${n}/welcome.html?v=${CONTENT_VERSION}`,
+    },
   ];
 
   for (const sec of sections) {
@@ -115,7 +123,7 @@ for (const n of [1, 2, 3, 4]) {
       title: sec.title,
       durationMin: sec.duration_min ?? null,
       kind: 'html',
-      src: `/lessons/lesson-${n}/${sec.id}.html`,
+      src: `/lessons/lesson-${n}/${sec.id}.html?v=${CONTENT_VERSION}`,
     });
   }
 

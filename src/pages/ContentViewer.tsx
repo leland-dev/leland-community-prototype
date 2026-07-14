@@ -19,14 +19,20 @@ import {
   IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
+  IconDotsHorizontal,
   IconHelp,
   IconShare,
   IconWrite,
   IconX,
   Menu,
+  Modal,
+  ModalContent,
+  ModalSize,
   ProgressBar,
   ProgressBarColor,
+  withModal,
   type MenuItemSection,
+  type ModalProps,
 } from "../components/leland";
 import lessonData from "../data/aiBuilderL1Lessons.json";
 
@@ -158,7 +164,9 @@ function CourseViewerSidebar({
   onToggle: () => void;
 }) {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
   const [tab, setTab] = useState<SidebarTab>('lessons');
+  const { options, toggleOption } = usePrototypeOptions();
 
   const entries = lesson.sections;
   const completedCount = entries.filter((e) => isCompleted(e.id)).length;
@@ -175,17 +183,19 @@ function CourseViewerSidebar({
         >
           <IconLeftSidebarClose className="size-6" aria-hidden />
         </button>
-        {SIDEBAR_TABS.map(({ id, label }) => (
-          <Button
-            key={id}
-            label={label}
-            buttonColor={ButtonColor.WHITE}
-            size={ButtonSize.SMALL}
-            rounded
-            selected={tab === id}
-            onClick={() => setTab(id)}
-          />
-        ))}
+        {options.hidePivotMenu
+          ? null
+          : SIDEBAR_TABS.map(({ id, label }) => (
+              <Button
+                key={id}
+                label={label}
+                buttonColor={ButtonColor.WHITE}
+                size={ButtonSize.SMALL}
+                rounded
+                selected={tab === id}
+                onClick={() => setTab(id)}
+              />
+            ))}
       </div>
 
       {/* Scrollable main content — horizontal padding lives on the inner
@@ -303,12 +313,20 @@ function CourseViewerSidebar({
 
       {/* Bottom actions — full-width section */}
       <div className="px-4 py-4 bg-leland-beige">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex items-center justify-between gap-2">
           <Button
             label="Share feedback"
             buttonColor={ButtonColor.REVEAL}
             LeftIcon={IconWrite}
             onClick={() => setFeedbackModalOpen(true)}
+          />
+          <Button
+            label="Prototype options"
+            hideLabel
+            rounded
+            buttonColor={ButtonColor.REVEAL}
+            LeftIcon={IconDotsHorizontal}
+            onClick={() => setPrototypeOptionsOpen(true)}
           />
         </div>
         <CourseFeedbackModal
@@ -317,10 +335,89 @@ function CourseViewerSidebar({
           currentEntryId={currentSectionId}
           entries={entries}
         />
+        <PrototypeOptionsModal
+          open={prototypeOptionsOpen}
+          onOpenChange={setPrototypeOptionsOpen}
+          options={options}
+          onToggle={toggleOption}
+        />
       </div>
     </aside>
   );
 }
+
+// ─── Prototype options (meta-UI for demoing variants, not product UI) ────────
+
+type PrototypeOptions = {
+  hidePivotMenu: boolean;
+};
+
+const PROTOTYPE_OPTIONS_KEY = "content-viewer-prototype-options";
+
+const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
+  hidePivotMenu: false,
+};
+
+function usePrototypeOptions() {
+  const [options, setOptions] = useState<PrototypeOptions>(() => {
+    try {
+      return {
+        ...DEFAULT_PROTOTYPE_OPTIONS,
+        ...JSON.parse(localStorage.getItem(PROTOTYPE_OPTIONS_KEY) ?? "{}"),
+      };
+    } catch {
+      return DEFAULT_PROTOTYPE_OPTIONS;
+    }
+  });
+  const toggleOption = (key: keyof PrototypeOptions) => {
+    setOptions((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      localStorage.setItem(PROTOTYPE_OPTIONS_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+  return { options, toggleOption };
+}
+
+const PROTOTYPE_OPTION_LABELS: Record<keyof PrototypeOptions, string> = {
+  hidePivotMenu: "Hide pivot menu",
+};
+
+const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
+  options,
+  onToggle,
+  ...modalProps
+}: ModalProps & {
+  options: PrototypeOptions;
+  onToggle: (key: keyof PrototypeOptions) => void;
+}) {
+  return (
+    <Modal {...modalProps}>
+      <ModalContent size={ModalSize.SMALL} header="Prototype options">
+        <div className="flex flex-col gap-1 p-6">
+          {(
+            Object.keys(PROTOTYPE_OPTION_LABELS) as Array<keyof PrototypeOptions>
+          ).map((key) => (
+            <label
+              key={key}
+              className="flex cursor-pointer items-center justify-between gap-3 rounded-lg p-3 hover:bg-leland-gray-hover"
+            >
+              <span className="leland-paragraph-base text-leland-gray-dark">
+                {PROTOTYPE_OPTION_LABELS[key]}
+              </span>
+              <input
+                type="checkbox"
+                checked={options[key]}
+                onChange={() => onToggle(key)}
+                className="size-4 accent-leland-gray-dark"
+              />
+            </label>
+          ))}
+        </div>
+      </ModalContent>
+    </Modal>
+  );
+});
 
 // ─── Section nav (mirrors CourseViewerSectionNav.client.tsx) ─────────────────
 
