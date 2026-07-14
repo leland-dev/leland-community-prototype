@@ -135,9 +135,8 @@ function SectionContent({ section }: { section: Section }) {
 
 const SIDEBAR_TABS = [
   { id: 'lessons', label: 'Lessons' },
-  { id: 'details', label: 'Program details' },
-  { id: 'live', label: 'Live sessions' },
-  { id: 'more', label: 'More' },
+  { id: 'live', label: 'Live program' },
+  { id: 'resources', label: 'Resources' },
 ] as const;
 
 type SidebarTab = (typeof SIDEBAR_TABS)[number]['id'];
@@ -164,8 +163,15 @@ function CourseViewerSidebar({
 
   return (
     <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-leland-beige">
-      {/* Pivot menu */}
-      <div className="flex flex-wrap gap-1.5 px-4 pt-4">
+      {/* Collapse toggle + pivot menu */}
+      <div className="flex items-center gap-1.5 px-4 pt-4">
+        <button
+          onClick={onToggle}
+          className="flex size-10 shrink-0 items-center justify-center p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+          aria-label="Close sidebar"
+        >
+          <IconWindowSidebarLeft className="size-6" aria-hidden />
+        </button>
         {SIDEBAR_TABS.map(({ id, label }) => (
           <Button
             key={id}
@@ -181,27 +187,18 @@ function CourseViewerSidebar({
 
       {/* Scrollable main content */}
       <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden px-4 pt-6">
-        {/* Toggle + lesson badge */}
-        <button
-          onClick={onToggle}
-          className="flex items-center self-start focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-          aria-label="Close sidebar"
-        >
-          <span className="flex size-10 items-center justify-center p-2.5">
-            <IconWindowSidebarLeft className="size-[18px]" aria-hidden />
-          </span>
-          <span className="px-2 py-2 leland-heading-base text-leland-gray-light">
-            Lesson {lessonIdx + 1}
-          </span>
-        </button>
-
         {tab === 'lessons' ? (
           <>
-            {/* Lesson title + progress */}
+            {/* Lesson badge + title + progress */}
             <div className="flex flex-col gap-4 px-2">
-              <p className="leland-heading-2xl font-semibold text-leland-gray-dark">
-                {lesson.title}
-              </p>
+              <div className="flex flex-col gap-1">
+                <p className="leland-heading-base text-leland-gray-light">
+                  Lesson {lessonIdx + 1}
+                </p>
+                <p className="leland-heading-2xl font-semibold text-leland-gray-dark">
+                  {lesson.title}
+                </p>
+              </div>
               <div className="flex flex-col gap-2">
                 <p className="leland-paragraph-sm text-leland-gray-light">
                   {completedCount} of {totalCount} complete
@@ -254,41 +251,35 @@ function CourseViewerSidebar({
               <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-leland-beige to-transparent" />
             </div>
           </>
-        ) : tab === 'details' ? (
-          /* Placeholder content — swap for real program data */
-          <div className="flex flex-col gap-4 px-2">
-            <p className="leland-heading-2xl font-semibold text-leland-gray-dark">
-              {COURSE_TITLE}
-            </p>
-            <p className="leland-paragraph-base text-leland-gray-light">
-              Use AI to 10x your impact: build a real product, automate your
-              communication, analyze data, and launch your own custom AI
-              system — in four hands-on lessons.
-            </p>
-            <div className="flex flex-col gap-1 leland-paragraph-base text-leland-gray-dark">
-              <p>Cohort 3 · Apr 21 – May 8</p>
-              <p>{LESSONS.length} lessons · 90 min each</p>
-            </div>
-          </div>
         ) : tab === 'live' ? (
           /* Placeholder content — swap for real session data */
-          <div className="flex flex-col gap-2 px-2">
-            {LESSONS.map((l, idx) => (
-              <div
-                key={l.id}
-                className="flex flex-col gap-0.5 rounded-lg border border-leland-gray-stroke bg-white p-3"
-              >
-                <p className="leland-heading-base text-leland-gray-dark">
-                  Session {idx + 1}: {l.title}
-                </p>
-                <p className="leland-paragraph-sm text-leland-gray-light">
-                  Tue 11:00 AM · 90 min
-                </p>
-              </div>
-            ))}
+          <div className="flex flex-col gap-4 px-2">
+            <div className="flex flex-col gap-1">
+              <p className="leland-heading-lg text-leland-gray-dark">
+                Cohort 3 · Apr 21 – May 8
+              </p>
+              <p className="leland-paragraph-sm text-leland-gray-light">
+                {LESSONS.length} live sessions · 90 min each
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
+              {LESSONS.map((l, idx) => (
+                <div
+                  key={l.id}
+                  className="flex flex-col gap-0.5 rounded-lg border border-leland-gray-stroke bg-white p-3"
+                >
+                  <p className="leland-heading-base text-leland-gray-dark">
+                    Session {idx + 1}: {l.title}
+                  </p>
+                  <p className="leland-paragraph-sm text-leland-gray-light">
+                    Tue 11:00 AM · 90 min
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
-          /* Placeholder content — swap for real links */
+          /* Placeholder content — swap for real resource links */
           <div className="flex flex-col gap-1 px-2">
             <Button
               label="Get help"
@@ -403,7 +394,7 @@ export default function ContentViewer() {
 
   const lessonMenuSections: MenuItemSection[] = [
     LESSONS.map((l, idx) => ({
-      label: `Lesson ${idx + 1}`,
+      label: `Lesson ${idx + 1}: ${l.title}`,
       url: sectionUrl(l, l.sections[0]),
       selected: idx === lessonIdx,
     })),

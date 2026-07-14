@@ -3,6 +3,8 @@
 // - next/link → react-router-dom Link
 // - text-base → explicit 0.875rem (the monorepo overrides the base scale)
 // - z-dropdown utility comes from styles/leland-theme.css
+// - PROTOTYPE DIVERGENCE: whitespace-nowrap removed from items and max-w-80
+//   added to content so long labels (e.g. full lesson titles) wrap.
 import {
   Content as DropdownMenuContent,
   Item as DropdownMenuItem,
@@ -124,11 +126,11 @@ const MenuItem = forwardRef<HTMLDivElement, InternalMenuItemProps>(
       [alignSubmenuWithParent, parentMenuRef, triggerRef, childRefs],
     );
 
-    const itemClassName = `flex w-full group cursor-pointer select-none items-center justify-between gap-x-2.5 whitespace-nowrap rounded-md p-2.5 text-[0.875rem] leading-tight text-leland-gray-dark outline-none hover:bg-leland-gray-hover focus:bg-leland-gray-hover active:bg-leland-gray-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-gray-dark data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 ${selected ? "bg-leland-gray-hover" : ""} ${FontWeightToStyles[fontWeight]}`;
+    const itemClassName = `flex w-full group cursor-pointer select-none items-center justify-between gap-x-2.5 rounded-md p-2.5 text-[0.875rem] leading-tight text-leland-gray-dark outline-none hover:bg-leland-gray-hover focus:bg-leland-gray-hover active:bg-leland-gray-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-gray-dark data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 ${selected ? "bg-leland-gray-hover" : ""} ${FontWeightToStyles[fontWeight]}`;
 
     const menuItem = (
       <>
-        <div className="flex items-center gap-x-2.5">
+        <div className="flex min-w-0 items-center gap-x-2.5">
           {CustomLeftIcon ? (
             <CustomLeftIcon iconClassName={iconStyles} />
           ) : LeftIcon ? (
@@ -192,7 +194,7 @@ const MenuItem = forwardRef<HTMLDivElement, InternalMenuItemProps>(
 
         <DropdownMenuPortal>
           <SubContent
-            className="min-w-48 rounded-md border border-leland-gray-stroke bg-leland-white p-2 shadow-md z-dropdown"
+            className="min-w-48 max-w-80 rounded-md border border-leland-gray-stroke bg-leland-white p-2 shadow-md z-dropdown"
             sideOffset={16}
             alignOffset={alignOffset}
             avoidCollisions={!ignoreCollisions}
@@ -334,7 +336,7 @@ export const Menu: FC<MenuProps> = ({
       </DropdownMenuTrigger>
       <Container>
         <DropdownMenuContent
-          className="min-w-48 rounded-md border border-leland-gray-stroke bg-leland-white p-2 shadow-md z-dropdown"
+          className="min-w-48 max-w-80 rounded-md border border-leland-gray-stroke bg-leland-white p-2 shadow-md z-dropdown"
           collisionPadding={
             !ignoreCollisions
               ? { top: 80, bottom: 80, left: 20, right: 20 }
