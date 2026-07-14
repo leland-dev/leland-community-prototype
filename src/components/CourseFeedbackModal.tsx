@@ -61,7 +61,7 @@ const CourseFeedbackModalImpl = ({
                 >
                   <IconStar className="size-5 shrink-0 text-leland-gray-dark" />
                   <div>
-                    <p className="leland-heading-lg text-leland-gray-dark">
+                    <p className="leland-heading-lg font-semibold text-leland-gray-dark">
                       Leave a review
                     </p>
                     <p className="leland-paragraph-base text-leland-gray-light">
@@ -75,7 +75,7 @@ const CourseFeedbackModalImpl = ({
                 >
                   <IconFlag className="size-5 shrink-0 text-leland-gray-dark" />
                   <div>
-                    <p className="leland-heading-lg text-leland-gray-dark">
+                    <p className="leland-heading-lg font-semibold text-leland-gray-dark">
                       Report an issue
                     </p>
                     <p className="leland-paragraph-base text-leland-gray-light">
