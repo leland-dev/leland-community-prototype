@@ -49,6 +49,10 @@ const BASE_CHROME_CSS = `
 /* Tool-track switcher (Claude/Gemini/Codex/... pills) hidden — the viewer
    presents a single track; content defaults to the guide's primary track. */
 .track-switcher { display: none !important; }
+/* Page background removed — the viewer's white content area shows through
+   (inner cards keep their own fills). */
+html, body { background: transparent !important; }
+.dirB { background: transparent !important; }
 `;
 // Welcome page: hero only. Sections stay in the data (keeps the
 // "N builds · model" meta line accurate) but are hidden, as is the
