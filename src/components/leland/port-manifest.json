@@ -37,6 +37,13 @@
       "notes": "@radix-ui/react-progress replaced with plain divs + aria attributes."
     },
     {
+      "target": "src/components/leland/Rating.tsx",
+      "sourcePaths": [
+        "packages/ui-library/src/components/rating/rating.tsx"
+      ],
+      "notes": "Star rating only; the dimension-breakdown Popover branch is not ported. text-* sizes -> explicit rems."
+    },
+    {
       "target": "src/components/leland/Menu.tsx",
       "sourcePaths": [
         "packages/ui-library/src/components/menu/menu.tsx",
