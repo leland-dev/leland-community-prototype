@@ -188,12 +188,14 @@ function CourseViewerSidebar({
         ))}
       </div>
 
-      {/* Scrollable main content */}
-      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden px-4 pt-6">
+      {/* Scrollable main content — horizontal padding lives on the inner
+          blocks so the section list's scrollbar sits flush against the
+          sidebar's right edge */}
+      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden pt-6">
         {tab === 'lessons' ? (
           <>
             {/* Lesson badge + title + progress */}
-            <div className="flex flex-col gap-4 px-2">
+            <div className="flex flex-col gap-4 px-6">
               <div className="flex flex-col gap-1">
                 <p className="leland-heading-base text-leland-gray-light">
                   Lesson {lessonIdx + 1}
@@ -216,7 +218,7 @@ function CourseViewerSidebar({
             </div>
 
             {/* Section list */}
-            <div className="relative min-h-0 flex-1 overflow-y-auto">
+            <div className="relative min-h-0 flex-1 overflow-y-auto pl-4 pr-1">
               <div className="flex flex-col gap-1">
                 {entries.map((entry, idx) => {
                   const isActive = entry.id === currentSectionId;
@@ -256,7 +258,7 @@ function CourseViewerSidebar({
           </>
         ) : tab === 'live' ? (
           /* Placeholder content — swap for real session data */
-          <div className="flex flex-col gap-4 px-2">
+          <div className="flex flex-col gap-4 px-6">
             <div className="flex flex-col gap-1">
               <p className="leland-heading-lg text-leland-gray-dark">
                 Cohort 3 · Apr 21 – May 8
@@ -283,7 +285,7 @@ function CourseViewerSidebar({
           </div>
         ) : (
           /* Placeholder content — swap for real resource links */
-          <div className="flex flex-col gap-1 px-2">
+          <div className="flex flex-col gap-1 px-6">
             <Button
               label="Get help"
               buttonColor={ButtonColor.REVEAL}
