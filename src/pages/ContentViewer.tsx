@@ -421,8 +421,9 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
 
 // ─── Section nav (mirrors CourseViewerSectionNav.client.tsx) ─────────────────
 
+// Matches production ButtonSize.LARGE (p-4, 14px) at semibold weight
 const navButtonBase =
-  "flex shrink-0 items-center gap-2 rounded-lg px-4 py-3 leland-heading-base";
+  "flex shrink-0 items-center gap-2 rounded-lg p-4 text-[0.875rem] font-semibold leading-tight";
 
 function CourseViewerSectionNav({
   prevSectionLink,
@@ -456,14 +457,14 @@ function CourseViewerSectionNav({
         <Link
           to={nextSectionLink}
           onClick={onNext}
-          className={`${navButtonBase} border border-leland-gray-dark bg-leland-gray-dark text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
+          className={`${navButtonBase} border border-leland-primary bg-leland-primary text-leland-on-primary-text hover:bg-leland-primary-hover hover:border-leland-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
         >
           Next
           <IconChevronRight className="size-5" />
         </Link>
       ) : (
         <span
-          className={`${navButtonBase} cursor-not-allowed border border-leland-gray-dark bg-leland-gray-dark text-white opacity-40`}
+          className={`${navButtonBase} cursor-not-allowed border border-leland-primary bg-leland-primary text-leland-on-primary-text opacity-40`}
           aria-hidden
         >
           Next
