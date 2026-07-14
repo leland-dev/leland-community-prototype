@@ -277,7 +277,7 @@ function CourseViewerSidebar({
           /* Placeholder content — swap for real session data */
           <div className="flex flex-col gap-4 px-6">
             <div className="flex flex-col gap-1">
-              <p className="leland-heading-lg text-leland-gray-dark">
+              <p className="leland-heading-lg font-semibold text-leland-gray-dark">
                 Cohort 3 · Apr 21 – May 8
               </p>
               <p className="leland-paragraph-sm text-leland-gray-light">
