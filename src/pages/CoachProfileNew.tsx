@@ -7,12 +7,16 @@ import verifiedIcon from "../assets/icons/verified.svg";
 import editIcon from "../assets/icons/edit.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import videoThumbnail from "../assets/img/Video-Thumbnail.png";
+import mbaIcon from "../assets/icons/category-icons/mba.svg";
+import pmIcon from "../assets/icons/category-icons/product-management.svg";
+import consultingIcon from "../assets/icons/category-icons/consulting.svg";
+import chevronRightIcon from "../assets/icons/chevron-right.svg";
 
 // Secondary gray edit/add button used across the page.
 function EditButton({ label = "Edit", icon = editIcon }: { label?: string; icon?: string }) {
   return (
-    <Button size="sm" variant="secondary">
-      <img src={icon} alt="" className="h-4 w-4" />
+    <Button size="sm" variant="secondary" rounded="rounded-full" className="text-[15px] font-semibold">
+      <img src={icon} alt="" className="h-[18px] w-[18px]" />
       {label}
     </Button>
   );
@@ -86,19 +90,22 @@ function CredentialRow({
 
 const categoryListings = [
   {
-    slug: "product-management",
-    category: "Product Management",
-    headline: "Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB",
-  },
-  {
     slug: "mba",
     category: "MBA",
-    headline: "MBA Expert | Stanford GSB | 100+ M7 Admits",
+    headline: "MBA Admissions Coach | Stanford GSB | 100+ M7 Admits",
+    icon: mbaIcon,
   },
   {
-    slug: "college",
-    category: "College",
-    headline: "College Admissions Expert | Yale Grad | 50+ Ivy League Admits",
+    slug: "management-consulting",
+    category: "Management Consulting",
+    headline: "Ex-McKinsey Consultant | Wharton MBA | Case Prep Pro",
+    icon: consultingIcon,
+  },
+  {
+    slug: "product-management",
+    category: "Product Management",
+    headline: "Senior PM at LinkedIn | Ex-Meta | Breaking Into Tech",
+    icon: pmIcon,
   },
 ];
 
@@ -111,22 +118,9 @@ export default function CoachProfileNew() {
   }, []);
 
   return (
-    <div>
-      {/* Page header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">Profile</h1>
-          <p className="mt-2 text-[16px] leading-[1.45] text-[#707070]">
-            An approximate preview of your public profile. Edit any section inline.
-          </p>
-        </div>
-        <LinkButton size="md" variant="secondary" href="/profile/samantha-parker">
-          View public profile
-        </LinkButton>
-      </div>
-
-      {/* Preview column — mirrors the narrow customer-facing profile layout */}
-      <div className="mx-auto mt-8 max-w-[720px]">
+    <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
+      {/* Main column — mirrors the narrow customer-facing profile layout */}
+      <div className="min-w-0 flex-1 lg:max-w-[720px]">
         {/* Cover */}
         <div className="relative">
           <img src={coverImage} alt="Cover" className="h-[180px] w-full rounded-[6px] object-cover" />
@@ -182,23 +176,21 @@ export default function CoachProfileNew() {
           title="Category listings"
           action={<EditButton label="Add new category" icon={addPlusIcon} />}
         >
-          <div className="overflow-hidden rounded-2xl border border-[#E5E5E5]">
-            {categoryListings.map(({ slug, category, headline }, i) => (
+          <div className="flex flex-col gap-1">
+            {categoryListings.map(({ slug, category, headline, icon }) => (
               <Link
                 key={category}
                 to={`/coach/manage/${slug}`}
-                className={`group flex items-center gap-3 px-5 py-4 no-underline transition-colors hover:bg-[#F5F5F5]${
-                  i > 0 ? " border-t border-[#E5E5E5]" : ""
-                }`}
+                className="group flex items-center gap-3 rounded-xl px-3 py-3 no-underline transition-colors hover:bg-gray-hover"
               >
-                <div className="min-w-0 flex-1">
-                  <p className="text-[16px] font-medium leading-tight text-gray-dark">{category}</p>
-                  <p className="mt-[2px] truncate text-[14px] leading-tight text-[#707070]">{headline}</p>
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[6px] bg-[#f5f5f5] icon-tile">
+                  <img src={icon} alt="" className="h-6 w-6" />
                 </div>
-                <span className="flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[14px] font-medium text-[#707070] transition-colors group-hover:bg-white">
-                  <img src={editIcon} alt="" className="h-[15px] w-[15px] opacity-60" />
-                  Edit
-                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[15px] font-semibold leading-tight text-gray-dark">{category}</p>
+                  <p className="mt-[2px] truncate text-[15px] leading-tight text-[#707070]">{headline}</p>
+                </div>
+                <img src={chevronRightIcon} alt="" className="h-6 w-6 shrink-0 opacity-60" />
               </Link>
             ))}
           </div>
@@ -211,20 +203,6 @@ export default function CoachProfileNew() {
             trajectory. Coaching is my way of paying that forward — helping people tell their most honest,
             compelling story.
           </p>
-        </Section>
-
-        {/* Profile video */}
-        <Section title="Profile video" action={<EditButton label="Edit link" />}>
-          <div className="relative overflow-hidden rounded-xl">
-            <img src={videoThumbnail} alt="Profile video" className="h-[260px] w-full object-cover" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-md">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#222222">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-            </div>
-          </div>
         </Section>
 
         {/* Experience */}
@@ -287,6 +265,62 @@ export default function CoachProfileNew() {
           </div>
         </Section>
       </div>
+
+      {/* Right column — video + price + availability */}
+      <aside className="flex w-full flex-col gap-4 lg:sticky lg:top-[77px] lg:w-[320px] lg:shrink-0">
+        {/* Profile video */}
+        <div className="rounded-[12px] border border-gray-200 bg-white p-4">
+          <p className="mb-3 text-[15px] font-semibold text-gray-dark">Profile video</p>
+          <div className="group relative overflow-hidden rounded-lg">
+            <img src={videoThumbnail} alt="Profile video" className="aspect-video w-full object-cover" />
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-md">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#222222">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+            </div>
+            {/* Edit / remove — frosted actions in the top-right corner */}
+            <div className="absolute right-2 top-2 flex gap-1.5">
+              <Button size="sm" variant="white" iconOnly aria-label="Edit video">
+                <img src={editIcon} alt="" className="h-[15px] w-[15px]" />
+              </Button>
+              <Button size="sm" variant="white" iconOnly aria-label="Remove video">
+                <svg className="h-[15px] w-[15px] text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                </svg>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Hourly price */}
+        <div className="rounded-[12px] border border-gray-200 bg-white">
+          <div className="flex items-center justify-between px-5 py-4">
+            <div>
+              <p className="text-[15px] text-[#707070]">Your hourly price</p>
+              <p className="mt-1 font-serif text-[26px] font-medium leading-tight text-gray-dark">$319/hr</p>
+            </div>
+            <Button size="sm" variant="secondary" iconOnly aria-label="Edit price">
+              <img src={editIcon} alt="" className="h-[15px] w-[15px]" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Availability — mirrors the profile template card, with an edit action */}
+        <div className="rounded-[12px] border border-gray-200 bg-white">
+          <div className="flex items-center justify-between px-5 py-4">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[14px] font-semibold leading-tight text-gray-dark">Available tomorrow</span>
+              <span className="text-[14px] leading-tight text-[#4C4C4C]">Starting at 5:30 PM MT</span>
+            </div>
+            <span className="h-[12px] w-[12px] shrink-0 rounded-full bg-[#80ACED] animate-[pulse-ring-blue_2.4s_ease-out_infinite]" />
+          </div>
+          <div className="border-t border-gray-200 px-5 py-3">
+            <EditButton label="Edit availability" />
+          </div>
+        </div>
+      </aside>
     </div>
   );
 }

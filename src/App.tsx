@@ -78,11 +78,13 @@ import CoachInbox from "./pages/CoachInbox";
 import CoachManage from "./pages/CoachManage";
 import CoachProfileNew from "./pages/CoachProfileNew";
 import CoachOpportunities from "./pages/CoachOpportunities";
+import CoachLivestreams from "./pages/CoachLivestreams";
 import CoachCalendar from "./pages/CoachCalendar";
 import CoachEarnings from "./pages/CoachEarnings";
 import CoachReviews from "./pages/CoachReviews";
 import CoachDiscountCodes from "./pages/CoachDiscountCodes";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
+import CoachProductNew from "./pages/CoachProductNew";
 import LiveSession from "./pages/program/session/LiveSession";
 import IncredibleHomePage from "./pages/IncredibleHomePage";
 import IncredibleHomePageBU from "./pages/IncredibleHomePageBU";
@@ -139,7 +141,10 @@ export default function App() {
           <Route path="/coach/profile-new" element={<CoachProfileNew />} />
           <Route path="/coach/products" element={<CoachProducts />} />
           <Route path="/coach/manage/:category" element={<CoachCategoryEdit />} />
+          <Route path="/coach/manage/:category/new-product" element={<CoachProductNew />} />
+          <Route path="/coach/manage/:category/new-product/:type" element={<CoachProductNew />} />
           <Route path="/coach/opportunities" element={<CoachOpportunities />} />
+          <Route path="/coach/livestreams" element={<CoachLivestreams />} />
           <Route path="/coach/calendar" element={<CoachCalendar />} />
           <Route path="/coach/earnings" element={<CoachEarnings />} />
           <Route path="/coach/reviews" element={<CoachReviews />} />

@@ -1343,40 +1343,59 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   <img
                     src={unified && cover ? cover : customerCoverImage}
                     alt="Cover"
-                    className="block aspect-[3/1] w-full object-cover md:rounded-[6px]"
+                    className="block aspect-[3/1] md:aspect-[7/2] w-full object-cover md:rounded-[6px]"
                   />
                   <div className="absolute inset-0 bg-black/25 md:rounded-[6px]" />
                   <div className="absolute inset-0 bg-gradient-to-t from-transparent to-[#111111] md:hidden" />
                 </>
               ) : (
-                <div className="aspect-[3/1] w-full md:rounded-[6px]" style={{ backgroundColor: coverBg }} />
+                <div className={`aspect-[3/1] w-full md:rounded-[6px] ${coverMode === "none" ? "md:hidden" : "md:aspect-[7/2]"}`} style={{ backgroundColor: coverBg }} />
               )}
 
               {/* Desktop floating cover actions — frosted-glass round buttons in
                   the top corners (back on the left, share on the right), mirroring
                   the mobile top nav. */}
               {unified && (
-                <>
-                  {/* Back — hidden on the high-level profile (nothing to go back
-                      to yet); shown on category-specific variants. */}
-                  {!highLevel && (
-                  <button
-                    onClick={onBack}
-                    aria-label="Go back"
-                    className={`absolute left-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-colors md:flex ${coverActionBg}`}
-                  >
-                    <svg className="h-[18px] w-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M15 18l-6-6 6-6" />
-                    </svg>
-                  </button>
-                  )}
-                  <button
-                    aria-label="Share"
-                    className={`absolute right-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-colors md:flex ${coverActionBg}`}
-                  >
-                    <img src={shareArrowFilledIcon} alt="" className="h-[17px] w-[17px] brightness-0 invert" />
-                  </button>
-                </>
+                coverMode === "none" ? (
+                  /* Cover hidden (none) — desktop action row sits inline above the
+                     profile photo, using the secondary gray button style. */
+                  <div className="hidden items-center justify-between px-4 pt-4 md:flex">
+                    {!highLevel ? (
+                      <Button size="sm" variant="secondary" iconOnly onClick={onBack} aria-label="Go back">
+                        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M15 18l-6-6 6-6" />
+                        </svg>
+                      </Button>
+                    ) : (
+                      <span className="h-9 w-9" />
+                    )}
+                    <Button size="sm" variant="secondary" iconOnly aria-label="Share">
+                      <img src={shareArrowFilledIcon} alt="" className="h-[17px] w-[17px] brightness-0" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Back — hidden on the high-level profile (nothing to go back
+                        to yet); shown on category-specific variants. */}
+                    {!highLevel && (
+                    <button
+                      onClick={onBack}
+                      aria-label="Go back"
+                      className={`absolute left-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-colors md:flex ${coverActionBg}`}
+                    >
+                      <svg className="h-[18px] w-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M15 18l-6-6 6-6" />
+                      </svg>
+                    </button>
+                    )}
+                    <button
+                      aria-label="Share"
+                      className={`absolute right-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-colors md:flex ${coverActionBg}`}
+                    >
+                      <img src={shareArrowFilledIcon} alt="" className="h-[17px] w-[17px] brightness-0 invert" />
+                    </button>
+                  </>
+                )
               )}
             </div>
           ) : (
@@ -1384,7 +1403,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               <img
                 src={coachCoverImage}
                 alt="Cover"
-                className="block aspect-[3/1] w-full rounded-[6px] object-cover"
+                className="block aspect-[3/1] md:aspect-[7/2] w-full rounded-[6px] object-cover"
               />
             )
           )}
@@ -1394,7 +1413,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
           {unified && <div ref={heroSentinelRef} />}
 
           {/* Profile photo + CTA buttons */}
-          <div className={`${heroCustomer ? "-mt-[80px] md:pl-4 items-end" : showCoverImage ? "-mt-[80px] pl-4 items-start" : showGrayHeader ? "-mt-[100px] items-start" : "mt-0 items-start"} mb-2 flex justify-between md:mb-4 ${heroCustomer || showCoverImage || showGrayHeader ? "md:items-end" : ""} ${heroCustomer && !showCoverImage ? "md:mt-0 md:pl-0" : ""}`}>
+          <div className={`${heroCustomer ? "-mt-[80px] md:pl-4 items-end" : showCoverImage ? "-mt-[80px] pl-4 items-start" : showGrayHeader ? "-mt-[100px] items-start" : "mt-0 items-start"} mb-2 flex justify-between md:mb-4 ${heroCustomer || showCoverImage || showGrayHeader ? "md:items-end" : ""} ${heroCustomer && !showCoverImage ? "md:mt-0 md:pl-0" : ""} ${coverMode === "none" ? "md:mt-0" : ""}`}>
             <div className={`group relative z-20 cursor-pointer border-[4px] ${darkMode ? "border-[#131313] bg-[#131313]" : "border-white bg-white"} ${heroCustomer ? "rounded-full" : "rounded-lg md:rounded-lg"}`} onClick={() => setLightboxOpen(true)}>
               <div className={`relative overflow-hidden ${heroCustomer ? "rounded-full" : "rounded-[4px] md:rounded-[4px]"}`}>
                 <motion.img
