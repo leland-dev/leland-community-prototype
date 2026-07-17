@@ -376,6 +376,20 @@ function Select({ value, onChange, options, className = "" }: { value: string; o
   );
 }
 
+// Toggle row used in the floating admin tool.
+function AdminToggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-gray-hover">
+      <span className="text-[14px] font-medium text-gray-dark">{label}</span>
+      <div className="relative">
+        <input type="checkbox" checked={checked} onChange={onChange} className="peer sr-only" />
+        <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-gray-dark" />
+        <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+      </div>
+    </label>
+  );
+}
+
 export default function CoachProductNew() {
   const { category } = useParams<{ category: string; type?: string }>();
   const navigate = useNavigate();
@@ -393,6 +407,17 @@ export default function CoachProductNew() {
   const [description, setDescription] = useState("");
   const [buttonText, setButtonText] = useState("Purchase");
   const nextOfferingId = useRef(0);
+
+  // Admin tool — MVP on shows the full feature set; off hides not-yet-built bits.
+  const [mvp, setMvp] = useState(true);
+  const [adminOpen, setAdminOpen] = useState(false);
+  const adminRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!adminOpen) return;
+    const onDown = (e: MouseEvent) => { if (adminRef.current && !adminRef.current.contains(e.target as Node)) setAdminOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [adminOpen]);
 
   useEffect(() => {
     document.title = "Leland Prototype | Add product";
@@ -472,10 +497,11 @@ export default function CoachProductNew() {
                     paidType={paidType} setPaidType={setPaidType}
                     price={price} setPrice={setPrice}
                     buttonText={buttonText} setButtonText={setButtonText}
+                    mvp={mvp}
                   />
                 )}
                 {step === "offerings" && (
-                  <OfferingsStep added={added} onAdd={addOffering} onRemove={removeOffering} onConfigChange={updateOfferingConfig} onItemsChange={setOfferingItems} onConfigured={markOfferingConfigured} />
+                  <OfferingsStep added={added} onAdd={addOffering} onRemove={removeOffering} onConfigChange={updateOfferingConfig} onItemsChange={setOfferingItems} onConfigured={markOfferingConfigured} mvp={mvp} />
                 )}
                 {step === "page" && (
                   <PageStep
@@ -506,6 +532,34 @@ export default function CoachProductNew() {
           />
         </aside>
       </div>
+
+      {/* Admin tool — bottom-right, mirrors the profile template */}
+      <div ref={adminRef} className="fixed bottom-6 right-6 z-40">
+        <AnimatePresence>
+          {adminOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 4 }}
+              transition={{ duration: 0.15 }}
+              className="absolute bottom-full right-0 mb-2 w-[200px] rounded-xl border border-gray-stroke bg-white p-2 shadow-[0_4px_16px_rgba(16,24,40,0.12)]"
+            >
+              <AdminToggle label="MVP" checked={mvp} onChange={() => setMvp((v) => !v)} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <button
+          onClick={() => setAdminOpen((o) => !o)}
+          aria-label="Admin controls"
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-colors hover:bg-[#B1B1B1]/30"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="3" cy="8" r="1.5" fill="#222222" />
+            <circle cx="8" cy="8" r="1.5" fill="#222222" />
+            <circle cx="13" cy="8" r="1.5" fill="#222222" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
@@ -515,7 +569,7 @@ export default function CoachProductNew() {
 function ProductStep({
   name, setName, headline, setHeadline,
   pricingMode, setPricingMode, paidType, setPaidType, price, setPrice,
-  buttonText, setButtonText,
+  buttonText, setButtonText, mvp,
 }: {
   name: string; setName: (v: string) => void;
   headline: string; setHeadline: (v: string) => void;
@@ -523,6 +577,7 @@ function ProductStep({
   paidType: "recurring" | "one-time"; setPaidType: (v: "recurring" | "one-time") => void;
   price: string; setPrice: (v: string) => void;
   buttonText: string; setButtonText: (v: string) => void;
+  mvp: boolean;
 }) {
   const pricingOptions = [
     { key: "free" as const, label: "Free access", desc: "Anyone can access this for free.", icon: freeIcon },
@@ -573,7 +628,7 @@ function ProductStep({
       <div className="border-t border-gray-stroke" />
 
       <Collapsible title="Product settings" subtitle="URL, taxes, affiliates, and more.">
-        <ProductSettings buttonText={buttonText} setButtonText={setButtonText} />
+        <ProductSettings buttonText={buttonText} setButtonText={setButtonText} mvp={mvp} />
       </Collapsible>
     </div>
   );
@@ -685,7 +740,7 @@ function PaidPricingCard({ paidType, setPaidType, price, setPrice }: { paidType:
 
 /* ---------- Product settings (URL, taxes, affiliates) ---------- */
 
-function ProductSettings({ buttonText, setButtonText }: { buttonText: string; setButtonText: (v: string) => void }) {
+function ProductSettings({ buttonText, setButtonText, mvp }: { buttonText: string; setButtonText: (v: string) => void; mvp: boolean }) {
   const [affiliate, setAffiliate] = useState(false);
   const [storeVisible, setStoreVisible] = useState(true);
 
@@ -693,12 +748,14 @@ function ProductSettings({ buttonText, setButtonText }: { buttonText: string; se
 
   return (
     <div className="flex flex-col gap-5">
-      <div>
-        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Stock</label>
-        <input placeholder="Unlimited" className={inputClass} />
-      </div>
+      {!mvp && (
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Stock</label>
+          <input placeholder="Unlimited" className={inputClass} />
+        </div>
+      )}
 
-      <AskQuestions />
+      {!mvp && <AskQuestions />}
 
       <div>
         <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Purchase button text</label>
@@ -714,18 +771,20 @@ function ProductSettings({ buttonText, setButtonText }: { buttonText: string; se
         <input defaultValue="leland.com/samantha-parker/new-product" className={inputClass} />
       </div>
 
-      <div>
-        <div className="flex items-center justify-between">
-          <span className="text-[14px] font-medium text-gray-dark">Add affiliate rate</span>
-          <Toggle checked={affiliate} onChange={() => setAffiliate((v) => !v)} />
-        </div>
-        {affiliate && (
-          <div className="mt-2 flex items-center rounded-lg border border-gray-stroke bg-white px-3.5 focus-within:border-gray-dark">
-            <input defaultValue="30" className="w-full bg-transparent py-2.5 text-[14px] text-gray-dark outline-none" />
-            <span className="text-[14px] text-gray-light">%</span>
+      {!mvp && (
+        <div>
+          <div className="flex items-center justify-between">
+            <span className="text-[14px] font-medium text-gray-dark">Add affiliate rate</span>
+            <Toggle checked={affiliate} onChange={() => setAffiliate((v) => !v)} />
           </div>
-        )}
-      </div>
+          {affiliate && (
+            <div className="mt-2 flex items-center rounded-lg border border-gray-stroke bg-white px-3.5 focus-within:border-gray-dark">
+              <input defaultValue="30" className="w-full bg-transparent py-2.5 text-[14px] text-gray-dark outline-none" />
+              <span className="text-[14px] text-gray-light">%</span>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="flex items-center justify-between">
         <span className="text-[14px] font-medium text-gray-dark">Visible on your store page</span>
@@ -791,9 +850,10 @@ function AskQuestions() {
 
 /* ---------- Step 2: Included offerings ---------- */
 
-function OfferingsStep({ added, onAdd, onRemove, onConfigChange, onItemsChange, onConfigured }: { added: OfferingItem[]; onAdd: (slug: string) => void; onRemove: (id: number) => void; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void }) {
+function OfferingsStep({ added, onAdd, onRemove, onConfigChange, onItemsChange, onConfigured, mvp }: { added: OfferingItem[]; onAdd: (slug: string) => void; onRemove: (id: number) => void; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; mvp: boolean }) {
   // One of each: an offering leaves the "Add" grid once it's been added.
-  const available = offeringTypes.filter((o) => !added.some((a) => a.slug === o.slug));
+  // When MVP is on, hide the not-yet-built Agent / Private group options.
+  const available = offeringTypes.filter((o) => !added.some((a) => a.slug === o.slug) && (!mvp || (o.slug !== "agent" && o.slug !== "membership")));
   const [configuringId, setConfiguringId] = useState<number | null>(null);
   const configuring = added.find((item) => item.id === configuringId) ?? null;
 
