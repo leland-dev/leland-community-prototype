@@ -22,6 +22,20 @@ function EditButton({ label = "Edit", icon = editIcon }: { label?: string; icon?
   );
 }
 
+// Small per-section edit affordance — always shown on mobile, reveals on hover
+// of the enclosing `group` section on desktop. Matches the category management
+// sidebar.
+function SectionEditButton() {
+  return (
+    <button
+      aria-label="Edit"
+      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full opacity-100 transition-all hover:bg-gray-hover md:opacity-0 md:group-hover:opacity-100"
+    >
+      <img src={editIcon} alt="" className="h-4 w-4 opacity-60" />
+    </button>
+  );
+}
+
 // Editable section wrapper: a heading, freeform content, then the edit/add
 // action anchored at the bottom of the section. Matches the customer-facing
 // profile's section rhythm while signalling that everything here is editable.
@@ -266,58 +280,58 @@ export default function CoachProfileNew() {
         </Section>
       </div>
 
-      {/* Right column — video + price + availability */}
-      <aside className="flex w-full flex-col gap-4 lg:sticky lg:top-[77px] lg:w-[320px] lg:shrink-0">
-        {/* Profile video */}
-        <div className="rounded-[12px] border border-gray-200 bg-white p-4">
-          <p className="mb-3 text-[15px] font-semibold text-gray-dark">Profile video</p>
-          <div className="group relative overflow-hidden rounded-lg">
-            <img src={videoThumbnail} alt="Profile video" className="aspect-video w-full object-cover" />
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-md">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#222222">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+      {/* Right column — video + price + availability, divider-separated to
+          mirror the category management sidebar */}
+      <aside className="w-full lg:sticky lg:top-[77px] lg:w-[320px] lg:shrink-0">
+        <div className="flex flex-col divide-y divide-gray-stroke">
+          {/* Profile video */}
+          <div className="group pb-6">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[15px] font-semibold text-gray-dark">Profile video</p>
+              <SectionEditButton />
+            </div>
+            <div className="relative overflow-hidden rounded-lg">
+              <img src={videoThumbnail} alt="Profile video" className="aspect-video w-full object-cover" />
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-md">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#222222">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
               </div>
             </div>
-            {/* Edit / remove — frosted actions in the top-right corner */}
-            <div className="absolute right-2 top-2 flex gap-1.5">
-              <Button size="sm" variant="white" iconOnly aria-label="Edit video">
-                <img src={editIcon} alt="" className="h-[15px] w-[15px]" />
-              </Button>
-              <Button size="sm" variant="white" iconOnly aria-label="Remove video">
-                <svg className="h-[15px] w-[15px] text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                </svg>
-              </Button>
-            </div>
           </div>
-        </div>
 
-        {/* Hourly price */}
-        <div className="rounded-[12px] border border-gray-200 bg-white">
-          <div className="flex items-center justify-between px-5 py-4">
-            <div>
-              <p className="text-[15px] text-[#707070]">Your hourly price</p>
-              <p className="mt-1 font-serif text-[26px] font-medium leading-tight text-gray-dark">$319/hr</p>
+          {/* Hourly price */}
+          <div className="group py-6">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[15px] font-semibold text-gray-dark">Hourly price</p>
+              <SectionEditButton />
             </div>
-            <Button size="sm" variant="secondary" iconOnly aria-label="Edit price">
-              <img src={editIcon} alt="" className="h-[15px] w-[15px]" />
-            </Button>
+            <p className="text-[20px] font-semibold leading-tight text-gray-dark">$319/hr</p>
           </div>
-        </div>
 
-        {/* Availability — mirrors the profile template card, with an edit action */}
-        <div className="rounded-[12px] border border-gray-200 bg-white">
-          <div className="flex items-center justify-between px-5 py-4">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[14px] font-semibold leading-tight text-gray-dark">Available tomorrow</span>
-              <span className="text-[14px] leading-tight text-[#4C4C4C]">Starting at 5:30 PM MT</span>
+          {/* Availability */}
+          <div className="group py-6">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[15px] font-semibold text-gray-dark">Availability</p>
+              <SectionEditButton />
             </div>
-            <span className="h-[12px] w-[12px] shrink-0 rounded-full bg-[#80ACED] animate-[pulse-ring-blue_2.4s_ease-out_infinite]" />
-          </div>
-          <div className="border-t border-gray-200 px-5 py-3">
-            <EditButton label="Edit availability" />
+            <div className="flex items-center justify-between">
+              {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => {
+                const available = [1, 2, 4, 5].includes(i);
+                return (
+                  <span
+                    key={i}
+                    className={`flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-semibold ${
+                      available ? "bg-gray-dark text-white" : "bg-[#f5f5f5] text-gray-extra-light"
+                    }`}
+                  >
+                    {day}
+                  </span>
+                );
+              })}
+            </div>
           </div>
         </div>
       </aside>

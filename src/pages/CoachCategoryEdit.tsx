@@ -114,7 +114,7 @@ function SectionEditButton() {
 // (null = show everything).
 const productFilters: { label: string; types: string[] | null }[] = [
   { label: "All", types: null },
-  { label: "Packages", types: ["package", "hourly-package", "hourly"] },
+  { label: "Packages", types: ["package", "hourly-package"] },
   { label: "Memberships", types: ["membership"] },
   { label: "Content", types: ["content"] },
   { label: "Courses", types: ["course"] },
@@ -176,7 +176,7 @@ export default function CoachCategoryEdit() {
     <div className="max-w-[1280px]">
       {/* Top actions — back */}
       <div className="mb-6">
-        <Button size="sm" variant="secondary" iconOnly onClick={() => navigate(-1)} aria-label="Go back">
+        <Button size="sm" variant="secondary" iconOnly onClick={() => navigate("/coach/profile-new")} aria-label="Go back">
           <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 18l-6-6 6-6" />
           </svg>
