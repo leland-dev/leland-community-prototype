@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import OfferingCard from "../components/OfferingCard";
 import { Button, LinkButton } from "../components/Button";
