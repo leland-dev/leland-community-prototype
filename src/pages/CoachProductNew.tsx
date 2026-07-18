@@ -21,6 +21,11 @@ import uploadIcon from "../assets/icons/upload.svg";
 import attachIcon from "../assets/icons/attach.svg";
 import trashIcon from "../assets/icons/trash.svg";
 import editIcon from "../assets/icons/edit.svg";
+import textIcon from "../assets/icons/text.svg";
+import helpIcon from "../assets/icons/help.svg";
+import photoIcon from "../assets/icons/photo.svg";
+import videoIcon from "../assets/icons/video-icon.svg";
+import starIcon from "../assets/icons/star-icon.svg";
 
 type StepKey = "product" | "offerings" | "page";
 
@@ -62,6 +67,15 @@ const offeringTypes = [
   { slug: "membership", label: "Private group", blurb: "A private community for members", icon: crownIcon },
 ];
 const offeringBySlug = Object.fromEntries(offeringTypes.map((o) => [o.slug, o]));
+
+// Section types a coach can add to the customer-facing product page.
+const pageSectionTypes = [
+  { label: "Text Section", icon: textIcon },
+  { label: "FAQs Section", icon: helpIcon },
+  { label: "Image Section", icon: photoIcon },
+  { label: "Video Section", icon: videoIcon },
+  { label: "Reviews Section", icon: starIcon },
+];
 
 // A course section — placeholder builder for now (just a name).
 type CourseSection = { id: number; name: string };
@@ -685,7 +699,7 @@ function PaidPricingCard({ paidType, setPaidType, price, setPrice }: { paidType:
       {/* Big price field: left-aligned number with the cadence beside it */}
       <div className="flex items-end gap-2 px-5 py-6">
         <div className="flex items-center gap-1">
-          <span className="text-[36px] font-medium leading-none text-gray-dark">$</span>
+          <span className="text-[32px] font-medium leading-none text-gray-dark">$</span>
           <input
             inputMode="decimal"
             value={price}
@@ -693,7 +707,7 @@ function PaidPricingCard({ paidType, setPaidType, price, setPrice }: { paidType:
             onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ""))}
             onBlur={formatPrice}
             style={{ width: `${priceWidthCh}ch` }}
-            className="min-w-0 bg-transparent text-left text-[36px] font-medium leading-none text-gray-dark underline decoration-gray-dark decoration-dotted decoration-2 underline-offset-[6px] outline-none placeholder:text-gray-dark"
+            className="min-w-0 bg-transparent text-left text-[32px] font-medium leading-none text-gray-dark underline decoration-gray-dark decoration-dotted decoration-2 underline-offset-[6px] outline-none placeholder:text-gray-dark"
           />
         </div>
         <div className="pb-1">
@@ -905,9 +919,9 @@ function OfferingsStep({ added, onAdd, onRemove, onConfigChange, onItemsChange, 
               exit={{ opacity: 0, scale: 0.96 }}
               transition={offeringTransition}
               onClick={() => onAdd(o.slug)}
-              className="group flex items-center justify-between rounded-xl bg-gray-hover px-3 py-2.5 text-left transition-colors hover:bg-[#ececec]"
+              className="group flex items-center justify-between rounded-xl bg-gray-hover px-3 py-2 text-left transition-colors hover:bg-[#ececec]"
             >
-              <span className="flex items-center gap-3">
+              <span className="flex items-center gap-2.5">
                 <span className="flex h-9 w-9 items-center justify-center rounded-[8px]">
                   <img src={o.icon} alt="" className="h-5 w-5" />
                 </span>
@@ -1724,10 +1738,28 @@ function PageStep({ name, headline, pricingMode, paidType, price, description, s
         className="mt-3 w-full resize-none rounded-xl border border-gray-stroke bg-white px-3.5 py-3 text-[15px] leading-relaxed text-gray-dark outline-none placeholder:text-[#B1B1B1] focus:border-gray-dark"
       />
 
-      <button className="mt-4 flex w-full items-center justify-between border-t border-gray-stroke pt-4 text-[15px] font-medium text-gray-dark">
-        Add FAQ
-        <svg className="h-[18px] w-[18px] text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-      </button>
+      {/* Add section — same button style as the "Add offering" grid */}
+      <div className="mt-8 border-t border-gray-stroke pt-6">
+        <p className="mb-2 text-[14px] font-medium text-gray-light">Add section</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {pageSectionTypes.map((s) => (
+            <button
+              key={s.label}
+              className="group flex items-center justify-between rounded-xl bg-gray-hover px-3 py-2 text-left transition-colors hover:bg-[#ececec]"
+            >
+              <span className="flex items-center gap-2.5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-[8px]">
+                  <img src={s.icon} alt="" className="h-5 w-5" />
+                </span>
+                <span className="text-[15px] font-semibold text-gray-dark">{s.label}</span>
+              </span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors group-hover:text-gray-dark">
+                <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
       <span className="sr-only">{name}</span>
     </div>
   );
