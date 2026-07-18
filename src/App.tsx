@@ -118,6 +118,9 @@ export default function App() {
       <Route path="/messages/:conversationId" element={<ConversationDetail />} />
       <Route path="/messages/:conversationId/relationship" element={<ConversationRelationship />} />
       <Route path="/content-viewer/:lessonId?/:sectionId?" element={<ContentViewer />} />
+      {/* Product-creation flow — standalone full-screen surface (no app chrome) */}
+      <Route path="/coach/manage/:category/new-product" element={<CoachProductNew />} />
+      <Route path="/coach/manage/:category/new-product/:type" element={<CoachProductNew />} />
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
         <Route path="/profile-v2" element={<ProfileV2 />} />
@@ -141,8 +144,6 @@ export default function App() {
           <Route path="/coach/profile-new" element={<CoachProfileNew />} />
           <Route path="/coach/products" element={<CoachProducts />} />
           <Route path="/coach/manage/:category" element={<CoachCategoryEdit />} />
-          <Route path="/coach/manage/:category/new-product" element={<CoachProductNew />} />
-          <Route path="/coach/manage/:category/new-product/:type" element={<CoachProductNew />} />
           <Route path="/coach/opportunities" element={<CoachOpportunities />} />
           <Route path="/coach/livestreams" element={<CoachLivestreams />} />
           <Route path="/coach/calendar" element={<CoachCalendar />} />
