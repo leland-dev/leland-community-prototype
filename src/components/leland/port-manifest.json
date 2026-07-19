@@ -1,6 +1,6 @@
 {
   "description": "Tracks what has been ported from the leland monorepo (leland-dev/leland-applicant-web) into this prototype's design system. The weekly design-system-sync routine diffs each entry's monorepo sourcePaths between lastSyncedMonorepoCommit and main HEAD, ports any changes per SYNC.md, and bumps lastSyncedMonorepoCommit. When porting NEW components by hand, add an entry here so the routine picks them up.",
-  "lastSyncedMonorepoCommit": "a4b124ecabf2f52827811934f97d9654663afe56",
+  "lastSyncedMonorepoCommit": "ddf3494d2d3c991e3a683ccbc0d2569a3f637981",
   "ports": [
     {
       "target": "src/styles/leland-theme.css",
@@ -26,7 +26,7 @@
         "packages/ui-library/src/components/tag/tag.tsx",
         "packages/ui-library/src/components/tag/constants.ts"
       ],
-      "notes": "Flattened into one file. text-sm/base -> explicit rem sizes. PALETTE IS AHEAD OF MAIN: carries monorepo PR #6923 (tag color redesign). Skip syncing Tag style changes until that PR merges; after it merges, normal sync resumes."
+      "notes": "Flattened into one file. text-sm/base -> explicit rem sizes. PR #6923 (tag color redesign: GREEN/BEIGE replace PRIMARY/ORANGE/PURPLE) merged; prototype is now in sync."
     },
     {
       "target": "src/components/leland/ProgressBar.tsx",

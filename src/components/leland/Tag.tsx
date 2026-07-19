@@ -1,8 +1,6 @@
 // Ported from @leland/ui-library (components/tag) — 1:1 except text-sm/base
 // swapped for explicit sizes (the monorepo overrides the Tailwind base scale:
 // sm=12px, base=14px; the prototype keeps defaults).
-// Palette carries monorepo PR #6923 (tag color redesign: GREEN/BEIGE replace
-// PRIMARY/ORANGE/PURPLE) — slightly ahead of prod main until that PR merges.
 import { type FC, type SVGProps } from 'react';
 
 import { FontWeight, FontWeightToStyles, type PickEnum } from './util';

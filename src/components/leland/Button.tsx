@@ -89,12 +89,12 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
         : 'text-white bg-leland-purple disabled:bg-leland-purple border-leland-purple hover:bg-leland-purple-hover hover:border-leland-purple-hover shadow-transparent',
     [ButtonColor.LIGHT_BLUE]: (selected) =>
       selected
-        ? 'text-leland-blue bg-white border-leland-blue shadow-leland-blue'
-        : 'text-leland-blue bg-leland-blue-light disabled:bg-leland-blue-light border-leland-blue-light hover:bg-leland-blue-light-hover hover:border-leland-blue-light-hover shadow-transparent',
+        ? 'text-leland-blue-dark bg-white border-leland-blue-dark shadow-leland-blue-dark'
+        : 'text-leland-blue-dark bg-leland-blue-light disabled:bg-leland-blue-light border-leland-blue-light hover:bg-leland-blue-light-hover hover:border-leland-blue-light-hover shadow-transparent',
     [ButtonColor.BLUE]: (selected) =>
       selected
-        ? 'text-leland-blue bg-white border-leland-blue shadow-leland-blue'
-        : 'text-leland-white bg-leland-blue disabled:bg-leland-blue border-leland-blue hover:bg-leland-blue-hover hover:border-leland-blue-hover shadow-transparent',
+        ? 'text-leland-blue-dark bg-white border-leland-blue-dark shadow-leland-blue-dark'
+        : 'text-leland-white bg-leland-blue-dark disabled:bg-leland-blue-dark border-leland-blue-dark hover:bg-leland-blue-hover hover:border-leland-blue-hover shadow-transparent',
     [ButtonColor.ORANGE]: (selected) =>
       selected
         ? 'text-leland-orange bg-white border-leland-orange shadow-leland-orange'
