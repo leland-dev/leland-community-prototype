@@ -132,7 +132,7 @@ export default function CoachProfileNew() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
+    <div className="mx-auto flex w-full max-w-[1080px] flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
       {/* Main column — mirrors the narrow customer-facing profile layout */}
       <div className="min-w-0 flex-1 lg:max-w-[720px]">
         {/* Cover */}
