@@ -42,10 +42,8 @@ const TagColorToStyles: Record<
 > = {
   [TagColor.TRANSPARENT]: (hoverable, selected) =>
     `border ${selected ? 'border-leland-black' : 'border-leland-gray-stroke'} ${hoverable ? 'hover:opacity-50' : ''}`,
-  // gray-solid-hover (opaque #F4F4F4), not gray-hover: gray-hover is gray-dark @
-  // 5% alpha, so a gray tag on any non-white surface reads as transparent.
   [TagColor.GRAY]: (hoverable, selected) =>
-    `bg-leland-gray-solid-hover text-leland-gray-light border ${selected ? 'border-leland-black' : 'border-transparent'} ${hoverable ? 'hover:bg-leland-gray-stroke' : ''}`,
+    `bg-leland-gray-hover text-leland-gray-light border ${selected ? 'border-leland-black' : 'border-transparent'} ${hoverable ? 'hover:bg-leland-gray-stroke' : ''}`,
   [TagColor.GREEN]: (hoverable, selected) =>
     `bg-leland-success-extra-light text-leland-dark-green border ${selected ? 'border-leland-black' : 'border-transparent'} ${hoverable ? 'hover:bg-leland-success-extra-light' : ''}`,
   [TagColor.YELLOW]: (_hoverable, selected) =>
