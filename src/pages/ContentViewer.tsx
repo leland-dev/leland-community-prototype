@@ -32,6 +32,7 @@ import {
   IconExperiences,
   IconLightning,
   IconOnboarding,
+  IconGift,
   IconQuestion,
   IconUserProfileGroup,
   IconChevronDown,
@@ -73,6 +74,7 @@ import {
   LessonPageProvider,
   LiveSessionCallout,
 } from "../components/lesson-blocks";
+import { SwitchInput } from "../components/leland";
 import { COHORT_MEMBERS } from "./Group";
 import { SelectCohortModal } from "../components/LiveCourseCard";
 
@@ -538,7 +540,7 @@ function LessonAccordion({
     });
 
   return (
-    <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto px-3">
+    <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto">
       {LESSONS.map((l, idx) => {
         const percent = lessonProgress(l, completed);
         const statusLabel =
@@ -551,12 +553,12 @@ function LessonAccordion({
         return (
           <div
             key={l.id}
-            className="flex flex-col gap-3 border-b border-leland-gray-stroke px-2 py-5"
+            className="flex flex-col gap-3 border-b border-leland-gray-stroke py-5"
           >
             <button
               type="button"
               onClick={() => toggle(l.id)}
-              className="flex flex-col gap-1.5 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+              className="flex flex-col gap-1.5 rounded px-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
               <span className="flex items-center gap-2 leland-subtext-sm text-leland-gray-extra-light">
                 <span className="font-semibold uppercase tracking-[1.3px]">
@@ -577,7 +579,7 @@ function LessonAccordion({
               </span>
             </button>
             {isOpen ? (
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 px-3">
                 {l.sections.map((s, sIdx) => {
                   const sectionDone = completed.has(`${l.id}/${s.id}`);
                   const active =
@@ -669,6 +671,7 @@ function LessonsAccordionSidebar({
   tab,
   onTabChange,
   onSwitchCohort,
+  hideTabs = false,
 }: {
   currentLessonId: string;
   currentSectionId: string;
@@ -677,37 +680,50 @@ function LessonsAccordionSidebar({
   tab: SidebarTab;
   onTabChange: (tab: SidebarTab) => void;
   onSwitchCohort: () => void;
+  hideTabs?: boolean;
 }) {
   return (
     <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
-      {/* Two-tab header (Overview / Lessons) + collapse */}
-      <div className="flex items-center gap-8 border-b border-leland-gray-stroke px-3">
-        <div className="flex flex-1 items-center gap-8 px-3">
-          {SIDEBAR_TABS_TWO.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onTabChange(id)}
-              className={`border-b-[3px] py-6 leland-paragraph-lg font-medium focus:outline-none ${
-                tab === id
-                  ? "border-leland-gray-dark text-leland-gray-dark"
-                  : "border-transparent text-leland-gray-light hover:text-leland-gray-dark"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+      {hideTabs ? (
+        <div className="flex items-center pl-6 pr-4 pt-4">
+          <button
+            onClick={onToggle}
+            aria-label="Close sidebar"
+            className="ml-auto flex size-10 shrink-0 items-center justify-center p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+          >
+            <IconLeftSidebarClose className="size-6" aria-hidden />
+          </button>
         </div>
-        <button
-          onClick={onToggle}
-          aria-label="Close sidebar"
-          className="flex size-11 shrink-0 items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-        >
-          <IconLeftSidebarClose className="size-6" aria-hidden />
-        </button>
-      </div>
+      ) : (
+        /* Two-tab header (Overview / Lessons) + collapse */
+        <div className="flex items-center gap-8 border-b border-leland-gray-stroke px-3">
+          <div className="flex flex-1 items-center gap-8 px-3">
+            {SIDEBAR_TABS_TWO.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onTabChange(id)}
+                className={`border-b-[3px] py-6 leland-paragraph-lg font-medium focus:outline-none ${
+                  tab === id
+                    ? "border-leland-gray-dark text-leland-gray-dark"
+                    : "border-transparent text-leland-gray-light hover:text-leland-gray-dark"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={onToggle}
+            aria-label="Close sidebar"
+            className="flex size-11 shrink-0 items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+          >
+            <IconLeftSidebarClose className="size-6" aria-hidden />
+          </button>
+        </div>
+      )}
 
-      {tab === "overview" ? (
+      {!hideTabs && tab === "overview" ? (
         <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto px-3 py-5">
           {/* Cohort summary */}
           <div className="flex items-start gap-4 p-3">
@@ -787,6 +803,164 @@ function LessonsAccordionSidebar({
   );
 }
 
+function CombinedSidebar({
+  currentLessonId,
+  currentSectionId,
+  completed,
+  onToggle,
+  onSwitchCohort,
+  tab,
+  onTabChange,
+}: {
+  currentLessonId: string;
+  currentSectionId: string;
+  completed: Set<string>;
+  onToggle: () => void;
+  onSwitchCohort: () => void;
+  tab: SidebarTab;
+  onTabChange: (tab: SidebarTab) => void;
+}) {
+  const [seeMoreOpen, setSeeMoreOpen] = useState(false);
+
+  return (
+    <aside className="relative flex w-[360px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
+      {/* Collapse button — fixed to aside, overlays scrolling content */}
+      <div className="absolute right-0 top-0 z-10 p-3">
+        <button
+          onClick={onToggle}
+          aria-label="Close sidebar"
+          className="flex size-10 items-center justify-center rounded-full bg-white/75 backdrop-blur-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+        >
+          <IconLeftSidebarClose className="size-6" aria-hidden />
+        </button>
+      </div>
+
+      <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pb-12">
+        {/* Program info card */}
+        <div className="w-full bg-white pb-5">
+          <div className="flex flex-col gap-5 px-6 pt-5">
+            {/* Thumbnail */}
+            <img
+              src="/program-cover.avif"
+              alt="AI Builder Program cover"
+              className="h-16 w-[122px] shrink-0 rounded object-cover"
+            />
+
+            {/* Program title */}
+            <p className="text-heading-3xl font-season font-normal text-leland-gray-dark">{COURSE_TITLE_FULL}</p>
+
+            {/* Creator */}
+            <div className="flex items-center gap-2">
+              <img
+                src="/leland-profile.png"
+                alt="Leland"
+                className="size-6 shrink-0 rounded-full object-cover"
+              />
+              <span className="leland-paragraph-base text-leland-gray-extra-light">Created by Leland</span>
+            </div>
+          </div>
+
+          {/* Date / cohort row */}
+          <div className="mt-5 flex items-center gap-3 border-y border-leland-gray-stroke px-6 py-4">
+            <div className="flex w-12 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke">
+              <div className="flex items-center justify-center bg-leland-blue px-2.5 pb-0.5 pt-[3px]">
+                <span className="leland-eyebrow text-leland-gray-dark">MAY</span>
+              </div>
+              <div className="flex flex-1 items-center justify-center bg-white px-2.5 py-1">
+                <span className="leland-heading-xl font-semibold text-leland-gray-dark">24</span>
+              </div>
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <p className="leland-heading-lg text-leland-gray-dark">May 16 – Jun 8</p>
+              <div className="flex items-center gap-1.5">
+                <IconRecurring className="size-[15px] shrink-0 text-leland-gray-light" />
+                <button
+                  type="button"
+                  onClick={onSwitchCohort}
+                  className="leland-paragraph-sm text-leland-gray-light underline decoration-dotted underline-offset-2 focus:outline-none"
+                >
+                  Switch cohort
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Expanded "See more" items */}
+          {seeMoreOpen && (
+            <div className="flex flex-col gap-1 px-3 pt-4">
+              <SidebarMenuItem
+                Icon={IconCalendarAlt}
+                label="Overview"
+                active={tab === "overview"}
+                onClick={() => onTabChange("overview")}
+              />
+              <SidebarMenuItem
+                Icon={IconExperiences}
+                label="Office hours"
+                external
+                onClick={() =>
+                  window.open(
+                    "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours",
+                    "_blank",
+                    "noopener",
+                  )
+                }
+              />
+              <SidebarMenuItem
+                Icon={IconUserProfileGroup}
+                label="Community"
+                external
+                onClick={() =>
+                  window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")
+                }
+              />
+              <SidebarMenuItem
+                Icon={IconBooks}
+                label="Your cohort's builds"
+                external
+                onClick={() => {}}
+              />
+              <SidebarMenuItem
+                Icon={IconOnboarding}
+                label="Setup guide"
+                external
+                onClick={() => {}}
+              />
+              <SidebarMenuItem
+                Icon={IconGift}
+                label="Refer a friend"
+                external
+                onClick={() => {}}
+              />
+            </div>
+          )}
+
+          {/* See more / see less toggle */}
+          <div className="px-3 pt-3">
+            <button
+              type="button"
+              onClick={() => setSeeMoreOpen((v) => !v)}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-leland-gray-hover px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <span className="leland-heading-base text-leland-gray-dark">See more</span>
+              <IconChevronDown
+                className={`size-5 text-leland-gray-dark transition-transform duration-200 ${seeMoreOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Lesson accordion */}
+        <LessonAccordion
+          currentLessonId={currentLessonId}
+          currentSectionId={currentSectionId}
+          completed={completed}
+        />
+      </div>
+    </aside>
+  );
+}
+
 function CourseViewerSidebar({
   lesson,
   lessonIdx,
@@ -816,23 +990,8 @@ function CourseViewerSidebar({
 
   return (
     <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
-      {/* Pivot menu + collapse toggle (at the panel edge it controls) */}
-      <div className="flex items-center gap-1.5 pl-6 pr-4 pt-4">
-        {SIDEBAR_TABS.map(({ id, label }) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => onTabChange(id)}
-            className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-          >
-            <Tag
-              text={label}
-              tagColor={TagColor.GRAY}
-              size={TagSize.SMALL}
-              selected={tab === id}
-            />
-          </button>
-        ))}
+      {/* Collapse toggle */}
+      <div className="flex items-center pl-6 pr-4 pt-4">
         <button
           onClick={onToggle}
           className="ml-auto flex size-10 shrink-0 items-center justify-center p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
@@ -935,9 +1094,15 @@ function CourseViewerSidebar({
 
 // ─── Prototype options (meta-UI for demoing variants, not product UI) ────────
 
+export type SidebarView = "default" | "tabbed" | "combined";
+
+type ExitNavStyle = "backLeft" | "closeRight";
+
 type PrototypeOptions = {
-  lessonsAccordion: boolean;
+  sidebarView: SidebarView;
+  beigeBackground: boolean;
   liveSessionVariant: LiveSessionVariant;
+  exitNavStyle: ExitNavStyle;
 };
 
 // Keys whose value is a boolean (rendered as toggles).
@@ -948,12 +1113,25 @@ type BooleanOptionKey = {
 const PROTOTYPE_OPTIONS_KEY = "content-viewer-prototype-options";
 
 const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
-  lessonsAccordion: false,
+  sidebarView: "default",
+  beigeBackground: false,
   liveSessionVariant: "addToCalendar",
+  exitNavStyle: "backLeft",
 };
 
+const EXIT_NAV_OPTIONS: { value: ExitNavStyle; label: string }[] = [
+  { value: "backLeft", label: "Back arrow (left)" },
+  { value: "closeRight", label: "Close icon (right)" },
+];
+
 const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
-  { key: "lessonsAccordion", label: "All-lessons accordion sidebar" },
+  { key: "beigeBackground", label: "Beige background" },
+];
+
+const SIDEBAR_VIEW_OPTIONS: { value: SidebarView; label: string }[] = [
+  { value: "default", label: "Lessons only" },
+  { value: "tabbed", label: "Tabbed sidebar with overview" },
+  { value: "combined", label: "Combined, lesson-first" },
 ];
 
 const LIVE_SESSION_VARIANT_OPTIONS: {
@@ -990,54 +1168,100 @@ function usePrototypeOptions() {
   return { options, toggleOption, setOption };
 }
 
+
 const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   options,
   onToggle,
+  onSetSidebarView,
   onSetVariant,
+  onSetExitNav,
   ...modalProps
 }: ModalProps & {
   options: PrototypeOptions;
   onToggle: (key: BooleanOptionKey) => void;
+  onSetSidebarView: (view: SidebarView) => void;
   onSetVariant: (variant: LiveSessionVariant) => void;
+  onSetExitNav: (style: ExitNavStyle) => void;
 }) {
   return (
     <Modal {...modalProps}>
-      <ModalContent size={ModalSize.SMALL} header="Prototype options">
-        <div className="flex flex-col gap-1 p-6">
-          {BOOLEAN_OPTIONS.map(({ key, label }) => (
-            <label
-              key={key}
-              className="flex cursor-pointer items-center justify-between gap-3 rounded-lg p-3 hover:bg-leland-gray-hover"
-            >
-              <span className="leland-paragraph-base text-leland-gray-dark">
-                {label}
-              </span>
-              <input
-                type="checkbox"
-                checked={options[key]}
-                onChange={() => onToggle(key)}
-                className="size-4 accent-leland-gray-dark"
-              />
-            </label>
-          ))}
-          <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg p-3 hover:bg-leland-gray-hover">
-            <span className="leland-paragraph-base text-leland-gray-dark">
+      <ModalContent size={ModalSize.SMALL}>
+        <div className="flex flex-col gap-1 px-6 py-[14px]">
+          <div className="flex flex-col gap-1.5 rounded-lg p-3">
+            <span className="leland-paragraph-base font-medium text-leland-gray-dark">
+              Sidebar
+            </span>
+            <div className="flex gap-1.5">
+              {SIDEBAR_VIEW_OPTIONS.map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => onSetSidebarView(o.value)}
+                  className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+                >
+                  <Tag
+                    text={o.label}
+                    tagColor={TagColor.GRAY}
+                    size={TagSize.SMALL}
+                    selected={options.sidebarView === o.value}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5 rounded-lg p-3">
+            <span className="leland-paragraph-base font-medium text-leland-gray-dark">
+              Exit navigation
+            </span>
+            <div className="flex gap-1.5">
+              {EXIT_NAV_OPTIONS.map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => onSetExitNav(o.value)}
+                  className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+                >
+                  <Tag
+                    text={o.label}
+                    tagColor={TagColor.GRAY}
+                    size={TagSize.SMALL}
+                    selected={options.exitNavStyle === o.value}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5 rounded-lg p-3">
+            <span className="leland-paragraph-base font-medium text-leland-gray-dark">
               Live session callout
             </span>
-            <select
-              value={options.liveSessionVariant}
-              onChange={(e) =>
-                onSetVariant(e.target.value as LiveSessionVariant)
-              }
-              className="rounded-lg border border-leland-gray-stroke bg-white px-2 py-1.5 leland-paragraph-sm text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-            >
+            <div className="flex flex-wrap gap-1.5">
               {LIVE_SESSION_VARIANT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => onSetVariant(o.value)}
+                  className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+                >
+                  <Tag
+                    text={o.label}
+                    tagColor={TagColor.GRAY}
+                    size={TagSize.SMALL}
+                    selected={options.liveSessionVariant === o.value}
+                  />
+                </button>
               ))}
-            </select>
-          </label>
+            </div>
+          </div>
+          {BOOLEAN_OPTIONS.map(({ key, label }) => (
+            <div key={key} className="rounded-lg p-3">
+              <SwitchInput
+                label={label}
+                isChecked={options[key]}
+                onToggle={() => onToggle(key)}
+              />
+            </div>
+          ))}
         </div>
       </ModalContent>
     </Modal>
@@ -1280,7 +1504,7 @@ function LiveProgramOverview({
               key={s.number}
               type="button"
               onClick={() => onSelectSession(s.number)}
-              className="flex w-[240px] shrink-0 flex-col gap-4 rounded-xl border border-leland-gray-stroke p-4 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+              className="flex w-[240px] shrink-0 flex-col gap-4 rounded-xl border border-leland-gray-stroke bg-white p-4 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
             >
               <div className="flex items-start justify-between">
                 <OverviewDateTile date={s.date} />
@@ -1462,7 +1686,7 @@ function SessionDetailView({
             </span>
           </button>
           <span aria-hidden>/</span>
-          <span>Session {session.number}</span>
+          <span className="font-medium text-leland-gray-dark">Session {session.number}</span>
         </div>
         <div className="flex flex-col gap-3">
           <h1 className="text-heading-4xl md:text-heading-5xl font-normal font-season text-leland-gray-dark">
@@ -1560,6 +1784,13 @@ export default function ContentViewer() {
   const params = useParams<{ lessonId?: string; sectionId?: string }>();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>("lessons");
+
+  // In combined view, navigating to a lesson section exits the overview back to lesson content.
+  useEffect(() => {
+    if (options.sidebarView === "combined" && sidebarTab === "overview") {
+      setSidebarTab("lessons");
+    }
+  }, [params.sectionId]); // eslint-disable-line react-hooks/exhaustive-deps
   const [selectedSessionNumber, setSelectedSessionNumber] = useState<
     number | null
   >(null);
@@ -1607,40 +1838,25 @@ export default function ContentViewer() {
     <div className="flex h-screen flex-col bg-white text-leland-gray-dark">
       {/* Top header — spans the full window width; sidebar sits below it */}
       <header className="flex shrink-0 items-center gap-2 border-b border-leland-gray-stroke py-3 pl-6 pr-4">
-        {/* Left: logo + program title (two-tab view) or breadcrumb + lesson
-            dropdown (legacy view). */}
+        {/* Left: back arrow (backLeft) or logo + title */}
         <div className="flex min-w-0 flex-1 items-center">
-          <BrandLelandLogoSilhouette className="h-5 w-auto shrink-0 text-leland-gray-dark" />
-          {options.lessonsAccordion ? (
-            <p className="ml-5 min-w-0 truncate leland-heading-base font-medium text-leland-gray-dark">
-              {COURSE_TITLE_FULL}
-            </p>
-          ) : (
-            <>
-              {/* Back to course */}
-              <Link
-                to={COURSE_HOME}
-                className="group leland-heading-base font-semibold ml-4 shrink-0 whitespace-nowrap px-1 py-3 text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary rounded-sm"
-              >
-                /{" "}
-                <span className="group-hover:underline group-hover:decoration-dotted group-hover:decoration-[1.5px] group-hover:underline-offset-4">
-                  {COURSE_TITLE}
-                </span>
-              </Link>
-
-              <Menu asChild itemSections={lessonMenuSections}>
-                <button className="group leland-subtext-base ml-2 flex shrink-0 items-center gap-2 rounded-sm px-1 py-3 text-leland-gray-dark outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
-                  <span className="group-hover:underline group-hover:decoration-dotted group-hover:decoration-[1.5px] group-hover:underline-offset-4">
-                    Lesson {lessonIdx + 1}
-                  </span>
-                  <IconChevronDown className="size-5" />
-                </button>
-              </Menu>
-            </>
+          {options.exitNavStyle === "backLeft" && (
+            <Link
+              to={COURSE_HOME}
+              aria-label="Back to course"
+              className="mr-4 flex size-10 shrink-0 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+            >
+              <IconChevronLeft className="size-5" />
+            </Link>
           )}
+          <BrandLelandLogoSilhouette className="h-5 w-auto shrink-0 text-leland-gray-dark" />
+          <span className="mx-4 h-5 w-px shrink-0 bg-leland-gray-stroke" aria-hidden />
+          <p className="min-w-0 truncate leland-heading-base font-medium text-leland-gray-dark">
+            {COURSE_TITLE_FULL}
+          </p>
         </div>
 
-        {/* Right: icon-only gray circular actions + close */}
+        {/* Right: icon-only gray circular actions + optional close */}
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -1664,20 +1880,36 @@ export default function ContentViewer() {
           >
             <IconShare className="size-5" />
           </button>
-          <Link
-            to={COURSE_HOME}
-            aria-label="Back to course"
-            className="ml-2 flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-          >
-            <IconX className="size-5" />
-          </Link>
+          {options.exitNavStyle === "closeRight" && (
+            <Link
+              to={COURSE_HOME}
+              aria-label="Back to course"
+              className="ml-2 flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+            >
+              <IconX className="size-5" />
+            </Link>
+          )}
         </div>
       </header>
 
       {/* Body */}
       <div className="relative flex min-h-0 flex-1">
         {sidebarOpen ? (
-          options.lessonsAccordion ? (
+          options.sidebarView === "combined" ? (
+            <CombinedSidebar
+              currentLessonId={lesson.id}
+              currentSectionId={section.id}
+              completed={completed}
+              onToggle={() => setSidebarOpen(false)}
+              onSwitchCohort={() => setCohortModalOpen(true)}
+              tab={sidebarTab}
+              onTabChange={(tab) => {
+                setSidebarTab(tab);
+                setSelectedSessionNumber(null);
+                setShowRecording(false);
+              }}
+            />
+          ) : (
             <LessonsAccordionSidebar
               currentLessonId={lesson.id}
               currentSectionId={section.id}
@@ -1690,25 +1922,7 @@ export default function ContentViewer() {
                 setShowRecording(false);
               }}
               onSwitchCohort={() => setCohortModalOpen(true)}
-            />
-          ) : (
-            <CourseViewerSidebar
-              lesson={lesson}
-              lessonIdx={lessonIdx}
-              currentSectionId={section.id}
-              isCompleted={isCompleted}
-              onToggle={() => setSidebarOpen(false)}
-              tab={sidebarTab}
-              onTabChange={(tab) => {
-                setSidebarTab(tab);
-                setSelectedSessionNumber(null);
-                setShowRecording(false);
-              }}
-              selectedSessionNumber={selectedSessionNumber}
-              onSelectSession={(n) => {
-                setSelectedSessionNumber(n);
-                setShowRecording(false);
-              }}
+              hideTabs={options.sidebarView !== "tabbed"}
             />
           )
         ) : (
@@ -1724,8 +1938,8 @@ export default function ContentViewer() {
         {/* Main content + section nav. The Calendar tab takes over the main
             area (calendar → session detail); lesson sections otherwise.
             (Community isn't here — it opens as its own page in a new tab.) */}
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          {sidebarTab === "live" || sidebarTab === "overview" ? (
+        <div className={`flex min-w-0 flex-1 flex-col overflow-hidden${options.beigeBackground ? " bg-leland-beige/50" : ""}`}>
+          {(options.sidebarView === "tabbed" || options.sidebarView === "combined") && (sidebarTab === "live" || sidebarTab === "overview") ? (
             <div className="min-h-0 flex-1 flex flex-col overflow-hidden">
               {showRecording ? (
                 <SessionRecordingView
@@ -1756,7 +1970,7 @@ export default function ContentViewer() {
           ) : (
             <>
               {section.kind === 'blocks' ? (
-                <div className="min-h-0 flex-1 overflow-y-auto bg-white">
+                <div className="min-h-0 flex-1 overflow-y-auto">
                   <LessonPageProvider
                     actions={{
                       onShareFeedback: () => setFeedbackModalOpen(true),
@@ -1776,11 +1990,11 @@ export default function ContentViewer() {
                         <BlockList blocks={lesson.topBlocks} />
                       ) : null}
                       <div className="flex flex-col gap-8">
+                        <p className="leland-paragraph-base font-medium text-leland-gray-dark">
+                          Lesson {lessonIdx + 1}
+                        </p>
                         <div className="flex flex-col gap-4">
                           <div className="flex flex-col gap-1">
-                            <p className="leland-paragraph-base text-leland-gray-light">
-                              Lesson {lessonIdx + 1}
-                            </p>
                             <h1 className="text-heading-4xl md:text-heading-5xl font-season font-normal text-leland-gray-dark">
                               {section.title}
                             </h1>
@@ -1831,7 +2045,7 @@ export default function ContentViewer() {
                   </LessonPageProvider>
                 </div>
               ) : section.kind === 'html' ? (
-                <div className="min-h-0 flex-1 overflow-y-auto bg-white">
+                <div className="min-h-0 flex-1 overflow-y-auto">
                   <div className="mx-auto w-full max-w-[800px] pt-10 pb-6">
                     <div className="overflow-hidden rounded-2xl border border-leland-gray-stroke">
                       <SectionContent
@@ -1906,7 +2120,9 @@ export default function ContentViewer() {
         onOpenChange={setPrototypeOptionsOpen}
         options={options}
         onToggle={toggleOption}
+        onSetSidebarView={(view) => setOption("sidebarView", view)}
         onSetVariant={(variant) => setOption("liveSessionVariant", variant)}
+        onSetExitNav={(style) => setOption("exitNavStyle", style)}
       />
       <SelectCohortModal
         open={cohortModalOpen}

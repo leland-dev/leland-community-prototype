@@ -40,9 +40,6 @@ const TagColorToStyles: Record<
 > = {
   [TagColor.TRANSPARENT]: (hoverable, selected) =>
     `border ${selected ? 'border-leland-black' : 'border-leland-gray-stroke'} ${hoverable ? 'hover:opacity-50' : ''}`,
-  // gray-hover (gray-dark @ 5% alpha) on purpose: the semi-transparent fill
-  // tints to match whatever surface the chip sits on, so it reads better than
-  // an opaque gray on non-white backgrounds. Over white it's near-identical.
   [TagColor.GRAY]: (hoverable, selected) =>
     `bg-leland-gray-hover text-leland-gray-light border ${selected ? 'border-leland-black' : 'border-transparent'} ${hoverable ? 'hover:bg-leland-gray-stroke' : ''}`,
   [TagColor.GREEN]: (hoverable, selected) =>

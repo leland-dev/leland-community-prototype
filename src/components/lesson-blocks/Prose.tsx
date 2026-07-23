@@ -72,7 +72,7 @@ const components: Components = {
     // Extra top margin so tables aren't cramped against the text above (adds to
     // the Prose flex gap).
     <div className="mt-4 overflow-x-auto">
-      <table className="w-full border-collapse overflow-hidden rounded-lg border border-leland-gray-stroke text-left">
+      <table className="w-full border-collapse overflow-hidden rounded-lg border border-leland-gray-stroke bg-white text-left">
         {children}
       </table>
     </div>

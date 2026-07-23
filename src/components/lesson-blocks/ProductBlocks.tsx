@@ -28,7 +28,7 @@ import type {
 } from "../../data/lessonBlocks";
 
 const CALLOUT_CONTAINER =
-  "flex w-full items-center gap-3 rounded-lg border border-leland-gray-stroke p-4";
+  "flex w-full items-center gap-3 rounded-lg border border-leland-gray-stroke bg-white p-4";
 
 function LiveDateTile({ month, day }: { month: string; day: string }) {
   return (
