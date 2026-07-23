@@ -2,7 +2,15 @@
 // (CourseViewerShell / CourseViewerSidebar / CourseViewerSectionNav on the
 // feature/course-viewer branch) using the ported leland design system:
 // leland tokens, icons, Button/Menu/ProgressBar, and the CourseFeedbackModal.
-import { useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FC,
+  type SVGProps,
+} from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { CourseFeedbackModal } from "../components/CourseFeedbackModal";
@@ -14,13 +22,29 @@ import {
   BrandLelandLogoSilhouette,
   Button,
   ButtonColor,
+  ButtonSize,
+  IconCalendar,
+  IconCalendarAlt,
   IconCheck,
+  IconClock,
+  IconArrowUpRight,
+  IconBooks,
+  IconExperiences,
+  IconLightning,
+  IconOnboarding,
+  IconQuestion,
+  IconUserProfileGroup,
   IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
+  IconChevronUp,
+  IconText,
+  IconRecurring,
   IconDotsHorizontal,
   IconHelp,
   IconShare,
+  IconStar,
+  IconStarOutline,
   IconWrite,
   IconX,
   Menu,
@@ -37,18 +61,37 @@ import {
   type ModalProps,
 } from "../components/leland";
 import lessonData from "../data/aiBuilderL1Lessons.json";
+import type {
+  Block,
+  BlockSection,
+  LiveSessionVariant,
+} from "../data/lessonBlocks";
+import { LESSON_1_SECTIONS, LESSON_1_TOP_BLOCKS } from "../data/sampleLesson";
+import {
+  BlockList,
+  LessonFooterActions,
+  LessonPageProvider,
+  LiveSessionCallout,
+} from "../components/lesson-blocks";
+import { COHORT_MEMBERS } from "./Group";
+import { SelectCohortModal } from "../components/LiveCourseCard";
 
 // ─── Types & seed data ───────────────────────────────────────────────────────
 
 type SectionKind = "html" | "video" | "pdf";
 
-type Section = {
+// Legacy media section: rendered via iframe/video (lessons 2–4).
+type MediaSection = {
   id: string;
   title: string;
   durationMin?: number | null;
   kind: SectionKind;
   src: string;
 };
+
+// A section is either a legacy media section or a native block section
+// (BlockSection). Chosen per-section by `kind`, so the two coexist in a course.
+type Section = MediaSection | BlockSection;
 
 type Lesson = {
   id: string;
@@ -57,34 +100,39 @@ type Lesson = {
   subtitle: string;
   durationMin: number;
   sections: Section[];
+  // Product/CTA blocks rendered above the body on every section of this lesson.
+  topBlocks?: Block[];
 };
 
 const COURSE_TITLE = "AI Builder Program Level 1";
+const COURSE_TITLE_FULL = "AI Builder Program Level 1: Use AI to 10x your impact";
+const COURSE_DESCRIPTION =
+  "Learn to build AI-powered applications using Claude — from foundational prompting to deploying production-ready tools.";
 const COURSE_HOME = "/course/ai-builder-l1";
 
-// Generated from the leland-courses session guides (see manifest). Lesson 1
-// gets a demo video + PDF section so all three section content types show.
+// The community page opens externally (new tab) — it's the existing group page.
+const COMMUNITY_GROUP_ID = "ai-bp-apr-26";
+
+// Lessons 2–4 come from the generated manifest (legacy HTML iframe sections).
+// Lesson 1 is the block/CMS demo: hand-authored native block sections (incl. an
+// inline video recording), plus a demo PDF section so a media section still
+// coexists with block sections.
+const MEDIA_DEMO_SECTIONS: MediaSection[] = [
+  {
+    id: "slides",
+    title: "Session slides",
+    durationMin: null,
+    kind: "pdf",
+    src: "/lessons/sample-deck.pdf",
+  },
+];
+
 const LESSONS: Lesson[] = (lessonData as Lesson[]).map((lesson) =>
   lesson.number === 1
     ? {
         ...lesson,
-        sections: [
-          ...lesson.sections,
-          {
-            id: "recording",
-            title: "Session recording",
-            durationMin: 90,
-            kind: "video" as const,
-            src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-          },
-          {
-            id: "slides",
-            title: "Session slides",
-            durationMin: null,
-            kind: "pdf" as const,
-            src: "/lessons/sample-deck.pdf",
-          },
-        ],
+        topBlocks: LESSON_1_TOP_BLOCKS,
+        sections: [...LESSON_1_SECTIONS, ...MEDIA_DEMO_SECTIONS],
       }
     : lesson,
 );
@@ -116,7 +164,27 @@ function useCompletion() {
 
 // ─── Section content ─────────────────────────────────────────────────────────
 
-function SectionContent({ section }: { section: Section }) {
+function SectionContent({ section }: { section: MediaSection }) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [htmlHeight, setHtmlHeight] = useState(1200);
+
+  useEffect(() => { setHtmlHeight(1200); }, [section.src]);
+
+  const handleHtmlLoad = useCallback(() => {
+    const doc = iframeRef.current?.contentDocument;
+    if (!doc) return;
+    // .dirB-page is the actual content container — its scrollHeight is correct
+    // regardless of the parent body/grid overflow constraints.
+    const measure = () => {
+      const page = doc.querySelector('.dirB-page');
+      const h = page ? page.scrollHeight : doc.body.scrollHeight;
+      if (h > 200) setHtmlHeight(h);
+    };
+    measure();
+    // Re-measure once after renderer finishes any async work
+    setTimeout(measure, 300);
+  }, []);
+
   if (section.kind === "video") {
     return (
       <div className="absolute inset-0 flex items-center justify-center bg-black">
@@ -135,23 +203,51 @@ function SectionContent({ section }: { section: Section }) {
   }
   return (
     <iframe
+      ref={iframeRef}
       src={section.src}
       title={section.title}
-      className="absolute inset-0 h-full w-full border-0 bg-white"
+      onLoad={handleHtmlLoad}
+      scrolling="no"
+      style={{ height: htmlHeight }}
+      className="block w-full border-0 bg-white"
     />
   );
 }
 
 // ─── Live program placeholder data ───────────────────────────────────────────
 
+type SlotStatus =
+  | { kind: 'available' }
+  | { kind: 'recording' }
+  | { kind: 'upcoming'; label: string };
+
+type TimeSlot = {
+  time: string;
+  status: SlotStatus;
+};
+
 type LiveSession = {
   number: number;
   title: string;
   description: string;
   date: Date;
-  timeSlots: string[];
+  timeSlots: TimeSlot[];
   durationMin: number;
 };
+
+type BuildSession = {
+  title: string;
+  date: Date;
+  isRecording?: boolean;
+};
+
+const BUILD_SESSIONS: BuildSession[] = [
+  { title: "Foundations build session", date: new Date(2026, 3, 22) },
+  { title: "Advanced prompting build session", date: new Date(2026, 3, 29) },
+  { title: "Deployment build session", date: new Date(2026, 4, 6) },
+  { title: "Intro build session", date: new Date(2026, 3, 15), isRecording: true },
+  { title: "Kickoff build session", date: new Date(2026, 3, 8), isRecording: true },
+];
 
 // Placeholder schedule — swap for real cohort data
 const LIVE_SESSION_DATES = [
@@ -166,8 +262,15 @@ const LIVE_SESSIONS: LiveSession[] = LESSONS.map((l, i) => ({
   title: l.title,
   description: l.subtitle,
   date: LIVE_SESSION_DATES[i] ?? LIVE_SESSION_DATES[0],
-  timeSlots: ["11:00 AM PT", "4:00 PM PT"],
   durationMin: 90,
+  timeSlots: i === 0
+    ? [
+        { time: "11:00 AM PT", status: { kind: 'recording' } as SlotStatus },
+      ]
+    : [
+        { time: "11:00 AM PT", status: { kind: 'available' } as SlotStatus },
+        { time: "4:00 PM PT", status: { kind: 'available' } as SlotStatus },
+      ],
 }));
 
 const formatSessionDate = (date: Date) =>
@@ -179,13 +282,510 @@ const formatSessionDate = (date: Date) =>
 
 // ─── Sidebar (mirrors CourseViewerSidebar.client.tsx) ────────────────────────
 
-const SIDEBAR_TABS = [
+// 'overview' is the two-tab sidebar's Overview tab (cohort + program resources +
+// the live-sessions/calendar main view). 'live' is the legacy sidebar's calendar
+// tab; both route to the same overview main content.
+type SidebarTab = 'lessons' | 'live' | 'resources' | 'community' | 'overview';
+
+const SIDEBAR_TABS: { id: SidebarTab; label: string }[] = [
   { id: 'lessons', label: 'Lessons' },
   { id: 'live', label: 'Live program' },
   { id: 'resources', label: 'More' },
-] as const;
+];
 
-type SidebarTab = (typeof SIDEBAR_TABS)[number]['id'];
+// Circular completion indicator. A filled check at 100%; otherwise a ring
+// whose arc tracks percent — inline SVG because strokeDashoffset must vary at
+// runtime (per the frontend-common-patterns icon rule).
+function CircularProgress({ percent }: { percent: number }) {
+  if (percent >= 100) {
+    return (
+      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-leland-gray-dark">
+        <IconCheck className="size-3 text-white" />
+      </span>
+    );
+  }
+  const radius = 10;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.max(0, Math.min(100, percent));
+  const offset = circumference * (1 - clamped / 100);
+  return (
+    <svg viewBox="0 0 24 24" className="size-6 shrink-0 -rotate-90" aria-hidden>
+      <circle
+        cx="12"
+        cy="12"
+        r={radius}
+        fill="none"
+        strokeWidth="2"
+        stroke="currentColor"
+        className="text-leland-gray-stroke"
+      />
+      <circle
+        cx="12"
+        cy="12"
+        r={radius}
+        fill="none"
+        strokeWidth="2"
+        strokeLinecap="round"
+        stroke="currentColor"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        className="text-leland-gray-dark"
+      />
+    </svg>
+  );
+}
+
+function lessonProgress(lesson: Lesson, completed: Set<string>): number {
+  const total = lesson.sections.length;
+  if (total === 0) return 0;
+  const done = lesson.sections.filter((s) =>
+    completed.has(`${lesson.id}/${s.id}`),
+  ).length;
+  return (done / total) * 100;
+}
+
+function CohortCard({
+  open,
+  onToggle,
+}: {
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-leland-gray-stroke bg-leland-gray-hover px-3 pb-3 pt-4">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center gap-1 px-1 text-left"
+      >
+        <div className="flex flex-1 flex-col gap-1">
+          <p className="leland-paragraph-base font-medium text-leland-gray-light">
+            Your cohort
+          </p>
+          <p className="leland-heading-2xl font-semibold text-leland-gray-dark">
+            Apr 21 – May 8
+          </p>
+        </div>
+        {open ? (
+          <IconChevronUp className="size-4 shrink-0 text-leland-gray-light" />
+        ) : (
+          <IconChevronDown className="size-4 shrink-0 text-leland-gray-light" />
+        )}
+      </button>
+      {open ? (
+        <div className="flex flex-col gap-1 border-t border-leland-gray-stroke pb-2 pt-4">
+          <p className="leland-paragraph-base font-medium text-leland-gray-dark">
+            Tuesdays &amp; Fridays
+          </p>
+          <p className="leland-paragraph-base text-leland-gray-light">
+            11:00 AM or 4:00 PM PT · 90 min
+          </p>
+        </div>
+      ) : null}
+      <div className="px-1">
+        <Button
+          label="Switch cohorts"
+          buttonColor={ButtonColor.SECONDARY}
+          size={ButtonSize.SMALL}
+          LeftIcon={IconRecurring}
+          rounded
+        />
+      </div>
+    </div>
+  );
+}
+
+function LiveSessionsList({
+  selectedSessionNumber,
+  onSelectSession,
+}: {
+  selectedSessionNumber: number | null;
+  onSelectSession: (n: number) => void;
+}) {
+  return (
+    <>
+      <div className="flex items-center gap-2">
+        <Button
+          label="Office hours"
+          buttonColor={ButtonColor.SECONDARY}
+          size={ButtonSize.SMALL}
+          RightIcon={IconArrowUpRight}
+          rounded
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        {LIVE_SESSIONS.map((session) => (
+          <button
+            key={session.number}
+            type="button"
+            onClick={() => onSelectSession(session.number)}
+            className={`flex items-center gap-3 rounded-lg p-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
+              selectedSessionNumber === session.number
+                ? "bg-leland-gray-hover"
+                : "hover:bg-leland-gray-hover"
+            }`}
+          >
+            <div className="flex size-12 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke">
+              <div className="flex items-center justify-center bg-leland-primary px-2.5 pb-0.5 pt-[3px]">
+                <span className="leland-eyebrow text-[10px] font-semibold tracking-[1px] text-leland-gray-dark">
+                  {session.date.toLocaleDateString("en-US", { month: "short" })}
+                </span>
+              </div>
+              <div className="flex flex-1 items-center justify-center bg-white">
+                <span className="leland-heading-xl font-semibold text-leland-gray-dark">
+                  {session.date.getDate()}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="leland-subtext-sm text-leland-gray-light">
+                Session {session.number}
+              </p>
+              <p className="leland-paragraph-base font-medium text-leland-gray-dark">
+                {session.title}
+              </p>
+            </div>
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-col gap-3 pt-2">
+        <div className="flex items-center gap-2 px-1">
+          <p className="leland-eyebrow font-medium text-leland-gray-light shrink-0">Also included</p>
+          <div className="h-px flex-1 bg-leland-gray-stroke" />
+        </div>
+        <div className="flex flex-col gap-1">
+          {BUILD_SESSIONS.filter((s) => !s.isRecording).map((s, i) => (
+            <div key={i} className="flex items-center gap-3 rounded-lg p-3 hover:bg-leland-gray-hover">
+              <div className="flex size-12 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke">
+                <div className="flex items-center justify-center bg-leland-gray-hover px-2.5 pb-0.5 pt-[3px]">
+                  <span className="leland-eyebrow text-[10px] font-semibold tracking-[1px] text-leland-gray-light">
+                    {s.date.toLocaleDateString("en-US", { month: "short" })}
+                  </span>
+                </div>
+                <div className="flex flex-1 items-center justify-center bg-white">
+                  <span className="leland-heading-xl font-semibold text-leland-gray-dark">
+                    {s.date.getDate()}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <p className="leland-subtext-sm text-leland-gray-light">Extra build session</p>
+                <p className="leland-paragraph-base font-medium text-leland-gray-dark">{s.title}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ResourcesPanel() {
+  return (
+    <>
+      <div className="flex flex-col gap-3 border-b border-leland-gray-stroke pb-6">
+        <p className="leland-paragraph-base text-leland-gray-light">
+          Learn to build AI-powered applications using Claude — from foundational prompting to deploying production-ready tools.
+        </p>
+        <p className="leland-paragraph-sm text-leland-gray-light">
+          4 lessons · ~12 hours
+        </p>
+      </div>
+      <div className="flex flex-col gap-1 -mx-2">
+        <button className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary">
+          <IconCalendar className="size-4 shrink-0 text-leland-gray-light" />
+          <span className="leland-paragraph-base text-leland-gray-dark">Office hours</span>
+        </button>
+        <button className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary">
+          <IconHelp className="size-4 shrink-0 text-leland-gray-light" />
+          <span className="leland-paragraph-base text-leland-gray-dark">Get help</span>
+        </button>
+        <button className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary">
+          <IconShare className="size-4 shrink-0 text-leland-gray-light" />
+          <span className="leland-paragraph-base text-leland-gray-dark">Share this course</span>
+        </button>
+      </div>
+    </>
+  );
+}
+
+function LessonAccordion({
+  currentLessonId,
+  currentSectionId,
+  completed,
+}: {
+  currentLessonId: string;
+  currentSectionId: string;
+  completed: Set<string>;
+}) {
+  const [expanded, setExpanded] = useState<Set<string>>(
+    () => new Set([currentLessonId]),
+  );
+
+  useEffect(() => {
+    setExpanded((prev) => new Set(prev).add(currentLessonId));
+  }, [currentLessonId]);
+
+  const toggle = (id: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+
+  return (
+    <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto px-3">
+      {LESSONS.map((l, idx) => {
+        const percent = lessonProgress(l, completed);
+        const statusLabel =
+          percent >= 100
+            ? "100% complete"
+            : percent > 0
+              ? `${Math.round(percent)}% complete`
+              : "Not started";
+        const isOpen = expanded.has(l.id);
+        return (
+          <div
+            key={l.id}
+            className="flex flex-col gap-3 border-b border-leland-gray-stroke px-2 py-5"
+          >
+            <button
+              type="button"
+              onClick={() => toggle(l.id)}
+              className="flex flex-col gap-1.5 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+            >
+              <span className="flex items-center gap-2 leland-subtext-sm text-leland-gray-extra-light">
+                <span className="font-semibold uppercase tracking-[1.3px]">
+                  Lesson {idx + 1}
+                </span>
+                <span>·</span>
+                <span>{statusLabel}</span>
+              </span>
+              <span className="flex items-center gap-3">
+                <span className="flex-1 leland-paragraph-lg font-medium text-leland-gray-dark">
+                  {l.title}
+                </span>
+                <CircularProgress percent={percent} />
+                <IconChevronDown
+                  className="size-5 shrink-0 text-leland-gray-light transition-transform"
+                  style={isOpen ? { transform: "rotate(180deg)" } : undefined}
+                />
+              </span>
+            </button>
+            {isOpen ? (
+              <div className="flex flex-col gap-1">
+                {l.sections.map((s, sIdx) => {
+                  const sectionDone = completed.has(`${l.id}/${s.id}`);
+                  const active =
+                    l.id === currentLessonId && s.id === currentSectionId;
+                  return (
+                    <Link
+                      key={s.id}
+                      to={`/content-viewer/${l.id}/${s.id}`}
+                      className={`flex items-center gap-2.5 rounded-lg p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
+                        active ? "bg-leland-gray-hover" : "hover:bg-leland-gray-hover"
+                      }`}
+                    >
+                      <span
+                        className={`flex size-8 shrink-0 items-center justify-center rounded-full ${
+                          sectionDone
+                            ? "bg-leland-gray-dark"
+                            : active
+                              ? "border-[1.5px] border-leland-gray-extra-light bg-white"
+                              : "border border-leland-gray-stroke bg-white"
+                        }`}
+                      >
+                        {sectionDone ? (
+                          <IconCheck className="size-3.5 text-white" />
+                        ) : (
+                          <span className="leland-heading-base font-semibold text-leland-gray-light">
+                            {sIdx + 1}
+                          </span>
+                        )}
+                      </span>
+                      <span className="min-w-0 flex-1 leland-paragraph-base font-medium text-leland-gray-dark">
+                        {s.title}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SidebarMenuItem({
+  Icon,
+  label,
+  active,
+  external,
+  onClick,
+}: {
+  Icon: FC<SVGProps<SVGSVGElement>>;
+  label: string;
+  active?: boolean;
+  external?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full items-center gap-2.5 rounded-lg p-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
+        active ? "bg-leland-gray-solid-hover" : "hover:bg-leland-gray-hover"
+      }`}
+    >
+      <Icon className="size-6 shrink-0 text-leland-gray-dark" />
+      <span className="min-w-0 flex-1 leland-paragraph-base font-medium text-leland-gray-dark">
+        {label}
+      </span>
+      {external ? (
+        <IconArrowUpRight className="size-5 shrink-0 text-leland-gray-light" />
+      ) : (
+        <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
+      )}
+    </button>
+  );
+}
+
+const SIDEBAR_TABS_TWO: { id: SidebarTab; label: string }[] = [
+  { id: "overview", label: "Overview" },
+  { id: "lessons", label: "Lessons" },
+];
+
+function LessonsAccordionSidebar({
+  currentLessonId,
+  currentSectionId,
+  completed,
+  onToggle,
+  tab,
+  onTabChange,
+  onSwitchCohort,
+}: {
+  currentLessonId: string;
+  currentSectionId: string;
+  completed: Set<string>;
+  onToggle: () => void;
+  tab: SidebarTab;
+  onTabChange: (tab: SidebarTab) => void;
+  onSwitchCohort: () => void;
+}) {
+  return (
+    <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
+      {/* Two-tab header (Overview / Lessons) + collapse */}
+      <div className="flex items-center gap-8 border-b border-leland-gray-stroke px-3">
+        <div className="flex flex-1 items-center gap-8 px-3">
+          {SIDEBAR_TABS_TWO.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onTabChange(id)}
+              className={`border-b-[3px] py-6 leland-paragraph-lg font-medium focus:outline-none ${
+                tab === id
+                  ? "border-leland-gray-dark text-leland-gray-dark"
+                  : "border-transparent text-leland-gray-light hover:text-leland-gray-dark"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={onToggle}
+          aria-label="Close sidebar"
+          className="flex size-11 shrink-0 items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+        >
+          <IconLeftSidebarClose className="size-6" aria-hidden />
+        </button>
+      </div>
+
+      {tab === "overview" ? (
+        <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto px-3 py-5">
+          {/* Cohort summary */}
+          <div className="flex items-start gap-4 p-3">
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <p className="leland-heading-2xl font-semibold text-leland-gray-dark">
+                May 16 – Jun 8
+              </p>
+              <div className="flex flex-col gap-0.5">
+                <p className="leland-paragraph-base font-medium text-leland-gray-light">
+                  Tuesdays and Thursdays
+                </p>
+                <p className="leland-paragraph-sm text-leland-gray-light">
+                  5:00 PM and 7:00 PM MST
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onSwitchCohort}
+              aria-label="Switch cohort"
+              className="shrink-0 rounded text-leland-gray-light hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconRecurring className="size-6" />
+            </button>
+          </div>
+
+          {/* Program resources — Calendar is in-app; the rest open externally */}
+          <div className="flex flex-col gap-1 pt-2">
+            <SidebarMenuItem
+              Icon={IconCalendarAlt}
+              label="Calendar"
+              active
+              onClick={() => onTabChange("overview")}
+            />
+            <SidebarMenuItem
+              Icon={IconExperiences}
+              label="Office hours"
+              external
+              onClick={() =>
+                window.open(
+                  "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours",
+                  "_blank",
+                  "noopener",
+                )
+              }
+            />
+            <SidebarMenuItem
+              Icon={IconUserProfileGroup}
+              label="Community"
+              external
+              onClick={() =>
+                window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")
+              }
+            />
+            <SidebarMenuItem
+              Icon={IconBooks}
+              label="Your cohort's builds"
+              external
+              onClick={() => {}}
+            />
+            <SidebarMenuItem
+              Icon={IconOnboarding}
+              label="Setup guide"
+              external
+              onClick={() => {}}
+            />
+          </div>
+        </div>
+      ) : (
+        <LessonAccordion
+          currentLessonId={currentLessonId}
+          currentSectionId={currentSectionId}
+          completed={completed}
+        />
+      )}
+    </aside>
+  );
+}
 
 function CourseViewerSidebar({
   lesson,
@@ -206,37 +806,33 @@ function CourseViewerSidebar({
   tab: SidebarTab;
   onTabChange: (tab: SidebarTab) => void;
   selectedSessionNumber: number | null;
-  onSelectSession: (n: number | null) => void;
+  onSelectSession: (n: number) => void;
 }) {
-  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
-  const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
-  const { options, toggleOption } = usePrototypeOptions();
+  const [cohortOpen, setCohortOpen] = useState(false);
 
   const entries = lesson.sections;
   const completedCount = entries.filter((e) => isCompleted(e.id)).length;
   const totalCount = entries.length;
 
   return (
-    <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-leland-beige">
+    <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
       {/* Pivot menu + collapse toggle (at the panel edge it controls) */}
       <div className="flex items-center gap-1.5 pl-6 pr-4 pt-4">
-        {options.hidePivotMenu
-          ? null
-          : SIDEBAR_TABS.map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => onTabChange(id)}
-                className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-              >
-                <Tag
-                  text={label}
-                  tagColor={TagColor.WHITE}
-                  size={TagSize.SMALL}
-                  selected={tab === id}
-                />
-              </button>
-            ))}
+        {SIDEBAR_TABS.map(({ id, label }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onTabChange(id)}
+            className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+          >
+            <Tag
+              text={label}
+              tagColor={TagColor.GRAY}
+              size={TagSize.SMALL}
+              selected={tab === id}
+            />
+          </button>
+        ))}
         <button
           onClick={onToggle}
           className="ml-auto flex size-10 shrink-0 items-center justify-center p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
@@ -271,7 +867,7 @@ function CourseViewerSidebar({
                     totalCount > 0 ? (completedCount / totalCount) * 100 : 0
                   }
                   color={ProgressBarColor.Dark}
-                  trackClassName="bg-white"
+                  trackClassName="bg-leland-gray-stroke"
                 />
               </div>
             </div>
@@ -312,90 +908,27 @@ function CourseViewerSidebar({
                   );
                 })}
               </div>
-              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-leland-beige to-transparent" />
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white to-transparent" />
             </div>
           </>
         ) : tab === 'live' ? (
-          <div className="flex flex-col gap-4 px-6">
-            <div className="flex flex-col gap-1">
-              <p className="leland-heading-lg font-semibold text-leland-gray-dark">
-                Cohort 3 · Apr 21 – May 8
-              </p>
-              <p className="leland-paragraph-sm text-leland-gray-light">
-                {LIVE_SESSIONS.length} live sessions · 90 min each
-              </p>
-            </div>
-            <div className="flex flex-col gap-2">
-              {LIVE_SESSIONS.map((session) => (
-                <button
-                  key={session.number}
-                  type="button"
-                  onClick={() => onSelectSession(session.number)}
-                  className={`flex flex-col gap-0.5 rounded-lg border bg-white p-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
-                    selectedSessionNumber === session.number
-                      ? "border-leland-gray-dark"
-                      : "border-leland-gray-stroke hover:bg-leland-gray-hover"
-                  }`}
-                >
-                  <p className="leland-heading-base text-leland-gray-dark">
-                    Session {session.number}: {session.title}
-                  </p>
-                  <p className="leland-paragraph-sm text-leland-gray-light">
-                    {formatSessionDate(session.date)} · {session.durationMin}{" "}
-                    min
-                  </p>
-                </button>
-              ))}
-            </div>
+          <div className="min-h-0 flex-1 overflow-y-auto flex flex-col gap-4 px-4 pb-6">
+            <CohortCard
+              open={cohortOpen}
+              onToggle={() => setCohortOpen((o) => !o)}
+            />
+            <LiveSessionsList
+              selectedSessionNumber={selectedSessionNumber}
+              onSelectSession={onSelectSession}
+            />
           </div>
         ) : (
-          /* Placeholder content — swap for real resource links */
-          <div className="flex flex-col gap-1 px-6">
-            <Button
-              label="Get help"
-              buttonColor={ButtonColor.REVEAL}
-              LeftIcon={IconHelp}
-            />
-            <Button
-              label="Share this course"
-              buttonColor={ButtonColor.REVEAL}
-              LeftIcon={IconShare}
-            />
+          <div className="min-h-0 flex-1 overflow-y-auto flex flex-col gap-6 px-6 pb-6">
+            <ResourcesPanel />
           </div>
         )}
       </div>
 
-      {/* Bottom actions — full-width section */}
-      <div className="px-4 py-4 bg-leland-beige">
-        <div className="flex items-center justify-between gap-2">
-          <Button
-            label="Share feedback"
-            buttonColor={ButtonColor.REVEAL}
-            LeftIcon={IconWrite}
-            onClick={() => setFeedbackModalOpen(true)}
-          />
-          <Button
-            label="Prototype options"
-            hideLabel
-            rounded
-            buttonColor={ButtonColor.REVEAL}
-            LeftIcon={IconDotsHorizontal}
-            onClick={() => setPrototypeOptionsOpen(true)}
-          />
-        </div>
-        <CourseFeedbackModal
-          open={feedbackModalOpen}
-          onOpenChange={setFeedbackModalOpen}
-          currentEntryId={currentSectionId}
-          entries={entries}
-        />
-        <PrototypeOptionsModal
-          open={prototypeOptionsOpen}
-          onOpenChange={setPrototypeOptionsOpen}
-          options={options}
-          onToggle={toggleOption}
-        />
-      </div>
     </aside>
   );
 }
@@ -403,14 +936,35 @@ function CourseViewerSidebar({
 // ─── Prototype options (meta-UI for demoing variants, not product UI) ────────
 
 type PrototypeOptions = {
-  hidePivotMenu: boolean;
+  lessonsAccordion: boolean;
+  liveSessionVariant: LiveSessionVariant;
 };
+
+// Keys whose value is a boolean (rendered as toggles).
+type BooleanOptionKey = {
+  [K in keyof PrototypeOptions]: PrototypeOptions[K] extends boolean ? K : never;
+}[keyof PrototypeOptions];
 
 const PROTOTYPE_OPTIONS_KEY = "content-viewer-prototype-options";
 
 const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
-  hidePivotMenu: false,
+  lessonsAccordion: false,
+  liveSessionVariant: "addToCalendar",
 };
+
+const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
+  { key: "lessonsAccordion", label: "All-lessons accordion sidebar" },
+];
+
+const LIVE_SESSION_VARIANT_OPTIONS: {
+  value: LiveSessionVariant;
+  label: string;
+}[] = [
+  { value: "addToCalendar", label: "Upcoming — add to calendar" },
+  { value: "addedToCalendar", label: "Added — countdown" },
+  { value: "watchRecording", label: "Recording available" },
+  { value: "joinNow", label: "Live now — join" },
+];
 
 function usePrototypeOptions() {
   const [options, setOptions] = useState<PrototypeOptions>(() => {
@@ -423,41 +977,40 @@ function usePrototypeOptions() {
       return DEFAULT_PROTOTYPE_OPTIONS;
     }
   });
-  const toggleOption = (key: keyof PrototypeOptions) => {
-    setOptions((prev) => {
-      const next = { ...prev, [key]: !prev[key] };
-      localStorage.setItem(PROTOTYPE_OPTIONS_KEY, JSON.stringify(next));
-      return next;
-    });
+  const persist = (next: PrototypeOptions) => {
+    localStorage.setItem(PROTOTYPE_OPTIONS_KEY, JSON.stringify(next));
+    return next;
   };
-  return { options, toggleOption };
+  const toggleOption = (key: BooleanOptionKey) =>
+    setOptions((prev) => persist({ ...prev, [key]: !prev[key] }));
+  const setOption = <K extends keyof PrototypeOptions>(
+    key: K,
+    value: PrototypeOptions[K],
+  ) => setOptions((prev) => persist({ ...prev, [key]: value }));
+  return { options, toggleOption, setOption };
 }
-
-const PROTOTYPE_OPTION_LABELS: Record<keyof PrototypeOptions, string> = {
-  hidePivotMenu: "Hide pivot menu",
-};
 
 const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   options,
   onToggle,
+  onSetVariant,
   ...modalProps
 }: ModalProps & {
   options: PrototypeOptions;
-  onToggle: (key: keyof PrototypeOptions) => void;
+  onToggle: (key: BooleanOptionKey) => void;
+  onSetVariant: (variant: LiveSessionVariant) => void;
 }) {
   return (
     <Modal {...modalProps}>
       <ModalContent size={ModalSize.SMALL} header="Prototype options">
         <div className="flex flex-col gap-1 p-6">
-          {(
-            Object.keys(PROTOTYPE_OPTION_LABELS) as Array<keyof PrototypeOptions>
-          ).map((key) => (
+          {BOOLEAN_OPTIONS.map(({ key, label }) => (
             <label
               key={key}
               className="flex cursor-pointer items-center justify-between gap-3 rounded-lg p-3 hover:bg-leland-gray-hover"
             >
               <span className="leland-paragraph-base text-leland-gray-dark">
-                {PROTOTYPE_OPTION_LABELS[key]}
+                {label}
               </span>
               <input
                 type="checkbox"
@@ -467,6 +1020,24 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
               />
             </label>
           ))}
+          <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg p-3 hover:bg-leland-gray-hover">
+            <span className="leland-paragraph-base text-leland-gray-dark">
+              Live session callout
+            </span>
+            <select
+              value={options.liveSessionVariant}
+              onChange={(e) =>
+                onSetVariant(e.target.value as LiveSessionVariant)
+              }
+              className="rounded-lg border border-leland-gray-stroke bg-white px-2 py-1.5 leland-paragraph-sm text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              {LIVE_SESSION_VARIANT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </ModalContent>
     </Modal>
@@ -485,14 +1056,65 @@ function monthGrid(year: number, month: number): Array<Date | null> {
   return cells;
 }
 
-function LiveProgramCalendar({
+
+function SessionRecordingView({
+  session,
+  onBack,
+}: {
+  session: LiveSession;
+  onBack: () => void;
+}) {
+  return (
+    <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-8 py-10">
+        <button
+          onClick={onBack}
+          className="-ml-5 flex items-center gap-1 leland-paragraph-base text-leland-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-4 hover:text-leland-gray-dark"
+        >
+          <IconChevronLeft className="size-4" />
+          Back to session
+        </button>
+        <div className="flex flex-col gap-2">
+          <p className="leland-paragraph-lg font-medium text-leland-rust">
+            Session {session.number}
+          </p>
+          <h1 className="text-heading-4xl md:text-heading-5xl font-normal font-season text-leland-gray-dark">
+            {session.title}
+          </h1>
+        </div>
+        <Link
+          to={`/content-viewer/lesson-${session.number}/welcome`}
+          className="flex items-center gap-4 rounded-xl bg-[#EFF5FF] px-5 py-4 hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+        >
+          <IconText className="size-5 shrink-0 text-leland-gray-dark" />
+          <span className="flex-1 leland-heading-base font-semibold text-leland-gray-dark">View lesson outline</span>
+          <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
+        </Link>
+
+        {/* Video player placeholder */}
+        <div className="aspect-video w-full overflow-hidden rounded-2xl bg-leland-gray-dark flex items-center justify-center">
+          <p className="leland-heading-xl font-semibold text-white opacity-40">
+            Recording
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SessionCalendar({
   onSelectSession,
+  highlightSessionNumber,
+  initialMonth = LIVE_SESSIONS[0].date.getMonth(),
 }: {
   onSelectSession: (n: number) => void;
+  highlightSessionNumber?: number;
+  initialMonth?: number;
 }) {
-  // Cohort spans Apr–May 2026
-  const [month, setMonth] = useState(3);
+  const [month, setMonth] = useState(initialMonth);
+  const [hoveredDay, setHoveredDay] = useState<number | null>(null);
   const year = 2026;
+
   const monthLabel = new Date(year, month, 1).toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
@@ -505,160 +1127,372 @@ function LiveProgramCalendar({
     ]),
   );
 
+  const buildSessionByDay = new Map(
+    BUILD_SESSIONS.filter(
+      (s) => s.date.getMonth() === month && !s.isRecording,
+    ).map((s) => [s.date.getDate(), s]),
+  );
+
   return (
-    <div className="mx-auto flex h-full w-full max-w-2xl flex-col gap-8 overflow-y-auto px-8 py-10">
-      <div className="flex flex-col gap-1">
-        <p className="leland-eyebrow text-leland-gray-light">Live program</p>
-        <h1 className="leland-heading-3xl font-semibold text-leland-gray-dark">
-          Cohort 3 schedule
-        </h1>
-        <p className="leland-paragraph-lg text-leland-gray-light">
-          Four live sessions, Apr 21 – May 8. Click a session for details and
-          available times.
+    <div className="rounded-2xl border border-leland-gray-stroke bg-white p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <p className="leland-heading-lg font-semibold text-leland-gray-dark">
+          {monthLabel}
         </p>
-      </div>
-
-      <div className="rounded-2xl border border-leland-gray-stroke bg-white p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <p className="leland-heading-lg font-semibold text-leland-gray-dark">
-            {monthLabel}
-          </p>
-          <div className="flex gap-1">
-            <button
-              type="button"
-              onClick={() => setMonth(3)}
-              disabled={month === 3}
-              aria-label="Previous month"
-              className="flex size-8 items-center justify-center rounded-full text-leland-gray-dark hover:bg-leland-gray-hover disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-            >
-              <IconChevronLeft className="size-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setMonth(4)}
-              disabled={month === 4}
-              aria-label="Next month"
-              className="flex size-8 items-center justify-center rounded-full text-leland-gray-dark hover:bg-leland-gray-hover disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-            >
-              <IconChevronRight className="size-4" />
-            </button>
-          </div>
-        </div>
-        <div className="grid grid-cols-7 gap-y-1 text-center">
-          {WEEKDAY_LABELS.map((d, i) => (
-            <span
-              key={`${d}-${i}`}
-              className="leland-heading-sm py-1 text-leland-gray-extra-light"
-            >
-              {d}
-            </span>
-          ))}
-          {monthGrid(2026, month).map((date, i) => {
-            const session = date ? sessionByDay.get(date.getDate()) : undefined;
-            return (
-              <div key={i} className="flex justify-center py-0.5">
-                {date == null ? (
-                  <span className="size-9" />
-                ) : session ? (
-                  <button
-                    type="button"
-                    onClick={() => onSelectSession(session.number)}
-                    title={`Session ${session.number}: ${session.title}`}
-                    className="flex size-9 items-center justify-center rounded-full bg-leland-primary leland-heading-base font-semibold text-leland-on-primary-text hover:bg-leland-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-gray-dark"
-                  >
-                    {date.getDate()}
-                  </button>
-                ) : (
-                  <span className="flex size-9 items-center justify-center leland-paragraph-base text-leland-gray-dark">
-                    {date.getDate()}
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        {LIVE_SESSIONS.map((session) => (
+        <div className="flex gap-1">
           <button
-            key={session.number}
             type="button"
-            onClick={() => onSelectSession(session.number)}
-            className="flex items-center justify-between gap-3 rounded-lg border border-leland-gray-stroke bg-white px-4 py-3 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            onClick={() => setMonth(3)}
+            disabled={month === 3}
+            aria-label="Previous month"
+            className="flex size-8 items-center justify-center rounded-full text-leland-gray-dark hover:bg-leland-gray-hover disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
           >
-            <div className="min-w-0">
-              <p className="leland-heading-base font-semibold text-leland-gray-dark">
-                Session {session.number}: {session.title}
-              </p>
-              <p className="leland-paragraph-sm text-leland-gray-light">
-                {formatSessionDate(session.date)} · {session.durationMin} min
-              </p>
-            </div>
-            <IconChevronRight className="size-5 shrink-0 text-leland-gray-extra-light" />
+            <IconChevronLeft className="size-4" />
           </button>
+          <button
+            type="button"
+            onClick={() => setMonth(4)}
+            disabled={month === 4}
+            aria-label="Next month"
+            className="flex size-8 items-center justify-center rounded-full text-leland-gray-dark hover:bg-leland-gray-hover disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+          >
+            <IconChevronRight className="size-4" />
+          </button>
+        </div>
+      </div>
+      <div className="grid grid-cols-7 gap-y-1 text-center">
+        {WEEKDAY_LABELS.map((d, i) => (
+          <span
+            key={`${d}-${i}`}
+            className="leland-heading-sm py-1 text-leland-gray-extra-light"
+          >
+            {d}
+          </span>
         ))}
+        {monthGrid(2026, month).map((date, i) => {
+          const calSession = date
+            ? sessionByDay.get(date.getDate())
+            : undefined;
+          const buildSession = date
+            ? buildSessionByDay.get(date.getDate())
+            : undefined;
+          const isCurrent = calSession?.number === highlightSessionNumber;
+          const hasPopover = !!(calSession || buildSession);
+          const col = i % 7;
+          return (
+            <div
+              key={i}
+              className="relative flex justify-center py-0.5"
+              onMouseEnter={() => hasPopover && date && setHoveredDay(date.getDate())}
+              onMouseLeave={() => setHoveredDay(null)}
+              onClick={() => hasPopover && date && setHoveredDay(v => v === date.getDate() ? null : date.getDate())}
+            >
+              {date == null ? (
+                <span className="size-9" />
+              ) : calSession ? (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onSelectSession(calSession.number); }}
+                  className={`flex size-9 items-center justify-center rounded-full leland-heading-base font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-gray-dark ${
+                    isCurrent
+                      ? "bg-leland-primary text-leland-on-primary-text ring-2 ring-leland-gray-dark ring-offset-1"
+                      : "bg-leland-primary text-leland-on-primary-text hover:bg-leland-primary-hover"
+                  }`}
+                >
+                  {date.getDate()}
+                </button>
+              ) : (
+                <span
+                  className={`flex size-9 items-center justify-center leland-paragraph-base text-leland-gray-dark ${
+                    buildSession
+                      ? "underline decoration-leland-gray-stroke-dark decoration-dotted decoration-[1.5px] underline-offset-4"
+                      : ""
+                  }`}
+                >
+                  {date.getDate()}
+                </span>
+              )}
+              {hasPopover && hoveredDay === date?.getDate() && (
+                <div className={`pointer-events-none absolute bottom-full z-50 mb-2 w-48 rounded-xl border border-leland-gray-stroke bg-white p-3 shadow-lg ${col <= 1 ? "left-0" : col >= 5 ? "right-0" : "left-1/2 -translate-x-1/2"}`}>
+                  {calSession && (
+                    <div className={buildSession ? "mb-2" : ""}>
+                      <p className="leland-subtext-sm text-leland-gray-light">Session {calSession.number}</p>
+                      <p className="leland-paragraph-sm font-medium text-leland-gray-dark">{calSession.title}</p>
+                    </div>
+                  )}
+                  {buildSession && (
+                    <div>
+                      <p className="leland-subtext-sm text-leland-gray-light">Extra build session</p>
+                      <p className="leland-paragraph-sm font-medium text-leland-gray-dark">{buildSession.title}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
+function OverviewDateTile({ date }: { date: Date }) {
+  return (
+    <div className="flex size-12 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke">
+      <div className="flex items-center justify-center bg-leland-blue px-2.5 pb-0.5 pt-[3px]">
+        <span className="text-[10px] font-semibold uppercase tracking-[1px] text-leland-gray-dark">
+          {date.toLocaleDateString("en-US", { month: "short" })}
+        </span>
+      </div>
+      <div className="flex flex-1 items-center justify-center bg-white">
+        <span className="leland-heading-xl font-semibold text-leland-gray-dark">
+          {date.getDate()}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function LiveProgramOverview({
+  onSelectSession,
+}: {
+  onSelectSession: (n: number) => void;
+}) {
+  const buildSessions = BUILD_SESSIONS.filter((s) => !s.isRecording);
+  return (
+    <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-8 py-10">
+        <div className="flex flex-col gap-3">
+          <h1 className="text-heading-4xl md:text-heading-5xl font-normal font-season text-leland-gray-dark">
+            {COURSE_TITLE_FULL}
+          </h1>
+          <p className="leland-paragraph-lg text-leland-gray-light">
+            {COURSE_DESCRIPTION}
+          </p>
+        </div>
+
+        {/* Live sessions carousel */}
+        <div className="flex flex-col gap-3">
+          <p className="leland-eyebrow text-leland-gray-light">Live sessions</p>
+          <div className="scrollbar-hide -mx-1 flex gap-4 overflow-x-auto px-1">
+          {LIVE_SESSIONS.map((s) => (
+            <button
+              key={s.number}
+              type="button"
+              onClick={() => onSelectSession(s.number)}
+              className="flex w-[240px] shrink-0 flex-col gap-4 rounded-xl border border-leland-gray-stroke p-4 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <div className="flex items-start justify-between">
+                <OverviewDateTile date={s.date} />
+                <IconChevronRight className="size-5 text-leland-gray-light" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <p className="line-clamp-2 leland-heading-lg font-semibold leading-snug text-leland-gray-dark">
+                  {s.title}
+                </p>
+                <p className="leland-paragraph-sm text-leland-gray-light">
+                  {formatSessionDate(s.date)}, 10:00 AM
+                </p>
+              </div>
+            </button>
+          ))}
+          </div>
+        </div>
+
+        {/* Add all to calendar */}
+        <button
+          type="button"
+          className="flex w-full items-center gap-3 rounded-xl bg-leland-gray-hover px-4 py-4 text-left hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+        >
+          <IconCalendarAlt className="size-6 shrink-0 text-leland-gray-dark" />
+          <span className="flex-1 leland-heading-base font-semibold text-leland-gray-dark">
+            Add all sessions to your calendar
+          </span>
+          <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
+        </button>
+
+        <SessionCalendar onSelectSession={onSelectSession} />
+
+        {/* Extra build sessions (add-on live experiences) */}
+        <div className="flex flex-col gap-3">
+          <p className="leland-eyebrow text-leland-gray-light">
+            Extra build sessions
+          </p>
+          <div className="scrollbar-hide -mx-1 flex gap-4 overflow-x-auto px-1">
+            {buildSessions.map((s, i) => (
+              <div
+                key={i}
+                className="flex w-[368px] shrink-0 flex-col overflow-hidden rounded-xl border border-leland-gray-stroke"
+              >
+                <div className="h-40 bg-gradient-to-br from-leland-blue-light to-leland-primary-light" />
+                <div className="flex flex-col gap-2 px-4 pb-4 pt-3">
+                  <p className="leland-heading-base font-semibold text-leland-gray-dark">
+                    {s.title}
+                  </p>
+                  <div className="flex items-end justify-between gap-2">
+                    <div className="flex flex-col gap-1.5">
+                      <p className="leland-paragraph-sm text-leland-gray-light">
+                        {formatSessionDate(s.date)}, 10:00 AM
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex -space-x-1.5">
+                          {COHORT_MEMBERS.slice(0, 4).map((m) => (
+                            <img
+                              key={m.name}
+                              src={m.avatar}
+                              alt=""
+                              className="size-5 rounded-full border border-white object-cover"
+                            />
+                          ))}
+                        </div>
+                        <span className="leland-paragraph-sm text-leland-gray-light">
+                          46 going
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      label="Add to calendar"
+                      buttonColor={ButtonColor.SECONDARY_NEUTRAL}
+                      size={ButtonSize.SMALL}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SessionActionBanner({
+  session,
+  variant,
+  onViewRecording,
+}: {
+  session: LiveSession;
+  variant: LiveSessionVariant;
+  onViewRecording: () => void;
+}) {
+  const month = session.date
+    .toLocaleDateString("en-US", { month: "short" })
+    .toUpperCase();
+  const day = String(session.date.getDate());
+  const weekday = session.date.toLocaleDateString("en-US", { weekday: "long" });
+  const time = session.timeSlots[0]?.time ?? "11:00 AM PT";
+  const shortDate = session.date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+
+  switch (variant) {
+    case "watchRecording":
+      return (
+        <LiveSessionCallout
+          recording
+          title="Watch the recording"
+          subtitle={`${shortDate}, ${time}`}
+          trailing={{ kind: "chevron" }}
+          onClick={onViewRecording}
+        />
+      );
+    case "addedToCalendar":
+      return (
+        <LiveSessionCallout
+          month={month}
+          day={day}
+          title="Starts in 2 days"
+          subtitle="Added to your calendar"
+          trailing={{ kind: "kebab" }}
+        />
+      );
+    case "joinNow":
+      return (
+        <LiveSessionCallout
+          month={month}
+          day={day}
+          title="Join the live session"
+          subtitle="Started 10 mins ago"
+          trailing={{ kind: "join" }}
+        />
+      );
+    default:
+      return (
+        <LiveSessionCallout
+          month={month}
+          day={day}
+          title={`${weekday} at ${time}`}
+          subtitle={
+            <span className="font-medium text-leland-blue-dark">
+              Add to calendar
+            </span>
+          }
+          trailing={{ kind: "chevron" }}
+        />
+      );
+  }
+}
+
 function SessionDetailView({
   session,
+  variant,
+  onSelectSession,
+  onViewRecording,
   onBack,
 }: {
   session: LiveSession;
+  variant: LiveSessionVariant;
+  onSelectSession: (n: number) => void;
+  onViewRecording: () => void;
   onBack: () => void;
 }) {
   return (
-    <div className="mx-auto flex h-full w-full max-w-2xl flex-col gap-6 overflow-y-auto px-8 py-10">
-      <div>
-        <Button
-          label="Back to schedule"
-          buttonColor={ButtonColor.TERTIARY}
-          LeftIcon={IconChevronLeft}
-          onClick={onBack}
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <p className="leland-eyebrow text-leland-gray-light">
-          Session {session.number}
-        </p>
-        <h1 className="leland-heading-3xl font-semibold text-leland-gray-dark">
-          {session.title}
-        </h1>
-        <p className="leland-subtext-lg text-leland-gray-light">
-          {formatSessionDate(session.date)} · {session.durationMin} min
-        </p>
-      </div>
-      <p className="leland-paragraph-lg text-leland-gray-dark">
-        {session.description}
-      </p>
-
-      <div className="flex flex-col gap-3">
-        <p className="leland-heading-base font-semibold uppercase tracking-wide text-leland-gray-light">
-          Available times
-        </p>
-        {session.timeSlots.map((slot) => (
-          <div
-            key={slot}
-            className="flex items-center justify-between gap-3 rounded-lg border border-leland-gray-stroke bg-white px-4 py-3"
+    <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-8 pt-10 pb-16">
+        {/* Breadcrumb: ‹ Calendar (back) / Session N */}
+        <div className="flex items-center gap-2 leland-paragraph-base text-leland-gray-light">
+          <button
+            onClick={onBack}
+            className="-ml-1 flex items-center gap-1 rounded-sm hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
           >
-            <div>
-              <p className="leland-heading-base font-semibold text-leland-gray-dark">
-                {formatSessionDate(session.date)} · {slot}
-              </p>
-              <p className="leland-paragraph-sm text-leland-gray-light">
-                {session.durationMin} minutes
-              </p>
-            </div>
-            <Button
-              label="Add to calendar"
-              buttonColor={ButtonColor.SECONDARY}
-              rounded
-            />
-          </div>
-        ))}
+            <IconChevronLeft className="size-4" />
+            <span className="underline decoration-dotted decoration-[1.5px] underline-offset-4">
+              Calendar
+            </span>
+          </button>
+          <span aria-hidden>/</span>
+          <span>Session {session.number}</span>
+        </div>
+        <div className="flex flex-col gap-3">
+          <h1 className="text-heading-4xl md:text-heading-5xl font-normal font-season text-leland-gray-dark">
+            {session.title}
+          </h1>
+          <p className="leland-paragraph-lg text-leland-gray-dark">
+            {session.description}
+          </p>
+        </div>
+
+        <SessionActionBanner
+          session={session}
+          variant={variant}
+          onViewRecording={onViewRecording}
+        />
+
+        <Link
+          to={`/content-viewer/lesson-${session.number}/welcome`}
+          className="flex items-center gap-4 rounded-xl bg-[#EFF5FF] px-5 py-4 hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+        >
+          <IconText className="size-5 shrink-0 text-leland-gray-dark" />
+          <span className="flex-1 leland-heading-base font-semibold text-leland-gray-dark">View lesson outline</span>
+          <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
+        </Link>
+
+        <SessionCalendar
+          onSelectSession={onSelectSession}
+          highlightSessionNumber={session.number}
+          initialMonth={session.date.getMonth()}
+        />
       </div>
     </div>
   );
@@ -729,6 +1563,11 @@ export default function ContentViewer() {
   const [selectedSessionNumber, setSelectedSessionNumber] = useState<
     number | null
   >(null);
+  const [showRecording, setShowRecording] = useState(false);
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
+  const [cohortModalOpen, setCohortModalOpen] = useState(false);
+  const { options, toggleOption, setOption } = usePrototypeOptions();
   const { completed, markComplete } = useCompletion();
 
   const selectedSession =
@@ -768,50 +1607,67 @@ export default function ContentViewer() {
     <div className="flex h-screen flex-col bg-white text-leland-gray-dark">
       {/* Top header — spans the full window width; sidebar sits below it */}
       <header className="flex shrink-0 items-center gap-2 border-b border-leland-gray-stroke py-3 pl-6 pr-4">
-        {/* Left: logo + breadcrumb */}
+        {/* Left: logo + program title (two-tab view) or breadcrumb + lesson
+            dropdown (legacy view). */}
         <div className="flex min-w-0 flex-1 items-center">
           <BrandLelandLogoSilhouette className="h-5 w-auto shrink-0 text-leland-gray-dark" />
-          {/* Back to course */}
-          <Link
-            to={COURSE_HOME}
-            className="group leland-heading-base font-semibold ml-4 shrink-0 whitespace-nowrap px-1 py-3 text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary rounded-sm"
-          >
-            /{" "}
-            <span className="group-hover:underline group-hover:decoration-dotted group-hover:decoration-[1.5px] group-hover:underline-offset-4">
-              {COURSE_TITLE}
-            </span>
-          </Link>
+          {options.lessonsAccordion ? (
+            <p className="ml-5 min-w-0 truncate leland-heading-base font-medium text-leland-gray-dark">
+              {COURSE_TITLE_FULL}
+            </p>
+          ) : (
+            <>
+              {/* Back to course */}
+              <Link
+                to={COURSE_HOME}
+                className="group leland-heading-base font-semibold ml-4 shrink-0 whitespace-nowrap px-1 py-3 text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary rounded-sm"
+              >
+                /{" "}
+                <span className="group-hover:underline group-hover:decoration-dotted group-hover:decoration-[1.5px] group-hover:underline-offset-4">
+                  {COURSE_TITLE}
+                </span>
+              </Link>
 
-          <Menu asChild itemSections={lessonMenuSections}>
-            <button className="group leland-subtext-base ml-2 flex shrink-0 items-center gap-2 rounded-sm px-1 py-3 text-leland-gray-dark outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
-              <span className="group-hover:underline group-hover:decoration-dotted group-hover:decoration-[1.5px] group-hover:underline-offset-4">
-                Lesson {lessonIdx + 1}
-              </span>
-              <IconChevronDown className="size-5" />
-            </button>
-          </Menu>
+              <Menu asChild itemSections={lessonMenuSections}>
+                <button className="group leland-subtext-base ml-2 flex shrink-0 items-center gap-2 rounded-sm px-1 py-3 text-leland-gray-dark outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
+                  <span className="group-hover:underline group-hover:decoration-dotted group-hover:decoration-[1.5px] group-hover:underline-offset-4">
+                    Lesson {lessonIdx + 1}
+                  </span>
+                  <IconChevronDown className="size-5" />
+                </button>
+              </Menu>
+            </>
+          )}
         </div>
 
-        {/* Right: actions + close */}
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center">
-            <Button
-              label="Get help"
-              buttonColor={ButtonColor.REVEAL}
-              rounded
-              LeftIcon={IconHelp}
-            />
-            <Button
-              label="Share"
-              buttonColor={ButtonColor.REVEAL}
-              rounded
-              LeftIcon={IconShare}
-            />
-          </div>
+        {/* Right: icon-only gray circular actions + close */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Get help"
+            className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+          >
+            <IconQuestion className="size-5" />
+          </button>
+          <button
+            type="button"
+            aria-label="Share feedback"
+            onClick={() => setFeedbackModalOpen(true)}
+            className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+          >
+            <IconStarOutline className="size-5" />
+          </button>
+          <button
+            type="button"
+            aria-label="Share"
+            className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+          >
+            <IconShare className="size-5" />
+          </button>
           <Link
             to={COURSE_HOME}
             aria-label="Back to course"
-            className="inline-flex items-center justify-center rounded-full border border-leland-gray-stroke bg-white p-3 text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+            className="ml-2 flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
           >
             <IconX className="size-5" />
           </Link>
@@ -821,52 +1677,208 @@ export default function ContentViewer() {
       {/* Body */}
       <div className="relative flex min-h-0 flex-1">
         {sidebarOpen ? (
-          <CourseViewerSidebar
-            lesson={lesson}
-            lessonIdx={lessonIdx}
-            currentSectionId={section.id}
-            isCompleted={isCompleted}
-            onToggle={() => setSidebarOpen(false)}
-            tab={sidebarTab}
-            onTabChange={(tab) => {
-              setSidebarTab(tab);
-              if (tab !== "live") setSelectedSessionNumber(null);
-            }}
-            selectedSessionNumber={selectedSessionNumber}
-            onSelectSession={setSelectedSessionNumber}
-          />
+          options.lessonsAccordion ? (
+            <LessonsAccordionSidebar
+              currentLessonId={lesson.id}
+              currentSectionId={section.id}
+              completed={completed}
+              onToggle={() => setSidebarOpen(false)}
+              tab={sidebarTab}
+              onTabChange={(tab) => {
+                setSidebarTab(tab);
+                setSelectedSessionNumber(null);
+                setShowRecording(false);
+              }}
+              onSwitchCohort={() => setCohortModalOpen(true)}
+            />
+          ) : (
+            <CourseViewerSidebar
+              lesson={lesson}
+              lessonIdx={lessonIdx}
+              currentSectionId={section.id}
+              isCompleted={isCompleted}
+              onToggle={() => setSidebarOpen(false)}
+              tab={sidebarTab}
+              onTabChange={(tab) => {
+                setSidebarTab(tab);
+                setSelectedSessionNumber(null);
+                setShowRecording(false);
+              }}
+              selectedSessionNumber={selectedSessionNumber}
+              onSelectSession={(n) => {
+                setSelectedSessionNumber(n);
+                setShowRecording(false);
+              }}
+            />
+          )
         ) : (
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Open sidebar"
-            className="absolute left-0 top-6 z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-leland-beige p-4 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            className="absolute left-0 top-6 z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-white p-4 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
           >
             <IconLeftSidebarOpen className="size-6" aria-hidden />
           </button>
         )}
 
-        {/* Main content + section nav. The Live program tab takes over the
-            main area (calendar → session detail); lesson sections otherwise. */}
+        {/* Main content + section nav. The Calendar tab takes over the main
+            area (calendar → session detail); lesson sections otherwise.
+            (Community isn't here — it opens as its own page in a new tab.) */}
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          {sidebarTab === "live" ? (
-            <div className="min-h-0 flex-1 overflow-hidden">
-              {selectedSession ? (
+          {sidebarTab === "live" || sidebarTab === "overview" ? (
+            <div className="min-h-0 flex-1 flex flex-col overflow-hidden">
+              {showRecording ? (
+                <SessionRecordingView
+                  session={selectedSession ?? LIVE_SESSIONS[0]}
+                  onBack={() => setShowRecording(false)}
+                />
+              ) : selectedSession ? (
                 <SessionDetailView
+                  key={selectedSession.number}
                   session={selectedSession}
+                  variant={options.liveSessionVariant}
+                  onSelectSession={(n) => {
+                    setSelectedSessionNumber(n);
+                    setShowRecording(false);
+                  }}
+                  onViewRecording={() => setShowRecording(true)}
                   onBack={() => setSelectedSessionNumber(null)}
                 />
               ) : (
-                <LiveProgramCalendar onSelectSession={setSelectedSessionNumber} />
+                <LiveProgramOverview
+                  onSelectSession={(n) => {
+                    setSelectedSessionNumber(n);
+                    setShowRecording(false);
+                  }}
+                />
               )}
             </div>
           ) : (
             <>
-              <div className="relative min-h-0 flex-1 overflow-hidden">
-                <SectionContent
-                  key={`${lesson.id}/${section.id}`}
-                  section={section}
-                />
-              </div>
+              {section.kind === 'blocks' ? (
+                <div className="min-h-0 flex-1 overflow-y-auto bg-white">
+                  <LessonPageProvider
+                    actions={{
+                      onShareFeedback: () => setFeedbackModalOpen(true),
+                      onOpenCalendar: () => {
+                        setSidebarTab("live");
+                        setSelectedSessionNumber(null);
+                        setShowRecording(false);
+                      },
+                      liveSessionVariant: options.liveSessionVariant,
+                    }}
+                  >
+                    {/* Larger gap-10 between product-level blocks (top banner,
+                        bottom feedback) and the lesson content zone; gap-6
+                        within the content zone. */}
+                    <div className="mx-auto flex w-full max-w-[800px] flex-col gap-10 px-8 pt-10">
+                      {lesson.topBlocks?.length ? (
+                        <BlockList blocks={lesson.topBlocks} />
+                      ) : null}
+                      <div className="flex flex-col gap-8">
+                        <div className="flex flex-col gap-4">
+                          <div className="flex flex-col gap-1">
+                            <p className="leland-paragraph-base text-leland-gray-light">
+                              Lesson {lessonIdx + 1}
+                            </p>
+                            <h1 className="text-heading-4xl md:text-heading-5xl font-season font-normal text-leland-gray-dark">
+                              {section.title}
+                            </h1>
+                          </div>
+                          {section.description ? (
+                            <p className="leland-paragraph-lg text-leland-gray-light">
+                              {section.description}
+                            </p>
+                          ) : null}
+                          <div className="flex flex-wrap items-center gap-2">
+                            {section.meta?.minsTotal ? (
+                              <Tag
+                                text={`${section.meta.minsTotal} mins total`}
+                                tagColor={TagColor.GRAY}
+                                size={TagSize.SMALL}
+                                LeftIcon={IconClock}
+                              />
+                            ) : section.durationMin ? (
+                              <Tag
+                                text={`${section.durationMin} min`}
+                                tagColor={TagColor.GRAY}
+                                size={TagSize.SMALL}
+                                LeftIcon={IconClock}
+                              />
+                            ) : null}
+                            {section.meta?.builds ? (
+                              <Tag
+                                text={`${section.meta.builds} builds`}
+                                tagColor={TagColor.GRAY}
+                                size={TagSize.SMALL}
+                                LeftIcon={IconLightning}
+                              />
+                            ) : null}
+                            {section.meta?.model ? (
+                              <Tag
+                                text={section.meta.model}
+                                tagColor={TagColor.GRAY}
+                                size={TagSize.SMALL}
+                                LeftIcon={IconLightning}
+                              />
+                            ) : null}
+                          </div>
+                        </div>
+                        <BlockList blocks={section.blocks} />
+                      </div>
+                      <LessonFooterActions />
+                    </div>
+                  </LessonPageProvider>
+                </div>
+              ) : section.kind === 'html' ? (
+                <div className="min-h-0 flex-1 overflow-y-auto bg-white">
+                  <div className="mx-auto w-full max-w-[800px] pt-10 pb-6">
+                    <div className="overflow-hidden rounded-2xl border border-leland-gray-stroke">
+                      <SectionContent
+                        key={`${lesson.id}/${section.id}`}
+                        section={section}
+                      />
+                    </div>
+                  </div>
+                  <div className="mx-auto max-w-[800px] pb-10">
+                    <button
+                      onClick={() => setFeedbackModalOpen(true)}
+                      className="flex w-full items-center gap-4 rounded-xl border border-leland-gray-stroke bg-white px-5 py-4 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                    >
+                      <IconStar className="size-5 shrink-0 text-leland-gray-dark" />
+                      <span className="flex-1 leland-heading-base font-semibold text-leland-gray-dark">Share feedback</span>
+                      <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="relative min-h-0 flex-1 overflow-hidden">
+                    <SectionContent
+                      key={`${lesson.id}/${section.id}`}
+                      section={section}
+                    />
+                  </div>
+                  <div className="bg-white">
+                    <div className="mx-auto max-w-[800px] pb-10 pt-4">
+                      <button
+                        onClick={() => setFeedbackModalOpen(true)}
+                        className="flex w-full items-center gap-4 rounded-xl border border-leland-gray-stroke bg-white px-5 py-4 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                      >
+                        <IconStar className="size-5 shrink-0 text-leland-gray-dark" />
+                        <span className="flex-1 leland-heading-base font-semibold text-leland-gray-dark">Share feedback</span>
+                        <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+              <CourseFeedbackModal
+                open={feedbackModalOpen}
+                onOpenChange={setFeedbackModalOpen}
+                currentEntryId={section.id}
+                entries={lesson.sections}
+              />
               <CourseViewerSectionNav
                 prevSectionLink={
                   prevSection ? sectionUrl(lesson, prevSection) : null
@@ -880,6 +1892,27 @@ export default function ContentViewer() {
           )}
         </div>
       </div>
+
+      {/* Floating prototype options button — bottom-left corner */}
+      <button
+        onClick={() => setPrototypeOptionsOpen(true)}
+        aria-label="Prototype options"
+        className="fixed bottom-4 left-4 z-50 flex items-center justify-center rounded-full border border-leland-gray-stroke bg-white p-2.5 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+      >
+        <IconDotsHorizontal className="size-4 text-leland-gray-light" />
+      </button>
+      <PrototypeOptionsModal
+        open={prototypeOptionsOpen}
+        onOpenChange={setPrototypeOptionsOpen}
+        options={options}
+        onToggle={toggleOption}
+        onSetVariant={(variant) => setOption("liveSessionVariant", variant)}
+      />
+      <SelectCohortModal
+        open={cohortModalOpen}
+        onClose={() => setCohortModalOpen(false)}
+        onSelect={() => setCohortModalOpen(false)}
+      />
     </div>
   );
 }

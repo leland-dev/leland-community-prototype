@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import PageShell from "../components/PageShell";
@@ -58,7 +58,7 @@ interface GroupData {
 
 // ─── Group data ───────────────────────────────────────
 
-const GROUPS: Record<string, GroupData> = {
+export const GROUPS: Record<string, GroupData> = {
   "ai-bootcamp-apr-2026": {
     name: "AI Boot Camp",
     cohortLabel: "April 21 – May 16, 2026 · Cohort 4",
@@ -393,7 +393,7 @@ const GROUP_POSTS: Record<string, Post[]> = {
 
 // ─── Members ──────────────────────────────────────────
 
-const COHORT_MEMBERS: { name: string; avatar: string; headline: string; role: "self" | "coach" | "member" }[] = [
+export const COHORT_MEMBERS: { name: string; avatar: string; headline: string; role: "self" | "coach" | "member" }[] = [
   { name: "You", avatar: profilePhoto, headline: "Product Manager", role: "self" },
   { name: "David Kim", avatar: pic4, headline: "MBA Admissions Consultant", role: "coach" },
   { name: "Sarah Chen", avatar: pic3, headline: "Product Manager", role: "member" },
@@ -720,6 +720,11 @@ export default function Group() {
   const { groupId = "ai-bootcamp-apr-2026" } = useParams<{ groupId: string }>();
   const group = GROUPS[groupId];
   const posts = GROUP_POSTS[groupId] ?? [];
+  // Embed mode (?embed=1): the host surface (course viewer) shows the group
+  // identity in its own sidebar, so we drop this page's header and pin the tab
+  // bar to the top instead of the scroll-triggered floating nav.
+  const isEmbed =
+    new URLSearchParams(useLocation().search).get("embed") === "1";
 
   const [activeTab, setActiveTab] = useState<Tab>("activity");
   const [isJoined, setIsJoined] = useState(true);
@@ -756,8 +761,9 @@ export default function Group() {
 
   return (
     <>
-      {/* Sticky tab nav — portaled to body */}
-      {createPortal(
+      {/* Sticky tab nav — portaled to body. Skipped in embed mode, where the
+          inline tab bar is pinned to the top instead. */}
+      {!isEmbed && createPortal(
         <AnimatePresence>
           {stickyNavVisible && (
             <motion.div
@@ -792,54 +798,66 @@ export default function Group() {
         document.body,
       )}
 
-      <PageShell rightSidebar={isMobile ? undefined : <GroupRightSidebar group={group} />}>
-        {/* Group icon + CTA row — mirrors coach profile "no header" layout */}
-        <div className="mb-4 flex items-start justify-between">
-          <div
-            className="flex h-[88px] w-[88px] md:h-[132px] md:w-[132px] shrink-0 items-center justify-center rounded-lg text-white text-[30px] md:text-[46px] font-bold"
-            style={{ backgroundColor: group.accentColor }}
-          >
-            {group.name.charAt(0)}
-          </div>
-          <div className="flex items-center pb-1">
-            <button
-              onClick={() => setIsJoined(!isJoined)}
-              className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[13px] md:text-[14px] font-medium transition-colors ${
-                isJoined
-                  ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
-                  : "bg-[#FFD96F] text-[#222222] hover:bg-[#FFD96F]/90"
-              }`}
-            >
-              {isJoined && <CheckIcon />}
-              {isJoined ? "Joined" : "Request to join"}
-            </button>
-          </div>
-        </div>
+      <PageShell rightSidebar={isMobile || isEmbed ? undefined : <GroupRightSidebar group={group} />}>
+        {!isEmbed && (
+          <>
+            {/* Group icon + CTA row — mirrors coach profile "no header" layout */}
+            <div className="mb-4 flex items-start justify-between">
+              <div
+                className="flex h-[88px] w-[88px] md:h-[132px] md:w-[132px] shrink-0 items-center justify-center rounded-lg text-white text-[30px] md:text-[46px] font-bold"
+                style={{ backgroundColor: group.accentColor }}
+              >
+                {group.name.charAt(0)}
+              </div>
+              <div className="flex items-center pb-1">
+                <button
+                  onClick={() => setIsJoined(!isJoined)}
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-[13px] md:text-[14px] font-medium transition-colors ${
+                    isJoined
+                      ? "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/[0.08]"
+                      : "bg-[#FFD96F] text-[#222222] hover:bg-[#FFD96F]/90"
+                  }`}
+                >
+                  {isJoined && <CheckIcon />}
+                  {isJoined ? "Joined" : "Request to join"}
+                </button>
+              </div>
+            </div>
 
-        {/* Group name + tagline */}
-        <h1 className="text-[20px] md:text-[22px] font-medium leading-tight text-gray-dark">{group.name}</h1>
-        <p className="mt-1 mb-[6px] text-[14px] md:text-[16px] leading-[1.3] text-[#707070]">{group.tagline}</p>
+            {/* Group name + tagline */}
+            <h1 className="text-[20px] md:text-[22px] font-medium leading-tight text-gray-dark">{group.name}</h1>
+            <p className="mt-1 mb-[6px] text-[14px] md:text-[16px] leading-[1.3] text-[#707070]">{group.tagline}</p>
 
-        {/* Face pile + stats */}
-        <div className="mt-3 flex items-center gap-2.5 text-[14px] text-[#707070]">
-          <div className="flex -space-x-1.5">
-            {COHORT_MEMBERS.slice(0, 4).map((m) => (
-              <img
-                key={m.name}
-                src={m.avatar}
-                alt=""
-                className="h-8 w-8 rounded-full border-2 border-white object-cover"
-              />
-            ))}
-          </div>
-          <span>{group.memberCount.toLocaleString()} members</span>
-        </div>
+            {/* Face pile + stats */}
+            <div className="mt-3 flex items-center gap-2.5 text-[14px] text-[#707070]">
+              <div className="flex -space-x-1.5">
+                {COHORT_MEMBERS.slice(0, 4).map((m) => (
+                  <img
+                    key={m.name}
+                    src={m.avatar}
+                    alt=""
+                    className="h-8 w-8 rounded-full border-2 border-white object-cover"
+                  />
+                ))}
+              </div>
+              <span>{group.memberCount.toLocaleString()} members</span>
+            </div>
 
-        {/* Sentinel for sticky nav */}
-        <div ref={heroSentinelRef} />
+            {/* Sentinel for sticky nav */}
+            <div ref={heroSentinelRef} />
+          </>
+        )}
 
-        {/* Tab bar */}
-        <div className="mt-2 md:mt-4 flex gap-1 border-b border-[#E5E5E5]">
+        {/* Embed mode has no sidebars, so cap + center the content column. */}
+        <div className={isEmbed ? "mx-auto w-full max-w-[800px]" : "w-full"}>
+        {/* Tab bar. In embed mode it pins to the top of the scroll area. */}
+        <div
+          className={`flex gap-1 border-b border-[#E5E5E5] ${
+            isEmbed
+              ? "sticky top-0 z-20 -mt-4 bg-white pt-2 sm:-mt-10 sm:pt-4"
+              : "mt-2 md:mt-4"
+          }`}
+        >
           {visibleTabs.map((tab) => (
             <button
               key={tab.id}
@@ -865,6 +883,7 @@ export default function Group() {
             {activeTab === "other" && <HelpfulLinksList group={group} />}
           </>
         )}
+        </div>
       </PageShell>
     </>
   );
