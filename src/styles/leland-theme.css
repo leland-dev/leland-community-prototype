@@ -165,7 +165,7 @@
 @utility leland-paragraph-base { @apply text-paragraph-base font-normal; }
 @utility leland-paragraph-lg { @apply text-paragraph-lg font-normal; }
 @utility leland-paragraph-xl { @apply text-paragraph-xl font-normal; }
-@utility leland-eyebrow { @apply text-eyebrow font-normal uppercase; }
+@utility leland-eyebrow { @apply text-eyebrow font-medium uppercase; }
 
 /* ── Text links (brand-tokens.css) ─────────────────────────────────────── */
 :is(.link, .link--primary, .link--neutral) {

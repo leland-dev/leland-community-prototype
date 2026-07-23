@@ -84,9 +84,14 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   // Post detail and the profile template are their own surfaces: they hide the
   // shared mobile top nav and render their own nav inside the sliding page, so
   // the mobile top padding (which normally clears the shared nav) is dropped.
-  const pathname = useLocation().pathname;
+  const location = useLocation();
+  const pathname = location.pathname;
   const isPostDetail = pathname.startsWith("/post/");
   const isOwnSurface = isPostDetail || pathname.startsWith("/profile/");
+  // Embed mode (?embed=1): strip the global nav chrome so the page renders as
+  // bare content — used when a page is loaded inside another surface (e.g. the
+  // course viewer's Community tab iframes this route).
+  const isEmbed = new URLSearchParams(location.search).get("embed") === "1";
 
   // Keep height/overflow constrained while the close animation plays out,
   // so the content doesn't snap to full height mid-transition.
@@ -198,9 +203,11 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
 
         {/* Mobile top nav */}
-        <div className="md:hidden">
-          <MobileTopNav />
-        </div>
+        {!isEmbed && (
+          <div className="md:hidden">
+            <MobileTopNav />
+          </div>
+        )}
 
         {/* Desktop/Tablet top nav.
             sticky must live on the wrapper, not on <header> inside TopNav —
@@ -208,12 +215,14 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
             element room to scroll within. When sticky lived on <header>, its
             immediate parent (this same wrapper) was already collapsed to the
             header's height, so there was no scroll room and it never stuck. */}
-        <div className="sticky top-0 z-30 hidden md:block">
-          <TopNav />
-        </div>
+        {!isEmbed && (
+          <div className="sticky top-0 z-30 hidden md:block">
+            <TopNav />
+          </div>
+        )}
 
         {/* Sub-nav */}
-        {subNav && showSubNav && (
+        {!isEmbed && subNav && showSubNav && (
           <div className="hidden bg-gray-hover md:block">
             <div className="relative mx-auto max-w-[1280px] px-6">
               {/* Left arrow */}
@@ -258,7 +267,13 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Main content area */}
-        <main className={`relative z-0 pb-20 md:pt-0 md:pb-0 ${isOwnSurface ? "pt-0" : "pt-14"}`}>
+        <main
+          className={`relative z-0 md:pt-0 ${
+            isEmbed
+              ? "pt-0 pb-0"
+              : `pb-20 md:pb-0 ${isOwnSurface ? "pt-0" : "pt-14"}`
+          }`}
+        >
           {children}
         </main>
 
@@ -269,9 +284,11 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
         <div id="saved-toast-root" />
 
         {/* Mobile bottom nav */}
-        <div className="md:hidden">
-          <BottomNav />
-        </div>
+        {!isEmbed && (
+          <div className="md:hidden">
+            <BottomNav />
+          </div>
+        )}
       </div>
     </div>
   );
