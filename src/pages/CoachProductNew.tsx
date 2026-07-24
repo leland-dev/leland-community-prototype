@@ -14,6 +14,8 @@ import moneyIcon from "../assets/icons/money.svg";
 import browseIcon from "../assets/icons/nav-icons/browse-inactive.svg";
 import storeIcon from "../assets/icons/store.svg";
 import freeIcon from "../assets/icons/free.svg";
+import eyeIcon from "../assets/icons/eye.svg";
+import eyeClosedIcon from "../assets/icons/eye-closed.svg";
 import coverImage9 from "../assets/img/cover-images/cover-image-9.png";
 import samanthaPhoto from "../assets/profile photos/pic-6.png";
 import labelTagIcon from "../assets/icons/label-tag.svg";
@@ -335,7 +337,7 @@ function CheckBox({ checked, onChange, label }: { checked: boolean; onChange: ()
 }
 
 // Custom select — a trigger with a chevron and a menu that opens below.
-function Select({ value, onChange, options, className = "" }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[]; className?: string }) {
+function Select({ value, onChange, options, className = "", triggerClassName = "py-2.5 pl-3.5 pr-3 text-[14px]" }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[]; className?: string; triggerClassName?: string }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   // Menu is portaled to the body so it isn't clipped by any overflow-hidden
@@ -356,7 +358,7 @@ function Select({ value, onChange, options, className = "" }: { value: string; o
         ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-stroke bg-white py-2.5 pl-3.5 pr-3 text-left text-[14px] text-gray-dark transition-colors hover:border-[#c9c9c9]"
+        className={`flex w-full items-center justify-between gap-2 rounded-lg border border-gray-stroke bg-white text-left text-gray-dark transition-colors hover:border-[#c9c9c9] ${triggerClassName}`}
       >
         <span className="truncate">{selected?.label ?? value}</span>
         <svg className={`h-4 w-4 shrink-0 text-gray-light transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
@@ -641,9 +643,13 @@ function ProductStep({
 
       <div className="border-t border-gray-stroke" />
 
-      <Collapsible title="Offering settings" subtitle="URL, taxes, affiliates, and more.">
-        <ProductSettings buttonText={buttonText} setButtonText={setButtonText} mvp={mvp} />
-      </Collapsible>
+      <section>
+        <h2 className="text-[22px] font-semibold text-gray-dark">Visibility</h2>
+        <p className="mt-0.5 text-[15px] text-gray-light">Control who can discover this offering and how it appears on your profile.</p>
+        <div className="mt-5">
+          <ProductSettings buttonText={buttonText} setButtonText={setButtonText} mvp={mvp} />
+        </div>
+      </section>
     </div>
   );
 }
@@ -756,12 +762,34 @@ function PaidPricingCard({ paidType, setPaidType, price, setPrice }: { paidType:
 
 function ProductSettings({ buttonText, setButtonText, mvp }: { buttonText: string; setButtonText: (v: string) => void; mvp: boolean }) {
   const [affiliate, setAffiliate] = useState(false);
-  const [storeVisible, setStoreVisible] = useState(true);
+  const [visibility, setVisibility] = useState<"public" | "private">("public");
 
   const inputClass = "w-full rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[14px] text-gray-dark outline-none placeholder:text-[#B1B1B1] focus:border-gray-dark";
 
+  const visibilityOptions = [
+    { key: "public" as const, label: "Public", desc: "Visible to everyone", icon: eyeIcon },
+    { key: "private" as const, label: "Private", desc: "Only reachable with a direct link", icon: eyeClosedIcon },
+  ];
+
   return (
     <div className="flex flex-col gap-5">
+      <div className="grid grid-cols-2 gap-3">
+        {visibilityOptions.map((opt) => {
+          const active = visibility === opt.key;
+          return (
+            <button
+              key={opt.key}
+              onClick={() => setVisibility(opt.key)}
+              className={`flex flex-col items-center rounded-xl px-4 py-6 text-center transition-colors ${active ? "border-[1.5px] border-gray-dark" : "border border-gray-stroke hover:border-[#c9c9c9]"}`}
+            >
+              <MaskIcon src={opt.icon} className={`h-7 w-7 ${active ? "text-gray-dark" : "text-gray-extra-light"}`} />
+              <span className="mt-3 text-[16px] font-semibold text-gray-dark">{opt.label}</span>
+              <span className="mt-1 text-[14px] leading-snug text-gray-light">{opt.desc}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {!mvp && (
         <div>
           <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Stock</label>
@@ -776,13 +804,19 @@ function ProductSettings({ buttonText, setButtonText, mvp }: { buttonText: strin
         <Select
           value={buttonText}
           onChange={setButtonText}
+          triggerClassName="px-4 py-3 text-[15px]"
           options={["Purchase", "Join", "Join now", "Get access", "Subscribe", "Buy now"].map((v) => ({ value: v, label: v }))}
         />
       </div>
 
       <div>
         <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Offering URL</label>
-        <input defaultValue="leland.com/samantha-parker/new-offering" className={inputClass} />
+        <div className="flex items-stretch overflow-hidden rounded-lg border border-gray-stroke bg-white transition-colors focus-within:border-gray-dark">
+          <span className="flex select-none items-center whitespace-nowrap border-r border-gray-stroke bg-[#F5F5F5] px-4 text-[15px] text-gray-light">
+            leland.com/samantha-parker/
+          </span>
+          <input defaultValue="new-offering" className="w-full min-w-0 bg-transparent px-4 py-3 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1]" />
+        </div>
       </div>
 
       {!mvp && (
@@ -799,11 +833,6 @@ function ProductSettings({ buttonText, setButtonText, mvp }: { buttonText: strin
           )}
         </div>
       )}
-
-      <div className="flex items-center justify-between">
-        <span className="text-[14px] font-medium text-gray-dark">Visible on your store page</span>
-        <Toggle checked={storeVisible} onChange={() => setStoreVisible((v) => !v)} />
-      </div>
     </div>
   );
 }
@@ -866,8 +895,10 @@ function AskQuestions() {
 
 function OfferingsStep({ added, onAdd, onRemove, onConfigChange, onItemsChange, onConfigured, mvp }: { added: OfferingItem[]; onAdd: (slug: string) => void; onRemove: (id: number) => void; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; mvp: boolean }) {
   // One of each: an offering leaves the "Add" grid once it's been added.
-  // When MVP is on, hide the not-yet-built Agent / Private group options.
-  const available = offeringTypes.filter((o) => !added.some((a) => a.slug === o.slug) && (!mvp || (o.slug !== "agent" && o.slug !== "membership")));
+  // When MVP is on, hide the not-yet-built Agent / Private group / Paid
+  // Livestream options.
+  const mvpHidden = ["agent", "membership", "paid-livestream"];
+  const available = offeringTypes.filter((o) => !added.some((a) => a.slug === o.slug) && (!mvp || !mvpHidden.includes(o.slug)));
   const [configuringId, setConfiguringId] = useState<number | null>(null);
   const configuring = added.find((item) => item.id === configuringId) ?? null;
 
