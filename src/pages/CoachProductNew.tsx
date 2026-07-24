@@ -30,8 +30,8 @@ import starIcon from "../assets/icons/star-icon.svg";
 type StepKey = "product" | "offerings" | "page";
 
 const STEPS: { key: StepKey; label: string; icon: string }[] = [
-  { key: "product", label: "Product", icon: moneyIcon },
-  { key: "offerings", label: "Offerings", icon: browseIcon },
+  { key: "product", label: "Offering", icon: moneyIcon },
+  { key: "offerings", label: "Products", icon: browseIcon },
   { key: "page", label: "Page", icon: storeIcon },
 ];
 
@@ -434,7 +434,7 @@ export default function CoachProductNew() {
   }, [adminOpen]);
 
   useEffect(() => {
-    document.title = "Leland Prototype | Add product";
+    document.title = "Leland Prototype | Add offering";
   }, []);
 
   const stepIndex = STEPS.findIndex((s) => s.key === step);
@@ -465,7 +465,7 @@ export default function CoachProductNew() {
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           </Button>
-          <span className="hidden text-[15px] font-semibold text-gray-dark sm:inline">Add product</span>
+          <span className="hidden text-[15px] font-semibold text-gray-dark sm:inline">Add offering</span>
         </div>
 
         {/* Breadcrumb — click a step to jump to it */}
@@ -601,11 +601,11 @@ function ProductStep({
   return (
     <div className="flex flex-col gap-8">
       <section>
-        <h2 className="text-[22px] font-semibold text-gray-dark">Product details</h2>
-        <p className="mt-0.5 text-[15px] text-gray-light">Describe your product offering.</p>
+        <h2 className="text-[22px] font-semibold text-gray-dark">Offering details</h2>
+        <p className="mt-0.5 text-[15px] text-gray-light">Describe your offering.</p>
         <div className="mt-5 flex flex-col gap-5">
-          <CharField label="Name" required value={name} onChange={setName} placeholder="My product name" max={80} />
-          <CharField label="Headline" value={headline} onChange={setHeadline} placeholder="A short subheadline for my product here." max={80} />
+          <CharField label="Name" required value={name} onChange={setName} placeholder="My offering name" max={80} />
+          <CharField label="Headline" value={headline} onChange={setHeadline} placeholder="A short subheadline for my offering here." max={80} />
         </div>
       </section>
 
@@ -613,7 +613,7 @@ function ProductStep({
 
       <section>
         <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
-        <p className="mt-0.5 text-[15px] text-gray-light">Choose how people access this product.</p>
+        <p className="mt-0.5 text-[15px] text-gray-light">Choose how people access this offering.</p>
 
         <div className="mt-5 grid grid-cols-2 gap-3">
           {pricingOptions.map((opt) => {
@@ -641,7 +641,7 @@ function ProductStep({
 
       <div className="border-t border-gray-stroke" />
 
-      <Collapsible title="Product settings" subtitle="URL, taxes, affiliates, and more.">
+      <Collapsible title="Offering settings" subtitle="URL, taxes, affiliates, and more.">
         <ProductSettings buttonText={buttonText} setButtonText={setButtonText} mvp={mvp} />
       </Collapsible>
     </div>
@@ -781,8 +781,8 @@ function ProductSettings({ buttonText, setButtonText, mvp }: { buttonText: strin
       </div>
 
       <div>
-        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Product URL</label>
-        <input defaultValue="leland.com/samantha-parker/new-product" className={inputClass} />
+        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Offering URL</label>
+        <input defaultValue="leland.com/samantha-parker/new-offering" className={inputClass} />
       </div>
 
       {!mvp && (
@@ -873,8 +873,8 @@ function OfferingsStep({ added, onAdd, onRemove, onConfigChange, onItemsChange, 
 
   return (
     <div>
-      <h2 className="text-[22px] font-semibold text-gray-dark">Included offerings</h2>
-      <p className="mt-0.5 text-[15px] text-gray-light">Choose the offerings you want to include with this product.</p>
+      <h2 className="text-[22px] font-semibold text-gray-dark">Included products</h2>
+      <p className="mt-0.5 text-[15px] text-gray-light">Choose the products you want to include with this offering.</p>
 
       {/* Animated top gap for the added list (collapses smoothly when empty). */}
       <AnimatePresence initial={false}>
@@ -905,7 +905,7 @@ function OfferingsStep({ added, onAdd, onRemove, onConfigChange, onItemsChange, 
       </div>
 
       {available.length > 0 && (
-        <p className="mb-2 mt-8 text-[14px] font-medium text-gray-light">Add offering</p>
+        <p className="mb-2 mt-8 text-[14px] font-medium text-gray-light">Add product</p>
       )}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* popLayout pops an added card out of flow so the rest reflow to fill. */}
@@ -1056,7 +1056,7 @@ function ConfigModal({ item, onChange, onSave, onClose }: { item: OfferingItem |
             {/* Actions */}
             <div className="px-7 pb-7 pt-4">
               <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" disabled={!complete} onClick={onSave}>
-                Save offering
+                Save product
               </Button>
             </div>
           </motion.div>
@@ -1073,7 +1073,7 @@ function OfferingConfigFields({ slug, config, onChange }: { slug: string; config
   if (slug === "coaching-time") return <CoachingTimeFields config={config} onChange={onChange} />;
   if (slug === "content") return <ContentFields config={config} onChange={onChange} />;
   if (slug === "paid-livestream") return <PaidLivestreamFields config={config} onChange={onChange} />;
-  return <PlaceholderFields label={offeringBySlug[slug]?.label ?? "This offering"} />;
+  return <PlaceholderFields label={offeringBySlug[slug]?.label ?? "This product"} />;
 }
 
 /* ---------- Paid livestream config ---------- */
@@ -1156,7 +1156,7 @@ function PlaceholderFields({ label }: { label: string }) {
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.07-7.07-1.41 1.41M6.34 17.66l-1.41 1.41m12.14 0-1.41-1.41M6.34 6.34 4.93 4.93" /><circle cx="12" cy="12" r="4" /></svg>
       </span>
       <p className="mt-4 text-[16px] font-semibold text-gray-dark">{label} setup is coming soon</p>
-      <p className="mt-1.5 text-[14px] leading-snug text-gray-light">We're still designing the configuration for this offering. For now you can add it to your product as a placeholder.</p>
+      <p className="mt-1.5 text-[14px] leading-snug text-gray-light">We're still designing the configuration for this product. For now you can add it to your offering as a placeholder.</p>
     </div>
   );
 }
@@ -1704,7 +1704,7 @@ function PageStep({ name, headline, pricingMode, paidType, price, description, s
   return (
     <div>
       <h2 className="text-[22px] font-semibold text-gray-dark">Page</h2>
-      <p className="mt-0.5 text-[15px] text-gray-light">Configure the customer-facing page for this product.</p>
+      <p className="mt-0.5 text-[15px] text-gray-light">Configure the customer-facing page for this offering.</p>
 
       {/* Media dropzone */}
       <div className="mt-5 flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-2xl bg-[#F5F5F5] text-center">
@@ -1734,7 +1734,7 @@ function PageStep({ name, headline, pricingMode, paidType, price, description, s
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         rows={6}
-        placeholder="Describe what customers get with this product…"
+        placeholder="Describe what customers get with this offering…"
         className="mt-3 w-full resize-none rounded-xl border border-gray-stroke bg-white px-3.5 py-3 text-[15px] leading-relaxed text-gray-dark outline-none placeholder:text-[#B1B1B1] focus:border-gray-dark"
       />
 
@@ -1772,7 +1772,7 @@ function ProductPreview({ name, headline, pricingMode, paidType, price, added, j
     <div className="overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_1px_3px_rgba(16,24,40,0.06)]">
       <img src={coverImage9} alt="" className="aspect-[1200/630] w-full object-cover opacity-25" />
       <div className="p-4">
-        <p className="text-[17px] font-semibold leading-tight text-gray-dark">{name || "Product name"}</p>
+        <p className="text-[17px] font-semibold leading-tight text-gray-dark">{name || "Offering name"}</p>
         {headline ? (
           <p className="mt-1 text-[15px] leading-snug text-gray-light">{headline}</p>
         ) : (
