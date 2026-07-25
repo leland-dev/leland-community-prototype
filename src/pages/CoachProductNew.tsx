@@ -18,6 +18,11 @@ import eyeIcon from "../assets/icons/eye.svg";
 import eyeClosedIcon from "../assets/icons/eye-closed.svg";
 import coverImage9 from "../assets/img/cover-images/cover-image-9.png";
 import samanthaPhoto from "../assets/profile photos/pic-6.png";
+import reviewPhoto1 from "../assets/profile photos/pic-1.png";
+import reviewPhoto2 from "../assets/profile photos/pic-2.png";
+import reviewPhoto3 from "../assets/profile photos/pic-3.png";
+import reviewPhoto4 from "../assets/profile photos/pic-4.png";
+import reviewPhoto5 from "../assets/profile photos/pic-7.png";
 import labelTagIcon from "../assets/icons/label-tag.svg";
 import uploadIcon from "../assets/icons/upload.svg";
 import attachIcon from "../assets/icons/attach.svg";
@@ -70,13 +75,49 @@ const offeringTypes = [
 ];
 const offeringBySlug = Object.fromEntries(offeringTypes.map((o) => [o.slug, o]));
 
-// Section types a coach can add to the customer-facing product page.
-const pageSectionTypes = [
-  { label: "Text Section", icon: textIcon },
-  { label: "FAQs Section", icon: helpIcon },
-  { label: "Image Section", icon: photoIcon },
-  { label: "Video Section", icon: videoIcon },
-  { label: "Reviews Section", icon: starIcon },
+// The kinds of section a coach can add to the customer-facing page.
+type PageSectionKind = "text" | "faqs" | "image" | "video" | "reviews";
+
+// A single Q&A pair inside a FAQs section.
+type FaqItem = { id: number; question: string; answer: string };
+
+// A configured page section. Each kind carries its own content shape; the
+// discriminant `kind` narrows to the right fields.
+type PageSection =
+  | { id: number; kind: "text"; heading: string; body: string }
+  | { id: number; kind: "faqs"; heading: string; faqs: FaqItem[] }
+  | { id: number; kind: "image"; heading: string; fileName: string }
+  | { id: number; kind: "video"; heading: string; fileName: string }
+  | { id: number; kind: "reviews"; heading: string; slots: (number | null)[] };
+
+// Section types a coach can add to the customer-facing page. `kind` maps to the
+// PageSection built when the button is clicked.
+const pageSectionTypes: { kind: PageSectionKind; label: string; icon: string }[] = [
+  { kind: "text", label: "Text Section", icon: textIcon },
+  { kind: "faqs", label: "FAQs Section", icon: helpIcon },
+  { kind: "image", label: "Image Section", icon: photoIcon },
+  { kind: "video", label: "Video Section", icon: videoIcon },
+  { kind: "reviews", label: "Reviews Section", icon: starIcon },
+];
+
+// A blank section of the given kind, ready to edit.
+function newPageSection(kind: PageSectionKind, id: number): PageSection {
+  switch (kind) {
+    case "text": return { id, kind, heading: "", body: "" };
+    case "faqs": return { id, kind, heading: "", faqs: [{ id: 1, question: "", answer: "" }] };
+    case "image": return { id, kind, heading: "", fileName: "" };
+    case "video": return { id, kind, heading: "", fileName: "" };
+    case "reviews": return { id, kind, heading: "", slots: [null, null, null] };
+  }
+}
+
+// The coach's existing reviews, offered up when featuring reviews on the page.
+const existingReviews: { id: number; name: string; photo: string; rating: number; text: string }[] = [
+  { id: 1, name: "Jordan Reyes", photo: reviewPhoto1, rating: 5, text: "Samantha completely reshaped my application strategy. I got into my top-choice M7 program." },
+  { id: 2, name: "Priya Natarajan", photo: reviewPhoto2, rating: 5, text: "The mock interviews were incredibly realistic. I walked into every real interview feeling calm and prepared." },
+  { id: 3, name: "Marcus Webb", photo: reviewPhoto3, rating: 5, text: "Clear, direct feedback on my essays. She helped me find the story I didn't know I had." },
+  { id: 4, name: "Elena Fischer", photo: reviewPhoto4, rating: 4, text: "Great structure and accountability throughout the process. Highly recommend for anyone applying." },
+  { id: 5, name: "David Okafor", photo: reviewPhoto5, rating: 5, text: "Worth every penny — the coaching went far beyond admissions into real career guidance." },
 ];
 
 // A course section — placeholder builder for now (just a name).
@@ -422,7 +463,9 @@ export default function CoachProductNew() {
   const [added, setAdded] = useState<OfferingItem[]>([]);
   const [description, setDescription] = useState("");
   const [buttonText, setButtonText] = useState("Purchase");
+  const [sections, setSections] = useState<PageSection[]>([]);
   const nextOfferingId = useRef(0);
+  const nextSectionId = useRef(0);
 
   // Admin tool — MVP on shows the full feature set; off hides not-yet-built bits.
   const [mvp, setMvp] = useState(true);
@@ -456,6 +499,21 @@ export default function CoachProductNew() {
     setAdded((a) => a.map((item) => (item.id === id ? { ...item, items } : item)));
   const markOfferingConfigured = (id: number) =>
     setAdded((a) => a.map((item) => (item.id === id ? { ...item, configured: true } : item)));
+
+  // Page sections (step 3). New sections append to the end; reorder swaps with a
+  // neighbor so "move up/down" stays a single-step nudge.
+  const addSection = (kind: PageSectionKind) => setSections((s) => [...s, newPageSection(kind, nextSectionId.current++)]);
+  const removeSection = (id: number) => setSections((s) => s.filter((sec) => sec.id !== id));
+  const updateSection = (next: PageSection) => setSections((s) => s.map((sec) => (sec.id === next.id ? next : sec)));
+  const moveSection = (id: number, dir: -1 | 1) =>
+    setSections((s) => {
+      const i = s.findIndex((sec) => sec.id === id);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= s.length) return s;
+      const next = [...s];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
 
   return (
     <div className="min-h-screen bg-white">
@@ -528,6 +586,11 @@ export default function CoachProductNew() {
                     price={price}
                     description={description}
                     setDescription={setDescription}
+                    sections={sections}
+                    onAddSection={addSection}
+                    onUpdateSection={updateSection}
+                    onRemoveSection={removeSection}
+                    onMoveSection={moveSection}
                   />
                 )}
               </motion.div>
@@ -904,7 +967,7 @@ function OfferingsStep({ added, onAdd, onRemove, onConfigChange, onItemsChange, 
 
   return (
     <div>
-      <h2 className="text-[22px] font-semibold text-gray-dark">Included products</h2>
+      <h2 className="text-[22px] font-semibold text-gray-dark">Add products to this offering</h2>
       <p className="mt-0.5 text-[15px] text-gray-light">Choose the products you want to include with this offering.</p>
 
       {/* Animated top gap for the added list (collapses smoothly when empty). */}
@@ -1586,12 +1649,12 @@ function ToggleRow({ label, desc, checked, onChange, className = "" }: { label: 
 
 // Click-to-pick file control. No real upload — captures the chosen file's name
 // so the prototype can reflect a "finished" state.
-function UploadField({ value, onChange, hint }: { value: string; onChange: (name: string) => void; hint: string }) {
+function UploadField({ value, onChange, hint, label = "Upload a file" }: { value: string; onChange: (name: string) => void; hint: string; label?: string }) {
   return (
     <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-stroke bg-[#FAFAFA] px-4 py-6 text-center transition-colors hover:border-[#c9c9c9]">
       <input type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onChange(f.name); }} />
       <MaskIcon src={uploadIcon} className={`h-6 w-6 ${value ? "text-gray-dark" : "text-gray-light"}`} />
-      <span className="text-[15px] font-medium text-gray-dark">{value || "Upload a file"}</span>
+      <span className="text-[15px] font-medium text-gray-dark">{value || label}</span>
       <span className="text-[13px] text-gray-light">{value ? "Click to replace" : hint}</span>
     </label>
   );
@@ -1731,7 +1794,18 @@ function CoachingTimeFields({ config, onChange }: { config: Record<string, strin
 
 /* ---------- Step 3: Customer-facing page ---------- */
 
-function PageStep({ name, headline, pricingMode, paidType, price, description, setDescription }: { name: string; headline: string; pricingMode: "free" | "paid"; paidType: "recurring" | "one-time"; price: string; description: string; setDescription: (v: string) => void }) {
+function PageStep({
+  name, headline, pricingMode, paidType, price, description, setDescription,
+  sections, onAddSection, onUpdateSection, onRemoveSection, onMoveSection,
+}: {
+  name: string; headline: string; pricingMode: "free" | "paid"; paidType: "recurring" | "one-time"; price: string;
+  description: string; setDescription: (v: string) => void;
+  sections: PageSection[];
+  onAddSection: (kind: PageSectionKind) => void;
+  onUpdateSection: (next: PageSection) => void;
+  onRemoveSection: (id: number) => void;
+  onMoveSection: (id: number, dir: -1 | 1) => void;
+}) {
   return (
     <div>
       <h2 className="text-[22px] font-semibold text-gray-dark">Page</h2>
@@ -1743,6 +1817,12 @@ function PageStep({ name, headline, pricingMode, paidType, price, description, s
         <p className="text-[15px] font-semibold text-gray-dark">Add a video or photo</p>
         <p className="text-[14px] text-gray-light">Pages with videos convert 4x better.</p>
       </div>
+
+      {/* Name + headline + description */}
+      <h3 className="mt-8 text-[28px] font-semibold leading-tight text-gray-dark">
+        {name || <span className="text-[#B1B1B1]">Your offering name here</span>}
+      </h3>
+      {headline && <p className="mt-2 text-[18px] font-normal leading-tight text-gray-extra-light">{headline}</p>}
 
       {/* Price + author bar */}
       <div className="mt-4 flex items-center rounded-xl border border-gray-stroke">
@@ -1757,10 +1837,6 @@ function PageStep({ name, headline, pricingMode, paidType, price, description, s
         </div>
       </div>
 
-      {/* Headline + description */}
-      <h3 className="mt-8 text-[28px] font-semibold leading-tight text-gray-dark">
-        {headline || <span className="text-[#B1B1B1]">Write a headline…</span>}
-      </h3>
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
@@ -1769,13 +1845,41 @@ function PageStep({ name, headline, pricingMode, paidType, price, description, s
         className="mt-3 w-full resize-none rounded-xl border border-gray-stroke bg-white px-3.5 py-3 text-[15px] leading-relaxed text-gray-dark outline-none placeholder:text-[#B1B1B1] focus:border-gray-dark"
       />
 
-      {/* Add section — same button style as the "Add offering" grid */}
+      {/* Added sections — reorderable, above the "Add section" picker */}
+      {sections.length > 0 && (
+        <div className="mt-8 flex flex-col">
+          <AnimatePresence initial={false} mode="popLayout">
+            {sections.map((sec, i) => (
+              <motion.div
+                key={sec.id}
+                layout
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
+              >
+                <PageSectionCard
+                  section={sec}
+                  index={i}
+                  total={sections.length}
+                  onChange={onUpdateSection}
+                  onRemove={() => onRemoveSection(sec.id)}
+                  onMove={(dir) => onMoveSection(sec.id, dir)}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Add section — same button style as the "Add product" grid */}
       <div className="mt-8 border-t border-gray-stroke pt-6">
         <p className="mb-2 text-[14px] font-medium text-gray-light">Add section</p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {pageSectionTypes.map((s) => (
             <button
               key={s.label}
+              onClick={() => onAddSection(s.kind)}
               className="group flex items-center justify-between rounded-xl bg-gray-hover px-3 py-2 text-left transition-colors hover:bg-[#ececec]"
             >
               <span className="flex items-center gap-2.5">
@@ -1791,8 +1895,240 @@ function PageStep({ name, headline, pricingMode, paidType, price, description, s
           ))}
         </div>
       </div>
-      <span className="sr-only">{name}</span>
     </div>
+  );
+}
+
+/* ---------- Page section card + editors ---------- */
+
+const chevronUpIcon = <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 15l-6-6-6 6" /></svg>;
+const chevronDownIcon = <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>;
+
+// Small round icon button used for the section reorder / remove controls.
+function IconBtn({ label, onClick, disabled, danger, children }: { label: string; onClick: () => void; disabled?: boolean; danger?: boolean; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:opacity-30 disabled:hover:bg-transparent ${danger ? "text-gray-light hover:bg-[#E5484D]/10 hover:text-[#E5484D]" : "text-gray-light hover:bg-gray-hover hover:text-gray-dark"}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+// Five-star rating row.
+function Stars({ n }: { n: number }) {
+  return (
+    <span className="flex gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg key={i} className={`h-3.5 w-3.5 ${i < n ? "text-[#F5A623]" : "text-[#E0E0E0]"}`} viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" /></svg>
+      ))}
+    </span>
+  );
+}
+
+function PageSectionCard({ section, index, total, onChange, onRemove, onMove }: {
+  section: PageSection; index: number; total: number;
+  onChange: (next: PageSection) => void; onRemove: () => void; onMove: (dir: -1 | 1) => void;
+}) {
+  const label = pageSectionTypes.find((t) => t.kind === section.kind)!.label;
+  return (
+    <div className="group relative border-t border-gray-stroke py-6">
+      {/* Header — kind label + reorder / remove controls (revealed on hover) */}
+      <div className="mb-4 flex items-center justify-between">
+        <span className="rounded-[4px] bg-gray-hover px-2 py-1 text-[12px] font-semibold uppercase tracking-[0.08em] text-gray-extra-light">{label}</span>
+        <div className="flex items-center gap-0.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+          <IconBtn label="Move section up" disabled={index === 0} onClick={() => onMove(-1)}>{chevronUpIcon}</IconBtn>
+          <IconBtn label="Move section down" disabled={index === total - 1} onClick={() => onMove(1)}>{chevronDownIcon}</IconBtn>
+          <IconBtn label="Remove section" danger onClick={onRemove}><MaskIcon src={trashIcon} className="h-[17px] w-[17px]" /></IconBtn>
+        </div>
+      </div>
+
+      {/* Optional headline — available on every section type */}
+      <input
+        value={section.heading}
+        onChange={(e) => onChange({ ...section, heading: e.target.value })}
+        placeholder="Add an optional header..."
+        className="mb-3 w-full bg-transparent text-[28px] font-semibold leading-tight text-gray-dark outline-none placeholder:text-[#B1B1B1]"
+      />
+
+      {section.kind === "text" && <TextSectionEditor section={section} onChange={onChange} />}
+      {section.kind === "faqs" && <FaqsSectionEditor section={section} onChange={onChange} />}
+      {section.kind === "image" && <MediaSectionEditor section={section} onChange={onChange} hint="PNG or JPG — recommended 1200 × 630" />}
+      {section.kind === "video" && <MediaSectionEditor section={section} onChange={onChange} hint="MP4 or MOV" />}
+      {section.kind === "reviews" && <ReviewsSectionEditor section={section} onChange={onChange} />}
+    </div>
+  );
+}
+
+function TextSectionEditor({ section, onChange }: { section: Extract<PageSection, { kind: "text" }>; onChange: (next: PageSection) => void }) {
+  return (
+    <textarea
+      value={section.body}
+      onChange={(e) => onChange({ ...section, body: e.target.value })}
+      rows={4}
+      placeholder="Write your text…"
+      className="w-full resize-none rounded-xl border border-gray-stroke bg-white px-3.5 py-3 text-[15px] leading-relaxed text-gray-dark outline-none placeholder:text-[#B1B1B1] focus:border-gray-dark"
+    />
+  );
+}
+
+function FaqsSectionEditor({ section, onChange }: { section: Extract<PageSection, { kind: "faqs" }>; onChange: (next: PageSection) => void }) {
+  const faqs = section.faqs;
+  const setFaqs = (next: FaqItem[]) => onChange({ ...section, faqs: next });
+  const addFaq = () => setFaqs([...faqs, { id: faqs.reduce((m, f) => Math.max(m, f.id), 0) + 1, question: "", answer: "" }]);
+  const updateFaq = (id: number, patch: Partial<FaqItem>) => setFaqs(faqs.map((f) => (f.id === id ? { ...f, ...patch } : f)));
+  const removeFaq = (id: number) => setFaqs(faqs.filter((f) => f.id !== id));
+  const moveFaq = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= faqs.length) return;
+    const next = [...faqs];
+    [next[i], next[j]] = [next[j], next[i]];
+    setFaqs(next);
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      {faqs.map((f, i) => (
+        <div key={f.id} className="rounded-xl border border-gray-stroke p-3.5">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[13px] font-medium text-gray-light">Question {i + 1}</span>
+            <div className="flex items-center gap-0.5">
+              <IconBtn label="Move question up" disabled={i === 0} onClick={() => moveFaq(i, -1)}>{chevronUpIcon}</IconBtn>
+              <IconBtn label="Move question down" disabled={i === faqs.length - 1} onClick={() => moveFaq(i, 1)}>{chevronDownIcon}</IconBtn>
+              <IconBtn label="Remove question" danger onClick={() => removeFaq(f.id)}><MaskIcon src={trashIcon} className="h-4 w-4" /></IconBtn>
+            </div>
+          </div>
+          <input value={f.question} onChange={(e) => updateFaq(f.id, { question: e.target.value })} placeholder="Question" autoComplete="off" className={configInputClass} />
+          <textarea value={f.answer} onChange={(e) => updateFaq(f.id, { answer: e.target.value })} rows={2} placeholder="Answer" className={`${configInputClass} mt-2 resize-none`} />
+        </div>
+      ))}
+      <button onClick={addFaq} className="flex items-center gap-2 self-start text-[15px] font-semibold text-[#4666E5]">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#EEF1FF]">
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+        </span>
+        Add question
+      </button>
+    </div>
+  );
+}
+
+function MediaSectionEditor({ section, onChange, hint }: { section: Extract<PageSection, { kind: "image" | "video" }>; onChange: (next: PageSection) => void; hint: string }) {
+  const label = section.kind === "image" ? "Upload a photo" : "Upload a video";
+  return <UploadField value={section.fileName} onChange={(fileName) => onChange({ ...section, fileName })} hint={hint} label={label} />;
+}
+
+function ReviewsSectionEditor({ section, onChange }: { section: Extract<PageSection, { kind: "reviews" }>; onChange: (next: PageSection) => void }) {
+  const [pickingSlot, setPickingSlot] = useState<number | null>(null);
+  const setSlot = (slot: number, reviewId: number | null) =>
+    onChange({ ...section, slots: section.slots.map((s, i) => (i === slot ? reviewId : s)) });
+  const chosen = section.slots.filter((s): s is number => s !== null);
+
+  return (
+    <>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {section.slots.map((reviewId, i) => {
+          const review = reviewId !== null ? existingReviews.find((r) => r.id === reviewId) ?? null : null;
+          return review ? (
+            <div key={i} className="relative flex flex-col rounded-xl border border-gray-stroke p-4">
+              <button
+                onClick={() => setSlot(i, null)}
+                aria-label="Remove review"
+                className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+              </button>
+              <Stars n={review.rating} />
+              <p className="mt-2 line-clamp-4 text-[14px] leading-snug text-gray-dark">“{review.text}”</p>
+              <div className="mt-3 flex items-center gap-2">
+                <img src={review.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
+                <span className="text-[13px] font-medium text-gray-dark">{review.name}</span>
+              </div>
+            </div>
+          ) : (
+            <button
+              key={i}
+              onClick={() => setPickingSlot(i)}
+              className="flex min-h-[150px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-stroke text-gray-light transition-colors hover:border-[#c9c9c9] hover:text-gray-dark"
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+              <span className="text-[13px] font-medium">Select a review</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <ReviewPicker
+        open={pickingSlot !== null}
+        chosen={chosen}
+        onSelect={(id) => { if (pickingSlot !== null) setSlot(pickingSlot, id); setPickingSlot(null); }}
+        onClose={() => setPickingSlot(null)}
+      />
+    </>
+  );
+}
+
+// Modal for choosing one of the coach's existing reviews to feature.
+function ReviewPicker({ open, chosen, onSelect, onClose }: { open: boolean; chosen: number[]; onSelect: (id: number) => void; onClose: () => void }) {
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 32 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 32 }}
+            transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative flex max-h-[85vh] w-full max-w-[520px] flex-col overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)]"
+          >
+            <div className="flex items-center justify-between border-b border-gray-stroke px-6 py-5">
+              <h2 className="font-serif text-[24px] text-gray-dark">Select a review</h2>
+              <button onClick={onClose} aria-label="Close" className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-hover text-gray-dark transition-colors hover:bg-[#ebebeb]">
+                <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="flex flex-col gap-2">
+                {existingReviews.map((r) => {
+                  const used = chosen.includes(r.id);
+                  return (
+                    <button
+                      key={r.id}
+                      type="button"
+                      disabled={used}
+                      onClick={() => onSelect(r.id)}
+                      className={`flex flex-col rounded-xl border p-4 text-left transition-colors ${used ? "border-gray-stroke opacity-40" : "border-gray-stroke hover:border-gray-dark"}`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="flex items-center gap-2.5">
+                          <img src={r.photo} alt="" className="h-8 w-8 rounded-full object-cover" />
+                          <span className="text-[14px] font-semibold text-gray-dark">{r.name}</span>
+                        </span>
+                        <Stars n={r.rating} />
+                      </div>
+                      <p className="mt-2 text-[14px] leading-snug text-gray-light">“{r.text}”</p>
+                      {used && <span className="mt-2 text-[12px] font-medium text-gray-extra-light">Already featured</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body,
   );
 }
 
