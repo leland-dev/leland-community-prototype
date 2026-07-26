@@ -94,7 +94,7 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
     >
       {header ? (
         <RdxDialog.Title asChild>
-          <header className="relative flex min-h-12 w-full shrink-0 items-center justify-center border-b border-b-leland-gray-stroke px-6 pt-6 pb-4 text-[1rem] font-medium text-leland-gray-dark">
+          <header className="leland-heading-lg relative flex min-h-12 w-full shrink-0 items-center justify-center border-b border-b-leland-gray-stroke px-6 py-3.5 text-leland-gray-dark">
             {header}
           </header>
         </RdxDialog.Title>
@@ -102,8 +102,11 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
         <RdxDialog.Title className="sr-only">Dialog</RdxDialog.Title>
       )}
       {hideCloseButton ? null : (
-        <RdxDialog.Close className="absolute right-2 top-2" asChild>
-          <span>
+        // Position-only wrapper so Close merges onto the single Button via
+        // asChild — a RdxDialog.Close button wrapping a Button nests two
+        // interactive controls (axe nested-interactive).
+        <div className="absolute right-2 top-2">
+          <RdxDialog.Close asChild>
             <Button
               label="Close"
               hideLabel
@@ -111,13 +114,16 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
               size={ButtonSize.SMALL}
               rounded
             />
-          </span>
-        </RdxDialog.Close>
+          </RdxDialog.Close>
+        </div>
       )}
       <div
         className={`flex grow flex-col ${
           preventScroll ? "overflow-hidden" : "overflow-auto"
         }`}
+        // A scrollable region must be keyboard-focusable so it can be scrolled
+        // without a mouse (axe scrollable-region-focusable).
+        tabIndex={preventScroll ? undefined : 0}
       >
         {children}
       </div>

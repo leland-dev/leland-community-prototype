@@ -63,46 +63,69 @@ export const Rating: FC<RatingProps> = ({
 }) => {
   const [hoverRate, setHoverRate] = useState(0);
 
+  const formattedRate = (overallRate ?? 0).toFixed(1);
   const rateToUse = hoverRate || overallRate;
 
   return (
     <div className="flex items-center justify-start">
-      <div className="flex gap-px">
+      {/* Interactive rating exposes one labeled button per star; a static
+       * display rating is a single labeled image (the decorative star icons
+       * carry no name of their own). */}
+      <div
+        className="flex gap-px"
+        role={hoverable ? undefined : "img"}
+        aria-label={
+          hoverable ? undefined : `${formattedRate} out of ${totalStars} stars`
+        }
+      >
         {Array.from({ length: totalStars }, (_, i) => i + 1).map((index) => {
           const indexDifference = rateToUse - index;
-          return (
+          const star =
+            index <= rateToUse ||
+            indexDifference > -0.25 ||
+            (hoverRate === index && indexDifference > -0.75) ? (
+              <IconStar
+                className={`${ratingSizeClasses[size]} ${
+                  hoverRate === index
+                    ? "text-leland-yellow-hover active:text-leland-yellow-hover/80"
+                    : "text-leland-yellow"
+                }`}
+              />
+            ) : indexDifference > -0.75 ? (
+              <IconStarHalf
+                className={`${ratingSizeClasses[size]} fill-leland-gray-stroke text-leland-yellow`}
+              />
+            ) : (
+              <IconStar
+                className={`${ratingSizeClasses[size]} ${
+                  hoverRate === index
+                    ? "text-leland-yellow active:text-leland-yellow-hover"
+                    : "text-leland-gray-stroke"
+                }`}
+              />
+            );
+
+          // A display-only rating is a single labeled image (the wrapper above
+          // carries the name); its stars are decorative. Rendering a <button>
+          // per star here produces invalid nested-button HTML whenever a
+          // consumer wraps the rating in its own button/link, which fails
+          // hydration and regenerates the subtree client-side (visible flash).
+          // Only the interactive rating needs real buttons.
+          return hoverable ? (
             <button
               type="button"
               key={index}
+              aria-label={`Rate ${index} star${index === 1 ? "" : "s"}`}
               onMouseEnter={() => setHoverRate(index)}
               onMouseLeave={() => setHoverRate(0)}
               onClick={() => onSaveRating?.(index)}
-              disabled={!hoverable}
             >
-              {index <= rateToUse ||
-              indexDifference > -0.25 ||
-              (hoverRate === index && indexDifference > -0.75) ? (
-                <IconStar
-                  className={`${ratingSizeClasses[size]} ${
-                    hoverRate === index
-                      ? "text-leland-yellow-hover active:text-leland-yellow-hover/80"
-                      : "text-leland-yellow"
-                  }`}
-                />
-              ) : indexDifference > -0.75 ? (
-                <IconStarHalf
-                  className={`${ratingSizeClasses[size]} fill-leland-gray-stroke text-leland-yellow`}
-                />
-              ) : (
-                <IconStar
-                  className={`${ratingSizeClasses[size]} ${
-                    hoverRate === index
-                      ? "text-leland-yellow active:text-leland-yellow-hover"
-                      : "text-leland-gray-stroke"
-                  }`}
-                />
-              )}
+              {star}
             </button>
+          ) : (
+            <span key={index} className="inline-flex">
+              {star}
+            </span>
           );
         })}
       </div>
@@ -110,7 +133,7 @@ export const Rating: FC<RatingProps> = ({
         <p
           className={`ml-2 ${ratingTextSizeClasses[size]} ${ratingTextColorClasses[textColor]}`}
         >
-          {(overallRate ?? 0).toFixed(1)}
+          {formattedRate}
         </p>
       ) : null}
     </div>

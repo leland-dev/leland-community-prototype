@@ -78,7 +78,7 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
     [ButtonColor.GRAY]: (selected) =>
       selected
         ? 'text-leland-gray-dark bg-white border-leland-gray-dark shadow-leland-gray-dark'
-        : 'btn--gray-borderless text-leland-gray-dark bg-leland-gray-hover disabled:bg-leland-gray-hover border-leland-gray-hover hover:bg-leland-gray-stroke hover:border-leland-gray-stroke shadow-transparent',
+        : 'text-leland-gray-dark bg-leland-gray-hover disabled:bg-leland-gray-hover border-transparent hover:bg-leland-gray-stroke hover:border-transparent',
     [ButtonColor.RED]: (selected) =>
       selected
         ? 'text-leland-red bg-white border-leland-red shadow-leland-red'
@@ -130,7 +130,7 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
     [ButtonColor.SECONDARY_NEUTRAL]: (selected) =>
       selected
         ? 'text-leland-gray-dark bg-white border-leland-gray-dark shadow-leland-gray-dark'
-        : 'btn--gray-borderless text-leland-gray-dark bg-leland-gray-hover disabled:bg-leland-gray-hover border-leland-gray-hover hover:bg-leland-gray-stroke hover:border-leland-gray-stroke shadow-transparent',
+        : 'text-leland-gray-dark bg-leland-gray-hover disabled:bg-leland-gray-hover border-transparent hover:bg-leland-gray-stroke hover:border-transparent',
     // TERTIARY reads as an inline text link (dotted underline) — no hover box.
     [ButtonColor.TERTIARY]: (selected) =>
       selected
@@ -173,6 +173,11 @@ const ButtonRoundedSideToStyles: Record<
   [ButtonRoundedSide.NONE]: () => 'border-l-leland-gray-stroke border-r-0',
 };
 
+const BORDERLESS_COLORS = new Set([
+  ButtonColor.GRAY,
+  ButtonColor.SECONDARY_NEUTRAL,
+]);
+
 interface ButtonStyleProps {
   buttonColor: ButtonColor;
   size: ButtonSize;
@@ -192,7 +197,7 @@ export const getButtonStyles = ({
   selected,
   roundedSide = ButtonRoundedSide.BOTH,
 }: ButtonStyleProps): string =>
-  `sm:whitespace-nowrap leading-tight items-center justify-center border shadow-border ${ButtonColorToStyles[
+  `sm:whitespace-nowrap leading-tight items-center justify-center border ${BORDERLESS_COLORS.has(buttonColor) ? '' : 'shadow-border'} ${ButtonColorToStyles[
     buttonColor
   ](selected)} ${ButtonSizeToStyles[size]} ${ButtonWidthToStyles[width]} ${
     FontWeightToStyles[fontWeight]

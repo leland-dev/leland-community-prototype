@@ -350,7 +350,13 @@ export const Menu: FC<MenuProps> = ({
           onMouseEnter={onMouseEnter}
         >
           {loading ? (
-            <div className="flex flex-col gap-2" data-testid="menu-loading">
+            <div
+              className="flex flex-col gap-2"
+              data-testid="menu-loading"
+              role="status"
+              aria-busy="true"
+              aria-label="Loading"
+            >
               <div className="h-10 w-full motion-safe:animate-pulse rounded-md bg-leland-gray-hover" />
               <div className="h-10 w-full motion-safe:animate-pulse rounded-md bg-leland-gray-hover" />
               <div className="h-10 w-full motion-safe:animate-pulse rounded-md bg-leland-gray-hover" />

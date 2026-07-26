@@ -79,6 +79,20 @@
   --color-leland-tan-dark: rgb(126 69 46);
   --color-leland-slate: rgb(134 154 166);
 
+  /*
+   * Avatar fallback palette — fixed backgrounds for name initials when no
+   * profile photo is set, assigned by a hash of the person's name. Full hex
+   * values (used via `var()` in inline style); all pair with white initials at
+   * WCAG AA contrast (>= 4.5:1).
+   */
+  --color-leland-avatar-1: #037052; /* green */
+  --color-leland-avatar-2: #654888; /* purple */
+  --color-leland-avatar-3: #132884; /* navy */
+  --color-leland-avatar-4: #b85a2b; /* rust */
+  --color-leland-avatar-5: #5c717e; /* slate */
+  --color-leland-avatar-6: #2166cb; /* blue */
+  --color-leland-avatar-7: #b93561; /* raspberry */
+
   /* ── Brand fonts (production sans = Macan; condensed = Season) ───────── */
   --font-macan: "Macan", ui-sans-serif, system-ui, sans-serif;
   --font-season: "Season", ui-serif, serif;
