@@ -14,6 +14,7 @@ import {
 import { Link, useParams } from "react-router-dom";
 
 import { CourseFeedbackModal } from "../components/CourseFeedbackModal";
+import TopNav from "../components/TopNav";
 import {
   IconLeftSidebarClose,
   IconLeftSidebarOpen,
@@ -75,12 +76,14 @@ import {
   LiveSessionCallout,
 } from "../components/lesson-blocks";
 import { SwitchInput } from "../components/leland";
+import { GettingStartedFlow, type FlowKey } from "../components/getting-started";
 import { COHORT_MEMBERS } from "./Group";
 import { SelectCohortModal } from "../components/LiveCourseCard";
 
 // ─── Types & seed data ───────────────────────────────────────────────────────
 
 type SectionKind = "html" | "video" | "pdf";
+type SectionBadge = "required" | "recommended" | "optional";
 
 // Legacy media section: rendered via iframe/video (lessons 2–4).
 type MediaSection = {
@@ -89,11 +92,23 @@ type MediaSection = {
   durationMin?: number | null;
   kind: SectionKind;
   src: string;
+  badge?: SectionBadge;
 };
 
-// A section is either a legacy media section or a native block section
-// (BlockSection). Chosen per-section by `kind`, so the two coexist in a course.
-type Section = MediaSection | BlockSection;
+// Interactive section: a native multi-step getting-started flow (IT setup,
+// skills assessment, personalization), rendered by a mapped React component.
+type InteractiveSection = {
+  id: string;
+  title: string;
+  badge?: SectionBadge;
+  durationMin?: number | null;
+  kind: "interactive";
+  flow: FlowKey;
+};
+
+// A section is either a legacy media section, a native block section
+// (BlockSection), or an interactive flow. Chosen per-section by `kind`.
+type Section = MediaSection | BlockSection | InteractiveSection;
 
 type Lesson = {
   id: string;
@@ -111,6 +126,7 @@ const COURSE_TITLE_FULL = "AI Builder Program Level 1: Use AI to 10x your impact
 const COURSE_DESCRIPTION =
   "Learn to build AI-powered applications using Claude — from foundational prompting to deploying production-ready tools.";
 const COURSE_HOME = "/course/ai-builder-l1";
+const DASHBOARD = "/dashboard";
 
 // The community page opens externally (new tab) — it's the existing group page.
 const COMMUNITY_GROUP_ID = "ai-bp-apr-26";
@@ -138,6 +154,23 @@ const LESSONS: Lesson[] = (lessonData as Lesson[]).map((lesson) =>
       }
     : lesson,
 );
+
+const START_HERE: Lesson = {
+  id: "start-here",
+  number: 0,
+  title: "Start here",
+  subtitle: "Complete these steps before your first session so you're ready to hit the ground running.",
+  durationMin: 20,
+  sections: [
+    { id: "add-to-calendar", title: "Add sessions to your calendar", kind: "interactive", flow: "add-to-calendar" },
+    { id: "setup-tools", title: "Set up your tools & permissions", kind: "interactive", flow: "it-setup" },
+    { id: "personalize", title: "Personalize your experience", kind: "html", src: "/lessons/lesson-1/welcome.html" },
+  ],
+};
+
+// ALL_LESSONS includes Start Here at position 0 for routing and sidebar.
+// LESSONS is kept separate so LIVE_SESSIONS numbering is unaffected.
+const ALL_LESSONS: Lesson[] = [START_HERE, ...LESSONS];
 
 // ─── Completion state (localStorage, prototype-only) ────────────────────────
 
@@ -235,6 +268,7 @@ type LiveSession = {
   date: Date;
   timeSlots: TimeSlot[];
   durationMin: number;
+  recordingVideoSrc?: string;
 };
 
 type BuildSession = {
@@ -259,12 +293,16 @@ const LIVE_SESSION_DATES = [
   new Date(2026, 4, 1),
 ];
 
+const RECORDING_VIDEO_SRC =
+  "https://tannerthelin.github.io/courses-prototype/assets/8814086-hd_1920_1080_25fps-Bbf7RRvH.mp4";
+
 const LIVE_SESSIONS: LiveSession[] = LESSONS.map((l, i) => ({
   number: i + 1,
   title: l.title,
   description: l.subtitle,
   date: LIVE_SESSION_DATES[i] ?? LIVE_SESSION_DATES[0],
   durationMin: 90,
+  recordingVideoSrc: i === 0 ? RECORDING_VIDEO_SRC : undefined,
   timeSlots: i === 0
     ? [
         { time: "11:00 AM PT", status: { kind: 'recording' } as SlotStatus },
@@ -511,14 +549,87 @@ function ResourcesPanel() {
   );
 }
 
+type LiveSessionBannerState = "upcoming" | "upcoming-multiple" | "live" | "recording";
+
+// Prototype: assign a different state per lesson to demo all variants
+const LESSON_BANNER_STATES: LiveSessionBannerState[] = [
+  "recording",
+  "live",
+  "upcoming-multiple",
+  "upcoming",
+];
+
+function LiveSessionBanner({ state, href }: { state: LiveSessionBannerState; href: string }) {
+  const isLive = state === "live";
+  const [elapsedSec, setElapsedSec] = useState(636); // start at 10m 36s
+
+  useEffect(() => {
+    if (!isLive) return;
+    const id = setInterval(() => setElapsedSec((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [isLive]);
+
+  const liveTime = `${Math.floor(elapsedSec / 60)}m ${elapsedSec % 60}s`;
+  const isRecording = state === "recording";
+  const isUpcomingMultiple = state === "upcoming-multiple";
+
+  return (
+    <Link
+      to={href}
+      className={`flex w-full items-center gap-1.5 rounded-[6px] px-2.5 py-1.5 text-[13px] font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
+        isLive
+          ? "bg-leland-red-dark text-white hover:bg-leland-red"
+          : isRecording
+            ? "bg-leland-gray-hover text-leland-gray-light hover:bg-leland-gray-solid-hover"
+            : "border border-leland-gray-stroke bg-white text-leland-gray-light hover:bg-leland-gray-hover"
+      }`}
+    >
+      {isLive ? (
+        <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden>
+          <circle cx="8" cy="8" r="2" fill="white" />
+          <path d="M4.8 4.8a4.53 4.53 0 000 6.4M11.2 4.8a4.53 4.53 0 010 6.4" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+      ) : isRecording ? (
+        <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden>
+          <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.3" />
+          <path d="M7 6.2l3.2 1.8-3.2 1.8V6.2z" fill="currentColor" />
+        </svg>
+      ) : (
+        <IconCalendarAlt className="size-4 shrink-0" />
+      )}
+      <span className="flex-1">
+        {isLive && (
+          <>
+            <span>Live now</span>
+            <span className="text-white/70"> · {liveTime}</span>
+          </>
+        )}
+        {isRecording && "Watch session recording"}
+        {state === "upcoming" && "Live session starts in 2d"}
+        {isUpcomingMultiple && (
+          <>
+            <span>Live session</span>
+            <span className="text-leland-gray-extra-light"> · 2 times available</span>
+          </>
+        )}
+      </span>
+      <IconChevronRight className={`size-4 shrink-0 ${isLive ? "text-white/70" : "text-leland-gray-extra-light"}`} />
+    </Link>
+  );
+}
+
 function LessonAccordion({
   currentLessonId,
   currentSectionId,
   completed,
+  liveProgram = false,
+  showSessionBanners = true,
 }: {
   currentLessonId: string;
   currentSectionId: string;
   completed: Set<string>;
+  liveProgram?: boolean;
+  showSessionBanners?: boolean;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(
     () => new Set([currentLessonId]),
@@ -541,14 +652,13 @@ function LessonAccordion({
 
   return (
     <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto">
-      {LESSONS.map((l, idx) => {
+      {ALL_LESSONS.map((l, idx) => {
+        const isStartHere = l.id === "start-here";
         const percent = lessonProgress(l, completed);
-        const statusLabel =
-          percent >= 100
-            ? "100% complete"
-            : percent > 0
-              ? `${Math.round(percent)}% complete`
-              : "Not started";
+        const completedCount = l.sections.filter((s) =>
+          completed.has(`${l.id}/${s.id}`),
+        ).length;
+        const totalCount = l.sections.length;
         const isOpen = expanded.has(l.id);
         return (
           <div
@@ -560,54 +670,69 @@ function LessonAccordion({
               onClick={() => toggle(l.id)}
               className="flex flex-col gap-1.5 rounded px-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
-              <span className="flex items-center gap-2 leland-subtext-sm text-leland-gray-extra-light">
-                <span className="font-semibold uppercase tracking-[1.3px]">
-                  Lesson {idx + 1}
-                </span>
-                <span>·</span>
-                <span>{statusLabel}</span>
+              <span className="leland-subtext-sm font-semibold uppercase tracking-[1.3px] text-leland-gray-extra-light">
+                {isStartHere ? "Before you begin" : `Lesson ${idx}`}
               </span>
               <span className="flex items-center gap-3">
                 <span className="flex-1 leland-paragraph-lg font-medium text-leland-gray-dark">
                   {l.title}
                 </span>
-                <CircularProgress percent={percent} />
+                <span
+                  role="img"
+                  aria-label={`${completedCount}/${totalCount} complete`}
+                >
+                  <CircularProgress percent={percent} />
+                </span>
                 <IconChevronDown
                   className="size-5 shrink-0 text-leland-gray-light transition-transform"
                   style={isOpen ? { transform: "rotate(180deg)" } : undefined}
                 />
               </span>
             </button>
+            {liveProgram && showSessionBanners && !isStartHere && l.sections.length > 0 && (
+              <div className="px-6">
+                <LiveSessionBanner
+                  state={LESSON_BANNER_STATES[(idx - 1) % LESSON_BANNER_STATES.length]}
+                  href={`/content-viewer/${l.id}/${l.sections[0].id}`}
+                />
+              </div>
+            )}
             {isOpen ? (
               <div className="flex flex-col gap-1 px-3">
                 {l.sections.map((s, sIdx) => {
                   const sectionDone = completed.has(`${l.id}/${s.id}`);
                   const active =
                     l.id === currentLessonId && s.id === currentSectionId;
+                  const badge = (s as MediaSection).badge;
                   return (
                     <Link
                       key={s.id}
+                      id={`sidebar-section-${s.id}`}
                       to={`/content-viewer/${l.id}/${s.id}`}
                       className={`flex items-center gap-2.5 rounded-lg p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
                         active ? "bg-leland-gray-hover" : "hover:bg-leland-gray-hover"
                       }`}
                     >
-                      <span
-                        className={`flex size-8 shrink-0 items-center justify-center rounded-full ${
-                          sectionDone
-                            ? "bg-leland-gray-dark"
-                            : active
-                              ? "border-[1.5px] border-leland-gray-extra-light bg-white"
-                              : "border border-leland-gray-stroke bg-white"
-                        }`}
-                      >
-                        {sectionDone ? (
-                          <IconCheck className="size-3.5 text-white" />
-                        ) : (
-                          <span className="leland-heading-base font-semibold text-leland-gray-light">
-                            {sIdx + 1}
-                          </span>
-                        )}
+                      <span className="relative shrink-0">
+                        <span
+                          className={`flex size-8 items-center justify-center rounded-full ${
+                            sectionDone
+                              ? "bg-leland-gray-dark"
+                              : active
+                                ? "border-[1.5px] border-leland-gray-extra-light bg-white"
+                                : badge === "required"
+                                  ? "border border-leland-blue-light-hover bg-leland-blue-light"
+                                  : "border border-leland-gray-stroke bg-white"
+                          }`}
+                        >
+                          {sectionDone ? (
+                            <IconCheck className="size-3.5 text-white" />
+                          ) : (
+                            <span className="leland-heading-base font-semibold text-leland-gray-light">
+                              {sIdx + 1}
+                            </span>
+                          )}
+                        </span>
                       </span>
                       <span className="min-w-0 flex-1 leland-paragraph-base font-medium text-leland-gray-dark">
                         {s.title}
@@ -672,6 +797,10 @@ function LessonsAccordionSidebar({
   onTabChange,
   onSwitchCohort,
   hideTabs = false,
+  liveProgram = true,
+  showSessionBanners = true,
+  exitDestination,
+  noHeader = true,
 }: {
   currentLessonId: string;
   currentSectionId: string;
@@ -681,10 +810,45 @@ function LessonsAccordionSidebar({
   onTabChange: (tab: SidebarTab) => void;
   onSwitchCohort: () => void;
   hideTabs?: boolean;
+  liveProgram?: boolean;
+  showSessionBanners?: boolean;
+  exitDestination: string;
+  noHeader?: boolean;
 }) {
   return (
     <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
-      {hideTabs ? (
+      {/* My content back nav — only when header is hidden */}
+      {noHeader && (
+        <Link
+          to={exitDestination}
+          className="flex shrink-0 items-center gap-1.5 border-b border-leland-gray-stroke px-6 py-3 leland-paragraph-sm font-medium text-leland-gray-light hover:bg-leland-gray-hover hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary"
+        >
+          <IconChevronLeft className="size-3.5 shrink-0" />
+          My content
+        </Link>
+      )}
+      {/* Program info card — mirrors what CombinedSidebar shows in the header view */}
+      {noHeader && (
+        <div className="flex flex-col gap-4 border-b border-leland-gray-stroke px-6 pb-5 pt-6">
+          <img
+            src="/program-cover.avif"
+            alt="AI Builder Program cover"
+            className="h-16 w-[122px] shrink-0 rounded object-cover"
+          />
+          <p className="font-season text-heading-3xl font-normal text-leland-gray-dark">
+            {COURSE_TITLE_FULL}
+          </p>
+          <div className="flex items-center gap-2">
+            <img
+              src="/leland-profile.png"
+              alt="Leland"
+              className="size-5 shrink-0 rounded-full object-cover"
+            />
+            <span className="leland-paragraph-base text-leland-gray-extra-light">Created by Leland</span>
+          </div>
+        </div>
+      )}
+      {(hideTabs || !liveProgram) ? (
         <div className="flex items-center pl-6 pr-4 pt-4">
           <button
             onClick={onToggle}
@@ -723,32 +887,34 @@ function LessonsAccordionSidebar({
         </div>
       )}
 
-      {!hideTabs && tab === "overview" ? (
+      {!hideTabs && liveProgram && tab === "overview" ? (
         <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto px-3 py-5">
           {/* Cohort summary */}
-          <div className="flex items-start gap-4 p-3">
-            <div className="flex min-w-0 flex-1 flex-col gap-2">
-              <p className="leland-heading-2xl font-semibold text-leland-gray-dark">
-                May 16 – Jun 8
-              </p>
-              <div className="flex flex-col gap-0.5">
-                <p className="leland-paragraph-base font-medium text-leland-gray-light">
-                  Tuesdays and Thursdays
-                </p>
-                <p className="leland-paragraph-sm text-leland-gray-light">
-                  5:00 PM and 7:00 PM MST
-                </p>
+          <div className="flex items-center gap-3 p-3">
+            <div className="flex w-12 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
+              <div className="flex items-center justify-center bg-leland-blue px-2.5 py-1">
+                <span className="text-[10px] font-semibold leading-none tracking-[1px] text-leland-gray-dark">MAY</span>
+              </div>
+              <div className="flex flex-1 items-center justify-center bg-white px-2.5 pb-1 pt-0.5">
+                <span className="leland-heading-xl font-semibold text-leland-gray-dark">24</span>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={onSwitchCohort}
-              aria-label="Switch cohort"
-              className="shrink-0 rounded text-leland-gray-light hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-            >
-              <IconRecurring className="size-6" />
-            </button>
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <p className="leland-heading-lg font-semibold text-leland-gray-dark">May 16 – Jun 8</p>
+              <div className="flex items-center gap-1.5">
+                <IconRecurring className="size-[15px] shrink-0 text-leland-gray-light" />
+                <button
+                  type="button"
+                  onClick={onSwitchCohort}
+                  className="leland-paragraph-sm text-leland-gray-light underline decoration-dotted underline-offset-2 focus:outline-none"
+                >
+                  Switch cohort
+                </button>
+              </div>
+            </div>
           </div>
+
+          <div className="mx-3 border-t border-leland-gray-stroke" />
 
           {/* Program resources — Calendar is in-app; the rest open externally */}
           <div className="flex flex-col gap-1 pt-2">
@@ -797,6 +963,8 @@ function LessonsAccordionSidebar({
           currentLessonId={currentLessonId}
           currentSectionId={currentSectionId}
           completed={completed}
+          liveProgram={liveProgram}
+          showSessionBanners={showSessionBanners}
         />
       )}
     </aside>
@@ -811,6 +979,13 @@ function CombinedSidebar({
   onSwitchCohort,
   tab,
   onTabChange,
+  liveProgram = true,
+  showSessionBanners = true,
+  compactCourseInfo = false,
+  seeMoreOpen,
+  onSeeMoreChange,
+  exitDestination,
+  noHeader = true,
 }: {
   currentLessonId: string;
   currentSectionId: string;
@@ -819,32 +994,84 @@ function CombinedSidebar({
   onSwitchCohort: () => void;
   tab: SidebarTab;
   onTabChange: (tab: SidebarTab) => void;
+  liveProgram?: boolean;
+  showSessionBanners?: boolean;
+  compactCourseInfo?: boolean;
+  seeMoreOpen: boolean;
+  onSeeMoreChange: (open: boolean) => void;
+  exitDestination: string;
+  noHeader?: boolean;
 }) {
-  const [seeMoreOpen, setSeeMoreOpen] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const resourcesRef = useRef<HTMLDivElement>(null);
+  const [resourcesInView, setResourcesInView] = useState(true);
+
+  useEffect(() => {
+    if (!liveProgram) return;
+    const scroll = scrollRef.current;
+    const target = resourcesRef.current;
+    if (!scroll || !target) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setResourcesInView(entry.isIntersecting),
+      { root: scroll, threshold: 0 },
+    );
+    obs.observe(target);
+    return () => obs.disconnect();
+  }, [liveProgram]);
+
+  const scrollToTop = () =>
+    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
     <aside className="relative flex w-[360px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
-      {/* Collapse button — fixed to aside, overlays scrolling content */}
-      <div className="absolute right-0 top-0 z-10 p-3">
-        <button
-          onClick={onToggle}
-          aria-label="Close sidebar"
-          className="flex size-10 items-center justify-center rounded-full bg-white/75 backdrop-blur-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+      {/* My content back nav */}
+      {noHeader && (
+        <Link
+          to={exitDestination}
+          className="relative z-10 flex shrink-0 items-center gap-1.5 border-b border-leland-gray-stroke bg-white px-6 py-3 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)] leland-paragraph-base font-medium text-leland-gray-light hover:bg-leland-gray-hover hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary"
         >
-          <IconLeftSidebarClose className="size-6" aria-hidden />
-        </button>
-      </div>
+          <IconChevronLeft className="size-4 shrink-0" />
+          My content
+        </Link>
+      )}
 
-      <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pb-12">
+      {/* Pinned cohort row — shown once the resources section has scrolled out of view */}
+      {liveProgram && !resourcesInView && (
+        <button
+          type="button"
+          onClick={scrollToTop}
+          className="flex w-full items-center gap-3 border-b border-leland-gray-stroke px-6 py-4 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary"
+        >
+          {!compactCourseInfo && (
+            <div className="flex h-9 w-9 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
+              <div className="flex items-center justify-center bg-leland-blue px-1.5 pb-0.5 pt-[3px]">
+                <span className="text-[8px] font-semibold leading-none tracking-[0.8px] text-leland-gray-dark">MAY</span>
+              </div>
+              <div className="flex flex-1 items-center justify-center bg-white">
+                <span className="leland-heading-base font-semibold text-leland-gray-dark">24</span>
+              </div>
+            </div>
+          )}
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+            <p className="leland-heading-base font-semibold text-leland-gray-dark">May 16 – Jun 8</p>
+            <p className="leland-paragraph-sm text-leland-gray-light">Cohort details</p>
+          </div>
+          <IconChevronUp className="size-4 shrink-0 text-leland-gray-light" />
+        </button>
+      )}
+
+      <div ref={scrollRef} className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pb-12">
         {/* Program info card */}
-        <div className="w-full bg-white pb-5">
-          <div className="flex flex-col gap-5 px-6 pt-5">
+        <div className="relative z-10 w-full bg-white pb-5 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)]">
+          <div className="flex flex-col gap-4 px-6 pt-6">
             {/* Thumbnail */}
-            <img
-              src="/program-cover.avif"
-              alt="AI Builder Program cover"
-              className="h-16 w-[122px] shrink-0 rounded object-cover"
-            />
+            {!compactCourseInfo && (
+              <img
+                src="/program-cover.avif"
+                alt="AI Builder Program cover"
+                className="h-16 w-[122px] shrink-0 rounded object-cover"
+              />
+            )}
 
             {/* Program title */}
             <p className="text-heading-3xl font-season font-normal text-leland-gray-dark">{COURSE_TITLE_FULL}</p>
@@ -854,24 +1081,24 @@ function CombinedSidebar({
               <img
                 src="/leland-profile.png"
                 alt="Leland"
-                className="size-6 shrink-0 rounded-full object-cover"
+                className="size-5 shrink-0 rounded-full object-cover"
               />
               <span className="leland-paragraph-base text-leland-gray-extra-light">Created by Leland</span>
             </div>
           </div>
 
-          {/* Date / cohort row */}
-          <div className="mt-5 flex items-center gap-3 border-y border-leland-gray-stroke px-6 py-4">
-            <div className="flex w-12 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke">
-              <div className="flex items-center justify-center bg-leland-blue px-2.5 pb-0.5 pt-[3px]">
-                <span className="leland-eyebrow text-leland-gray-dark">MAY</span>
+          {/* Date / cohort row — live program only */}
+          {liveProgram && <div className="mt-5 flex items-center gap-3 border-y border-leland-gray-stroke px-6 py-4">
+            <div className="flex w-12 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
+              <div className="flex items-center justify-center bg-leland-blue px-2.5 py-1">
+                <span className="text-[10px] font-semibold leading-none tracking-[1px] text-leland-gray-dark">MAY</span>
               </div>
-              <div className="flex flex-1 items-center justify-center bg-white px-2.5 py-1">
+              <div className="flex flex-1 items-center justify-center bg-white px-2.5 pb-1 pt-0.5">
                 <span className="leland-heading-xl font-semibold text-leland-gray-dark">24</span>
               </div>
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <p className="leland-heading-lg text-leland-gray-dark">May 16 – Jun 8</p>
+              <p className="leland-heading-lg font-semibold text-leland-gray-dark">May 16 – Jun 8</p>
               <div className="flex items-center gap-1.5">
                 <IconRecurring className="size-[15px] shrink-0 text-leland-gray-light" />
                 <button
@@ -883,49 +1110,51 @@ function CombinedSidebar({
                 </button>
               </div>
             </div>
-          </div>
+          </div>}
 
           {/* Expanded "See more" items */}
           {seeMoreOpen && (
             <div className="flex flex-col gap-1 px-3 pt-4">
-              <SidebarMenuItem
-                Icon={IconCalendarAlt}
-                label="Overview"
-                active={tab === "overview"}
-                onClick={() => onTabChange("overview")}
-              />
-              <SidebarMenuItem
-                Icon={IconExperiences}
-                label="Office hours"
-                external
-                onClick={() =>
-                  window.open(
-                    "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours",
-                    "_blank",
-                    "noopener",
-                  )
-                }
-              />
-              <SidebarMenuItem
-                Icon={IconUserProfileGroup}
-                label="Community"
-                external
-                onClick={() =>
-                  window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")
-                }
-              />
-              <SidebarMenuItem
-                Icon={IconBooks}
-                label="Your cohort's builds"
-                external
-                onClick={() => {}}
-              />
-              <SidebarMenuItem
-                Icon={IconOnboarding}
-                label="Setup guide"
-                external
-                onClick={() => {}}
-              />
+              {liveProgram && (
+                <>
+                  <SidebarMenuItem
+                    Icon={IconExperiences}
+                    label="Office hours"
+                    external
+                    onClick={() =>
+                      window.open(
+                        "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours",
+                        "_blank",
+                        "noopener",
+                      )
+                    }
+                  />
+                </>
+              )}
+              {liveProgram && (
+                <>
+                  <SidebarMenuItem
+                    Icon={IconUserProfileGroup}
+                    label="Community"
+                    external
+                    onClick={() =>
+                      window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")
+                    }
+                  />
+                  <SidebarMenuItem
+                    Icon={IconBooks}
+                    label="Your cohort's builds"
+                    external
+                    onClick={() => {}}
+                  />
+                  <SidebarMenuItem
+                    Icon={IconOnboarding}
+                    label="Setup guide"
+                    external
+                    onClick={() => {}}
+                  />
+                </>
+              )}
               <SidebarMenuItem
                 Icon={IconGift}
                 label="Refer a friend"
@@ -936,13 +1165,13 @@ function CombinedSidebar({
           )}
 
           {/* See more / see less toggle */}
-          <div className="px-3 pt-3">
+          <div ref={resourcesRef} className="px-3 pt-3">
             <button
               type="button"
-              onClick={() => setSeeMoreOpen((v) => !v)}
+              onClick={() => onSeeMoreChange(!seeMoreOpen)}
               className="flex w-full items-center justify-center gap-2 rounded-full bg-leland-gray-hover px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
             >
-              <span className="leland-heading-base text-leland-gray-dark">See more</span>
+              <span className="leland-heading-base text-leland-gray-dark">See all resources</span>
               <IconChevronDown
                 className={`size-5 text-leland-gray-dark transition-transform duration-200 ${seeMoreOpen ? "rotate-180" : ""}`}
               />
@@ -955,6 +1184,8 @@ function CombinedSidebar({
           currentLessonId={currentLessonId}
           currentSectionId={currentSectionId}
           completed={completed}
+          liveProgram={liveProgram}
+          showSessionBanners={showSessionBanners}
         />
       </div>
     </aside>
@@ -990,11 +1221,14 @@ function CourseViewerSidebar({
 
   return (
     <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
-      {/* Collapse toggle */}
-      <div className="flex items-center pl-6 pr-4 pt-4">
+      {/* Course title + collapse toggle */}
+      <div className="flex items-center gap-3 pl-6 pr-4 pt-4">
+        <p className="min-w-0 flex-1 truncate leland-heading-base font-medium text-leland-gray-dark">
+          {COURSE_TITLE_FULL}
+        </p>
         <button
           onClick={onToggle}
-          className="ml-auto flex size-10 shrink-0 items-center justify-center p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+          className="flex size-10 shrink-0 items-center justify-center p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
           aria-label="Close sidebar"
         >
           <IconLeftSidebarClose className="size-6" aria-hidden />
@@ -1096,13 +1330,15 @@ function CourseViewerSidebar({
 
 export type SidebarView = "default" | "tabbed" | "combined";
 
-type ExitNavStyle = "backLeft" | "closeRight";
-
 type PrototypeOptions = {
   sidebarView: SidebarView;
   beigeBackground: boolean;
+  liveProgram: boolean;
+  compactCourseInfo: boolean;
+  noHeader: boolean;
+  showSiteNav: boolean;
+  showSessionBanners: boolean;
   liveSessionVariant: LiveSessionVariant;
-  exitNavStyle: ExitNavStyle;
 };
 
 // Keys whose value is a boolean (rendered as toggles).
@@ -1115,17 +1351,21 @@ const PROTOTYPE_OPTIONS_KEY = "content-viewer-prototype-options";
 const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
   sidebarView: "default",
   beigeBackground: false,
+  liveProgram: true,
+  compactCourseInfo: false,
+  noHeader: true,
+  showSiteNav: false,
+  showSessionBanners: true,
   liveSessionVariant: "addToCalendar",
-  exitNavStyle: "backLeft",
 };
 
-const EXIT_NAV_OPTIONS: { value: ExitNavStyle; label: string }[] = [
-  { value: "backLeft", label: "Back arrow (left)" },
-  { value: "closeRight", label: "Close icon (right)" },
-];
-
 const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
+  { key: "liveProgram", label: "Live program" },
   { key: "beigeBackground", label: "Beige background" },
+  { key: "compactCourseInfo", label: "Compact course info" },
+  { key: "noHeader", label: "No header" },
+  { key: "showSiteNav", label: "Show site nav" },
+  { key: "showSessionBanners", label: "Session banners" },
 ];
 
 const SIDEBAR_VIEW_OPTIONS: { value: SidebarView; label: string }[] = [
@@ -1174,14 +1414,12 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onToggle,
   onSetSidebarView,
   onSetVariant,
-  onSetExitNav,
   ...modalProps
 }: ModalProps & {
   options: PrototypeOptions;
   onToggle: (key: BooleanOptionKey) => void;
   onSetSidebarView: (view: SidebarView) => void;
   onSetVariant: (variant: LiveSessionVariant) => void;
-  onSetExitNav: (style: ExitNavStyle) => void;
 }) {
   return (
     <Modal {...modalProps}>
@@ -1209,50 +1447,30 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
               ))}
             </div>
           </div>
-          <div className="flex flex-col gap-1.5 rounded-lg p-3">
-            <span className="leland-paragraph-base font-medium text-leland-gray-dark">
-              Exit navigation
-            </span>
-            <div className="flex gap-1.5">
-              {EXIT_NAV_OPTIONS.map((o) => (
-                <button
-                  key={o.value}
-                  type="button"
-                  onClick={() => onSetExitNav(o.value)}
-                  className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-                >
-                  <Tag
-                    text={o.label}
-                    tagColor={TagColor.GRAY}
-                    size={TagSize.SMALL}
-                    selected={options.exitNavStyle === o.value}
-                  />
-                </button>
-              ))}
+          {options.liveProgram && (
+            <div className="flex flex-col gap-1.5 rounded-lg p-3">
+              <span className="leland-paragraph-base font-medium text-leland-gray-dark">
+                Live session callout
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {LIVE_SESSION_VARIANT_OPTIONS.map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => onSetVariant(o.value)}
+                    className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+                  >
+                    <Tag
+                      text={o.label}
+                      tagColor={TagColor.GRAY}
+                      size={TagSize.SMALL}
+                      selected={options.liveSessionVariant === o.value}
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="flex flex-col gap-1.5 rounded-lg p-3">
-            <span className="leland-paragraph-base font-medium text-leland-gray-dark">
-              Live session callout
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {LIVE_SESSION_VARIANT_OPTIONS.map((o) => (
-                <button
-                  key={o.value}
-                  type="button"
-                  onClick={() => onSetVariant(o.value)}
-                  className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-                >
-                  <Tag
-                    text={o.label}
-                    tagColor={TagColor.GRAY}
-                    size={TagSize.SMALL}
-                    selected={options.liveSessionVariant === o.value}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
+          )}
           {BOOLEAN_OPTIONS.map(({ key, label }) => (
             <div key={key} className="rounded-lg p-3">
               <SwitchInput
@@ -1284,43 +1502,63 @@ function monthGrid(year: number, month: number): Array<Date | null> {
 function SessionRecordingView({
   session,
   onBack,
+  breadcrumb = false,
 }: {
   session: LiveSession;
   onBack: () => void;
+  breadcrumb?: boolean;
 }) {
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
       <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-8 py-10">
-        <button
-          onClick={onBack}
-          className="-ml-5 flex items-center gap-1 leland-paragraph-base text-leland-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-4 hover:text-leland-gray-dark"
-        >
-          <IconChevronLeft className="size-4" />
-          Back to session
-        </button>
-        <div className="flex flex-col gap-2">
-          <p className="leland-paragraph-lg font-medium text-leland-rust">
-            Session {session.number}
-          </p>
-          <h1 className="text-heading-4xl md:text-heading-5xl font-normal font-season text-leland-gray-dark">
-            {session.title}
-          </h1>
+        {/* Breadcrumb / back nav */}
+        {breadcrumb ? (
+          <div className="leland-paragraph-base text-leland-gray-light">
+            <button
+              onClick={onBack}
+              className="inline-flex items-center gap-1 underline decoration-dotted decoration-[1.5px] underline-offset-4 hover:text-leland-gray-dark focus:outline-none"
+            >
+              <IconChevronLeft className="-ml-5 size-4 shrink-0" />
+              Session {session.number}
+            </button>
+            <span className="mx-2" aria-hidden="true">/</span>
+            <span className="text-leland-gray-dark">Recording</span>
+          </div>
+        ) : (
+          <button
+            onClick={onBack}
+            className="-ml-5 flex items-center gap-1 leland-paragraph-base text-leland-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-4 hover:text-leland-gray-dark"
+          >
+            <IconChevronLeft className="size-4" />
+            Back to session
+          </button>
+        )}
+
+        {/* Video player */}
+        <div className="aspect-video w-full overflow-hidden rounded-2xl bg-leland-gray-dark">
+          <video
+            src="https://tannerthelin.github.io/courses-prototype/assets/8814086-hd_1920_1080_25fps-Bbf7RRvH.mp4"
+            controls
+            className="h-full w-full object-cover"
+          />
         </div>
+
+        {/* CTA: view session/lesson guide */}
         <Link
-          to={`/content-viewer/lesson-${session.number}/welcome`}
-          className="flex items-center gap-4 rounded-xl bg-[#EFF5FF] px-5 py-4 hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+          to={(() => {
+            const lesson = LESSONS[session.number - 1];
+            return lesson
+              ? `/content-viewer/${lesson.id}/${lesson.sections[0]?.id ?? ""}`
+              : `/content-viewer/lesson-${session.number}`;
+          })()}
+          className="flex items-center gap-4 rounded-xl bg-leland-blue-light px-5 py-4 hover:bg-leland-blue-light-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
         >
           <IconText className="size-5 shrink-0 text-leland-gray-dark" />
-          <span className="flex-1 leland-heading-base font-semibold text-leland-gray-dark">View lesson outline</span>
+          <span className="flex-1 leland-heading-base font-semibold text-leland-gray-dark">
+            View session {session.number} lesson guide
+          </span>
           <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
         </Link>
-
-        {/* Video player placeholder */}
-        <div className="aspect-video w-full overflow-hidden rounded-2xl bg-leland-gray-dark flex items-center justify-center">
-          <p className="leland-heading-xl font-semibold text-white opacity-40">
-            Recording
-          </p>
-        </div>
       </div>
     </div>
   );
@@ -1615,6 +1853,7 @@ function SessionActionBanner({
       return (
         <LiveSessionCallout
           recording
+          recordingVideoSrc={session.recordingVideoSrc}
           title="Watch the recording"
           subtitle={`${shortDate}, ${time}`}
           trailing={{ kind: "chevron" }}
@@ -1703,14 +1942,22 @@ function SessionDetailView({
           onViewRecording={onViewRecording}
         />
 
-        <Link
-          to={`/content-viewer/lesson-${session.number}/welcome`}
-          className="flex items-center gap-4 rounded-xl bg-[#EFF5FF] px-5 py-4 hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-        >
-          <IconText className="size-5 shrink-0 text-leland-gray-dark" />
-          <span className="flex-1 leland-heading-base font-semibold text-leland-gray-dark">View lesson outline</span>
-          <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
-        </Link>
+        {(() => {
+          const lesson = LESSONS[session.number - 1];
+          const href = lesson
+            ? `/content-viewer/${lesson.id}/${lesson.sections[0]?.id ?? ""}`
+            : `/content-viewer/lesson-${session.number}`;
+          return (
+            <Link
+              to={href}
+              className="flex items-center gap-4 rounded-xl bg-leland-blue-light px-5 py-4 hover:bg-leland-blue-light-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconText className="size-5 shrink-0 text-leland-gray-dark" />
+              <span className="flex-1 leland-heading-base font-semibold text-leland-gray-dark">View lesson outline</span>
+              <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
+            </Link>
+          );
+        })()}
 
         <SessionCalendar
           onSelectSession={onSelectSession}
@@ -1785,16 +2032,28 @@ export default function ContentViewer() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>("lessons");
 
-  // In combined view, navigating to a lesson section exits the overview back to lesson content.
+  // Navigating to a lesson section always exits calendar/overview back to lesson content.
   useEffect(() => {
-    if (options.sidebarView === "combined" && sidebarTab === "overview") {
+    if (sidebarTab === "overview" || sidebarTab === "live") {
       setSidebarTab("lessons");
     }
+    setLessonShowRecording(false);
+    setSeeMoreOpen(false);
+    // Scroll the active section into view in the sidebar after render.
+    const id = params.sectionId;
+    const timer = setTimeout(() => {
+      document
+        .getElementById(`sidebar-section-${id}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 50);
+    return () => clearTimeout(timer);
   }, [params.sectionId]); // eslint-disable-line react-hooks/exhaustive-deps
   const [selectedSessionNumber, setSelectedSessionNumber] = useState<
     number | null
   >(null);
   const [showRecording, setShowRecording] = useState(false);
+  const [lessonShowRecording, setLessonShowRecording] = useState(false);
+  const [seeMoreOpen, setSeeMoreOpen] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
@@ -1806,9 +2065,9 @@ export default function ContentViewer() {
 
   const lessonIdx = Math.max(
     0,
-    LESSONS.findIndex((l) => l.id === params.lessonId),
+    ALL_LESSONS.findIndex((l) => l.id === params.lessonId),
   );
-  const lesson = LESSONS[lessonIdx];
+  const lesson = ALL_LESSONS[lessonIdx];
   const sectionIdx = Math.max(
     0,
     lesson.sections.findIndex((s) => s.id === params.sectionId),
@@ -1822,12 +2081,14 @@ export default function ContentViewer() {
     LESSONS.map((l, idx) => ({
       label: `Lesson ${idx + 1}: ${l.title}`,
       url: sectionUrl(l, l.sections[0]),
-      selected: idx === lessonIdx,
+      selected: l.id === lesson.id,
     })),
   ];
 
   const prevSection = lesson.sections[sectionIdx - 1] ?? null;
   const nextSection = lesson.sections[sectionIdx + 1] ?? null;
+
+  const exitDestination = options.sidebarView === "default" ? COURSE_HOME : DASHBOARD;
 
   const isCompleted = useMemo(
     () => (sectionId: string) => completed.has(`${lesson.id}/${sectionId}`),
@@ -1836,61 +2097,37 @@ export default function ContentViewer() {
 
   return (
     <div className="flex h-screen flex-col bg-white text-leland-gray-dark">
-      {/* Top header — spans the full window width; sidebar sits below it */}
-      <header className="flex shrink-0 items-center gap-2 border-b border-leland-gray-stroke py-3 pl-6 pr-4">
-        {/* Left: back arrow (backLeft) or logo + title */}
-        <div className="flex min-w-0 flex-1 items-center">
-          {options.exitNavStyle === "backLeft" && (
+      {options.showSiteNav && <TopNav />}
+      {!options.noHeader && (
+        <header className="relative flex shrink-0 items-center border-b border-leland-gray-stroke py-3 pl-6 pr-4">
+          <div className="flex min-w-0 flex-1 items-center gap-3 leland-paragraph-base">
             <Link
-              to={COURSE_HOME}
-              aria-label="Back to course"
-              className="mr-4 flex size-10 shrink-0 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+              to={exitDestination}
+              className="flex shrink-0 items-center gap-1 rounded-full bg-leland-gray-solid-hover px-4 py-2 font-medium text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
-              <IconChevronLeft className="size-5" />
+              <IconChevronLeft className="size-4 shrink-0" />
+              My content
             </Link>
-          )}
-          <BrandLelandLogoSilhouette className="h-5 w-auto shrink-0 text-leland-gray-dark" />
-          <span className="mx-4 h-5 w-px shrink-0 bg-leland-gray-stroke" aria-hidden />
-          <p className="min-w-0 truncate leland-heading-base font-medium text-leland-gray-dark">
-            {COURSE_TITLE_FULL}
-          </p>
-        </div>
-
-        {/* Right: icon-only gray circular actions + optional close */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            aria-label="Get help"
-            className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-          >
-            <IconQuestion className="size-5" />
-          </button>
-          <button
-            type="button"
-            aria-label="Share feedback"
-            onClick={() => setFeedbackModalOpen(true)}
-            className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-          >
-            <IconStarOutline className="size-5" />
-          </button>
-          <button
-            type="button"
-            aria-label="Share"
-            className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-          >
-            <IconShare className="size-5" />
-          </button>
-          {options.exitNavStyle === "closeRight" && (
-            <Link
-              to={COURSE_HOME}
-              aria-label="Back to course"
-              className="ml-2 flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-            >
-              <IconX className="size-5" />
-            </Link>
-          )}
-        </div>
-      </header>
+            {!sidebarOpen && (
+              <>
+                <span className="h-4 w-px shrink-0 bg-leland-gray-stroke" aria-hidden />
+                <span className="min-w-0 truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
+              </>
+            )}
+          </div>
+          <div className="flex flex-1 items-center justify-end gap-2">
+            <button type="button" aria-label="Get help" className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
+              <IconQuestion className="size-5" />
+            </button>
+            <button type="button" aria-label="Share feedback" onClick={() => setFeedbackModalOpen(true)} className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
+              <IconStarOutline className="size-5" />
+            </button>
+            <button type="button" aria-label="Share" className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
+              <IconShare className="size-5" />
+            </button>
+          </div>
+        </header>
+      )}
 
       {/* Body */}
       <div className="relative flex min-h-0 flex-1">
@@ -1908,6 +2145,13 @@ export default function ContentViewer() {
                 setSelectedSessionNumber(null);
                 setShowRecording(false);
               }}
+              liveProgram={options.liveProgram}
+              showSessionBanners={options.showSessionBanners}
+              compactCourseInfo={options.compactCourseInfo}
+              seeMoreOpen={seeMoreOpen}
+              onSeeMoreChange={setSeeMoreOpen}
+              exitDestination={exitDestination}
+              noHeader={options.noHeader}
             />
           ) : (
             <LessonsAccordionSidebar
@@ -1923,22 +2167,62 @@ export default function ContentViewer() {
               }}
               onSwitchCohort={() => setCohortModalOpen(true)}
               hideTabs={options.sidebarView !== "tabbed"}
+              liveProgram={options.liveProgram}
+              showSessionBanners={options.showSessionBanners}
+              exitDestination={exitDestination}
+              noHeader={options.noHeader}
             />
           )
         ) : (
-          <button
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open sidebar"
-            className="absolute left-0 top-6 z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-white p-4 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-          >
-            <IconLeftSidebarOpen className="size-6" aria-hidden />
-          </button>
+          <>
+            <button
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open sidebar"
+              className="absolute left-0 top-4 z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-white p-3 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconLeftSidebarOpen className="size-5" aria-hidden />
+            </button>
+            {options.noHeader && (
+              <Link
+                to={exitDestination}
+                className="absolute left-14 top-4 z-10 flex items-center gap-1 rounded-full border border-leland-gray-stroke bg-white px-4 py-2 shadow-sm leland-paragraph-sm font-medium text-leland-gray-dark hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+              >
+                <IconChevronLeft className="size-4 shrink-0" />
+                My content
+              </Link>
+            )}
+          </>
         )}
 
         {/* Main content + section nav. The Calendar tab takes over the main
             area (calendar → session detail); lesson sections otherwise.
             (Community isn't here — it opens as its own page in a new tab.) */}
-        <div className={`flex min-w-0 flex-1 flex-col overflow-hidden${options.beigeBackground ? " bg-leland-beige/50" : ""}`}>
+        <div className={`relative flex min-w-0 flex-1 flex-col overflow-hidden${options.beigeBackground ? " bg-leland-beige/50" : ""}`}>
+          {/* Floating action buttons — top-right of content area (no-header mode only) */}
+          {options.noHeader && <div className="absolute right-6 top-4 z-10 flex gap-2">
+            <button
+              type="button"
+              aria-label="Get help"
+              className="flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-dark shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+            >
+              <IconQuestion className="size-5" />
+            </button>
+            <button
+              type="button"
+              aria-label="Share feedback"
+              onClick={() => setFeedbackModalOpen(true)}
+              className="flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-dark shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+            >
+              <IconStarOutline className="size-5" />
+            </button>
+            <button
+              type="button"
+              aria-label="Share"
+              className="flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-dark shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+            >
+              <IconShare className="size-5" />
+            </button>
+          </div>}
           {(options.sidebarView === "tabbed" || options.sidebarView === "combined") && (sidebarTab === "live" || sidebarTab === "overview") ? (
             <div className="min-h-0 flex-1 flex flex-col overflow-hidden">
               {showRecording ? (
@@ -1969,7 +2253,13 @@ export default function ContentViewer() {
             </div>
           ) : (
             <>
-              {section.kind === 'blocks' ? (
+              {section.kind === 'blocks' && lessonShowRecording ? (
+                <SessionRecordingView
+                  session={LIVE_SESSIONS[lessonIdx] ?? LIVE_SESSIONS[0]}
+                  onBack={() => setLessonShowRecording(false)}
+                  breadcrumb
+                />
+              ) : section.kind === 'blocks' ? (
                 <div className="min-h-0 flex-1 overflow-y-auto">
                   <LessonPageProvider
                     actions={{
@@ -1980,19 +2270,21 @@ export default function ContentViewer() {
                         setShowRecording(false);
                       },
                       liveSessionVariant: options.liveSessionVariant,
+                      liveProgram: options.liveProgram,
+                      onViewRecording: () => setLessonShowRecording(true),
                     }}
                   >
                     {/* Larger gap-10 between product-level blocks (top banner,
                         bottom feedback) and the lesson content zone; gap-6
                         within the content zone. */}
-                    <div className="mx-auto flex w-full max-w-[800px] flex-col gap-10 px-8 pt-10">
-                      {lesson.topBlocks?.length ? (
-                        <BlockList blocks={lesson.topBlocks} />
-                      ) : null}
+                    <div className={`mx-auto flex w-full max-w-[800px] flex-col gap-10 px-8 ${options.noHeader ? "pt-8" : "pt-10"}`}>
                       <div className="flex flex-col gap-8">
                         <p className="leland-paragraph-base font-medium text-leland-gray-dark">
                           Lesson {lessonIdx + 1}
                         </p>
+                        {lesson.topBlocks?.length ? (
+                          <BlockList blocks={lesson.topBlocks} />
+                        ) : null}
                         <div className="flex flex-col gap-4">
                           <div className="flex flex-col gap-1">
                             <h1 className="text-heading-4xl md:text-heading-5xl font-season font-normal text-leland-gray-dark">
@@ -2065,6 +2357,16 @@ export default function ContentViewer() {
                     </button>
                   </div>
                 </div>
+              ) : section.kind === 'interactive' ? (
+                <div className="min-h-0 flex-1 overflow-y-auto">
+                  <div className={`mx-auto w-full max-w-[800px] px-8 pb-16 ${options.noHeader ? "pt-8" : "pt-10"}`}>
+                    <GettingStartedFlow
+                      key={`${lesson.id}/${section.id}`}
+                      flow={section.flow}
+                      onComplete={() => markComplete(lesson.id, section.id)}
+                    />
+                  </div>
+                </div>
               ) : (
                 <>
                   <div className="relative min-h-0 flex-1 overflow-hidden">
@@ -2093,15 +2395,17 @@ export default function ContentViewer() {
                 currentEntryId={section.id}
                 entries={lesson.sections}
               />
-              <CourseViewerSectionNav
-                prevSectionLink={
-                  prevSection ? sectionUrl(lesson, prevSection) : null
-                }
-                nextSectionLink={
-                  nextSection ? sectionUrl(lesson, nextSection) : null
-                }
-                onNext={() => markComplete(lesson.id, section.id)}
-              />
+              {lesson.id !== "start-here" && (
+                <CourseViewerSectionNav
+                  prevSectionLink={
+                    prevSection ? sectionUrl(lesson, prevSection) : null
+                  }
+                  nextSectionLink={
+                    nextSection ? sectionUrl(lesson, nextSection) : null
+                  }
+                  onNext={() => markComplete(lesson.id, section.id)}
+                />
+              )}
             </>
           )}
         </div>
@@ -2122,7 +2426,6 @@ export default function ContentViewer() {
         onToggle={toggleOption}
         onSetSidebarView={(view) => setOption("sidebarView", view)}
         onSetVariant={(variant) => setOption("liveSessionVariant", variant)}
-        onSetExitNav={(style) => setOption("exitNavStyle", style)}
       />
       <SelectCohortModal
         open={cohortModalOpen}
