@@ -819,47 +819,32 @@ function LessonsAccordionSidebar({
     <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
       {/* My content back nav — only when header is hidden */}
       {noHeader && (
-        <Link
-          to={exitDestination}
-          className="flex shrink-0 items-center gap-1.5 border-b border-leland-gray-stroke px-6 py-3 leland-paragraph-sm font-medium text-leland-gray-light hover:bg-leland-gray-hover hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary"
-        >
-          <IconChevronLeft className="size-3.5 shrink-0" />
-          My content
-        </Link>
-      )}
-      {/* Program info card — mirrors what CombinedSidebar shows in the header view */}
-      {noHeader && (
-        <div className="flex flex-col gap-4 border-b border-leland-gray-stroke px-6 pb-5 pt-6">
-          <img
-            src="/program-cover.avif"
-            alt="AI Builder Program cover"
-            className="h-16 w-[122px] shrink-0 rounded object-cover"
-          />
-          <p className="font-season text-heading-3xl font-normal text-leland-gray-dark">
-            {COURSE_TITLE_FULL}
-          </p>
-          <div className="flex items-center gap-2">
-            <img
-              src="/leland-profile.png"
-              alt="Leland"
-              className="size-5 shrink-0 rounded-full object-cover"
-            />
-            <span className="leland-paragraph-base text-leland-gray-extra-light">Created by Leland</span>
-          </div>
-        </div>
-      )}
-      {(hideTabs || !liveProgram) ? (
-        <div className="flex items-center pl-6 pr-4 pt-4">
-          <button
-            onClick={onToggle}
-            aria-label="Close sidebar"
-            className="ml-auto flex size-10 shrink-0 items-center justify-center p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+        <div className="shrink-0 border-b border-leland-gray-stroke px-6 py-3">
+          <Link
+            to={exitDestination}
+            className="inline-flex items-center gap-1.5 rounded-full bg-leland-gray-solid-hover px-3 py-1.5 leland-paragraph-sm font-medium text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
           >
-            <IconLeftSidebarClose className="size-6" aria-hidden />
-          </button>
+            <IconChevronLeft className="size-3.5 shrink-0" />
+            My content
+          </Link>
         </div>
-      ) : (
-        /* Two-tab header (Overview / Lessons) + collapse */
+      )}
+      {/* Program info card — always shown in lessons-only sidebar */}
+      <div className="flex flex-col gap-3 border-b border-leland-gray-stroke px-6 pb-6 pt-6">
+        <p className="font-season text-heading-3xl font-normal text-leland-gray-dark">
+          {COURSE_TITLE_FULL}
+        </p>
+        <div className="flex items-center gap-2">
+          <img
+            src="/leland-profile.png"
+            alt="Leland"
+            className="size-5 shrink-0 rounded-full object-cover"
+          />
+          <span className="leland-paragraph-base text-leland-gray-extra-light">Created by Leland</span>
+        </div>
+      </div>
+      {(!hideTabs && liveProgram) && (
+        /* Two-tab header (Overview / Lessons) */
         <div className="flex items-center gap-8 border-b border-leland-gray-stroke px-3">
           <div className="flex flex-1 items-center gap-8 px-3">
             {SIDEBAR_TABS_TWO.map(({ id, label }) => (
@@ -877,13 +862,6 @@ function LessonsAccordionSidebar({
               </button>
             ))}
           </div>
-          <button
-            onClick={onToggle}
-            aria-label="Close sidebar"
-            className="flex size-11 shrink-0 items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-          >
-            <IconLeftSidebarClose className="size-6" aria-hidden />
-          </button>
         </div>
       )}
 
@@ -2132,47 +2110,56 @@ export default function ContentViewer() {
       {/* Body */}
       <div className="relative flex min-h-0 flex-1">
         {sidebarOpen ? (
-          options.sidebarView === "combined" ? (
-            <CombinedSidebar
-              currentLessonId={lesson.id}
-              currentSectionId={section.id}
-              completed={completed}
-              onToggle={() => setSidebarOpen(false)}
-              onSwitchCohort={() => setCohortModalOpen(true)}
-              tab={sidebarTab}
-              onTabChange={(tab) => {
-                setSidebarTab(tab);
-                setSelectedSessionNumber(null);
-                setShowRecording(false);
-              }}
-              liveProgram={options.liveProgram}
-              showSessionBanners={options.showSessionBanners}
-              compactCourseInfo={options.compactCourseInfo}
-              seeMoreOpen={seeMoreOpen}
-              onSeeMoreChange={setSeeMoreOpen}
-              exitDestination={exitDestination}
-              noHeader={options.noHeader}
-            />
-          ) : (
-            <LessonsAccordionSidebar
-              currentLessonId={lesson.id}
-              currentSectionId={section.id}
-              completed={completed}
-              onToggle={() => setSidebarOpen(false)}
-              tab={sidebarTab}
-              onTabChange={(tab) => {
-                setSidebarTab(tab);
-                setSelectedSessionNumber(null);
-                setShowRecording(false);
-              }}
-              onSwitchCohort={() => setCohortModalOpen(true)}
-              hideTabs={options.sidebarView !== "tabbed"}
-              liveProgram={options.liveProgram}
-              showSessionBanners={options.showSessionBanners}
-              exitDestination={exitDestination}
-              noHeader={options.noHeader}
-            />
-          )
+          <div className="relative shrink-0">
+            {options.sidebarView === "combined" ? (
+              <CombinedSidebar
+                currentLessonId={lesson.id}
+                currentSectionId={section.id}
+                completed={completed}
+                onToggle={() => setSidebarOpen(false)}
+                onSwitchCohort={() => setCohortModalOpen(true)}
+                tab={sidebarTab}
+                onTabChange={(tab) => {
+                  setSidebarTab(tab);
+                  setSelectedSessionNumber(null);
+                  setShowRecording(false);
+                }}
+                liveProgram={options.liveProgram}
+                showSessionBanners={options.showSessionBanners}
+                compactCourseInfo={options.compactCourseInfo}
+                seeMoreOpen={seeMoreOpen}
+                onSeeMoreChange={setSeeMoreOpen}
+                exitDestination={exitDestination}
+                noHeader={options.noHeader}
+              />
+            ) : (
+              <LessonsAccordionSidebar
+                currentLessonId={lesson.id}
+                currentSectionId={section.id}
+                completed={completed}
+                onToggle={() => setSidebarOpen(false)}
+                tab={sidebarTab}
+                onTabChange={(tab) => {
+                  setSidebarTab(tab);
+                  setSelectedSessionNumber(null);
+                  setShowRecording(false);
+                }}
+                onSwitchCohort={() => setCohortModalOpen(true)}
+                hideTabs={options.sidebarView !== "tabbed"}
+                liveProgram={options.liveProgram}
+                showSessionBanners={options.showSessionBanners}
+                exitDestination={exitDestination}
+                noHeader={options.noHeader}
+              />
+            )}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Collapse sidebar"
+              className="absolute left-full top-4 z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-white p-3 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconLeftSidebarClose className="size-5" aria-hidden />
+            </button>
+          </div>
         ) : (
           <>
             <button
