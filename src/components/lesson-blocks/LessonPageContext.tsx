@@ -8,8 +8,9 @@ import type { LiveSessionVariant } from "../../data/lessonBlocks";
 type LessonPageActions = {
   onShareFeedback: () => void;
   onOpenCalendar: () => void;
-  // Which live-session callout variant to render (from the prototype menu).
+  onViewRecording: () => void;
   liveSessionVariant: LiveSessionVariant;
+  liveProgram: boolean;
 };
 
 const LessonPageContext = createContext<LessonPageActions | null>(null);

@@ -1,4 +1,4 @@
-import { type FC, type ReactNode, type SVGProps } from "react";
+import { type FC, type ReactNode, type SVGProps, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -30,6 +30,35 @@ import type {
 const CALLOUT_CONTAINER =
   "flex w-full items-center gap-3 rounded-lg border border-leland-gray-stroke bg-white p-4";
 
+// Renders a frame from a video as a thumbnail with a play icon overlay.
+// Seeks to 2s on load to skip any black opening frame.
+function VideoThumbnail({ src }: { src: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const seek = () => { el.currentTime = 2; };
+    el.addEventListener("loadedmetadata", seek);
+    return () => el.removeEventListener("loadedmetadata", seek);
+  }, [src]);
+  return (
+    <div className="relative flex aspect-video h-14 shrink-0 overflow-hidden rounded-lg border border-leland-gray-stroke">
+      <video
+        ref={ref}
+        src={src}
+        muted
+        preload="metadata"
+        className="h-full w-full object-cover"
+      />
+      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+        <div className="flex size-6 items-center justify-center rounded-full bg-white/90 shadow">
+          <IconPlayVideo className="size-3.5 text-leland-gray-dark" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function LiveDateTile({ month, day }: { month: string; day: string }) {
   return (
     <div className="flex size-12 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke">
@@ -59,6 +88,7 @@ type CalloutTrailing =
 // the per-variant copy so the layout lives in one place.
 export function LiveSessionCallout({
   recording = false,
+  recordingVideoSrc,
   month,
   day,
   title,
@@ -67,6 +97,7 @@ export function LiveSessionCallout({
   onClick,
 }: {
   recording?: boolean;
+  recordingVideoSrc?: string;
   month?: string;
   day?: string;
   title: string;
@@ -77,9 +108,13 @@ export function LiveSessionCallout({
   const body = (
     <>
       {recording ? (
-        <div className="flex aspect-[1200/630] h-12 shrink-0 items-center justify-center overflow-hidden rounded border border-leland-gray-stroke bg-leland-gray-hover">
-          <IconPlayVideo className="size-5 text-leland-gray-light" />
-        </div>
+        recordingVideoSrc ? (
+          <VideoThumbnail src={recordingVideoSrc} />
+        ) : (
+          <div className="flex aspect-[1200/630] h-12 shrink-0 items-center justify-center overflow-hidden rounded border border-leland-gray-stroke bg-leland-gray-hover">
+            <IconPlayVideo className="size-5 text-leland-gray-light" />
+          </div>
+        )
       ) : (
         <LiveDateTile month={month ?? ""} day={day ?? ""} />
       )}
@@ -136,13 +171,16 @@ export function LiveSessionCallout({
 // Lesson-page live-session banner: four states (chosen from the prototype menu)
 // with the session title in the subtext.
 export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType }) {
-  const { onOpenCalendar, liveSessionVariant } = useLessonPage();
+  const { onOpenCalendar, onViewRecording, liveSessionVariant, liveProgram } = useLessonPage();
+
+  if (!liveProgram) return null;
 
   switch (liveSessionVariant) {
     case "watchRecording":
       return (
         <LiveSessionCallout
           recording
+          recordingVideoSrc={block.recordingVideoSrc}
           title="Live session recording"
           subtitle={
             <>
@@ -151,7 +189,7 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
             </>
           }
           trailing={{ kind: "arrow" }}
-          onClick={onOpenCalendar}
+          onClick={onViewRecording}
         />
       );
     case "addedToCalendar":

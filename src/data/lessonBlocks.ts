@@ -68,6 +68,8 @@ export type LiveSessionBannerBlock = {
   time?: string; // e.g. "11:00 AM PT" — shown in the recording variant
   sessionTitle: string; // the session/lesson name, shown as the subtitle
   countdownLabel?: string; // e.g. "2 days" — shown in the countdown variant
+  // Video URL used to generate a thumbnail preview in the "watchRecording" variant.
+  recordingVideoSrc?: string;
 };
 
 export type ShareFeedbackBlock = { kind: "shareFeedback" };
