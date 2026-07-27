@@ -37,8 +37,8 @@ import starIcon from "../assets/icons/star-icon.svg";
 type StepKey = "product" | "offerings" | "page";
 
 const STEPS: { key: StepKey; label: string; icon: string }[] = [
-  { key: "product", label: "Offering", icon: moneyIcon },
   { key: "offerings", label: "Products", icon: browseIcon },
+  { key: "product", label: "Details", icon: moneyIcon },
   { key: "page", label: "Page", icon: storeIcon },
 ];
 
@@ -452,7 +452,7 @@ export default function CoachProductNew() {
   const navigate = useNavigate();
 
   const [pendingNav, setPendingNav] = useState<string | null>(null);
-  const [step, setStep] = useState<StepKey>("product");
+  const [step, setStep] = useState<StepKey>("offerings");
 
   // Shared product-in-progress state, reflected live in the preview.
   const [name, setName] = useState("");
