@@ -22,6 +22,8 @@ export const LESSON_1_TOP_BLOCKS: Block[] = [
     time: "Apr 21, 11:00 AM PT",
     sessionTitle: "Build a real product with world-class design",
     countdownLabel: "2 days",
+    recordingVideoSrc:
+      "https://tannerthelin.github.io/courses-prototype/assets/8814086-hd_1920_1080_25fps-Bbf7RRvH.mp4",
   },
 ];
 
