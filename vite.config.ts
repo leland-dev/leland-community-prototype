@@ -70,7 +70,7 @@ export default defineConfig(({ mode }) => {
   const apiKey = env.ANTHROPIC_API_KEY;
   const store = new FileAgentStore(".agents-store.json");
   return {
-    base: "/",
+    base: process.env.GITHUB_ACTIONS ? "/leland-community-prototype/" : "/",
     plugins: [react(), tailwindcss(), agentApiDevPlugin(apiKey, store)],
     server: { port: 5174, host: true },
   };
