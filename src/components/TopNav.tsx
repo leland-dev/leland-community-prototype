@@ -59,7 +59,7 @@ const profileMenuGroups = [
   },
   {
     items: [
-      { to: "/coach/home", icon: switchIcon, label: "Switch to coaching", danger: false },
+      { to: "/coach/inbox", icon: switchIcon, label: "Switch to coaching", danger: false },
       { to: null, icon: helpIcon, label: "Help", danger: false },
       { to: null, icon: logOutIcon, label: "Log out", danger: true },
     ],
@@ -119,7 +119,7 @@ export default function TopNav() {
       <div className="flex items-stretch justify-between px-6">
         {/* Left: Logo + Nav links */}
         <div className="flex items-stretch gap-1">
-          <NavLink to="/" className="mr-4 flex shrink-0 items-center py-5">
+          <NavLink to={isCoachMode ? "/coach/inbox" : "/"} className="mr-4 flex shrink-0 items-center py-5">
             <img src={lelandWordmark} alt="Leland" className="h-6 w-auto" />
           </NavLink>
 

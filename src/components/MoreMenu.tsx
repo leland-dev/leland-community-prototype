@@ -23,7 +23,7 @@ const menuGroups = [
   },
   {
     items: [
-      { icon: switchIcon, label: "Switch to coaching", danger: false, to: "/coach/home" as string | null },
+      { icon: switchIcon, label: "Switch to coaching", danger: false, to: "/coach/inbox" as string | null },
       { icon: helpIcon, label: "Help", danger: false },
       { icon: logOutIcon, label: "Log out", danger: true },
     ],
