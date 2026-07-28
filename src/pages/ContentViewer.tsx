@@ -653,7 +653,7 @@ function LessonAccordion({
     });
 
   return (
-    <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto">
+    <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pt-3">
       {ALL_LESSONS.map((l, idx) => {
         const isStartHere = l.id === "start-here";
         const percent = lessonProgress(l, completed);
@@ -665,7 +665,7 @@ function LessonAccordion({
         return (
           <div
             key={l.id}
-            className="flex flex-col gap-3 border-b border-leland-gray-stroke py-5"
+            className="flex flex-col gap-5 border-b border-leland-gray-stroke py-5"
           >
             <button
               type="button"
