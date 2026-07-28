@@ -676,7 +676,7 @@ function LessonAccordion({
                 {isStartHere ? "Before you begin" : `Lesson ${idx}`}
               </span>
               <span className="flex items-center gap-3">
-                <span className={`flex-1 ${largerLessonHeadings ? "leland-subtext-base" : "leland-paragraph-lg font-medium text-leland-gray-dark"}`}>
+                <span className={`flex-1 ${largerLessonHeadings ? "leland-paragraph-base" : "leland-paragraph-lg font-medium text-leland-gray-dark"}`}>
                   {l.title}
                 </span>
                 <span
