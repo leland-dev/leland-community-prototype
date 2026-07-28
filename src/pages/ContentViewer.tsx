@@ -158,7 +158,7 @@ const LESSONS: Lesson[] = (lessonData as Lesson[]).map((lesson) =>
 const START_HERE: Lesson = {
   id: "start-here",
   number: 0,
-  title: "Start here",
+  title: "Get set up before Lesson 1",
   subtitle: "Complete these steps before your first session so you're ready to hit the ground running.",
   durationMin: 20,
   sections: [
@@ -670,40 +670,23 @@ function LessonAccordion({
             <button
               type="button"
               onClick={() => toggle(l.id)}
-              className="flex rounded px-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+              className="flex flex-col gap-1.5 rounded px-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
-              {isStartHere ? (
-                <span className="flex flex-1 items-center gap-3">
-                  <span className="flex-1 leland-heading-lg font-semibold text-leland-gray-dark">
-                    Before you begin
-                  </span>
-                  <span role="img" aria-label={`${completedCount}/${totalCount} complete`}>
-                    <CircularProgress percent={percent} />
-                  </span>
-                  <IconChevronDown
-                    className="size-5 shrink-0 text-leland-gray-light transition-transform"
-                    style={isOpen ? { transform: "rotate(180deg)" } : undefined}
-                  />
+              <span className={largerLessonHeadings ? "leland-heading-lg font-semibold text-leland-gray-dark" : "leland-subtext-sm font-semibold uppercase tracking-[1.3px] text-leland-gray-extra-light"}>
+                {isStartHere ? "Before you begin" : `Lesson ${idx}`}
+              </span>
+              <span className="flex items-center gap-3">
+                <span className={`flex-1 ${largerLessonHeadings ? "leland-paragraph-base text-leland-gray-light" : "leland-paragraph-lg font-medium text-leland-gray-dark"}`}>
+                  {l.title}
                 </span>
-              ) : (
-                <span className="flex flex-col gap-1.5">
-                  <span className={largerLessonHeadings ? "leland-heading-lg font-semibold text-leland-gray-dark" : "leland-subtext-sm font-semibold uppercase tracking-[1.3px] text-leland-gray-extra-light"}>
-                    {`Lesson ${idx}`}
-                  </span>
-                  <span className="flex items-center gap-3">
-                    <span className={`flex-1 ${largerLessonHeadings ? "leland-paragraph-base text-leland-gray-light" : "leland-paragraph-lg font-medium text-leland-gray-dark"}`}>
-                      {l.title}
-                    </span>
-                    <span role="img" aria-label={`${completedCount}/${totalCount} complete`}>
-                      <CircularProgress percent={percent} />
-                    </span>
-                    <IconChevronDown
-                      className="size-5 shrink-0 text-leland-gray-light transition-transform"
-                      style={isOpen ? { transform: "rotate(180deg)" } : undefined}
-                    />
-                  </span>
+                <span role="img" aria-label={`${completedCount}/${totalCount} complete`}>
+                  <CircularProgress percent={percent} />
                 </span>
-              )}
+                <IconChevronDown
+                  className="size-5 shrink-0 text-leland-gray-light transition-transform"
+                  style={isOpen ? { transform: "rotate(180deg)" } : undefined}
+                />
+              </span>
             </button>
             {liveProgram && showSessionBanners && !isStartHere && l.sections.length > 0 && (
               <div className="px-6">
