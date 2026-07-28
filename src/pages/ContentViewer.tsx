@@ -2009,6 +2009,7 @@ export default function ContentViewer() {
   const params = useParams<{ lessonId?: string; sectionId?: string }>();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>("lessons");
+  const contentScrollRef = useRef<HTMLDivElement>(null);
 
   // Navigating to a lesson section always exits calendar/overview back to lesson content.
   useEffect(() => {
@@ -2017,6 +2018,8 @@ export default function ContentViewer() {
     }
     setLessonShowRecording(false);
     setSeeMoreOpen(false);
+    // Scroll content area back to top on section change.
+    contentScrollRef.current?.scrollTo({ top: 0 });
     // Scroll the active section into view in the sidebar after render.
     const id = params.sectionId;
     const timer = setTimeout(() => {
@@ -2247,7 +2250,7 @@ export default function ContentViewer() {
                   breadcrumb
                 />
               ) : section.kind === 'blocks' ? (
-                <div className="min-h-0 flex-1 overflow-y-auto">
+                <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
                   <LessonPageProvider
                     actions={{
                       onShareFeedback: () => setFeedbackModalOpen(true),
@@ -2324,7 +2327,7 @@ export default function ContentViewer() {
                   </LessonPageProvider>
                 </div>
               ) : section.kind === 'html' ? (
-                <div className="min-h-0 flex-1 overflow-y-auto">
+                <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
                   <div className="mx-auto w-full max-w-[800px] pt-10 pb-6">
                     <div className="overflow-hidden rounded-2xl border border-leland-gray-stroke">
                       <SectionContent
@@ -2345,7 +2348,7 @@ export default function ContentViewer() {
                   </div>
                 </div>
               ) : section.kind === 'interactive' ? (
-                <div className="min-h-0 flex-1 overflow-y-auto">
+                <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
                   <div className={`mx-auto w-full max-w-[800px] px-8 pb-16 ${options.noHeader ? "pt-8" : "pt-10"}`}>
                     <GettingStartedFlow
                       key={`${lesson.id}/${section.id}`}
