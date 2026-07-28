@@ -836,7 +836,7 @@ function LessonsAccordionSidebar({
         </p>
         <div className="flex items-center gap-2">
           <img
-            src="/leland-profile.png"
+            src={`${import.meta.env.BASE_URL}leland-profile.png`}
             alt="Leland"
             className="size-5 shrink-0 rounded-full object-cover"
           />
@@ -1045,7 +1045,7 @@ function CombinedSidebar({
             {/* Thumbnail */}
             {!compactCourseInfo && (
               <img
-                src="/program-cover.avif"
+                src={`${import.meta.env.BASE_URL}program-cover.avif`}
                 alt="AI Builder Program cover"
                 className="h-16 w-[122px] shrink-0 rounded object-cover"
               />
@@ -1057,7 +1057,7 @@ function CombinedSidebar({
             {/* Creator */}
             <div className="flex items-center gap-2">
               <img
-                src="/leland-profile.png"
+                src={`${import.meta.env.BASE_URL}leland-profile.png`}
                 alt="Leland"
                 className="size-5 shrink-0 rounded-full object-cover"
               />
