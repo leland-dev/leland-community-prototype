@@ -624,12 +624,14 @@ function LessonAccordion({
   completed,
   liveProgram = false,
   showSessionBanners = true,
+  largerLessonHeadings = false,
 }: {
   currentLessonId: string;
   currentSectionId: string;
   completed: Set<string>;
   liveProgram?: boolean;
   showSessionBanners?: boolean;
+  largerLessonHeadings?: boolean;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(
     () => new Set([currentLessonId]),
@@ -670,11 +672,11 @@ function LessonAccordion({
               onClick={() => toggle(l.id)}
               className="flex flex-col gap-1.5 rounded px-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
-              <span className="leland-subtext-sm font-semibold uppercase tracking-[1.3px] text-leland-gray-extra-light">
+              <span className={largerLessonHeadings ? "leland-heading-lg font-semibold text-leland-gray-dark" : "leland-subtext-sm font-semibold uppercase tracking-[1.3px] text-leland-gray-extra-light"}>
                 {isStartHere ? "Before you begin" : `Lesson ${idx}`}
               </span>
               <span className="flex items-center gap-3">
-                <span className="flex-1 leland-paragraph-lg font-medium text-leland-gray-dark">
+                <span className={`flex-1 ${largerLessonHeadings ? "leland-subtext-base" : "leland-paragraph-lg font-medium text-leland-gray-dark"}`}>
                   {l.title}
                 </span>
                 <span
@@ -799,6 +801,7 @@ function LessonsAccordionSidebar({
   hideTabs = false,
   liveProgram = true,
   showSessionBanners = true,
+  largerLessonHeadings = false,
   exitDestination,
   noHeader = true,
 }: {
@@ -812,6 +815,7 @@ function LessonsAccordionSidebar({
   hideTabs?: boolean;
   liveProgram?: boolean;
   showSessionBanners?: boolean;
+  largerLessonHeadings?: boolean;
   exitDestination: string;
   noHeader?: boolean;
 }) {
@@ -943,6 +947,7 @@ function LessonsAccordionSidebar({
           completed={completed}
           liveProgram={liveProgram}
           showSessionBanners={showSessionBanners}
+          largerLessonHeadings={largerLessonHeadings}
         />
       )}
     </aside>
@@ -1164,6 +1169,7 @@ function CombinedSidebar({
           completed={completed}
           liveProgram={liveProgram}
           showSessionBanners={showSessionBanners}
+          largerLessonHeadings={largerLessonHeadings}
         />
       </div>
     </aside>
@@ -1316,6 +1322,7 @@ type PrototypeOptions = {
   noHeader: boolean;
   showSiteNav: boolean;
   showSessionBanners: boolean;
+  largerLessonHeadings: boolean;
   liveSessionVariant: LiveSessionVariant;
 };
 
@@ -1334,6 +1341,7 @@ const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
   noHeader: true,
   showSiteNav: false,
   showSessionBanners: true,
+  largerLessonHeadings: false,
   liveSessionVariant: "addToCalendar",
 };
 
@@ -1344,6 +1352,7 @@ const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
   { key: "noHeader", label: "No header" },
   { key: "showSiteNav", label: "Show site nav" },
   { key: "showSessionBanners", label: "Session banners" },
+  { key: "largerLessonHeadings", label: "Larger lesson headings" },
 ];
 
 const SIDEBAR_VIEW_OPTIONS: { value: SidebarView; label: string }[] = [
@@ -2151,6 +2160,7 @@ export default function ContentViewer() {
                 hideTabs={options.sidebarView !== "tabbed"}
                 liveProgram={options.liveProgram}
                 showSessionBanners={options.showSessionBanners}
+                largerLessonHeadings={options.largerLessonHeadings}
                 exitDestination={exitDestination}
                 noHeader={options.noHeader}
               />
