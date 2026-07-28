@@ -691,7 +691,7 @@ function LessonAccordion({
                     {`Lesson ${idx}`}
                   </span>
                   <span className="flex items-center gap-3">
-                    <span className={`flex-1 ${largerLessonHeadings ? "leland-paragraph-base text-leland-gray-light" : "leland-paragraph-lg font-medium text-leland-gray-light"}`}>
+                    <span className={`flex-1 ${largerLessonHeadings ? "leland-paragraph-base text-leland-gray-light" : "leland-paragraph-lg font-medium text-leland-gray-dark"}`}>
                       {l.title}
                     </span>
                     <span role="img" aria-label={`${completedCount}/${totalCount} complete`}>
