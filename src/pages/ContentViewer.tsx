@@ -965,6 +965,7 @@ function CombinedSidebar({
   liveProgram = true,
   showSessionBanners = true,
   compactCourseInfo = false,
+  largerLessonHeadings = false,
   seeMoreOpen,
   onSeeMoreChange,
   exitDestination,
@@ -980,6 +981,7 @@ function CombinedSidebar({
   liveProgram?: boolean;
   showSessionBanners?: boolean;
   compactCourseInfo?: boolean;
+  largerLessonHeadings?: boolean;
   seeMoreOpen: boolean;
   onSeeMoreChange: (open: boolean) => void;
   exitDestination: string;
@@ -2143,6 +2145,7 @@ export default function ContentViewer() {
                 onSeeMoreChange={setSeeMoreOpen}
                 exitDestination={exitDestination}
                 noHeader={options.noHeader}
+                largerLessonHeadings={options.largerLessonHeadings}
               />
             ) : (
               <LessonsAccordionSidebar
