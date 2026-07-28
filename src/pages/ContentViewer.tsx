@@ -670,28 +670,40 @@ function LessonAccordion({
             <button
               type="button"
               onClick={() => toggle(l.id)}
-              className="flex flex-col gap-1.5 rounded px-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+              className="flex rounded px-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
-              <span className={largerLessonHeadings ? "leland-heading-lg font-semibold text-leland-gray-dark" : "leland-subtext-sm font-semibold uppercase tracking-[1.3px] text-leland-gray-extra-light"}>
-                {isStartHere ? "Before you begin" : `Lesson ${idx}`}
-              </span>
-              <span className="flex items-center gap-3">
-                {!isStartHere && (
+              {isStartHere ? (
+                <span className="flex flex-1 items-center gap-3">
                   <span className={`flex-1 ${largerLessonHeadings ? "leland-paragraph-base" : "leland-paragraph-lg font-medium text-leland-gray-dark"}`}>
-                    {l.title}
+                    Before you begin
                   </span>
-                )}
-                <span
-                  role="img"
-                  aria-label={`${completedCount}/${totalCount} complete`}
-                >
-                  <CircularProgress percent={percent} />
+                  <span role="img" aria-label={`${completedCount}/${totalCount} complete`}>
+                    <CircularProgress percent={percent} />
+                  </span>
+                  <IconChevronDown
+                    className="size-5 shrink-0 text-leland-gray-light transition-transform"
+                    style={isOpen ? { transform: "rotate(180deg)" } : undefined}
+                  />
                 </span>
-                <IconChevronDown
-                  className="size-5 shrink-0 text-leland-gray-light transition-transform"
-                  style={isOpen ? { transform: "rotate(180deg)" } : undefined}
-                />
-              </span>
+              ) : (
+                <span className="flex flex-col gap-1.5">
+                  <span className={largerLessonHeadings ? "leland-heading-lg font-semibold text-leland-gray-dark" : "leland-subtext-sm font-semibold uppercase tracking-[1.3px] text-leland-gray-extra-light"}>
+                    {`Lesson ${idx}`}
+                  </span>
+                  <span className="flex items-center gap-3">
+                    <span className={`flex-1 ${largerLessonHeadings ? "leland-paragraph-base" : "leland-paragraph-lg font-medium text-leland-gray-dark"}`}>
+                      {l.title}
+                    </span>
+                    <span role="img" aria-label={`${completedCount}/${totalCount} complete`}>
+                      <CircularProgress percent={percent} />
+                    </span>
+                    <IconChevronDown
+                      className="size-5 shrink-0 text-leland-gray-light transition-transform"
+                      style={isOpen ? { transform: "rotate(180deg)" } : undefined}
+                    />
+                  </span>
+                </span>
+              )}
             </button>
             {liveProgram && showSessionBanners && !isStartHere && l.sections.length > 0 && (
               <div className="px-6">
