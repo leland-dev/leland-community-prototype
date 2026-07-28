@@ -1126,8 +1126,8 @@ function CombinedSidebar({
                     onClick={() => {}}
                   />
                   <SidebarMenuItem
-                    Icon={IconOnboarding}
-                    label="Setup guide"
+                    Icon={IconBooks}
+                    label="Knowledge hub"
                     external
                     onClick={() => {}}
                   />
