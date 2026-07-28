@@ -72,7 +72,7 @@ function CalendarButton({
 function DateChip({ month, day }: { month: string; day: string }) {
   return (
     <div className="flex w-12 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
-      <div className="flex items-center justify-center bg-leland-blue-light px-2.5 py-0.5">
+      <div className="flex items-center justify-center bg-leland-blue px-2.5 py-0.5">
         <span className="text-[10px] font-semibold uppercase tracking-[1px] text-leland-gray-dark">
           {month}
         </span>
