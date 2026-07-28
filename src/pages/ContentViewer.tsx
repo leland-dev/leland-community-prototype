@@ -2110,7 +2110,7 @@ export default function ContentViewer() {
       {/* Body */}
       <div className="relative flex min-h-0 flex-1">
         {sidebarOpen ? (
-          <div className="relative shrink-0">
+          <div className="relative flex shrink-0">
             {options.sidebarView === "combined" ? (
               <CombinedSidebar
                 currentLessonId={lesson.id}
