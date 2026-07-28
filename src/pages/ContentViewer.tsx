@@ -873,16 +873,16 @@ function LessonsAccordionSidebar({
         <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto px-3 py-5">
           {/* Cohort summary */}
           <div className="flex items-center gap-3 p-3">
-            <div className="flex w-12 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
-              <div className="flex items-center justify-center bg-leland-blue px-2.5 py-1">
-                <span className="text-[10px] font-semibold leading-none tracking-[1px] text-leland-gray-dark">MAY</span>
+            <div className="flex w-10 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
+              <div className="flex items-center justify-center bg-leland-blue px-2 py-0.5">
+                <span className="text-[9px] font-semibold leading-none tracking-[1px] text-leland-gray-dark">MAY</span>
               </div>
-              <div className="flex flex-1 items-center justify-center bg-white px-2.5 pb-1 pt-0.5">
-                <span className="leland-heading-xl font-semibold text-leland-gray-dark">24</span>
+              <div className="flex flex-1 items-center justify-center bg-white px-2 pb-1 pt-0.5">
+                <span className="leland-heading-base font-semibold text-leland-gray-dark">24</span>
               </div>
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <p className="leland-heading-lg font-semibold text-leland-gray-dark">May 16 – Jun 8</p>
+              <p className="leland-heading-base font-semibold text-leland-gray-dark">May 16 – Jun 8</p>
               <div className="flex items-center gap-1.5">
                 <IconRecurring className="size-[15px] shrink-0 text-leland-gray-light" />
                 <button
@@ -1074,16 +1074,16 @@ function CombinedSidebar({
 
           {/* Date / cohort row — live program only */}
           {liveProgram && <div className="mt-5 flex items-center gap-3 border-y border-leland-gray-stroke px-6 py-4">
-            <div className="flex w-12 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
-              <div className="flex items-center justify-center bg-leland-blue px-2.5 py-1">
-                <span className="text-[10px] font-semibold leading-none tracking-[1px] text-leland-gray-dark">MAY</span>
+            <div className="flex w-10 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
+              <div className="flex items-center justify-center bg-leland-blue px-2 py-0.5">
+                <span className="text-[9px] font-semibold leading-none tracking-[1px] text-leland-gray-dark">MAY</span>
               </div>
-              <div className="flex flex-1 items-center justify-center bg-white px-2.5 pb-1 pt-0.5">
-                <span className="leland-heading-xl font-semibold text-leland-gray-dark">24</span>
+              <div className="flex flex-1 items-center justify-center bg-white px-2 pb-1 pt-0.5">
+                <span className="leland-heading-base font-semibold text-leland-gray-dark">24</span>
               </div>
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <p className="leland-heading-lg font-semibold text-leland-gray-dark">May 16 – Jun 8</p>
+              <p className="leland-heading-base font-semibold text-leland-gray-dark">May 16 – Jun 8</p>
               <div className="flex items-center gap-1.5">
                 <IconRecurring className="size-[15px] shrink-0 text-leland-gray-light" />
                 <button
