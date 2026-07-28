@@ -674,6 +674,9 @@ function LessonAccordion({
             >
               <span className={largerLessonHeadings ? "leland-heading-lg font-semibold text-leland-gray-dark" : "leland-subtext-sm font-semibold uppercase tracking-[1.3px] text-leland-gray-extra-light"}>
                 {isStartHere ? "Before you begin" : `Lesson ${idx}`}
+                {l.durationMin ? (
+                  <span className="font-normal normal-case tracking-normal"> · {l.durationMin}m</span>
+                ) : null}
               </span>
               <span className="flex items-center gap-3">
                 <span className={`flex-1 ${largerLessonHeadings ? "leland-paragraph-base text-leland-gray-light" : "leland-paragraph-lg font-medium text-leland-gray-dark"}`}>
