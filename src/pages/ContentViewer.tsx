@@ -1391,12 +1391,10 @@ export type SidebarView = "default" | "tabbed" | "combined";
 
 type PrototypeOptions = {
   sidebarView: SidebarView;
-  beigeBackground: boolean;
   liveProgram: boolean;
   compactCourseInfo: boolean;
   noHeader: boolean;
   showSiteNav: boolean;
-  showSessionBanners: boolean;
   largerLessonHeadings: boolean;
   liveSessionVariant: LiveSessionVariant;
 };
@@ -1410,23 +1408,19 @@ const PROTOTYPE_OPTIONS_KEY = "content-viewer-prototype-options";
 
 const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
   sidebarView: "default",
-  beigeBackground: false,
   liveProgram: true,
   compactCourseInfo: false,
   noHeader: true,
   showSiteNav: false,
-  showSessionBanners: true,
   largerLessonHeadings: false,
   liveSessionVariant: "addToCalendar",
 };
 
 const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
   { key: "liveProgram", label: "Live program" },
-  { key: "beigeBackground", label: "Beige background" },
   { key: "compactCourseInfo", label: "Compact course info" },
   { key: "noHeader", label: "No header" },
   { key: "showSiteNav", label: "Show site nav" },
-  { key: "showSessionBanners", label: "Session banners" },
   { key: "largerLessonHeadings", label: "Larger lesson headings" },
 ];
 
@@ -2212,7 +2206,7 @@ export default function ContentViewer() {
                   setShowRecording(false);
                 }}
                 liveProgram={options.liveProgram}
-                showSessionBanners={options.showSessionBanners}
+                showSessionBanners={true}
                 compactCourseInfo={options.compactCourseInfo}
                 seeMoreOpen={seeMoreOpen}
                 onSeeMoreChange={setSeeMoreOpen}
@@ -2235,7 +2229,7 @@ export default function ContentViewer() {
                 onSwitchCohort={() => setCohortModalOpen(true)}
                 hideTabs={options.sidebarView !== "tabbed"}
                 liveProgram={options.liveProgram}
-                showSessionBanners={options.showSessionBanners}
+                showSessionBanners={true}
                 largerLessonHeadings={options.largerLessonHeadings}
                 exitDestination={exitDestination}
                 noHeader={options.noHeader}
@@ -2273,7 +2267,7 @@ export default function ContentViewer() {
         {/* Main content + section nav. The Calendar tab takes over the main
             area (calendar → session detail); lesson sections otherwise.
             (Community isn't here — it opens as its own page in a new tab.) */}
-        <div className={`relative flex min-w-0 flex-1 flex-col overflow-hidden${options.beigeBackground ? " bg-leland-beige/50" : ""}`}>
+        <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-leland-beige/50">
           {/* Floating action buttons — top-right of content area (no-header mode only) */}
           {options.noHeader && <div className="absolute right-6 top-4 z-10 flex gap-2">
             <button
