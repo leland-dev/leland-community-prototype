@@ -1,4 +1,4 @@
-import { type FC, type ReactNode, type SVGProps, useRef, useEffect } from "react";
+import { type FC, type ReactNode, type SVGProps, useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -55,6 +55,64 @@ function VideoThumbnail({ src }: { src: string }) {
           <IconPlayVideo className="size-3.5 text-leland-gray-dark" />
         </div>
       </div>
+    </div>
+  );
+}
+
+function SessionRecordingEmbed({ src }: { src: string }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    const seek = () => { el.currentTime = 2; };
+    el.addEventListener("loadedmetadata", seek);
+    return () => el.removeEventListener("loadedmetadata", seek);
+  }, [src]);
+
+  return (
+    <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-leland-gray-stroke bg-black">
+      <video
+        ref={videoRef}
+        src={src}
+        controls={isPlaying}
+        className="h-full w-full object-cover"
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
+      />
+      {/* Pop-out button — always visible */}
+      <button
+        type="button"
+        onClick={() => window.open(src, "_blank", "noopener")}
+        className="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+        aria-label="Open in new window"
+      >
+        <IconArrowUpRight className="size-4" />
+      </button>
+      {/* Paused overlay */}
+      {!isPlaying && (
+        <button
+          type="button"
+          onClick={() => videoRef.current?.play()}
+          className="absolute inset-0 w-full focus:outline-none"
+          aria-label="Play session recording"
+        >
+          {/* Bottom gradient for label legibility */}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
+          {/* Centered play button */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="flex size-14 items-center justify-center rounded-full bg-white/25 backdrop-blur-sm">
+              <IconPlayVideo className="size-7 text-white" />
+            </div>
+          </div>
+          {/* Label bottom-left */}
+          <p className="absolute bottom-4 left-4 leland-heading-xl font-semibold text-white drop-shadow">
+            Session recording
+          </p>
+        </button>
+      )}
     </div>
   );
 }
@@ -177,25 +235,16 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
 
   switch (liveSessionVariant) {
     case "watchRecording":
-      return (
-        <div className="flex flex-col gap-3">
-          {block.recordingVideoSrc ? (
-            <video
-              src={block.recordingVideoSrc}
-              controls
-              className="aspect-video w-full rounded-xl border border-leland-gray-stroke bg-black"
-            />
-          ) : (
-            <LiveSessionCallout
-              recording
-              title="Live session recording"
-              subtitle={block.sessionTitle}
-              trailing={{ kind: "arrow" }}
-              onClick={onViewRecording}
-            />
-          )}
-          <p className="leland-paragraph-sm font-semibold text-leland-gray-dark">Session recording</p>
-        </div>
+      return block.recordingVideoSrc ? (
+        <SessionRecordingEmbed src={block.recordingVideoSrc} />
+      ) : (
+        <LiveSessionCallout
+          recording
+          title="Live session recording"
+          subtitle={block.sessionTitle}
+          trailing={{ kind: "arrow" }}
+          onClick={onViewRecording}
+        />
       );
     case "addedToCalendar":
       return (
