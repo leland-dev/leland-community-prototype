@@ -1047,8 +1047,8 @@ function CombinedSidebar({
 
       <div ref={scrollRef} className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pb-12">
         {/* Program info card */}
-        <div className="w-full bg-white pb-5">
-          <div className="flex flex-col gap-3 px-6 pt-6">
+        <div className={`w-full bg-white ${compactCourseInfo ? "" : "pb-5"}`}>
+          <div className={`flex flex-col gap-3 px-6 pt-6 ${compactCourseInfo ? "pb-5" : ""}`}>
             {/* Back link */}
             {noHeader && (
               <Link
