@@ -178,19 +178,31 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
   switch (liveSessionVariant) {
     case "watchRecording":
       return (
-        <LiveSessionCallout
-          recording
-          recordingVideoSrc={block.recordingVideoSrc}
-          title="Live session recording"
-          subtitle={
-            <>
-              {block.time ? `${block.time} · ` : ""}
-              {block.sessionTitle}
-            </>
-          }
-          trailing={{ kind: "arrow" }}
-          onClick={onViewRecording}
-        />
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-0.5">
+            <p className="leland-paragraph-sm font-semibold text-leland-gray-dark">Session recording</p>
+            {(block.time || block.sessionTitle) && (
+              <p className="leland-paragraph-sm text-leland-gray-light">
+                {[block.time, block.sessionTitle].filter(Boolean).join(" · ")}
+              </p>
+            )}
+          </div>
+          {block.recordingVideoSrc ? (
+            <video
+              src={block.recordingVideoSrc}
+              controls
+              className="aspect-video w-full rounded-xl border border-leland-gray-stroke bg-black"
+            />
+          ) : (
+            <LiveSessionCallout
+              recording
+              title="Live session recording"
+              subtitle={block.sessionTitle}
+              trailing={{ kind: "arrow" }}
+              onClick={onViewRecording}
+            />
+          )}
+        </div>
       );
     case "addedToCalendar":
       return (
