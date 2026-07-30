@@ -1069,7 +1069,7 @@ function CombinedSidebar({
             )}
 
             {/* Program title */}
-            <p className="text-heading-3xl font-season font-normal text-leland-gray-dark">{COURSE_TITLE_FULL}</p>
+            <p className="mt-2 text-heading-3xl font-season font-normal text-leland-gray-dark">{COURSE_TITLE_FULL}</p>
 
             {/* Creator */}
             <div className="flex items-center gap-2">
@@ -1084,7 +1084,7 @@ function CombinedSidebar({
 
           {compactCourseInfo ? (
             /* Compact: Quick links collapsible row */
-            <div ref={resourcesRef} className="mt-4 border-t border-leland-gray-stroke">
+            <div ref={resourcesRef} className="mt-5 border-t border-leland-gray-stroke">
               <button
                 type="button"
                 onClick={() => onSeeMoreChange(!seeMoreOpen)}
