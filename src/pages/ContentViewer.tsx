@@ -1047,7 +1047,7 @@ function CombinedSidebar({
 
       <div ref={scrollRef} className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pb-12">
         {/* Program info card */}
-        <div className={`w-full bg-white ${compactCourseInfo ? "" : "pb-5"}`}>
+        <div className="w-full bg-white pb-5">
           <div className="flex flex-col gap-3 px-6 pt-6">
             {/* Back link */}
             {noHeader && (
@@ -1084,7 +1084,7 @@ function CombinedSidebar({
 
           {compactCourseInfo ? (
             /* Compact: Quick links collapsible row */
-            <div ref={resourcesRef} className="sticky top-0 z-10 mt-5 border-t border-leland-gray-stroke bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)]">
+            <div ref={resourcesRef} className="sticky top-0 z-10 border-t border-leland-gray-stroke bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)]">
               <button
                 type="button"
                 onClick={() => onSeeMoreChange(!seeMoreOpen)}
