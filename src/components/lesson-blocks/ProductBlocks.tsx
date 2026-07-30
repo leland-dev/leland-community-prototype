@@ -179,14 +179,6 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
     case "watchRecording":
       return (
         <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-0.5">
-            <p className="leland-paragraph-sm font-semibold text-leland-gray-dark">Session recording</p>
-            {(block.time || block.sessionTitle) && (
-              <p className="leland-paragraph-sm text-leland-gray-light">
-                {[block.time, block.sessionTitle].filter(Boolean).join(" · ")}
-              </p>
-            )}
-          </div>
           {block.recordingVideoSrc ? (
             <video
               src={block.recordingVideoSrc}
@@ -202,6 +194,14 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
               onClick={onViewRecording}
             />
           )}
+          <div className="flex flex-col gap-0.5">
+            <p className="leland-paragraph-sm font-semibold text-leland-gray-dark">Session recording</p>
+            {(block.time || block.sessionTitle) && (
+              <p className="leland-paragraph-sm text-leland-gray-light">
+                {[block.time, block.sessionTitle].filter(Boolean).join(" · ")}
+              </p>
+            )}
+          </div>
         </div>
       );
     case "addedToCalendar":
