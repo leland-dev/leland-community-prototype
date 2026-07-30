@@ -194,14 +194,7 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
               onClick={onViewRecording}
             />
           )}
-          <div className="flex flex-col gap-0.5">
-            <p className="leland-paragraph-sm font-semibold text-leland-gray-dark">Session recording</p>
-            {(block.time || block.sessionTitle) && (
-              <p className="leland-paragraph-sm text-leland-gray-light">
-                {[block.time, block.sessionTitle].filter(Boolean).join(" · ")}
-              </p>
-            )}
-          </div>
+          <p className="leland-paragraph-sm font-semibold text-leland-gray-dark">Session recording</p>
         </div>
       );
     case "addedToCalendar":
