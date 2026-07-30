@@ -1047,13 +1047,13 @@ function CombinedSidebar({
 
       <div ref={scrollRef} className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pb-12">
         {/* Program info card */}
-        <div className={`relative z-10 w-full bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)] ${compactCourseInfo ? "" : "pb-5"}`}>
+        <div className={`sticky top-0 z-10 w-full bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)] ${compactCourseInfo ? "" : "pb-5"}`}>
           <div className="flex flex-col gap-3 px-6 pt-6">
             {/* Back link */}
             {noHeader && (
               <Link
                 to={exitDestination}
-                className="inline-flex items-center gap-1 leland-paragraph-sm text-leland-gray-light hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary rounded"
+                className="inline-flex items-center gap-1 leland-paragraph-base text-leland-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-4 hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary rounded"
               >
                 <IconChevronLeft className="size-3.5 shrink-0" />
                 My content
