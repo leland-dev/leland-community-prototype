@@ -822,20 +822,18 @@ function LessonsAccordionSidebar({
 }) {
   return (
     <aside className="flex w-[340px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
-      {/* My content back nav — only when header is hidden */}
-      {noHeader && (
-        <div className="shrink-0 border-b border-leland-gray-stroke px-6 py-3">
+      {/* Program info card — always shown in lessons-only sidebar */}
+      <div className="flex flex-col gap-3 border-b border-leland-gray-stroke px-6 pb-6 pt-6">
+        {/* Back link */}
+        {noHeader && (
           <Link
             to={exitDestination}
-            className="inline-flex items-center gap-1.5 rounded-full bg-leland-gray-solid-hover px-3 py-1.5 leland-paragraph-sm font-medium text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            className="inline-flex items-center gap-1 leland-paragraph-sm text-leland-gray-light hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary rounded"
           >
             <IconChevronLeft className="size-3.5 shrink-0" />
             My content
           </Link>
-        </div>
-      )}
-      {/* Program info card — always shown in lessons-only sidebar */}
-      <div className="flex flex-col gap-3 border-b border-leland-gray-stroke px-6 pb-6 pt-6">
+        )}
         <p className="font-season text-heading-3xl font-normal text-leland-gray-dark">
           {COURSE_TITLE_FULL}
         </p>
@@ -1010,46 +1008,57 @@ function CombinedSidebar({
 
   return (
     <aside className="relative flex w-[360px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
-      {/* My content back nav */}
-      {noHeader && (
-        <Link
-          to={exitDestination}
-          className="relative z-10 flex shrink-0 items-center gap-1.5 border-b border-leland-gray-stroke bg-white px-6 py-3 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)] leland-paragraph-base font-medium text-leland-gray-light hover:bg-leland-gray-hover hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary"
-        >
-          <IconChevronLeft className="size-4 shrink-0" />
-          My content
-        </Link>
-      )}
-
-      {/* Pinned cohort row — shown once the resources section has scrolled out of view */}
+      {/* Pinned cohort / quick links row — shown once the resources section has scrolled out of view */}
       {liveProgram && !resourcesInView && (
         <button
           type="button"
           onClick={scrollToTop}
           className="flex w-full items-center gap-3 border-b border-leland-gray-stroke px-6 py-4 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary"
         >
-          {!compactCourseInfo && (
-            <div className="flex h-9 w-9 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
-              <div className="flex items-center justify-center bg-leland-blue px-1.5 pb-0.5 pt-[3px]">
-                <span className="text-[8px] font-semibold leading-none tracking-[0.8px] text-leland-gray-dark">MAY</span>
+          {compactCourseInfo ? (
+            <>
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-leland-blue-light">
+                <IconLink className="size-4 text-leland-blue-dark" />
               </div>
-              <div className="flex flex-1 items-center justify-center bg-white">
-                <span className="leland-heading-base font-semibold text-leland-gray-dark">24</span>
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+                <p className="leland-paragraph-base font-semibold text-leland-gray-dark">Quick links</p>
+                <p className="leland-paragraph-sm text-leland-gray-light">May 24th cohort</p>
               </div>
-            </div>
+            </>
+          ) : (
+            <>
+              <div className="flex h-9 w-9 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
+                <div className="flex items-center justify-center bg-leland-blue px-1.5 pb-0.5 pt-[3px]">
+                  <span className="text-[8px] font-semibold leading-none tracking-[0.8px] text-leland-gray-dark">MAY</span>
+                </div>
+                <div className="flex flex-1 items-center justify-center bg-white">
+                  <span className="leland-heading-base font-semibold text-leland-gray-dark">24</span>
+                </div>
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+                <p className="leland-heading-base font-semibold text-leland-gray-dark">May 16 – Jun 8</p>
+                <p className="leland-paragraph-sm text-leland-gray-light">Cohort details</p>
+              </div>
+            </>
           )}
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
-            <p className="leland-heading-base font-semibold text-leland-gray-dark">May 16 – Jun 8</p>
-            <p className="leland-paragraph-sm text-leland-gray-light">Cohort details</p>
-          </div>
           <IconChevronUp className="size-4 shrink-0 text-leland-gray-light" />
         </button>
       )}
 
       <div ref={scrollRef} className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pb-12">
         {/* Program info card */}
-        <div className="relative z-10 w-full bg-white pb-5 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)]">
-          <div className="flex flex-col gap-4 px-6 pt-6">
+        <div className={`relative z-10 w-full bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)] ${compactCourseInfo ? "pb-2" : "pb-5"}`}>
+          <div className="flex flex-col gap-3 px-6 pt-6">
+            {/* Back link */}
+            {noHeader && (
+              <Link
+                to={exitDestination}
+                className="inline-flex items-center gap-1 leland-paragraph-sm text-leland-gray-light hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary rounded"
+              >
+                <IconChevronLeft className="size-3.5 shrink-0" />
+                My content
+              </Link>
+            )}
             {/* Thumbnail */}
             {!compactCourseInfo && (
               <img
