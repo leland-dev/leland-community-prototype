@@ -1050,16 +1050,27 @@ function CombinedSidebar({
         {/* Program info card */}
         <div className={`w-full bg-white ${compactCourseInfo ? "" : "pb-5"}`}>
           <div className="flex flex-col gap-3 px-6 pt-6">
-            {/* Back link */}
-            {noHeader && (
-              <Link
-                to={exitDestination}
-                className="inline-flex items-center gap-1 leland-paragraph-base text-leland-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-4 hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary rounded"
+            {/* Back link + collapse toggle */}
+            <div className="flex items-center justify-between gap-3">
+              {noHeader ? (
+                <Link
+                  to={exitDestination}
+                  className="inline-flex items-center gap-1 leland-paragraph-base text-leland-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-4 hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary rounded"
+                >
+                  <IconChevronLeft className="size-3.5 shrink-0" />
+                  My content
+                </Link>
+              ) : (
+                <span />
+              )}
+              <button
+                onClick={onToggle}
+                aria-label="Collapse sidebar"
+                className="-mr-1.5 flex size-8 shrink-0 items-center justify-center rounded text-leland-gray-light hover:bg-leland-gray-hover hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
               >
-                <IconChevronLeft className="size-3.5 shrink-0" />
-                My content
-              </Link>
-            )}
+                <IconLeftSidebarClose className="size-5" aria-hidden />
+              </button>
+            </div>
             {/* Thumbnail */}
             {!compactCourseInfo && (
               <img
@@ -2245,13 +2256,16 @@ export default function ContentViewer() {
                 noHeader={options.noHeader}
               />
             )}
-            <button
-              onClick={() => setSidebarOpen(false)}
-              aria-label="Collapse sidebar"
-              className="absolute left-full top-4 z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-white p-3 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-            >
-              <IconLeftSidebarClose className="size-5" aria-hidden />
-            </button>
+            {/* Combined sidebar renders its own collapse toggle in the header row */}
+            {options.sidebarView !== "combined" && (
+              <button
+                onClick={() => setSidebarOpen(false)}
+                aria-label="Collapse sidebar"
+                className="absolute left-full top-4 z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-white p-3 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+              >
+                <IconLeftSidebarClose className="size-5" aria-hidden />
+              </button>
+            )}
           </div>
         ) : (
           <>
