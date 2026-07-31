@@ -1049,9 +1049,9 @@ function CombinedSidebar({
       <div ref={scrollRef} className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pb-12">
         {/* Program info card */}
         <div className={`w-full bg-white ${compactCourseInfo ? "" : "pb-5"}`}>
-          <div className="flex flex-col gap-3 px-6 pt-6">
+          <div className="flex flex-col px-6 pt-6">
             {/* Back link + collapse toggle */}
-            <div className="flex items-center justify-between gap-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
               {noHeader ? (
                 <Link
                   to={exitDestination}
@@ -1071,26 +1071,28 @@ function CombinedSidebar({
                 <IconLeftSidebarClose className="size-6" aria-hidden />
               </button>
             </div>
-            {/* Thumbnail */}
-            {!compactCourseInfo && (
-              <img
-                src={`${import.meta.env.BASE_URL}program-cover.avif`}
-                alt="AI Builder Program cover"
-                className="h-16 w-[122px] shrink-0 rounded object-cover"
-              />
-            )}
+            <div className="flex flex-col gap-3">
+              {/* Thumbnail */}
+              {!compactCourseInfo && (
+                <img
+                  src={`${import.meta.env.BASE_URL}program-cover.avif`}
+                  alt="AI Builder Program cover"
+                  className="h-16 w-[122px] shrink-0 rounded object-cover"
+                />
+              )}
 
-            {/* Program title */}
-            <p className="mt-2 text-heading-3xl font-season font-normal text-leland-gray-dark">{COURSE_TITLE_FULL}</p>
+              {/* Program title */}
+              <p className="text-heading-3xl font-season font-normal text-leland-gray-dark">{COURSE_TITLE_FULL}</p>
 
-            {/* Creator */}
-            <div className="flex items-center gap-2">
-              <img
-                src={`${import.meta.env.BASE_URL}leland-profile.png`}
-                alt="Leland"
-                className="size-5 shrink-0 rounded-full object-cover"
-              />
-              <span className="leland-paragraph-base text-leland-gray-extra-light">Created by Leland</span>
+              {/* Creator */}
+              <div className="flex items-center gap-2">
+                <img
+                  src={`${import.meta.env.BASE_URL}leland-profile.png`}
+                  alt="Leland"
+                  className="size-5 shrink-0 rounded-full object-cover"
+                />
+                <span className="leland-paragraph-base text-leland-gray-extra-light">Created by Leland</span>
+              </div>
             </div>
           </div>
 
