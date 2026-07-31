@@ -1085,7 +1085,7 @@ function CombinedSidebar({
               <p className="text-heading-3xl font-season font-normal text-leland-gray-dark">{COURSE_TITLE_FULL}</p>
 
               {/* Creator */}
-              <div className="flex items-center gap-2">
+              <div className="mt-2 flex items-center gap-2">
                 <img
                   src={`${import.meta.env.BASE_URL}leland-profile.png`}
                   alt="Leland"
