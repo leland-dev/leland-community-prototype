@@ -1008,8 +1008,9 @@ function CombinedSidebar({
 
   return (
     <aside className="relative flex w-[360px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
-      {/* Pinned cohort / quick links row — shown once the resources section has scrolled out of view */}
-      {liveProgram && !resourcesInView && (
+      {/* Pinned cohort / quick links row — shown once the resources section has scrolled out of view.
+          Compact mode instead uses a natively sticky quick-links row (below). */}
+      {liveProgram && !compactCourseInfo && !resourcesInView && (
         <button
           type="button"
           onClick={scrollToTop}
@@ -1082,77 +1083,7 @@ function CombinedSidebar({
             </div>
           </div>
 
-          {compactCourseInfo ? (
-            /* Compact: Quick links collapsible row */
-            <>
-            <div className="h-5" />
-            <div ref={resourcesRef} className="sticky top-0 z-10 border-t border-leland-gray-stroke bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)]">
-              <button
-                type="button"
-                onClick={() => onSeeMoreChange(!seeMoreOpen)}
-                className="flex w-full items-center gap-3 px-6 py-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary"
-              >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-leland-blue-light">
-                  <IconLink className="size-5 text-leland-blue-dark" />
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
-                  <p className="leland-paragraph-base font-semibold text-leland-gray-dark">Quick links</p>
-                  <p className="leland-paragraph-sm text-leland-gray-light">May 24th cohort</p>
-                </div>
-                <IconChevronDown
-                  className={`size-5 shrink-0 text-leland-gray-light transition-transform duration-200 ${seeMoreOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-              {seeMoreOpen && (
-                <div className="flex flex-col gap-1 px-3 pb-2">
-                  <SidebarMenuItem
-                    Icon={IconRecurring}
-                    label="Switch cohort"
-                    onClick={onSwitchCohort}
-                  />
-                  {liveProgram && (
-                    <>
-                      <SidebarMenuItem
-                        Icon={IconExperiences}
-                        label="Office hours"
-                        external
-                        onClick={() => window.open("https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours", "_blank", "noopener")}
-                      />
-                      <SidebarMenuItem
-                        Icon={IconUserProfileGroup}
-                        label="Community"
-                        external
-                        onClick={() => window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")}
-                      />
-                      <SidebarMenuItem
-                        Icon={IconBooks}
-                        label="Cohort showcase"
-                        external
-                        onClick={() => {}}
-                      />
-                      <SidebarMenuItem
-                        Icon={IconBooks}
-                        label="Knowledge hub"
-                        external
-                        onClick={() => {}}
-                      />
-                    </>
-                  )}
-                  <div className="pt-2 pb-1 px-1">
-                    <button
-                      type="button"
-                      onClick={() => onSeeMoreChange(false)}
-                      className="flex w-full items-center justify-center gap-2 rounded-full bg-leland-gray-hover px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-                    >
-                      <span className="leland-heading-base text-leland-gray-dark">Collapse</span>
-                      <IconChevronUp className="size-5 text-leland-gray-dark" />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            </>
-          ) : (
+          {!compactCourseInfo && (
             <>
               {/* Date / cohort row — live program only */}
               {liveProgram && <div className="mt-5 flex items-center gap-3 border-y border-leland-gray-stroke px-6 py-4">
@@ -1239,6 +1170,82 @@ function CombinedSidebar({
             </>
           )}
         </div>
+
+        {/* Compact: sticky quick-links row. It's a direct child of the scroll
+            container (not nested in the program info card), so its sticky
+            containing block is the whole scroll area — it pins to the top the
+            moment the title block scrolls past and stays there for the entire
+            scroll, rather than unsticking when the card ends. */}
+        {compactCourseInfo && (
+          <>
+            <div className="h-5 bg-white" />
+            <div className="sticky top-0 z-10 border-t border-leland-gray-stroke bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)]">
+              <button
+                type="button"
+                onClick={() => onSeeMoreChange(!seeMoreOpen)}
+                className="flex w-full items-center gap-3 px-6 py-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary"
+              >
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-leland-blue-light">
+                  <IconLink className="size-5 text-leland-blue-dark" />
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+                  <p className="leland-paragraph-base font-semibold text-leland-gray-dark">Quick links</p>
+                  <p className="leland-paragraph-sm text-leland-gray-light">May 24th cohort</p>
+                </div>
+                <IconChevronDown
+                  className={`size-5 shrink-0 text-leland-gray-light transition-transform duration-200 ${seeMoreOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {seeMoreOpen && (
+                <div className="flex flex-col gap-1 px-3 pb-2">
+                  <SidebarMenuItem
+                    Icon={IconRecurring}
+                    label="Switch cohort"
+                    onClick={onSwitchCohort}
+                  />
+                  {liveProgram && (
+                    <>
+                      <SidebarMenuItem
+                        Icon={IconExperiences}
+                        label="Office hours"
+                        external
+                        onClick={() => window.open("https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours", "_blank", "noopener")}
+                      />
+                      <SidebarMenuItem
+                        Icon={IconUserProfileGroup}
+                        label="Community"
+                        external
+                        onClick={() => window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")}
+                      />
+                      <SidebarMenuItem
+                        Icon={IconBooks}
+                        label="Cohort showcase"
+                        external
+                        onClick={() => {}}
+                      />
+                      <SidebarMenuItem
+                        Icon={IconBooks}
+                        label="Knowledge hub"
+                        external
+                        onClick={() => {}}
+                      />
+                    </>
+                  )}
+                  <div className="pt-2 pb-1 px-1">
+                    <button
+                      type="button"
+                      onClick={() => onSeeMoreChange(false)}
+                      className="flex w-full items-center justify-center gap-2 rounded-full bg-leland-gray-hover px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                    >
+                      <span className="leland-heading-base text-leland-gray-dark">Collapse</span>
+                      <IconChevronUp className="size-5 text-leland-gray-dark" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Lesson accordion */}
         <LessonAccordion
