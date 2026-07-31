@@ -1066,9 +1066,9 @@ function CombinedSidebar({
               <button
                 onClick={onToggle}
                 aria-label="Collapse sidebar"
-                className="-mr-1.5 flex size-8 shrink-0 items-center justify-center rounded text-leland-gray-light hover:bg-leland-gray-hover hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                className="flex h-12 shrink-0 items-center justify-center px-0 text-leland-gray-extra-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
               >
-                <IconLeftSidebarClose className="size-5" aria-hidden />
+                <IconLeftSidebarClose className="size-6" aria-hidden />
               </button>
             </div>
             {/* Thumbnail */}
