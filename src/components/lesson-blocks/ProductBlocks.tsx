@@ -154,7 +154,7 @@ function SessionRecordingEmbed({ src }: { src: string }) {
             step={0.1}
             value={currentTime}
             onChange={e => { const v = videoRef.current; if (v) v.currentTime = Number(e.target.value); }}
-            className="mb-2.5 h-0.5 w-full cursor-pointer accent-white"
+            className="mb-2.5 h-0.5 w-full cursor-pointer accent-white [&::-webkit-slider-thumb]:appearance-none [&::-moz-range-thumb]:appearance-none"
           />
           <div className="flex items-center gap-3">
             <button
