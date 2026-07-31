@@ -2293,7 +2293,7 @@ export default function ContentViewer() {
         {/* Main content + section nav. The Calendar tab takes over the main
             area (calendar → session detail); lesson sections otherwise.
             (Community isn't here — it opens as its own page in a new tab.) */}
-        <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-leland-beige/50">
+        <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-[#F9F8F3]">
           {/* Floating action buttons — top-right of content area (no-header mode only) */}
           {options.noHeader && <div className="absolute right-6 top-4 z-20 flex gap-2">
             <button
@@ -2375,7 +2375,7 @@ export default function ContentViewer() {
                         content as it scrolls beneath, keeping the course context
                         visible the whole way down the page. */}
                     {options.noHeader && (
-                      <div className="sticky top-0 z-10 bg-leland-beige/50">
+                      <div className="sticky top-0 z-10 bg-[#F9F8F3]">
                         <div className="mx-auto flex h-16 w-full max-w-[800px] items-center gap-2 px-8 leland-paragraph-base">
                           <span className="max-w-[240px] truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
                           <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
