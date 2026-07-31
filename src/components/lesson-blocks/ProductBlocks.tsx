@@ -59,60 +59,133 @@ function VideoThumbnail({ src }: { src: string }) {
   );
 }
 
+const SESSION_SLOTS = ["11:00 AM Session", "2:00 PM Session", "5:00 PM Session"];
+
 function SessionRecordingEmbed({ src }: { src: string }) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [hovering, setHovering] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el) return;
-    const seek = () => { el.currentTime = 2; };
-    el.addEventListener("loadedmetadata", seek);
-    return () => el.removeEventListener("loadedmetadata", seek);
-  }, [src]);
+  const showControls = !isPlaying || hovering;
+
+  const fmt = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${String(s).padStart(2, "0")}`;
+  };
+
+  const togglePlay = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) v.play(); else v.pause();
+  };
+
+  const overlayClass = `pointer-events-none absolute inset-x-0 transition-opacity duration-200 ${
+    showControls ? "opacity-100 pointer-events-auto" : "opacity-0"
+  }`;
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-leland-gray-stroke bg-black">
+    <div
+      className="relative aspect-video w-full overflow-hidden rounded-xl border border-leland-gray-stroke bg-black"
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+    >
       <video
         ref={videoRef}
         src={src}
-        controls={isPlaying}
-        className="h-full w-full object-cover"
+        className="h-full w-full cursor-pointer object-cover"
+        onClick={togglePlay}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
+        onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime ?? 0)}
+        onLoadedMetadata={() => setDuration(videoRef.current?.duration ?? 0)}
       />
-      {/* Pop-out button — always visible */}
-      <button
-        type="button"
-        onClick={() => window.open(src, "_blank", "noopener")}
-        className="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-        aria-label="Open in new window"
-      >
-        <IconArrowUpRight className="size-4" />
-      </button>
-      {/* Paused overlay */}
+
+      {/* Top: title + session selector */}
+      <div className={`${overlayClass} top-0`}>
+        <div className="bg-gradient-to-b from-black/70 to-transparent px-4 pt-3 pb-14">
+          <div className="flex items-center justify-between gap-3">
+            <p className="leland-paragraph-base font-semibold text-white">Session recording</p>
+            <div className="relative">
+              <select
+                value={selectedSlot}
+                onChange={e => setSelectedSlot(Number(e.target.value))}
+                className="cursor-pointer appearance-none rounded-full bg-white/15 py-1.5 pl-3 pr-7 text-[13px] font-medium text-white backdrop-blur-sm focus:outline-none"
+              >
+                {SESSION_SLOTS.map((label, i) => (
+                  <option key={i} value={i} className="bg-gray-900">{label}</option>
+                ))}
+              </select>
+              <svg className="pointer-events-none absolute right-2 top-1/2 size-3 -translate-y-1/2 text-white" viewBox="0 0 12 12" fill="none" aria-hidden>
+                <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Center: large play button when paused */}
       {!isPlaying && (
         <button
           type="button"
-          onClick={() => videoRef.current?.play()}
-          className="absolute inset-0 w-full focus:outline-none"
-          aria-label="Play session recording"
+          onClick={togglePlay}
+          className="absolute inset-0 flex items-center justify-center focus:outline-none"
+          aria-label="Play"
         >
-          {/* Bottom gradient for label legibility */}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
-          {/* Centered play button */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex size-14 items-center justify-center rounded-full bg-white/25 backdrop-blur-sm">
-              <IconPlayVideo className="size-7 text-white" />
-            </div>
+          <div className="flex size-14 items-center justify-center rounded-full bg-white/25 backdrop-blur-sm">
+            <IconPlayVideo className="size-7 text-white" />
           </div>
-          {/* Label bottom-left */}
-          <p className="absolute bottom-4 left-4 leland-heading-xl font-semibold text-white drop-shadow">
-            Session recording
-          </p>
         </button>
       )}
+
+      {/* Bottom: scrubber + controls */}
+      <div className={`${overlayClass} bottom-0`}>
+        <div className="bg-gradient-to-t from-black/70 to-transparent px-4 pb-3 pt-12">
+          <input
+            type="range"
+            min={0}
+            max={duration || 100}
+            step={0.1}
+            value={currentTime}
+            onChange={e => { const v = videoRef.current; if (v) v.currentTime = Number(e.target.value); }}
+            className="mb-2.5 h-0.5 w-full cursor-pointer accent-white"
+          />
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={togglePlay}
+              className="text-white focus:outline-none"
+              aria-label={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? (
+                <svg viewBox="0 0 20 20" fill="currentColor" className="size-5" aria-hidden>
+                  <rect x="4" y="3" width="4" height="14" rx="1" />
+                  <rect x="12" y="3" width="4" height="14" rx="1" />
+                </svg>
+              ) : (
+                <IconPlayVideo className="size-5 text-white" />
+              )}
+            </button>
+            <span className="leland-paragraph-sm tabular-nums text-white/80">
+              {fmt(currentTime)} / {fmt(duration)}
+            </span>
+            <div className="flex-1" />
+            <button
+              type="button"
+              onClick={() => window.open(src, "_blank", "noopener")}
+              className="flex items-center gap-1.5 text-[13px] font-medium text-white/80 hover:text-white focus:outline-none"
+              aria-label="Open in new window"
+            >
+              <IconArrowUpRight className="size-4" />
+              Pop out
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
