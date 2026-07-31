@@ -2377,7 +2377,7 @@ export default function ContentViewer() {
                     {options.noHeader && (
                       <div className="sticky top-0 z-10 bg-leland-beige/50">
                         <div className="mx-auto flex h-16 w-full max-w-[800px] items-center gap-2 px-8 leland-paragraph-base">
-                          <span className="max-w-[300px] truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
+                          <span className="max-w-[240px] truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
                           <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
                           <span className="shrink-0 font-medium text-leland-gray-dark">Lesson {lessonIdx + 1}</span>
                         </div>
