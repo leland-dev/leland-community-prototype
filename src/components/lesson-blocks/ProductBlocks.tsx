@@ -137,7 +137,9 @@ function SessionRecordingEmbed({ src }: { src: string }) {
           aria-label="Play"
         >
           <div className="flex size-14 items-center justify-center rounded-full bg-white/25 backdrop-blur-sm">
-            <IconPlayVideo className="size-7 text-white" />
+            <svg viewBox="0 0 24 24" fill="white" className="size-7 translate-x-0.5" aria-hidden>
+              <polygon points="5,3 21,12 5,21" />
+            </svg>
           </div>
         </button>
       )}
@@ -167,7 +169,9 @@ function SessionRecordingEmbed({ src }: { src: string }) {
                   <rect x="12" y="3" width="4" height="14" rx="1" />
                 </svg>
               ) : (
-                <IconPlayVideo className="size-5 text-white" />
+                <svg viewBox="0 0 24 24" fill="white" className="size-5 translate-x-px" aria-hidden>
+                  <polygon points="5,3 21,12 5,21" />
+                </svg>
               )}
             </button>
             <span className="leland-paragraph-sm tabular-nums text-white/80">
