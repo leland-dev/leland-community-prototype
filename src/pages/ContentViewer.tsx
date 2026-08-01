@@ -2211,6 +2211,46 @@ export default function ContentViewer() {
     [completed, lesson.id],
   );
 
+  const breadcrumbLabel =
+    lesson.id === "start-here" ? "Before you begin" : `Lesson ${lesson.number}`;
+
+  // Sticky course → lesson breadcrumb. Beige bg matches the content area so it's
+  // invisible at rest and cleanly masks content as it scrolls beneath, keeping
+  // the course context visible the whole way down. Shared across every section
+  // render path (blocks, interactive, html) so lessons and "Before you begin"
+  // are consistent.
+  const breadcrumbBar = options.noHeader ? (
+    <div className={`z-10 bg-[#F9F8F3] ${!sidebarOpen ? "sticky top-0" : ""}`}>
+      <div className={`flex w-full items-center gap-2 px-8 leland-paragraph-base ${sidebarOpen ? "mx-auto max-w-[800px] py-8" : "py-4"}`}>
+        {!sidebarOpen ? (
+          <>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open sidebar"
+              className="mr-2 flex size-10 shrink-0 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-extra-light shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconLeftSidebarOpen className="size-5" aria-hidden />
+            </button>
+            <Link
+              to={exitDestination}
+              className="flex shrink-0 items-center gap-1 text-leland-gray-light underline decoration-dotted underline-offset-2 hover:text-leland-gray-dark"
+            >
+              <IconChevronLeft className="size-4 shrink-0" />
+              My content
+            </Link>
+            <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
+            <span className="max-w-[240px] truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
+            <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
+            <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbLabel}</span>
+          </>
+        ) : (
+          <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbLabel}</span>
+        )}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <div className="flex h-screen flex-col bg-white text-leland-gray-dark">
       {options.showSiteNav && <TopNav />}
@@ -2406,41 +2446,7 @@ export default function ContentViewer() {
                       onViewRecording: () => setLessonShowRecording(true),
                     }}
                   >
-                    {/* Sticky course → lesson breadcrumb. Beige bg matches the
-                        content area so it's invisible at rest and cleanly masks
-                        content as it scrolls beneath, keeping the course context
-                        visible the whole way down the page. */}
-                    {options.noHeader && (
-                      <div className={`z-10 bg-[#F9F8F3] ${!sidebarOpen ? "sticky top-0" : ""}`}>
-                        <div className={`flex w-full items-center gap-2 px-8 leland-paragraph-base ${sidebarOpen ? "mx-auto max-w-[800px] py-8" : "py-4"}`}>
-                          {!sidebarOpen ? (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => setSidebarOpen(true)}
-                                aria-label="Open sidebar"
-                                className="mr-2 flex size-10 shrink-0 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-extra-light shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-                              >
-                                <IconLeftSidebarOpen className="size-5" aria-hidden />
-                              </button>
-                              <Link
-                                to={exitDestination}
-                                className="flex shrink-0 items-center gap-1 text-leland-gray-light underline decoration-dotted underline-offset-2 hover:text-leland-gray-dark"
-                              >
-                                <IconChevronLeft className="size-4 shrink-0" />
-                                My content
-                              </Link>
-                              <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-                              <span className="max-w-[240px] truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
-                              <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-                              <span className="shrink-0 font-medium text-leland-gray-dark">Lesson {lessonIdx + 1}</span>
-                            </>
-                          ) : (
-                            <span className="shrink-0 font-medium text-leland-gray-dark">Lesson {lessonIdx + 1}</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                    {breadcrumbBar}
                     {/* Larger gap-10 between product-level blocks (top banner,
                         bottom feedback) and the lesson content zone; gap-6
                         within the content zone. */}
@@ -2448,7 +2454,7 @@ export default function ContentViewer() {
                       <div className="flex flex-col gap-8">
                         {!options.noHeader && (
                           <p className="leland-paragraph-base font-medium text-leland-gray-dark">
-                            Lesson {lessonIdx + 1}
+                            {breadcrumbLabel}
                           </p>
                         )}
                         {lesson.topBlocks?.length ? (
@@ -2507,7 +2513,8 @@ export default function ContentViewer() {
                 </div>
               ) : section.kind === 'html' ? (
                 <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
-                  <div className="mx-auto w-full max-w-[800px] pt-10 pb-6">
+                  {breadcrumbBar}
+                  <div className={`mx-auto w-full max-w-[800px] pb-6 ${options.noHeader ? "pt-4" : "pt-10"}`}>
                     <div className="overflow-hidden rounded-2xl border border-leland-gray-stroke">
                       <SectionContent
                         key={`${lesson.id}/${section.id}`}
@@ -2528,7 +2535,8 @@ export default function ContentViewer() {
                 </div>
               ) : section.kind === 'interactive' ? (
                 <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
-                  <div className={`mx-auto w-full max-w-[800px] px-8 pb-16 ${options.noHeader ? "pt-8" : "pt-10"}`}>
+                  {breadcrumbBar}
+                  <div className={`mx-auto w-full max-w-[800px] px-8 pb-16 ${options.noHeader ? "pt-4" : "pt-10"}`}>
                     <GettingStartedFlow
                       key={`${lesson.id}/${section.id}`}
                       flow={section.flow}

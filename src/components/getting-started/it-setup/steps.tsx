@@ -86,7 +86,6 @@ function ConfirmToolStep({ c }: StepProps) {
   const v = VENDOR_INFO[c.state.vendor];
   return (
     <FlowShell
-      eyebrow={`Step ${c.progress.n}`}
       title="Confirm your tool"
       subhead={`Based on your intake, looks like you're using ${v.name}. Everything from here on is written for it.`}
       onBack={() => c.goTo("welcome")}
@@ -173,7 +172,6 @@ function PlanStep({ c }: StepProps) {
   const selected = c.state.account.plan;
   return (
     <FlowShell
-      eyebrow={`Step ${c.progress.n}`}
       title="Check if you're on a paid plan"
       subhead={`Level 1 uses features that aren't available on the free plan — you'll need ${v.planName} to follow along.`}
       onBack={() => c.goTo(c.backFromAccount())}
@@ -238,7 +236,6 @@ function AppInstallStep({ c }: StepProps) {
   const isDesktop = Boolean(v.desktopScheme);
   return (
     <FlowShell
-      eyebrow={`Step ${c.progress.n}`}
       title={isDesktop ? `Get ${v.appName} installed` : `Sign in to ${v.appName}`}
       subhead={`Sign in with your ${v.signIn}${isDesktop ? " once installed." : "."}`}
       onBack={() => c.goTo("plan")}
@@ -342,7 +339,6 @@ function ExtensionStep({ c }: StepProps) {
 
   return (
     <FlowShell
-      eyebrow={`Step ${c.progress.n}`}
       title={`Get ${extLabel} set up`}
       subhead={isChromeExt ? "Let Claude see and act on whatever's open in your browser." : undefined}
       onBack={() => c.goTo("appinstall")}
@@ -395,7 +391,6 @@ function CohortStep({ c }: StepProps) {
   const selected = c.state.account.cohort;
   return (
     <FlowShell
-      eyebrow={`Step ${c.progress.n}`}
       title="Join your cohort"
       subhead="Community membership, separate from the Slack connector in the next step."
       onBack={() => c.goTo("extension")}
@@ -616,12 +611,10 @@ function ConnectorStateRow({
 function ConnectorsStep({ c }: StepProps) {
   const v = VENDOR_INFO[c.state.vendor];
   const showWallOption = c.state.persona === "company";
-  const eyebrow = `Step ${c.progress.n}`;
 
   if (!c.state.connectorsConfirming) {
     return (
       <FlowShell
-        eyebrow={eyebrow}
         title="Connect your tools"
         subhead="You'll need these live during class, connecting now means no surprise permission walls when it counts."
         onBack={() => c.goTo("connectors-intro")}
@@ -635,7 +628,6 @@ function ConnectorsStep({ c }: StepProps) {
 
   return (
     <FlowShell
-      eyebrow={eyebrow}
       title="Connect your tools"
       subhead="Here's what came back. Mark anything that's off — you can still sort it out live in class."
       onBack={() => c.setConfirming(false)}
@@ -696,7 +688,6 @@ function CheckingStep({ c }: StepProps) {
 
   return (
     <FlowShell
-      eyebrow={`Step ${c.progress.n}`}
       title="Running your system check"
       subhead="Hang tight, we're pulling your setup together so it's ready when you are."
     >

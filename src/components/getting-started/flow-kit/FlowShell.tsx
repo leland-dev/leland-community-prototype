@@ -28,6 +28,32 @@ export function FlowProgressHeader({
   );
 }
 
+// Segmented step progress — one bar per step, completed steps filled dark gray.
+export function FlowStepProgress({
+  current,
+  total,
+}: {
+  current: number;
+  total: number;
+}) {
+  return (
+    <div
+      className="flex items-center gap-1.5"
+      role="progressbar"
+      aria-valuenow={current}
+      aria-valuemin={0}
+      aria-valuemax={total}
+    >
+      {Array.from({ length: total }, (_, i) => (
+        <span
+          key={i}
+          className={`h-1 flex-1 rounded-full ${i < current ? "bg-leland-gray-dark" : "bg-leland-gray-stroke"}`}
+        />
+      ))}
+    </div>
+  );
+}
+
 type FlowShellProps = {
   eyebrow?: string;
   title: string;

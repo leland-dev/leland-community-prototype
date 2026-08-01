@@ -1,4 +1,4 @@
-export { FlowShell, FlowProgressHeader } from "./FlowShell";
+export { FlowShell, FlowProgressHeader, FlowStepProgress } from "./FlowShell";
 export { OptionCard, OptionGrid } from "./OptionCard";
 export { FlowInfoCard } from "./FlowInfoCard";
 export { CopyPromptButton } from "./CopyPromptButton";

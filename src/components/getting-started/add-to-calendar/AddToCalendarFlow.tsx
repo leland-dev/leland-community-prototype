@@ -90,15 +90,6 @@ export function AddToCalendarFlow({ onComplete }: FlowProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Eyebrow */}
-      <p className="leland-paragraph-base text-leland-gray-light">
-        <span className="font-medium text-leland-gray-dark">Pre-flight</span>
-        {"  "}
-        <span className="text-leland-gray-stroke">|</span>
-        {"  "}
-        1/5
-      </p>
-
       {/* Heading */}
       <div className="flex flex-col gap-4">
         <h1 className="font-season text-heading-5xl font-normal text-leland-gray-dark">

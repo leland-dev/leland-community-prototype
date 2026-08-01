@@ -1,4 +1,4 @@
-import { FlowProgressHeader } from "../flow-kit";
+import { FlowStepProgress } from "../flow-kit";
 import type { Persona } from "./data";
 import { renderItSetupStep } from "./steps";
 import { useItSetupFlow } from "./useItSetupFlow";
@@ -49,9 +49,9 @@ export function ItSetupFlow({ onComplete }: ItSetupFlowProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      <FlowProgressHeader
-        breadcrumb={controller.progress.breadcrumb}
-        value={controller.progress.value}
+      <FlowStepProgress
+        current={controller.progress.n}
+        total={controller.progress.total}
       />
       {renderItSetupStep(controller, onComplete)}
       <PersonaPreviewControl

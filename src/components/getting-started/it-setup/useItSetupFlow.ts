@@ -132,7 +132,7 @@ const TOTAL_STEPS = 7;
 
 export type ItSetupController = {
   state: ItSetupState;
-  progress: { breadcrumb: string; value: number; n: number; counted: boolean };
+  progress: { breadcrumb: string; value: number; n: number; total: number; counted: boolean };
   goTo: (step: ItSetupStep) => void;
   selectVendor: (vendor: VendorKey) => void;
   setPersona: (persona: Persona) => void;
@@ -166,7 +166,7 @@ export function useItSetupFlow(): ItSetupController {
 
   return {
     state,
-    progress: { breadcrumb, value, n, counted },
+    progress: { breadcrumb, value, n, total: TOTAL_STEPS, counted },
     goTo: (step) => dispatch({ type: "GO_TO", step }),
     selectVendor: (vendor) => dispatch({ type: "SELECT_VENDOR", vendor }),
     setPersona: (persona) => dispatch({ type: "SET_PERSONA", persona }),
