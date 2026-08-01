@@ -9,32 +9,31 @@ const SESSIONS = [
 
 function GoogleCalIcon() {
   return (
-    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-leland-gray-stroke bg-white text-sm font-bold text-[#4285F4]">
-      31
-    </div>
+    <img
+      src={`${import.meta.env.BASE_URL}google-calendar.png`}
+      alt=""
+      className="size-8 shrink-0 rounded-lg object-contain"
+    />
   );
 }
 
 function OutlookIcon() {
   return (
-    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#0078D4] text-sm font-bold text-white">
-      O
-    </div>
+    <img
+      src={`${import.meta.env.BASE_URL}outlook-calendar.png`}
+      alt=""
+      className="size-8 shrink-0 rounded-lg object-contain"
+    />
   );
 }
 
 function AppleCalIcon() {
   return (
-    <div className="flex size-8 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke">
-      <div className="flex shrink-0 items-center justify-center bg-red-500 py-0.5">
-        <span className="font-semibold text-white" style={{ fontSize: 6, letterSpacing: "0.5px" }}>
-          JUL
-        </span>
-      </div>
-      <div className="flex flex-1 items-center justify-center bg-white text-xs font-bold text-leland-gray-dark">
-        17
-      </div>
-    </div>
+    <img
+      src={`${import.meta.env.BASE_URL}apple-calendar.jpeg`}
+      alt=""
+      className="size-8 shrink-0 rounded-lg object-contain"
+    />
   );
 }
 
