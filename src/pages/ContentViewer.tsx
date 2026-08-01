@@ -26,10 +26,13 @@ import {
   ButtonSize,
   IconCalendar,
   IconCalendarAlt,
+  IconLivestreamSignal,
+  IconPlayVideo,
   IconCheck,
   IconClock,
   IconArrowUpRight,
   IconBooks,
+  IconModules,
   IconExperiences,
   IconLightning,
   IconOnboarding,
@@ -577,32 +580,24 @@ function LiveSessionBanner({ state, href }: { state: LiveSessionBannerState; hre
   return (
     <Link
       to={href}
-      className={`flex w-full items-center gap-1.5 rounded-[6px] px-2.5 py-1.5 text-[13px] font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
+      className={
         isLive
-          ? "bg-leland-red-dark text-white hover:bg-leland-red"
-          : isRecording
-            ? "bg-leland-gray-hover text-leland-gray-light hover:bg-leland-gray-solid-hover"
-            : "border border-leland-gray-stroke bg-white text-leland-gray-light hover:bg-leland-gray-hover"
-      }`}
+          ? "group inline-flex w-fit items-center gap-2 py-1 text-[13px] font-medium text-leland-red focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+          : "inline-flex w-fit items-center gap-2 py-1 text-[13px] font-medium text-leland-gray-extra-light decoration-[1.5px] underline-offset-4 hover:underline hover:decoration-dotted focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+      }
     >
       {isLive ? (
-        <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden>
-          <circle cx="8" cy="8" r="2" fill="white" />
-          <path d="M4.8 4.8a4.53 4.53 0 000 6.4M11.2 4.8a4.53 4.53 0 010 6.4" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
-        </svg>
+        <IconLivestreamSignal className="size-4 shrink-0" />
       ) : isRecording ? (
-        <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden>
-          <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.3" />
-          <path d="M7 6.2l3.2 1.8-3.2 1.8V6.2z" fill="currentColor" />
-        </svg>
+        <IconPlayVideo className="size-4 shrink-0" />
       ) : (
         <IconCalendarAlt className="size-4 shrink-0" />
       )}
-      <span className="flex-1">
+      <span>
         {isLive && (
           <>
-            <span>Live now</span>
-            <span className="text-white/70"> · {liveTime}</span>
+            <span className="decoration-[1.5px] underline-offset-4 group-hover:underline group-hover:decoration-dotted">Live now</span>
+            <span className="text-leland-gray-extra-light"> · {liveTime}</span>
           </>
         )}
         {isRecording && "Watch session recording"}
@@ -614,7 +609,9 @@ function LiveSessionBanner({ state, href }: { state: LiveSessionBannerState; hre
           </>
         )}
       </span>
-      <IconChevronRight className={`size-4 shrink-0 ${isLive ? "text-white/70" : "text-leland-gray-extra-light"}`} />
+      {isRecording && (
+        <IconChevronRight className="size-4 shrink-0 text-leland-gray-extra-light" />
+      )}
     </Link>
   );
 }
@@ -668,6 +665,7 @@ function LessonAccordion({
             key={l.id}
             className="flex flex-col gap-5 border-b border-leland-gray-stroke py-5"
           >
+            <div className="flex flex-col gap-2">
             <button
               type="button"
               onClick={() => toggle(l.id)}
@@ -700,6 +698,7 @@ function LessonAccordion({
                 />
               </div>
             )}
+            </div>
             {isOpen ? (
               <div className="flex flex-col gap-1 px-3">
                 {l.sections.map((s, sIdx) => {
@@ -988,7 +987,9 @@ function CombinedSidebar({
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const resourcesRef = useRef<HTMLDivElement>(null);
+  const courseInfoRef = useRef<HTMLParagraphElement>(null);
   const [resourcesInView, setResourcesInView] = useState(true);
+  const [courseInfoInView, setCourseInfoInView] = useState(true);
 
   useEffect(() => {
     if (!liveProgram) return;
@@ -1003,11 +1004,51 @@ function CombinedSidebar({
     return () => obs.disconnect();
   }, [liveProgram]);
 
+  useEffect(() => {
+    const scroll = scrollRef.current;
+    const target = courseInfoRef.current;
+    if (!scroll || !target) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setCourseInfoInView(entry.isIntersecting),
+      { root: scroll, threshold: 0 },
+    );
+    obs.observe(target);
+    return () => obs.disconnect();
+  }, []);
+
   const scrollToTop = () =>
     scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
     <aside className="relative flex w-[360px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
+      {/* Persistent header — always visible, outside the scroll container */}
+      <div className={`flex shrink-0 items-center gap-6 bg-white px-6 pt-4 ${courseInfoInView ? "pb-2" : "pb-0"}`}>
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          {noHeader ? (
+            <Link
+              to={exitDestination}
+              className={`inline-flex shrink-0 items-center gap-1 text-leland-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-4 hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary rounded ${courseInfoInView ? "leland-paragraph-base" : "leland-paragraph-sm"}`}
+            >
+              <IconChevronLeft className="size-3.5 shrink-0" />
+              My content
+            </Link>
+          ) : null}
+          {noHeader && !courseInfoInView && (
+            <>
+              <span className="shrink-0 leland-paragraph-sm text-leland-gray-light" aria-hidden>/</span>
+              <span className="min-w-0 flex-1 truncate leland-paragraph-sm text-leland-gray-extra-light">{COURSE_TITLE_FULL}</span>
+            </>
+          )}
+        </div>
+        <button
+          onClick={onToggle}
+          aria-label="Collapse sidebar"
+          className="ml-auto flex shrink-0 items-center justify-center px-0 py-3 text-leland-gray-extra-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+        >
+          <IconLeftSidebarClose className="size-6" aria-hidden />
+        </button>
+      </div>
+
       {/* Pinned cohort / quick links row — shown once the resources section has scrolled out of view.
           Compact mode instead uses a natively sticky quick-links row (below). */}
       {liveProgram && !compactCourseInfo && !resourcesInView && (
@@ -1049,29 +1090,8 @@ function CombinedSidebar({
       <div ref={scrollRef} className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pb-12">
         {/* Program info card */}
         <div className={`w-full bg-white ${compactCourseInfo ? "" : "pb-5"}`}>
-          <div className="flex flex-col px-6 pt-6">
-            {/* Back link + collapse toggle */}
-            <div className="mb-2 flex items-center justify-between gap-3">
-              {noHeader ? (
-                <Link
-                  to={exitDestination}
-                  className="inline-flex items-center gap-1 leland-paragraph-base text-leland-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-4 hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary rounded"
-                >
-                  <IconChevronLeft className="size-3.5 shrink-0" />
-                  My content
-                </Link>
-              ) : (
-                <span />
-              )}
-              <button
-                onClick={onToggle}
-                aria-label="Collapse sidebar"
-                className="flex shrink-0 items-center justify-center px-0 py-3 text-leland-gray-extra-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-              >
-                <IconLeftSidebarClose className="size-6" aria-hidden />
-              </button>
-            </div>
-            <div className="flex flex-col gap-3">
+          <div className="flex flex-col">
+            <div className={`flex flex-col gap-3 px-6 pt-2 ${compactCourseInfo ? "border-b border-leland-gray-stroke pb-5" : ""}`}>
               {/* Thumbnail */}
               {!compactCourseInfo && (
                 <img
@@ -1082,7 +1102,7 @@ function CombinedSidebar({
               )}
 
               {/* Program title */}
-              <p className="text-heading-3xl font-season font-normal text-leland-gray-dark">{COURSE_TITLE_FULL}</p>
+              <p ref={courseInfoRef} className="text-heading-3xl font-season font-normal text-leland-gray-dark">{COURSE_TITLE_FULL}</p>
 
               {/* Creator */}
               <div className="mt-2 flex items-center gap-2">
@@ -1191,18 +1211,17 @@ function CombinedSidebar({
             scroll, rather than unsticking when the card ends. */}
         {compactCourseInfo && (
           <>
-            <div className="h-5 bg-white" />
-            <div className="sticky top-0 z-10 border-t border-leland-gray-stroke bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)]">
+            <div className="sticky top-0 z-10 border-b border-leland-gray-stroke bg-white shadow-[0_8px_16px_-6px_rgba(0,0,0,0.16)]">
               <button
                 type="button"
                 onClick={() => onSeeMoreChange(!seeMoreOpen)}
                 className="flex w-full items-center gap-3 px-6 py-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary"
               >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-leland-blue-light">
-                  <IconLink className="size-5 text-leland-blue-dark" />
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-leland-gray-stroke">
+                  <IconLink className="size-5 text-leland-gray-dark" />
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
-                  <p className="leland-paragraph-base font-semibold text-leland-gray-dark">Quick links</p>
+                  <p className="leland-paragraph-lg font-semibold text-leland-gray-dark">Quick links</p>
                   <p className="leland-paragraph-sm text-leland-gray-light">May 24th cohort</p>
                 </div>
                 <IconChevronDown
@@ -1231,7 +1250,7 @@ function CombinedSidebar({
                         onClick={() => window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")}
                       />
                       <SidebarMenuItem
-                        Icon={IconBooks}
+                        Icon={IconModules}
                         label="Cohort showcase"
                         external
                         onClick={() => {}}
@@ -1261,14 +1280,19 @@ function CombinedSidebar({
         )}
 
         {/* Lesson accordion */}
-        <LessonAccordion
-          currentLessonId={currentLessonId}
-          currentSectionId={currentSectionId}
-          completed={completed}
-          liveProgram={liveProgram}
-          showSessionBanners={showSessionBanners}
-          largerLessonHeadings={largerLessonHeadings}
-        />
+        <div className="relative">
+          {compactCourseInfo && seeMoreOpen && (
+            <div className="absolute inset-0 z-[5] bg-black/20" />
+          )}
+          <LessonAccordion
+            currentLessonId={currentLessonId}
+            currentSectionId={currentSectionId}
+            completed={completed}
+            liveProgram={liveProgram}
+            showSessionBanners={showSessionBanners}
+            largerLessonHeadings={largerLessonHeadings}
+          />
+        </div>
       </div>
     </aside>
   );
@@ -2058,30 +2082,38 @@ function CourseViewerSectionNav({
   prevSectionLink,
   nextSectionLink,
   onNext,
+  completedCount,
+  totalSections,
 }: {
   prevSectionLink: string | null;
   nextSectionLink: string | null;
   onNext: () => void;
+  completedCount: number;
+  totalSections: number;
 }) {
   return (
-    <div className="flex items-center justify-between border-t border-leland-gray-stroke bg-white px-6 py-4">
+    <div className="relative flex items-center justify-between bg-[#F9F8F3] px-6 pb-4">
+      <div className="pointer-events-none absolute inset-x-0 bottom-full h-16 bg-gradient-to-b from-transparent to-[#F9F8F3]" />
       {prevSectionLink ? (
         <Link
           to={prevSectionLink}
-          className={`${navButtonBase} border border-leland-gray-stroke bg-white text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
+          className={`${navButtonBase} border border-leland-gray-stroke bg-[#F9F8F3] text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
         >
           <IconChevronLeft className="size-5" />
           Back
         </Link>
       ) : (
         <span
-          className={`${navButtonBase} cursor-not-allowed border border-leland-gray-stroke bg-white text-leland-gray-dark opacity-40`}
+          className={`${navButtonBase} cursor-not-allowed border border-leland-gray-stroke bg-[#F9F8F3] text-leland-gray-dark opacity-40`}
           aria-hidden
         >
           <IconChevronLeft className="size-5" />
           Back
         </span>
       )}
+      <span className="absolute left-1/2 -translate-x-1/2 leland-paragraph-base text-leland-gray-extra-light">
+        {completedCount}/{totalSections}
+      </span>
       {nextSectionLink ? (
         <Link
           to={nextSectionLink}
@@ -2108,7 +2140,9 @@ function CourseViewerSectionNav({
 
 export default function ContentViewer() {
   const params = useParams<{ lessonId?: string; sectionId?: string }>();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => typeof window === "undefined" || window.innerWidth >= 1024,
+  );
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>("lessons");
   const contentScrollRef = useRef<HTMLDivElement>(null);
 
@@ -2214,7 +2248,15 @@ export default function ContentViewer() {
       {/* Body */}
       <div className="relative flex min-h-0 flex-1">
         {sidebarOpen ? (
-          <div className="relative flex shrink-0">
+          <>
+            {/* Tablet/mobile: sidebar overlays the content with a dismissable scrim
+                instead of squishing it. Desktop keeps it in flow. */}
+            <div
+              onClick={() => setSidebarOpen(false)}
+              aria-hidden
+              className="absolute inset-0 z-30 bg-black/30 lg:hidden"
+            />
+            <div className="absolute inset-y-0 left-0 z-40 flex shrink-0 shadow-xl lg:relative lg:inset-auto lg:z-auto lg:shadow-none">
             {options.sidebarView === "combined" ? (
               <CombinedSidebar
                 currentLessonId={lesson.id}
@@ -2268,24 +2310,18 @@ export default function ContentViewer() {
                 <IconLeftSidebarClose className="size-5" aria-hidden />
               </button>
             )}
-          </div>
+            </div>
+          </>
         ) : (
           <>
-            <button
-              onClick={() => setSidebarOpen(true)}
-              aria-label="Open sidebar"
-              className="absolute left-0 top-4 z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-white p-3 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-            >
-              <IconLeftSidebarOpen className="size-5" aria-hidden />
-            </button>
-            {options.noHeader && (
-              <Link
-                to={exitDestination}
-                className="absolute left-14 top-4 z-10 flex items-center gap-1 rounded-full border border-leland-gray-stroke bg-white px-4 py-2 shadow-sm leland-paragraph-sm font-medium text-leland-gray-dark hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+            {!options.noHeader && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Open sidebar"
+                className="absolute left-0 top-4 z-10 flex items-center justify-center rounded-r-lg border border-l-0 border-leland-gray-stroke bg-white p-3 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
               >
-                <IconChevronLeft className="size-4 shrink-0" />
-                My content
-              </Link>
+                <IconLeftSidebarOpen className="size-5" aria-hidden />
+              </button>
             )}
           </>
         )}
@@ -2295,11 +2331,11 @@ export default function ContentViewer() {
             (Community isn't here — it opens as its own page in a new tab.) */}
         <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-[#F9F8F3]">
           {/* Floating action buttons — top-right of content area (no-header mode only) */}
-          {options.noHeader && <div className="absolute right-6 top-4 z-20 flex gap-2">
+          {options.noHeader && <div className="absolute right-6 top-4 z-20 hidden gap-2 lg:flex">
             <button
               type="button"
               aria-label="Get help"
-              className="flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-dark shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+              className="flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-extra-light shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
               <IconQuestion className="size-5" />
             </button>
@@ -2307,14 +2343,14 @@ export default function ContentViewer() {
               type="button"
               aria-label="Share feedback"
               onClick={() => setFeedbackModalOpen(true)}
-              className="flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-dark shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+              className="flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-extra-light shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
               <IconStarOutline className="size-5" />
             </button>
             <button
               type="button"
               aria-label="Share"
-              className="flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-dark shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+              className="flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-extra-light shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
               <IconShare className="size-5" />
             </button>
@@ -2375,18 +2411,40 @@ export default function ContentViewer() {
                         content as it scrolls beneath, keeping the course context
                         visible the whole way down the page. */}
                     {options.noHeader && (
-                      <div className="sticky top-0 z-10 bg-[#F9F8F3]">
-                        <div className="mx-auto flex h-16 w-full max-w-[800px] items-center gap-2 px-8 leland-paragraph-base">
-                          <span className="max-w-[240px] truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
-                          <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-                          <span className="shrink-0 font-medium text-leland-gray-dark">Lesson {lessonIdx + 1}</span>
+                      <div className={`z-10 bg-[#F9F8F3] ${!sidebarOpen ? "sticky top-0" : ""}`}>
+                        <div className={`flex w-full items-center gap-2 px-8 leland-paragraph-base ${sidebarOpen ? "mx-auto max-w-[800px] py-8" : "py-4"}`}>
+                          {!sidebarOpen ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => setSidebarOpen(true)}
+                                aria-label="Open sidebar"
+                                className="mr-2 flex size-10 shrink-0 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-extra-light shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                              >
+                                <IconLeftSidebarOpen className="size-5" aria-hidden />
+                              </button>
+                              <Link
+                                to={exitDestination}
+                                className="flex shrink-0 items-center gap-1 text-leland-gray-light underline decoration-dotted underline-offset-2 hover:text-leland-gray-dark"
+                              >
+                                <IconChevronLeft className="size-4 shrink-0" />
+                                My content
+                              </Link>
+                              <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
+                              <span className="max-w-[240px] truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
+                              <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
+                              <span className="shrink-0 font-medium text-leland-gray-dark">Lesson {lessonIdx + 1}</span>
+                            </>
+                          ) : (
+                            <span className="shrink-0 font-medium text-leland-gray-dark">Lesson {lessonIdx + 1}</span>
+                          )}
                         </div>
                       </div>
                     )}
                     {/* Larger gap-10 between product-level blocks (top banner,
                         bottom feedback) and the lesson content zone; gap-6
                         within the content zone. */}
-                    <div className={`mx-auto flex w-full max-w-[800px] flex-col gap-10 px-8 ${options.noHeader ? "pt-2" : "pt-10"}`}>
+                    <div className="mx-auto flex w-full max-w-[800px] flex-col gap-10 px-8 pt-4">
                       <div className="flex flex-col gap-8">
                         {!options.noHeader && (
                           <p className="leland-paragraph-base font-medium text-leland-gray-dark">
@@ -2515,6 +2573,10 @@ export default function ContentViewer() {
                     nextSection ? sectionUrl(lesson, nextSection) : null
                   }
                   onNext={() => markComplete(lesson.id, section.id)}
+                  completedCount={
+                    lesson.sections.filter((s) => isCompleted(s.id)).length
+                  }
+                  totalSections={lesson.sections.length}
                 />
               )}
             </>
