@@ -90,8 +90,6 @@ export const VENDOR_INFO: Record<VendorKey, VendorInfo> = {
 export const COHORT_SLACK_INVITE =
   "https://join.slack.com/t/lelandaibuilders/shared_invite/zt-3y9fgg4a9-qQBHHWe8ZlHYmr9oQ6mp7w";
 
-export type Persona = "personal" | "company";
-
 export type ConnectorKey = "slack" | "email" | "calendar";
 
 export type ConnectorDef = {

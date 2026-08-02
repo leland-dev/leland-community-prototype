@@ -75,51 +75,9 @@ function WelcomeStep({ c }: StepProps) {
       eyebrow="Getting started · Level 1"
       title="Let's get your tools set up"
       subhead="Seven quick steps, about 3 minutes. We'll confirm your account, connect the tools Level 1 needs, and make sure nothing blocks you once you're live."
-      onContinue={() => c.goTo(c.nextFromWelcome())}
+      onContinue={() => c.goTo("choosetool")}
       continueLabel="Get started"
     />
-  );
-}
-
-function ContextStep({ c }: StepProps) {
-  if (c.state.persona === "company") {
-    return (
-      <FlowShell
-        eyebrow="Before we start"
-        title="Heads up: your company hasn't reviewed AI tools yet"
-        subhead="That's normal, most people in your position get here before their IT team does. A couple of steps ahead may need their sign-off, so we'll flag those clearly as we go."
-        onBack={() => c.goTo("welcome")}
-        onContinue={() => c.goTo("choosetool")}
-      >
-        <ConnectorListItem
-          badge={<ServiceBadge>📄</ServiceBadge>}
-          name="AI Builder L1 — IT & Security Brief"
-          desc="One page. What's installed, what data it touches, and where it's already certified (SOC 2 Type II, ISO 27001)."
-          action={
-            <ExternalActionButton
-              label="View brief →"
-              href="#"
-              tone="secondary"
-              size="sm"
-            />
-          }
-        />
-      </FlowShell>
-    );
-  }
-  return (
-    <FlowShell
-      eyebrow="Before we start"
-      title="Good news — your company's already cleared this"
-      subhead="Your IT team approved this vendor as part of your organization's rollout, so you shouldn't hit any permission walls. If something does get blocked, it's worth a quick note to your admin."
-      onBack={() => c.goTo("welcome")}
-      onContinue={() => c.goTo("choosetool")}
-    >
-      <FlowInfoCard tone="blue" icon="✅">
-        <strong>IT approval on file</strong> for your organization. You're clear
-        to connect everything below.
-      </FlowInfoCard>
-    </FlowShell>
   );
 }
 
@@ -137,7 +95,7 @@ function ChooseToolStep({ c }: StepProps) {
     <FlowShell
       title="Which AI tool are you using for the program?"
       subhead="Everything in Level 1, including your setup steps, will be tailored to this."
-      onBack={() => c.goTo(c.backFromAccount())}
+      onBack={() => c.goTo("welcome")}
       onContinue={() => c.goTo("plan")}
     >
       <OptionGrid>
@@ -809,8 +767,6 @@ export function renderItSetupStep(
   switch (c.state.step) {
     case "welcome":
       return <WelcomeStep c={c} />;
-    case "context":
-      return <ContextStep c={c} />;
     case "choosetool":
       return <ChooseToolStep c={c} />;
     case "plan":
