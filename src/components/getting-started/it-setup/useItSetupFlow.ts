@@ -4,8 +4,8 @@ import type { ConnectorKey, Persona, VendorKey } from "./data";
 
 export type ItSetupStep =
   | "welcome"
-  | "confirm"
   | "context"
+  | "choosetool"
   | "plan"
   | "appinstall"
   | "extension"
@@ -105,8 +105,8 @@ function loadState(): ItSetupState {
 // the prior number so the bar never snaps backward on transition screens.
 const PROGRESS_N: Record<ItSetupStep, number> = {
   welcome: 0,
-  confirm: 1,
   context: 1,
+  choosetool: 1,
   plan: 2,
   appinstall: 3,
   extension: 4,
@@ -118,7 +118,7 @@ const PROGRESS_N: Record<ItSetupStep, number> = {
 };
 
 const COUNTED_STEPS: ReadonlySet<ItSetupStep> = new Set([
-  "confirm",
+  "choosetool",
   "plan",
   "appinstall",
   "extension",
@@ -142,7 +142,7 @@ export type ItSetupController = {
   setConfirming: (value: boolean) => void;
   reset: () => void;
   // Persona-dependent transitions (personal skips the IT-context screen).
-  nextFromConfirm: () => ItSetupStep;
+  nextFromWelcome: () => ItSetupStep;
   backFromAccount: () => ItSetupStep;
 };
 
@@ -175,7 +175,7 @@ export function useItSetupFlow(): ItSetupController {
     startVerify: () => dispatch({ type: "START_VERIFY" }),
     setConfirming: (value) => dispatch({ type: "SET_CONFIRMING", value }),
     reset: () => dispatch({ type: "RESET" }),
-    nextFromConfirm: () => (state.persona === "personal" ? "plan" : "context"),
-    backFromAccount: () => (state.persona === "personal" ? "confirm" : "context"),
+    nextFromWelcome: () => (state.persona === "personal" ? "choosetool" : "context"),
+    backFromAccount: () => (state.persona === "personal" ? "welcome" : "context"),
   };
 }

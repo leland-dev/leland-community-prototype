@@ -12,8 +12,9 @@ const PERSONAS: { key: Persona; label: string }[] = [
   { key: "company", label: "Company (needs sign-off)" },
 ];
 
-// Prototype-only affordance: the source gated persona behind dev tools; this is
-// a slimmed-down toggle so both branches stay previewable.
+// Prototype-only affordance standing in for a future user-level B2C/B2B flag:
+// the setup flow no longer asks persona up front, so this toggle keeps the
+// company (sign-off) branch — the `context` screen — reviewable.
 function PersonaPreviewControl({
   persona,
   onSelect,

@@ -13,7 +13,6 @@ import {
   EmailMark,
   CalendarMark,
   VendorBadge,
-  VendorPicker,
 } from "../flow-kit";
 import { ConfirmSetupModal } from "./ConfirmSetupModal";
 import {
@@ -22,6 +21,7 @@ import {
   connectorDefs,
   type ConnectorKey,
   type VendorInfo,
+  type VendorKey,
 } from "./data";
 import type { ItSetupController } from "./useItSetupFlow";
 
@@ -75,50 +75,9 @@ function WelcomeStep({ c }: StepProps) {
       eyebrow="Getting started · Level 1"
       title="Let's get your tools set up"
       subhead="Seven quick steps, about 3 minutes. We'll confirm your account, connect the tools Level 1 needs, and make sure nothing blocks you once you're live."
-      onContinue={() => c.goTo("confirm")}
+      onContinue={() => c.goTo(c.nextFromWelcome())}
       continueLabel="Get started"
     />
-  );
-}
-
-function ConfirmToolStep({ c }: StepProps) {
-  const [vendorChangeOpen, setVendorChangeOpen] = useState(false);
-  const v = VENDOR_INFO[c.state.vendor];
-  return (
-    <FlowShell
-      title="Confirm your tool"
-      subhead={`Based on your intake, looks like you're using ${v.name}. Everything from here on is written for it.`}
-      onBack={() => c.goTo("welcome")}
-      onContinue={() => c.goTo(c.nextFromConfirm())}
-    >
-      <div className="flex items-center gap-3 rounded-xl border border-leland-gray-stroke bg-white px-4 py-3.5">
-        <VendorBadge vendor={c.state.vendor} />
-        <div className="min-w-0 flex-1">
-          <div className="leland-paragraph-base font-semibold text-leland-gray-dark">
-            {v.name}
-          </div>
-          <div className="leland-paragraph-sm text-leland-gray-light">
-            Picked up from your intake responses.
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => setVendorChangeOpen((o) => !o)}
-          className="shrink-0 leland-paragraph-sm font-semibold text-leland-gray-dark underline decoration-dotted underline-offset-4 hover:text-leland-gray-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-        >
-          {vendorChangeOpen ? "Cancel" : "Not right? Change it"}
-        </button>
-      </div>
-      {vendorChangeOpen ? (
-        <VendorPicker
-          selected={c.state.vendor}
-          onSelect={(vendor) => {
-            c.selectVendor(vendor);
-            setVendorChangeOpen(false);
-          }}
-        />
-      ) : null}
-    </FlowShell>
   );
 }
 
@@ -129,8 +88,8 @@ function ContextStep({ c }: StepProps) {
         eyebrow="Before we start"
         title="Heads up: your company hasn't reviewed AI tools yet"
         subhead="That's normal, most people in your position get here before their IT team does. A couple of steps ahead may need their sign-off, so we'll flag those clearly as we go."
-        onBack={() => c.goTo("confirm")}
-        onContinue={() => c.goTo("plan")}
+        onBack={() => c.goTo("welcome")}
+        onContinue={() => c.goTo("choosetool")}
       >
         <ConnectorListItem
           badge={<ServiceBadge>📄</ServiceBadge>}
@@ -153,13 +112,45 @@ function ContextStep({ c }: StepProps) {
       eyebrow="Before we start"
       title="Good news — your company's already cleared this"
       subhead="Your IT team approved this vendor as part of your organization's rollout, so you shouldn't hit any permission walls. If something does get blocked, it's worth a quick note to your admin."
-      onBack={() => c.goTo("confirm")}
-      onContinue={() => c.goTo("plan")}
+      onBack={() => c.goTo("welcome")}
+      onContinue={() => c.goTo("choosetool")}
     >
       <FlowInfoCard tone="blue" icon="✅">
         <strong>IT approval on file</strong> for your organization. You're clear
         to connect everything below.
       </FlowInfoCard>
+    </FlowShell>
+  );
+}
+
+// ── Choose AI tool ───────────────────────────────────────────────────────────
+
+const TOOL_CHOICE_DESC: Record<VendorKey, string> = {
+  claude: "Anthropic · desktop app + Cowork",
+  chatgpt: "OpenAI · desktop app + Codex",
+  copilot: "Microsoft 365 ecosystem",
+  gemini: "Google Workspace ecosystem",
+};
+
+function ChooseToolStep({ c }: StepProps) {
+  return (
+    <FlowShell
+      title="Which AI tool are you using for the program?"
+      subhead="Everything in Level 1, including your setup steps, will be tailored to this."
+      onBack={() => c.goTo(c.backFromAccount())}
+      onContinue={() => c.goTo("plan")}
+    >
+      <OptionGrid>
+        {(Object.keys(VENDOR_INFO) as VendorKey[]).map((key) => (
+          <OptionCard
+            key={key}
+            name={VENDOR_INFO[key].name}
+            desc={TOOL_CHOICE_DESC[key]}
+            selected={c.state.vendor === key}
+            onClick={() => c.selectVendor(key)}
+          />
+        ))}
+      </OptionGrid>
     </FlowShell>
   );
 }
@@ -174,7 +165,7 @@ function PlanStep({ c }: StepProps) {
     <FlowShell
       title="Check if you're on a paid plan"
       subhead={`Level 1 uses features that aren't available on the free plan — you'll need ${v.planName} to follow along.`}
-      onBack={() => c.goTo(c.backFromAccount())}
+      onBack={() => c.goTo("choosetool")}
       onContinue={() => c.goTo("appinstall")}
       continueDisabled={selected === null}
     >
@@ -479,11 +470,9 @@ function ConnectorsIntroStep({ c }: StepProps) {
 
 function ConnectHowTo({
   v,
-  showWallOption,
   onVerify,
 }: {
   v: VendorInfo;
-  showWallOption: boolean;
   onVerify: () => void;
 }) {
   const [wallOpen, setWallOpen] = useState(false);
@@ -519,17 +508,15 @@ function ConnectHowTo({
         </>
       )}
 
-      {showWallOption ? (
-        <button
-          type="button"
-          onClick={() => setWallOpen((o) => !o)}
-          className="self-start leland-paragraph-sm font-semibold text-leland-gray-dark underline decoration-dotted underline-offset-4 hover:text-leland-gray-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-        >
-          {wallOpen ? "Hide permission-wall options" : "Hit a permission wall? →"}
-        </button>
-      ) : null}
+      <button
+        type="button"
+        onClick={() => setWallOpen((o) => !o)}
+        className="self-start leland-paragraph-sm font-semibold text-leland-gray-dark underline decoration-dotted underline-offset-4 hover:text-leland-gray-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+      >
+        {wallOpen ? "Hide permission-wall options" : "Hit a permission wall? →"}
+      </button>
 
-      {showWallOption && wallOpen ? (
+      {wallOpen ? (
         <div className="flex flex-col gap-4 border-t border-leland-gray-stroke pt-4">
           <div className="flex flex-col gap-2">
             <div className="leland-paragraph-sm font-semibold uppercase tracking-[1px] text-leland-gray-extra-light">
@@ -610,7 +597,6 @@ function ConnectorStateRow({
 
 function ConnectorsStep({ c }: StepProps) {
   const v = VENDOR_INFO[c.state.vendor];
-  const showWallOption = c.state.persona === "company";
 
   if (!c.state.connectorsConfirming) {
     return (
@@ -621,7 +607,7 @@ function ConnectorsStep({ c }: StepProps) {
         onContinue={() => c.startVerify()}
         continueDisabled={!c.state.connectorsVerifyStarted}
       >
-        <ConnectHowTo v={v} showWallOption={showWallOption} onVerify={c.startVerify} />
+        <ConnectHowTo v={v} onVerify={c.startVerify} />
       </FlowShell>
     );
   }
@@ -823,10 +809,10 @@ export function renderItSetupStep(
   switch (c.state.step) {
     case "welcome":
       return <WelcomeStep c={c} />;
-    case "confirm":
-      return <ConfirmToolStep c={c} />;
     case "context":
       return <ContextStep c={c} />;
+    case "choosetool":
+      return <ChooseToolStep c={c} />;
     case "plan":
       return <PlanStep c={c} />;
     case "appinstall":
@@ -844,6 +830,7 @@ export function renderItSetupStep(
     case "clear":
       return <ClearStep c={c} onComplete={onComplete} />;
     default:
-      return null;
+      // Safety net for a stale persisted step (e.g. the removed "confirm").
+      return <WelcomeStep c={c} />;
   }
 }
