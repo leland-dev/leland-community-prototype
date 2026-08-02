@@ -143,9 +143,26 @@
   --text-eyebrow--line-height: 120%;
   --text-eyebrow--letter-spacing: 0.1em;
 
+  /* ── Spacing additions ───────────────────────────────────────────────── */
+  --spacing-26: 6.5rem;
+
+  /* ── Animations ──────────────────────────────────────────────────────── */
+  /* Starts one band-width before the leading edge and ends past the trailing
+     one so the band never rests anywhere visible. Assumes a w-1/2 band. */
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+
   /* ── Shadows / misc ──────────────────────────────────────────────────── */
   --shadow-border: 0 0 0 1px;
   --shadow-bottomBorder: inset 0 -2px 0 0;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
 }
 
 /* ── Production z-index scale (layered surfaces) ───────────────────────── */

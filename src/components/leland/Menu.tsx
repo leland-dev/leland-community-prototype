@@ -253,6 +253,18 @@ export interface MenuProps {
   header?: string;
   maxItems?: number;
   includeLeftIconPlaceholder?: boolean | null;
+  /**
+   * If true, the trigger emits no corner radius of its own, leaving the shape to
+   * the element passed in via `asChild`.
+   *
+   * Needed because this package's stylesheet loads after the consuming app's, so
+   * the default `rounded-sm` here and a consumer's own radius utility tie on
+   * specificity and this one wins — a pill trigger renders with clipped corners.
+   * Set this when the trigger is not a standard rectangle; the focus ring follows
+   * whatever radius the element carries either way.
+   * @default false
+   */
+  hasCustomTriggerRadius?: boolean;
 }
 
 // Approximate rendered height of a MenuItem in pixels — used to compute a
@@ -276,6 +288,7 @@ export const Menu: FC<MenuProps> = ({
   header,
   maxItems,
   includeLeftIconPlaceholder = null,
+  hasCustomTriggerRadius = false,
 }) => {
   const itemSections = useMemo(
     () => rawItemSections.filter((section) => section.length > 0),
@@ -327,7 +340,9 @@ export const Menu: FC<MenuProps> = ({
       modal={!fillParentWidth && !openOnHover}
     >
       <DropdownMenuTrigger
-        className="rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-gray-dark"
+        className={`focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-gray-dark ${
+          hasCustomTriggerRadius ? '' : 'rounded-sm'
+        }`}
         asChild={asChild}
         onMouseEnter={onMouseEnter}
         ref={containerRef}
