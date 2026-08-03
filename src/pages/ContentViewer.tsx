@@ -49,6 +49,7 @@ import {
   IconDotsHorizontal,
   IconHelp,
   IconShare,
+  IconMenuBurger,
   IconStar,
   IconStarOutline,
   IconWrite,
@@ -1021,7 +1022,7 @@ function CombinedSidebar({
     scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
-    <aside className="relative flex w-[360px] shrink-0 flex-col overflow-hidden border-r border-leland-gray-stroke bg-white">
+    <aside className="relative flex w-full shrink-0 flex-col overflow-hidden bg-white md:w-[360px] md:border-r md:border-leland-gray-stroke">
       {/* Persistent header — always visible, outside the scroll container */}
       <div className={`flex shrink-0 items-center gap-6 bg-white px-6 pt-4 ${courseInfoInView ? "pb-2" : "pb-0"}`}>
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -1043,10 +1044,12 @@ function CombinedSidebar({
         </div>
         <button
           onClick={onToggle}
-          aria-label="Collapse sidebar"
+          aria-label="Close menu"
           className="ml-auto flex shrink-0 items-center justify-center px-0 py-3 text-leland-gray-extra-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
         >
-          <IconLeftSidebarClose className="size-6" aria-hidden />
+          {/* Drawer on mobile (X); collapse toggle on desktop */}
+          <IconX className="size-6 md:hidden" aria-hidden />
+          <IconLeftSidebarClose className="hidden size-6 md:block" aria-hidden />
         </button>
       </div>
 
@@ -1614,7 +1617,7 @@ function SessionRecordingView({
 }) {
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-8 py-10">
+      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-4 md:px-8 py-10">
         {/* Breadcrumb / back nav */}
         {breadcrumb ? (
           <div className="leland-paragraph-base text-leland-gray-light">
@@ -1827,7 +1830,7 @@ function LiveProgramOverview({
   const buildSessions = BUILD_SESSIONS.filter((s) => !s.isRecording);
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-8 py-10">
+      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-4 md:px-8 py-10">
         <div className="flex flex-col gap-3">
           <h1 className="text-heading-4xl md:text-heading-5xl font-normal font-season text-leland-gray-dark">
             {COURSE_TITLE_FULL}
@@ -2016,7 +2019,7 @@ function SessionDetailView({
 }) {
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-8 pt-10 pb-16">
+      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-4 md:px-8 pt-10 pb-16">
         {/* Breadcrumb: ‹ Calendar (back) / Session N */}
         <div className="flex items-center gap-2 leland-paragraph-base text-leland-gray-light">
           <button
@@ -2093,7 +2096,7 @@ function CourseViewerSectionNav({
   totalSections: number;
 }) {
   return (
-    <div className="relative flex items-center justify-between bg-[#F9F8F3] px-6 pb-4">
+    <div className="relative flex items-center justify-between bg-[#F9F8F3] px-4 pb-4 md:px-6">
       <div className="pointer-events-none absolute inset-x-0 bottom-full h-16 bg-gradient-to-b from-transparent to-[#F9F8F3]" />
       {prevSectionLink ? (
         <Link
@@ -2212,6 +2215,17 @@ export default function ContentViewer() {
     [completed, lesson.id],
   );
 
+  // Opening the drawer/sidebar jumps to the lesson + section the user is on.
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const timer = setTimeout(() => {
+      document
+        .getElementById(`sidebar-section-${section.id}`)
+        ?.scrollIntoView({ block: "center" });
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [sidebarOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const breadcrumbLabel =
     lesson.id === "start-here" ? "Before you begin" : `Lesson ${lesson.number}`;
 
@@ -2222,27 +2236,31 @@ export default function ContentViewer() {
   // are consistent.
   const breadcrumbBar = options.noHeader ? (
     <div className={`z-10 bg-[#F9F8F3] ${!sidebarOpen ? "sticky top-0" : ""}`}>
-      <div className={`flex w-full items-center gap-2 px-8 leland-paragraph-base ${sidebarOpen ? "mx-auto max-w-[800px] py-8" : "py-4"}`}>
+      <div className={`flex w-full items-center gap-2 px-4 md:px-8 leland-paragraph-base ${sidebarOpen ? "mx-auto max-w-[800px] py-8" : "py-4"}`}>
         {!sidebarOpen ? (
           <>
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(true)}
-              aria-label="Open sidebar"
-              className="mr-2 flex size-10 shrink-0 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-extra-light shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-            >
-              <IconLeftSidebarOpen className="size-5" aria-hidden />
-            </button>
-            <Link
-              to={exitDestination}
-              className="flex shrink-0 items-center gap-1 text-leland-gray-light underline decoration-dotted underline-offset-2 hover:text-leland-gray-dark"
-            >
-              <IconChevronLeft className="size-4 shrink-0" />
-              My content
-            </Link>
-            <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-            <span className="max-w-[240px] truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
-            <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
+            {/* Full trail only on desktop; on mobile the page header already
+                carries back + title + menu, so just the lesson label shows. */}
+            <div className="hidden items-center gap-2 md:flex">
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Open sidebar"
+                className="mr-2 flex size-10 shrink-0 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-extra-light shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+              >
+                <IconLeftSidebarOpen className="size-5" aria-hidden />
+              </button>
+              <Link
+                to={exitDestination}
+                className="flex shrink-0 items-center gap-1 text-leland-gray-light underline decoration-dotted underline-offset-2 hover:text-leland-gray-dark"
+              >
+                <IconChevronLeft className="size-4 shrink-0" />
+                My content
+              </Link>
+              <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
+              <span className="max-w-[240px] truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
+              <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
+            </div>
             <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbLabel}</span>
           </>
         ) : (
@@ -2254,9 +2272,35 @@ export default function ContentViewer() {
 
   return (
     <div className="flex h-screen flex-col bg-white text-leland-gray-dark">
-      {options.showSiteNav && <TopNav />}
+      {options.showSiteNav && (
+        <div className="hidden md:block">
+          <TopNav />
+        </div>
+      )}
+      {/* Mobile page header — stands in for the global nav + desktop header
+          below lg: back to My content, course title, and a drawer toggle. */}
+      <header className="flex shrink-0 items-center gap-3 border-b border-leland-gray-stroke bg-white px-4 py-3 md:hidden">
+        <Link
+          to={exitDestination}
+          aria-label="Back to My content"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+        >
+          <IconChevronLeft className="size-5" aria-hidden />
+        </Link>
+        <span className="min-w-0 flex-1 truncate leland-heading-base text-leland-gray-dark">
+          {COURSE_TITLE_FULL}
+        </span>
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open menu"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full border border-leland-gray-stroke text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+        >
+          <IconMenuBurger className="size-5" aria-hidden />
+        </button>
+      </header>
       {!options.noHeader && (
-        <header className="relative flex shrink-0 items-center border-b border-leland-gray-stroke py-3 pl-6 pr-4">
+        <header className="relative hidden shrink-0 items-center border-b border-leland-gray-stroke py-3 pl-6 pr-4 md:flex">
           <div className="flex min-w-0 flex-1 items-center gap-3 leland-paragraph-base">
             <Link
               to={exitDestination}
@@ -2290,14 +2334,15 @@ export default function ContentViewer() {
       <div className="relative flex min-h-0 flex-1">
         {sidebarOpen ? (
           <>
-            {/* Tablet/mobile: sidebar overlays the content with a dismissable scrim
-                instead of squishing it. Desktop keeps it in flow. */}
+            {/* Mobile: full-viewport scrim (covers the page header too) + a
+                bottom-sheet drawer. Tablet: side-drawer overlay below the header.
+                Desktop: sidebar in flow. */}
             <div
               onClick={() => setSidebarOpen(false)}
               aria-hidden
-              className="absolute inset-0 z-30 bg-black/30 lg:hidden"
+              className="fixed inset-0 z-30 bg-black/30 md:absolute lg:hidden"
             />
-            <div className="absolute inset-y-0 left-0 z-40 flex shrink-0 shadow-xl lg:relative lg:inset-auto lg:z-auto lg:shadow-none">
+            <div className="fixed bottom-0 left-0 right-0 top-12 z-40 flex animate-[slide-up_0.25s_ease-out] overflow-hidden rounded-t-2xl shadow-xl md:absolute md:right-auto md:top-0 md:animate-none md:overflow-visible md:rounded-none lg:relative lg:bottom-auto lg:left-auto lg:right-auto lg:top-auto lg:z-auto lg:shadow-none">
             {options.sidebarView === "combined" ? (
               <CombinedSidebar
                 currentLessonId={lesson.id}
@@ -2372,7 +2417,7 @@ export default function ContentViewer() {
             (Community isn't here — it opens as its own page in a new tab.) */}
         <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-[#F9F8F3]">
           {/* Floating action buttons — top-right of content area (no-header mode only) */}
-          {options.noHeader && <div className="absolute right-6 top-4 z-20 hidden gap-2 lg:flex">
+          {options.noHeader && <div className="absolute right-6 top-4 z-20 hidden gap-2 md:flex">
             <button
               type="button"
               aria-label="Get help"
@@ -2451,7 +2496,7 @@ export default function ContentViewer() {
                     {/* Larger gap-10 between product-level blocks (top banner,
                         bottom feedback) and the lesson content zone; gap-6
                         within the content zone. */}
-                    <div className="mx-auto flex w-full max-w-[800px] flex-col gap-10 px-8 pt-4">
+                    <div className="mx-auto flex w-full max-w-[800px] flex-col gap-10 px-4 md:px-8 pt-4">
                       <div className="flex flex-col gap-8">
                         {!options.noHeader && (
                           <p className="leland-paragraph-base font-medium text-leland-gray-dark">
@@ -2537,7 +2582,7 @@ export default function ContentViewer() {
               ) : section.kind === 'interactive' ? (
                 <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
                   {breadcrumbBar}
-                  <div className={`mx-auto w-full max-w-[800px] px-8 pb-16 ${options.noHeader ? "pt-4" : "pt-10"}`}>
+                  <div className={`mx-auto w-full max-w-[800px] px-4 md:px-8 pb-16 ${options.noHeader ? "pt-4" : "pt-10"}`}>
                     <GettingStartedFlow
                       key={`${lesson.id}/${section.id}`}
                       flow={section.flow}

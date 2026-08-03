@@ -368,3 +368,13 @@ input[name="phone"]:-webkit-autofill:focus {
   background: rgba(34, 34, 34, 0.18);
   border-radius: 3px;
 }
+
+/* Mobile drawer bottom-sheet entrance. */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

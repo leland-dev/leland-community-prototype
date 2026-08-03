@@ -23,7 +23,7 @@ export function JoinCohortFlow({ onComplete }: FlowProps) {
             onClick={complete}
           />
           <Button
-            label="Done"
+            label="I've joined →"
             buttonColor={ButtonColor.PRIMARY}
             size={ButtonSize.LARGE}
             width={ButtonWidth.AUTO}
