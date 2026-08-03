@@ -4,9 +4,10 @@ import { useItSetupFlow } from "./useItSetupFlow";
 
 type ItSetupFlowProps = {
   onComplete?: () => void;
+  onContinue?: () => void;
 };
 
-export function ItSetupFlow({ onComplete }: ItSetupFlowProps) {
+export function ItSetupFlow({ onComplete, onContinue }: ItSetupFlowProps) {
   const controller = useItSetupFlow();
 
   return (
@@ -15,7 +16,7 @@ export function ItSetupFlow({ onComplete }: ItSetupFlowProps) {
         current={controller.progress.n}
         total={controller.progress.total}
       />
-      {renderItSetupStep(controller, onComplete)}
+      {renderItSetupStep(controller, onComplete, onContinue)}
     </div>
   );
 }

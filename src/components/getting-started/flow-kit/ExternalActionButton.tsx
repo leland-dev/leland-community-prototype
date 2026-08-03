@@ -1,4 +1,4 @@
-type Tone = "primary" | "secondary";
+type Tone = "primary" | "secondary" | "black";
 type Size = "sm" | "md";
 
 type ExternalActionButtonProps = {
@@ -16,10 +16,12 @@ const TONE_CLASSES: Record<Tone, string> = {
     "border-transparent bg-leland-primary text-leland-on-primary-text hover:bg-leland-primary-hover",
   secondary:
     "border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover",
+  black:
+    "border-transparent bg-leland-black text-white hover:bg-leland-black-hover",
 };
 
 const SIZE_CLASSES: Record<Size, string> = {
-  sm: "px-3 py-2 text-[0.75rem]",
+  sm: "p-2 text-[0.75rem] leading-none",
   md: "px-4 py-3 text-[0.875rem]",
 };
 

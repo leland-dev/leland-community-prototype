@@ -8,8 +8,9 @@ import {
 } from "../flow-kit";
 import { COHORT_SLACK_INVITE } from "../it-setup/data";
 
-export function JoinCohortFlow({ onComplete }: FlowProps) {
-  const complete = () => onComplete?.();
+export function JoinCohortFlow({ onComplete, onContinue }: FlowProps) {
+  // Both actions advance to the next lesson section (joining is optional).
+  const advance = () => (onContinue ?? onComplete)?.();
   return (
     <FlowShell
       title="Join your Slack community"
@@ -20,14 +21,14 @@ export function JoinCohortFlow({ onComplete }: FlowProps) {
             label="Skip for now"
             buttonColor={ButtonColor.GRAY}
             size={ButtonSize.LARGE}
-            onClick={complete}
+            onClick={advance}
           />
           <Button
             label="I've joined →"
             buttonColor={ButtonColor.PRIMARY}
             size={ButtonSize.LARGE}
             width={ButtonWidth.AUTO}
-            onClick={complete}
+            onClick={advance}
           />
         </div>
       }

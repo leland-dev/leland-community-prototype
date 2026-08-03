@@ -10,8 +10,7 @@ export type ItSetupStep =
   | "extension"
   | "connectors-intro"
   | "connectors"
-  | "checking"
-  | "clear";
+  | "checking";
 
 // null = unanswered, true = yes, false = "not yet" (flagged, never blocks).
 type TriState = null | boolean;
@@ -104,7 +103,6 @@ const PROGRESS_N: Record<ItSetupStep, number> = {
   "connectors-intro": 4,
   connectors: 5,
   checking: 6,
-  clear: 6,
 };
 
 const COUNTED_STEPS: ReadonlySet<ItSetupStep> = new Set([
@@ -114,7 +112,6 @@ const COUNTED_STEPS: ReadonlySet<ItSetupStep> = new Set([
   "extension",
   "connectors",
   "checking",
-  "clear",
 ]);
 
 const TOTAL_STEPS = 6;

@@ -11,7 +11,7 @@ import {
   type FC,
   type SVGProps,
 } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { CourseFeedbackModal } from "../components/CourseFeedbackModal";
 import TopNav from "../components/TopNav";
@@ -2134,6 +2134,7 @@ function CourseViewerSectionNav({
 
 export default function ContentViewer() {
   const params = useParams<{ lessonId?: string; sectionId?: string }>();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(
     () => typeof window === "undefined" || window.innerWidth >= 1024,
   );
@@ -2579,6 +2580,12 @@ export default function ContentViewer() {
                       key={`${lesson.id}/${section.id}`}
                       flow={section.flow}
                       onComplete={() => markComplete(lesson.id, section.id)}
+                      onContinue={() => {
+                        markComplete(lesson.id, section.id);
+                        if (nextSection) {
+                          navigate(sectionUrl(lesson, nextSection));
+                        }
+                      }}
                     />
                   </div>
                 </div>

@@ -29,6 +29,16 @@ export function OptionCard({ name, desc, selected = false, onClick }: OptionCard
   );
 }
 
-export function OptionGrid({ children }: { children: ReactNode }) {
-  return <div className="grid gap-3 sm:grid-cols-2">{children}</div>;
+export function OptionGrid({
+  children,
+  columns = 2,
+}: {
+  children: ReactNode;
+  columns?: 1 | 2;
+}) {
+  return (
+    <div className={`grid gap-3 ${columns === 2 ? "sm:grid-cols-2" : ""}`}>
+      {children}
+    </div>
+  );
 }

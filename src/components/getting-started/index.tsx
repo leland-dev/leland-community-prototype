@@ -11,7 +11,7 @@ export type FlowKey =
   | "skills-assessment"
   | "personalization";
 
-export type FlowProps = { onComplete?: () => void };
+export type FlowProps = { onComplete?: () => void; onContinue?: () => void };
 
 // Registry of native getting-started flows. Phases 2–3 add skills-assessment
 // and personalization here.
@@ -24,9 +24,11 @@ const FLOW_COMPONENTS: Partial<Record<FlowKey, ComponentType<FlowProps>>> = {
 export function GettingStartedFlow({
   flow,
   onComplete,
+  onContinue,
 }: {
   flow: FlowKey;
   onComplete?: () => void;
+  onContinue?: () => void;
 }) {
   const Flow = FLOW_COMPONENTS[flow];
   if (!Flow) {
@@ -41,5 +43,5 @@ export function GettingStartedFlow({
       </div>
     );
   }
-  return <Flow onComplete={onComplete} />;
+  return <Flow onComplete={onComplete} onContinue={onContinue} />;
 }

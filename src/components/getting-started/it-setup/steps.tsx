@@ -4,9 +4,11 @@ import {
   Button,
   ButtonColor,
   ButtonSize,
+  ButtonWidth,
   IconCalendar,
   IconCheck,
   IconEmail,
+  IconFlag,
 } from "../../leland";
 import {
   CopyPromptButton,
@@ -367,44 +369,43 @@ function ConnectHowTo({
   const checkPrompt = `Check which connectors I have set up in ${v.name} — Slack, email, and calendar. Walk me through connecting any that aren't, step by step.`;
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl bg-leland-gray-hover px-5 py-5">
-      <div className="leland-paragraph-sm font-semibold uppercase tracking-[1px] text-leland-gray-extra-light">
-        Let {ai} do it for you
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4 rounded-xl bg-leland-gray-hover px-5 py-5">
+        {v.desktopScheme ? (
+          <>
+            <p className="leland-paragraph-base text-leland-gray-light">
+              Skip the menu-digging — click below and {ai} will check all three at
+              once, then walk you through anything that isn't connected.
+            </p>
+            <ExternalActionButton
+              label={`Let ${ai} do it for you →`}
+              href={v.desktopScheme + encodeURIComponent(checkPrompt)}
+              tone="black"
+              size="sm"
+              onClick={onVerify}
+            />
+          </>
+        ) : (
+          <>
+            <p className="leland-paragraph-base text-leland-gray-light">
+              Skip the menu-digging — paste this into {ai} and it'll check all three
+              at once, then walk you through anything that isn't connected.
+            </p>
+            <CopyPromptButton prompt={checkPrompt} onCopy={onVerify} />
+          </>
+        )}
       </div>
-      {v.desktopScheme ? (
-        <>
-          <p className="leland-paragraph-base text-leland-gray-light">
-            Skip the menu-digging — click below and {ai} will check all three at
-            once, then walk you through anything that isn't connected.
-          </p>
-          <ExternalActionButton
-            label="Test the connection →"
-            href={v.desktopScheme + encodeURIComponent(checkPrompt)}
-            tone="primary"
-            size="sm"
-            onClick={onVerify}
-          />
-        </>
-      ) : (
-        <>
-          <p className="leland-paragraph-base text-leland-gray-light">
-            Skip the menu-digging — paste this into {ai} and it'll check all three
-            at once, then walk you through anything that isn't connected.
-          </p>
-          <CopyPromptButton prompt={checkPrompt} onCopy={onVerify} />
-        </>
-      )}
 
       <button
         type="button"
         onClick={() => setWallOpen((o) => !o)}
-        className="self-start leland-paragraph-sm font-semibold text-leland-gray-dark underline decoration-dotted underline-offset-4 hover:text-leland-gray-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+        className="self-start leland-paragraph-sm font-medium text-leland-gray-light underline decoration-dotted underline-offset-4 hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
       >
-        {wallOpen ? "Hide permission-wall options" : "Hit a permission wall? →"}
+        {wallOpen ? "Hide permission-wall options" : "Hit a permission wall?"}
       </button>
 
       {wallOpen ? (
-        <div className="flex flex-col gap-4 border-t border-leland-gray-stroke pt-4">
+        <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <div className="leland-paragraph-sm font-semibold uppercase tracking-[1px] text-leland-gray-extra-light">
               Ask {ai} to check
@@ -510,164 +511,72 @@ function ConnectorsStep({ c }: StepProps) {
 
 // ── Finish (checking → receipt) ──────────────────────────────────────────────
 
-const CHECK_ITEMS = [
-  "Account & plan",
-  "Desktop app, browser & Slack workspace",
-  "Slack connector",
-  "Email connector",
-];
-
-function CheckingStep({ c }: StepProps) {
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const [doneCount, setDoneCount] = useState(0);
-  const { goTo } = c;
-
-  useEffect(() => {
-    const timers: number[] = [];
-    CHECK_ITEMS.forEach((_, i) => {
-      timers.push(
-        window.setTimeout(() => {
-          setActiveIndex(i);
-          timers.push(
-            window.setTimeout(() => {
-              setActiveIndex(-1);
-              setDoneCount(i + 1);
-              if (i === CHECK_ITEMS.length - 1) {
-                timers.push(window.setTimeout(() => goTo("clear"), 500));
-              }
-            }, 700),
-          );
-        }, i * 750),
-      );
-    });
-    return () => timers.forEach((t) => clearTimeout(t));
-    // Run the reveal sequence once on mount; goTo is stable enough for a
-    // fire-once animation.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return (
-    <FlowShell
-      title="Running your system check"
-      subhead="Hang tight, we're pulling your setup together so it's ready when you are."
-    >
-      <div className="flex flex-col gap-2">
-        {CHECK_ITEMS.map((label, i) => {
-          const done = i < doneCount;
-          const active = i === activeIndex;
-          return (
-            <div
-              key={label}
-              className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition-colors ${
-                active
-                  ? "border-leland-primary bg-leland-primary-extra-light"
-                  : "border-leland-gray-stroke bg-white"
-              }`}
-            >
-              <span
-                className={`flex size-6 items-center justify-center rounded-full text-sm transition-colors ${
-                  done
-                    ? "bg-leland-primary text-leland-on-primary-text"
-                    : "border border-leland-gray-stroke text-transparent"
-                }`}
-              >
-                {done ? <IconCheck className="size-3.5" /> : null}
-              </span>
-              <span className="leland-paragraph-base text-leland-gray-dark">
-                {label}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    </FlowShell>
-  );
-}
-
-function ClearStep({ c, onComplete }: StepProps & { onComplete?: () => void }) {
+function CheckingStep({
+  c,
+  onComplete,
+  onContinue,
+}: StepProps & { onComplete?: () => void; onContinue?: () => void }) {
   const v = VENDOR_INFO[c.state.vendor];
   const defs = connectorDefs(v);
-  const rows: { label: string; state: "ok" | "bad" | "skip" }[] = [
-    { label: "Paid plan confirmed", state: c.state.account.plan === false ? "bad" : "ok" },
+  const rows: { label: string; done: boolean }[] = [
+    { label: "Paid plan confirmed", done: c.state.account.plan !== false },
     {
       label: v.appName + (v.desktopScheme ? " installed" : " signed in"),
-      state: c.state.account.app === false ? "bad" : "ok",
+      done: c.state.account.app !== false,
     },
-    { label: v.browserExt, state: c.state.account.ext === false ? "bad" : "ok" },
-    ...defs.map((d) => ({ label: d.name, state: c.state.connectors[d.key] })),
+    { label: v.browserExt, done: c.state.account.ext !== false },
+    ...defs.map((d) => ({
+      label: d.name,
+      done: c.state.connectors[d.key] === "ok",
+    })),
   ];
-  const total = rows.length;
-  const doneCount = rows.filter((r) => r.state === "ok").length;
-  const allDone = doneCount === total;
 
   useEffect(() => {
     onComplete?.();
-    // Mark the section complete once the receipt renders.
+    // Mark the section complete once the summary renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <FlowShell
-      centered
-      title={allDone ? "You're all set" : "You're on your way"}
-      subhead={
-        allDone
-          ? "Every tool you need is ready. Nothing left to configure before you start."
-          : `You've got ${doneCount} of ${total} things set up. What's left will follow you into the session so it doesn't get lost.`
-      }
+      title="Here's everything you've set up"
+      subhead="Anything still open will follow you into the session so it doesn't get lost."
       footer={
-        <div className="flex justify-center pt-2">
+        <div className="flex pt-2">
           <Button
-            label="Restart preview →"
+            label="Continue"
             buttonColor={ButtonColor.PRIMARY}
             size={ButtonSize.LARGE}
-            onClick={() => c.reset()}
+            width={ButtonWidth.AUTO}
+            onClick={() => onContinue?.()}
           />
         </div>
       }
     >
-      <div
-        className={`flex size-[92px] items-center justify-center rounded-full ${
-          allDone
-            ? "bg-leland-primary text-leland-on-primary-text"
-            : "bg-leland-gray-hover text-leland-gray-dark"
-        }`}
-      >
-        {allDone ? (
-          <IconCheck className="size-10" />
-        ) : (
-          <span className="leland-heading-2xl font-semibold">
-            {doneCount}/{total}
-          </span>
-        )}
-      </div>
-      <div className="flex w-full flex-col gap-2 text-left">
-        {rows.map((r) => {
-          if (r.state === "ok") {
-            return (
-              <div
-                key={r.label}
-                className="flex items-center gap-2 leland-paragraph-base text-leland-gray-dark"
-              >
-                <IconCheck className="size-4 shrink-0 text-leland-success" />
-                {r.label}
-              </div>
-            );
-          }
-          const bad = r.state === "bad";
-          return (
-            <div
-              key={r.label}
-              className="flex items-center gap-2 leland-paragraph-base text-leland-gray-light"
+      <div className="flex flex-col gap-2">
+        {rows.map((r) => (
+          <div
+            key={r.label}
+            className="flex items-center gap-3 rounded-xl border border-leland-gray-stroke bg-white px-4 py-3"
+          >
+            <span
+              className={`flex size-6 shrink-0 items-center justify-center rounded-full ${
+                r.done
+                  ? "bg-leland-success text-white"
+                  : "bg-leland-gray-stroke text-leland-gray-dark"
+              }`}
             >
-              <span className={bad ? "text-leland-red" : "text-leland-gray-dark"}>
-                {bad ? "✕" : "⚑"}
-              </span>
+              {r.done ? (
+                <IconCheck className="size-3.5" />
+              ) : (
+                <IconFlag className="size-3" />
+              )}
+            </span>
+            <span className="leland-paragraph-base text-leland-gray-dark">
               {r.label}
-              {bad ? " — still need this" : " — flagged for later"}
-            </div>
-          );
-        })}
+            </span>
+          </div>
+        ))}
       </div>
     </FlowShell>
   );
@@ -678,6 +587,7 @@ function ClearStep({ c, onComplete }: StepProps & { onComplete?: () => void }) {
 export function renderItSetupStep(
   c: ItSetupController,
   onComplete?: () => void,
+  onContinue?: () => void,
 ): ReactNode {
   switch (c.state.step) {
     case "welcome":
@@ -695,9 +605,9 @@ export function renderItSetupStep(
     case "connectors":
       return <ConnectorsStep c={c} />;
     case "checking":
-      return <CheckingStep c={c} />;
-    case "clear":
-      return <ClearStep c={c} onComplete={onComplete} />;
+      return (
+        <CheckingStep c={c} onComplete={onComplete} onContinue={onContinue} />
+      );
     default:
       // Safety net for a stale persisted step (e.g. the removed "confirm").
       return <WelcomeStep c={c} />;
