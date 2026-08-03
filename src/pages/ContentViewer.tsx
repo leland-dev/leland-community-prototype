@@ -2080,7 +2080,7 @@ function SessionDetailView({
 
 // Matches production ButtonSize.LARGE (p-4, 14px) at semibold weight
 const navButtonBase =
-  "flex shrink-0 items-center gap-2 rounded-lg p-4 text-[0.875rem] font-semibold leading-tight";
+  "flex shrink-0 items-center gap-2 rounded-full p-4 text-[0.875rem] font-semibold leading-tight md:rounded-lg";
 
 function CourseViewerSectionNav({
   prevSectionLink,
@@ -2096,7 +2096,7 @@ function CourseViewerSectionNav({
   totalSections: number;
 }) {
   return (
-    <div className="relative flex items-center justify-between bg-[#F9F8F3] px-4 pb-4 md:px-6">
+    <div className="relative flex items-center justify-between bg-[#F9F8F3] px-4 pb-[calc(1rem_+_env(safe-area-inset-bottom))] md:px-6">
       <div className="pointer-events-none absolute inset-x-0 bottom-full h-16 bg-gradient-to-b from-transparent to-[#F9F8F3]" />
       {prevSectionLink ? (
         <Link
@@ -2273,7 +2273,7 @@ export default function ContentViewer() {
   ) : null;
 
   return (
-    <div className="flex h-screen flex-col bg-white text-leland-gray-dark">
+    <div className="flex h-dvh flex-col bg-white text-leland-gray-dark">
       {options.showSiteNav && (
         <div className="hidden md:block">
           <TopNav />
@@ -2344,7 +2344,7 @@ export default function ContentViewer() {
               aria-hidden
               className="fixed inset-0 z-30 bg-black/30 md:absolute lg:hidden"
             />
-            <div className="fixed bottom-0 left-0 right-0 top-12 z-40 flex animate-[slide-up_0.25s_ease-out] overflow-hidden rounded-t-2xl shadow-xl md:absolute md:right-auto md:top-0 md:animate-none md:overflow-visible md:rounded-none lg:relative lg:bottom-auto lg:left-auto lg:right-auto lg:top-auto lg:z-auto lg:shadow-none">
+            <div className="fixed bottom-0 left-0 right-0 top-0 z-40 flex animate-[slide-up_0.25s_ease-out] overflow-hidden shadow-xl md:absolute md:right-auto md:animate-none md:overflow-visible lg:relative lg:bottom-auto lg:left-auto lg:right-auto lg:top-auto lg:z-auto lg:shadow-none">
             {options.sidebarView === "combined" ? (
               <CombinedSidebar
                 currentLessonId={lesson.id}
