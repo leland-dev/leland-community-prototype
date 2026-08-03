@@ -160,7 +160,7 @@ const START_HERE: Lesson = {
     { id: "add-to-calendar", title: "Add sessions to your calendar", kind: "interactive", flow: "add-to-calendar" },
     { id: "setup-tools", title: "Set up your tools & permissions", kind: "interactive", flow: "it-setup" },
     { id: "join-cohort", title: "Join your Slack community", kind: "interactive", flow: "join-cohort" },
-    { id: "personalize", title: "Personalize your experience", kind: "html", src: "/lessons/lesson-1/welcome.html" },
+    { id: "personalize", title: "Personalize your experience", kind: "interactive", flow: "personalization" },
   ],
 };
 

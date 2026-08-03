@@ -3,6 +3,7 @@ import type { ComponentType } from "react";
 import { AddToCalendarFlow } from "./add-to-calendar/AddToCalendarFlow";
 import { ItSetupFlow } from "./it-setup/ItSetupFlow";
 import { JoinCohortFlow } from "./join-cohort/JoinCohortFlow";
+import { PersonalizationFlow } from "./personalization/PersonalizationFlow";
 
 export type FlowKey =
   | "add-to-calendar"
@@ -13,12 +14,11 @@ export type FlowKey =
 
 export type FlowProps = { onComplete?: () => void; onContinue?: () => void };
 
-// Registry of native getting-started flows. Phases 2–3 add skills-assessment
-// and personalization here.
 const FLOW_COMPONENTS: Partial<Record<FlowKey, ComponentType<FlowProps>>> = {
   "add-to-calendar": AddToCalendarFlow,
   "it-setup": ItSetupFlow,
   "join-cohort": JoinCohortFlow,
+  "personalization": PersonalizationFlow,
 };
 
 export function GettingStartedFlow({
