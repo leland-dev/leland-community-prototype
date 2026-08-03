@@ -16,7 +16,6 @@ import {
 } from "../flow-kit";
 import { ConfirmSetupModal } from "./ConfirmSetupModal";
 import {
-  COHORT_SLACK_INVITE,
   VENDOR_INFO,
   connectorDefs,
   type ConnectorKey,
@@ -55,7 +54,7 @@ function ConnectorListItem({
 }
 
 const CONNECTOR_ICON: Record<ConnectorKey, { mark: ReactNode; bg?: string }> = {
-  slack: { mark: <SlackMark />, bg: "#4A154B" },
+  slack: { mark: <SlackMark /> },
   email: { mark: <EmailMark /> },
   calendar: { mark: <CalendarMark /> },
 };
@@ -74,7 +73,7 @@ function WelcomeStep({ c }: StepProps) {
     <FlowShell
       eyebrow="Getting started · Level 1"
       title="Let's get your tools set up"
-      subhead="Seven quick steps, about 3 minutes. We'll confirm your account, connect the tools Level 1 needs, and make sure nothing blocks you once you're live."
+      subhead="Six quick steps, about 3 minutes. We'll confirm your account, connect the tools Level 1 needs, and make sure nothing blocks you once you're live."
       onContinue={() => c.goTo("choosetool")}
       continueLabel="Get started"
     />
@@ -113,7 +112,7 @@ function ChooseToolStep({ c }: StepProps) {
   );
 }
 
-// ── Account steps (plan / app / extension / cohort) ──────────────────────────
+// ── Account steps (plan / app / extension) ───────────────────────────────────
 
 function PlanStep({ c }: StepProps) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -220,20 +219,12 @@ function AppInstallStep({ c }: StepProps) {
           />
         </OptionGrid>
         {v.desktopScheme && selected === true ? (
-          <div className="flex flex-col gap-2 rounded-xl bg-leland-gray-solid-hover px-4 py-4">
-            <div className="leland-paragraph-sm font-semibold uppercase tracking-[1px] text-leland-gray-extra-light">
-              Test it
-            </div>
-            <ExternalActionButton
-              label="Verify with Claude →"
-              href={v.desktopScheme + encodeURIComponent(v.testPrompt ?? "")}
-              tone="primary"
-            />
-            <p className="leland-paragraph-sm text-leland-gray-light">
-              This opens {v.appName} with a quick test message already typed in —
-              you'll still need to hit send.
-            </p>
-          </div>
+          <a
+            href={v.desktopScheme + encodeURIComponent(v.testPrompt ?? "")}
+            className="self-start leland-paragraph-base font-medium text-leland-gray-extra-light underline decoration-dotted underline-offset-4 hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary rounded"
+          >
+            Verify {v.short} opens and you're signed in →
+          </a>
         ) : null}
       </div>
       <ConfirmSetupModal
@@ -276,22 +267,14 @@ function ExtensionStep({ c }: StepProps) {
         Vivaldi.
       </FlowInfoCard>
     );
-  } else if (!isChromeExt) {
-    callout = (
-      <FlowInfoCard tone="blue" icon="ℹ️">
-        <strong>We can't verify this automatically. </strong>Pick whichever
-        matches below — you can hand Claude a screenshot instead during the
-        session.
-      </FlowInfoCard>
-    );
   }
 
   return (
     <FlowShell
       title={`Get ${extLabel} set up`}
-      subhead={isChromeExt ? "Let Claude see and act on whatever's open in your browser." : undefined}
+      subhead={`Let ${v.short} see and act on whatever's open in your browser.`}
       onBack={() => c.goTo("appinstall")}
-      onContinue={() => c.goTo("cohort")}
+      onContinue={() => c.goTo("connectors-intro")}
       continueDisabled={selected === null}
     >
       <div className="flex flex-col gap-4">
@@ -301,7 +284,7 @@ function ExtensionStep({ c }: StepProps) {
           name={
             <span className="flex items-center gap-2">
               {v.browserExt}
-              <span className="rounded bg-leland-gray-solid-hover px-1.5 py-0.5 leland-paragraph-sm font-medium text-leland-gray-light">
+              <span className="rounded bg-leland-gray-hover px-1.5 py-0.5 leland-paragraph-sm font-medium text-leland-gray-light">
                 Optional
               </span>
             </span>
@@ -335,68 +318,6 @@ function ExtensionStep({ c }: StepProps) {
   );
 }
 
-function CohortStep({ c }: StepProps) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const selected = c.state.account.cohort;
-  return (
-    <FlowShell
-      title="Join your cohort"
-      subhead="Community membership, separate from the Slack connector in the next step."
-      onBack={() => c.goTo("extension")}
-      onContinue={() => c.goTo("connectors-intro")}
-      continueDisabled={selected === null}
-    >
-      <div className="flex flex-col gap-4">
-        <ConnectorListItem
-          badge={<ServiceBadge bg="#4A154B"><SlackMark /></ServiceBadge>}
-          name="Join #l1-jul6-cohort in Slack"
-          desc="Your cohort, TAs, and announcements live here."
-          action={
-            <ExternalActionButton
-              label="Join →"
-              href={COHORT_SLACK_INVITE}
-              tone="secondary"
-              size="sm"
-            />
-          }
-        />
-        <OptionGrid>
-          <OptionCard
-            name="Yes, I've joined"
-            desc="Good to go."
-            selected={selected === true}
-            onClick={() => c.setAccount("cohort", true)}
-          />
-          <OptionCard
-            name="Not yet"
-            desc="Takes about a minute."
-            selected={selected === false}
-            onClick={() => setModalOpen(true)}
-          />
-        </OptionGrid>
-      </div>
-      <ConfirmSetupModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        header="Let's get you in the cohort"
-        desc="Join the Slack workspace, then come back here."
-        actionLabel="Join →"
-        actionHref={COHORT_SLACK_INVITE}
-        confirmLabel="I've joined — continue"
-        onConfirm={() => {
-          c.setAccount("cohort", true);
-          setModalOpen(false);
-          c.goTo("connectors-intro");
-        }}
-        onCantDoIt={() => {
-          c.setAccount("cohort", false);
-          setModalOpen(false);
-        }}
-      />
-    </FlowShell>
-  );
-}
-
 function ConnectorsIntroStep({ c }: StepProps) {
   const v = VENDOR_INFO[c.state.vendor];
   return (
@@ -404,14 +325,14 @@ function ConnectorsIntroStep({ c }: StepProps) {
       eyebrow="Almost there"
       title="Last step — connect your tools"
       subhead="You've downloaded everything you need. Now let's make sure it's all actually connected, not just installed."
-      onBack={() => c.goTo("cohort")}
+      onBack={() => c.goTo("extension")}
       onContinue={() => c.goTo("connectors")}
     >
       <FlowInfoCard
         tone="blue"
         icon={
           <span className="flex items-center gap-1.5">
-            <ServiceBadge bg="#4A154B"><SlackMark /></ServiceBadge>
+            <ServiceBadge><SlackMark /></ServiceBadge>
             <ServiceBadge><EmailMark /></ServiceBadge>
             <ServiceBadge><CalendarMark /></ServiceBadge>
           </span>
@@ -438,7 +359,7 @@ function ConnectHowTo({
   const checkPrompt = `Check which connectors I have set up in ${v.name} — Slack, email, and calendar. Walk me through connecting any that aren't, step by step.`;
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl bg-leland-gray-solid-hover px-5 py-5">
+    <div className="flex flex-col gap-4 rounded-xl bg-leland-gray-hover px-5 py-5">
       <div className="leland-paragraph-sm font-semibold uppercase tracking-[1px] text-leland-gray-extra-light">
         Let {ai} do it for you
       </div>
@@ -677,7 +598,6 @@ function ClearStep({ c, onComplete }: StepProps & { onComplete?: () => void }) {
       label: v.appName + (v.desktopScheme ? " installed" : " signed in"),
       state: c.state.account.app === false ? "bad" : "ok",
     },
-    { label: "Cohort Slack workspace", state: c.state.account.cohort === false ? "bad" : "ok" },
     { label: v.browserExt, state: c.state.account.ext === false ? "bad" : "ok" },
     ...defs.map((d) => ({ label: d.name, state: c.state.connectors[d.key] })),
   ];
@@ -715,7 +635,7 @@ function ClearStep({ c, onComplete }: StepProps & { onComplete?: () => void }) {
         className={`flex size-[92px] items-center justify-center rounded-full ${
           allDone
             ? "bg-leland-primary text-leland-on-primary-text"
-            : "bg-leland-gray-solid-hover text-leland-gray-dark"
+            : "bg-leland-gray-hover text-leland-gray-dark"
         }`}
       >
         {allDone ? (
@@ -775,8 +695,6 @@ export function renderItSetupStep(
       return <AppInstallStep c={c} />;
     case "extension":
       return <ExtensionStep c={c} />;
-    case "cohort":
-      return <CohortStep c={c} />;
     case "connectors-intro":
       return <ConnectorsIntroStep c={c} />;
     case "connectors":

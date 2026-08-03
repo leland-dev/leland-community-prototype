@@ -1,97 +1,33 @@
-// Brand + service glyphs for the getting-started flows, ported from the
-// standalone prototypes' inline SVG. Kept as small presentational components so
-// the vendor picker and connector rows can share them.
+// Brand + service glyphs for the getting-started flows. Vendor logos are real
+// brand assets (see VendorBadge); the connector marks below stay inline SVG.
 import type { VendorKey } from "../it-setup/data";
 
-export function VendorMark({ vendor }: { vendor: VendorKey }) {
-  if (vendor === "claude") {
-    return (
-      <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden>
-        {Array.from({ length: 8 }, (_, i) => (
-          <rect
-            key={i}
-            x="9"
-            y="2"
-            width="2"
-            height="7"
-            rx="1"
-            fill="#fff"
-            transform={`rotate(${i * 45} 10 10)`}
-          />
-        ))}
-      </svg>
-    );
-  }
-  if (vendor === "chatgpt") {
-    return (
-      <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden>
-        {Array.from({ length: 6 }, (_, i) => (
-          <ellipse
-            key={i}
-            cx="10"
-            cy="5.6"
-            rx="2.4"
-            ry="3.8"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="1.5"
-            transform={`rotate(${i * 60} 10 10)`}
-          />
-        ))}
-      </svg>
-    );
-  }
-  if (vendor === "copilot") {
-    return (
-      <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden>
-        <rect x="2" y="2" width="7" height="7" fill="#F25022" />
-        <rect x="11" y="2" width="7" height="7" fill="#7FBA00" />
-        <rect x="2" y="11" width="7" height="7" fill="#00A4EF" />
-        <rect x="11" y="11" width="7" height="7" fill="#FFB900" />
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden>
-      <defs>
-        <linearGradient id="gemgrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#4285F4" />
-          <stop offset="100%" stopColor="#EA4C89" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M10 1 C10 7 13 10 19 10 C13 10 10 13 10 19 C10 13 7 10 1 10 C7 10 10 7 10 1 Z"
-        fill="url(#gemgrad)"
-      />
-    </svg>
-  );
-}
-
-const VENDOR_BADGE_BG: Record<VendorKey, string> = {
-  claude: "#D97757",
-  chatgpt: "#000000",
-  copilot: "#FFFFFF",
-  gemini: "#FFFFFF",
+const VENDOR_LOGO: Record<VendorKey, string> = {
+  claude: "logo-claude.webp",
+  chatgpt: "logo-chatgpt.jpg",
+  copilot: "logo-copilot.jpg",
+  gemini: "logo-gemini.webp",
 };
 
 export function VendorBadge({ vendor }: { vendor: VendorKey }) {
   return (
-    <div
-      className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-leland-gray-stroke"
-      style={{ background: VENDOR_BADGE_BG[vendor] }}
-    >
-      <VendorMark vendor={vendor} />
+    <div className="size-9 shrink-0 overflow-hidden rounded-lg border border-leland-gray-stroke bg-white">
+      <img
+        src={`${import.meta.env.BASE_URL}${VENDOR_LOGO[vendor]}`}
+        alt=""
+        className="size-full object-cover"
+      />
     </div>
   );
 }
 
 export function SlackMark() {
   return (
-    <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden>
-      <rect x="7.3" y="0.5" width="2.6" height="8" rx="1.3" fill="#fff" />
-      <rect x="0.5" y="7.4" width="8" height="2.6" rx="1.3" fill="#fff" />
-      <rect x="10.1" y="11.5" width="2.6" height="8" rx="1.3" fill="#fff" />
-      <rect x="11.5" y="10.1" width="8" height="2.6" rx="1.3" fill="#fff" />
+    <svg viewBox="0 0 127 127" width="18" height="18" aria-hidden>
+      <path d="M27.2 80c0 7.3-5.9 13.2-13.2 13.2C6.7 93.2.8 87.3.8 80c0-7.3 5.9-13.2 13.2-13.2h13.2V80zm6.6 0c0-7.3 5.9-13.2 13.2-13.2 7.3 0 13.2 5.9 13.2 13.2v33c0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V80z" fill="#E01E5A" />
+      <path d="M47 27c-7.3 0-13.2-5.9-13.2-13.2C33.8 6.5 39.7.6 47 .6c7.3 0 13.2 5.9 13.2 13.2V27H47zm0 6.7c7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2H13.9C6.6 60.1.7 54.2.7 46.9c0-7.3 5.9-13.2 13.2-13.2H47z" fill="#36C5F0" />
+      <path d="M99.9 46.9c0-7.3 5.9-13.2 13.2-13.2 7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2H99.9V46.9zm-6.6 0c0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V13.8C66.9 6.5 72.8.6 80.1.6c7.3 0 13.2 5.9 13.2 13.2v33.1z" fill="#2EB67D" />
+      <path d="M80.1 99.8c7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V99.8h13.2zm0-6.6c-7.3 0-13.2-5.9-13.2-13.2 0-7.3 5.9-13.2 13.2-13.2h33.1c7.3 0 13.2 5.9 13.2 13.2 0 7.3-5.9 13.2-13.2 13.2H80.1z" fill="#ECB22E" />
     </svg>
   );
 }

@@ -16,7 +16,7 @@ export function OptionCard({ name, desc, selected = false, onClick }: OptionCard
       className={`flex flex-col gap-1 rounded-lg border-2 px-5 py-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
         selected
           ? "border-leland-gray-dark bg-white shadow-sm"
-          : "border-transparent bg-leland-gray-solid-hover hover:bg-leland-gray-hover"
+          : "border-transparent bg-leland-gray-hover hover:bg-leland-gray-stroke"
       }`}
     >
       <span className="leland-paragraph-base font-semibold text-leland-gray-dark">

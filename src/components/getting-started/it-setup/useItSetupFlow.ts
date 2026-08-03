@@ -8,7 +8,6 @@ export type ItSetupStep =
   | "plan"
   | "appinstall"
   | "extension"
-  | "cohort"
   | "connectors-intro"
   | "connectors"
   | "checking"
@@ -22,7 +21,6 @@ type AccountState = {
   plan: TriState;
   app: TriState;
   ext: TriState;
-  cohort: TriState;
 };
 
 type ConnectorState = Record<ConnectorKey, ConnectorStatus>;
@@ -41,7 +39,7 @@ type ItSetupState = {
 const INITIAL_STATE: ItSetupState = {
   step: "welcome",
   vendor: "claude",
-  account: { plan: null, app: null, ext: null, cohort: null },
+  account: { plan: null, app: null, ext: null },
   connectors: { slack: "ok", email: "ok", calendar: "ok" },
   connectorsConfirming: false,
   connectorsVerifyStarted: false,
@@ -103,11 +101,10 @@ const PROGRESS_N: Record<ItSetupStep, number> = {
   plan: 2,
   appinstall: 3,
   extension: 4,
-  cohort: 5,
-  "connectors-intro": 5,
-  connectors: 6,
-  checking: 7,
-  clear: 7,
+  "connectors-intro": 4,
+  connectors: 5,
+  checking: 6,
+  clear: 6,
 };
 
 const COUNTED_STEPS: ReadonlySet<ItSetupStep> = new Set([
@@ -115,13 +112,12 @@ const COUNTED_STEPS: ReadonlySet<ItSetupStep> = new Set([
   "plan",
   "appinstall",
   "extension",
-  "cohort",
   "connectors",
   "checking",
   "clear",
 ]);
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 6;
 
 export type ItSetupController = {
   state: ItSetupState;

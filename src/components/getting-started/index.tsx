@@ -2,8 +2,14 @@ import type { ComponentType } from "react";
 
 import { AddToCalendarFlow } from "./add-to-calendar/AddToCalendarFlow";
 import { ItSetupFlow } from "./it-setup/ItSetupFlow";
+import { JoinCohortFlow } from "./join-cohort/JoinCohortFlow";
 
-export type FlowKey = "add-to-calendar" | "it-setup" | "skills-assessment" | "personalization";
+export type FlowKey =
+  | "add-to-calendar"
+  | "it-setup"
+  | "join-cohort"
+  | "skills-assessment"
+  | "personalization";
 
 export type FlowProps = { onComplete?: () => void };
 
@@ -12,6 +18,7 @@ export type FlowProps = { onComplete?: () => void };
 const FLOW_COMPONENTS: Partial<Record<FlowKey, ComponentType<FlowProps>>> = {
   "add-to-calendar": AddToCalendarFlow,
   "it-setup": ItSetupFlow,
+  "join-cohort": JoinCohortFlow,
 };
 
 export function GettingStartedFlow({
