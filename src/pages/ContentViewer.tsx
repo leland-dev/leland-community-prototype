@@ -140,22 +140,12 @@ const COMMUNITY_GROUP_ID = "ai-bp-apr-26";
 // Lesson 1 is the block/CMS demo: hand-authored native block sections (incl. an
 // inline video recording), plus a demo PDF section so a media section still
 // coexists with block sections.
-const MEDIA_DEMO_SECTIONS: MediaSection[] = [
-  {
-    id: "slides",
-    title: "Session slides",
-    durationMin: null,
-    kind: "pdf",
-    src: "/lessons/sample-deck.pdf",
-  },
-];
-
 const LESSONS: Lesson[] = (lessonData as Lesson[]).map((lesson) =>
   lesson.number === 1
     ? {
         ...lesson,
         topBlocks: LESSON_1_TOP_BLOCKS,
-        sections: [...LESSON_1_SECTIONS, ...MEDIA_DEMO_SECTIONS],
+        sections: LESSON_1_SECTIONS,
       }
     : lesson,
 );

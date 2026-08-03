@@ -160,21 +160,4 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
       },
     ],
   },
-  {
-    kind: "blocks",
-    id: "recording",
-    title: "Session recording",
-    durationMin: 90,
-    blocks: [
-      {
-        kind: "markdown",
-        body: "Missed the live session or want to revisit it? Watch the full recording below.",
-      },
-      {
-        kind: "video",
-        title: "Session 1 recording",
-        src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      },
-    ],
-  },
 ];
