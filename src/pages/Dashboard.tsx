@@ -101,9 +101,9 @@ export default function Dashboard() {
 
   return (
     <div>
-      {/* Mobile hero */}
+      {/* Hero — full-bleed beige band on both mobile and desktop */}
       <div
-        className="-mx-4 -mt-[72px] mb-0 px-4 pt-[150px] pb-6 md:hidden"
+        className="-mx-4 sm:-mx-6 -mt-[72px] md:-mt-10 mb-0 px-4 sm:px-6 pt-[150px] md:pt-10 pb-6 md:pb-10"
         style={{ backgroundColor: heroBg }}
       >
         <h1 className="font-serif text-[36px] font-medium leading-[1.2] text-gray-dark">
@@ -129,11 +129,6 @@ export default function Dashboard() {
           </LinkButton>
         )}
       </div>
-
-      {/* Desktop h1 */}
-      <h1 className="hidden font-serif text-[36px] font-medium text-gray-dark md:block">
-        Dashboard
-      </h1>
 
       {/* Upcoming sessions */}
       <section className="mt-6">

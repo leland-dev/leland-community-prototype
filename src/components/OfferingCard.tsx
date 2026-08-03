@@ -35,6 +35,8 @@ interface OfferingCardProps {
   showImage?: boolean;
   size?: "large" | "small";
   href?: string;
+  /** Extra classes on the card container (e.g. padding/shadow overrides). */
+  className?: string;
 }
 
 function getDefaultCta(type: OfferingType, purchased: boolean, cohortSelected: boolean, exhausted: boolean, fullyScheduled: boolean): { label: string; green?: boolean } {
@@ -139,6 +141,7 @@ export default function OfferingCard({
   showImage = false,
   size = "large",
   href,
+  className = "",
 }: OfferingCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -193,7 +196,7 @@ export default function OfferingCard({
 
   /* ── Standard inline row layout ── */
   const cardContent = (
-    <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 py-3 transition-colors hover:bg-[#F5F5F5] ${showMenu ? "pr-1" : "pr-2"}`}>
+    <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 py-3 transition-colors hover:bg-[#F5F5F5] ${showMenu ? "pr-1" : "pr-2"} ${className}`}>
         {/* Image */}
         {type === "leland-plus" ? (
           <img

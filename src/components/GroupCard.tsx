@@ -56,10 +56,10 @@ export default function GroupCard({
 
       {/* Name + meta */}
       <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
-        <p className={`truncate ${titleSizeClass} leading-tight font-medium text-gray-dark`}>
+        <p className={`truncate ${titleSizeClass} leading-[1.2] font-semibold text-gray-dark`}>
           {name}
         </p>
-        <p className={`truncate ${subtitleSizeClass} leading-tight text-[#707070]`}>
+        <p className={`truncate ${subtitleSizeClass} leading-[1.4] text-[#707070]`}>
           {members} members{newPosts > 0 && <> <span className="text-[#9B9B9B]">&middot;</span> {newPosts} new post{newPosts !== 1 ? "s" : ""}</>}
         </p>
       </div>

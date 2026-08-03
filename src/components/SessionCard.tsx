@@ -25,6 +25,29 @@ interface SessionCardProps {
   size?: "large" | "small";
   cta?: React.ReactNode;
   joinHref?: string;
+  /** Day of the month shown in the calendar icon. Parsed from `dateTime` when omitted. */
+  day?: string | number;
+}
+
+// Apple-style calendar chip: blue header bar over a white face with the day.
+function CalendarIcon({ day, dim }: { day: string; dim?: boolean }) {
+  return (
+    <div
+      className={`flex h-[36px] w-[36px] shrink-0 flex-col overflow-hidden rounded-[8px] bg-white${dim ? " opacity-50" : ""}`}
+      style={{ boxShadow: "0 1px 3px 0 rgba(16, 24, 40, 0.10), 0 1px 2px 0 rgba(16, 24, 40, 0.06)" }}
+    >
+      <div className="h-[10px] w-full shrink-0" style={{ backgroundColor: "#80ACED" }} />
+      <div className="flex flex-1 items-center justify-center pb-[2px]">
+        <span className="text-[16px] font-semibold leading-[1.2] text-gray-dark">{day}</span>
+      </div>
+    </div>
+  );
+}
+
+// Pull the day-of-month out of a "Weekday, Mon D at Time" string.
+function dayFromDateTime(dateTime: string): string {
+  const m = dateTime.split(" at ")[0].match(/(\d{1,2})/);
+  return m ? m[1] : "";
 }
 
 function getMenuItems(status: string, type: string) {
@@ -91,9 +114,11 @@ export default function SessionCard({
   size = "large",
   cta,
   joinHref,
+  day,
 }: SessionCardProps) {
   const isPast = status === "past";
   const isSmall = size === "small";
+  const dayNum = day != null ? String(day) : dayFromDateTime(dateTime);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -117,29 +142,17 @@ export default function SessionCard({
   return (
     <div className="@container">
       <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 pr-1 transition-colors hover:bg-[#F5F5F5] ${isSmall ? "py-[10px]" : "py-3"}`}>
-        {/* Image — hidden when hideImage, otherwise hidden below 380px */}
-        {!hideImage && (type === "coach" ? (
-          <img
-            src={image}
-            alt=""
-            className={`hidden @[380px]:block h-[40px] w-[40px] shrink-0 rounded-full object-cover${isPast ? " opacity-50" : ""}`}
-          />
-        ) : (
-          <img
-            src={image}
-            alt=""
-            className={`hidden @[380px]:block h-[40px] w-[72px] shrink-0 rounded-[4px] object-cover${isPast ? " opacity-50" : ""}`}
-          />
-        ))}
+        {/* Calendar icon — always shown (unless explicitly hidden) */}
+        {!hideImage && <CalendarIcon day={dayNum} dim={isPast} />}
 
         {/* Title + date/time */}
         <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
-          <p className={`truncate ${titleSizeClass} leading-tight font-medium ${isPast ? "text-[#707070]" : "text-gray-dark"}`}>
+          <p className={`truncate ${titleSizeClass} leading-[1.2] font-semibold ${isPast ? "text-[#707070]" : "text-gray-dark"}`}>
             {title}
           </p>
-          <p className={`truncate ${subtitleSizeClass} leading-tight text-[#707070]`}>
+          <p className={`truncate ${subtitleSizeClass} leading-[1.4] text-[#707070]`}>
             {status === "live" ? (
-              <><span className="text-[#E2574C]">Happening now</span> · Started at {dateTime.split(" at ")[1]} · <span className="text-[#9B9B9B]">{duration}</span></>
+              <><span className="text-red">Happening now</span> · Started at {dateTime.split(" at ")[1]} · <span className="text-[#9B9B9B]">{duration}</span></>
             ) : (
               <>{dateTime} · <span className="text-[#9B9B9B]">{duration}</span></>
             )}
@@ -150,9 +163,9 @@ export default function SessionCard({
         <div className="flex shrink-0 items-center gap-0 self-stretch">
           {cta ? cta : status === "live" ? (
             joinHref ? (
-              <LinkButton size="md" variant="primary" href={joinHref}>Join</LinkButton>
+              <LinkButton size={isSmall ? "sm" : "md"} variant="dark" rounded="rounded-full" style={{ fontWeight: 600 }} href={joinHref}>Join</LinkButton>
             ) : (
-              <Button size="md" variant="primary">Join</Button>
+              <Button size={isSmall ? "sm" : "md"} variant="dark" rounded="rounded-full" style={{ fontWeight: 600 }}>Join</Button>
             )
           ) : status === "upcoming" ? null
           : isPast && hasRecording && (type === "event" || type === "bootcamp") ? (

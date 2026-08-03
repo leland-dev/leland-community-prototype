@@ -111,11 +111,11 @@ export default function SidebarCard({
       <Leading variant={variant} image={image} icon={icon} live={live} />
 
       {/* Center: title + subtitle */}
-      <div className={`flex min-w-0 flex-1 flex-col ${variant === "category" ? "gap-[2px]" : "gap-[4px]"}`}>
-        <p className="line-clamp-2 text-[14px] font-medium leading-[1.2] text-gray-dark group-hover:underline group-hover:decoration-[1px] group-hover:underline-offset-[2px]">{title}</p>
-        <p className="truncate text-[12px] font-normal leading-none text-[#707070]">{subtitle}</p>
+      <div className={`flex min-w-0 flex-1 flex-col gap-[2px]`}>
+        <p className="line-clamp-2 text-[14px] font-semibold leading-[1.2] text-gray-dark group-hover:underline group-hover:decoration-[1px] group-hover:underline-offset-[2px]">{title}</p>
+        <p className="truncate text-[12px] font-normal leading-[1.4] text-[#707070]">{subtitle}</p>
         {reviews && (
-          <p className="truncate text-[12px] font-normal leading-none text-[#707070]">
+          <p className="truncate text-[12px] font-normal leading-[1.4] text-[#707070]">
             <ReviewRow rating={reviews.rating} count={reviews.count} />
           </p>
         )}

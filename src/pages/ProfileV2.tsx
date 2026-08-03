@@ -7,6 +7,7 @@ import { useDarkMode } from "../contexts/DarkModeContext";
 import PageShell from "../components/PageShell";
 import SessionCard from "../components/SessionCard";
 import OfferingCard, { type OfferingType } from "../components/OfferingCard";
+import PackageCard from "../components/PackageCard";
 import AllOfferingsModal from "./AllOfferings";
 import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
 import topicHash from "../assets/img/topic-hash.svg";
@@ -115,6 +116,18 @@ const PROFILE_SECTIONS = [
 const dashedBorderStyle = {
   backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")`,
 };
+
+// Package offerings shown as cover cards in the Offerings tab grid.
+const PLACEHOLDER_PACKAGES: { title: string; meta: string; badge?: string }[] = [
+  { title: "MBA Applications | Comprehensive Package", meta: "Starting at $8,000 · 20h+ of coaching", badge: "Best Value" },
+  { title: "Essay Unlimited MBA Package", meta: "Starting at $4,300 · 15h+ of coaching", badge: "Best Value" },
+  { title: "Holistic MBA Profile Evaluation", meta: "$390 · 1h of coaching" },
+  { title: "Deferred MBA Applications | Comprehensive Package", meta: "Starting at $8,000 · 20h+ of coaching", badge: "Best Value" },
+  { title: "Find Your Fit: MBA School Selection Session", meta: "Starting at $390 · 1h+ of coaching" },
+  { title: "MBA Resume Revamp Package", meta: "Starting at $235 · 1h+ of coaching", badge: "Save up to $555" },
+  { title: "MIT / Yale / Kellogg Video Essay Mock Interview Prep", meta: "Starting at $450 · 1h+ of coaching" },
+  { title: "Stanford GSB Mock Interview Package", meta: "$500 · 1h of coaching" },
+];
 
 const BIO_PLACEHOLDER = `I help ambitious professionals break into top MBA programs and land PM roles at leading tech companies. With eight-plus years in product at LinkedIn and Meta, plus my own Stanford GSB journey, I bring firsthand experience to every coaching session — from the first brainstorm to the final decision.
 
@@ -672,7 +685,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
         <button
           key={c.slug}
           onClick={() => onSelectCategory?.(c.slug)}
-          className={`flex w-full items-center gap-3 rounded-2xl border border-gray-stroke bg-white px-5 py-4 text-left transition-colors hover:bg-gray-hover ${capped ? "max-w-[500px]" : ""}`}>
+          className={`flex w-full items-center gap-3 rounded-2xl border border-gray-stroke bg-white px-5 py-4 text-left transition-colors hover:bg-gray-hover ${capped ? "max-w-[550px]" : ""}`}>
           {c.icon && <img src={c.icon} alt="" className="h-7 w-7 shrink-0" />}
           <span className="min-w-0 flex-1 text-[16px] font-semibold text-gray-dark">{c.label}</span>
           <img src={chevronRightIcon} alt="" className="h-5 w-5 shrink-0" />
@@ -2138,10 +2151,23 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                       {highLevel ? (
                         renderCategoryButtons(true)
                       ) : (
-                        <div className="flex flex-col gap-3">
-                          {[...Array(4)].map((_, i) => (
-                            <div key={i} className="h-[92px] rounded-xl bg-[#222222]/5" style={dashedBorderStyle} />
-                          ))}
+                        <div className="mx-auto flex w-full max-w-[550px] flex-col gap-2">
+                          {coachConfig.offerings
+                            .filter((o) => o.type === "package" || o.type === "hourly-package")
+                            .slice(0, 4)
+                            .map((o) => (
+                              <OfferingCard
+                                key={o.title}
+                                type={o.type}
+                                title={o.title}
+                                subtitle={o.subtitle}
+                                image={o.image}
+                                ctaLabel={o.ctaLabel}
+                                href={o.href}
+                                showImage
+                                className="!px-3 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)]"
+                              />
+                            ))}
                         </div>
                       )}
                       <div className="mt-6 flex flex-col items-center">
@@ -2227,9 +2253,17 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                               Buy coaching
                             </Button>
                           </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            {[...Array(12)].map((_, i) => (
-                              <div key={i} className="h-[280px] rounded-xl bg-[#222222]/5" style={dashedBorderStyle} />
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {PLACEHOLDER_PACKAGES.map((pkg, i) => (
+                              <PackageCard
+                                key={pkg.title}
+                                title={pkg.title}
+                                meta={pkg.meta}
+                                badge={pkg.badge}
+                                coachName={coachConfig.name}
+                                coachPhoto={coachConfig.photo}
+                                themeIndex={i}
+                              />
                             ))}
                           </div>
                         </>
