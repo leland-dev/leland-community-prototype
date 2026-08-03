@@ -67,7 +67,10 @@ function SessionRecordingEmbed({ src }: { src: string }) {
   const [duration, setDuration] = useState(0);
   const [hovering, setHovering] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(0);
+  const [muted, setMuted] = useState(false);
+  const [captionsOn, setCaptionsOn] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const showControls = !isPlaying || hovering;
 
@@ -83,12 +86,38 @@ function SessionRecordingEmbed({ src }: { src: string }) {
     if (v.paused) v.play(); else v.pause();
   };
 
+  const toggleMute = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setMuted(v.muted);
+  };
+
+  const popOut = async () => {
+    const v = videoRef.current;
+    if (v && document.pictureInPictureEnabled && !v.disablePictureInPicture) {
+      try {
+        await v.requestPictureInPicture();
+        return;
+      } catch {
+        // fall through to opening in a new tab
+      }
+    }
+    window.open(src, "_blank", "noopener");
+  };
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else containerRef.current?.requestFullscreen?.();
+  };
+
   const overlayClass = `pointer-events-none absolute inset-x-0 transition-opacity duration-200 ${
     showControls ? "opacity-100 pointer-events-auto" : "opacity-0"
   }`;
 
   return (
     <div
+      ref={containerRef}
       className="relative aspect-video w-full overflow-hidden rounded-xl border border-leland-gray-stroke bg-black"
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
@@ -114,13 +143,13 @@ function SessionRecordingEmbed({ src }: { src: string }) {
               <select
                 value={selectedSlot}
                 onChange={e => setSelectedSlot(Number(e.target.value))}
-                className="cursor-pointer appearance-none rounded-full bg-white/15 py-1.5 pl-3 pr-7 text-[13px] font-medium text-white backdrop-blur-sm focus:outline-none"
+                className="cursor-pointer appearance-none rounded-full bg-white/15 py-1 pl-2.5 pr-6 text-xs font-medium text-white backdrop-blur-sm focus:outline-none md:py-1.5 md:pl-3 md:pr-7 md:text-[13px]"
               >
                 {SESSION_SLOTS.map((label, i) => (
                   <option key={i} value={i} className="bg-gray-900">{label}</option>
                 ))}
               </select>
-              <svg className="pointer-events-none absolute right-2 top-1/2 size-3 -translate-y-1/2 text-white" viewBox="0 0 12 12" fill="none" aria-hidden>
+              <svg className="pointer-events-none absolute right-1.5 top-1/2 size-2.5 -translate-y-1/2 text-white md:right-2 md:size-3" viewBox="0 0 12 12" fill="none" aria-hidden>
                 <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
@@ -156,11 +185,11 @@ function SessionRecordingEmbed({ src }: { src: string }) {
             onChange={e => { const v = videoRef.current; if (v) v.currentTime = Number(e.target.value); }}
             className="mb-2.5 h-0.5 w-full cursor-pointer accent-white [&::-webkit-slider-thumb]:appearance-none [&::-moz-range-thumb]:appearance-none"
           />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3.5 text-white/80">
             <button
               type="button"
               onClick={togglePlay}
-              className="text-white focus:outline-none"
+              className="hover:text-white focus:outline-none"
               aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
@@ -169,23 +198,71 @@ function SessionRecordingEmbed({ src }: { src: string }) {
                   <rect x="12" y="3" width="4" height="14" rx="1" />
                 </svg>
               ) : (
-                <svg viewBox="0 0 24 24" fill="white" className="size-5 translate-x-px" aria-hidden>
+                <svg viewBox="0 0 24 24" fill="currentColor" className="size-5 translate-x-px" aria-hidden>
                   <polygon points="5,3 21,12 5,21" />
                 </svg>
               )}
             </button>
-            <span className="leland-paragraph-sm tabular-nums text-white/80">
-              {fmt(currentTime)} / {fmt(duration)}
-            </span>
-            <div className="flex-1" />
             <button
               type="button"
-              onClick={() => window.open(src, "_blank", "noopener")}
-              className="flex items-center gap-1.5 text-[13px] font-medium text-white/80 hover:text-white focus:outline-none"
-              aria-label="Open in new window"
+              onClick={toggleMute}
+              className="hover:text-white focus:outline-none"
+              aria-label={muted ? "Unmute" : "Mute"}
             >
-              <IconArrowUpRight className="size-4" />
-              Pop out
+              {muted ? (
+                <svg viewBox="0 0 24 24" className="size-5" aria-hidden>
+                  <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
+                  <path d="M16 9.5l5 5M21 9.5l-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" className="size-5" aria-hidden>
+                  <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
+                  <path d="M16 8.8a4 4 0 010 6.4M18.6 6.4a7.5 7.5 0 010 11.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+                </svg>
+              )}
+            </button>
+            <div className="flex-1" />
+            <span className="leland-paragraph-sm tabular-nums">
+              {fmt(currentTime)} / {fmt(duration)}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCaptionsOn(c => !c)}
+              className={`focus:outline-none ${captionsOn ? "text-white" : "hover:text-white"}`}
+              aria-label="Captions"
+              aria-pressed={captionsOn}
+            >
+              <span className="flex h-[18px] items-center justify-center rounded border-[1.5px] border-current px-1 text-[10px] font-bold leading-none">CC</span>
+            </button>
+            <button
+              type="button"
+              className="hover:text-white focus:outline-none"
+              aria-label="Settings"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="size-5" aria-hidden>
+                <path d="M19.14 12.94a7.5 7.5 0 000-1.88l2.03-1.58a.5.5 0 00.12-.64l-1.92-3.32a.5.5 0 00-.61-.22l-2.39.96a7 7 0 00-1.62-.94l-.36-2.54a.5.5 0 00-.5-.42h-3.84a.5.5 0 00-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 00-.61.22L2.69 8.84a.5.5 0 00.12.64l2.03 1.58a7.5 7.5 0 000 1.88l-2.03 1.58a.5.5 0 00-.12.64l1.92 3.32a.5.5 0 00.61.22l2.39-.96c.49.38 1.03.7 1.62.94l.36 2.54a.5.5 0 00.5.42h3.84a.5.5 0 00.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96a.5.5 0 00.61-.22l1.92-3.32a.5.5 0 00-.12-.64l-2.03-1.58zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={popOut}
+              className="hover:text-white focus:outline-none"
+              aria-label="Pop out"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="size-5" aria-hidden>
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <rect x="12" y="11" width="7" height="5" rx="1" fill="currentColor" stroke="none" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="hover:text-white focus:outline-none"
+              aria-label="Fullscreen"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-5" aria-hidden>
+                <path d="M4 9V5a1 1 0 011-1h4M20 9V5a1 1 0 00-1-1h-4M4 15v4a1 1 0 001 1h4M20 15v4a1 1 0 01-1 1h-4" />
+              </svg>
             </button>
           </div>
         </div>

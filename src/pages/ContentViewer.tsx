@@ -2159,6 +2159,8 @@ export default function ContentViewer() {
     setSeeMoreOpen(false);
     // Scroll content area back to top on section change.
     contentScrollRef.current?.scrollTo({ top: 0 });
+    // Below lg the sidebar is a drawer — selecting a section closes it.
+    if (window.innerWidth < 1024) setSidebarOpen(false);
     // Scroll the active section into view in the sidebar after render.
     const id = params.sectionId;
     const timer = setTimeout(() => {
@@ -2287,7 +2289,7 @@ export default function ContentViewer() {
         >
           <IconChevronLeft className="size-5" aria-hidden />
         </Link>
-        <span className="min-w-0 flex-1 truncate leland-heading-base text-leland-gray-dark">
+        <span className="min-w-0 flex-1 truncate leland-heading-base font-semibold text-leland-gray-dark">
           {COURSE_TITLE_FULL}
         </span>
         <button
