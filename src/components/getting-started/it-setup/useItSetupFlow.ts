@@ -15,7 +15,7 @@ export type ItSetupStep =
 
 // null = unanswered, true = yes, false = "not yet" (flagged, never blocks).
 type TriState = null | boolean;
-type ConnectorStatus = "ok" | "flag" | "bad";
+type ConnectorStatus = "ok" | "skip";
 
 type AccountState = {
   plan: TriState;
@@ -40,7 +40,7 @@ const INITIAL_STATE: ItSetupState = {
   step: "welcome",
   vendor: "claude",
   account: { plan: null, app: null, ext: null },
-  connectors: { slack: "ok", email: "ok", calendar: "ok" },
+  connectors: { slack: "skip", email: "skip", calendar: "skip" },
   connectorsConfirming: false,
   connectorsVerifyStarted: false,
 };

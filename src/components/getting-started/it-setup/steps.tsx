@@ -1,6 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 
-import { Button, ButtonColor, ButtonSize, IconCheck } from "../../leland";
+import {
+  Button,
+  ButtonColor,
+  ButtonSize,
+  IconCalendar,
+  IconCheck,
+  IconEmail,
+} from "../../leland";
 import {
   CopyPromptButton,
   ExternalActionButton,
@@ -10,8 +17,6 @@ import {
   OptionGrid,
   ServiceBadge,
   SlackMark,
-  EmailMark,
-  CalendarMark,
   VendorBadge,
 } from "../flow-kit";
 import { ConfirmSetupModal } from "./ConfirmSetupModal";
@@ -40,13 +45,15 @@ function ConnectorListItem({
   action: ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-leland-gray-stroke bg-white px-4 py-3.5">
-      {badge}
-      <div className="min-w-0 flex-1">
-        <div className="leland-paragraph-base font-semibold text-leland-gray-dark">
-          {name}
+    <div className="flex flex-col gap-3 rounded-xl border border-leland-gray-stroke bg-white px-4 py-3.5 sm:flex-row sm:items-center">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        {badge}
+        <div className="min-w-0 flex-1">
+          <div className="leland-paragraph-base font-semibold text-leland-gray-dark">
+            {name}
+          </div>
+          <div className="leland-paragraph-sm text-leland-gray-light">{desc}</div>
         </div>
-        <div className="leland-paragraph-sm text-leland-gray-light">{desc}</div>
       </div>
       <div className="shrink-0">{action}</div>
     </div>
@@ -55,8 +62,8 @@ function ConnectorListItem({
 
 const CONNECTOR_ICON: Record<ConnectorKey, { mark: ReactNode; bg?: string }> = {
   slack: { mark: <SlackMark /> },
-  email: { mark: <EmailMark /> },
-  calendar: { mark: <CalendarMark /> },
+  email: { mark: <IconEmail className="size-5 text-leland-gray-dark" /> },
+  calendar: { mark: <IconCalendar className="size-5 text-leland-gray-dark" /> },
 };
 
 function isChromiumBrowser(): boolean {
@@ -330,11 +337,12 @@ function ConnectorsIntroStep({ c }: StepProps) {
     >
       <FlowInfoCard
         tone="blue"
+        className="flex-col text-leland-gray-dark sm:flex-row sm:items-center"
         icon={
           <span className="flex items-center gap-1.5">
             <ServiceBadge><SlackMark /></ServiceBadge>
-            <ServiceBadge><EmailMark /></ServiceBadge>
-            <ServiceBadge><CalendarMark /></ServiceBadge>
+            <ServiceBadge><IconEmail className="size-5 text-leland-gray-dark" /></ServiceBadge>
+            <ServiceBadge><IconCalendar className="size-5 text-leland-gray-dark" /></ServiceBadge>
           </span>
         }
       >
@@ -419,58 +427,40 @@ function ConnectHowTo({
   );
 }
 
-const CONNECTOR_STATES = [
-  { value: "ok", glyph: "✓", label: "Connected" },
-  { value: "flag", glyph: "⚑", label: "Not sure — flag for later" },
-  { value: "bad", glyph: "✕", label: "Not connected" },
-] as const;
-
-function ConnectorStateRow({
+function ConnectorCheckRow({
   connectorKey,
   name,
-  status,
-  onSet,
+  connected,
+  onToggle,
 }: {
   connectorKey: ConnectorKey;
   name: string;
-  status: "ok" | "flag" | "bad";
-  onSet: (value: "ok" | "flag" | "bad") => void;
+  connected: boolean;
+  onToggle: () => void;
 }) {
   const icon = CONNECTOR_ICON[connectorKey];
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-leland-gray-stroke bg-white px-4 py-3">
-      <ServiceBadge bg={icon.bg}>{icon.mark}</ServiceBadge>
-      <div className="min-w-0 flex-1 leland-paragraph-base font-semibold text-leland-gray-dark">
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={connected}
+      aria-label={`${name} — ${connected ? "connected" : "not connected"}`}
+      className="flex w-full items-center gap-3 rounded-xl border border-leland-gray-stroke bg-white px-4 py-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+    >
+      <ServiceBadge>{icon.mark}</ServiceBadge>
+      <span className="min-w-0 flex-1 leland-paragraph-base font-semibold text-leland-gray-dark">
         {name}
-      </div>
-      <div className="flex shrink-0 items-center gap-1">
-        {CONNECTOR_STATES.map((s) => {
-          const active = status === s.value;
-          const activeClass =
-            s.value === "ok"
-              ? "border-leland-success bg-leland-success-extra-light text-leland-success"
-              : s.value === "flag"
-                ? "border-leland-primary bg-leland-primary-extra-light text-leland-gray-dark"
-                : "border-leland-red bg-leland-red-light text-leland-red";
-          return (
-            <button
-              key={s.value}
-              type="button"
-              aria-label={s.label}
-              aria-pressed={active}
-              onClick={() => onSet(s.value)}
-              className={`flex size-8 items-center justify-center rounded-full border text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
-                active
-                  ? activeClass
-                  : "border-leland-gray-stroke bg-white text-leland-gray-extra-light hover:bg-leland-gray-hover"
-              }`}
-            >
-              {s.glyph}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+      </span>
+      <span
+        className={`flex size-6 shrink-0 items-center justify-center rounded-full border transition-colors ${
+          connected
+            ? "border-leland-success bg-leland-success text-white"
+            : "border-leland-gray-stroke text-transparent"
+        }`}
+      >
+        <IconCheck className="size-3.5" />
+      </span>
+    </button>
   );
 }
 
@@ -494,18 +484,23 @@ function ConnectorsStep({ c }: StepProps) {
   return (
     <FlowShell
       title="Connect your tools"
-      subhead="Here's what came back. Mark anything that's off — you can still sort it out live in class."
+      subhead="Check off your tools as you connect them."
       onBack={() => c.setConfirming(false)}
       onContinue={() => c.goTo("checking")}
     >
       <div className="flex flex-col gap-2">
         {connectorDefs(v).map((def) => (
-          <ConnectorStateRow
+          <ConnectorCheckRow
             key={def.key}
             connectorKey={def.key}
             name={def.name}
-            status={c.state.connectors[def.key]}
-            onSet={(value) => c.setConnector(def.key, value)}
+            connected={c.state.connectors[def.key] === "ok"}
+            onToggle={() =>
+              c.setConnector(
+                def.key,
+                c.state.connectors[def.key] === "ok" ? "skip" : "ok",
+              )
+            }
           />
         ))}
       </div>
@@ -592,7 +587,7 @@ function CheckingStep({ c }: StepProps) {
 function ClearStep({ c, onComplete }: StepProps & { onComplete?: () => void }) {
   const v = VENDOR_INFO[c.state.vendor];
   const defs = connectorDefs(v);
-  const rows: { label: string; state: "ok" | "flag" | "bad" }[] = [
+  const rows: { label: string; state: "ok" | "bad" | "skip" }[] = [
     { label: "Paid plan confirmed", state: c.state.account.plan === false ? "bad" : "ok" },
     {
       label: v.appName + (v.desktopScheme ? " installed" : " signed in"),

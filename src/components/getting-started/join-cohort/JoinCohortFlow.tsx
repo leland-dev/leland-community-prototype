@@ -32,21 +32,25 @@ export function JoinCohortFlow({ onComplete }: FlowProps) {
         </div>
       }
     >
-      <div className="flex items-center gap-3 rounded-xl border border-leland-gray-stroke bg-white px-4 py-3.5">
-        <ServiceBadge>
-          <SlackMark />
-        </ServiceBadge>
-        <div className="min-w-0 flex-1">
-          <div className="leland-paragraph-base font-semibold text-leland-gray-dark">
-            Join #l1-jul6-cohort in Slack
+      <div className="flex flex-col gap-3 rounded-xl border border-leland-gray-stroke bg-white px-4 py-3.5 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <ServiceBadge>
+            <SlackMark />
+          </ServiceBadge>
+          <div className="min-w-0 flex-1">
+            <div className="leland-paragraph-base font-semibold text-leland-gray-dark">
+              Join #l1-jul6-cohort in Slack
+            </div>
           </div>
         </div>
-        <ExternalActionButton
-          label="Join →"
-          href={COHORT_SLACK_INVITE}
-          tone="secondary"
-          size="sm"
-        />
+        <div className="shrink-0">
+          <ExternalActionButton
+            label="Join →"
+            href={COHORT_SLACK_INVITE}
+            tone="secondary"
+            size="sm"
+          />
+        </div>
       </div>
     </FlowShell>
   );
