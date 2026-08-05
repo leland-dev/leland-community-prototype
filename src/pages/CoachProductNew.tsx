@@ -17,6 +17,14 @@ import freeIcon from "../assets/icons/free.svg";
 import eyeIcon from "../assets/icons/eye.svg";
 import eyeClosedIcon from "../assets/icons/eye-closed.svg";
 import coverImage9 from "../assets/img/cover-images/cover-image-9.png";
+import libThumb1 from "../assets/placeholder images/leland-plus-images/3cf6e985-7397-4e50-8e06-ef9a8f40491c.webp";
+import libThumb2 from "../assets/placeholder images/leland-plus-images/b9669ad2-4b6f-4c32-83e1-d1370dbf9484.webp";
+import libThumb3 from "../assets/placeholder images/leland-plus-images/db2eb673-d212-41d5-8df9-6fa6de57bc23.webp";
+import libThumb4 from "../assets/placeholder images/placeholder-event-01.png";
+import libThumb5 from "../assets/placeholder images/placeholder-event-02.png";
+import libThumb6 from "../assets/placeholder images/placeholder-event-03.png";
+import libThumb7 from "../assets/placeholder images/bootcamp-1.webp";
+import libThumb8 from "../assets/placeholder images/bootcamp-2.webp";
 import samanthaPhoto from "../assets/profile photos/pic-6.png";
 import reviewPhoto1 from "../assets/profile photos/pic-1.png";
 import reviewPhoto2 from "../assets/profile photos/pic-2.png";
@@ -28,6 +36,7 @@ import uploadIcon from "../assets/icons/upload.svg";
 import attachIcon from "../assets/icons/attach.svg";
 import trashIcon from "../assets/icons/trash.svg";
 import editIcon from "../assets/icons/edit.svg";
+import globeIcon from "../assets/icons/globe.svg";
 import textIcon from "../assets/icons/text.svg";
 import helpIcon from "../assets/icons/help.svg";
 import photoIcon from "../assets/icons/photo.svg";
@@ -42,6 +51,7 @@ type StepKey = "product" | "offerings" | "page";
 type PricingOption = {
   id: number;
   name: string;   // shown/edited only when there is more than one option
+  access: "free" | "paid";  // per-option access mode
   billing: "recurring" | "one-time";
   price: string;
   interval: string;   // e.g. "1 month" — only meaningful when billing === "recurring"
@@ -56,8 +66,9 @@ type PricingOption = {
 const newPricingOption = (id: number): PricingOption => ({
   id,
   name: "",
+  access: "free",
   billing: "one-time",
-  price: "29.99",
+  price: "0.00",
   interval: "1 month",
   currency: "USD",
   freeTrial: false,
@@ -68,8 +79,8 @@ const newPricingOption = (id: number): PricingOption => ({
 });
 
 const STEPS: { key: StepKey; label: string; icon: string }[] = [
-  { key: "product", label: "Details", icon: moneyIcon },
-  { key: "offerings", label: "Products", icon: browseIcon },
+  { key: "offerings", label: "Products", icon: moneyIcon },
+  { key: "product", label: "Details", icon: textIcon },
   { key: "page", label: "Page", icon: storeIcon },
 ];
 
@@ -242,6 +253,33 @@ const RESOURCE_TYPES = [
   { value: "tool", label: "Tool" },
 ];
 
+// Previously-uploaded content the coach can reuse in a new content/collection
+// item (mock library for the prototype).
+type LibraryContent = { id: string; name: string; kind: "pdf" | "doc" | "video" | "image"; title: string; description: string; resourceType: string; size: string; date: string; thumb: string; views: number };
+// Bucket a view count, e.g. 4210 → "4.2k", 980 → "980".
+const formatViews = (n: number): string => (n < 1000 ? String(n) : `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`);
+const CONTENT_LIBRARY: LibraryContent[] = [
+  { id: "c1", name: "MBA Essay Framework.pdf", kind: "pdf", title: "MBA Essay Framework", description: "A step-by-step framework for structuring standout MBA essays.", resourceType: "guide", size: "2.4 MB", date: "Mar 12", thumb: libThumb1, views: 4210 },
+  { id: "c2", name: "Consulting Resume Template.docx", kind: "doc", title: "Consulting Resume Template", description: "The exact resume template I used to land offers at McKinsey and Bain.", resourceType: "template", size: "180 KB", date: "Feb 28", thumb: libThumb2, views: 8940 },
+  { id: "c3", name: "Mock Interview Walkthrough.mp4", kind: "video", title: "Mock Interview Walkthrough", description: "A full recording of a mock case interview with live feedback.", resourceType: "example", size: "412 MB", date: "Feb 10", thumb: libThumb3, views: 2180 },
+  { id: "c4", name: "50 Behavioral Questions.pdf", kind: "pdf", title: "50 Behavioral Questions", description: "The most common behavioral questions and how to answer them.", resourceType: "practice", size: "1.1 MB", date: "Jan 22", thumb: libThumb4, views: 12530 },
+  { id: "c5", name: "School Selection Worksheet.xlsx", kind: "doc", title: "School Selection Worksheet", description: "Compare programs across the factors that actually matter.", resourceType: "tool", size: "96 KB", date: "Jan 8", thumb: libThumb5, views: 1760 },
+  { id: "c6", name: "Networking Email Scripts.pdf", kind: "pdf", title: "Networking Email Scripts", description: "Copy-paste templates for reaching out to alumni and recruiters.", resourceType: "template", size: "640 KB", date: "Dec 15", thumb: libThumb6, views: 6020 },
+  { id: "c7", name: "GMAT Study Plan (90 Days).pdf", kind: "pdf", title: "GMAT Study Plan — 90 Days", description: "A week-by-week plan to go from baseline to a 730+ score.", resourceType: "guide", size: "1.8 MB", date: "Dec 2", thumb: libThumb7, views: 9380 },
+  { id: "c8", name: "Case Interview Frameworks.pdf", kind: "pdf", title: "Case Interview Frameworks", description: "The core frameworks for cracking any consulting case.", resourceType: "guide", size: "3.2 MB", date: "Nov 20", thumb: libThumb8, views: 15110 },
+  { id: "c9", name: "Sample Stanford Essay.pdf", kind: "pdf", title: "Sample Stanford GSB Essay", description: "An annotated admitted essay with commentary on what worked.", resourceType: "example", size: "820 KB", date: "Nov 8", thumb: libThumb1, views: 3640 },
+  { id: "c10", name: "Cover Letter Template.docx", kind: "doc", title: "Cover Letter Template", description: "A flexible cover letter template for any role.", resourceType: "template", size: "72 KB", date: "Oct 30", thumb: libThumb2, views: 5290 },
+  { id: "c11", name: "Company Research Tracker.xlsx", kind: "doc", title: "Company Research Tracker", description: "Track your target firms, contacts, and application status.", resourceType: "tool", size: "110 KB", date: "Oct 18", thumb: libThumb3, views: 980 },
+  { id: "c12", name: "Behavioral Prep Walkthrough.mp4", kind: "video", title: "Behavioral Prep Walkthrough", description: "How to build a bank of stories using the STAR method.", resourceType: "example", size: "356 MB", date: "Oct 4", thumb: libThumb4, views: 7450 },
+  { id: "c13", name: "Recommendation Letter Guide.pdf", kind: "pdf", title: "Recommendation Letter Guide", description: "How to brief your recommenders for the strongest letters.", resourceType: "guide", size: "540 KB", date: "Sep 22", thumb: libThumb5, views: 4870 },
+  { id: "c14", name: "Networking Tracker.xlsx", kind: "doc", title: "Networking Tracker", description: "Stay on top of coffee chats, follow-ups, and referrals.", resourceType: "tool", size: "88 KB", date: "Sep 10", thumb: libThumb6, views: 1320 },
+  { id: "c15", name: "Practice Case: Market Entry.pdf", kind: "pdf", title: "Practice Case — Market Entry", description: "A full market-entry case with a sample answer key.", resourceType: "practice", size: "1.3 MB", date: "Aug 28", thumb: libThumb7, views: 6610 },
+  { id: "c16", name: "Wharton Interview Debrief.mp4", kind: "video", title: "Wharton Team-Based Discussion Debrief", description: "A walkthrough of the TBD format and how to stand out.", resourceType: "example", size: "298 MB", date: "Aug 14", thumb: libThumb8, views: 2940 },
+];
+// Effective title of a content item, respecting its mode (uploaded vs reused).
+const contentItemTitle = (c: Record<string, string>): string =>
+  c.source === "reuse" ? (c.r_title || CONTENT_LIBRARY.find((l) => l.id === c.libraryId)?.title || "") : (c.title || "");
+
 // MBA subcategories a livestream can be tagged with (maps to Leland categories).
 const MBA_SUBCATEGORIES = ["Deferred MBA", "Executive MBA", "JD/MBA", "Online MBA", "Part-Time MBA", "Traditional Full-Time MBA"];
 
@@ -262,7 +300,7 @@ function isConfigComplete(item: OfferingItem): boolean {
     return c.mode === "range" ? Boolean(c.minHours && c.maxHours) : Boolean(c.hours || c.minutes);
   }
   if (item.slug === "content") {
-    return Boolean(c.assetName && c.title);
+    return c.source === "reuse" ? Boolean(c.libraryId) : Boolean(c.assetName && c.title);
   }
   if (item.slug === "paid-livestream") {
     return Boolean(c.name && c.date && c.time);
@@ -284,6 +322,7 @@ function configSummary(item: OfferingItem): string {
     return `${parts.join(" ") || "0 min"} of coaching`;
   }
   if (item.slug === "content") {
+    if (c.source === "reuse") return c.r_title || CONTENT_LIBRARY.find((l) => l.id === c.libraryId)?.title || "";
     return c.assetName;
   }
   if (item.slug === "paid-livestream") {
@@ -483,15 +522,13 @@ export default function CoachProductNew() {
   const navigate = useNavigate();
 
   const [pendingNav, setPendingNav] = useState<string | null>(null);
-  const [step, setStep] = useState<StepKey>("product");
+  const [step, setStep] = useState<StepKey>("offerings");
 
   // Shared product-in-progress state, reflected live in the preview.
   const [name, setName] = useState("");
   const [headline, setHeadline] = useState("");
-  const [pricingMode, setPricingMode] = useState<"free" | "paid">("free");
-  // Always keep at least one option: it holds the offering's products in both
-  // modes (shown as the flat "Add products" section when free, and as the first
-  // card when paid), so the product list carries over as the user toggles.
+  // Always keep at least one pricing option. Each option is a self-contained
+  // unit: name + its own products + its own access (free/paid) + price.
   const [pricingOptions, setPricingOptions] = useState<PricingOption[]>(() => [newPricingOption(0)]);
   const nextPricingId = useRef(1);
   const [added, setAdded] = useState<OfferingItem[]>([]);
@@ -525,19 +562,30 @@ export default function CoachProductNew() {
     else setStep(STEPS[stepIndex + 1].key);
   };
 
-  // Pricing options (step 2). Switching to "paid" seeds one option if none
-  // exist yet; the preview reads from the first option.
+  // Pricing options (step 2). Each is a self-contained option.
   const makePricingOption = () => newPricingOption(nextPricingId.current++);
-  const selectPricingMode = (mode: "free" | "paid") => setPricingMode(mode);
   const addPricingOption = () => setPricingOptions((o) => [...o, makePricingOption()]);
-  const removePricingOption = (id: number) => setPricingOptions((o) => o.filter((p) => p.id !== id));
+  const removePricingOption = (id: number) => {
+    // Drop the deleted option's products from the shared library so they don't
+    // linger as orphans (which the preview would keep showing).
+    const opt = pricingOptions.find((p) => p.id === id);
+    if (opt) setAdded((a) => a.filter((item) => !opt.productIds.includes(item.id)));
+    setPricingOptions((o) => o.filter((p) => p.id !== id));
+  };
   const updatePricingOption = (id: number, patch: Partial<PricingOption>) =>
     setPricingOptions((o) => o.map((p) => (p.id === id ? { ...p, ...patch } : p)));
 
-  // Preview reads the headline price from the first option.
+  // Preview reads the headline access + price + products from the first option.
+  // Free is derived from a $0 price (there's no separate free/paid toggle).
   const primaryPricing = pricingOptions[0];
+  const previewMode: "free" | "paid" = Number(primaryPricing?.price || 0) === 0 ? "free" : "paid";
   const previewPaidType: "recurring" | "one-time" = primaryPricing?.billing === "recurring" ? "recurring" : "one-time";
   const previewPrice = primaryPricing?.price ?? "";
+  // The products shown in the preview are exactly the primary option's current
+  // products (resolved from its productIds), never the raw shared library.
+  const previewItems = (primaryPricing?.productIds ?? [])
+    .map((id) => added.find((a) => a.id === id))
+    .filter((it): it is OfferingItem => Boolean(it));
 
   const makeOffering = (slug: string): OfferingItem => ({ id: nextOfferingId.current++, slug, config: defaultConfigFor(slug), configured: false, ...(isListOffering(slug) ? { items: [] } : {}) });
   const addOffering = (slug: string) => setAdded((a) => [...a, makeOffering(slug)]);
@@ -636,8 +684,7 @@ export default function CoachProductNew() {
                 )}
                 {step === "offerings" && (
                   <OfferingsStep
-                    added={added} onAdd={addOffering} onRemove={removeOffering} onConfigChange={updateOfferingConfig} onItemsChange={setOfferingItems} onConfigured={markOfferingConfigured}
-                    pricingMode={pricingMode} setPricingMode={selectPricingMode}
+                    added={added} onConfigChange={updateOfferingConfig} onItemsChange={setOfferingItems} onConfigured={markOfferingConfigured}
                     pricingOptions={pricingOptions}
                     onAddPricingOption={addPricingOption}
                     onRemovePricingOption={removePricingOption}
@@ -651,7 +698,7 @@ export default function CoachProductNew() {
                   <PageStep
                     name={name}
                     headline={headline}
-                    pricingMode={pricingMode}
+                    pricingMode={previewMode}
                     paidType={previewPaidType}
                     price={previewPrice}
                     description={description}
@@ -673,10 +720,10 @@ export default function CoachProductNew() {
           <ProductPreview
             name={name}
             headline={headline}
-            pricingMode={pricingMode}
+            pricingMode={previewMode}
             paidType={previewPaidType}
             price={previewPrice}
-            added={added}
+            added={previewItems}
             joinLabel={buttonText}
           />
         </aside>
@@ -731,7 +778,7 @@ function ProductStep({
         <p className="mt-0.5 text-[15px] text-gray-light">Describe your offering.</p>
         <div className="mt-5 flex flex-col gap-5">
           <CharField label="Name" required value={name} onChange={setName} placeholder="My offering name" max={80} />
-          <CharField label="Headline" value={headline} onChange={setHeadline} placeholder="A short subheadline for my offering here." max={80} />
+          <CharField label="Headline" value={headline} onChange={setHeadline} placeholder="A short subheadline for my offering here." max={72} />
         </div>
       </section>
 
@@ -741,9 +788,16 @@ function ProductStep({
         <h2 className="text-[22px] font-semibold text-gray-dark">Visibility</h2>
         <p className="mt-0.5 text-[15px] text-gray-light">Control who can discover this offering and how it appears on your profile.</p>
         <div className="mt-5">
-          <ProductSettings buttonText={buttonText} setButtonText={setButtonText} mvp={mvp} />
+          <ProductSettings />
         </div>
       </section>
+
+      {!mvp && (
+        <>
+          <div className="border-t border-gray-stroke" />
+          <AdvancedSection buttonText={buttonText} setButtonText={setButtonText} />
+        </>
+      )}
     </div>
   );
 }
@@ -877,173 +931,165 @@ function RadioDot({ active }: { active: boolean }) {
 
 function AddPricingOptionButton({ onClick }: { onClick: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
-    >
+    <Button size="md" variant="secondary" onClick={onClick} style={{ fontWeight: 600 }}>
       <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
       Add pricing option
-    </button>
+    </Button>
   );
 }
 
-// A single pricing option: the products it unlocks + its billing config. When
-// `bare`, it drops the card chrome and price/billing controls and renders as the
-// flat "Add products to this offering" section — used for the free-mode primary
-// option. The card chrome (border, padding) and the price/trial rows animate in
-// and out as `bare` flips, so free↔paid reads as one continuous element.
-function PricingOptionCard({ option, products, available, canDelete, bare = false, showPrice = true, className = "", belowPrice, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct }: {
+// Price box: large editable price + cadence. When the price is 0, shows a green
+// "Free" tag (setting $0 is how a coach makes an offering free — no toggle).
+function PriceFields({ option, onChange, mvp }: { option: PricingOption; onChange: (patch: Partial<PricingOption>) => void; mvp: boolean }) {
+  const recurring = option.billing === "recurring";
+  const isFree = Number(option.price || 0) === 0;
+  const formatPrice = () => {
+    if (option.price !== "" && !Number.isNaN(Number(option.price))) onChange({ price: Number(option.price).toFixed(2) });
+  };
+  const priceDisplay = option.price || "0";
+  const priceWidthCh = [...priceDisplay].reduce((w, c) => w + (c === "." ? 0.45 : 1), 0);
+
+  return (
+    <>
+      <div className="rounded-xl border border-gray-stroke bg-white transition-colors focus-within:border-gray-dark">
+        <div className="flex items-end justify-between gap-2 px-5 py-6">
+          <div className="flex items-center gap-1">
+            <span className="text-[32px] font-medium leading-none text-gray-dark">$</span>
+            <input
+              inputMode="decimal"
+              value={option.price}
+              placeholder="0"
+              onChange={(e) => onChange({ price: e.target.value.replace(/[^0-9.]/g, "") })}
+              onBlur={formatPrice}
+              style={{ width: `${priceWidthCh}ch` }}
+              className="min-w-0 bg-transparent text-left text-[32px] font-medium leading-none text-gray-dark underline decoration-gray-dark decoration-dotted decoration-2 underline-offset-[6px] outline-none placeholder:text-gray-dark"
+            />
+          </div>
+          <div className="pb-1">
+            {isFree ? (
+              <span className="inline-flex items-center gap-1.5 text-[16px] text-gray-extra-light">
+                <MaskIcon src={giftIcon} className="h-[18px] w-[18px] text-gray-extra-light" />
+                Free
+              </span>
+            ) : mvp ? (
+              <span className="text-[16px] text-gray-extra-light">One-time purchase</span>
+            ) : (
+              <CadenceLink recurring={recurring} onChange={(r) => onChange({ billing: r ? "recurring" : "one-time" })} />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {recurring && !isFree && (
+        <div className="mt-3 flex flex-col gap-4 rounded-xl bg-gray-hover p-4">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-2.5 text-[15px] font-medium text-gray-dark">
+              <MaskIcon src={giftIcon} className="h-[18px] w-[18px] text-gray-dark" />
+              Include a free trial
+              <span className="rounded bg-[#EEF1FF] px-1.5 py-0.5 text-[12px] font-semibold text-[#4666E5]">Recommended</span>
+            </span>
+            <Toggle checked={option.freeTrial} onChange={() => onChange({ freeTrial: !option.freeTrial })} />
+          </div>
+          {option.freeTrial && (
+            <Select
+              value={option.trialLength}
+              onChange={(v) => onChange({ trialLength: v })}
+              options={[
+                { value: "3", label: "3 days" },
+                { value: "7", label: "7 days" },
+                { value: "14", label: "14 days" },
+                { value: "30", label: "30 days" },
+              ]}
+            />
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+// A full pricing option: name + its own products + access (free/paid) + price.
+// When `bare` (the single-option default), renders as two flat labeled sections
+// ("Add products" and "Pricing"). Otherwise wraps in card chrome with an
+// editable option name — used when there are multiple options.
+function PricingOptionCard({ option, products, available, bare, canDelete, mvp, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct }: {
   option: PricingOption;
   products: OfferingItem[];
   available: (typeof offeringTypes)[number][];
+  bare: boolean;
   canDelete: boolean;
-  bare?: boolean;       // no card chrome — flat, full-width (single option / free)
-  showPrice?: boolean;  // show the price + billing row (paid access)
-  className?: string;
-  belowPrice?: ReactNode; // slot rendered between the price row and the divider
+  mvp: boolean;
   onRemove: () => void;
   onChange: (patch: Partial<PricingOption>) => void;
   onAddProduct: (slug: string) => void;
   onRemoveProduct: (itemId: number) => void;
   onConfigureProduct: (itemId: number) => void;
 }) {
-  const recurring = option.billing === "recurring";
-
-  const formatPrice = () => {
-    if (option.price !== "" && !Number.isNaN(Number(option.price))) onChange({ price: Number(option.price).toFixed(2) });
-  };
-
-  // Size the price input to its content (treat "." as narrow) so the cadence
-  // link tucks right up against the number.
-  const priceDisplay = option.price || "0";
-  const priceWidthCh = [...priceDisplay].reduce((w, c) => w + (c === "." ? 0.45 : 1), 0);
-
-  return (
-    <motion.div
-      initial={false}
-      animate={{
-        borderColor: bare ? "rgba(229,229,229,0)" : "rgba(229,229,229,1)",
-        paddingTop: bare ? 0 : 20,
-        paddingBottom: bare ? 0 : 20,
-        paddingLeft: bare ? 0 : 20,
-        paddingRight: bare ? 0 : 20,
-      }}
-      transition={offeringTransition}
-      style={{ borderWidth: 1, borderStyle: "solid", borderRadius: 16 }}
-      className={className}
-    >
-      {/* Option name + delete — only with multiple paid options */}
-      <AnimatePresence initial={false}>
-        {!bare && canDelete && (
-          <motion.div key="name" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={offeringTransition} className="overflow-hidden">
-            <div className="mb-4 flex items-center gap-3">
-              <input
-                value={option.name}
-                onChange={(e) => onChange({ name: e.target.value })}
-                placeholder="Option name"
-                className="min-w-0 flex-1 bg-transparent text-[22px] font-semibold leading-tight text-gray-dark outline-none placeholder:text-[#B1B1B1]"
-              />
-              <button type="button" onClick={onRemove} aria-label="Remove pricing option" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#D92D20] transition-colors hover:bg-[#FEE6E3]">
-                <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Price + billing — shown for paid access */}
-      <AnimatePresence initial={false}>
-        {showPrice && (
-          <motion.div key="price" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={offeringTransition} className="overflow-hidden">
-            <div className="rounded-xl border border-gray-stroke transition-colors focus-within:border-gray-dark">
-              <div className="flex items-end gap-2 px-5 py-6">
-                <div className="flex items-center gap-1">
-                  <span className="text-[32px] font-medium leading-none text-gray-dark">$</span>
-                  <input
-                    inputMode="decimal"
-                    value={option.price}
-                    placeholder="0"
-                    onChange={(e) => onChange({ price: e.target.value.replace(/[^0-9.]/g, "") })}
-                    onBlur={formatPrice}
-                    style={{ width: `${priceWidthCh}ch` }}
-                    className="min-w-0 bg-transparent text-left text-[32px] font-medium leading-none text-gray-dark underline decoration-gray-dark decoration-dotted decoration-2 underline-offset-[6px] outline-none placeholder:text-gray-dark"
-                  />
-                </div>
-                <div className="pb-1">
-                  <CadenceLink recurring={recurring} onChange={(r) => onChange({ billing: r ? "recurring" : "one-time" })} />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {belowPrice}
-
-      {/* Divider between the pricing and products sections. Roomier when flat. */}
-      <div className={`border-t border-gray-stroke ${bare ? "my-9" : "my-5"}`} />
-
-      {/* Products — the shared element that stays mounted across the morph */}
+  if (bare) {
+    return (
       <div>
-        {bare ? (
-          <>
-            <h2 className="text-[22px] font-semibold text-gray-dark">Add products</h2>
-            <p className="mt-0.5 text-[15px] text-gray-light">Choose the products you want to include with this offering.</p>
-          </>
-        ) : (
-          <>
-            <p className="text-[15px] font-semibold text-gray-dark">Add products</p>
-            {products.length === 0 && (
-              <p className="mt-0.5 text-[14px] text-gray-extra-light">No products added to this option yet.</p>
-            )}
-          </>
+        {/* Products (the offering-wide "Configure your offering" header lives at
+            the step level, above this) */}
+        <ProductPicker items={products} available={available} addVariant="grid" onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} />
+
+        <div className="my-10 border-t border-gray-stroke" />
+
+        {/* Pricing */}
+        <section>
+          <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
+          <p className="mt-0.5 text-[15px] text-gray-light">Set a price, or enter $0 to offer it for free.</p>
+          <div className="mt-5">
+            <PriceFields option={option} onChange={onChange} mvp={mvp} />
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  // Carded (multiple options)
+  return (
+    <div className="rounded-2xl bg-gray-hover p-5">
+      {/* Name + delete */}
+      <div className="mb-4 flex items-center gap-3">
+        <input
+          value={option.name}
+          onChange={(e) => onChange({ name: e.target.value })}
+          placeholder="Option name..."
+          className="min-w-0 flex-1 bg-transparent text-[22px] font-semibold leading-tight text-gray-dark outline-none placeholder:text-[#B1B1B1]"
+        />
+        {canDelete && (
+          <Button iconOnly size="sm" variant="secondary" onClick={onRemove} aria-label="Remove pricing option" className="shrink-0">
+            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </Button>
         )}
-        <div className="mt-3">
-          <ProductPicker items={products} available={available} addVariant={bare ? "grid" : "menu"} onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} />
-        </div>
       </div>
 
-      {/* Free trial — only for recurring paid billing */}
-      <AnimatePresence initial={false}>
-        {showPrice && recurring && (
-          <motion.div key="trial" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={offeringTransition} className="overflow-hidden">
-            <div className="mt-5 flex flex-col gap-4 rounded-xl bg-gray-hover p-4">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2.5 text-[15px] font-medium text-gray-dark">
-                  <MaskIcon src={giftIcon} className="h-[18px] w-[18px] text-gray-dark" />
-                  Include a free trial
-                  <span className="rounded bg-[#EEF1FF] px-1.5 py-0.5 text-[12px] font-semibold text-[#4666E5]">Recommended</span>
-                </span>
-                <Toggle checked={option.freeTrial} onChange={() => onChange({ freeTrial: !option.freeTrial })} />
-              </div>
-              {option.freeTrial && (
-                <Select
-                  value={option.trialLength}
-                  onChange={(v) => onChange({ trialLength: v })}
-                  options={[
-                    { value: "3", label: "3 days" },
-                    { value: "7", label: "7 days" },
-                    { value: "14", label: "14 days" },
-                    { value: "30", label: "30 days" },
-                  ]}
-                />
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {/* Products — a white card (header + list) once products exist; a plain
+          "No products added" label when empty. Add button sits below either. */}
+      {products.length === 0 ? (
+        <p className="text-[15px] font-medium text-gray-extra-light">No products added</p>
+      ) : (
+        <div className="overflow-hidden rounded-xl border border-gray-stroke bg-white">
+          <p className="px-4 pt-4 pb-1 text-[15px] font-medium text-gray-extra-light">Included products:</p>
+          <ProductPicker items={products} available={available} addVariant="menu" boxed hideAdd onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} />
+        </div>
+      )}
+      <div className="mt-3">
+        <AddProductMenu available={available} onAdd={onAddProduct} />
+      </div>
+
+      {/* Price */}
+      <div className="mt-5">
+        <PriceFields option={option} onChange={onChange} mvp={mvp} />
+      </div>
+    </div>
   );
 }
 
-/* ---------- Product settings (URL, taxes, affiliates) ---------- */
+/* ---------- Visibility (public / private) ---------- */
 
-function ProductSettings({ buttonText, setButtonText, mvp }: { buttonText: string; setButtonText: (v: string) => void; mvp: boolean }) {
-  const [affiliate, setAffiliate] = useState(false);
+function ProductSettings() {
   const [visibility, setVisibility] = useState<"public" | "private">("public");
-
-  const inputClass = "w-full rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[14px] text-gray-dark outline-none placeholder:text-[#B1B1B1] focus:border-gray-dark";
 
   const visibilityOptions = [
     { key: "public" as const, label: "Public", desc: "Visible to everyone", icon: eyeIcon },
@@ -1051,68 +1097,96 @@ function ProductSettings({ buttonText, setButtonText, mvp }: { buttonText: strin
   ];
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-2 gap-3">
-        {visibilityOptions.map((opt) => {
-          const active = visibility === opt.key;
-          return (
-            <button
-              key={opt.key}
-              onClick={() => setVisibility(opt.key)}
-              className={`flex flex-col items-center rounded-xl px-4 py-6 text-center transition-colors ${active ? "border-[1.5px] border-gray-dark" : "border border-gray-stroke hover:border-[#c9c9c9]"}`}
-            >
-              <MaskIcon src={opt.icon} className={`h-7 w-7 ${active ? "text-gray-dark" : "text-gray-extra-light"}`} />
-              <span className="mt-3 text-[16px] font-semibold text-gray-dark">{opt.label}</span>
-              <span className="mt-1 text-[14px] leading-snug text-gray-light">{opt.desc}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {!mvp && (
-        <div>
-          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Stock</label>
-          <input placeholder="Unlimited" className={inputClass} />
-        </div>
-      )}
-
-      {!mvp && <AskQuestions />}
-
-      <div>
-        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Purchase button text</label>
-        <Select
-          value={buttonText}
-          onChange={setButtonText}
-          triggerClassName="px-4 py-3 text-[15px]"
-          options={["Purchase", "Join", "Join now", "Get access", "Subscribe", "Buy now"].map((v) => ({ value: v, label: v }))}
-        />
-      </div>
-
-      <div>
-        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Offering URL</label>
-        <div className="flex items-stretch overflow-hidden rounded-lg border border-gray-stroke bg-white transition-colors focus-within:border-gray-dark">
-          <span className="flex select-none items-center whitespace-nowrap border-r border-gray-stroke bg-[#F5F5F5] px-4 text-[15px] text-gray-light">
-            leland.com/samantha-parker/
-          </span>
-          <input defaultValue="new-offering" className="w-full min-w-0 bg-transparent px-4 py-3 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1]" />
-        </div>
-      </div>
-
-      {!mvp && (
-        <div>
-          <div className="flex items-center justify-between">
-            <span className="text-[14px] font-medium text-gray-dark">Add affiliate rate</span>
-            <Toggle checked={affiliate} onChange={() => setAffiliate((v) => !v)} />
-          </div>
-          {affiliate && (
-            <div className="mt-2 flex items-center rounded-lg border border-gray-stroke bg-white px-3.5 focus-within:border-gray-dark">
-              <input defaultValue="30" className="w-full bg-transparent py-2.5 text-[14px] text-gray-dark outline-none" />
-              <span className="text-[14px] text-gray-light">%</span>
-            </div>
-          )}
-        </div>
-      )}
+    <div className="grid grid-cols-2 gap-3">
+      {visibilityOptions.map((opt) => {
+        const active = visibility === opt.key;
+        return (
+          <button
+            key={opt.key}
+            onClick={() => setVisibility(opt.key)}
+            className={`flex flex-col items-center rounded-xl px-4 py-6 text-center transition-colors ${active ? "border-[1.5px] border-gray-dark" : "border border-gray-stroke hover:border-[#c9c9c9]"}`}
+          >
+            <MaskIcon src={opt.icon} className={`h-7 w-7 ${active ? "text-gray-dark" : "text-gray-extra-light"}`} />
+            <span className="mt-3 text-[16px] font-semibold text-gray-dark">{opt.label}</span>
+            <span className="mt-1 text-[14px] leading-snug text-gray-light">{opt.desc}</span>
+          </button>
+        );
+      })}
     </div>
+  );
+}
+
+/* ---------- Advanced (checkout, availability, links) — non-MVP only ---------- */
+
+function AdvancedSection({ buttonText, setButtonText }: { buttonText: string; setButtonText: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [affiliate, setAffiliate] = useState(false);
+
+  return (
+    <section>
+      <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full items-center justify-between text-left">
+        <span>
+          <span className="block text-[22px] font-semibold text-gray-dark">Advanced</span>
+          <span className="mt-0.5 block text-[15px] text-gray-light">Fine-tune checkout, availability, and links.</span>
+        </span>
+        <svg className={`h-5 w-5 shrink-0 text-gray-dark transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }} className="overflow-hidden">
+            <div className="mt-5 flex flex-col gap-5">
+              {/* Purchase button text */}
+              <div>
+                <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Purchase button text</label>
+                <Select
+                  value={buttonText}
+                  onChange={setButtonText}
+                  triggerClassName="px-4 py-3 text-[15px]"
+                  options={["Purchase", "Join", "Join now", "Get access", "Subscribe", "Buy now"].map((v) => ({ value: v, label: v }))}
+                />
+              </div>
+
+              {/* Offering URL */}
+              <div>
+                <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Offering URL</label>
+                <div className="flex items-stretch overflow-hidden rounded-lg border border-gray-stroke bg-white transition-colors focus-within:border-gray-dark">
+                  <span className="flex select-none items-center whitespace-nowrap border-r border-gray-stroke bg-[#F5F5F5] px-4 text-[15px] text-gray-light">
+                    leland.com/samantha-parker/
+                  </span>
+                  <input defaultValue="new-offering" className="w-full min-w-0 bg-transparent px-4 py-3 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1]" />
+                </div>
+              </div>
+
+              {/* Stock */}
+              <div>
+                <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Stock</label>
+                <input placeholder="Unlimited" className="w-full rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[14px] text-gray-dark outline-none placeholder:text-[#B1B1B1] focus:border-gray-dark" />
+              </div>
+
+              {/* Ask questions before checkout */}
+              <AskQuestions />
+
+              {/* Add affiliate rate */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[14px] font-medium text-gray-dark">Add affiliate rate</span>
+                  <Toggle checked={affiliate} onChange={() => setAffiliate((v) => !v)} />
+                </div>
+                {affiliate && (
+                  <div className="mt-2 flex items-center rounded-lg border border-gray-stroke bg-white px-3.5 focus-within:border-gray-dark">
+                    <input defaultValue="30" className="w-full bg-transparent py-2.5 text-[14px] text-gray-dark outline-none" />
+                    <span className="text-[14px] text-gray-light">%</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
   );
 }
 
@@ -1172,11 +1246,7 @@ function AskQuestions() {
 
 /* ---------- Step 2: Included offerings ---------- */
 
-function OfferingsStep({ added, onAdd, onRemove, onConfigChange, onItemsChange, onConfigured, pricingMode, setPricingMode, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, mvp }: { added: OfferingItem[]; onAdd: (slug: string) => void; onRemove: (id: number) => void; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; pricingMode: "free" | "paid"; setPricingMode: (v: "free" | "paid") => void; pricingOptions: PricingOption[]; onAddPricingOption: () => void; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => void; onRemoveProductFromOption: (optionId: number, itemId: number) => void; mvp: boolean }) {
-  const pricingChoices = [
-    { key: "free" as const, label: "Free access", icon: freeIcon },
-    { key: "paid" as const, label: "Paid access", icon: moneyIcon },
-  ];
+function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, mvp }: { added: OfferingItem[]; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; pricingOptions: PricingOption[]; onAddPricingOption: () => void; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => void; onRemoveProductFromOption: (optionId: number, itemId: number) => void; mvp: boolean }) {
   // One of each: an offering leaves the "Add" grid once it's been added.
   // When MVP is on, hide the not-yet-built Agent / Private group / Paid
   // Livestream options.
@@ -1192,108 +1262,52 @@ function OfferingsStep({ added, onAdd, onRemove, onConfigChange, onItemsChange, 
     const avail = offeringTypes.filter((o) => !items.some((it) => it.slug === o.slug) && (!mvp || !mvpHidden.includes(o.slug)));
     return { items, avail };
   };
-  const [primary, ...rest] = pricingOptions;
-  const primaryData = optionData(primary);
+  const multi = pricingOptions.length > 1;
 
   return (
     <div>
-      <section>
-        <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
-        <p className="mt-0.5 text-[15px] text-gray-light">Choose how people access this offering.</p>
+      {/* Persistent offering-level header — kept across single and multi. */}
+      <h2 className="text-[22px] font-semibold text-gray-dark">Configure your offering</h2>
+      <p className="mt-0.5 text-[15px] text-gray-light">Set up what's included and how people pay for it.</p>
 
-        {/* Compact free/paid toggle: horizontal pill with a radio on the right. */}
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          {pricingChoices.map((opt) => {
-            const active = pricingMode === opt.key;
+      {/* Each option is a self-contained unit: name + products + access + price.
+          A single option renders flat; multiple options render as stacked cards. */}
+      <div className="mt-6 flex flex-col gap-3">
+        <AnimatePresence initial={false}>
+          {pricingOptions.map((opt) => {
+            const { items, avail } = optionData(opt);
             return (
-              <button
-                key={opt.key}
-                onClick={() => setPricingMode(opt.key)}
-                className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3.5 text-left transition-colors ${active ? "border-[1.5px] border-gray-dark" : "border border-gray-stroke hover:border-[#c9c9c9]"}`}
+              <motion.div
+                key={opt.id}
+                initial={multi ? { height: 0, opacity: 0 } : false}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={offeringTransition}
+                className="overflow-hidden"
               >
-                <span className="flex items-center gap-2.5">
-                  <MaskIcon src={opt.icon} className="h-5 w-5 text-gray-dark" />
-                  <span className="text-[15px] font-semibold text-gray-dark">{opt.label}</span>
-                </span>
-                <RadioDot active={active} />
-              </button>
+                <PricingOptionCard
+                  option={opt}
+                  products={items}
+                  available={avail}
+                  bare={!multi}
+                  canDelete={multi}
+                  mvp={mvp}
+                  onRemove={() => onRemovePricingOption(opt.id)}
+                  onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
+                  onAddProduct={(slug) => onAddProductToOption(opt.id, slug)}
+                  onRemoveProduct={(itemId) => onRemoveProductFromOption(opt.id, itemId)}
+                  onConfigureProduct={setConfiguringId}
+                />
+              </motion.div>
             );
           })}
-        </div>
-
-        {/* Primary option — the shared product list. Renders flat in free mode
-            (the "Add products to this offering" section) and morphs into the
-            first pricing card in paid mode, with the same product list mounted
-            throughout so the transition reads as one continuous element. */}
-        <PricingOptionCard
-          className="mt-3"
-          option={primary}
-          bare={!(pricingMode === "paid" && pricingOptions.length > 1)}
-          showPrice={pricingMode === "paid"}
-          belowPrice={pricingMode === "paid" && pricingOptions.length === 1 ? (
-            <div className="mt-4"><AddPricingOptionButton onClick={onAddPricingOption} /></div>
-          ) : null}
-          products={primaryData.items}
-          available={primaryData.avail}
-          canDelete={pricingMode === "paid" && pricingOptions.length > 1}
-          onRemove={() => onRemovePricingOption(primary.id)}
-          onChange={(patch) => onUpdatePricingOption(primary.id, patch)}
-          onAddProduct={(slug) => onAddProductToOption(primary.id, slug)}
-          onRemoveProduct={(itemId) => onRemoveProductFromOption(primary.id, itemId)}
-          onConfigureProduct={setConfiguringId}
-        />
-
-        {/* Additional paid options + "Add pricing option" — collapses in free mode. */}
-        <AnimatePresence initial={false}>
-          {pricingMode === "paid" && (
-            <motion.div
-              key="extra-options"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={offeringTransition}
-              className="overflow-hidden"
-            >
-              <div className="mt-3 flex flex-col gap-3">
-                <AnimatePresence initial={false}>
-                  {rest.map((opt) => {
-                    const { items, avail } = optionData(opt);
-                    return (
-                      <motion.div
-                        key={opt.id}
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={offeringTransition}
-                        className="overflow-hidden"
-                      >
-                        <PricingOptionCard
-                          option={opt}
-                          bare={false}
-                          showPrice
-                          products={items}
-                          available={avail}
-                          canDelete={pricingOptions.length > 1}
-                          onRemove={() => onRemovePricingOption(opt.id)}
-                          onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
-                          onAddProduct={(slug) => onAddProductToOption(opt.id, slug)}
-                          onRemoveProduct={(itemId) => onRemoveProductFromOption(opt.id, itemId)}
-                          onConfigureProduct={setConfiguringId}
-                        />
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-                {rest.length > 0 && (
-                  <div>
-                    <AddPricingOptionButton onClick={onAddPricingOption} />
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
         </AnimatePresence>
-      </section>
+      </div>
+
+      {/* Add another pricing option — reads as part of the Pricing section. */}
+      <div className="mt-3">
+        <AddPricingOptionButton onClick={onAddPricingOption} />
+      </div>
 
       <ConfigModal
         item={configuring && !isListOffering(configuring.slug) ? configuring : null}
@@ -1324,13 +1338,14 @@ function OfferingsStep({ added, onAdd, onRemove, onConfigChange, onItemsChange, 
 // Compact "Add product" trigger with a portaled dropdown of addable types.
 // Portaled so an overflow-hidden ancestor (the option card's height-animation
 // wrapper) can't clip it. Used inside multi-option cards to keep them tidy.
-function AddProductMenu({ available, onAdd, className = "" }: {
+function AddProductMenu({ available, onAdd, className = "", label = "Add product" }: {
   available: (typeof offeringTypes)[number][];
   onAdd: (slug: string) => void;
   className?: string;
+  label?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ left: 0, top: 0, width: 0 });
 
   useLayoutEffect(() => {
@@ -1342,32 +1357,40 @@ function AddProductMenu({ available, onAdd, className = "" }: {
   if (available.length === 0) return null;
 
   return (
-    <div className={`relative ${className}`}>
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
-      >
+    <div ref={triggerRef} className={`inline-block ${className}`}>
+      <Button size="md" variant="secondary" onClick={() => setOpen((o) => !o)} style={{ fontWeight: 600 }}>
         <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-        Add product
-      </button>
-      {open && createPortal(
+        {label}
+      </Button>
+      {createPortal(
         <>
-          <button aria-hidden tabIndex={-1} className="fixed inset-0 z-[100] cursor-default" onClick={() => setOpen(false)} />
-          <div style={{ position: "fixed", left: pos.left, top: pos.top, minWidth: Math.max(pos.width, 220) }} className="z-[101] overflow-hidden rounded-xl border border-gray-stroke bg-white p-1 shadow-[0_4px_16px_rgba(16,24,40,0.12)]">
-            {available.map((o) => (
-              <button
-                key={o.slug}
-                type="button"
-                onClick={() => { onAdd(o.slug); setOpen(false); }}
-                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-colors hover:bg-gray-hover"
+          {open && <button aria-hidden tabIndex={-1} className="fixed inset-0 z-[100] cursor-default" onClick={() => setOpen(false)} />}
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
+                transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+                style={{ position: "fixed", left: pos.left, top: pos.top, minWidth: Math.max(pos.width, 240) }}
+                className="z-[101] rounded-2xl border border-gray-stroke bg-white shadow-lg"
               >
-                <img src={o.icon} alt="" className="h-5 w-5 shrink-0" />
-                <span className="text-[14px] font-medium text-gray-dark">{o.label}</span>
-              </button>
-            ))}
-          </div>
+                <div className="px-2 py-2">
+                  {available.map((o) => (
+                    <button
+                      key={o.slug}
+                      type="button"
+                      onClick={() => { onAdd(o.slug); setOpen(false); }}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
+                    >
+                      <img src={o.icon} alt="" className="h-6 w-6 shrink-0" />
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </>,
         document.body
       )}
@@ -1379,10 +1402,12 @@ function AddProductMenu({ available, onAdd, className = "" }: {
 // configure/remove control) plus the affordance for adding more — a full grid
 // of types ("grid") for the flat/single view, or a compact "Add product"
 // dropdown ("menu") inside multi-option cards.
-function ProductPicker({ items, available, addVariant = "grid", onAdd, onRemove, onConfigure }: {
+function ProductPicker({ items, available, addVariant = "grid", boxed = false, hideAdd = false, onAdd, onRemove, onConfigure }: {
   items: OfferingItem[];
   available: (typeof offeringTypes)[number][];
   addVariant?: "grid" | "menu";
+  boxed?: boolean;   // pad rows with 16px so they sit inside a card
+  hideAdd?: boolean; // omit the add affordance (rendered separately by caller)
   onAdd: (slug: string) => void;
   onRemove: (id: number) => void;
   onConfigure: (id: number) => void;
@@ -1391,7 +1416,7 @@ function ProductPicker({ items, available, addVariant = "grid", onAdd, onRemove,
     <div>
       <div className="flex flex-col">
         <AnimatePresence initial={false}>
-          {items.map((item) => (
+          {items.map((item, i) => (
             <motion.div
               key={item.id}
               initial={{ height: 0, opacity: 0 }}
@@ -1400,47 +1425,50 @@ function ProductPicker({ items, available, addVariant = "grid", onAdd, onRemove,
               transition={offeringTransition}
               className="overflow-hidden"
             >
-              <AddedOfferingRow item={item} onRemove={() => onRemove(item.id)} onConfigure={() => onConfigure(item.id)} />
+              <div className={boxed ? "px-4" : ""}>
+                <AddedOfferingRow item={item} onRemove={() => onRemove(item.id)} onConfigure={() => onConfigure(item.id)} isLast={i === items.length - 1} />
+              </div>
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
 
-      {addVariant === "menu" ? (
-        <AddProductMenu available={available} onAdd={onAdd} className={items.length > 0 ? "mt-3" : ""} />
+      {hideAdd ? null : addVariant === "menu" || items.length > 0 ? (
+        // Once a product is added, collapse the full grid into an "Add another
+        // product" dropdown (matches the multi-pricing-option cards).
+        <AddProductMenu
+          available={available}
+          onAdd={onAdd}
+          className={items.length > 0 ? "mt-3" : ""}
+        />
       ) : (
-        <>
-          {items.length > 0 && available.length > 0 && (
-            <p className="mb-2 mt-6 text-[14px] font-medium text-gray-extra-light">Available products</p>
-          )}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {/* popLayout pops an added card out of flow so the rest reflow to fill. */}
-            <AnimatePresence initial={false} mode="popLayout">
-              {available.map((o) => (
-                <motion.button
-                  key={o.slug}
-                  layout
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={offeringTransition}
-                  onClick={() => onAdd(o.slug)}
-                  className="group flex items-center justify-between rounded-xl bg-gray-hover px-3 py-2 text-left transition-colors hover:bg-[#ececec]"
-                >
-                  <span className="flex items-center gap-2.5">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-[8px]">
-                      <img src={o.icon} alt="" className="h-5 w-5" />
-                    </span>
-                    <span className="text-[15px] font-semibold text-gray-dark">{o.label}</span>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {/* popLayout pops an added card out of flow so the rest reflow to fill. */}
+          <AnimatePresence initial={false} mode="popLayout">
+            {available.map((o) => (
+              <motion.button
+                key={o.slug}
+                layout
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={offeringTransition}
+                onClick={() => onAdd(o.slug)}
+                className="group flex items-center justify-between rounded-xl bg-gray-hover px-3 py-2 text-left transition-colors hover:bg-[#ececec]"
+              >
+                <span className="flex items-center gap-2.5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-[8px]">
+                    <img src={o.icon} alt="" className="h-5 w-5" />
                   </span>
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-hover text-gray-light transition-colors group-hover:text-gray-dark">
-                    <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-                  </span>
-                </motion.button>
-              ))}
-            </AnimatePresence>
-          </div>
-        </>
+                  <span className="text-[15px] font-semibold text-gray-dark">{o.label}</span>
+                </span>
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-hover text-gray-light transition-colors group-hover:text-gray-dark">
+                  <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                </span>
+              </motion.button>
+            ))}
+          </AnimatePresence>
+        </div>
       )}
     </div>
   );
@@ -1448,7 +1476,7 @@ function ProductPicker({ items, available, addVariant = "grid", onAdd, onRemove,
 
 /* ---------- Added offering row ---------- */
 
-function AddedOfferingRow({ item, onRemove, onConfigure }: { item: OfferingItem; onRemove: () => void; onConfigure: () => void }) {
+function AddedOfferingRow({ item, onRemove, onConfigure, isLast = false }: { item: OfferingItem; onRemove: () => void; onConfigure: () => void; isLast?: boolean }) {
   const o = offeringBySlug[item.slug];
   const configurable = isConfigurable(item.slug);
   const finished = !configurable || item.configured;
@@ -1464,7 +1492,7 @@ function AddedOfferingRow({ item, onRemove, onConfigure }: { item: OfferingItem;
   const cta = configCTA[item.slug] ?? { label: "Configure" };
 
   return (
-    <div className="flex items-center gap-3 border-b border-gray-stroke bg-white py-4">
+    <div className={`flex items-center gap-3 bg-white py-4 ${isLast ? "" : "border-b border-gray-stroke"}`}>
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[6px] bg-[#f5f5f5]">
         <img src={o.icon} alt="" className="h-[22px] w-[22px]" />
       </span>
@@ -1529,19 +1557,19 @@ function ConfigModal({ item, onChange, onSave, onClose }: { item: OfferingItem |
             </button>
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto px-7 pb-2 pt-8">
+            <div className="flex-1 overflow-y-auto px-7 pb-1 pt-8">
               {/* Left-aligned header */}
               <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">Configure {o.label.toLowerCase()}</h2>
               {prompt && <p className="mt-1.5 text-[15px] text-gray-light">{prompt}</p>}
 
               {/* Fields */}
-              <div className="mt-6">
+              <div className="mt-3">
                 <OfferingConfigFields slug={item.slug} config={item.config} onChange={onChange} />
               </div>
             </div>
 
             {/* Actions */}
-            <div className="px-7 pb-7 pt-4">
+            <div className="px-7 pb-7 pt-1">
               <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" disabled={!complete} onClick={onSave}>
                 Save product
               </Button>
@@ -1745,7 +1773,7 @@ function ListConfigModal({ item, onGeneralChange, onItemsChange, onSave, onClose
                       onClick={() => setSelected(r.id)}
                       className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 transition-colors ${active ? "bg-white shadow-[0_1px_2px_rgba(16,24,40,0.08)]" : "hover:bg-black/[0.03]"}`}
                     >
-                      <span className={`min-w-0 flex-1 truncate text-[14px] ${active ? "font-medium text-gray-dark" : "text-gray-light"}`}>{r.config.title || `Untitled ${copy.noun}`}</span>
+                      <span className={`min-w-0 flex-1 truncate text-[14px] ${active ? "font-medium text-gray-dark" : "text-gray-light"}`}>{contentItemTitle(r.config) || `Untitled ${copy.noun}`}</span>
                       <svg className="h-4 w-4 shrink-0 cursor-grab text-[#C4C4C4]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 9h16M4 15h16" /></svg>
                     </div>
                   );
@@ -1766,7 +1794,7 @@ function ListConfigModal({ item, onGeneralChange, onItemsChange, onSave, onClose
             <div className="relative flex min-w-0 flex-1 flex-col">
               <div className="flex items-center justify-between gap-3 border-b border-gray-stroke py-4 pl-7 pr-5">
                 <h2 className="min-w-0 truncate font-serif text-[22px] text-gray-dark">
-                  {showGeneral ? "General" : (selectedItem!.config.title || `Untitled ${copy.noun}`)}
+                  {showGeneral ? "General" : (contentItemTitle(selectedItem!.config) || `Untitled ${copy.noun}`)}
                 </h2>
                 <div className="flex shrink-0 items-center gap-2">
                   {!showGeneral && (
@@ -2033,10 +2061,35 @@ function ToggleRow({ label, desc, checked, onChange, className = "" }: { label: 
         {checked && <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
       </span>
       <span className="min-w-0">
-        <span className="block text-[15px] font-medium text-gray-dark">{label}</span>
-        {desc && <span className="mt-0.5 block text-[13px] leading-snug text-gray-light">{desc}</span>}
+        <span className="block text-[14px] font-semibold text-gray-dark">{label}</span>
+        {desc && <span className="mt-0.5 block text-[14px] leading-snug text-gray-light">{desc}</span>}
       </span>
     </button>
+  );
+}
+
+// Unified content-setting row: a 24px icon (floating on the left), a
+// headline + subheadline, and a checkbox on the right. The divider sits under
+// the text (not the icon); expanded `children` sit under the text too.
+function SettingRow({ icon, title, desc, checked, onChange, children, divider = true }: {
+  icon: ReactNode; title: string; desc: string; checked: boolean; onChange: () => void; children?: ReactNode; divider?: boolean;
+}) {
+  return (
+    <div className="flex gap-4">
+      <span className="flex shrink-0 pt-5 text-gray-dark">{icon}</span>
+      <div className={`min-w-0 flex-1 pt-5 pb-5 ${divider ? "border-b border-gray-stroke" : ""}`}>
+        <button type="button" onClick={onChange} className="flex w-full items-start justify-between gap-4 text-left">
+          <span className="min-w-0">
+            <span className="block text-[15px] font-semibold text-gray-dark">{title}</span>
+            <span className="mt-0.5 block text-[15px] leading-snug text-gray-light">{desc}</span>
+          </span>
+          <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[7px] border-[1.5px] transition-colors ${checked ? "border-gray-dark bg-gray-dark" : "border-gray-stroke bg-white"}`}>
+            {checked && <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+          </span>
+        </button>
+        {checked && children}
+      </div>
+    </div>
   );
 }
 
@@ -2053,69 +2106,321 @@ function UploadField({ value, onChange, hint, label = "Upload a file" }: { value
   );
 }
 
-/* ---------- Content config ---------- */
+/* ---------- Content config (upload new / reuse existing) ---------- */
 
 function ContentFields({ config, onChange }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void }) {
-  const on = (k: string) => config[k] === "true";
-  const toggle = (k: string) => onChange({ [k]: on(k) ? "false" : "true" });
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  // Leland+ section is an accordion: closed by default, open if already enabled.
+  const [lelandOpen, setLelandOpen] = useState(config.lelandPlus === "true" || config.r_lelandPlus === "true");
+  const [editing, setEditing] = useState(false);
+  const [query, setQuery] = useState("");
 
-  return (
-    <div className="flex flex-col gap-5">
-      <UploadField value={config.assetName ?? ""} onChange={(name) => onChange({ assetName: name })} hint="PDF, video, image, or doc" />
+  // The active mode (persisted in config so parent helpers can read it). The
+  // two modes keep independent data so switching tabs never bleeds across.
+  const source: "upload" | "reuse" = config.source === "reuse" ? "reuse" : config.source === "upload" ? "upload" : (config.libraryId ? "reuse" : "upload");
+  const setSource = (t: "upload" | "reuse") => onChange({ source: t });
 
-      <div>
-        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Title</label>
-        <input value={config.title ?? ""} onChange={(e) => onChange({ title: e.target.value })} placeholder="Give your content a title" autoComplete="off" className={configInputClass} />
-      </div>
+  const q = query.trim().toLowerCase();
+  const results = q
+    ? CONTENT_LIBRARY.filter((c) => c.title.toLowerCase().includes(q) || c.name.toLowerCase().includes(q))
+    : CONTENT_LIBRARY;
+  // Reusing writes only reuse-namespaced ("r_") keys, never the upload fields.
+  const selectLibrary = (c: LibraryContent) =>
+    onChange({ source: "reuse", libraryId: c.id, r_assetName: c.name, r_title: c.title, r_description: c.description, r_resourceType: c.resourceType });
+  const selectedLib = config.libraryId ? CONTENT_LIBRARY.find((c) => c.id === config.libraryId) ?? null : null;
 
-      <div>
-        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Description</label>
-        <textarea value={config.description ?? ""} onChange={(e) => onChange({ description: e.target.value })} rows={3} placeholder="Describe what this is…" autoComplete="off" className={`${configInputClass} resize-none`} />
-      </div>
+  // Edit-screen flow: snapshot the config on open so Cancel can discard changes.
+  const snapshotRef = useRef<Record<string, string> | null>(null);
+  const openEdit = () => { snapshotRef.current = { ...config }; setEditing(true); };
+  const cancelEdit = () => { if (snapshotRef.current) onChange(snapshotRef.current); setEditing(false); };
+  const saveEdit = () => setEditing(false);
 
-      <div>
-        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Resource type</label>
-        <Select value={config.resourceType ?? "guide"} onChange={(v) => onChange({ resourceType: v })} options={RESOURCE_TYPES} />
-      </div>
+  // Editable metadata fields bound to a config-key namespace ("" for a freshly
+  // uploaded asset, "r_" for a reused library asset).
+  const renderMetadata = (p: string) => {
+    const g = (f: string) => config[`${p}${f}`] ?? "";
+    const set = (f: string, v: string) => onChange({ [`${p}${f}`]: v });
+    const isOn = (f: string) => config[`${p}${f}`] === "true";
+    const flip = (f: string) => onChange({ [`${p}${f}`]: isOn(f) ? "false" : "true" });
+    return (
+      <>
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Title</label>
+          <input value={g("title")} onChange={(e) => set("title", e.target.value)} placeholder="Give your content a title" autoComplete="off" className={configInputClass} />
+        </div>
 
-      {/* Advanced settings — collapsed by default */}
-      <div className="border-t border-gray-stroke pt-2">
-        <button type="button" onClick={() => setAdvancedOpen((v) => !v)} className="flex w-full items-center justify-between py-2 text-left">
-          <span className="text-[17px] font-semibold text-gray-dark">Advanced settings</span>
-          <svg className={`h-5 w-5 shrink-0 text-gray-dark transition-transform ${advancedOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-        </button>
-        <AnimatePresence initial={false}>
-          {advancedOpen && (
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Description</label>
+          <textarea value={g("description")} onChange={(e) => set("description", e.target.value)} rows={3} placeholder="Describe what this is…" autoComplete="off" className={`${configInputClass} resize-none`} />
+        </div>
+
+        {/* Leland+ library — collapsible section (open when already enabled) */}
+        <div className="border-t border-gray-stroke">
+          <button type="button" onClick={() => setLelandOpen((v) => !v)} className="flex w-full items-center justify-between py-5 text-left">
+            <span className="text-[17px] font-semibold text-gray-dark">Leland+ library</span>
+            <svg className={`h-5 w-5 shrink-0 text-gray-dark transition-transform ${lelandOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+          </button>
+          <AnimatePresence initial={false}>
+            {lelandOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={offeringTransition} className="overflow-hidden">
+          <SettingRow
+            icon={<MaskIcon src={bookOpenIcon} className="h-6 w-6 text-gray-dark" />}
+            title="Add to the Leland+ library"
+            desc="Anyone with a Leland+ subscription can access it. You’ll get paid based on usage."
+            checked={isOn("lelandPlus")}
+            onChange={() => flip("lelandPlus")}
+            divider={isOn("lelandPlus")}
+          />
+
+          <AnimatePresence initial={false}>
+          {isOn("lelandPlus") && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={offeringTransition} className="overflow-hidden">
-              <div className="flex flex-col gap-5 pt-4">
-                <ToggleRow label="Allow downloads" desc="Let members download this asset." checked={on("downloadable")} onChange={() => toggle("downloadable")} />
-
-                <div>
-                  <ToggleRow label="Attach a separate, downloadable file" checked={on("attachFile")} onChange={() => toggle("attachFile")} />
-                  {on("attachFile") && (
-                    <div className="mt-3">
-                      <UploadField value={config.attachmentName ?? ""} onChange={(name) => onChange({ attachmentName: name })} hint="The file members can download" />
-                    </div>
-                  )}
+              {/* Resource type — same row layout (icon + content), no checkbox */}
+              <div className="flex gap-4">
+                <span className="flex shrink-0 pt-5 text-gray-dark"><MaskIcon src={stackIcon} className="h-6 w-6 text-gray-dark" /></span>
+                <div className="min-w-0 flex-1 border-b border-gray-stroke pt-5 pb-5">
+                  <p className="text-[15px] font-semibold text-gray-dark">Resource type</p>
+                  <div className="mt-3">
+                    <Select value={g("resourceType") || "guide"} onChange={(v) => set("resourceType", v)} options={RESOURCE_TYPES} />
+                  </div>
                 </div>
+              </div>
 
-                <div>
-                  <ToggleRow
-                    label="Add to the Leland+ library"
-                    desc="Anyone with a Leland+ subscription can access it. You’ll get paid based on usage."
-                    checked={on("lelandPlus")}
-                    onChange={() => toggle("lelandPlus")}
-                  />
-                  {on("lelandPlus") && (
-                    <ToggleRow className="mt-4" label="Submit anonymously" checked={on("anonymous")} onChange={() => toggle("anonymous")} />
-                  )}
+              <SettingRow
+                icon={<MaskIcon src={eyeClosedIcon} className="h-6 w-6 text-gray-dark" />}
+                title="Submit anonymously"
+                desc="Your name won’t appear on this resource."
+                checked={isOn("anonymous")}
+                onChange={() => flip("anonymous")}
+              />
+
+              {/* Content visibility — same row layout (icon + content), no checkbox */}
+              <div className="flex gap-4">
+                <span className="flex shrink-0 pt-5 text-gray-dark"><MaskIcon src={globeIcon} className="h-6 w-6 text-gray-dark" /></span>
+                <div className="min-w-0 flex-1 pt-5 pb-5">
+                  <p className="text-[15px] font-semibold text-gray-dark">Content visibility</p>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    {[
+                      { key: "public", label: "Public", desc: "Appears in search results" },
+                      { key: "unlisted", label: "Unlisted", desc: "Won't appear in search results" },
+                    ].map((opt) => {
+                      const active = (g("visibility") || "public") === opt.key;
+                      return (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          onClick={() => set("visibility", opt.key)}
+                          className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3.5 text-left transition-colors ${active ? "border-[1.5px] border-gray-dark" : "border border-gray-stroke hover:border-[#c9c9c9]"}`}
+                        >
+                          <span className="min-w-0">
+                            <span className="block text-[15px] font-semibold text-gray-dark">{opt.label}</span>
+                            <span className="block text-[13px] text-gray-light">{opt.desc}</span>
+                          </span>
+                          <RadioDot active={active} />
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </motion.div>
           )}
-        </AnimatePresence>
+          </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Advanced settings — collapsible; shares the unified SettingRow design.
+            -mt-5 cancels the parent's gap-5 so the divider sits symmetrically
+            between the two accordion headers. */}
+        <div className="-mt-5 border-t border-gray-stroke">
+          <button type="button" onClick={() => setAdvancedOpen((v) => !v)} className="flex w-full items-center justify-between py-5 text-left">
+            <span className="text-[17px] font-semibold text-gray-dark">Advanced settings</span>
+            <svg className={`h-5 w-5 shrink-0 text-gray-dark transition-transform ${advancedOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+          </button>
+          <AnimatePresence initial={false}>
+            {advancedOpen && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={offeringTransition} className="overflow-hidden">
+                <SettingRow
+                  icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11" /><path d="m7 10 5 5 5-5" /><path d="M5 19h14" /></svg>}
+                  title="Allow users to download this file"
+                  desc="Not supported for videos"
+                  checked={isOn("downloadable")}
+                  onChange={() => flip("downloadable")}
+                />
+
+                <SettingRow
+                  icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>}
+                  title="Attach a separate, downloadable file"
+                  desc="Add an extra asset, like a spreadsheet or worksheet, for users to download. The file above should explain it."
+                  checked={isOn("attachFile")}
+                  onChange={() => flip("attachFile")}
+                >
+                  <div className="mt-3">
+                    <UploadField value={g("attachmentName")} onChange={(name) => set("attachmentName", name)} hint="The file members can download" label="Click to upload or drag and drop" />
+                  </div>
+                </SettingRow>
+
+                <SettingRow
+                  icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-4.35-4.35a2 2 0 0 0-2.83 0L4 20" /></svg>}
+                  title="Add a custom thumbnail"
+                  desc="Upload a custom thumbnail to help this resource stand out. A screenshot or eye-catching mockup works well."
+                  checked={isOn("thumbnailEnabled")}
+                  onChange={() => flip("thumbnailEnabled")}
+                  divider={false}
+                >
+                  <div className="mt-3">
+                    <UploadField value={g("thumbnail")} onChange={(name) => set("thumbnail", name)} hint="PNG, JPG, JPEG, GIF, WEBP, SVG, HEIC" label="Click to upload or drag and drop" />
+                  </div>
+                </SettingRow>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </>
+    );
+  };
+
+  // Inline SVGs (shared viewBox + strokeWidth + currentColor) so both icons
+  // render at a consistent weight/size and inherit the tab's text color.
+  const tabs = [
+    {
+      key: "upload" as const,
+      label: "Upload new",
+      icon: (
+        <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4v16M4 12h16" /></svg>
+      ),
+    },
+    {
+      key: "reuse" as const,
+      label: "Reuse existing",
+      icon: (
+        <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 12l-2 2-2-2" />
+          <path d="M6.34 6.34A8 8 0 0 1 20 12c0 .6-.07 1.2-.2 1.77" />
+          <path d="M2 12l2-2 2 2" />
+          <path d="M17.66 17.66A8 8 0 0 1 4 12c0-.61.07-1.2.2-1.77" />
+        </svg>
+      ),
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-5">
+      {/* Tab bar / pivot — mirrors the profile template tabs. Negative margins
+          pull it full-bleed past the modal's px-7 content padding. */}
+      <div className="-mx-7 flex border-b border-gray-stroke">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => setSource(t.key)}
+            className={`flex flex-1 items-center justify-center gap-2 border-b-2 py-3 transition-colors ${source === t.key ? "border-gray-dark text-gray-dark" : "border-transparent text-gray-light hover:text-gray-dark"}`}
+          >
+            {t.icon}
+            <span className="text-[15px] font-medium">{t.label}</span>
+          </button>
+        ))}
       </div>
+
+      {source === "upload" ? (
+        <>
+          <UploadField value={config.assetName ?? ""} onChange={(name) => onChange({ source: "upload", assetName: name })} hint="PDF, video, image, or doc" />
+          {renderMetadata("")}
+        </>
+      ) : (
+        <div>
+          <div className="relative">
+            <svg className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search your content…"
+              autoComplete="off"
+              className="w-full rounded-full border border-transparent bg-gray-hover px-4 py-3 pl-11 text-[15px] text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
+            />
+          </div>
+
+          <div className="mt-3 flex max-h-[440px] flex-col gap-2 overflow-y-auto pb-20">
+            {results.map((c) => {
+              const selected = config.libraryId === c.id;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => selectLibrary(c)}
+                  className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors ${selected ? "border-gray-dark bg-gray-hover" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
+                >
+                  <img src={c.thumb} alt="" className="h-11 w-[68px] shrink-0 rounded-[6px] object-cover" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[15px] font-semibold text-gray-dark">{c.title}</span>
+                    <span className="block truncate text-[13px] text-gray-light">Uploaded {c.date} · {formatViews(c.views)} views</span>
+                  </span>
+                  <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border transition-colors ${selected ? "border-gray-dark bg-gray-dark" : "border-gray-stroke bg-white"}`}>
+                    {selected && <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+                  </span>
+                </button>
+              );
+            })}
+            {results.length === 0 && (
+              <p className="py-8 text-center text-[14px] text-gray-light">No content matches “{query}”.</p>
+            )}
+          </div>
+
+          {/* Selected-asset indicator — a sticky bar pinned just above the Save CTA */}
+          {selectedLib && (
+            <div className="sticky bottom-0 -mx-7 -mb-1 flex items-center justify-between gap-3 border-t border-gray-stroke bg-white px-7 pb-2 pt-3">
+              <span className="flex min-w-0 items-center gap-2 text-[15px] text-gray-light">
+                <MaskIcon src={attachIcon} className="h-[18px] w-[18px] shrink-0 text-gray-light" />
+                <span className="truncate">Selected: {config.r_title || selectedLib.title}</span>
+              </span>
+              <button type="button" onClick={openEdit} className="flex shrink-0 items-center gap-1.5 text-[15px] text-gray-light transition-colors hover:text-gray-dark">
+                <MaskIcon src={editIcon} className="h-4 w-4" />
+                <span className="underline underline-offset-2">Edit</span>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Edit screen — an in-modal pane that slides in from the right and
+          replaces the modal's content (it fills the modal box via absolute
+          inset-0, whose containing block is the modal frame). */}
+      <AnimatePresence>
+        {editing && selectedLib && (
+          <motion.div
+            key="edit-pane"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            className="absolute inset-0 z-30 flex flex-col bg-white"
+          >
+            <button onClick={cancelEdit} aria-label="Close" className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gray-hover text-gray-dark transition-colors hover:bg-[#ebebeb]">
+              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            </button>
+
+            <div className="px-7 pt-8">
+              <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">Edit content</h2>
+              <p className="mt-1.5 text-[15px] text-gray-light">{selectedLib.title} <span className="text-gray-extra-light">· Uploaded {selectedLib.date}</span></p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-7 pb-2 pt-6">
+              {/* Warning banner above the fields */}
+              <div className="mb-3 rounded-md bg-[#FEE6E3] px-4 py-3 text-center text-[14px] font-medium text-[#D92D20]">
+                This will affect all iterations of this resource
+              </div>
+              <div className="flex flex-col gap-5">{renderMetadata("r_")}</div>
+            </div>
+
+            <div className="flex gap-3 px-7 pb-7 pt-4">
+              <Button size="lg" variant="secondary" rounded="rounded-full" className="flex-1" onClick={cancelEdit}>Cancel</Button>
+              <Button size="lg" variant="primary" rounded="rounded-full" className="flex-1" onClick={saveEdit}>Save</Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -2215,7 +2520,9 @@ function PageStep({
       <h3 className="mt-8 text-[28px] font-semibold leading-tight text-gray-dark">
         {name || <span className="text-[#B1B1B1]">Your offering name here</span>}
       </h3>
-      {headline && <p className="mt-2 text-[18px] font-normal leading-tight text-gray-extra-light">{headline}</p>}
+      <p className="mt-2 text-[18px] font-normal leading-tight text-gray-extra-light">
+        {headline || <span className="text-[#C4C4C4]">Your headline appears here</span>}
+      </p>
 
       {/* Price + author bar */}
       <div className="mt-4 flex items-center rounded-xl border border-gray-stroke">
@@ -2237,6 +2544,10 @@ function PageStep({
         placeholder="Describe what customers get with this offering…"
         className="mt-3 w-full resize-none rounded-xl border border-gray-stroke bg-white px-3.5 py-3 text-[15px] leading-relaxed text-gray-dark outline-none placeholder:text-[#B1B1B1] focus:border-gray-dark"
       />
+      <button type="button" className="mt-2 inline-flex items-center gap-1.5 text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark">
+        <MaskIcon src={aiIcon} className="h-4 w-4" />
+        Generate a description
+      </button>
 
       {/* Added sections — reorderable, above the "Add section" picker */}
       {sections.length > 0 && (
@@ -2532,7 +2843,7 @@ function ProductPreview({ name, headline, pricingMode, paidType, price, added, j
     <div className="overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_1px_3px_rgba(16,24,40,0.06)]">
       <img src={coverImage9} alt="" className="aspect-[1200/630] w-full object-cover opacity-25" />
       <div className="p-4">
-        <p className="text-[17px] font-semibold leading-tight text-gray-dark">{name || "Offering name"}</p>
+        <p className={`text-[17px] font-semibold leading-tight ${name ? "text-gray-dark" : "text-gray-extra-light"}`}>{name || "Your offering name here"}</p>
         {headline ? (
           <p className="mt-1 text-[15px] leading-snug text-gray-light">{headline}</p>
         ) : (

@@ -20,7 +20,7 @@ const iconSizeClasses: Record<ButtonSize, string> = {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-[#FFD96F] text-[#111111] hover:bg-[#F3C948]",
-  secondary: "bg-gray-hover text-gray-dark hover:bg-[#ebebeb]",
+  secondary: "bg-[#222222]/5 text-gray-dark hover:bg-[#222222]/10",
   white: "bg-white text-gray-dark hover:bg-gray-hover",
   dark: "bg-gray-dark text-white hover:bg-[#3a3a3a]",
 };
