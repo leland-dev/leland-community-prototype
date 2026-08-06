@@ -82,6 +82,7 @@ import {
   BlockList,
   LessonFooterActions,
   LessonPageProvider,
+  LiveElapsedTime,
   LiveSessionCallout,
 } from "../components/lesson-blocks";
 import { SwitchInput } from "../components/leland";
@@ -2116,7 +2117,7 @@ function SessionActionBanner({
           subtitle={
             <>
               <span className="font-medium text-leland-red">Happening now</span>
-              {` · ${session.title}`}
+              {" · "}<LiveElapsedTime startSec={636} />
             </>
           }
           trailing={{ kind: "join", href: session.meetingUrl }}

@@ -272,6 +272,21 @@ function SessionRecordingEmbed({ src }: { src: string }) {
   );
 }
 
+export function LiveElapsedTime({ startSec = 0 }: { startSec?: number }) {
+  const [elapsed, setElapsed] = useState(startSec);
+  useEffect(() => {
+    const id = setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  return (
+    <span className="text-leland-gray-extra-light">
+      {m}m {String(s).padStart(2, "0")}s
+    </span>
+  );
+}
+
 function LiveDateTile({ month, day }: { month: string; day: string }) {
   return (
     <div className="flex size-12 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke">
@@ -467,7 +482,7 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
           subtitle={
             <>
               <span className="font-medium text-leland-red">Happening now</span>
-              {block.sessionTitle ? ` · ${block.sessionTitle}` : null}
+              {" · "}<LiveElapsedTime startSec={636} />
             </>
           }
           trailing={{ kind: "join", href: meetingUrl, onJoin: onOpenCalendar }}
