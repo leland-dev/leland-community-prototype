@@ -746,12 +746,14 @@ function LessonAccordion({
 function SidebarMenuItem({
   Icon,
   label,
+  subtext,
   active,
   external,
   onClick,
 }: {
   Icon: FC<SVGProps<SVGSVGElement>>;
   label: string;
+  subtext?: string;
   active?: boolean;
   external?: boolean;
   onClick: () => void;
@@ -765,8 +767,15 @@ function SidebarMenuItem({
       }`}
     >
       <Icon className="size-6 shrink-0 text-leland-gray-dark" />
-      <span className="min-w-0 flex-1 leland-paragraph-base font-medium text-leland-gray-dark">
-        {label}
+      <span className="min-w-0 flex-1">
+        <span className="block leland-paragraph-base font-medium text-leland-gray-dark">
+          {label}
+        </span>
+        {subtext ? (
+          <span className="block leland-paragraph-sm text-leland-gray-light">
+            {subtext}
+          </span>
+        ) : null}
       </span>
       {external ? (
         <IconArrowUpRight className="size-5 shrink-0 text-leland-gray-light" />
@@ -1247,6 +1256,7 @@ function CombinedSidebar({
                   <SidebarMenuItem
                     Icon={IconRecurring}
                     label="Switch cohort"
+                    subtext="May 16 – Jun 8"
                     onClick={onSwitchCohort}
                   />
                   <div className="pt-2 pb-1 px-1">
