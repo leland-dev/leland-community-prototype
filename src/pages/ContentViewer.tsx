@@ -621,14 +621,12 @@ function LessonAccordion({
   completed,
   liveProgram = false,
   showSessionBanners = true,
-  largerLessonHeadings = false,
 }: {
   currentLessonId: string;
   currentSectionId: string;
   completed: Set<string>;
   liveProgram?: boolean;
   showSessionBanners?: boolean;
-  largerLessonHeadings?: boolean;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(
     () => new Set([currentLessonId]),
@@ -670,14 +668,14 @@ function LessonAccordion({
               onClick={() => toggle(l.id)}
               className="flex flex-col gap-1.5 rounded px-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
-              <span className={largerLessonHeadings ? "leland-heading-lg font-semibold text-leland-gray-dark" : "leland-subtext-sm font-semibold uppercase tracking-[1.3px] text-leland-gray-extra-light"}>
+              <span className="leland-heading-lg font-semibold text-leland-gray-dark">
                 {isStartHere ? "Before you begin" : `Lesson ${idx}`}
                 {l.durationMin ? (
                   <span className="leland-paragraph-sm font-normal normal-case tracking-normal text-leland-gray-extra-light"><span className="mx-1.5">·</span>{l.durationMin}m</span>
                 ) : null}
               </span>
               <span className="flex items-center gap-3">
-                <span className={`flex-1 ${largerLessonHeadings ? "leland-paragraph-base text-leland-gray-light" : "leland-paragraph-lg font-medium text-leland-gray-dark"}`}>
+                <span className="flex-1 leland-paragraph-base text-leland-gray-light">
                   {l.title}
                 </span>
                 <span role="img" aria-label={`${completedCount}/${totalCount} complete`}>
@@ -809,7 +807,6 @@ function LessonsAccordionSidebar({
   hideTabs = false,
   liveProgram = true,
   showSessionBanners = true,
-  largerLessonHeadings = false,
   exitDestination,
   noHeader = true,
 }: {
@@ -823,7 +820,6 @@ function LessonsAccordionSidebar({
   hideTabs?: boolean;
   liveProgram?: boolean;
   showSessionBanners?: boolean;
-  largerLessonHeadings?: boolean;
   exitDestination: string;
   noHeader?: boolean;
 }) {
@@ -953,7 +949,6 @@ function LessonsAccordionSidebar({
           completed={completed}
           liveProgram={liveProgram}
           showSessionBanners={showSessionBanners}
-          largerLessonHeadings={largerLessonHeadings}
         />
       )}
     </aside>
@@ -970,8 +965,6 @@ function CombinedSidebar({
   onTabChange,
   liveProgram = true,
   showSessionBanners = true,
-  compactCourseInfo = false,
-  largerLessonHeadings = false,
   seeMoreOpen,
   onSeeMoreChange,
   exitDestination,
@@ -986,8 +979,6 @@ function CombinedSidebar({
   onTabChange: (tab: SidebarTab) => void;
   liveProgram?: boolean;
   showSessionBanners?: boolean;
-  compactCourseInfo?: boolean;
-  largerLessonHeadings?: boolean;
   seeMoreOpen: boolean;
   onSeeMoreChange: (open: boolean) => void;
   exitDestination: string;
@@ -1059,58 +1050,34 @@ function CombinedSidebar({
         </button>
       </div>
 
-      {/* Pinned cohort / quick links row — shown once the resources section has scrolled out of view.
-          Compact mode instead uses a natively sticky quick-links row (below). */}
-      {liveProgram && !compactCourseInfo && !resourcesInView && (
+      {/* Pinned cohort row — shown once the resources section has scrolled out of view. */}
+      {liveProgram && !resourcesInView && (
         <button
           type="button"
           onClick={scrollToTop}
           className="flex w-full items-center gap-3 border-b border-leland-gray-stroke px-6 py-4 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary"
         >
-          {compactCourseInfo ? (
-            <>
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-leland-blue-light">
-                <IconLink className="size-4 text-leland-blue-dark" />
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
-                <p className="leland-paragraph-base font-semibold text-leland-gray-dark">Quick links</p>
-                <p className="leland-paragraph-sm text-leland-gray-light">May 24th cohort</p>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex h-9 w-9 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
-                <div className="flex items-center justify-center bg-leland-blue px-1.5 pb-0.5 pt-[3px]">
-                  <span className="text-[8px] font-semibold leading-none tracking-[0.8px] text-leland-gray-dark">MAY</span>
-                </div>
-                <div className="flex flex-1 items-center justify-center bg-white">
-                  <span className="leland-heading-base font-semibold text-leland-gray-dark">24</span>
-                </div>
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
-                <p className="leland-heading-base font-semibold text-leland-gray-dark">May 16 – Jun 8</p>
-                <p className="leland-paragraph-sm text-leland-gray-light">Cohort details</p>
-              </div>
-            </>
-          )}
+          <div className="flex h-9 w-9 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
+            <div className="flex items-center justify-center bg-leland-blue px-1.5 pb-0.5 pt-[3px]">
+              <span className="text-[8px] font-semibold leading-none tracking-[0.8px] text-leland-gray-dark">MAY</span>
+            </div>
+            <div className="flex flex-1 items-center justify-center bg-white">
+              <span className="leland-heading-base font-semibold text-leland-gray-dark">24</span>
+            </div>
+          </div>
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+            <p className="leland-heading-base font-semibold text-leland-gray-dark">May 16 – Jun 8</p>
+            <p className="leland-paragraph-sm text-leland-gray-light">Cohort details</p>
+          </div>
           <IconChevronUp className="size-4 shrink-0 text-leland-gray-light" />
         </button>
       )}
 
       <div ref={scrollRef} className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pb-12">
         {/* Program info card */}
-        <div className={`w-full bg-white ${compactCourseInfo ? "" : "pb-5"}`}>
+        <div className="w-full bg-white pb-5">
           <div className="flex flex-col">
-            <div className={`flex flex-col gap-3 px-6 pt-2 ${compactCourseInfo ? "border-b border-leland-gray-stroke pb-5" : ""}`}>
-              {/* Thumbnail */}
-              {!compactCourseInfo && (
-                <img
-                  src={`${import.meta.env.BASE_URL}program-cover.avif`}
-                  alt="AI Builder Program cover"
-                  className="h-16 w-[122px] shrink-0 rounded object-cover"
-                />
-              )}
-
+            <div className="flex flex-col gap-3 px-6 pt-2">
               {/* Program title */}
               <p ref={courseInfoRef} className="text-heading-3xl font-season font-normal text-leland-gray-dark">{COURSE_TITLE_FULL}</p>
 
@@ -1142,9 +1109,7 @@ function CombinedSidebar({
             </div>
           </div>
 
-          {!compactCourseInfo && (
-            <>
-
+          <>
               {/* Expanded "See more" items */}
               {seeMoreOpen && (
                 <div className="flex flex-col gap-1 px-3 pt-4">
@@ -1203,107 +1168,16 @@ function CombinedSidebar({
                 </button>
               </div>
             </>
-          )}
         </div>
-
-        {/* Compact: sticky quick-links row. It's a direct child of the scroll
-            container (not nested in the program info card), so its sticky
-            containing block is the whole scroll area — it pins to the top the
-            moment the title block scrolls past and stays there for the entire
-            scroll, rather than unsticking when the card ends. */}
-        {compactCourseInfo && (
-          <>
-            <div className="sticky top-0 z-10 border-b border-leland-gray-stroke bg-white shadow-[0_8px_16px_-6px_rgba(0,0,0,0.16)]">
-              <button
-                type="button"
-                onClick={() => onSeeMoreChange(!seeMoreOpen)}
-                className="flex w-full items-center gap-3 px-6 py-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary"
-              >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-leland-gray-stroke">
-                  <IconLink className="size-5 text-leland-gray-dark" />
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
-                  <p className="leland-paragraph-lg font-semibold text-leland-gray-dark">Resources</p>
-                  <p className="leland-paragraph-sm text-leland-gray-light">
-                    {(() => {
-                      const labels = [
-                        ...(liveProgram ? ["Office hours", "Slack community", "Cohort showcase", "Knowledge hub"] : []),
-                        "Switch cohort",
-                      ];
-                      return labels.length > 1
-                        ? `${labels[0]} and ${labels.length - 1} more`
-                        : labels[0];
-                    })()}
-                  </p>
-                </div>
-                <IconChevronDown
-                  className={`size-5 shrink-0 text-leland-gray-light transition-transform duration-200 ${seeMoreOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-              {seeMoreOpen && (
-                <div className="flex flex-col gap-1 px-3 pb-2">
-                  {liveProgram && (
-                    <>
-                      <SidebarMenuItem
-                        Icon={IconExperiences}
-                        label="Office hours"
-                        external
-                        onClick={() => window.open("https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours", "_blank", "noopener")}
-                      />
-                      <SidebarMenuItem
-                        Icon={IconUserProfileGroup}
-                        label="Slack community"
-                        external
-                        onClick={() => window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")}
-                      />
-                      <SidebarMenuItem
-                        Icon={IconModules}
-                        label="Cohort showcase"
-                        external
-                        onClick={() => {}}
-                      />
-                      <SidebarMenuItem
-                        Icon={IconBooks}
-                        label="Knowledge hub"
-                        external
-                        onClick={() => {}}
-                      />
-                    </>
-                  )}
-                  <SidebarMenuItem
-                    Icon={IconRecurring}
-                    label="Switch cohort"
-                    subtext="May 16 – Jun 8"
-                    onClick={onSwitchCohort}
-                  />
-                  <div className="pt-2 pb-1 px-1">
-                    <button
-                      type="button"
-                      onClick={() => onSeeMoreChange(false)}
-                      className="flex w-full items-center justify-center gap-2 rounded-full bg-leland-gray-hover px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-                    >
-                      <span className="leland-heading-base text-leland-gray-dark">Collapse</span>
-                      <IconChevronUp className="size-5 text-leland-gray-dark" />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </>
-        )}
 
         {/* Lesson accordion */}
         <div className="relative">
-          {compactCourseInfo && seeMoreOpen && (
-            <div className="absolute inset-0 z-[5] bg-black/20" />
-          )}
           <LessonAccordion
             currentLessonId={currentLessonId}
             currentSectionId={currentSectionId}
             completed={completed}
             liveProgram={liveProgram}
             showSessionBanners={showSessionBanners}
-            largerLessonHeadings={largerLessonHeadings}
           />
         </div>
       </div>
@@ -1452,10 +1326,8 @@ export type SidebarView = "default" | "tabbed" | "combined";
 type PrototypeOptions = {
   sidebarView: SidebarView;
   liveProgram: boolean;
-  compactCourseInfo: boolean;
   noHeader: boolean;
   showSiteNav: boolean;
-  largerLessonHeadings: boolean;
   liveSessionVariant: LiveSessionVariant;
 };
 
@@ -1469,19 +1341,15 @@ const PROTOTYPE_OPTIONS_KEY = "content-viewer-prototype-options";
 const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
   sidebarView: "default",
   liveProgram: true,
-  compactCourseInfo: false,
   noHeader: true,
   showSiteNav: false,
-  largerLessonHeadings: false,
   liveSessionVariant: "addToCalendar",
 };
 
 const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
   { key: "liveProgram", label: "Live program" },
-  { key: "compactCourseInfo", label: "Compact course info" },
   { key: "noHeader", label: "No header" },
   { key: "showSiteNav", label: "Show site nav" },
-  { key: "largerLessonHeadings", label: "Larger lesson headings" },
 ];
 
 const SIDEBAR_VIEW_OPTIONS: { value: SidebarView; label: string }[] = [
@@ -2505,12 +2373,10 @@ export default function ContentViewer() {
                 }}
                 liveProgram={options.liveProgram}
                 showSessionBanners={true}
-                compactCourseInfo={options.compactCourseInfo}
                 seeMoreOpen={seeMoreOpen}
                 onSeeMoreChange={setSeeMoreOpen}
                 exitDestination={exitDestination}
                 noHeader={options.noHeader}
-                largerLessonHeadings={options.largerLessonHeadings}
               />
             ) : (
               <LessonsAccordionSidebar
@@ -2528,7 +2394,6 @@ export default function ContentViewer() {
                 hideTabs={options.sidebarView !== "tabbed"}
                 liveProgram={options.liveProgram}
                 showSessionBanners={true}
-                largerLessonHeadings={options.largerLessonHeadings}
                 exitDestination={exitDestination}
                 noHeader={options.noHeader}
               />
