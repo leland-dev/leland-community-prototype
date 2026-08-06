@@ -2300,6 +2300,11 @@ export default function ContentViewer() {
               <>
                 <span className="h-4 w-px shrink-0 bg-leland-gray-stroke" aria-hidden />
                 <span className="min-w-0 truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
+                <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
+                <span className="shrink-0 font-medium text-leland-gray-dark">
+                  {breadcrumbLabel}
+                  <span className="font-normal text-leland-gray-light"> / {sectionIdx + 1}</span>
+                </span>
               </>
             )}
           </div>
