@@ -47,6 +47,7 @@ import {
   IconLink,
   IconRecurring,
   IconDotsHorizontal,
+  IconDownload,
   IconHelp,
   IconShare,
   IconMenuBurger,
@@ -63,6 +64,9 @@ import {
   Tag,
   TagColor,
   TagSize,
+  ButtonWidth,
+  FontWeight,
+  getButtonStyles,
   withModal,
   type MenuItemSection,
   type ModalProps,
@@ -1696,25 +1700,10 @@ const AddToCalendarModal = withModal(function AddToCalendarModal({
             href={urls.ics}
             download={`${session.title}.ics`}
             onClick={handleAdd}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-leland-gray-hover px-6 py-3.5 hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            className={getButtonStyles({ buttonColor: ButtonColor.GRAY, size: ButtonSize.LARGE, width: ButtonWidth.FULL, fontWeight: FontWeight.SEMIBOLD })}
           >
-            <svg
-              className="size-4 shrink-0 text-leland-gray-dark"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <path d="M8 2v8" />
-              <path d="M5 8l3 3 3-3" />
-              <path d="M3 13h10" />
-            </svg>
-            <span className="leland-paragraph-base font-medium text-leland-gray-dark">
-              Download .ics file
-            </span>
+            <IconDownload className="size-5" />
+            <span>Download .ics file</span>
           </a>
         </div>
       </ModalContent>
@@ -2644,6 +2633,16 @@ export default function ContentViewer() {
                       liveSessionVariant: options.liveSessionVariant,
                       liveProgram: options.liveProgram,
                       onViewRecording: () => setLessonShowRecording(true),
+                      calendarItems: (() => {
+                        const s = LIVE_SESSIONS[lessonIdx] ?? LIVE_SESSIONS[0];
+                        const urls = buildCalendarUrls(s);
+                        return [
+                          { label: "Add to Google Calendar", href: urls.google },
+                          { label: "Add to Outlook", href: urls.outlook },
+                          { label: "Apple Calendar", href: urls.ics, download: `${s.title}.ics` },
+                          { label: "Download .ics file", href: urls.ics, download: `${s.title}.ics` },
+                        ];
+                      })(),
                     }}
                   >
                     {breadcrumbBar}

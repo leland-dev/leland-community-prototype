@@ -416,7 +416,7 @@ export function LiveSessionCallout({
 // Lesson-page live-session banner: four states (chosen from the prototype menu)
 // with the session title in the subtext.
 export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType }) {
-  const { onOpenCalendar, onViewRecording, liveSessionVariant, liveProgram } = useLessonPage();
+  const { onOpenCalendar, onViewRecording, liveSessionVariant, liveProgram, calendarItems } = useLessonPage();
 
   if (!liveProgram) return null;
 
@@ -440,7 +440,7 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
           day={block.day}
           title={`Live session starts in ${block.countdownLabel ?? "2 days"}`}
           subtitle={block.sessionTitle}
-          trailing={{ kind: "kebab" }}
+          trailing={{ kind: "kebab", items: calendarItems }}
         />
       );
     case "joinNow":
