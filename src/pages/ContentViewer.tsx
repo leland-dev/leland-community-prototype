@@ -1216,7 +1216,7 @@ function CombinedSidebar({
                   <IconLink className="size-5 text-leland-gray-dark" />
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
-                  <p className="leland-paragraph-lg font-semibold text-leland-gray-dark">Quick links</p>
+                  <p className="leland-paragraph-lg font-semibold text-leland-gray-dark">Resources</p>
                   <p className="leland-paragraph-sm text-leland-gray-light">
                     {(() => {
                       const labels = [
