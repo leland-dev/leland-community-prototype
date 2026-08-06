@@ -2100,8 +2100,7 @@ function SessionActionBanner({
             items: [
               { label: "Add to Google Calendar", href: calUrls.google },
               { label: "Add to Outlook", href: calUrls.outlook },
-              { label: "Apple Calendar", href: calUrls.ics, download: `${session.title}.ics` },
-              { label: "Download .ics file", href: calUrls.ics, download: `${session.title}.ics` },
+              { label: "Other calendars", href: calUrls.ics, download: `${session.title}.ics` },
             ],
           }}
         />
@@ -2639,8 +2638,7 @@ export default function ContentViewer() {
                         return [
                           { label: "Add to Google Calendar", href: urls.google },
                           { label: "Add to Outlook", href: urls.outlook },
-                          { label: "Apple Calendar", href: urls.ics, download: `${s.title}.ics` },
-                          { label: "Download .ics file", href: urls.ics, download: `${s.title}.ics` },
+                          { label: "Other calendars", href: urls.ics, download: `${s.title}.ics` },
                         ];
                       })(),
                     }}
