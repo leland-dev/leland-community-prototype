@@ -2640,11 +2640,7 @@ export default function ContentViewer() {
                   <LessonPageProvider
                     actions={{
                       onShareFeedback: () => setFeedbackModalOpen(true),
-                      onOpenCalendar: () => {
-                        setSidebarTab("live");
-                        setSelectedSessionNumber(null);
-                        setShowRecording(false);
-                      },
+                      onOpenCalendar: () => setAddToCalendarModalOpen(true),
                       liveSessionVariant: options.liveSessionVariant,
                       liveProgram: options.liveProgram,
                       onViewRecording: () => setLessonShowRecording(true),
