@@ -1102,7 +1102,7 @@ function CombinedSidebar({
                 <button
                   type="button"
                   onClick={onSwitchCohort}
-                  className="mt-3 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                  className="mt-3 self-start rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
                 >
                   <Tag
                     text="May 16 – Jun 8 cohort"
