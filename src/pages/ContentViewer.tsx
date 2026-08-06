@@ -1321,7 +1321,7 @@ function CourseViewerSidebar({
 
 // ─── Prototype options (meta-UI for demoing variants, not product UI) ────────
 
-export type SidebarView = "default" | "tabbed" | "combined";
+export type SidebarView = "default" | "combined";
 
 type PrototypeOptions = {
   sidebarView: SidebarView;
@@ -1354,7 +1354,6 @@ const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
 
 const SIDEBAR_VIEW_OPTIONS: { value: SidebarView; label: string }[] = [
   { value: "default", label: "Lessons only" },
-  { value: "tabbed", label: "Tabbed sidebar with overview" },
   { value: "combined", label: "Combined, lesson-first" },
 ];
 
@@ -2391,7 +2390,7 @@ export default function ContentViewer() {
                   setShowRecording(false);
                 }}
                 onSwitchCohort={() => setCohortModalOpen(true)}
-                hideTabs={options.sidebarView !== "tabbed"}
+                hideTabs={true}
                 liveProgram={options.liveProgram}
                 showSessionBanners={true}
                 exitDestination={exitDestination}
@@ -2453,7 +2452,7 @@ export default function ContentViewer() {
               <IconShare className="size-5" />
             </button>
           </div>}
-          {(options.sidebarView === "tabbed" || options.sidebarView === "combined") && (sidebarTab === "live" || sidebarTab === "overview") ? (
+          {options.sidebarView === "combined" && (sidebarTab === "live" || sidebarTab === "overview") ? (
             <div className="min-h-0 flex-1 flex flex-col overflow-hidden">
               {showRecording ? (
                 <SessionRecordingView
