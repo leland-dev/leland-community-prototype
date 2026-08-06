@@ -12,6 +12,7 @@ import {
   IconChevronRight,
   IconDotsVertical,
   IconHelp,
+  IconLivestreamSignal,
   IconMegaphone,
   IconPlayVideo,
   IconQuestion,
@@ -313,7 +314,7 @@ export function LiveSessionCallout({
   recordingVideoSrc?: string;
   month?: string;
   day?: string;
-  title: string;
+  title: ReactNode;
   subtitle?: ReactNode;
   trailing: CalloutTrailing;
   onClick?: () => void;
@@ -448,13 +449,13 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
         <LiveSessionCallout
           month={block.month}
           day={block.day}
-          title="Join the live session"
-          subtitle={
-            <>
-              <span className="font-medium text-leland-rust">Happening now</span>{" "}
-              · {block.sessionTitle}
-            </>
+          title={
+            <span className="flex items-center gap-1.5 font-semibold text-leland-red">
+              <IconLivestreamSignal className="size-4 shrink-0" />
+              Live now
+            </span>
           }
+          subtitle={block.sessionTitle}
           trailing={{ kind: "join", onJoin: onOpenCalendar }}
         />
       );

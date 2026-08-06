@@ -2111,8 +2111,13 @@ function SessionActionBanner({
         <LiveSessionCallout
           month={month}
           day={day}
-          title="Join the live session"
-          subtitle="Started 10 mins ago"
+          title={
+            <span className="flex items-center gap-1.5 font-semibold text-leland-red">
+              <IconLivestreamSignal className="size-4 shrink-0" />
+              Live now
+            </span>
+          }
+          subtitle={session.title}
           trailing={{ kind: "join" }}
         />
       );
