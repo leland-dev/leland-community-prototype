@@ -1339,7 +1339,7 @@ type BooleanOptionKey = {
 const PROTOTYPE_OPTIONS_KEY = "content-viewer-prototype-options";
 
 const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
-  sidebarView: "default",
+  sidebarView: "combined",
   liveProgram: true,
   noHeader: true,
   showSiteNav: false,
