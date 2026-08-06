@@ -1217,7 +1217,17 @@ function CombinedSidebar({
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
                   <p className="leland-paragraph-lg font-semibold text-leland-gray-dark">Quick links</p>
-                  <p className="leland-paragraph-sm text-leland-gray-light">May 24th cohort</p>
+                  <p className="leland-paragraph-sm text-leland-gray-light">
+                    {(() => {
+                      const labels = [
+                        ...(liveProgram ? ["Office hours", "Community", "Cohort showcase", "Knowledge hub"] : []),
+                        "Switch cohort",
+                      ];
+                      return labels.length > 1
+                        ? `${labels[0]} and ${labels.length - 1} more`
+                        : labels[0];
+                    })()}
+                  </p>
                 </div>
                 <IconChevronDown
                   className={`size-5 shrink-0 text-leland-gray-light transition-transform duration-200 ${seeMoreOpen ? "rotate-180" : ""}`}
