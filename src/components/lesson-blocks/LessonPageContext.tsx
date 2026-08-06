@@ -12,6 +12,7 @@ type LessonPageActions = {
   liveSessionVariant: LiveSessionVariant;
   liveProgram: boolean;
   calendarItems?: { label: string; href: string; download?: string }[];
+  meetingUrl?: string;
 };
 
 const LessonPageContext = createContext<LessonPageActions | null>(null);

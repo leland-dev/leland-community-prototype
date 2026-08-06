@@ -269,6 +269,7 @@ type LiveSession = {
   timeSlots: TimeSlot[];
   durationMin: number;
   recordingVideoSrc?: string;
+  meetingUrl?: string;
 };
 
 type BuildSession = {
@@ -302,6 +303,7 @@ const LIVE_SESSIONS: LiveSession[] = LESSONS.map((l, i) => ({
   description: l.subtitle,
   date: LIVE_SESSION_DATES[i] ?? LIVE_SESSION_DATES[0],
   durationMin: 90,
+  meetingUrl: `/program/session/session-${i + 1}`,
   recordingVideoSrc: i === 0 ? RECORDING_VIDEO_SRC : undefined,
   timeSlots: i === 0
     ? [
@@ -2113,12 +2115,15 @@ function SessionActionBanner({
           day={day}
           title="Join the live session"
           subtitle={
-            <span className="flex items-center gap-1.5 font-medium text-leland-red">
-              <IconLivestreamSignal className="size-4 shrink-0" />
-              Live now
-            </span>
+            <>
+              <span className="flex items-center gap-1.5 font-medium text-leland-red">
+                <IconLivestreamSignal className="size-4 shrink-0" />
+                Happening now
+              </span>
+              {` · ${session.title}`}
+            </>
           }
-          trailing={{ kind: "join" }}
+          trailing={{ kind: "join", href: session.meetingUrl }}
         />
       );
     default:
@@ -2637,6 +2642,7 @@ export default function ContentViewer() {
                       liveSessionVariant: options.liveSessionVariant,
                       liveProgram: options.liveProgram,
                       onViewRecording: () => setLessonShowRecording(true),
+                      meetingUrl: (LIVE_SESSIONS[lessonIdx] ?? LIVE_SESSIONS[0]).meetingUrl,
                       calendarItems: (() => {
                         const s = LIVE_SESSIONS[lessonIdx] ?? LIVE_SESSIONS[0];
                         const urls = buildCalendarUrls(s);

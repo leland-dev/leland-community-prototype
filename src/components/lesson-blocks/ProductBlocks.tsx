@@ -295,7 +295,7 @@ type CalloutTrailing =
   | { kind: "chevron" }
   | { kind: "arrow" }
   | { kind: "kebab"; items?: KebabItem[] }
-  | { kind: "join"; onJoin?: () => void };
+  | { kind: "join"; onJoin?: () => void; href?: string };
 
 // Presentational live-session callout. Shared between the lesson-page banner
 // (LiveSessionBanner) and the session-detail action banner — the callers own
@@ -386,6 +386,15 @@ export function LiveSessionCallout({
             </div>
           )}
         </div>
+      ) : trailing.kind === "join" && trailing.href ? (
+        <a
+          href={trailing.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 rounded-lg bg-leland-gray-dark px-4 py-3 leland-heading-base font-semibold text-white hover:bg-leland-gray-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+        >
+          Join
+        </a>
       ) : (
         <button
           type="button"
@@ -417,7 +426,7 @@ export function LiveSessionCallout({
 // Lesson-page live-session banner: four states (chosen from the prototype menu)
 // with the session title in the subtext.
 export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType }) {
-  const { onOpenCalendar, onViewRecording, liveSessionVariant, liveProgram, calendarItems } = useLessonPage();
+  const { onOpenCalendar, onViewRecording, liveSessionVariant, liveProgram, calendarItems, meetingUrl } = useLessonPage();
 
   if (!liveProgram) return null;
 
@@ -451,12 +460,15 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
           day={block.day}
           title="Join the live session"
           subtitle={
-            <span className="flex items-center gap-1.5 font-medium text-leland-red">
-              <IconLivestreamSignal className="size-4 shrink-0" />
-              Live now
-            </span>
+            <>
+              <span className="flex items-center gap-1.5 font-medium text-leland-red">
+                <IconLivestreamSignal className="size-4 shrink-0" />
+                Happening now
+              </span>
+              {block.sessionTitle ? ` · ${block.sessionTitle}` : null}
+            </>
           }
-          trailing={{ kind: "join", onJoin: onOpenCalendar }}
+          trailing={{ kind: "join", href: meetingUrl, onJoin: onOpenCalendar }}
         />
       );
     default:
