@@ -919,7 +919,7 @@ function LessonsAccordionSidebar({
             />
             <SidebarMenuItem
               Icon={IconUserProfileGroup}
-              label="Community"
+              label="Slack community"
               external
               onClick={() =>
                 window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")
@@ -1155,7 +1155,7 @@ function CombinedSidebar({
                     <>
                       <SidebarMenuItem
                         Icon={IconUserProfileGroup}
-                        label="Community"
+                        label="Slack community"
                         external
                         onClick={() => window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")}
                       />
@@ -1220,7 +1220,7 @@ function CombinedSidebar({
                   <p className="leland-paragraph-sm text-leland-gray-light">
                     {(() => {
                       const labels = [
-                        ...(liveProgram ? ["Office hours", "Community", "Cohort showcase", "Knowledge hub"] : []),
+                        ...(liveProgram ? ["Office hours", "Slack community", "Cohort showcase", "Knowledge hub"] : []),
                         "Switch cohort",
                       ];
                       return labels.length > 1
@@ -1245,7 +1245,7 @@ function CombinedSidebar({
                       />
                       <SidebarMenuItem
                         Icon={IconUserProfileGroup}
-                        label="Community"
+                        label="Slack community"
                         external
                         onClick={() => window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")}
                       />
