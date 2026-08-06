@@ -2244,13 +2244,13 @@ export default function ContentViewer() {
             </div>
             <span className="shrink-0 font-medium text-leland-gray-dark">
               {breadcrumbLabel}
-              <span className="font-normal text-leland-gray-light"> / {sectionIdx + 1}</span>
+              <span className="font-normal text-leland-gray-light"> · {sectionIdx + 1} of {lesson.sections.length}</span>
             </span>
           </>
         ) : (
           <span className="shrink-0 font-medium text-leland-gray-dark">
             {breadcrumbLabel}
-            <span className="font-normal text-leland-gray-light"> / {sectionIdx + 1}</span>
+            <span className="font-normal text-leland-gray-light"> · {sectionIdx + 1} of {lesson.sections.length}</span>
           </span>
         )}
       </div>
@@ -2303,7 +2303,7 @@ export default function ContentViewer() {
                 <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
                 <span className="shrink-0 font-medium text-leland-gray-dark">
                   {breadcrumbLabel}
-                  <span className="font-normal text-leland-gray-light"> / {sectionIdx + 1}</span>
+                  <span className="font-normal text-leland-gray-light"> · {sectionIdx + 1} of {lesson.sections.length}</span>
                 </span>
               </>
             )}
