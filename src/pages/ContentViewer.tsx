@@ -2071,8 +2071,9 @@ function CourseViewerSectionNav({
   totalSections: number;
 }) {
   return (
-    <div className="relative flex items-center justify-between bg-[#F9F8F3] px-4 pb-[calc(1rem_+_env(safe-area-inset-bottom))] md:px-6">
+    <div className="relative bg-[#F9F8F3] px-4 pb-[calc(1rem_+_env(safe-area-inset-bottom))] md:px-6">
       <div className="pointer-events-none absolute inset-x-0 bottom-full h-16 bg-gradient-to-b from-transparent to-[#F9F8F3]" />
+      <div className="relative mx-auto flex w-full max-w-[1280px] items-center justify-between">
       {prevSectionLink ? (
         <Link
           to={prevSectionLink}
@@ -2111,6 +2112,7 @@ function CourseViewerSectionNav({
           <IconChevronRight className="size-5" />
         </span>
       )}
+      </div>
     </div>
   );
 }
