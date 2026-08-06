@@ -303,6 +303,7 @@ type CalloutTrailing =
 export function LiveSessionCallout({
   recording = false,
   recordingVideoSrc,
+  liveNow = false,
   month,
   day,
   title,
@@ -312,6 +313,7 @@ export function LiveSessionCallout({
 }: {
   recording?: boolean;
   recordingVideoSrc?: string;
+  liveNow?: boolean;
   month?: string;
   day?: string;
   title: ReactNode;
@@ -341,6 +343,10 @@ export function LiveSessionCallout({
             <IconPlayVideo className="size-5 text-leland-gray-light" />
           </div>
         )
+      ) : liveNow ? (
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-leland-red/10">
+          <IconLivestreamSignal className="size-6 text-leland-red" />
+        </div>
       ) : (
         <LiveDateTile month={month ?? ""} day={day ?? ""} />
       )}
@@ -456,8 +462,7 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
     case "joinNow":
       return (
         <LiveSessionCallout
-          month={block.month}
-          day={block.day}
+          liveNow
           title="Join the live session"
           subtitle={
             <>

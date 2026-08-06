@@ -2111,8 +2111,7 @@ function SessionActionBanner({
     case "joinNow":
       return (
         <LiveSessionCallout
-          month={month}
-          day={day}
+          liveNow
           title="Join the live session"
           subtitle={
             <>
