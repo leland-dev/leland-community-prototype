@@ -2116,7 +2116,7 @@ function SessionActionBanner({
           title="Join the live session"
           subtitle={
             <>
-              <span className="flex items-center gap-1.5 font-medium text-leland-red">
+              <span className="inline-flex items-center gap-1.5 font-medium text-leland-red">
                 <IconLivestreamSignal className="size-4 shrink-0" />
                 Happening now
               </span>
