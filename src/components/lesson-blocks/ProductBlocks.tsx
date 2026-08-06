@@ -449,13 +449,13 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
         <LiveSessionCallout
           month={block.month}
           day={block.day}
-          title={
-            <span className="flex items-center gap-1.5 font-semibold text-leland-red">
+          title="Join the live session"
+          subtitle={
+            <span className="flex items-center gap-1.5 font-medium text-leland-red">
               <IconLivestreamSignal className="size-4 shrink-0" />
               Live now
             </span>
           }
-          subtitle={block.sessionTitle}
           trailing={{ kind: "join", onJoin: onOpenCalendar }}
         />
       );
