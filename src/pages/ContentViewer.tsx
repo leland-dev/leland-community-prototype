@@ -1321,10 +1321,7 @@ function CourseViewerSidebar({
 
 // ─── Prototype options (meta-UI for demoing variants, not product UI) ────────
 
-export type SidebarView = "default" | "combined";
-
 type PrototypeOptions = {
-  sidebarView: SidebarView;
   liveProgram: boolean;
   noHeader: boolean;
   showSiteNav: boolean;
@@ -1339,7 +1336,6 @@ type BooleanOptionKey = {
 const PROTOTYPE_OPTIONS_KEY = "content-viewer-prototype-options";
 
 const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
-  sidebarView: "combined",
   liveProgram: true,
   noHeader: true,
   showSiteNav: false,
@@ -1352,10 +1348,6 @@ const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
   { key: "showSiteNav", label: "Show site nav" },
 ];
 
-const SIDEBAR_VIEW_OPTIONS: { value: SidebarView; label: string }[] = [
-  { value: "default", label: "Lessons only" },
-  { value: "combined", label: "Combined, lesson-first" },
-];
 
 const LIVE_SESSION_VARIANT_OPTIONS: {
   value: LiveSessionVariant;
@@ -1395,41 +1387,17 @@ function usePrototypeOptions() {
 const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   options,
   onToggle,
-  onSetSidebarView,
   onSetVariant,
   ...modalProps
 }: ModalProps & {
   options: PrototypeOptions;
   onToggle: (key: BooleanOptionKey) => void;
-  onSetSidebarView: (view: SidebarView) => void;
   onSetVariant: (variant: LiveSessionVariant) => void;
 }) {
   return (
     <Modal {...modalProps}>
       <ModalContent size={ModalSize.SMALL}>
         <div className="flex flex-col gap-1 px-6 py-[14px]">
-          <div className="flex flex-col gap-1.5 rounded-lg p-3">
-            <span className="leland-paragraph-base font-medium text-leland-gray-dark">
-              Sidebar
-            </span>
-            <div className="flex gap-1.5">
-              {SIDEBAR_VIEW_OPTIONS.map((o) => (
-                <button
-                  key={o.value}
-                  type="button"
-                  onClick={() => onSetSidebarView(o.value)}
-                  className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-                >
-                  <Tag
-                    text={o.label}
-                    tagColor={TagColor.GRAY}
-                    size={TagSize.SMALL}
-                    selected={options.sidebarView === o.value}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
           {options.liveProgram && (
             <div className="flex flex-col gap-1.5 rounded-lg p-3">
               <span className="leland-paragraph-base font-medium text-leland-gray-dark">
@@ -2222,7 +2190,7 @@ export default function ContentViewer() {
   const prevSection = lesson.sections[sectionIdx - 1] ?? null;
   const nextSection = lesson.sections[sectionIdx + 1] ?? null;
 
-  const exitDestination = options.sidebarView === "default" ? COURSE_HOME : DASHBOARD;
+  const exitDestination = DASHBOARD;
 
   const isCompleted = useMemo(
     () => (sectionId: string) => completed.has(`${lesson.id}/${sectionId}`),
@@ -2357,7 +2325,7 @@ export default function ContentViewer() {
               className="fixed inset-0 z-30 bg-black/30 md:absolute lg:hidden"
             />
             <div className="fixed bottom-0 left-0 right-0 top-0 z-40 flex animate-[slide-up_0.25s_ease-out] overflow-hidden shadow-xl md:absolute md:right-auto md:animate-none md:overflow-visible lg:relative lg:bottom-auto lg:left-auto lg:right-auto lg:top-auto lg:z-auto lg:shadow-none">
-            {options.sidebarView === "combined" ? (
+            {true ? (
               <CombinedSidebar
                 currentLessonId={lesson.id}
                 currentSectionId={section.id}
@@ -2398,7 +2366,7 @@ export default function ContentViewer() {
               />
             )}
             {/* Combined sidebar renders its own collapse toggle in the header row */}
-            {options.sidebarView !== "combined" && (
+            {false && (
               <button
                 onClick={() => setSidebarOpen(false)}
                 aria-label="Collapse sidebar"
@@ -2452,7 +2420,7 @@ export default function ContentViewer() {
               <IconShare className="size-5" />
             </button>
           </div>}
-          {options.sidebarView === "combined" && (sidebarTab === "live" || sidebarTab === "overview") ? (
+          {(sidebarTab === "live" || sidebarTab === "overview") ? (
             <div className="min-h-0 flex-1 flex flex-col overflow-hidden">
               {showRecording ? (
                 <SessionRecordingView
@@ -2680,7 +2648,6 @@ export default function ContentViewer() {
         onOpenChange={setPrototypeOptionsOpen}
         options={options}
         onToggle={toggleOption}
-        onSetSidebarView={(view) => setOption("sidebarView", view)}
         onSetVariant={(variant) => setOption("liveSessionVariant", variant)}
       />
       <SelectCohortModal
