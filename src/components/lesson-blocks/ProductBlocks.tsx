@@ -289,10 +289,11 @@ function LiveDateTile({ month, day }: { month: string; day: string }) {
 }
 
 // Trailing affordance on the right edge of the callout.
+export type KebabItem = { label: string; href: string; download?: string };
 type CalloutTrailing =
   | { kind: "chevron" }
   | { kind: "arrow" }
-  | { kind: "kebab" }
+  | { kind: "kebab"; items?: KebabItem[] }
   | { kind: "join"; onJoin?: () => void };
 
 // Presentational live-session callout. Shared between the lesson-page banner
@@ -317,6 +318,18 @@ export function LiveSessionCallout({
   trailing: CalloutTrailing;
   onClick?: () => void;
 }) {
+  const [kebabOpen, setKebabOpen] = useState(false);
+  const kebabRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!kebabOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (!kebabRef.current?.contains(e.target as Node)) setKebabOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [kebabOpen]);
+
   const body = (
     <>
       {recording ? (
@@ -345,13 +358,33 @@ export function LiveSessionCallout({
       ) : trailing.kind === "arrow" ? (
         <IconArrowUpRight className="size-6 shrink-0 text-leland-gray-dark" />
       ) : trailing.kind === "kebab" ? (
-        <button
-          type="button"
-          aria-label="Session options"
-          className="shrink-0 rounded p-1 text-leland-gray-light hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-        >
-          <IconDotsVertical className="size-5" />
-        </button>
+        <div ref={kebabRef} className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setKebabOpen((o) => !o)}
+            aria-label="Session options"
+            className="rounded p-1 text-leland-gray-light hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+          >
+            <IconDotsVertical className="size-5" />
+          </button>
+          {kebabOpen && trailing.items && trailing.items.length > 0 && (
+            <div className="absolute right-0 top-full z-50 mt-1 min-w-[220px] overflow-hidden rounded-xl border border-leland-gray-stroke bg-white py-1 shadow-lg">
+              {trailing.items.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target={item.download ? undefined : "_blank"}
+                  rel="noopener noreferrer"
+                  download={item.download}
+                  onClick={() => setKebabOpen(false)}
+                  className="flex items-center px-4 py-2.5 leland-paragraph-base text-leland-gray-dark hover:bg-leland-gray-hover"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
       ) : (
         <button
           type="button"

@@ -1595,6 +1595,133 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   );
 });
 
+// ─── Add to calendar modal ───────────────────────────────────────────────────
+
+function formatCountdown(date: Date): string {
+  const diff = date.getTime() - Date.now();
+  if (diff <= 0) return "Session has started";
+  const days = Math.floor(diff / 86_400_000);
+  const hours = Math.floor((diff % 86_400_000) / 3_600_000);
+  const mins = Math.floor((diff % 3_600_000) / 60_000);
+  if (days > 1) return `Starts in ${days} days`;
+  if (days === 1) return "Starts tomorrow";
+  if (hours > 0) return `Starts in ${hours}h ${mins}m`;
+  return `Starts in ${mins}m`;
+}
+
+function buildCalendarUrls(session: LiveSession) {
+  const start = session.date;
+  const end = new Date(start.getTime() + 90 * 60 * 1000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const fmtCompact = (d: Date) =>
+    `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+  const fmtIso = (d: Date) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
+  const title = encodeURIComponent(session.title);
+  const icsContent = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "BEGIN:VEVENT",
+    `DTSTART:${fmtCompact(start)}`,
+    `DTEND:${fmtCompact(end)}`,
+    `SUMMARY:${session.title}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+  return {
+    google: `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmtCompact(start)}/${fmtCompact(end)}`,
+    outlook: `https://outlook.live.com/calendar/0/deeplink/compose?subject=${title}&startdt=${fmtIso(start)}&enddt=${fmtIso(end)}`,
+    ics: `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`,
+  };
+}
+
+const AddToCalendarModal = withModal(function AddToCalendarModal({
+  session,
+  onAdd,
+  onOpenChange,
+  open,
+  ...rest
+}: ModalProps & { session: LiveSession; onAdd?: () => void }) {
+  const urls = buildCalendarUrls(session);
+  const time = session.timeSlots[0]?.time ?? "11:00 AM PT";
+  const dateStr = session.date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  const handleAdd = () => {
+    onAdd?.();
+    onOpenChange(false);
+  };
+  const providers = [
+    { label: "Google", img: "google-calendar.png", href: urls.google, download: false },
+    { label: "Outlook", img: "outlook-calendar.png", href: urls.outlook, download: false },
+    { label: "Apple Calendar", img: "apple-calendar.jpeg", href: urls.ics, download: true },
+  ];
+  return (
+    <Modal open={open} onOpenChange={onOpenChange} {...rest}>
+      <ModalContent size={ModalSize.SMALL}>
+        <div className="flex flex-col gap-6 px-6 pb-6 pt-5">
+          <div className="flex flex-col gap-1">
+            <h2 className="leland-heading-2xl font-semibold text-leland-gray-dark">
+              Add to your calendar
+            </h2>
+            <p className="leland-paragraph-base text-leland-gray-light">
+              {dateStr} at {time}
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {providers.map(({ label, img, href, download }) => (
+              <a
+                key={label}
+                href={href}
+                target={download ? undefined : "_blank"}
+                rel="noopener noreferrer"
+                download={download ? `${session.title}.ics` : undefined}
+                onClick={handleAdd}
+                className="flex flex-col items-center gap-2.5 rounded-xl border border-leland-gray-stroke bg-white px-3 py-4 text-center hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+              >
+                <img
+                  src={`${import.meta.env.BASE_URL}${img}`}
+                  alt=""
+                  className="size-10 rounded-xl object-contain"
+                />
+                <span className="leland-paragraph-sm font-medium leading-tight text-leland-gray-dark">
+                  {label}
+                </span>
+              </a>
+            ))}
+          </div>
+          <a
+            href={urls.ics}
+            download={`${session.title}.ics`}
+            onClick={handleAdd}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-leland-gray-hover px-6 py-3.5 hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+          >
+            <svg
+              className="size-4 shrink-0 text-leland-gray-dark"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M8 2v8" />
+              <path d="M5 8l3 3 3-3" />
+              <path d="M3 13h10" />
+            </svg>
+            <span className="leland-paragraph-base font-medium text-leland-gray-dark">
+              Download .ics file
+            </span>
+          </a>
+        </div>
+      </ModalContent>
+    </Modal>
+  );
+});
+
 // ─── Live program: calendar + session detail (main content area) ─────────────
 
 const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -1941,10 +2068,12 @@ function SessionActionBanner({
   session,
   variant,
   onViewRecording,
+  onAddToCalendar,
 }: {
   session: LiveSession;
   variant: LiveSessionVariant;
   onViewRecording: () => void;
+  onAddToCalendar?: () => void;
 }) {
   const month = session.date
     .toLocaleDateString("en-US", { month: "short" })
@@ -1969,16 +2098,26 @@ function SessionActionBanner({
           onClick={onViewRecording}
         />
       );
-    case "addedToCalendar":
+    case "addedToCalendar": {
+      const calUrls = buildCalendarUrls(session);
       return (
         <LiveSessionCallout
           month={month}
           day={day}
-          title="Starts in 2 days"
+          title={formatCountdown(session.date)}
           subtitle="Added to your calendar"
-          trailing={{ kind: "kebab" }}
+          trailing={{
+            kind: "kebab",
+            items: [
+              { label: "Add to Google Calendar", href: calUrls.google },
+              { label: "Add to Outlook", href: calUrls.outlook },
+              { label: "Apple Calendar", href: calUrls.ics, download: `${session.title}.ics` },
+              { label: "Download .ics file", href: calUrls.ics, download: `${session.title}.ics` },
+            ],
+          }}
         />
       );
+    }
     case "joinNow":
       return (
         <LiveSessionCallout
@@ -2001,6 +2140,7 @@ function SessionActionBanner({
             </span>
           }
           trailing={{ kind: "chevron" }}
+          onClick={onAddToCalendar}
         />
       );
   }
@@ -2012,12 +2152,14 @@ function SessionDetailView({
   onSelectSession,
   onViewRecording,
   onBack,
+  onAddToCalendar,
 }: {
   session: LiveSession;
   variant: LiveSessionVariant;
   onSelectSession: (n: number) => void;
   onViewRecording: () => void;
   onBack: () => void;
+  onAddToCalendar?: () => void;
 }) {
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
@@ -2049,6 +2191,7 @@ function SessionDetailView({
           session={session}
           variant={variant}
           onViewRecording={onViewRecording}
+          onAddToCalendar={onAddToCalendar}
         />
 
         {(() => {
@@ -2180,6 +2323,10 @@ export default function ContentViewer() {
   const [lessonShowRecording, setLessonShowRecording] = useState(false);
   const [seeMoreOpen, setSeeMoreOpen] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [addToCalendarModalOpen, setAddToCalendarModalOpen] = useState(false);
+  const [calendarAdded, setCalendarAdded] = useState<Set<number>>(new Set());
+  const markCalendarAdded = (n: number) =>
+    setCalendarAdded((prev) => new Set([...prev, n]));
   const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
   const { options, toggleOption, setOption } = usePrototypeOptions();
@@ -2457,13 +2604,19 @@ export default function ContentViewer() {
                 <SessionDetailView
                   key={selectedSession.number}
                   session={selectedSession}
-                  variant={options.liveSessionVariant}
+                  variant={
+                    options.liveSessionVariant === "addToCalendar" &&
+                    calendarAdded.has(selectedSession.number)
+                      ? "addedToCalendar"
+                      : options.liveSessionVariant
+                  }
                   onSelectSession={(n) => {
                     setSelectedSessionNumber(n);
                     setShowRecording(false);
                   }}
                   onViewRecording={() => setShowRecording(true)}
                   onBack={() => setSelectedSessionNumber(null)}
+                  onAddToCalendar={() => setAddToCalendarModalOpen(true)}
                 />
               ) : (
                 <LiveProgramOverview
@@ -2669,6 +2822,14 @@ export default function ContentViewer() {
         open={cohortModalOpen}
         onClose={() => setCohortModalOpen(false)}
         onSelect={() => setCohortModalOpen(false)}
+      />
+      <AddToCalendarModal
+        open={addToCalendarModalOpen}
+        onOpenChange={setAddToCalendarModalOpen}
+        session={selectedSession ?? LIVE_SESSIONS[0]}
+        onAdd={() => {
+          if (selectedSession) markCalendarAdded(selectedSession.number);
+        }}
       />
     </div>
   );
