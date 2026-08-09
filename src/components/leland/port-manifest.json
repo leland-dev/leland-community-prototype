@@ -1,6 +1,6 @@
 {
   "description": "Tracks what has been ported from the leland monorepo (leland-dev/leland-applicant-web) into this prototype's design system. The weekly design-system-sync routine diffs each entry's monorepo sourcePaths between lastSyncedMonorepoCommit and main HEAD, ports any changes per SYNC.md, and bumps lastSyncedMonorepoCommit. When porting NEW components by hand, add an entry here so the routine picks them up.",
-  "lastSyncedMonorepoCommit": "350833e76698c0271a9164d0efb3906dab13f7d6",
+  "lastSyncedMonorepoCommit": "583819e591a7c33a7c4795f3c1956f55ce46a39c",
   "ports": [
     {
       "target": "src/styles/leland-theme.css",

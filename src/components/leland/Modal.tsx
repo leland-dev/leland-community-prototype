@@ -64,6 +64,12 @@ export interface ModalContentProps {
   hideCloseButton?: boolean;
   preventCloseOnOverlayClick?: boolean;
   preventScroll?: boolean;
+  /**
+   * Presents as a centred card on mobile rather than the default full-screen
+   * sheet. For a prompt that interrupts a task mid-flow, where filling the
+   * screen reads as having navigated somewhere instead of as a dialog.
+   */
+  popupOnMobile?: boolean;
   /** Extra classes appended to the modal content root — use `md:!min-w-0` and a tighter `sm:!max-w-*` to override default sizing. */
   className?: string;
 }
@@ -77,11 +83,18 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
   children,
   preventCloseOnOverlayClick,
   preventScroll,
+  popupOnMobile,
   className,
 }) => {
+  // The overlay already centres and gutters its child, so a popup only needs to
+  // stop filling the viewport; the sm: rules below then take over unchanged.
+  const mobilePresentationClasses = popupOnMobile
+    ? "relative max-h-modal w-full rounded-2xl"
+    : "fixed inset-y-0 left-0 w-full";
+
   const content = (
     <RdxDialog.Content
-      className={`fixed inset-y-0 left-0 w-full bg-white sm:relative sm:max-h-[90vh] sm:rounded-2xl md:min-w-[25rem] ${ModalSizeToClass[size]} flex flex-col overflow-hidden ${ModalHeightToClass[height]} z-modal ${className ?? ""}`}
+      className={`${mobilePresentationClasses} bg-white sm:relative sm:max-h-modal sm:rounded-2xl md:min-w-[25rem] ${ModalSizeToClass[size]} flex flex-col overflow-hidden ${ModalHeightToClass[height]} z-modal ${className ?? ""}`}
       onPointerDownOutside={
         preventCloseOnOverlayClick ? (e) => e.preventDefault() : undefined
       }
