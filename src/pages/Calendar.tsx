@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { motion } from "motion/react";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useSetNavTheme } from "../components/NavThemeContext";
@@ -230,6 +230,20 @@ function ListView() {
   );
 }
 
+// Admin toggle row — mirrors the profile template / dashboard admin controls.
+function AdminToggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+      <span className="text-[14px] font-medium text-gray-dark">{label}</span>
+      <div className="relative">
+        <input type="checkbox" checked={checked} onChange={onChange} className="peer sr-only" />
+        <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-gray-dark" />
+        <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+      </div>
+    </label>
+  );
+}
+
 export default function Calendar() {
   const navigate = useNavigate();
   const { dark: darkMode } = useDarkMode();
@@ -238,6 +252,19 @@ export default function Calendar() {
   useSetNavTheme(navTheme);
 
   const [view, setView] = useState<"calendar" | "list">("list");
+
+  // Admin menu (bottom-right) — matches the dashboard's 3-dot control.
+  const [adminOpen, setAdminOpen] = useState(false);
+  const [expert, setExpert] = useState(false);
+  const adminRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!adminOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (adminRef.current && !adminRef.current.contains(e.target as Node)) setAdminOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [adminOpen]);
 
   return (
     <PageShell variant="standard">
@@ -278,8 +305,14 @@ export default function Calendar() {
           <section className="rounded-2xl border border-[#222222]/[0.10] bg-white p-5 sm:p-6">
             <div className="mb-5 flex items-center justify-between gap-4">
               <h2 className="text-[19px] font-semibold leading-tight text-gray-dark">Upcoming sessions</h2>
-              {/* View toggle */}
-              <div className="flex shrink-0 items-center gap-1 rounded-full bg-gray-hover p-1">
+              {/* Experts get an availability shortcut across from the header */}
+              {expert && (
+                <Button size="md" variant="secondary" onClick={() => navigate("/coach/calendar")} className="shrink-0 font-semibold">
+                  Edit availability
+                </Button>
+              )}
+              {/* View toggle — hidden for now */}
+              <div className="hidden shrink-0 items-center gap-1 rounded-full bg-gray-hover p-1">
                 {VIEWS.map((v) => (
                   <button
                     key={v.key}
@@ -301,6 +334,37 @@ export default function Calendar() {
             {view === "calendar" ? <CalendarView /> : <ListView />}
           </section>
         </motion.div>
+      </div>
+
+      {/* Admin tool — 3-dot menu matching the dashboard */}
+      <div
+        ref={adminRef}
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-40 md:bottom-6 md:right-6"
+      >
+        <AnimatePresence>
+          {adminOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 4 }}
+              transition={{ duration: 0.15 }}
+              className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+            >
+              <AdminToggle label="Expert" checked={expert} onChange={() => setExpert((v) => !v)} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <button
+          onClick={() => setAdminOpen((o) => !o)}
+          aria-label="Admin controls"
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-colors hover:bg-[#B1B1B1]/30"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="3" cy="8" r="1.5" fill="#222222" />
+            <circle cx="8" cy="8" r="1.5" fill="#222222" />
+            <circle cx="13" cy="8" r="1.5" fill="#222222" />
+          </svg>
+        </button>
       </div>
     </PageShell>
   );

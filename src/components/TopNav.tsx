@@ -25,7 +25,7 @@ import lelandWordmark from "../assets/leland-wordmark.svg";
 
 /* ── Nav links ── */
 const navLinks = [
-  { to: "/", label: "Home", end: true },
+  { to: "/", label: "Feed", end: true },
   { to: "/events", label: "Livestreams" },
   { to: "/courses", label: "Live programs" },
   { to: "/plus", label: "Leland+" },
@@ -146,20 +146,11 @@ export default function TopNav() {
 
           {!isCoachMode && (
             <nav className="flex items-stretch gap-3">
-              {/* Home */}
-              <NavLink
-                to="/"
-                end
-                className="relative flex self-stretch items-center"
-              >
-                {({ isActive }) => (
-                  <>
-                    <span className={`flex items-center rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-[#222222]/5" : ""}`}>
-                      Home
-                    </span>
-                    {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
-                  </>
-                )}
+              {/* Feed */}
+              <NavLink to="/" end className="relative flex self-stretch items-center">
+                <span className="flex items-center rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222] hover:bg-[#222222]/5">
+                  Feed
+                </span>
               </NavLink>
 
               {/* Browse dropdown */}
@@ -229,20 +220,10 @@ export default function TopNav() {
 
               {/* Nav links (Events, Courses, Leland+) */}
               {navLinks.filter(({ to }) => to !== "/").map(({ to, label, end }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end={end}
-                  className="relative flex self-stretch items-center"
-                >
-                  {({ isActive }) => (
-                    <>
-                      <span className={`flex items-center rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-[#222222]/5" : ""}`}>
-                        {label}
-                      </span>
-                      {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
-                    </>
-                  )}
+                <NavLink key={to} to={to} end={end} className="relative flex self-stretch items-center">
+                  <span className="flex items-center rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222] hover:bg-[#222222]/5">
+                    {label}
+                  </span>
                 </NavLink>
               ))}
 
@@ -273,18 +254,26 @@ export default function TopNav() {
           )}
         </div>
 
-        {/* Right: Home, Inbox, Calendar, Notifications, Profile */}
+        {/* Right: Dashboard, Inbox, Notifications, Profile */}
         <div className="flex shrink-0 items-stretch gap-1">
+
+          {/* Dashboard */}
+          {!isCoachMode && (
+            <NavLink to="/dashboard" className="relative flex self-stretch items-center">
+              <span className="flex items-center rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222] hover:bg-[#222222]/5">
+                Dashboard
+              </span>
+            </NavLink>
+          )}
 
           {/* Inbox */}
           {!isCoachMode && (
             <NavLink to="/messages" className="relative flex self-stretch items-center">
               {({ isActive }) => (
                 <>
-                  <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-[#222222]/5" : ""}`}>
+                  <span className="flex items-center justify-center h-10 w-10 rounded-full py-5 hover:bg-[#222222]/5">
                     <img src={isActive ? chatActive : chatInactive} alt="Inbox" className="h-[20px] w-[20px]" />
                   </span>
-                  {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
                 </>
               )}
             </NavLink>
@@ -294,10 +283,9 @@ export default function TopNav() {
           <NavLink to="/notifications" className="relative flex self-stretch items-center">
             {({ isActive }) => (
               <>
-                <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-[#222222]/5" : ""}`}>
+                <span className="flex items-center justify-center h-10 w-10 rounded-full py-5 hover:bg-[#222222]/5">
                   <img src={isActive ? notificationsActive : notificationsInactive} alt="Notifications" className="h-[20px] w-[20px]" />
                 </span>
-                {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
               </>
             )}
           </NavLink>

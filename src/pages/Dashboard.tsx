@@ -142,10 +142,9 @@ function coursePct(progress: string): number {
 
 function CourseCard({ course }: { course: Course }) {
   const pct = coursePct(course.progress);
-  const [author, lessons] = course.meta.split(" · ");
+  const [author] = course.meta.split(" · ");
   return (
     <div className="group relative w-[232px] shrink-0 snap-start">
-      {/* Thumbnail + progress bar share one rounded, clipped container */}
       <div className="overflow-hidden rounded-xl">
         <div className="relative">
           <img src={course.image} alt="" className="aspect-[1.91/1] w-full object-cover" />
@@ -169,14 +168,10 @@ function CourseCard({ course }: { course: Course }) {
             </div>
           </div>
         </div>
-        <div className="h-1.5 w-full bg-[#222222]/[0.08]">
-          <div className="h-full bg-gray-dark" style={{ width: `${pct}%` }} />
-        </div>
       </div>
       <h3 className="mt-3 truncate text-[16px] font-semibold leading-snug text-gray-dark">{course.title}</h3>
       <p className="mt-1 truncate text-[14px] leading-tight text-gray-light">
-        {author}
-        {lessons && <> · <span className="text-gray-extra-light">{lessons}</span></>}
+        {author} · <span className="text-gray-extra-light">{course.progress}</span>
       </p>
       {/* Stretched link makes the whole card clickable (keyboard-accessible). */}
       <Link to={course.href ?? "/courses"} className="absolute inset-0" aria-label={course.title} />
@@ -260,16 +255,12 @@ function MyCourses() {
       {myCourses.slice(0, 3).map((c) => (
         <CourseCard key={c.title} course={c} />
       ))}
-      {/* Always-present CTA — dashed tile matching the "My goals" add card.
-          Keeps the 6px strip so its height aligns with the sibling thumbnails. */}
+      {/* Always-present CTA — dashed tile matching the "My goals" add card */}
       <button onClick={() => navigate("/courses")} className="group w-[232px] shrink-0 snap-start text-left">
-        <div className="rounded-xl bg-[#F5F5F5] transition-colors group-hover:bg-[#EEEEEE]" style={dashedBorderStyle}>
-          <div className="flex aspect-[1.91/1] w-full items-center justify-center">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
-          </div>
-          <div className="h-1.5 w-full" />
+        <div className="flex aspect-[1.91/1] w-full items-center justify-center rounded-xl bg-[#F5F5F5] transition-colors group-hover:bg-[#EEEEEE]" style={dashedBorderStyle}>
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
+          </svg>
         </div>
         <h3 className="mt-3 truncate text-[16px] font-semibold leading-snug text-gray-dark">Take the next step</h3>
         <p className="mt-1 truncate text-[14px] leading-tight text-gray-light">Browse all programs</p>
