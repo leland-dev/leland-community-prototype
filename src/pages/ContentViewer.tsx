@@ -965,8 +965,6 @@ function CombinedSidebar({
   onTabChange,
   liveProgram = true,
   showSessionBanners = true,
-  seeMoreOpen,
-  onSeeMoreChange,
   exitDestination,
   noHeader = true,
 }: {
@@ -979,29 +977,16 @@ function CombinedSidebar({
   onTabChange: (tab: SidebarTab) => void;
   liveProgram?: boolean;
   showSessionBanners?: boolean;
-  seeMoreOpen: boolean;
-  onSeeMoreChange: (open: boolean) => void;
   exitDestination: string;
   noHeader?: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const resourcesRef = useRef<HTMLDivElement>(null);
+  const linksSentinelRef = useRef<HTMLDivElement>(null);
   const courseInfoRef = useRef<HTMLParagraphElement>(null);
-  const [resourcesInView, setResourcesInView] = useState(true);
   const [courseInfoInView, setCourseInfoInView] = useState(true);
-
-  useEffect(() => {
-    if (!liveProgram) return;
-    const scroll = scrollRef.current;
-    const target = resourcesRef.current;
-    if (!scroll || !target) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => setResourcesInView(entry.isIntersecting),
-      { root: scroll, threshold: 0 },
-    );
-    obs.observe(target);
-    return () => obs.disconnect();
-  }, [liveProgram]);
+  const [linksStuck, setLinksStuck] = useState(false);
+  const [linksOpen, setLinksOpen] = useState(false);
 
   useEffect(() => {
     const scroll = scrollRef.current;
@@ -1015,13 +1000,26 @@ function CombinedSidebar({
     return () => obs.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (!liveProgram) return;
+    const scroll = scrollRef.current;
+    const sentinel = linksSentinelRef.current;
+    if (!scroll || !sentinel) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setLinksStuck(!entry.isIntersecting),
+      { root: scroll, threshold: 0 },
+    );
+    obs.observe(sentinel);
+    return () => obs.disconnect();
+  }, [liveProgram]);
+
   const scrollToTop = () =>
     scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
     <aside className="relative flex w-full shrink-0 flex-col overflow-hidden bg-white md:w-[360px] md:border-r md:border-leland-gray-stroke">
       {/* Persistent header — always visible, outside the scroll container */}
-      <div className={`flex shrink-0 items-center gap-6 bg-white px-6 pt-4 ${courseInfoInView ? "pb-2" : "pb-0"}`}>
+      <div className={`flex shrink-0 items-center gap-6 bg-white px-6 pt-4 ${courseInfoInView ? "pb-2" : !liveProgram ? "pb-4" : "pb-0"}${!liveProgram && !courseInfoInView ? " shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)]" : ""}`}>
         <div className="flex min-w-0 flex-1 items-center gap-2">
           {noHeader ? (
             <Link
@@ -1050,32 +1048,9 @@ function CombinedSidebar({
         </button>
       </div>
 
-      {/* Pinned cohort row — shown once the resources section has scrolled out of view. */}
-      {liveProgram && !resourcesInView && (
-        <button
-          type="button"
-          onClick={scrollToTop}
-          className="flex w-full items-center gap-3 border-b border-leland-gray-stroke px-6 py-4 shadow-sm hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-primary"
-        >
-          <div className="flex h-9 w-9 shrink-0 flex-col overflow-hidden rounded-lg border border-leland-gray-stroke shadow-sm">
-            <div className="flex items-center justify-center bg-leland-blue px-1.5 pb-0.5 pt-[3px]">
-              <span className="text-[8px] font-semibold leading-none tracking-[0.8px] text-leland-gray-dark">MAY</span>
-            </div>
-            <div className="flex flex-1 items-center justify-center bg-white">
-              <span className="leland-heading-base font-semibold text-leland-gray-dark">24</span>
-            </div>
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
-            <p className="leland-heading-base font-semibold text-leland-gray-dark">May 16 – Jun 8</p>
-            <p className="leland-paragraph-sm text-leland-gray-light">Cohort details</p>
-          </div>
-          <IconChevronUp className="size-4 shrink-0 text-leland-gray-light" />
-        </button>
-      )}
-
       <div ref={scrollRef} className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pb-12">
         {/* Program info card */}
-        <div className="w-full bg-white pb-5">
+        <div className={`w-full bg-white pb-5${!liveProgram ? " shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)]" : ""}`}>
           <div className="flex flex-col">
             <div className="flex flex-col gap-3 px-6 pt-2">
               {/* Program title */}
@@ -1109,66 +1084,77 @@ function CombinedSidebar({
             </div>
           </div>
 
+        </div>
+
+        {/* Resource links — sticky row, collapses/expands, casts shadow onto lesson accordion */}
+        {liveProgram && (
           <>
-              {/* Expanded "See more" items */}
-              {seeMoreOpen && (
-                <div className="flex flex-col gap-1 px-3 pt-4">
-                  {liveProgram && (
-                    <>
-                      <SidebarMenuItem
-                        Icon={IconExperiences}
-                        label="Office hours"
-                        external
-                        onClick={() => window.open("https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours", "_blank", "noopener")}
-                      />
-                    </>
-                  )}
-                  {liveProgram && (
-                    <>
-                      <SidebarMenuItem
-                        Icon={IconUserProfileGroup}
-                        label="Slack community"
-                        external
-                        onClick={() => window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")}
-                      />
-                      <SidebarMenuItem
-                        Icon={IconBooks}
-                        label="Your cohort's builds"
-                        external
-                        onClick={() => {}}
-                      />
-                      <SidebarMenuItem
-                        Icon={IconBooks}
-                        label="Knowledge hub"
-                        external
-                        onClick={() => {}}
-                      />
-                    </>
-                  )}
+          <div ref={linksSentinelRef} className="h-px" />
+          <div ref={resourcesRef} className="sticky top-0 z-10 bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)]">
+            <div className={!linksStuck ? "border-t border-leland-gray-stroke" : ""}>
+              <button
+                type="button"
+                onClick={() => setLinksOpen(!linksOpen)}
+                className="flex w-full items-center gap-3 px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+              >
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-leland-gray-hover">
+                  <IconLink className="size-6 text-leland-gray-dark" />
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+                  <p className="leland-heading-base font-semibold text-leland-gray-dark">Resource links</p>
+                  <p className="leland-paragraph-sm text-leland-gray-light">Office hours and 4 more</p>
+                </div>
+                <IconChevronDown
+                  className={`size-5 shrink-0 text-leland-gray-dark transition-transform duration-200 ${linksOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {linksOpen && (
+                <div className="flex flex-col gap-1 px-3 pb-3">
                   <SidebarMenuItem
-                    Icon={IconGift}
-                    label="Refer a friend"
+                    Icon={IconExperiences}
+                    label="Office hours"
+                    external
+                    onClick={() => window.open("https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours", "_blank", "noopener")}
+                  />
+                  <SidebarMenuItem
+                    Icon={IconUserProfileGroup}
+                    label="Slack community"
+                    external
+                    onClick={() => window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")}
+                  />
+                  <SidebarMenuItem
+                    Icon={IconBooks}
+                    label="Cohort showcase"
                     external
                     onClick={() => {}}
                   />
+                  <SidebarMenuItem
+                    Icon={IconBooks}
+                    label="Knowledge hub"
+                    external
+                    onClick={() => {}}
+                  />
+                  <SidebarMenuItem
+                    Icon={IconRecurring}
+                    label="Switch cohort"
+                    subtext="May 16 – Jun 8"
+                    onClick={onSwitchCohort}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setLinksOpen(false)}
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-leland-gray-hover px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                  >
+                    <span className="leland-heading-base text-leland-gray-dark">Collapse</span>
+                    <IconChevronUp className="size-5 text-leland-gray-dark" />
+                  </button>
                 </div>
               )}
-
-              {/* See more / see less toggle */}
-              <div ref={resourcesRef} className="px-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => onSeeMoreChange(!seeMoreOpen)}
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-leland-gray-hover px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-                >
-                  <span className="leland-heading-base text-leland-gray-dark">See all resources</span>
-                  <IconChevronDown
-                    className={`size-5 text-leland-gray-dark transition-transform duration-200 ${seeMoreOpen ? "rotate-180" : ""}`}
-                  />
-                </button>
-              </div>
-            </>
-        </div>
+            </div>
+          </div>
+          </>
+        )}
 
         {/* Lesson accordion */}
         <div className="relative">
@@ -2131,7 +2117,6 @@ export default function ContentViewer() {
       setSidebarTab("lessons");
     }
     setLessonShowRecording(false);
-    setSeeMoreOpen(false);
     // Scroll content area back to top on section change.
     contentScrollRef.current?.scrollTo({ top: 0 });
     // Below lg the sidebar is a drawer — selecting a section closes it.
@@ -2150,7 +2135,6 @@ export default function ContentViewer() {
   >(null);
   const [showRecording, setShowRecording] = useState(false);
   const [lessonShowRecording, setLessonShowRecording] = useState(false);
-  const [seeMoreOpen, setSeeMoreOpen] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [addToCalendarModalOpen, setAddToCalendarModalOpen] = useState(false);
   const [calendarAdded, setCalendarAdded] = useState<Set<number>>(new Set());
@@ -2349,8 +2333,6 @@ export default function ContentViewer() {
                 }}
                 liveProgram={options.liveProgram}
                 showSessionBanners={true}
-                seeMoreOpen={seeMoreOpen}
-                onSeeMoreChange={setSeeMoreOpen}
                 exitDestination={exitDestination}
                 noHeader={options.noHeader}
               />
