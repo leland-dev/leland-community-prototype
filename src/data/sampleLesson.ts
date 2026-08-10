@@ -50,9 +50,14 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "note",
+        tone: "gray",
         title: "Before you start",
-        body: "You'll need access to **Claude** and about 90 minutes. No engineering background required — just bring a project idea.",
+        content: [
+          {
+            kind: "markdown",
+            body: "You'll need access to **Claude** and about 90 minutes. No engineering background required — just bring a project idea.",
+          },
+        ],
       },
     ],
   },
@@ -78,8 +83,13 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "tip",
-        body: "New to prompting? Read [How to write better prompts](https://www.lelandcourses.com/ai-builder/docs/how-to-write-better-prompts/) before the session.",
+        tone: "blue",
+        content: [
+          {
+            kind: "markdown",
+            body: "New to prompting? Read [How to write better prompts](https://www.lelandcourses.com/ai-builder/docs/how-to-write-better-prompts/) before the session.",
+          },
+        ],
       },
       {
         kind: "markdown",
@@ -117,9 +127,14 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "tip",
+        tone: "blue",
         title: "Today we use Cowork",
-        body: "It's built for extended work sessions — it plans the work, runs code inside an isolated VM, reads and edits files in your folders, and delivers finished outputs.",
+        content: [
+          {
+            kind: "markdown",
+            body: "It's built for extended work sessions — it plans the work, runs code inside an isolated VM, reads and edits files in your folders, and delivers finished outputs.",
+          },
+        ],
       },
     ],
   },
@@ -146,7 +161,12 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
         kind: "callout",
         tone: "warning",
         title: "If Claude stalls",
-        body: "If the build stops partway, re-share the goal and ask it to continue from the last completed step — don't restart from scratch.",
+        content: [
+          {
+            kind: "markdown",
+            body: "If the build stops partway, re-share the goal and ask it to continue from the last completed step — don't restart from scratch.",
+          },
+        ],
       },
       {
         kind: "divider",

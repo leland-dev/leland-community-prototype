@@ -1,6 +1,6 @@
 // Supplies imperative callbacks to product/CTA blocks so block *data* stays
 // serializable (blocks never carry functions). Provided by the lesson page in
-// ContentViewer; consumed by LiveSessionBanner / ShareFeedback / Cta.
+// ContentViewer; consumed by LiveSessionBanner / LessonFooterActions / Cta.
 import { createContext, useContext, type ReactNode } from "react";
 
 import type { LiveSessionVariant } from "../../data/lessonBlocks";

@@ -17,7 +17,6 @@ import {
   IconPlayVideo,
   IconQuestion,
   IconShare,
-  IconStar,
   IconStarOutline,
 } from "../leland";
 
@@ -507,23 +506,6 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
         />
       );
   }
-}
-
-export function ShareFeedback() {
-  const { onShareFeedback } = useLessonPage();
-  return (
-    <button
-      type="button"
-      onClick={onShareFeedback}
-      className="flex w-full items-center gap-4 rounded-xl border border-leland-gray-stroke bg-white px-5 py-4 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-    >
-      <IconStar className="size-5 shrink-0 text-leland-gray-dark" />
-      <span className="flex-1 leland-heading-base font-semibold text-leland-gray-dark">
-        Share feedback
-      </span>
-      <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
-    </button>
-  );
 }
 
 // Bottom-of-page action row: a top divider with 32px vertical padding and

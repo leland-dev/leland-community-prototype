@@ -94,6 +94,7 @@ import MinimalOnboarding from "./pages/onboarding/MinimalOnboarding";
 import MinimalOnboardingV2 from "./pages/onboarding/MinimalOnboardingV2";
 import ContentViewer from "./pages/ContentViewer";
 import LelandKitTest from "./pages/LelandKitTest";
+import LessonBlocksGallery from "./pages/LessonBlocksGallery";
 
 export default function App() {
   return (
@@ -153,6 +154,7 @@ export default function App() {
         </Route>
         <Route path="/components" element={<Components />} />
         <Route path="/components/leland" element={<LelandKitTest />} />
+        <Route path="/components/lesson-blocks" element={<LessonBlocksGallery />} />
         <Route path="/components/session-card" element={<SessionCardTest />} />
         <Route path="/components/sidebar-cards" element={<SidebarCardsTest />} />
         <Route path="/components/offering-card" element={<OfferingCardTest />} />

@@ -13,11 +13,22 @@ export type MarkdownBlock = {
   body: Markdown;
 };
 
+// Content allowed inside a callout: text (including lists), images, and
+// video — anything except an H1. H1-sized markdown headings are demoted to
+// H2 size when rendered inside a callout, so this is a rendering rule rather
+// than something enforced by the type.
 export type CalloutBlock = {
   kind: "callout";
-  tone: "tip" | "warning" | "note";
+  // Named colors from the design system only — never a raw hex value.
+  // Defaults to "gray" when omitted; "blue" and "beige" are explicit
+  // alternate choices; "warning" (orange) is reserved for actual warnings.
+  tone?: "blue" | "beige" | "gray" | "warning";
   title?: string;
-  body: Markdown;
+  content: Block[];
+  // Defaults to true. Icons read well on short, banner-style callouts; for
+  // larger callouts with a lot of text/image content, skipping the icon
+  // usually looks better.
+  showIcon?: boolean;
 };
 
 // The one iframe block — for self-contained HTML animations/embeds. Unlike the
@@ -47,6 +58,46 @@ export type VideoBlock = {
 
 export type DividerBlock = { kind: "divider" };
 
+// Structured table (not markdown-table syntax) so headers/rows are reliable
+// for machine generation and match the dedicated design (no outer card,
+// muted header row, thin row dividers) rather than the generic markdown
+// table styling.
+export type TableBlock = {
+  kind: "table";
+  headers: string[];
+  rows: string[][];
+};
+
+// CTA card for a downloadable file (e.g. a PDF).
+export type DownloadBlock = {
+  kind: "download";
+  label: string; // e.g. "Download PDF"
+  fileSize?: string; // e.g. "246 KB" — shown next to the label
+  filename?: string; // e.g. "session-1-slides.pdf" — shown as the subtitle line
+  href: string;
+};
+
+// Syntax-highlighted-ready code snippet with a copy button. `language` drives
+// the label shown in the header (no highlighting yet — see ContentBlocks.tsx).
+export type CodeBlock = {
+  kind: "code";
+  code: string;
+  language: string;
+  filename?: string;
+};
+
+// One expandable row in an AccordionBlock (deep dives, FAQs). Each row toggles
+// independently; only the currently open rows show their body.
+export type AccordionRow = {
+  title: string;
+  body: Markdown;
+};
+
+export type AccordionBlock = {
+  kind: "accordion";
+  rows: AccordionRow[];
+};
+
 // Escape hatch for bespoke markup that isn't worth a typed block yet.
 export type HtmlBlock = { kind: "html"; html: string };
 
@@ -72,8 +123,6 @@ export type LiveSessionBannerBlock = {
   recordingVideoSrc?: string;
 };
 
-export type ShareFeedbackBlock = { kind: "shareFeedback" };
-
 export type CtaBlock = {
   kind: "cta";
   label: string;
@@ -91,8 +140,11 @@ export type Block =
   | VideoBlock
   | DividerBlock
   | HtmlBlock
+  | AccordionBlock
+  | CodeBlock
+  | TableBlock
+  | DownloadBlock
   | LiveSessionBannerBlock
-  | ShareFeedbackBlock
   | CtaBlock;
 
 // A section rendered as native blocks. Coexists with the legacy html/video/pdf

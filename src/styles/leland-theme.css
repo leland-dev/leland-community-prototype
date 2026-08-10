@@ -73,6 +73,9 @@
   --color-leland-yellow-dark: rgb(148 55 12);
 
   --color-leland-beige: rgb(243 241 230);
+  /* Light page background for lesson pages — distinct from leland-beige
+     (used for callout-style surfaces like the accordion). */
+  --color-leland-page-bg: #fcfcfa;
   --color-leland-rust: rgb(159 91 52);
   --color-leland-tan: rgb(235 212 181);
   --color-leland-tan-light: rgb(245 234 218);

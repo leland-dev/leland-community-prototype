@@ -1,20 +1,24 @@
 import type { Block } from "../../data/lessonBlocks";
 
 import {
+  AccordionBlock,
   CalloutBlock,
+  CodeBlock,
   DividerBlock,
+  DownloadBlock,
   EmbedBlock,
   HtmlBlock,
   ImageBlock,
+  TableBlock,
   VideoBlock,
 } from "./ContentBlocks";
 import { Prose } from "./Prose";
-import { Cta, LiveSessionBanner, ShareFeedback } from "./ProductBlocks";
+import { Cta, LiveSessionBanner } from "./ProductBlocks";
 
-function BlockRenderer({ block }: { block: Block }) {
+export function BlockRenderer({ block, allowH1 = true }: { block: Block; allowH1?: boolean }) {
   switch (block.kind) {
     case "markdown":
-      return <Prose body={block.body} />;
+      return <Prose body={block.body} allowH1={allowH1} />;
     case "callout":
       return <CalloutBlock block={block} />;
     case "embed":
@@ -27,10 +31,16 @@ function BlockRenderer({ block }: { block: Block }) {
       return <DividerBlock block={block} />;
     case "html":
       return <HtmlBlock block={block} />;
+    case "accordion":
+      return <AccordionBlock block={block} />;
+    case "code":
+      return <CodeBlock block={block} />;
+    case "table":
+      return <TableBlock block={block} />;
+    case "download":
+      return <DownloadBlock block={block} />;
     case "liveSessionBanner":
       return <LiveSessionBanner block={block} />;
-    case "shareFeedback":
-      return <ShareFeedback />;
     case "cta":
       return <Cta block={block} />;
     default: {
@@ -41,11 +51,19 @@ function BlockRenderer({ block }: { block: Block }) {
   }
 }
 
-export function BlockList({ blocks }: { blocks: Block[] }) {
+export function BlockList({
+  blocks,
+  className = "flex flex-col gap-8",
+  allowH1 = true,
+}: {
+  blocks: Block[];
+  className?: string;
+  allowH1?: boolean;
+}) {
   return (
-    <div className="flex flex-col gap-8">
+    <div className={className}>
       {blocks.map((block, i) => (
-        <BlockRenderer key={i} block={block} />
+        <BlockRenderer key={i} block={block} allowH1={allowH1} />
       ))}
     </div>
   );

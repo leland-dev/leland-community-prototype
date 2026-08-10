@@ -4,6 +4,5 @@ export {
   LessonFooterActions,
   LiveElapsedTime,
   LiveSessionCallout,
-  ShareFeedback,
 } from "./ProductBlocks";
 export { Prose } from "./Prose";
