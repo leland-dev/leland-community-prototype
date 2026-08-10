@@ -32,7 +32,7 @@ function buildComponents(allowH1: boolean): Components {
     <p className="leland-paragraph-base text-leland-gray-dark md:leland-paragraph-lg">{children}</p>
   ),
   ul: ({ children }) => (
-    <ul className="flex list-disc flex-col gap-4 pl-5 leland-paragraph-lg text-leland-gray-dark marker:text-leland-gray-extra-light">
+    <ul className="flex list-disc flex-col gap-4 pl-5 leland-paragraph-base text-leland-gray-dark marker:text-leland-gray-extra-light md:leland-paragraph-lg">
       {children}
     </ul>
   ),
@@ -55,7 +55,7 @@ function buildComponents(allowH1: boolean): Components {
           </span>
           <span className="mt-1 w-0 flex-1 border-l-2 border-dotted border-leland-gray-stroke group-last:hidden" />
         </div>
-        <div className="pb-4 leland-paragraph-lg text-leland-gray-dark group-last:pb-0">
+        <div className="pb-4 leland-paragraph-base text-leland-gray-dark group-last:pb-0 md:leland-paragraph-lg">
           {children}
         </div>
       </li>
