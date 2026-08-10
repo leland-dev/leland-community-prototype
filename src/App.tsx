@@ -79,6 +79,7 @@ import CoachManage from "./pages/CoachManage";
 import CoachProfileNew from "./pages/CoachProfileNew";
 import CoachOpportunities from "./pages/CoachOpportunities";
 import CoachLivestreams from "./pages/CoachLivestreams";
+import CoachContent from "./pages/CoachContent";
 import CoachCalendar from "./pages/CoachCalendar";
 import CoachEarnings from "./pages/CoachEarnings";
 import CoachReviews from "./pages/CoachReviews";
@@ -147,6 +148,7 @@ export default function App() {
           <Route path="/coach/manage/:category" element={<CoachCategoryEdit />} />
           <Route path="/coach/opportunities" element={<CoachOpportunities />} />
           <Route path="/coach/livestreams" element={<CoachLivestreams />} />
+          <Route path="/coach/content" element={<CoachContent />} />
           <Route path="/coach/calendar" element={<CoachCalendar />} />
           <Route path="/coach/earnings" element={<CoachEarnings />} />
           <Route path="/coach/reviews" element={<CoachReviews />} />

@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { motion } from "motion/react";
+import { useNavigate } from "react-router-dom";
+import { useDarkMode } from "../contexts/DarkModeContext";
+import { useSetNavTheme } from "../components/NavThemeContext";
 import PageShell from "../components/PageShell";
-import { LinkButton } from "../components/Button";
+import { Button, LinkButton } from "../components/Button";
 import OfferingCard from "../components/OfferingCard";
 import { LiveCourse, isLiveCourseCompleted } from "../components/LiveCourseCard";
-import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
 import event1 from "../assets/placeholder images/placeholder-event-01.png";
 import event2 from "../assets/placeholder images/placeholder-event-02.png";
 import event3 from "../assets/placeholder images/placeholder-event-03.png";
@@ -16,7 +19,14 @@ import pic3 from "../assets/profile photos/pic-3.png";
 import pic4 from "../assets/profile photos/pic-4.png";
 import pic5 from "../assets/profile photos/pic-5.png";
 import pic6 from "../assets/profile photos/pic-6.png";
-import arrowRightSmIcon from "../assets/icons/arrow-right.svg";
+
+const HERO_BG = "#F3F1E6";
+
+// Break an element out to the full window width regardless of its container.
+const fullBleed = { marginLeft: "calc(50% - 50vw)", marginRight: "calc(50% - 50vw)" };
+
+// Shared width wrapper — matches the Dashboard so the hero content edges align.
+const WRAP = "mx-auto w-full max-w-[1280px] px-4 sm:px-6";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -182,9 +192,14 @@ function isCourseDone(course: EnrolledCourse): boolean {
 type Variant = "default" | "single" | "past" | "empty";
 
 export default function MyCourses() {
+  const navigate = useNavigate();
+  const { dark: darkMode } = useDarkMode();
+  const heroBg = darkMode ? "#5E6E79" : HERO_BG;
+  const navTheme = useMemo(() => ({ bg: heroBg, light: darkMode, hideWordmark: false, scrollReveal: true }), [heroBg, darkMode]);
+  useSetNavTheme(navTheme);
+
   const [variant, setVariant] = useState<Variant>("default");
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(true);
   const allActive = enrolledCourses.filter((c) => !isCourseDone(c));
   const allCompleted = enrolledCourses.filter(isCourseDone);
   const activeCourses = variant === "empty" || variant === "past" ? [] : variant === "single" ? allActive.slice(0, 1) : allActive;
@@ -193,83 +208,97 @@ export default function MyCourses() {
   const noInProgressPlaceholder = (
     <div className="flex flex-col items-center justify-center gap-5 rounded-xl bg-[#F5F5F5] py-16 text-center">
       <div className="flex flex-col gap-2">
-        <h2 className="text-[22px] font-medium text-gray-dark">Nothing in progress</h2>
+        <h3 className="text-[22px] font-medium text-gray-dark">Nothing in progress</h3>
         <p className="max-w-xs text-[14px] text-[#707070]">Programs you enroll in will appear here.</p>
       </div>
       <LinkButton href="/courses" size="lg" variant="primary">Browse courses</LinkButton>
     </div>
   );
 
-  const suggestedCoursesSection = (
-    <SidebarGroup label="Suggested programs" href="/browse">
-      {suggestedCourses.map((course, i) => (
-        <SidebarCard
-          key={i}
-          variant="course"
-          image={course.image}
-          title={course.title}
-          subtitle={`${course.type} · ${course.duration}`}
-        />
-      ))}
-    </SidebarGroup>
-  );
-
   return (
-    <PageShell variant={showSidebar ? "standard" : "thin"} rightSidebar={showSidebar ? suggestedCoursesSection : undefined}>
-      <div className="pb-20 leading-[1.2]">
-        <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">My Programs</h1>
-
-        <div className="mt-8">
-          {activeCourses.length === 0 ? (
-            noInProgressPlaceholder
-          ) : (
-            <div className="flex flex-col gap-1">
-              {activeCourses.map((course) => (
-                <OfferingCard
-                  key={course.id}
-                  type="course"
-                  title={course.title}
-                  subtitle={courseSubtitle(course)}
-                  image={course.image}
-                  purchased
-                  cohortSelected={course.type === "live" ? course.cohortSelected !== false : true}
-                  showImage
-                  href={course.id === 1 ? "/course/1" : undefined}
-                />
-              ))}
-            </div>
-          )}
+    <PageShell variant="standard">
+      <div className="pb-[180px]">
+        {/* Hero — full-window beige band, mirrors the Dashboard */}
+        <div className="-mt-[72px] pb-28 pt-[150px] md:-mt-10 md:pb-36 md:pt-16" style={{ backgroundColor: heroBg, ...fullBleed }}>
+          <motion.div
+            className={`${WRAP} flex items-start justify-between gap-4`}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <h1 className="font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">My programs</h1>
+            <Button
+              size="md"
+              variant="secondary"
+              iconOnly
+              onClick={() => navigate("/dashboard")}
+              aria-label="Back to dashboard"
+              className="mt-1 shrink-0"
+            >
+              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </Button>
+          </motion.div>
         </div>
 
-        {completedCourses.length > 0 && (
-          <div className="mt-10">
-            <h2 className="text-[22px] font-medium leading-[1.2] text-gray-dark">Past programs</h2>
-            <div className="mt-4 flex flex-col gap-1">
-              {completedCourses.map((course) => (
-                <OfferingCard
-                  key={course.id}
-                  type="course"
-                  title={course.title}
-                  subtitle={courseSubtitle(course)}
-                  image={course.image}
-                  purchased
-                  cohortSelected
-                  showImage
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Content — single column pulled up to overlap the hero */}
+        <motion.div
+          className="relative z-10 -mt-20 flex flex-col gap-5 md:-mt-28"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {/* In progress */}
+          <section className="rounded-2xl border border-[#222222]/[0.10] bg-white p-5 sm:p-6">
+            <h2 className="mb-4 text-[19px] font-semibold leading-tight text-gray-dark">In progress</h2>
+            {activeCourses.length === 0 ? (
+              noInProgressPlaceholder
+            ) : (
+              <div className="flex flex-col gap-1">
+                {activeCourses.map((course) => (
+                  <OfferingCard
+                    key={course.id}
+                    type="course"
+                    title={course.title}
+                    subtitle={courseSubtitle(course)}
+                    image={course.image}
+                    purchased
+                    cohortSelected={course.type === "live" ? course.cohortSelected !== false : true}
+                    showImage
+                    href={course.id === 1 ? "/course/1" : undefined}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
 
-        {!showSidebar && activeCourses.length + completedCourses.length <= 1 && (
-          <div className="mt-10">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-[22px] font-medium leading-[1.2] text-gray-dark">Explore programs</h2>
-              <a href="/browse" className="flex items-center gap-1 text-[13px] font-medium text-gray-dark hover:opacity-80">
-                See all
-                <img src={arrowRightSmIcon} alt="" className="h-4 w-4 opacity-70" />
-              </a>
-            </div>
+          {/* Past programs */}
+          {completedCourses.length > 0 && (
+            <section className="rounded-2xl border border-[#222222]/[0.10] bg-white p-5 sm:p-6">
+              <h2 className="mb-4 text-[19px] font-semibold leading-tight text-gray-dark">Past programs</h2>
+              <div className="flex flex-col gap-1">
+                {completedCourses.map((course) => (
+                  <OfferingCard
+                    key={course.id}
+                    type="course"
+                    title={course.title}
+                    subtitle={courseSubtitle(course)}
+                    image={course.image}
+                    purchased
+                    cohortSelected
+                    showImage
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Explore programs */}
+          <section className="rounded-2xl border border-[#222222]/[0.10] bg-white p-5 sm:p-6">
+            <h2 className="mb-4 text-[19px] font-semibold leading-tight text-gray-dark">Explore programs</h2>
             <div className="flex flex-col gap-1">
               {suggestedCourses.map((course, i) => (
                 <OfferingCard
@@ -282,9 +311,14 @@ export default function MyCourses() {
                 />
               ))}
             </div>
-          </div>
-        )}
+            <Button onClick={() => navigate("/courses")} size="md" variant="secondary" className="mt-4 font-semibold">
+              Browse all programs
+            </Button>
+          </section>
+        </motion.div>
       </div>
+
+      {/* Dev-only page-variant switcher */}
       <div className="fixed bottom-6 right-6 z-50">
         {optionsOpen && (
           <div className="mb-2 w-[240px] rounded-xl border border-gray-stroke bg-white px-4 py-3 shadow-lg">
@@ -307,16 +341,6 @@ export default function MyCourses() {
                   <span className={variant === value ? "font-medium text-gray-dark" : "text-gray-light"}>{label}</span>
                 </button>
               ))}
-            </div>
-
-            <div className="mt-4 flex items-center justify-between">
-              <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">Suggested programs sidebar</p>
-              <button
-                onClick={() => setShowSidebar(!showSidebar)}
-                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${showSidebar ? "bg-[#FFD96F]" : "bg-gray-300"}`}
-              >
-                <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showSidebar ? "translate-x-[18px]" : "translate-x-0.5"}`} />
-              </button>
             </div>
           </div>
         )}

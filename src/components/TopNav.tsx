@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useSubNavStyle } from "./SubNavStyleContext";
 import { useIsCoachMode } from "../hooks/useIsCoachMode";
 import { useDarkMode } from "../contexts/DarkModeContext";
+import { useNavTheme } from "./NavThemeContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import notificationsInactive from "../assets/icons/nav-icons/notifications-inactive.svg";
 import notificationsActive from "../assets/icons/nav-icons/notifications-active.svg";
@@ -75,6 +76,19 @@ export default function TopNav() {
   const { showSubNav, setShowSubNav } = useSubNavStyle();
   const isCoachMode = useIsCoachMode();
   const { dark, toggle: toggleDark } = useDarkMode();
+  const navTheme = useNavTheme();
+
+  // scrollReveal pages (e.g. Dashboard) start with the nav matching the hero
+  // color, then swap to white + a subtle shadow once the user scrolls.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    if (!navTheme.scrollReveal) return;
+    const onScroll = () => setScrolled(window.scrollY > 1);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [navTheme.scrollReveal]);
+  const reveal = navTheme.scrollReveal;
 
   const activeProfileMenuGroups = useMemo(() => {
     if (!isCoachMode) return profileMenuGroups;
@@ -115,7 +129,14 @@ export default function TopNav() {
   }, [profileOpen, browseOpen]);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-gray-stroke bg-white">
+    <header
+      className={`sticky top-0 z-30 ${
+        reveal
+          ? `transition-[background-color,box-shadow] duration-200 ${scrolled ? "bg-white shadow-[0_1px_4px_rgba(0,0,0,0.08)]" : ""}`
+          : "border-b border-gray-stroke bg-white"
+      }`}
+      style={reveal && !scrolled ? { backgroundColor: navTheme.bg } : undefined}
+    >
       <div className="flex items-stretch justify-between px-6">
         {/* Left: Logo + Nav links */}
         <div className="flex items-stretch gap-1">
@@ -133,7 +154,7 @@ export default function TopNav() {
               >
                 {({ isActive }) => (
                   <>
-                    <span className={`flex items-center rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                    <span className={`flex items-center rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-[#222222]/5" : ""}`}>
                       Home
                     </span>
                     {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
@@ -145,7 +166,7 @@ export default function TopNav() {
               <div ref={browseRef} className="relative flex self-stretch items-center">
                 <button
                   onClick={() => setBrowseOpen(!browseOpen)}
-                  className="flex items-center gap-1 rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222] hover:bg-gray-hover"
+                  className="flex items-center gap-1 rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222] hover:bg-[#222222]/5"
                 >
                   Browse
                   <svg
@@ -180,7 +201,7 @@ export default function TopNav() {
                             key={to}
                             to={to}
                             onClick={() => setBrowseOpen(false)}
-                            className="flex w-full items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                            className="flex w-full items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/5"
                           >
                             {label}
                             <svg
@@ -216,7 +237,7 @@ export default function TopNav() {
                 >
                   {({ isActive }) => (
                     <>
-                      <span className={`flex items-center rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                      <span className={`flex items-center rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222]${!isActive ? " hover:bg-[#222222]/5" : ""}`}>
                         {label}
                       </span>
                       {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
@@ -260,7 +281,7 @@ export default function TopNav() {
             <NavLink to="/messages" className="relative flex self-stretch items-center">
               {({ isActive }) => (
                 <>
-                  <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                  <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-[#222222]/5" : ""}`}>
                     <img src={isActive ? chatActive : chatInactive} alt="Inbox" className="h-[20px] w-[20px]" />
                   </span>
                   {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
@@ -273,7 +294,7 @@ export default function TopNav() {
           <NavLink to="/notifications" className="relative flex self-stretch items-center">
             {({ isActive }) => (
               <>
-                <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-gray-hover" : ""}`}>
+                <span className={`flex items-center justify-center h-10 w-10 rounded-full py-5${!isActive ? " hover:bg-[#222222]/5" : ""}`}>
                   <img src={isActive ? notificationsActive : notificationsInactive} alt="Notifications" className="h-[20px] w-[20px]" />
                 </span>
                 {isActive && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#333333]" />}
@@ -318,8 +339,8 @@ export default function TopNav() {
                             onClick={() => setProfileOpen(false)}
                             className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium transition-colors ${
                               danger
-                                ? "text-[#D92D20] hover:bg-gray-hover"
-                                : "text-gray-dark hover:bg-gray-hover"
+                                ? "text-[#D92D20] hover:bg-[#222222]/5"
+                                : "text-gray-dark hover:bg-[#222222]/5"
                             }`}
                           >
                             {icon && (
@@ -337,8 +358,8 @@ export default function TopNav() {
                             onClick={() => setProfileOpen(false)}
                             className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium transition-colors ${
                               danger
-                                ? "text-[#D92D20] hover:bg-gray-hover"
-                                : "text-gray-dark hover:bg-gray-hover"
+                                ? "text-[#D92D20] hover:bg-[#222222]/5"
+                                : "text-gray-dark hover:bg-[#222222]/5"
                             }`}
                           >
                             {icon && (
@@ -356,7 +377,7 @@ export default function TopNav() {
                     <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-[#999999]">
                       Admin Controls
                     </p>
-                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
+                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5">
                       Search bar
                       <button
                         type="button"
@@ -370,7 +391,7 @@ export default function TopNav() {
                         />
                       </button>
                     </label>
-                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
+                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5">
                       Sub-nav
                       <button
                         type="button"
@@ -384,7 +405,7 @@ export default function TopNav() {
                         />
                       </button>
                     </label>
-                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
+                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5">
                       Dark mode
                       <button
                         type="button"
@@ -401,7 +422,7 @@ export default function TopNav() {
                     <NavLink
                       to="/partner-dashboard"
                       onClick={() => setProfileOpen(false)}
-                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                     >
                       <img src={browserIcon} alt="Partner dashboard" className="h-6 w-6 shrink-0" />
                       Partner dashboard
@@ -409,7 +430,7 @@ export default function TopNav() {
                     <NavLink
                       to="/components"
                       onClick={() => setProfileOpen(false)}
-                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                     >
                       <img src={codeIcon} alt="Components" className="h-6 w-6 shrink-0" />
                       Components
@@ -417,7 +438,7 @@ export default function TopNav() {
                     <NavLink
                       to="/onboarding"
                       onClick={() => setProfileOpen(false)}
-                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                     >
                       <img src={compassIcon} alt="Onboarding v1" className="h-6 w-6 shrink-0" />
                       Onboarding v1
@@ -425,7 +446,7 @@ export default function TopNav() {
                     <NavLink
                       to="/onboarding-minimal"
                       onClick={() => setProfileOpen(false)}
-                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                     >
                       <img src={compassIcon} alt="Onboarding v2" className="h-6 w-6 shrink-0" />
                       Onboarding v2
@@ -433,7 +454,7 @@ export default function TopNav() {
                     <NavLink
                       to="/onboarding-minimal-v2"
                       onClick={() => setProfileOpen(false)}
-                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                     >
                       <img src={compassIcon} alt="Onboarding v3" className="h-6 w-6 shrink-0" />
                       Onboarding v3

@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useOutlet } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import TopNav from "./TopNav";
@@ -46,7 +46,7 @@ export default function Layout() {
                   <NavThemeProvider>
                     <MobileSidebarProvider>
                       <LayoutChrome>
-                        <Outlet />
+                        <AnimatedOutlet />
                       </LayoutChrome>
                     </MobileSidebarProvider>
                   </NavThemeProvider>
@@ -58,6 +58,35 @@ export default function Layout() {
         </LeftSidebarProvider>
       </RightSidebarProvider>
     </ExtraLinksProvider>
+  );
+}
+
+// Routes that share the same hero and animate their content-below between each
+// other (Dashboard ⇄ Calendar feel like two states of one page).
+const ANIMATED_STATE_ROUTES = ["/dashboard", "/calendar", "/my-programs"];
+
+/**
+ * AnimatedOutlet — for the Dashboard/Calendar "states", wraps the routed page
+ * in AnimatePresence so the outgoing page's content-below can animate out and
+ * the incoming one's can animate in (their shared hero has no exit prop, so it
+ * stays put). Every other route renders the outlet directly — unchanged
+ * behavior, no forced remounts on param changes, no mode="wait" delay.
+ */
+function FrozenOutlet() {
+  // Freeze at mount: an exiting instance must keep rendering its own page, not
+  // the one we just navigated to.
+  const [outlet] = useState(useOutlet());
+  return <>{outlet}</>;
+}
+
+function AnimatedOutlet() {
+  const location = useLocation();
+  const outlet = useOutlet();
+  if (!ANIMATED_STATE_ROUTES.includes(location.pathname)) return outlet;
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <FrozenOutlet key={location.pathname} />
+    </AnimatePresence>
   );
 }
 
@@ -303,13 +332,23 @@ export function ContextLayout() {
   const leftSidebar = useLeftSidebarContent();
   const variant = useLayoutVariant();
   const contentMaxWidth = useContentMaxWidth();
+  const { pathname } = useLocation();
+
+  // Home feed uses a full-bleed 3-col layout: sidebars pinned to the window
+  // edges (356px each), the feed capped at 640px in the middle.
+  const isHomeFeed = pathname === "/";
 
   return (
     <PageShell
       variant={variant}
       leftSidebar={leftSidebar}
       rightSidebar={rightSidebar}
-      contentMaxWidth={contentMaxWidth}
+      contentMaxWidth={isHomeFeed ? 640 : contentMaxWidth}
+      edgeToEdge={isHomeFeed}
+      sidebarWidth={isHomeFeed ? 356 : undefined}
+      // Start the row at the sidebar's sticky pin point (nav 61px + 20px gap) so
+      // the columns don't slide up 20px before locking as you scroll.
+      paddingYClassName={isHomeFeed ? "py-4 sm:pt-5 sm:pb-10" : undefined}
     >
       <Outlet />
     </PageShell>

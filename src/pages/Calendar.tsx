@@ -1,294 +1,307 @@
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { motion } from "motion/react";
+import { useNavigate } from "react-router-dom";
+import { useDarkMode } from "../contexts/DarkModeContext";
+import { useSetNavTheme } from "../components/NavThemeContext";
 import PageShell from "../components/PageShell";
-import { LinkButton } from "../components/Button";
+import { Button } from "../components/Button";
+import SessionCard from "../components/SessionCard";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic3 from "../assets/profile photos/pic-3.png";
 import pic4 from "../assets/profile photos/pic-4.png";
 import pic5 from "../assets/profile photos/pic-5.png";
 import pic6 from "../assets/profile photos/pic-6.png";
-import arrowRoundIcon from "../assets/icons/arrow-round.svg";
-import event1 from "../assets/placeholder images/placeholder-event-01.png";
-import event2 from "../assets/placeholder images/placeholder-event-02.png";
-import event3 from "../assets/placeholder images/placeholder-event-03.png";
+import calendarPageIcon from "../assets/icons/calendar-page.svg";
+import textIcon from "../assets/icons/text.svg";
 
-const upcomingEvents = [
-  {
-    day: "MON",
-    date: 30,
-    title: "1:1 Session with Jessica",
-    dateTime: "March 30 at 2:00 PM",
-    duration: "45 minutes",
-    image: profilePhoto,
-    isNow: true,
-  },
-  {
-    day: "MON",
-    date: 30,
-    title: "AIBP: Building Your First AI Agent",
-    dateTime: "Today at 2:45 PM",
-    duration: "90 minutes",
-    image: pic3,
-    isNow: true,
-    joinHref: "/program/session/mock-live",
-  },
-  {
-    day: "WED",
-    date: 1,
-    title: "Intro Call with Samantha",
-    dateTime: "April 1 at 11:00 AM",
-    duration: "30 minutes",
-    image: pic1,
-    isNow: false,
-  },
-  {
-    day: "THU",
-    date: 2,
-    title: "GMAT Exam Prep Bootcamp",
-    dateTime: "April 2 at 6:00 PM",
-    duration: "60 minutes",
-    image: pic4,
-    isNow: false,
-  },
-  {
-    day: "SAT",
-    date: 4,
-    title: "MBA Strategy Live",
-    dateTime: "April 4 at 10:00 AM",
-    duration: "45 minutes",
-    image: pic5,
-    isNow: false,
-  },
-  {
-    day: "TUE",
-    date: 7,
-    title: "Deferred MBA Application Bootcamp",
-    dateTime: "April 7 at 3:00 PM",
-    duration: "90 minutes",
-    image: pic6,
-    isNow: false,
-  },
+const HERO_BG = "#F3F1E6";
+
+// Break an element out to the full window width regardless of its container.
+const fullBleed = { marginLeft: "calc(50% - 50vw)", marginRight: "calc(50% - 50vw)" };
+
+// Shared width wrapper — matches the Dashboard so the hero content edges align.
+const WRAP = "mx-auto w-full max-w-[1280px] px-4 sm:px-6";
+
+// Render an SVG icon as a mask so it inherits the button's text color
+// (active = white, inactive = gray) rather than the SVG's baked-in stroke.
+const maskStyle = (icon: string) => ({
+  maskImage: `url("${icon}")`,
+  WebkitMaskImage: `url("${icon}")`,
+  maskSize: "contain",
+  WebkitMaskSize: "contain",
+  maskRepeat: "no-repeat",
+  WebkitMaskRepeat: "no-repeat",
+  maskPosition: "center",
+  WebkitMaskPosition: "center",
+});
+
+const VIEWS = [
+  { key: "list" as const, icon: textIcon, label: "List view" },
+  { key: "calendar" as const, icon: calendarPageIcon, label: "Calendar view" },
 ];
 
-const popularEvents = [
-  {
-    title: "MBA Strategy Live",
-    subtitle: "Live now",
-    subtitleColor: "text-[#D92D20] font-medium",
-    meta: "125 watching",
-    image: event1,
-  },
-  {
-    title: "Tech Consulting Workshop",
-    subtitle: "Starts 4:30 PM",
-    subtitleColor: "text-gray-light",
-    meta: "89 registered",
-    image: event2,
-  },
-  {
-    title: "Interview Prep Session",
-    subtitle: "Tomorrow, 2:00 PM",
-    subtitleColor: "text-gray-light",
-    meta: "54 registered",
-    image: event3,
-  },
+type SessionKind = "coaching" | "event";
+
+interface Session {
+  id: number;
+  month: number; // 3 = March, 4 = April, 5 = May
+  date: number;
+  day: string;
+  title: string;
+  dateTime: string;
+  duration: string;
+  image: string;
+  kind: SessionKind;
+  isNow: boolean;
+  joinHref?: string;
+}
+
+// Upcoming sessions. The weekdays line up on a month where April 1 is a
+// Wednesday (Mar 30 = Mon), which the calendar grid below is built around.
+const sessions: Session[] = [
+  { id: 1, month: 3, date: 30, day: "MON", title: "1:1 Session with Jessica", dateTime: "March 30 at 2:00 PM", duration: "45 minutes", image: profilePhoto, kind: "coaching", isNow: true },
+  { id: 2, month: 3, date: 30, day: "MON", title: "AIBP: Building Your First AI Agent", dateTime: "Today at 2:45 PM", duration: "90 minutes", image: pic3, kind: "event", isNow: true, joinHref: "/program/session/mock-live" },
+  { id: 3, month: 4, date: 1, day: "WED", title: "Intro Call with Samantha", dateTime: "April 1 at 11:00 AM", duration: "30 minutes", image: pic1, kind: "coaching", isNow: false },
+  { id: 4, month: 4, date: 2, day: "THU", title: "GMAT Exam Prep Bootcamp", dateTime: "April 2 at 6:00 PM", duration: "60 minutes", image: pic4, kind: "event", isNow: false },
+  { id: 5, month: 4, date: 4, day: "SAT", title: "MBA Strategy Live", dateTime: "April 4 at 10:00 AM", duration: "45 minutes", image: pic5, kind: "event", isNow: false },
+  { id: 6, month: 4, date: 7, day: "TUE", title: "Deferred MBA Application Bootcamp", dateTime: "April 7 at 3:00 PM", duration: "90 minutes", image: pic6, kind: "event", isNow: false },
 ];
 
 const pastEvents = [
-  {
-    title: "1:1 Session with Marcus",
-    dateTime: "March 28 at 10:00 AM",
-    duration: "45 minutes",
-    image: pic3,
-    hasRecording: false,
-  },
-  {
-    title: "Resume Review Workshop",
-    dateTime: "March 27 at 3:00 PM",
-    duration: "60 minutes",
-    image: pic4,
-    hasRecording: true,
-  },
-  {
-    title: "1:1 Session with Jessica",
-    dateTime: "March 26 at 2:00 PM",
-    duration: "45 minutes",
-    image: profilePhoto,
-    hasRecording: false,
-  },
-  {
-    title: "MBA Admissions Strategy",
-    dateTime: "March 25 at 1:00 PM",
-    duration: "45 minutes",
-    image: pic5,
-    hasRecording: true,
-  },
-  {
-    title: "Intro Call with David",
-    dateTime: "March 24 at 11:00 AM",
-    duration: "30 minutes",
-    image: pic1,
-    hasRecording: false,
-  },
-  {
-    title: "GMAT Prep Live Session",
-    dateTime: "March 21 at 4:00 PM",
-    duration: "60 minutes",
-    image: pic6,
-    hasRecording: true,
-  },
-  {
-    title: "Career Pivot Workshop",
-    dateTime: "March 19 at 12:00 PM",
-    duration: "45 minutes",
-    image: pic3,
-    hasRecording: false,
-  },
-  {
-    title: "1:1 Session with Jessica",
-    dateTime: "March 17 at 2:00 PM",
-    duration: "45 minutes",
-    image: profilePhoto,
-    hasRecording: false,
-  },
+  { title: "1:1 Session with Marcus", dateTime: "March 28 at 10:00 AM", duration: "45 minutes", image: pic3, hasRecording: false },
+  { title: "Resume Review Workshop", dateTime: "March 27 at 3:00 PM", duration: "60 minutes", image: pic4, hasRecording: true },
+  { title: "1:1 Session with Jessica", dateTime: "March 26 at 2:00 PM", duration: "45 minutes", image: profilePhoto, hasRecording: false },
+  { title: "MBA Admissions Strategy", dateTime: "March 25 at 1:00 PM", duration: "45 minutes", image: pic5, hasRecording: true },
+  { title: "Intro Call with David", dateTime: "March 24 at 11:00 AM", duration: "30 minutes", image: pic1, hasRecording: false },
+  { title: "GMAT Prep Live Session", dateTime: "March 21 at 4:00 PM", duration: "60 minutes", image: pic6, hasRecording: true },
 ];
 
-export default function Calendar() {
-  const [pastOpen, setPastOpen] = useState(false);
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH_LABEL = "April 2027";
 
-  const popularEventsSection = (
-    <>
-      <NavLink to="/events" className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
-        Popular events
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
-          <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </NavLink>
-      <div className="mt-4 flex flex-col gap-4">
-        {popularEvents.map((event, i) => (
-          <div key={i} className="group flex cursor-pointer items-center gap-3">
-            <img
-              src={event.image}
-              alt=""
-              className="h-[36px] w-[55px] shrink-0 rounded-[4px] object-cover"
-            />
-            <div className="min-w-0">
-              <p className="truncate text-[14px] font-medium text-gray-dark group-hover:opacity-70">{event.title}</p>
-              <p className="truncate text-[12px]">
-                <span className={event.subtitleColor}>{event.subtitle}</span>
-                <span className="text-gray-light"> · {event.meta}</span>
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </>
-  );
+// 35-cell (5-week) grid starting Sun Mar 29 → Sat May 2, with April as the
+// current month. Matches the weekdays baked into the session data above.
+const gridCells = [
+  ...[29, 30, 31].map((date) => ({ month: 3, date, current: false })),
+  ...Array.from({ length: 30 }, (_, i) => ({ month: 4, date: i + 1, current: true })),
+  ...[1, 2].map((date) => ({ month: 5, date, current: false })),
+];
+
+// Days the coach has blocked off as unavailable — rendered with a diagonal
+// hatch. Adjacent-month days (outside April) with no sessions are treated as
+// unavailable too. Every day is either blocked-off or available.
+const blockedDates = new Set(["4-21", "4-22", "4-23", "4-24"]);
+
+// Faint diagonal hatch for blocked/unavailable days. Semi-transparent gray so
+// it reads on both the white card (light) and the dark card (dark mode).
+const hatchStyle = {
+  backgroundImage:
+    "repeating-linear-gradient(-45deg, rgba(120,120,120,0.28) 0, rgba(120,120,120,0.28) 1px, transparent 1px, transparent 7px)",
+};
+
+function CalendarView() {
+  const eventsByKey = useMemo(() => {
+    const map = new Map<string, Session[]>();
+    for (const s of sessions) {
+      const key = `${s.month}-${s.date}`;
+      const list = map.get(key) ?? [];
+      list.push(s);
+      map.set(key, list);
+    }
+    return map;
+  }, []);
 
   return (
-    <PageShell rightSidebar={popularEventsSection}>
-        {/* Header — spans full width above both columns */}
-        <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">
-          Calendar
-        </h1>
-        <p className="mt-2 text-[16px] text-gray-light">
-          Everything on your schedule, between 1:1 coaching sessions, events, and courses.
-        </p>
+    <div>
+      <h3 className="mb-4 text-[15px] font-semibold leading-tight text-gray-dark">{MONTH_LABEL}</h3>
 
-        <div className="mt-8 border-t border-gray-stroke">
-            {/* Event list */}
-            <div className="mt-2 flex flex-col gap-1">
-              {upcomingEvents.map((event, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]"
-                >
-                  {/* Profile photo / event thumbnail */}
-                  <img
-                    src={event.image}
-                    alt=""
-                    className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover"
-                  />
-
-                  {/* Event details */}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[16px] font-medium text-gray-dark">{event.title}</p>
-                    <p className="text-[14px] text-[#707070]">
-                      {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
-                    </p>
-                  </div>
-
-                  {/* Right side: Join button or calendar icon */}
-                  <div className="flex shrink-0 items-center self-stretch">
-                    {event.isNow ? (
-                      <LinkButton size="md" variant="primary" href={event.joinHref ?? "#"}>
-                        Join
-                      </LinkButton>
-                    ) : (
-                      <div className="flex w-[48px] flex-col items-center overflow-hidden rounded-[8px] border border-[#E5E5E5] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]">
-                        <div className="w-full bg-[#F5F5F5] text-center text-[10px] font-medium uppercase tracking-[0.05em] text-[#707070]">
-                          {event.day}
-                        </div>
-                        <div className="w-full pt-0.5 pb-1 text-center text-[17px] font-medium leading-tight text-[#707070]">
-                          {event.date}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* View past sessions */}
-            <button
-              onClick={() => setPastOpen(!pastOpen)}
-              className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+      <div className="overflow-hidden rounded-xl border-l border-t border-gray-stroke">
+        <div className="grid grid-cols-7">
+          {/* Weekday header */}
+          {WEEKDAYS.map((w) => (
+            <div
+              key={w}
+              className="border-b border-r border-gray-stroke py-2 pl-2 text-left text-[11px] font-semibold uppercase tracking-[0.04em] text-gray-light"
             >
-              {pastOpen ? "Hide past sessions" : "View past sessions"}
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 12 12"
-                fill="none"
-                className={`transition-transform ${pastOpen ? "rotate-180" : ""}`}
-              >
-                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
+              <span className="sm:hidden">{w[0]}</span>
+              <span className="hidden sm:inline">{w}</span>
+            </div>
+          ))}
 
-            {/* Past sessions (collapsible) */}
-            {pastOpen && (
-              <div className="mt-2 flex flex-col gap-1">
-                {pastEvents.map((event, i) => (
-                  <div
-                    key={i}
-                    className="group flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-[#F5F5F5]"
-                  >
-                    <img
-                      src={event.image}
-                      alt=""
-                      className="h-[44px] w-[44px] shrink-0 rounded-[4px] object-cover opacity-50 transition-opacity group-hover:opacity-100"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[16px] font-medium text-[#707070]">{event.title}</p>
-                      <p className="text-[14px] text-[#707070]">
-                        {event.dateTime} · <span className="text-[#9B9B9B]">{event.duration}</span>
-                      </p>
-                    </div>
-                    {event.hasRecording && (
-                      <div className="flex shrink-0 items-center self-stretch">
-                        <button className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:border-[#222222]/20">
-                          <img src={arrowRoundIcon} alt="" className="h-5 w-5" />
-                          Rewatch
-                        </button>
-                      </div>
-                    )}
+          {/* Day cells */}
+          {gridCells.map((cell) => {
+            const key = `${cell.month}-${cell.date}`;
+            const events = eventsByKey.get(key) ?? [];
+            // A day is either available or blocked-off. Blocked = an explicit
+            // block, or an adjacent-month day — but never a day with sessions.
+            const isBlocked = (!cell.current || blockedDates.has(key)) && events.length === 0;
+            const [first, ...rest] = events;
+            const numberColor = isBlocked ? "text-gray-extra-light" : "text-gray-dark";
+            return (
+              <div
+                key={key}
+                className={`flex min-h-[92px] flex-col gap-1 border-b border-r border-gray-stroke p-2 sm:min-h-[124px] ${isBlocked ? "bg-gray-hover" : ""}`}
+                style={isBlocked ? hatchStyle : undefined}
+              >
+                {/* Date number + first event pill inline (desktop) */}
+                <div className="flex items-start gap-1.5">
+                  <span className={`w-6 shrink-0 text-[16px] leading-6 ${numberColor}`}>{cell.date}</span>
+                  {first && (
+                    <span className="hidden min-w-0 flex-1 truncate rounded-[4px] bg-[#222222]/[0.06] px-2 py-1 text-[12px] leading-tight text-gray-dark sm:block">
+                      {first.title}
+                    </span>
+                  )}
+                </div>
+
+                {/* Remaining events collapse to a "+N more" line (desktop) */}
+                {rest.length > 0 && (
+                  <span className="hidden pl-[30px] text-[12px] font-medium text-gray-light sm:block">+{rest.length} more</span>
+                )}
+
+                {/* Mobile — events shown as compact dots */}
+                {events.length > 0 && (
+                  <div className="flex flex-wrap gap-1 pl-1 sm:hidden">
+                    {events.map((s) => (
+                      <span key={s.id} className="h-1.5 w-1.5 rounded-full bg-gray-light" />
+                    ))}
                   </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ListView() {
+  const [pastOpen, setPastOpen] = useState(false);
+
+  return (
+    <div>
+      <div className="-mx-2 flex flex-col gap-1">
+        {sessions.map((s) => (
+          <SessionCard
+            key={s.id}
+            size="auto"
+            title={s.title}
+            dateTime={s.dateTime}
+            duration={s.duration}
+            image={s.image}
+            day={s.date}
+            type={s.kind === "coaching" ? "coach" : "event"}
+            status={s.isNow ? "live" : "upcoming"}
+            joinHref={s.joinHref}
+          />
+        ))}
+      </div>
+
+      {/* View past sessions */}
+      <button
+        onClick={() => setPastOpen(!pastOpen)}
+        className="my-4 flex cursor-pointer items-center gap-2 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+      >
+        {pastOpen ? "Hide past sessions" : "View past sessions"}
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${pastOpen ? "rotate-180" : ""}`}>
+          <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
+      {pastOpen && (
+        <div className="-mx-2 flex flex-col gap-1">
+          {pastEvents.map((event, i) => (
+            <SessionCard
+              key={i}
+              size="auto"
+              title={event.title}
+              dateTime={event.dateTime}
+              duration={event.duration}
+              image={event.image}
+              status="past"
+              hasRecording={event.hasRecording}
+              type={event.hasRecording ? "event" : "coach"}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function Calendar() {
+  const navigate = useNavigate();
+  const { dark: darkMode } = useDarkMode();
+  const heroBg = darkMode ? "#5E6E79" : HERO_BG;
+  const navTheme = useMemo(() => ({ bg: heroBg, light: darkMode, hideWordmark: false, scrollReveal: true }), [heroBg, darkMode]);
+  useSetNavTheme(navTheme);
+
+  const [view, setView] = useState<"calendar" | "list">("list");
+
+  return (
+    <PageShell variant="standard">
+      <div className="pb-[180px]">
+        {/* Hero — full-window beige band, mirrors the Dashboard */}
+        <div className="-mt-[72px] pb-28 pt-[150px] md:-mt-10 md:pb-36 md:pt-16" style={{ backgroundColor: heroBg, ...fullBleed }}>
+          <motion.div
+            className={`${WRAP} flex items-start justify-between gap-4`}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <h1 className="font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">Calendar</h1>
+            <Button
+              size="md"
+              variant="secondary"
+              iconOnly
+              onClick={() => navigate("/dashboard")}
+              aria-label="Back to dashboard"
+              className="mt-1 shrink-0"
+            >
+              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </Button>
+          </motion.div>
+        </div>
+
+        {/* Content — single column pulled up to overlap the hero */}
+        <motion.div
+          className="relative z-10 -mt-20 md:-mt-28"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <section className="rounded-2xl border border-[#222222]/[0.10] bg-white p-5 sm:p-6">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <h2 className="text-[19px] font-semibold leading-tight text-gray-dark">Upcoming sessions</h2>
+              {/* View toggle */}
+              <div className="flex shrink-0 items-center gap-1 rounded-full bg-gray-hover p-1">
+                {VIEWS.map((v) => (
+                  <button
+                    key={v.key}
+                    onClick={() => setView(v.key)}
+                    aria-label={v.label}
+                    aria-pressed={view === v.key}
+                    className={`flex h-8 w-9 items-center justify-center rounded-full transition-colors ${
+                      view === v.key
+                        ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
+                        : "text-gray-extra-light hover:text-gray-light"
+                    }`}
+                  >
+                    <span aria-hidden className="h-[18px] w-[18px] bg-current" style={maskStyle(v.icon)} />
+                  </button>
                 ))}
               </div>
-            )}
-        </div>
+            </div>
+
+            {view === "calendar" ? <CalendarView /> : <ListView />}
+          </section>
+        </motion.div>
+      </div>
     </PageShell>
   );
 }

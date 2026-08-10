@@ -16,11 +16,12 @@ import { useIsMobile } from "../hooks/useIsMobile";
 import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
 import SessionCard from "../components/SessionCard";
 import OfferingCard from "../components/OfferingCard";
-import GroupCard from "../components/GroupCard";
-import groupImg1 from "../assets/placeholder images/group images/18603db620e37b489d2d52da4c9c1f86.jpg";
-import groupImg2 from "../assets/placeholder images/group images/419a6944d25e95be7012699559c7b0be.jpg";
-import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
+import SidebarCard from "../components/SidebarCard";
 import profilePhoto from "../assets/profile photos/profile photo.png";
+import profileCover from "../assets/img/cover-image-2.png";
+import editIcon from "../assets/icons/edit.svg";
+import calendarPageIcon from "../assets/icons/calendar-page.svg";
+import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
 import eventImageSrc from "../assets/img/EventImage.avif";
 import lelandCompass from "../assets/leland-compass.svg";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
@@ -3461,18 +3462,65 @@ export function CategorySubtitle({ photos, experts }: { photos: string[]; expert
   );
 }
 
+// Popular experts — each row can be dismissed; the whole card hides once empty.
+const POPULAR_EXPERTS = [
+  { name: "Jasmine Singer", photo: pic1, headline: "Experienced Product Leader at LinkedIn | Ex-..." },
+  { name: "Jackson Ringger", photo: pic3, headline: "Ex-McKinsey Consultant | Wharton MBA" },
+  { name: "Erika Mah", photo: pic5, headline: "MBA Expert | Stanford GSB | 100+ M7 Admits" },
+];
+
+function ExpertRow({ expert, onDismiss }: { expert: (typeof POPULAR_EXPERTS)[number]; onDismiss: () => void }) {
+  const [following, setFollowing] = useState(false);
+  return (
+    <SidebarCard
+      variant="coach"
+      image={expert.photo}
+      title={expert.name}
+      subtitle={expert.headline}
+      right={
+        <div className="flex items-center gap-1.5">
+          <Button size="sm" variant="secondary" onClick={() => setFollowing((f) => !f)} className="min-w-[74px]">
+            {following ? "Following" : "Follow"}
+          </Button>
+          <button
+            onClick={onDismiss}
+            aria-label={`Dismiss ${expert.name}`}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+      }
+    />
+  );
+}
+
+function PopularExperts() {
+  const [experts, setExperts] = useState(POPULAR_EXPERTS);
+  if (experts.length === 0) return null;
+  return (
+    <SidebarSectionCard title="Popular experts" to="/browse" bleed={false}>
+      {experts.map((e) => (
+        <ExpertRow key={e.name} expert={e} onDismiss={() => setExperts((prev) => prev.filter((x) => x.name !== e.name))} />
+      ))}
+    </SidebarSectionCard>
+  );
+}
+
 export function HomeRightSidebar() {
   return (
-    <div className="flex flex-col gap-6 px-1">
+    <div className="flex flex-col gap-[14px]">
       {/* Livestreams */}
-      <SidebarGroup label="Livestreams">
+      <SidebarSectionCard title="Livestreams" to="/events" bleed={false}>
         <SidebarCard
           variant="event"
           live
           image={eventImg1}
           title="MBA Strategy Live"
           subtitle={<><span className="font-medium text-[#FB5A42]">Live now</span> · 125 registered</>}
-          right={<Button size="sm" variant="primary">Join</Button>}
+          right={<Button size="sm" variant="dark" rounded="rounded-full" className="w-fit">Join</Button>}
         />
         <SidebarCard
           variant="event"
@@ -3486,10 +3534,10 @@ export function HomeRightSidebar() {
           title="Interview Prep Session"
           subtitle="Tomorrow, 2:00 PM · 54 registered"
         />
-      </SidebarGroup>
+      </SidebarSectionCard>
 
       {/* Popular categories */}
-      <SidebarGroup label="Popular categories" hideChevron>
+      <SidebarSectionCard title="Popular categories" bleed={false}>
         <SidebarCard
           variant="category"
           image={categoryInvestmentBanking}
@@ -3508,118 +3556,103 @@ export function HomeRightSidebar() {
           title="GMAT Tutoring"
           subtitle={<CategorySubtitle photos={[pic2, pic3, pic10]} experts="156 experts" />}
         />
-      </SidebarGroup>
+      </SidebarSectionCard>
 
       {/* Popular experts */}
-      <SidebarGroup label="Popular experts">
-        <SidebarCard
-          variant="coach"
-          image={pic1}
-          title="Jasmine Singer"
-          subtitle="Experienced Product Leader at LinkedIn | Ex-..."
-          to="/coach-profile"
-        />
-        <SidebarCard
-          variant="coach"
-          image={pic3}
-          title="Jackson Ringger"
-          subtitle="Experienced Product Leader at LinkedIn | Ex-..."
-          to="/coach-profile"
-        />
-        <SidebarCard
-          variant="coach"
-          image={pic5}
-          title="Erika Mah"
-          subtitle="Experienced Product Leader at LinkedIn | Ex-..."
-          to="/coach-profile"
-        />
-      </SidebarGroup>
+      <PopularExperts />
 
+      {/* Footer links — inline directly below the last card */}
+      <div className="px-2 pt-1">
+        <p className="text-[12px] leading-[1.7] text-gray-extra-light">
+          {["About", "Help", "Careers", "Blog", "Coaches", "Privacy", "Terms"].map((l, i) => (
+            <span key={l}>
+              {i > 0 && <span className="mx-1">·</span>}
+              <a href="#" className="transition-opacity hover:opacity-70">{l}</a>
+            </span>
+          ))}
+        </p>
+        <p className="mt-3 text-[12px] text-gray-extra-light">© 2026 Leland</p>
+      </div>
     </div>
   );
 }
 
 // ─── Left Sidebar ──────────────────────────────────────
 
-export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
+// Experts the user has purchased time with — shown as a photo grid with the
+// remaining time under each.
+const MY_EXPERTS = [
+  { name: "Jessica", photo: pic6, timeLeft: "45m left" },
+  { name: "Marcus", photo: pic1, timeLeft: "Out of time", outOfTime: true },
+  { name: "Priya", photo: pic3, timeLeft: "1h 20m left" },
+  { name: "David", photo: pic5, timeLeft: "30m left" },
+  { name: "Elena", photo: pic7, timeLeft: "3h left" },
+  { name: "Sofia", photo: pic8, timeLeft: "1h left" },
+];
+
+// A sidebar section rendered as a card: large bold header with a small "See all"
+// link in the top-right corner, then the section's content.
+function SidebarSectionCard({ title, to, bleed = true, children }: { title: string; to?: string; bleed?: boolean; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-5">
-      {/* Profile card */}
-      <div className="overflow-hidden rounded-2xl bg-white border border-gray-200">
-        {/* Banner */}
-        <div className="relative h-[56px] bg-gray-100">
-          <div className="absolute -bottom-10 left-4">
-            <img
-              src={profilePhoto}
-              alt="Jamie"
-              className="h-[80px] w-[80px] rounded-full border-[3px] border-white object-cover shadow-sm"
-            />
-          </div>
-        </div>
-        {/* Body */}
-        <div className="px-4 pt-12 pb-4">
-          <p className="text-[17px] font-medium leading-tight text-gray-dark">Jamie Allen</p>
-          <p className="mt-0.5 text-[13px] leading-snug text-gray-light">Interactive Lead at Airbnb</p>
-          <button
-            onClick={onCreatePost}
-            className="mt-4 w-full cursor-pointer rounded-lg bg-gray-dark py-2 text-center text-[12px] font-medium text-white transition-opacity hover:opacity-85"
-          >
-            Create post
-          </button>
+    <div className="rounded-[12px] border border-[#222222]/[0.12] bg-white p-4">
+      <div className="mb-3 flex items-start justify-between">
+        <h2 className="text-[17px] font-bold leading-tight text-gray-dark">{title}</h2>
+        {to && (
+          <NavLink to={to} className="shrink-0 text-[13px] font-medium leading-none text-gray-extra-light transition-opacity hover:opacity-80">
+            See all
+          </NavLink>
+        )}
+      </div>
+      <div className={`flex flex-col ${bleed ? "-mx-2" : ""}`}>{children}</div>
+    </div>
+  );
+}
+
+export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
+  const navigate = useNavigate();
+  return (
+    <div className="flex flex-col gap-[14px]">
+      {/* Profile preview */}
+      <div className="flex items-center gap-3">
+        <img src={profilePhoto} alt="Alex" className="h-12 w-12 shrink-0 rounded-full object-cover" />
+        <div className="min-w-0">
+          <p className="truncate text-[16px] font-semibold leading-tight text-gray-dark">Alex Rivera</p>
+          <p className="mt-0.5 truncate text-[13px] leading-tight text-gray-light">MBA Applicant · Class of 2027</p>
         </div>
       </div>
 
-      {/* Upcoming Sessions + My Purchases + Create post */}
-      <div className="px-1">
-        <NavLink to="/dashboard" className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
-          Upcoming Sessions
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
+      {/* Next session + calendar link */}
+      <div className="rounded-[12px] border border-[#222222]/[0.12] bg-white">
+        <div className="p-2">
+          <SessionCard size="small" title="Alex <> Jessica" dateTime="Today, 5:45 PM" duration="30m" day={16} image={pic6} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
+        </div>
+        <NavLink
+          to="/dashboard"
+          className="flex items-center justify-center gap-1.5 rounded-b-[12px] border-t border-[#222222]/[0.12] py-[14px] text-[15px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
+        >
+          View full calendar
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0">
             <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </NavLink>
-        <div className="mt-2 flex flex-col -mx-2">
-          <SessionCard size="small" title="AIBP: Building Your First AI Agent" dateTime="Today, 2:45 PM" duration="90 min" image={bootcampImg} type="bootcamp" status="live" joinHref="/program/session/mock-live" />
-          <SessionCard size="small" title="Mock Interview" dateTime="Today, 3:00 PM" duration="45 min" image={pic3} type="coach" status="upcoming" startsIn="2h" />
-          <SessionCard size="small" title="Resume Review" dateTime="Oct 29, 5:00 PM" duration="45 min" image={pic5} type="coach" status="upcoming" />
-        </div>
-
-        <NavLink to="/dashboard" className="mt-5 flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
-          My Purchases
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
-            <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </NavLink>
-        <div className="mt-2 flex flex-col -mx-2">
-          <OfferingCard type="hourly" title="1h 20m with Jessica" subtitle="45m available to schedule" image={pic6} purchased showImage size="small" />
-          <OfferingCard type="package" title="MBA Application Package" subtitle={<span>Comprehensive package · <span className="text-gray-dark">Active</span></span>} image={pic3} purchased showImage size="small" />
-        </div>
-
-        <NavLink to="/dashboard" className="mt-5 flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070] transition-opacity hover:opacity-80">
-          My Groups
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
-            <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </NavLink>
-        <div className="mt-2 flex flex-col -mx-2">
-          <GroupCard
-            name="AI BP April 26"
-            image={groupImg1}
-            members={18}
-            newPosts={3}
-            to="/groups/ai-bp-apr-26"
-            size="small"
-          />
-          <GroupCard
-            name="MBA Admissions 2027"
-            image={groupImg2}
-            members={142}
-            newPosts={0}
-            to="/groups/mba-admissions-2027"
-            size="small"
-          />
-        </div>
       </div>
 
+      {/* My Experts */}
+      <SidebarSectionCard title="My experts" to="/dashboard" bleed={false}>
+        <div className="grid grid-cols-3 gap-x-3">
+          {MY_EXPERTS.slice(0, 3).map((e) => (
+            <NavLink key={e.name} to="/coach-profile" className="group flex flex-col items-center text-center transition-opacity hover:opacity-90">
+              <img src={e.photo} alt={e.name} className="h-12 w-12 rounded-full object-cover" />
+              <p className="mt-2 w-full truncate text-[14px] font-semibold leading-tight text-gray-dark">{e.name}</p>
+              <p className={`mt-0.5 text-[12px] font-medium leading-tight ${e.outOfTime ? "text-gray-extra-light" : "text-gray-light"}`}>{e.timeLeft}</p>
+            </NavLink>
+          ))}
+        </div>
+      </SidebarSectionCard>
+
+      <Button onClick={() => navigate("/dashboard")} size="md" variant="secondary" rounded="rounded-full" className="self-start font-semibold">
+        View dashboard
+      </Button>
     </div>
   );
 }

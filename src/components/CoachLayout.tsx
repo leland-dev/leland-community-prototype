@@ -10,6 +10,7 @@ import moneyIcon from "../assets/icons/money.svg";
 import starIcon from "../assets/icons/star-icon.svg";
 import discountIcon from "../assets/icons/discount.svg";
 import livestreamIcon from "../assets/icons/lte-signal.svg";
+import bookOpenIcon from "../assets/icons/book-open.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import mbaIcon from "../assets/icons/category-icons/mba.svg";
 import consultingIcon from "../assets/icons/category-icons/consulting.svg";
@@ -20,6 +21,7 @@ const sidebarItems = [
   { to: "/coach/profile-new", label: "Profile", icon: userIcon },
   { to: "/coach/opportunities", label: "Opportunities", icon: lightningIcon },
   { to: "/coach/livestreams", label: "Livestreams", icon: livestreamIcon },
+  { to: "/coach/content", label: "Content", icon: bookOpenIcon },
   { to: "/coach/calendar", label: "Calendar", icon: calendarIcon },
   { to: "/coach/earnings", label: "Earnings", icon: moneyIcon },
   { to: "/coach/reviews", label: "Reviews", icon: starIcon },

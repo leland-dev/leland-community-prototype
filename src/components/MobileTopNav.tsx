@@ -73,9 +73,11 @@ export default function MobileTopNav() {
       style={{
         background: darkNav
           ? "#111111"
-          : navTheme.bgGradient
-            ? `linear-gradient(to bottom, ${navTheme.bg}, transparent)`
-            : navTheme.bg,
+          : navTheme.scrollReveal && scrolled
+            ? "#ffffff"
+            : navTheme.bgGradient
+              ? `linear-gradient(to bottom, ${navTheme.bg}, transparent)`
+              : navTheme.bg,
       }}
     >
       {/* Left: menu — or Back button on a post detail / profile template page */}

@@ -22,11 +22,14 @@ interface SessionCardProps {
   startsIn?: string;
   hasRecording?: boolean;
   hideImage?: boolean;
-  size?: "large" | "small";
+  /** "auto" renders small styles below a 500px container width, large above it. */
+  size?: "large" | "small" | "auto";
   cta?: React.ReactNode;
   joinHref?: string;
   /** Day of the month shown in the calendar icon. Parsed from `dateTime` when omitted. */
   day?: string | number;
+  /** Tailwind color class for the date/time subtitle (defaults to the muted gray). */
+  subtitleColorClass?: string;
 }
 
 // Apple-style calendar chip: blue header bar over a white face with the day.
@@ -115,15 +118,28 @@ export default function SessionCard({
   cta,
   joinHref,
   day,
+  subtitleColorClass = "text-[#707070]",
 }: SessionCardProps) {
   const isPast = status === "past";
+  const isAuto = size === "auto";
   const isSmall = size === "small";
   const dayNum = day != null ? String(day) : dayFromDateTime(dateTime);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const titleSizeClass = isSmall ? "text-[14px]" : "text-[16px]";
-  const subtitleSizeClass = isSmall ? "text-[12px]" : "text-[14px]";
+  // "auto" swaps small→large styles at a 500px container width via @container.
+  const titleSizeClass = isAuto ? "text-[14px] @[500px]:text-[16px]" : isSmall ? "text-[14px]" : "text-[16px]";
+  const subtitleSizeClass = isAuto ? "text-[12px] @[500px]:text-[14px]" : isSmall ? "text-[12px]" : "text-[14px]";
+  const rowPadClass = isAuto ? "py-[10px] @[500px]:py-3" : isSmall ? "py-[10px]" : "py-3";
+
+  // Join button: sized to match; in auto mode both sizes render and toggle by
+  // container width (a Button's size prop can't itself be a container query).
+  const joinButton = (sz: "sm" | "md") =>
+    joinHref ? (
+      <LinkButton size={sz} variant="dark" rounded="rounded-full" style={{ fontWeight: 600 }} href={joinHref}>Join</LinkButton>
+    ) : (
+      <Button size={sz} variant="dark" rounded="rounded-full" style={{ fontWeight: 600 }}>Join</Button>
+    );
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -141,7 +157,7 @@ export default function SessionCard({
 
   return (
     <div className="@container">
-      <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 pr-1 transition-colors hover:bg-[#F5F5F5] ${isSmall ? "py-[10px]" : "py-3"}`}>
+      <div className={`flex cursor-pointer items-center gap-3 rounded-[12px] bg-white pl-2 pr-1 transition-colors hover:bg-[#F5F5F5] ${rowPadClass}`}>
         {/* Calendar icon — always shown (unless explicitly hidden) */}
         {!hideImage && <CalendarIcon day={dayNum} dim={isPast} />}
 
@@ -150,7 +166,7 @@ export default function SessionCard({
           <p className={`truncate ${titleSizeClass} leading-[1.2] font-semibold ${isPast ? "text-[#707070]" : "text-gray-dark"}`}>
             {title}
           </p>
-          <p className={`truncate ${subtitleSizeClass} leading-[1.4] text-[#707070]`}>
+          <p className={`truncate ${subtitleSizeClass} leading-[1.4] ${subtitleColorClass}`}>
             {status === "live" ? (
               <><span className="text-red">Happening now</span> · Started at {dateTime.split(" at ")[1]} · <span className="text-[#9B9B9B]">{duration}</span></>
             ) : (
@@ -162,11 +178,12 @@ export default function SessionCard({
         {/* Right action area */}
         <div className="flex shrink-0 items-center gap-0 self-stretch">
           {cta ? cta : status === "live" ? (
-            joinHref ? (
-              <LinkButton size={isSmall ? "sm" : "md"} variant="dark" rounded="rounded-full" style={{ fontWeight: 600 }} href={joinHref}>Join</LinkButton>
-            ) : (
-              <Button size={isSmall ? "sm" : "md"} variant="dark" rounded="rounded-full" style={{ fontWeight: 600 }}>Join</Button>
-            )
+            isAuto ? (
+              <>
+                <span className="@[500px]:hidden">{joinButton("sm")}</span>
+                <span className="hidden @[500px]:inline-flex">{joinButton("md")}</span>
+              </>
+            ) : joinButton(isSmall ? "sm" : "md")
           ) : status === "upcoming" ? null
           : isPast && hasRecording && (type === "event" || type === "bootcamp") ? (
             <Button size="md" variant="secondary" className="hidden @[448px]:inline-flex">

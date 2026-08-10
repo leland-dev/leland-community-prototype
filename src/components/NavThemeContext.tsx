@@ -20,6 +20,9 @@ interface NavTheme {
   bgGradient?: boolean;
   /** Slide the nav in from the right on mount */
   slideIn?: boolean;
+  /** Nav matches `bg` at the top of the page, then swaps to white + a subtle
+   *  shadow once the user scrolls (desktop + mobile). */
+  scrollReveal?: boolean;
 }
 
 const defaultTheme: NavTheme = { bg: "white", light: false, hideWordmark: false };
@@ -92,7 +95,7 @@ export function useSetNavTheme(t: NavTheme) {
   useEffect(() => {
     setTheme(t);
     return () => setTheme(defaultTheme);
-  }, [t.bg, t.light, t.hideWordmark, t.themeColor, t.bgGradient, setTheme]);
+  }, [t.bg, t.light, t.hideWordmark, t.themeColor, t.bgGradient, t.scrollReveal, setTheme]);
 }
 
 export function useNavBackHandler() {
