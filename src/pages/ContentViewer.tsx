@@ -31,6 +31,7 @@ import {
   IconCheck,
   IconClock,
   IconArrowUpRight,
+  IconArrowLeft,
   IconBooks,
   IconModules,
   IconExperiences,
@@ -2258,13 +2259,13 @@ export default function ContentViewer() {
       )}
       {/* Mobile page header — stands in for the global nav + desktop header
           below lg: back to My content, course title, and a drawer toggle. */}
-      <header className="flex shrink-0 items-center gap-3 border-b border-leland-gray-stroke bg-white px-4 py-3 md:hidden">
+      <header className="flex shrink-0 items-center gap-4 border-b border-leland-gray-stroke bg-white px-4 py-3 md:hidden">
         <Link
           to={exitDestination}
           aria-label="Back to My content"
-          className="flex size-9 shrink-0 items-center justify-center rounded-full text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
         >
-          <IconChevronLeft className="size-5" aria-hidden />
+          <IconArrowLeft className="size-5" aria-hidden />
         </Link>
         <span className="min-w-0 flex-1 truncate leland-heading-base font-semibold text-leland-gray-dark">
           {COURSE_TITLE_FULL}
@@ -2273,7 +2274,7 @@ export default function ContentViewer() {
           type="button"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open menu"
-          className="flex size-9 shrink-0 items-center justify-center rounded-full border border-leland-gray-stroke text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
         >
           <IconMenuBurger className="size-5" aria-hidden />
         </button>
