@@ -51,6 +51,7 @@ type StepKey = "product" | "offerings" | "page";
 type PricingOption = {
   id: number;
   name: string;   // shown/edited only when there is more than one option
+  description: string;   // optional blurb shown under the option name
   access: "free" | "paid";  // per-option access mode
   billing: "recurring" | "one-time";
   price: string;
@@ -66,6 +67,7 @@ type PricingOption = {
 const newPricingOption = (id: number): PricingOption => ({
   id,
   name: "",
+  description: "",
   access: "free",
   billing: "one-time",
   price: "0.00",
@@ -564,7 +566,17 @@ export default function CoachProductNew() {
 
   // Pricing options (step 2). Each is a self-contained option.
   const makePricingOption = () => newPricingOption(nextPricingId.current++);
-  const addPricingOption = () => setPricingOptions((o) => [...o, makePricingOption()]);
+  const addPricingOption = () => {
+    // Mirror the primary option's product line-up into the new option, but as
+    // fresh, unconfigured instances — same types, empty setup, "Configure" CTA.
+    const template = pricingOptions[0];
+    const clones = (template?.productIds ?? [])
+      .map((id) => added.find((a) => a.id === id))
+      .filter((it): it is OfferingItem => Boolean(it))
+      .map((it) => makeOffering(it.slug));
+    if (clones.length) setAdded((a) => [...a, ...clones]);
+    setPricingOptions((o) => [...o, { ...makePricingOption(), productIds: clones.map((c) => c.id) }]);
+  };
   const removePricingOption = (id: number) => {
     // Drop the deleted option's products from the shared library so they don't
     // linger as orphans (which the preview would keep showing).
@@ -724,7 +736,7 @@ export default function CoachProductNew() {
             paidType={previewPaidType}
             price={previewPrice}
             added={previewItems}
-            joinLabel={buttonText}
+            joinLabel={pricingOptions.length > 1 ? "Select an option" : buttonText}
           />
         </aside>
       </div>
@@ -954,7 +966,7 @@ function PriceFields({ option, onChange, mvp }: { option: PricingOption; onChang
       <div className="rounded-xl border border-gray-stroke bg-white transition-colors focus-within:border-gray-dark">
         <div className="flex items-end justify-between gap-2 px-5 py-6">
           <div className="flex items-center gap-1">
-            <span className="text-[32px] font-medium leading-none text-gray-dark">$</span>
+            <span className={`text-[32px] font-medium leading-none ${isFree ? "text-gray-extra-light" : "text-gray-dark"}`}>$</span>
             <input
               inputMode="decimal"
               value={option.price}
@@ -962,7 +974,7 @@ function PriceFields({ option, onChange, mvp }: { option: PricingOption; onChang
               onChange={(e) => onChange({ price: e.target.value.replace(/[^0-9.]/g, "") })}
               onBlur={formatPrice}
               style={{ width: `${priceWidthCh}ch` }}
-              className="min-w-0 bg-transparent text-left text-[32px] font-medium leading-none text-gray-dark underline decoration-gray-dark decoration-dotted decoration-2 underline-offset-[6px] outline-none placeholder:text-gray-dark"
+              className={`min-w-0 bg-transparent text-left text-[32px] font-medium leading-none underline decoration-dotted decoration-2 underline-offset-[6px] outline-none ${isFree ? "text-gray-extra-light decoration-gray-extra-light placeholder:text-gray-extra-light" : "text-gray-dark decoration-gray-dark placeholder:text-gray-dark"}`}
             />
           </div>
           <div className="pb-1">
@@ -1012,8 +1024,9 @@ function PriceFields({ option, onChange, mvp }: { option: PricingOption; onChang
 // When `bare` (the single-option default), renders as two flat labeled sections
 // ("Add products" and "Pricing"). Otherwise wraps in card chrome with an
 // editable option name — used when there are multiple options.
-function PricingOptionCard({ option, products, available, bare, canDelete, mvp, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct }: {
+function PricingOptionCard({ option, index, products, available, bare, canDelete, mvp, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct }: {
   option: PricingOption;
+  index: number;
   products: OfferingItem[];
   available: (typeof offeringTypes)[number][];
   bare: boolean;
@@ -1032,31 +1045,31 @@ function PricingOptionCard({ option, products, available, bare, canDelete, mvp, 
             the step level, above this) */}
         <ProductPicker items={products} available={available} addVariant="grid" onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} />
 
-        <div className="my-10 border-t border-gray-stroke" />
-
-        {/* Pricing */}
-        <section>
-          <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
-          <p className="mt-0.5 text-[15px] text-gray-light">Set a price, or enter $0 to offer it for free.</p>
-          <div className="mt-5">
-            <PriceFields option={option} onChange={onChange} mvp={mvp} />
-          </div>
-        </section>
+        {/* Pricing — only surfaced once at least one product has been added */}
+        {products.length > 0 && (
+          <>
+            <div className="my-10 border-t border-gray-stroke" />
+            <section>
+              <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
+              <p className="mt-0.5 text-[15px] text-gray-light">Set a price, or enter $0 to offer it for free.</p>
+              <div className="mt-5">
+                <PriceFields option={option} onChange={onChange} mvp={mvp} />
+              </div>
+            </section>
+          </>
+        )}
       </div>
     );
   }
 
-  // Carded (multiple options)
+  // Carded (multiple options): each option is a self-contained white card with an
+  // "Option N" headline, name + description fields, its products, and its price.
+  // Cards sit inside a padded gray container (see OfferingsStep).
   return (
-    <div className="rounded-2xl bg-gray-hover p-5">
-      {/* Name + delete */}
+    <div className="rounded-2xl bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.08)]">
+      {/* Headline + delete */}
       <div className="mb-4 flex items-center gap-3">
-        <input
-          value={option.name}
-          onChange={(e) => onChange({ name: e.target.value })}
-          placeholder="Option name..."
-          className="min-w-0 flex-1 bg-transparent text-[22px] font-semibold leading-tight text-gray-dark outline-none placeholder:text-[#B1B1B1]"
-        />
+        <h3 className="min-w-0 flex-1 text-[22px] font-semibold leading-tight text-gray-dark">Option {index + 1}</h3>
         {canDelete && (
           <Button iconOnly size="sm" variant="secondary" onClick={onRemove} aria-label="Remove pricing option" className="shrink-0">
             <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
@@ -1064,23 +1077,62 @@ function PricingOptionCard({ option, products, available, bare, canDelete, mvp, 
         )}
       </div>
 
-      {/* Products — a white card (header + list) once products exist; a plain
-          "No products added" label when empty. Add button sits below either. */}
-      {products.length === 0 ? (
-        <p className="text-[15px] font-medium text-gray-extra-light">No products added</p>
-      ) : (
-        <div className="overflow-hidden rounded-xl border border-gray-stroke bg-white">
-          <p className="px-4 pt-4 pb-1 text-[15px] font-medium text-gray-extra-light">Included products:</p>
-          <ProductPicker items={products} available={available} addVariant="menu" boxed hideAdd onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} />
+      {/* Name + price + description */}
+      <div className="mb-5 flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Name</label>
+            <input
+              value={option.name}
+              onChange={(e) => onChange({ name: e.target.value })}
+              placeholder="Option name"
+              className="w-full rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[15px] text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Price</label>
+            <div className="flex items-center rounded-lg border border-gray-stroke bg-white px-4 transition-colors focus-within:border-gray-dark">
+              <span className="text-[15px] text-gray-light">$</span>
+              <input
+                inputMode="decimal"
+                value={option.price}
+                onChange={(e) => onChange({ price: e.target.value.replace(/[^0-9.]/g, "") })}
+                onBlur={() => { if (option.price !== "" && !Number.isNaN(Number(option.price))) onChange({ price: Number(option.price).toFixed(2) }); }}
+                placeholder="0.00"
+                className="w-full bg-transparent py-3 pl-1.5 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1]"
+              />
+            </div>
+          </div>
         </div>
-      )}
-      <div className="mt-3">
-        <AddProductMenu available={available} onAdd={onAddProduct} />
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Description</label>
+          <textarea
+            value={option.description}
+            onChange={(e) => onChange({ description: e.target.value })}
+            placeholder="A short description of what's included in this option."
+            rows={2}
+            className="w-full resize-none rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[15px] leading-snug text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
+          />
+        </div>
       </div>
 
-      {/* Price */}
-      <div className="mt-5">
-        <PriceFields option={option} onChange={onChange} mvp={mvp} />
+      {/* Products — a labeled white card holding the product list (or an empty
+          label) with the "Add product" button tucked inside at the bottom. The
+          "Included products" label matches the Name/Price/Description labels. */}
+      <div>
+        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Included products</label>
+        <div className="overflow-hidden rounded-xl border border-gray-stroke bg-white">
+          {products.length === 0 ? (
+            <p className="px-4 py-4 text-[15px] font-medium text-gray-extra-light">No products added</p>
+          ) : (
+            <ProductPicker items={products} available={available} addVariant="menu" boxed hideAdd onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} />
+          )}
+        </div>
+        {available.length > 0 && (
+          <div className="mt-3">
+            <AddProductMenu available={available} onAdd={onAddProduct} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1271,10 +1323,14 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
       <p className="mt-0.5 text-[15px] text-gray-light">Set up what's included and how people pay for it.</p>
 
       {/* Each option is a self-contained unit: name + products + access + price.
-          A single option renders flat; multiple options render as stacked cards. */}
-      <div className="mt-6 flex flex-col gap-3">
+          A single option renders flat; multiple options render as white cards
+          nested inside a padded gray container. The 12px gutter is split between
+          this container (6px) and each card's motion wrapper (6px) so the card
+          box-shadow has room and isn't clipped by the wrapper's overflow-hidden
+          (needed for the add/remove height animation). */}
+      <div className={`mt-6 flex flex-col ${multi ? "rounded-[28px] bg-gray-hover p-1.5" : "gap-3"}`}>
         <AnimatePresence initial={false}>
-          {pricingOptions.map((opt) => {
+          {pricingOptions.map((opt, i) => {
             const { items, avail } = optionData(opt);
             return (
               <motion.div
@@ -1283,10 +1339,11 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={offeringTransition}
-                className="overflow-hidden"
+                className={`overflow-hidden ${multi ? "p-1.5" : ""}`}
               >
                 <PricingOptionCard
                   option={opt}
+                  index={i}
                   products={items}
                   available={avail}
                   bare={!multi}
@@ -1304,10 +1361,13 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
         </AnimatePresence>
       </div>
 
-      {/* Add another pricing option — reads as part of the Pricing section. */}
-      <div className="mt-3">
-        <AddPricingOptionButton onClick={onAddPricingOption} />
-      </div>
+      {/* Add another pricing option — reads as part of the Pricing section, so
+          it only surfaces once at least one product has been added. */}
+      {added.length > 0 && (
+        <div className="mt-6 flex justify-center">
+          <AddPricingOptionButton onClick={onAddPricingOption} />
+        </div>
+      )}
 
       <ConfigModal
         item={configuring && !isListOffering(configuring.slug) ? configuring : null}
