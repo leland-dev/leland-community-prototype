@@ -1,20 +1,25 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 import {
   IconCheck,
   IconChevronDown,
+  IconChevronRight,
   IconCopy,
   IconDownload,
   IconInfo,
-  IconSparkle,
-  IconWarningTriangle,
+  Tag,
+  TagColor,
 } from "../leland";
+import * as LelandIcons from "../leland/svg/icons";
 
 import { BlockRenderer } from "./BlockRenderer";
 import { H3_CLASS, Prose } from "./Prose";
 
 import type {
   AccordionBlock as AccordionBlockType,
+  BannerBlock as BannerBlockType,
+  BannerColor,
   Block,
   CalloutBlock as CalloutBlockType,
   CodeBlock as CodeBlockType,
@@ -23,50 +28,30 @@ import type {
   EmbedBlock as EmbedBlockType,
   HtmlBlock as HtmlBlockType,
   ImageBlock as ImageBlockType,
+  StepsBlock as StepsBlockType,
   TableBlock as TableBlockType,
+  TagsBlock as TagsBlockType,
   VideoBlock as VideoBlockType,
 } from "../../data/lessonBlocks";
 
 const isTextBlock = (block: Block) => block.kind === "markdown";
 
 // Every background here is a named design-system token — never a raw hex
-// value. "gray" is the default (see CalloutBlock.tone); "warning" is the one
-// deliberate exception to the blue/beige/gray default set.
+// value. "gray" is the default; "warning" is the one deliberate exception to
+// the blue/beige/gray default set.
 const CALLOUT_TONES = {
-  blue: {
-    Icon: IconSparkle,
-    container: "bg-leland-blue-light",
-    icon: "text-leland-blue-dark",
-  },
-  beige: {
-    Icon: IconSparkle,
-    container: "bg-leland-beige",
-    icon: "text-leland-gray-light",
-  },
-  gray: {
-    Icon: IconInfo,
-    container: "bg-leland-gray-hover",
-    icon: "text-leland-gray-light",
-  },
-  warning: {
-    Icon: IconWarningTriangle,
-    container: "bg-leland-orange-light",
-    icon: "text-leland-orange-dark",
-  },
+  blue: { container: "bg-leland-blue-light" },
+  beige: { container: "bg-leland-beige" },
+  gray: { container: "bg-leland-gray-hover" },
+  warning: { container: "bg-leland-orange-light" },
 } as const;
 
 export function CalloutBlock({ block }: { block: CalloutBlockType }) {
   const tone = CALLOUT_TONES[block.tone ?? "gray"];
-  const Icon = tone.Icon;
   return (
-    <div className={`flex gap-3 rounded-xl px-6 py-6 md:py-8 ${tone.container}`}>
-      {block.showIcon !== false ? <Icon className={`size-5 shrink-0 ${tone.icon}`} /> : null}
+    <div className={`rounded-xl px-6 py-6 md:py-8 ${tone.container}`}>
       <div className="flex min-w-0 flex-col gap-4">
-        {block.title ? (
-          <p className="leland-heading-lg font-semibold text-leland-gray-dark">
-            {block.title}
-          </p>
-        ) : null}
+        {block.title ? <h3 className={H3_CLASS}>{block.title}</h3> : null}
         <div className="flex flex-col">
           {block.content.map((item, i) => {
             // Consecutive text blocks get normal paragraph spacing (16px); a
@@ -83,6 +68,52 @@ export function CalloutBlock({ block }: { block: CalloutBlockType }) {
         </div>
       </div>
     </div>
+  );
+}
+
+// Backgrounds/icon tints match the design system's tag colors (leland/Tag.tsx)
+// exactly, so a banner's color always resolves to a real token, never a raw
+// hex value. Heading/subtext text stay the fixed gray-dark/#222-80% treatment
+// on every color except "black", which needs light text to stay legible.
+const BANNER_COLORS: Record<BannerColor, { container: string; icon: string; text?: string }> = {
+  gray: { container: "bg-leland-gray-hover", icon: "text-leland-gray-dark" },
+  white: { container: "bg-white border border-leland-gray-stroke", icon: "text-leland-gray-dark" },
+  green: { container: "bg-leland-success-extra-light", icon: "text-leland-dark-green" },
+  yellow: { container: "bg-leland-primary-extra-light", icon: "text-leland-yellow-dark" },
+  blue: { container: "bg-leland-blue-light", icon: "text-leland-blue-dark" },
+  red: { container: "bg-leland-red-light", icon: "text-leland-red-dark" },
+  beige: { container: "bg-leland-tan-light", icon: "text-leland-tan-dark" },
+  black: { container: "bg-leland-black", icon: "text-leland-white", text: "text-leland-white" },
+};
+
+export function BannerBlock({ block }: { block: BannerBlockType }) {
+  const color = BANNER_COLORS[block.color ?? "gray"];
+  const Icon = (LelandIcons as Record<string, typeof IconInfo>)[block.icon ?? "IconInfo"] ?? IconInfo;
+  const headingClass = `leland-paragraph-lg font-semibold! ${color.text ?? "text-leland-gray-dark"}`;
+  const subtextClass = `leland-paragraph-base ${color.text ?? "text-[#222222]/80"}`;
+
+  const content = (
+    <>
+      <span className="flex min-w-0 flex-1 items-start gap-3">
+        <Icon className={`size-6 shrink-0 ${color.icon}`} />
+        <span className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className={headingClass}>{block.text}</span>
+          {block.subtext ? <span className={subtextClass}>{block.subtext}</span> : null}
+        </span>
+      </span>
+      {block.href ? <IconChevronRight className={`size-6 shrink-0 ${color.icon}`} /> : null}
+    </>
+  );
+
+  return block.href ? (
+    <Link
+      to={block.href}
+      className={`flex items-center gap-6 rounded-xl px-6 py-5 transition-colors hover:brightness-95 ${color.container}`}
+    >
+      {content}
+    </Link>
+  ) : (
+    <div className={`flex items-center gap-6 rounded-xl px-6 py-5 ${color.container}`}>{content}</div>
   );
 }
 
@@ -139,11 +170,14 @@ export function DividerBlock(_: { block: DividerBlockType }) {
 // Structured table: no outer card, muted header row, thin dividers between
 // body rows only (no divider after the header, none after the last row).
 export function TableBlock({ block }: { block: TableBlockType }) {
+  const columns = block.columnWidths
+    ? block.columnWidths.join(" ")
+    : `repeat(${block.headers.length}, minmax(120px, 1fr))`;
   return (
     <div className="overflow-x-auto">
       <div
         className="grid min-w-full gap-x-8"
-        style={{ gridTemplateColumns: `repeat(${block.headers.length}, minmax(120px, 1fr))` }}
+        style={{ gridTemplateColumns: columns }}
       >
         {block.headers.map((header, i) => (
           <div key={`h-${i}`} className="pb-4 leland-paragraph-base text-leland-gray-light md:leland-paragraph-lg">
@@ -156,13 +190,30 @@ export function TableBlock({ block }: { block: TableBlockType }) {
               key={`${rowIndex}-${colIndex}`}
               className={`py-3 leland-paragraph-base text-leland-gray-dark md:leland-paragraph-lg ${
                 rowIndex < block.rows.length - 1 ? "border-b border-leland-gray-stroke" : ""
-              }`}
+              } ${colIndex === 0 && block.firstColumnBold !== false ? "font-semibold" : ""}`}
             >
               {cell}
             </div>
           )),
         )}
       </div>
+    </div>
+  );
+}
+
+const TAG_COLORS: Record<NonNullable<TagsBlockType["tags"][number]["color"]>, TagColor> = {
+  white: TagColor.WHITE,
+  gray: TagColor.GRAY,
+};
+
+// A wrapping row of the design system's real Tag component — not inline in
+// text, since Tag is a chip and Markdown has no way to embed one mid-sentence.
+export function TagsBlock({ block }: { block: TagsBlockType }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {block.tags.map((tag, i) => (
+        <Tag key={i} text={tag.text} tagColor={TAG_COLORS[tag.color ?? "gray"]} />
+      ))}
     </div>
   );
 }
@@ -201,22 +252,21 @@ export function CodeBlock({ block }: { block: CodeBlockType }) {
 
   return (
     <div className="overflow-hidden rounded-lg border border-leland-gray-stroke">
-      <div className="flex items-center justify-between gap-3 border-b border-leland-gray-stroke bg-white px-4 py-2">
-        <span className="truncate font-mono text-[12px] text-leland-gray-light">
+      <div className="flex items-center justify-between gap-3 bg-white py-4 pl-6 pr-4">
+        <span className="truncate leland-heading-base text-leland-gray-extra-light">
           {block.filename ?? block.language}
         </span>
         <button
           type="button"
           onClick={handleCopy}
           aria-label="Copy code"
-          className="flex shrink-0 items-center gap-1.5 rounded px-1.5 py-1 text-[12px] font-medium text-leland-gray-light hover:bg-leland-gray-hover hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+          className="flex shrink-0 items-center justify-center rounded-lg p-2.5 text-leland-gray-light hover:bg-leland-gray-hover hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
         >
-          {copied ? <IconCheck className="size-3.5" /> : <IconCopy className="size-3.5" />}
-          {copied ? "Copied" : "Copy"}
+          {copied ? <IconCheck className="size-5" /> : <IconCopy className="size-5" />}
         </button>
       </div>
-      <pre className="overflow-x-auto bg-white p-4">
-        <code className="font-mono text-[13px] leading-relaxed text-leland-gray-dark">{block.code}</code>
+      <pre className={`bg-white px-6 pb-6 pt-0 ${block.language === "prompt" ? "whitespace-pre-wrap break-words" : "overflow-x-auto"}`}>
+        <code className="font-mono leland-paragraph-base text-leland-gray-dark">{block.code}</code>
       </pre>
     </div>
   );
@@ -242,6 +292,36 @@ export function AccordionBlock({ block }: { block: AccordionBlockType }) {
         </details>
       ))}
     </div>
+  );
+}
+
+// Numbered steps with optional nested blocks per step. Matches the ordered-list
+// circle-badge treatment from Prose.tsx but allows embedding structured blocks
+// (e.g. a copyable CodeBlock for a prompt) below each step's description.
+export function StepsBlock({ block }: { block: StepsBlockType }) {
+  return (
+    <ol className="flex flex-col text-leland-gray-dark">
+      {block.items.map((step, i) => (
+        <li key={i} className="group grid grid-cols-[24px_1fr] gap-x-4">
+          <div className="flex flex-col items-center">
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-[13px] font-semibold text-leland-gray-dark">
+              {i + 1}
+            </span>
+            <span className="mt-1 w-0 flex-1 border-l-2 border-dotted border-leland-gray-stroke group-last:hidden" />
+          </div>
+          <div className="flex min-w-0 flex-col gap-3 pb-4 group-last:pb-0">
+            <Prose body={step.text} allowH1={false} />
+            {step.blocks?.length ? (
+              <div className="flex flex-col gap-3">
+                {step.blocks.map((b, j) => (
+                  <BlockRenderer key={j} block={b} allowH1={false} />
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </li>
+      ))}
+    </ol>
   );
 }
 

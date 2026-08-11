@@ -99,22 +99,20 @@ function buildComponents(allowH1: boolean): Components {
     <img src={typeof src === "string" ? src : undefined} alt={alt} className="max-w-full rounded-lg" />
   ),
   table: ({ children }) => (
-    // Extra top margin so tables aren't cramped against the text above (adds to
-    // the Prose flex gap).
     <div className="mt-4 overflow-x-auto">
-      <table className="w-full border-collapse overflow-hidden rounded-lg border border-leland-gray-stroke bg-white text-left">
+      <table className="w-full border-collapse text-left">
         {children}
       </table>
     </div>
   ),
-  thead: ({ children }) => <thead className="bg-leland-gray-hover">{children}</thead>,
+  thead: ({ children }) => <thead>{children}</thead>,
   th: ({ children }) => (
-    <th className="border-b border-leland-gray-stroke px-4 py-2.5 leland-heading-base font-semibold text-leland-gray-dark">
+    <th className="pb-4 pr-8 leland-paragraph-base text-leland-gray-light font-normal">
       {children}
     </th>
   ),
   td: ({ children }) => (
-    <td className="border-b border-leland-gray-stroke px-4 py-2.5 align-top leland-paragraph-base text-leland-gray-dark">
+    <td className="py-3 pr-8 align-top leland-paragraph-base text-leland-gray-dark [tr:last-child_&]:border-0 border-b border-leland-gray-stroke">
       {children}
     </td>
   ),

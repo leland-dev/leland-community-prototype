@@ -1,19 +1,13 @@
-import { type FC, type ReactNode, type SVGProps, useRef, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { type ReactNode, useRef, useEffect, useState } from "react";
 
 import {
   Button,
   ButtonColor,
   ButtonSize,
-  IconArrowRight,
   IconArrowUpRight,
-  IconBookClosed,
-  IconCalendar,
   IconChevronRight,
   IconDotsVertical,
-  IconHelp,
   IconLivestreamSignal,
-  IconMegaphone,
   IconPlayVideo,
   IconQuestion,
   IconShare,
@@ -22,10 +16,7 @@ import {
 
 import { useLessonPage } from "./LessonPageContext";
 
-import type {
-  CtaBlock as CtaBlockType,
-  LiveSessionBannerBlock as LiveSessionBannerBlockType,
-} from "../../data/lessonBlocks";
+import type { LiveSessionBannerBlock as LiveSessionBannerBlockType } from "../../data/lessonBlocks";
 
 const CALLOUT_CONTAINER =
   "flex w-full items-center gap-3 rounded-lg border border-leland-gray-stroke bg-white p-4";
@@ -538,50 +529,3 @@ export function LessonFooterActions() {
   );
 }
 
-const CTA_ICONS: Record<
-  NonNullable<CtaBlockType["icon"]>,
-  FC<SVGProps<SVGSVGElement>>
-> = {
-  calendar: IconCalendar,
-  arrow: IconArrowRight,
-  book: IconBookClosed,
-  help: IconHelp,
-  megaphone: IconMegaphone,
-};
-
-export function Cta({ block }: { block: CtaBlockType }) {
-  const Icon = block.icon ? CTA_ICONS[block.icon] : null;
-  const isPrimary = block.tone === "primary";
-  const className = `flex w-full items-center gap-4 rounded-xl px-5 py-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
-    isPrimary
-      ? "bg-leland-primary text-leland-on-primary-text hover:bg-leland-primary-hover"
-      : "border border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover"
-  }`;
-
-  const inner = (
-    <>
-      {Icon ? <Icon className="size-5 shrink-0" /> : null}
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="leland-heading-base font-semibold">{block.label}</span>
-        {block.sublabel ? (
-          <span
-            className={`leland-paragraph-sm ${isPrimary ? "opacity-80" : "text-leland-gray-light"}`}
-          >
-            {block.sublabel}
-          </span>
-        ) : null}
-      </span>
-      <IconChevronRight className="size-5 shrink-0 opacity-60" />
-    </>
-  );
-
-  return block.href ? (
-    <Link to={block.href} className={className}>
-      {inner}
-    </Link>
-  ) : (
-    <button type="button" className={className}>
-      {inner}
-    </button>
-  );
-}

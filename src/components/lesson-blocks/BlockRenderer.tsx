@@ -2,6 +2,7 @@ import type { Block } from "../../data/lessonBlocks";
 
 import {
   AccordionBlock,
+  BannerBlock,
   CalloutBlock,
   CodeBlock,
   DividerBlock,
@@ -9,11 +10,13 @@ import {
   EmbedBlock,
   HtmlBlock,
   ImageBlock,
+  StepsBlock,
   TableBlock,
+  TagsBlock,
   VideoBlock,
 } from "./ContentBlocks";
 import { Prose } from "./Prose";
-import { Cta, LiveSessionBanner } from "./ProductBlocks";
+import { LiveSessionBanner } from "./ProductBlocks";
 
 export function BlockRenderer({ block, allowH1 = true }: { block: Block; allowH1?: boolean }) {
   switch (block.kind) {
@@ -39,10 +42,14 @@ export function BlockRenderer({ block, allowH1 = true }: { block: Block; allowH1
       return <TableBlock block={block} />;
     case "download":
       return <DownloadBlock block={block} />;
+    case "banner":
+      return <BannerBlock block={block} />;
+    case "tags":
+      return <TagsBlock block={block} />;
+    case "steps":
+      return <StepsBlock block={block} />;
     case "liveSessionBanner":
       return <LiveSessionBanner block={block} />;
-    case "cta":
-      return <Cta block={block} />;
     default: {
       // Exhaustiveness guard — a new block kind must be handled above.
       const _never: never = block;

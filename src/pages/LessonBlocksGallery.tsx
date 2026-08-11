@@ -63,35 +63,36 @@ const ORDERED_LIST: Block[] = [
   },
 ];
 
+// Trimmed to the examples that actually show off what makes Callout distinct
+// from Banner — holding multiple/richer content blocks. A short one-liner
+// with a title is better demonstrated as a Banner (see BANNER below).
 const CALLOUTS: Block[] = [
-  {
-    kind: "callout",
-    tone: "blue",
-    title: "Tip",
-    content: [{ kind: "markdown", body: "A tip-toned callout, used for helpful, optional context." }],
-  },
-  {
-    kind: "callout",
-    tone: "warning",
-    title: "Heads up",
-    content: [{ kind: "markdown", body: "A warning-toned callout, used when something could trip someone up." }],
-  },
-  {
-    kind: "callout",
-    tone: "gray",
-    content: [{ kind: "markdown", body: "A note-toned callout with no title — plain informational context." }],
-  },
   {
     kind: "callout",
     tone: "gray",
     title: "Callouts can hold more than text",
-    showIcon: false,
     content: [
       {
         kind: "markdown",
         body: "Callouts can contain any text (including lists) plus images or video:\n\n- Lists work fine\n- So do images below",
       },
       { kind: "image", src: coverImage, alt: "Sample image inside a callout" },
+    ],
+  },
+  {
+    kind: "callout",
+    tone: "warning",
+    title: "Almost any block can go inside",
+    content: [
+      { kind: "markdown", body: "Text, a code snippet, a download, and a banner can all sit in one callout:" },
+      {
+        kind: "code",
+        language: "javascript",
+        filename: "example.js",
+        code: ["const greeting = \"Hello, world!\";", "console.log(greeting);"].join("\n"),
+      },
+      { kind: "download", label: "Download PDF", fileSize: "246 KB", filename: "session-1-slides.pdf", href: "#" },
+      { kind: "banner", text: "Nested banners work too", subtext: "Just not nested callouts", color: "white" },
     ],
   },
 ];
@@ -127,6 +128,30 @@ const DOWNLOAD: Block[] = [
   { kind: "download", label: "Download PDF", fileSize: "246 KB", filename: "session-1-slides.pdf", href: "#" },
 ];
 
+const BANNER: Block[] = [
+  { kind: "banner", text: "This is a small banner", subtext: "Optionally, banner subtext will appear here" },
+  {
+    kind: "banner",
+    text: "This banner links somewhere",
+    subtext: "The chevron shows it's clickable",
+    href: "#",
+  },
+  { kind: "banner", text: "A colored, icon-customized banner", icon: "IconSparkle", color: "blue", href: "#" },
+];
+
+const TAGS: Block[] = [
+  {
+    kind: "tags",
+    tags: [
+      { text: "Beginner friendly" },
+      { text: "45 minutes" },
+      { text: "No coding required", color: "white" },
+      { text: "Claude" },
+      { text: "Cowork" },
+    ],
+  },
+];
+
 const EMBED: Block[] = [{ kind: "embed", src: ANIMATION_SRC, height: 160, title: "Sample embed" }];
 
 const DIVIDER: Block[] = [
@@ -155,10 +180,6 @@ const ACCORDION: Block[] = [
   },
 ];
 
-const CTAS: Block[] = [
-  { kind: "cta", label: "Primary action", sublabel: "With a sublabel and icon", tone: "primary", icon: "arrow" },
-  { kind: "cta", label: "Neutral action", tone: "neutral", icon: "book" },
-];
 
 const LIVE_SESSION: Block[] = [
   {
@@ -192,6 +213,7 @@ function GallerySection({ title, blocks }: { title: string; blocks: Block[] }) {
 function GalleryContent() {
   return (
     <LessonPageProvider actions={LESSON_PAGE_STUB_ACTIONS}>
+      <GallerySection title="Live session banner" blocks={LIVE_SESSION} />
       <GallerySection title="Headings & paragraph text" blocks={HEADINGS_AND_TEXT} />
       <GallerySection title="Unordered list" blocks={UNORDERED_LIST} />
       <GallerySection title="Ordered list" blocks={ORDERED_LIST} />
@@ -201,11 +223,11 @@ function GalleryContent() {
       <GallerySection title="Code block" blocks={CODE} />
       <GallerySection title="Table" blocks={TABLE} />
       <GallerySection title="Download" blocks={DOWNLOAD} />
+      <GallerySection title="Banner" blocks={BANNER} />
+      <GallerySection title="Tags" blocks={TAGS} />
       <GallerySection title="Embed" blocks={EMBED} />
       <GallerySection title="Divider" blocks={DIVIDER} />
       <GallerySection title="Expandable / accordion" blocks={ACCORDION} />
-      <GallerySection title="CTA" blocks={CTAS} />
-      <GallerySection title="Live session banner" blocks={LIVE_SESSION} />
     </LessonPageProvider>
   );
 }

@@ -78,6 +78,7 @@ import type {
   LiveSessionVariant,
 } from "../data/lessonBlocks";
 import { LESSON_1_SECTIONS, LESSON_1_TOP_BLOCKS } from "../data/sampleLesson";
+import { LESSON_2_SECTIONS, LESSON_2_TOP_BLOCKS } from "../data/sampleLesson2";
 import {
   BlockList,
   LessonFooterActions,
@@ -141,19 +142,13 @@ const DASHBOARD = "/dashboard";
 // The community page opens externally (new tab) — it's the existing group page.
 const COMMUNITY_GROUP_ID = "ai-bp-apr-26";
 
-// Lessons 2–4 come from the generated manifest (legacy HTML iframe sections).
-// Lesson 1 is the block/CMS demo: hand-authored native block sections (incl. an
-// inline video recording), plus a demo PDF section so a media section still
-// coexists with block sections.
-const LESSONS: Lesson[] = (lessonData as Lesson[]).map((lesson) =>
-  lesson.number === 1
-    ? {
-        ...lesson,
-        topBlocks: LESSON_1_TOP_BLOCKS,
-        sections: LESSON_1_SECTIONS,
-      }
-    : lesson,
-);
+// Lessons 3–4 come from the generated manifest (legacy HTML iframe sections).
+// Lessons 1 and 2 are the block/CMS demo: hand-authored native block sections.
+const LESSONS: Lesson[] = (lessonData as Lesson[]).map((lesson) => {
+  if (lesson.number === 1) return { ...lesson, topBlocks: LESSON_1_TOP_BLOCKS, sections: LESSON_1_SECTIONS };
+  if (lesson.number === 2) return { ...lesson, topBlocks: LESSON_2_TOP_BLOCKS, sections: LESSON_2_SECTIONS };
+  return lesson;
+});
 
 const START_HERE: Lesson = {
   id: "start-here",
@@ -754,6 +749,7 @@ function SidebarMenuItem({
   subtext,
   active,
   external,
+  trailingIcon: TrailingIcon,
   onClick,
 }: {
   Icon: FC<SVGProps<SVGSVGElement>>;
@@ -761,8 +757,15 @@ function SidebarMenuItem({
   subtext?: string;
   active?: boolean;
   external?: boolean;
+  trailingIcon?: FC<SVGProps<SVGSVGElement>>;
   onClick: () => void;
 }) {
+  const trailing = TrailingIcon
+    ? <TrailingIcon className="size-5 shrink-0 text-leland-gray-light" />
+    : external
+    ? <IconArrowUpRight className="size-5 shrink-0 text-leland-gray-light" />
+    : null;
+
   return (
     <button
       type="button"
@@ -782,11 +785,7 @@ function SidebarMenuItem({
           </span>
         ) : null}
       </span>
-      {external ? (
-        <IconArrowUpRight className="size-5 shrink-0 text-leland-gray-light" />
-      ) : (
-        <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
-      )}
+      {trailing}
     </button>
   );
 }
@@ -1090,67 +1089,76 @@ function CombinedSidebar({
         {liveProgram && (
           <>
           <div ref={linksSentinelRef} className="h-px" />
-          <div ref={resourcesRef} className="sticky top-0 z-10 bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)]">
-            <div className={!linksStuck ? "border-t border-leland-gray-stroke" : ""}>
-              <button
-                type="button"
-                onClick={() => setLinksOpen(!linksOpen)}
-                className="flex w-full items-center gap-3 px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-              >
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-leland-gray-hover">
-                  <IconLink className="size-6 text-leland-gray-dark" />
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
-                  <p className="leland-heading-base font-semibold text-leland-gray-dark">Resource links</p>
-                  <p className="leland-paragraph-sm text-leland-gray-light">Office hours and 4 more</p>
-                </div>
-                <IconChevronDown
-                  className={`size-5 shrink-0 text-leland-gray-dark transition-transform duration-200 ${linksOpen ? "rotate-180" : ""}`}
-                />
-              </button>
+          <div ref={resourcesRef} className={`sticky top-0 z-10 bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border-b border-leland-gray-stroke${!linksStuck ? " border-t" : ""}`}>
+            <div className="px-3">
+              <div className="flex flex-col gap-5 py-5">
+                <button
+                  type="button"
+                  onClick={() => setLinksOpen(!linksOpen)}
+                  className="flex w-full items-center gap-3 px-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                >
+                  <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-leland-gray-stroke">
+                    <IconLink className="size-6 text-leland-gray-dark" />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+                    <p className="leland-heading-lg font-semibold text-leland-gray-dark">Resource links</p>
+                    <p className="leland-paragraph-sm text-leland-gray-extra-light">Office hours and 4 more</p>
+                  </div>
+                  <IconChevronDown
+                    className={`size-5 shrink-0 text-leland-gray-dark transition-transform duration-200 ${linksOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
 
-              {linksOpen && (
-                <div className="flex flex-col gap-1 px-3 pb-3">
-                  <SidebarMenuItem
-                    Icon={IconExperiences}
-                    label="Office hours"
-                    external
-                    onClick={() => window.open("https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours", "_blank", "noopener")}
-                  />
-                  <SidebarMenuItem
-                    Icon={IconUserProfileGroup}
-                    label="Slack community"
-                    external
-                    onClick={() => window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")}
-                  />
-                  <SidebarMenuItem
-                    Icon={IconBooks}
-                    label="Cohort showcase"
-                    external
-                    onClick={() => {}}
-                  />
-                  <SidebarMenuItem
-                    Icon={IconBooks}
-                    label="Knowledge hub"
-                    external
-                    onClick={() => {}}
-                  />
-                  <SidebarMenuItem
-                    Icon={IconRecurring}
-                    label="Switch cohort"
-                    subtext="May 16 – Jun 8"
-                    onClick={onSwitchCohort}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setLinksOpen(false)}
-                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-leland-gray-hover px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-                  >
-                    <span className="leland-heading-base text-leland-gray-dark">Collapse</span>
-                    <IconChevronUp className="size-5 text-leland-gray-dark" />
-                  </button>
-                </div>
-              )}
+                {linksOpen && (
+                  <div className="flex flex-col gap-1">
+                    <SidebarMenuItem
+                      Icon={IconExperiences}
+                      label="Office hours"
+                      onClick={() => window.open("https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours", "_blank", "noopener")}
+                    />
+                    <SidebarMenuItem
+                      Icon={IconUserProfileGroup}
+                      label="Slack community"
+                      onClick={() => window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")}
+                    />
+                    <SidebarMenuItem
+                      Icon={IconBooks}
+                      label="Cohort showcase"
+                      onClick={() => {}}
+                    />
+                    <SidebarMenuItem
+                      Icon={IconBooks}
+                      label="Knowledge hub"
+                      onClick={() => {}}
+                    />
+                    {linksStuck ? (
+                      <div className="px-1 py-3">
+                        <button
+                          type="button"
+                          onClick={onSwitchCohort}
+                          className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                        >
+                          <Tag
+                            text="May 16 – Jun 8 cohort"
+                            tagColor={TagColor.WHITE}
+                            size={TagSize.LARGE}
+                            RightIcon={IconRecurring}
+                            hoverable
+                          />
+                        </button>
+                      </div>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => setLinksOpen(false)}
+                      className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-leland-gray-hover px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                    >
+                      <span className="leland-heading-base text-leland-gray-dark">Collapse</span>
+                      <IconChevronUp className="size-5 text-leland-gray-dark" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           </>
@@ -2500,14 +2508,14 @@ export default function ContentViewer() {
                             </p>
                           ) : null}
                           <div className="flex flex-wrap items-center gap-2">
-                            {section.meta?.minsTotal ? (
+                            {sectionIdx === 0 && section.meta?.minsTotal ? (
                               <Tag
                                 text={`${section.meta.minsTotal} mins total`}
                                 tagColor={TagColor.GRAY}
                                 size={TagSize.SMALL}
                                 LeftIcon={IconClock}
                               />
-                            ) : section.durationMin ? (
+                            ) : !section.meta?.minsTotal && section.durationMin ? (
                               <Tag
                                 text={`${section.durationMin} min`}
                                 tagColor={TagColor.GRAY}
@@ -2515,7 +2523,7 @@ export default function ContentViewer() {
                                 LeftIcon={IconClock}
                               />
                             ) : null}
-                            {section.meta?.builds ? (
+                            {sectionIdx === 0 && section.meta?.builds ? (
                               <Tag
                                 text={`${section.meta.builds} builds`}
                                 tagColor={TagColor.GRAY}
@@ -2523,7 +2531,7 @@ export default function ContentViewer() {
                                 LeftIcon={IconLightning}
                               />
                             ) : null}
-                            {section.meta?.model ? (
+                            {sectionIdx === 0 && section.meta?.model ? (
                               <Tag
                                 text={section.meta.model}
                                 tagColor={TagColor.GRAY}

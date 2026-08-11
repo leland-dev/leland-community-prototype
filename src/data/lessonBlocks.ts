@@ -13,10 +13,11 @@ export type MarkdownBlock = {
   body: Markdown;
 };
 
-// Content allowed inside a callout: text (including lists), images, and
-// video — anything except an H1. H1-sized markdown headings are demoted to
-// H2 size when rendered inside a callout, so this is a rendering rule rather
-// than something enforced by the type.
+// Content allowed inside a callout: any block except another callout (no
+// nesting) — text (including lists), images, video, code, downloads,
+// banners, etc. H1-sized markdown headings are demoted to H2 size when
+// rendered inside a callout; that "no H1" rule is a rendering rule, not
+// something the type enforces.
 export type CalloutBlock = {
   kind: "callout";
   // Named colors from the design system only — never a raw hex value.
@@ -24,11 +25,7 @@ export type CalloutBlock = {
   // alternate choices; "warning" (orange) is reserved for actual warnings.
   tone?: "blue" | "beige" | "gray" | "warning";
   title?: string;
-  content: Block[];
-  // Defaults to true. Icons read well on short, banner-style callouts; for
-  // larger callouts with a lot of text/image content, skipping the icon
-  // usually looks better.
-  showIcon?: boolean;
+  content: Exclude<Block, CalloutBlock>[];
 };
 
 // The one iframe block — for self-contained HTML animations/embeds. Unlike the
@@ -66,6 +63,35 @@ export type TableBlock = {
   kind: "table";
   headers: string[];
   rows: string[][];
+  // CSS grid track sizes per column, e.g. ["56px", "1fr", "1fr"]. When omitted,
+  // all columns share equal width via minmax(120px, 1fr).
+  columnWidths?: string[];
+  // Bold the first column (row labels). Defaults to true — set to false when
+  // the first column is a numeric index rather than a semantic label.
+  firstColumnBold?: boolean;
+};
+
+// Matches the design system's tag color palette (see leland/Tag.tsx).
+export type BannerColor = "gray" | "white" | "green" | "yellow" | "blue" | "red" | "beige" | "black";
+
+// Compact single/two-line banner with an icon. Informational when no href;
+// clickable (chevron shown as the affordance) when href is set.
+export type BannerBlock = {
+  kind: "banner";
+  text: string;
+  subtext?: string;
+  href?: string;
+  icon?: string; // any icon component name from the leland icon set, e.g. "IconInfo" (default)
+  color?: BannerColor; // defaults to "gray"
+};
+
+// A wrapping row of tags from the design system's Tag component (leland/Tag.tsx).
+// Standalone rather than inline in text — Tag is a chip, not something
+// Markdown has a way to embed mid-sentence, and it matches how Tag is used
+// elsewhere in the product (rows of chips, not inline in copy).
+export type TagsBlock = {
+  kind: "tags";
+  tags: { text: string; color?: "white" | "gray" }[]; // color defaults to "gray"
 };
 
 // CTA card for a downloadable file (e.g. a PDF).
@@ -101,6 +127,23 @@ export type AccordionBlock = {
 // Escape hatch for bespoke markup that isn't worth a typed block yet.
 export type HtmlBlock = { kind: "html"; html: string };
 
+// Numbered steps where each step can carry optional nested blocks (e.g. a
+// copyable prompt as a CodeBlock). Renders the same circle-badge + dotted
+// connector treatment as an ordered list in markdown, but lets content authors
+// embed structured blocks — like a CodeBlock for a copyable prompt — below
+// the step description. Use this instead of an ordered markdown list whenever
+// any step has nested block content; use the markdown ordered list for simple
+// text-only step sequences.
+export type Step = {
+  text: string; // inline markdown — no block-level syntax (headings, lists)
+  blocks?: Block[]; // optional blocks rendered below the step text
+};
+
+export type StepsBlock = {
+  kind: "steps";
+  items: Step[];
+};
+
 // ─── Product / CTA blocks (page chrome around the lesson body) ────────────────
 
 // Which state of the live-session callout to show (chosen via prototype menu).
@@ -123,15 +166,6 @@ export type LiveSessionBannerBlock = {
   recordingVideoSrc?: string;
 };
 
-export type CtaBlock = {
-  kind: "cta";
-  label: string;
-  sublabel?: string;
-  tone?: "primary" | "neutral";
-  icon?: "calendar" | "arrow" | "book" | "help" | "megaphone";
-  href?: string;
-};
-
 export type Block =
   | MarkdownBlock
   | CalloutBlock
@@ -144,8 +178,10 @@ export type Block =
   | CodeBlock
   | TableBlock
   | DownloadBlock
-  | LiveSessionBannerBlock
-  | CtaBlock;
+  | BannerBlock
+  | TagsBlock
+  | StepsBlock
+  | LiveSessionBannerBlock;
 
 // A section rendered as native blocks. Coexists with the legacy html/video/pdf
 // sections (see the Section union in ContentViewer.tsx) — chosen per-section by
