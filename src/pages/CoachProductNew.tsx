@@ -1364,7 +1364,7 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
       {/* Add another pricing option — reads as part of the Pricing section, so
           it only surfaces once at least one product has been added. */}
       {added.length > 0 && (
-        <div className="mt-6 flex justify-center">
+        <div className={`mt-6 flex ${multi ? "justify-center" : "justify-start"}`}>
           <AddPricingOptionButton onClick={onAddPricingOption} />
         </div>
       )}
