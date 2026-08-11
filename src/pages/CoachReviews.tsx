@@ -5,6 +5,7 @@ import { Button } from "../components/Button";
 import { IconStar, IconDotsVertical, IconAddPlus, IconArrowUp } from "../components/leland/svg/icons";
 import linkIcon from "../assets/icons/link.svg";
 import settingsIcon from "../assets/icons/settings.svg";
+import thumbtackIcon from "../assets/icons/thumbtack-angle.svg";
 import eyeIcon from "../assets/icons/eye.svg";
 import eyeClosedIcon from "../assets/icons/eye-closed.svg";
 import abhiPhoto from "../assets/profile photos/pic-2.png";
@@ -354,12 +355,14 @@ function OutcomeRow({
   outcome,
   onToggleHidden,
   borderless,
+  featured,
   onRowDragStart,
   onRowDragEnd,
 }: {
   outcome: Outcome;
   onToggleHidden: (id: string) => void;
   borderless?: boolean;
+  featured?: boolean;
   onRowDragStart?: (outcome: Outcome) => void;
   onRowDragEnd?: (outcome: Outcome) => void;
 }) {
@@ -411,10 +414,15 @@ function OutcomeRow({
           {outcome.name}
         </p>
         <p
-          className={`text-[13px] ${outcome.hidden ? "text-gray-extra-light" : "text-gray-light"}`}
+          className={`flex items-center text-[13px] ${outcome.hidden ? "text-gray-extra-light" : "text-gray-light"}`}
         >
+          {featured && (
+            <span className="mr-1 flex items-center">
+              <img src={thumbtackIcon} alt="" className="mr-1 h-3.5 w-3.5" />Featured ·
+            </span>
+          )}
           {outcome.clients} {outcome.clients === 1 ? "client" : "clients"}
-          {outcome.hidden && " · Hidden"}
+          {outcome.hidden && <span className="ml-1">· Hidden</span>}
         </p>
       </div>
 
@@ -566,6 +574,7 @@ function OutcomesModal({
                       outcome={outcome}
                       onToggleHidden={toggleHidden}
                       borderless={i === 3}
+                      featured={i < 4}
                       onRowDragStart={handleDragStart}
                       onRowDragEnd={handleDragEnd}
                     />
