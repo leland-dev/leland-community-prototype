@@ -4,6 +4,7 @@ import { AnimatePresence, motion, Reorder, useDragControls } from "motion/react"
 import { Button } from "../components/Button";
 import { IconStar, IconDotsVertical, IconAddPlus, IconArrowUp } from "../components/leland/svg/icons";
 import linkIcon from "../assets/icons/link.svg";
+import settingsIcon from "../assets/icons/settings.svg";
 import eyeIcon from "../assets/icons/eye.svg";
 import eyeClosedIcon from "../assets/icons/eye-closed.svg";
 import abhiPhoto from "../assets/profile photos/pic-2.png";
@@ -635,9 +636,50 @@ function AddOutcomeButton() {
   );
 }
 
+// Single-line logo strip: fits as many 36px logos as the container allows,
+// then caps with a "+X" chip for the remainder (mirrors the profile template).
+function LogoStrip({ outcomes }: { outcomes: Outcome[] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [slots, setSlots] = useState(outcomes.length);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ITEM = 36;
+    const GAP = 6;
+    const measure = () => {
+      const w = el.clientWidth;
+      setSlots(Math.max(1, Math.floor((w + GAP) / (ITEM + GAP))));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const total = outcomes.length;
+  const truncated = total > slots;
+  const shown = truncated ? outcomes.slice(0, Math.max(0, slots - 1)) : outcomes;
+  const remaining = total - shown.length;
+
+  return (
+    <div ref={ref} className="flex items-center gap-1.5 overflow-hidden">
+      {shown.map((outcome) => (
+        <div key={outcome.id} className="h-9 w-9 shrink-0 overflow-hidden rounded-none">
+          <img src={outcome.logo} alt={outcome.name} className="h-full w-full object-cover" />
+        </div>
+      ))}
+      {truncated && (
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-none bg-[#f5f5f5] text-[12px] font-medium text-[#707070]">
+          +{remaining}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function CoachReviews() {
   const [tab, setTab] = useState<"reviews" | "pending">("reviews");
-  const [breakdownOpen, setBreakdownOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [outcomesOpen, setOutcomesOpen] = useState(false);
@@ -672,22 +714,25 @@ export default function CoachReviews() {
     setTimeout(() => setCopied(false), 1500);
   };
 
-  const visibleOutcomes = outcomes.filter((o) => !o.hidden);
+  const visibleOutcomes = [...outcomes, ...schoolOutcomes].filter((o) => !o.hidden);
 
   return (
     <div className="mx-auto max-w-[880px]">
       <div className="flex items-start justify-between gap-4">
         <div>
-          {/* Stars */}
-          <div className="mb-3 flex">
-            {[...Array(5)].map((_, i) => (
-              <svg key={i} width="24" height="24" viewBox="0 0 24 24" fill="#222222">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-            ))}
-          </div>
-
           <h1 className="font-serif text-[30px] font-medium text-gray-dark md:text-[38px]">37 reviews</h1>
+
+          {/* Stars + average */}
+          <div className="mt-2 flex items-center gap-2.5">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <svg key={i} width="24" height="24" viewBox="0 0 24 24" fill="#222222">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              ))}
+            </div>
+            <span className="text-[18px] font-normal text-gray-light">4.9 avg</span>
+          </div>
         </div>
 
         <div ref={shareRef} className="relative shrink-0">
@@ -723,40 +768,15 @@ export default function CoachReviews() {
 
       {/* Review hero — mirrors the profile template's review summary */}
       <div className="mt-1">
-        <div className="flex flex-col items-start justify-between gap-1 md:flex-row md:items-end">
-          <p className="text-[22px] font-normal text-gray-extra-light">4.9 average</p>
-          <button
-            onClick={() => setBreakdownOpen((o) => !o)}
-            className="flex items-center gap-1 text-[14px] font-medium text-gray-extra-light transition-colors hover:text-gray-light"
-          >
-            View breakdown
-            <svg
-              className={`h-4 w-4 transition-transform duration-200 ${breakdownOpen ? "rotate-180" : ""}`}
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            >
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Rating breakdown — collapsible accordion */}
-        <AnimatePresence initial={false}>
-          {breakdownOpen && (
-            <motion.div
-              key="breakdown"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-              className="overflow-hidden"
-            >
+        {/* Rating breakdown — always expanded */}
+        <div>
               <div className="my-5 border-t border-gray-200" />
 
               {/* Airbnb-style columns */}
               <div className="flex flex-col gap-4 md:grid md:grid-cols-5">
                 {/* Overall rating distribution */}
                 <div className="md:col-span-1">
-                  <p className="mb-1 text-[14px] font-medium text-gray-dark">Overall rating</p>
+                  <p className="mb-1 text-[14px] font-medium text-gray-light">Overall rating</p>
                   <div className="flex flex-col gap-1">
                     {[
                       { star: 5, count: 3 },
@@ -788,7 +808,7 @@ export default function CoachReviews() {
                   ].map((item) => (
                     <div key={item.label} className="flex w-[60vw] shrink-0 flex-col justify-between rounded-lg border border-gray-200 p-4 md:w-auto md:shrink md:rounded-none md:border-0 md:border-l md:p-0 md:pl-4">
                       <div>
-                        <p className="text-[14px] font-medium text-gray-dark">{item.label}</p>
+                        <p className="text-[14px] font-medium text-gray-light">{item.label}</p>
                         <p className="text-[22px] font-semibold text-gray-dark">{item.score.toFixed(1)}</p>
                       </div>
                       <div className="mt-3 text-gray-dark">{item.icon}</div>
@@ -797,36 +817,23 @@ export default function CoachReviews() {
                 </div>
               </div>
 
-              {/* Divider below the breakdown — only present while expanded */}
+              {/* Divider below the breakdown */}
               <div className="mt-6 border-t border-gray-200" />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        </div>
 
         {/* Outcomes from your reviews */}
         <div className="mt-6">
-          <p className="mb-1.5 text-[14px] font-medium text-gray-extra-light">Outcomes from your reviews</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex flex-wrap items-center gap-[4px]">
-              {visibleOutcomes.slice(0, 10).map((outcome) => (
-                <div key={outcome.id} className="h-[32px] w-[32px] shrink-0 overflow-hidden rounded-[2px]">
-                  <img src={outcome.logo} alt={outcome.name} className="h-full w-full object-cover" />
-                </div>
-              ))}
-              {visibleOutcomes.length > 10 && (
-                <span className="flex h-[32px] items-center rounded-[2px] bg-[#f5f5f5] px-2 text-[12px] font-medium text-[#707070]">
-                  +{visibleOutcomes.length - 10}
-                </span>
-              )}
-            </div>
-            <div className="hidden flex-1 md:block" />
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <p className="text-[14px] font-medium text-gray-light">Outcomes from your reviews</p>
             <button
               onClick={() => setOutcomesOpen(true)}
-              className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+              className="flex shrink-0 items-center gap-1.5 text-[14px] font-medium text-gray-extra-light transition-colors hover:text-gray-light"
             >
-              Manage outcomes
+              <img src={settingsIcon} alt="" className="h-4 w-4" />
+              Manage
             </button>
           </div>
+          <LogoStrip outcomes={visibleOutcomes} />
         </div>
       </div>
 
