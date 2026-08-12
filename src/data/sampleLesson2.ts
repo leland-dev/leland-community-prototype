@@ -41,7 +41,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "gray",
+        tone: "blue",
         title: "Before you start",
         content: [
           {
@@ -82,7 +82,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "gray",
+        tone: "blue",
         title: "How this session runs",
         content: [
           {
@@ -168,7 +168,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "warning",
+        tone: "tan",
         title: "Permission scope matters",
         content: [
           {
@@ -179,7 +179,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "gray",
+        tone: "blue",
         title: "Using a personal account?",
         content: [
           {
@@ -233,7 +233,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "gray",
+        tone: "blue",
         title: "Voice guides get better over time",
         content: [
           {
@@ -293,7 +293,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "warning",
+        tone: "tan",
         title: "Review every draft before the first 2 weeks",
         content: [
           {
@@ -346,7 +346,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "gray",
+        tone: "blue",
         title: "What makes a good candidate workflow",
         content: [
           {
@@ -446,7 +446,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "gray",
+        tone: "blue",
         title: "Not quite done yet?",
         content: [
           {

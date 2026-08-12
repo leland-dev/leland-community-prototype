@@ -91,6 +91,7 @@ import { SwitchInput } from "../components/leland";
 import { GettingStartedFlow, type FlowKey } from "../components/getting-started";
 import { COHORT_MEMBERS } from "./Group";
 import { SelectCohortModal } from "../components/LiveCourseCard";
+import { TrackPickerModal, type CourseTrack, TRACK_STORAGE_KEY } from "../components/TrackPickerModal";
 
 // ─── Types & seed data ───────────────────────────────────────────────────────
 
@@ -967,6 +968,8 @@ function CombinedSidebar({
   showSessionBanners = true,
   exitDestination,
   noHeader = true,
+  selectedTrack,
+  onChangeTrack,
 }: {
   currentLessonId: string;
   currentSectionId: string;
@@ -979,6 +982,8 @@ function CombinedSidebar({
   showSessionBanners?: boolean;
   exitDestination: string;
   noHeader?: boolean;
+  selectedTrack?: CourseTrack | null;
+  onChangeTrack?: () => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const resourcesRef = useRef<HTMLDivElement>(null);
@@ -1057,19 +1062,36 @@ function CombinedSidebar({
               <p ref={courseInfoRef} className="text-heading-3xl font-season font-normal text-leland-gray-dark">{COURSE_TITLE_FULL}</p>
 
               {liveProgram && (
-                <button
-                  type="button"
-                  onClick={onSwitchCohort}
-                  className="mt-3 self-start rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-                >
-                  <Tag
-                    text="May 16 – Jun 8 cohort"
-                    tagColor={TagColor.WHITE}
-                    size={TagSize.LARGE}
-                    RightIcon={IconRecurring}
-                    hoverable
-                  />
-                </button>
+                <div className="mt-3 flex flex-wrap gap-2 self-start">
+                  <button
+                    type="button"
+                    onClick={onSwitchCohort}
+                    className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                  >
+                    <Tag
+                      text="May 16th cohort"
+                      tagColor={TagColor.GRAY}
+                      size={TagSize.LARGE}
+                      RightIcon={IconRecurring}
+                      hoverable
+                    />
+                  </button>
+                  {selectedTrack ? (
+                    <button
+                      type="button"
+                      onClick={onChangeTrack}
+                      className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                    >
+                      <Tag
+                        text={selectedTrack.charAt(0).toUpperCase() + selectedTrack.slice(1)}
+                        tagColor={TagColor.GRAY}
+                        size={TagSize.LARGE}
+                        RightIcon={IconChevronDown}
+                        hoverable
+                      />
+                    </button>
+                  ) : null}
+                </div>
               )}
 
               {/* Creator */}
@@ -1133,30 +1155,48 @@ function CombinedSidebar({
                       onClick={() => {}}
                     />
                     {linksStuck ? (
-                      <div className="px-1 py-3">
+                      <div className="flex flex-wrap gap-2 px-1 pt-3">
                         <button
                           type="button"
                           onClick={onSwitchCohort}
                           className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
                         >
                           <Tag
-                            text="May 16 – Jun 8 cohort"
-                            tagColor={TagColor.WHITE}
+                            text="May 16th cohort"
+                            tagColor={TagColor.GRAY}
                             size={TagSize.LARGE}
                             RightIcon={IconRecurring}
                             hoverable
                           />
                         </button>
+                        {selectedTrack ? (
+                          <button
+                            type="button"
+                            onClick={onChangeTrack}
+                            className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                          >
+                            <Tag
+                              text={selectedTrack.charAt(0).toUpperCase() + selectedTrack.slice(1)}
+                              tagColor={TagColor.GRAY}
+                              size={TagSize.LARGE}
+                              RightIcon={IconChevronDown}
+                              hoverable
+                            />
+                          </button>
+                        ) : null}
                       </div>
                     ) : null}
-                    <button
-                      type="button"
-                      onClick={() => setLinksOpen(false)}
-                      className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-leland-gray-hover px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-                    >
-                      <span className="leland-heading-base text-leland-gray-dark">Collapse</span>
-                      <IconChevronUp className="size-5 text-leland-gray-dark" />
-                    </button>
+                    <div className="mt-5">
+                      <Button
+                        label="Collapse"
+                        buttonColor={ButtonColor.BLACK}
+                        size={ButtonSize.MEDIUM}
+                        width={ButtonWidth.FULL}
+                        rounded
+                        RightIcon={IconChevronUp}
+                        onClick={() => setLinksOpen(false)}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -1320,6 +1360,7 @@ type PrototypeOptions = {
   liveProgram: boolean;
   noHeader: boolean;
   showSiteNav: boolean;
+  showTrackPicker: boolean;
   liveSessionVariant: LiveSessionVariant;
 };
 
@@ -1334,6 +1375,7 @@ const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
   liveProgram: true,
   noHeader: true,
   showSiteNav: false,
+  showTrackPicker: true,
   liveSessionVariant: "addToCalendar",
 };
 
@@ -1341,6 +1383,7 @@ const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
   { key: "liveProgram", label: "Live program" },
   { key: "noHeader", label: "No header" },
   { key: "showSiteNav", label: "Show site nav" },
+  { key: "showTrackPicker", label: "Track picker" },
 ];
 
 
@@ -1383,16 +1426,18 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   options,
   onToggle,
   onSetVariant,
+  onOpenFeedback,
   ...modalProps
 }: ModalProps & {
   options: PrototypeOptions;
   onToggle: (key: BooleanOptionKey) => void;
   onSetVariant: (variant: LiveSessionVariant) => void;
+  onOpenFeedback: () => void;
 }) {
   return (
     <Modal {...modalProps}>
       <ModalContent size={ModalSize.SMALL}>
-        <div className="flex flex-col gap-1 px-6 py-[14px]">
+        <div className="flex flex-col gap-1 px-6 py-4 md:px-8">
           {options.liveProgram && (
             <div className="flex flex-col gap-1.5 rounded-lg p-3">
               <span className="leland-paragraph-base font-medium text-leland-gray-dark">
@@ -1426,6 +1471,16 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
               />
             </div>
           ))}
+          <div className="mt-1 border-t border-leland-gray-stroke pt-2">
+            <button
+              type="button"
+              onClick={onOpenFeedback}
+              className="flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconStar className="size-4 shrink-0 text-leland-gray-light" />
+              <span className="leland-paragraph-base text-leland-gray-dark">Trigger feedback modal</span>
+            </button>
+          </div>
         </div>
       </ModalContent>
     </Modal>
@@ -1498,12 +1553,12 @@ const AddToCalendarModal = withModal(function AddToCalendarModal({
   return (
     <Modal open={open} onOpenChange={onOpenChange} {...rest}>
       <ModalContent size={ModalSize.SMALL}>
-        <div className="flex flex-col gap-6 px-6 pb-6 pt-5">
-          <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-6 p-6 md:p-8">
+          <div className="flex flex-col gap-2">
             <h2 className="leland-heading-2xl font-semibold text-leland-gray-dark">
               Add to your calendar
             </h2>
-            <p className="leland-paragraph-base text-leland-gray-light">
+            <p className="leland-heading-lg text-leland-gray-extra-light">
               {dateStr} at {time}
             </p>
           </div>
@@ -1533,7 +1588,7 @@ const AddToCalendarModal = withModal(function AddToCalendarModal({
             href={urls.ics}
             download={`${session.title}.ics`}
             onClick={handleAdd}
-            className={getButtonStyles({ buttonColor: ButtonColor.GRAY, size: ButtonSize.LARGE, width: ButtonWidth.FULL, fontWeight: FontWeight.SEMIBOLD })}
+            className={getButtonStyles({ buttonColor: ButtonColor.GRAY, size: ButtonSize.LARGE, width: ButtonWidth.FULL, fontWeight: FontWeight.SEMIBOLD, rounded: true })}
           >
             <IconDownload className="size-5" />
             <span>Download .ics file</span>
@@ -1568,7 +1623,7 @@ function SessionRecordingView({
 }) {
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-4 md:px-8 py-10">
+      <div className="mx-auto flex w-full max-w-[720px] flex-col gap-8 px-4 md:px-8 py-10">
         {/* Breadcrumb / back nav */}
         {breadcrumb ? (
           <div className="leland-paragraph-base text-leland-gray-light">
@@ -1781,7 +1836,7 @@ function LiveProgramOverview({
   const buildSessions = BUILD_SESSIONS.filter((s) => !s.isRecording);
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-4 md:px-8 py-10">
+      <div className="mx-auto flex w-full max-w-[720px] flex-col gap-8 px-4 md:px-8 py-10">
         <div className="flex flex-col gap-3">
           <h1 className="text-heading-4xl md:text-heading-5xl font-normal font-season text-leland-gray-dark">
             {COURSE_TITLE_FULL}
@@ -1988,7 +2043,7 @@ function SessionDetailView({
 }) {
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-4 md:px-8 pt-10 pb-16">
+      <div className="mx-auto flex w-full max-w-[720px] flex-col gap-8 px-4 md:px-8 pt-10 pb-16">
         {/* Breadcrumb: ‹ Calendar (back) / Session N */}
         <div className="flex items-center gap-2 leland-paragraph-base text-leland-gray-light">
           <button
@@ -2050,7 +2105,7 @@ function SessionDetailView({
 
 // Matches production ButtonSize.LARGE (p-4, 14px) at semibold weight
 const navButtonBase =
-  "flex shrink-0 items-center gap-2 rounded-full p-4 text-[0.875rem] font-semibold leading-tight md:rounded-lg";
+  "flex shrink-0 items-center gap-2 rounded-full md:rounded-lg p-4 text-[0.875rem] font-semibold leading-tight";
 
 function CourseViewerSectionNav({
   prevSectionLink,
@@ -2068,18 +2123,18 @@ function CourseViewerSectionNav({
   return (
     <div className="relative bg-[#F9F8F3] px-4 pb-[calc(1rem_+_env(safe-area-inset-bottom))] md:px-6">
       <div className="pointer-events-none absolute inset-x-0 bottom-full h-16 bg-gradient-to-b from-transparent to-[#F9F8F3]" />
-      <div className="relative mx-auto flex w-full max-w-[1280px] items-center justify-between">
+      <div className="relative mx-auto flex w-full max-w-[1280px] items-center justify-between gap-3">
       {prevSectionLink ? (
         <Link
           to={prevSectionLink}
-          className={`${navButtonBase} border border-leland-gray-stroke bg-[#F9F8F3] text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
+          className={`${navButtonBase} flex-1 justify-center md:flex-none border border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
         >
           <IconChevronLeft className="size-5" />
           Back
         </Link>
       ) : (
         <span
-          className={`${navButtonBase} cursor-not-allowed border border-leland-gray-stroke bg-[#F9F8F3] text-leland-gray-dark opacity-40`}
+          className={`${navButtonBase} flex-1 justify-center md:flex-none cursor-not-allowed border border-leland-gray-stroke bg-white text-leland-gray-dark opacity-40`}
           aria-hidden
         >
           <IconChevronLeft className="size-5" />
@@ -2090,14 +2145,14 @@ function CourseViewerSectionNav({
         <Link
           to={nextSectionLink}
           onClick={onNext}
-          className={`${navButtonBase} border border-leland-primary bg-leland-primary text-leland-on-primary-text hover:bg-leland-primary-hover hover:border-leland-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
+          className={`${navButtonBase} flex-1 justify-center md:flex-none border border-leland-primary bg-leland-primary text-leland-on-primary-text hover:bg-leland-primary-hover hover:border-leland-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
         >
           Next
           <IconChevronRight className="size-5" />
         </Link>
       ) : (
         <span
-          className={`${navButtonBase} cursor-not-allowed border border-leland-primary bg-leland-primary text-leland-on-primary-text opacity-40`}
+          className={`${navButtonBase} flex-1 justify-center md:flex-none cursor-not-allowed border border-leland-primary bg-leland-primary text-leland-on-primary-text opacity-40`}
           aria-hidden
         >
           Next
@@ -2145,12 +2200,18 @@ export default function ContentViewer() {
   const [showRecording, setShowRecording] = useState(false);
   const [lessonShowRecording, setLessonShowRecording] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [hasSpent5Min, setHasSpent5Min] = useState(false);
+  const engagementTriggered = useRef(false);
   const [addToCalendarModalOpen, setAddToCalendarModalOpen] = useState(false);
   const [calendarAdded, setCalendarAdded] = useState<Set<number>>(new Set());
   const markCalendarAdded = (n: number) =>
     setCalendarAdded((prev) => new Set([...prev, n]));
   const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
+  const [trackPickerOpen, setTrackPickerOpen] = useState(false);
+  const [selectedTrack, setSelectedTrack] = useState<CourseTrack | null>(
+    () => localStorage.getItem(TRACK_STORAGE_KEY) as CourseTrack | null,
+  );
   const { options, toggleOption, setOption } = usePrototypeOptions();
   const { completed, markComplete } = useCompletion();
 
@@ -2189,6 +2250,33 @@ export default function ContentViewer() {
     [completed, lesson.id],
   );
 
+  // Start a 5-minute timer once on mount.
+  useEffect(() => {
+    const timer = setTimeout(() => setHasSpent5Min(true), 5 * 60 * 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Auto-open the track picker on first load if the feature is enabled and
+  // no track has been chosen yet.
+  useEffect(() => {
+    if (options.showTrackPicker && !selectedTrack) {
+      setTrackPickerOpen(true);
+    }
+  }, [options.showTrackPicker]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-open the feedback modal when the user reaches 80% of the lesson
+  // (by section navigation) and has spent at least 5 minutes, or when they
+  // arrive at the last section. Fires at most once per page load.
+  useEffect(() => {
+    if (engagementTriggered.current || feedbackModalOpen) return;
+    const progressPct = (sectionIdx + 1) / lesson.sections.length;
+    const isLastSection = sectionIdx === lesson.sections.length - 1;
+    if ((progressPct >= 0.8 && hasSpent5Min) || isLastSection) {
+      engagementTriggered.current = true;
+      setFeedbackModalOpen(true);
+    }
+  }, [sectionIdx, lesson.sections.length, hasSpent5Min, feedbackModalOpen]);
+
   // Opening the drawer/sidebar jumps to the lesson + section the user is on.
   useEffect(() => {
     if (!sidebarOpen) return;
@@ -2209,8 +2297,8 @@ export default function ContentViewer() {
   // render path (blocks, interactive, html) so lessons and "Before you begin"
   // are consistent.
   const breadcrumbBar = options.noHeader ? (
-    <div className={`z-10 bg-[#F9F8F3] ${!sidebarOpen ? "sticky top-0" : ""}`}>
-      <div className={`flex w-full items-center gap-2 px-4 md:px-8 leland-paragraph-base ${sidebarOpen ? "mx-auto max-w-[800px] py-8" : "py-4"}`}>
+    <div className={`hidden md:block z-10 bg-[#F9F8F3] ${!sidebarOpen ? "sticky top-0" : ""}`}>
+      <div className={`flex w-full items-center gap-2 px-4 md:px-8 leland-paragraph-base ${sidebarOpen ? "mx-auto max-w-[720px] py-8" : "py-4"}`}>
         {!sidebarOpen ? (
           <>
             {/* Full trail only on desktop; on mobile the page header already
@@ -2237,13 +2325,13 @@ export default function ContentViewer() {
             </div>
             <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbLabel}</span>
             <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-            <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1}</span>
+            <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {lesson.sections.length}</span>
           </>
         ) : (
           <>
             <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbLabel}</span>
             <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-            <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1}</span>
+            <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {lesson.sections.length}</span>
           </>
         )}
       </div>
@@ -2267,9 +2355,14 @@ export default function ContentViewer() {
         >
           <IconArrowLeft className="size-5" aria-hidden />
         </Link>
-        <span className="min-w-0 flex-1 truncate leland-heading-base font-semibold text-leland-gray-dark">
-          {COURSE_TITLE_FULL}
-        </span>
+        <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5 py-1">
+          <span className="w-full truncate text-center leland-heading-base font-semibold text-leland-gray-dark">
+            {COURSE_TITLE_FULL}
+          </span>
+          <span className="leland-paragraph-sm text-leland-gray-light">
+            {breadcrumbLabel} / {sectionIdx + 1} of {lesson.sections.length}
+          </span>
+        </div>
         <button
           type="button"
           onClick={() => setSidebarOpen(true)}
@@ -2296,7 +2389,7 @@ export default function ContentViewer() {
                 <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
                 <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbLabel}</span>
                 <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-                <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1}</span>
+                <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {lesson.sections.length}</span>
               </>
             )}
           </div>
@@ -2344,6 +2437,8 @@ export default function ContentViewer() {
                 showSessionBanners={true}
                 exitDestination={exitDestination}
                 noHeader={options.noHeader}
+                selectedTrack={options.showTrackPicker ? selectedTrack : null}
+                onChangeTrack={() => setTrackPickerOpen(true)}
               />
             ) : (
               <LessonsAccordionSidebar
@@ -2487,7 +2582,7 @@ export default function ContentViewer() {
                     {/* Larger gap-10 between product-level blocks (top banner,
                         bottom feedback) and the lesson content zone; gap-6
                         within the content zone. */}
-                    <div className="mx-auto flex w-full max-w-[800px] flex-col gap-10 px-4 md:px-8 pt-4">
+                    <div className="mx-auto flex w-full max-w-[720px] flex-col gap-10 px-4 md:px-8 pt-4">
                       <div className="flex flex-col gap-8">
                         {!options.noHeader && (
                           <p className="leland-paragraph-base font-medium text-leland-gray-dark">
@@ -2504,7 +2599,7 @@ export default function ContentViewer() {
                             </h1>
                           </div>
                           {section.description ? (
-                            <p className="leland-paragraph-lg text-leland-gray-light">
+                            <p className="leland-paragraph-xl font-medium text-leland-gray-extra-light">
                               {section.description}
                             </p>
                           ) : null}
@@ -2513,14 +2608,14 @@ export default function ContentViewer() {
                               <Tag
                                 text={`${section.meta.minsTotal} mins total`}
                                 tagColor={TagColor.GRAY}
-                                size={TagSize.SMALL}
+                                size={TagSize.LARGE}
                                 LeftIcon={IconClock}
                               />
                             ) : !section.meta?.minsTotal && section.durationMin ? (
                               <Tag
                                 text={`${section.durationMin} min`}
                                 tagColor={TagColor.GRAY}
-                                size={TagSize.SMALL}
+                                size={TagSize.LARGE}
                                 LeftIcon={IconClock}
                               />
                             ) : null}
@@ -2528,7 +2623,7 @@ export default function ContentViewer() {
                               <Tag
                                 text={`${section.meta.builds} builds`}
                                 tagColor={TagColor.GRAY}
-                                size={TagSize.SMALL}
+                                size={TagSize.LARGE}
                                 LeftIcon={IconLightning}
                               />
                             ) : null}
@@ -2536,7 +2631,7 @@ export default function ContentViewer() {
                               <Tag
                                 text={section.meta.model}
                                 tagColor={TagColor.GRAY}
-                                size={TagSize.SMALL}
+                                size={TagSize.LARGE}
                                 LeftIcon={IconLightning}
                               />
                             ) : null}
@@ -2551,7 +2646,7 @@ export default function ContentViewer() {
               ) : section.kind === 'html' ? (
                 <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
                   {breadcrumbBar}
-                  <div className={`mx-auto w-full max-w-[800px] pb-6 ${options.noHeader ? "pt-4" : "pt-10"}`}>
+                  <div className={`mx-auto w-full max-w-[720px] pb-6 ${options.noHeader ? "pt-4" : "pt-10"}`}>
                     <div className="overflow-hidden rounded-2xl border border-leland-gray-stroke">
                       <SectionContent
                         key={`${lesson.id}/${section.id}`}
@@ -2559,7 +2654,7 @@ export default function ContentViewer() {
                       />
                     </div>
                   </div>
-                  <div className="mx-auto max-w-[800px] pb-10">
+                  <div className="mx-auto max-w-[720px] pb-10">
                     <button
                       onClick={() => setFeedbackModalOpen(true)}
                       className="flex w-full items-center gap-4 rounded-xl border border-leland-gray-stroke bg-white px-5 py-4 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
@@ -2573,7 +2668,7 @@ export default function ContentViewer() {
               ) : section.kind === 'interactive' ? (
                 <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
                   {breadcrumbBar}
-                  <div className={`mx-auto w-full max-w-[800px] px-4 md:px-8 pb-16 ${options.noHeader ? "pt-4" : "pt-10"}`}>
+                  <div className={`mx-auto w-full max-w-[720px] px-4 md:px-8 pb-16 ${options.noHeader ? "pt-4" : "pt-10"}`}>
                     <GettingStartedFlow
                       key={`${lesson.id}/${section.id}`}
                       flow={section.flow}
@@ -2596,7 +2691,7 @@ export default function ContentViewer() {
                     />
                   </div>
                   <div className="bg-white">
-                    <div className="mx-auto max-w-[800px] pb-10 pt-4">
+                    <div className="mx-auto max-w-[720px] pb-10 pt-4">
                       <button
                         onClick={() => setFeedbackModalOpen(true)}
                         className="flex w-full items-center gap-4 rounded-xl border border-leland-gray-stroke bg-white px-5 py-4 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
@@ -2612,8 +2707,6 @@ export default function ContentViewer() {
               <CourseFeedbackModal
                 open={feedbackModalOpen}
                 onOpenChange={setFeedbackModalOpen}
-                currentEntryId={section.id}
-                entries={lesson.sections}
               />
               {lesson.id !== "start-here" && (
                 <CourseViewerSectionNav
@@ -2649,11 +2742,18 @@ export default function ContentViewer() {
         options={options}
         onToggle={toggleOption}
         onSetVariant={(variant) => setOption("liveSessionVariant", variant)}
+        onOpenFeedback={() => { setPrototypeOptionsOpen(false); setFeedbackModalOpen(true); }}
       />
       <SelectCohortModal
         open={cohortModalOpen}
         onClose={() => setCohortModalOpen(false)}
         onSelect={() => setCohortModalOpen(false)}
+      />
+      <TrackPickerModal
+        open={trackPickerOpen}
+        onOpenChange={setTrackPickerOpen}
+        onSelect={(track) => setSelectedTrack(track)}
+        currentTrack={selectedTrack}
       />
       <AddToCalendarModal
         open={addToCalendarModalOpen}

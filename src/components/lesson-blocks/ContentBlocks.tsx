@@ -36,21 +36,21 @@ import type {
 
 const isTextBlock = (block: Block) => block.kind === "markdown";
 
-// Every background here is a named design-system token — never a raw hex
-// value. "gray" is the default; "warning" is the one deliberate exception to
-// the blue/beige/gray default set.
 const CALLOUT_TONES = {
-  blue: { container: "bg-leland-blue-light" },
-  beige: { container: "bg-leland-beige" },
-  gray: { container: "bg-leland-gray-hover" },
-  warning: { container: "bg-leland-orange-light" },
+  blue: { container: "bg-leland-blue-light", eyebrow: "text-leland-blue-dark" },
+  tan:  { container: "bg-leland-tan-light",  eyebrow: "text-leland-tan-dark"  },
 } as const;
 
 export function CalloutBlock({ block }: { block: CalloutBlockType }) {
-  const tone = CALLOUT_TONES[block.tone ?? "gray"];
+  const tone = CALLOUT_TONES[block.tone ?? "blue"];
   return (
     <div className={`rounded-xl px-6 py-6 md:py-8 ${tone.container}`}>
       <div className="flex min-w-0 flex-col gap-4">
+        {block.eyebrow ? (
+          <p className={`leland-eyebrow font-semibold uppercase tracking-widest ${tone.eyebrow}`}>
+            {block.eyebrow}
+          </p>
+        ) : null}
         {block.title ? <h3 className={H3_CLASS}>{block.title}</h3> : null}
         <div className="flex flex-col">
           {block.content.map((item, i) => {
@@ -143,7 +143,7 @@ export function ImageBlock({ block }: { block: ImageBlockType }) {
         <figcaption>
           <Prose
             body={block.caption}
-            className="gap-1 text-center leland-paragraph-sm text-leland-gray-light"
+            className="gap-1 leland-paragraph-sm text-leland-gray-light"
           />
         </figcaption>
       ) : null}
@@ -171,16 +171,21 @@ export function DividerBlock(_: { block: DividerBlockType }) {
 // body rows only (no divider after the header, none after the last row).
 export function TableBlock({ block }: { block: TableBlockType }) {
   const columns = block.columnWidths
-    ? block.columnWidths.join(" ")
-    : `repeat(${block.headers.length}, minmax(120px, 1fr))`;
+    ? block.columnWidths.map(w => `minmax(min-content, ${w})`).join(" ")
+    : `repeat(${block.headers.length}, minmax(min-content, 1fr))`;
   return (
     <div className="overflow-x-auto">
       <div
-        className="grid min-w-full gap-x-8"
+        className="grid min-w-full overflow-hidden rounded-xl border border-leland-gray-stroke"
         style={{ gridTemplateColumns: columns }}
       >
         {block.headers.map((header, i) => (
-          <div key={`h-${i}`} className="pb-4 leland-paragraph-base text-leland-gray-light md:leland-paragraph-lg">
+          <div
+            key={`h-${i}`}
+            className={`bg-leland-gray-hover px-3 py-3 leland-paragraph-base text-leland-gray-light ${
+              i > 0 ? "border-l border-leland-gray-stroke" : ""
+            }`}
+          >
             {header}
           </div>
         ))}
@@ -188,8 +193,8 @@ export function TableBlock({ block }: { block: TableBlockType }) {
           row.map((cell, colIndex) => (
             <div
               key={`${rowIndex}-${colIndex}`}
-              className={`py-3 leland-paragraph-base text-leland-gray-dark md:leland-paragraph-lg ${
-                rowIndex < block.rows.length - 1 ? "border-b border-leland-gray-stroke" : ""
+              className={`border-t border-leland-gray-stroke bg-white px-3 py-4 leland-paragraph-base text-leland-gray-dark ${
+                colIndex > 0 ? "border-l border-leland-gray-stroke" : ""
               } ${colIndex === 0 && block.firstColumnBold !== false ? "font-semibold" : ""}`}
             >
               {cell}
@@ -304,10 +309,10 @@ export function StepsBlock({ block }: { block: StepsBlockType }) {
       {block.items.map((step, i) => (
         <li key={i} className="group grid grid-cols-[24px_1fr] gap-x-4">
           <div className="flex flex-col items-center">
-            <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-[13px] font-semibold text-leland-gray-dark">
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-leland-gray-extra-light bg-white text-[13px] font-semibold text-leland-gray-dark">
               {i + 1}
             </span>
-            <span className="mt-1 w-0 flex-1 border-l-2 border-dotted border-leland-gray-stroke group-last:hidden" />
+            <span className="w-0 flex-1 border-l-2 border-dotted border-leland-gray-extra-light group-last:hidden" />
           </div>
           <div className="flex min-w-0 flex-col gap-3 pb-4 group-last:pb-0">
             <Prose body={step.text} allowH1={false} />

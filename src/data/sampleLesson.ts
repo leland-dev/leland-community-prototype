@@ -50,7 +50,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "gray",
+        tone: "blue",
         title: "Before you start",
         content: [
           {
@@ -165,7 +165,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "warning",
+        tone: "tan",
         title: "If Claude stalls",
         content: [
           {
@@ -206,7 +206,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "gray",
+        tone: "blue",
         title: "How this session runs",
         content: [
           {
@@ -272,7 +272,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "gray",
+        tone: "blue",
         title: "Skill format",
         content: [
           {
@@ -322,7 +322,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "warning",
+        tone: "tan",
         title: "If the output drifts from your inspiration",
         content: [
           {
@@ -352,7 +352,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
       },
       {
         kind: "callout",
-        tone: "gray",
+        tone: "blue",
         title: "Not quite done yet?",
         content: [
           {

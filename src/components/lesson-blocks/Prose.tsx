@@ -12,7 +12,7 @@ const isBlockCode = (className?: string, children?: React.ReactNode) =>
 const H2_CLASS = "leland-heading-2xl font-semibold! text-leland-gray-dark md:leland-heading-3xl";
 // Exported so other components (e.g. the accordion row title) can reuse the
 // real H3 treatment instead of hard-coding a one-off size.
-export const H3_CLASS = "leland-heading-lg font-semibold! text-leland-gray-dark md:leland-heading-xl";
+export const H3_CLASS = "leland-heading-xl font-semibold! text-leland-gray-dark";
 
 // h1 gets its own large Season-font treatment — except inside contexts that
 // disallow it (e.g. a callout's content), where it's demoted to H2 size so it
@@ -21,18 +21,18 @@ function buildComponents(allowH1: boolean): Components {
   return {
   h1: allowH1
     ? ({ children }) => (
-        <h2 className="text-heading-4xl font-normal font-season text-leland-gray-dark md:text-heading-5xl">
+        <h2 className="mt-2 text-heading-4xl font-normal font-season text-leland-gray-dark md:text-heading-5xl">
           {children}
         </h2>
       )
-    : ({ children }) => <h2 className={H2_CLASS}>{children}</h2>,
-  h2: ({ children }) => <h2 className={H2_CLASS}>{children}</h2>,
-  h3: ({ children }) => <h3 className={H3_CLASS}>{children}</h3>,
+    : ({ children }) => <h2 className={`mt-2 ${H2_CLASS}`}>{children}</h2>,
+  h2: ({ children }) => <h2 className={`mt-2 ${H2_CLASS}`}>{children}</h2>,
+  h3: ({ children }) => <h3 className={`mt-2 ${H3_CLASS}`}>{children}</h3>,
   p: ({ children }) => (
-    <p className="leland-paragraph-base text-leland-gray-dark md:leland-paragraph-lg">{children}</p>
+    <p className="leland-paragraph-lg text-leland-gray-dark">{children}</p>
   ),
   ul: ({ children }) => (
-    <ul className="flex list-disc flex-col gap-4 pl-5 leland-paragraph-base text-leland-gray-dark marker:text-leland-gray-extra-light md:leland-paragraph-lg">
+    <ul className="flex list-disc flex-col gap-4 pl-5 leland-paragraph-lg text-leland-gray-dark marker:text-leland-gray-extra-light">
       {children}
     </ul>
   ),
@@ -50,12 +50,12 @@ function buildComponents(allowH1: boolean): Components {
     index !== undefined ? (
       <li className="group grid grid-cols-[24px_1fr] gap-x-4">
         <div className="flex flex-col items-center">
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-[13px] font-semibold text-leland-gray-dark">
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-leland-gray-extra-light bg-white text-[13px] font-semibold text-leland-gray-dark">
             {index + 1}
           </span>
-          <span className="mt-1 w-0 flex-1 border-l-2 border-dotted border-leland-gray-stroke group-last:hidden" />
+          <span className="w-0 flex-1 border-l-2 border-dotted border-leland-gray-extra-light group-last:hidden" />
         </div>
-        <div className="pb-4 leland-paragraph-base text-leland-gray-dark group-last:pb-0 md:leland-paragraph-lg">
+        <div className="pb-4 leland-paragraph-lg text-leland-gray-dark group-last:pb-0">
           {children}
         </div>
       </li>
@@ -99,20 +99,22 @@ function buildComponents(allowH1: boolean): Components {
     <img src={typeof src === "string" ? src : undefined} alt={alt} className="max-w-full rounded-lg" />
   ),
   table: ({ children }) => (
-    <div className="mt-4 overflow-x-auto">
-      <table className="w-full border-collapse text-left">
-        {children}
-      </table>
+    <div className="overflow-x-auto">
+      <div className="overflow-hidden rounded-xl border border-leland-gray-stroke">
+        <table className="min-w-full border-collapse text-left">
+          {children}
+        </table>
+      </div>
     </div>
   ),
-  thead: ({ children }) => <thead>{children}</thead>,
+  thead: ({ children }) => <thead className="bg-leland-gray-hover">{children}</thead>,
   th: ({ children }) => (
-    <th className="pb-4 pr-8 leland-paragraph-base text-leland-gray-light font-normal">
+    <th className="border-b border-l border-leland-gray-stroke px-3 py-3 leland-paragraph-base font-normal text-leland-gray-light first:border-l-0">
       {children}
     </th>
   ),
   td: ({ children }) => (
-    <td className="py-3 pr-8 align-top leland-paragraph-base text-leland-gray-dark [tr:last-child_&]:border-0 border-b border-leland-gray-stroke">
+    <td className="border-b border-l border-leland-gray-stroke bg-white px-3 py-4 align-top leland-paragraph-base text-leland-gray-dark first:border-l-0 [tr:last-child_&]:border-b-0">
       {children}
     </td>
   ),

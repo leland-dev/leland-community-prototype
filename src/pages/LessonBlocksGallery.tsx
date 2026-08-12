@@ -69,7 +69,7 @@ const ORDERED_LIST: Block[] = [
 const CALLOUTS: Block[] = [
   {
     kind: "callout",
-    tone: "gray",
+    tone: "blue",
     title: "Callouts can hold more than text",
     content: [
       {
@@ -81,7 +81,7 @@ const CALLOUTS: Block[] = [
   },
   {
     kind: "callout",
-    tone: "warning",
+    tone: "tan",
     title: "Almost any block can go inside",
     content: [
       { kind: "markdown", body: "Text, a code snippet, a download, and a banner can all sit in one callout:" },

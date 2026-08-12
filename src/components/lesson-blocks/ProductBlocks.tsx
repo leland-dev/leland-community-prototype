@@ -5,6 +5,7 @@ import {
   ButtonColor,
   ButtonSize,
   IconArrowUpRight,
+  IconChevronDown,
   IconChevronRight,
   IconDotsVertical,
   IconLivestreamSignal,
@@ -12,6 +13,7 @@ import {
   IconQuestion,
   IconShare,
   IconStarOutline,
+  IconX,
 } from "../leland";
 
 import { useLessonPage } from "./LessonPageContext";
@@ -33,7 +35,7 @@ function VideoThumbnail({ src }: { src: string }) {
     return () => el.removeEventListener("loadedmetadata", seek);
   }, [src]);
   return (
-    <div className="relative flex aspect-video h-14 shrink-0 overflow-hidden rounded-lg border border-leland-gray-stroke">
+    <div className="relative flex aspect-video h-11 shrink-0 overflow-hidden rounded border border-leland-gray-stroke">
       <video
         ref={ref}
         src={src}
@@ -41,18 +43,21 @@ function VideoThumbnail({ src }: { src: string }) {
         preload="metadata"
         className="h-full w-full object-cover"
       />
-      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-        <div className="flex size-6 items-center justify-center rounded-full bg-white/90 shadow">
-          <IconPlayVideo className="size-3.5 text-leland-gray-dark" />
-        </div>
-      </div>
     </div>
   );
 }
 
-const SESSION_SLOTS = ["11:00 AM Session", "2:00 PM Session", "5:00 PM Session"];
+const SESSION_SLOTS = ["Apr 21, 11:00 AM Session", "Apr 21, 2:00 PM Session", "Apr 21, 5:00 PM Session"];
 
-function SessionRecordingEmbed({ src }: { src: string }) {
+function SessionRecordingEmbed({
+  src,
+  title,
+  onClose,
+}: {
+  src: string;
+  title?: string;
+  onClose?: () => void;
+}) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -102,9 +107,13 @@ function SessionRecordingEmbed({ src }: { src: string }) {
     else containerRef.current?.requestFullscreen?.();
   };
 
-  const overlayClass = `pointer-events-none absolute inset-x-0 transition-opacity duration-200 ${
-    showControls ? "opacity-100 pointer-events-auto" : "opacity-0"
+  const overlayClass = `absolute inset-x-0 transition-opacity duration-200 ${
+    showControls ? "opacity-100" : "opacity-0 pointer-events-none"
   }`;
+
+  const progressPct = duration ? (currentTime / duration) * 100 : 0;
+
+  const ctrlBtn = "flex size-10 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10 focus:outline-none";
 
   return (
     <div
@@ -125,136 +134,118 @@ function SessionRecordingEmbed({ src }: { src: string }) {
         onLoadedMetadata={() => setDuration(videoRef.current?.duration ?? 0)}
       />
 
-      {/* Top: title + session selector */}
+      {/* Top: title + X, session selector below */}
       <div className={`${overlayClass} top-0`}>
-        <div className="bg-gradient-to-b from-black/70 to-transparent px-4 pt-3 pb-14">
-          <div className="flex items-center justify-between gap-3">
-            <p className="leland-paragraph-base font-semibold text-white">Session recording</p>
-            <div className="relative">
-              <select
-                value={selectedSlot}
-                onChange={e => setSelectedSlot(Number(e.target.value))}
-                className="cursor-pointer appearance-none rounded-full bg-white/15 py-1 pl-2.5 pr-6 text-xs font-medium text-white backdrop-blur-sm focus:outline-none md:py-1.5 md:pl-3 md:pr-7 md:text-[13px]"
-              >
-                {SESSION_SLOTS.map((label, i) => (
-                  <option key={i} value={i} className="bg-gray-900">{label}</option>
-                ))}
-              </select>
-              <svg className="pointer-events-none absolute right-1.5 top-1/2 size-2.5 -translate-y-1/2 text-white md:right-2 md:size-3" viewBox="0 0 12 12" fill="none" aria-hidden>
-                <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+        <div className="bg-gradient-to-b from-[#222] to-transparent pl-5 pr-2 pt-2 pb-14">
+          <div className="flex items-start justify-between gap-6">
+            <div className="flex flex-col gap-2 pt-3">
+              <p className="leland-heading-xl font-semibold text-white">
+                {title ?? "Live session recording"}
+              </p>
+              <div className="relative">
+                <select
+                  value={selectedSlot}
+                  onChange={e => setSelectedSlot(Number(e.target.value))}
+                  className="cursor-pointer appearance-none pr-7 leland-paragraph-lg text-white focus:outline-none"
+                >
+                  {SESSION_SLOTS.map((label, i) => (
+                    <option key={i} value={i} className="bg-gray-900">{label}</option>
+                  ))}
+                </select>
+                <svg className="pointer-events-none absolute right-1.5 top-1/2 size-[18px] -translate-y-1/2 text-white" viewBox="0 0 20 20" fill="none" aria-hidden>
+                  <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
             </div>
+            {onClose ? (
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close video player"
+                className="flex size-10 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10 focus:outline-none"
+              >
+                <IconX className="size-6" />
+              </button>
+            ) : null}
           </div>
         </div>
       </div>
 
-      {/* Center: large play button when paused */}
-      {!isPlaying && (
-        <button
-          type="button"
-          onClick={togglePlay}
-          className="absolute inset-0 flex items-center justify-center focus:outline-none"
-          aria-label="Play"
-        >
-          <div className="flex size-14 items-center justify-center rounded-full bg-white/25 backdrop-blur-sm">
-            <svg viewBox="0 0 24 24" fill="white" className="size-7 translate-x-0.5" aria-hidden>
-              <polygon points="5,3 21,12 5,21" />
-            </svg>
-          </div>
-        </button>
-      )}
-
-      {/* Bottom: scrubber + controls */}
+      {/* Bottom: scrubber row + controls row */}
       <div className={`${overlayClass} bottom-0`}>
-        <div className="bg-gradient-to-t from-black/70 to-transparent px-4 pb-3 pt-12">
-          <input
-            type="range"
-            min={0}
-            max={duration || 100}
-            step={0.1}
-            value={currentTime}
-            onChange={e => { const v = videoRef.current; if (v) v.currentTime = Number(e.target.value); }}
-            className="mb-2.5 h-0.5 w-full cursor-pointer accent-white [&::-webkit-slider-thumb]:appearance-none [&::-moz-range-thumb]:appearance-none"
-          />
-          <div className="flex items-center gap-3.5 text-white/80">
-            <button
-              type="button"
-              onClick={togglePlay}
-              className="hover:text-white focus:outline-none"
-              aria-label={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? (
-                <svg viewBox="0 0 20 20" fill="currentColor" className="size-5" aria-hidden>
-                  <rect x="4" y="3" width="4" height="14" rx="1" />
-                  <rect x="12" y="3" width="4" height="14" rx="1" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="currentColor" className="size-5 translate-x-px" aria-hidden>
-                  <polygon points="5,3 21,12 5,21" />
-                </svg>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={toggleMute}
-              className="hover:text-white focus:outline-none"
-              aria-label={muted ? "Unmute" : "Mute"}
-            >
-              {muted ? (
-                <svg viewBox="0 0 24 24" className="size-5" aria-hidden>
-                  <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
-                  <path d="M16 9.5l5 5M21 9.5l-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" fill="none" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" className="size-5" aria-hidden>
-                  <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
-                  <path d="M16 8.8a4 4 0 010 6.4M18.6 6.4a7.5 7.5 0 010 11.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" fill="none" />
-                </svg>
-              )}
-            </button>
-            <div className="flex-1" />
-            <span className="leland-paragraph-sm tabular-nums">
+        <div className="bg-gradient-to-t from-[#222] to-transparent px-2 pb-2 pt-12">
+          {/* Row 1: progress bar + timestamp */}
+          <div className="mb-2 flex items-center gap-3 px-2">
+            <input
+              type="range"
+              min={0}
+              max={duration || 100}
+              step={0.1}
+              value={currentTime}
+              onChange={e => { const v = videoRef.current; if (v) v.currentTime = Number(e.target.value); }}
+              className="h-0.5 flex-1 cursor-pointer appearance-none rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-0 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:size-0"
+              style={{ background: `linear-gradient(to right, #fff ${progressPct}%, rgba(255,255,255,0.2) ${progressPct}%)` }}
+            />
+            <span className="shrink-0 leland-paragraph-base tabular-nums text-white">
               {fmt(currentTime)} / {fmt(duration)}
             </span>
-            <button
-              type="button"
-              onClick={() => setCaptionsOn(c => !c)}
-              className={`focus:outline-none ${captionsOn ? "text-white" : "hover:text-white"}`}
-              aria-label="Captions"
-              aria-pressed={captionsOn}
-            >
-              <span className="flex h-[18px] items-center justify-center rounded border-[1.5px] border-current px-1 text-[10px] font-bold leading-none">CC</span>
-            </button>
-            <button
-              type="button"
-              className="hover:text-white focus:outline-none"
-              aria-label="Settings"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="size-5" aria-hidden>
-                <path d="M19.14 12.94a7.5 7.5 0 000-1.88l2.03-1.58a.5.5 0 00.12-.64l-1.92-3.32a.5.5 0 00-.61-.22l-2.39.96a7 7 0 00-1.62-.94l-.36-2.54a.5.5 0 00-.5-.42h-3.84a.5.5 0 00-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 00-.61.22L2.69 8.84a.5.5 0 00.12.64l2.03 1.58a7.5 7.5 0 000 1.88l-2.03 1.58a.5.5 0 00-.12.64l1.92 3.32a.5.5 0 00.61.22l2.39-.96c.49.38 1.03.7 1.62.94l.36 2.54a.5.5 0 00.5.42h3.84a.5.5 0 00.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96a.5.5 0 00.61-.22l1.92-3.32a.5.5 0 00-.12-.64l-2.03-1.58zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={popOut}
-              className="hover:text-white focus:outline-none"
-              aria-label="Pop out"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="size-5" aria-hidden>
-                <rect x="3" y="5" width="18" height="14" rx="2" />
-                <rect x="12" y="11" width="7" height="5" rx="1" fill="currentColor" stroke="none" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={toggleFullscreen}
-              className="hover:text-white focus:outline-none"
-              aria-label="Fullscreen"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-5" aria-hidden>
-                <path d="M4 9V5a1 1 0 011-1h4M20 9V5a1 1 0 00-1-1h-4M4 15v4a1 1 0 001 1h4M20 15v4a1 1 0 01-1 1h-4" />
-              </svg>
-            </button>
+          </div>
+          {/* Row 2: playback controls */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <button type="button" onClick={togglePlay} className={ctrlBtn} aria-label={isPlaying ? "Pause" : "Play"}>
+                {isPlaying ? (
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="size-6" aria-hidden>
+                    <rect x="5" y="4" width="4" height="16" rx="1" />
+                    <rect x="15" y="4" width="4" height="16" rx="1" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="size-6 translate-x-px" aria-hidden>
+                    <polygon points="6,4 22,12 6,20" />
+                  </svg>
+                )}
+              </button>
+              <button type="button" onClick={toggleMute} className={ctrlBtn} aria-label={muted ? "Unmute" : "Mute"}>
+                {muted ? (
+                  <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
+                    <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
+                    <path d="M16 9.5l5 5M21 9.5l-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
+                    <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
+                    <path d="M16 8.8a4 4 0 010 6.4M18.6 6.4a7.5 7.5 0 010 11.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            <div className="flex items-center">
+              <button
+                type="button"
+                onClick={() => setCaptionsOn(c => !c)}
+                className={`${ctrlBtn} ${captionsOn ? "opacity-100" : "opacity-60 hover:opacity-100"}`}
+                aria-label="Captions"
+                aria-pressed={captionsOn}
+              >
+                <span className="flex h-[18px] items-center justify-center rounded border-[1.5px] border-current px-1 text-[10px] font-bold leading-none">CC</span>
+              </button>
+              <button type="button" className={ctrlBtn} aria-label="Settings">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="size-6" aria-hidden>
+                  <path d="M19.14 12.94a7.5 7.5 0 000-1.88l2.03-1.58a.5.5 0 00.12-.64l-1.92-3.32a.5.5 0 00-.61-.22l-2.39.96a7 7 0 00-1.62-.94l-.36-2.54a.5.5 0 00-.5-.42h-3.84a.5.5 0 00-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 00-.61.22L2.69 8.84a.5.5 0 00.12.64l2.03 1.58a7.5 7.5 0 000 1.88l-2.03 1.58a.5.5 0 00-.12.64l1.92 3.32a.5.5 0 00.61.22l2.39-.96c.49.38 1.03.7 1.62.94l.36 2.54a.5.5 0 00.5.42h3.84a.5.5 0 00.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96a.5.5 0 00.61-.22l1.92-3.32a.5.5 0 00-.12-.64l-2.03-1.58zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z" />
+                </svg>
+              </button>
+              <button type="button" onClick={popOut} className={ctrlBtn} aria-label="Pop out">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="size-6" aria-hidden>
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <rect x="12" y="11" width="7" height="5" rx="1" fill="currentColor" stroke="none" />
+                </svg>
+              </button>
+              <button type="button" onClick={toggleFullscreen} className={ctrlBtn} aria-label="Fullscreen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-6" aria-hidden>
+                  <path d="M4 9V5a1 1 0 011-1h4M20 9V5a1 1 0 00-1-1h-4M4 15v4a1 1 0 001 1h4M20 15v4a1 1 0 01-1 1h-4" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -298,6 +289,8 @@ function LiveDateTile({ month, day }: { month: string; day: string }) {
 export type KebabItem = { label: string; href: string; download?: string };
 type CalloutTrailing =
   | { kind: "chevron" }
+  | { kind: "chevronDown" }
+  | { kind: "plus" }
   | { kind: "arrow" }
   | { kind: "kebab"; items?: KebabItem[] }
   | { kind: "join"; onJoin?: () => void; href?: string };
@@ -367,6 +360,12 @@ export function LiveSessionCallout({
       </div>
       {trailing.kind === "chevron" ? (
         <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
+      ) : trailing.kind === "chevronDown" ? (
+        <IconChevronDown className="size-5 shrink-0 text-leland-gray-light" />
+      ) : trailing.kind === "plus" ? (
+        <svg viewBox="0 0 20 20" fill="none" className="size-5 shrink-0 text-leland-gray-light" aria-hidden>
+          <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        </svg>
       ) : trailing.kind === "arrow" ? (
         <IconArrowUpRight className="size-6 shrink-0 text-leland-gray-dark" />
       ) : trailing.kind === "kebab" ? (
@@ -418,9 +417,8 @@ export function LiveSessionCallout({
     </>
   );
 
-  // Only the chevron/arrow states make the whole row a click target; kebab and
-  // join own their own controls.
-  if (onClick && (trailing.kind === "chevron" || trailing.kind === "arrow")) {
+  // Chevron, arrow, chevronDown, and plus trailing kinds make the whole row clickable.
+  if (onClick && (trailing.kind === "chevron" || trailing.kind === "arrow" || trailing.kind === "chevronDown" || trailing.kind === "plus")) {
     return (
       <button
         type="button"
@@ -438,20 +436,31 @@ export function LiveSessionCallout({
 // with the session title in the subtext.
 export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType }) {
   const { onOpenCalendar, onViewRecording, liveSessionVariant, liveProgram, calendarItems, meetingUrl } = useLessonPage();
+  const [recordingExpanded, setRecordingExpanded] = useState(false);
 
   if (!liveProgram) return null;
 
+  const formattedDate = `${block.month.charAt(0)}${block.month.slice(1).toLowerCase()} ${block.day}`;
+
   switch (liveSessionVariant) {
     case "watchRecording":
-      return block.recordingVideoSrc ? (
-        <SessionRecordingEmbed src={block.recordingVideoSrc} />
-      ) : (
+      if (recordingExpanded && block.recordingVideoSrc) {
+        return (
+          <SessionRecordingEmbed
+            src={block.recordingVideoSrc}
+            title="Live session recording"
+            onClose={() => setRecordingExpanded(false)}
+          />
+        );
+      }
+      return (
         <LiveSessionCallout
           recording
+          recordingVideoSrc={block.recordingVideoSrc}
           title="Live session recording"
           subtitle={block.sessionTitle}
-          trailing={{ kind: "arrow" }}
-          onClick={onViewRecording}
+          trailing={{ kind: "chevronDown" }}
+          onClick={() => setRecordingExpanded(true)}
         />
       );
     case "addedToCalendar":
@@ -483,16 +492,16 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
         <LiveSessionCallout
           month={block.month}
           day={block.day}
-          title="Join the live session"
+          title="Attend the live session"
           subtitle={
             <>
               <span className="font-medium text-leland-blue-dark">
                 Add to calendar
-              </span>{" "}
-              · {block.sessionTitle}
+              </span>{" · "}
+              {formattedDate}
             </>
           }
-          trailing={{ kind: "chevron" }}
+          trailing={{ kind: "plus" }}
           onClick={onOpenCalendar}
         />
       );
@@ -528,4 +537,3 @@ export function LessonFooterActions() {
     </div>
   );
 }
-

@@ -1,6 +1,3 @@
-// Ported 1:1 from the monorepo course viewer
-// (apps/customer/src/components/content/course/CourseFeedbackModal.client.tsx,
-// feature/course-viewer branch) — imports adapted to the local leland kit.
 import { useState } from "react";
 
 import {
@@ -8,10 +5,7 @@ import {
   ButtonColor,
   ButtonSize,
   ButtonWidth,
-  IconFlag,
-  IconStar,
   Modal,
-  ModalClose,
   ModalContent,
   ModalSize,
   Rating,
@@ -20,29 +14,25 @@ import {
   type ModalProps,
 } from "./leland";
 
-type FeedbackType = "review" | "issue" | null;
+type Thumb = "yes" | "no";
 
-interface CourseFeedbackModalProps extends ModalProps {
-  currentEntryId: string;
-  entries: Array<{ id: string; title: string }>;
-}
+const THUMBS: { id: Thumb; emoji: string; label: string }[] = [
+  { id: "no", emoji: "👎", label: "No" },
+  { id: "yes", emoji: "👍", label: "Yes" },
+];
 
 const CourseFeedbackModalImpl = ({
   open,
   onOpenChange,
-  currentEntryId,
-  entries,
-}: CourseFeedbackModalProps) => {
-  const [feedbackType, setFeedbackType] = useState<FeedbackType>(null);
+}: ModalProps) => {
+  const [thumb, setThumb] = useState<Thumb | null>(null);
   const [rating, setRating] = useState(0);
-  const [selectedEntryId, setSelectedEntryId] = useState(currentEntryId);
   const [text, setText] = useState("");
 
   const handleOpenChange = (next: boolean) => {
     if (!next) {
-      setFeedbackType(null);
+      setThumb(null);
       setRating(0);
-      setSelectedEntryId(currentEntryId);
       setText("");
     }
     onOpenChange?.(next);
@@ -50,110 +40,61 @@ const CourseFeedbackModalImpl = ({
 
   return (
     <Modal open={open} onOpenChange={handleOpenChange}>
-      <ModalContent size={ModalSize.SMALL} header="Share feedback">
-        <div className="flex flex-col gap-4 p-6">
-          {feedbackType === null ? (
-            <>
-              <div className="flex flex-col gap-3">
+      <ModalContent size={ModalSize.SMALL}>
+        <div className="flex flex-col gap-5 p-6 md:p-8">
+          <h2 className="leland-heading-3xl font-semibold text-leland-gray-dark pr-8">
+            Was this lesson helpful?
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {THUMBS.map(({ id, emoji, label }) => {
+              const selected = thumb === id;
+              return (
                 <button
-                  onClick={() => setFeedbackType("review")}
-                  className="flex items-center gap-3 rounded-lg border border-leland-gray-stroke bg-white px-5 py-5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary hover:bg-leland-gray-hover"
+                  key={id}
+                  type="button"
+                  onClick={() => setThumb(id)}
+                  className={`flex flex-col items-center gap-2 rounded-xl py-5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
+                    selected
+                      ? "border-2 border-leland-gray-dark bg-white"
+                      : "border border-leland-gray-stroke bg-white hover:bg-leland-gray-hover"
+                  }`}
                 >
-                  <IconStar className="size-5 shrink-0 text-leland-gray-dark" />
-                  <div>
-                    <p className="leland-heading-lg font-semibold text-leland-gray-dark">
-                      Leave a review
-                    </p>
-                    <p className="leland-paragraph-base text-leland-gray-light">
-                      Enjoying the course? Share what&apos;s working for you.
-                    </p>
-                  </div>
+                  <span className="text-4xl leading-none">{emoji}</span>
+                  <span className="leland-heading-base font-semibold text-leland-gray-dark">{label}</span>
                 </button>
-                <button
-                  onClick={() => setFeedbackType("issue")}
-                  className="flex items-center gap-3 rounded-lg border border-leland-gray-stroke bg-white px-5 py-5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary hover:bg-leland-gray-hover"
-                >
-                  <IconFlag className="size-5 shrink-0 text-leland-gray-dark" />
-                  <div>
-                    <p className="leland-heading-lg font-semibold text-leland-gray-dark">
-                      Report an issue
-                    </p>
-                    <p className="leland-paragraph-base text-leland-gray-light">
-                      Found something confusing or outdated? Let us know.
-                    </p>
-                  </div>
-                </button>
-              </div>
-            </>
-          ) : feedbackType === "review" ? (
+              );
+            })}
+          </div>
+          {thumb !== null && (
             <>
-              <div className="flex flex-col items-center gap-4">
-                <p className="leland-paragraph-base text-leland-gray-light">
-                  How would you rate this course?
-                </p>
-                <Rating
-                  rate={rating}
-                  hoverable
-                  size={RatingSize.LARGE}
-                  onSaveRating={setRating}
-                />
-              </div>
-              <div className="mt-2">
+              {thumb === "yes" && (
+                <div className="flex flex-col gap-2">
+                  <p className="leland-paragraph-base text-leland-gray-dark">How many stars would you give it?</p>
+                  <Rating
+                    rate={rating}
+                    hoverable
+                    size={RatingSize.LARGE}
+                    onSaveRating={setRating}
+                  />
+                </div>
+              )}
+              {(thumb === "no" || rating > 0) && (
                 <textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="Share your thoughts..."
+                  placeholder={thumb === "no" ? "What wasn't helpful?" : "Share your thoughts"}
                   rows={4}
-                  className="w-full resize-none rounded-lg border border-leland-gray-stroke bg-white px-3 py-2 leland-paragraph-base text-leland-gray-dark placeholder:text-leland-gray-extra-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                  className="w-full resize-y rounded-xl border border-leland-gray-stroke bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark placeholder:text-leland-gray-extra-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
                 />
-              </div>
-              <ModalClose asChild>
-                <span>
-                  <Button
-                    label="Submit"
-                    buttonColor={ButtonColor.PRIMARY}
-                    size={ButtonSize.LARGE}
-                    rounded
-                    width={ButtonWidth.FULL}
-                  />
-                </span>
-              </ModalClose>
-            </>
-          ) : (
-            <>
-              <p className="leland-paragraph-base text-leland-gray-light">
-                Which section has the issue?
-              </p>
-              <select
-                value={selectedEntryId}
-                onChange={(e) => setSelectedEntryId(e.target.value)}
-                className="w-full rounded-lg border border-leland-gray-stroke bg-white pl-3 pr-8 py-2 leland-paragraph-base text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-              >
-                <option value="">This lesson generally</option>
-                {entries.map((entry) => (
-                  <option key={entry.id} value={entry.id}>
-                    {entry.title}
-                  </option>
-                ))}
-              </select>
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Describe the issue (optional)"
-                rows={4}
-                className="w-full resize-none rounded-lg border border-leland-gray-stroke bg-white px-3 py-2 leland-paragraph-base text-leland-gray-dark placeholder:text-leland-gray-extra-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+              )}
+              <Button
+                label="Submit"
+                buttonColor={ButtonColor.PRIMARY}
+                size={ButtonSize.LARGE}
+                rounded
+                width={ButtonWidth.FULL}
+                onClick={() => handleOpenChange(false)}
               />
-              <ModalClose asChild>
-                <span>
-                  <Button
-                    label="Submit"
-                    buttonColor={ButtonColor.PRIMARY}
-                    size={ButtonSize.LARGE}
-                    rounded
-                    width={ButtonWidth.FULL}
-                  />
-                </span>
-              </ModalClose>
             </>
           )}
         </div>

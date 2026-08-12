@@ -20,10 +20,8 @@ export type MarkdownBlock = {
 // something the type enforces.
 export type CalloutBlock = {
   kind: "callout";
-  // Named colors from the design system only — never a raw hex value.
-  // Defaults to "gray" when omitted; "blue" and "beige" are explicit
-  // alternate choices; "warning" (orange) is reserved for actual warnings.
-  tone?: "blue" | "beige" | "gray" | "warning";
+  tone?: "blue" | "tan";
+  eyebrow?: string;
   title?: string;
   content: Exclude<Block, CalloutBlock>[];
 };
