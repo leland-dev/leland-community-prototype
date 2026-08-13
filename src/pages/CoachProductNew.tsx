@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
@@ -43,8 +43,22 @@ import photoIcon from "../assets/icons/photo.svg";
 import videoIcon from "../assets/icons/video-icon.svg";
 import starIcon from "../assets/icons/star-icon.svg";
 import giftIcon from "../assets/icons/gift.svg";
+import lightBulbIcon from "../assets/icons/light-bulb.svg";
+import shapesIcon from "../assets/icons/shapes.svg";
 
 type StepKey = "product" | "offerings" | "page";
+
+// Setup-flow version, toggled from the admin menu. v1: add products, then set a
+// price. v2: each product carries its own price and the option shows a roll-up
+// (subtotal → discount → total). Provided via context so deeply-nested config
+// fields and the roll-up can read it without prop-drilling.
+const V2Context = createContext(false);
+const useV2 = () => useContext(V2Context);
+
+// Product types that carry a price in v2 (everything with a real config modal;
+// placeholder types like Agent / Private group are excluded).
+const PRICEABLE = ["coaching-time", "content", "collection", "course", "paid-livestream"];
+const isPriceable = (slug: string) => PRICEABLE.includes(slug);
 
 // A single pricing option under "Paid access". Each option bundles its own set
 // of products (referenced by OfferingItem id) and its own billing settings.
@@ -62,6 +76,12 @@ type PricingOption = {
   acceptLocalCurrency: boolean;
   customizePaymentMethods: boolean;
   productIds: number[];
+  // v1: lock the price to the coach's hourly rate (only when the offering is a
+  // single hourly coaching-time product).
+  syncHourly: boolean;
+  // v2 roll-up discount applied to the option's product subtotal.
+  discountType: "percent" | "flat";
+  discountValue: string;
 };
 
 const newPricingOption = (id: number): PricingOption => ({
@@ -78,6 +98,9 @@ const newPricingOption = (id: number): PricingOption => ({
   acceptLocalCurrency: false,
   customizePaymentMethods: false,
   productIds: [],
+  syncHourly: false,
+  discountType: "percent",
+  discountValue: "",
 });
 
 const STEPS: { key: StepKey; label: string; icon: string }[] = [
@@ -118,6 +141,17 @@ const offeringTypes = [
   { slug: "membership", label: "Private group", blurb: "A private community for members", icon: crownIcon },
 ];
 const offeringBySlug = Object.fromEntries(offeringTypes.map((o) => [o.slug, o]));
+
+// Fuller descriptions for the v2 "add a product" list (the initial state).
+const offeringAddDescription: Record<string, string> = {
+  "coaching-time": "Sell 1:1 time — priced automatically from your hourly rate.",
+  content: "Share a guide, template, video, or other resource.",
+  collection: "Bundle several resources together into one product.",
+  course: "Teach with a structured, multi-lesson course.",
+  "paid-livestream": "Host a live session your audience pays to join.",
+  agent: "An AI assistant trained on your expertise.",
+  membership: "Give members access to a private community.",
+};
 
 // The kinds of section a coach can add to the customer-facing page.
 type PageSectionKind = "text" | "faqs" | "image" | "video" | "reviews";
@@ -257,30 +291,41 @@ const RESOURCE_TYPES = [
 
 // Previously-uploaded content the coach can reuse in a new content/collection
 // item (mock library for the prototype).
-type LibraryContent = { id: string; name: string; kind: "pdf" | "doc" | "video" | "image"; title: string; description: string; resourceType: string; size: string; date: string; thumb: string; views: number };
+type LibraryContent = { id: string; name: string; kind: "pdf" | "doc" | "video" | "image"; title: string; description: string; resourceType: string; size: string; date: string; thumb: string; views: number; price: number };
 // Bucket a view count, e.g. 4210 → "4.2k", 980 → "980".
 const formatViews = (n: number): string => (n < 1000 ? String(n) : `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`);
 const CONTENT_LIBRARY: LibraryContent[] = [
-  { id: "c1", name: "MBA Essay Framework.pdf", kind: "pdf", title: "MBA Essay Framework", description: "A step-by-step framework for structuring standout MBA essays.", resourceType: "guide", size: "2.4 MB", date: "Mar 12", thumb: libThumb1, views: 4210 },
-  { id: "c2", name: "Consulting Resume Template.docx", kind: "doc", title: "Consulting Resume Template", description: "The exact resume template I used to land offers at McKinsey and Bain.", resourceType: "template", size: "180 KB", date: "Feb 28", thumb: libThumb2, views: 8940 },
-  { id: "c3", name: "Mock Interview Walkthrough.mp4", kind: "video", title: "Mock Interview Walkthrough", description: "A full recording of a mock case interview with live feedback.", resourceType: "example", size: "412 MB", date: "Feb 10", thumb: libThumb3, views: 2180 },
-  { id: "c4", name: "50 Behavioral Questions.pdf", kind: "pdf", title: "50 Behavioral Questions", description: "The most common behavioral questions and how to answer them.", resourceType: "practice", size: "1.1 MB", date: "Jan 22", thumb: libThumb4, views: 12530 },
-  { id: "c5", name: "School Selection Worksheet.xlsx", kind: "doc", title: "School Selection Worksheet", description: "Compare programs across the factors that actually matter.", resourceType: "tool", size: "96 KB", date: "Jan 8", thumb: libThumb5, views: 1760 },
-  { id: "c6", name: "Networking Email Scripts.pdf", kind: "pdf", title: "Networking Email Scripts", description: "Copy-paste templates for reaching out to alumni and recruiters.", resourceType: "template", size: "640 KB", date: "Dec 15", thumb: libThumb6, views: 6020 },
-  { id: "c7", name: "GMAT Study Plan (90 Days).pdf", kind: "pdf", title: "GMAT Study Plan — 90 Days", description: "A week-by-week plan to go from baseline to a 730+ score.", resourceType: "guide", size: "1.8 MB", date: "Dec 2", thumb: libThumb7, views: 9380 },
-  { id: "c8", name: "Case Interview Frameworks.pdf", kind: "pdf", title: "Case Interview Frameworks", description: "The core frameworks for cracking any consulting case.", resourceType: "guide", size: "3.2 MB", date: "Nov 20", thumb: libThumb8, views: 15110 },
-  { id: "c9", name: "Sample Stanford Essay.pdf", kind: "pdf", title: "Sample Stanford GSB Essay", description: "An annotated admitted essay with commentary on what worked.", resourceType: "example", size: "820 KB", date: "Nov 8", thumb: libThumb1, views: 3640 },
-  { id: "c10", name: "Cover Letter Template.docx", kind: "doc", title: "Cover Letter Template", description: "A flexible cover letter template for any role.", resourceType: "template", size: "72 KB", date: "Oct 30", thumb: libThumb2, views: 5290 },
-  { id: "c11", name: "Company Research Tracker.xlsx", kind: "doc", title: "Company Research Tracker", description: "Track your target firms, contacts, and application status.", resourceType: "tool", size: "110 KB", date: "Oct 18", thumb: libThumb3, views: 980 },
-  { id: "c12", name: "Behavioral Prep Walkthrough.mp4", kind: "video", title: "Behavioral Prep Walkthrough", description: "How to build a bank of stories using the STAR method.", resourceType: "example", size: "356 MB", date: "Oct 4", thumb: libThumb4, views: 7450 },
-  { id: "c13", name: "Recommendation Letter Guide.pdf", kind: "pdf", title: "Recommendation Letter Guide", description: "How to brief your recommenders for the strongest letters.", resourceType: "guide", size: "540 KB", date: "Sep 22", thumb: libThumb5, views: 4870 },
-  { id: "c14", name: "Networking Tracker.xlsx", kind: "doc", title: "Networking Tracker", description: "Stay on top of coffee chats, follow-ups, and referrals.", resourceType: "tool", size: "88 KB", date: "Sep 10", thumb: libThumb6, views: 1320 },
-  { id: "c15", name: "Practice Case: Market Entry.pdf", kind: "pdf", title: "Practice Case — Market Entry", description: "A full market-entry case with a sample answer key.", resourceType: "practice", size: "1.3 MB", date: "Aug 28", thumb: libThumb7, views: 6610 },
-  { id: "c16", name: "Wharton Interview Debrief.mp4", kind: "video", title: "Wharton Team-Based Discussion Debrief", description: "A walkthrough of the TBD format and how to stand out.", resourceType: "example", size: "298 MB", date: "Aug 14", thumb: libThumb8, views: 2940 },
+  { id: "c1", name: "MBA Essay Framework.pdf", kind: "pdf", title: "MBA Essay Framework", description: "A step-by-step framework for structuring standout MBA essays.", resourceType: "guide", size: "2.4 MB", date: "Mar 12", thumb: libThumb1, views: 4210, price: 18 },
+  { id: "c2", name: "Consulting Resume Template.docx", kind: "doc", title: "Consulting Resume Template", description: "The exact resume template I used to land offers at McKinsey and Bain.", resourceType: "template", size: "180 KB", date: "Feb 28", thumb: libThumb2, views: 8940, price: 12 },
+  { id: "c3", name: "Mock Interview Walkthrough.mp4", kind: "video", title: "Mock Interview Walkthrough", description: "A full recording of a mock case interview with live feedback.", resourceType: "example", size: "412 MB", date: "Feb 10", thumb: libThumb3, views: 2180, price: 29 },
+  { id: "c4", name: "50 Behavioral Questions.pdf", kind: "pdf", title: "50 Behavioral Questions", description: "The most common behavioral questions and how to answer them.", resourceType: "practice", size: "1.1 MB", date: "Jan 22", thumb: libThumb4, views: 12530, price: 9 },
+  { id: "c5", name: "School Selection Worksheet.xlsx", kind: "doc", title: "School Selection Worksheet", description: "Compare programs across the factors that actually matter.", resourceType: "tool", size: "96 KB", date: "Jan 8", thumb: libThumb5, views: 1760, price: 7 },
+  { id: "c6", name: "Networking Email Scripts.pdf", kind: "pdf", title: "Networking Email Scripts", description: "Copy-paste templates for reaching out to alumni and recruiters.", resourceType: "template", size: "640 KB", date: "Dec 15", thumb: libThumb6, views: 6020, price: 11 },
+  { id: "c7", name: "GMAT Study Plan (90 Days).pdf", kind: "pdf", title: "GMAT Study Plan — 90 Days", description: "A week-by-week plan to go from baseline to a 730+ score.", resourceType: "guide", size: "1.8 MB", date: "Dec 2", thumb: libThumb7, views: 9380, price: 22 },
+  { id: "c8", name: "Case Interview Frameworks.pdf", kind: "pdf", title: "Case Interview Frameworks", description: "The core frameworks for cracking any consulting case.", resourceType: "guide", size: "3.2 MB", date: "Nov 20", thumb: libThumb8, views: 15110, price: 25 },
+  { id: "c9", name: "Sample Stanford Essay.pdf", kind: "pdf", title: "Sample Stanford GSB Essay", description: "An annotated admitted essay with commentary on what worked.", resourceType: "example", size: "820 KB", date: "Nov 8", thumb: libThumb1, views: 3640, price: 15 },
+  { id: "c10", name: "Cover Letter Template.docx", kind: "doc", title: "Cover Letter Template", description: "A flexible cover letter template for any role.", resourceType: "template", size: "72 KB", date: "Oct 30", thumb: libThumb2, views: 5290, price: 8 },
+  { id: "c11", name: "Company Research Tracker.xlsx", kind: "doc", title: "Company Research Tracker", description: "Track your target firms, contacts, and application status.", resourceType: "tool", size: "110 KB", date: "Oct 18", thumb: libThumb3, views: 980, price: 6 },
+  { id: "c12", name: "Behavioral Prep Walkthrough.mp4", kind: "video", title: "Behavioral Prep Walkthrough", description: "How to build a bank of stories using the STAR method.", resourceType: "example", size: "356 MB", date: "Oct 4", thumb: libThumb4, views: 7450, price: 27 },
+  { id: "c13", name: "Recommendation Letter Guide.pdf", kind: "pdf", title: "Recommendation Letter Guide", description: "How to brief your recommenders for the strongest letters.", resourceType: "guide", size: "540 KB", date: "Sep 22", thumb: libThumb5, views: 4870, price: 14 },
+  { id: "c14", name: "Networking Tracker.xlsx", kind: "doc", title: "Networking Tracker", description: "Stay on top of coffee chats, follow-ups, and referrals.", resourceType: "tool", size: "88 KB", date: "Sep 10", thumb: libThumb6, views: 1320, price: 5 },
+  { id: "c15", name: "Practice Case: Market Entry.pdf", kind: "pdf", title: "Practice Case — Market Entry", description: "A full market-entry case with a sample answer key.", resourceType: "practice", size: "1.3 MB", date: "Aug 28", thumb: libThumb7, views: 6610, price: 19 },
+  { id: "c16", name: "Wharton Interview Debrief.mp4", kind: "video", title: "Wharton Team-Based Discussion Debrief", description: "A walkthrough of the TBD format and how to stand out.", resourceType: "example", size: "298 MB", date: "Aug 14", thumb: libThumb8, views: 2940, price: 32 },
 ];
 // Effective title of a content item, respecting its mode (uploaded vs reused).
 const contentItemTitle = (c: Record<string, string>): string =>
   c.source === "reuse" ? (c.r_title || CONTENT_LIBRARY.find((l) => l.id === c.libraryId)?.title || "") : (c.title || "");
+
+// File-type label + view count for a content item's row detail. Reused library
+// items carry both; a fresh upload only has a file name, so we infer the type
+// from its extension and have no views to show.
+const CONTENT_KIND_LABEL: Record<string, string> = { pdf: "PDF", doc: "Doc", docx: "Doc", xlsx: "Doc", video: "Video", mp4: "Video", mov: "Video", image: "Image", png: "Image", jpg: "Image", jpeg: "Image" };
+function contentMeta(c: Record<string, string>): { typeLabel: string | null; views: number | null } {
+  const lib = c.libraryId ? CONTENT_LIBRARY.find((l) => l.id === c.libraryId) : null;
+  if (lib) return { typeLabel: CONTENT_KIND_LABEL[lib.kind] ?? null, views: lib.views };
+  const ext = (c.assetName || "").split(".").pop()?.toLowerCase() ?? "";
+  return { typeLabel: CONTENT_KIND_LABEL[ext] ?? (ext ? ext.toUpperCase() : null), views: null };
+}
 
 // MBA subcategories a livestream can be tagged with (maps to Leland categories).
 const MBA_SUBCATEGORIES = ["Deferred MBA", "Executive MBA", "JD/MBA", "Online MBA", "Part-Time MBA", "Traditional Full-Time MBA"];
@@ -542,6 +587,9 @@ export default function CoachProductNew() {
 
   // Admin tool — MVP on shows the full feature set; off hides not-yet-built bits.
   const [mvp, setMvp] = useState(true);
+  // Setup-flow version: v1 (current) or v2 (per-product prices + roll-up).
+  const [version, setVersion] = useState<"v1" | "v2">("v1");
+  const v2 = version === "v2";
   const [adminOpen, setAdminOpen] = useState(false);
   const adminRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -588,16 +636,18 @@ export default function CoachProductNew() {
     setPricingOptions((o) => o.map((p) => (p.id === id ? { ...p, ...patch } : p)));
 
   // Preview reads the headline access + price + products from the first option.
-  // Free is derived from a $0 price (there's no separate free/paid toggle).
   const primaryPricing = pricingOptions[0];
-  const previewMode: "free" | "paid" = Number(primaryPricing?.price || 0) === 0 ? "free" : "paid";
-  const previewPaidType: "recurring" | "one-time" = primaryPricing?.billing === "recurring" ? "recurring" : "one-time";
-  const previewPrice = primaryPricing?.price ?? "";
   // The products shown in the preview are exactly the primary option's current
   // products (resolved from its productIds), never the raw shared library.
   const previewItems = (primaryPricing?.productIds ?? [])
     .map((id) => added.find((a) => a.id === id))
     .filter((it): it is OfferingItem => Boolean(it));
+  const previewPaidType: "recurring" | "one-time" = primaryPricing?.billing === "recurring" ? "recurring" : "one-time";
+  // v2 derives the price from the option's roll-up total; v1 uses its set price.
+  // Free is derived from a $0 price either way.
+  const v2Total = optionRollup(previewItems, primaryPricing ?? { discountType: "percent", discountValue: "" }).total;
+  const previewPrice = v2 ? v2Total.toFixed(2) : (primaryPricing?.price ?? "");
+  const previewMode: "free" | "paid" = Number(previewPrice || 0) === 0 ? "free" : "paid";
 
   const makeOffering = (slug: string): OfferingItem => ({ id: nextOfferingId.current++, slug, config: defaultConfigFor(slug), configured: false, ...(isListOffering(slug) ? { items: [] } : {}) });
   const addOffering = (slug: string) => setAdded((a) => [...a, makeOffering(slug)]);
@@ -606,10 +656,11 @@ export default function CoachProductNew() {
   // Paid mode: products belong to a specific pricing option. Adding creates a
   // fresh product instance and files it under that option; removing drops it
   // from the option and the shared item library together.
-  const addOfferingToOption = (optionId: number, slug: string) => {
+  const addOfferingToOption = (optionId: number, slug: string): number => {
     const item = makeOffering(slug);
     setAdded((a) => [...a, item]);
     setPricingOptions((o) => o.map((p) => (p.id === optionId ? { ...p, productIds: [...p.productIds, item.id] } : p)));
+    return item.id;
   };
   const removeOfferingFromOption = (optionId: number, itemId: number) => {
     setPricingOptions((o) => o.map((p) => (p.id === optionId ? { ...p, productIds: p.productIds.filter((x) => x !== itemId) } : p)));
@@ -639,6 +690,7 @@ export default function CoachProductNew() {
     });
 
   return (
+    <V2Context.Provider value={v2}>
     <div className="min-h-screen bg-white">
       {/* Flow header — close, title, step breadcrumb, next */}
       <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-gray-stroke bg-white px-4 py-3 sm:px-6">
@@ -753,6 +805,21 @@ export default function CoachProductNew() {
               className="absolute bottom-full right-0 mb-2 w-[200px] rounded-xl border border-gray-stroke bg-white p-2 shadow-[0_4px_16px_rgba(16,24,40,0.12)]"
             >
               <AdminToggle label="MVP" checked={mvp} onChange={() => setMvp((v) => !v)} />
+              <div className="mt-1 flex items-center justify-between rounded-lg px-2 py-2">
+                <span className="text-[14px] font-medium text-gray-dark">Version</span>
+                <div className="flex rounded-lg bg-gray-hover p-0.5">
+                  {(["v1", "v2"] as const).map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => setVersion(val)}
+                      className={`rounded-md px-2.5 py-1 text-[13px] font-semibold transition-colors ${version === val ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(16,24,40,0.12)]" : "text-gray-light hover:text-gray-dark"}`}
+                    >
+                      {val}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -769,6 +836,7 @@ export default function CoachProductNew() {
         </button>
       </div>
     </div>
+    </V2Context.Provider>
   );
 }
 
@@ -950,32 +1018,188 @@ function AddPricingOptionButton({ onClick }: { onClick: () => void }) {
   );
 }
 
+/* ---------- Suggested pricing ---------- */
+
+// The expert's global hourly rate (set on their profile, mocked here). It's the
+// basis for price suggestions on any hourly coaching time in the offering.
+const EXPERT_HOURLY_RATE = 150;
+
+// Hours represented by a configured coaching-time product. Range mode uses the
+// midpoint; set mode adds hours + minutes.
+function coachingHours(item: OfferingItem): number {
+  const c = item.config;
+  if (item.slug !== "coaching-time" || !item.configured) return 0;
+  if (c.mode === "range") return (Number(c.minHours || 0) + Number(c.maxHours || 0)) / 2;
+  return Number(c.hours || 0) + Number(c.minutes || 0) / 60;
+}
+
+// v2 per-product price. Coaching time is derived from hours × the expert's
+// hourly rate; every other priceable product carries a manual price in its
+// config. Non-priceable placeholder products contribute nothing.
+function productPrice(item: OfferingItem): number {
+  if (item.slug === "coaching-time") return Math.round(coachingHours(item) * EXPERT_HOURLY_RATE);
+  if (!isPriceable(item.slug)) return 0;
+  return Number(item.config.price || 0);
+}
+
+// v2 roll-up math for a pricing option: the priceable products, their subtotal,
+// the resolved discount amount (clamped to the subtotal), and the final total.
+function optionRollup(products: OfferingItem[], option: Pick<PricingOption, "discountType" | "discountValue">) {
+  const items = products.filter((p) => isPriceable(p.slug));
+  const subtotal = items.reduce((s, it) => s + productPrice(it), 0);
+  const raw = Number(option.discountValue || 0);
+  const discount = raw <= 0 ? 0 : Math.min(option.discountType === "flat" ? raw : subtotal * (raw / 100), subtotal);
+  return { items, subtotal, discount, total: Math.max(0, subtotal - discount) };
+}
+
+// Money with thousands separators; 2 decimals only when non-integer.
+const formatMoney = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
+
+// Roughly humanize an hour count, e.g. 2.5 → "2 hr 30 min", 3 → "3 hr".
+function formatHours(h: number): string {
+  const whole = Math.floor(h);
+  const mins = Math.round((h - whole) * 60);
+  const parts: string[] = [];
+  if (whole) parts.push(`${whole} hr`);
+  if (mins) parts.push(`${mins} min`);
+  return parts.join(" ") || "0 min";
+}
+
+// Compact form, e.g. 2.5 → "2h 30m", 3 → "3h".
+function compactHours(h: number): string {
+  const whole = Math.floor(h);
+  const mins = Math.round((h - whole) * 60);
+  const parts: string[] = [];
+  if (whole) parts.push(`${whole}h`);
+  if (mins) parts.push(`${mins}m`);
+  return parts.join(" ") || "0m";
+}
+
+// What we can (and can't) price in a set of products. Only hourly coaching time
+// maps cleanly to the expert's rate; everything else is "unpriced" and merely
+// acknowledged so the coach knows the number doesn't cover it.
+function pricingBasis(products: OfferingItem[]) {
+  let hours = 0;
+  let hasCoaching = false;
+  let unconfiguredCoaching = false;
+  let otherCount = 0;
+  for (const p of products) {
+    if (p.slug === "coaching-time") {
+      hasCoaching = true;
+      if (p.configured) hours += coachingHours(p);
+      else unconfiguredCoaching = true;
+    } else {
+      otherCount++;
+    }
+  }
+  return { hours, amount: Math.round(hours * EXPERT_HOURLY_RATE), hasCoaching, unconfiguredCoaching, otherCount };
+}
+
+// Suggested-price treatment shown beneath a price field. `compact` renders a
+// small pill (used in the narrow multi-option Price column); the default renders
+// the full green banner framing the hourly coaching value as a plain FYI. When
+// there's no hourly basis, the banner shows a soft note and the pill hides.
+function SuggestedPrice({ products, compact = false }: { products: OfferingItem[]; compact?: boolean }) {
+  const { hours, amount } = pricingBasis(products);
+  const hasSuggestion = amount > 0;
+
+  // Nothing to show until there's configured coaching time to price against.
+  if (!hasSuggestion) return null;
+
+  const text = `${formatHours(hours)} of coaching at your $${EXPERT_HOURLY_RATE.toLocaleString()}/hr rate is equal to $${amount.toLocaleString()}`;
+
+  // Multi-option cards: a subtle "Suggestion" link that reveals the reasoning on
+  // hover (sits on the Price label row, so a full inline line would be too wide).
+  if (compact) {
+    return (
+      <span className="group relative inline-flex items-center">
+        <button
+          type="button"
+          className="text-[13px] font-medium text-gray-light underline decoration-dotted underline-offset-2 transition-colors hover:text-gray-dark"
+        >
+          Suggestion
+        </button>
+        <span
+          role="tooltip"
+          className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 hidden w-max max-w-[240px] rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block group-focus-within:block"
+        >
+          {text}
+        </span>
+      </span>
+    );
+  }
+
+  // Plain inline helper line beneath the price field.
+  return (
+    <div className="mt-2.5 flex items-center gap-2">
+      <MaskIcon src={lightBulbIcon} className="h-[18px] w-[18px] shrink-0 text-gray-extra-light" />
+      <span className="text-[14px] font-medium text-gray-extra-light">{text}</span>
+    </div>
+  );
+}
+
+// Add thousands separators to a numeric input string, preserving any trailing
+// dot / decimals the user is mid-typing. "1700.00" → "1,700.00", "1700." → "1,700."
+function withCommas(v: string): string {
+  if (v === "") return "";
+  const [int, ...rest] = v.split(".");
+  const intFmt = int.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return rest.length ? `${intFmt}.${rest.join("")}` : intFmt;
+}
+
 // Price box: large editable price + cadence. When the price is 0, shows a green
 // "Free" tag (setting $0 is how a coach makes an offering free — no toggle).
-function PriceFields({ option, onChange, mvp }: { option: PricingOption; onChange: (patch: Partial<PricingOption>) => void; mvp: boolean }) {
+function PriceFields({ option, products, onChange, mvp }: { option: PricingOption; products: OfferingItem[]; onChange: (patch: Partial<PricingOption>) => void; mvp: boolean }) {
   const recurring = option.billing === "recurring";
-  const isFree = Number(option.price || 0) === 0;
+
+  // Sync-to-hourly-rate is only offered when the offering is exactly one hourly
+  // coaching-time product — the only thing that maps cleanly to the coach's
+  // hourly rate. When synced, the price is derived (hours × rate) and locked.
+  const canSyncHourly = products.length === 1 && products[0].slug === "coaching-time";
+  const { amount: syncedPrice } = pricingBasis(products);
+  const syncOn = canSyncHourly && option.syncHourly;
+
+  // While synced, keep the stored price in lockstep with the derived value so
+  // the summary/total downstream reflect it.
+  useEffect(() => {
+    if (!syncOn) return;
+    const v = syncedPrice.toFixed(2);
+    if (option.price !== v) onChange({ price: v });
+  }, [syncOn, syncedPrice, option.price, onChange]);
+
+  const effectivePrice = syncOn ? syncedPrice : Number(option.price || 0);
+  const isFree = effectivePrice === 0;
   const formatPrice = () => {
     if (option.price !== "" && !Number.isNaN(Number(option.price))) onChange({ price: Number(option.price).toFixed(2) });
   };
-  const priceDisplay = option.price || "0";
-  const priceWidthCh = [...priceDisplay].reduce((w, c) => w + (c === "." ? 0.45 : 1), 0);
+  // Displayed with commas; the stored value stays raw (onChange strips them).
+  const displayValue = withCommas(option.price);
+  const priceDisplay = displayValue || "0";
+  const priceWidthCh = [...priceDisplay].reduce((w, c) => w + (c === "." || c === "," ? 0.45 : 1), 0);
 
   return (
     <>
-      <div className="rounded-xl border border-gray-stroke bg-white transition-colors focus-within:border-gray-dark">
+      <div className="rounded-xl bg-white shadow-[inset_0_0_0_1px_rgba(34,34,34,0.1)] transition-shadow focus-within:shadow-[inset_0_0_0_1px_#222222]">
         <div className="flex items-end justify-between gap-2 px-5 py-6">
           <div className="flex items-center gap-1">
-            <span className={`text-[32px] font-medium leading-none ${isFree ? "text-gray-extra-light" : "text-gray-dark"}`}>$</span>
-            <input
-              inputMode="decimal"
-              value={option.price}
-              placeholder="0"
-              onChange={(e) => onChange({ price: e.target.value.replace(/[^0-9.]/g, "") })}
-              onBlur={formatPrice}
-              style={{ width: `${priceWidthCh}ch` }}
-              className={`min-w-0 bg-transparent text-left text-[32px] font-medium leading-none underline decoration-dotted decoration-2 underline-offset-[6px] outline-none ${isFree ? "text-gray-extra-light decoration-gray-extra-light placeholder:text-gray-extra-light" : "text-gray-dark decoration-gray-dark placeholder:text-gray-dark"}`}
-            />
+            <span className={`text-[32px] font-medium leading-none ${syncOn ? "text-gray-extra-light" : "text-gray-dark"}`}>$</span>
+            {syncOn ? (
+              // Locked to the synced hourly value — not editable.
+              <span className="text-[32px] font-medium leading-none text-gray-extra-light">
+                {withCommas(syncedPrice.toFixed(2))}
+              </span>
+            ) : (
+              <input
+                inputMode="decimal"
+                value={displayValue}
+                placeholder="0"
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => onChange({ price: e.target.value.replace(/[^0-9.]/g, "") })}
+                onBlur={formatPrice}
+                style={{ width: `${priceWidthCh}ch` }}
+                className="min-w-0 bg-transparent text-left text-[32px] font-medium leading-none text-gray-dark underline decoration-gray-dark decoration-dotted decoration-2 underline-offset-[4px] [text-decoration-skip-ink:none] outline-none placeholder:text-gray-dark"
+              />
+            )}
           </div>
           <div className="pb-1">
             {isFree ? (
@@ -991,6 +1215,27 @@ function PriceFields({ option, onChange, mvp }: { option: PricingOption; onChang
           </div>
         </div>
       </div>
+
+      {/* Sync-to-hourly-rate toggle — locks the price to the coach's rate. Its
+          own card, identical to the price card above. */}
+      {canSyncHourly && (
+        <div
+          onClick={() => onChange({ syncHourly: !option.syncHourly })}
+          className="mt-3 flex cursor-pointer items-center gap-3 rounded-xl bg-white px-5 py-4 shadow-[inset_0_0_0_1px_rgba(34,34,34,0.1)]"
+        >
+          {/* The toggle stops propagation so a direct click doesn't double-fire
+              with the card's own handler. */}
+          <span onClick={(e) => e.stopPropagation()}>
+            <Toggle checked={option.syncHourly} onChange={() => onChange({ syncHourly: !option.syncHourly })} />
+          </span>
+          <div>
+            <div className="text-[15px] font-semibold text-gray-dark">Sync to my hourly rate</div>
+            <div className="text-[14px] text-gray-light">Changing your hourly rate and bulk discounts will update your package price.</div>
+          </div>
+        </div>
+      )}
+
+      {!syncOn && products.length > 1 && <SuggestedPrice products={products} />}
 
       {recurring && !isFree && (
         <div className="mt-3 flex flex-col gap-4 rounded-xl bg-gray-hover p-4">
@@ -1020,6 +1265,85 @@ function PriceFields({ option, onChange, mvp }: { option: PricingOption; onChang
   );
 }
 
+// v2 roll-up summary rows — Subtotal, a %/$ discount control, and the final
+// Total. The products themselves are already listed above, so this only carries
+// the totals; the rows share the product list's rhythm (py-4 + dividers) so they
+// read as an extension of it.
+function PricingRollup({ products, option, onChange }: { products: OfferingItem[]; option: PricingOption; onChange: (patch: Partial<PricingOption>) => void }) {
+  const { items, subtotal, discount, total } = optionRollup(products, option);
+  // The toggle + input are hidden behind an "Add discount" link until the coach
+  // opts in (or a discount is already set).
+  const [showDiscount, setShowDiscount] = useState(() => Number(option.discountValue || 0) > 0);
+
+  return (
+    <div className="flex flex-col">
+      {/* Redundant with the single line item above, so hidden for one product. */}
+      {items.length > 1 && (
+        <div className="flex items-center justify-between py-4 text-[15px]">
+          <span className="text-gray-light">Subtotal</span>
+          <span className="text-gray-dark">${formatMoney(subtotal)}</span>
+        </div>
+      )}
+
+      <div className={`flex items-center gap-3 py-4 ${items.length > 1 ? "border-t border-gray-stroke" : ""}`}>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] bg-gray-hover">
+          {/* Inlined (not MaskIcon) so the stroke width is controllable — scales
+              with the icon to match the sibling product icons. */}
+          <svg className="h-[22px] w-[22px] text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M8.31306 7.75894c.151914.151914.151914.398215 0 .550129 -.151914.151914-.398215.151914-.550129 0 -.151914-.151914-.151914-.398215-8.88178e-16-.550129 .151914-.151914.398215-.151914.550129-8.88178e-16" />
+            <path d="M7.244 3.025l2.849-.025c.531-.005 1.042.205 1.418.58l8.904 8.908c.781.781.781 2.048 0 2.829l-5.094 5.097c-.781.782-2.049.782-2.83 0l-8.911-8.914c-.371-.371-.58-.875-.58-1.401v-2.812c0-.526.209-1.03.58-1.401l2.28-2.281c.368-.368.865-.576 1.384-.58Z" />
+          </svg>
+        </span>
+        {/* Left content is identical in both states — only the right side swaps
+            between the "Add discount" prompt and the controls. */}
+        <span className="min-w-0 flex-1">
+          <span className="block text-[15px] font-semibold text-gray-dark">Discount</span>
+          <span className="block text-[15px] text-gray-light">Take a percentage or flat amount off the total.</span>
+        </span>
+        {showDiscount ? (
+          <div className="flex items-center gap-3">
+            {discount > 0 && <span className="text-[15px] text-gray-light">−${formatMoney(discount)}</span>}
+            <div className="flex rounded-lg bg-gray-hover p-0.5">
+              {(["percent", "flat"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => onChange({ discountType: t })}
+                  className={`flex h-7 w-8 items-center justify-center rounded-md text-[14px] font-semibold transition-colors ${option.discountType === t ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(16,24,40,0.12)]" : "text-gray-light hover:text-gray-dark"}`}
+                >
+                  {t === "percent" ? "%" : "$"}
+                </button>
+              ))}
+            </div>
+            <div className="flex w-[96px] items-center rounded-lg border border-gray-stroke bg-white px-3 transition-colors focus-within:border-gray-dark">
+              {option.discountType === "flat" && <span className="text-[15px] text-gray-light">$</span>}
+              <input
+                autoFocus
+                inputMode="decimal"
+                value={option.discountValue}
+                onChange={(e) => onChange({ discountValue: e.target.value.replace(/[^0-9.]/g, "") })}
+                placeholder="0"
+                className="w-full min-w-0 bg-transparent py-2 px-1 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1]"
+              />
+              {option.discountType === "percent" && <span className="text-[15px] text-gray-light">%</span>}
+            </div>
+          </div>
+        ) : (
+          <Button size="md" variant="secondary" onClick={() => setShowDiscount(true)} style={{ fontWeight: 600 }}>
+            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            Add discount
+          </Button>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between border-t border-gray-stroke py-4">
+        <span className="text-[16px] font-semibold text-gray-dark">Total</span>
+        <span className="text-[18px] font-semibold text-gray-dark">{total === 0 ? "Free" : `$${formatMoney(total)}`}</span>
+      </div>
+    </div>
+  );
+}
+
 // A full pricing option: name + its own products + access (free/paid) + price.
 // When `bare` (the single-option default), renders as two flat labeled sections
 // ("Add products" and "Pricing"). Otherwise wraps in card chrome with an
@@ -1038,25 +1362,69 @@ function PricingOptionCard({ option, index, products, available, bare, canDelete
   onRemoveProduct: (itemId: number) => void;
   onConfigureProduct: (itemId: number) => void;
 }) {
+  const v2 = useV2();
+  // v2 pricing only surfaces once a product has actually been configured (so
+  // there's a real price to roll up).
+  const anyConfigured = products.some((p) => !isConfigurable(p.slug) || p.configured);
   if (bare) {
     return (
       <div>
         {/* Products (the offering-wide "Configure your offering" header lives at
-            the step level, above this) */}
-        <ProductPicker items={products} available={available} addVariant="grid" onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} />
+            the step level, above this). In v2, once at least one product exists
+            the "Add product" affordance moves to that header, so the list hides
+            its own — but the empty-state grid stays as-is. */}
+        <ProductPicker items={products} available={available} addVariant="grid" hideAdd={v2 && products.length > 0} onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} />
 
-        {/* Pricing — only surfaced once at least one product has been added */}
-        {products.length > 0 && (
-          <>
-            <div className="my-10 border-t border-gray-stroke" />
-            <section>
-              <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
-              <p className="mt-0.5 text-[15px] text-gray-light">Set a price, or enter $0 to offer it for free.</p>
-              <div className="mt-5">
-                <PriceFields option={option} onChange={onChange} mvp={mvp} />
-              </div>
-            </section>
-          </>
+        {/* With exactly one product, nudge to bundle as a product-style row. Once
+            there are two or more, drop the nudge and just show a plain "Add
+            product" button (matching v1). */}
+        {v2 && available.length > 0 && (
+          products.length === 1 ? (
+            <div className="flex items-center gap-3 border-t border-gray-stroke py-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] bg-gray-hover text-gray-light">
+                <MaskIcon src={shapesIcon} className="h-[22px] w-[22px] text-gray-light" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-semibold text-gray-dark">Make it a bundle</span>
+                <span className="block text-[15px] text-gray-light">Add another product to this offering.</span>
+              </span>
+              <AddProductMenu available={available} onAdd={onAddProduct} />
+            </div>
+          ) : products.length >= 2 ? (
+            <div className="mt-3">
+              <AddProductMenu available={available} onAdd={onAddProduct} />
+            </div>
+          ) : null
+        )}
+
+        {v2 ? (
+          // v2: a separate "Pricing" section (like v1), surfaced once a product
+          // has been configured. The roll-up replaces v1's single price field.
+          anyConfigured && (
+            <>
+              <div className="my-10 border-t border-gray-stroke" />
+              <section>
+                <h2 className="text-[22px] font-semibold text-gray-dark">Adjust your pricing</h2>
+                <p className="mt-0.5 text-[15px] text-gray-light">Each product carries its own price. Review the total and add a discount if you'd like.</p>
+                <div className="mt-5 border-t border-gray-stroke">
+                  <PricingRollup products={products} option={option} onChange={onChange} />
+                </div>
+              </section>
+            </>
+          )
+        ) : (
+          products.length > 0 && (
+            <>
+              <div className="my-10 border-t border-gray-stroke" />
+              <section>
+                <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
+                <p className="mt-0.5 text-[15px] text-gray-light">Set a price, or enter $0 to offer it for free.</p>
+                <div className="mt-5">
+                  <PriceFields option={option} products={products} onChange={onChange} mvp={mvp} />
+                </div>
+              </section>
+            </>
+          )
         )}
       </div>
     );
@@ -1077,9 +1445,10 @@ function PricingOptionCard({ option, index, products, available, bare, canDelete
         )}
       </div>
 
-      {/* Name + price + description */}
+      {/* Name + price + description. In v2 there's no manual price (it's a
+          roll-up of the products' own prices), so Name spans full width. */}
       <div className="mb-5 flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-4">
+        {v2 ? (
           <div>
             <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Name</label>
             <input
@@ -1089,21 +1458,36 @@ function PricingOptionCard({ option, index, products, available, bare, canDelete
               className="w-full rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[15px] text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
             />
           </div>
-          <div>
-            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Price</label>
-            <div className="flex items-center rounded-lg border border-gray-stroke bg-white px-4 transition-colors focus-within:border-gray-dark">
-              <span className="text-[15px] text-gray-light">$</span>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Name</label>
               <input
-                inputMode="decimal"
-                value={option.price}
-                onChange={(e) => onChange({ price: e.target.value.replace(/[^0-9.]/g, "") })}
-                onBlur={() => { if (option.price !== "" && !Number.isNaN(Number(option.price))) onChange({ price: Number(option.price).toFixed(2) }); }}
-                placeholder="0.00"
-                className="w-full bg-transparent py-3 pl-1.5 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1]"
+                value={option.name}
+                onChange={(e) => onChange({ name: e.target.value })}
+                placeholder="Option name"
+                className="w-full rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[15px] text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
               />
             </div>
+            <div>
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <label className="text-[14px] font-medium text-gray-light">Price</label>
+                <SuggestedPrice compact products={products} />
+              </div>
+              <div className="flex items-center rounded-lg border border-gray-stroke bg-white px-4 transition-colors focus-within:border-gray-dark">
+                <span className="text-[15px] text-gray-light">$</span>
+                <input
+                  inputMode="decimal"
+                  value={option.price}
+                  onChange={(e) => onChange({ price: e.target.value.replace(/[^0-9.]/g, "") })}
+                  onBlur={() => { if (option.price !== "" && !Number.isNaN(Number(option.price))) onChange({ price: Number(option.price).toFixed(2) }); }}
+                  placeholder="0.00"
+                  className="w-full bg-transparent py-3 pl-1.5 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1]"
+                />
+              </div>
+            </div>
           </div>
-        </div>
+        )}
         <div>
           <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Description</label>
           <textarea
@@ -1134,6 +1518,14 @@ function PricingOptionCard({ option, index, products, available, bare, canDelete
           </div>
         )}
       </div>
+
+      {/* v2 roll-up of this option's product prices + discount + total — only
+          once at least one product has been configured. */}
+      {v2 && anyConfigured && (
+        <div className="mt-5 border-t border-gray-stroke">
+          <PricingRollup products={products} option={option} onChange={onChange} />
+        </div>
+      )}
     </div>
   );
 }
@@ -1298,13 +1690,14 @@ function AskQuestions() {
 
 /* ---------- Step 2: Included offerings ---------- */
 
-function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, mvp }: { added: OfferingItem[]; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; pricingOptions: PricingOption[]; onAddPricingOption: () => void; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => void; onRemoveProductFromOption: (optionId: number, itemId: number) => void; mvp: boolean }) {
+function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, mvp }: { added: OfferingItem[]; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; pricingOptions: PricingOption[]; onAddPricingOption: () => void; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => number; onRemoveProductFromOption: (optionId: number, itemId: number) => void; mvp: boolean }) {
   // One of each: an offering leaves the "Add" grid once it's been added.
   // When MVP is on, hide the not-yet-built Agent / Private group / Paid
   // Livestream options.
   const mvpHidden = ["agent", "membership", "paid-livestream"];
   const [configuringId, setConfiguringId] = useState<number | null>(null);
   const configuring = added.find((item) => item.id === configuringId) ?? null;
+  const v2 = useV2();
 
   // Products + still-addable types for a given option.
   const optionData = (opt: PricingOption) => {
@@ -1316,10 +1709,18 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
   };
   const multi = pricingOptions.length > 1;
 
+  // Adding a product drops the coach straight into its configure modal (in
+  // both v1 and v2). The product's "Configure" CTA still shows afterward if
+  // they dismiss the modal without configuring.
+  const addProduct = (optionId: number, slug: string) => {
+    const id = onAddProductToOption(optionId, slug);
+    setConfiguringId(id);
+  };
+
   return (
     <div>
       {/* Persistent offering-level header — kept across single and multi. */}
-      <h2 className="text-[22px] font-semibold text-gray-dark">Configure your offering</h2>
+      <h2 className="text-[22px] font-semibold text-gray-dark">Build your offering</h2>
       <p className="mt-0.5 text-[15px] text-gray-light">Set up what's included and how people pay for it.</p>
 
       {/* Each option is a self-contained unit: name + products + access + price.
@@ -1351,7 +1752,7 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
                   mvp={mvp}
                   onRemove={() => onRemovePricingOption(opt.id)}
                   onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
-                  onAddProduct={(slug) => onAddProductToOption(opt.id, slug)}
+                  onAddProduct={(slug) => addProduct(opt.id, slug)}
                   onRemoveProduct={(itemId) => onRemoveProductFromOption(opt.id, itemId)}
                   onConfigureProduct={setConfiguringId}
                 />
@@ -1361,9 +1762,10 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
         </AnimatePresence>
       </div>
 
-      {/* Add another pricing option — reads as part of the Pricing section, so
-          it only surfaces once at least one product has been added. */}
-      {added.length > 0 && (
+      {/* Add another pricing option — reads as part of the Pricing section. In
+          v1 it appears once a product has been added; in v2 (like the roll-up)
+          it waits until a product has been configured. */}
+      {(v2 ? added.some((p) => !isConfigurable(p.slug) || p.configured) : added.length > 0) && (
         <div className={`mt-6 flex ${multi ? "justify-center" : "justify-start"}`}>
           <AddPricingOptionButton onClick={onAddPricingOption} />
         </div>
@@ -1472,6 +1874,45 @@ function ProductPicker({ items, available, addVariant = "grid", boxed = false, h
   onRemove: (id: number) => void;
   onConfigure: (id: number) => void;
 }) {
+  const v2 = useV2();
+
+  // v2 flat list: the initial "add a product" rows and the added rows live in a
+  // single slug-keyed AnimatePresence, so the chosen product's row persists
+  // (morphing Add → its configured state) while the others collapse away.
+  if (v2 && addVariant === "grid") {
+    return (
+      <div className={`flex flex-col ${items.length === 0 ? "gap-1.5" : ""}`}>
+        <AnimatePresence initial={false} mode="popLayout">
+          {items.length === 0
+            ? available.map((o) => (
+                <motion.div key={o.slug} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} transition={offeringTransition} className="overflow-hidden">
+                  <div
+                    onClick={() => onAdd(o.slug)}
+                    className="flex cursor-pointer items-center gap-3 rounded-lg bg-gray-hover px-4 py-4 transition-colors hover:bg-[#ececec]"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+                      <img src={o.icon} alt="" className="h-[26px] w-[26px]" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] font-semibold text-gray-dark">{o.label}</span>
+                      <span className="block text-[15px] text-gray-light">{offeringAddDescription[o.slug] ?? o.blurb}</span>
+                    </span>
+                    <Button iconOnly size="md" variant="secondary" aria-label={`Add ${o.label}`} onClick={(e) => { e.stopPropagation(); onAdd(o.slug); }}>
+                      <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                    </Button>
+                  </div>
+                </motion.div>
+              ))
+            : items.map((item, i) => (
+                <motion.div key={item.slug} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} transition={offeringTransition} className="overflow-hidden">
+                  <AddedOfferingRow item={item} onRemove={() => onRemove(item.id)} onConfigure={() => onConfigure(item.id)} isLast={i === items.length - 1} />
+                </motion.div>
+              ))}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex flex-col">
@@ -1502,30 +1943,37 @@ function ProductPicker({ items, available, addVariant = "grid", boxed = false, h
           className={items.length > 0 ? "mt-3" : ""}
         />
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        // Descriptive rows (same as v2's empty state) — icon, label + blurb, and
+        // a secondary "+" button. Uses v1's larger card radius and gap.
+        <div className="flex flex-col gap-3">
           {/* popLayout pops an added card out of flow so the rest reflow to fill. */}
           <AnimatePresence initial={false} mode="popLayout">
             {available.map((o) => (
-              <motion.button
+              <motion.div
                 key={o.slug}
                 layout
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, height: 0 }}
                 transition={offeringTransition}
-                onClick={() => onAdd(o.slug)}
-                className="group flex items-center justify-between rounded-xl bg-gray-hover px-3 py-2 text-left transition-colors hover:bg-[#ececec]"
+                className="overflow-hidden"
               >
-                <span className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-[8px]">
-                    <img src={o.icon} alt="" className="h-5 w-5" />
+                <div
+                  onClick={() => onAdd(o.slug)}
+                  className="flex cursor-pointer items-center gap-3 rounded-xl bg-gray-hover px-4 py-4 transition-colors hover:bg-[#ececec]"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+                    <img src={o.icon} alt="" className="h-[26px] w-[26px]" />
                   </span>
-                  <span className="text-[15px] font-semibold text-gray-dark">{o.label}</span>
-                </span>
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-hover text-gray-light transition-colors group-hover:text-gray-dark">
-                  <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-                </span>
-              </motion.button>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[15px] font-semibold text-gray-dark">{o.label}</span>
+                    <span className="block text-[15px] text-gray-light">{offeringAddDescription[o.slug] ?? o.blurb}</span>
+                  </span>
+                  <Button iconOnly size="md" variant="secondary" aria-label={`Add ${o.label}`} onClick={(e) => { e.stopPropagation(); onAdd(o.slug); }}>
+                    <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                  </Button>
+                </div>
+              </motion.div>
             ))}
           </AnimatePresence>
         </div>
@@ -1537,6 +1985,7 @@ function ProductPicker({ items, available, addVariant = "grid", boxed = false, h
 /* ---------- Added offering row ---------- */
 
 function AddedOfferingRow({ item, onRemove, onConfigure, isLast = false }: { item: OfferingItem; onRemove: () => void; onConfigure: () => void; isLast?: boolean }) {
+  const v2 = useV2();
   const o = offeringBySlug[item.slug];
   const configurable = isConfigurable(item.slug);
   const finished = !configurable || item.configured;
@@ -1551,36 +2000,82 @@ function AddedOfferingRow({ item, onRemove, onConfigure, isLast = false }: { ite
   const subtextIcon = configurable && finished ? configSummaryIcon[item.slug] : undefined;
   const cta = configCTA[item.slug] ?? { label: "Configure" };
 
+  // v2 finished priceable rows: price moves to the right, and Edit / Remove
+  // become inline text links at the end of the secondary line.
+  const v2Priced = v2 && finished && isPriceable(item.slug);
+
+  // Headline + secondary detail. Finished coaching-time and content rows lead
+  // with product-specific info in both v1 and v2 — the amount of time / content
+  // name as the headline, with the rate / file-type · views beneath. Everything
+  // else uses the type label + config summary (or setup nudge when unfinished).
+  let headline = o.label;
+  let detail: ReactNode = (
+    <>
+      {subtextIcon && <MaskIcon src={subtextIcon} className="h-4 w-4 shrink-0" />}
+      <span className="truncate">{subtext}</span>
+    </>
+  );
+  if (finished && item.slug === "coaching-time") {
+    headline = item.config.mode === "range"
+      ? `${Number(item.config.minHours || 0)}h–${Number(item.config.maxHours || 0)}h of coaching`
+      : `${compactHours(coachingHours(item))} of coaching`;
+    detail = <span className="truncate">${EXPERT_HOURLY_RATE.toLocaleString()}/hr</span>;
+  } else if (finished && item.slug === "content") {
+    const { typeLabel, views } = contentMeta(item.config);
+    headline = contentItemTitle(item.config) || o.label;
+    const meta = [typeLabel, views != null ? `${formatViews(views)} views` : null].filter(Boolean).join(" · ");
+    detail = meta ? <span className="truncate">{meta}</span> : null;
+  } else if (v2Priced) {
+    detail = <span className="truncate">{configSummary(item)}</span>;
+  }
+
+  const rowClass = `group flex items-center gap-3 bg-white py-4 ${isLast ? "" : "border-b border-gray-stroke"}`;
+
   return (
-    <div className={`flex items-center gap-3 bg-white py-4 ${isLast ? "" : "border-b border-gray-stroke"}`}>
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[6px] bg-[#f5f5f5]">
+    <div className={rowClass}>
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] bg-[#f5f5f5]">
         <img src={o.icon} alt="" className="h-[22px] w-[22px]" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[15px] font-semibold text-gray-dark">{o.label}</span>
-        <span className={`flex items-center gap-1.5 text-[15px] ${finished ? "text-gray-light" : "text-gray-extra-light"}`}>
-          {subtextIcon && <MaskIcon src={subtextIcon} className="h-4 w-4 shrink-0" />}
-          <span className="truncate">{subtext}</span>
-        </span>
+        <span className="block truncate text-[15px] font-semibold text-gray-dark">{headline}</span>
+        {v2Priced ? (
+          <span className="flex items-center gap-1.5 text-[15px] text-gray-light">
+            {detail}
+            {detail && <span className="text-gray-extra-light">·</span>}
+            <button type="button" onClick={onConfigure} className="shrink-0 transition-colors hover:text-gray-dark hover:underline">Edit</button>
+            <span className="flex shrink-0 items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="text-gray-extra-light">·</span>
+              <button type="button" onClick={onRemove} className="text-[#E5484D] transition-colors hover:underline">Remove</button>
+            </span>
+          </span>
+        ) : (
+          <span className={`flex items-center gap-1.5 text-[15px] ${finished ? "text-gray-light" : "text-gray-extra-light"}`}>
+            {detail}
+          </span>
+        )}
       </span>
 
-      <div className="flex shrink-0 items-center gap-1">
-        {configurable && (
-          finished ? (
-            <button onClick={onConfigure} aria-label={`Edit ${o.label}`} className="flex h-8 w-8 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
-              <MaskIcon src={editIcon} className="h-[18px] w-[18px]" />
-            </button>
-          ) : (
-            <Button size="md" variant="dark" onClick={onConfigure} className="mr-1">
-              {cta.icon && <MaskIcon src={cta.icon} className="h-[18px] w-[18px]" />}
-              {cta.label}
-            </Button>
-          )
-        )}
-        <button onClick={onRemove} aria-label={`Remove ${o.label}`} className="flex h-8 w-8 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
-          <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-        </button>
-      </div>
+      {v2Priced ? (
+        <span className="shrink-0 text-[15px] text-gray-dark">${formatMoney(productPrice(item))}</span>
+      ) : (
+        <div className="flex shrink-0 items-center gap-1">
+          {configurable && (
+            finished ? (
+              <button onClick={onConfigure} aria-label={`Edit ${o.label}`} className="flex h-8 w-8 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
+                <MaskIcon src={editIcon} className="h-[18px] w-[18px]" />
+              </button>
+            ) : (
+              <Button size="md" variant="dark" onClick={onConfigure} className="mr-1">
+                {cta.icon && <MaskIcon src={cta.icon} className="h-[18px] w-[18px]" />}
+                {cta.label}
+              </Button>
+            )
+          )}
+          <button onClick={onRemove} aria-label={`Remove ${o.label}`} className="flex h-8 w-8 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
+            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1609,7 +2104,7 @@ function ConfigModal({ item, onChange, onSave, onClose }: { item: OfferingItem |
             exit={{ opacity: 0, scale: 0.96, y: 32 }}
             transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
             onClick={(e) => e.stopPropagation()}
-            className="relative flex max-h-[85vh] w-full max-w-[500px] flex-col overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)]"
+            className="relative flex max-h-[85vh] w-full max-w-[600px] flex-col overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)]"
           >
             {/* Close — circular gray, top-right */}
             <button onClick={onClose} aria-label="Close" className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gray-hover text-gray-dark transition-colors hover:bg-[#ebebeb]">
@@ -1645,8 +2140,9 @@ function ConfigModal({ item, onChange, onSave, onClose }: { item: OfferingItem |
 // Dispatches to the fields component for the offering type. Add a case here
 // alongside a configDefaults entry to configure another type.
 function OfferingConfigFields({ slug, config, onChange }: { slug: string; config: Record<string, string>; onChange: (patch: Record<string, string>) => void }) {
+  const v2 = useV2();
   if (slug === "coaching-time") return <CoachingTimeFields config={config} onChange={onChange} />;
-  if (slug === "content") return <ContentFields config={config} onChange={onChange} />;
+  if (slug === "content") return <ContentFields config={config} onChange={onChange} priced={v2} />;
   if (slug === "paid-livestream") return <PaidLivestreamFields config={config} onChange={onChange} />;
   return <PlaceholderFields label={offeringBySlug[slug]?.label ?? "This product"} />;
 }
@@ -1654,6 +2150,7 @@ function OfferingConfigFields({ slug, config, onChange }: { slug: string; config
 /* ---------- Paid livestream config ---------- */
 
 function PaidLivestreamFields({ config, onChange }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void }) {
+  const v2 = useV2();
   const selectedSubs = (config.subcategories ?? "").split(",").filter(Boolean);
   const toggleSub = (s: string) => {
     const set = new Set(selectedSubs);
@@ -1672,6 +2169,13 @@ function PaidLivestreamFields({ config, onChange }: { config: Record<string, str
         <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Description</label>
         <textarea value={config.description ?? ""} onChange={(e) => onChange({ description: e.target.value })} rows={3} placeholder="What will you cover?" autoComplete="off" className={`${configInputClass} resize-none`} />
       </div>
+
+      {v2 && (
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Price</label>
+          <PriceField value={config.price ?? ""} onChange={(v) => onChange({ price: v })} />
+        </div>
+      )}
 
       <div>
         <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Duration</label>
@@ -1740,6 +2244,7 @@ function PlaceholderFields({ label }: { label: string }) {
 
 // Overall settings shown on the "General" tab of a list offering.
 function ListGeneralFields({ config, onChange, heading }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; heading: string }) {
+  const v2 = useV2();
   const lower = heading.toLowerCase();
   return (
     <div className="flex flex-col gap-5">
@@ -1751,6 +2256,12 @@ function ListGeneralFields({ config, onChange, heading }: { config: Record<strin
         <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Description</label>
         <textarea value={config.description ?? ""} onChange={(e) => onChange({ description: e.target.value })} rows={3} placeholder={`Describe this ${lower}…`} autoComplete="off" className={`${configInputClass} resize-none`} />
       </div>
+      {v2 && (
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Price</label>
+          <PriceField value={config.price ?? ""} onChange={(v) => onChange({ price: v })} />
+        </div>
+      )}
     </div>
   );
 }
@@ -2113,6 +2624,24 @@ function CourseModal({ item, onGeneralChange, onItemsChange, onSave, onClose }: 
 
 const configInputClass = "w-full rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1] focus:border-gray-dark";
 
+// A dollar-prefixed price input used inside v2 product config modals. Stores the
+// raw numeric string; formats to two decimals on blur.
+function PriceField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex items-center rounded-lg border border-gray-stroke bg-white px-4 transition-colors focus-within:border-gray-dark">
+      <span className="text-[15px] text-gray-light">$</span>
+      <input
+        inputMode="decimal"
+        value={value}
+        onChange={(e) => onChange(e.target.value.replace(/[^0-9.]/g, ""))}
+        onBlur={() => { if (value !== "" && !Number.isNaN(Number(value))) onChange(Number(value).toFixed(2)); }}
+        placeholder="0.00"
+        className="w-full bg-transparent py-3 pl-1.5 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1]"
+      />
+    </div>
+  );
+}
+
 // A leading checkbox with a label + description — the standard settings row.
 function ToggleRow({ label, desc, checked, onChange, className = "" }: { label: string; desc?: string; checked: boolean; onChange: () => void; className?: string }) {
   return (
@@ -2153,6 +2682,22 @@ function SettingRow({ icon, title, desc, checked, onChange, children, divider = 
   );
 }
 
+// Metadata field styled like SettingRow (icon + headline + subheadline) but with
+// its input control below instead of a right-hand checkbox — so the content
+// metadata fields read as the same system as the Leland+ / Advanced rows.
+function FieldRow({ icon, title, desc, children, divider = true }: { icon: string; title: string; desc?: string; children: ReactNode; divider?: boolean }) {
+  return (
+    <div className="flex gap-4">
+      <span className="flex shrink-0 pt-5 text-gray-dark"><MaskIcon src={icon} className="h-6 w-6 text-gray-dark" /></span>
+      <div className={`min-w-0 flex-1 pt-5 pb-5 ${divider ? "border-b border-gray-stroke" : ""}`}>
+        <p className="text-[15px] font-semibold text-gray-dark">{title}</p>
+        {desc && <p className="mt-0.5 text-[15px] leading-snug text-gray-light">{desc}</p>}
+        <div className="mt-3">{children}</div>
+      </div>
+    </div>
+  );
+}
+
 // Click-to-pick file control. No real upload — captures the chosen file's name
 // so the prototype can reflect a "finished" state.
 function UploadField({ value, onChange, hint, label = "Upload a file" }: { value: string; onChange: (name: string) => void; hint: string; label?: string }) {
@@ -2168,7 +2713,7 @@ function UploadField({ value, onChange, hint, label = "Upload a file" }: { value
 
 /* ---------- Content config (upload new / reuse existing) ---------- */
 
-function ContentFields({ config, onChange }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void }) {
+function ContentFields({ config, onChange, priced = false }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; priced?: boolean }) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   // Leland+ section is an accordion: closed by default, open if already enabled.
   const [lelandOpen, setLelandOpen] = useState(config.lelandPlus === "true" || config.r_lelandPlus === "true");
@@ -2186,7 +2731,7 @@ function ContentFields({ config, onChange }: { config: Record<string, string>; o
     : CONTENT_LIBRARY;
   // Reusing writes only reuse-namespaced ("r_") keys, never the upload fields.
   const selectLibrary = (c: LibraryContent) =>
-    onChange({ source: "reuse", libraryId: c.id, r_assetName: c.name, r_title: c.title, r_description: c.description, r_resourceType: c.resourceType });
+    onChange({ source: "reuse", libraryId: c.id, r_assetName: c.name, r_title: c.title, r_description: c.description, r_resourceType: c.resourceType, price: c.price.toFixed(2) });
   const selectedLib = config.libraryId ? CONTENT_LIBRARY.find((c) => c.id === config.libraryId) ?? null : null;
 
   // Edit-screen flow: snapshot the config on open so Cancel can discard changes.
@@ -2205,13 +2750,20 @@ function ContentFields({ config, onChange }: { config: Record<string, string>; o
     return (
       <>
         <div>
-          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Title</label>
-          <input value={g("title")} onChange={(e) => set("title", e.target.value)} placeholder="Give your content a title" autoComplete="off" className={configInputClass} />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Description</label>
-          <textarea value={g("description")} onChange={(e) => set("description", e.target.value)} rows={3} placeholder="Describe what this is…" autoComplete="off" className={`${configInputClass} resize-none`} />
+          <FieldRow icon={labelTagIcon} title="Title" desc="The name people will see for this content.">
+            <input value={g("title")} onChange={(e) => set("title", e.target.value)} placeholder="Give your content a title" autoComplete="off" className={configInputClass} />
+          </FieldRow>
+          <FieldRow icon={textIcon} title="Description" desc="A short summary of what this content is.">
+            <textarea value={g("description")} onChange={(e) => set("description", e.target.value)} rows={3} placeholder="Describe what this is…" autoComplete="off" className={`${configInputClass} resize-none`} />
+          </FieldRow>
+          <FieldRow icon={stackIcon} title="Resource type" desc="Choose the category that best fits it." divider={priced}>
+            <Select value={g("resourceType") || "guide"} onChange={(v) => set("resourceType", v)} options={RESOURCE_TYPES} />
+          </FieldRow>
+          {priced && (
+            <FieldRow icon={moneyIcon} title="Price" desc="What buyers pay for this content in the offering." divider={false}>
+              <PriceField value={config.price ?? ""} onChange={(v) => onChange({ price: v })} />
+            </FieldRow>
+          )}
         </div>
 
         {/* Leland+ library — collapsible section (open when already enabled) */}
@@ -2235,17 +2787,6 @@ function ContentFields({ config, onChange }: { config: Record<string, string>; o
           <AnimatePresence initial={false}>
           {isOn("lelandPlus") && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={offeringTransition} className="overflow-hidden">
-              {/* Resource type — same row layout (icon + content), no checkbox */}
-              <div className="flex gap-4">
-                <span className="flex shrink-0 pt-5 text-gray-dark"><MaskIcon src={stackIcon} className="h-6 w-6 text-gray-dark" /></span>
-                <div className="min-w-0 flex-1 border-b border-gray-stroke pt-5 pb-5">
-                  <p className="text-[15px] font-semibold text-gray-dark">Resource type</p>
-                  <div className="mt-3">
-                    <Select value={g("resourceType") || "guide"} onChange={(v) => set("resourceType", v)} options={RESOURCE_TYPES} />
-                  </div>
-                </div>
-              </div>
-
               <SettingRow
                 icon={<MaskIcon src={eyeClosedIcon} className="h-6 w-6 text-gray-dark" />}
                 title="Submit anonymously"
@@ -2505,11 +3046,17 @@ function TimeField({ value, onChange, label }: { value: string; onChange: (v: st
 }
 
 function CoachingTimeFields({ config, onChange }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void }) {
+  const v2 = useV2();
   const mode = config.mode === "range" ? "range" : "set";
   const modes = [
     { value: "set", label: "Set amount of hours" },
     { value: "range", label: "Range of hours" },
   ];
+  // v2: coaching time is auto-priced from hours × the expert's hourly rate.
+  const hrs = mode === "range"
+    ? (Number(config.minHours || 0) + Number(config.maxHours || 0)) / 2
+    : Number(config.hours || 0) + Number(config.minutes || 0) / 60;
+  const autoPrice = Math.round(hrs * EXPERT_HOURLY_RATE);
 
   return (
     <div>
@@ -2541,9 +3088,23 @@ function CoachingTimeFields({ config, onChange }: { config: Record<string, strin
           <TimeField value={config.minutes ?? ""} onChange={(v) => onChange({ minutes: v })} label="minutes" />
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="flex items-center gap-3">
           <TimeField value={config.minHours ?? ""} onChange={(v) => onChange({ minHours: v })} label="min hours" />
+          <span className="shrink-0 text-[24px] font-medium text-gray-light" aria-hidden="true">–</span>
           <TimeField value={config.maxHours ?? ""} onChange={(v) => onChange({ maxHours: v })} label="max hours" />
+        </div>
+      )}
+
+      {/* v2: coaching time is auto-priced from the expert's hourly rate. */}
+      {v2 && (
+        <div className="mt-5 flex items-center justify-between gap-3 rounded-xl bg-gray-hover px-4 py-3.5">
+          <span className="flex min-w-0 items-center gap-2.5">
+            <MaskIcon src={moneyIcon} className="h-[18px] w-[18px] shrink-0 text-gray-light" />
+            <span className="text-[14px] leading-snug text-gray-light">
+              {hrs > 0 ? `${formatHours(hrs)} × your $${EXPERT_HOURLY_RATE.toLocaleString()}/hr rate` : "Set the time to price this automatically"}
+            </span>
+          </span>
+          <span className="shrink-0 text-[16px] font-semibold text-gray-dark">${formatMoney(autoPrice)}</span>
         </div>
       )}
     </div>
