@@ -101,7 +101,7 @@ export function AddToCalendarFlow({ onComplete }: FlowProps) {
       </div>
 
       {/* Calendar card */}
-      <div className="flex flex-col gap-4 rounded-2xl bg-white px-8 pb-6 pt-8">
+      <div className="flex flex-col gap-4 rounded-2xl border border-leland-gray-stroke bg-white px-8 pb-6 pt-8">
         <p className="text-[19px] font-semibold leading-snug text-leland-gray-dark">
           Add all upcoming sessions to...
         </p>
@@ -140,10 +140,10 @@ export function AddToCalendarFlow({ onComplete }: FlowProps) {
             <div className="flex flex-1 min-w-0 items-center gap-3 p-3">
               <DateChip month={session.month} day={session.day} />
               <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <p className="leland-heading-base font-semibold text-leland-gray-dark">
+                <p className="leland-heading-lg font-semibold text-leland-gray-dark">
                   {session.title}
                 </p>
-                <p className="leland-paragraph-sm text-leland-gray-light">{session.datetime}</p>
+                <p className="leland-paragraph-base text-leland-gray-light">{session.datetime}</p>
               </div>
             </div>
           </div>

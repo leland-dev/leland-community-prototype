@@ -1124,7 +1124,7 @@ function CombinedSidebar({
                     <IconLink className="size-6 text-leland-gray-dark" />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
-                    <p className="leland-heading-lg font-semibold text-leland-gray-dark">Resource links</p>
+                    <p className="leland-heading-lg font-semibold text-leland-gray-dark">Resources</p>
                     <p className="leland-paragraph-sm text-leland-gray-extra-light">Office hours and 4 more</p>
                   </div>
                   <IconChevronDown
@@ -2397,9 +2397,6 @@ export default function ContentViewer() {
             <button type="button" aria-label="Get help" className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
               <IconQuestion className="size-5" />
             </button>
-            <button type="button" aria-label="Share feedback" onClick={() => setFeedbackModalOpen(true)} className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
-              <IconStarOutline className="size-5" />
-            </button>
             <button type="button" aria-label="Share" className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
               <IconShare className="size-5" />
             </button>
@@ -2498,14 +2495,6 @@ export default function ContentViewer() {
               className="flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-extra-light shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
               <IconQuestion className="size-5" />
-            </button>
-            <button
-              type="button"
-              aria-label="Share feedback"
-              onClick={() => setFeedbackModalOpen(true)}
-              className="flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-extra-light shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-            >
-              <IconStarOutline className="size-5" />
             </button>
             <button
               type="button"
