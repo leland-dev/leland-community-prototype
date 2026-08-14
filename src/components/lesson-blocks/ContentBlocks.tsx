@@ -193,7 +193,7 @@ export function TableBlock({ block }: { block: TableBlockType }) {
           row.map((cell, colIndex) => (
             <div
               key={`${rowIndex}-${colIndex}`}
-              className={`border-t border-leland-gray-stroke bg-white px-3 py-4 leland-paragraph-base text-leland-gray-dark ${
+              className={`border-t border-leland-gray-stroke bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark ${
                 colIndex > 0 ? "border-l border-leland-gray-stroke" : ""
               } ${colIndex === 0 && block.firstColumnBold !== false ? "font-semibold" : ""}`}
             >

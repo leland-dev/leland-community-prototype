@@ -114,7 +114,7 @@ function buildComponents(allowH1: boolean): Components {
     </th>
   ),
   td: ({ children }) => (
-    <td className="border-b border-l border-leland-gray-stroke bg-white px-3 py-4 align-top leland-paragraph-base text-leland-gray-dark first:border-l-0 [tr:last-child_&]:border-b-0">
+    <td className="border-b border-l border-leland-gray-stroke bg-white px-3 py-3 align-top leland-paragraph-base text-leland-gray-dark first:border-l-0 [tr:last-child_&]:border-b-0">
       {children}
     </td>
   ),
