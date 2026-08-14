@@ -22,9 +22,13 @@ export function GoalTile({ goal }: { goal: Goal }) {
       className="flex w-[300px] shrink-0 flex-col gap-3 rounded-xl bg-[#F5F5F5] p-4 text-left transition-colors hover:bg-[#EEEEEE]"
     >
       <div className="flex items-center gap-1.5">
-        <span className={`h-1.5 w-1.5 rounded-full ${status === "needs-action" ? "bg-[#9F5B34]" : "bg-[#869AA6]"}`} />
+        <span
+          className={`h-1.5 w-1.5 rounded-full ${
+            status === "completed" ? "bg-gray-dark" : status === "needs-action" ? "bg-[#9F5B34]" : "bg-[#869AA6]"
+          }`}
+        />
         <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-gray-extra-light">
-          {status === "needs-action" ? "Needs action" : "On track"}
+          {status === "completed" ? "Completed" : status === "needs-action" ? "Needs action" : "On track"}
         </span>
       </div>
 
@@ -33,7 +37,14 @@ export function GoalTile({ goal }: { goal: Goal }) {
         <div className="text-[14px] leading-[1.4] text-gray-extra-light">{goal.targetLabel}</div>
       </div>
 
-      {upNext && (
+      {status === "completed" ? (
+        goal.outcome && (
+          <div className="flex flex-col gap-[3px] rounded-lg bg-white px-3 py-2.5">
+            <div className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">Outcome</div>
+            <div className="line-clamp-2 text-[14px] leading-[1.3] text-gray-dark">{goal.outcome}</div>
+          </div>
+        )
+      ) : upNext ? (
         <div className="flex flex-col gap-[3px] rounded-lg bg-white px-3 py-2.5">
           <div className="text-[12px] font-medium uppercase tracking-[0.1em] text-[#707070]">Up next</div>
           <div className="text-[14px] font-medium leading-[1.3] text-gray-dark">{upNext.title}</div>
@@ -55,11 +66,11 @@ export function GoalTile({ goal }: { goal: Goal }) {
             )}
           </div>
         </div>
-      )}
+      ) : null}
 
       <div className="flex flex-col gap-1.5">
         <div className="h-1 overflow-hidden rounded-full bg-[#222222]/10">
-          <div className="h-full rounded-full bg-gray-dark" style={{ width: `${pct}%` }} />
+          <div className={`h-full rounded-full ${status === "completed" ? "bg-[#869AA6]" : "bg-gray-dark"}`} style={{ width: `${pct}%` }} />
         </div>
         <div className="text-[12px] text-gray-extra-light">
           {done} of {total} tasks

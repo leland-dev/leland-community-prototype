@@ -11,7 +11,9 @@ import EditableText from "../components/EditableText";
 import RowDelete from "../components/RowDelete";
 import { useGoals } from "../contexts/GoalsContext";
 import { dueLabel, goalProgress, goalStatus, isCheckedToday, isOverdue, type Goal, type Project, type Task, type TaskStatus } from "../data/goals";
+import { scoreRangeFor } from "../data/goalPlans";
 import addPlusIcon from "../assets/icons/add-plus.svg";
+import dragDotsIcon from "../assets/icons/drag-dots.svg";
 
 const HERO_BG = "#F3F1E6";
 
@@ -39,61 +41,96 @@ function ViaTag({ assignedBy }: { assignedBy: NonNullable<Task["assignedBy"]> })
   );
 }
 
+function NoteIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 4h16v12l-4 4H4V4z" />
+      <path d="M15 20v-4h4" />
+    </svg>
+  );
+}
+
 function TaskRow({
   task,
   onToggle,
   onRename,
   onSetDue,
+  onSetNote,
   onDelete,
 }: {
   task: Task;
   onToggle: () => void;
   onRename: (title: string) => void;
   onSetDue: (dueDate: string | undefined) => void;
+  onSetNote: (note: string | undefined) => void;
   onDelete: () => void;
 }) {
   const meta = taskMeta(task);
   const done = task.status === "done";
   const [editingDue, setEditingDue] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
 
   return (
-    <div className="group flex items-start gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-[#F5F5F5]">
-      <div className="mt-[1px]">
-        <GoalCheck checked={done} onChange={onToggle} label={task.title} />
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <EditableText
-            value={task.title}
-            onCommit={onRename}
-            label="task name"
-            className={done ? "text-[15px] text-gray-extra-light line-through" : "text-[15px] font-medium leading-[1.3] text-gray-dark"}
-          />
-          {task.assignedBy && <ViaTag assignedBy={task.assignedBy} />}
+    <div className="group flex flex-col gap-2 rounded-lg px-2 py-2.5 transition-colors hover:bg-[#F5F5F5]">
+      <div className="flex items-start gap-3">
+        <div className="mt-[1px]">
+          <GoalCheck checked={done} onChange={onToggle} label={task.title} />
         </div>
-        {editingDue ? (
-          <input
-            type="date"
-            autoFocus
-            value={task.dueDate ?? ""}
-            aria-label="Due date"
-            onChange={(e) => onSetDue(e.target.value || undefined)}
-            onBlur={() => setEditingDue(false)}
-            className="w-[150px] rounded border-[1.5px] border-gray-dark bg-white px-1 text-[13px] text-gray-dark outline-none"
-          />
-        ) : (
-          <button
-            onClick={() => setEditingDue(true)}
-            aria-label="Edit due date"
-            className={`-mx-1 self-start rounded px-1 text-left text-[13px] transition-colors hover:bg-[#222222]/[0.06] ${
-              meta?.overdue ? "text-[#9F5B34]" : "text-gray-extra-light"
-            }`}
-          >
-            {meta?.text ?? <span className="opacity-0 group-hover:opacity-100">Add a date</span>}
-          </button>
-        )}
+        <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <EditableText
+              value={task.title}
+              onCommit={onRename}
+              label="task name"
+              className={done ? "text-[15px] text-gray-extra-light line-through" : "text-[15px] font-medium leading-[1.3] text-gray-dark"}
+            />
+            {task.assignedBy && <ViaTag assignedBy={task.assignedBy} />}
+          </div>
+          {editingDue ? (
+            <input
+              type="date"
+              autoFocus
+              value={task.dueDate ?? ""}
+              aria-label="Due date"
+              onChange={(e) => onSetDue(e.target.value || undefined)}
+              onBlur={() => setEditingDue(false)}
+              className="w-[150px] rounded border-[1.5px] border-gray-dark bg-white px-1 text-[13px] text-gray-dark outline-none"
+            />
+          ) : (
+            <button
+              onClick={() => setEditingDue(true)}
+              aria-label="Edit due date"
+              className={`-mx-1 self-start rounded px-1 text-left text-[13px] transition-colors hover:bg-[#222222]/[0.06] ${
+                meta?.overdue ? "text-[#9F5B34]" : "text-gray-extra-light"
+              }`}
+            >
+              {meta?.text ?? <span className="opacity-0 group-hover:opacity-100">Add a date</span>}
+            </button>
+          )}
+        </div>
+        <button
+          onClick={() => setNotesOpen((v) => !v)}
+          aria-label={task.note ? "Edit note" : "Add note"}
+          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-[#222222]/10 ${
+            task.note ? "text-gray-dark" : "text-gray-extra-light opacity-0 group-hover:opacity-100"
+          } ${notesOpen ? "bg-[#222222]/10" : ""}`}
+        >
+          <NoteIcon filled={!!task.note} />
+        </button>
+        <RowDelete onDelete={onDelete} label={task.title} />
       </div>
-      <RowDelete onDelete={onDelete} label={task.title} />
+      {notesOpen && (
+        <div className="pl-[34px]">
+          <textarea
+            autoFocus
+            rows={2}
+            value={task.note ?? ""}
+            onChange={(e) => onSetNote(e.target.value || undefined)}
+            placeholder="Add details or notes for this task…"
+            className="w-full resize-y rounded-lg border-[1.5px] border-[#949494] bg-white px-2.5 py-2 text-[13px] leading-[1.4] text-gray-dark outline-none placeholder:text-[#949494] focus:border-gray-dark"
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -202,24 +239,74 @@ function AddTask({
   );
 }
 
-function ProjectBoard({ goal, project }: { goal: Goal; project: Project }) {
-  const { toggleTask, moveTask, addTask, setProjectView, updateTask, deleteTask, updateProject, deleteProject } = useGoals();
+function ProjectBoard({
+  goal,
+  project,
+  dragging,
+  onDragStart,
+  onDragEnd,
+  onDropOn,
+}: {
+  goal: Goal;
+  project: Project;
+  dragging: boolean;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  onDropOn: () => void;
+}) {
+  const { toggleTask, moveTask, addTask, setProjectView, toggleProjectCollapsed, updateTask, deleteTask, updateProject, deleteProject } = useGoals();
   const [dragId, setDragId] = useState<string | null>(null);
+  const [dropHover, setDropHover] = useState(false);
   const view = project.view ?? "list";
   const done = project.tasks.filter((t) => t.status === "done").length;
+  const collapsed = !!project.collapsed;
 
   const taskHandlers = (task: Task) => ({
     onToggle: () => toggleTask(goal.id, task.id),
     onRename: (title: string) => updateTask(goal.id, task.id, { title }),
+    onSetNote: (note: string | undefined) => updateTask(goal.id, task.id, { note }),
     onDelete: () => deleteTask(goal.id, task.id),
   });
 
   return (
-    <section className={`${CARD} group/project`}>
+    <section
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDropHover(true);
+      }}
+      onDragLeave={() => setDropHover(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDropHover(false);
+        onDropOn();
+      }}
+      className={`${CARD} group/project transition-[opacity,box-shadow] ${dragging ? "opacity-40" : ""} ${dropHover ? "ring-2 ring-gray-dark" : ""}`}
+    >
       <div className="mb-1 flex items-baseline justify-between gap-3">
-        <h2 className="min-w-0 text-[19px] font-semibold leading-[1.2] text-gray-dark">
-          <EditableText value={project.name} onCommit={(name) => updateProject(goal.id, project.id, { name })} label="project name" />
-        </h2>
+        <div className="flex min-w-0 items-center gap-2">
+          <span
+            draggable
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            aria-label={`Reorder ${project.name}`}
+            className="flex shrink-0 cursor-grab items-center self-start pt-[3px] text-[#949494] transition-colors hover:text-gray-dark active:cursor-grabbing"
+          >
+            <img src={dragDotsIcon} alt="" className="h-4 w-4" />
+          </span>
+          <button
+            onClick={() => toggleProjectCollapsed(goal.id, project.id)}
+            aria-label={collapsed ? `Expand ${project.name}` : `Collapse ${project.name}`}
+            className="flex shrink-0 items-center self-start pt-[3px] text-gray-extra-light transition-colors hover:text-gray-dark"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              className={`transition-transform ${collapsed ? "-rotate-90" : ""}`}>
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          <h2 className="min-w-0 text-[19px] font-semibold leading-[1.2] text-gray-dark">
+            <EditableText value={project.name} onCommit={(name) => updateProject(goal.id, project.id, { name })} label="project name" />
+          </h2>
+        </div>
         <div className="flex shrink-0 items-center gap-3">
           <span className="opacity-0 transition-opacity group-hover/project:opacity-100">
             <RowDelete onDelete={() => deleteProject(goal.id, project.id)} label={project.name} />
@@ -227,22 +314,27 @@ function ProjectBoard({ goal, project }: { goal: Goal; project: Project }) {
           <span className="whitespace-nowrap text-[13px] text-gray-extra-light">
             {done} of {project.tasks.length} done
           </span>
-          <div className="flex items-center gap-1 rounded-full bg-gray-hover p-1">
-            {(["list", "kanban"] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => setProjectView(goal.id, project.id, v)}
-                className={`rounded-full px-2.5 py-1 text-[12px] font-medium capitalize transition-colors ${
-                  view === v ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]" : "text-gray-light hover:text-gray-dark"
-                }`}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
+          {!collapsed && (
+            <div className="flex items-center gap-1 rounded-full bg-gray-hover p-1">
+              {(["list", "kanban"] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setProjectView(goal.id, project.id, v)}
+                  className={`rounded-full px-2.5 py-1 text-[12px] font-medium capitalize transition-colors ${
+                    view === v ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]" : "text-gray-light hover:text-gray-dark"
+                  }`}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      <p className="mb-3 text-[14px] text-[#707070]">
+      {collapsed && project.note && <p className="pl-[38px] text-[14px] text-[#707070]">{project.note}</p>}
+      {!collapsed && (
+      <>
+      <p className="mb-3 pl-[38px] text-[14px] text-[#707070]">
         <EditableText
           value={project.note ?? ""}
           onCommit={(note) => updateProject(goal.id, project.id, { note })}
@@ -273,9 +365,13 @@ function ProjectBoard({ goal, project }: { goal: Goal; project: Project }) {
             return (
               <div
                 key={status}
-                onDragOver={(e) => e.preventDefault()}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
                 onDrop={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   if (dragId) moveTask(goal.id, dragId, status);
                   setDragId(null);
                 }}
@@ -295,6 +391,8 @@ function ProjectBoard({ goal, project }: { goal: Goal; project: Project }) {
           })}
         </div>
       )}
+      </>
+      )}
     </section>
   );
 }
@@ -304,13 +402,19 @@ export default function GoalDetail() {
   const navigate = useNavigate();
   const {
     getGoal, toggleTask, toggleRoutine, addTask, updateTask, deleteTask,
-    updateGoal, deleteGoal, addProject, addRoutine, updateRoutine, deleteRoutine,
+    updateGoal, deleteGoal, completeGoal, reopenGoal, addProject, addRoutine, updateRoutine, deleteRoutine,
+    reorderProject, setProjectsLayout, updateContentItem, deleteContentItem,
   } = useGoals();
   const { dark: darkMode } = useDarkMode();
   const heroBg = darkMode ? "#5E6E79" : HERO_BG;
   const navTheme = useMemo(() => ({ bg: "#FCFCFA", light: false, hideWordmark: false, scrollReveal: true }), []);
   useSetNavTheme(navTheme);
   const [editingTarget, setEditingTarget] = useState(false);
+  const [editingScore, setEditingScore] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const [outcomeDraft, setOutcomeDraft] = useState("");
+  const [finalScoreStr, setFinalScoreStr] = useState("");
+  const [dragProjectId, setDragProjectId] = useState<string | null>(null);
 
   const goal = goalId ? getGoal(goalId) : undefined;
 
@@ -341,6 +445,24 @@ export default function GoalDetail() {
     navigate("/dashboard");
   };
 
+  const scoreRange = goal.type === "test" ? scoreRangeFor(goal.categories[0]) : null;
+  const finalScoreNum = finalScoreStr.trim() ? Number(finalScoreStr) : undefined;
+  const finalScoreError =
+    scoreRange && finalScoreNum !== undefined && (finalScoreNum < scoreRange.min || finalScoreNum > scoreRange.max)
+      ? `${goal.categories[0]} scores run ${scoreRange.min}–${scoreRange.max}.`
+      : null;
+
+  const startCompleting = () => {
+    setOutcomeDraft(goal.outcome ?? "");
+    setFinalScoreStr(goal.finalScore !== undefined ? String(goal.finalScore) : goal.targetScore !== undefined ? String(goal.targetScore) : "");
+    setCompleting(true);
+  };
+  const confirmComplete = () => {
+    if (finalScoreError) return;
+    completeGoal(goal.id, outcomeDraft.trim() || undefined, finalScoreNum);
+    setCompleting(false);
+  };
+
   return (
     <PageShell variant="standard" contentMaxWidth={860}>
       <motion.div
@@ -358,11 +480,31 @@ export default function GoalDetail() {
 
         {/* Header — cream block with status, name, target, progress */}
         <div className="rounded-2xl px-7 pb-6 pt-7" style={{ backgroundColor: heroBg }}>
-          <div className="mb-2.5 flex items-center gap-1.5">
-            <span className={`h-1.5 w-1.5 rounded-full ${status === "needs-action" ? "bg-[#9F5B34]" : "bg-[#869AA6]"}`} />
-            <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-gray-light">
-              {status === "needs-action" ? "Needs action" : "On track"}
-            </span>
+          <div className="mb-2.5 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5">
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  status === "completed" ? "bg-gray-dark" : status === "needs-action" ? "bg-[#9F5B34]" : "bg-[#869AA6]"
+                }`}
+              />
+              <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-gray-light">
+                {status === "completed" ? "Completed" : status === "needs-action" ? "Needs action" : "On track"}
+              </span>
+            </div>
+            {status === "completed" ? (
+              <button
+                onClick={() => reopenGoal(goal.id)}
+                className="text-[13px] font-medium text-gray-light underline decoration-1 underline-offset-4 transition-colors hover:text-gray-dark"
+              >
+                Reopen goal
+              </button>
+            ) : (
+              !completing && (
+                <button onClick={startCompleting} className="text-[13px] font-medium text-gray-light underline decoration-1 underline-offset-4 transition-colors hover:text-gray-dark">
+                  Mark complete
+                </button>
+              )
+            )}
           </div>
           <h1 className="font-serif text-[34px] font-medium leading-[1.1] text-gray-dark">
             <EditableText value={goal.name} onCommit={(name) => updateGoal(goal.id, { name })} label="goal name" />
@@ -388,6 +530,33 @@ export default function GoalDetail() {
               </button>
             )}
             <span>· {goal.projects.length} project{goal.projects.length === 1 ? "" : "s"}</span>
+            {scoreRange && status !== "completed" && (
+              <>
+                <span>·</span>
+                {editingScore ? (
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    autoFocus
+                    defaultValue={goal.targetScore ?? ""}
+                    onBlur={(e) => {
+                      const n = e.target.value.trim() ? Number(e.target.value) : undefined;
+                      updateGoal(goal.id, { targetScore: n !== undefined && n >= scoreRange.min && n <= scoreRange.max ? n : undefined });
+                      setEditingScore(false);
+                    }}
+                    className="w-20 rounded border-[1.5px] border-gray-dark bg-white px-1.5 py-0.5 text-[15px] text-gray-dark outline-none"
+                  />
+                ) : (
+                  <button
+                    onClick={() => setEditingScore(true)}
+                    aria-label="Edit target score"
+                    className="-mx-1 rounded px-1 transition-colors hover:bg-[#222222]/[0.06]"
+                  >
+                    {goal.targetScore !== undefined ? `Target ${goal.targetScore}` : "Add a target score"}
+                  </button>
+                )}
+              </>
+            )}
           </p>
           <p className="mt-2 max-w-[560px] text-[14px] leading-[1.5] text-gray-light">
             <EditableText
@@ -406,6 +575,71 @@ export default function GoalDetail() {
               {done} of {total} tasks
             </span>
           </div>
+
+          {completing && (
+            <div className="mt-5 flex flex-col gap-2.5 rounded-xl bg-white p-4">
+              {scoreRange && (
+                <label className="flex max-w-[220px] flex-col gap-1.5">
+                  <span className="text-[13px] font-medium text-gray-light">
+                    Your score <span className="font-normal text-[#949494]">optional</span>
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    autoFocus
+                    value={finalScoreStr}
+                    onChange={(e) => setFinalScoreStr(e.target.value)}
+                    placeholder={`${goal.categories[0]} runs ${scoreRange.min}–${scoreRange.max}`}
+                    className="rounded-lg border-[1.5px] border-[#949494] bg-white px-3 py-2.5 text-[15px] text-gray-dark outline-none placeholder:text-[#949494] focus:border-gray-dark"
+                  />
+                  {finalScoreError && <span className="text-[13px] text-[#9F5B34]">{finalScoreError}</span>}
+                </label>
+              )}
+              <label className="flex flex-col gap-1.5">
+                <span className="text-[13px] font-medium text-gray-light">
+                  What happened? <span className="font-normal text-[#949494]">optional</span>
+                </span>
+                <textarea
+                  autoFocus={!scoreRange}
+                  rows={2}
+                  value={outcomeDraft}
+                  onChange={(e) => setOutcomeDraft(e.target.value)}
+                  placeholder="Got into Stanford GSB, starting fall 2027."
+                  className="resize-y rounded-lg border-[1.5px] border-[#949494] bg-white px-3 py-2.5 text-[15px] leading-[1.5] text-gray-dark outline-none placeholder:text-[#949494] focus:border-gray-dark"
+                />
+              </label>
+              <div className="flex items-center gap-2.5">
+                <Button onClick={confirmComplete} size="md" variant="primary" className="font-medium">
+                  Mark goal complete
+                </Button>
+                <button onClick={() => setCompleting(false)} className="px-2.5 py-2 text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {status === "completed" && goal.finalScore !== undefined && (
+            <div className="mt-5 flex items-center gap-3">
+              <span className="text-[28px] font-semibold leading-none text-gray-dark">{goal.finalScore}</span>
+              {goal.targetScore !== undefined && (
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[12px] font-semibold ${
+                    goal.finalScore >= goal.targetScore ? "bg-[#E5F5F1] text-[#037052]" : "bg-[#222222]/5 text-gray-light"
+                  }`}
+                >
+                  {goal.finalScore >= goal.targetScore ? "Target reached" : `Target was ${goal.targetScore}`}
+                </span>
+              )}
+              {goal.baselineScore !== undefined && (
+                <span className="text-[14px] text-gray-light">from {goal.baselineScore} baseline</span>
+              )}
+            </div>
+          )}
+
+          {status === "completed" && goal.outcome && (
+            <p className="mt-3 max-w-[560px] text-[15px] italic leading-[1.5] text-gray-dark">“{goal.outcome}”</p>
+          )}
         </div>
 
         {/* Routines — their own section above the boards */}
@@ -450,10 +684,44 @@ export default function GoalDetail() {
           <AddTask label="Add routine" placeholder="What do you want to repeat?" onAdd={(label) => addRoutine(goal.id, label, "Daily")} />
         </section>
 
-        {/* Projects — one board each, list or kanban */}
-        {goal.projects.map((project) => (
-          <ProjectBoard key={project.id} goal={goal} project={project} />
-        ))}
+        {/* Projects — one board each, list or kanban, reorderable and
+            collapsible, stacked or side by side */}
+        {goal.projects.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-3 px-1">
+              <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-gray-extra-light">Projects</span>
+              <div className="flex items-center gap-1 rounded-full bg-gray-hover p-1">
+                {(["stack", "grid"] as const).map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setProjectsLayout(goal.id, v)}
+                    className={`rounded-full px-2.5 py-1 text-[12px] font-medium capitalize transition-colors ${
+                      (goal.projectsLayout ?? "stack") === v ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]" : "text-gray-light hover:text-gray-dark"
+                    }`}
+                  >
+                    {v === "grid" ? "Side by side" : "Stack"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={goal.projectsLayout === "grid" ? "grid grid-cols-1 items-start gap-5 lg:grid-cols-2" : "flex flex-col gap-5"}>
+              {goal.projects.map((project) => (
+                <ProjectBoard
+                  key={project.id}
+                  goal={goal}
+                  project={project}
+                  dragging={dragProjectId === project.id}
+                  onDragStart={() => setDragProjectId(project.id)}
+                  onDragEnd={() => setDragProjectId(null)}
+                  onDropOn={() => {
+                    if (dragProjectId) reorderProject(goal.id, dragProjectId, project.id);
+                    setDragProjectId(null);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Standalone tasks */}
         <section className={CARD}>
@@ -467,6 +735,7 @@ export default function GoalDetail() {
                 onToggle={() => toggleTask(goal.id, task.id)}
                 onRename={(title) => updateTask(goal.id, task.id, { title })}
                 onSetDue={(dueDate) => updateTask(goal.id, task.id, { dueDate })}
+                onSetNote={(note) => updateTask(goal.id, task.id, { note })}
                 onDelete={() => deleteTask(goal.id, task.id)}
               />
             ))}
@@ -477,7 +746,7 @@ export default function GoalDetail() {
           </div>
         </section>
 
-        {/* Content queue — pinned at the bottom */}
+        {/* Content queue — horizontal discovery row, pinned at the bottom */}
         {goal.contentQueue.length > 0 && (
           <section className={CARD}>
             <div className="mb-1 flex items-center justify-between gap-3">
@@ -487,15 +756,33 @@ export default function GoalDetail() {
               </Link>
             </div>
             <p className="mb-4 text-[14px] text-[#707070]">Picked for your {goal.categories[0]} goal.</p>
-            <div className="-mx-2 flex flex-col gap-1">
+            <div className="scrollbar-hide -mx-1 flex gap-4 overflow-x-auto px-1 pb-1">
               {goal.contentQueue.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-[#F5F5F5]">
-                  <img src={item.image} alt="" className="h-11 w-20 shrink-0 rounded object-cover" />
-                  <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                    <div className="truncate text-[15px] font-semibold leading-[1.2] text-gray-dark">{item.title}</div>
-                    <div className="truncate text-[13px] text-gray-extra-light">{item.meta}</div>
+                <div key={item.id} className="flex w-[220px] shrink-0 flex-col gap-2.5">
+                  <div className="group relative">
+                    <img src={item.image} alt="" className="aspect-video w-full rounded-xl object-cover" />
+                    <span className="absolute right-2 top-2">
+                      <button
+                        onClick={() => deleteContentItem(goal.id, item.id)}
+                        aria-label={`Remove ${item.title}`}
+                        className="flex h-7 w-7 items-center justify-center rounded-full bg-[#222222]/50 text-white backdrop-blur transition-colors hover:bg-[#222222]/70"
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    </span>
                   </div>
-                  <Button size="md" variant="secondary" className="shrink-0 font-medium">
+                  <div className="flex flex-col gap-[2px]">
+                    <EditableText
+                      value={item.title}
+                      onCommit={(title) => updateContentItem(goal.id, item.id, { title })}
+                      label="title"
+                      className="text-[15px] font-semibold leading-[1.25] text-gray-dark"
+                    />
+                    <div className="text-[13px] text-gray-extra-light">{item.meta}</div>
+                  </div>
+                  <Button size="md" variant="secondary" className="w-full font-medium">
                     {item.action}
                   </Button>
                 </div>

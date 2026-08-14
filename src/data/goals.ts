@@ -36,6 +36,7 @@ export type Project = {
   note?: string;
   tasks: Task[];
   view?: "list" | "kanban";
+  collapsed?: boolean;
 };
 
 // An item in the goal's content queue ("Worth your time" on goal detail).
@@ -48,7 +49,8 @@ export type GoalContentItem = {
 };
 
 export type GoalType = "ai" | "career" | "school" | "test";
-export type GoalStatus = "on-track" | "needs-action";
+export type GoalStatus = "on-track" | "needs-action" | "completed";
+export type ProjectsLayout = "stack" | "grid";
 
 export type Goal = {
   id: string;
@@ -65,16 +67,27 @@ export type Goal = {
   // expert context the structured fields don't carry.
   description?: string;
   projects: Project[];
+  projectsLayout?: ProjectsLayout;
   routines: Routine[];
   otherTasks: Task[]; // standalone tasks with no project (screen 2's "Other tasks")
   contentQueue: GoalContentItem[];
+  // Set together, on the same action — a goal is either open or done, with the
+  // result recorded at the moment it's closed out.
+  completedAt?: string; // ISO date
+  outcome?: string;
+  // Test-type goals only: the score this goal is targeting, a previous score if
+  // retaking, and the score actually recorded at completion. Validated against
+  // TEST_SCORE_RANGE for the goal's category where one exists.
+  targetScore?: number;
+  baselineScore?: number;
+  finalScore?: number;
 };
 
 // Reference "today" the mock fixtures below are written against, mirroring
 // how upcomingEvents/TODAY_DAY anchor Dashboard.tsx's other demo data to a
 // fixed point instead of the real clock.
 const TODAY = new Date(2026, 7, 14); // Aug 14, 2026
-const TODAY_ISO = "2026-08-14";
+export const TODAY_ISO = "2026-08-14";
 
 // New Date("YYYY-MM-DD") parses as UTC midnight, which rolls back a day once
 // formatted in a timezone behind UTC. Parse the parts into a local date instead.
@@ -134,9 +147,10 @@ export function overdueCount(goal: Goal): number {
   return goalOneOffTasks(goal).filter(isOverdue).length;
 }
 
-// Derived, not stored — an explicit `status` field would just be a second
-// place for this to drift out of sync with the tasks underneath it.
+// Derived from the tasks underneath it, except completion — that's an
+// explicit customer action (see completedAt), not something task state implies.
 export function goalStatus(goal: Goal): GoalStatus {
+  if (goal.completedAt) return "completed";
   return overdueCount(goal) > 0 ? "needs-action" : "on-track";
 }
 

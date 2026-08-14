@@ -400,16 +400,22 @@ function GoalsEmptyState() {
 
 function GoalsCard() {
   const { goals } = useGoals();
+  const navigate = useNavigate();
   return (
     <DashCard title="My goals" to={goals.length > 0 ? "/goals" : undefined}>
       <p className="-mt-2 mb-4 text-[15px] text-[#707070]">Track your progress toward what matters most.</p>
       {goals.length > 0 ? (
-        <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-1">
-          {goals.map((goal) => (
-            <GoalTile key={goal.id} goal={goal} />
-          ))}
-          <NewGoalTile />
-        </div>
+        <>
+          <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-1">
+            {goals.map((goal) => (
+              <GoalTile key={goal.id} goal={goal} />
+            ))}
+            <NewGoalTile />
+          </div>
+          <Button onClick={() => navigate("/tasks")} size="md" variant="secondary" className="mt-4 font-semibold">
+            See all tasks
+          </Button>
+        </>
       ) : (
         <GoalsEmptyState />
       )}

@@ -58,6 +58,7 @@ import Dashboard from "./pages/Dashboard";
 import GoalsIndex from "./pages/GoalsIndex";
 import GoalDetail from "./pages/GoalDetail";
 import GoalNew from "./pages/GoalNew";
+import TaskList from "./pages/TaskList";
 import PostDetail from "./pages/PostDetail";
 import ReplyCompose from "./pages/ReplyCompose";
 import AccountSettings from "./pages/AccountSettings";
@@ -178,6 +179,7 @@ export default function App() {
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/goals" element={<GoalsIndex />} />
+          <Route path="/tasks" element={<TaskList />} />
           <Route path="/goals/new" element={<GoalNew />} />
           <Route path="/goals/:goalId" element={<GoalDetail />} />
           <Route path="/notifications" element={<Notifications />} />

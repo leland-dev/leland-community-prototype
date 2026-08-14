@@ -1,5 +1,17 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import { buildTargetLabel, myGoals, type Goal, type Project, type Routine, type Task, type TaskStatus, type GoalType } from "../data/goals";
+import {
+  buildTargetLabel,
+  myGoals,
+  TODAY_ISO,
+  type Goal,
+  type GoalContentItem,
+  type Project,
+  type ProjectsLayout,
+  type Routine,
+  type Task,
+  type TaskStatus,
+  type GoalType,
+} from "../data/goals";
 import type { Plan } from "../data/goalPlans";
 
 // Goals are mutated from three places — the dashboard card, goal detail, and
@@ -13,11 +25,18 @@ interface GoalsContextValue {
   moveTask: (goalId: string, taskId: string, status: TaskStatus) => void;
   addTask: (goalId: string, projectId: string | null, title: string) => void;
   setProjectView: (goalId: string, projectId: string, view: "list" | "kanban") => void;
+  toggleProjectCollapsed: (goalId: string, projectId: string) => void;
+  reorderProject: (goalId: string, projectId: string, targetId: string) => void;
+  setProjectsLayout: (goalId: string, layout: ProjectsLayout) => void;
   createGoal: (input: CreateGoalInput) => Goal;
   // Edits
-  updateGoal: (goalId: string, patch: Partial<Pick<Goal, "name" | "targetDate" | "description">>) => void;
+  updateGoal: (goalId: string, patch: Partial<Pick<Goal, "name" | "targetDate" | "description" | "targetScore" | "baselineScore">>) => void;
   deleteGoal: (goalId: string) => void;
-  updateTask: (goalId: string, taskId: string, patch: Partial<Pick<Task, "title" | "dueDate">>) => void;
+  completeGoal: (goalId: string, outcome?: string, finalScore?: number) => void;
+  reopenGoal: (goalId: string) => void;
+  updateContentItem: (goalId: string, itemId: string, patch: Partial<Pick<GoalContentItem, "title" | "meta">>) => void;
+  deleteContentItem: (goalId: string, itemId: string) => void;
+  updateTask: (goalId: string, taskId: string, patch: Partial<Pick<Task, "title" | "dueDate" | "note">>) => void;
   deleteTask: (goalId: string, taskId: string) => void;
   addProject: (goalId: string, name: string) => void;
   updateProject: (goalId: string, projectId: string, patch: Partial<Pick<Project, "name" | "note">>) => void;
@@ -33,6 +52,8 @@ export type CreateGoalInput = {
   categories: string[];
   targetDate?: string;
   description?: string;
+  targetScore?: number;
+  baselineScore?: number;
   plan: Plan;
 };
 
@@ -119,6 +140,37 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const toggleProjectCollapsed = useCallback((goalId: string, projectId: string) => {
+    setGoals((prev) =>
+      mapGoal(prev, goalId, (goal) => ({
+        ...goal,
+        projects: goal.projects.map((p) => (p.id === projectId ? { ...p, collapsed: !p.collapsed } : p)),
+      })),
+    );
+  }, []);
+
+  // Drag-to-reorder: dropping project A onto project B swaps their positions
+  // in the list — simple and predictable, versus inserting-before/after which
+  // gets confusing once cards are different sizes (collapsed vs. not).
+  const reorderProject = useCallback((goalId: string, projectId: string, targetId: string) => {
+    if (projectId === targetId) return;
+    setGoals((prev) =>
+      mapGoal(prev, goalId, (goal) => {
+        const from = goal.projects.findIndex((p) => p.id === projectId);
+        const to = goal.projects.findIndex((p) => p.id === targetId);
+        if (from === -1 || to === -1) return goal;
+        const projects = [...goal.projects];
+        const [moved] = projects.splice(from, 1);
+        projects.splice(to, 0, moved);
+        return { ...goal, projects };
+      }),
+    );
+  }, []);
+
+  const setProjectsLayout = useCallback((goalId: string, projectsLayout: ProjectsLayout) => {
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, projectsLayout })));
+  }, []);
+
   const createGoal = useCallback((input: CreateGoalInput) => {
     const projects: Project[] = input.plan.projects.map((p) => ({
       id: nextId("project"),
@@ -135,6 +187,8 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
       targetDate: input.targetDate,
       targetLabel: buildTargetLabel(input.type, input.targetDate),
       description: input.description,
+      targetScore: input.targetScore,
+      baselineScore: input.baselineScore,
       projects,
       routines: input.plan.routines.map((r) => ({ id: nextId("routine"), label: r.label, cadence: r.cadence, streak: 0 })),
       otherTasks: [],
@@ -147,7 +201,7 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
 
   // ─── Edits ────────────────────────────────────────────────────────────────
 
-  const updateGoal = useCallback((goalId: string, patch: Partial<Pick<Goal, "name" | "targetDate" | "description">>) => {
+  const updateGoal = useCallback((goalId: string, patch: Partial<Pick<Goal, "name" | "targetDate" | "description" | "targetScore" | "baselineScore">>) => {
     setGoals((prev) =>
       mapGoal(prev, goalId, (goal) => {
         const next = { ...goal, ...patch };
@@ -162,7 +216,28 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
     setGoals((prev) => prev.filter((g) => g.id !== goalId));
   }, []);
 
-  const updateTask = useCallback((goalId: string, taskId: string, patch: Partial<Pick<Task, "title" | "dueDate">>) => {
+  const completeGoal = useCallback((goalId: string, outcome?: string, finalScore?: number) => {
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, completedAt: TODAY_ISO, outcome, finalScore })));
+  }, []);
+
+  const reopenGoal = useCallback((goalId: string) => {
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, completedAt: undefined, outcome: undefined, finalScore: undefined })));
+  }, []);
+
+  const updateContentItem = useCallback((goalId: string, itemId: string, patch: Partial<Pick<GoalContentItem, "title" | "meta">>) => {
+    setGoals((prev) =>
+      mapGoal(prev, goalId, (goal) => ({
+        ...goal,
+        contentQueue: goal.contentQueue.map((item) => (item.id === itemId ? { ...item, ...patch } : item)),
+      })),
+    );
+  }, []);
+
+  const deleteContentItem = useCallback((goalId: string, itemId: string) => {
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, contentQueue: goal.contentQueue.filter((item) => item.id !== itemId) })));
+  }, []);
+
+  const updateTask = useCallback((goalId: string, taskId: string, patch: Partial<Pick<Task, "title" | "dueDate" | "note">>) => {
     setGoals((prev) => mapGoal(prev, goalId, (goal) => mapTasks(goal, (t) => (t.id === taskId ? { ...t, ...patch } : t))));
   }, []);
 
@@ -217,16 +292,20 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      goals, getGoal, toggleTask, toggleRoutine, moveTask, addTask, setProjectView, createGoal,
-      updateGoal, deleteGoal, updateTask, deleteTask,
+      goals, getGoal, toggleTask, toggleRoutine, moveTask, addTask,
+      setProjectView, toggleProjectCollapsed, reorderProject, setProjectsLayout, createGoal,
+      updateGoal, deleteGoal, completeGoal, reopenGoal, updateTask, deleteTask,
       addProject, updateProject, deleteProject,
       addRoutine, updateRoutine, deleteRoutine,
+      updateContentItem, deleteContentItem,
     }),
     [
-      goals, getGoal, toggleTask, toggleRoutine, moveTask, addTask, setProjectView, createGoal,
-      updateGoal, deleteGoal, updateTask, deleteTask,
+      goals, getGoal, toggleTask, toggleRoutine, moveTask, addTask,
+      setProjectView, toggleProjectCollapsed, reorderProject, setProjectsLayout, createGoal,
+      updateGoal, deleteGoal, completeGoal, reopenGoal, updateTask, deleteTask,
       addProject, updateProject, deleteProject,
       addRoutine, updateRoutine, deleteRoutine,
+      updateContentItem, deleteContentItem,
     ],
   );
 
@@ -238,6 +317,3 @@ export function useGoals(): GoalsContextValue {
   if (!ctx) throw new Error("useGoals must be used within a GoalsProvider");
   return ctx;
 }
-
-// Kept in sync with the fixture "today" in src/data/goals.ts.
-const TODAY_ISO = "2026-08-14";

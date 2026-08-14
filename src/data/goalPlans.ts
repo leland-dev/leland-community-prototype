@@ -183,6 +183,29 @@ function sectionsFor(exam: string): string[] {
   return SECTIONS[exam] ?? ["First section review", "Rebuild your weakest section"];
 }
 
+// Real score ranges for the "test" goal type's target/baseline/result fields —
+// validates against the actual scale instead of accepting any number. Exams
+// without a single composite score (AP Exams is per-exam 1–5, NCLEX is
+// pass/fail) are left out; those goals just skip score validation.
+export const TEST_SCORE_RANGE: Record<string, { min: number; max: number }> = {
+  GMAT: { min: 205, max: 805 },
+  "GMAT Focus": { min: 205, max: 805 },
+  "Executive Assessment": { min: 100, max: 200 },
+  GRE: { min: 260, max: 340 },
+  SAT: { min: 400, max: 1600 },
+  PSAT: { min: 320, max: 1520 },
+  ACT: { min: 1, max: 36 },
+  LSAT: { min: 120, max: 180 },
+  MCAT: { min: 472, max: 528 },
+  TOEFL: { min: 0, max: 120 },
+  IELTS: { min: 0, max: 9 },
+  "Duolingo English Test": { min: 10, max: 160 },
+};
+
+export function scoreRangeFor(category: string): { min: number; max: number } | null {
+  return TEST_SCORE_RANGE[category] ?? null;
+}
+
 // Which exam a school category implies, for the test-prep project.
 const SCHOOL_EXAM: Record<string, string> = {
   MBA: "GMAT",
