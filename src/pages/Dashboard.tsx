@@ -31,6 +31,9 @@ import airplaneIcon from "../assets/icons/airplane.svg";
 import chevronRightIcon from "../assets/icons/chevron-right.svg";
 import starIcon from "../assets/icons/star.svg";
 import editIcon from "../assets/icons/edit.svg";
+import { GoalTile, NewGoalTile } from "../components/GoalTile";
+import { useGoals } from "../contexts/GoalsContext";
+import type { Goal } from "../data/goals";
 
 const HERO_BG = "#F3F1E6";
 
@@ -375,6 +378,42 @@ function GetHelp() {
         </button>
       </div>
     </section>
+  );
+}
+
+function GoalsEmptyState() {
+  const navigate = useNavigate();
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-6 rounded-xl bg-[#F3F1E6] p-6">
+      <div className="flex max-w-[520px] flex-col gap-1.5">
+        <div className="text-[16px] font-semibold leading-[1.2] text-gray-dark">Name the thing you're working toward.</div>
+        <p className="text-[14px] leading-[1.5] text-gray-light">
+          A seat at business school, a new role, a skill you want by spring. Pick a goal and we'll lay out the projects and tasks that get you there — your expert can add to it too.
+        </p>
+      </div>
+      <Button onClick={() => navigate("/goals/new")} size="md" variant="primary" className="font-medium">
+        Set a goal
+      </Button>
+    </div>
+  );
+}
+
+function GoalsCard() {
+  const { goals } = useGoals();
+  return (
+    <DashCard title="My goals" to={goals.length > 0 ? "/goals" : undefined}>
+      <p className="-mt-2 mb-4 text-[15px] text-[#707070]">Track your progress toward what matters most.</p>
+      {goals.length > 0 ? (
+        <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-1">
+          {goals.map((goal) => (
+            <GoalTile key={goal.id} goal={goal} />
+          ))}
+          <NewGoalTile />
+        </div>
+      ) : (
+        <GoalsEmptyState />
+      )}
+    </DashCard>
   );
 }
 
@@ -783,21 +822,7 @@ export default function Dashboard() {
             )}
 
             {/* My goals — hidden for experts */}
-            {!expert && (
-              <DashCard title="My goals">
-                <p className="-mt-2 mb-4 text-[15px] text-[#707070]">Track your progress toward what matters most.</p>
-                <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-1">
-                  {[0, 1].map((i) => (
-                    <div key={i} className="h-[100px] w-[200px] shrink-0 rounded-xl bg-[#F5F5F5]" style={dashedBorderStyle} />
-                  ))}
-                  <button className="flex h-[100px] w-[200px] shrink-0 cursor-pointer items-center justify-center rounded-xl border-none bg-[#F5F5F5] transition-colors hover:bg-[#EEEEEE]" style={dashedBorderStyle}>
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                      <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
-                    </svg>
-                  </button>
-                </div>
-              </DashCard>
-            )}
+            {!expert && <GoalsCard />}
 
             {/* 6. Get help */}
             <GetHelp />
