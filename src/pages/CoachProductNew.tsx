@@ -1,7 +1,7 @@
-import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useParams, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, Reorder, useDragControls } from "motion/react";
 import { Button } from "../components/Button";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import crownIcon from "../assets/icons/crown-membership.svg";
@@ -36,15 +36,21 @@ import uploadIcon from "../assets/icons/upload.svg";
 import attachIcon from "../assets/icons/attach.svg";
 import trashIcon from "../assets/icons/trash.svg";
 import editIcon from "../assets/icons/edit.svg";
+import editFilledIcon from "../assets/icons/edit-filled.svg";
+import infoFilledIcon from "../assets/icons/info-filled.svg";
+import dotsVerticalIcon from "../assets/icons/dots-vertical.svg";
+import dragDotsIcon from "../assets/icons/drag-dots.svg";
 import globeIcon from "../assets/icons/globe.svg";
 import textIcon from "../assets/icons/text.svg";
 import helpIcon from "../assets/icons/help.svg";
 import photoIcon from "../assets/icons/photo.svg";
-import videoIcon from "../assets/icons/video-icon.svg";
 import starIcon from "../assets/icons/star-icon.svg";
+import starFilledIcon from "../assets/icons/star.svg";
+import checkmarkBadgeIcon from "../assets/icons/checkmark-badge.svg";
+import checkmarkFilledIcon from "../assets/icons/checkmark-filled.svg";
 import giftIcon from "../assets/icons/gift.svg";
 import lightBulbIcon from "../assets/icons/light-bulb.svg";
-import shapesIcon from "../assets/icons/shapes.svg";
+import packageBoxOpenIcon from "../assets/icons/package-box-open.svg";
 
 type StepKey = "product" | "offerings" | "page";
 
@@ -136,7 +142,7 @@ const offeringTypes = [
   { slug: "content", label: "Content", blurb: "Guides, templates, videos", icon: bookOpenIcon },
   { slug: "collection", label: "Collection", blurb: "Group products into a bundle", icon: stackIcon },
   { slug: "course", label: "Course", blurb: "Structured multi-lesson course", icon: myCoursesIcon },
-  { slug: "paid-livestream", label: "Paid Livestream", blurb: "Host a paid live session", icon: lteSignalIcon },
+  { slug: "paid-livestream", label: "Livestream", blurb: "Host a paid live session", icon: lteSignalIcon },
   { slug: "agent", label: "Agent", blurb: "An AI assistant trained on you", icon: aiIcon },
   { slug: "membership", label: "Private group", blurb: "A private community for members", icon: crownIcon },
 ];
@@ -144,58 +150,64 @@ const offeringBySlug = Object.fromEntries(offeringTypes.map((o) => [o.slug, o]))
 
 // Fuller descriptions for the v2 "add a product" list (the initial state).
 const offeringAddDescription: Record<string, string> = {
-  "coaching-time": "Sell 1:1 time — priced automatically from your hourly rate.",
+  "coaching-time": "Sell 1:1 time, priced automatically from your hourly rate.",
   content: "Share a guide, template, video, or other resource.",
-  collection: "Bundle several resources together into one product.",
-  course: "Teach with a structured, multi-lesson course.",
-  "paid-livestream": "Host a live session your audience pays to join.",
+  collection: "Bundle multiple resources together.",
+  course: "Create a structured, multi-lesson course.",
+  "paid-livestream": "Host a live, group session.",
   agent: "An AI assistant trained on your expertise.",
   membership: "Give members access to a private community.",
 };
 
 // The kinds of section a coach can add to the customer-facing page.
-type PageSectionKind = "text" | "faqs" | "image" | "video" | "reviews";
+type PageSectionKind = "text" | "faqs" | "checklist" | "media" | "reviews";
 
 // A single Q&A pair inside a FAQs section.
 type FaqItem = { id: number; question: string; answer: string };
+
+// A single checkmark line inside a checklist section.
+type ChecklistItem = { id: number; text: string };
 
 // A configured page section. Each kind carries its own content shape; the
 // discriminant `kind` narrows to the right fields.
 type PageSection =
   | { id: number; kind: "text"; heading: string; body: string }
   | { id: number; kind: "faqs"; heading: string; faqs: FaqItem[] }
-  | { id: number; kind: "image"; heading: string; fileName: string }
-  | { id: number; kind: "video"; heading: string; fileName: string }
+  | { id: number; kind: "checklist"; heading: string; items: ChecklistItem[] }
+  | { id: number; kind: "media"; heading: string; fileName: string }
   | { id: number; kind: "reviews"; heading: string; slots: (number | null)[] };
 
 // Section types a coach can add to the customer-facing page. `kind` maps to the
 // PageSection built when the button is clicked.
 const pageSectionTypes: { kind: PageSectionKind; label: string; icon: string }[] = [
-  { kind: "text", label: "Text Section", icon: textIcon },
-  { kind: "faqs", label: "FAQs Section", icon: helpIcon },
-  { kind: "image", label: "Image Section", icon: photoIcon },
-  { kind: "video", label: "Video Section", icon: videoIcon },
-  { kind: "reviews", label: "Reviews Section", icon: starIcon },
+  { kind: "text", label: "Text", icon: textIcon },
+  { kind: "checklist", label: "Checklist", icon: checkmarkBadgeIcon },
+  { kind: "media", label: "Media", icon: photoIcon },
+  { kind: "reviews", label: "Reviews", icon: starIcon },
+  { kind: "faqs", label: "FAQs", icon: helpIcon },
 ];
+
+// Up to this many checkmark lines per checklist section.
+const MAX_CHECKLIST_ITEMS = 10;
 
 // A blank section of the given kind, ready to edit.
 function newPageSection(kind: PageSectionKind, id: number): PageSection {
   switch (kind) {
     case "text": return { id, kind, heading: "", body: "" };
     case "faqs": return { id, kind, heading: "", faqs: [{ id: 1, question: "", answer: "" }] };
-    case "image": return { id, kind, heading: "", fileName: "" };
-    case "video": return { id, kind, heading: "", fileName: "" };
-    case "reviews": return { id, kind, heading: "", slots: [null, null, null] };
+    case "checklist": return { id, kind, heading: "", items: [{ id: 1, text: "" }] };
+    case "media": return { id, kind, heading: "", fileName: "" };
+    case "reviews": return { id, kind, heading: "", slots: [] };
   }
 }
 
 // The coach's existing reviews, offered up when featuring reviews on the page.
-const existingReviews: { id: number; name: string; photo: string; rating: number; text: string }[] = [
-  { id: 1, name: "Jordan Reyes", photo: reviewPhoto1, rating: 5, text: "Samantha completely reshaped my application strategy. I got into my top-choice M7 program." },
-  { id: 2, name: "Priya Natarajan", photo: reviewPhoto2, rating: 5, text: "The mock interviews were incredibly realistic. I walked into every real interview feeling calm and prepared." },
-  { id: 3, name: "Marcus Webb", photo: reviewPhoto3, rating: 5, text: "Clear, direct feedback on my essays. She helped me find the story I didn't know I had." },
-  { id: 4, name: "Elena Fischer", photo: reviewPhoto4, rating: 4, text: "Great structure and accountability throughout the process. Highly recommend for anyone applying." },
-  { id: 5, name: "David Okafor", photo: reviewPhoto5, rating: 5, text: "Worth every penny — the coaching went far beyond admissions into real career guidance." },
+const existingReviews: { id: number; name: string; photo: string; role: string; date: string; rating: number; text: string; accepted?: string }[] = [
+  { id: 1, name: "Jordan Reyes", photo: reviewPhoto1, role: "MBA Admissions", date: "May 2026", rating: 5, text: "Samantha completely reshaped my application strategy. She helped me completely restructure my essays and think about my story in a way I never would have on my own. I got into my top-choice program and I genuinely don't think I could have done it without her.", accepted: "Accepted to Stanford University" },
+  { id: 2, name: "Priya Natarajan", photo: reviewPhoto2, role: "Interview Prep", date: "Apr 2026", rating: 5, text: "The mock interviews were incredibly realistic. We did multiple rounds and she gave sharp, specific feedback each time. I walked into every real interview feeling calm and prepared.", accepted: "Accepted to Harvard Business School" },
+  { id: 3, name: "Marcus Webb", photo: reviewPhoto3, role: "Essay Coaching", date: "Mar 2026", rating: 5, text: "Clear, direct feedback on my essays. She helped me find the story I didn't know I had and pushed me to make every sentence count.", accepted: "Accepted to Wharton" },
+  { id: 4, name: "Elena Fischer", photo: reviewPhoto4, role: "MBA Admissions", date: "Feb 2026", rating: 4, text: "Great structure and accountability throughout the process. Highly recommend for anyone applying — she kept me on track the whole way.", accepted: "Accepted to Kellogg" },
+  { id: 5, name: "David Okafor", photo: reviewPhoto5, role: "Career Coaching", date: "Jan 2026", rating: 5, text: "Worth every penny — the coaching went far beyond admissions into real career guidance. She connected me with current students so I could ask questions before committing.", accepted: "Accepted to Booth" },
 ];
 
 // A course section — placeholder builder for now (just a name).
@@ -235,7 +247,7 @@ const newCourseSection = (existing: CourseSection[]): CourseSection => ({
 // gets a CTA that opens the config modal (see OfferingConfigFields). Add an
 // entry to give another offering type its own configuration.
 const configDefaults: Record<string, Record<string, string>> = {
-  "coaching-time": { mode: "set", hours: "", minutes: "", minHours: "", maxHours: "" },
+  "coaching-time": { mode: "set", hours: "", minutes: "", minHours: "", maxHours: "", delivery: "" },
   content: { assetName: "", title: "", description: "", downloadable: "false", attachFile: "false", attachmentName: "", resourceType: "guide", lelandPlus: "false", anonymous: "false" },
   collection: { title: "", description: "" },
   course: { title: "", description: "" },
@@ -340,6 +352,14 @@ const LIVESTREAM_DURATIONS = [
   { value: "120", label: "2 hours" },
 ];
 
+// How coaching time is delivered. Async carries an explanatory tooltip.
+const deliveryFormats: { value: string; label: string; info?: string }[] = [
+  { value: "live", label: "Live Sessions" },
+  { value: "async", label: "Asynchronous Coaching", info: "Asynchronous coaching is done offline, rather than in live sessions. It can be great for editing, document feedback, or any work that doesn't require live collaboration." },
+  { value: "mix", label: "Mix of Live and Asynchronous" },
+];
+const deliveryLabel = (v: string) => deliveryFormats.find((d) => d.value === v)?.label;
+
 // Whether a configurable offering has enough filled in to be saved as finished.
 function isConfigComplete(item: OfferingItem): boolean {
   const c = item.config;
@@ -404,16 +424,17 @@ const stepMotion = {
 const offeringTransition = { duration: 0.26, ease: [0.25, 0.1, 0.25, 1] as const };
 
 // Matches the toggle used in the top-nav profile dropdown.
-function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
+function Toggle({ checked, onChange, size = "md" }: { checked: boolean; onChange: () => void; size?: "sm" | "md" }) {
+  const sm = size === "sm";
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
       onClick={onChange}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${checked ? "bg-[#222222]" : "bg-[#d9d9d9]"}`}
+      className={`relative shrink-0 rounded-full transition-colors ${sm ? "h-5 w-9" : "h-6 w-11"} ${checked ? "bg-[#222222]" : "bg-[#d9d9d9]"}`}
     >
-      <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${checked ? "translate-x-5" : ""}`} />
+      <span className={`absolute top-0.5 left-0.5 rounded-full bg-white transition-transform ${sm ? "h-4 w-4" : "h-5 w-5"} ${checked ? (sm ? "translate-x-4" : "translate-x-5") : ""}`} />
     </button>
   );
 }
@@ -494,8 +515,9 @@ function CheckBox({ checked, onChange, label }: { checked: boolean; onChange: ()
   );
 }
 
-// Custom select — a trigger with a chevron and a menu that opens below.
-function Select({ value, onChange, options, className = "", triggerClassName = "py-2.5 pl-3.5 pr-3 text-[14px]" }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[]; className?: string; triggerClassName?: string }) {
+// Custom select — a trigger with a chevron and a menu that opens below. Options
+// may carry an `info` string, shown as a hoverable "i" tooltip in the menu.
+function Select({ value, onChange, options, placeholder, className = "", triggerClassName = "py-2.5 pl-3.5 pr-3 text-[14px]" }: { value: string; onChange: (v: string) => void; options: { value: string; label: string; info?: string }[]; placeholder?: string; className?: string; triggerClassName?: string }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   // Menu is portaled to the body so it isn't clipped by any overflow-hidden
@@ -503,6 +525,8 @@ function Select({ value, onChange, options, className = "", triggerClassName = "
   // measured from the trigger each time the menu opens.
   const [pos, setPos] = useState({ left: 0, top: 0, width: 0 });
   const selected = options.find((o) => o.value === value);
+  // Info tooltips escape the menu, so don't clip when any option has one.
+  const hasInfo = options.some((o) => o.info);
 
   useLayoutEffect(() => {
     if (!open || !triggerRef.current) return;
@@ -516,16 +540,16 @@ function Select({ value, onChange, options, className = "", triggerClassName = "
         ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`flex w-full items-center justify-between gap-2 rounded-lg border border-gray-stroke bg-white text-left text-gray-dark transition-colors hover:border-[#c9c9c9] ${triggerClassName}`}
+        className={`flex w-full items-center justify-between gap-2 rounded-lg border border-gray-stroke bg-white text-left transition-colors hover:border-[#c9c9c9] ${selected ? "text-gray-dark" : "text-[#B1B1B1]"} ${triggerClassName}`}
       >
-        <span className="truncate">{selected?.label ?? value}</span>
+        <span className="truncate">{selected?.label ?? placeholder ?? value}</span>
         <svg className={`h-4 w-4 shrink-0 text-gray-light transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
       </button>
       {open && createPortal(
         <>
           <button aria-hidden tabIndex={-1} className="fixed inset-0 z-[100] cursor-default" onClick={() => setOpen(false)} />
           <div
-            className="fixed z-[110] max-h-[280px] overflow-auto rounded-xl border border-gray-stroke bg-white p-1 shadow-[0_4px_16px_rgba(16,24,40,0.12)]"
+            className={`fixed z-[110] rounded-xl border border-gray-stroke bg-white p-1 shadow-[0_4px_16px_rgba(16,24,40,0.12)] ${hasInfo ? "overflow-visible" : "max-h-[280px] overflow-auto"}`}
             style={{ left: pos.left, top: pos.top, width: pos.width }}
           >
             {options.map((o) => {
@@ -537,8 +561,18 @@ function Select({ value, onChange, options, className = "", triggerClassName = "
                   onClick={() => { onChange(o.value); setOpen(false); }}
                   className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-[14px] transition-colors hover:bg-gray-hover ${active ? "font-semibold text-gray-dark" : "font-medium text-gray-dark"}`}
                 >
-                  {o.label}
-                  {active && <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+                  <span className="truncate">{o.label}</span>
+                  <span className="flex shrink-0 items-center gap-2">
+                    {o.info && (
+                      <span className="group/info relative flex" onClick={(e) => e.stopPropagation()}>
+                        <svg className="h-4 w-4 text-gray-light transition-colors hover:text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
+                        <span role="tooltip" className="pointer-events-none absolute bottom-full right-0 z-[120] mb-2 hidden w-max max-w-[280px] rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover/info:block">
+                          {o.info}
+                        </span>
+                      </span>
+                    )}
+                    {active && <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+                  </span>
                 </button>
               );
             })}
@@ -578,9 +612,15 @@ export default function CoachProductNew() {
   // unit: name + its own products + its own access (free/paid) + price.
   const [pricingOptions, setPricingOptions] = useState<PricingOption[]>(() => [newPricingOption(0)]);
   const nextPricingId = useRef(1);
+  // v2: whether the offering has multiple pricing options (tabs). Off collapses
+  // back to a single option.
+  const [multiEnabled, setMultiEnabled] = useState(false);
   const [added, setAdded] = useState<OfferingItem[]>([]);
   const [description, setDescription] = useState("");
   const [buttonText, setButtonText] = useState("Purchase");
+  // Thumbnail image (demo-only object URL) — set on the Details step, previewed
+  // in the sidebar card and on the Page step.
+  const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [sections, setSections] = useState<PageSection[]>([]);
   const nextOfferingId = useRef(0);
   const nextSectionId = useRef(0);
@@ -588,7 +628,7 @@ export default function CoachProductNew() {
   // Admin tool — MVP on shows the full feature set; off hides not-yet-built bits.
   const [mvp, setMvp] = useState(true);
   // Setup-flow version: v1 (current) or v2 (per-product prices + roll-up).
-  const [version, setVersion] = useState<"v1" | "v2">("v1");
+  const [version, setVersion] = useState<"v1" | "v2">("v2");
   const v2 = version === "v2";
   const [adminOpen, setAdminOpen] = useState(false);
   const adminRef = useRef<HTMLDivElement>(null);
@@ -612,9 +652,16 @@ export default function CoachProductNew() {
     else setStep(STEPS[stepIndex + 1].key);
   };
 
+  // Whether the preview column is in the DOM — true while a product exists and
+  // stays true through the column's exit animation (cleared on exit-complete).
+  // The main column keeps its two-column width until the preview is fully gone,
+  // so it doesn't thrash against the still-collapsing preview on the way out.
+  const [previewMounted, setPreviewMounted] = useState(added.length > 0);
+  if (added.length > 0 && !previewMounted) setPreviewMounted(true);
+
   // Pricing options (step 2). Each is a self-contained option.
   const makePricingOption = () => newPricingOption(nextPricingId.current++);
-  const addPricingOption = () => {
+  const addPricingOption = (): number => {
     // Mirror the primary option's product line-up into the new option, but as
     // fresh, unconfigured instances — same types, empty setup, "Configure" CTA.
     const template = pricingOptions[0];
@@ -623,7 +670,22 @@ export default function CoachProductNew() {
       .filter((it): it is OfferingItem => Boolean(it))
       .map((it) => makeOffering(it.slug));
     if (clones.length) setAdded((a) => [...a, ...clones]);
-    setPricingOptions((o) => [...o, { ...makePricingOption(), productIds: clones.map((c) => c.id) }]);
+    const opt = { ...makePricingOption(), productIds: clones.map((c) => c.id) };
+    setPricingOptions((o) => [...o, opt]);
+    return opt.id;
+  };
+
+  // Turn multiple pricing options on/off. Turning off collapses to the first
+  // option, discarding the others (and their products).
+  const toggleMulti = () => {
+    if (multiEnabled) {
+      const dropIds = pricingOptions.slice(1).flatMap((p) => p.productIds);
+      if (dropIds.length) setAdded((a) => a.filter((it) => !dropIds.includes(it.id)));
+      setPricingOptions((o) => o.slice(0, 1));
+      setMultiEnabled(false);
+    } else {
+      setMultiEnabled(true);
+    }
   };
   const removePricingOption = (id: number) => {
     // Drop the deleted option's products from the shared library so they don't
@@ -631,6 +693,8 @@ export default function CoachProductNew() {
     const opt = pricingOptions.find((p) => p.id === id);
     if (opt) setAdded((a) => a.filter((item) => !opt.productIds.includes(item.id)));
     setPricingOptions((o) => o.filter((p) => p.id !== id));
+    // Dropping back to a single option turns multiple pricing options off.
+    if (pricingOptions.length - 1 <= 1) setMultiEnabled(false);
   };
   const updatePricingOption = (id: number, patch: Partial<PricingOption>) =>
     setPricingOptions((o) => o.map((p) => (p.id === id ? { ...p, ...patch } : p)));
@@ -679,15 +743,8 @@ export default function CoachProductNew() {
   const addSection = (kind: PageSectionKind) => setSections((s) => [...s, newPageSection(kind, nextSectionId.current++)]);
   const removeSection = (id: number) => setSections((s) => s.filter((sec) => sec.id !== id));
   const updateSection = (next: PageSection) => setSections((s) => s.map((sec) => (sec.id === next.id ? next : sec)));
-  const moveSection = (id: number, dir: -1 | 1) =>
-    setSections((s) => {
-      const i = s.findIndex((sec) => sec.id === id);
-      const j = i + dir;
-      if (i < 0 || j < 0 || j >= s.length) return s;
-      const next = [...s];
-      [next[i], next[j]] = [next[j], next[i]];
-      return next;
-    });
+  // Drag-and-drop reorder — the Reorder list hands back the new order live.
+  const reorderSections = (next: PageSection[]) => setSections(next);
 
   return (
     <V2Context.Provider value={v2}>
@@ -707,14 +764,17 @@ export default function CoachProductNew() {
         <nav className="flex items-center gap-1.5">
           {STEPS.map((s, i) => {
             const active = s.key === step;
+            // The Details and Page steps are locked until a product exists.
+            const locked = added.length === 0 && s.key !== "offerings";
             return (
               <div key={s.key} className="flex items-center gap-1.5">
                 {i > 0 && (
                   <svg className="h-4 w-4 text-[#CFCFCF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                 )}
                 <button
-                  onClick={() => setStep(s.key)}
-                  className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[14px] transition-colors ${active ? "font-semibold text-gray-dark" : "font-medium text-gray-light hover:text-gray-dark"}`}
+                  onClick={() => { if (!locked) setStep(s.key); }}
+                  disabled={locked}
+                  className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[14px] transition-colors ${active ? "font-semibold text-gray-dark" : locked ? "cursor-not-allowed font-medium text-gray-extra-light" : "font-medium text-gray-light hover:text-gray-dark"}`}
                 >
                   <MaskIcon src={s.icon} />
                   <span className="hidden sm:inline">{s.label}</span>
@@ -724,7 +784,7 @@ export default function CoachProductNew() {
           })}
         </nav>
 
-        <Button size="sm" variant="dark" rounded="rounded-full" className="text-[14px] font-semibold" onClick={next}>
+        <Button size="sm" variant="dark" rounded="rounded-full" className="text-[14px] font-semibold" onClick={next} disabled={added.length === 0}>
           {isLast ? "Publish" : "Next"}
           {!isLast && (
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
@@ -733,8 +793,14 @@ export default function CoachProductNew() {
       </header>
 
       <div className="mx-auto flex w-full max-w-[1080px] flex-col gap-10 px-4 py-10 sm:px-6 lg:flex-row lg:gap-14">
-        {/* Step content */}
-        <main className="min-w-0 flex-1 pb-[120px]">
+        {/* Step content. Before any product is added there's no preview column,
+            so the content is capped and centered rather than stretching full
+            width; it slides into place as the preview animates in. */}
+        <motion.main
+          layout="position"
+          transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+          className={`min-w-0 pb-[120px] ${previewMounted ? "flex-1" : "w-full lg:mx-auto lg:max-w-[660px]"}`}
+        >
           <AnimatePresence mode="wait" onExitComplete={() => pendingNav && navigate(pendingNav)}>
             {!pendingNav && (
               <motion.div key={step} {...stepMotion}>
@@ -742,6 +808,7 @@ export default function CoachProductNew() {
                   <ProductStep
                     name={name} setName={setName}
                     headline={headline} setHeadline={setHeadline}
+                    thumbnail={thumbnail} setThumbnail={setThumbnail}
                     buttonText={buttonText} setButtonText={setButtonText}
                     mvp={mvp}
                   />
@@ -755,6 +822,8 @@ export default function CoachProductNew() {
                     onUpdatePricingOption={updatePricingOption}
                     onAddProductToOption={addOfferingToOption}
                     onRemoveProductFromOption={removeOfferingFromOption}
+                    multiEnabled={multiEnabled}
+                    onToggleMulti={toggleMulti}
                     mvp={mvp}
                   />
                 )}
@@ -771,26 +840,39 @@ export default function CoachProductNew() {
                     onAddSection={addSection}
                     onUpdateSection={updateSection}
                     onRemoveSection={removeSection}
-                    onMoveSection={moveSection}
+                    onReorderSections={reorderSections}
                   />
                 )}
               </motion.div>
             )}
           </AnimatePresence>
-        </main>
+        </motion.main>
 
-        {/* Live preview — persists across steps */}
-        <aside className="w-full lg:sticky lg:top-[88px] lg:h-fit lg:w-[320px] lg:shrink-0">
-          <ProductPreview
-            name={name}
-            headline={headline}
-            pricingMode={previewMode}
-            paidType={previewPaidType}
-            price={previewPrice}
-            added={previewItems}
-            joinLabel={pricingOptions.length > 1 ? "Select an option" : buttonText}
-          />
-        </aside>
+        {/* Live preview — hidden until the first product is added, then animates
+            in; persists across steps thereafter. On the way out, the main column
+            waits for this to finish exiting before re-centering. */}
+        <AnimatePresence onExitComplete={() => setPreviewMounted(false)}>
+          {added.length > 0 && (
+            <motion.aside
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 24 }}
+              transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+              className="w-full lg:sticky lg:top-[88px] lg:h-fit lg:w-[320px] lg:shrink-0"
+            >
+              <ProductPreview
+                name={name}
+                headline={headline}
+                pricingMode={previewMode}
+                paidType={previewPaidType}
+                price={previewPrice}
+                cover={thumbnail}
+                multiOption={pricingOptions.length > 1}
+                joinLabel={multiEnabled ? "Select an option" : buttonText}
+              />
+            </motion.aside>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Admin tool — bottom-right, mirrors the profile template */}
@@ -843,26 +925,29 @@ export default function CoachProductNew() {
 /* ---------- Step 1: Product details + pricing ---------- */
 
 function ProductStep({
-  name, setName, headline, setHeadline,
+  name, setName, headline, setHeadline, thumbnail, setThumbnail,
   buttonText, setButtonText, mvp,
 }: {
   name: string; setName: (v: string) => void;
   headline: string; setHeadline: (v: string) => void;
+  thumbnail: string | null; setThumbnail: (v: string | null) => void;
   buttonText: string; setButtonText: (v: string) => void;
   mvp: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-12">
       <section>
         <h2 className="text-[22px] font-semibold text-gray-dark">Create your offering</h2>
         <p className="mt-0.5 text-[15px] text-gray-light">Describe your offering.</p>
         <div className="mt-5 flex flex-col gap-5">
           <CharField label="Name" required value={name} onChange={setName} placeholder="My offering name" max={80} />
           <CharField label="Headline" value={headline} onChange={setHeadline} placeholder="A short subheadline for my offering here." max={72} />
+          <div>
+            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Thumbnail</label>
+            <ImageUploadField value={thumbnail} onChange={setThumbnail} label="Add a thumbnail image" hint="Recommended 1200 × 630" />
+          </div>
         </div>
       </section>
-
-      <div className="border-t border-gray-stroke" />
 
       <section>
         <h2 className="text-[22px] font-semibold text-gray-dark">Visibility</h2>
@@ -873,10 +958,7 @@ function ProductStep({
       </section>
 
       {!mvp && (
-        <>
-          <div className="border-t border-gray-stroke" />
-          <AdvancedSection buttonText={buttonText} setButtonText={setButtonText} />
-        </>
+        <AdvancedSection buttonText={buttonText} setButtonText={setButtonText} />
       )}
     </div>
   );
@@ -1033,23 +1115,32 @@ function coachingHours(item: OfferingItem): number {
   return Number(c.hours || 0) + Number(c.minutes || 0) / 60;
 }
 
-// v2 per-product price. Coaching time is derived from hours × the expert's
-// hourly rate; every other priceable product carries a manual price in its
-// config. Non-priceable placeholder products contribute nothing.
-function productPrice(item: OfferingItem): number {
+// v2 per-product list price, before any per-item "free" override. Coaching time
+// is derived from hours × the expert's hourly rate; every other priceable
+// product carries a manual price in its config. Non-priceable placeholder
+// products contribute nothing.
+function productListPrice(item: OfferingItem): number {
   if (item.slug === "coaching-time") return Math.round(coachingHours(item) * EXPERT_HOURLY_RATE);
   if (!isPriceable(item.slug)) return 0;
   return Number(item.config.price || 0);
 }
 
-// v2 roll-up math for a pricing option: the priceable products, their subtotal,
-// the resolved discount amount (clamped to the subtotal), and the final total.
+// Effective per-product price — 0 when the coach has marked the product free.
+function productPrice(item: OfferingItem): number {
+  return item.config.free === "true" ? 0 : productListPrice(item);
+}
+
+// v2 roll-up math for a pricing option: the priceable products, their subtotal
+// (list prices, before any "free" overrides), the amount waived by free
+// products, the resolved discount, and the final total.
 function optionRollup(products: OfferingItem[], option: Pick<PricingOption, "discountType" | "discountValue">) {
   const items = products.filter((p) => isPriceable(p.slug));
-  const subtotal = items.reduce((s, it) => s + productPrice(it), 0);
+  const subtotal = items.reduce((s, it) => s + productListPrice(it), 0);
+  const freeAmount = items.reduce((s, it) => s + (it.config.free === "true" ? productListPrice(it) : 0), 0);
+  const afterFree = Math.max(0, subtotal - freeAmount);
   const raw = Number(option.discountValue || 0);
-  const discount = raw <= 0 ? 0 : Math.min(option.discountType === "flat" ? raw : subtotal * (raw / 100), subtotal);
-  return { items, subtotal, discount, total: Math.max(0, subtotal - discount) };
+  const discount = raw <= 0 ? 0 : Math.min(option.discountType === "flat" ? raw : afterFree * (raw / 100), afterFree);
+  return { items, subtotal, freeAmount, discount, total: Math.max(0, afterFree - discount) };
 }
 
 // Money with thousands separators; 2 decimals only when non-integer.
@@ -1269,72 +1360,146 @@ function PriceFields({ option, products, onChange, mvp }: { option: PricingOptio
 // Total. The products themselves are already listed above, so this only carries
 // the totals; the rows share the product list's rhythm (py-4 + dividers) so they
 // read as an extension of it.
-function PricingRollup({ products, option, onChange }: { products: OfferingItem[]; option: PricingOption; onChange: (patch: Partial<PricingOption>) => void }) {
-  const { items, subtotal, discount, total } = optionRollup(products, option);
-  // The toggle + input are hidden behind an "Add discount" link until the coach
-  // opts in (or a discount is already set).
-  const [showDiscount, setShowDiscount] = useState(() => Number(option.discountValue || 0) > 0);
+function PricingRollup({ products, option, onChange, multiEnabled = false, onToggleMulti }: { products: OfferingItem[]; option: PricingOption; onChange: (patch: Partial<PricingOption>) => void; multiEnabled?: boolean; onToggleMulti?: () => void }) {
+  const { items, subtotal, freeAmount, discount, total } = optionRollup(products, option);
+  // Discount has three states: idle (an "Add discount" link), editing (the
+  // %/$ controls + an "Apply" action), and done (the applied amount, editable,
+  // with an "X" to clear). Starts in "done" if a discount is already set.
+  const [discountMode, setDiscountMode] = useState<"idle" | "editing" | "done">(() => (Number(option.discountValue || 0) > 0 ? "done" : "idle"));
+  const applyDiscount = () => {
+    if (Number(option.discountValue || 0) > 0) setDiscountMode("done");
+    else { onChange({ discountValue: "" }); setDiscountMode("idle"); }
+  };
+  const removeDiscount = () => { onChange({ discountValue: "" }); setDiscountMode("idle"); };
+  // Remember the last non-zero free amount so the collapsing row keeps its value
+  // instead of flashing to $0 during the exit animation.
+  const lastFreeRef = useRef(0);
+  if (freeAmount > 0) lastFreeRef.current = freeAmount;
+  const freeDisplay = freeAmount > 0 ? freeAmount : lastFreeRef.current;
 
   return (
     <div className="flex flex-col">
-      {/* Redundant with the single line item above, so hidden for one product. */}
-      {items.length > 1 && (
-        <div className="flex items-center justify-between py-4 text-[15px]">
-          <span className="text-gray-light">Subtotal</span>
-          <span className="text-gray-dark">${formatMoney(subtotal)}</span>
-        </div>
-      )}
+      <div className="flex items-center justify-between py-4 text-[15px]">
+        <span className="text-gray-light">Subtotal</span>
+        <span className="text-gray-dark">${formatMoney(subtotal)}</span>
+      </div>
 
-      <div className={`flex items-center gap-3 py-4 ${items.length > 1 ? "border-t border-gray-stroke" : ""}`}>
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] bg-gray-hover">
-          {/* Inlined (not MaskIcon) so the stroke width is controllable — scales
-              with the icon to match the sibling product icons. */}
-          <svg className="h-[22px] w-[22px] text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M8.31306 7.75894c.151914.151914.151914.398215 0 .550129 -.151914.151914-.398215.151914-.550129 0 -.151914-.151914-.151914-.398215-8.88178e-16-.550129 .151914-.151914.398215-.151914.550129-8.88178e-16" />
-            <path d="M7.244 3.025l2.849-.025c.531-.005 1.042.205 1.418.58l8.904 8.908c.781.781.781 2.048 0 2.829l-5.094 5.097c-.781.782-2.049.782-2.83 0l-8.911-8.914c-.371-.371-.58-.875-.58-1.401v-2.812c0-.526.209-1.03.58-1.401l2.28-2.281c.368-.368.865-.576 1.384-.58Z" />
-          </svg>
-        </span>
-        {/* Left content is identical in both states — only the right side swaps
-            between the "Add discount" prompt and the controls. */}
-        <span className="min-w-0 flex-1">
-          <span className="block text-[15px] font-semibold text-gray-dark">Discount</span>
-          <span className="block text-[15px] text-gray-light">Take a percentage or flat amount off the total.</span>
-        </span>
-        {showDiscount ? (
-          <div className="flex items-center gap-3">
-            {discount > 0 && <span className="text-[15px] text-gray-light">−${formatMoney(discount)}</span>}
-            <div className="flex rounded-lg bg-gray-hover p-0.5">
-              {(["percent", "flat"] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => onChange({ discountType: t })}
-                  className={`flex h-7 w-8 items-center justify-center rounded-md text-[14px] font-semibold transition-colors ${option.discountType === t ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(16,24,40,0.12)]" : "text-gray-light hover:text-gray-dark"}`}
-                >
-                  {t === "percent" ? "%" : "$"}
-                </button>
-              ))}
+      {/* Amount waived by products marked free — animates in/out. Uses the last
+          non-zero amount so the value doesn't flash to $0 while collapsing. */}
+      <AnimatePresence initial={false}>
+        {freeAmount > 0 && (
+          <motion.div
+            key="free-products"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={offeringTransition}
+            className="overflow-hidden"
+          >
+            <div className="flex items-center justify-between border-t border-gray-stroke py-4 text-[15px]">
+              <span className="text-gray-light">Free products</span>
+              <span className="text-gray-dark">−${formatMoney(freeDisplay)}</span>
             </div>
-            <div className="flex w-[96px] items-center rounded-lg border border-gray-stroke bg-white px-3 transition-colors focus-within:border-gray-dark">
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="border-t border-gray-stroke py-4 text-[15px]">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-gray-light">Discount</span>
+          <AnimatePresence mode="wait" initial={false}>
+            {discountMode === "done" ? (
+              <motion.div key="done" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDiscountMode("editing")}
+                  aria-label="Edit discount"
+                  className="flex h-5 w-5 items-center justify-center text-gray-extra-light transition-colors hover:text-gray-light"
+                >
+                  <MaskIcon src={editFilledIcon} className="h-4 w-4" />
+                </button>
+                <span>
+                  {option.discountType === "percent" && <span className="text-gray-extra-light">{option.discountValue}% </span>}<span className="text-gray-dark">−${formatMoney(discount)}</span>
+                </span>
+              </motion.div>
+            ) : discountMode === "idle" ? (
+              <motion.button
+                key="idle"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
+                type="button"
+                onClick={() => setDiscountMode("editing")}
+                className="font-normal text-gray-light underline decoration-dotted underline-offset-2 transition-colors hover:text-gray-dark"
+              >
+                Add discount
+              </motion.button>
+            ) : null}
+          </AnimatePresence>
+        </div>
+
+        <AnimatePresence initial={false}>
+          {discountMode === "editing" && (
+            <motion.div
+              key="discount-editing"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={offeringTransition}
+              className="overflow-hidden"
+            >
+          <div className="flex items-center gap-3 pt-3">
+            <Select
+              value={option.discountType}
+              onChange={(v) => onChange({ discountType: v as "percent" | "flat" })}
+              options={[{ value: "percent", label: "Percentage" }, { value: "flat", label: "Dollar amount" }]}
+              className="flex-1"
+            />
+            <div className="flex flex-1 items-center rounded-lg border border-gray-stroke bg-white px-3 transition-colors focus-within:border-gray-dark">
               {option.discountType === "flat" && <span className="text-[15px] text-gray-light">$</span>}
               <input
                 autoFocus
                 inputMode="decimal"
                 value={option.discountValue}
                 onChange={(e) => onChange({ discountValue: e.target.value.replace(/[^0-9.]/g, "") })}
+                onKeyDown={(e) => { if (e.key === "Enter") applyDiscount(); }}
                 placeholder="0"
                 className="w-full min-w-0 bg-transparent py-2 px-1 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1]"
               />
               {option.discountType === "percent" && <span className="text-[15px] text-gray-light">%</span>}
             </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Button size="sm" variant="secondary" iconOnly aria-label="Remove discount" onClick={removeDiscount}>
+                <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
+              </Button>
+              <Button size="sm" variant="dark" rounded="rounded-full" onClick={applyDiscount} className="text-[14px]">Apply</Button>
+            </div>
           </div>
-        ) : (
-          <Button size="md" variant="secondary" onClick={() => setShowDiscount(true)} style={{ fontWeight: 600 }}>
-            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-            Add discount
-          </Button>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+
+      {/* Multiple pricing options — a line-item above the Total, matching the
+          other rows. The whole row toggles; the toggle stops propagation so a
+          direct click doesn't double-fire. */}
+      {onToggleMulti && (
+        <div
+          onClick={onToggleMulti}
+          className="flex cursor-pointer items-center justify-between gap-3 border-t border-gray-stroke py-4 text-[15px]"
+        >
+          <span className="flex items-center gap-1.5">
+            <span className="text-gray-light">Multiple pricing options</span>
+            <span className="group relative flex" onClick={(e) => e.stopPropagation()}>
+              <MaskIcon src={infoFilledIcon} className="h-[18px] w-[18px] text-gray-extra-light opacity-50 transition-opacity group-hover:opacity-100" />
+              <span role="tooltip" className="pointer-events-none absolute bottom-full left-0 z-20 mb-2 hidden w-max max-w-[260px] rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
+                Offer varied sets of products at different price points. Buyers pick the one that fits them.
+              </span>
+            </span>
+          </span>
+          <span className="flex items-center" onClick={(e) => e.stopPropagation()}>
+            <Toggle checked={multiEnabled} onChange={onToggleMulti} size="sm" />
+          </span>
+        </div>
+      )}
 
       <div className="flex items-center justify-between border-t border-gray-stroke py-4">
         <span className="text-[16px] font-semibold text-gray-dark">Total</span>
@@ -1348,19 +1513,23 @@ function PricingRollup({ products, option, onChange }: { products: OfferingItem[
 // When `bare` (the single-option default), renders as two flat labeled sections
 // ("Add products" and "Pricing"). Otherwise wraps in card chrome with an
 // editable option name — used when there are multiple options.
-function PricingOptionCard({ option, index, products, available, bare, canDelete, mvp, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct }: {
+function PricingOptionCard({ option, index, products, available, comingSoon = [], bare, canDelete, mvp, multiEnabled = false, onToggleMulti, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct, onToggleFreeProduct }: {
   option: PricingOption;
   index: number;
   products: OfferingItem[];
   available: (typeof offeringTypes)[number][];
+  comingSoon?: (typeof offeringTypes)[number][];
   bare: boolean;
   canDelete: boolean;
   mvp: boolean;
+  multiEnabled?: boolean;
+  onToggleMulti?: () => void;
   onRemove: () => void;
   onChange: (patch: Partial<PricingOption>) => void;
   onAddProduct: (slug: string) => void;
   onRemoveProduct: (itemId: number) => void;
   onConfigureProduct: (itemId: number) => void;
+  onToggleFreeProduct: (itemId: number) => void;
 }) {
   const v2 = useV2();
   // v2 pricing only surfaces once a product has actually been configured (so
@@ -1369,20 +1538,28 @@ function PricingOptionCard({ option, index, products, available, bare, canDelete
   if (bare) {
     return (
       <div>
-        {/* Products (the offering-wide "Configure your offering" header lives at
-            the step level, above this). In v2, once at least one product exists
-            the "Add product" affordance moves to that header, so the list hides
-            its own — but the empty-state grid stays as-is. */}
-        <ProductPicker items={products} available={available} addVariant="grid" hideAdd={v2 && products.length > 0} onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} />
+        {/* Products. Empty: the descriptive "Add" grid. Populated: grouped into a
+            bordered card (matching the multi-option "Included products" card). */}
+        {products.length === 0 ? (
+          <ProductPicker items={products} available={available} comingSoon={comingSoon} addVariant="grid" onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} onToggleFree={onToggleFreeProduct} />
+        ) : (
+          <div className="overflow-hidden rounded-[20px] border border-gray-stroke bg-white">
+            <ProductPicker items={products} available={available} addVariant="menu" boxed hideAdd onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} onToggleFree={onToggleFreeProduct} />
+            {/* With two or more products, the "Add product" button is integrated
+                into the bottom of the card. */}
+            {products.length >= 2 && available.length > 0 && (
+              <AddProductMenu available={available} onAdd={onAddProduct} trigger="footer" />
+            )}
+          </div>
+        )}
 
-        {/* With exactly one product, nudge to bundle as a product-style row. Once
-            there are two or more, drop the nudge and just show a plain "Add
-            product" button (matching v1). */}
-        {v2 && available.length > 0 && (
-          products.length === 1 ? (
-            <div className="flex items-center gap-3 border-t border-gray-stroke py-4">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] bg-gray-hover text-gray-light">
-                <MaskIcon src={shapesIcon} className="h-[22px] w-[22px] text-gray-light" />
+        {/* With exactly one product, add another below the card — v2 nudges to
+            make it a bundle; v1 shows a plain "Add product" button. */}
+        {products.length === 1 && available.length > 0 && (
+          v2 ? (
+            <div className="mt-3 flex items-center gap-3 rounded-[20px] border border-gray-stroke bg-white px-4 py-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center text-gray-light">
+                <MaskIcon src={packageBoxOpenIcon} className="h-[26px] w-[26px] text-gray-light" />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[15px] font-semibold text-gray-dark">Make it a bundle</span>
@@ -1390,40 +1567,33 @@ function PricingOptionCard({ option, index, products, available, bare, canDelete
               </span>
               <AddProductMenu available={available} onAdd={onAddProduct} />
             </div>
-          ) : products.length >= 2 ? (
+          ) : (
             <div className="mt-3">
               <AddProductMenu available={available} onAdd={onAddProduct} />
             </div>
-          ) : null
+          )
         )}
 
         {v2 ? (
           // v2: a separate "Pricing" section (like v1), surfaced once a product
           // has been configured. The roll-up replaces v1's single price field.
           anyConfigured && (
-            <>
-              <div className="my-10 border-t border-gray-stroke" />
-              <section>
-                <h2 className="text-[22px] font-semibold text-gray-dark">Adjust your pricing</h2>
-                <p className="mt-0.5 text-[15px] text-gray-light">Each product carries its own price. Review the total and add a discount if you'd like.</p>
-                <div className="mt-5 border-t border-gray-stroke">
-                  <PricingRollup products={products} option={option} onChange={onChange} />
-                </div>
-              </section>
-            </>
+            <section className="mt-14">
+              <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
+              <div className="mt-5 border-t border-gray-stroke">
+                <PricingRollup products={products} option={option} onChange={onChange} multiEnabled={multiEnabled} onToggleMulti={onToggleMulti} />
+              </div>
+            </section>
           )
         ) : (
           products.length > 0 && (
-            <>
-              <div className="my-10 border-t border-gray-stroke" />
-              <section>
-                <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
-                <p className="mt-0.5 text-[15px] text-gray-light">Set a price, or enter $0 to offer it for free.</p>
-                <div className="mt-5">
-                  <PriceFields option={option} products={products} onChange={onChange} mvp={mvp} />
-                </div>
-              </section>
-            </>
+            <section className="mt-14">
+              <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
+              <p className="mt-0.5 text-[15px] text-gray-light">Set a price, or enter $0 to offer it for free.</p>
+              <div className="mt-5">
+                <PriceFields option={option} products={products} onChange={onChange} mvp={mvp} />
+              </div>
+            </section>
           )
         )}
       </div>
@@ -1509,7 +1679,7 @@ function PricingOptionCard({ option, index, products, available, bare, canDelete
           {products.length === 0 ? (
             <p className="px-4 py-4 text-[15px] font-medium text-gray-extra-light">No products added</p>
           ) : (
-            <ProductPicker items={products} available={available} addVariant="menu" boxed hideAdd onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} />
+            <ProductPicker items={products} available={available} addVariant="menu" boxed hideAdd onAdd={onAddProduct} onRemove={onRemoveProduct} onConfigure={onConfigureProduct} onToggleFree={onToggleFreeProduct} />
           )}
         </div>
         {available.length > 0 && (
@@ -1690,22 +1860,105 @@ function AskQuestions() {
 
 /* ---------- Step 2: Included offerings ---------- */
 
-function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, mvp }: { added: OfferingItem[]; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; pricingOptions: PricingOption[]; onAddPricingOption: () => void; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => number; onRemoveProductFromOption: (optionId: number, itemId: number) => void; mvp: boolean }) {
-  // One of each: an offering leaves the "Add" grid once it's been added.
-  // When MVP is on, hide the not-yet-built Agent / Private group / Paid
-  // Livestream options.
-  const mvpHidden = ["agent", "membership", "paid-livestream"];
+// Tab bar for multiple pricing options: a tab per option (name or "Option N"),
+// an "X" to remove on hover, and a trailing "+" to add another.
+function OptionTabs({ options, activeId, onSelect, onAdd, onRemove }: { options: PricingOption[]; activeId: number; onSelect: (id: number) => void; onAdd: () => void; onRemove: (id: number) => void }) {
+  return (
+    <div className="flex items-center gap-1 overflow-x-auto border-b border-gray-stroke">
+      {options.map((opt, i) => {
+        const active = opt.id === activeId;
+        const label = opt.name || `Option ${i + 1}`;
+        return (
+          <div key={opt.id} className="group relative flex shrink-0 items-center">
+            <button
+              type="button"
+              onClick={() => onSelect(opt.id)}
+              className={`flex items-center border-b-2 py-2.5 pl-1 text-[15px] transition-colors ${options.length > 1 ? "pr-7" : "pr-3"} ${active ? "border-gray-dark font-semibold text-gray-dark" : "border-transparent font-medium text-gray-light hover:text-gray-dark"}`}
+            >
+              <span className="max-w-[160px] truncate">{label}</span>
+            </button>
+            {options.length > 1 && (
+              <button
+                type="button"
+                onClick={() => onRemove(opt.id)}
+                aria-label={`Remove ${label}`}
+                className="absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-gray-extra-light opacity-0 transition-opacity hover:text-gray-dark group-hover:opacity-100"
+              >
+                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+              </button>
+            )}
+          </div>
+        );
+      })}
+      <button
+        type="button"
+        onClick={onAdd}
+        aria-label="Add pricing option"
+        className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+      >
+        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+      </button>
+    </div>
+  );
+}
+
+// Name + description for a pricing option — shown above the products when the
+// offering has multiple options.
+function OptionMetaFields({ option, onChange }: { option: PricingOption; onChange: (patch: Partial<PricingOption>) => void }) {
+  return (
+    <div className="mt-6 flex flex-col gap-4">
+      <div>
+        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Name</label>
+        <input
+          value={option.name}
+          onChange={(e) => onChange({ name: e.target.value })}
+          placeholder="Option name"
+          className="w-full rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[15px] text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
+        />
+      </div>
+      <div>
+        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Description</label>
+        <textarea
+          value={option.description}
+          onChange={(e) => onChange({ description: e.target.value })}
+          placeholder="A short description of what's included in this option."
+          rows={2}
+          className="w-full resize-none rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[15px] leading-snug text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
+        />
+      </div>
+    </div>
+  );
+}
+
+function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, multiEnabled, onToggleMulti, mvp }: { added: OfferingItem[]; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; pricingOptions: PricingOption[]; onAddPricingOption: () => number; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => number; onRemoveProductFromOption: (optionId: number, itemId: number) => void; multiEnabled: boolean; onToggleMulti: () => void; mvp: boolean }) {
+  // When MVP is on: Agent / Private group are hidden entirely, while Collection,
+  // Course, and Livestream are shown as non-clickable "coming soon" options.
+  const mvpHidden = ["agent", "membership"];
+  const mvpComingSoon = ["collection", "course", "paid-livestream"];
   const [configuringId, setConfiguringId] = useState<number | null>(null);
   const configuring = added.find((item) => item.id === configuringId) ?? null;
   const v2 = useV2();
+
+  // All coaching-time products in an offering must share one mode (a fixed
+  // amount vs. a range) — mixing them breaks the pricing math. When configuring
+  // a coaching-time, lock its mode to any other coaching-time already added.
+  const lockedCoachingMode: "set" | "range" | null = (() => {
+    if (!configuring || configuring.slug !== "coaching-time") return null;
+    const other = added.find((a) => a.slug === "coaching-time" && a.id !== configuring.id);
+    if (!other) return null;
+    return other.config.mode === "range" ? "range" : "set";
+  })();
 
   // Products + still-addable types for a given option.
   const optionData = (opt: PricingOption) => {
     const items = opt.productIds
       .map((id) => added.find((a) => a.id === id))
       .filter((it): it is OfferingItem => Boolean(it));
-    const avail = offeringTypes.filter((o) => !items.some((it) => it.slug === o.slug) && (!mvp || !mvpHidden.includes(o.slug)));
-    return { items, avail };
+    // Every type stays addable (you can add multiples of a product); MVP hides
+    // the not-yet-built types and moves the "coming soon" ones out of `avail`.
+    const avail = offeringTypes.filter((o) => !mvp || (!mvpHidden.includes(o.slug) && !mvpComingSoon.includes(o.slug)));
+    const comingSoon = mvp ? offeringTypes.filter((o) => mvpComingSoon.includes(o.slug)) : [];
+    return { items, avail, comingSoon };
   };
   const multi = pricingOptions.length > 1;
 
@@ -1717,62 +1970,154 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
     setConfiguringId(id);
   };
 
+  // Toggle a product's "free" flag (zeroes its price in the roll-up).
+  const toggleFree = (id: number) => {
+    const it = added.find((a) => a.id === id);
+    if (it) onConfigChange(id, { free: it.config.free === "true" ? "" : "true" });
+  };
+
+  // Turning multiple options off deletes the extra options, so confirm first
+  // (unless there's nothing to lose — a single option).
+  const [confirmDisableMulti, setConfirmDisableMulti] = useState(false);
+  const handleToggleMulti = () => {
+    if (multiEnabled && pricingOptions.length > 1) setConfirmDisableMulti(true);
+    else onToggleMulti();
+  };
+
+  // v2 multi-option tabs: which option is shown. Falls back to the first option
+  // when the selected one no longer exists.
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const activeOption = pricingOptions.find((o) => o.id === activeId) ?? pricingOptions[0];
+  const removeOption = (id: number) => {
+    const idx = pricingOptions.findIndex((o) => o.id === id);
+    if (id === activeId) {
+      const next = pricingOptions[idx + 1] ?? pricingOptions[idx - 1];
+      setActiveId(next ? next.id : null);
+    }
+    onRemovePricingOption(id);
+  };
+
+  // A single option's products + pricing (the flat "bare" layout), shared by the
+  // single-option view and each multi-option tab.
+  const renderOptionCard = (opt: PricingOption) => {
+    const { items, avail, comingSoon } = optionData(opt);
+    return (
+      <PricingOptionCard
+        option={opt}
+        index={pricingOptions.findIndex((o) => o.id === opt.id)}
+        products={items}
+        available={avail}
+        comingSoon={comingSoon}
+        bare
+        canDelete={false}
+        mvp={mvp}
+        multiEnabled={multiEnabled}
+        onToggleMulti={handleToggleMulti}
+        onRemove={() => onRemovePricingOption(opt.id)}
+        onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
+        onAddProduct={(slug) => addProduct(opt.id, slug)}
+        onRemoveProduct={(itemId) => onRemoveProductFromOption(opt.id, itemId)}
+        onConfigureProduct={setConfiguringId}
+        onToggleFreeProduct={toggleFree}
+      />
+    );
+  };
+
   return (
     <div>
       {/* Persistent offering-level header — kept across single and multi. */}
       <h2 className="text-[22px] font-semibold text-gray-dark">Build your offering</h2>
-      <p className="mt-0.5 text-[15px] text-gray-light">Set up what's included and how people pay for it.</p>
+      <p className="mt-0.5 text-[15px] text-gray-light">The products you add will show up as a single offering on your profile.</p>
 
-      {/* Each option is a self-contained unit: name + products + access + price.
-          A single option renders flat; multiple options render as white cards
-          nested inside a padded gray container. The 12px gutter is split between
-          this container (6px) and each card's motion wrapper (6px) so the card
-          box-shadow has room and isn't clipped by the wrapper's overflow-hidden
-          (needed for the add/remove height animation). */}
-      <div className={`mt-6 flex flex-col ${multi ? "rounded-[28px] bg-gray-hover p-1.5" : "gap-3"}`}>
-        <AnimatePresence initial={false}>
-          {pricingOptions.map((opt, i) => {
-            const { items, avail } = optionData(opt);
-            return (
+      {!v2 ? (
+        // v1 (legacy): options stack as cards, added via the button below.
+        <>
+          <div className={`mt-6 flex flex-col ${multi ? "rounded-[28px] bg-gray-hover p-1.5" : "gap-3"}`}>
+            <AnimatePresence initial={false}>
+              {pricingOptions.map((opt, i) => {
+                const { items, avail, comingSoon } = optionData(opt);
+                return (
+                  <motion.div
+                    key={opt.id}
+                    initial={multi ? { height: 0, opacity: 0 } : false}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={offeringTransition}
+                    className={`overflow-hidden ${multi ? "p-1.5" : ""}`}
+                  >
+                    <PricingOptionCard
+                      option={opt}
+                      index={i}
+                      products={items}
+                      available={avail}
+                      comingSoon={comingSoon}
+                      bare={!multi}
+                      canDelete={multi}
+                      mvp={mvp}
+                      onRemove={() => onRemovePricingOption(opt.id)}
+                      onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
+                      onAddProduct={(slug) => addProduct(opt.id, slug)}
+                      onRemoveProduct={(itemId) => onRemoveProductFromOption(opt.id, itemId)}
+                      onConfigureProduct={setConfiguringId}
+                      onToggleFreeProduct={toggleFree}
+                    />
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+          {added.length > 0 && (
+            <div className={`mt-6 flex ${multi ? "justify-center" : "justify-start"}`}>
+              <AddPricingOptionButton onClick={onAddPricingOption} />
+            </div>
+          )}
+        </>
+      ) : (
+        // v2: the products + pricing card stays put; the tabs + name/description
+        // block animates in/out above it when multiple options are toggled. The
+        // active option is the first when multiple options are off.
+        <>
+          <AnimatePresence initial={false}>
+            {multiEnabled && (
               <motion.div
-                key={opt.id}
-                initial={multi ? { height: 0, opacity: 0 } : false}
+                key="multi-header"
+                initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={offeringTransition}
-                className={`overflow-hidden ${multi ? "p-1.5" : ""}`}
+                className="overflow-hidden"
               >
-                <PricingOptionCard
-                  option={opt}
-                  index={i}
-                  products={items}
-                  available={avail}
-                  bare={!multi}
-                  canDelete={multi}
-                  mvp={mvp}
-                  onRemove={() => onRemovePricingOption(opt.id)}
-                  onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
-                  onAddProduct={(slug) => addProduct(opt.id, slug)}
-                  onRemoveProduct={(itemId) => onRemoveProductFromOption(opt.id, itemId)}
-                  onConfigureProduct={setConfiguringId}
-                />
+                <div className="pt-6">
+                  <OptionTabs
+                    options={pricingOptions}
+                    activeId={activeOption.id}
+                    onSelect={setActiveId}
+                    onAdd={() => setActiveId(onAddPricingOption())}
+                    onRemove={removeOption}
+                  />
+                  <OptionMetaFields option={activeOption} onChange={(patch) => onUpdatePricingOption(activeOption.id, patch)} />
+                </div>
               </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
-
-      {/* Add another pricing option — reads as part of the Pricing section. In
-          v1 it appears once a product has been added; in v2 (like the roll-up)
-          it waits until a product has been configured. */}
-      {(v2 ? added.some((p) => !isConfigurable(p.slug) || p.configured) : added.length > 0) && (
-        <div className={`mt-6 flex ${multi ? "justify-center" : "justify-start"}`}>
-          <AddPricingOptionButton onClick={onAddPricingOption} />
-        </div>
+            )}
+          </AnimatePresence>
+          <div className="mt-6">
+            {renderOptionCard(activeOption)}
+          </div>
+        </>
       )}
+
+      <ConfirmModal
+        open={confirmDisableMulti}
+        title="Turn off multiple pricing options?"
+        body="Your other pricing options and everything in them will be deleted. Only the first option will be kept."
+        confirmLabel="Yes, turn off"
+        onConfirm={() => { onToggleMulti(); setConfirmDisableMulti(false); }}
+        onClose={() => setConfirmDisableMulti(false)}
+      />
 
       <ConfigModal
         item={configuring && !isListOffering(configuring.slug) ? configuring : null}
+        lockedCoachingMode={lockedCoachingMode}
         onChange={(patch) => configuring && onConfigChange(configuring.id, patch)}
         onSave={() => { if (configuring) { onConfigured(configuring.id); setConfiguringId(null); } }}
         onClose={() => setConfiguringId(null)}
@@ -1800,11 +2145,12 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
 // Compact "Add product" trigger with a portaled dropdown of addable types.
 // Portaled so an overflow-hidden ancestor (the option card's height-animation
 // wrapper) can't clip it. Used inside multi-option cards to keep them tidy.
-function AddProductMenu({ available, onAdd, className = "", label = "Add product" }: {
+function AddProductMenu({ available, onAdd, className = "", label = "Add product", trigger = "button" }: {
   available: (typeof offeringTypes)[number][];
   onAdd: (slug: string) => void;
   className?: string;
   label?: string;
+  trigger?: "button" | "footer";
 }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -1819,11 +2165,24 @@ function AddProductMenu({ available, onAdd, className = "", label = "Add product
   if (available.length === 0) return null;
 
   return (
-    <div ref={triggerRef} className={`inline-block ${className}`}>
-      <Button size="md" variant="secondary" onClick={() => setOpen((o) => !o)} style={{ fontWeight: 600 }}>
-        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-        {label}
-      </Button>
+    <div ref={triggerRef} className={trigger === "footer" ? `block ${className}` : `inline-block ${className}`}>
+      {trigger === "footer" ? (
+        // Integrated into the bottom of the products card — full-width, divided
+        // from the last product row above.
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="flex w-full cursor-pointer items-center justify-center gap-2 border-t border-gray-stroke py-3 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
+        >
+          <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+          {label}
+        </button>
+      ) : (
+        <Button size="md" variant="secondary" onClick={() => setOpen((o) => !o)} style={{ fontWeight: 600 }}>
+          <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+          {label}
+        </Button>
+      )}
       {createPortal(
         <>
           {open && <button aria-hidden tabIndex={-1} className="fixed inset-0 z-[100] cursor-default" onClick={() => setOpen(false)} />}
@@ -1834,7 +2193,7 @@ function AddProductMenu({ available, onAdd, className = "", label = "Add product
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 6 }}
                 transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-                style={{ position: "fixed", left: pos.left, top: pos.top, minWidth: Math.max(pos.width, 240) }}
+                style={{ position: "fixed", left: pos.left, top: pos.top, minWidth: trigger === "footer" ? 240 : Math.max(pos.width, 240) }}
                 className="z-[101] rounded-2xl border border-gray-stroke bg-white shadow-lg"
               >
                 <div className="px-2 py-2">
@@ -1860,19 +2219,38 @@ function AddProductMenu({ available, onAdd, className = "", label = "Add product
   );
 }
 
+// A non-clickable "coming soon" product option (MVP only) — sits in the empty
+// product grid alongside the addable options, but muted and without an add CTA.
+function ComingSoonProductCard({ o }: { o: (typeof offeringTypes)[number] }) {
+  return (
+    <div className="flex items-center gap-3 rounded-[20px] border border-gray-stroke bg-white px-4 py-4">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+        <MaskIcon src={o.icon} className="h-[26px] w-[26px] text-gray-dark" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[15px] font-semibold text-gray-dark">{o.label}</span>
+        <span className="block text-[15px] text-gray-light">{offeringAddDescription[o.slug] ?? o.blurb}</span>
+      </span>
+      <span className="shrink-0 rounded-md bg-gray-hover px-2 py-1 text-[10px] font-medium uppercase tracking-[0.05em] text-gray-light">Coming soon</span>
+    </div>
+  );
+}
+
 // Reusable product manager: the list of already-added products (each with a
 // configure/remove control) plus the affordance for adding more — a full grid
 // of types ("grid") for the flat/single view, or a compact "Add product"
 // dropdown ("menu") inside multi-option cards.
-function ProductPicker({ items, available, addVariant = "grid", boxed = false, hideAdd = false, onAdd, onRemove, onConfigure }: {
+function ProductPicker({ items, available, comingSoon = [], addVariant = "grid", boxed = false, hideAdd = false, onAdd, onRemove, onConfigure, onToggleFree }: {
   items: OfferingItem[];
   available: (typeof offeringTypes)[number][];
+  comingSoon?: (typeof offeringTypes)[number][];   // non-clickable "coming soon" options, shown in the empty grid
   addVariant?: "grid" | "menu";
   boxed?: boolean;   // pad rows with 16px so they sit inside a card
   hideAdd?: boolean; // omit the add affordance (rendered separately by caller)
   onAdd: (slug: string) => void;
   onRemove: (id: number) => void;
   onConfigure: (id: number) => void;
+  onToggleFree: (id: number) => void;
 }) {
   const v2 = useV2();
 
@@ -1881,31 +2259,38 @@ function ProductPicker({ items, available, addVariant = "grid", boxed = false, h
   // (morphing Add → its configured state) while the others collapse away.
   if (v2 && addVariant === "grid") {
     return (
-      <div className={`flex flex-col ${items.length === 0 ? "gap-1.5" : ""}`}>
+      <div className={`flex flex-col ${items.length === 0 ? "gap-3" : ""}`}>
         <AnimatePresence initial={false} mode="popLayout">
           {items.length === 0
-            ? available.map((o) => (
-                <motion.div key={o.slug} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} transition={offeringTransition} className="overflow-hidden">
-                  <div
-                    onClick={() => onAdd(o.slug)}
-                    className="flex cursor-pointer items-center gap-3 rounded-lg bg-gray-hover px-4 py-4 transition-colors hover:bg-[#ececec]"
-                  >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center">
-                      <img src={o.icon} alt="" className="h-[26px] w-[26px]" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[15px] font-semibold text-gray-dark">{o.label}</span>
-                      <span className="block text-[15px] text-gray-light">{offeringAddDescription[o.slug] ?? o.blurb}</span>
-                    </span>
-                    <Button iconOnly size="md" variant="secondary" aria-label={`Add ${o.label}`} onClick={(e) => { e.stopPropagation(); onAdd(o.slug); }}>
-                      <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-                    </Button>
-                  </div>
-                </motion.div>
-              ))
+            ? [
+                ...available.map((o) => (
+                  <motion.div key={o.slug} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} transition={offeringTransition} className="overflow-hidden">
+                    <div
+                      onClick={() => onAdd(o.slug)}
+                      className="flex group cursor-pointer items-center gap-3 rounded-[20px] border border-gray-stroke bg-white px-4 py-4 transition-colors hover:border-gray-dark"
+                    >
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+                        <img src={o.icon} alt="" className="h-[26px] w-[26px]" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[15px] font-semibold text-gray-dark">{o.label}</span>
+                        <span className="block text-[15px] text-gray-light">{offeringAddDescription[o.slug] ?? o.blurb}</span>
+                      </span>
+                      <Button iconOnly size="md" variant="secondary" aria-label={`Add ${o.label}`} onClick={(e) => { e.stopPropagation(); onAdd(o.slug); }} className="transition-colors !bg-transparent group-hover:!bg-gray-hover">
+                        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                      </Button>
+                    </div>
+                  </motion.div>
+                )),
+                ...comingSoon.map((o) => (
+                  <motion.div key={o.slug} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} transition={offeringTransition} className="overflow-hidden">
+                    <ComingSoonProductCard o={o} />
+                  </motion.div>
+                )),
+              ]
             : items.map((item, i) => (
-                <motion.div key={item.slug} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} transition={offeringTransition} className="overflow-hidden">
-                  <AddedOfferingRow item={item} onRemove={() => onRemove(item.id)} onConfigure={() => onConfigure(item.id)} isLast={i === items.length - 1} />
+                <motion.div key={item.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} transition={offeringTransition} className="overflow-hidden">
+                  <AddedOfferingRow item={item} onRemove={() => onRemove(item.id)} onConfigure={() => onConfigure(item.id)} onToggleFree={() => onToggleFree(item.id)} isLast={i === items.length - 1} />
                 </motion.div>
               ))}
         </AnimatePresence>
@@ -1927,7 +2312,7 @@ function ProductPicker({ items, available, addVariant = "grid", boxed = false, h
               className="overflow-hidden"
             >
               <div className={boxed ? "px-4" : ""}>
-                <AddedOfferingRow item={item} onRemove={() => onRemove(item.id)} onConfigure={() => onConfigure(item.id)} isLast={i === items.length - 1} />
+                <AddedOfferingRow item={item} onRemove={() => onRemove(item.id)} onConfigure={() => onConfigure(item.id)} onToggleFree={() => onToggleFree(item.id)} isLast={i === items.length - 1} />
               </div>
             </motion.div>
           ))}
@@ -1948,33 +2333,48 @@ function ProductPicker({ items, available, addVariant = "grid", boxed = false, h
         <div className="flex flex-col gap-3">
           {/* popLayout pops an added card out of flow so the rest reflow to fill. */}
           <AnimatePresence initial={false} mode="popLayout">
-            {available.map((o) => (
-              <motion.div
-                key={o.slug}
-                layout
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={offeringTransition}
-                className="overflow-hidden"
-              >
-                <div
-                  onClick={() => onAdd(o.slug)}
-                  className="flex cursor-pointer items-center gap-3 rounded-xl bg-gray-hover px-4 py-4 transition-colors hover:bg-[#ececec]"
+            {[
+              ...available.map((o) => (
+                <motion.div
+                  key={o.slug}
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={offeringTransition}
+                  className="overflow-hidden"
                 >
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center">
-                    <img src={o.icon} alt="" className="h-[26px] w-[26px]" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15px] font-semibold text-gray-dark">{o.label}</span>
-                    <span className="block text-[15px] text-gray-light">{offeringAddDescription[o.slug] ?? o.blurb}</span>
-                  </span>
-                  <Button iconOnly size="md" variant="secondary" aria-label={`Add ${o.label}`} onClick={(e) => { e.stopPropagation(); onAdd(o.slug); }}>
-                    <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
+                  <div
+                    onClick={() => onAdd(o.slug)}
+                    className="flex group cursor-pointer items-center gap-3 rounded-[20px] border border-gray-stroke bg-white px-4 py-4 transition-colors hover:border-gray-dark"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+                      <img src={o.icon} alt="" className="h-[26px] w-[26px]" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] font-semibold text-gray-dark">{o.label}</span>
+                      <span className="block text-[15px] text-gray-light">{offeringAddDescription[o.slug] ?? o.blurb}</span>
+                    </span>
+                    <Button iconOnly size="md" variant="secondary" aria-label={`Add ${o.label}`} onClick={(e) => { e.stopPropagation(); onAdd(o.slug); }} className="transition-colors !bg-transparent group-hover:!bg-gray-hover">
+                      <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                    </Button>
+                  </div>
+                </motion.div>
+              )),
+              ...comingSoon.map((o) => (
+                <motion.div
+                  key={o.slug}
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={offeringTransition}
+                  className="overflow-hidden"
+                >
+                  <ComingSoonProductCard o={o} />
+                </motion.div>
+              )),
+            ]}
           </AnimatePresence>
         </div>
       )}
@@ -1984,7 +2384,78 @@ function ProductPicker({ items, available, addVariant = "grid", boxed = false, h
 
 /* ---------- Added offering row ---------- */
 
-function AddedOfferingRow({ item, onRemove, onConfigure, isLast = false }: { item: OfferingItem; onRemove: () => void; onConfigure: () => void; isLast?: boolean }) {
+// A far-right "⋮" menu holding a row's Edit / Remove actions. Anchored to and
+// right-aligned under the trigger via a portal (so it escapes the row's clip).
+function RowActionsMenu({ onEdit, onToggleFree, onRemove, isFree, label }: { onEdit: () => void; onToggleFree: () => void; onRemove: () => void; isFree: boolean; label: string }) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [pos, setPos] = useState({ right: 0, top: 0 });
+
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current) return;
+    const r = triggerRef.current.getBoundingClientRect();
+    setPos({ right: window.innerWidth - r.right, top: r.bottom + 6 });
+  }, [open]);
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label={`Actions for ${label}`}
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-extra-light transition-colors hover:text-gray-light"
+      >
+        <MaskIcon src={dotsVerticalIcon} className="h-4 w-4" />
+      </button>
+      {createPortal(
+        <>
+          {open && <button aria-hidden tabIndex={-1} className="fixed inset-0 z-[100] cursor-default" onClick={() => setOpen(false)} />}
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
+                transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+                style={{ position: "fixed", right: pos.right, top: pos.top, minWidth: 160 }}
+                className="z-[101] rounded-2xl border border-gray-stroke bg-white p-2 shadow-lg"
+              >
+                <button
+                  type="button"
+                  onClick={() => { onEdit(); setOpen(false); }}
+                  className="flex w-full items-center gap-2.5 rounded-lg p-3 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
+                >
+                  <MaskIcon src={editIcon} className="h-[18px] w-[18px]" />
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { onToggleFree(); setOpen(false); }}
+                  className="flex w-full items-center gap-2.5 rounded-lg p-3 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
+                >
+                  <MaskIcon src={isFree ? moneyIcon : freeIcon} className="h-[18px] w-[18px]" />
+                  {isFree ? "Unmark as free" : "Mark as free"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { onRemove(); setOpen(false); }}
+                  className="flex w-full items-center gap-2.5 rounded-lg p-3 text-[14px] font-semibold text-[#E5484D] transition-colors hover:bg-gray-hover"
+                >
+                  <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
+                  Remove
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>,
+        document.body
+      )}
+    </>
+  );
+}
+
+function AddedOfferingRow({ item, onRemove, onConfigure, onToggleFree, isLast = false }: { item: OfferingItem; onRemove: () => void; onConfigure: () => void; onToggleFree: () => void; isLast?: boolean }) {
   const v2 = useV2();
   const o = offeringBySlug[item.slug];
   const configurable = isConfigurable(item.slug);
@@ -2019,7 +2490,13 @@ function AddedOfferingRow({ item, onRemove, onConfigure, isLast = false }: { ite
     headline = item.config.mode === "range"
       ? `${Number(item.config.minHours || 0)}h–${Number(item.config.maxHours || 0)}h of coaching`
       : `${compactHours(coachingHours(item))} of coaching`;
-    detail = <span className="truncate">${EXPERT_HOURLY_RATE.toLocaleString()}/hr</span>;
+    const delivery = deliveryLabel(item.config.delivery ?? "");
+    detail = (
+      <span className="truncate">
+        ${EXPERT_HOURLY_RATE.toLocaleString()}/hr
+        {delivery && <span className="text-gray-extra-light"> · {delivery}</span>}
+      </span>
+    );
   } else if (finished && item.slug === "content") {
     const { typeLabel, views } = contentMeta(item.config);
     headline = contentItemTitle(item.config) || o.label;
@@ -2033,20 +2510,14 @@ function AddedOfferingRow({ item, onRemove, onConfigure, isLast = false }: { ite
 
   return (
     <div className={rowClass}>
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] bg-[#f5f5f5]">
-        <img src={o.icon} alt="" className="h-[22px] w-[22px]" />
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+        <img src={o.icon} alt="" className="h-[26px] w-[26px]" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[15px] font-semibold text-gray-dark">{headline}</span>
         {v2Priced ? (
           <span className="flex items-center gap-1.5 text-[15px] text-gray-light">
             {detail}
-            {detail && <span className="text-gray-extra-light">·</span>}
-            <button type="button" onClick={onConfigure} className="shrink-0 transition-colors hover:text-gray-dark hover:underline">Edit</button>
-            <span className="flex shrink-0 items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
-              <span className="text-gray-extra-light">·</span>
-              <button type="button" onClick={onRemove} className="text-[#E5484D] transition-colors hover:underline">Remove</button>
-            </span>
           </span>
         ) : (
           <span className={`flex items-center gap-1.5 text-[15px] ${finished ? "text-gray-light" : "text-gray-extra-light"}`}>
@@ -2056,7 +2527,28 @@ function AddedOfferingRow({ item, onRemove, onConfigure, isLast = false }: { ite
       </span>
 
       {v2Priced ? (
-        <span className="shrink-0 text-[15px] text-gray-dark">${formatMoney(productPrice(item))}</span>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="flex items-center gap-1.5 text-[15px]">
+            <motion.span layout transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }} className={item.config.free === "true" ? "text-gray-extra-light line-through decoration-1 opacity-60" : "text-gray-dark"}>
+              ${formatMoney(productListPrice(item))}
+            </motion.span>
+            <AnimatePresence initial={false}>
+              {item.config.free === "true" && (
+                <motion.span
+                  key="free-zero"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                  className="text-gray-light"
+                >
+                  $0
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </span>
+          <RowActionsMenu onEdit={onConfigure} onToggleFree={onToggleFree} onRemove={onRemove} isFree={item.config.free === "true"} label={o.label} />
+        </div>
       ) : (
         <div className="flex shrink-0 items-center gap-1">
           {configurable && (
@@ -2082,7 +2574,46 @@ function AddedOfferingRow({ item, onRemove, onConfigure, isLast = false }: { ite
 
 /* ---------- Configuration modal ---------- */
 
-function ConfigModal({ item, onChange, onSave, onClose }: { item: OfferingItem | null; onChange: (patch: Record<string, string>) => void; onSave: () => void; onClose: () => void }) {
+// Destructive-action confirmation dialog: serif title, muted body, a "Back"
+// button and a red confirm button.
+function ConfirmModal({ open, title, body, confirmLabel, onConfirm, onClose }: { open: boolean; title: string; body: string; confirmLabel: string; onConfirm: () => void; onClose: () => void }) {
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 p-4"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 32 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 32 }}
+            transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-[620px] rounded-3xl bg-white p-7 shadow-[0_20px_60px_rgba(16,24,40,0.28)]"
+          >
+            <button onClick={onClose} aria-label="Close" className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-gray-hover text-gray-dark transition-colors hover:bg-[#ebebeb]">
+              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            </button>
+            <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">{title}</h2>
+            <p className="mt-2 text-[15px] text-gray-light">{body}</p>
+            <div className="mt-6 flex gap-3">
+              <Button size="lg" variant="secondary" onClick={onClose}>Never mind</Button>
+              <Button size="lg" variant="danger" onClick={onConfirm} className="font-semibold">{confirmLabel}</Button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body,
+  );
+}
+
+function ConfigModal({ item, lockedCoachingMode = null, onChange, onSave, onClose }: { item: OfferingItem | null; lockedCoachingMode?: "set" | "range" | null; onChange: (patch: Record<string, string>) => void; onSave: () => void; onClose: () => void }) {
   const o = item ? offeringBySlug[item.slug] : null;
   const complete = item ? isConfigComplete(item) : false;
   const prompt = item ? configPrompts[item.slug] : undefined;
@@ -2119,7 +2650,7 @@ function ConfigModal({ item, onChange, onSave, onClose }: { item: OfferingItem |
 
               {/* Fields */}
               <div className="mt-3">
-                <OfferingConfigFields slug={item.slug} config={item.config} onChange={onChange} />
+                <OfferingConfigFields slug={item.slug} config={item.config} onChange={onChange} lockedCoachingMode={lockedCoachingMode} />
               </div>
             </div>
 
@@ -2139,9 +2670,9 @@ function ConfigModal({ item, onChange, onSave, onClose }: { item: OfferingItem |
 
 // Dispatches to the fields component for the offering type. Add a case here
 // alongside a configDefaults entry to configure another type.
-function OfferingConfigFields({ slug, config, onChange }: { slug: string; config: Record<string, string>; onChange: (patch: Record<string, string>) => void }) {
+function OfferingConfigFields({ slug, config, onChange, lockedCoachingMode = null }: { slug: string; config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedCoachingMode?: "set" | "range" | null }) {
   const v2 = useV2();
-  if (slug === "coaching-time") return <CoachingTimeFields config={config} onChange={onChange} />;
+  if (slug === "coaching-time") return <CoachingTimeFields config={config} onChange={onChange} lockedMode={lockedCoachingMode} />;
   if (slug === "content") return <ContentFields config={config} onChange={onChange} priced={v2} />;
   if (slug === "paid-livestream") return <PaidLivestreamFields config={config} onChange={onChange} />;
   return <PlaceholderFields label={offeringBySlug[slug]?.label ?? "This product"} />;
@@ -2700,6 +3231,48 @@ function FieldRow({ icon, title, desc, children, divider = true }: { icon: strin
 
 // Click-to-pick file control. No real upload — captures the chosen file's name
 // so the prototype can reflect a "finished" state.
+// Image upload with a live preview. Demo-only: the picked file becomes an
+// in-memory object URL (so it survives navigation between steps but not a page
+// refresh) — no upload/persistence.
+function ImageUploadField({ value, onChange, label, hint, accept = "image/*" }: { value: string | null; onChange: (url: string | null) => void; label: string; hint: string; accept?: string }) {
+  const [isVideo, setIsVideo] = useState(false);
+  const pick = (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) { setIsVideo(f.type.startsWith("video/")); onChange(URL.createObjectURL(f)); }
+    e.target.value = "";   // let the same file be re-selected after removal
+  };
+  if (value) {
+    return (
+      <div className="group relative overflow-hidden rounded-xl border border-gray-stroke">
+        {isVideo ? (
+          <video src={value} muted playsInline className="aspect-[1200/630] w-full object-cover" />
+        ) : (
+          <img src={value} alt="Upload preview" className="aspect-[1200/630] w-full object-cover" />
+        )}
+        <div className="absolute inset-0 flex items-end justify-end gap-2 bg-gradient-to-t from-black/45 via-transparent to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
+          <label className="cursor-pointer rounded-full bg-white/95 px-3 py-1.5 text-[13px] font-semibold text-gray-dark shadow-sm transition-colors hover:bg-white">
+            Replace
+            <input type="file" accept={accept} className="hidden" onChange={pick} />
+          </label>
+          <button type="button" onClick={() => { onChange(null); setIsVideo(false); }} className="rounded-full bg-white/95 px-3 py-1.5 text-[13px] font-semibold text-[#E5484D] shadow-sm transition-colors hover:bg-white">
+            Remove
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl bg-gray-hover px-4 py-16 text-center transition-colors hover:bg-[#ececec]">
+      <input type="file" accept={accept} className="hidden" onChange={pick} />
+      <MaskIcon src={uploadIcon} className="h-8 w-8 text-gray-light" />
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[15px] font-semibold text-gray-dark">{label}</span>
+        <span className="text-[15px] text-gray-light">{hint}</span>
+      </div>
+    </label>
+  );
+}
+
 function UploadField({ value, onChange, hint, label = "Upload a file" }: { value: string; onChange: (name: string) => void; hint: string; label?: string }) {
   return (
     <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-stroke bg-[#FAFAFA] px-4 py-6 text-center transition-colors hover:border-[#c9c9c9]">
@@ -3045,9 +3618,14 @@ function TimeField({ value, onChange, label }: { value: string; onChange: (v: st
   );
 }
 
-function CoachingTimeFields({ config, onChange }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void }) {
+function CoachingTimeFields({ config, onChange, lockedMode = null }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedMode?: "set" | "range" | null }) {
   const v2 = useV2();
-  const mode = config.mode === "range" ? "range" : "set";
+  // When another coaching-time in the offering already fixed the mode, this one
+  // is locked to match it — keep the stored mode in sync and disable the toggle.
+  const mode = lockedMode ?? (config.mode === "range" ? "range" : "set");
+  useEffect(() => {
+    if (lockedMode && config.mode !== lockedMode) onChange({ mode: lockedMode });
+  }, [lockedMode, config.mode, onChange]);
   const modes = [
     { value: "set", label: "Set amount of hours" },
     { value: "range", label: "Range of hours" },
@@ -3063,18 +3641,26 @@ function CoachingTimeFields({ config, onChange }: { config: Record<string, strin
       <div className="grid grid-cols-2 gap-3">
         {modes.map((opt) => {
           const active = mode === opt.value;
+          const disabled = Boolean(lockedMode) && opt.value !== lockedMode;
           return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => onChange({ mode: opt.value })}
-              className={`flex items-center justify-between gap-2 rounded-xl border-[1.5px] bg-white px-4 py-3.5 text-left transition-colors ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
-            >
-              <span className="text-[15px] font-semibold text-gray-dark">{opt.label}</span>
-              <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-[1.5px] ${active ? "border-gray-dark" : "border-[#CFCFCF]"}`}>
-                {active && <span className="h-2.5 w-2.5 rounded-full bg-gray-dark" />}
-              </span>
-            </button>
+            <div key={opt.value} className="group relative">
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => { if (!disabled) onChange({ mode: opt.value }); }}
+                className={`flex w-full items-center justify-between gap-2 rounded-xl border-[1.5px] bg-white px-4 py-3.5 text-left transition-colors ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"} ${disabled ? "pointer-events-none cursor-not-allowed opacity-40" : ""}`}
+              >
+                <span className="text-[15px] font-semibold text-gray-dark">{opt.label}</span>
+                <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-[1.5px] ${active ? "border-gray-dark" : "border-[#CFCFCF]"}`}>
+                  {active && <span className="h-2.5 w-2.5 rounded-full bg-gray-dark" />}
+                </span>
+              </button>
+              {disabled && (
+                <span role="tooltip" className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-max max-w-[220px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
+                  All coaching time in an offering must use the same format.
+                </span>
+              )}
+            </div>
           );
         })}
       </div>
@@ -3094,6 +3680,18 @@ function CoachingTimeFields({ config, onChange }: { config: Record<string, strin
           <TimeField value={config.maxHours ?? ""} onChange={(v) => onChange({ maxHours: v })} label="max hours" />
         </div>
       )}
+
+      {/* Delivery format — how the coaching time is delivered. */}
+      <div className="mt-5">
+        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Delivery Format</label>
+        <Select
+          value={config.delivery ?? ""}
+          onChange={(v) => onChange({ delivery: v })}
+          options={deliveryFormats}
+          placeholder="Select an option"
+          triggerClassName="py-3 pl-4 pr-3 text-[15px]"
+        />
+      </div>
 
       {/* v2: coaching time is auto-priced from the expert's hourly rate. */}
       {v2 && (
@@ -3115,7 +3713,7 @@ function CoachingTimeFields({ config, onChange }: { config: Record<string, strin
 
 function PageStep({
   name, headline, pricingMode, paidType, price, description, setDescription,
-  sections, onAddSection, onUpdateSection, onRemoveSection, onMoveSection,
+  sections, onAddSection, onUpdateSection, onRemoveSection, onReorderSections,
 }: {
   name: string; headline: string; pricingMode: "free" | "paid"; paidType: "recurring" | "one-time"; price: string;
   description: string; setDescription: (v: string) => void;
@@ -3123,22 +3721,17 @@ function PageStep({
   onAddSection: (kind: PageSectionKind) => void;
   onUpdateSection: (next: PageSection) => void;
   onRemoveSection: (id: number) => void;
-  onMoveSection: (id: number, dir: -1 | 1) => void;
+  onReorderSections: (next: PageSection[]) => void;
 }) {
   return (
     <div>
-      <h2 className="text-[22px] font-semibold text-gray-dark">Page</h2>
-      <p className="mt-0.5 text-[15px] text-gray-light">Configure the customer-facing page for this offering.</p>
-
-      {/* Media dropzone */}
-      <div className="mt-5 flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-2xl bg-[#F5F5F5] text-center">
-        <MaskIcon src={uploadIcon} className="h-8 w-8 text-gray-dark" />
-        <p className="text-[15px] font-semibold text-gray-dark">Add a video or photo</p>
-        <p className="text-[14px] text-gray-light">Pages with videos convert 4x better.</p>
+      <div className="flex items-center gap-2.5 rounded-xl bg-gray-hover px-4 py-3">
+        <MaskIcon src={eyeIcon} className="h-[18px] w-[18px] shrink-0 text-gray-light" />
+        <span className="text-[15px] font-medium text-gray-light">Configure the public-facing page for this offering.</span>
       </div>
 
       {/* Name + headline + description */}
-      <h3 className="mt-8 text-[28px] font-semibold leading-tight text-gray-dark">
+      <h3 className="mt-8 font-serif text-[40px] leading-tight text-gray-dark">
         {name || <span className="text-[#B1B1B1]">Your offering name here</span>}
       </h3>
       <p className="mt-2 text-[18px] font-normal leading-tight text-gray-extra-light">
@@ -3170,31 +3763,18 @@ function PageStep({
         Generate a description
       </button>
 
-      {/* Added sections — reorderable, above the "Add section" picker */}
+      {/* Added sections — drag-and-drop reorderable (live), above the picker */}
       {sections.length > 0 && (
-        <div className="mt-8 flex flex-col">
-          <AnimatePresence initial={false} mode="popLayout">
-            {sections.map((sec, i) => (
-              <motion.div
-                key={sec.id}
-                layout
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
-              >
-                <PageSectionCard
-                  section={sec}
-                  index={i}
-                  total={sections.length}
-                  onChange={onUpdateSection}
-                  onRemove={() => onRemoveSection(sec.id)}
-                  onMove={(dir) => onMoveSection(sec.id, dir)}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+        <Reorder.Group axis="y" values={sections} onReorder={onReorderSections} as="div" className="mt-8 flex flex-col">
+          {sections.map((sec) => (
+            <PageSectionCard
+              key={sec.id}
+              section={sec}
+              onChange={onUpdateSection}
+              onRemove={() => onRemoveSection(sec.id)}
+            />
+          ))}
+        </Reorder.Group>
       )}
 
       {/* Add section — same button style as the "Add product" grid */}
@@ -3255,37 +3835,50 @@ function Stars({ n }: { n: number }) {
   );
 }
 
-function PageSectionCard({ section, index, total, onChange, onRemove, onMove }: {
-  section: PageSection; index: number; total: number;
-  onChange: (next: PageSection) => void; onRemove: () => void; onMove: (dir: -1 | 1) => void;
+function PageSectionCard({ section, onChange, onRemove }: {
+  section: PageSection;
+  onChange: (next: PageSection) => void; onRemove: () => void;
 }) {
-  const label = pageSectionTypes.find((t) => t.kind === section.kind)!.label;
+  const dragControls = useDragControls();
   return (
-    <div className="group relative border-t border-gray-stroke py-6">
-      {/* Header — kind label + reorder / remove controls (revealed on hover) */}
-      <div className="mb-4 flex items-center justify-between">
-        <span className="rounded-[4px] bg-gray-hover px-2 py-1 text-[12px] font-semibold uppercase tracking-[0.08em] text-gray-extra-light">{label}</span>
-        <div className="flex items-center gap-0.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
-          <IconBtn label="Move section up" disabled={index === 0} onClick={() => onMove(-1)}>{chevronUpIcon}</IconBtn>
-          <IconBtn label="Move section down" disabled={index === total - 1} onClick={() => onMove(1)}>{chevronDownIcon}</IconBtn>
-          <IconBtn label="Remove section" danger onClick={onRemove}><MaskIcon src={trashIcon} className="h-[17px] w-[17px]" /></IconBtn>
-        </div>
-      </div>
+    <Reorder.Item
+      as="div"
+      value={section}
+      dragListener={false}
+      dragControls={dragControls}
+      className="group relative bg-white py-6"
+    >
+      {/* Drag handle — sits in the left margin, outside the content, on hover.
+          Only the handle initiates the drag (dragListener is off). */}
+      <span
+        onPointerDown={(e) => dragControls.start(e)}
+        aria-label="Drag to reorder"
+        className="absolute -left-7 top-7 flex h-6 w-5 cursor-grab touch-none items-center justify-center text-gray-extra-light opacity-0 transition-opacity hover:text-gray-light group-hover:opacity-100 active:cursor-grabbing"
+      >
+        <MaskIcon src={dragDotsIcon} className="h-[18px] w-[18px]" />
+      </span>
 
-      {/* Optional headline — available on every section type */}
-      <input
-        value={section.heading}
-        onChange={(e) => onChange({ ...section, heading: e.target.value })}
-        placeholder="Add an optional header..."
-        className="mb-3 w-full bg-transparent text-[28px] font-semibold leading-tight text-gray-dark outline-none placeholder:text-[#B1B1B1]"
-      />
+      {/* Optional headline (every section) + a remove "X" across from it, on hover. */}
+      <div className="mb-3 flex items-center gap-3">
+        <input
+          value={section.heading}
+          onChange={(e) => onChange({ ...section, heading: e.target.value })}
+          placeholder="Add an optional header..."
+          className="min-w-0 flex-1 bg-transparent text-[24px] font-semibold leading-tight text-gray-dark outline-none placeholder:text-[#B1B1B1]"
+        />
+        <span className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+          <IconBtn label="Remove section" danger onClick={onRemove}>
+            <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
+          </IconBtn>
+        </span>
+      </div>
 
       {section.kind === "text" && <TextSectionEditor section={section} onChange={onChange} />}
       {section.kind === "faqs" && <FaqsSectionEditor section={section} onChange={onChange} />}
-      {section.kind === "image" && <MediaSectionEditor section={section} onChange={onChange} hint="PNG or JPG — recommended 1200 × 630" />}
-      {section.kind === "video" && <MediaSectionEditor section={section} onChange={onChange} hint="MP4 or MOV" />}
+      {section.kind === "checklist" && <ChecklistSectionEditor section={section} onChange={onChange} />}
+      {section.kind === "media" && <MediaSectionEditor section={section} onChange={onChange} />}
       {section.kind === "reviews" && <ReviewsSectionEditor section={section} onChange={onChange} />}
-    </div>
+    </Reorder.Item>
   );
 }
 
@@ -3331,66 +3924,149 @@ function FaqsSectionEditor({ section, onChange }: { section: Extract<PageSection
           <textarea value={f.answer} onChange={(e) => updateFaq(f.id, { answer: e.target.value })} rows={2} placeholder="Answer" className={`${configInputClass} mt-2 resize-none`} />
         </div>
       ))}
-      <button onClick={addFaq} className="flex items-center gap-2 self-start text-[15px] font-semibold text-[#4666E5]">
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#EEF1FF]">
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-        </span>
-        Add question
+      <button onClick={addFaq} className="flex items-center gap-1.5 self-start text-[15px] font-medium text-gray-dark transition-colors hover:text-gray-light">
+        <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+        <span className="underline decoration-dotted underline-offset-2">Add question</span>
       </button>
     </div>
   );
 }
 
-function MediaSectionEditor({ section, onChange, hint }: { section: Extract<PageSection, { kind: "image" | "video" }>; onChange: (next: PageSection) => void; hint: string }) {
-  const label = section.kind === "image" ? "Upload a photo" : "Upload a video";
-  return <UploadField value={section.fileName} onChange={(fileName) => onChange({ ...section, fileName })} hint={hint} label={label} />;
+function ChecklistSectionEditor({ section, onChange }: { section: Extract<PageSection, { kind: "checklist" }>; onChange: (next: PageSection) => void }) {
+  const items = section.items;
+  const setItems = (next: ChecklistItem[]) => onChange({ ...section, items: next });
+  const addItem = () => { if (items.length < MAX_CHECKLIST_ITEMS) setItems([...items, { id: items.reduce((m, it) => Math.max(m, it.id), 0) + 1, text: "" }]); };
+  const updateItem = (id: number, text: string) => setItems(items.map((it) => (it.id === id ? { ...it, text } : it)));
+  const removeItem = (id: number) => setItems(items.filter((it) => it.id !== id));
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="overflow-hidden rounded-[20px] border border-gray-stroke bg-white px-3">
+        {items.map((it, i) => (
+          <div key={it.id} className={`flex items-center ${i > 0 ? "border-t border-gray-stroke" : ""}`}>
+            <img src={checkmarkFilledIcon} alt="" className="h-5 w-5 shrink-0" />
+            <input value={it.text} onChange={(e) => updateItem(it.id, e.target.value)} placeholder={`Item ${i + 1}`} autoComplete="off" className="min-w-0 flex-1 bg-transparent px-2.5 py-4 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1]" />
+            {items.length > 1 && (
+              <button type="button" onClick={() => removeItem(it.id)} aria-label="Remove item" className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-gray-extra-light transition-colors hover:text-gray-light">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+      {items.length < MAX_CHECKLIST_ITEMS && (
+        <button onClick={addItem} className="flex items-center gap-1.5 self-start text-[15px] font-medium text-gray-dark transition-colors hover:text-gray-light">
+          <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+          <span className="underline decoration-dotted underline-offset-2">Add item</span>
+        </button>
+      )}
+    </div>
+  );
 }
 
+function MediaSectionEditor({ section, onChange }: { section: Extract<PageSection, { kind: "media" }>; onChange: (next: PageSection) => void }) {
+  return (
+    <ImageUploadField
+      value={section.fileName || null}
+      onChange={(url) => onChange({ ...section, fileName: url ?? "" })}
+      label="Upload media"
+      hint="JPG, PNG, GIF, MP4, MOV · Max 100MB"
+      accept="image/*,video/*"
+    />
+  );
+}
+
+const MAX_REVIEWS = 3;
+
 function ReviewsSectionEditor({ section, onChange }: { section: Extract<PageSection, { kind: "reviews" }>; onChange: (next: PageSection) => void }) {
-  const [pickingSlot, setPickingSlot] = useState<number | null>(null);
-  const setSlot = (slot: number, reviewId: number | null) =>
-    onChange({ ...section, slots: section.slots.map((s, i) => (i === slot ? reviewId : s)) });
-  const chosen = section.slots.filter((s): s is number => s !== null);
+  const [picking, setPicking] = useState(false);
+  // Chosen review IDs, in order — stored compactly (no empty slots).
+  const reviews = section.slots.filter((s): s is number => s !== null);
+  const addReview = (id: number) => onChange({ ...section, slots: [...reviews, id] });
+  const removeReview = (idx: number) => onChange({ ...section, slots: reviews.filter((_, i) => i !== idx) });
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {section.slots.map((reviewId, i) => {
-          const review = reviewId !== null ? existingReviews.find((r) => r.id === reviewId) ?? null : null;
-          return review ? (
-            <div key={i} className="relative flex flex-col rounded-xl border border-gray-stroke p-4">
+      <div className="flex flex-col gap-6">
+        {reviews.map((reviewId, i) => {
+          const review = existingReviews.find((r) => r.id === reviewId);
+          if (!review) return null;
+          return (
+            <div key={i} className="group/review relative flex flex-col">
               <button
-                onClick={() => setSlot(i, null)}
+                onClick={() => removeReview(i)}
                 aria-label="Remove review"
-                className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+                className="absolute right-0 top-0 flex h-7 w-7 items-center justify-center rounded-full text-gray-extra-light opacity-0 transition-opacity hover:text-gray-light group-hover/review:opacity-100"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
               </button>
-              <Stars n={review.rating} />
-              <p className="mt-2 line-clamp-4 text-[14px] leading-snug text-gray-dark">“{review.text}”</p>
-              <div className="mt-3 flex items-center gap-2">
-                <img src={review.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
-                <span className="text-[13px] font-medium text-gray-dark">{review.name}</span>
+
+              {/* Reviewer — avatar + name + role */}
+              <div className="flex items-center gap-3">
+                <img src={review.photo} alt="" className="h-11 w-11 shrink-0 rounded-full object-cover" />
+                <div className="min-w-0">
+                  <div className="truncate text-[15px] font-semibold text-gray-dark">{review.name}</div>
+                  <div className="truncate text-[14px] text-gray-light">{review.role}</div>
+                </div>
               </div>
+
+              {/* Rating + date */}
+              <div className="mt-3 flex items-center gap-2 text-[14px] text-gray-light">
+                <span className="flex items-center gap-0.5">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <MaskIcon key={s} src={starFilledIcon} className={`h-3.5 w-3.5 ${s < review.rating ? "text-gray-dark" : "text-gray-extra-light"}`} />
+                  ))}
+                </span>
+                <span className="text-gray-extra-light">·</span>
+                <span>{review.date}</span>
+              </div>
+
+              {/* Body */}
+              <p className="mt-3 text-[15px] leading-relaxed text-gray-dark">{review.text}</p>
+
+              {/* Outcome */}
+              {review.accepted && (
+                <div className="mt-4 flex items-center gap-2 text-[15px] text-gray-dark">
+                  <span className="text-[16px] leading-none">🎓</span>
+                  {review.accepted}
+                </div>
+              )}
             </div>
-          ) : (
-            <button
-              key={i}
-              onClick={() => setPickingSlot(i)}
-              className="flex min-h-[150px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-stroke text-gray-light transition-colors hover:border-[#c9c9c9] hover:text-gray-dark"
-            >
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-              <span className="text-[13px] font-medium">Select a review</span>
-            </button>
           );
         })}
+
+        {/* Empty state — a single "Select a review" card until the first is added. */}
+        {reviews.length === 0 && (
+          <button
+            onClick={() => setPicking(true)}
+            className="group/review flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl bg-gray-hover px-4 py-16 text-center transition-colors hover:bg-[#ececec]"
+          >
+            <div className="flex items-center gap-0 text-gray-extra-light opacity-50 transition-opacity group-hover/review:opacity-100">
+              {Array.from({ length: 5 }).map((_, s) => (
+                <MaskIcon key={s} src={starFilledIcon} className="h-4 w-4" />
+              ))}
+            </div>
+            <span className="text-[15px] font-medium text-gray-light underline decoration-dotted underline-offset-2">Select a review</span>
+          </button>
+        )}
       </div>
 
+      {/* Add another review — a link + a count, once at least one is added. */}
+      {reviews.length > 0 && reviews.length < MAX_REVIEWS && (
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <button onClick={() => setPicking(true)} className="flex items-center gap-1.5 text-[15px] font-medium text-gray-dark transition-colors hover:text-gray-light">
+            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            <span className="underline decoration-dotted underline-offset-2">Add another review</span>
+          </button>
+          <span className="text-[14px] font-medium text-gray-light">{reviews.length}/{MAX_REVIEWS}</span>
+        </div>
+      )}
+
       <ReviewPicker
-        open={pickingSlot !== null}
-        chosen={chosen}
-        onSelect={(id) => { if (pickingSlot !== null) setSlot(pickingSlot, id); setPickingSlot(null); }}
-        onClose={() => setPickingSlot(null)}
+        open={picking}
+        chosen={reviews}
+        onSelect={(id) => { addReview(id); setPicking(false); }}
+        onClose={() => setPicking(false)}
       />
     </>
   );
@@ -3459,10 +4135,10 @@ function ReviewPicker({ open, chosen, onSelect, onClose }: { open: boolean; chos
 
 /* ---------- Live preview card ---------- */
 
-function ProductPreview({ name, headline, pricingMode, paidType, price, added, joinLabel }: { name: string; headline: string; pricingMode: "free" | "paid"; paidType: "recurring" | "one-time"; price: string; added: OfferingItem[]; joinLabel: string }) {
+function ProductPreview({ name, headline, pricingMode, paidType, price, cover, multiOption, joinLabel }: { name: string; headline: string; pricingMode: "free" | "paid"; paidType: "recurring" | "one-time"; price: string; cover: string | null; multiOption: boolean; joinLabel: string }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_1px_3px_rgba(16,24,40,0.06)]">
-      <img src={coverImage9} alt="" className="aspect-[1200/630] w-full object-cover opacity-25" />
+      <img src={cover || coverImage9} alt="" className={`aspect-[1200/630] w-full object-cover ${cover ? "" : "opacity-25"}`} />
       <div className="p-4">
         <p className={`text-[17px] font-semibold leading-tight ${name ? "text-gray-dark" : "text-gray-extra-light"}`}>{name || "Your offering name here"}</p>
         {headline ? (
@@ -3471,26 +4147,10 @@ function ProductPreview({ name, headline, pricingMode, paidType, price, added, j
           <p className="mt-1 text-[15px] leading-snug text-[#C4C4C4]">Your headline appears here</p>
         )}
 
-        {added.length > 0 && (
-          <div className="mt-3 flex flex-col gap-2.5 text-[15px] font-normal text-gray-light">
-            {added.map((item) => {
-              const o = offeringBySlug[item.slug];
-              const label = item.slug === "coaching-time" && item.configured
-                ? configSummary(item)
-                : o.label;
-              return (
-                <div key={item.id} className="flex items-center gap-2.5">
-                  <MaskIcon src={o.icon} className="h-[17px] w-[17px] shrink-0" />
-                  <span>{label}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
         {pricingMode === "paid" && (
           <p className="mt-3 text-[15px] font-semibold text-gray-dark">
-            ${price} <span className="font-normal text-gray-light">{paidType === "recurring" ? "/ month" : "one-time"}</span>
+            {multiOption && "Starting at "}
+            ${formatMoney(Number(price))} <span className="font-normal text-gray-light">{paidType === "recurring" ? "/ month" : "one-time"}</span>
           </p>
         )}
 
