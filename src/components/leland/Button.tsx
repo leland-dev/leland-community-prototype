@@ -212,6 +212,7 @@ export interface ButtonProps
   disabled?: boolean;
   fontWeight?: ButtonFontWeight;
   label: string;
+  ariaLabel?: string;
   LeftIcon?: FC<SVGProps<SVGSVGElement>>;
   CustomLeftIcon?: FC<{ iconClassName?: string }>;
   RightIcon?: FC<SVGProps<SVGSVGElement>>;
@@ -224,6 +225,7 @@ export interface ButtonProps
   width?: ButtonWidth;
   roundedSide?: ButtonRoundedSide;
   href?: string;
+  openInNew?: boolean;
   useSolidHover?: boolean;
 }
 
@@ -234,6 +236,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       disabled,
       fontWeight = FontWeight.SEMIBOLD,
       label,
+      ariaLabel,
       LeftIcon,
       RightIcon,
       CustomLeftIcon,
@@ -246,6 +249,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       width = ButtonWidth.AUTO,
       roundedSide = ButtonRoundedSide.BOTH,
       href,
+      openInNew,
       useSolidHover,
       ...props
     },
@@ -303,7 +307,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             id={id}
             className={buttonClassName}
             role="link"
-            aria-label={label}
+            aria-label={ariaLabel || label || undefined}
             aria-disabled
           >
             {innerContent}
@@ -313,10 +317,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       return (
         <Link
           {...passthroughProps}
+          {...(openInNew
+            ? { target: '_blank', rel: 'noopener noreferrer' }
+            : {})}
           id={id}
           to={href}
           className={buttonClassName}
-          aria-label={label}
+          aria-label={ariaLabel || label || undefined}
         >
           {innerContent}
         </Link>
@@ -328,7 +335,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         type="button"
         {...props}
         className={buttonClassName}
-        aria-label={label}
+        aria-label={ariaLabel || label || undefined}
         disabled={disabled}
         ref={ref}
       >

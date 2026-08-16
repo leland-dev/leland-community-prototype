@@ -171,6 +171,8 @@
   }
 }
 
+@utility outline-1\.5 { outline-width: 1.5px; }
+
 /* ── Production z-index scale (layered surfaces) ───────────────────────── */
 @utility z-navbar { z-index: 1000; }
 @utility z-modal { z-index: 1010; }
