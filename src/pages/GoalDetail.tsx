@@ -7,10 +7,16 @@ import { useSetNavTheme } from "../components/NavThemeContext";
 import { Button } from "../components/Button";
 import GoalCheck from "../components/GoalCheck";
 import GoalFlame from "../components/GoalFlame";
+import GoalDonut from "../components/GoalDonut";
+import Confetti from "../components/Confetti";
 import EditableText from "../components/EditableText";
 import RowDelete from "../components/RowDelete";
-import { useGoals } from "../contexts/GoalsContext";
-import { dueLabel, goalProgress, goalStatus, isCheckedToday, isOverdue, type Goal, type Project, type Task, type TaskStatus } from "../data/goals";
+import QuickAddTask from "../components/QuickAddTask";
+import TestOutcomes from "../components/TestOutcomes";
+import TaskDetailModal from "../components/TaskDetailModal";
+import ConfirmModal from "../components/ConfirmModal";
+import { useGoals, OTHER_TASKS_TILE_ID } from "../contexts/GoalsContext";
+import { dueLabel, goalProgress, goalStatus, isCheckedToday, isOverdue, type Goal, type Task, type TaskStatus } from "../data/goals";
 import { scoreRangeFor } from "../data/goalPlans";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import dragDotsIcon from "../assets/icons/drag-dots.svg";
@@ -18,6 +24,10 @@ import dragDotsIcon from "../assets/icons/drag-dots.svg";
 const HERO_BG = "#F3F1E6";
 
 const CARD = "rounded-2xl bg-white p-6 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10";
+
+// Custom drag type so a project drag can't be mistaken for anything else
+// dropped onto the board.
+const PROJECT_DRAG_TYPE = "application/x-leland-project";
 
 const KANBAN_COLUMNS: { status: TaskStatus; label: string }[] = [
   { status: "todo", label: "To do" },
@@ -41,96 +51,44 @@ function ViaTag({ assignedBy }: { assignedBy: NonNullable<Task["assignedBy"]> })
   );
 }
 
-function NoteIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M4 4h16v12l-4 4H4V4z" />
-      <path d="M15 20v-4h4" />
-    </svg>
-  );
-}
-
+// Clicking anywhere on a task's row/card opens its detail modal — the
+// checkbox and delete button stop the click from bubbling so they keep their
+// own single-purpose behavior instead of also opening the modal.
 function TaskRow({
   task,
   onToggle,
-  onRename,
-  onSetDue,
-  onSetNote,
+  onOpenDetail,
   onDelete,
 }: {
   task: Task;
   onToggle: () => void;
-  onRename: (title: string) => void;
-  onSetDue: (dueDate: string | undefined) => void;
-  onSetNote: (note: string | undefined) => void;
+  onOpenDetail: () => void;
   onDelete: () => void;
 }) {
   const meta = taskMeta(task);
   const done = task.status === "done";
-  const [editingDue, setEditingDue] = useState(false);
-  const [notesOpen, setNotesOpen] = useState(false);
 
   return (
-    <div className="group flex flex-col gap-2 rounded-lg px-2 py-2.5 transition-colors hover:bg-[#F5F5F5]">
-      <div className="flex items-start gap-3">
-        <div className="mt-[1px]">
-          <GoalCheck checked={done} onChange={onToggle} label={task.title} />
-        </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <EditableText
-              value={task.title}
-              onCommit={onRename}
-              label="task name"
-              className={done ? "text-[15px] text-gray-extra-light line-through" : "text-[15px] font-medium leading-[1.3] text-gray-dark"}
-            />
-            {task.assignedBy && <ViaTag assignedBy={task.assignedBy} />}
-          </div>
-          {editingDue ? (
-            <input
-              type="date"
-              autoFocus
-              value={task.dueDate ?? ""}
-              aria-label="Due date"
-              onChange={(e) => onSetDue(e.target.value || undefined)}
-              onBlur={() => setEditingDue(false)}
-              className="w-[150px] rounded border-[1.5px] border-gray-dark bg-white px-1 text-[13px] text-gray-dark outline-none"
-            />
-          ) : (
-            <button
-              onClick={() => setEditingDue(true)}
-              aria-label="Edit due date"
-              className={`-mx-1 self-start rounded px-1 text-left text-[13px] transition-colors hover:bg-[#222222]/[0.06] ${
-                meta?.overdue ? "text-[#9F5B34]" : "text-gray-extra-light"
-              }`}
-            >
-              {meta?.text ?? <span className="opacity-0 group-hover:opacity-100">Add a date</span>}
-            </button>
-          )}
-        </div>
-        <button
-          onClick={() => setNotesOpen((v) => !v)}
-          aria-label={task.note ? "Edit note" : "Add note"}
-          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-[#222222]/10 ${
-            task.note ? "text-gray-dark" : "text-gray-extra-light opacity-0 group-hover:opacity-100"
-          } ${notesOpen ? "bg-[#222222]/10" : ""}`}
-        >
-          <NoteIcon filled={!!task.note} />
-        </button>
-        <RowDelete onDelete={onDelete} label={task.title} />
+    <div
+      onClick={onOpenDetail}
+      className="group flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-[#F5F5F5]"
+    >
+      <div className="mt-[1px]" onClick={(e) => e.stopPropagation()}>
+        <GoalCheck checked={done} onChange={onToggle} label={task.title} />
       </div>
-      {notesOpen && (
-        <div className="pl-[34px]">
-          <textarea
-            autoFocus
-            rows={2}
-            value={task.note ?? ""}
-            onChange={(e) => onSetNote(e.target.value || undefined)}
-            placeholder="Add details or notes for this task…"
-            className="w-full resize-y rounded-lg border-[1.5px] border-[#949494] bg-white px-2.5 py-2 text-[13px] leading-[1.4] text-gray-dark outline-none placeholder:text-[#949494] focus:border-gray-dark"
-          />
+      <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className={done ? "text-[15px] text-gray-extra-light line-through" : "text-[15px] font-medium leading-[1.3] text-gray-dark"}>
+            {task.title}
+          </span>
+          {task.assignedBy && <ViaTag assignedBy={task.assignedBy} />}
         </div>
-      )}
+        {meta && <span className={`text-[13px] ${meta.overdue ? "font-medium text-[#9F5B34]" : "text-gray-extra-light"}`}>{meta.text}</span>}
+        {task.note && <p className="text-[13px] leading-[1.4] text-gray-light">{task.note}</p>}
+      </div>
+      <span onClick={(e) => e.stopPropagation()}>
+        <RowDelete onDelete={onDelete} label={task.title} />
+      </span>
     </div>
   );
 }
@@ -138,13 +96,13 @@ function TaskRow({
 function KanbanCard({
   task,
   onToggle,
-  onRename,
+  onOpenDetail,
   onDelete,
   onDragStart,
 }: {
   task: Task;
   onToggle: () => void;
-  onRename: (title: string) => void;
+  onOpenDetail: () => void;
   onDelete: () => void;
   onDragStart: () => void;
 }) {
@@ -154,18 +112,16 @@ function KanbanCard({
     <div
       draggable
       onDragStart={onDragStart}
+      onClick={onOpenDetail}
       className="group flex cursor-grab items-start gap-2.5 rounded-xl bg-white p-3 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10 transition-colors hover:bg-[#FCFCFA] active:cursor-grabbing"
     >
-      <div className="mt-[1px]">
+      <div className="mt-[1px]" onClick={(e) => e.stopPropagation()}>
         <GoalCheck checked={done} onChange={onToggle} size={18} shape="squareSm" label={task.title} />
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <EditableText
-          value={task.title}
-          onCommit={onRename}
-          label="task name"
-          className={done ? "text-[14px] leading-[1.3] text-gray-extra-light line-through" : "text-[14px] font-medium leading-[1.3] text-gray-dark"}
-        />
+        <span className={done ? "text-[14px] leading-[1.3] text-gray-extra-light line-through" : "text-[14px] font-medium leading-[1.3] text-gray-dark"}>
+          {task.title}
+        </span>
         {meta && <span className={`text-[12px] ${meta.overdue ? "text-[#9F5B34]" : "text-gray-extra-light"}`}>{meta.text}</span>}
         {task.assignedBy && (
           <span className="self-start">
@@ -173,7 +129,9 @@ function KanbanCard({
           </span>
         )}
       </div>
-      <RowDelete onDelete={onDelete} label={task.title} />
+      <span onClick={(e) => e.stopPropagation()}>
+        <RowDelete onDelete={onDelete} label={task.title} />
+      </span>
     </div>
   );
 }
@@ -185,20 +143,32 @@ function AddTask({
   variant = "block",
   label = "Add task",
   placeholder = "What needs doing?",
+  withCadence = false,
+  className = "mt-3 font-medium",
 }: {
-  onAdd: (title: string) => void;
+  onAdd: (title: string, cadence?: string) => void;
   variant?: "block" | "column";
   label?: string;
   placeholder?: string;
+  // Routines repeat on a schedule, so their add form asks for it up front
+  // instead of defaulting silently to "Daily" — same free-text field as the
+  // one on an existing routine row.
+  withCadence?: boolean;
+  // Override the collapsed "block" button's classes — the default assumes
+  // it's stacked below other content; pass something without a top margin
+  // when it sits inline next to another control.
+  className?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
+  const [cadenceDraft, setCadenceDraft] = useState("");
 
   const submit = () => {
     const title = draft.trim();
     if (!title) return;
-    onAdd(title);
+    onAdd(title, withCadence ? cadenceDraft.trim() || "Daily" : undefined);
     setDraft("");
+    setCadenceDraft("");
     setOpen(false);
   };
 
@@ -212,7 +182,7 @@ function AddTask({
         {label}
       </button>
     ) : (
-      <Button onClick={() => setOpen(true)} size="md" variant="secondary" className="mt-3 font-medium">
+      <Button onClick={() => setOpen(true)} size="md" variant="secondary" className={className}>
         <img src={addPlusIcon} alt="" className="h-[18px] w-[18px]" />
         {label}
       </Button>
@@ -220,18 +190,33 @@ function AddTask({
   }
 
   return (
-    <div className={`flex gap-2 ${variant === "column" ? "flex-col" : "mt-3"}`}>
+    <div className={`flex gap-2 ${variant === "column" ? "flex-col" : "mt-3 flex-wrap"}`}>
       <input
         autoFocus
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter") submit();
+          if (e.key === "Enter" && !withCadence) submit();
           if (e.key === "Escape") setOpen(false);
         }}
         placeholder={placeholder}
         className="min-w-0 flex-1 rounded-lg border-[1.5px] border-[#949494] bg-white px-3 py-2.5 text-[15px] text-gray-dark outline-none placeholder:text-[#949494] focus:border-gray-dark"
       />
+      {withCadence && (
+        <input
+          value={cadenceDraft}
+          onChange={(e) => setCadenceDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") submit();
+            if (e.key === "Escape") setOpen(false);
+          }}
+          placeholder="How often? (e.g. Daily, Weekdays)"
+          aria-label="Cadence"
+          className={`rounded-lg border-[1.5px] border-[#949494] bg-white px-3 py-2.5 text-[15px] text-gray-dark outline-none placeholder:text-[#949494] focus:border-gray-dark ${
+            variant === "column" ? "" : "w-[220px] shrink-0"
+          }`}
+        />
+      )}
       <Button onClick={submit} size="md" variant="primary" className="font-medium">
         Add
       </Button>
@@ -239,129 +224,218 @@ function AddTask({
   );
 }
 
+type DropZone = "left" | "right" | "top" | "bottom";
+
+// Which edge of the target box the cursor is nearest — left/right propose
+// sitting beside it (half width); top/bottom propose a fresh row above or
+// below it (full width).
+function computeDropZone(clientX: number, clientY: number, rect: DOMRect): DropZone {
+  const distances: [DropZone, number][] = [
+    ["left", clientX - rect.left],
+    ["right", rect.right - clientX],
+    ["top", clientY - rect.top],
+    ["bottom", rect.bottom - clientY],
+  ];
+  return distances.reduce((a, b) => (b[1] < a[1] ? b : a))[0];
+}
+
+// A card in the goal's modular board. Real projects and the synthetic "Other
+// tasks" tile are rendered by the same component so they share view/width/
+// reorder behavior — the difference is just which callbacks the caller wires
+// up (Other tasks has no onRename/onSetNote/onDelete, since it isn't a real,
+// renameable, deletable project).
+type BoardTile = {
+  id: string;
+  name: string;
+  note?: string;
+  tasks: Task[];
+  view?: "list" | "kanban";
+  span?: "full" | "half";
+  collapsed?: boolean;
+};
+
 function ProjectBoard({
-  goal,
-  project,
+  tile,
   dragging,
   onDragStart,
   onDragEnd,
   onDropOn,
+  onOpenTaskDetail,
+  onDeleteTask,
+  onSetView,
+  onSetSpan,
+  onToggleCollapsed,
+  onRename,
+  onSetNote,
+  onDelete,
+  onAddTask,
 }: {
-  goal: Goal;
-  project: Project;
+  tile: BoardTile;
   dragging: boolean;
   onDragStart: () => void;
   onDragEnd: () => void;
-  onDropOn: () => void;
+  onDropOn: (edge: "before" | "after", draggedId: string, span: "full" | "half") => void;
+  onOpenTaskDetail: (task: Task) => void;
+  onDeleteTask: (task: Task) => void;
+  onSetView: (view: "list" | "kanban") => void;
+  onSetSpan: (span: "full" | "half") => void;
+  onToggleCollapsed: () => void;
+  onRename?: (name: string) => void;
+  onSetNote?: (note: string) => void;
+  onDelete?: () => void;
+  onAddTask: (title: string) => void;
 }) {
-  const { toggleTask, moveTask, addTask, setProjectView, toggleProjectCollapsed, updateTask, deleteTask, updateProject, deleteProject } = useGoals();
+  const { toggleTask, moveTask } = useGoals();
   const [dragId, setDragId] = useState<string | null>(null);
-  const [dropHover, setDropHover] = useState(false);
-  const view = project.view ?? "list";
-  const done = project.tasks.filter((t) => t.status === "done").length;
-  const collapsed = !!project.collapsed;
+  const [dropZone, setDropZone] = useState<DropZone | null>(null);
+  const view = tile.view ?? "list";
+  const done = tile.tasks.filter((t) => t.status === "done").length;
+  const collapsed = !!tile.collapsed;
+  const span = tile.span ?? "full";
 
   const taskHandlers = (task: Task) => ({
-    onToggle: () => toggleTask(goal.id, task.id),
-    onRename: (title: string) => updateTask(goal.id, task.id, { title }),
-    onSetNote: (note: string | undefined) => updateTask(goal.id, task.id, { note }),
-    onDelete: () => deleteTask(goal.id, task.id),
+    onToggle: () => toggleTask(task.id),
+    onOpenDetail: () => onOpenTaskDetail(task),
+    onDelete: () => onDeleteTask(task),
   });
 
   return (
     <section
       onDragOver={(e) => {
         e.preventDefault();
-        setDropHover(true);
+        // Notion-style: the indicator shows which edge you'll land on. Left/
+        // right propose sitting beside this tile (half width); top/bottom
+        // propose a fresh row above or below it (full width).
+        const rect = e.currentTarget.getBoundingClientRect();
+        setDropZone(computeDropZone(e.clientX, e.clientY, rect));
       }}
-      onDragLeave={() => setDropHover(false)}
+      onDragLeave={() => setDropZone(null)}
       onDrop={(e) => {
         e.preventDefault();
-        setDropHover(false);
-        onDropOn();
+        setDropZone(null);
+        // Read both the zone and the dragged id straight off the event. Relying
+        // on React state for either is racy — a quick drag can drop before a
+        // dragover/dragstart setState has landed.
+        const draggedId = e.dataTransfer.getData(PROJECT_DRAG_TYPE);
+        if (!draggedId) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const zone = computeDropZone(e.clientX, e.clientY, rect);
+        const edge = zone === "left" || zone === "top" ? "before" : "after";
+        const droppedSpan = zone === "left" || zone === "right" ? "half" : "full";
+        onDropOn(edge, draggedId, droppedSpan);
       }}
-      className={`${CARD} group/project transition-[opacity,box-shadow] ${dragging ? "opacity-40" : ""} ${dropHover ? "ring-2 ring-gray-dark" : ""}`}
+      className={`${CARD} group/project relative transition-opacity ${dragging ? "opacity-40" : ""} ${
+        span === "half" ? "lg:col-span-1" : "lg:col-span-2"
+      }`}
     >
+      {/* Insertion indicator, Notion-style — a bar on the edge you'd drop into */}
+      {dropZone && (
+        <span
+          aria-hidden
+          className={`absolute rounded-full bg-gray-dark ${
+            dropZone === "left"
+              ? "inset-y-3 -left-[10px] w-[3px]"
+              : dropZone === "right"
+                ? "inset-y-3 -right-[10px] w-[3px]"
+                : dropZone === "top"
+                  ? "inset-x-3 -top-[10px] h-[3px]"
+                  : "inset-x-3 -bottom-[10px] h-[3px]"
+          }`}
+        />
+      )}
       <div className="mb-1 flex items-baseline justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <span
             draggable
-            onDragStart={onDragStart}
+            onDragStart={(e) => {
+              e.dataTransfer.setData(PROJECT_DRAG_TYPE, tile.id);
+              e.dataTransfer.effectAllowed = "move";
+              onDragStart();
+            }}
             onDragEnd={onDragEnd}
-            aria-label={`Reorder ${project.name}`}
-            className="flex shrink-0 cursor-grab items-center self-start pt-[3px] text-[#949494] transition-colors hover:text-gray-dark active:cursor-grabbing"
+            aria-label={`Reorder ${tile.name}`}
+            className="flex shrink-0 cursor-grab items-center self-start pt-[3px] text-[#949494] opacity-0 transition-[opacity,color] hover:text-gray-dark active:cursor-grabbing group-hover/project:opacity-100"
           >
             <img src={dragDotsIcon} alt="" className="h-4 w-4" />
           </span>
+          <h2 className="min-w-0 text-[19px] font-semibold leading-[1.2] text-gray-dark">
+            {onRename ? <EditableText value={tile.name} onCommit={onRename} label="project name" /> : tile.name}
+          </h2>
+        </div>
+        <div className="flex shrink-0 items-center gap-3">
+          {onDelete && (
+            <span className="opacity-0 transition-opacity group-hover/project:opacity-100">
+              <RowDelete onDelete={onDelete} label={tile.name} />
+            </span>
+          )}
+          <span className="whitespace-nowrap text-[13px] text-gray-extra-light">
+            {done} of {tile.tasks.length} done
+          </span>
+          {!collapsed && (
+            <>
+              <div className="flex items-center gap-1 rounded-full bg-gray-hover p-1">
+                {(["list", "kanban"] as const).map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => onSetView(v)}
+                    className={`rounded-full px-2.5 py-1 text-[12px] font-medium capitalize transition-colors ${
+                      view === v ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]" : "text-gray-light hover:text-gray-dark"
+                    }`}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+              {/* Width, per tile — this is what makes the board modular */}
+              <button
+                onClick={() => onSetSpan(span === "full" ? "half" : "full")}
+                aria-label={span === "full" ? `Make ${tile.name} half width` : `Make ${tile.name} full width`}
+                title={span === "full" ? "Half width" : "Full width"}
+                className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-extra-light transition-colors hover:bg-[#222222]/[0.06] hover:text-gray-dark lg:flex"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {span === "full" ? <path d="M4 6h16v12H4zM12 6v12" /> : <path d="M4 6h16v12H4z" />}
+                </svg>
+              </button>
+            </>
+          )}
+          {/* Collapse chevron sits last, right-aligned */}
           <button
-            onClick={() => toggleProjectCollapsed(goal.id, project.id)}
-            aria-label={collapsed ? `Expand ${project.name}` : `Collapse ${project.name}`}
-            className="flex shrink-0 items-center self-start pt-[3px] text-gray-extra-light transition-colors hover:text-gray-dark"
+            onClick={onToggleCollapsed}
+            aria-label={collapsed ? `Expand ${tile.name}` : `Collapse ${tile.name}`}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-extra-light transition-colors hover:bg-[#222222]/[0.06] hover:text-gray-dark"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
               className={`transition-transform ${collapsed ? "-rotate-90" : ""}`}>
               <path d="M6 9l6 6 6-6" />
             </svg>
           </button>
-          <h2 className="min-w-0 text-[19px] font-semibold leading-[1.2] text-gray-dark">
-            <EditableText value={project.name} onCommit={(name) => updateProject(goal.id, project.id, { name })} label="project name" />
-          </h2>
-        </div>
-        <div className="flex shrink-0 items-center gap-3">
-          <span className="opacity-0 transition-opacity group-hover/project:opacity-100">
-            <RowDelete onDelete={() => deleteProject(goal.id, project.id)} label={project.name} />
-          </span>
-          <span className="whitespace-nowrap text-[13px] text-gray-extra-light">
-            {done} of {project.tasks.length} done
-          </span>
-          {!collapsed && (
-            <div className="flex items-center gap-1 rounded-full bg-gray-hover p-1">
-              {(["list", "kanban"] as const).map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setProjectView(goal.id, project.id, v)}
-                  className={`rounded-full px-2.5 py-1 text-[12px] font-medium capitalize transition-colors ${
-                    view === v ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]" : "text-gray-light hover:text-gray-dark"
-                  }`}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </div>
-      {collapsed && project.note && <p className="pl-[38px] text-[14px] text-[#707070]">{project.note}</p>}
+      {collapsed && tile.note && <p className="pl-6 text-[14px] text-[#707070]">{tile.note}</p>}
       {!collapsed && (
       <>
-      <p className="mb-3 pl-[38px] text-[14px] text-[#707070]">
-        <EditableText
-          value={project.note ?? ""}
-          onCommit={(note) => updateProject(goal.id, project.id, { note })}
-          label="project description"
-          placeholder="Add a description"
-          allowEmpty
-        />
+      <p className="mb-3 pl-6 text-[14px] text-[#707070]">
+        {onSetNote ? (
+          <EditableText value={tile.note ?? ""} onCommit={onSetNote} label="project description" placeholder="Add a description" allowEmpty />
+        ) : (
+          tile.note
+        )}
       </p>
 
       {view === "list" ? (
         <>
           <div className="-mx-2 flex flex-col gap-[2px]">
-            {project.tasks.map((task) => (
-              <TaskRow
-                key={task.id}
-                task={task}
-                {...taskHandlers(task)}
-                onSetDue={(dueDate) => updateTask(goal.id, task.id, { dueDate })}
-              />
+            {tile.tasks.map((task) => (
+              <TaskRow key={task.id} task={task} {...taskHandlers(task)} />
             ))}
           </div>
-          <AddTask onAdd={(title) => addTask(goal.id, project.id, title)} />
+          <AddTask onAdd={onAddTask} />
         </>
       ) : (
         <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-3">
           {KANBAN_COLUMNS.map(({ status, label }) => {
-            const tasks = project.tasks.filter((t) => t.status === status);
+            const tasks = tile.tasks.filter((t) => t.status === status);
             return (
               <div
                 key={status}
@@ -372,7 +446,7 @@ function ProjectBoard({
                 onDrop={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  if (dragId) moveTask(goal.id, dragId, status);
+                  if (dragId) moveTask(dragId, status);
                   setDragId(null);
                 }}
                 className="flex min-h-[120px] flex-col gap-2 rounded-xl bg-[#F5F5F5] p-3"
@@ -385,7 +459,7 @@ function ProjectBoard({
                   <KanbanCard key={task.id} task={task} {...taskHandlers(task)} onDragStart={() => setDragId(task.id)} />
                 ))}
                 {tasks.length === 0 && <div className="px-[2px] pb-2 pt-1 text-[13px] text-[#949494]">Nothing here.</div>}
-                {status === "todo" && <AddTask variant="column" onAdd={(title) => addTask(goal.id, project.id, title)} />}
+                {status === "todo" && <AddTask variant="column" onAdd={onAddTask} />}
               </div>
             );
           })}
@@ -401,9 +475,11 @@ export default function GoalDetail() {
   const { goalId } = useParams<{ goalId: string }>();
   const navigate = useNavigate();
   const {
-    getGoal, toggleTask, toggleRoutine, addTask, updateTask, deleteTask,
+    goals, getGoal, toggleTask, toggleRoutine, createTask, updateTask, deleteTask, assignTask,
     updateGoal, deleteGoal, completeGoal, reopenGoal, addProject, addRoutine, updateRoutine, deleteRoutine,
-    reorderProject, setProjectsLayout, updateContentItem, deleteContentItem,
+    reorderBoardItem, setProjectView, setProjectSpan, toggleProjectCollapsed, updateProject, deleteProject,
+    setOtherTasksView, setOtherTasksSpan, toggleOtherTasksCollapsed,
+    updateContentItem, deleteContentItem,
   } = useGoals();
   const { dark: darkMode } = useDarkMode();
   const heroBg = darkMode ? "#5E6E79" : HERO_BG;
@@ -411,10 +487,25 @@ export default function GoalDetail() {
   useSetNavTheme(navTheme);
   const [editingTarget, setEditingTarget] = useState(false);
   const [editingScore, setEditingScore] = useState(false);
-  const [completing, setCompleting] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [outcomeDraft, setOutcomeDraft] = useState("");
   const [finalScoreStr, setFinalScoreStr] = useState("");
-  const [dragProjectId, setDragProjectId] = useState<string | null>(null);
+  const [dragBoardId, setDragBoardId] = useState<string | null>(null);
+  // Store just the id and look the task up fresh below — holding onto the
+  // task object itself would freeze the modal on a stale snapshot the moment
+  // an edit updates the underlying goal data.
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [confirmDeleteTarget, setConfirmDeleteTarget] = useState<Task | null>(null);
+
+  // Expert-assigned tasks get a confirmation step before they disappear —
+  // everything else deletes right away, same as the modal's own delete flow.
+  const requestDeleteTask = (task: Task) => {
+    if (task.assignedBy) {
+      setConfirmDeleteTarget(task);
+      return;
+    }
+    deleteTask(task.id);
+  };
 
   const goal = goalId ? getGoal(goalId) : undefined;
 
@@ -439,6 +530,38 @@ export default function GoalDetail() {
   const status = goalStatus(goal);
   const { done, total, pct } = goalProgress(goal);
 
+  // Re-derived from the live goal on every render — see the note on
+  // selectedTaskId above.
+  const selectedTask = (() => {
+    if (!selectedTaskId) return null;
+    for (const p of goal.projects) {
+      const task = p.tasks.find((t) => t.id === selectedTaskId);
+      if (task) return { task, projectName: p.name };
+    }
+    const task = goal.otherTasks.find((t) => t.id === selectedTaskId);
+    return task ? { task, projectName: null } : null;
+  })();
+
+  // "Other tasks" sits in the same reorderable, resizable board as projects —
+  // spliced into the project list at its stored position, defaulting to last.
+  const boardTiles: BoardTile[] = (() => {
+    const otherTile: BoardTile = {
+      id: OTHER_TASKS_TILE_ID,
+      name: "Other tasks",
+      note: "Not part of a project.",
+      tasks: goal.otherTasks,
+      view: goal.otherTasksView,
+      span: goal.otherTasksSpan,
+      collapsed: goal.otherTasksCollapsed,
+    };
+    const tiles: BoardTile[] = goal.projects.map((p) => ({
+      id: p.id, name: p.name, note: p.note, tasks: p.tasks, view: p.view, span: p.span, collapsed: p.collapsed,
+    }));
+    const idx = Math.min(goal.otherTasksIndex ?? tiles.length, tiles.length);
+    tiles.splice(idx, 0, otherTile);
+    return tiles;
+  })();
+
   const confirmDeleteGoal = () => {
     if (!window.confirm(`Delete "${goal.name}"? Its projects, tasks, and routines go with it.`)) return;
     deleteGoal(goal.id);
@@ -452,15 +575,25 @@ export default function GoalDetail() {
       ? `${goal.categories[0]} scores run ${scoreRange.min}–${scoreRange.max}.`
       : null;
 
-  const startCompleting = () => {
+  // Checking the box completes the goal immediately and celebrates — the
+  // score/outcome fields come after, so filling in detail never gates the
+  // moment. Unchecking reopens.
+  const toggleComplete = () => {
+    if (status === "completed") {
+      reopenGoal(goal.id);
+      return;
+    }
     setOutcomeDraft(goal.outcome ?? "");
-    setFinalScoreStr(goal.finalScore !== undefined ? String(goal.finalScore) : goal.targetScore !== undefined ? String(goal.targetScore) : "");
-    setCompleting(true);
+    setFinalScoreStr(goal.finalScore !== undefined ? String(goal.finalScore) : "");
+    completeGoal(goal.id);
+    setShowConfetti(true);
   };
-  const confirmComplete = () => {
-    if (finalScoreError) return;
-    completeGoal(goal.id, outcomeDraft.trim() || undefined, finalScoreNum);
-    setCompleting(false);
+
+  const saveOutcomeDetail = () => {
+    updateGoal(goal.id, {
+      outcome: outcomeDraft.trim() || undefined,
+      ...(finalScoreError ? {} : { finalScore: finalScoreNum }),
+    });
   };
 
   return (
@@ -471,7 +604,7 @@ export default function GoalDetail() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       >
-        <Link to="/dashboard" className="inline-flex items-center gap-1.5 self-start text-[14px] font-medium text-gray-extra-light transition-opacity hover:opacity-70">
+        <Link to="/goals" className="inline-flex items-center gap-1.5 self-start text-[14px] font-medium text-gray-extra-light transition-opacity hover:opacity-70">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M19 12H5M11 18l-6-6 6-6" />
           </svg>
@@ -491,20 +624,6 @@ export default function GoalDetail() {
                 {status === "completed" ? "Completed" : status === "needs-action" ? "Needs action" : "On track"}
               </span>
             </div>
-            {status === "completed" ? (
-              <button
-                onClick={() => reopenGoal(goal.id)}
-                className="text-[13px] font-medium text-gray-light underline decoration-1 underline-offset-4 transition-colors hover:text-gray-dark"
-              >
-                Reopen goal
-              </button>
-            ) : (
-              !completing && (
-                <button onClick={startCompleting} className="text-[13px] font-medium text-gray-light underline decoration-1 underline-offset-4 transition-colors hover:text-gray-dark">
-                  Mark complete
-                </button>
-              )
-            )}
           </div>
           <h1 className="font-serif text-[34px] font-medium leading-[1.1] text-gray-dark">
             <EditableText value={goal.name} onCommit={(name) => updateGoal(goal.id, { name })} label="goal name" />
@@ -567,28 +686,68 @@ export default function GoalDetail() {
               allowEmpty
             />
           </p>
-          <div className="mt-5 flex max-w-[420px] items-center gap-3.5">
-            <div className="h-1 flex-1 overflow-hidden rounded-full bg-[#222222]/15">
-              <div className="h-full rounded-full bg-gray-dark transition-[width] duration-300" style={{ width: `${pct}%` }} />
+          {/* Progress + completion — the donut carries the weight, and the
+              checkbox below it is the one momentous control on the page. */}
+          <div className="mt-6 flex flex-wrap items-center gap-7">
+            <GoalDonut done={done} total={total} pct={pct} complete={status === "completed"} />
+
+            <div className="flex min-w-0 flex-col gap-2">
+              <button
+                onClick={toggleComplete}
+                aria-pressed={status === "completed"}
+                className="group/complete flex items-center gap-3 self-start rounded-xl px-2 py-2 text-left transition-colors hover:bg-[#222222]/[0.05]"
+              >
+                <span
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${
+                    status === "completed" ? "border-gray-dark bg-gray-dark" : "border-[#949494] bg-white group-hover/complete:border-gray-dark"
+                  }`}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" className={status === "completed" ? "opacity-100" : "opacity-0"}>
+                    <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <span className="flex flex-col">
+                  <span className="text-[16px] font-semibold leading-[1.2] text-gray-dark">
+                    {status === "completed" ? "You completed this goal" : "I've completed this goal"}
+                  </span>
+                  <span className="text-[13px] text-gray-light">
+                    {status === "completed" ? "Uncheck to reopen it" : `${done} of ${total} tasks done — you can finish early`}
+                  </span>
+                </span>
+              </button>
+
+              {status === "completed" && goal.finalScore !== undefined && (
+                <div className="flex flex-wrap items-center gap-3 pl-2">
+                  <span className="font-serif text-[32px] font-medium leading-none text-gray-dark">{goal.finalScore}</span>
+                  {goal.targetScore !== undefined && (
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-[12px] font-semibold ${
+                        goal.finalScore >= goal.targetScore ? "bg-[#E5F5F1] text-[#037052]" : "bg-[#222222]/5 text-gray-light"
+                      }`}
+                    >
+                      {goal.finalScore >= goal.targetScore ? "Target reached" : `Target was ${goal.targetScore}`}
+                    </span>
+                  )}
+                  {goal.baselineScore !== undefined && <span className="text-[14px] text-gray-light">from {goal.baselineScore} baseline</span>}
+                </div>
+              )}
             </div>
-            <span className="whitespace-nowrap text-[13px] text-gray-light">
-              {done} of {total} tasks
-            </span>
           </div>
 
-          {completing && (
+          {/* Optional detail, filled in after the moment rather than gating it */}
+          {status === "completed" && (
             <div className="mt-5 flex flex-col gap-2.5 rounded-xl bg-white p-4">
               {scoreRange && (
-                <label className="flex max-w-[220px] flex-col gap-1.5">
+                <label className="flex max-w-[240px] flex-col gap-1.5">
                   <span className="text-[13px] font-medium text-gray-light">
                     Your score <span className="font-normal text-[#949494]">optional</span>
                   </span>
                   <input
                     type="number"
                     inputMode="numeric"
-                    autoFocus
                     value={finalScoreStr}
                     onChange={(e) => setFinalScoreStr(e.target.value)}
+                    onBlur={saveOutcomeDetail}
                     placeholder={`${goal.categories[0]} runs ${scoreRange.min}–${scoreRange.max}`}
                     className="rounded-lg border-[1.5px] border-[#949494] bg-white px-3 py-2.5 text-[15px] text-gray-dark outline-none placeholder:text-[#949494] focus:border-gray-dark"
                   />
@@ -600,47 +759,22 @@ export default function GoalDetail() {
                   What happened? <span className="font-normal text-[#949494]">optional</span>
                 </span>
                 <textarea
-                  autoFocus={!scoreRange}
                   rows={2}
                   value={outcomeDraft}
                   onChange={(e) => setOutcomeDraft(e.target.value)}
+                  onBlur={saveOutcomeDetail}
                   placeholder="Got into Stanford GSB, starting fall 2027."
                   className="resize-y rounded-lg border-[1.5px] border-[#949494] bg-white px-3 py-2.5 text-[15px] leading-[1.5] text-gray-dark outline-none placeholder:text-[#949494] focus:border-gray-dark"
                 />
               </label>
-              <div className="flex items-center gap-2.5">
-                <Button onClick={confirmComplete} size="md" variant="primary" className="font-medium">
-                  Mark goal complete
-                </Button>
-                <button onClick={() => setCompleting(false)} className="px-2.5 py-2 text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark">
-                  Cancel
-                </button>
-              </div>
             </div>
           )}
 
-          {status === "completed" && goal.finalScore !== undefined && (
-            <div className="mt-5 flex items-center gap-3">
-              <span className="text-[28px] font-semibold leading-none text-gray-dark">{goal.finalScore}</span>
-              {goal.targetScore !== undefined && (
-                <span
-                  className={`rounded-full px-2.5 py-1 text-[12px] font-semibold ${
-                    goal.finalScore >= goal.targetScore ? "bg-[#E5F5F1] text-[#037052]" : "bg-[#222222]/5 text-gray-light"
-                  }`}
-                >
-                  {goal.finalScore >= goal.targetScore ? "Target reached" : `Target was ${goal.targetScore}`}
-                </span>
-              )}
-              {goal.baselineScore !== undefined && (
-                <span className="text-[14px] text-gray-light">from {goal.baselineScore} baseline</span>
-              )}
-            </div>
-          )}
-
-          {status === "completed" && goal.outcome && (
-            <p className="mt-3 max-w-[560px] text-[15px] italic leading-[1.5] text-gray-dark">“{goal.outcome}”</p>
-          )}
+          {showConfetti && <Confetti onDone={() => setShowConfetti(false)} />}
         </div>
+
+        {/* Test goals lead with the numbers — the scores are the goal. */}
+        {goal.type === "test" && <TestOutcomes goal={goal} />}
 
         {/* Routines — their own section above the boards */}
         <section className={CARD}>
@@ -681,81 +815,74 @@ export default function GoalDetail() {
             ))}
             {goal.routines.length === 0 && <p className="text-[14px] text-[#949494]">No routines yet.</p>}
           </div>
-          <AddTask label="Add routine" placeholder="What do you want to repeat?" onAdd={(label) => addRoutine(goal.id, label, "Daily")} />
+          <AddTask
+            label="Add routine"
+            placeholder="What do you want to repeat?"
+            withCadence
+            onAdd={(label, cadence) => addRoutine(goal.id, label, cadence || "Daily")}
+          />
         </section>
 
-        {/* Projects — one board each, list or kanban, reorderable and
-            collapsible, stacked or side by side */}
-        {goal.projects.length > 0 && (
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between gap-3 px-1">
-              <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-gray-extra-light">Projects</span>
-              <div className="flex items-center gap-1 rounded-full bg-gray-hover p-1">
-                {(["stack", "grid"] as const).map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => setProjectsLayout(goal.id, v)}
-                    className={`rounded-full px-2.5 py-1 text-[12px] font-medium capitalize transition-colors ${
-                      (goal.projectsLayout ?? "stack") === v ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]" : "text-gray-light hover:text-gray-dark"
-                    }`}
-                  >
-                    {v === "grid" ? "Side by side" : "Stack"}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className={goal.projectsLayout === "grid" ? "grid grid-cols-1 items-start gap-5 lg:grid-cols-2" : "flex flex-col gap-5"}>
-              {goal.projects.map((project) => (
+        {/* The board — projects and "Other tasks" share one modular grid.
+            Each tile sets its own width and view, so a wide kanban can sit
+            above two narrow lists; drag any tile to reorder. */}
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
+            {boardTiles.map((tile) => {
+              const isOtherTasks = tile.id === OTHER_TASKS_TILE_ID;
+              return (
                 <ProjectBoard
-                  key={project.id}
-                  goal={goal}
-                  project={project}
-                  dragging={dragProjectId === project.id}
-                  onDragStart={() => setDragProjectId(project.id)}
-                  onDragEnd={() => setDragProjectId(null)}
-                  onDropOn={() => {
-                    if (dragProjectId) reorderProject(goal.id, dragProjectId, project.id);
-                    setDragProjectId(null);
+                  key={tile.id}
+                  tile={tile}
+                  dragging={dragBoardId === tile.id}
+                  onDragStart={() => setDragBoardId(tile.id)}
+                  onDragEnd={() => setDragBoardId(null)}
+                  onDropOn={(edge, draggedId, span) => {
+                    reorderBoardItem(goal.id, draggedId, tile.id, edge, span);
+                    setDragBoardId(null);
                   }}
+                  onOpenTaskDetail={(task) => setSelectedTaskId(task.id)}
+                  onDeleteTask={requestDeleteTask}
+                  onSetView={(view) => (isOtherTasks ? setOtherTasksView(goal.id, view) : setProjectView(goal.id, tile.id, view))}
+                  onSetSpan={(span) => (isOtherTasks ? setOtherTasksSpan(goal.id, span) : setProjectSpan(goal.id, tile.id, span))}
+                  onToggleCollapsed={() => (isOtherTasks ? toggleOtherTasksCollapsed(goal.id) : toggleProjectCollapsed(goal.id, tile.id))}
+                  onRename={isOtherTasks ? undefined : (name) => updateProject(goal.id, tile.id, { name })}
+                  onSetNote={isOtherTasks ? undefined : (note) => updateProject(goal.id, tile.id, { note })}
+                  onDelete={isOtherTasks ? undefined : () => deleteProject(goal.id, tile.id)}
+                  onAddTask={(title) => createTask({ title, goalId: goal.id, projectId: isOtherTasks ? null : tile.id })}
                 />
-              ))}
-            </div>
+              );
+            })}
           </div>
-        )}
-
-        {/* Standalone tasks */}
-        <section className={CARD}>
-          <h2 className="mb-1 text-[19px] font-semibold leading-[1.2] text-gray-dark">Other tasks</h2>
-          <p className="mb-3 text-[14px] text-[#707070]">Not part of a project.</p>
-          <div className="-mx-2 flex flex-col gap-[2px]">
-            {goal.otherTasks.map((task) => (
-              <TaskRow
-                key={task.id}
-                task={task}
-                onToggle={() => toggleTask(goal.id, task.id)}
-                onRename={(title) => updateTask(goal.id, task.id, { title })}
-                onSetDue={(dueDate) => updateTask(goal.id, task.id, { dueDate })}
-                onSetNote={(note) => updateTask(goal.id, task.id, { note })}
-                onDelete={() => deleteTask(goal.id, task.id)}
-              />
-            ))}
-          </div>
+          {/* Pre-assigned to this goal, but the picker lets you send a new task
+              to a project, another goal, or nowhere. */}
           <div className="flex flex-wrap items-center gap-2">
-            <AddTask onAdd={(title) => addTask(goal.id, null, title)} />
-            <AddTask label="Add project" placeholder="What's the project called?" onAdd={(name) => addProject(goal.id, name)} />
+            <QuickAddTask defaultGoalId={goal.id} className="font-medium" />
+            <AddTask
+              label="Add project"
+              placeholder="What's the project called?"
+              className="font-medium"
+              onAdd={(name) => addProject(goal.id, name)}
+            />
           </div>
-        </section>
+        </div>
 
-        {/* Content queue — horizontal discovery row, pinned at the bottom */}
-        {goal.contentQueue.length > 0 && (
-          <section className={CARD}>
-            <div className="mb-1 flex items-center justify-between gap-3">
-              <h2 className="text-[19px] font-semibold leading-[1.2] text-gray-dark">Worth your time</h2>
-              <Link to="/courses" className="shrink-0 text-[14px] font-medium text-gray-extra-light transition-opacity hover:opacity-70">
-                See all
-              </Link>
-            </div>
-            <p className="mb-4 text-[14px] text-[#707070]">Picked for your {goal.categories[0]} goal.</p>
+        {/* Content queue — horizontal discovery row, pinned at the bottom.
+            Always present, even with nothing queued yet, so every goal has
+            somewhere to discover content from. */}
+        <section className={CARD}>
+          <div className="mb-1 flex items-center justify-between gap-3">
+            <h2 className="text-[19px] font-semibold leading-[1.2] text-gray-dark">Worth your time</h2>
+            <Link to="/courses" className="shrink-0 text-[14px] font-medium text-gray-extra-light transition-opacity hover:opacity-70">
+              See all
+            </Link>
+          </div>
+          <p className="mb-4 text-[14px] text-[#707070]">Picked for your {goal.categories[0]} goal.</p>
+          {goal.contentQueue.length === 0 ? (
+            <p className="rounded-xl bg-[#F3F1E6] p-4 text-[14px] text-gray-light">
+              Nothing queued yet — browse courses and livestreams to add some here.
+            </p>
+          ) : (
             <div className="scrollbar-hide -mx-1 flex gap-4 overflow-x-auto px-1 pb-1">
               {goal.contentQueue.map((item) => (
                 <div key={item.id} className="flex w-[220px] shrink-0 flex-col gap-2.5">
@@ -788,8 +915,8 @@ export default function GoalDetail() {
                 </div>
               ))}
             </div>
-          </section>
-        )}
+          )}
+        </section>
 
         <button
           onClick={confirmDeleteGoal}
@@ -798,6 +925,30 @@ export default function GoalDetail() {
           Delete this goal
         </button>
       </motion.div>
+
+      <TaskDetailModal
+        task={selectedTask?.task ?? null}
+        goal={goal}
+        projectName={selectedTask?.projectName ?? null}
+        goals={goals}
+        onClose={() => setSelectedTaskId(null)}
+        onToggle={() => selectedTask && toggleTask(selectedTask.task.id)}
+        onSave={(patch) => selectedTask && updateTask(selectedTask.task.id, patch)}
+        onDelete={() => selectedTask && deleteTask(selectedTask.task.id)}
+        onReassign={(target) => selectedTask && assignTask(selectedTask.task.id, target)}
+      />
+
+      <ConfirmModal
+        open={!!confirmDeleteTarget}
+        title="Delete this task?"
+        body={`${confirmDeleteTarget?.assignedBy?.name ?? "Your expert"} assigned "${confirmDeleteTarget?.title ?? "this task"}" — deleting it removes it for both of you.`}
+        confirmLabel="Delete task"
+        onConfirm={() => {
+          if (confirmDeleteTarget) deleteTask(confirmDeleteTarget.id);
+          setConfirmDeleteTarget(null);
+        }}
+        onClose={() => setConfirmDeleteTarget(null)}
+      />
     </PageShell>
   );
 }

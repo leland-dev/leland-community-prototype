@@ -37,6 +37,10 @@ export type Project = {
   tasks: Task[];
   view?: "list" | "kanban";
   collapsed?: boolean;
+  // How wide this project sits in the board grid. Set per project rather than
+  // globally, so the page composes like Notion blocks — a wide kanban next to
+  // two narrow lists — instead of forcing one layout on everything.
+  span?: "full" | "half";
 };
 
 // An item in the goal's content queue ("Worth your time" on goal detail).
@@ -48,9 +52,22 @@ export type GoalContentItem = {
   action: string; // "Watch" / "Read" / "Save"
 };
 
+// One sitting of a test — a practice run or the real thing. Sections are
+// per-exam (see EXAM_SECTIONS); total is what gets reported.
+export type TestAttempt = {
+  id: string;
+  kind: "practice" | "official";
+  date: string; // ISO date
+  total: number;
+  sections?: Record<string, number>;
+  note?: string;
+  // Set when an expert logged or reviewed the sitting, so the customer can see
+  // whose read this was — same "via" attribution used on tasks.
+  loggedBy?: { name: string; avatarUrl: string };
+};
+
 export type GoalType = "ai" | "career" | "school" | "test";
 export type GoalStatus = "on-track" | "needs-action" | "completed";
-export type ProjectsLayout = "stack" | "grid";
 
 export type Goal = {
   id: string;
@@ -67,9 +84,16 @@ export type Goal = {
   // expert context the structured fields don't carry.
   description?: string;
   projects: Project[];
-  projectsLayout?: ProjectsLayout;
   routines: Routine[];
   otherTasks: Task[]; // standalone tasks with no project (screen 2's "Other tasks")
+  // The "Other tasks" bucket sits in the same reorderable, resizable board as
+  // projects, so it carries the same per-tile view/span/collapsed state.
+  otherTasksView?: "list" | "kanban";
+  otherTasksSpan?: "full" | "half";
+  otherTasksCollapsed?: boolean;
+  // Where "Other tasks" sits among `projects` in the board's render order.
+  // Undefined means "after every project" (today's default position).
+  otherTasksIndex?: number;
   contentQueue: GoalContentItem[];
   // Set together, on the same action — a goal is either open or done, with the
   // result recorded at the moment it's closed out.
@@ -81,6 +105,9 @@ export type Goal = {
   targetScore?: number;
   baselineScore?: number;
   finalScore?: number;
+  // Per-section targets, keyed by section name, plus every sitting logged.
+  sectionTargets?: Record<string, number>;
+  attempts?: TestAttempt[];
 };
 
 // Reference "today" the mock fixtures below are written against, mirroring
@@ -188,6 +215,56 @@ export function upNextItem(goal: Goal): UpNext | null {
 
 export const myGoals: Goal[] = [
   {
+    id: "gmat-720",
+    name: "Hit 720 on the GMAT",
+    type: "test",
+    categories: ["GMAT"],
+    targetDate: "2026-10-03",
+    targetLabel: "Test date · Oct 3, 2026",
+    description: "Retaking after a 640. Quant is the gap — verbal is already where it needs to be.",
+    targetScore: 720,
+    baselineScore: 640,
+    sectionTargets: { Quantitative: 48, Verbal: 40 },
+    attempts: [
+      { id: "a-1", kind: "official", date: "2026-04-11", total: 640, sections: { Quantitative: 41, Verbal: 36 }, note: "First sitting. Ran out of time on the last five quant questions." },
+      { id: "a-2", kind: "practice", date: "2026-06-20", total: 660, sections: { Quantitative: 43, Verbal: 37 } },
+      { id: "a-3", kind: "practice", date: "2026-07-18", total: 690, sections: { Quantitative: 45, Verbal: 39 }, note: "Pacing drills are working.", loggedBy: { name: "Priya", avatarUrl: pic7 } },
+      { id: "a-4", kind: "practice", date: "2026-08-08", total: 700, sections: { Quantitative: 46, Verbal: 40 }, loggedBy: { name: "Priya", avatarUrl: pic7 } },
+    ],
+    routines: [
+      { id: "r-gmat-drill", label: "Timed quant set", cadence: "Every weekday", streak: 6, lastCheckedAt: "2026-08-13" },
+      { id: "r-gmat-log", label: "Review error log", cadence: "Sundays", streak: 3 },
+    ],
+    otherTasks: [{ id: "t-gmat-book", title: "Book the Oct 3 sitting", status: "todo", dueDate: "2026-08-20" }],
+    contentQueue: [
+      { id: "c-gmat-1", title: "How I raised my GMAT score 80 points", meta: "Marcus Thomas · 15 min video", image: eventImg1, action: "Watch" },
+      { id: "c-gmat-2", title: "Quant pacing framework", meta: "Priya Raman · Guide, 10 pages", image: eventImg2, action: "Read" },
+      { id: "c-gmat-3", title: "Data sufficiency shortcuts", meta: "Livestream · Wed, Aug 26 at 6:00 PM", image: eventImg3, action: "Save" },
+    ],
+    projects: [
+      {
+        id: "p-gmat-quant",
+        name: "Quant rebuild",
+        note: "The 8-point gap is almost all here.",
+        tasks: [
+          { id: "t-q1", title: "Rebuild number properties from scratch", status: "done" },
+          { id: "t-q2", title: "Drill data sufficiency to 80% accuracy", status: "in-progress" },
+          { id: "t-q3", title: "Two timed quant sections back to back", status: "todo", dueDate: "2026-08-25" },
+        ],
+      },
+      {
+        id: "p-gmat-mocks",
+        name: "Mocks",
+        note: "Full-length, under real timing.",
+        span: "half",
+        tasks: [
+          { id: "t-m1", title: "Mock 4 under timing", status: "todo", dueDate: "2026-09-05" },
+          { id: "t-m2", title: "Final mock the week before", status: "todo", dueDate: "2026-09-26" },
+        ],
+      },
+    ],
+  },
+  {
     id: "stanford-gsb",
     name: "Get into Stanford GSB",
     type: "school",
@@ -277,3 +354,75 @@ export const myGoals: Goal[] = [
     ],
   },
 ];
+
+// Tasks that belong to no goal. Real to-do lists always accumulate things that
+// don't ladder up to a goal yet ("book the flight"), and forcing every task
+// into a goal makes people either skip capture or invent junk goals. These can
+// be assigned to a goal (and optionally a project) later.
+export const myStandaloneTasks: Task[] = [
+  { id: "t-solo-1", title: "Renew passport", status: "todo", dueDate: "2026-09-01" },
+  { id: "t-solo-2", title: "Ask Jessica about her GSB interviewer", status: "todo" },
+];
+
+// ─── Test outcomes ──────────────────────────────────────────────────────────
+
+// Attempts oldest-first, which is the order every chart and delta below wants.
+export function sortedAttempts(goal: Goal): TestAttempt[] {
+  return [...(goal.attempts ?? [])].sort((a, b) => a.date.localeCompare(b.date));
+}
+
+export type TestSummary = {
+  attempts: TestAttempt[];
+  baseline: TestAttempt | null;
+  latest: TestAttempt | null;
+  best: TestAttempt | null;
+  bestOfficial: TestAttempt | null;
+  // Change from the previous sitting to the latest one.
+  delta: number | null;
+  // Total gained since the first sitting.
+  gained: number | null;
+  target?: number;
+  hitTarget: boolean;
+};
+
+export function testSummary(goal: Goal): TestSummary {
+  const attempts = sortedAttempts(goal);
+  const baseline = attempts[0] ?? null;
+  const latest = attempts.length ? attempts[attempts.length - 1] : null;
+  const best = attempts.reduce<TestAttempt | null>((acc, a) => (!acc || a.total > acc.total ? a : acc), null);
+  const bestOfficial = attempts
+    .filter((a) => a.kind === "official")
+    .reduce<TestAttempt | null>((acc, a) => (!acc || a.total > acc.total ? a : acc), null);
+  const previous = attempts.length > 1 ? attempts[attempts.length - 2] : null;
+
+  return {
+    attempts,
+    baseline,
+    latest,
+    best,
+    bestOfficial,
+    delta: latest && previous ? latest.total - previous.total : null,
+    gained: latest && baseline && latest !== baseline ? latest.total - baseline.total : null,
+    target: goal.targetScore,
+    // Measured against the best official sitting — a practice high doesn't get
+    // you into school.
+    hitTarget: goal.targetScore !== undefined && (bestOfficial?.total ?? -Infinity) >= goal.targetScore,
+  };
+}
+
+// Latest recorded value and movement for one scored section.
+export function sectionProgress(goal: Goal, section: string): { latest?: number; first?: number; delta: number | null; target?: number } {
+  const withSection = sortedAttempts(goal).filter((a) => a.sections?.[section] !== undefined);
+  const first = withSection[0]?.sections?.[section];
+  const latest = withSection.length ? withSection[withSection.length - 1].sections?.[section] : undefined;
+  return {
+    latest,
+    first,
+    delta: latest !== undefined && first !== undefined && withSection.length > 1 ? latest - first : null,
+    target: goal.sectionTargets?.[section],
+  };
+}
+
+export function attemptDateLabel(iso: string): string {
+  return shortDate(parseISODate(iso), true);
+}

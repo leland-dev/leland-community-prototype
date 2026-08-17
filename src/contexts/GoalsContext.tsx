@@ -2,17 +2,23 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import {
   buildTargetLabel,
   myGoals,
+  myStandaloneTasks,
   TODAY_ISO,
   type Goal,
   type GoalContentItem,
   type Project,
-  type ProjectsLayout,
   type Routine,
   type Task,
   type TaskStatus,
+  type TestAttempt,
   type GoalType,
 } from "../data/goals";
 import type { Plan } from "../data/goalPlans";
+
+// Sentinel id for the "Other tasks" tile in the goal-detail board — it isn't a
+// real Project, but reorderBoardItem treats it as one so it can sit anywhere
+// among the project cards.
+export const OTHER_TASKS_TILE_ID = "__other-tasks__";
 
 // Goals are mutated from three places — the dashboard card, goal detail, and
 // the new-goal flow — so they live in one shared store. Prototype-only:
@@ -20,30 +26,47 @@ import type { Plan } from "../data/goalPlans";
 interface GoalsContextValue {
   goals: Goal[];
   getGoal: (id: string) => Goal | undefined;
-  toggleTask: (goalId: string, taskId: string) => void;
+  // Tasks are addressed by their own id, not by (goalId, taskId) — a task can
+  // live in a project, directly on a goal, or on nothing at all, and callers
+  // shouldn't have to know which.
+  standaloneTasks: Task[];
+  toggleTask: (taskId: string) => void;
   toggleRoutine: (goalId: string, routineId: string) => void;
-  moveTask: (goalId: string, taskId: string, status: TaskStatus) => void;
-  addTask: (goalId: string, projectId: string | null, title: string) => void;
+  moveTask: (taskId: string, status: TaskStatus) => void;
+  createTask: (input: { title: string; goalId?: string | null; projectId?: string | null; dueDate?: string }) => void;
+  // Move an existing task between containers. Omit both ids to unassign it.
+  assignTask: (taskId: string, target: { goalId?: string | null; projectId?: string | null }) => void;
+  taskLocation: (taskId: string) => { goal: Goal | null; projectId: string | null };
   setProjectView: (goalId: string, projectId: string, view: "list" | "kanban") => void;
   toggleProjectCollapsed: (goalId: string, projectId: string) => void;
-  reorderProject: (goalId: string, projectId: string, targetId: string) => void;
-  setProjectsLayout: (goalId: string, layout: ProjectsLayout) => void;
+  // itemId/targetId are project ids or OTHER_TASKS_TILE_ID — the board treats
+  // "Other tasks" as just another reorderable tile.
+  reorderBoardItem: (goalId: string, itemId: string, targetId: string, edge?: "before" | "after", span?: "full" | "half") => void;
+  setProjectSpan: (goalId: string, projectId: string, span: "full" | "half") => void;
+  setOtherTasksView: (goalId: string, view: "list" | "kanban") => void;
+  setOtherTasksSpan: (goalId: string, span: "full" | "half") => void;
+  toggleOtherTasksCollapsed: (goalId: string) => void;
   createGoal: (input: CreateGoalInput) => Goal;
   // Edits
-  updateGoal: (goalId: string, patch: Partial<Pick<Goal, "name" | "targetDate" | "description" | "targetScore" | "baselineScore">>) => void;
+  updateGoal: (goalId: string, patch: Partial<Pick<Goal, "name" | "targetDate" | "description" | "targetScore" | "baselineScore" | "outcome" | "finalScore">>) => void;
   deleteGoal: (goalId: string) => void;
   completeGoal: (goalId: string, outcome?: string, finalScore?: number) => void;
   reopenGoal: (goalId: string) => void;
   updateContentItem: (goalId: string, itemId: string, patch: Partial<Pick<GoalContentItem, "title" | "meta">>) => void;
   deleteContentItem: (goalId: string, itemId: string) => void;
-  updateTask: (goalId: string, taskId: string, patch: Partial<Pick<Task, "title" | "dueDate" | "note">>) => void;
-  deleteTask: (goalId: string, taskId: string) => void;
+  updateTask: (taskId: string, patch: Partial<Pick<Task, "title" | "dueDate" | "note">>) => void;
+  deleteTask: (taskId: string) => void;
   addProject: (goalId: string, name: string) => void;
   updateProject: (goalId: string, projectId: string, patch: Partial<Pick<Project, "name" | "note">>) => void;
   deleteProject: (goalId: string, projectId: string) => void;
   addRoutine: (goalId: string, label: string, cadence: string) => void;
   updateRoutine: (goalId: string, routineId: string, patch: Partial<Pick<Routine, "label" | "cadence">>) => void;
   deleteRoutine: (goalId: string, routineId: string) => void;
+  // Test outcomes
+  addAttempt: (goalId: string, attempt: Omit<TestAttempt, "id">) => void;
+  updateAttempt: (goalId: string, attemptId: string, patch: Partial<Omit<TestAttempt, "id">>) => void;
+  deleteAttempt: (goalId: string, attemptId: string) => void;
+  setSectionTarget: (goalId: string, section: string, target: number | undefined) => void;
 }
 
 export type CreateGoalInput = {
@@ -85,12 +108,32 @@ function mapTasks(goal: Goal, fn: (task: Task) => Task): Goal {
 
 export function GoalsProvider({ children }: { children: ReactNode }) {
   const [goals, setGoals] = useState<Goal[]>(myGoals);
+  const [standaloneTasks, setStandaloneTasks] = useState<Task[]>(myStandaloneTasks);
 
   const getGoal = useCallback((id: string) => goals.find((g) => g.id === id), [goals]);
 
-  const toggleTask = useCallback((goalId: string, taskId: string) => {
-    setGoals((prev) => mapGoal(prev, goalId, (goal) => mapTasks(goal, (t) => (t.id === taskId ? flipTask(t) : t))));
+  // Apply fn to whichever container holds taskId — a project, a goal's loose
+  // tasks, or the standalone list.
+  const patchTaskEverywhere = useCallback((taskId: string, fn: (t: Task) => Task) => {
+    const apply = (t: Task) => (t.id === taskId ? fn(t) : t);
+    setGoals((prev) => prev.map((goal) => mapTasks(goal, apply)));
+    setStandaloneTasks((prev) => prev.map(apply));
   }, []);
+
+  const toggleTask = useCallback((taskId: string) => patchTaskEverywhere(taskId, flipTask), [patchTaskEverywhere]);
+
+  const taskLocation = useCallback(
+    (taskId: string) => {
+      for (const goal of goals) {
+        for (const p of goal.projects) {
+          if (p.tasks.some((t) => t.id === taskId)) return { goal, projectId: p.id };
+        }
+        if (goal.otherTasks.some((t) => t.id === taskId)) return { goal, projectId: null };
+      }
+      return { goal: null, projectId: null };
+    },
+    [goals],
+  );
 
   const toggleRoutine = useCallback((goalId: string, routineId: string) => {
     setGoals((prev) =>
@@ -109,27 +152,65 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  const moveTask = useCallback((goalId: string, taskId: string, status: TaskStatus) => {
-    setGoals((prev) =>
-      mapGoal(prev, goalId, (goal) =>
-        mapTasks(goal, (t) => {
-          if (t.id !== taskId || t.status === status) return t;
-          return { ...t, status, previousStatus: status === "done" ? t.status : undefined };
-        }),
-      ),
-    );
-  }, []);
+  const moveTask = useCallback(
+    (taskId: string, status: TaskStatus) => {
+      patchTaskEverywhere(taskId, (t) =>
+        t.status === status ? t : { ...t, status, previousStatus: status === "done" ? t.status : undefined },
+      );
+    },
+    [patchTaskEverywhere],
+  );
 
-  const addTask = useCallback((goalId: string, projectId: string | null, title: string) => {
-    const task: Task = { id: nextId("task"), title, status: "todo" };
-    setGoals((prev) =>
-      mapGoal(prev, goalId, (goal) =>
-        projectId === null
-          ? { ...goal, otherTasks: [...goal.otherTasks, task] }
-          : { ...goal, projects: goal.projects.map((p) => (p.id === projectId ? { ...p, tasks: [...p.tasks, task] } : p)) },
-      ),
-    );
-  }, []);
+  const createTask = useCallback(
+    ({ title, goalId, projectId, dueDate }: { title: string; goalId?: string | null; projectId?: string | null; dueDate?: string }) => {
+      const task: Task = { id: nextId("task"), title, status: "todo", dueDate };
+      if (!goalId) {
+        setStandaloneTasks((prev) => [...prev, task]);
+        return;
+      }
+      setGoals((prev) =>
+        mapGoal(prev, goalId, (goal) =>
+          !projectId
+            ? { ...goal, otherTasks: [...goal.otherTasks, task] }
+            : { ...goal, projects: goal.projects.map((p) => (p.id === projectId ? { ...p, tasks: [...p.tasks, task] } : p)) },
+        ),
+      );
+    },
+    [],
+  );
+
+  const assignTask = useCallback(
+    (taskId: string, target: { goalId?: string | null; projectId?: string | null }) => {
+      // Resolve the task up front from current state, then update each list
+      // independently — no cross-updater side effects, so this stays correct
+      // under StrictMode's double-invoked updaters.
+      const moved =
+        standaloneTasks.find((t) => t.id === taskId) ??
+        goals.flatMap((g) => [...g.projects.flatMap((p) => p.tasks), ...g.otherTasks]).find((t) => t.id === taskId);
+      if (!moved) return;
+
+      const without = (tasks: Task[]) => tasks.filter((t) => t.id !== taskId);
+
+      setStandaloneTasks((prev) => (target.goalId ? without(prev) : [...without(prev), moved]));
+
+      setGoals((prev) =>
+        prev
+          .map((goal) => ({
+            ...goal,
+            projects: goal.projects.map((p) => ({ ...p, tasks: without(p.tasks) })),
+            otherTasks: without(goal.otherTasks),
+          }))
+          .map((goal) =>
+            goal.id !== target.goalId
+              ? goal
+              : !target.projectId
+                ? { ...goal, otherTasks: [...goal.otherTasks, moved] }
+                : { ...goal, projects: goal.projects.map((p) => (p.id === target.projectId ? { ...p, tasks: [...p.tasks, moved] } : p)) },
+          ),
+      );
+    },
+    [goals, standaloneTasks],
+  );
 
   const setProjectView = useCallback((goalId: string, projectId: string, view: "list" | "kanban") => {
     setGoals((prev) =>
@@ -149,26 +230,65 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  // Drag-to-reorder: dropping project A onto project B swaps their positions
-  // in the list — simple and predictable, versus inserting-before/after which
-  // gets confusing once cards are different sizes (collapsed vs. not).
-  const reorderProject = useCallback((goalId: string, projectId: string, targetId: string) => {
-    if (projectId === targetId) return;
+  // Drag-to-reorder, Notion-style: the dragged tile is lifted out and
+  // inserted before or after the drop target, depending on which edge of it
+  // the cursor was nearest. Projects and the "Other tasks" tile share one
+  // order — build a combined id list (projects, with OTHER_TASKS_TILE_ID
+  // spliced in at its stored position), reorder that, then split it back into
+  // `projects` plus a new `otherTasksIndex`.
+  //
+  // Dropping on the left/right edge tucks the tile in beside the target, so
+  // it's forced to half width; dropping on the top/bottom edge gives it a
+  // fresh row of its own, so it's forced back to full width.
+  const reorderBoardItem = useCallback(
+    (goalId: string, itemId: string, targetId: string, edge: "before" | "after" = "before", span: "full" | "half" = "full") => {
+      if (itemId === targetId) return;
+      setGoals((prev) =>
+        mapGoal(prev, goalId, (goal) => {
+          const order = goal.projects.map((p) => p.id);
+          const otherIdx = Math.min(goal.otherTasksIndex ?? order.length, order.length);
+          order.splice(otherIdx, 0, OTHER_TASKS_TILE_ID);
+
+          const from = order.indexOf(itemId);
+          if (from === -1) return goal;
+          const rest = [...order];
+          rest.splice(from, 1);
+          const targetIdx = rest.indexOf(targetId);
+          if (targetIdx === -1) return goal;
+          rest.splice(edge === "before" ? targetIdx : targetIdx + 1, 0, itemId);
+
+          const newOtherTasksIndex = rest.indexOf(OTHER_TASKS_TILE_ID);
+          const projectById = new Map(goal.projects.map((p) => [p.id, p]));
+          const projects = rest
+            .filter((id) => id !== OTHER_TASKS_TILE_ID)
+            .map((id) => (id === itemId ? { ...projectById.get(id)!, span } : projectById.get(id)!));
+          const otherTasksSpan = itemId === OTHER_TASKS_TILE_ID ? span : goal.otherTasksSpan;
+          return { ...goal, projects, otherTasksIndex: newOtherTasksIndex, otherTasksSpan };
+        }),
+      );
+    },
+    [],
+  );
+
+  const setProjectSpan = useCallback((goalId: string, projectId: string, span: "full" | "half") => {
     setGoals((prev) =>
-      mapGoal(prev, goalId, (goal) => {
-        const from = goal.projects.findIndex((p) => p.id === projectId);
-        const to = goal.projects.findIndex((p) => p.id === targetId);
-        if (from === -1 || to === -1) return goal;
-        const projects = [...goal.projects];
-        const [moved] = projects.splice(from, 1);
-        projects.splice(to, 0, moved);
-        return { ...goal, projects };
-      }),
+      mapGoal(prev, goalId, (goal) => ({
+        ...goal,
+        projects: goal.projects.map((p) => (p.id === projectId ? { ...p, span } : p)),
+      })),
     );
   }, []);
 
-  const setProjectsLayout = useCallback((goalId: string, projectsLayout: ProjectsLayout) => {
-    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, projectsLayout })));
+  const setOtherTasksView = useCallback((goalId: string, view: "list" | "kanban") => {
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, otherTasksView: view })));
+  }, []);
+
+  const setOtherTasksSpan = useCallback((goalId: string, span: "full" | "half") => {
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, otherTasksSpan: span })));
+  }, []);
+
+  const toggleOtherTasksCollapsed = useCallback((goalId: string) => {
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, otherTasksCollapsed: !goal.otherTasksCollapsed })));
   }, []);
 
   const createGoal = useCallback((input: CreateGoalInput) => {
@@ -201,7 +321,7 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
 
   // ─── Edits ────────────────────────────────────────────────────────────────
 
-  const updateGoal = useCallback((goalId: string, patch: Partial<Pick<Goal, "name" | "targetDate" | "description" | "targetScore" | "baselineScore">>) => {
+  const updateGoal = useCallback((goalId: string, patch: Partial<Pick<Goal, "name" | "targetDate" | "description" | "targetScore" | "baselineScore" | "outcome" | "finalScore">>) => {
     setGoals((prev) =>
       mapGoal(prev, goalId, (goal) => {
         const next = { ...goal, ...patch };
@@ -237,18 +357,20 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
     setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, contentQueue: goal.contentQueue.filter((item) => item.id !== itemId) })));
   }, []);
 
-  const updateTask = useCallback((goalId: string, taskId: string, patch: Partial<Pick<Task, "title" | "dueDate" | "note">>) => {
-    setGoals((prev) => mapGoal(prev, goalId, (goal) => mapTasks(goal, (t) => (t.id === taskId ? { ...t, ...patch } : t))));
-  }, []);
+  const updateTask = useCallback(
+    (taskId: string, patch: Partial<Pick<Task, "title" | "dueDate" | "note">>) => patchTaskEverywhere(taskId, (t) => ({ ...t, ...patch })),
+    [patchTaskEverywhere],
+  );
 
-  const deleteTask = useCallback((goalId: string, taskId: string) => {
+  const deleteTask = useCallback((taskId: string) => {
     setGoals((prev) =>
-      mapGoal(prev, goalId, (goal) => ({
+      prev.map((goal) => ({
         ...goal,
         projects: goal.projects.map((p) => ({ ...p, tasks: p.tasks.filter((t) => t.id !== taskId) })),
         otherTasks: goal.otherTasks.filter((t) => t.id !== taskId),
       })),
     );
+    setStandaloneTasks((prev) => prev.filter((t) => t.id !== taskId));
   }, []);
 
   const addProject = useCallback((goalId: string, name: string) => {
@@ -290,22 +412,54 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
     setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, routines: goal.routines.filter((r) => r.id !== routineId) })));
   }, []);
 
+  const addAttempt = useCallback((goalId: string, attempt: Omit<TestAttempt, "id">) => {
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, attempts: [...(goal.attempts ?? []), { ...attempt, id: nextId("attempt") }] })));
+  }, []);
+
+  const updateAttempt = useCallback((goalId: string, attemptId: string, patch: Partial<Omit<TestAttempt, "id">>) => {
+    setGoals((prev) =>
+      mapGoal(prev, goalId, (goal) => ({
+        ...goal,
+        attempts: (goal.attempts ?? []).map((a) => (a.id === attemptId ? { ...a, ...patch } : a)),
+      })),
+    );
+  }, []);
+
+  const deleteAttempt = useCallback((goalId: string, attemptId: string) => {
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, attempts: (goal.attempts ?? []).filter((a) => a.id !== attemptId) })));
+  }, []);
+
+  const setSectionTarget = useCallback((goalId: string, section: string, target: number | undefined) => {
+    setGoals((prev) =>
+      mapGoal(prev, goalId, (goal) => {
+        const next = { ...(goal.sectionTargets ?? {}) };
+        if (target === undefined) delete next[section];
+        else next[section] = target;
+        return { ...goal, sectionTargets: next };
+      }),
+    );
+  }, []);
+
   const value = useMemo(
     () => ({
-      goals, getGoal, toggleTask, toggleRoutine, moveTask, addTask,
-      setProjectView, toggleProjectCollapsed, reorderProject, setProjectsLayout, createGoal,
+      goals, standaloneTasks, getGoal, toggleTask, toggleRoutine, moveTask, createTask, assignTask, taskLocation,
+      setProjectView, toggleProjectCollapsed, reorderBoardItem, setProjectSpan, createGoal,
+      setOtherTasksView, setOtherTasksSpan, toggleOtherTasksCollapsed,
       updateGoal, deleteGoal, completeGoal, reopenGoal, updateTask, deleteTask,
       addProject, updateProject, deleteProject,
       addRoutine, updateRoutine, deleteRoutine,
       updateContentItem, deleteContentItem,
+      addAttempt, updateAttempt, deleteAttempt, setSectionTarget,
     }),
     [
-      goals, getGoal, toggleTask, toggleRoutine, moveTask, addTask,
-      setProjectView, toggleProjectCollapsed, reorderProject, setProjectsLayout, createGoal,
+      goals, standaloneTasks, getGoal, toggleTask, toggleRoutine, moveTask, createTask, assignTask, taskLocation,
+      setProjectView, toggleProjectCollapsed, reorderBoardItem, setProjectSpan, createGoal,
+      setOtherTasksView, setOtherTasksSpan, toggleOtherTasksCollapsed,
       updateGoal, deleteGoal, completeGoal, reopenGoal, updateTask, deleteTask,
       addProject, updateProject, deleteProject,
       addRoutine, updateRoutine, deleteRoutine,
       updateContentItem, deleteContentItem,
+      addAttempt, updateAttempt, deleteAttempt, setSectionTarget,
     ],
   );
 

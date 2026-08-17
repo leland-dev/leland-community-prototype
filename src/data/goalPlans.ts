@@ -139,7 +139,7 @@ export const DATE_LABEL: Record<GoalType, string> = {
 // Auto-derived goal name from the first selected category. Career names key off
 // intent too — "Land a Product Management role" is wrong for someone whose goal
 // is a promotion or sharper skills in the role they already have.
-export function deriveGoalName(type: GoalType, category: string, answers: Answers = {}): string {
+export function deriveGoalName(type: GoalType, category: string, answers: Answers = {}, targetScore?: number): string {
   if (!category) return "";
   switch (type) {
     case "school":
@@ -156,7 +156,9 @@ export function deriveGoalName(type: GoalType, category: string, answers: Answer
           return `Land a ${category} role`;
       }
     case "test":
-      return `Hit my ${category} target score`;
+      // Once they've named a number, the number is the goal — "Hit 720 on the
+      // GMAT" is what they'd actually call it.
+      return targetScore !== undefined ? `Hit ${targetScore} on the ${category}` : `Hit my ${category} target score`;
     case "ai":
       return category === "AI Fundamentals" ? "Get fluent with AI" : `Get good at ${category}`;
   }
@@ -204,6 +206,67 @@ export const TEST_SCORE_RANGE: Record<string, { min: number; max: number }> = {
 
 export function scoreRangeFor(category: string): { min: number; max: number } | null {
   return TEST_SCORE_RANGE[category] ?? null;
+}
+
+// The sections an exam actually reports a score for, with each section's own
+// scale. Distinct from the prep-task names in SECTIONS above — those are study
+// topics, these are scored components you can track a number against.
+export type ExamSection = { name: string; min: number; max: number };
+
+export const EXAM_SECTIONS: Record<string, ExamSection[]> = {
+  GMAT: [
+    { name: "Quantitative", min: 6, max: 51 },
+    { name: "Verbal", min: 6, max: 51 },
+  ],
+  "GMAT Focus": [
+    { name: "Quantitative", min: 60, max: 90 },
+    { name: "Verbal", min: 60, max: 90 },
+    { name: "Data Insights", min: 60, max: 90 },
+  ],
+  GRE: [
+    { name: "Quantitative", min: 130, max: 170 },
+    { name: "Verbal", min: 130, max: 170 },
+  ],
+  SAT: [
+    { name: "Math", min: 200, max: 800 },
+    { name: "Reading & Writing", min: 200, max: 800 },
+  ],
+  PSAT: [
+    { name: "Math", min: 160, max: 760 },
+    { name: "Reading & Writing", min: 160, max: 760 },
+  ],
+  ACT: [
+    { name: "English", min: 1, max: 36 },
+    { name: "Math", min: 1, max: 36 },
+    { name: "Reading", min: 1, max: 36 },
+    { name: "Science", min: 1, max: 36 },
+  ],
+  LSAT: [
+    { name: "Logical Reasoning", min: 0, max: 26 },
+    { name: "Reading Comprehension", min: 0, max: 27 },
+  ],
+  MCAT: [
+    { name: "Chem/Phys", min: 118, max: 132 },
+    { name: "CARS", min: 118, max: 132 },
+    { name: "Bio/Biochem", min: 118, max: 132 },
+    { name: "Psych/Soc", min: 118, max: 132 },
+  ],
+  TOEFL: [
+    { name: "Reading", min: 0, max: 30 },
+    { name: "Listening", min: 0, max: 30 },
+    { name: "Speaking", min: 0, max: 30 },
+    { name: "Writing", min: 0, max: 30 },
+  ],
+  IELTS: [
+    { name: "Listening", min: 0, max: 9 },
+    { name: "Reading", min: 0, max: 9 },
+    { name: "Writing", min: 0, max: 9 },
+    { name: "Speaking", min: 0, max: 9 },
+  ],
+};
+
+export function examSectionsFor(category: string): ExamSection[] {
+  return EXAM_SECTIONS[category] ?? [];
 }
 
 // Which exam a school category implies, for the test-prep project.
