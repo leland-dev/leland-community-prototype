@@ -31,6 +31,14 @@ import airplaneIcon from "../assets/icons/airplane.svg";
 import chevronRightIcon from "../assets/icons/chevron-right.svg";
 import starIcon from "../assets/icons/star.svg";
 import editIcon from "../assets/icons/edit.svg";
+import { GoalTile, NewGoalTile } from "../components/GoalTile";
+import { useGoals } from "../contexts/GoalsContext";
+import { dueLabel, isOverdue, type Goal, type Task } from "../data/goals";
+import GoalCheck from "../components/GoalCheck";
+import { useCheckedLinger } from "../hooks/useCheckedLinger";
+import QuickAddTask from "../components/QuickAddTask";
+import TaskDetailModal from "../components/TaskDetailModal";
+import AdminToggle from "../components/AdminToggle";
 
 const HERO_BG = "#F3F1E6";
 
@@ -378,6 +386,192 @@ function GetHelp() {
   );
 }
 
+function GoalsEmptyState() {
+  const navigate = useNavigate();
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-6 rounded-xl bg-[#F3F1E6] p-6">
+      <div className="flex max-w-[520px] flex-col gap-1.5">
+        <div className="text-[16px] font-semibold leading-[1.2] text-gray-dark">Name the thing you're working toward.</div>
+        <p className="text-[14px] leading-[1.5] text-gray-light">
+          A seat at business school, a new role, a skill you want by spring. Pick a goal and we'll lay out the projects and tasks that get you there — your expert can add to it too.
+        </p>
+      </div>
+      <Button onClick={() => navigate("/goals/new")} size="md" variant="primary" className="font-medium">
+        Set a goal
+      </Button>
+    </div>
+  );
+}
+
+// The pre-feature "My goals" card — skeleton tiles and a dashed add button,
+// no real data. Shown when the "Goals & tasks" admin toggle is off, so the
+// dashboard reads the same as it does on main rather than losing the section
+// entirely.
+function GoalsPlaceholderCard() {
+  return (
+    <DashCard title="My goals">
+      <p className="-mt-2 mb-4 text-[15px] text-[#707070]">Track your progress toward what matters most.</p>
+      <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-1">
+        {[0, 1].map((i) => (
+          <div key={i} className="h-[100px] w-[200px] shrink-0 rounded-xl bg-[#F5F5F5]" style={dashedBorderStyle} />
+        ))}
+        <button className="flex h-[100px] w-[200px] shrink-0 cursor-pointer items-center justify-center rounded-xl border-none bg-[#F5F5F5] transition-colors hover:bg-[#EEEEEE]" style={dashedBorderStyle}>
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
+          </svg>
+        </button>
+      </div>
+    </DashCard>
+  );
+}
+
+function GoalsCard() {
+  const { goals } = useGoals();
+  const navigate = useNavigate();
+  return (
+    <DashCard title="My goals" to={goals.length > 0 ? "/goals" : undefined}>
+      <p className="-mt-2 mb-4 text-[15px] text-[#707070]">Track your progress toward what matters most.</p>
+      {goals.length > 0 ? (
+        <>
+          <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-1">
+            {goals.map((goal) => (
+              <GoalTile key={goal.id} goal={goal} />
+            ))}
+            <NewGoalTile />
+          </div>
+        </>
+      ) : (
+        <GoalsEmptyState />
+      )}
+    </DashCard>
+  );
+}
+
+// "My tasks" — a peer of the goals card rather than a link buried inside it.
+// Shows what's actually due, most urgent first, across every goal.
+function TasksCard() {
+  const { goals, standaloneTasks, toggleTask, updateTask, deleteTask, assignTask } = useGoals();
+  const navigate = useNavigate();
+  const { hold, drop, isLingering } = useCheckedLinger();
+  // Store just the id and look the task up fresh below — holding onto the
+  // task object itself would freeze the modal on a stale snapshot the moment
+  // an edit updates the underlying goal/standalone-task data.
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+
+  const all = [
+    ...goals.flatMap((goal) => [
+      ...goal.projects.flatMap((p) => p.tasks.map((task) => ({ task, goal: goal as Goal | null, projectName: p.name as string | null }))),
+      ...goal.otherTasks.map((task) => ({ task, goal: goal as Goal | null, projectName: null as string | null })),
+    ]),
+    ...standaloneTasks.map((task) => ({ task, goal: null as Goal | null, projectName: null as string | null })),
+  ];
+
+  const selected = selectedTaskId ? (all.find(({ task }) => task.id === selectedTaskId) ?? null) : null;
+
+  // Keep a just-checked task in the list for a beat so the check is visible.
+  const open = all.filter(({ task }) => task.status !== "done" || isLingering(task.id));
+
+  // Overdue first, then soonest due, then undated — the order you'd work them.
+  const sorted = [...open].sort((a, b) => {
+    const aOverdue = isOverdue(a.task) ? 0 : 1;
+    const bOverdue = isOverdue(b.task) ? 0 : 1;
+    if (aOverdue !== bOverdue) return aOverdue - bOverdue;
+    if (a.task.dueDate && b.task.dueDate) return a.task.dueDate.localeCompare(b.task.dueDate);
+    if (a.task.dueDate) return -1;
+    if (b.task.dueDate) return 1;
+    return 0;
+  });
+
+  const shown = sorted.slice(0, 5);
+  // Counts reflect what's genuinely open, not the lingering rows.
+  const trulyOpen = all.filter(({ task }) => task.status !== "done");
+  const overdue = trulyOpen.filter(({ task }) => isOverdue(task)).length;
+
+  const onCheck = (taskId: string, done: boolean) => {
+    toggleTask(taskId);
+    if (done) drop(taskId);
+    else hold(taskId);
+  };
+
+  return (
+    <DashCard title="My tasks" to="/tasks">
+      <p className="-mt-2 mb-4 text-[15px] text-[#707070]">
+        {trulyOpen.length} open across {goals.length} goal{goals.length === 1 ? "" : "s"}
+        {overdue > 0 && <span className="text-[#9F5B34]"> · {overdue} overdue</span>}
+      </p>
+      {shown.length === 0 ? (
+        <div className="rounded-xl bg-[#F3F1E6] p-5">
+          <p className="text-[15px] font-semibold text-gray-dark">Nothing open.</p>
+          <p className="mt-1 text-[14px] leading-[1.5] text-gray-light">Everything on your goals is checked off.</p>
+          <QuickAddTask />
+        </div>
+      ) : (
+        <>
+          <div className="-mx-2 flex flex-col gap-[2px]">
+            {shown.map(({ task, goal, projectName }) => {
+              const overdueTask = isOverdue(task);
+              const checked = task.status === "done";
+              return (
+                <div
+                  key={task.id}
+                  onClick={() => setSelectedTaskId(task.id)}
+                  className={`flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-[#F5F5F5] ${checked ? "checked-off-exit" : ""}`}
+                >
+                  <div className="mt-[1px]" onClick={(e) => e.stopPropagation()}>
+                    <GoalCheck checked={checked} onChange={() => onCheck(task.id, checked)} label={task.title} />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
+                    <span
+                      className={`truncate text-[15px] leading-[1.3] ${checked ? "text-gray-extra-light line-through" : "font-medium text-gray-dark"}`}
+                    >
+                      {task.title}
+                    </span>
+                    {goal ? (
+                      <Link
+                        to={`/goals/${goal.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="truncate text-[13px] text-gray-extra-light transition-opacity hover:opacity-70"
+                      >
+                        {goal.name}
+                        {projectName && ` · ${projectName}`}
+                      </Link>
+                    ) : (
+                      <span className="truncate text-[13px] text-gray-extra-light">No goal</span>
+                    )}
+                  </div>
+                  {task.dueDate && !checked && (
+                    <span className={`shrink-0 text-[13px] ${overdueTask ? "font-medium text-[#9F5B34]" : "text-gray-extra-light"}`}>
+                      {dueLabel(task.dueDate)}
+                    </span>
+                  )}
+                  {checked && <span className="shrink-0 text-[13px] font-medium text-[#869AA6]">Done</span>}
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <QuickAddTask />
+            <Button onClick={() => navigate("/tasks")} size="md" variant="secondary" className="mt-4 font-semibold">
+              See all tasks
+            </Button>
+          </div>
+        </>
+      )}
+      <TaskDetailModal
+        task={selected?.task ?? null}
+        goal={selected?.goal ?? null}
+        projectName={selected?.projectName ?? null}
+        goals={goals}
+        onClose={() => setSelectedTaskId(null)}
+        onToggle={() => selected && onCheck(selected.task.id, selected.task.status === "done")}
+        onSave={(patch) => selected && updateTask(selected.task.id, patch)}
+        onDelete={() => selected && deleteTask(selected.task.id)}
+        onReassign={(target) => selected && assignTask(selected.task.id, target)}
+      />
+    </DashCard>
+  );
+}
+
 // ─── Expert-only sections ──────────────────────────────────────────────────
 
 // Order requests the coach needs to accept or decline.
@@ -656,19 +850,6 @@ function ProfileCard({ expert }: { expert: boolean }) {
   );
 }
 
-// Admin toggle row — mirrors the profile template's admin controls.
-function AdminToggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
-  return (
-    <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
-      <span className="text-[14px] font-medium text-gray-dark">{label}</span>
-      <div className="relative">
-        <input type="checkbox" checked={checked} onChange={onChange} className="peer sr-only" />
-        <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-gray-dark" />
-        <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
-      </div>
-    </label>
-  );
-}
 
 export default function Dashboard() {
   useSetLayoutVariant("standard");
@@ -683,6 +864,10 @@ export default function Dashboard() {
   const [adminOpen, setAdminOpen] = useState(false);
   const [expert, setExpert] = useState(false);
   const [altAnalytics, setAltAnalytics] = useState(false);
+  // Single toggle for the whole goals/tasks feature this branch adds
+  // (GoalsCard + TasksCard) — same show/hide pattern used everywhere else on
+  // this branch, just scoped to the feature as a whole rather than one card.
+  const [goalsFeature, setGoalsFeature] = useState(true);
   const adminRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!adminOpen) return;
@@ -782,22 +967,14 @@ export default function Dashboard() {
               </DashCard>
             )}
 
-            {/* My goals — hidden for experts */}
-            {!expert && (
-              <DashCard title="My goals">
-                <p className="-mt-2 mb-4 text-[15px] text-[#707070]">Track your progress toward what matters most.</p>
-                <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-1">
-                  {[0, 1].map((i) => (
-                    <div key={i} className="h-[100px] w-[200px] shrink-0 rounded-xl bg-[#F5F5F5]" style={dashedBorderStyle} />
-                  ))}
-                  <button className="flex h-[100px] w-[200px] shrink-0 cursor-pointer items-center justify-center rounded-xl border-none bg-[#F5F5F5] transition-colors hover:bg-[#EEEEEE]" style={dashedBorderStyle}>
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                      <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
-                    </svg>
-                  </button>
-                </div>
-              </DashCard>
-            )}
+            {/* My goals — hidden for experts. Both cards sit behind one
+                toggle: they're the whole goals/tasks feature this branch
+                adds, not two independent widgets. Off reverts "My goals" to
+                the pre-feature skeleton (matching main) rather than dropping
+                the section entirely; "My tasks" didn't exist on main, so it
+                just disappears. */}
+            {!expert && (goalsFeature ? <GoalsCard /> : <GoalsPlaceholderCard />)}
+            {!expert && goalsFeature && <TasksCard />}
 
             {/* 6. Get help */}
             <GetHelp />
@@ -820,6 +997,7 @@ export default function Dashboard() {
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
               <AdminToggle label="Expert" checked={expert} onChange={() => setExpert((v) => !v)} />
+              {!expert && <AdminToggle label="Goals & tasks" checked={goalsFeature} onChange={() => setGoalsFeature((v) => !v)} />}
               {expert && <AdminToggle label="Alt Analytics" checked={altAnalytics} onChange={() => setAltAnalytics((v) => !v)} />}
             </motion.div>
           )}

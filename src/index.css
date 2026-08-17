@@ -152,6 +152,35 @@
   display: none;
 }
 
+/* A row that was just checked off in an "open items only" list. It holds its
+   place at full opacity long enough for the check to register, then fades and
+   collapses out. Timing is paired with CHECKED_LINGER_MS in
+   src/hooks/useCheckedLinger.ts. */
+@keyframes checked-off-exit {
+  0%,
+  55% {
+    opacity: 1;
+    transform: none;
+    max-height: 96px;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(6px);
+    max-height: 0;
+  }
+}
+.checked-off-exit {
+  animation: checked-off-exit 1200ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .checked-off-exit {
+    animation-duration: 1200ms;
+    animation-name: none;
+    opacity: 1;
+  }
+}
+
 /* Push navigation: a detail screen (post, focused reply) slides in from the
    right so it reads as a page pushed on top of the current one. No
    animation-fill-mode, so the transform reverts to none once it lands —

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/leland-design-system-50d6d6d3-ac5f-4dfe-86b0-e7ace7f9d051/colors_and_type.css">
+<link rel="stylesheet" href="_ds/leland-design-system-50d6d6d3-ac5f-4dfe-86b0-e7ace7f9d051/styles.css">
+<script src="_ds/leland-design-system-50d6d6d3-ac5f-4dfe-86b0-e7ace7f9d051/_ds_bundle.js"></script>
+<style>
+  body { margin: 0; background: #fcfcfa; }
+  a { color: #222; text-decoration: none; }
+  a:hover { color: #4C4C4C; }
+  input::placeholder, textarea::placeholder { color: #949494; }
+</style>
+</helmet>
+<div style="font-family: var(--font-sans); color: #222222; padding: 40px 40px 96px; max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+
+  <div style="display: flex; flex-direction: column; gap: 6px;">
+    <div style="font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: #767676;">Screen 4 of 4 · customer dashboard</div>
+    <div style="font-family: var(--font-serif); font-size: 32px; font-weight: 500; line-height: 1.1;">Setting a new goal</div>
+    <div style="font-size: 15px; color: #4C4C4C;">Category picker treatment: <span style="font-weight: 500;">{{ pickerName }}</span> — switch it in Tweaks.</div>
+  </div>
+
+  <section style="border-radius: 16px; background: #fff; padding: 24px; box-shadow: 0 1px 2px 0 rgba(16,24,40,0.06), 0 0 0 1px rgba(34,34,34,0.10); display: flex; flex-direction: column; gap: 20px;">
+
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="width: 6px; height: 6px; border-radius: 999px; background: {{ s.dot }};"></span>
+          <span style="font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: {{ s.color }};">{{ s.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isCategory }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-family: var(--font-serif); font-size: 28px; font-weight: 500; line-height: 1.15;">What are you working toward?</div>
+          <div style="font-size: 15px; line-height: 1.5; color: #4C4C4C;">{{ pickerLead }}</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; font-weight: 500; color: #4C4C4C;">Goal</div>
+          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;">
+            <sc-for list="{{ types }}" as="t" hint-placeholder-count="4">
+              <button onClick="{{ t.pick }}" style="border: 0; border-radius: 12px; background: {{ t.bg }}; padding: 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; cursor: pointer; font-family: var(--font-sans); color: #222222; box-shadow: {{ t.ring }}; transition: background-color 200ms cubic-bezier(0.2,0.7,0.2,1);" style-hover="background: #EEEEEE;">
+                <span style="font-size: 15px; font-weight: 600; line-height: 1.25;">{{ t.label }}</span>
+                <span style="font-size: 13px; color: #767676;">{{ t.count }} categories</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+
+        <sc-if value="{{ hasType }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 13px; font-weight: 500; color: #4C4C4C;">Category</div>
+              <div style="font-size: 13px; color: #767676;">{{ categoryHint }}</div>
+            </div>
+
+            <sc-if value="{{ hasCats }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <sc-if value="{{ matchNote }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size: 13px; color: #767676;">{{ matchNote }}</div>
+                </sc-if>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                  <sc-for list="{{ cats }}" as="c" hint-placeholder-count="1">
+                    <span style="display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; background: #EBD4B5; padding: 6px 8px 6px 14px; font-size: 14px; font-weight: 500;">
+                      {{ c.label }}
+                      <button onClick="{{ c.remove }}" aria-label="{{ c.aria }}" style="background: rgba(34,34,34,0.10); border: 0; border-radius: 999px; width: 20px; height: 20px; cursor: pointer; color: #222222; display: flex; align-items: center; justify-content: center; padding: 0;" style-hover="background: rgba(34,34,34,0.22);">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>
+                      </button>
+                    </span>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ showText }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <textarea value="{{ text }}" onChange="{{ onText }}" rows="3" placeholder="{{ textPlaceholder }}" style="font-family: var(--font-sans); font-size: 15px; line-height: 1.5; color: #222222; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #949494; background: #fff; outline: none; resize: vertical;" style-focus="border-color: #222222;"></textarea>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <button onClick="{{ runMatch }}" style="background: rgba(34,34,34,0.06); color: #222222; border: 0; border-radius: 8px; padding: 11px 18px; font-family: var(--font-sans); font-size: 14px; font-weight: 500; cursor: pointer;" style-hover="background: rgba(34,34,34,0.12);">{{ matchLabel }}</button>
+                  <sc-if value="{{ matchStatus }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size: 13px; color: #767676;">{{ matchStatus }}</span>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ showBrowseToggle }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ toggleBrowse }}" style="align-self: flex-start; background: transparent; border: 0; padding: 0; font-family: var(--font-sans); font-size: 14px; font-weight: 500; color: #4C4C4C; cursor: pointer;" style-hover="color: #222222;">{{ browseLabel }}</button>
+            </sc-if>
+
+            <sc-if value="{{ showSearch }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="{{ searchPlaceholder }}" style="width: 100%; box-sizing: border-box; font-family: var(--font-sans); font-size: 15px; color: #222222; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #949494; background: #fff; outline: none;" style-focus="border-color: #222222;">
+                <sc-if value="{{ showPopular }}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: #767676;">Most picked</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                      <sc-for list="{{ popular }}" as="p" hint-placeholder-count="6">
+                        <button onClick="{{ p.add }}" style="border: 0; border-radius: 999px; background: #F5F5F5; color: #222222; padding: 9px 15px; font-family: var(--font-sans); font-size: 14px; font-weight: 500; cursor: pointer;" style-hover="background: #EEEEEE;">{{ p.label }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ showGroups }}" hint-placeholder-val="{{ false }}">
+                  <div style="border-radius: 12px; background: #F5F5F5; padding: 8px; max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;">
+                    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+                      <div style="display: flex; flex-direction: column; gap: 2px; padding: 8px 4px 4px;">
+                        <div style="font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: #767676; padding: 0 8px;">{{ g.name }}</div>
+                        <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="3">
+                          <button onClick="{{ i.add }}" style="background: transparent; border: 0; border-radius: 8px; padding: 9px 8px; text-align: left; font-family: var(--font-sans); font-size: 15px; color: #222222; cursor: pointer;" style-hover="background: #ffffff;">{{ i.label }}</button>
+                        </sc-for>
+                      </div>
+                    </sc-for>
+                    <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+                      <div style="padding: 12px; font-size: 14px; color: #767676;">Nothing matches “{{ query }}”. <a href="#" style="font-weight: 500;">Tell us</a> what's missing.</div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ showTwoPane }}" hint-placeholder-val="{{ false }}">
+              <div style="display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 12px; border-radius: 12px; background: #F5F5F5; padding: 8px;">
+                <div style="display: flex; flex-direction: column; gap: 2px; max-height: 300px; overflow-y: auto;">
+                  <sc-for list="{{ families }}" as="f" hint-placeholder-count="6">
+                    <button onClick="{{ f.open }}" style="background: {{ f.bg }}; border: 0; border-radius: 8px; padding: 10px 12px; text-align: left; font-family: var(--font-sans); cursor: pointer; display: flex; flex-direction: column; gap: 1px; color: #222222;" style-hover="background: #ffffff;">
+                      <span style="font-size: 15px; font-weight: 500;">{{ f.name }}</span>
+                      <span style="font-size: 13px; color: #767676;">{{ f.count }} categories</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px; max-height: 300px; overflow-y: auto; background: #ffffff; border-radius: 8px; padding: 6px;">
+                  <sc-for list="{{ leaves }}" as="l" hint-placeholder-count="6">
+                    <button onClick="{{ l.add }}" style="background: transparent; border: 0; border-radius: 8px; padding: 10px 12px; text-align: left; font-family: var(--font-sans); font-size: 15px; color: {{ l.color }}; cursor: pointer;" style-hover="background: #F5F5F5;">{{ l.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ showBuckets }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <sc-if value="{{ bucketOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button onClick="{{ clearBucket }}" style="align-self: flex-start; background: transparent; border: 0; padding: 0; font-family: var(--font-sans); font-size: 14px; font-weight: 500; color: #4C4C4C; cursor: pointer;" style-hover="color: #222222;">‹ All areas</button>
+                    <div style="font-size: 15px; font-weight: 600;">{{ bucketOpen }}</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                      <sc-for list="{{ leaves }}" as="l" hint-placeholder-count="6">
+                        <button onClick="{{ l.add }}" style="border: 0; border-radius: 999px; background: #F5F5F5; color: {{ l.color }}; padding: 9px 15px; font-family: var(--font-sans); font-size: 14px; font-weight: 500; cursor: pointer;" style-hover="background: #EEEEEE;">{{ l.label }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ bucketsVisible }}" hint-placeholder-val="{{ true }}">
+                  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">
+                    <sc-for list="{{ families }}" as="f" hint-placeholder-count="6">
+                      <button onClick="{{ f.open }}" style="border: 0; border-radius: 12px; background: #F5F5F5; padding: 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; font-family: var(--font-sans); color: #222222; cursor: pointer;" style-hover="background: #EEEEEE;">
+                        <span style="font-size: 15px; font-weight: 600; line-height: 1.25;">{{ f.name }}</span>
+                        <span style="font-size: 13px; color: #767676;">{{ f.count }} categories</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button onClick="{{ toDetails }}" style="background: #FFD96F; color: #111111; border: 0; border-radius: 8px; padding: 12px 20px; font-family: var(--font-sans); font-size: 14px; font-weight: 500; line-height: 1.2; cursor: pointer; transition: background-color 150ms cubic-bezier(0.2,0.7,0.2,1);" style-hover="background: #F3C948;">Continue</button>
+          <sc-if value="{{ needsCategory }}" hint-placeholder-val="{{ false }}">
+            <span style="font-size: 13px; color: #9F5B34;">{{ categoryError }}</span>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDetails }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-family: var(--font-serif); font-size: 28px; font-weight: 500; line-height: 1.15;">A few things about where you are</div>
+          <div style="font-size: 15px; line-height: 1.5; color: #4C4C4C;">Three quick answers and the plan comes out shaped like your situation, not a generic checklist.</div>
+        </div>
+
+        <sc-for list="{{ questions }}" as="q" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="font-size: 15px; font-weight: 600; line-height: 1.25;">{{ q.label }}</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <sc-for list="{{ q.options }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.pick }}" style="border: 0; border-radius: 999px; background: {{ o.bg }}; color: #222222; padding: 10px 16px; font-family: var(--font-sans); font-size: 14px; font-weight: 500; cursor: pointer; box-shadow: {{ o.ring }}; transition: background-color 150ms cubic-bezier(0.2,0.7,0.2,1);" style-hover="background: #EEEEEE;">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 12px;">
+          <label style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-size: 13px; font-weight: 500; color: #4C4C4C;">Name your goal</span>
+            <input value="{{ nameField }}" onChange="{{ onName }}" placeholder="Name your goal" style="font-family: var(--font-sans); font-size: 15px; color: #222222; padding: 11px 12px; border-radius: 8px; border: 1.5px solid #949494; background: #fff; outline: none;" style-focus="border-color: #222222;">
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-size: 13px; font-weight: 500; color: #4C4C4C;">{{ dateLabel }} <span style="color: #949494; font-weight: 400;">optional</span></span>
+            <input type="date" value="{{ date }}" onChange="{{ onDate }}" style="font-family: var(--font-sans); font-size: 15px; color: #222222; padding: 10px 12px; border-radius: 8px; border: 1.5px solid #949494; background: #fff; outline: none;" style-focus="border-color: #222222;">
+          </label>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button onClick="{{ toPlan }}" style="background: #FFD96F; color: #111111; border: 0; border-radius: 8px; padding: 12px 20px; font-family: var(--font-sans); font-size: 14px; font-weight: 500; line-height: 1.2; cursor: pointer; transition: background-color 150ms cubic-bezier(0.2,0.7,0.2,1);" style-hover="background: #F3C948;">Draft my plan</button>
+          <button onClick="{{ backToCategory }}" style="background: transparent; color: #4C4C4C; border: 0; border-radius: 8px; padding: 12px 10px; font-family: var(--font-sans); font-size: 14px; font-weight: 500; cursor: pointer;" style-hover="color: #222222;">Back</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isPlan }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-family: var(--font-serif); font-size: 28px; font-weight: 500; line-height: 1.15;">{{ name }}</div>
+          <div style="font-size: 15px; line-height: 1.5; color: #4C4C4C;">{{ planLead }}</div>
+        </div>
+
+        <sc-if value="{{ drafting }}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius: 12px; background: #F5F5F5; padding: 20px; font-size: 15px; color: #4C4C4C;">Drafting your plan…</div>
+        </sc-if>
+
+        <sc-if value="{{ planReady }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            <sc-if value="{{ hasRoutines }}" hint-placeholder-val="{{ true }}">
+              <div style="border-radius: 12px; background: #F5F5F5; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                  <div style="font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: #767676;">Routines</div>
+                  <div style="font-size: 13px; color: #767676;">Build the streak</div>
+                </div>
+                <sc-for list="{{ routines }}" as="r" hint-placeholder-count="2">
+                  <div style="display: flex; align-items: center; gap: 12px; border-radius: 8px; background: #fff; padding: 12px 14px;">
+                    <button onClick="{{ r.toggle }}" aria-label="{{ r.aria }}" style="width: 22px; height: 22px; flex-shrink: 0; border-radius: 999px; border: 1.5px solid {{ r.border }}; background: {{ r.fill }}; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="opacity: {{ r.tickOpacity }};"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+                    <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1;">
+                      <div style="font-size: 15px; font-weight: 500; line-height: 1.3; color: {{ r.color }};">{{ r.label }}</div>
+                      <div style="font-size: 13px; color: #767676;">{{ r.cadence }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: #767676;">Projects</div>
+              <sc-for list="{{ projects }}" as="p" hint-placeholder-count="3">
+                <div style="border-radius: 12px; background: #F5F5F5; padding: 16px; display: flex; flex-direction: column; gap: 10px; opacity: {{ p.opacity }};">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <button onClick="{{ p.toggle }}" aria-label="{{ p.aria }}" style="width: 22px; height: 22px; flex-shrink: 0; border-radius: 6px; border: 1.5px solid {{ p.border }}; background: {{ p.fill }}; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="opacity: {{ p.tickOpacity }};"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+                    <div style="display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0;">
+                      <div style="font-size: 16px; font-weight: 600; line-height: 1.2;">{{ p.label }}</div>
+                      <sc-if value="{{ p.why }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size: 13px; color: #767676;">{{ p.why }}</div>
+                      </sc-if>
+                    </div>
+                    <div style="font-size: 13px; color: #767676;">{{ p.count }}</div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 6px; padding-left: 34px;">
+                    <sc-for list="{{ p.tasks }}" as="t" hint-placeholder-count="3">
+                      <div style="display: flex; align-items: center; gap: 10px; border-radius: 8px; background: #fff; padding: 10px 12px;">
+                        <button onClick="{{ t.toggle }}" aria-label="{{ t.aria }}" style="width: 18px; height: 18px; flex-shrink: 0; border-radius: 5px; border: 1.5px solid {{ t.border }}; background: {{ t.fill }}; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="opacity: {{ t.tickOpacity }};"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        </button>
+                        <div style="font-size: 14px; line-height: 1.35; color: {{ t.color }}; flex: 1; min-width: 0;">{{ t.label }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+              <div style="font-size: 14px; color: #4C4C4C;">{{ summary }}</div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <button onClick="{{ backToDetails }}" style="background: transparent; color: #4C4C4C; border: 0; border-radius: 8px; padding: 12px 10px; font-family: var(--font-sans); font-size: 14px; font-weight: 500; cursor: pointer;" style-hover="color: #222222;">Back</button>
+                <button onClick="{{ create }}" style="background: #FFD96F; color: #111111; border: 0; border-radius: 8px; padding: 12px 20px; font-family: var(--font-sans); font-size: 14px; font-weight: 500; line-height: 1.2; cursor: pointer; transition: background-color 150ms cubic-bezier(0.2,0.7,0.2,1);" style-hover="background: #F3C948;">Create goal</button>
+              </div>
+            </div>
+            <sc-if value="{{ needsSomething }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 13px; color: #9F5B34;">Keep at least one task or routine.</div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+      <div style="border-radius: 12px; background: #F3F1E6; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-family: var(--font-serif); font-size: 28px; font-weight: 500; line-height: 1.15;">{{ name }} is live</div>
+          <div style="font-size: 15px; line-height: 1.5; color: #4C4C4C;">{{ summary }} on your dashboard. First routine starts tomorrow.</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <a href="2 · Goal Detail.dc.html" style="background: #222222; color: #ffffff; border-radius: 8px; padding: 12px 20px; font-size: 14px; font-weight: 500; line-height: 1.2;" style-hover="color: #ffffff; background: #000000;">Open the goal</a>
+          <button onClick="{{ restart }}" style="background: rgba(34,34,34,0.06); color: #222222; border: 0; border-radius: 8px; padding: 12px 18px; font-family: var(--font-sans); font-size: 14px; font-weight: 500; cursor: pointer;" style-hover="background: rgba(34,34,34,0.12);">Start over</button>
+        </div>
+      </div>
+    </sc-if>
+  </section>
+
+  <div style="font-size: 13px; color: #767676;">Category families are placeholder data — swap in the real 142. Created goals show up in the <a href="1 · Goal Card Widget.dc.html" style="font-weight: 500;">dashboard card</a> and open into <a href="2 · Goal Detail.dc.html" style="font-weight: 500;">goal detail</a>.</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:880},&quot;categoryPicker&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A · Search-first&quot;,&quot;B · Two-pane browse&quot;,&quot;C · Progressive narrowing&quot;,&quot;D · Free-text → AI match&quot;,&quot;E · Free-text → AI plan&quot;,&quot;F · Hybrid&quot;],&quot;default&quot;:&quot;F · Hybrid&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Category picker&quot;},&quot;defaultType&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ai&quot;,&quot;career&quot;,&quot;school&quot;,&quot;test&quot;],&quot;default&quot;:&quot;ai&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Flow&quot;}}">
+const FAMILIES = {
+  school: [
+    { name: "Business school", items: ["MBA", "Deferred MBA", "Executive MBA", "Business Analytics", "Master's in Management"] },
+    { name: "Undergrad", items: ["College", "Undergrad Transfer", "BS/MD Programs", "Ivy League Admissions"] },
+    { name: "Law", items: ["Law School", "LLM Programs"] },
+    { name: "Medical", items: ["Medical School", "Dental School", "Nursing School", "Physician Assistant", "Veterinary School"] },
+    { name: "Graduate", items: ["Master's Programs", "PhD Programs", "Data Science Masters", "Public Policy Masters", "Engineering Masters"] },
+  ],
+  career: [
+    { name: "Consulting", items: ["Management Consulting", "Strategy Consulting", "Operations Consulting", "Boutique Consulting", "Case Interview Prep"] },
+    { name: "Finance", items: ["Investment Banking", "Private Equity", "Venture Capital", "Hedge Funds", "Corporate Finance", "Equity Research", "Sales and Trading", "Financial Modeling"] },
+    { name: "Tech", items: ["Product Management", "Software Engineering", "Data Science", "Machine Learning", "Engineering Management", "Technical Program Management", "UX Design", "DevOps"] },
+    { name: "Leadership", items: ["Leadership Development", "Executive Presence", "First-Time Manager", "Managing Managers", "Difficult Conversations", "Team Building"] },
+    { name: "Marketing", items: ["Brand Marketing", "Growth Marketing", "Product Marketing", "Content Strategy", "SEO", "Marketing Analytics"] },
+    { name: "Job search", items: ["Resume Review", "LinkedIn Optimization", "Interview Prep", "Salary Negotiation", "Networking", "Career Change", "Job Search Strategy"] },
+    { name: "Healthcare", items: ["Healthcare Administration", "Nursing Leadership", "Biotech", "Pharma Commercial", "Medical Practice"] },
+    { name: "Law", items: ["Big Law", "In-House Counsel", "Legal Recruiting", "Clerkships"] },
+    { name: "Founders", items: ["Fundraising", "Startup Strategy", "Go-to-Market", "Pitch Deck Review", "Founder Advising"] },
+    { name: "Public sector", items: ["Public Policy", "Nonprofit Leadership", "Federal Careers", "International Development"] },
+    { name: "AI at work", items: ["AI for Product Managers", "AI for Marketers", "AI for Analysts", "Breaking into AI Roles"] },
+  ],
+  ai: [
+    { name: "Foundations", items: ["AI Fundamentals", "Prompt Engineering", "How Models Work", "AI Risk and Judgment"] },
+    { name: "Building", items: ["Building with Agents", "No-Code AI Tools", "AI App Development", "Working with Your Own Data", "Fine-Tuning"] },
+    { name: "In your job", items: ["AI for Product Managers", "AI for Marketers", "AI for Analysts", "AI for Engineers", "AI for Recruiters", "AI for Founders"] },
+    { name: "Leading it", items: ["Team AI Adoption", "AI Policy and Guardrails", "Bringing Your Team Along"] },
+    { name: "Career moves", items: ["Breaking into AI Roles", "AI Portfolio", "AI Certifications"] },
+  ],
+  test: [
+    { name: "Business school", items: ["GMAT", "GMAT Focus", "Executive Assessment"] },
+    { name: "Graduate", items: ["GRE"] },
+    { name: "Undergrad", items: ["SAT", "ACT", "PSAT", "AP Exams"] },
+    { name: "Professional", items: ["LSAT", "MCAT", "DAT", "NCLEX"] },
+    { name: "English", items: ["TOEFL", "IELTS", "Duolingo English Test"] },
+  ],
+};
+
+const POOL = {
+  school: FAMILIES.school.flatMap((f) => f.items),
+  career: FAMILIES.career.flatMap((f) => f.items),
+  test: FAMILIES.test.flatMap((f) => f.items),
+  ai: FAMILIES.ai.flatMap((f) => f.items),
+};
+
+const TYPES = [
+  { id: "ai", label: "Learn AI skills" },
+  { id: "career", label: "Build your career" },
+  { id: "school", label: "Get into school" },
+  { id: "test", label: "Take a test" },
+];
+
+const POPULAR = {
+  school: ["MBA", "College", "Law School", "Medical School", "Master's Programs", "PhD Programs"],
+  career: ["Product Management", "Management Consulting", "Investment Banking", "Interview Prep", "Resume Review", "Career Change", "Leadership Development", "Software Engineering"],
+  test: ["GMAT", "GRE", "SAT", "LSAT", "MCAT", "ACT"],
+  ai: ["Prompt Engineering", "Building with Agents", "AI for Product Managers", "AI Fundamentals", "No-Code AI Tools", "Breaking into AI Roles"],
+};
+
+const PICKERS = {
+  A: "A · Search-first",
+  B: "B · Two-pane browse",
+  C: "C · Progressive narrowing",
+  D: "D · Free-text → AI match",
+  E: "E · Free-text → AI plan",
+  F: "F · Hybrid",
+};
+
+const PICKER_LEAD = {
+  A: "Pick the kind of goal, then search for the categories that apply.",
+  B: "Pick the kind of goal, then browse by area to find your categories.",
+  C: "Pick the kind of goal, then narrow to the categories that apply — two taps.",
+  D: "Pick the kind of goal and describe it in your own words. We'll figure out the categories.",
+  E: "Pick the kind of goal and describe it in your own words. We'll match categories and draft the plan.",
+  F: "Pick the kind of goal, then describe it — or browse the full list yourself.",
+};
+
+const QUESTIONS = {
+  school: [
+    { id: "stage", label: "How far along are you?", options: ["Just exploring", "Building my school list", "Drafting essays", "Ready to submit"] },
+    { id: "schools", label: "How many schools are you applying to?", options: ["1–2", "3–5", "6 or more"] },
+    { id: "score", label: "Do you still need a test score?", options: ["Haven't started", "Retaking it", "Already have one"] },
+  ],
+  career: [
+    { id: "stage", label: "Where are you in the search?", options: ["Getting clear on the target", "Applying now", "Interviewing", "Weighing an offer"] },
+    { id: "resume", label: "How's your resume?", options: ["Haven't touched it", "Rough draft", "Up to date"] },
+    { id: "hours", label: "Time you can give this each week", options: ["Under 3 hours", "3–6 hours", "10 or more"] },
+  ],
+  test: [
+    { id: "attempt", label: "Have you taken it before?", options: ["First attempt", "Retaking it"] },
+    { id: "runway", label: "How long until test day?", options: ["Under 6 weeks", "2–3 months", "More than 3 months"] },
+    { id: "hours", label: "Time you can give this each week", options: ["Under 3 hours", "3–6 hours", "10 or more"] },
+  ],
+  ai: [
+    { id: "start", label: "Where are you starting?", options: ["Barely used it", "In it most days", "Built a few things", "Shipping already"] },
+    { id: "why", label: "What's this for?", options: ["My current job", "A career move", "Leading my team through it", "Keeping up"] },
+    { id: "hours", label: "Time you can give this each week", options: ["Under 3 hours", "3–6 hours", "10 or more"] },
+  ],
+};
+
+const NAME_PATTERN = {
+  school: (c) => "Get into " + (c === "MBA" ? "a top MBA program" : c === "College" ? "my dream college" : c),
+  career: (c) => "Land a " + c + " role",
+  test: (c) => "Hit my " + c + " target score",
+  ai: (c) => (c === "AI Fundamentals" ? "Get fluent with AI" : "Get good at " + c),
+};
+
+const DATE_LABEL = { school: "Application deadline", career: "Target date", test: "Test date", ai: "Be there by" };
+
+const SECTIONS = {
+  GMAT: ["Quant fundamentals", "Verbal fundamentals"],
+  "GMAT Focus": ["Quant fundamentals", "Verbal and data insights fundamentals"],
+  GRE: ["Quant fundamentals", "Verbal fundamentals"],
+  SAT: ["Math fundamentals", "Reading and writing fundamentals"],
+  PSAT: ["Math fundamentals", "Reading and writing fundamentals"],
+  ACT: ["Math and science fundamentals", "English and reading fundamentals"],
+  LSAT: ["Logical reasoning fundamentals", "Reading comprehension fundamentals"],
+  MCAT: ["Chem and physics review", "Bio and biochem review", "CARS practice"],
+  DAT: ["Natural sciences review", "Perceptual ability practice"],
+  TOEFL: ["Reading and listening practice", "Speaking and writing practice"],
+  IELTS: ["Reading and listening practice", "Speaking and writing practice"],
+  "Duolingo English Test": ["Reading and listening practice", "Speaking and writing practice"],
+};
+
+function sectionsFor(exam) {
+  return SECTIONS[exam] || ["First section review", "Rebuild your weakest section"];
+}
+
+const STOP = ["the", "and", "for", "with", "into", "want", "would", "like", "get", "role", "next", "year", "make", "move", "job", "school", "test", "goal", "about", "more", "that", "this", "from", "have", "need", "help", "myself"];
+
+class Component extends DCLogic {
+  state = { step: "category", type: null, cats: [], query: "", family: null, bucket: null, text: "", matching: false, matched: false, matchFailed: false, browseOpen: false, answers: {}, name: null, date: "", off: {}, warn: false, aiPlan: null, drafting: false };
+
+  picker() {
+    const raw = this.props.categoryPicker || "F · Hybrid";
+    return raw.charAt(0).toUpperCase();
+  }
+
+  usesText() { return ["D", "E", "F"].includes(this.picker()); }
+
+  type() { return this.state.type ?? this.props.defaultType ?? null; }
+
+  pool() { const t = this.type(); return t ? POOL[t] : []; }
+
+  answer(qid) {
+    const t = this.type();
+    if (!t) return null;
+    const q = QUESTIONS[t].find((x) => x.id === qid);
+    return this.state.answers[qid] ?? q.options[0];
+  }
+
+  answerSummary() {
+    const t = this.type();
+    if (!t) return "";
+    return QUESTIONS[t].map((q) => q.label + " " + this.answer(q.id)).join("; ");
+  }
+
+  cat() { return this.state.cats[0] || ""; }
+
+  addCat(c) {
+    this.setState((s) => (s.cats.includes(c) ? {} : { cats: s.cats.concat([c]), query: "", name: null, off: {}, aiPlan: null, warn: false }));
+  }
+
+  goalName() {
+    if (this.state.name !== null) return this.state.name;
+    if (this.state.aiPlan && this.state.aiPlan.name) return this.state.aiPlan.name;
+    const t = this.type();
+    const c = this.cat();
+    return t && c ? NAME_PATTERN[t](c) : "";
+  }
+
+  keywordMatch(text) {
+    const words = text.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2 && !STOP.includes(w));
+    const scored = this.pool().map((c) => {
+      const label = c.toLowerCase();
+      let score = 0;
+      words.forEach((w) => { if (label.includes(w)) score += w.length; });
+      return { c, score };
+    }).filter((x) => x.score > 0).sort((a, b) => b.score - a.score);
+    const hits = scored.slice(0, 3).map((x) => x.c);
+    return hits.length ? hits : POPULAR[this.type()].slice(0, 2);
+  }
+
+  async runMatch() {
+    const text = this.state.text.trim();
+    if (!text) { this.setState({ warn: true }); return; }
+    this.setState({ matching: true, matchFailed: false });
+    let cats = null;
+    try {
+      const raw = await window.claude.complete({
+        max_tokens: 300,
+        system: "You map a person's description of their goal onto a fixed category taxonomy. Reply with JSON only.",
+        messages: [{ role: "user", content: 'Categories: ' + JSON.stringify(this.pool()) + '\n\nDescription: "' + text + '"\n\nReturn the 1-3 best-fitting categories, most relevant first, as JSON: {"categories":["..."]}' }],
+      });
+      const parsed = JSON.parse(raw.slice(raw.indexOf("{"), raw.lastIndexOf("}") + 1));
+      cats = (parsed.categories || []).filter((c) => this.pool().includes(c)).slice(0, 3);
+      if (!cats.length) cats = null;
+    } catch (e) {
+      cats = null;
+    }
+    const failed = !cats;
+    this.setState({ cats: cats || this.keywordMatch(text), matching: false, matched: true, matchFailed: failed, name: null, off: {}, aiPlan: null, warn: false });
+  }
+
+  async draftPlan() {
+    const text = this.state.text.trim();
+    this.setState({ drafting: true, aiPlan: null });
+    let plan = null;
+    try {
+      const raw = await window.claude.complete({
+        max_tokens: 1600,
+        system: "You draft goal plans for an ambitious person working with an expert. Warm, direct, specific. Tasks are concrete single actions, 3-6 words to a short sentence, no numbering, no emoji. Sentence case everywhere — goal name, project labels, task labels — never Title Case; capitalize only the first word and proper nouns. Reply with JSON only.",
+        messages: [{ role: "user", content:
+          'Goal type: ' + this.type() + '\nCategories: ' + this.state.cats.join(", ") +
+          '\nTheir description: "' + text + '"\nTheir answers: ' + this.answerSummary() +
+          '\n\nDraft a plan. 2 routines (recurring habits with a cadence) and 3-5 projects, each with 2-5 tasks. Give a project a short "why" only when it exists because of something they told you.' +
+          '\nJSON shape: {"name":"goal name","routines":[{"label":"","cadence":""}],"projects":[{"label":"","why":"","tasks":[""]}]}' }],
+      });
+      const parsed = JSON.parse(raw.slice(raw.indexOf("{"), raw.lastIndexOf("}") + 1));
+      if (Array.isArray(parsed.projects) && parsed.projects.length) {
+        plan = {
+          name: typeof parsed.name === "string" ? this.sentenceCase(parsed.name) : null,
+          routines: (parsed.routines || []).filter((r) => r && r.label).map((r) => ({ label: this.sentenceCase(r.label), cadence: r.cadence || "Weekly" })),
+          projects: parsed.projects.filter((p) => p && p.label && Array.isArray(p.tasks) && p.tasks.length).map((p) => ({
+            label: this.sentenceCase(p.label),
+            why: p.why ? this.sentenceCase(p.why) : null,
+            tasks: p.tasks.filter((t) => typeof t === "string").map((t) => this.sentenceCase(t)),
+          })),
+        };
+      }
+    } catch (e) {
+      plan = null;
+    }
+    this.setState({ aiPlan: plan, drafting: false, off: {} });
+  }
+
+  sentenceCase(str) {
+    if (typeof str !== "string" || !str) return str;
+    const keep = new Set(["linkedin", "ai", "cars", "phd", "llm", "ux", "seo", "mba", "gmat", "gre", "sat", "psat", "act", "lsat", "mcat", "dat", "nclex", "toefl", "ielts"]);
+    this.state.cats.forEach((c) => c.split(/[\s/-]+/).forEach((w) => keep.add(w.toLowerCase())));
+    return str.split(" ").map((w, i) => {
+      const bare = w.replace(/[^A-Za-z]/g, "");
+      if (!bare) return w;
+      if (bare.length > 1 && bare === bare.toUpperCase()) return w;
+      if (keep.has(bare.toLowerCase())) return w;
+      return i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w.charAt(0).toLowerCase() + w.slice(1);
+    }).join(" ");
+  }
+
+  templatePlan() {
+    const t = this.type();
+    const c = this.cat() || "your goal";
+    if (!t) return { routines: [], projects: [] };
+    const routines = [];
+    const projects = [];
+
+    if (t === "school") {
+      const stage = this.answer("stage");
+      const schools = this.answer("schools");
+      const score = this.answer("score");
+      const needsTest = score !== "Already have one";
+      if (needsTest) routines.push({ label: "Practice set", cadence: "Every weekday" });
+      routines.push({ label: "Research one program", cadence: "Sundays" });
+      if (stage === "Just exploring" || stage === "Building my school list") {
+        projects.push({ label: "School list", why: "You're still shaping the list", tasks: ["Draft a list of 8 programs", "Compare them on fit and cost", "Sit in on one info session", "Cut it to your real shortlist"] });
+      }
+      projects.push({
+        label: "Application essays",
+        why: schools === "6 or more" ? "Six-plus apps — build a reusable core essay" : null,
+        tasks: schools === "1–2"
+          ? ["Outline your core story", "Draft essay 1", "Draft essay 2", "Get essay 1 reviewed by your expert"]
+          : schools === "3–5"
+            ? ["Outline your core story", "Draft the core essay", "Adapt it for schools 2 and 3", "Write the school-specific “why us” paragraphs", "Get the core essay reviewed by your expert"]
+            : ["Outline your core story", "Draft the core essay", "Build a reuse map across all schools", "Write each “why us” paragraph", "Two rounds of expert review", "Final proofread pass"],
+      });
+      if (needsTest) {
+        const exam = this.testFor(c);
+        projects.push({
+          label: exam + " prep",
+          why: score === "Retaking it" ? "Retake — start from the last score report" : "No score yet",
+          tasks: score === "Retaking it"
+            ? ["Break down your last score report", "Fix your two weakest sections", "Full-length mock under timing", "Book the retake"]
+            : ["Take a diagnostic test"].concat(sectionsFor(exam), ["Full-length mock under timing", "Book your test date"]),
+        });
+      }
+      projects.push({ label: "Recommenders", tasks: ["Shortlist two recommenders", "Send them your brag sheet", "Confirm both submitted"] });
+      if (stage !== "Just exploring") projects.push({ label: "Interview prep", tasks: ["Write your two-minute story", "Two mock interviews with your expert"] });
+      if (stage === "Ready to submit") projects.push({ label: "Submission check", why: "You said you're close", tasks: ["Proof every form field", "Confirm transcripts and scores sent", "Submit and save confirmations"] });
+    }
+
+    if (t === "career") {
+      const stage = this.answer("stage");
+      const resume = this.answer("resume");
+      const light = this.answer("hours") === "Under 3 hours";
+      if (stage === "Applying now" || stage === "Interviewing") routines.push({ label: light ? "Apply to one role" : "Apply to two roles", cadence: "Every weekday" });
+      routines.push({ label: "Send one networking message", cadence: light ? "Mondays" : "Mon, Wed, Fri" });
+      if (stage === "Getting clear on the target") {
+        projects.push({ label: "Get clear on the target", why: "Before you apply anywhere", tasks: ["Write what you want the next role to give you", "Talk to three people doing it now", "Name your two non-negotiables"] });
+      }
+      projects.push({
+        label: "Resume and story",
+        why: resume === "Haven't touched it" ? "Starting from scratch" : null,
+        tasks: resume === "Up to date"
+          ? ["Tailor it for " + c, "Get it reviewed by your expert", "Tighten your LinkedIn headline"]
+          : ["Rewrite your bullets for " + c + " scope", "Quantify your top three wins", "Get it reviewed by your expert", "Update LinkedIn to match"],
+      });
+      if (stage !== "Weighing an offer") projects.push({ label: "Target list", tasks: ["Pick 15 target companies", "Find a warm intro at five of them", "Track every application in one place"] });
+      projects.push({ label: "Interview loop", tasks: ["Build your " + c + " story bank", "Two mock interviews with your expert", "Practice a live case or take-home"] });
+      if (stage === "Weighing an offer") projects.push({ label: "Offer and negotiation", why: "You have something on the table", tasks: ["Benchmark the comp range", "Script your ask", "Run the negotiation call"] });
+    }
+
+    if (t === "test") {
+      const attempt = this.answer("attempt");
+      const runway = this.answer("runway");
+      const light = this.answer("hours") === "Under 3 hours";
+      routines.push({ label: light ? "Twenty timed questions" : "Timed practice set", cadence: light ? "Mon, Wed, Fri" : "Every weekday" });
+      routines.push({ label: "Review your error log", cadence: "Sundays" });
+      projects.push(
+        attempt === "Retaking it"
+          ? { label: "Score review", why: "Retake — start from what went wrong", tasks: ["Break down your last score report", "Name the two sections costing you most", "Set a realistic target score"] }
+          : { label: "Baseline", why: "First attempt", tasks: ["Take a full diagnostic", "Set a target score", "Pick your test date"] }
+      );
+      projects.push({
+        label: c + " content review",
+        tasks: runway === "Under 6 weeks"
+          ? ["Drill your two weakest topics", "One targeted section review"]
+          : sectionsFor(c).concat(["Section strategy pass", "Rebuild your weakest topic from scratch"]),
+      });
+      projects.push({ label: "Mocks", tasks: runway === "Under 6 weeks" ? ["Two full-length mocks under timing", "Review every miss"] : ["Three full-length mocks under timing", "Review every miss", "Final mock the week before"] });
+    }
+
+    if (t === "ai") {
+      const start = this.answer("start");
+      const why = this.answer("why");
+      const light = this.answer("hours") === "Under 3 hours";
+      const early = start === "Barely used it" || start === "In it most days";
+      routines.push({ label: light ? "Twenty minutes of building" : "Thirty minutes of building", cadence: light ? "Mon, Wed, Fri" : "Daily" });
+      routines.push({ label: "Ship one small thing", cadence: "Fridays" });
+      projects.push(
+        early
+          ? { label: "Foundations", why: "Starting close to zero", tasks: ["Pick one tool and use it daily for a week", "Learn the prompt patterns that actually matter", "Redo one real work task with it", "Write down where it failed you"] }
+          : { label: "Go deeper", why: "You're past the basics", tasks: ["Name your weakest area and fix it", "Rebuild your best project properly", "Read two things that change how you build"] }
+      );
+      projects.push({ label: "Build something real", tasks: ["Pick the most annoying task in your week", "Build a first version", "Put it in front of one other person", "Rebuild it around what broke"] });
+      if (why === "My current job") projects.push({ label: "Put it to work", why: "This is for your current job", tasks: ["Automate one recurring report", "Save your best prompts where your team can find them", "Show the result to your manager"] });
+      if (why === "A career move") projects.push({ label: "Show the work", why: "You're aiming at a move", tasks: ["Ship one public project", "Write up what you learned", "Put the AI work on your resume and LinkedIn", "Talk to two people already in those roles"] });
+      if (why === "Leading my team through it") projects.push({ label: "Bring your team along", why: "You're leading others through this", tasks: ["Run one working session with real tasks", "Pick two workflows worth changing", "Write your team's ground rules", "Check what actually stuck a month later"] });
+      if (why === "Keeping up") projects.push({ label: "Stay current without drowning", why: "You want signal, not noise", tasks: ["Pick three sources and drop the rest", "Try one new tool a month", "Keep a list of what you'd use again"] });
+    }
+
+    return { routines, projects };
+  }
+
+  plan() {
+    if (this.picker() === "E" && this.state.aiPlan) return this.state.aiPlan;
+    return this.templatePlan();
+  }
+
+  testFor(cat) {
+    const map = { MBA: "GMAT", "Deferred MBA": "GMAT", "Executive MBA": "Executive Assessment", "Law School": "LSAT", "Medical School": "MCAT", College: "SAT", "Undergrad Transfer": "SAT", "Dental School": "DAT", "Master's Programs": "GRE", "PhD Programs": "GRE", "Data Science Masters": "GRE", "Public Policy Masters": "GRE", "Engineering Masters": "GRE", "Business Analytics": "GMAT", "Master's in Management": "GMAT", "LLM Programs": "TOEFL" };
+    return map[cat] || "Test";
+  }
+
+  isOff(k) { return !!this.state.off[k]; }
+  flip(k) { this.setState((s) => ({ off: { ...s.off, [k]: !s.off[k] }, warn: false })); }
+  flipProject(pi, tasks) {
+    const on = !this.isOff("p" + pi);
+    this.setState((s) => {
+      const off = { ...s.off, ["p" + pi]: on };
+      tasks.forEach((_, ti) => { off["t" + pi + "-" + ti] = on; });
+      return { off, warn: false };
+    });
+  }
+
+  box(on) {
+    return { border: on ? "#222222" : "#949494", fill: on ? "#222222" : "#ffffff", tickOpacity: on ? "1" : "0", color: on ? "#222222" : "#949494" };
+  }
+
+  plural(n, w) { return n + " " + w + (n === 1 ? "" : "s"); }
+
+  renderVals() {
+    const s = this.state;
+    const mode = this.picker();
+    const type = this.type();
+    const pool = this.pool();
+    const fams = type ? FAMILIES[type] : [];
+    const plan = this.plan();
+
+    let tasks = 0, projectCount = 0;
+    plan.projects.forEach((p, pi) => {
+      const kept = p.tasks.filter((_, ti) => !this.isOff("t" + pi + "-" + ti)).length;
+      if (kept > 0 && !this.isOff("p" + pi)) { projectCount += 1; tasks += kept; }
+    });
+    const routineCount = plan.routines.filter((_, ri) => !this.isOff("r" + ri)).length;
+    const parts = [this.plural(projectCount, "project"), this.plural(tasks, "task")];
+    if (routineCount) parts.push(this.plural(routineCount, "routine"));
+
+    const q = s.query.trim().toLowerCase();
+    const groups = fams
+      .map((f) => ({ name: f.name, items: f.items.filter((c) => !s.cats.includes(c) && c.toLowerCase().includes(q)) }))
+      .filter((g) => g.items.length);
+
+    const twoPane = mode === "B" || (mode === "F" && s.browseOpen);
+    const activeFamily = fams.find((f) => f.name === (s.family || (fams[0] && fams[0].name)));
+    const bucket = fams.find((f) => f.name === s.bucket);
+    const leafSource = mode === "C" ? bucket : activeFamily;
+
+    const order = { category: 0, details: 1, plan: 2, done: 2 };
+    const cur = order[s.step];
+
+    return {
+      pickerName: PICKERS[mode],
+      pickerLead: PICKER_LEAD[mode],
+      steps: ["Category", "Details", "Your plan"].map((label, i) => ({
+        label,
+        dot: i <= cur ? "#222222" : "rgba(34,34,34,0.20)",
+        color: i === cur ? "#222222" : "#949494",
+      })),
+      isCategory: s.step === "category",
+      isDetails: s.step === "details",
+      isPlan: s.step === "plan",
+      isDone: s.step === "done",
+
+      types: TYPES.map((t) => ({
+        ...t,
+        count: POOL[t.id].length,
+        bg: t.id === type ? "#EBD4B5" : "#F5F5F5",
+        ring: t.id === type ? "inset 0 0 0 1.5px #222222" : "none",
+        pick: () => this.setState({ type: t.id, cats: [], query: "", family: null, bucket: null, text: "", matched: false, matchFailed: false, answers: {}, name: null, off: {}, aiPlan: null, warn: false }),
+      })),
+      hasType: !!type,
+      categoryHint: this.usesText() ? "Describe it in your own words — we'll match it to categories you can confirm." : "Add at least one category that applies to your goal.",
+      hasCats: s.cats.length > 0,
+      cats: s.cats.map((c) => ({ label: c, aria: "Remove " + c, remove: () => this.setState((st) => ({ cats: st.cats.filter((x) => x !== c), name: null, off: {}, aiPlan: null })) })),
+      matchNote: s.matched && this.usesText() ? (s.matchFailed ? "Matched offline — closest categories from your words. Edit any of them." : "We heard these — drop any that aren't right.") : false,
+
+      showText: this.usesText(),
+      text: s.text,
+      textPlaceholder: type === "ai"
+        ? "I run a marketing team and I want us actually using AI by Q1 — I've barely touched it myself."
+        : type === "career"
+        ? "I'm a senior engineer who wants to move into product management at a bigger company by next spring."
+        : type === "test"
+          ? "I need a GMAT score good enough for a top-10 MBA, and I'm starting from scratch."
+          : "I want to apply to a few MBA programs in round 1 and I haven't started essays.",
+      onText: (e) => this.setState({ text: e.target.value, warn: false }),
+      matchLabel: s.matching ? "Matching…" : s.matched ? "Match again" : "Find my categories",
+      matchStatus: s.matching ? "Reading your description…" : false,
+      runMatch: () => this.runMatch(),
+
+      showBrowseToggle: mode === "F",
+      browseLabel: s.browseOpen ? "Hide the full category list" : "Or browse all " + pool.length + " categories",
+      toggleBrowse: () => this.setState((st) => ({ browseOpen: !st.browseOpen })),
+
+      showSearch: mode === "A",
+      query: s.query,
+      searchPlaceholder: "Search " + pool.length + " categories…",
+      onQuery: (e) => this.setState({ query: e.target.value }),
+      showPopular: mode === "A" && !q,
+      popular: (type ? POPULAR[type] : []).filter((c) => !s.cats.includes(c)).map((c) => ({ label: c, add: () => this.addCat(c) })),
+      showGroups: mode === "A" && !!q,
+      groups: groups.map((g) => ({ name: g.name, items: g.items.map((c) => ({ label: c, add: () => this.addCat(c) })) })),
+      noResults: mode === "A" && !!q && groups.length === 0,
+
+      showTwoPane: twoPane,
+      families: fams.map((f) => ({
+        name: f.name,
+        count: f.items.length,
+        bg: twoPane && activeFamily && f.name === activeFamily.name ? "#ffffff" : "transparent",
+        open: () => this.setState({ family: f.name, bucket: f.name }),
+      })),
+      leaves: (leafSource ? leafSource.items : []).map((c) => ({
+        label: c,
+        color: s.cats.includes(c) ? "#949494" : "#222222",
+        add: () => this.addCat(c),
+      })),
+
+      showBuckets: mode === "C",
+      bucketOpen: s.bucket || false,
+      bucketsVisible: mode === "C" && !s.bucket,
+      clearBucket: () => this.setState({ bucket: null }),
+
+      needsCategory: s.warn && s.step === "category",
+      categoryError: !type
+        ? "Pick what kind of goal this is."
+        : this.usesText() && !s.text.trim()
+          ? "Describe your goal first."
+          : this.usesText() && !(mode === "F" && s.browseOpen)
+            ? "Match your description to categories first."
+            : "Add at least one category.",
+      toDetails: () => {
+        if (!type || s.cats.length === 0) { this.setState({ warn: true }); return; }
+        this.setState({ step: "details", warn: false });
+      },
+
+      questions: (type ? QUESTIONS[type] : []).map((qq) => ({
+        label: qq.label,
+        options: qq.options.map((o) => {
+          const on = this.answer(qq.id) === o;
+          return {
+            label: o,
+            bg: on ? "#EBD4B5" : "#F5F5F5",
+            ring: on ? "inset 0 0 0 1.5px #222222" : "none",
+            pick: () => this.setState((st) => ({ answers: { ...st.answers, [qq.id]: o }, off: {}, aiPlan: null })),
+          };
+        }),
+      })),
+      nameField: this.goalName(),
+      onName: (e) => this.setState({ name: e.target.value }),
+      dateLabel: type ? DATE_LABEL[type] : "Target date",
+      date: s.date,
+      onDate: (e) => this.setState({ date: e.target.value }),
+      backToCategory: () => this.setState({ step: "category", warn: false }),
+      toPlan: () => {
+        this.setState({ step: "plan", warn: false });
+        if (mode === "E" && !s.aiPlan) this.draftPlan();
+      },
+
+      name: this.goalName() || "Your goal",
+      drafting: s.drafting,
+      planReady: !s.drafting,
+      planLead: mode === "E"
+        ? (s.aiPlan ? "Drafted from your description and answers. Uncheck anything you don't want." : "Drafted from your answers — the live draft didn't come back, so this is the standard plan for " + (this.cat() || "your goal") + ".")
+        : "Drafted from " + (this.cat() || "your goal") + " and your answers. Uncheck anything you don't want — you can add more any time, and your expert can too.",
+      hasRoutines: plan.routines.length > 0,
+      routines: plan.routines.map((r, ri) => {
+        const on = !this.isOff("r" + ri);
+        return { ...r, ...this.box(on), aria: (on ? "Remove " : "Add ") + r.label, toggle: () => this.flip("r" + ri) };
+      }),
+      projects: plan.projects.map((p, pi) => {
+        const pOn = !this.isOff("p" + pi);
+        const kept = p.tasks.filter((_, ti) => !this.isOff("t" + pi + "-" + ti)).length;
+        return {
+          label: p.label,
+          why: p.why || false,
+          count: kept + " of " + p.tasks.length,
+          opacity: pOn && kept > 0 ? "1" : "0.55",
+          ...this.box(pOn),
+          aria: (pOn ? "Remove " : "Add ") + p.label,
+          toggle: () => this.flipProject(pi, p.tasks),
+          tasks: p.tasks.map((label, ti) => {
+            const on = !this.isOff("t" + pi + "-" + ti) && pOn;
+            return { label, ...this.box(on), aria: (on ? "Remove " : "Add ") + label, toggle: () => this.flip("t" + pi + "-" + ti) };
+          }),
+        };
+      }),
+      summary: s.step === "done" ? parts.join(" · ") : parts.join(" · ") + " will be created",
+      needsSomething: s.warn && s.step === "plan",
+      backToDetails: () => this.setState({ step: "details", warn: false }),
+      create: () => {
+        if (tasks === 0 && routineCount === 0) { this.setState({ warn: true }); return; }
+        this.setState({ step: "done", warn: false });
+      },
+      restart: () => this.setState({ step: "category", type: null, cats: [], query: "", family: null, bucket: null, text: "", matched: false, matchFailed: false, browseOpen: false, answers: {}, name: null, date: "", off: {}, aiPlan: null, warn: false }),
+    };
+  }
+}
+</script>
+</body>
+</html>

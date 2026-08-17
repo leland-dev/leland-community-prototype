@@ -7,6 +7,7 @@ import { SavedToastProvider } from "./contexts/SavedToastContext";
 import { ExpertModeProvider } from "./contexts/ExpertModeContext";
 import { ProfileBarModeProvider } from "./contexts/ProfileBarModeContext";
 import { PageExitProvider } from "./contexts/PageExitContext";
+import { GoalsProvider } from "./contexts/GoalsContext";
 import PageExitOverlay from "./components/PageExitOverlay";
 import Layout from "./components/Layout";
 import { ContextLayout } from "./components/Layout";
@@ -54,6 +55,10 @@ import Events from "./pages/Events";
 import Courses from "./pages/Courses";
 import LelandPlus from "./pages/LelandPlus";
 import Dashboard from "./pages/Dashboard";
+import GoalsIndex from "./pages/GoalsIndex";
+import GoalDetail from "./pages/GoalDetail";
+import GoalNew from "./pages/GoalNew";
+import TaskList from "./pages/TaskList";
 import PostDetail from "./pages/PostDetail";
 import ReplyCompose from "./pages/ReplyCompose";
 import AccountSettings from "./pages/AccountSettings";
@@ -105,6 +110,7 @@ export default function App() {
     <BookmarksProvider>
     <SavedToastProvider>
     <ProfileBarModeProvider>
+    <GoalsProvider>
     <ScrollToTop />
     <PageExitProvider>
     <Routes>
@@ -172,6 +178,10 @@ export default function App() {
           <Route path="/browse" element={<Browse />} />
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/goals" element={<GoalsIndex />} />
+          <Route path="/tasks" element={<TaskList />} />
+          <Route path="/goals/new" element={<GoalNew />} />
+          <Route path="/goals/:goalId" element={<GoalDetail />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/messages" element={<Messaging />} />
           <Route path="/profile" element={<Profile />} />
@@ -184,6 +194,7 @@ export default function App() {
     </Routes>
     <PageExitOverlay />
     </PageExitProvider>
+    </GoalsProvider>
     </ProfileBarModeProvider>
     </SavedToastProvider>
     </BookmarksProvider>
