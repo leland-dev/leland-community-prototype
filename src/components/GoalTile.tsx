@@ -37,6 +37,16 @@ export function GoalTile({ goal }: { goal: Goal }) {
         <div className="text-[14px] leading-[1.4] text-gray-extra-light">{goal.targetLabel}</div>
       </div>
 
+      <div className="flex flex-col gap-1.5">
+        <div className="h-1 overflow-hidden rounded-full bg-[#222222]/10">
+          <div className={`h-full rounded-full ${status === "completed" ? "bg-[#869AA6]" : "bg-gray-dark"}`} style={{ width: `${pct}%` }} />
+        </div>
+        <div className="text-[12px] text-gray-extra-light">
+          {done} of {total} tasks
+        </div>
+        {overdue > 0 && <div className="text-right text-[12px] font-medium text-[#9F5B34]">{overdue} overdue</div>}
+      </div>
+
       {status === "completed" ? (
         goal.outcome && (
           <div className="flex flex-col gap-[3px] rounded-lg bg-white px-3 py-2.5">
@@ -67,16 +77,6 @@ export function GoalTile({ goal }: { goal: Goal }) {
           </div>
         </div>
       ) : null}
-
-      <div className="flex flex-col gap-1.5">
-        <div className="h-1 overflow-hidden rounded-full bg-[#222222]/10">
-          <div className={`h-full rounded-full ${status === "completed" ? "bg-[#869AA6]" : "bg-gray-dark"}`} style={{ width: `${pct}%` }} />
-        </div>
-        <div className="text-[12px] text-gray-extra-light">
-          {done} of {total} tasks
-        </div>
-        {overdue > 0 && <div className="text-right text-[12px] font-medium text-[#9F5B34]">{overdue} overdue</div>}
-      </div>
     </button>
   );
 }

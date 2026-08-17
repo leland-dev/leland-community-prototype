@@ -403,6 +403,28 @@ function GoalsEmptyState() {
   );
 }
 
+// The pre-feature "My goals" card — skeleton tiles and a dashed add button,
+// no real data. Shown when the "Goals & tasks" admin toggle is off, so the
+// dashboard reads the same as it does on main rather than losing the section
+// entirely.
+function GoalsPlaceholderCard() {
+  return (
+    <DashCard title="My goals">
+      <p className="-mt-2 mb-4 text-[15px] text-[#707070]">Track your progress toward what matters most.</p>
+      <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-1">
+        {[0, 1].map((i) => (
+          <div key={i} className="h-[100px] w-[200px] shrink-0 rounded-xl bg-[#F5F5F5]" style={dashedBorderStyle} />
+        ))}
+        <button className="flex h-[100px] w-[200px] shrink-0 cursor-pointer items-center justify-center rounded-xl border-none bg-[#F5F5F5] transition-colors hover:bg-[#EEEEEE]" style={dashedBorderStyle}>
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M16 8v16M8 16h16" stroke="#9B9B9B" strokeWidth="2.5" strokeLinecap="round" />
+          </svg>
+        </button>
+      </div>
+    </DashCard>
+  );
+}
+
 function GoalsCard() {
   const { goals } = useGoals();
   const navigate = useNavigate();
@@ -842,7 +864,10 @@ export default function Dashboard() {
   const [adminOpen, setAdminOpen] = useState(false);
   const [expert, setExpert] = useState(false);
   const [altAnalytics, setAltAnalytics] = useState(false);
-  const [tasksWidget, setTasksWidget] = useState(true);
+  // Single toggle for the whole goals/tasks feature this branch adds
+  // (GoalsCard + TasksCard) — same show/hide pattern used everywhere else on
+  // this branch, just scoped to the feature as a whole rather than one card.
+  const [goalsFeature, setGoalsFeature] = useState(true);
   const adminRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!adminOpen) return;
@@ -942,9 +967,14 @@ export default function Dashboard() {
               </DashCard>
             )}
 
-            {/* My goals — hidden for experts */}
-            {!expert && <GoalsCard />}
-            {!expert && tasksWidget && <TasksCard />}
+            {/* My goals — hidden for experts. Both cards sit behind one
+                toggle: they're the whole goals/tasks feature this branch
+                adds, not two independent widgets. Off reverts "My goals" to
+                the pre-feature skeleton (matching main) rather than dropping
+                the section entirely; "My tasks" didn't exist on main, so it
+                just disappears. */}
+            {!expert && (goalsFeature ? <GoalsCard /> : <GoalsPlaceholderCard />)}
+            {!expert && goalsFeature && <TasksCard />}
 
             {/* 6. Get help */}
             <GetHelp />
@@ -967,7 +997,7 @@ export default function Dashboard() {
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
               <AdminToggle label="Expert" checked={expert} onChange={() => setExpert((v) => !v)} />
-              {!expert && <AdminToggle label="Tasks widget" checked={tasksWidget} onChange={() => setTasksWidget((v) => !v)} />}
+              {!expert && <AdminToggle label="Goals & tasks" checked={goalsFeature} onChange={() => setGoalsFeature((v) => !v)} />}
               {expert && <AdminToggle label="Alt Analytics" checked={altAnalytics} onChange={() => setAltAnalytics((v) => !v)} />}
             </motion.div>
           )}
