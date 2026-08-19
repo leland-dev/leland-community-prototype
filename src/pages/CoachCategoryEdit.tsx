@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useParams, useNavigate, Link } from "react-router-dom";
@@ -80,12 +80,21 @@ const categoryData: Record<string, {
 
 const HERO_BG = "#F3F1E6";
 
+// Admin-toggleable layout version for this page — persisted so a demo survives
+// reloads. v1 is the current design; v2 is the in-progress redesign.
+type CategoryVersion = "v1" | "v2" | "v3";
+const VERSION_KEY = "coachCategoryVersion";
+
 // Dashed border drawn as an SVG background so we can set a larger dash length
 // and a lower-opacity stroke than CSS `border-dashed` allows. Stroke is
-// gray-light (#4C4C4C) at 50% opacity; rx matches rounded-2xl (16px).
-const dashedBorderStyle = {
-  backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='%234C4C4C' stroke-opacity='0.5' stroke-width='2' stroke-dasharray='6%2c 5' stroke-linecap='butt'/%3e%3c/svg%3e")`,
-};
+// gray-light (#4C4C4C); rx matches rounded-2xl (16px). The border lives on the
+// button element itself (not an overlay) so all four sides render reliably; the
+// hover variant fades in on top to darken it. 0.4 base + 0.2 boost ≈ 0.5.
+const dashedBorder = (opacity: number) => ({
+  backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='%234C4C4C' stroke-opacity='${opacity}' stroke-width='2' stroke-dasharray='6%2c 5' stroke-linecap='butt'/%3e%3c/svg%3e")`,
+});
+const dashedBorderStyle = dashedBorder(0.4);
+const dashedBorderHoverStyle = dashedBorder(0.2);
 
 const LEVEL_OPTIONS = ["Associate", "Manager", "Senior Manager", "Director", "VP", "C-Level"];
 
@@ -141,6 +150,39 @@ function CoachOfferingCard({ offering, onPreview, onEdit }: { offering: Offering
   );
 }
 
+// "Offerings" heading + a grid of offering cards led by the dashed "New
+// offering" tile. gridClass sets the column layout so the wide (v1/v2) and
+// two-column (v3) layouts can differ.
+function OfferingsSection({ category, gridClass }: { category: string | undefined; gridClass: string }) {
+  const navigate = useNavigate();
+  return (
+    <div>
+      <h2 className="mb-4 text-[20px] font-semibold text-gray-dark">Offerings</h2>
+      <div className={`grid gap-4 ${gridClass}`}>
+        {/* Add-new tile — the base dashed border is on the button so all four
+            sides render; a darker border fades in on hover via the overlay. */}
+        <button
+          onClick={() => navigate(`/coach/manage/${category}/new-product`)}
+          style={dashedBorderStyle}
+          className="group relative flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl bg-gray-hover transition-colors hover:bg-[#eeeeee]"
+        >
+          <span aria-hidden style={dashedBorderHoverStyle} className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100" />
+          <svg className="h-7 w-7 text-gray-extra-light transition-colors group-hover:text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+          <span className="text-[15px] font-semibold leading-tight text-gray-extra-light transition-colors group-hover:text-gray-light">New offering</span>
+        </button>
+        {OFFERINGS.map((o) => (
+          <CoachOfferingCard
+            key={o.slug}
+            offering={o}
+            onPreview={() => navigate(`/offering/${o.slug}`)}
+            onEdit={() => navigate(`/coach/manage/${category}/new-product`)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const boxClass = "flex h-full flex-col rounded-[20px] bg-white p-6 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10";
 
 type FirstStep = { type: "free" | "trial"; discountPct: number };
@@ -149,34 +191,27 @@ const DISCOUNT_OPTIONS = [25, 50, 75];
 // Left card (spans two columns) — avatar + name, an Edit link to the details
 // modal, the serif headline, service-tag chips, and a truncated qualifications
 // blurb.
-function CategoryInfoCard({ settings, onEdit }: { settings: ListingSettings; onEdit: () => void }) {
+function CategoryInfoCard({ settings, onEdit, category, className = "" }: { settings: ListingSettings; onEdit: () => void; category: string | undefined; className?: string }) {
   return (
-    <section className={`${boxClass} lg:col-span-2`}>
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-2.5">
-          <img src={pic6} alt="Samantha Parker" className="h-7 w-7 rounded-full object-cover" />
-          <span className="text-[16px] text-gray-dark">Samantha Parker</span>
+    <section className={`${boxClass} ${className}`}>
+      <div className="mb-6">
+        <div className="flex items-start justify-between gap-3">
+          <img src={pic6} alt="Samantha Parker" className="h-[72px] w-[72px] rounded-full object-cover" />
+          <Button size="sm" variant="secondary" rounded="rounded-full" onClick={onEdit} className="text-[14px] font-semibold">
+            <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
+            Edit
+          </Button>
         </div>
-        <button onClick={onEdit} className="flex shrink-0 items-center gap-1.5 text-[15px] font-medium text-gray-dark transition-opacity hover:opacity-70">
-          <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
-          <span className="underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">Edit</span>
-        </button>
+
+        <h2 className="mt-4 font-serif text-[26px] leading-tight text-gray-dark">{settings.headline}</h2>
+
+        <p className="mt-4 line-clamp-3 text-[14px] leading-[1.4] text-gray-light">{settings.qualifications}</p>
       </div>
 
-      <h2 className="mt-4 font-serif text-[26px] leading-tight text-gray-dark">{settings.headline}</h2>
-
-      {settings.services.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {settings.services.slice(0, 4).map((s) => (
-            <span key={s} className="rounded-full bg-[#222222]/5 px-3 py-1.5 text-[13px] font-medium text-gray-extra-light">{s}</span>
-          ))}
-          {settings.services.length > 4 && (
-            <span className="rounded-full bg-[#222222]/5 px-3 py-1.5 text-[13px] font-medium text-gray-extra-light">+{settings.services.length - 4}</span>
-          )}
-        </div>
-      )}
-
-      <p className="mt-4 line-clamp-2 text-[15px] leading-relaxed text-gray-light">{settings.qualifications}</p>
+      <LinkButton size="lg" variant="white" rounded="rounded-full" href={`/profile/samantha-parker/${category}`} className="mt-auto w-full border border-gray-stroke text-[15px] font-semibold">
+        <img src={eyeIcon} alt="" className="h-[18px] w-[18px]" />
+        Preview listing
+      </LinkButton>
     </section>
   );
 }
@@ -188,11 +223,13 @@ const revealBtnClass = "flex h-9 w-9 shrink-0 items-center justify-center rounde
 function FirstStepDropdown({ value, onChange }: { value: FirstStep; onChange: (v: FirstStep) => void }) {
   return (
     <div className="flex flex-1 flex-col justify-center p-6">
-      <p className="text-[15px] text-gray-light">First step</p>
-      <div className="group relative mt-1 flex items-center justify-between gap-3">
-        <p className="font-serif text-[24px] leading-tight text-gray-dark">
-          {value.type === "free" ? "Free intro call" : "Paid trial session"}
-        </p>
+      <div className="group relative flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[15px] text-gray-light">First step</p>
+          <p className="mt-1 font-serif text-[24px] leading-tight text-gray-dark">
+            {value.type === "free" ? "Free intro call" : "Paid trial session"}
+          </p>
+        </div>
         <span className={`${revealBtnClass} group-hover:bg-gray-hover`} aria-hidden>
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
         </span>
@@ -242,26 +279,31 @@ function HourlyRateSection({ rate, onChange }: { rate: string; onChange: (v: str
 
   return (
     <div className="flex flex-1 flex-col justify-center p-6">
-      <p className="text-[15px] text-gray-light">Hourly rate</p>
       {editing ? (
-        <div className="mt-2 flex items-center gap-2">
-          <div className="relative">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[16px] font-semibold text-gray-dark">$</span>
-            <input
-              autoFocus
-              inputMode="numeric"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value.replace(/[^0-9]/g, ""))}
-              onKeyDown={(e) => { if (e.key === "Enter") save(); }}
-              placeholder="0"
-              className="w-[110px] rounded-lg border border-gray-stroke bg-white py-2 pl-7 pr-3 text-[16px] font-semibold text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
-            />
+        <div>
+          <p className="text-[15px] text-gray-light">Hourly rate</p>
+          <div className="mt-2 flex items-center gap-2">
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[16px] font-semibold text-gray-dark">$</span>
+              <input
+                autoFocus
+                inputMode="numeric"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value.replace(/[^0-9]/g, ""))}
+                onKeyDown={(e) => { if (e.key === "Enter") save(); }}
+                placeholder="0"
+                className="w-[110px] rounded-lg border border-gray-stroke bg-white py-2 pl-7 pr-3 text-[16px] font-semibold text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
+              />
+            </div>
+            <Button size="sm" variant="primary" rounded="rounded-full" onClick={save}>Save</Button>
           </div>
-          <Button size="sm" variant="primary" rounded="rounded-full" onClick={save}>Save</Button>
         </div>
       ) : (
-        <div className="mt-1 flex items-center justify-between gap-3">
-          <p className="font-serif text-[24px] leading-tight text-gray-dark">${rate || "0"} per hour</p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[15px] text-gray-light">Hourly rate</p>
+            <p className="mt-1 font-serif text-[24px] leading-tight text-gray-dark">${rate || "0"} per hour</p>
+          </div>
           <button onClick={startEdit} aria-label="Edit hourly rate" className={revealBtnClass}>
             <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
           </button>
@@ -276,8 +318,68 @@ function HourlyRateSection({ rate, onChange }: { rate: string; onChange: (v: str
 function CategoryPricingCard({ firstStep, onFirstStepChange, rate, onRateChange }: { firstStep: FirstStep; onFirstStepChange: (v: FirstStep) => void; rate: string; onRateChange: (v: string) => void }) {
   return (
     <section className="flex h-full flex-col divide-y divide-[#222222]/10 rounded-[20px] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10">
-      <FirstStepDropdown value={firstStep} onChange={onFirstStepChange} />
       <HourlyRateSection rate={rate} onChange={onRateChange} />
+      <FirstStepDropdown value={firstStep} onChange={onFirstStepChange} />
+    </section>
+  );
+}
+
+// ─── v2 ─────────────────────────────────────────────────────────────────────
+
+// Per-category analytics card — mirrors the coach Dashboard's "Analytics"
+// roll-up (label + big value + mini area chart), trimmed to three metrics to
+// fit the two-column card. Sparkline logic matches the Dashboard's.
+const SPARK_COLOR = "#94370C";
+const ANALYTICS_METRICS = [
+  { key: "views", label: "Listing views", value: "1.2k", data: [40, 45, 50, 48, 55, 60, 58, 66, 70, 68, 75, 80, 78, 85, 90, 95] },
+  { key: "leads", label: "New leads", value: "18", data: [1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7] },
+  { key: "bookings", label: "Bookings", value: "$1.8k", data: [100, 150, 120, 200, 250, 220, 300, 350, 320, 400, 450, 420, 500, 550, 600, 650] },
+];
+
+function Sparkline({ id, data }: { id: string; data: number[] }) {
+  const w = 100;
+  const h = 36;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const line = data
+    .map((v, i) => `${((i / (data.length - 1)) * w).toFixed(2)},${(h - ((v - min) / range) * h).toFixed(2)}`)
+    .join(" ");
+  const gid = `spark-${id}`;
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="h-8 w-24">
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={SPARK_COLOR} stopOpacity="0.22" />
+          <stop offset="100%" stopColor={SPARK_COLOR} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={`0,${h} ${line} ${w},${h}`} fill={`url(#${gid})`} />
+      <polyline points={line} fill="none" stroke={SPARK_COLOR} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+}
+
+function CategoryAnalyticsCard({ className = "" }: { className?: string }) {
+  return (
+    <section className={`${boxClass} ${className}`}>
+      <div className="flex items-center justify-between">
+        <h2 className="text-[19px] font-semibold leading-tight text-gray-dark">Analytics</h2>
+        <Link to="/coach/earnings" className="text-[14px] font-medium leading-none text-gray-extra-light transition-opacity hover:opacity-70">See all</Link>
+      </div>
+      <div className="mt-6 flex flex-1 items-center">
+        <div className="grid w-full grid-cols-3 gap-x-6">
+          {ANALYTICS_METRICS.map((m, i) => (
+            <div key={m.key} className={`text-center ${i > 0 ? "border-l border-[#222222]/10 pl-6" : ""}`}>
+              <p className="text-[13px] font-semibold leading-tight text-gray-extra-light">{m.label}</p>
+              <p className="mt-3 text-[24px] font-bold leading-none text-gray-dark">{m.value}</p>
+              <div className="mt-4 flex justify-center">
+                <Sparkline id={m.key} data={m.data} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
@@ -405,6 +507,32 @@ export default function CoachCategoryEdit() {
   const [firstStep, setFirstStep] = useState<FirstStep>({ type: "free", discountPct: 50 });
   const patchSettings = (patch: Partial<ListingSettings>) => setSettings((s) => (s ? { ...s, ...patch } : s));
 
+  // Admin: v1/v2 layout switch (bottom-right 3-dot menu), persisted for demos.
+  const [version, setVersion] = useState<CategoryVersion>(() => (localStorage.getItem(VERSION_KEY) as CategoryVersion) || "v3");
+  useEffect(() => { localStorage.setItem(VERSION_KEY, version); }, [version]);
+  const [adminOpen, setAdminOpen] = useState(false);
+  const adminRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!adminOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (adminRef.current && !adminRef.current.contains(e.target as Node)) setAdminOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [adminOpen]);
+
+  // Category options menu (top-right 3-dot: Share / Delete category).
+  const [catMenuOpen, setCatMenuOpen] = useState(false);
+  const catMenuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!catMenuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (catMenuRef.current && !catMenuRef.current.contains(e.target as Node)) setCatMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [catMenuOpen]);
+
   useEffect(() => {
     document.title = `Leland Prototype | Edit ${data?.name ?? "Category"}`;
   }, [data?.name]);
@@ -420,6 +548,10 @@ export default function CoachCategoryEdit() {
     );
   }
 
+  // v3 mirrors the customer Dashboard's two-column layout at its wider max
+  // width; v1/v2 stay in the narrower single-column layout.
+  const contentMax = version === "v3" ? "max-w-[1280px]" : "max-w-[1040px]";
+
   return (
     <div>
       {/* Hero — colored band bled to the edges of CoachLayout's flex-1 region
@@ -431,65 +563,161 @@ export default function CoachCategoryEdit() {
           726 = (1280 max-width + 220 sidebar) / 2 - 24 padding. The overlapping
           cards below pull up into it, matching the customer Dashboard hero. */}
       <div
-        className="-ml-4 -mr-4 -mt-8 px-4 pb-28 pt-8 sm:-mt-10 sm:px-6 sm:pb-32 sm:pt-10 sm:[margin-left:min(-24px,calc(726px_-_50vw))] sm:[margin-right:min(-24px,calc(726px_-_50vw))]"
+        className="-ml-4 -mr-4 -mt-8 pb-28 pt-8 sm:-mt-10 sm:pb-32 sm:pt-10 sm:[margin-left:min(-24px,calc(726px_-_50vw))] sm:[margin-right:min(-24px,calc(726px_-_50vw))]"
         style={{ backgroundColor: HERO_BG }}
       >
-        <div className="mx-auto max-w-[1040px]">
+        {/* Recreate CoachLayout's padded max-w container so the hero content
+            box matches the main content box exactly (which lives inside that
+            same container), then constrain to the per-version content width. */}
+        <div className="mx-auto max-w-[1280px] px-4 sm:px-6">
+          <div className={`mx-auto ${contentMax}`}>
           {/* Back + Preview listing */}
           <div className="mb-6 flex items-center justify-between gap-3">
             <Button size="sm" variant="secondary" iconOnly onClick={() => navigate("/coach/profile-new")} aria-label="Go back">
               <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
             </Button>
-            <LinkButton size="md" variant="secondary" rounded="rounded-full" href={`/profile/samantha-parker/${category}`} className="text-[15px] font-semibold">
-              <img src={eyeIcon} alt="" className="h-[16px] w-[16px]" />
-              Preview listing
-            </LinkButton>
+            <div className="relative" ref={catMenuRef}>
+              <Button size="sm" variant="secondary" iconOnly onClick={() => setCatMenuOpen((o) => !o)} aria-label="Category options">
+                <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></svg>
+              </Button>
+              <AnimatePresence>
+                {catMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full z-30 mt-2 w-[200px] rounded-xl border border-gray-200 bg-white p-1.5 shadow-lg"
+                  >
+                    <button onClick={() => setCatMenuOpen(false)} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
+                      <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v14" /></svg>
+                      Share
+                    </button>
+                    <button onClick={() => setCatMenuOpen(false)} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-[#DC2B23] transition-colors hover:bg-[#DC2B23]/[0.06]">
+                      <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V6" /></svg>
+                      Delete category
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
-          {/* Header */}
-          <div>
-            <h1 className="font-serif text-[42px] leading-[1.05] text-gray-dark md:text-[48px]">{data.name}</h1>
-            <p className="mt-3 text-[18px] leading-relaxed text-gray-light">
-              Manage the products, pricing, and details that appear on your public listing for this category.
-            </p>
+          {/* Header — v1: generic title + subtitle. v2: a preview of the
+              coach's category information (name, headline, expertise, bio). */}
+          {version === "v2" ? (
+            <div>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-2.5">
+                  <img src={pic6} alt="Samantha Parker" className="h-8 w-8 rounded-full object-cover" />
+                  <span className="text-[16px] text-gray-dark">Samantha Parker <span className="text-gray-extra-light">·</span> {data.name} listing</span>
+                </div>
+                <button onClick={() => setEditOpen(true)} className="flex shrink-0 items-center gap-1.5 text-[15px] font-medium text-gray-dark transition-opacity hover:opacity-70">
+                  <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
+                  <span className="underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">Edit</span>
+                </button>
+              </div>
+              <h1 className="mt-4 font-serif text-[42px] leading-[1.05] text-gray-dark md:text-[48px]">{settings.headline}</h1>
+              {settings.services.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {settings.services.slice(0, 4).map((s) => (
+                    <span key={s} className="rounded-full bg-[#222222]/5 px-3 py-1.5 text-[13px] font-medium text-gray-light">{s}</span>
+                  ))}
+                  {settings.services.length > 4 && (
+                    <span className="rounded-full bg-[#222222]/5 px-3 py-1.5 text-[13px] font-medium text-gray-light">+{settings.services.length - 4}</span>
+                  )}
+                </div>
+              )}
+              <p className="mt-4 line-clamp-2 max-w-[720px] text-[16px] leading-relaxed text-gray-light">{settings.qualifications}</p>
+            </div>
+          ) : (
+            <div>
+              <h1 className="font-serif text-[42px] leading-[1.05] text-gray-dark md:text-[48px]">{data.name}</h1>
+              <p className="mt-3 text-[18px] leading-relaxed text-gray-light">
+                Manage the products, pricing, and details that appear on your public listing for this category.
+              </p>
+            </div>
+          )}
           </div>
         </div>
       </div>
 
       {/* Content — pulled up to overlap the hero band */}
-      <div className="relative z-10 mx-auto -mt-16 max-w-[1040px] sm:-mt-20">
-        {/* Category details, first step, and hourly rate */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} />
-          <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />
-        </div>
-
-        {/* Offerings grid */}
-        <div className="mt-12">
-          <h2 className="mb-4 text-[20px] font-semibold text-gray-dark">Offerings</h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Add-new tile */}
-            <button
-              onClick={() => navigate(`/coach/manage/${category}/new-product`)}
-              style={dashedBorderStyle}
-              className="group flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl bg-gray-hover transition-colors hover:bg-[#eeeeee]"
-            >
-              <svg className="h-7 w-7 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-              <span className="text-[15px] font-semibold leading-tight text-gray-light">New offering</span>
-            </button>
-            {OFFERINGS.map((o) => (
-              <CoachOfferingCard
-                key={o.slug}
-                offering={o}
-                onPreview={() => navigate(`/offering/${o.slug}`)}
-                onEdit={() => navigate(`/coach/manage/${category}/new-product`)}
-              />
-            ))}
+      <div className={`relative z-10 mx-auto -mt-16 sm:-mt-20 ${contentMax}`}>
+        {version === "v3" ? (
+          // v3 — Dashboard-style two columns: left holds category info + first
+          // step + hourly rate; right holds analytics then offerings.
+          <div className="grid grid-cols-1 gap-6 lg:gap-x-10 lg:grid-cols-[320px_minmax(0,1fr)]">
+            <div className="flex flex-col gap-6 lg:sticky lg:top-[77px] lg:self-start">
+              <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} category={category} />
+              <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />
+            </div>
+            <div className="flex min-w-0 flex-col gap-8">
+              <CategoryAnalyticsCard />
+              <OfferingsSection category={category} gridClass="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3" />
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* v1: category info + pricing. v2: analytics + pricing (the
+                category info moves up into the hero preview). */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              {version === "v2"
+                ? <CategoryAnalyticsCard className="lg:col-span-2" />
+                : <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} category={category} className="lg:col-span-2" />}
+              <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />
+            </div>
+
+            <div className="mt-12">
+              <OfferingsSection category={category} gridClass="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" />
+            </div>
+          </>
+        )}
       </div>
 
       <ListingSettingsModal open={editOpen} settings={settings} allServices={data.allServices} onPatch={patchSettings} onClose={() => setEditOpen(false)} />
+
+      {/* Admin — bottom-right 3-dot menu to switch layout versions (demo tool) */}
+      <div
+        ref={adminRef}
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-40 md:bottom-6 md:right-6"
+      >
+        <AnimatePresence>
+          {adminOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 4 }}
+              transition={{ duration: 0.15 }}
+              className="absolute bottom-full right-0 mb-2 w-[200px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+            >
+              <p className="px-2 pb-1.5 pt-1 text-[12px] font-medium text-gray-light">Layout version</p>
+              <div className="flex gap-1 rounded-lg bg-gray-hover p-1">
+                {(["v1", "v2", "v3"] as const).map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setVersion(v)}
+                    className={`flex-1 rounded-md px-2 py-1.5 text-[13px] font-semibold uppercase transition-colors ${version === v ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]" : "text-gray-light hover:text-gray-dark"}`}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <button
+          onClick={() => setAdminOpen((o) => !o)}
+          aria-label="Admin controls"
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-colors hover:bg-[#B1B1B1]/30"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="3" cy="8" r="1.5" fill="#222222" />
+            <circle cx="8" cy="8" r="1.5" fill="#222222" />
+            <circle cx="13" cy="8" r="1.5" fill="#222222" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
