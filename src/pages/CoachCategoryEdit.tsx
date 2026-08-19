@@ -6,6 +6,11 @@ import { Button, LinkButton } from "../components/Button";
 import { OFFERINGS, type Offering } from "../lib/offerings";
 import editIcon from "../assets/icons/edit.svg";
 import eyeIcon from "../assets/icons/eye.svg";
+import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
+import packageBoxOpenIcon from "../assets/icons/package-box-open.svg";
+import bookOpenIcon from "../assets/icons/book-open.svg";
+import myCoursesIcon from "../assets/icons/my-courses.svg";
+import giftIcon from "../assets/icons/gift.svg";
 import pic6 from "../assets/profile photos/pic-6.png";
 
 const categoryData: Record<string, {
@@ -187,6 +192,80 @@ function OfferingsSection({ category, gridClass }: { category: string | undefine
             onPreview={() => navigate(`/offering/${o.slug}`)}
             onEdit={() => navigate(`/coach/manage/${category}/new-product`)}
           />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Pre-configured starting points a coach can launch the offering builder from.
+const OFFERING_TEMPLATES = [
+  { slug: "coaching-package", title: "1:1 Coaching Package", blurb: "A bundle of one-on-one coaching hours.", icon: hourglassIcon },
+  { slug: "application-package", title: "Application Package", blurb: "End-to-end support, strategy to submission.", icon: packageBoxOpenIcon },
+  { slug: "digital-guide", title: "Digital Guide", blurb: "A downloadable guide, template, or resource.", icon: bookOpenIcon },
+  { slug: "cohort-bootcamp", title: "Cohort Bootcamp", blurb: "A structured, group program on a schedule.", icon: myCoursesIcon },
+  { slug: "free-intro", title: "Free Intro Offer", blurb: "A no-cost first step to attract new clients.", icon: giftIcon },
+];
+
+// Horizontal, scrollable row of template cards shown above the offerings grid.
+// Each card launches the offering builder pre-seeded with that template.
+function TemplatesSection({ category }: { category: string | undefined }) {
+  const navigate = useNavigate();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => {
+      setAtStart(el.scrollLeft <= 1);
+      setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 1);
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => { el.removeEventListener("scroll", update); ro.disconnect(); };
+  }, []);
+
+  const scrollByCards = (dir: 1 | -1) => scrollRef.current?.scrollBy({ left: dir * 260, behavior: "smooth" });
+
+  const chevron = "flex h-9 w-9 items-center justify-center rounded-full border border-[#222222]/[0.12] text-gray-dark transition-colors hover:bg-[#222222]/5 disabled:opacity-30 disabled:hover:bg-transparent";
+
+  if (dismissed) return null;
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <h2 className="text-[20px] font-semibold text-gray-dark">Start from a template</h2>
+        <div className="flex shrink-0 items-center gap-2">
+          <button onClick={() => scrollByCards(-1)} disabled={atStart} aria-label="Previous templates" className={chevron}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <button onClick={() => scrollByCards(1)} disabled={atEnd} aria-label="More templates" className={chevron}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          </button>
+          <button onClick={() => setDismissed(true)} aria-label="Dismiss templates" className={chevron}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <div ref={scrollRef} className="scrollbar-hide flex gap-4 overflow-x-auto pb-1">
+        {OFFERING_TEMPLATES.map((t) => (
+          <button
+            key={t.slug}
+            onClick={() => navigate(`/coach/manage/${category}/new-product?template=${t.slug}`)}
+            className="group flex w-[220px] shrink-0 flex-col rounded-2xl border border-gray-stroke bg-white p-4 text-left shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#222222]/5">
+              <img src={t.icon} alt="" className="h-5 w-5" />
+            </div>
+            <p className="mt-3 text-[15px] font-semibold leading-tight text-gray-dark">{t.title}</p>
+            <p className="mt-1 text-[13px] leading-snug text-gray-light">{t.blurb}</p>
+          </button>
         ))}
       </div>
     </div>
@@ -683,6 +762,7 @@ export default function CoachCategoryEdit() {
             </div>
             <div className="flex min-w-0 flex-col gap-8">
               <CategoryAnalyticsCard analytics={data.analytics} />
+              <TemplatesSection category={category} />
               <OfferingsSection category={category} gridClass="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3" />
             </div>
           </div>
@@ -698,6 +778,10 @@ export default function CoachCategoryEdit() {
             </div>
 
             <div className="mt-12">
+              <TemplatesSection category={category} />
+            </div>
+
+            <div className="mt-10">
               <OfferingsSection category={category} gridClass="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" />
             </div>
           </>
