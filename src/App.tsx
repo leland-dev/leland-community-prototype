@@ -6,6 +6,7 @@ import { BookmarksProvider } from "./contexts/BookmarksContext";
 import { SavedToastProvider } from "./contexts/SavedToastContext";
 import { ExpertModeProvider } from "./contexts/ExpertModeContext";
 import { ProfileBarModeProvider } from "./contexts/ProfileBarModeContext";
+import { FeedDemoProvider } from "./contexts/FeedDemoContext";
 import { PageExitProvider } from "./contexts/PageExitContext";
 import { GoalsProvider } from "./contexts/GoalsContext";
 import PageExitOverlay from "./components/PageExitOverlay";
@@ -59,8 +60,9 @@ import GoalsIndex from "./pages/GoalsIndex";
 import GoalDetail from "./pages/GoalDetail";
 import GoalNew from "./pages/GoalNew";
 import TaskList from "./pages/TaskList";
-import PostDetail from "./pages/PostDetail";
+import PostDetail, { CommentDetail } from "./pages/PostDetail";
 import ReplyCompose from "./pages/ReplyCompose";
+import ReplayViewer from "./pages/ReplayViewer";
 import AccountSettings from "./pages/AccountSettings";
 import Calendar from "./pages/Calendar";
 import MyCourses from "./pages/MyCourses";
@@ -102,6 +104,7 @@ import MinimalOnboardingV2 from "./pages/onboarding/MinimalOnboardingV2";
 import ContentViewer from "./pages/ContentViewer";
 import LelandKitTest from "./pages/LelandKitTest";
 import LessonBlocksGallery from "./pages/LessonBlocksGallery";
+import Waitlist from "./pages/waitlist/Waitlist";
 
 export default function App() {
   return (
@@ -112,6 +115,7 @@ export default function App() {
     <SavedToastProvider>
     <ProfileBarModeProvider>
     <GoalsProvider>
+    <FeedDemoProvider>
     <ScrollToTop />
     <PageExitProvider>
     <Routes>
@@ -123,7 +127,9 @@ export default function App() {
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/onboarding-minimal" element={<MinimalOnboarding />} />
       <Route path="/onboarding-minimal-v2" element={<MinimalOnboardingV2 />} />
+      <Route path="/waitlist" element={<Waitlist />} />
       <Route path="/reply/:postId" element={<ReplyCompose />} />
+      <Route path="/replay/:postId" element={<ReplayViewer />} />
       <Route path="/messages/:conversationId" element={<ConversationDetail />} />
       <Route path="/messages/:conversationId/relationship" element={<ConversationRelationship />} />
       <Route path="/content-viewer/:lessonId?/:sectionId?" element={<ContentViewer />} />
@@ -189,6 +195,7 @@ export default function App() {
           <Route path="/messages" element={<Messaging />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/post/:postId" element={<PostDetail />} />
+          <Route path="/post/:postId/comment/:commentId" element={<CommentDetail />} />
           <Route path="/events" element={<Events />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/plus" element={<LelandPlus />} />
@@ -197,6 +204,7 @@ export default function App() {
     </Routes>
     <PageExitOverlay />
     </PageExitProvider>
+    </FeedDemoProvider>
     </GoalsProvider>
     </ProfileBarModeProvider>
     </SavedToastProvider>

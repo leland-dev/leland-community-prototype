@@ -217,7 +217,7 @@ export default function ProfileTemplate() {
       {/* Admin tool */}
       <div
         ref={menuRef}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-40 transition-transform duration-200 ease-out md:bottom-6 md:right-6"
+        className="fixed bottom-[calc(max(env(safe-area-inset-bottom),20px)+72px)] right-4 z-40 transition-transform duration-200 ease-out md:bottom-6 md:right-6"
         style={{ transform: isMobile && navHidden ? "translateY(56px)" : "translateY(0)" }}
       >
         <AnimatePresence>

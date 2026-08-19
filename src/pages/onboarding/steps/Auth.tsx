@@ -75,7 +75,8 @@ function PhoneMock({ reduced }: { reduced: boolean }) {
           initial={reduced ? { opacity: 0 } : { opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 120, damping: 18 }}
-          className="absolute inset-x-0 top-0"
+          // top-2 headroom so the idle float (±3px) never clips the frame top
+          className="absolute inset-x-0 top-2"
         >
           {/* idle float — single pre-composited mock (frame + profile + island) */}
           <motion.div
@@ -830,7 +831,7 @@ export default function Auth({
           whileTap={{ scale: 0.98 }}
           onClick={() => setPhoneOpen(true)}
           disabled={!!loading}
-          className="mb-3 flex h-14 w-full items-center justify-center gap-2 rounded-full border border-gray-stroke bg-white text-[15px] font-medium text-gray-dark transition-colors hover:bg-gray-hover disabled:opacity-60"
+          className="mb-3 flex h-[52px] w-full items-center justify-center gap-2 rounded-full border border-gray-stroke bg-white text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover disabled:opacity-60"
         >
           <Phone size={17} />
           Continue with phone
@@ -841,7 +842,7 @@ export default function Auth({
           whileTap={{ scale: 0.98 }}
           onClick={() => setEmailOpen(true)}
           disabled={!!loading}
-          className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333] disabled:opacity-60"
+          className="flex h-[52px] w-full items-center justify-center rounded-full bg-gray-dark text-[16px] font-medium text-white transition-colors hover:bg-[#333] disabled:opacity-60"
         >
           Continue with email
         </motion.button>

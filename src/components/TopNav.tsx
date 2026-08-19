@@ -447,6 +447,14 @@ export default function TopNav() {
                       <img src={compassIcon} alt="Onboarding v3" className="h-6 w-6 shrink-0" />
                       Onboarding v3
                     </NavLink>
+                    <NavLink
+                      to="/waitlist"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+                    >
+                      <img src={compassIcon} alt="Waitlist" className="h-6 w-6 shrink-0" />
+                      Waitlist
+                    </NavLink>
                   </div>
 
                 </motion.div>

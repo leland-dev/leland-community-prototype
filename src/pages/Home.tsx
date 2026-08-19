@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, type CSSProperties, type RefObject } from "react";
 import { Button } from "../components/Button";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
@@ -8,6 +8,8 @@ import { Image as ImageIcon } from "lucide-react";
 import { useVersion } from "../contexts/VersionContext";
 import { useBookmarks } from "../contexts/BookmarksContext";
 import { useSavedToast } from "../contexts/SavedToastContext";
+import { Composer } from "./Composer";
+import { useFeedDemo } from "../contexts/FeedDemoContext";
 import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
@@ -141,6 +143,11 @@ interface EventPost extends PostBase {
     format: "Online" | "In-person";
     spotsLeft?: number;
     registered?: number;
+    // Live/wrapped lifecycle demo (Admin Tools → Event stage)
+    videoId?: string;           // stream source while live
+    watching?: number;          // concurrent viewers while live
+    attended?: number;          // total attendees once wrapped
+    recordingDuration?: string; // e.g. "1:24:36"
   };
 }
 
@@ -148,8 +155,11 @@ interface MilestonePost extends PostBase {
   type: "milestone";
   body: string;
   milestone: {
-    school: string;
-    program: string;
+    // Celebration flavor: "admitted" (default) for school admits,
+    // "offer" for job offers. Both share the confetti treatment.
+    kind?: "admitted" | "offer";
+    school: string; // institution or company name
+    program: string; // program or role line
     clientName: string;
     clientAvatar: string;
     schoolColor: string;
@@ -157,6 +167,25 @@ interface MilestonePost extends PostBase {
     schoolLogo?: string;
   };
 }
+
+// Quieter milestone — a coaching session wrapped. No confetti; the CTA sells
+// the coach, not the celebration.
+interface SessionPost extends PostBase {
+  type: "session";
+  body: string;
+  session: {
+    topic: string;
+    duration: string;
+    coachName: string;
+    coachAvatar: string;
+    sessionsTogether?: number;
+  };
+}
+
+// Platform-parody explorations of the live post type. A post with a variant
+// always renders that parody card; posts without one use the Admin Tools
+// "Live card" toggle (Video/Min) as before.
+export type LiveVariant = "minimal" | "twitter" | "tiktok" | "linkedin" | "reddit" | "substack" | "instagram";
 
 interface LivePost extends PostBase {
   type: "live";
@@ -166,6 +195,33 @@ interface LivePost extends PostBase {
     videoId: string;
     viewers: number;
     topic: string;
+    variant?: LiveVariant;
+    // Local mp4 for the cam feed — preferred over the YouTube embed when set.
+    videoSrc?: string;
+    // Multi-host session: one cam feed per host, side by side.
+    hosts?: string[];
+    // Panel layout: equal-height rows instead of a dominant hero frame.
+    evenSplit?: boolean;
+    // Drop the screen-share thumbnail from the card.
+    hideDeck?: boolean;
+    // Media-only post: no author row or body text above the card.
+    bare?: boolean;
+    // Recorded session posted after the fact — swaps the pulsing live chip
+    // for a play-button + duration chip.
+    replay?: boolean;
+    duration?: string;
+    // Simple horizontal replay card (no vertical chrome). Toggles come from
+    // the composer: burned-in captions and the replayed chat overlay.
+    horizontal?: boolean;
+    showCaptions?: boolean;
+    showChat?: boolean;
+    // Best concurrent-viewer moment of the original stream — the hook that
+    // makes a replay worth tapping (live count would restart near zero).
+    peakViewers?: number;
+    // Crop chosen in the composer: card ratio + the user's framing pan.
+    cropAspect?: "Original" | "16:9" | "1:1" | "9:16";
+    cropX?: number;
+    cropY?: number;
   };
 }
 
@@ -189,8 +245,30 @@ interface QuotePost extends PostBase {
   quoted: QuotedSnapshot;
 }
 
-export type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost | LivePost | QuotePost;
-export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, LivePost, QuotePost };
+// Long-form content, Substack-style: a titled article that renders as a
+// preview card in the feed and full-length on its post page.
+interface ArticlePost extends PostBase {
+  type: "article";
+  title: string;
+  subtitle?: string;
+  body: string;
+  // Rich HTML from the composer's editor; `body` stays plain text for
+  // excerpts and read-time. Read page prefers this when present.
+  bodyHtml?: string;
+  readMinutes: number;
+}
+
+interface PollPost extends PostBase {
+  type: "poll";
+  body: string;
+  poll: {
+    options: { label: string; votes: number }[];
+    durationLabel: string; // e.g. "2 days left"
+  };
+}
+
+export type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost | SessionPost | LivePost | QuotePost | ArticlePost | PollPost;
+export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, SessionPost, LivePost, QuotePost, ArticlePost, PollPost };
 
 function shuffle<T>(items: T[]): T[] {
   const result = [...items];
@@ -204,6 +282,19 @@ function shuffle<T>(items: T[]): T[] {
 // ─── Sample data ──────────────────────────────────────
 
 export const posts: Post[] = [
+  {
+    id: 36,
+    type: "text",
+    author: "Marcus Williams",
+    avatar: pic14,
+    time: "30m",
+    headline: "Admissions at Stanford GSB",
+    body: "Unpopular opinion: your resume matters less than your ability to tell the same story out loud in 60 seconds.",
+    likes: 88,
+    comments: 14,
+    reposts: 6,
+    shares: 1,
+  },
   {
     id: 23,
     type: "image",
@@ -351,6 +442,10 @@ export const posts: Post[] = [
       format: "Online",
       spotsLeft: 38,
       registered: 142,
+      videoId: "1cfIAVasP6E",
+      watching: 89,
+      attended: 214,
+      recordingDuration: "1:24:36",
     },
     likes: 214,
     comments: 29,
@@ -381,25 +476,161 @@ export const posts: Post[] = [
     shares: 8,
   },
   {
-    id: 15,
-    type: "live",
-    author: "Eric",
+    id: 24,
+    type: "milestone",
+    author: "Nina Kowalski",
     avatar: pic7,
-    time: "Now",
+    time: "3h",
     verified: true,
     feed: "Consulting",
-    headline: "Ex-McKinsey | Consulting Recruiting Expert | 400+ Offers",
-    body: "Going live to answer your consulting recruiting questions — case prep, fit interviews, offer negotiation. Drop your questions in the chat.",
-    live: {
-      title: "Consulting Recruiting Q&A",
-      videoId: "1cfIAVasP6E",
-      viewers: 214,
-      topic: "Case prep · Fit interviews · Offer negotiation",
+    headline: "Partner at McKinsey & Company | Consulting Recruiting Lead",
+    body: "Six months of case prep, three final-round loops, and one very persistent client. Maya just signed her offer with McKinsey. Couldn't be prouder — she earned every bit of this.",
+    milestone: {
+      kind: "offer",
+      school: "McKinsey & Company",
+      program: "Associate, Strategy & Corporate Finance",
+      clientName: "Maya R.",
+      clientAvatar: pic12,
+      schoolColor: "#003580",
+      schoolInitial: "M",
+      schoolLogo: orgMcKinsey,
     },
-    likes: 87,
-    comments: 53,
+    likes: 389,
+    comments: 41,
+    reposts: 18,
+    shares: 7,
+  },
+  {
+    id: 25,
+    type: "session",
+    author: "Jordan Mitchell",
+    avatar: pic11,
+    time: "4h",
+    headline: "MBA Candidate | Deferred admit hopeful",
+    body: "Just wrapped my essay review session with David — we tore my Wharton essays apart and rebuilt them around a story I'd been burying the whole time. Feeling 10x more confident about round 2.",
+    session: {
+      topic: "MBA essay deep-dive",
+      duration: "60 min",
+      coachName: "David Kim",
+      coachAvatar: pic4,
+      sessionsTogether: 7,
+    },
+    likes: 96,
+    comments: 11,
+    reposts: 3,
+    shares: 1,
+  },
+  {
+    id: 27,
+    type: "live",
+    author: "Priya Patel",
+    avatar: pic3,
+    time: "Now",
+    verified: true,
+    headline: "MBA Admissions Coach | HBS MBA",
+    body: "Join my live stream 👋",
+    live: {
+      variant: "tiktok",
+      title: "GMAT quant night grind",
+      videoId: "1cfIAVasP6E",
+      videoSrc: "/videos/corinna.mp4",
+      viewers: 2113,
+      topic: "Study with me",
+    },
+    likes: 542,
+    comments: 187,
+    reposts: 31,
+    shares: 26,
+  },
+  {
+    id: 37,
+    type: "text",
+    author: "Emma Rodriguez",
+    avatar: pic5,
+    time: "45m",
+    headline: "AI Builder Program · Cohort 1",
+    body: "Round 2 deadlines are six weeks out. If you haven't started your essays yet, this is your sign.",
+    likes: 67,
+    comments: 9,
+    reposts: 4,
+    shares: 1,
+  },
+  {
+    id: 34,
+    type: "live",
+    author: "David Kim",
+    avatar: pic4,
+    time: "Now",
+    verified: true,
+    headline: "MBA Admissions Consultant | Ex-Bain, HBS '19",
+    body: "Join our live panel 👋",
+    live: {
+      variant: "tiktok",
+      title: "MBA admissions panel — ask us anything",
+      videoId: "1cfIAVasP6E",
+      hosts: ["/videos/garritt.mp4", "/videos/sabrina.mp4", "/videos/corinna.mp4"],
+      viewers: 3402,
+      topic: "Admissions panel",
+    },
+    likes: 618,
+    comments: 203,
+    reposts: 47,
+    shares: 22,
+  },
+  {
+    id: 38,
+    type: "text",
+    author: "Samantha Parker",
+    avatar: pic6,
+    time: "1h",
+    verified: true,
+    headline: "AI BP Instructor · Ex-Meta PM",
+    body: "Hot take from this week's cohort: the best AI demos were the simplest ones. Scope small, ship weekly.",
+    likes: 143,
+    comments: 19,
+    reposts: 8,
+    shares: 2,
+  },
+  {
+    id: 39,
+    type: "article",
+    author: "Lauren Hayes",
+    avatar: pic13,
+    time: "2h",
+    verified: true,
+    headline: "HBS Admissions Expert | Former Reader",
+    title: "Why your safest essay is your weakest essay",
+    subtitle: "Notes from 400 applications: the essays that stuck were the ones that stopped performing.",
+    body: "I read over 400 applications last cycle, and the essays that stuck with me had one thing in common: they weren't trying to impress anyone. The writers had stopped performing. Start with the moment, not the lesson. If your first sentence could open anyone else's essay, cut it.",
+    bodyHtml: "I read over 400 applications last cycle, and the essays that stuck with me had one thing in common: <b>they weren't trying to impress anyone.</b> The writers had stopped performing.<div><br/></div><div>They wrote about the moment they realized their dad's small business was failing, about botching their first client meeting, about the semester everything fell apart. Not because trauma wins admissions — it doesn't — but because specificity is the only thing a reader can't skim.</div><h2>Start with the moment, not the lesson</h2><div>If your first sentence could open anyone else's essay, cut it. Write the scene you'd be embarrassed to read aloud, then earn the reflection.</div><h3>The checklist I give every client</h3><ul><li>Open inside a scene, not a summary</li><li>One decision you'd defend, one you wouldn't</li><li>Reflection in the last third, never the first</li></ul><blockquote>A safe essay reads like everyone's. A specific one can only be yours.</blockquote><div>That's the whole trick. The reader has 400 of these — give them the one they can't skim.</div>",
+    readMinutes: 6,
+    likes: 287,
+    comments: 45,
+    reposts: 38,
+    shares: 21,
+  },
+  {
+    id: 40,
+    type: "poll",
+    author: "David Kim",
+    avatar: pic4,
+    time: "3h",
+    verified: true,
+    headline: "MBA Admissions Consultant | Ex-Bain, HBS '19",
+    body: "Settle a debate from today's session — which part of the application did you underestimate the most?",
+    poll: {
+      options: [
+        { label: "Essays", votes: 412 },
+        { label: "Recommendation letters", votes: 268 },
+        { label: "The interview", votes: 187 },
+        { label: "Short-answer questions", votes: 94 },
+      ],
+      durationLabel: "2 days left",
+    },
+    likes: 156,
+    comments: 33,
     reposts: 12,
-    shares: 6,
+    shares: 5,
   },
   {
     id: 5,
@@ -649,21 +880,23 @@ export function FeedLikeButton({ initialCount }: { initialCount: number }) {
       </div>
       <button
         onClick={handleClick}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${liked ? "text-red-500" : "text-gray-light"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${liked ? "text-red-500" : "text-[#555555]"}`}
       >
         <motion.svg
           className="h-[22px] w-[22px]"
           viewBox="0 0 24 24"
           fill={liked ? "currentColor" : "none"}
           stroke="currentColor"
-          strokeWidth="1.5"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
           animate={liked ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1] } : { scale: 1 }}
           transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
         >
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
         </motion.svg>
         <motion.span
-          className="text-[13px] font-normal"
+          className="text-[13px] font-medium"
           animate={liked ? { scale: [1, 1.4, 1] } : { scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
@@ -838,14 +1071,14 @@ export function FeedRepostButton({ initialCount, initialReposted = false, onRepo
 
       <button
         onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${reposted ? "text-[#4F86DB]" : "text-gray-light"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${reposted ? "text-[#4F86DB]" : "text-[#555555]"}`}
       >
         <motion.svg
           className="h-[22px] w-[22px]"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.5"
+          strokeWidth="1.75"
           strokeLinecap="round"
           strokeLinejoin="round"
           aria-hidden
@@ -858,7 +1091,7 @@ export function FeedRepostButton({ initialCount, initialReposted = false, onRepo
           <path d="M17.658 17.6555C16.209 19.1035 14.208 19.9995 11.997 19.9995C7.576 19.9995 3.992 16.4175 3.992 11.9975C3.992 11.3895 4.066 10.7995 4.194 10.2305" />
         </motion.svg>
         <motion.span
-          className="text-[13px] font-normal"
+          className="text-[13px] font-medium"
           animate={reposted && burst ? { scale: [1, 1.4, 1] } : { scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
@@ -953,7 +1186,7 @@ export function FeedBookmarkButton({ post }: { post: Post }) {
       <button
         onClick={handleClick}
         aria-label={saved ? "Remove from saved" : "Save"}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${saved ? "text-[#FFD96F]" : "text-gray-light"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${saved ? "text-[#FFD96F]" : "text-[#555555]"}`}
       >
         <motion.svg
           className="h-[22px] w-[22px]"
@@ -979,7 +1212,7 @@ export function FeedBookmarkButton({ post }: { post: Post }) {
               transition={{ type: "spring", stiffness: 480, damping: 34, mass: 0.8 }}
               onClick={() => { hideToast(); navigate("/profile-v2?tab=saved"); }}
               role="button"
-              className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+61px)] z-20 flex cursor-pointer items-center justify-between bg-[#FFD96F] px-5 py-3.5 text-[#111111] md:bottom-0"
+              className="fixed inset-x-0 bottom-[calc(max(env(safe-area-inset-bottom),20px)+61px)] z-20 flex cursor-pointer items-center justify-between bg-[#FFD96F] px-5 py-3.5 text-[#111111] md:bottom-0"
             >
               <div className="flex items-center gap-2.5">
                 <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
@@ -1009,9 +1242,9 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
     <div className="mt-1 flex items-center justify-between pl-[44px] pr-1">
       <FeedLikeButton initialCount={likes} />
       {/* Comment */}
-      <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`/post/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
-        <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 21C13.486 21.0018 14.9492 20.6339 16.2576 19.9293L20.3676 20.9755C20.4517 20.9969 20.5398 20.9961 20.6234 20.9731C20.707 20.9502 20.7832 20.9058 20.8445 20.8445C20.9058 20.7832 20.9501 20.707 20.9731 20.6234C20.9961 20.5398 20.9969 20.4517 20.9755 20.3676L19.9293 16.2576C20.8609 14.5226 21.1978 12.5299 20.8882 10.5851C20.5786 8.64022 19.6396 6.85061 18.2152 5.49065C16.7909 4.13068 14.9598 3.27543 13.0027 3.05604C11.0457 2.83664 9.07066 3.26522 7.38054 4.27604C5.69042 5.28687 4.3785 6.82414 3.64594 8.65215C2.91338 10.4802 2.80062 12.498 3.32495 14.3962C3.84928 16.2945 4.98176 17.9684 6.54873 19.1612C8.1157 20.354 10.0307 21 12 21Z" /></svg>
-        {comments > 0 && <span className="text-[13px] font-normal">{formatCount(comments)}</span>}
+      <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`/post/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-[#555555] transition-colors hover:bg-gray-hover">
+        <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 21C13.486 21.0018 14.9492 20.6339 16.2576 19.9293L20.3676 20.9755C20.4517 20.9969 20.5398 20.9961 20.6234 20.9731C20.707 20.9502 20.7832 20.9058 20.8445 20.8445C20.9058 20.7832 20.9501 20.707 20.9731 20.6234C20.9961 20.5398 20.9969 20.4517 20.9755 20.3676L19.9293 16.2576C20.8609 14.5226 21.1978 12.5299 20.8882 10.5851C20.5786 8.64022 19.6396 6.85061 18.2152 5.49065C16.7909 4.13068 14.9598 3.27543 13.0027 3.05604C11.0457 2.83664 9.07066 3.26522 7.38054 4.27604C5.69042 5.28687 4.3785 6.82414 3.64594 8.65215C2.91338 10.4802 2.80062 12.498 3.32495 14.3962C3.84928 16.2945 4.98176 17.9684 6.54873 19.1612C8.1157 20.354 10.0307 21 12 21Z" /></svg>
+        {comments > 0 && <span className="text-[13px] font-medium">{formatCount(comments)}</span>}
       </button>
       {/* Repost */}
       <FeedRepostButton
@@ -1023,8 +1256,8 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
       />
       {/* Share */}
       <div className="relative">
-        <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover">
-          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 15V4" /><path d="m8 8 4-4 4 4" /><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" /></svg>
+        <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-[#555555] transition-colors hover:bg-gray-hover">
+          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 15V4" /><path d="m8 8 4-4 4 4" /><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" /></svg>
         </button>
         <AnimatePresence>
           {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
@@ -1129,7 +1362,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
           <Link
             to={groupPoster ? `/profile/${nameToSlug(groupPoster.name)}` : isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `/profile/${nameToSlug(author)}`}
             onClick={(e) => e.stopPropagation()}
-            className="cursor-pointer truncate text-[15px] leading-tight font-medium text-gray-dark"
+            className="cursor-pointer truncate text-[15px] leading-tight font-semibold text-gray-dark"
           >{groupPoster ? groupPoster.name : author}</Link>
           {/* Minimal mode: company favicon sits next to the name (in place of
               the title line the other modes show). */}
@@ -1424,162 +1657,212 @@ function LinkCard({ link }: { link: LinkPost["link"] }) {
 }
 
 function EventCard({ event }: { event: EventPost["event"] }) {
+  const [rsvped, setRsvped] = useState(false);
+  const registered = event.registered !== undefined ? event.registered + (rsvped ? 1 : 0) : undefined;
+  const totalSpots =
+    event.registered !== undefined && event.spotsLeft !== undefined
+      ? event.registered + event.spotsLeft
+      : undefined;
   return (
     <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
-      <div className="relative">
-        <img src={event.image} alt={event.title} className="aspect-[1200/628] w-full object-cover" />
-      </div>
-      <div className="px-4 py-4">
+      <img src={event.image} alt={event.title} className="aspect-[1200/628] w-full object-cover" />
+      <div className="px-4 pb-4 pt-3.5">
         <p className="text-[15px] font-medium leading-snug text-gray-dark">{event.title}</p>
-        <div className="mt-2 space-y-1">
-          <div className="flex items-center gap-2 text-[13px] text-gray-light">
-            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            <span>{event.date}</span>
-          </div>
-          <div className="flex items-center gap-2 text-[13px] text-gray-light">
-            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-            <span>{event.time}</span>
-          </div>
-          {(event.registered !== undefined || event.spotsLeft !== undefined) && (
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-[13px] text-gray-light">
-                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-                <span>
-                  {event.registered !== undefined ? <>{event.registered.toLocaleString()} registered</> : null}
-                  {event.spotsLeft !== undefined ? <> ({event.spotsLeft} spots remaining)</> : null}
-                </span>
-              </div>
-              <button className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
-                Register for free
-              </button>
-            </div>
-          )}
+        {/* Date + time on one line; the year is noise in a feed */}
+        <div className="mt-1.5 flex items-center gap-1.5 text-[13px] text-gray-light">
+          <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <span className="truncate">
+            {event.date
+              .replace(/, \d{4}$/, "")
+              .replace(/^(\w{3})\w+day/, "$1")
+              .replace(/(January|February|March|April|June|July|August|September|October|November|December)/, m => m.slice(0, 3))}
+            {" · "}
+            {event.time}
+          </span>
         </div>
+        {registered !== undefined ? (
+          <div className="mt-3 flex items-center gap-3.5">
+            <div className="min-w-0 flex-1">
+              {totalSpots !== undefined ? (
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+                  <div
+                    className="h-full rounded-full bg-gray-dark transition-[width] duration-300"
+                    style={{ width: `${Math.min(100, Math.round((registered / totalSpots) * 100))}%` }}
+                  />
+                </div>
+              ) : null}
+              <p className="mt-1.5 text-[12px] text-gray-light">
+                {totalSpots !== undefined
+                  ? <><span className="font-medium text-gray-dark">{registered.toLocaleString()}</span> of {totalSpots.toLocaleString()} spots filled</>
+                  : <>{registered.toLocaleString()} registered</>}
+              </p>
+            </div>
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              onClick={() => setRsvped(v => !v)}
+              className={`shrink-0 cursor-pointer rounded-lg px-4 py-2.5 text-[12px] font-medium transition-colors ${
+                rsvped
+                  ? "bg-[#E7F4EC] text-[#0A7C4A] hover:bg-[#DCEEE3]"
+                  : "bg-gray-100 text-gray-dark hover:bg-gray-200"
+              }`}
+            >
+              {rsvped ? "✓ You're going" : "RSVP for free"}
+            </motion.button>
+          </div>
+        ) : null}
       </div>
     </div>
   );
 }
 
-// Greens: dark → mid → bright → light → pale
-const GREENS = ["#0a5c3f", "#038561", "#15b078", "#34d399", "#6ee7b7", "#a7f3d0", "#1a7a52", "#059669", "#10b981"];
-
-// shape: "rect" | "square" | "circle" | "streamer"
-const CONFETTI: { color: string; x: number; delay: number; dur: number; drift: number; w: number; h: number; shape: string; spin: number }[] = [
-  { color: GREENS[0], x: 4,  delay: 0,    dur: 1.8, drift:  8,  w: 8,  h: 12, shape: "rect",     spin: 720  },
-  { color: GREENS[1], x: 11, delay: 0.3,  dur: 2.1, drift: -10, w: 6,  h: 6,  shape: "square",   spin: 540  },
-  { color: GREENS[2], x: 18, delay: 0.1,  dur: 1.6, drift:  6,  w: 10, h: 5,  shape: "streamer", spin: 1080 },
-  { color: GREENS[3], x: 25, delay: 0.5,  dur: 2.0, drift: -8,  w: 7,  h: 10, shape: "rect",     spin: 360  },
-  { color: GREENS[4], x: 32, delay: 0.15, dur: 1.7, drift:  12, w: 6,  h: 6,  shape: "circle",   spin: 0    },
-  { color: GREENS[5], x: 39, delay: 0.4,  dur: 2.2, drift: -6,  w: 9,  h: 5,  shape: "streamer", spin: 900  },
-  { color: GREENS[6], x: 46, delay: 0.05, dur: 1.9, drift:  9,  w: 7,  h: 11, shape: "rect",     spin: 720  },
-  { color: GREENS[7], x: 53, delay: 0.6,  dur: 1.6, drift: -11, w: 6,  h: 6,  shape: "square",   spin: 540  },
-  { color: GREENS[8], x: 60, delay: 0.25, dur: 2.0, drift:  7,  w: 5,  h: 9,  shape: "rect",     spin: 360  },
-  { color: GREENS[0], x: 67, delay: 0.45, dur: 1.8, drift: -9,  w: 8,  h: 5,  shape: "streamer", spin: 1080 },
-  { color: GREENS[1], x: 74, delay: 0.7,  dur: 2.1, drift:  10, w: 6,  h: 6,  shape: "circle",   spin: 0    },
-  { color: GREENS[2], x: 80, delay: 0.8,  dur: 1.7, drift: -7,  w: 7,  h: 10, shape: "rect",     spin: 720  },
-  { color: GREENS[3], x: 87, delay: 0.2,  dur: 2.3, drift:  5,  w: 6,  h: 6,  shape: "square",   spin: 540  },
-  { color: GREENS[4], x: 93, delay: 0.55, dur: 1.9, drift: -8,  w: 9,  h: 5,  shape: "streamer", spin: 900  },
-  { color: GREENS[5], x: 7,  delay: 0.9,  dur: 2.0, drift:  11, w: 7,  h: 8,  shape: "rect",     spin: 360  },
-  { color: GREENS[6], x: 21, delay: 0.35, dur: 1.7, drift: -6,  w: 6,  h: 6,  shape: "circle",   spin: 0    },
-  { color: GREENS[7], x: 35, delay: 0.65, dur: 2.2, drift:  8,  w: 8,  h: 5,  shape: "streamer", spin: 1080 },
-  { color: GREENS[8], x: 50, delay: 0.12, dur: 1.8, drift: -10, w: 7,  h: 11, shape: "rect",     spin: 720  },
-  { color: GREENS[0], x: 63, delay: 0.75, dur: 2.1, drift:  9,  w: 6,  h: 6,  shape: "square",   spin: 540  },
-  { color: GREENS[2], x: 97, delay: 0.42, dur: 1.6, drift: -7,  w: 5,  h: 9,  shape: "rect",     spin: 360  },
-];
-
 function MilestoneCard({ milestone, postId, authorName }: { milestone: MilestonePost["milestone"]; postId: number; authorName: string }) {
   const navigate = useNavigate();
   return (
-    <div className="relative mt-3 overflow-hidden rounded-xl border border-gray-stroke">
-      {/* Confetti */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 overflow-hidden">
-        {CONFETTI.map((c, i) => (
-          <motion.div
-            key={i}
-            className="absolute top-0"
-            style={{
-              left: `${c.x}%`,
-              width: c.w,
-              height: c.h,
-              backgroundColor: c.color,
-              borderRadius: c.shape === "circle" ? "50%" : c.shape === "streamer" ? "2px" : "2px",
-            }}
-            initial={{ y: -14, x: 0, opacity: 1, rotate: 0, scaleX: 1 }}
-            animate={{
-              y: 72,
-              x: [0, c.drift * 0.4, c.drift, c.drift * 0.6, 0],
-              opacity: [1, 1, 1, 0.6, 0],
-              rotate: c.spin,
-              scaleX: c.shape === "streamer" ? [1, 0.2, 1, 0.2, 1] : [1, 0.3, 1, 0.3, 1],
-            }}
-            transition={{
-              duration: c.dur,
-              delay: c.delay,
-              repeat: Infinity,
-              repeatDelay: 1.8 + c.delay,
-              ease: [0.25, 0.46, 0.45, 0.94],
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Card content */}
-      <div className="px-5 py-5">
-        <div className="flex items-end gap-4">
-          {/* Overlapping avatars */}
-          <div className="relative flex shrink-0 items-center">
-            {milestone.schoolLogo ? (
-              <img
-                src={milestone.schoolLogo}
-                alt={milestone.school}
-                className="relative z-0 h-20 w-20 shrink-0 rounded-full object-cover ring-2 ring-white"
-              />
-            ) : (
-              <div
-                className="relative z-0 flex h-20 w-20 shrink-0 items-center justify-center rounded-full text-[24px] font-bold text-white ring-2 ring-white"
-                style={{ backgroundColor: milestone.schoolColor }}
-              >
-                {milestone.schoolInitial}
-              </div>
-            )}
-            <div className="relative z-10 -ml-6 shrink-0">
-              <img
-                src={milestone.clientAvatar}
-                alt={milestone.clientName}
-                className="h-20 w-20 rounded-full object-cover ring-2 ring-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)]"
-              />
-              <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-white text-[14px] shadow-sm">
-                🎉
-              </span>
+    <div className="mt-3 rounded-xl border border-gray-stroke p-4">
+      <div className="flex items-center gap-4">
+        {/* Overlapping avatars */}
+        <div className="flex shrink-0 items-center">
+          {milestone.schoolLogo ? (
+            <img
+              src={milestone.schoolLogo}
+              alt={milestone.school}
+              className="relative z-0 h-[72px] w-[72px] shrink-0 rounded-full object-cover ring-2 ring-white"
+            />
+          ) : (
+            <div
+              className="relative z-0 flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full text-[22px] font-bold text-white ring-2 ring-white"
+              style={{ backgroundColor: milestone.schoolColor }}
+            >
+              {milestone.schoolInitial}
             </div>
-          </div>
-
-          {/* Text */}
-          <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-light">Admitted</p>
-            <p className="mt-0.5 text-[15px] font-medium leading-tight text-gray-dark">{milestone.school}</p>
-            <p className="text-[12px] text-gray-light">{milestone.program}</p>
-          </div>
-
-          {/* CTA bottom-aligned */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              primeKeyboard();
-              navigate(`/post/${postId}`, { state: { focusInput: true, prefillComment: `@${authorName} Congratulations! 🎉` } });
-            }}
-            className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
-          >
-            Say congratulations
-          </button>
+          )}
+          <img
+            src={milestone.clientAvatar}
+            alt={milestone.clientName}
+            className="relative z-10 -ml-5 h-[72px] w-[72px] shrink-0 rounded-full object-cover ring-2 ring-white"
+          />
+        </div>
+        {/* Text — vertically centered beside the avatars */}
+        <div className="min-w-0">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-gray-light">
+            {milestone.kind === "offer" ? "Offer signed" : "Admitted"}
+          </p>
+          <p className="mt-0.5 line-clamp-2 text-[16px] font-semibold leading-snug text-gray-dark">{milestone.school}</p>
+          <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-gray-light">{milestone.program}</p>
         </div>
       </div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          primeKeyboard();
+          navigate(`/post/${postId}`, { state: { focusInput: true, prefillComment: `@${authorName} Congratulations! 🎉` } });
+        }}
+        className="mt-4 w-full cursor-pointer rounded-lg bg-gray-100 py-2.5 text-[13px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
+      >
+        Say congratulations
+      </button>
+    </div>
+  );
+}
+
+function SessionCompletedCard({ session }: { session: SessionPost["session"] }) {
+  const navigate = useNavigate();
+  const coachFirstName = session.coachName.split(" ")[0];
+  return (
+    <div className="mt-3 rounded-xl border border-gray-stroke p-4">
+      <div className="flex items-center gap-4">
+        <div className="relative shrink-0">
+          <img
+            src={session.coachAvatar}
+            alt={session.coachName}
+            className="h-16 w-16 rounded-full object-cover"
+          />
+          <span className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm">
+            <svg className="h-3.5 w-3.5 text-[#0A7C4A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </span>
+        </div>
+        <div className="min-w-0">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-gray-light">Session completed</p>
+          <p className="mt-0.5 line-clamp-2 text-[16px] font-semibold leading-snug text-gray-dark">{session.topic}</p>
+          <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-gray-light">
+            {session.duration} with {session.coachName}
+            {session.sessionsTogether !== undefined ? <> · Session #{session.sessionsTogether}</> : null}
+          </p>
+        </div>
+      </div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          navigate(`/profile/${nameToSlug(session.coachName)}`);
+        }}
+        className="mt-4 w-full cursor-pointer rounded-lg bg-gray-100 py-2.5 text-[13px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
+      >
+        Book with {coachFirstName}
+      </button>
+    </div>
+  );
+}
+
+// Substack-style article preview: title + snippet in the feed, full read on
+// the post page.
+function ArticleCard({ post }: { post: ArticlePost }) {
+  const navigate = useNavigate();
+  const heroSrc = post.bodyHtml?.match(/<img[^>]+src="([^"]+)"/)?.[1];
+  return (
+    <div
+      onClick={() => navigate(`/post/${post.id}`)}
+      className="mt-3 cursor-pointer overflow-hidden rounded-xl border border-gray-stroke transition-colors hover:bg-gray-50"
+    >
+      {heroSrc ? <img src={heroSrc} alt="" className="h-40 w-full object-cover" /> : null}
+      <div className="p-4">
+      <p className="font-serif text-[22px] leading-snug text-gray-dark">{post.title}</p>
+      <p className="mt-1.5 line-clamp-3 text-[13px] leading-[1.5] text-gray-light">{post.subtitle || post.body}</p>
+      <p className="mt-2.5 text-[12px] text-gray-light">
+        <span className="font-medium text-gray-dark">Read article</span> · {post.readMinutes} min read
+      </p>
+      </div>
+    </div>
+  );
+}
+
+// Twitter-style poll: tappable options that flip into result bars once voted.
+export function PollCard({ poll }: { poll: PollPost["poll"] }) {
+  const [choice, setChoice] = useState<number | null>(null);
+  const total = poll.options.reduce((sum, o) => sum + o.votes, 0) + (choice !== null ? 1 : 0);
+  return (
+    <div className="mt-3 space-y-2">
+      {poll.options.map((option, i) => {
+        const votes = option.votes + (choice === i ? 1 : 0);
+        const pct = total > 0 ? Math.round((votes / total) * 100) : 0;
+        return choice === null ? (
+          <button
+            key={i}
+            onClick={() => setChoice(i)}
+            className="block w-full cursor-pointer rounded-lg border border-gray-stroke px-3 py-2 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+          >
+            {option.label}
+          </button>
+        ) : (
+          <div key={i} className="relative h-9 overflow-hidden rounded-lg bg-gray-50">
+            <div
+              className={`absolute inset-y-0 left-0 rounded-lg ${choice === i ? "bg-[#E7F4EC]" : "bg-gray-100"}`}
+              style={{ width: `${pct}%`, transition: "width 0.4s ease" }}
+            />
+            <div className="relative flex h-full items-center justify-between px-3">
+              <span className={`text-[14px] text-gray-dark ${choice === i ? "font-semibold" : "font-medium"}`}>
+                {option.label}
+                {choice === i ? " ✓" : ""}
+              </span>
+              <span className="text-[13px] font-medium text-gray-light">{pct}%</span>
+            </div>
+          </div>
+        );
+      })}
+      <p className="pt-0.5 text-[12px] text-gray-light">{total.toLocaleString()} {total === 1 ? "vote" : "votes"} · {poll.durationLabel}</p>
     </div>
   );
 }
@@ -1946,6 +2229,761 @@ function LiveCard({ live, author, avatar }: { live: LivePost["live"]; author: st
   );
 }
 
+// Compact Twitter/X-style live treatment (Admin Tools → Live card → Min):
+// no embedded player or chat overlay — a slim broadcast row with a static
+// thumbnail, red LIVE chip, and viewer count. The whole row is the CTA.
+function LiveCardCompact({ live, author, avatar }: { live: LivePost["live"]; author: string; avatar: string }) {
+  const [modal, setModal] = useState<null | "info" | "checkout">(null);
+
+  return (
+    <>
+      <button
+        onClick={() => setModal("info")}
+        className="mt-3 flex w-full cursor-pointer items-stretch overflow-hidden rounded-xl border border-gray-stroke text-left transition-colors hover:bg-gray-hover"
+      >
+        {/* Thumbnail */}
+        <div className="relative h-[96px] w-[128px] shrink-0 overflow-hidden bg-black">
+          <img
+            src={`https://img.youtube.com/vi/${live.videoId}/hqdefault.jpg`}
+            alt=""
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-[4px] bg-[#D6204C] px-1.5 py-[2px]">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+            </span>
+            <span className="text-[10px] font-semibold tracking-wide text-white">LIVE</span>
+          </div>
+        </div>
+        {/* Info */}
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-3.5 py-2.5">
+          <p className="line-clamp-2 text-[15px] font-medium leading-snug text-gray-dark">{live.title}</p>
+          <p className="truncate text-[13px] text-gray-light">
+            {author} · {live.viewers.toLocaleString()} watching
+          </p>
+          <p className="text-[13px] font-medium text-[#D6204C]">Join live</p>
+        </div>
+      </button>
+
+      <AnimatePresence>
+        {modal === "info" && (
+          <OfficeHoursInfoModal
+            live={live}
+            author={author}
+            avatar={avatar}
+            onBuy={() => setModal("checkout")}
+            onClose={() => setModal(null)}
+          />
+        )}
+        {modal === "checkout" && (
+          <CheckoutModal onClose={() => setModal(null)} />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+// ─── Live-stream platform parodies ────────────────────
+// Six explorations of the same live post, each a 1:1-style parody of how a
+// major platform surfaces a live stream in its feed. Placement decisions:
+// coach cam is the main surface everywhere except LinkedIn (presentation-first,
+// coach in PiP) and Substack (speaker grid: coach top, guest + slides below).
+
+const liveEmbedUrl = (videoId: string) =>
+  `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&playsinline=1`;
+
+// A feed full of simultaneously-decoding videos is what makes scrolling
+// jitter — only the ones near the viewport should be playing.
+function useAutoPauseOffscreen(ref: RefObject<HTMLVideoElement | null>): void {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) el.play().catch(() => {});
+        else el.pause();
+      },
+      { rootMargin: "300px 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ref]);
+}
+
+// True once the element has come within a screen of the viewport; stays true
+// so heavyweight embeds mount once and never flicker back out.
+function useMountWhenNear(ref: RefObject<Element | null>, enabled: boolean): boolean {
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    if (!enabled || near) return;
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setNear(true);
+      },
+      { rootMargin: "500px 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ref, enabled, near]);
+  return near;
+}
+
+function LazyVideo({ src, className, style }: { src: string; className?: string; style?: CSSProperties }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useAutoPauseOffscreen(ref);
+  return <video ref={ref} src={src} muted loop playsInline preload="metadata" className={className} style={style} />;
+}
+
+// 16:9 YouTube embed cropped to fill any container (vertical crops zoom in,
+// which reads like a phone-native cam feed).
+function CoverVideo({ videoId, src, scrim = false, cropTop = false, objPos }: { videoId: string; src?: string; scrim?: boolean; cropTop?: boolean; objPos?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const embedNear = useMountWhenNear(containerRef, !src);
+  return (
+    <div ref={containerRef} className="absolute inset-0 overflow-hidden bg-black">
+      {/* Local mp4s object-cover cleanly and autoplay reliably; the YouTube
+          embed is the fallback when a post has no local footage. `cropTop`
+          bottom-anchors an oversized video box so the top of the source
+          (ceiling/headroom) is cropped away and the subject rides higher. */}
+      {src ? (
+        <LazyVideo
+          src={src}
+          className={cropTop ? "absolute bottom-0 left-0 w-full object-cover" : "absolute inset-0 h-full w-full object-cover"}
+          style={{ ...(cropTop ? { height: "135%" } : null), ...(objPos ? { objectPosition: objPos } : null) }}
+        />
+      ) : embedNear ? (
+        <iframe
+          src={liveEmbedUrl(videoId)}
+          allow="autoplay; encrypted-media"
+          className="absolute left-1/2 top-0 h-full w-[320%] -translate-x-1/2"
+          style={{ border: "none", pointerEvents: "none" }}
+        />
+      ) : null}
+      {/* TikTok/IG-style scrims keep the header and comment bar legible over
+          whatever the video is doing (including YouTube's paused chrome). */}
+      {scrim ? (
+        <>
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-black/85 via-black/50 to-transparent" />
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+// Stand-in for the shared presentation / screen-share surface.
+function FakeSlide() {
+  return (
+    <div className="flex h-full w-full flex-col justify-between bg-[#101418] p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-white/60">Case math · the 80/20</p>
+      <div className="flex items-end gap-1.5">
+        {[34, 20, 44, 28, 56].map((h, i) => (
+          <div key={i} className="w-4 rounded-sm bg-[#4F86DB]" style={{ height: h }} />
+        ))}
+      </div>
+      <p className="text-[9px] text-white/40">Slide 12 / 34</p>
+    </div>
+  );
+}
+
+function useRotatingComments(keep: number): { id: number; user: string; text: string }[] {
+  const [visible, setVisible] = useState<{ id: number; user: string; text: string }[]>([]);
+  const counter = useRef(0);
+  const index = useRef(0);
+
+  useEffect(() => {
+    const push = () => {
+      const c = LIVE_COMMENTS[index.current++ % LIVE_COMMENTS.length];
+      setVisible(prev => [...prev, { id: counter.current++, user: c.user, text: c.text }].slice(-keep));
+    };
+    push();
+    const interval = setInterval(push, 2800);
+    return () => clearInterval(interval);
+  }, [keep]);
+
+  return visible;
+}
+
+// Thumbnail of the shared deck — small enough to sit on the cam feed, just
+// legible enough to read as "they're presenting something".
+function MiniShareSlide({ title }: { title: string }) {
+  return (
+    <div className="relative aspect-[16/10] w-full bg-gradient-to-br from-[#141824] to-[#0D1016] p-2">
+      <div className="absolute -left-4 top-0 h-5 w-24 rotate-[-14deg] rounded-full bg-[#3B62B8]/35 blur-lg" />
+      <p className="relative text-[7px] font-semibold uppercase tracking-[0.14em] text-[#F5C64F]">Live workshop</p>
+      <p className="relative mt-0.5 line-clamp-2 font-serif text-[10px] leading-[1.15] text-white">{title}</p>
+      <div className="absolute inset-x-2 bottom-1.5 flex items-center gap-1">
+        <div className="h-[2px] flex-1 overflow-hidden rounded-full bg-white/15">
+          <div className="h-full w-[35%] rounded-full bg-white/60" />
+        </div>
+        <span className="text-[6px] font-medium tabular-nums text-white/50">12/34</span>
+      </div>
+    </div>
+  );
+}
+
+// X/Twitter broadcast card: clean 16:9 media, red LIVE chip + bold white title
+// on a bottom gradient, viewer chip top-right. No chat — X keeps the card quiet.
+function LiveCardTwitter({ live }: { live: LivePost["live"] }) {
+  return (
+    <div className="relative mt-3 aspect-video overflow-hidden rounded-2xl border border-gray-stroke bg-black">
+      <CoverVideo src={live.videoSrc} videoId={live.videoId} />
+      <div className="absolute right-3 top-3 rounded-md bg-black/60 px-1.5 py-0.5 backdrop-blur-sm">
+        <span className="text-[11px] font-medium text-white">{live.viewers.toLocaleString()} viewers</span>
+      </div>
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-3 pb-3 pt-10">
+        <div className="flex items-center gap-2">
+          <span className="shrink-0 rounded bg-[#D6204C] px-1.5 py-0.5 text-[11px] font-bold tracking-wide text-white">LIVE</span>
+          <p className="truncate text-[14px] font-bold text-white">{live.title}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// The pick: a super-simple vertical live video. No in-card identity (the post
+// header above carries it), no close/follow/comment chrome — just the cam(s),
+// live attendee count, a small screen-share thumbnail, and quiet bare chat.
+function LiveCardTikTok({ live }: { live: LivePost["live"] }) {
+  const comments = useRotatingComments(3);
+  const isPanel = live.hosts !== undefined && live.hosts.length > 1;
+
+  // Shared chat block. On panels it renders inside the host frame so it sits
+  // over the host's lower third regardless of the row proportions; on
+  // single-host cards it renders at the card's bottom.
+  const chatRows = (
+    <div className="pointer-events-none absolute bottom-3 left-3 flex w-[80%] flex-col gap-1">
+      {comments.map(c => (
+        <motion.p
+          key={c.id}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 0.65, y: 0 }}
+          className="text-[11px] leading-snug text-white drop-shadow"
+        >
+          <span className="font-semibold">{c.user}</span> {c.text}
+        </motion.p>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className={`relative mt-3 overflow-hidden rounded-xl bg-black ${isPanel ? "aspect-[9/14]" : live.cropAspect === "9:16" ? "aspect-[9/16]" : "aspect-[9/13]"}`}>
+      {isPanel && live.hosts ? (
+        <>
+          {/* Panel: host on top, each guest in their own frame below —
+              nobody's face is cropped to a sliver. evenSplit balances the
+              rows instead of letting the host dominate. */}
+          <div className="absolute inset-0 flex flex-col gap-0.5 bg-black">
+            <div className="relative min-h-0 flex-1 overflow-hidden">
+              <LazyVideo src={live.hosts[0]} className="absolute inset-0 h-full w-full object-cover" />
+              {/* Legibility for the chat that sits over the host's lower third */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/75 via-black/35 to-transparent" />
+              {chatRows}
+            </div>
+            <div
+              className={`grid gap-0.5 ${live.evenSplit ? "min-h-0 flex-1" : "h-36 shrink-0"}`}
+              style={{ gridTemplateColumns: `repeat(${live.hosts.length - 1}, minmax(0, 1fr))` }}
+            >
+              {live.hosts.slice(1).map((src, i) => (
+                <div key={i} className="relative overflow-hidden">
+                  <LazyVideo src={src} className="absolute inset-0 h-full w-full object-cover" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 to-transparent" />
+        </>
+      ) : (
+        <>
+          <CoverVideo src={live.videoSrc} videoId={live.videoId} scrim objPos={live.cropX !== undefined ? `${live.cropX}% ${live.cropY ?? 50}%` : undefined} />
+          {chatRows}
+        </>
+      )}
+      {/* Top-left chip: pulsing dot + attendees while live; play + duration
+          once it's a posted replay. */}
+      {live.replay ? (
+        <div className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-1 backdrop-blur-sm">
+          <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
+          <span className="text-[11px] font-medium text-white">{live.duration ?? "Replay"}</span>
+        </div>
+      ) : (
+        <div className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-1 backdrop-blur-sm">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#D6204C] opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#D6204C]" />
+          </span>
+          <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+          <span className="text-[11px] font-medium text-white">{live.viewers.toLocaleString()}</span>
+        </div>
+      )}
+      {/* What they're sharing — small screen top-right */}
+      {!live.hideDeck ? (
+        <div className="absolute right-2.5 top-2.5 w-[124px] overflow-hidden rounded-lg shadow-lg ring-1 ring-white/25">
+          <MiniShareSlide title={live.title} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+// LinkedIn Live: presentation-first (slides are the stream), coach cam in a
+// PiP window, attendee meta + reaction cluster + outline CTA below.
+function LiveCardLinkedIn({ live, avatar }: { live: LivePost["live"]; avatar: string }) {
+  return (
+    <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
+      <div className="relative aspect-video">
+        <FakeSlide />
+        {/* bottom-left keeps the badge clear of the slide's own title */}
+        <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-[3px] bg-[#D6204C] px-1.5 py-0.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-white" />
+          <span className="text-[10px] font-bold tracking-wide text-white">LIVE</span>
+        </div>
+        {/* Coach cam PiP */}
+        <img src={avatar} alt="" className="absolute bottom-2 right-2 h-16 w-24 rounded-md object-cover ring-2 ring-white/80" />
+      </div>
+      <div className="px-3.5 py-3">
+        <p className="text-[14px] font-semibold leading-snug text-gray-dark">{live.title}</p>
+        <p className="mt-0.5 text-[12px] text-gray-light">{live.viewers.toLocaleString()} attendees · Started 18 min ago</p>
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5">
+            <div className="flex -space-x-1">
+              {["👍", "❤️", "👏"].map((e, i) => (
+                <span key={i} className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-white text-[10px] ring-1 ring-gray-stroke" style={{ zIndex: 3 - i }}>{e}</span>
+              ))}
+            </div>
+            <span className="text-[12px] text-gray-light">Dwight K. and 87 others</span>
+          </div>
+          <button className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-200">
+            View event
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Reddit live AMA: flair chip + title up top, media, then a live-chat preview
+// (u/handles) and the vote / comments / join-chat pill row.
+function LiveCardReddit({ live }: { live: LivePost["live"] }) {
+  const comments = useRotatingComments(2);
+  return (
+    <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
+      <div className="px-3.5 pt-3">
+        <div className="flex items-center gap-1.5 text-[11px]">
+          <span className="font-bold text-gray-dark">MBA Admissions</span>
+          <span className="text-gray-light">· Live AMA</span>
+          <span className="rounded-full bg-[#D6204C] px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide text-white">Live</span>
+        </div>
+        <p className="mt-1 text-[15px] font-semibold leading-snug text-gray-dark">{live.title}</p>
+      </div>
+      <div className="relative mt-2.5 aspect-video bg-black">
+        <CoverVideo src={live.videoSrc} videoId={live.videoId} />
+      </div>
+      {/* Live chat preview — no exit animation (hidden-tab exits pile up) */}
+      <div className="space-y-1 bg-gray-50 px-3.5 py-2">
+        {comments.map(c => (
+          <motion.p key={c.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="truncate text-[12px] text-gray-dark">
+            <span className="font-semibold">{c.user}</span> {c.text}
+          </motion.p>
+        ))}
+      </div>
+      <div className="flex items-center gap-2 px-3.5 py-2.5">
+        <div className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1">
+          <svg className="h-3.5 w-3.5 text-gray-dark" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l8 8h-5v8H9v-8H4z"/></svg>
+          <span className="text-[12px] font-semibold text-gray-dark">1.2k</span>
+          <svg className="h-3.5 w-3.5 text-gray-light" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20l-8-8h5V4h6v8h5z"/></svg>
+        </div>
+        <div className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1">
+          <span className="text-[12px]">💬</span>
+          <span className="text-[12px] font-semibold text-gray-dark">342</span>
+        </div>
+        <button className="ml-auto cursor-pointer rounded-full bg-gray-dark px-3.5 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-[#333]">
+          Join live chat
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Substack live: speaker grid — host cam on top, guest + shared slides below —
+// with the Subscribe pill, viewer eye, joined-toast, and inline "Hi" composer.
+function LiveCardSubstack({ live, author, avatar }: { live: LivePost["live"]; author: string; avatar: string }) {
+  return (
+    <div className="mt-3 overflow-hidden rounded-xl bg-black">
+      {/* Header */}
+      <div className="flex items-center justify-between px-2.5 pb-1.5 pt-2">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <img src={avatar} alt={author} className="h-7 w-7 rounded-full object-cover ring-1 ring-white/30" />
+          <div className="min-w-0">
+            <p className="max-w-[80px] truncate text-[11px] font-semibold leading-tight text-white">{author}</p>
+            <p className="truncate text-[9px] leading-tight text-white/60">Admissions, weekly</p>
+          </div>
+          <button className="ml-1 whitespace-nowrap rounded-full bg-white px-3 py-1 text-[11px] font-bold text-gray-dark">Subscribe</button>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="rounded-md bg-[#D6204C] px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white">LIVE</span>
+          <div className="flex items-center gap-1 rounded-md bg-white/15 px-1.5 py-0.5">
+            <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
+            <span className="text-[10px] font-semibold text-white">{live.viewers}</span>
+          </div>
+          <span className="text-[14px] leading-none text-white/80">✕</span>
+        </div>
+      </div>
+      {/* Speaker grid: host on top, guest + slides below */}
+      <div className="flex flex-col gap-px">
+        <div className="relative aspect-[16/9]">
+          <CoverVideo src={live.videoSrc} videoId={live.videoId} />
+        </div>
+        <div className="grid grid-cols-2 gap-px">
+          <img src={pic9} alt="Guest speaker" className="aspect-[8/7] w-full object-cover" />
+          <div className="aspect-[8/7]"><FakeSlide /></div>
+        </div>
+      </div>
+      {/* Joined toast + composer */}
+      <div className="px-2.5 pb-2.5 pt-1.5">
+        <div className="mb-1.5 flex items-center gap-1.5">
+          <div className="flex -space-x-1.5">
+            {[pic2, pic11].map((p, i) => (
+              <img key={i} src={p} alt="" className="h-4 w-4 rounded-full object-cover ring-1 ring-black" />
+            ))}
+          </div>
+          <span className="text-[11px] text-white/70"><span className="font-semibold text-white/90">Alex Smith</span> and 2 others joined</span>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 flex-1 items-center justify-between rounded-full border border-white/30 pl-3.5 pr-1">
+            <span className="text-[13px] text-white/60">Hi</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15 text-[13px] text-white">↑</span>
+          </div>
+          <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/></svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Instagram Live: full-bleed vertical cam, gradient LIVE badge, plain white
+// chat overlay, "Add a comment…" pill with heart + paper-plane.
+function LiveCardInstagram({ live, author, avatar }: { live: LivePost["live"]; author: string; avatar: string }) {
+  const comments = useRotatingComments(3);
+  return (
+    <div className="relative mt-3 aspect-[9/13] overflow-hidden rounded-xl bg-black">
+      <CoverVideo src={live.videoSrc} videoId={live.videoId} scrim />
+      {/* Header */}
+      <div className="absolute inset-x-2.5 top-2.5 flex items-center justify-between">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="rounded-full bg-white/80 p-[2px]">
+            <img src={avatar} alt={author} className="h-7 w-7 rounded-full object-cover" />
+          </span>
+          <p className="max-w-[110px] truncate text-[12px] font-semibold text-white drop-shadow">{author.toLowerCase().replace(" ", "_")}</p>
+          <span className="rounded-md bg-[#D6204C] px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white">LIVE</span>
+          <div className="flex items-center gap-0.5 rounded-md bg-black/40 px-1.5 py-0.5">
+            <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
+            <span className="text-[10px] font-semibold text-white">{live.viewers}</span>
+          </div>
+        </div>
+        <span className="text-[16px] leading-none text-white drop-shadow">✕</span>
+      </div>
+      {/* Chat overlay — no exit animation (hidden-tab exits pile up) */}
+      <div className="pointer-events-none absolute bottom-14 left-3 flex w-[75%] flex-col gap-1.5">
+        {comments.map(c => (
+          <motion.p key={c.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="text-[12px] leading-snug text-white drop-shadow">
+            <span className="font-semibold">{c.user}</span> {c.text}
+          </motion.p>
+        ))}
+      </div>
+      {/* Comment bar */}
+      <div className="absolute inset-x-2.5 bottom-2.5 flex items-center gap-2.5">
+        <div className="flex h-9 flex-1 items-center rounded-full border border-white/40 px-3.5">
+          <span className="text-[12px] text-white/70">Add a comment…</span>
+        </div>
+        <svg className="h-[22px] w-[22px] text-white drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <svg className="h-[22px] w-[22px] text-white drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+      </div>
+    </div>
+  );
+}
+
+// Full-screen workshop slide (recreates the marketing-deck look: dark canvas,
+// soft light streaks, serif headline). Copy comes from the post's live data.
+function WorkshopSlide({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-[#0B0C10]">
+      {/* Stage ambience behind the deck */}
+      <div className="absolute -left-16 top-[10%] h-14 w-[380px] rotate-[-16deg] rounded-full bg-[#3B62B8]/25 blur-3xl" />
+      <div className="absolute -right-12 bottom-[10%] h-12 w-[300px] rotate-[-18deg] rounded-full bg-[#B77239]/20 blur-3xl" />
+      {/* The slide itself — an inset surface, like a shared deck */}
+      <div className="absolute inset-x-3 bottom-3 top-11 overflow-hidden rounded-lg bg-gradient-to-br from-[#141824] to-[#0D1016] shadow-[0_8px_24px_rgba(0,0,0,0.5)] ring-1 ring-white/10">
+        <div className="absolute -left-10 top-1 h-10 w-64 rotate-[-14deg] rounded-full bg-[#3B62B8]/35 blur-2xl" />
+        <div className="absolute -right-8 bottom-3 h-10 w-56 rotate-[-16deg] rounded-full bg-[#C98A3D]/25 blur-2xl" />
+        <div className="relative flex h-full flex-col justify-center px-4 pb-6">
+          <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#F5C64F]">Live workshop</p>
+          <h3 className="mt-1 font-serif text-[20px] leading-[1.1] tracking-[-0.01em] text-white">{title}</h3>
+          <p className="mt-1 line-clamp-2 max-w-[95%] text-[11px] leading-snug text-white/60">{subtitle}</p>
+        </div>
+        {/* Deck chrome: progress + page count */}
+        <div className="absolute inset-x-4 bottom-2.5 flex items-center gap-2">
+          <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/15">
+            <div className="h-full w-[35%] rounded-full bg-white/60" />
+          </div>
+          <span className="text-[9px] font-medium tabular-nums text-white/50">12 / 34</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Leland-native minimal treatment: full-bleed, fully self-contained — post
+// chrome lives ON the media. Presentation band on top (1/3) carries the
+// identity row (avatar · name · badges) and the ⋯ menu; coach cam below (2/3)
+// carries bare chat and the post's action bar.
+function LiveCardMinimal({ post }: { post: LivePost }) {
+  const navigate = useNavigate();
+  const comments = useRotatingComments(3);
+  const [liked, setLiked] = useState(false);
+  const { live } = post;
+
+  return (
+    <div className="bg-[#0E0F12]">
+      {/* Presentation — top third */}
+      <div className="relative aspect-[15/8]">
+        <WorkshopSlide title={live.title} subtitle={live.topic} />
+        {/* Identity row — like a post header */}
+        <div className="absolute inset-x-3 top-2.5 flex items-center gap-2">
+          <img src={post.avatar} alt={post.author} className="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-white/40" />
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span className="truncate text-[13px] font-semibold text-white drop-shadow">{post.author}</span>
+            {post.verified ? <img src={verifiedIcon} alt="" className="h-[14px] w-[14px] shrink-0" /> : null}
+            {post.companyLogo ? <img src={post.companyLogo} alt="" className="h-4 w-4 shrink-0 rounded-[3px] bg-white object-contain p-[1.5px]" /> : null}
+          </div>
+          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+            <div className="flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-sm">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#D6204C] opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#D6204C]" />
+              </span>
+              <span className="text-[10px] font-semibold tracking-wide text-white">LIVE · {live.viewers}</span>
+            </div>
+            <button className="cursor-pointer rounded-full p-1 text-white/90 transition-colors hover:bg-white/10" aria-label="More options">
+              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      {/* Coach cam — bottom two-thirds; crop biased up so the face sits in
+          the top half, clear of the chat and actions */}
+      <div className="relative aspect-[15/16]">
+        <CoverVideo src={live.videoSrc} videoId={live.videoId} scrim cropTop />
+        {/* Chat — plain text, raised above the action row. No exit animation:
+            AnimatePresence exits never finish in a hidden tab and pile up. */}
+        <div className="pointer-events-none absolute bottom-14 left-3 flex w-[85%] flex-col gap-1.5">
+          {comments.map(c => (
+            <motion.p
+              key={c.id}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 0.72, y: 0 }}
+              className="text-[12px] leading-snug text-white drop-shadow"
+            >
+              <span className="font-semibold">{c.user}</span> {c.text}
+            </motion.p>
+          ))}
+        </div>
+        {/* Action row — on the video */}
+        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-5 pb-3 pt-1">
+          <button
+            onClick={() => setLiked(l => !l)}
+            className={`flex cursor-pointer items-center gap-1.5 drop-shadow transition-colors ${liked ? "text-red-500" : "text-white"}`}
+            aria-label="Like"
+          >
+            <motion.svg
+              className="h-[22px] w-[22px]"
+              viewBox="0 0 24 24"
+              fill={liked ? "currentColor" : "none"}
+              stroke="currentColor"
+              strokeWidth="1.75"
+              animate={liked ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1] } : { scale: 1 }}
+              transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </motion.svg>
+            <span className="text-[13px] font-medium">{post.likes + (liked ? 1 : 0)}</span>
+          </button>
+          <button
+            onClick={() => { primeKeyboard(); navigate(`/post/${post.id}`, { state: { focusInput: true } }); }}
+            className="flex cursor-pointer items-center gap-1.5 text-white drop-shadow"
+            aria-label="Comment"
+          >
+            <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21C13.486 21.0018 14.9492 20.6339 16.2576 19.9293L20.3676 20.9755C20.4517 20.9969 20.5398 20.9961 20.6234 20.9731C20.707 20.9502 20.7832 20.9058 20.8445 20.8445C20.9058 20.7832 20.9501 20.707 20.9731 20.6234C20.9961 20.5398 20.9969 20.4517 20.9755 20.3676L19.9293 16.2576C20.8609 14.5226 21.1978 12.5299 20.8882 10.5851C20.5786 8.64022 19.6396 6.85061 18.2152 5.49065C16.7909 4.13068 14.9598 3.27543 13.0027 3.05604C11.0457 2.83664 9.07066 3.26522 7.38054 4.27604C5.69042 5.28687 4.3785 6.82414 3.64594 8.65215C2.91338 10.4802 2.80062 12.498 3.32495 14.3962C3.84928 16.2945 4.98176 17.9684 6.54873 19.1612C8.1157 20.354 10.0307 21 12 21Z" /></svg>
+            <span className="text-[13px] font-medium">{post.comments}</span>
+          </button>
+          <button className="flex cursor-pointer items-center gap-1.5 text-white drop-shadow" aria-label="Repost">
+            <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6.34204 6.34448C7.79104 4.89648 9.79204 4.00048 12.003 4.00048C16.424 4.00048 20.008 7.58248 20.008 12.0025C20.008 12.6105 19.934 13.2005 19.806 13.7695" />
+              <path d="M17.658 17.6555C16.209 19.1035 14.208 19.9995 11.997 19.9995C7.576 19.9995 3.992 16.4175 3.992 11.9975C3.992 11.3895 4.066 10.7995 4.194 10.2305" />
+            </svg>
+            <span className="text-[13px] font-medium">{post.reposts}</span>
+          </button>
+          <button className="flex cursor-pointer items-center text-white drop-shadow" aria-label="Share">
+            <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15V4" /><path d="m8 8 4-4 4 4" /><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" /></svg>
+          </button>
+          <button className="flex cursor-pointer items-center text-white drop-shadow" aria-label="Save">
+            <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Rolling transcript of what the speaker is saying — stands in for real
+// burned-in captions on a replay.
+const TRANSCRIPT_LINES = [
+  "…does the top bullet tell a story?…",
+  "…numbers only matter if we know what changed…",
+  "…read it out loud — if you stumble, they will too…",
+  "…one story per bullet, that's the whole trick…",
+  "…recruiters skim, so front-load the verbs…",
+];
+
+function CaptionsTicker() {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx(i => (i + 1) % TRANSCRIPT_LINES.length), 3400);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-0">
+      <div className="h-16 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+      <p className="absolute inset-x-0 bottom-2 truncate px-4 text-center text-[12px] font-medium leading-snug text-white">
+        {TRANSCRIPT_LINES[idx]}
+      </p>
+    </div>
+  );
+}
+
+// Simple horizontal replay: the person talking, edge to edge. No vertical
+// chrome, no deck — just the video, a play chip, and (via composer toggles)
+// captions and/or the replayed chat. Tapping opens the full replay viewer.
+export function LiveReplayCard({ live, postId, static: isStatic }: { live: LivePost["live"]; postId: number; static?: boolean }) {
+  const navigate = useNavigate();
+  const comments = useRotatingComments(2);
+  const aspect = live.cropAspect === "16:9" ? "aspect-video" : live.cropAspect === "1:1" ? "aspect-square" : live.cropAspect === "9:16" ? "aspect-[9/16] w-[290px]" : "aspect-[4/3]";
+  const userFramed = live.cropAspect !== undefined && live.cropAspect !== "Original";
+  return (
+    <div
+      onClick={isStatic ? undefined : () => navigate(`/replay/${postId}`)}
+      className={`relative mt-3 ${aspect} overflow-hidden rounded-xl bg-black ${isStatic ? "" : "cursor-pointer"}`}
+    >
+      {live.videoSrc ? (
+        userFramed ? (
+          /* The author framed this themselves in the crop editor. */
+          <LazyVideo src={live.videoSrc} className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: `${live.cropX ?? 50}% ${live.cropY ?? 50}%` }} />
+        ) : (
+          /* Bottom-anchored overscan crops the source's empty ceiling so the
+             speaker rides high in the frame, clear of the caption strip. */
+          <div className="absolute inset-0 overflow-hidden">
+            <LazyVideo src={live.videoSrc} className="absolute bottom-0 left-0 h-[135%] w-full object-cover" />
+          </div>
+        )
+      ) : (
+        <CoverVideo src={live.videoSrc} videoId={live.videoId} />
+      )}
+      {live.peakViewers ? (
+        <div className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-black/25 px-2 py-1 backdrop-blur-sm">
+          <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+          <span className="text-[11px] font-medium text-white">{live.peakViewers.toLocaleString()}</span>
+        </div>
+      ) : null}
+      {live.showChat ? (
+        <div className="pointer-events-none absolute left-3 top-10 flex w-[70%] flex-col gap-1">
+          {comments.map(c => (
+            <motion.p key={c.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 0.65, y: 0 }} className="text-[11px] leading-snug text-white drop-shadow">
+              <span className="font-semibold">{c.user}</span> {c.text}
+            </motion.p>
+          ))}
+        </div>
+      ) : null}
+      {live.showCaptions ? <CaptionsTicker /> : null}
+    </div>
+  );
+}
+
+function LiveCardParody({ live, author, avatar }: { live: LivePost["live"]; author: string; avatar: string }) {
+  switch (live.variant) {
+    // "minimal" needs the full post (identity + counts) and is handled
+    // directly in FeedPost, not through this switch.
+    case "twitter": return <LiveCardTwitter live={live} />;
+    case "tiktok": return <LiveCardTikTok live={live} />;
+    case "linkedin": return <LiveCardLinkedIn live={live} avatar={avatar} />;
+    case "reddit": return <LiveCardReddit live={live} />;
+    case "substack": return <LiveCardSubstack live={live} author={author} avatar={avatar} />;
+    case "instagram": return <LiveCardInstagram live={live} author={author} avatar={avatar} />;
+    default: return null;
+  }
+}
+
+// While an event is live it renders through the live-stream treatment.
+const eventAsLive = (event: EventPost["event"]): LivePost["live"] => ({
+  title: event.title,
+  videoId: event.videoId ?? "1cfIAVasP6E",
+  viewers: event.watching ?? 0,
+  topic: "Happening now · Free livestream",
+});
+
+// Post-event recap (Admin Tools → Event stage → Done): recording preview plus
+// a route back into the thread — the post becomes the place the conversation
+// continues after the event ends.
+function EventWrappedCard({ event, postId }: { event: EventPost["event"]; postId: number }) {
+  const navigate = useNavigate();
+  return (
+    <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
+      <button
+        onClick={() => navigate(`/post/${postId}`)}
+        className="relative block w-full cursor-pointer"
+      >
+        <img src={event.image} alt={event.title} className="aspect-[1200/628] w-full object-cover" />
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-transform hover:scale-105">
+            <svg className="ml-1 h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5.14v13.72c0 .79.87 1.27 1.54.84l10.44-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14z" />
+            </svg>
+          </div>
+        </div>
+        <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 backdrop-blur-sm">
+          <span className="text-[11px] font-semibold tracking-wide text-gray-dark">ENDED</span>
+        </div>
+        {event.recordingDuration ? (
+          <div className="absolute bottom-2 right-2 rounded-[4px] bg-black/70 px-1.5 py-[2px]">
+            <span className="text-[11px] font-medium text-white">{event.recordingDuration}</span>
+          </div>
+        ) : null}
+      </button>
+      <div className="px-4 py-4">
+        <p className="text-[15px] font-medium leading-snug text-gray-dark">{event.title}</p>
+        <div className="mt-2 flex items-center justify-between gap-3">
+          <p className="text-[12px] text-gray-light">
+            {event.attended !== undefined ? <>{event.attended.toLocaleString()} attended · </> : null}Recording available
+          </p>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              primeKeyboard();
+              navigate(`/post/${postId}`, { state: { focusInput: true } });
+            }}
+            className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
+          >
+            Join the conversation
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Coach hover card ─────────────────────────────────
 
 interface CoachProfile {
@@ -2202,6 +3240,15 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black">
             <img src={post.avatar} alt={post.author} className="h-5 w-5 brightness-0 invert" />
           </div>
+        ) : post.type === "live" ? (
+          // Just posted a livestream — red ring pulls the eye to the coach.
+          <div className="h-10 w-10 rounded-full bg-[#D6204C] p-[2px]">
+            <img
+              src={post.avatar}
+              alt={post.author}
+              className="h-full w-full rounded-full border-2 border-white object-cover"
+            />
+          </div>
         ) : (
           <img
             src={post.avatar}
@@ -2255,6 +3302,18 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { 
   const navigate = useNavigate();
   const [editOpen, setEditOpen] = useState(false);
   const { mode: profileBarMode } = useProfileBarMode();
+  const { liveCardStyle, eventStage } = useFeedDemo();
+
+  // Media-only live post: identity and actions live on the card itself.
+  if (post.type === "live" && post.live.variant === "minimal" && post.live.bare) {
+    return (
+      <div className="py-3">
+        <div className="-mx-4 sm:-mx-6" onClick={e => e.stopPropagation()}>
+          <LiveCardMinimal post={post} />
+        </div>
+      </div>
+    );
+  }
 
   // A re-surfaced simple repost points its click-through and repost state at
   // the original. A quote post is local-only (no /post route), so its card
@@ -2287,7 +3346,11 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { 
           {/* Minimal mode has no title line, so the body tucks up tight to the
               identity row (negative margin trims the line-height leading); the
               title modes give the body a touch more air. */}
-          <p className={`${profileBarMode === 1 ? "-mt-1.5" : "mt-1.5"} text-[15px] leading-[1.4] text-gray-dark`}>{post.body}</p>
+          {/* Articles are represented by their card (title + clamped excerpt) —
+              the raw body would dump the whole essay into the feed. */}
+          {post.type !== "article" ? (
+            <p className={`${profileBarMode === 1 ? "-mt-1.5" : "mt-1.5"} text-[15px] leading-[1.4] text-gray-dark`}>{post.body}</p>
+          ) : null}
           <div className={post.type !== "text" ? "pb-1" : ""} onClick={e => e.stopPropagation()}>
             {post.type === "image" && (
               <ImageGallery
@@ -2297,9 +3360,29 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { 
               />
             )}
             {post.type === "link" && <LinkCard link={post.link} />}
-            {post.type === "event" && <EventCard event={post.event} />}
+            {post.type === "article" && <ArticleCard post={post} />}
+            {post.type === "poll" && <PollCard poll={post.poll} />}
+            {post.type === "event" && (
+              eventStage === "live" ? (
+                liveCardStyle === "min"
+                  ? <LiveCardCompact live={eventAsLive(post.event)} author={post.author} avatar={post.avatar} />
+                  : <LiveCard live={eventAsLive(post.event)} author={post.author} avatar={post.avatar} />
+              ) : eventStage === "wrapped" ? (
+                <EventWrappedCard event={post.event} postId={post.id} />
+              ) : (
+                <EventCard event={post.event} />
+              )
+            )}
             {post.type === "milestone" && <MilestoneCard milestone={post.milestone} postId={post.id} authorName={post.milestone.clientName} />}
-            {post.type === "live" && <LiveCard live={post.live} author={post.author} avatar={post.avatar} />}
+            {post.type === "session" && <SessionCompletedCard session={post.session} />}
+            {/* "minimal" is full-bleed and renders below, outside the avatar column */}
+            {post.type === "live" && post.live.variant !== "minimal" && (
+              post.live.horizontal ? <LiveReplayCard live={post.live} postId={post.id} />
+                : post.live.variant ? <LiveCardParody live={post.live} author={post.author} avatar={post.avatar} />
+                : liveCardStyle === "min"
+                  ? <LiveCardCompact live={post.live} author={post.author} avatar={post.avatar} />
+                  : <LiveCard live={post.live} author={post.author} avatar={post.avatar} />
+            )}
             {post.type === "quote" && (
               <div onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.quoted.id}`); }}>
                 <QuotedPostCard quoted={post.quoted} />
@@ -2308,8 +3391,15 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { 
           </div>
         </div>
       </div>
+      {/* Full-bleed minimal live: escapes both the avatar column and the
+          feed's horizontal gutters (px-4 / sm:px-6 on the page wrapper). */}
+      {post.type === "live" && post.live.variant === "minimal" ? (
+        <div className="-mx-4 mt-3 sm:-mx-6" onClick={e => e.stopPropagation()}>
+          <LiveCardMinimal post={post} />
+        </div>
+      ) : null}
       <div className="mt-1" onClick={e => e.stopPropagation()}>
-        <ActionBar post={post} likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} postId={post.id} authorName={post.author} onRepost={onRepost} onUndoRepost={onUndoRepost} onQuote={onQuote} />
+        <ActionBar post={post} likes={post.likes} comments={post.comments} reposts={post.reposts} shares={post.shares} postId={navId} authorName={post.author} onRepost={onRepost} onUndoRepost={onUndoRepost} onQuote={onQuote} />
       </div>
       {editOpen && (
         <ComposeModal
@@ -3685,7 +4775,9 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
   useSetLeftSidebar(<HomeSidebar onCreatePost={() => setComposeOpen(true)} />);
   useSetRightSidebar(<HomeRightSidebar />);
-  const [feedPosts, setFeedPosts] = useState<Post[]>(posts);
+  // Copy, don't alias: handlePublish mutates `posts` (so /post/:id resolves),
+  // which would double-insert if this state shared the same array reference.
+  const [feedPosts, setFeedPosts] = useState<Post[]>(() => [...posts]);
   // The post the user is quoting ("repost with your thoughts"); drives the
   // quote composer modal.
   const [quoteTarget, setQuoteTarget] = useState<Post | null>(null);
@@ -3770,6 +4862,26 @@ export default function Home() {
       }
       return { ...p, type: "text" as const, body: text } as Post;
     }));
+  };
+
+  // New-composer publishes: prepend to the feed AND register in the global
+  // posts array so the post's own page (/post/:id) resolves.
+  const [draftToast, setDraftToast] = useState(false);
+  const [schedToast, setSchedToast] = useState(false);
+  const [composeInDrafts, setComposeInDrafts] = useState(false);
+  const [composeDraftsTab, setComposeDraftsTab] = useState<"Drafts" | "Scheduled">("Drafts");
+  const handleDraftSaved = () => {
+    setDraftToast(true);
+    window.setTimeout(() => setDraftToast(false), 2600);
+  };
+  const handleScheduled = () => {
+    setSchedToast(true);
+    window.setTimeout(() => setSchedToast(false), 2600);
+  };
+
+  const handlePublish = (newPost: Post) => {
+    posts.unshift(newPost);
+    setFeedPosts(prev => [newPost, ...prev]);
   };
 
   const handlePost = (text: string, postImages: ImageEntry[]) => {
@@ -3910,14 +5022,50 @@ export default function Home() {
         onClick={() => setComposeOpen(true)}
         aria-label="Create post"
         style={{ transform: `translateY(${savedToastActive ? -122 : navHidden ? 0 : -66}px)` }}
-        className={`fixed bottom-[calc(env(safe-area-inset-bottom)+16px)] right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden ${darkMode ? "bg-[#FFD96F] text-[#222222]" : "bg-[#222222] text-white"}`}
+        className={`fixed bottom-[calc(max(env(safe-area-inset-bottom),20px)+16px)] right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform duration-200 ease-out active:scale-95 md:hidden ${darkMode ? "bg-[#FFD96F] text-[#222222]" : "bg-[#222222] text-white"}`}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 5v14M5 12h14" />
         </svg>
       </button>
 
-      {composeOpen ? <ComposeModal onClose={() => setComposeOpen(false)} onPost={handlePost} onGoLive={() => setGoLiveOpen(true)} isMVP={version === "A"} /> : null}
+      {composeOpen ? <Composer onClose={() => { setComposeOpen(false); setComposeInDrafts(false); }} onPublish={handlePublish} onDraftSaved={handleDraftSaved} onScheduled={handleScheduled} openDraftsOnMount={composeInDrafts} draftsTabOnMount={composeDraftsTab} /> : null}
+      {/* Draft-saved toast — portaled so the tab bar's stacking context can't cover it */}
+      {createPortal(
+        <AnimatePresence>
+          {draftToast ? (
+            <div key="draft" className="pointer-events-none fixed inset-x-0 bottom-[calc(max(env(safe-area-inset-bottom),20px)+76px)] z-[80] flex justify-center">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 12 }}
+                onClick={() => { setDraftToast(false); setComposeDraftsTab("Drafts"); setComposeInDrafts(true); setComposeOpen(true); }}
+                className="pointer-events-auto flex cursor-pointer items-center gap-2 rounded-full bg-gray-dark px-4 py-2.5"
+              >
+                <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m5 13 4 4L19 7" /></svg>
+                <span className="whitespace-nowrap text-[14px] font-medium text-white">Draft saved</span>
+                <span className="whitespace-nowrap text-[14px] font-semibold text-white/70">· View</span>
+              </motion.div>
+            </div>
+          ) : null}
+          {schedToast ? (
+            <div key="sched" className="pointer-events-none fixed inset-x-0 bottom-[calc(max(env(safe-area-inset-bottom),20px)+76px)] z-[80] flex justify-center">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 12 }}
+                onClick={() => { setSchedToast(false); setComposeDraftsTab("Scheduled"); setComposeInDrafts(true); setComposeOpen(true); }}
+                className="pointer-events-auto flex cursor-pointer items-center gap-2 rounded-full bg-gray-dark px-4 py-2.5"
+              >
+                <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span className="whitespace-nowrap text-[14px] font-medium text-white">Post scheduled</span>
+                <span className="whitespace-nowrap text-[14px] font-semibold text-white/70">· View</span>
+              </motion.div>
+            </div>
+          ) : null}
+        </AnimatePresence>,
+        document.body
+      )}
       {quoteTarget ? <ComposeModal quotePost={quoteTarget} onClose={() => setQuoteTarget(null)} onPost={handleQuotePost} isMVP={version === "A"} /> : null}
       {goLiveOpen ? <GoLiveModal onClose={() => setGoLiveOpen(false)} /> : null}
     </div>

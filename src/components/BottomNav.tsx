@@ -35,7 +35,7 @@ export default function BottomNav() {
   }, []);
 
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 z-30 ${darkMode ? "bg-[#131313]" : "bg-white"} shadow-[0_-4px_12px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)] transition-transform duration-200 ease-out ${hidden ? "translate-y-full" : "translate-y-0"}`}>
+    <nav className={`fixed bottom-0 left-0 right-0 z-30 ${darkMode ? "bg-[#131313]" : "bg-white"} shadow-[0_-4px_12px_rgba(0,0,0,0.06)] pb-[max(env(safe-area-inset-bottom),20px)] transition-transform duration-200 ease-out ${hidden ? "translate-y-full" : "translate-y-0"}`}>
       <ul className="flex items-center">
         {navItems.map(({ to, icon, label }) => (
           <li key={to} className="flex-1">

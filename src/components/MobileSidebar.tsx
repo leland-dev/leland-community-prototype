@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useExpertMode } from "../contexts/ExpertModeContext";
 import { useProfileBarMode, type ProfileBarMode } from "../contexts/ProfileBarModeContext";
+import { useFeedDemo, type LiveCardStyle, type EventStage } from "../contexts/FeedDemoContext";
 import { Button } from "./Button";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import groupImg1 from "../assets/placeholder images/group images/18603db620e37b489d2d52da4c9c1f86.jpg";
@@ -53,10 +54,48 @@ const myLelandItems = [
   { icon: bookOpenIcon, label: "Leland+", to: "/plus", external: true },
 ];
 
+// Admin Tools segmented pill control — one row per demo toggle.
+function AdminSegControl<T extends string | number>({ label, darkMode, value, onChange, options }: {
+  label: string;
+  darkMode: boolean;
+  value: T;
+  onChange: (v: T) => void;
+  options: { value: T; label: string }[];
+}) {
+  return (
+    <div className="flex w-full items-center justify-between gap-3 py-[10px] text-[16px] font-normal">
+      <span className={`${darkMode ? "text-white" : "text-[#4c4c4c]"} shrink-0 whitespace-nowrap`}>{label}</span>
+      <div className={`flex shrink-0 overflow-hidden rounded-full p-[2px] ${darkMode ? "bg-white/15" : "bg-[#E5E5E5]"}`}>
+        {options.map((o) => {
+          const active = value === o.value;
+          return (
+            <button
+              key={String(o.value)}
+              onClick={() => onChange(o.value)}
+              className={`rounded-full px-2 py-[3px] text-[11px] font-medium transition-colors ${
+                active
+                  ? darkMode
+                    ? "bg-white text-[#131313]"
+                    : "bg-[#222222] text-white"
+                  : darkMode
+                    ? "text-white/70"
+                    : "text-[#4c4c4c]"
+              }`}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const { dark: darkMode, toggle: toggleDarkMode } = useDarkMode();
   const { expert: expertMode, toggle: toggleExpertMode } = useExpertMode();
   const { mode: profileBarMode, setMode: setProfileBarMode } = useProfileBarMode();
+  const { liveCardStyle, setLiveCardStyle, eventStage, setEventStage, hasLivestreams, setHasLivestreams } = useFeedDemo();
   const [accountOpen, setAccountOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -288,36 +327,45 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                   <span>Dark Mode</span>
                   {toggleSwitch(darkMode)}
                 </button>
-                <div className="flex w-full items-center justify-between gap-3 py-[10px] text-[16px] font-normal">
-                  <span className={`${textColor} shrink-0 whitespace-nowrap`}>Profile bar</span>
-                  <div
-                    className={`flex shrink-0 overflow-hidden rounded-full p-[2px] ${
-                      darkMode ? "bg-white/15" : "bg-[#E5E5E5]"
-                    }`}
-                  >
-                    {([1, 2, 3] as ProfileBarMode[]).map((m) => {
-                      const active = profileBarMode === m;
-                      const label = m === 1 ? "Min" : m === 2 ? "Title" : "Date";
-                      return (
-                        <button
-                          key={m}
-                          onClick={() => setProfileBarMode(m)}
-                          className={`rounded-full px-2 py-[3px] text-[11px] font-medium transition-colors ${
-                            active
-                              ? darkMode
-                                ? "bg-white text-[#131313]"
-                                : "bg-[#222222] text-white"
-                              : darkMode
-                                ? "text-white/70"
-                                : "text-[#4c4c4c]"
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                <button
+                  onClick={() => setHasLivestreams(!hasLivestreams)}
+                  className={`flex w-full items-center justify-between gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
+                >
+                  <span>Livestreams</span>
+                  {toggleSwitch(hasLivestreams)}
+                </button>
+                <AdminSegControl
+                  label="Profile bar"
+                  darkMode={darkMode}
+                  value={profileBarMode}
+                  onChange={setProfileBarMode}
+                  options={[
+                    { value: 1 as ProfileBarMode, label: "Min" },
+                    { value: 2 as ProfileBarMode, label: "Title" },
+                    { value: 3 as ProfileBarMode, label: "Date" },
+                  ]}
+                />
+                <AdminSegControl
+                  label="Live card"
+                  darkMode={darkMode}
+                  value={liveCardStyle}
+                  onChange={setLiveCardStyle}
+                  options={[
+                    { value: "video" as LiveCardStyle, label: "Video" },
+                    { value: "min" as LiveCardStyle, label: "Min" },
+                  ]}
+                />
+                <AdminSegControl
+                  label="Event stage"
+                  darkMode={darkMode}
+                  value={eventStage}
+                  onChange={setEventStage}
+                  options={[
+                    { value: "upcoming" as EventStage, label: "Soon" },
+                    { value: "live" as EventStage, label: "Live" },
+                    { value: "wrapped" as EventStage, label: "Done" },
+                  ]}
+                />
                 <NavLink
                   to="/onboarding"
                   onClick={onClose}
@@ -338,6 +386,13 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                   className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
                 >
                   <span>Onboarding v3</span>
+                </NavLink>
+                <NavLink
+                  to="/waitlist"
+                  onClick={onClose}
+                  className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
+                >
+                  <span>Waitlist</span>
                 </NavLink>
               </div>
             </motion.div>

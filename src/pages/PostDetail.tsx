@@ -11,7 +11,7 @@ import { useSetNavBackHandler } from "../components/NavThemeContext";
 import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { usePageExit } from "../contexts/PageExitContext";
 import { PUSH_TRANSITION } from "../lib/pushTransition";
-import { posts, type Post, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar } from "./Home";
+import { posts, type Post, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar, PollCard } from "./Home";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import verifiedIconSrc from "../assets/icons/verified.svg";
@@ -455,9 +455,30 @@ function PostMedia({ post, onImageClick }: { post: Post; onImageClick?: (idx: nu
             </div>
           </div>
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-light">Admitted</p>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-light">
+              {milestone.kind === "offer" ? "Offer signed" : "Admitted"}
+            </p>
             <p className="text-[15px] font-semibold text-gray-dark">{milestone.school}</p>
             <p className="text-[12px] text-gray-light">{milestone.program}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (post.type === "session") {
+    const { session } = post;
+    return (
+      <div className="relative mt-3 overflow-hidden rounded-xl border border-gray-stroke px-4 py-4">
+        <div className="flex items-center gap-4">
+          <img src={session.coachAvatar} alt={session.coachName} className="h-14 w-14 shrink-0 rounded-full object-cover" />
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-light">Session completed</p>
+            <p className="text-[15px] font-semibold text-gray-dark">{session.topic}</p>
+            <p className="text-[12px] text-gray-light">
+              {session.duration} with {session.coachName}
+              {session.sessionsTogether !== undefined ? <> · Session #{session.sessionsTogether}</> : null}
+            </p>
           </div>
         </div>
       </div>
@@ -486,7 +507,7 @@ function StatsRow({ post, onCommentFocus }: { post: Post; onCommentFocus: () => 
       {/* Comment */}
       <button
         onClick={onCommentFocus}
-        className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover"
+        className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-[#555555] transition-colors hover:bg-gray-hover"
       >
         <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 21C13.486 21.0018 14.9492 20.6339 16.2576 19.9293L20.3676 20.9755C20.4517 20.9969 20.5398 20.9961 20.6234 20.9731C20.707 20.9502 20.7832 20.9058 20.8445 20.8445C20.9058 20.7832 20.9501 20.707 20.9731 20.6234C20.9961 20.5398 20.9969 20.4517 20.9755 20.3676L19.9293 16.2576C20.8609 14.5226 21.1978 12.5299 20.8882 10.5851C20.5786 8.64022 19.6396 6.85061 18.2152 5.49065C16.7909 4.13068 14.9598 3.27543 13.0027 3.05604C11.0457 2.83664 9.07066 3.26522 7.38054 4.27604C5.69042 5.28687 4.3785 6.82414 3.64594 8.65215C2.91338 10.4802 2.80062 12.498 3.32495 14.3962C3.84928 16.2945 4.98176 17.9684 6.54873 19.1612C8.1157 20.354 10.0307 21 12 21Z" /></svg>
         {post.comments > 0 && <span className="text-[13px] font-normal">{post.comments.toLocaleString()}</span>}
@@ -497,7 +518,7 @@ function StatsRow({ post, onCommentFocus }: { post: Post; onCommentFocus: () => 
       <div className="relative">
         <button
           onClick={() => setShareOpen(o => !o)}
-          className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-gray-light transition-colors hover:bg-gray-hover"
+          className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-[#555555] transition-colors hover:bg-gray-hover"
         >
           <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 15V4" /><path d="m8 8 4-4 4 4" /><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" /></svg>
         </button>
@@ -538,8 +559,9 @@ function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number
 
   return (
     <div className="relative flex items-center gap-1">
-      {/* Balloon-pop particle burst */}
-      <div className="pointer-events-none absolute left-[7px] top-[7px]">
+      {/* Balloon-pop particle burst — origin sits at the icon center, offset
+          by the button's px-2 padding */}
+      <div className="pointer-events-none absolute left-[15px] top-[13px]">
         <AnimatePresence>
           {burst ? HEART_PARTICLES.map((p, i) => (
             <motion.span
@@ -567,14 +589,14 @@ function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number
 
       <button
         onClick={handleClick}
-        className={`flex items-center gap-1 text-[13px] transition-colors ${liked ? "text-red-500" : "text-gray-light hover:text-gray-dark"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-full px-2 py-1.5 transition-colors hover:bg-gray-hover ${liked ? "text-red-500" : "text-[#555555]"}`}
       >
         <motion.svg
-          className="h-[20px] w-[20px]"
+          className="h-[18px] w-[18px]"
           viewBox="0 0 24 24"
           fill={liked ? "currentColor" : "none"}
           stroke="currentColor"
-          strokeWidth="1.5"
+          strokeWidth="1.75"
           animate={liked
             ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1] }
             : { scale: 1 }
@@ -584,6 +606,7 @@ function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
         </motion.svg>
         <motion.span
+          className="text-[12px] font-medium"
           animate={liked ? { scale: [1, 1.4, 1] } : { scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
@@ -594,73 +617,70 @@ function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number
   );
 }
 
-function CommentItem({ comment, depth = 0, postId }: { comment: CommentData; depth?: number; postId: number }) {
+// Twitter model: every comment IS a post. It renders as a full post row
+// (avatar · name · body · its own action bar), separated by dividers rather
+// than thread lines, and tapping it opens the comment's own post page where
+// its replies become the comments. Nested replies are never inlined here.
+function CommentItem({ comment, postId }: { comment: CommentData; postId: number }) {
   const navigate = useNavigate();
   const [liked, setLiked] = useState(false);
+  const [reposted, setReposted] = useState(false);
   const replies = comment.replies ?? [];
 
   return (
-    <div className="relative">
-      {/* Comment row */}
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex gap-3 pt-3"
-      >
-        <img
-          src={comment.avatar}
-          alt={comment.author}
-          className="h-11 w-11 shrink-0 rounded-full object-cover"
-          style={{ objectPosition: "50% 15%" }}
-        />
-        <div className="min-w-0 flex-1 pb-2">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[15px] font-medium text-gray-dark">{comment.author}</span>
-            <span className="text-[15px] leading-tight text-gray-xlight">· {comment.time}</span>
-          </div>
-          {comment.headline ? (
-            <p className="truncate text-[13px] leading-tight text-[#707070]">{comment.headline}</p>
-          ) : null}
-          <p className="mt-0.5 text-[15px] leading-[1.4] text-gray-dark">{comment.text}</p>
-          <div className="mt-2 flex items-center gap-4">
-            <HeartButton liked={liked} count={comment.likes + (liked ? 1 : 0)} onToggle={() => setLiked(l => !l)} />
-            {depth === 0 ? (
-              <button
-                onClick={() => navigate(`/reply/${postId}`, { state: { target: { kind: "comment", comment } } })}
-                className="text-[13px] font-medium text-gray-light transition-colors hover:text-gray-dark"
-              >
-                Reply
-              </button>
-            ) : null}
-          </div>
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      onClick={() => navigate(`/post/${postId}/comment/${comment.id}`)}
+      className="flex cursor-pointer gap-3 border-b border-gray-stroke/60 pt-3"
+    >
+      <img
+        src={comment.avatar}
+        alt={comment.author}
+        className="h-11 w-11 shrink-0 rounded-full object-cover"
+        style={{ objectPosition: "50% 15%" }}
+      />
+      <div className="min-w-0 flex-1 pb-2">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-[15px] font-medium text-gray-dark">{comment.author}</span>
+          <span className="text-[15px] leading-tight text-gray-xlight">· {comment.time}</span>
         </div>
-      </motion.div>
-
-      {/* Replies sit at the SAME left margin as their parent — no indent. A
-          thin vertical line runs down the avatar column (x≈21), linking the
-          parent avatar to each reply avatar. The opaque avatars sit on top of
-          it, so the line only shows in the gaps between them; a white trim on
-          the last reply stops the line at that avatar's center. */}
-      {replies.length > 0 ? (
-        <>
-          <div
-            className="pointer-events-none absolute w-px bg-gray-200"
-            style={{ left: 21, top: 56, bottom: 0 }}
-          />
-          {replies.map((r, i) => (
-            <div key={r.id} className="relative">
-              {i === replies.length - 1 ? (
-                <div
-                  className="pointer-events-none absolute w-px bg-white"
-                  style={{ left: 21, top: 34, bottom: 0 }}
-                />
-              ) : null}
-              <CommentItem comment={r} depth={depth + 1} postId={postId} />
-            </div>
-          ))}
-        </>
-      ) : null}
-    </div>
+        {comment.headline ? (
+          <p className="truncate text-[13px] leading-tight text-[#707070]">{comment.headline}</p>
+        ) : null}
+        <p className="mt-0.5 text-[15px] leading-[1.4] text-gray-dark">{comment.text}</p>
+        {/* Full action row — taps here act on the comment, not the row */}
+        <div className="mt-1 -ml-2 flex max-w-[260px] items-center justify-between" onClick={e => e.stopPropagation()}>
+          {/* Reply */}
+          <button
+            onClick={() => navigate(`/reply/${postId}`, { state: { target: { kind: "comment", comment } } })}
+            className="flex cursor-pointer items-center gap-1 rounded-full px-2 py-1.5 text-[#555555] transition-colors hover:bg-gray-hover"
+            aria-label="Reply"
+          >
+            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 21C13.486 21.0018 14.9492 20.6339 16.2576 19.9293L20.3676 20.9755C20.4517 20.9969 20.5398 20.9961 20.6234 20.9731C20.707 20.9502 20.7832 20.9058 20.8445 20.8445C20.9058 20.7832 20.9501 20.707 20.9731 20.6234C20.9961 20.5398 20.9969 20.4517 20.9755 20.3676L19.9293 16.2576C20.8609 14.5226 21.1978 12.5299 20.8882 10.5851C20.5786 8.64022 19.6396 6.85061 18.2152 5.49065C16.7909 4.13068 14.9598 3.27543 13.0027 3.05604C11.0457 2.83664 9.07066 3.26522 7.38054 4.27604C5.69042 5.28687 4.3785 6.82414 3.64594 8.65215C2.91338 10.4802 2.80062 12.498 3.32495 14.3962C3.84928 16.2945 4.98176 17.9684 6.54873 19.1612C8.1157 20.354 10.0307 21 12 21Z" /></svg>
+            {replies.length > 0 ? <span className="text-[12px] font-medium">{replies.length}</span> : null}
+          </button>
+          {/* Repost */}
+          <button
+            onClick={() => setReposted(r => !r)}
+            className={`flex cursor-pointer items-center gap-1 rounded-full px-2 py-1.5 transition-colors hover:bg-gray-hover ${reposted ? "text-[#4F86DB]" : "text-[#555555]"}`}
+            aria-label="Repost"
+          >
+            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M6.34204 6.34448C7.79104 4.89648 9.79204 4.00048 12.003 4.00048C16.424 4.00048 20.008 7.58248 20.008 12.0025C20.008 12.6105 19.934 13.2005 19.806 13.7695" />
+              <path d="M17.658 17.6555C16.209 19.1035 14.208 19.9995 11.997 19.9995C7.576 19.9995 3.992 16.4175 3.992 11.9975C3.992 11.3895 4.066 10.7995 4.194 10.2305" />
+            </svg>
+            {reposted ? <span className="text-[12px] font-medium">1</span> : null}
+          </button>
+          {/* Like */}
+          <HeartButton liked={liked} count={comment.likes + (liked ? 1 : 0)} onToggle={() => setLiked(l => !l)} />
+          {/* Share */}
+          <button className="flex cursor-pointer items-center rounded-full px-2 py-1.5 text-[#555555] transition-colors hover:bg-gray-hover" aria-label="Share">
+            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 15V4" /><path d="m8 8 4-4 4 4" /><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" /></svg>
+          </button>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -744,7 +764,23 @@ function PostSurface({ post, comments, onBack, onImageClick }: {
       <div className="min-w-0 pb-36">
         <div className="border-b border-gray-stroke pt-4 pb-3">
           <AuthorRow post={post} />
-          <p className="mt-3 whitespace-pre-wrap text-[15px] leading-[1.5] text-gray-dark">{post.body}</p>
+          {post.type === "article" ? (
+            <>
+              <h1 className="mt-3 font-serif text-[26px] leading-[1.15] tracking-[-0.01em] text-gray-dark">{post.title}</h1>
+              {post.subtitle ? (
+                <p className="mt-2 text-[15px] leading-snug text-gray-light">{post.subtitle}</p>
+              ) : null}
+            </>
+          ) : null}
+          {post.type === "article" && post.bodyHtml ? (
+            <div
+              className="article-body mt-3 text-[16px] leading-[1.65] text-gray-dark"
+              dangerouslySetInnerHTML={{ __html: post.bodyHtml }}
+            />
+          ) : (
+            <p className={`mt-3 whitespace-pre-wrap text-gray-dark ${post.type === "article" ? "text-[16px] leading-[1.65]" : "text-[15px] leading-[1.5]"}`}>{post.body}</p>
+          )}
+          {post.type === "poll" ? <PollCard poll={post.poll} /> : null}
           <PostMedia post={post} onImageClick={post.type === "image" ? onImageClick : undefined} />
           {/* Metadata — time · date · views, below the body/media, above the actions. */}
           <div className="mt-3 flex flex-wrap items-center gap-x-1.5 text-[14px] leading-tight text-gray-light">
@@ -994,4 +1030,145 @@ export default function PostDetail() {
     </AnimatePresence>
     </>
   );
+}
+
+// ─── Comment as its own post page ─────────────────────
+// The Twitter model completed: tapping a comment opens it as the main post,
+// with its replies rendered as the comments. Works at any depth — replies to
+// replies open their own page too.
+
+function findComment(list: CommentData[], id: number): CommentData | undefined {
+  for (const c of list) {
+    if (c.id === id) return c;
+    const nested = c.replies ? findComment(c.replies, id) : undefined;
+    if (nested) return nested;
+  }
+  return undefined;
+}
+
+function CommentThread() {
+  const navigate = useNavigate();
+  const { postId, commentId } = useParams<{ postId: string; commentId: string }>();
+  const pid = Number(postId);
+  useSetRightSidebar(<HomeRightSidebar />);
+
+  // Bumped after posting a reply so the store re-read shows it immediately.
+  const [storeVersion, setStoreVersion] = useState(0);
+  void storeVersion;
+  const comment = findComment(getPostComments(pid), Number(commentId));
+
+  const [replyText, setReplyText] = useState("");
+  const [liked, setLiked] = useState(false);
+
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
+  if (!comment) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-gray-light">
+        <p className="text-[15px]">Post not found.</p>
+        <button onClick={() => navigate(-1)} className="mt-4 text-primary hover:underline">← Go back</button>
+      </div>
+    );
+  }
+
+  const replies = comment.replies ?? [];
+
+  const submitReply = () => {
+    if (!replyText.trim()) return;
+    addPostReply(pid, comment.id, {
+      id: Date.now(),
+      author: "You",
+      avatar: profilePhoto,
+      time: "just now",
+      text: replyText.trim(),
+      likes: 0,
+    });
+    setReplyText("");
+    setStoreVersion(v => v + 1);
+  };
+
+  return (
+    <>
+      <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} transition={PUSH_TRANSITION} className="min-h-[100dvh] bg-white">
+        <PostHeaderBar onBack={() => navigate(-1)} />
+        <div className="min-w-0 pb-36">
+          {/* The comment, promoted to the main post */}
+          <div className="border-b border-gray-stroke pt-4 pb-3">
+            <div className="flex items-center gap-3">
+              <img src={comment.avatar} alt={comment.author} className="h-11 w-11 shrink-0 rounded-full object-cover" style={{ objectPosition: "50% 15%" }} />
+              <div className="min-w-0">
+                <p className="text-[15px] font-semibold leading-tight text-gray-dark">{comment.author}</p>
+                {comment.headline ? <p className="truncate text-[13px] leading-tight text-[#707070]">{comment.headline}</p> : null}
+              </div>
+            </div>
+            <p className="mt-3 whitespace-pre-wrap text-[17px] leading-[1.5] text-gray-dark">{comment.text}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-x-1.5 text-[14px] leading-tight text-gray-light">
+              <span>{comment.time}</span>
+              <span aria-hidden>·</span>
+              <span><span className="font-semibold text-gray-dark">{replies.length}</span> {replies.length === 1 ? "Reply" : "Replies"}</span>
+              <span aria-hidden>·</span>
+              <span><span className="font-semibold text-gray-dark">{comment.likes + (liked ? 1 : 0)}</span> Likes</span>
+            </div>
+            <div className="mt-2 -ml-2">
+              <HeartButton liked={liked} count={comment.likes + (liked ? 1 : 0)} onToggle={() => setLiked(l => !l)} />
+            </div>
+          </div>
+          {/* Its replies, as comments — each one a post again */}
+          <div className="mt-1">
+            {replies.map(r => (
+              <CommentItem key={r.id} comment={r} postId={pid} />
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Reply composer */}
+      {createPortal(
+        <motion.div
+          initial={{ x: "100%" }}
+          animate={{ x: 0 }}
+          transition={PUSH_TRANSITION}
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + 60px)" }}
+          className="fixed inset-x-0 z-40 bg-white px-4 py-2.5 shadow-[0_-6px_16px_-6px_rgba(0,0,0,0.08)]"
+        >
+          <div className="mx-auto flex max-w-[600px] items-center gap-2">
+            <img src={profilePhoto} alt="You" className="h-9 w-9 shrink-0 rounded-full object-cover" />
+            <textarea
+              value={replyText}
+              onChange={e => {
+                setReplyText(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
+              placeholder={`Reply to ${comment.author}…`}
+              rows={1}
+              className="scrollbar-hide max-h-24 flex-1 resize-none overflow-y-auto rounded-xl border border-gray-stroke px-3 py-2.5 text-[14px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
+              onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitReply(); }}
+            />
+            <AnimatePresence>
+              {replyText.trim() ? (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.85 }}
+                  onClick={submitReply}
+                  className="shrink-0 rounded-[8px] bg-gray-dark px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#222]"
+                >
+                  Reply
+                </motion.button>
+              ) : null}
+            </AnimatePresence>
+          </div>
+        </motion.div>,
+        document.getElementById("saved-toast-root") ?? document.body,
+      )}
+    </>
+  );
+}
+
+// Remounts the thread when navigating from one comment's page to another —
+// the route stays the same, so React would otherwise keep stale state.
+export function CommentDetail() {
+  const { postId, commentId } = useParams<{ postId: string; commentId: string }>();
+  return <CommentThread key={`${postId}-${commentId}`} />;
 }
