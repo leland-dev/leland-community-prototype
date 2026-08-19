@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { ArrowRight, Check, Ticket } from "lucide-react";
+import { ArrowRight, Check, Ticket, MessageCircle, Mail, Link as LinkIcon, MoreHorizontal, X } from "lucide-react";
 
 import { StepChrome, StepHeading, SharpStar } from "../onboarding/steps/flowUI";
 import ChoiceQuestion, { type Choice } from "../onboarding/steps/ChoiceQuestion";
@@ -100,7 +100,7 @@ const rise = (reduced: boolean) => ({
 /* ── landing — white text over the b-roll ── */
 function Landing({ onJoin, onInvite }: { onJoin: () => void; onInvite: () => void }) {
   return (
-    <div className="flex h-full flex-col px-6 pb-8 pt-[max(3.5rem,env(safe-area-inset-top))] text-center text-white">
+    <div className="flex h-full flex-col px-6 pb-8 pt-[max(5.5rem,env(safe-area-inset-top))] text-center text-white">
       <img
         src={wordmark}
         alt="Leland"
@@ -108,11 +108,11 @@ function Landing({ onJoin, onInvite }: { onJoin: () => void; onInvite: () => voi
         style={{ filter: "brightness(0) invert(1)" }}
       />
 
-      <div className="flex flex-1 flex-col items-center justify-center gap-3">
+      <div className="flex flex-1 flex-col items-center justify-center">
         <h1 className="text-balance font-serif text-[40px] leading-[1.05] tracking-[-0.01em] drop-shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
           The community for ambition
         </h1>
-        <div className="mt-2 flex items-center gap-1.5">
+        <div className="mt-5 flex items-center gap-1.5">
           <div className="flex gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
               <SharpStar key={i} size={15} className="text-yellow" />
@@ -124,14 +124,14 @@ function Landing({ onJoin, onInvite }: { onJoin: () => void; onInvite: () => voi
           <span className="h-3 w-px rounded-sm bg-white/30" />
           <span className="text-[16px] text-white/70">{REVIEW_STATS.avg} avg</span>
         </div>
-        <div className="mt-3 flex items-center justify-center gap-3">
-          <div className="flex -space-x-2.5">
-            {MEMBER_AVATARS.slice(0, 4).map((src, i) => (
-              <img key={i} src={src} alt="" className="h-9 w-9 rounded-full border-[3px] border-white object-cover" style={{ zIndex: 4 - i }} />
+        <div className="mt-9 flex flex-col items-center gap-3">
+          <div className="flex -space-x-3">
+            {MEMBER_AVATARS.slice(0, 6).map((src, i) => (
+              <img key={i} src={src} alt="" className="h-11 w-11 rounded-full border-[2.5px] border-white object-cover" style={{ zIndex: 6 - i }} />
             ))}
           </div>
-          <span className="text-left text-[13.5px] leading-tight text-white/70">
-            <span className="font-semibold text-white">12,400+</span> already in line
+          <span className="text-[13.5px] leading-tight text-white/80">
+            <span className="font-semibold text-white">2,000+</span> experts
           </span>
         </div>
       </div>
@@ -237,7 +237,7 @@ function Details({ onContinue }: { onContinue: () => void }) {
       onSubmit={(e) => { e.preventDefault(); if (valid) onContinue(); }}
       className="flex h-full flex-col px-6 pt-2"
     >
-      <StepHeading title="Save your spot" subtitle="We'll text you the moment your wave opens." />
+      <StepHeading title="Save your spot" />
       <div className="flex flex-col gap-3">
         <input
           autoFocus
@@ -300,86 +300,174 @@ function Joining({ onDone, reduced }: { onDone: () => void; reduced: boolean }) 
   );
 }
 
+/* ── share sheet — mock iOS sheet so the send moment reads in the prototype
+      (real devices would invoke the native sheet via navigator.share) ── */
+function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => void; onClose: () => void }) {
+  const link = `${window.location.origin}/waitlist?code=${code}`;
+  const message = `I saved you a spot in the Leland community — tap to skip the line: ${link}`;
+
+  const sendVia = (copy: boolean) => {
+    if (copy) navigator.clipboard?.writeText(message).catch(() => {});
+    onSend();
+  };
+
+  const APPS = [
+    { label: "Messages", Icon: MessageCircle, bg: "#34C759" },
+    { label: "Mail", Icon: Mail, bg: "#007AFF" },
+    { label: "Copy link", Icon: LinkIcon, bg: "#8E8E93", copy: true },
+    { label: "More", Icon: MoreHorizontal, bg: "#8E8E93" },
+  ];
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 z-[80] bg-black/40"
+      />
+      <motion.div
+        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+        transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+        className="absolute inset-x-0 bottom-0 z-[90] rounded-t-3xl bg-[#f5f5f7] pb-[max(1rem,env(safe-area-inset-bottom))]"
+      >
+        <div className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-black/15" />
+        <div className="flex items-center justify-between px-5 pt-3">
+          <p className="text-[16px] font-semibold text-gray-dark">Send your pass</p>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-black/[0.06] text-gray-light"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* message preview */}
+        <div className="mx-5 mt-4 flex items-start gap-3 rounded-2xl bg-white p-3.5 shadow-card">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-yellow text-gray-dark">
+            <Ticket size={17} />
+          </span>
+          <p className="min-w-0 text-left text-[13.5px] leading-snug text-gray-dark">
+            I saved you a spot in the Leland community — tap to skip the line:
+            <span className="block truncate text-[#007AFF]">{link}</span>
+          </p>
+        </div>
+
+        {/* app targets */}
+        <div className="mt-5 flex justify-around px-6">
+          {APPS.map((a) => (
+            <button key={a.label} onClick={() => sendVia(!!a.copy)} className="flex w-16 flex-col items-center gap-1.5">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl text-white" style={{ backgroundColor: a.bg }}>
+                <a.Icon size={26} />
+              </span>
+              <span className="text-[11.5px] text-gray-dark">{a.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="px-5 pt-5">
+          <button
+            onClick={onClose}
+            className="flex h-12 w-full items-center justify-center rounded-2xl bg-white text-[16px] font-medium text-gray-dark shadow-card"
+          >
+            Cancel
+          </button>
+        </div>
+      </motion.div>
+    </>
+  );
+}
+
 /* ── in line — spot + passes, one screen ── */
 function InLine({ invited, reduced }: { invited: boolean; reduced: boolean }) {
   const [sent, setSent] = useState<boolean[]>([false, false, false]);
+  const [sharing, setSharing] = useState<number | null>(null);
   const used = sent.filter(Boolean).length;
   const spot = Math.max(1, (invited ? INVITED_SPOT : START_SPOT) - used * JUMP);
   const shown = useAnimatedNumber(spot, reduced);
   const pct = invited ? 1 : 9;
 
-  const share = (i: number) => {
+  const markSent = (i: number) => {
     setSent((s) => s.map((v, idx) => (idx === i ? true : v)));
-    const link = `${window.location.origin}/waitlist?code=${INVITE_CODES[i]}`;
-    const text = `I saved you a spot in the Leland community — tap to skip the line: ${link}`;
-    if (navigator.share) navigator.share({ title: "Leland", text }).catch(() => {});
-    else navigator.clipboard?.writeText(text).catch(() => {});
+    setSharing(null);
   };
 
   return (
-    <div className="h-full overflow-y-auto px-6 pb-10 pt-4 text-center">
-      <motion.span
-        initial={reduced ? { opacity: 0 } : { scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={reduced ? { duration: 0.2 } : { type: "spring", stiffness: 320, damping: 12 }}
-        className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-yellow text-gray-dark"
-      >
-        <Check size={28} strokeWidth={3} />
-      </motion.span>
-      <h1 className="mt-4 text-balance font-serif text-[28px] leading-[1.12] text-gray-dark">
-        {invited ? "You skipped the line" : "You're in line"}
-      </h1>
+    <div className="relative h-full">
+      <div className="h-full overflow-y-auto px-6 pb-10 pt-4 text-center">
+        <motion.span
+          initial={reduced ? { opacity: 0 } : { scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={reduced ? { duration: 0.2 } : { type: "spring", stiffness: 320, damping: 12 }}
+          className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-yellow text-gray-dark"
+        >
+          <Check size={28} strokeWidth={3} />
+        </motion.span>
+        <h1 className="mt-4 text-balance font-serif text-[28px] leading-[1.12] text-gray-dark">
+          {invited ? "You skipped the line" : "You're in line"}
+        </h1>
 
-      <p className="mt-5 font-serif text-[44px] leading-none tabular-nums text-gray-dark">
-        {shown.toLocaleString()}
-      </p>
-      <div className="mx-auto mt-4 w-full max-w-[280px]">
-        <div className="h-1.5 overflow-hidden rounded-full bg-gray-stroke">
-          <motion.div
-            initial={{ width: "0%" }} animate={{ width: `${100 - pct}%` }}
-            transition={{ duration: 1, ease: [0.4, 0, 0.2, 1], delay: 0.4 }}
-            className="h-full rounded-full bg-gray-dark"
-          />
+        <p className="mt-5 font-serif text-[44px] leading-none tabular-nums text-gray-dark">
+          {shown.toLocaleString()}
+        </p>
+        <div className="mx-auto mt-4 w-full max-w-[280px]">
+          <div className="h-1.5 overflow-hidden rounded-full bg-gray-stroke">
+            <motion.div
+              initial={{ width: "0%" }} animate={{ width: `${100 - pct}%` }}
+              transition={{ duration: 1, ease: [0.4, 0, 0.2, 1], delay: 0.4 }}
+              className="h-full rounded-full bg-gray-dark"
+            />
+          </div>
+          <p className="mt-2 text-[13.5px] font-medium text-gray-dark">Top {pct}%</p>
         </div>
-        <p className="mt-2 text-[13.5px] font-medium text-gray-dark">Top {pct}%</p>
-      </div>
 
-      <p className="mx-auto mt-9 max-w-[30ch] text-[15px] leading-relaxed text-gray-light">
-        Send these 3 passes and we'll bump you to the front of the line.
-      </p>
-      <div className="mt-4 flex flex-col gap-2.5">
-        {INVITE_CODES.map((code, i) => (
-          <div
-            key={code}
-            className={`flex items-center gap-3 rounded-2xl border border-gray-stroke p-3.5 text-left ${
-              sent[i] ? "bg-gray-hover" : "bg-white"
-            }`}
-          >
-            <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${sent[i] ? "bg-gray-stroke text-gray-light" : "bg-yellow text-gray-dark"}`}>
-              <Ticket size={18} />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[15px] font-medium text-gray-dark">
-                {sent[i] ? "Pass sent" : "Skip-the-line pass"}
-              </span>
-              <span className="block truncate font-mono text-[12.5px] text-gray-light">{code}</span>
-            </span>
-            <button
-              onClick={() => share(i)}
-              disabled={sent[i]}
-              className={`shrink-0 rounded-full px-5 py-2 text-[14px] font-medium transition-colors ${
-                sent[i] ? "text-gray-light" : "bg-gray-dark text-white hover:bg-[#333]"
+        <p className="mx-auto mt-9 max-w-[30ch] text-[15px] leading-relaxed text-gray-light">
+          Send these 3 passes and we'll bump you to the front of the line.
+        </p>
+        <div className="mt-4 flex flex-col gap-2.5">
+          {INVITE_CODES.map((code, i) => (
+            <div
+              key={code}
+              className={`flex items-center gap-3 rounded-2xl border border-gray-stroke p-3.5 text-left ${
+                sent[i] ? "bg-gray-hover" : "bg-white"
               }`}
             >
-              {sent[i] ? "Sent" : "Share"}
-            </button>
-          </div>
-        ))}
+              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${sent[i] ? "bg-gray-stroke text-gray-light" : "bg-yellow text-gray-dark"}`}>
+                <Ticket size={18} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-medium text-gray-dark">
+                  {sent[i] ? "Pass sent" : "Skip-the-line pass"}
+                </span>
+                <span className="block truncate font-mono text-[12.5px] text-gray-light">{code}</span>
+              </span>
+              <button
+                onClick={() => setSharing(i)}
+                disabled={sent[i]}
+                className={`shrink-0 rounded-full px-5 py-2 text-[14px] font-medium transition-colors ${
+                  sent[i] ? "text-gray-light" : "bg-gray-dark text-white hover:bg-[#333]"
+                }`}
+              >
+                {sent[i] ? "Sent" : "Share"}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-6 text-[13px] text-gray-light">
+          We'll text you when your wave opens.
+        </p>
       </div>
 
-      <p className="mt-6 text-[13px] text-gray-light">
-        We'll text you when your wave opens.
-      </p>
+      <AnimatePresence>
+        {sharing !== null ? (
+          <ShareSheet
+            code={INVITE_CODES[sharing]}
+            onSend={() => markSent(sharing)}
+            onClose={() => setSharing(null)}
+          />
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
