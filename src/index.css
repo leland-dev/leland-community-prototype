@@ -416,6 +416,8 @@ input[name="phone"]:-webkit-autofill:focus {
   to {
     transform: translateY(0);
   }
+}
+
 /* ── Article rich text — shared by the composer's contenteditable editor and
    the article read page. Tailwind preflight strips list/quote styling, so the
    handful of elements execCommand can produce get restyled here. ── */
