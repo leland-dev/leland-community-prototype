@@ -226,7 +226,7 @@ type CourseSelection = { type: "general" } | { type: "lesson"; lessonId: number 
 // settings (shape owned by each type's fields component); `configured` flips to
 // true once setup is saved. `items` is used by collections (resources) and
 // courses (lessons).
-type OfferingItem = { id: number; slug: string; config: Record<string, string>; configured: boolean; items?: CollectionItem[] };
+export type OfferingItem = { id: number; slug: string; config: Record<string, string>; configured: boolean; items?: CollectionItem[] };
 
 // Ids are derived from the existing list (max + 1) so they can't collide — even
 // if module state resets under HMR.
@@ -267,7 +267,7 @@ const listOfferingCopy: Record<string, { heading: string; noun: string }> = {
   course: { heading: "Course", noun: "lesson" },
 };
 const isListOffering = (slug: string) => slug in listOfferingCopy;
-const defaultConfigFor = (slug: string): Record<string, string> => ({ ...(configDefaults[slug] ?? {}) });
+export const defaultConfigFor = (slug: string): Record<string, string> => ({ ...(configDefaults[slug] ?? {}) });
 const isConfigurable = (slug: string) => slug in configDefaults;
 
 // Subheadline shown under the modal title for each configurable type.
@@ -2711,7 +2711,7 @@ function ConfirmModal({ open, title, body, confirmLabel, onConfirm, onClose }: {
   );
 }
 
-function ConfigModal({ item, lockedCoachingMode = null, onChange, onSave, onClose }: { item: OfferingItem | null; lockedCoachingMode?: "set" | "range" | null; onChange: (patch: Record<string, string>) => void; onSave: () => void; onClose: () => void }) {
+export function ConfigModal({ item, lockedCoachingMode = null, uploadOnly = false, saveLabel = "Save product", onChange, onSave, onClose }: { item: OfferingItem | null; lockedCoachingMode?: "set" | "range" | null; uploadOnly?: boolean; saveLabel?: string; onChange: (patch: Record<string, string>) => void; onSave: () => void; onClose: () => void }) {
   const o = item ? offeringBySlug[item.slug] : null;
   const complete = item ? isConfigComplete(item) : false;
   const prompt = item ? configPrompts[item.slug] : undefined;
@@ -2775,7 +2775,7 @@ function ConfigModal({ item, lockedCoachingMode = null, onChange, onSave, onClos
 
               {/* Fields */}
               <div className={item.slug === "content" ? "pt-8" : "mt-3"}>
-                <OfferingConfigFields slug={item.slug} config={item.config} onChange={onChange} lockedCoachingMode={lockedCoachingMode} backSignal={backSignal} scrolled={scrolled} />
+                <OfferingConfigFields slug={item.slug} config={item.config} onChange={onChange} lockedCoachingMode={lockedCoachingMode} backSignal={backSignal} scrolled={scrolled} uploadOnly={uploadOnly} onCancel={onClose} />
               </div>
             </div>
 
@@ -2790,7 +2790,7 @@ function ConfigModal({ item, lockedCoachingMode = null, onChange, onSave, onClos
                   </Button>
                 )}
                 <Button size="lg" variant="primary" rounded="rounded-full" className={wide ? "" : "w-full"} disabled={!complete} onClick={onSave}>
-                  Save product
+                  {saveLabel}
                 </Button>
               </div>
             )}
@@ -2804,10 +2804,10 @@ function ConfigModal({ item, lockedCoachingMode = null, onChange, onSave, onClos
 
 // Dispatches to the fields component for the offering type. Add a case here
 // alongside a configDefaults entry to configure another type.
-function OfferingConfigFields({ slug, config, onChange, lockedCoachingMode = null, backSignal = 0, scrolled = false }: { slug: string; config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedCoachingMode?: "set" | "range" | null; backSignal?: number; scrolled?: boolean }) {
+function OfferingConfigFields({ slug, config, onChange, lockedCoachingMode = null, backSignal = 0, scrolled = false, uploadOnly = false, onCancel }: { slug: string; config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedCoachingMode?: "set" | "range" | null; backSignal?: number; scrolled?: boolean; uploadOnly?: boolean; onCancel?: () => void }) {
   const v2 = useV2();
   if (slug === "coaching-time") return <CoachingTimeFields config={config} onChange={onChange} lockedMode={lockedCoachingMode} />;
-  if (slug === "content") return <ContentFields config={config} onChange={onChange} priced={v2} backSignal={backSignal} scrolled={scrolled} />;
+  if (slug === "content") return <ContentFields config={config} onChange={onChange} priced={v2} backSignal={backSignal} scrolled={scrolled} uploadOnly={uploadOnly} onCancel={onCancel} />;
   if (slug === "paid-livestream") return <PaidLivestreamFields config={config} onChange={onChange} />;
   return <PlaceholderFields label={offeringBySlug[slug]?.label ?? "This product"} />;
 }
@@ -3442,7 +3442,7 @@ function UploadedAssetField({ name, onReplace, preview = samanthaVideo }: { name
 
 /* ---------- Content config (upload new / reuse existing) ---------- */
 
-function ContentFields({ config, onChange, priced = false, backSignal = 0, scrolled = false }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; priced?: boolean; backSignal?: number; scrolled?: boolean }) {
+function ContentFields({ config, onChange, priced = false, backSignal = 0, scrolled = false, uploadOnly = false, onCancel }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; priced?: boolean; backSignal?: number; scrolled?: boolean; uploadOnly?: boolean; onCancel?: () => void }) {
   // Editing a reused item is persisted in config so ConfigModal can widen the
   // modal to the same two-column layout the upload editor uses.
   const editing = config.editing === "true";
@@ -3488,7 +3488,12 @@ function ContentFields({ config, onChange, priced = false, backSignal = 0, scrol
   const goToPrompt = () => beginTransition(() => onChange({ source: "upload", assetName: "" }), null);          // library → prompt
   const uploadAsset = () => beginTransition(() => onChange({ assetName: "my-asset.pdf" }), "editor");         // prompt → editor (grows)
   const backToLibrary = () => beginTransition(() => setSource("reuse"), null);                                // prompt → library
-  const backFromEditor = () => beginTransition(() => onChange({ source: "reuse", assetName: "" }), "library"); // editor → library (shrinks)
+  // editor → library (shrinks); in upload-only mode there's no library, so it
+  // returns to the upload prompt instead.
+  const backFromEditor = () =>
+    uploadOnly
+      ? beginTransition(() => onChange({ assetName: "" }), "prompt")
+      : beginTransition(() => onChange({ source: "reuse", assetName: "" }), "library");
   // The editor's Back button lives in the modal footer; it bumps `backSignal`.
   useEffect(() => {
     if (backSignal > 0 && view === "editor") backFromEditor();
@@ -3713,8 +3718,9 @@ function ContentFields({ config, onChange, priced = false, backSignal = 0, scrol
               <span className="mt-1.5 text-[15px] text-gray-light">PNG, JPG, GIF, MP4, MOV, PDF</span>
               <span className="mt-8 text-[15px] font-medium text-gray-dark underline decoration-dotted underline-offset-[3px]">Upload from your device</span>
             </button>
-            {/* Cancel — returns to the library, sits below the drop area */}
-            <Button size="lg" variant="secondary" rounded="rounded-full" className="mt-4 w-full" onClick={backToLibrary}>
+            {/* Cancel — returns to the library, or closes the modal in the
+                upload-only variant (no library to return to). */}
+            <Button size="lg" variant="secondary" rounded="rounded-full" className="mt-4 w-full" onClick={() => (uploadOnly ? onCancel?.() : backToLibrary())}>
               Cancel
             </Button>
           </motion.div>

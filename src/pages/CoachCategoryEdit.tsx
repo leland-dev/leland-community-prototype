@@ -234,41 +234,48 @@ function TemplatesSection({ category }: { category: string | undefined }) {
 
   const chevron = "flex h-9 w-9 items-center justify-center rounded-full border border-[#222222]/[0.12] text-gray-dark transition-colors hover:bg-[#222222]/5 disabled:opacity-30 disabled:hover:bg-transparent";
 
-  if (dismissed) return null;
-
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h2 className="text-[20px] font-semibold text-gray-dark">Start from a template</h2>
-        <div className="flex shrink-0 items-center gap-2">
-          <button onClick={() => scrollByCards(-1)} disabled={atStart} aria-label="Previous templates" className={chevron}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-          </button>
-          <button onClick={() => scrollByCards(1)} disabled={atEnd} aria-label="More templates" className={chevron}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-          </button>
-          <button onClick={() => setDismissed(true)} aria-label="Dismiss templates" className={chevron}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-          </button>
-        </div>
-      </div>
-
-      <div ref={scrollRef} className="scrollbar-hide flex gap-4 overflow-x-auto pb-1">
-        {OFFERING_TEMPLATES.map((t) => (
-          <button
-            key={t.slug}
-            onClick={() => navigate(`/coach/manage/${category}/new-product?template=${t.slug}`)}
-            className="group flex w-[220px] shrink-0 flex-col rounded-2xl border border-gray-stroke bg-white p-4 text-left shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#222222]/5">
-              <img src={t.icon} alt="" className="h-5 w-5" />
+    <AnimatePresence initial={false}>
+      {!dismissed && (
+        <motion.div
+          key="templates"
+          initial={false}
+          exit={{ opacity: 0, height: 0, marginTop: 0, overflow: "hidden" }}
+          transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <h2 className="text-[20px] font-semibold text-gray-dark">Start from a template</h2>
+            <div className="flex shrink-0 items-center gap-2">
+              <button onClick={() => scrollByCards(-1)} disabled={atStart} aria-label="Previous templates" className={chevron}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+              </button>
+              <button onClick={() => scrollByCards(1)} disabled={atEnd} aria-label="More templates" className={chevron}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </button>
+              <button onClick={() => setDismissed(true)} aria-label="Dismiss templates" className="flex h-9 w-9 items-center justify-center rounded-full bg-[#222222]/5 text-gray-dark transition-colors hover:bg-[#222222]/10">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+              </button>
             </div>
-            <p className="mt-3 text-[15px] font-semibold leading-tight text-gray-dark">{t.title}</p>
-            <p className="mt-1 text-[13px] leading-snug text-gray-light">{t.blurb}</p>
-          </button>
-        ))}
-      </div>
-    </div>
+          </div>
+
+          <div ref={scrollRef} className="scrollbar-hide flex gap-4 overflow-x-auto pb-2">
+            {OFFERING_TEMPLATES.map((t) => (
+              <button
+                key={t.slug}
+                onClick={() => navigate(`/coach/manage/${category}/new-product?template=${t.slug}`)}
+                className="group flex w-[220px] shrink-0 flex-col rounded-2xl border border-gray-stroke bg-white p-4 text-left shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#222222]/5">
+                  <img src={t.icon} alt="" className="h-5 w-5" />
+                </div>
+                <p className="mt-3 text-[15px] font-semibold leading-tight text-gray-dark">{t.title}</p>
+                <p className="mt-1 text-[13px] leading-snug text-gray-light">{t.blurb}</p>
+              </button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 

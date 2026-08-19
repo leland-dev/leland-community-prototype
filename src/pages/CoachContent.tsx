@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Button, LinkButton } from "../components/Button";
+import { ConfigModal, defaultConfigFor, type OfferingItem } from "./CoachProductNew";
+import { RESOURCES, type Resource } from "../lib/resources";
+import AnalyticsCard, { type AnalyticsMetric } from "../components/AnalyticsCard";
+import CoachContentResourceSheet from "./CoachContentResourceSheet";
 import eyeIcon from "../assets/icons/eye.svg";
 import likesIcon from "../assets/icons/likes.svg";
-import linkExternalIcon from "../assets/icons/link-external.svg";
-import dotsIcon from "../assets/icons/dots-horizontal.svg";
 import chevronDownIcon from "../assets/icons/chevron-down.svg";
 import helpIcon from "../assets/icons/help.svg";
 import editIcon from "../assets/icons/edit.svg";
@@ -34,28 +36,6 @@ function MaskIcon({ src, className = "" }: { src: string; className?: string }) 
   );
 }
 
-// ── Resource table data ──
-type Resource = {
-  title: string;
-  date: string;
-  earnings: string;
-  likes: number;
-  views: number;
-  status: "Public" | "Unlisted" | "Private";
-};
-
-const RESOURCES: Resource[] = [
-  { title: "Winning Essays from My HBS Admits [7/17/2026] (Recording)", date: "Jul 17, 2026", earnings: "$0.00", likes: 0, views: 14, status: "Public" },
-  { title: "Winning Essays from My Stanford GSB Admits [7/24/2026] (Recording)", date: "Jul 24, 2026", earnings: "$0.00", likes: 0, views: 11, status: "Public" },
-  { title: "Live Case Coach Throwdown: Bain vs. McKinsey", date: "Jul 24, 2026", earnings: "$0.13", likes: 0, views: 51, status: "Public" },
-  { title: "Session 3 Recording", date: "Jul 16, 2026", earnings: "$0.00", likes: 0, views: 5, status: "Private" },
-  { title: "Build a Full Trip Itinerary with Claude (Cowork, Code & Design)", date: "Jun 3, 2026", earnings: "$0.00", likes: 3, views: 252, status: "Public" },
-  { title: "Your MBA Application Roadmap", date: "Jun 1, 2026", earnings: "$0.00", likes: 0, views: 13, status: "Public" },
-  { title: "MBA Application Week Kickoff [6/1/2026] (Recording)", date: "Jun 1, 2026", earnings: "$0.00", likes: 0, views: 43, status: "Public" },
-  { title: "Build Your Personal Budget with Claude", date: "Jun 1, 2026", earnings: "$0.00", likes: 0, views: 48, status: "Public" },
-  { title: "Build an Investor-Level Pitch Deck with Claude, Excel & PowerPoint [5/29/2026] (Recording)", date: "May 29, 2026", earnings: "$0.00", likes: 1, views: 17, status: "Public" },
-];
-
 function StatusPill({ status }: { status: Resource["status"] }) {
   const styles: Record<Resource["status"], string> = {
     Public: "bg-[#E5F3EC] text-[#1B7A4B]",
@@ -69,21 +49,13 @@ function StatusPill({ status }: { status: Resource["status"] }) {
   );
 }
 
-function StatCard({ value, label, info }: { value: string; label: string; info?: boolean }) {
-  return (
-    <div className="flex items-baseline gap-2 rounded-xl border border-gray-stroke bg-white px-5 py-6">
-      <span className="text-[24px] font-semibold text-gray-dark">{value}</span>
-      <span className="flex items-center gap-1.5 text-[15px] text-gray-light">
-        {label}
-        {info && (
-          <span className="flex text-gray-extra-light">
-            <MaskIcon src={helpIcon} className="h-4 w-4" />
-          </span>
-        )}
-      </span>
-    </div>
-  );
-}
+// Content-page analytics — same figures as before, now shown in the shared
+// Analytics card (label + value + sparkline).
+const CONTENT_METRICS: AnalyticsMetric[] = [
+  { key: "earnings", label: "Total earnings", value: "$1,984.55", data: [100, 150, 120, 200, 250, 220, 300, 350, 320, 400, 450, 420, 500, 550, 600, 650] },
+  { key: "views", label: "Views", value: "8.5k", data: [40, 45, 50, 48, 55, 60, 58, 66, 70, 68, 75, 80, 78, 85, 90, 95] },
+  { key: "likes", label: "Likes", value: "251", data: [3, 2, 5, 4, 7, 6, 9, 8, 12, 10, 15, 13, 18, 16, 22, 20] },
+];
 
 // ── "Types of content" cards — generated gradient covers ──
 type ContentType = { title: string; desc: string; cover: React.ReactNode };
@@ -178,8 +150,23 @@ const EXTERNAL_ARROW = (
   </svg>
 );
 
+const RESOURCE_TABS = [
+  { key: "all", label: "All" },
+  { key: "leland", label: "Added to Leland+" },
+] as const;
+
 export default function CoachContent() {
   const [page, setPage] = useState(1);
+  const [resourceTab, setResourceTab] = useState<(typeof RESOURCE_TABS)[number]["key"]>("all");
+  // The resource whose details sheet is open (null = closed).
+  const [openResource, setOpenResource] = useState<Resource | null>(null);
+  // "Submit a resource" opens the content upload/configure modal (the same one
+  // used in the offering builder), started in its upload-new flow.
+  const [uploadItem, setUploadItem] = useState<OfferingItem | null>(null);
+  const openSubmit = () =>
+    setUploadItem({ id: 1, slug: "content", configured: false, config: { ...defaultConfigFor("content"), source: "upload" } });
+  const patchUpload = (patch: Record<string, string>) =>
+    setUploadItem((it) => (it ? { ...it, config: { ...it.config, ...patch } } : it));
 
   useEffect(() => {
     document.title = "Leland Prototype | Content";
@@ -190,26 +177,75 @@ export default function CoachContent() {
       {/* ── Header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">Contribute to Leland+</h1>
-          <p className="mt-2 text-[15px] text-gray-light">
-            Upload content and earn passive income.{" "}
-            <a href="#" className="inline-flex items-center gap-1 text-gray-dark underline">
-              See content requests from Leland
-              <span className="flex">{EXTERNAL_ARROW}</span>
-            </a>
+          <h1 className="font-serif text-[42px] leading-[1.05] text-gray-dark md:text-[48px]">My content</h1>
+          <p className="mt-2 text-[18px] font-normal text-gray-light">
+            Upload content and earn passive income.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <Button size="md" variant="secondary">Browse Leland+</Button>
-          <Button size="md" variant="dark">Submit a resource</Button>
+          <Button size="md" variant="dark" rounded="rounded-full" className="font-semibold" onClick={openSubmit}>
+            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            Upload content
+          </Button>
         </div>
       </div>
 
-      {/* ── Stats ── */}
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard value="$1,984.55" label="Total earnings" info />
-        <StatCard value="8.5k" label="Views" />
-        <StatCard value="251" label="Likes" />
+      {/* ── Analytics ── */}
+      <div className="mt-8">
+        <AnalyticsCard title="Your Leland+ stats" metrics={CONTENT_METRICS} collapsible />
+      </div>
+
+      {/* ── Your resources (simplified — styled like the offering builder's
+          product list) ── */}
+      <div className="mt-12">
+        <h2 className="text-[22px] font-semibold text-gray-dark">Your resources</h2>
+        <div className="mt-4 flex items-center justify-between gap-4">
+          <div className="inline-flex items-center gap-1 rounded-full bg-gray-hover p-1">
+            {RESOURCE_TABS.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setResourceTab(t.key)}
+                className={`rounded-full px-3.5 py-1.5 text-[14px] font-medium transition-colors ${resourceTab === t.key ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]" : "text-gray-light hover:text-gray-dark"}`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold">
+            Sort by
+            <MaskIcon src={chevronDownIcon} className="h-4 w-4 text-gray-light" />
+          </Button>
+        </div>
+        <div className="mt-5 overflow-hidden rounded-xl border border-gray-stroke bg-white px-6">
+          {(resourceTab === "leland" ? RESOURCES.filter((r) => r.lelandPlus) : RESOURCES).map((r, i, list) => {
+            const views = r.views < 1000 ? String(r.views) : `${(r.views / 1000).toFixed(1).replace(/\.0$/, "")}k`;
+            const offeringsText = `${r.offerings.length} offering${r.offerings.length === 1 ? "" : "s"}`;
+            return (
+              <div key={r.id} className={`flex items-center gap-3 ${i < list.length - 1 ? "border-b border-gray-stroke" : ""}`}>
+                <button onClick={() => setOpenResource(r)} className="flex min-w-0 flex-1 items-center gap-3 py-4 text-left">
+                  <img src={r.cover} alt="" className="h-10 w-[60px] shrink-0 rounded-lg object-cover" />
+                  <span className="min-w-0 flex-1">
+                    <span className="inline-block max-w-full truncate align-top text-[15px] font-semibold text-gray-dark hover:underline">{r.title}</span>
+                    <span className="mt-0.5 block truncate text-[15px] text-gray-light">{r.fileType} · {views} views</span>
+                  </span>
+                </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  {r.offerings.length > 0 && <span className="rounded-full bg-[#222222]/5 px-2 py-0.5 text-[12px] font-medium text-gray-light">{offeringsText}</span>}
+                  {r.lelandPlus && <span className="rounded-full bg-[#F1ECFB] px-2 py-0.5 text-[12px] font-medium text-[#6B4BB8]">Leland+</span>}
+                </div>
+                <button onClick={() => setOpenResource(r)} aria-label={`View details for ${r.title}`} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
+                  <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                </button>
+              </div>
+            );
+          })}
+          {/* Footer — upload content, part of the card like the offering
+              builder's "Add product" button */}
+          <button onClick={openSubmit} className="-mx-6 flex w-[calc(100%+3rem)] items-center justify-center gap-2 border-t border-gray-stroke px-6 py-4 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover">
+            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            Upload content
+          </button>
+        </div>
       </div>
 
       {/* ── Your resources ── */}
@@ -227,8 +263,11 @@ export default function CoachContent() {
       {/* Table */}
       <div className="mt-5 overflow-hidden rounded-xl border border-gray-stroke">
         {/* Header row */}
-        <div className="hidden bg-gray-hover px-6 py-3.5 text-[13px] font-medium text-gray-light md:grid md:grid-cols-[1fr_100px_80px_80px_110px_72px] md:items-center md:gap-4">
+        <div className="hidden bg-gray-hover px-6 py-3.5 text-[13px] font-medium text-gray-light md:grid md:grid-cols-[1fr_70px_80px_84px_90px_60px_60px_100px_60px] md:items-center md:gap-4">
           <span>Resource Title</span>
+          <span>Price</span>
+          <span>Leland+</span>
+          <span>Offerings</span>
           <span>Earnings</span>
           <span>Likes</span>
           <span>Views</span>
@@ -239,13 +278,22 @@ export default function CoachContent() {
         {RESOURCES.map((r, i) => (
           <div
             key={i}
-            className="grid grid-cols-1 gap-2 border-t border-gray-stroke px-6 py-4 md:grid-cols-[1fr_100px_80px_80px_110px_72px] md:items-center md:gap-4"
+            className="grid grid-cols-1 gap-2 border-t border-gray-stroke px-6 py-4 md:grid-cols-[1fr_70px_80px_84px_90px_60px_60px_100px_60px] md:items-center md:gap-4"
           >
             <div className="min-w-0">
               <p className="text-[15px] font-medium leading-snug text-gray-dark">{r.title}</p>
               <p className="mt-0.5 text-[13px] text-gray-extra-light">Uploaded {r.date}</p>
             </div>
-            <div className="flex items-center gap-3 text-[14px] text-gray-dark md:contents">
+            <div className="flex flex-wrap items-center gap-3 text-[14px] text-gray-dark md:contents">
+              <span className="md:block">{r.price === "$0" ? "Free" : r.price}</span>
+              <span className="flex items-center text-gray-dark" title={r.lelandPlus ? "Part of Leland+" : "Not in Leland+"}>
+                {r.lelandPlus ? (
+                  <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                ) : (
+                  <span className="text-gray-extra-light">—</span>
+                )}
+              </span>
+              <span className="text-gray-light">{r.offerings.length > 0 ? r.offerings.length : <span className="text-gray-extra-light">—</span>}</span>
               <span className="md:block">{r.earnings}</span>
               <span className="flex items-center gap-1.5 text-gray-light">
                 <MaskIcon src={likesIcon} className="h-4 w-4" />
@@ -256,12 +304,9 @@ export default function CoachContent() {
                 {r.views}
               </span>
               <span><StatusPill status={r.status} /></span>
-              <span className="flex items-center justify-end gap-1 text-gray-light">
-                <button className="flex rounded-md p-1.5 transition-colors hover:bg-gray-hover hover:text-gray-dark">
-                  <MaskIcon src={linkExternalIcon} className="h-[18px] w-[18px]" />
-                </button>
-                <button className="flex rounded-md p-1.5 transition-colors hover:bg-gray-hover hover:text-gray-dark">
-                  <MaskIcon src={dotsIcon} className="h-[18px] w-[18px]" />
+              <span className="flex items-center justify-end text-gray-light">
+                <button onClick={() => setOpenResource(r)} aria-label={`View details for ${r.title}`} className="flex rounded-md p-1.5 transition-colors hover:bg-gray-hover hover:text-gray-dark">
+                  <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                 </button>
               </span>
             </div>
@@ -352,6 +397,17 @@ export default function CoachContent() {
           ))}
         </div>
       </div>
+
+      <ConfigModal
+        item={uploadItem}
+        uploadOnly
+        saveLabel="Submit resource"
+        onChange={patchUpload}
+        onSave={() => setUploadItem(null)}
+        onClose={() => setUploadItem(null)}
+      />
+
+      <CoachContentResourceSheet resource={openResource} onClose={() => setOpenResource(null)} />
     </div>
   );
 }
