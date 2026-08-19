@@ -91,6 +91,7 @@ import CoachReviews from "./pages/CoachReviews";
 import CoachDiscountCodes from "./pages/CoachDiscountCodes";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
 import CoachProductNew from "./pages/CoachProductNew";
+import OfferingPage from "./pages/OfferingPage";
 import LiveSession from "./pages/program/session/LiveSession";
 import IncredibleHomePage from "./pages/IncredibleHomePage";
 import IncredibleHomePageBU from "./pages/IncredibleHomePageBU";
@@ -129,6 +130,8 @@ export default function App() {
       {/* Product-creation flow — standalone full-screen surface (no app chrome) */}
       <Route path="/coach/manage/:category/new-product" element={<CoachProductNew />} />
       <Route path="/coach/manage/:category/new-product/:type" element={<CoachProductNew />} />
+      {/* Customer-facing offering page — standalone full-screen surface */}
+      <Route path="/offering/:slug" element={<OfferingPage />} />
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
         <Route path="/profile-v2" element={<ProfileV2 />} />

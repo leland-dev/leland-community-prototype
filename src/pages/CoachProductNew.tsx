@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
+import { createContext, Fragment, useContext, useEffect, useLayoutEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion, Reorder, useDragControls } from "motion/react";
@@ -17,6 +17,7 @@ import freeIcon from "../assets/icons/free.svg";
 import eyeIcon from "../assets/icons/eye.svg";
 import eyeClosedIcon from "../assets/icons/eye-closed.svg";
 import coverImage9 from "../assets/img/cover-images/cover-image-9.png";
+import samanthaVideo from "../assets/img/samantha-video.png";
 import libThumb1 from "../assets/placeholder images/leland-plus-images/3cf6e985-7397-4e50-8e06-ef9a8f40491c.webp";
 import libThumb2 from "../assets/placeholder images/leland-plus-images/b9669ad2-4b6f-4c32-83e1-d1370dbf9484.webp";
 import libThumb3 from "../assets/placeholder images/leland-plus-images/db2eb673-d212-41d5-8df9-6fa6de57bc23.webp";
@@ -248,7 +249,7 @@ const newCourseSection = (existing: CourseSection[]): CourseSection => ({
 // entry to give another offering type its own configuration.
 const configDefaults: Record<string, Record<string, string>> = {
   "coaching-time": { mode: "set", hours: "", minutes: "", minHours: "", maxHours: "", delivery: "" },
-  content: { assetName: "", title: "", description: "", downloadable: "false", attachFile: "false", attachmentName: "", resourceType: "guide", lelandPlus: "false", anonymous: "false" },
+  content: { assetName: "", title: "", description: "", downloadable: "false", attachFile: "false", attachmentName: "", resourceType: "", lelandPlus: "true", anonymous: "false" },
   collection: { title: "", description: "" },
   course: { title: "", description: "" },
   "paid-livestream": { name: "", description: "", subcategories: "", lelandPlus: "false", duration: "30", date: "", time: "", coverName: "" },
@@ -300,6 +301,12 @@ const RESOURCE_TYPES = [
   { value: "practice", label: "Practice" },
   { value: "tool", label: "Tool" },
 ];
+
+// Discoverability taxonomy — mock option lists for the multi-selects.
+const CATEGORY_OPTIONS = ["MBA", "Consulting", "Product Management", "College Admissions", "Investment Banking", "Data Science", "Law School", "Medical School"];
+const SUBCATEGORY_OPTIONS = ["Executive MBA", "Deferred MBA", "JD/MBA", "MBA/JD", "MBA/MD", "Part-Time MBA", "Online MBA", "1-Year MBA"];
+const TOPIC_OPTIONS = ["Application Strategy", "Cover Letters", "Ding Analysis", "Editing", "Essays", "Interview Prep", "Letters of Recommendation", "Resume", "School Selection", "Scholarships", "Test Prep", "Waitlist Strategy"];
+const ORGANIZATION_OPTIONS = ["Harvard Business School", "Stanford GSB", "Wharton", "MIT Sloan", "Chicago Booth", "Kellogg", "Columbia Business School", "Berkeley Haas", "McKinsey & Company", "Bain & Company", "Boston Consulting Group", "Google", "Meta", "Amazon", "Goldman Sachs", "Morgan Stanley"];
 
 // Previously-uploaded content the coach can reuse in a new content/collection
 // item (mock library for the prototype).
@@ -364,7 +371,7 @@ const deliveryLabel = (v: string) => deliveryFormats.find((d) => d.value === v)?
 function isConfigComplete(item: OfferingItem): boolean {
   const c = item.config;
   if (item.slug === "coaching-time") {
-    return c.mode === "range" ? Boolean(c.minHours && c.maxHours) : Boolean(c.hours || c.minutes);
+    return c.mode === "range" ? Boolean(c.minHours && c.maxHours && c.price) : Boolean(c.hours || c.minutes);
   }
   if (item.slug === "content") {
     return c.source === "reuse" ? Boolean(c.libraryId) : Boolean(c.assetName && c.title);
@@ -578,6 +585,83 @@ function Select({ value, onChange, options, placeholder, className = "", trigger
             })}
           </div>
         </>,
+        document.body,
+      )}
+    </div>
+  );
+}
+
+// Searchable multi-select: selected values render as removable chips inside the
+// control, with a portaled dropdown of the remaining options. Closes on an
+// outside mousedown (no full-screen overlay) so the search input stays usable.
+function MultiSelect({ values, onChange, options, placeholder = "Select…", className = "" }: { values: string[]; onChange: (values: string[]) => void; options: string[]; placeholder?: string; className?: string }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ left: 0, top: 0, width: 0 });
+
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current) return;
+    const r = triggerRef.current.getBoundingClientRect();
+    setPos({ left: r.left, top: r.bottom + 6, width: r.width });
+  }, [open, values.length]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (triggerRef.current?.contains(t) || dropdownRef.current?.contains(t)) return;
+      setOpen(false); setQuery("");
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+
+  const remove = (v: string) => onChange(values.filter((x) => x !== v));
+  const add = (v: string) => { onChange([...values, v]); setQuery(""); };
+  const q = query.trim().toLowerCase();
+  const available = options.filter((o) => !values.includes(o) && (!q || o.toLowerCase().includes(q)));
+
+  return (
+    <div className={`relative ${className}`}>
+      <div
+        ref={triggerRef}
+        onClick={() => setOpen(true)}
+        className="flex min-h-[48px] w-full cursor-text flex-wrap items-center gap-2 rounded-lg border border-gray-stroke bg-white px-2.5 py-2 transition-colors hover:border-[#c9c9c9] focus-within:border-gray-dark"
+      >
+        {values.map((v) => (
+          <span key={v} className="flex items-center gap-1.5 rounded-full bg-gray-hover py-1 pl-3 pr-2 text-[14px] font-medium text-gray-dark">
+            {v}
+            <button type="button" onClick={(e) => { e.stopPropagation(); remove(v); }} className="text-gray-light transition-colors hover:text-gray-dark">
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            </button>
+          </span>
+        ))}
+        <input
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          placeholder={values.length ? "" : placeholder}
+          autoComplete="off"
+          className="min-w-[80px] flex-1 bg-transparent px-1.5 py-1 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1]"
+        />
+        <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m8 9 4-4 4 4M8 15l4 4 4-4" /></svg>
+      </div>
+      {open && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-[110] max-h-[280px] overflow-auto rounded-xl border border-gray-stroke bg-white p-1 shadow-[0_4px_16px_rgba(16,24,40,0.12)]"
+          style={{ left: pos.left, top: pos.top, width: pos.width }}
+        >
+          {available.length === 0 ? (
+            <p className="px-3 py-3 text-[14px] text-gray-light">{q ? "No matches" : "Nothing left to add"}</p>
+          ) : available.map((o) => (
+            <button key={o} type="button" onClick={() => add(o)} className="flex w-full items-center rounded-lg px-3 py-2.5 text-left text-[15px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
+              {o}
+            </button>
+          ))}
+        </div>,
         document.body,
       )}
     </div>
@@ -1120,7 +1204,11 @@ function coachingHours(item: OfferingItem): number {
 // product carries a manual price in its config. Non-priceable placeholder
 // products contribute nothing.
 function productListPrice(item: OfferingItem): number {
-  if (item.slug === "coaching-time") return Math.round(coachingHours(item) * EXPERT_HOURLY_RATE);
+  // Range-mode coaching is priced manually; set mode is auto-priced from hours.
+  if (item.slug === "coaching-time") {
+    if (item.config.mode === "range") return Number(item.config.price || 0);
+    return Math.round(coachingHours(item) * EXPERT_HOURLY_RATE);
+  }
   if (!isPriceable(item.slug)) return 0;
   return Number(item.config.price || 0);
 }
@@ -1970,6 +2058,15 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
     setConfiguringId(id);
   };
 
+  // Open a product's config modal. Content always lands on the "reuse existing"
+  // view, so re-opening a product that had been switched to "upload new" doesn't
+  // reopen there — reset its source first.
+  const openConfigure = (id: number) => {
+    const it = added.find((a) => a.id === id);
+    if (it && it.slug === "content") onConfigChange(id, { editing: "", ...(it.config.source === "upload" ? { source: "reuse" } : {}) });
+    setConfiguringId(id);
+  };
+
   // Toggle a product's "free" flag (zeroes its price in the roll-up).
   const toggleFree = (id: number) => {
     const it = added.find((a) => a.id === id);
@@ -2017,7 +2114,7 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
         onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
         onAddProduct={(slug) => addProduct(opt.id, slug)}
         onRemoveProduct={(itemId) => onRemoveProductFromOption(opt.id, itemId)}
-        onConfigureProduct={setConfiguringId}
+        onConfigureProduct={openConfigure}
         onToggleFreeProduct={toggleFree}
       />
     );
@@ -2058,7 +2155,7 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
                       onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
                       onAddProduct={(slug) => addProduct(opt.id, slug)}
                       onRemoveProduct={(itemId) => onRemoveProductFromOption(opt.id, itemId)}
-                      onConfigureProduct={setConfiguringId}
+                      onConfigureProduct={openConfigure}
                       onToggleFreeProduct={toggleFree}
                     />
                   </motion.div>
@@ -2487,13 +2584,14 @@ function AddedOfferingRow({ item, onRemove, onConfigure, onToggleFree, isLast = 
     </>
   );
   if (finished && item.slug === "coaching-time") {
-    headline = item.config.mode === "range"
+    const isRange = item.config.mode === "range";
+    headline = isRange
       ? `${Number(item.config.minHours || 0)}h–${Number(item.config.maxHours || 0)}h of coaching`
       : `${compactHours(coachingHours(item))} of coaching`;
     const delivery = deliveryLabel(item.config.delivery ?? "");
     detail = (
       <span className="truncate">
-        ${EXPERT_HOURLY_RATE.toLocaleString()}/hr
+        {isRange ? `$${formatMoney(Number(item.config.price || 0))}` : `$${EXPERT_HOURLY_RATE.toLocaleString()}/hr`}
         {delivery && <span className="text-gray-extra-light"> · {delivery}</span>}
       </span>
     );
@@ -2617,6 +2715,22 @@ function ConfigModal({ item, lockedCoachingMode = null, onChange, onSave, onClos
   const o = item ? offeringBySlug[item.slug] : null;
   const complete = item ? isConfigComplete(item) : false;
   const prompt = item ? configPrompts[item.slug] : undefined;
+  // Content's two-column editor uses a wider layout — so the modal grows to
+  // accommodate it. It's reached only once an asset is uploaded; the upload
+  // prompt (source === "upload" but no asset yet) stays compact like the rest.
+  const wide = !!item && item.slug === "content" && ((item.config.source === "upload" && !!item.config.assetName) || item.config.editing === "true");
+  // The upload prompt (source === "upload" but no asset yet) is a gate before the
+  // editor — there's nothing to save yet, so hide the footer action.
+  const uploadPrompt = !!item && item.slug === "content" && item.config.source === "upload" && !item.config.assetName;
+  // The editor's Back button lives in the footer; bumping this asks ContentFields
+  // to run its staged back-to-library transition.
+  const [backSignal, setBackSignal] = useState(0);
+  // Track scroll so the library's sticky search can gain a shadow and the close
+  // button can hide once the user scrolls past the top.
+  const [scrolled, setScrolled] = useState(false);
+  const isLibrary = !!item && item.slug === "content" && item.config.source !== "upload";
+  // Reset when the view or item changes so a stale scroll state doesn't linger.
+  useEffect(() => { setScrolled(false); }, [wide, uploadPrompt, item?.id]);
 
   return createPortal(
     <AnimatePresence>
@@ -2630,36 +2744,56 @@ function ConfigModal({ item, lockedCoachingMode = null, onChange, onSave, onClos
           className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4"
         >
           <motion.div
+            layout
             initial={{ opacity: 0, scale: 0.96, y: 32 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 32 }}
-            transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1], layout: { duration: 0.42, ease: [0, 0, 0.2, 1] } }}
             onClick={(e) => e.stopPropagation()}
-            className="relative flex max-h-[85vh] w-full max-w-[600px] flex-col overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)]"
+            style={{ borderRadius: 24 }}
+            className={`relative flex w-full flex-col overflow-hidden bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)] ${wide ? "max-w-[1180px]" : "max-w-[600px]"} ${item?.slug === "content" && !wide ? "h-[85vh]" : "max-h-[85vh]"}`}
           >
-            {/* Close — circular gray, top-right */}
-            <button onClick={onClose} aria-label="Close" className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gray-hover text-gray-dark transition-colors hover:bg-[#ebebeb]">
+            {/* Close — circular gray, top-right. Fades out once the library is
+                scrolled so it doesn't collide with the sticky search bar. */}
+            <button onClick={onClose} aria-label="Close" className={`absolute right-5 top-5 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-gray-hover text-gray-dark transition-all hover:bg-[#ebebeb] ${isLibrary && scrolled ? "pointer-events-none opacity-0" : "opacity-100"}`}>
               <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
             </button>
 
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto px-7 pb-1 pt-8">
-              {/* Left-aligned header */}
-              <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">Configure {o.label.toLowerCase()}</h2>
-              {prompt && <p className="mt-1.5 text-[15px] text-gray-light">{prompt}</p>}
+            {/* Scrollable content. pt lives on the inner wrappers (not here) so the
+                library's sticky search can pin flush to the top. The upload prompt
+                has no footer, so it gets a matching bottom padding. */}
+            <div onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)} className={`flex-1 overflow-y-auto px-7 ${uploadPrompt ? "pb-7" : "pb-1"}`}>
+              {/* Header — for content, each view (library / upload) renders its
+                  own header inside ContentFields so it animates with that view's
+                  content rather than morphing across the modal resize. */}
+              {item.slug !== "content" && (
+                <div className="pt-8">
+                  <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">Configure {o.label.toLowerCase()}</h2>
+                  {prompt && <p className="mt-1.5 text-[15px] text-gray-light">{prompt}</p>}
+                </div>
+              )}
 
               {/* Fields */}
-              <div className="mt-3">
-                <OfferingConfigFields slug={item.slug} config={item.config} onChange={onChange} lockedCoachingMode={lockedCoachingMode} />
+              <div className={item.slug === "content" ? "pt-8" : "mt-3"}>
+                <OfferingConfigFields slug={item.slug} config={item.config} onChange={onChange} lockedCoachingMode={lockedCoachingMode} backSignal={backSignal} scrolled={scrolled} />
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="px-7 pb-7 pt-1">
-              <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" disabled={!complete} onClick={onSave}>
-                Save product
-              </Button>
-            </div>
+            {/* Actions — hidden on the upload prompt, which has nothing to save.
+                The editor shows Back (far left) and Save (far right), equal size. */}
+            {!uploadPrompt && (
+              <div className="flex items-center justify-between gap-3 px-7 pb-7 pt-1">
+                {wide && (
+                  <Button size="lg" variant="secondary" rounded="rounded-full" onClick={() => setBackSignal((n) => n + 1)}>
+                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                    Back
+                  </Button>
+                )}
+                <Button size="lg" variant="primary" rounded="rounded-full" className={wide ? "" : "w-full"} disabled={!complete} onClick={onSave}>
+                  Save product
+                </Button>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}
@@ -2670,10 +2804,10 @@ function ConfigModal({ item, lockedCoachingMode = null, onChange, onSave, onClos
 
 // Dispatches to the fields component for the offering type. Add a case here
 // alongside a configDefaults entry to configure another type.
-function OfferingConfigFields({ slug, config, onChange, lockedCoachingMode = null }: { slug: string; config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedCoachingMode?: "set" | "range" | null }) {
+function OfferingConfigFields({ slug, config, onChange, lockedCoachingMode = null, backSignal = 0, scrolled = false }: { slug: string; config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedCoachingMode?: "set" | "range" | null; backSignal?: number; scrolled?: boolean }) {
   const v2 = useV2();
   if (slug === "coaching-time") return <CoachingTimeFields config={config} onChange={onChange} lockedMode={lockedCoachingMode} />;
-  if (slug === "content") return <ContentFields config={config} onChange={onChange} priced={v2} />;
+  if (slug === "content") return <ContentFields config={config} onChange={onChange} priced={v2} backSignal={backSignal} scrolled={scrolled} />;
   if (slug === "paid-livestream") return <PaidLivestreamFields config={config} onChange={onChange} />;
   return <PlaceholderFields label={offeringBySlug[slug]?.label ?? "This product"} />;
 }
@@ -3284,19 +3418,81 @@ function UploadField({ value, onChange, hint, label = "Upload a file" }: { value
   );
 }
 
+// A file that's already been uploaded — a 1.91:1 preview slot with the filename
+// and a Replace control. Used in the editor where an asset always exists.
+function UploadedAssetField({ name, onReplace, preview = samanthaVideo }: { name: string; onReplace: (name: string) => void; preview?: string }) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-gray-stroke">
+      {/* Preview — 1.91:1. Demo art stands in for the asset's thumbnail. */}
+      <img src={preview} alt="" className="aspect-[1.91/1] w-full object-cover" />
+      {/* Filename + replace */}
+      <div className="flex items-center justify-between gap-3 border-t border-gray-stroke px-4 py-3">
+        <span className="flex min-w-0 items-center gap-2">
+          <MaskIcon src={attachIcon} className="h-[18px] w-[18px] shrink-0 text-gray-light" />
+          <span className="truncate text-[15px] font-medium text-gray-dark">{name}</span>
+        </span>
+        <label className="shrink-0 cursor-pointer text-[14px] font-medium text-gray-dark underline decoration-dotted underline-offset-[3px] transition-opacity hover:opacity-70">
+          <input type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onReplace(f.name); }} />
+          Replace
+        </label>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- Content config (upload new / reuse existing) ---------- */
 
-function ContentFields({ config, onChange, priced = false }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; priced?: boolean }) {
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-  // Leland+ section is an accordion: closed by default, open if already enabled.
-  const [lelandOpen, setLelandOpen] = useState(config.lelandPlus === "true" || config.r_lelandPlus === "true");
-  const [editing, setEditing] = useState(false);
+function ContentFields({ config, onChange, priced = false, backSignal = 0, scrolled = false }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; priced?: boolean; backSignal?: number; scrolled?: boolean }) {
+  // Editing a reused item is persisted in config so ConfigModal can widen the
+  // modal to the same two-column layout the upload editor uses.
+  const editing = config.editing === "true";
   const [query, setQuery] = useState("");
 
   // The active mode (persisted in config so parent helpers can read it). The
   // two modes keep independent data so switching tabs never bleeds across.
-  const source: "upload" | "reuse" = config.source === "reuse" ? "reuse" : config.source === "upload" ? "upload" : (config.libraryId ? "reuse" : "upload");
+  const source: "upload" | "reuse" = config.source === "upload" ? "upload" : "reuse";
   const setSource = (t: "upload" | "reuse") => onChange({ source: t });
+
+  // Three views:
+  //   library — browse/reuse existing content (narrow)
+  //   prompt  — "upload your asset" gate; you must upload before editing (narrow)
+  //   editor  — the full two-column details editor (wide)
+  // The editor is only reachable once an asset exists.
+  const uploaded = Boolean(config.assetName);
+  const view: "library" | "prompt" | "editor" = source === "reuse" ? "library" : uploaded ? "editor" : "prompt";
+
+  // View changes are staged so a size change never overlaps content: the
+  // outgoing view animates out first, then we commit the state change (which may
+  // resize the modal), then the incoming view animates in — delayed past the
+  // resize when the size changed (`delayedView` names that view).
+  const [exiting, setExiting] = useState(false);
+  const [delayedView, setDelayedView] = useState<string | null>(null);
+  const pendingRef = useRef<{ commit: () => void; delay: string | null } | null>(null);
+  const beginTransition = (commit: () => void, delay: string | null) => {
+    pendingRef.current = { commit, delay };
+    setDelayedView(null);
+    setExiting(true);
+  };
+  const handleExitComplete = () => {
+    const p = pendingRef.current;
+    pendingRef.current = null;
+    setExiting(false);
+    if (p) { setDelayedView(p.delay); p.commit(); }
+  };
+  const enterDelay = (key: string) => (delayedView === key ? 0.42 : 0);
+
+  // Transitions. Only prompt↔editor change the modal size, so only those delay
+  // the incoming view past the resize. For the demo, "uploading" is a click.
+  // Clear any stale asset so "Upload new" always starts at the prompt rather
+  // than jumping straight to the editor (which is gated on an asset existing).
+  const goToPrompt = () => beginTransition(() => onChange({ source: "upload", assetName: "" }), null);          // library → prompt
+  const uploadAsset = () => beginTransition(() => onChange({ assetName: "my-asset.pdf" }), "editor");         // prompt → editor (grows)
+  const backToLibrary = () => beginTransition(() => setSource("reuse"), null);                                // prompt → library
+  const backFromEditor = () => beginTransition(() => onChange({ source: "reuse", assetName: "" }), "library"); // editor → library (shrinks)
+  // The editor's Back button lives in the modal footer; it bumps `backSignal`.
+  useEffect(() => {
+    if (backSignal > 0 && view === "editor") backFromEditor();
+  }, [backSignal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const q = query.trim().toLowerCase();
   const results = q
@@ -3305,13 +3501,17 @@ function ContentFields({ config, onChange, priced = false }: { config: Record<st
   // Reusing writes only reuse-namespaced ("r_") keys, never the upload fields.
   const selectLibrary = (c: LibraryContent) =>
     onChange({ source: "reuse", libraryId: c.id, r_assetName: c.name, r_title: c.title, r_description: c.description, r_resourceType: c.resourceType, price: c.price.toFixed(2) });
+  // Clicking the already-selected item de-selects it, clearing the reuse fields.
+  const deselectLibrary = () =>
+    onChange({ libraryId: "", r_assetName: "", r_title: "", r_description: "", r_resourceType: "", price: "" });
+  const toggleLibrary = (c: LibraryContent) => (config.libraryId === c.id ? deselectLibrary() : selectLibrary(c));
   const selectedLib = config.libraryId ? CONTENT_LIBRARY.find((c) => c.id === config.libraryId) ?? null : null;
 
   // Edit-screen flow: snapshot the config on open so Cancel can discard changes.
   const snapshotRef = useRef<Record<string, string> | null>(null);
-  const openEdit = () => { snapshotRef.current = { ...config }; setEditing(true); };
-  const cancelEdit = () => { if (snapshotRef.current) onChange(snapshotRef.current); setEditing(false); };
-  const saveEdit = () => setEditing(false);
+  const openEdit = () => { snapshotRef.current = { ...config }; onChange({ editing: "true" }); };
+  const cancelEdit = () => { onChange({ ...(snapshotRef.current ?? {}), editing: "" }); };
+  const saveEdit = () => onChange({ editing: "" });
 
   // Editable metadata fields bound to a config-key namespace ("" for a freshly
   // uploaded asset, "r_" for a reused library asset).
@@ -3320,34 +3520,60 @@ function ContentFields({ config, onChange, priced = false }: { config: Record<st
     const set = (f: string, v: string) => onChange({ [`${p}${f}`]: v });
     const isOn = (f: string) => config[`${p}${f}`] === "true";
     const flip = (f: string) => onChange({ [`${p}${f}`]: isOn(f) ? "false" : "true" });
+    const getMulti = (f: string) => g(f).split(",").filter(Boolean);
+    const setMulti = (f: string, arr: string[]) => set(f, arr.join(","));
     return (
       <>
         <div>
+          <p className="pb-5 text-[22px] font-semibold text-gray-dark">General</p>
           <FieldRow icon={labelTagIcon} title="Title" desc="The name people will see for this content.">
             <input value={g("title")} onChange={(e) => set("title", e.target.value)} placeholder="Give your content a title" autoComplete="off" className={configInputClass} />
           </FieldRow>
-          <FieldRow icon={textIcon} title="Description" desc="A short summary of what this content is.">
+          <FieldRow icon={textIcon} title="Description" desc="A short summary of what this content is." divider={priced}>
             <textarea value={g("description")} onChange={(e) => set("description", e.target.value)} rows={3} placeholder="Describe what this is…" autoComplete="off" className={`${configInputClass} resize-none`} />
           </FieldRow>
-          <FieldRow icon={stackIcon} title="Resource type" desc="Choose the category that best fits it." divider={priced}>
-            <Select value={g("resourceType") || "guide"} onChange={(v) => set("resourceType", v)} options={RESOURCE_TYPES} />
-          </FieldRow>
           {priced && (
-            <FieldRow icon={moneyIcon} title="Price" desc="What buyers pay for this content in the offering." divider={false}>
+            <FieldRow icon={moneyIcon} title="Suggested price" desc="What you'd charge by default. This won't be for sale until you add it to an offering." divider={false}>
               <PriceField value={config.price ?? ""} onChange={(v) => onChange({ price: v })} />
             </FieldRow>
           )}
         </div>
 
-        {/* Leland+ library — collapsible section (open when already enabled) */}
-        <div className="border-t border-gray-stroke">
-          <button type="button" onClick={() => setLelandOpen((v) => !v)} className="flex w-full items-center justify-between py-5 text-left">
-            <span className="text-[17px] font-semibold text-gray-dark">Leland+ library</span>
-            <svg className={`h-5 w-5 shrink-0 text-gray-dark transition-transform ${lelandOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-          </button>
-          <AnimatePresence initial={false}>
-            {lelandOpen && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={offeringTransition} className="overflow-hidden">
+        {/* Discoverability — how this resource is categorized & surfaced */}
+        <div>
+          <p className="py-5 text-[22px] font-semibold text-gray-dark">Discoverability</p>
+          <FieldRow icon={browseIcon} title="Category" desc="Where this shows up in the catalog.">
+            <MultiSelect values={getMulti("category")} onChange={(v) => setMulti("category", v)} options={CATEGORY_OPTIONS} placeholder="Select categories" />
+          </FieldRow>
+          <FieldRow icon={labelTagIcon} title="Subcategory" desc="Narrow it down further.">
+            <MultiSelect values={getMulti("subcategory")} onChange={(v) => setMulti("subcategory", v)} options={SUBCATEGORY_OPTIONS} placeholder="Select subcategories" />
+          </FieldRow>
+          <FieldRow icon={lightBulbIcon} title="Topics" desc="The focuses this resource covers.">
+            <MultiSelect values={getMulti("topics")} onChange={(v) => setMulti("topics", v)} options={TOPIC_OPTIONS} placeholder="Search coaching focuses…" />
+          </FieldRow>
+          <FieldRow icon={stackIcon} title="Resource type" desc="Choose the categories that best fit it.">
+            <MultiSelect values={getMulti("resourceType")} onChange={(v) => setMulti("resourceType", v)} options={RESOURCE_TYPES.map((t) => t.label)} placeholder="Select resource types" />
+          </FieldRow>
+          <FieldRow icon={storeIcon} title="Organizations" desc="Tag relevant schools or companies.">
+            <MultiSelect values={getMulti("organizations")} onChange={(v) => setMulti("organizations", v)} options={ORGANIZATION_OPTIONS} placeholder="Search schools & companies…" />
+          </FieldRow>
+          <SettingRow
+            icon={<MaskIcon src={photoIcon} className="h-6 w-6 text-gray-dark" />}
+            title="Add a custom thumbnail"
+            desc="Upload a custom thumbnail to help this resource stand out. A screenshot or eye-catching mockup works well."
+            checked={isOn("thumbnailEnabled")}
+            onChange={() => flip("thumbnailEnabled")}
+            divider={false}
+          >
+            <div className="mt-3">
+              <UploadField value={g("thumbnail")} onChange={(name) => set("thumbnail", name)} hint="PNG, JPG, JPEG, GIF, WEBP, SVG, HEIC" label="Click to upload or drag and drop" />
+            </div>
+          </SettingRow>
+        </div>
+
+        {/* Leland+ library */}
+        <div>
+          <p className="py-5 text-[22px] font-semibold text-gray-dark">Leland+ library</p>
           <SettingRow
             icon={<MaskIcon src={bookOpenIcon} className="h-6 w-6 text-gray-dark" />}
             title="Add to the Leland+ library"
@@ -3400,197 +3626,231 @@ function ContentFields({ config, onChange, priced = false }: { config: Record<st
             </motion.div>
           )}
           </AnimatePresence>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
-        {/* Advanced settings — collapsible; shares the unified SettingRow design.
-            -mt-5 cancels the parent's gap-5 so the divider sits symmetrically
-            between the two accordion headers. */}
-        <div className="-mt-5 border-t border-gray-stroke">
-          <button type="button" onClick={() => setAdvancedOpen((v) => !v)} className="flex w-full items-center justify-between py-5 text-left">
-            <span className="text-[17px] font-semibold text-gray-dark">Advanced settings</span>
-            <svg className={`h-5 w-5 shrink-0 text-gray-dark transition-transform ${advancedOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-          </button>
-          <AnimatePresence initial={false}>
-            {advancedOpen && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={offeringTransition} className="overflow-hidden">
-                <SettingRow
-                  icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11" /><path d="m7 10 5 5 5-5" /><path d="M5 19h14" /></svg>}
-                  title="Allow users to download this file"
-                  desc="Not supported for videos"
-                  checked={isOn("downloadable")}
-                  onChange={() => flip("downloadable")}
-                />
+        {/* Advanced settings */}
+        <div>
+          <p className="py-5 text-[22px] font-semibold text-gray-dark">Advanced settings</p>
+          <SettingRow
+            icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11" /><path d="m7 10 5 5 5-5" /><path d="M5 19h14" /></svg>}
+            title="Allow users to download this file"
+            desc="Not supported for videos"
+            checked={isOn("downloadable")}
+            onChange={() => flip("downloadable")}
+          />
 
-                <SettingRow
-                  icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>}
-                  title="Attach a separate, downloadable file"
-                  desc="Add an extra asset, like a spreadsheet or worksheet, for users to download. The file above should explain it."
-                  checked={isOn("attachFile")}
-                  onChange={() => flip("attachFile")}
-                >
-                  <div className="mt-3">
-                    <UploadField value={g("attachmentName")} onChange={(name) => set("attachmentName", name)} hint="The file members can download" label="Click to upload or drag and drop" />
-                  </div>
-                </SettingRow>
-
-                <SettingRow
-                  icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-4.35-4.35a2 2 0 0 0-2.83 0L4 20" /></svg>}
-                  title="Add a custom thumbnail"
-                  desc="Upload a custom thumbnail to help this resource stand out. A screenshot or eye-catching mockup works well."
-                  checked={isOn("thumbnailEnabled")}
-                  onChange={() => flip("thumbnailEnabled")}
-                  divider={false}
-                >
-                  <div className="mt-3">
-                    <UploadField value={g("thumbnail")} onChange={(name) => set("thumbnail", name)} hint="PNG, JPG, JPEG, GIF, WEBP, SVG, HEIC" label="Click to upload or drag and drop" />
-                  </div>
-                </SettingRow>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <SettingRow
+            icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>}
+            title="Attach a separate, downloadable file"
+            desc="Add an extra asset, like a spreadsheet or worksheet, for users to download. The file above should explain it."
+            checked={isOn("attachFile")}
+            onChange={() => flip("attachFile")}
+            divider={false}
+          >
+            <div className="mt-3">
+              <UploadField value={g("attachmentName")} onChange={(name) => set("attachmentName", name)} hint="The file members can download" label="Click to upload or drag and drop" />
+            </div>
+          </SettingRow>
         </div>
       </>
     );
   };
 
-  // Inline SVGs (shared viewBox + strokeWidth + currentColor) so both icons
-  // render at a consistent weight/size and inherit the tab's text color.
-  const tabs = [
-    {
-      key: "upload" as const,
-      label: "Upload new",
-      icon: (
-        <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4v16M4 12h16" /></svg>
-      ),
-    },
-    {
-      key: "reuse" as const,
-      label: "Reuse existing",
-      icon: (
-        <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M22 12l-2 2-2-2" />
-          <path d="M6.34 6.34A8 8 0 0 1 20 12c0 .6-.07 1.2-.2 1.77" />
-          <path d="M2 12l2-2 2 2" />
-          <path d="M17.66 17.66A8 8 0 0 1 4 12c0-.61.07-1.2.2-1.77" />
-        </svg>
-      ),
-    },
-  ];
-
   return (
     <div className="flex flex-col gap-5">
-      {/* Tab bar / pivot — mirrors the profile template tabs. Negative margins
-          pull it full-bleed past the modal's px-7 content padding. */}
-      <div className="-mx-7 flex border-b border-gray-stroke">
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            onClick={() => setSource(t.key)}
-            className={`flex flex-1 items-center justify-center gap-2 border-b-2 py-3 transition-colors ${source === t.key ? "border-gray-dark text-gray-dark" : "border-transparent text-gray-light hover:text-gray-dark"}`}
+      {/* mode="wait" holds the incoming view until the outgoing one has fully
+          animated out. Size-changing steps (prompt↔editor) commit inside
+          `handleExitComplete` so the modal resizes only after the old view is
+          gone, and the new view's entrance is delayed to clear the resize. */}
+      <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
+        {exiting ? null : view === "editor" ? (
+          <motion.div
+            key="editor"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.26, ease: [0, 0, 0.2, 1], delay: enterDelay("editor") } }}
+            exit={{ opacity: 0, y: 8, transition: { duration: 0.16, ease: [0.4, 0, 1, 1] } }}
           >
-            {t.icon}
-            <span className="text-[15px] font-medium">{t.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {source === "upload" ? (
-        <>
-          <UploadField value={config.assetName ?? ""} onChange={(name) => onChange({ source: "upload", assetName: name })} hint="PDF, video, image, or doc" />
-          {renderMetadata("")}
-        </>
-      ) : (
-        <div>
-          <div className="relative">
-            <svg className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search your content…"
-              autoComplete="off"
-              className="w-full rounded-full border border-transparent bg-gray-hover px-4 py-3 pl-11 text-[15px] text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
-            />
-          </div>
-
-          <div className="mt-3 flex max-h-[440px] flex-col gap-2 overflow-y-auto pb-20">
-            {results.map((c) => {
-              const selected = config.libraryId === c.id;
-              return (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => selectLibrary(c)}
-                  className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors ${selected ? "border-gray-dark bg-gray-hover" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
-                >
-                  <img src={c.thumb} alt="" className="h-11 w-[68px] shrink-0 rounded-[6px] object-cover" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15px] font-semibold text-gray-dark">{c.title}</span>
-                    <span className="block truncate text-[13px] text-gray-light">Uploaded {c.date} · {formatViews(c.views)} views</span>
-                  </span>
-                  <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border transition-colors ${selected ? "border-gray-dark bg-gray-dark" : "border-gray-stroke bg-white"}`}>
-                    {selected && <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
-                  </span>
-                </button>
-              );
-            })}
-            {results.length === 0 && (
-              <p className="py-8 text-center text-[14px] text-gray-light">No content matches “{query}”.</p>
-            )}
-          </div>
-
-          {/* Selected-asset indicator — a sticky bar pinned just above the Save CTA */}
-          {selectedLib && (
-            <div className="sticky bottom-0 -mx-7 -mb-1 flex items-center justify-between gap-3 border-t border-gray-stroke bg-white px-7 pb-2 pt-3">
-              <span className="flex min-w-0 items-center gap-2 text-[15px] text-gray-light">
-                <MaskIcon src={attachIcon} className="h-[18px] w-[18px] shrink-0 text-gray-light" />
-                <span className="truncate">Selected: {config.r_title || selectedLib.title}</span>
-              </span>
-              <button type="button" onClick={openEdit} className="flex shrink-0 items-center gap-1.5 text-[15px] text-gray-light transition-colors hover:text-gray-dark">
-                <MaskIcon src={editIcon} className="h-4 w-4" />
-                <span className="underline underline-offset-2">Edit</span>
-              </button>
+            <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start lg:gap-10">
+              {/* Left column — header + asset upload, sticky as a group while the
+                  right column scrolls (Back now lives in the footer). top-8 matches
+                  the content wrapper's pt-8 so it doesn't jump when it sticks. */}
+              <div className="lg:sticky lg:top-8">
+                <h2 className="font-serif text-[28px] leading-tight text-gray-dark">Upload new content</h2>
+                <p className="mt-1.5 text-[15px] text-gray-light">Add your file and fill in the details below.</p>
+                <div className="mt-6">
+                  <UploadedAssetField name={config.assetName ?? ""} onReplace={(name) => onChange({ source: "upload", assetName: name })} />
+                </div>
+              </div>
+              {/* Right column — the rest of the upload line-items */}
+              <div className="flex flex-col gap-5">
+                {renderMetadata("")}
+              </div>
             </div>
-          )}
-        </div>
-      )}
+          </motion.div>
+        ) : view === "prompt" ? (
+          <motion.div
+            key="prompt"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.26, ease: [0, 0, 0.2, 1], delay: enterDelay("prompt") } }}
+            exit={{ opacity: 0, y: 8, transition: { duration: 0.16, ease: [0.4, 0, 1, 1] } }}
+            className="flex min-h-[calc(85vh-60px)] flex-col"
+          >
+            {/* The whole area is the drop target. You must upload an asset before
+                you can edit its details — clicking anywhere (or the link) stands
+                in for a real upload in this prototype.
+                Dashed border drawn as an inline SVG so the dash length is fully
+                controllable. currentColor = gray-extra-light, at 50% opacity. */}
+            <button
+              type="button"
+              onClick={uploadAsset}
+              className="relative flex flex-1 flex-col items-center justify-center rounded-2xl px-6 py-10 text-center"
+            >
+              <svg aria-hidden="true" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible text-gray-extra-light opacity-50">
+                <rect x="0" y="0" width="100%" height="100%" rx="16" ry="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="7 6" />
+              </svg>
+              <MaskIcon src={uploadIcon} className="h-8 w-8 text-gray-dark" />
+              <span className="mt-4 font-serif text-[28px] leading-tight text-gray-dark">Drag your resource here</span>
+              <span className="mt-1.5 text-[15px] text-gray-light">PNG, JPG, GIF, MP4, MOV, PDF</span>
+              <span className="mt-8 text-[15px] font-medium text-gray-dark underline decoration-dotted underline-offset-[3px]">Upload from your device</span>
+            </button>
+            {/* Cancel — returns to the library, sits below the drop area */}
+            <Button size="lg" variant="secondary" rounded="rounded-full" className="mt-4 w-full" onClick={backToLibrary}>
+              Cancel
+            </Button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="library"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.2, ease: [0, 0, 0.2, 1], delay: enterDelay("library") } }}
+            exit={{ opacity: 0, y: -6, transition: { duration: 0.16, ease: [0.4, 0, 1, 1] } }}
+          >
+            {/* Header — this view's own; fades in/out with its content */}
+            <div className="mb-4">
+              <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">Configure content</h2>
+              <p className="mt-1.5 text-[15px] text-gray-light">Upload your file and add the details.</p>
+            </div>
+            {/* Sticky search — full-bleed white bar so rows scroll behind it.
+                Gains a subtle shadow once the list is scrolled. */}
+            <div className={`sticky top-0 z-[1] -mx-7 bg-white px-7 pb-3 pt-3 transition-shadow ${scrolled ? "shadow-[0_8px_16px_-10px_rgba(16,24,40,0.35)]" : ""}`}>
+              <div className="relative">
+                <svg className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search your content…"
+                  autoComplete="off"
+                  className="w-full rounded-full border border-transparent bg-gray-hover px-4 py-3 pl-11 text-[15px] text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
+                />
+              </div>
+            </div>
 
-      {/* Edit screen — an in-modal pane that slides in from the right and
-          replaces the modal's content (it fills the modal box via absolute
-          inset-0, whose containing block is the modal frame). */}
+            <div className="mt-3 flex flex-col gap-3 pb-4">
+              {/* Upload new — separate card at the top; opens the upload prompt */}
+              <button
+                type="button"
+                onClick={goToPrompt}
+                className="flex items-center gap-3 rounded-2xl bg-gray-hover px-3 py-2.5 text-left transition-colors hover:bg-[#ededed]"
+              >
+                <span className="flex h-11 w-[68px] shrink-0 items-center justify-center rounded-[6px] bg-[#222222]/5 text-gray-dark">
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-semibold text-gray-dark">Upload new</span>
+                  <span className="block text-[13px] text-gray-light">Add a new file from your computer</span>
+                </span>
+                <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </button>
+
+              {/* Existing resources — combined into a single card, one row each.
+                  Full-width rows with inset dividers (mirrors the products card). */}
+              {results.length === 0 ? (
+                <p className="py-8 text-center text-[14px] text-gray-light">No content matches “{query}”.</p>
+              ) : (
+                <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-stroke">
+                  {results.map((c, i) => {
+                    const selected = config.libraryId === c.id;
+                    const offerings = Math.max(1, Math.round(c.views / 2500));
+                    return (
+                      <Fragment key={c.id}>
+                        {i > 0 && <div className="mx-5 border-t border-gray-stroke" />}
+                        <button
+                          type="button"
+                          onClick={() => toggleLibrary(c)}
+                          className={`flex w-full items-center gap-4 px-5 py-4 text-left transition-colors ${selected ? "bg-gray-hover" : "hover:bg-gray-hover"}`}
+                        >
+                          <img src={c.thumb} alt="" className="h-11 w-[68px] shrink-0 rounded-[6px] object-cover" />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[15px] font-semibold text-gray-dark">{c.title}</span>
+                            <span className="block truncate text-[13px] text-gray-light">Added to {offerings} {offerings === 1 ? "offering" : "offerings"} · {formatViews(c.views)} views</span>
+                          </span>
+                          <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border transition-colors ${selected ? "border-gray-dark bg-gray-dark" : "border-gray-stroke bg-white"}`}>
+                            {selected && <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+                          </span>
+                        </button>
+                      </Fragment>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Selected-asset indicator — a sticky bar pinned just above the Save CTA */}
+            {selectedLib && (
+              <div className="sticky bottom-0 -mx-7 -mb-1 flex items-center justify-between gap-3 border-t border-gray-stroke bg-white px-7 pb-2 pt-3">
+                <span className="flex min-w-0 items-center gap-2 text-[15px] text-gray-light">
+                  <MaskIcon src={attachIcon} className="h-[18px] w-[18px] shrink-0 text-gray-light" />
+                  <span className="truncate">Selected: {config.r_title || selectedLib.title}</span>
+                </span>
+                <button type="button" onClick={openEdit} className="flex shrink-0 items-center gap-1.5 text-[15px] text-gray-light transition-colors hover:text-gray-dark">
+                  <MaskIcon src={editIcon} className="h-4 w-4" />
+                  <span className="underline underline-offset-2">Edit</span>
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit screen — fills the (now wide) modal box via absolute inset-0 and
+          mirrors the upload editor's two-column layout so they feel like one
+          system. Fades in after the modal has finished widening. */}
       <AnimatePresence>
         {editing && selectedLib && (
           <motion.div
             key="edit-pane"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.26, ease: [0, 0, 0.2, 1], delay: 0.42 } }}
+            exit={{ opacity: 0, transition: { duration: 0.16, ease: [0.4, 0, 1, 1] } }}
             className="absolute inset-0 z-30 flex flex-col bg-white"
           >
             <button onClick={cancelEdit} aria-label="Close" className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gray-hover text-gray-dark transition-colors hover:bg-[#ebebeb]">
               <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
             </button>
 
-            <div className="px-7 pt-8">
-              <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">Edit content</h2>
-              <p className="mt-1.5 text-[15px] text-gray-light">{selectedLib.title} <span className="text-gray-extra-light">· Uploaded {selectedLib.date}</span></p>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-7 pb-2 pt-6">
-              {/* Warning banner above the fields */}
-              <div className="mb-3 rounded-md bg-[#FEE6E3] px-4 py-3 text-center text-[14px] font-medium text-[#D92D20]">
-                This will affect all iterations of this resource
+            <div className="flex-1 overflow-y-auto px-7 pb-1 pt-8">
+              <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start lg:gap-10">
+                {/* Left column — header + preview + warning, sticky */}
+                <div className="lg:sticky lg:top-8">
+                  <h2 className="font-serif text-[28px] leading-tight text-gray-dark">Edit content</h2>
+                  <p className="mt-1.5 text-[15px] text-gray-light">{selectedLib.title} <span className="text-gray-extra-light">· Uploaded {selectedLib.date}</span></p>
+                  <div className="mt-6">
+                    <UploadedAssetField name={config.r_assetName || selectedLib.name} onReplace={(n) => onChange({ r_assetName: n })} preview={selectedLib.thumb} />
+                  </div>
+                  <div className="mt-3 rounded-md bg-[#FEE6E3] px-4 py-3 text-center text-[14px] font-medium text-[#D92D20]">
+                    This will affect all iterations of this resource
+                  </div>
+                </div>
+                {/* Right column — the editable fields */}
+                <div className="flex flex-col gap-5">
+                  {renderMetadata("r_")}
+                </div>
               </div>
-              <div className="flex flex-col gap-5">{renderMetadata("r_")}</div>
             </div>
 
-            <div className="flex gap-3 px-7 pb-7 pt-4">
-              <Button size="lg" variant="secondary" rounded="rounded-full" className="flex-1" onClick={cancelEdit}>Cancel</Button>
-              <Button size="lg" variant="primary" rounded="rounded-full" className="flex-1" onClick={saveEdit}>Save</Button>
+            <div className="flex items-center justify-between gap-3 px-7 pb-7 pt-1">
+              <Button size="lg" variant="secondary" rounded="rounded-full" onClick={cancelEdit}>Cancel</Button>
+              <Button size="lg" variant="primary" rounded="rounded-full" onClick={saveEdit}>Save</Button>
             </div>
           </motion.div>
         )}
@@ -3693,8 +3953,30 @@ function CoachingTimeFields({ config, onChange, lockedMode = null }: { config: R
         />
       </div>
 
-      {/* v2: coaching time is auto-priced from the expert's hourly rate. */}
-      {v2 && (
+      {/* Range mode isn't auto-priced — collect a manual price and a scope of
+          work describing what the coaching covers. */}
+      {mode === "range" && (
+        <>
+          <div className="mt-5">
+            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Price</label>
+            <PriceField value={config.price ?? ""} onChange={(v) => onChange({ price: v })} />
+          </div>
+          <div className="mt-5">
+            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">What you'll work on</label>
+            <textarea
+              value={config.workOn ?? ""}
+              onChange={(e) => onChange({ workOn: e.target.value })}
+              rows={4}
+              placeholder="Describe the scope of work for this coaching time…"
+              autoComplete="off"
+              className={`${configInputClass} resize-none`}
+            />
+          </div>
+        </>
+      )}
+
+      {/* Set mode is auto-priced from the expert's hourly rate. */}
+      {v2 && mode === "set" && (
         <div className="mt-5 flex items-center justify-between gap-3 rounded-xl bg-gray-hover px-4 py-3.5">
           <span className="flex min-w-0 items-center gap-2.5">
             <MaskIcon src={moneyIcon} className="h-[18px] w-[18px] shrink-0 text-gray-light" />

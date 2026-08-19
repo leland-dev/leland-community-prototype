@@ -31,11 +31,11 @@ function AdminToggle({ label, checked, onChange, disabled = false }: { label: st
   );
 }
 
-function AdminSelect({ label, value, options, onChange }: { label: string; value: string; options: { value: string; label: string }[]; onChange: (v: string) => void }) {
+function AdminSelect({ label, value, options, onChange, cols = 2 }: { label: string; value: string; options: { value: string; label: string }[]; onChange: (v: string) => void; cols?: number }) {
   return (
     <div className="px-2 py-2">
       <span className="text-[14px] font-medium text-gray-dark">{label}</span>
-      <div className="mt-1.5 grid grid-cols-2 gap-1">
+      <div className="mt-1.5 grid gap-1" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
         {options.map((o) => (
           <button
             key={o.value}
@@ -70,6 +70,10 @@ export default function ProfileTemplate() {
   const [mvp, setMvp] = useState(true);
   const [coverMode, setCoverMode] = useState<"default" | "dark" | "beige" | "none">("default");
   const [myProfile, setMyProfile] = useState(isMe);
+  // A/B test toggle for profile-page improvements (defaults ON).
+  const [abTest, setAbTest] = useState(true);
+  // Which improvement variant to show when A/B testing is on.
+  const [abVersion, setAbVersion] = useState<"v1" | "v2" | "v3">("v1");
   const coachId = person?.coachId ?? "samantha";
 
   // Identity (name + photo + cover) is fixed per profile and stays constant
@@ -205,6 +209,8 @@ export default function ProfileTemplate() {
         categoryHeadline={categoryHeadline}
         categories={categories}
         onSelectCategory={(c) => navigate(c ? `/profile/${slug}/${c}` : `/profile/${slug}`)}
+        abTest={abTest}
+        abVersion={abVersion}
       />
       </div>
 
@@ -223,6 +229,21 @@ export default function ProfileTemplate() {
               transition={{ duration: 0.15 }}
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
+              <AdminToggle label="A/B Test Improvements" checked={abTest} onChange={() => setAbTest((v) => !v)} />
+              {abTest && (
+                <AdminSelect
+                  label="Version"
+                  value={abVersion}
+                  onChange={(v) => setAbVersion(v as "v1" | "v2" | "v3")}
+                  cols={3}
+                  options={[
+                    { value: "v1", label: "v1" },
+                    { value: "v2", label: "v2" },
+                    { value: "v3", label: "v3" },
+                  ]}
+                />
+              )}
+              <div className="my-1 border-t border-gray-100" />
               <AdminToggle label="Expert" checked={expert} onChange={() => setExpert((v) => !v)} />
               <AdminToggle label="My profile" checked={myProfile} onChange={() => setMyProfile((v) => !v)} />
               <div className="my-1 border-t border-gray-100" />

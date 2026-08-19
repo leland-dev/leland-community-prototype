@@ -1,21 +1,12 @@
-import { useEffect, useState } from "react";
-import { motion } from "motion/react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "motion/react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import OfferingCard from "../components/OfferingCard";
 import { Button, LinkButton } from "../components/Button";
-import addPlusIcon from "../assets/icons/add-plus.svg";
+import { OFFERINGS, type Offering } from "../lib/offerings";
 import editIcon from "../assets/icons/edit.svg";
-import arrowDiagonalIcon from "../assets/icons/arrow-diagonal.svg";
-import videoIcon from "../assets/icons/video-icon.svg";
-import coverImage from "../assets/img/cover-image-2.png";
-import pic1 from "../assets/profile photos/pic-1.png";
+import eyeIcon from "../assets/icons/eye.svg";
 import pic6 from "../assets/profile photos/pic-6.png";
-import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
-import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
-import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
-import bootcampImg1 from "../assets/placeholder images/bootcamp-1.webp";
-import lelandPlusImg1 from "../assets/placeholder images/leland-plus-images/3cf6e985-7397-4e50-8e06-ef9a8f40491c.webp";
-import lelandPlusImg2 from "../assets/placeholder images/leland-plus-images/b9669ad2-4b6f-4c32-83e1-d1370dbf9484.webp";
 
 const categoryData: Record<string, {
   name: string;
@@ -87,81 +78,338 @@ const categoryData: Record<string, {
   },
 };
 
-// Secondary gray edit/add button — matches the Profile (new) page.
-function EditButton({ label = "Edit", icon = editIcon, className = "" }: { label?: string; icon?: string; className?: string }) {
+const HERO_BG = "#F3F1E6";
+
+// Dashed border drawn as an SVG background so we can set a larger dash length
+// and a lower-opacity stroke than CSS `border-dashed` allows. Stroke is
+// gray-light (#4C4C4C) at 50% opacity; rx matches rounded-2xl (16px).
+const dashedBorderStyle = {
+  backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='%234C4C4C' stroke-opacity='0.5' stroke-width='2' stroke-dasharray='6%2c 5' stroke-linecap='butt'/%3e%3c/svg%3e")`,
+};
+
+const LEVEL_OPTIONS = ["Associate", "Manager", "Senior Manager", "Director", "VP", "C-Level"];
+
+type ListingSettings = {
+  headline: string;
+  yearsOfExperience: string;
+  levelOfExperience: string;
+  qualifications: string;
+  services: string[];
+  videoLink: string;
+};
+
+const inputClass = "w-full rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[15px] text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark";
+const labelClass = "mb-1.5 block text-[14px] font-medium text-gray-light";
+
+// Coach-side offering card — visually identical to the customer's
+// CustomerOfferingCard (cover, title, headline, price row) but with a hover
+// state that darkens the thumbnail and reveals Preview + Edit icon buttons.
+function CoachOfferingCard({ offering, onPreview, onEdit }: { offering: Offering; onPreview: () => void; onEdit: () => void }) {
+  const priceRow = (
+    <div>
+      {offering.startingAt && (
+        <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-gray-extra-light">Starting at</p>
+      )}
+      <p className="flex items-baseline gap-x-1 text-[14px] font-semibold text-gray-dark">
+        <span>{offering.price}</span>
+        {offering.origPrice && <span className="font-normal text-gray-extra-light line-through">{offering.origPrice}</span>}
+        {offering.savePct != null && <span className="ml-auto text-[12px] font-medium text-[#1B8A54]">Save {offering.savePct}%</span>}
+      </p>
+    </div>
+  );
+
   return (
-    <Button size="sm" variant="secondary" rounded="rounded-full" className={`text-[15px] font-semibold ${className}`}>
-      <img src={icon} alt="" className="h-[18px] w-[18px]" />
-      {label}
-    </Button>
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_1px_3px_rgba(16,24,40,0.06)] transition-shadow duration-200 hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]">
+      <div className="relative">
+        <img src={offering.image} alt="" className="aspect-[1200/630] w-full object-cover" />
+        {/* Hover: darken the thumbnail and reveal Preview + Edit controls. */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-3 bg-black/45 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          <button onClick={onPreview} aria-label="Preview offering" className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-gray-dark shadow-[0_2px_8px_rgba(16,24,40,0.2)] transition-colors hover:bg-gray-hover">
+            <img src={eyeIcon} alt="" className="h-5 w-5" />
+          </button>
+          <button onClick={onEdit} aria-label="Edit offering" className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-gray-dark shadow-[0_2px_8px_rgba(16,24,40,0.2)] transition-colors hover:bg-gray-hover">
+            <img src={editIcon} alt="" className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col p-4">
+        <p className="text-[15px] font-semibold leading-tight text-gray-dark">{offering.title}</p>
+        <p className="mt-1 text-[14px] leading-snug text-gray-light">{offering.headline}</p>
+        <div className="mt-auto pt-3">{priceRow}</div>
+      </div>
+    </div>
   );
 }
 
-// Small per-section edit affordance — always shown on mobile, reveals on hover
-// of the enclosing `group` section on desktop.
-function SectionEditButton() {
+const boxClass = "flex h-full flex-col rounded-[20px] bg-white p-6 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10";
+
+type FirstStep = { type: "free" | "trial"; discountPct: number };
+const DISCOUNT_OPTIONS = [25, 50, 75];
+
+// Left card (spans two columns) — avatar + name, an Edit link to the details
+// modal, the serif headline, service-tag chips, and a truncated qualifications
+// blurb.
+function CategoryInfoCard({ settings, onEdit }: { settings: ListingSettings; onEdit: () => void }) {
   return (
-    <button
-      aria-label="Edit"
-      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full opacity-100 transition-all hover:bg-gray-hover md:opacity-0 md:group-hover:opacity-100"
-    >
-      <img src={editIcon} alt="" className="h-4 w-4 opacity-60" />
-    </button>
+    <section className={`${boxClass} lg:col-span-2`}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-2.5">
+          <img src={pic6} alt="Samantha Parker" className="h-7 w-7 rounded-full object-cover" />
+          <span className="text-[16px] text-gray-dark">Samantha Parker</span>
+        </div>
+        <button onClick={onEdit} className="flex shrink-0 items-center gap-1.5 text-[15px] font-medium text-gray-dark transition-opacity hover:opacity-70">
+          <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
+          <span className="underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">Edit</span>
+        </button>
+      </div>
+
+      <h2 className="mt-4 font-serif text-[26px] leading-tight text-gray-dark">{settings.headline}</h2>
+
+      {settings.services.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {settings.services.slice(0, 4).map((s) => (
+            <span key={s} className="rounded-full bg-[#222222]/5 px-3 py-1.5 text-[13px] font-medium text-gray-extra-light">{s}</span>
+          ))}
+          {settings.services.length > 4 && (
+            <span className="rounded-full bg-[#222222]/5 px-3 py-1.5 text-[13px] font-medium text-gray-extra-light">+{settings.services.length - 4}</span>
+          )}
+        </div>
+      )}
+
+      <p className="mt-4 line-clamp-2 text-[15px] leading-relaxed text-gray-light">{settings.qualifications}</p>
+    </section>
   );
 }
 
-// Product type filters. `types` is matched against each offering's `type`
-// (null = show everything).
-const productFilters: { label: string; types: string[] | null }[] = [
-  { label: "All", types: null },
-  { label: "Packages", types: ["package", "hourly-package"] },
-  { label: "Memberships", types: ["membership"] },
-  { label: "Content", types: ["content"] },
-  { label: "Courses", types: ["course"] },
-  { label: "Agents", types: ["agent"] },
-];
+// First-step picker — a borderless serif dropdown; picking "Paid trial session"
+// reveals a discount selector.
+const revealBtnClass = "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover";
 
-const offerings = [
-  { type: "hourly-package" as const, title: "10-Hour Coaching Package", subtitle: "10 hours · $1,200", image: eventImg1 },
-  { type: "package" as const, title: "MBA Application Package", subtitle: "Comprehensive Package · Starting at $750", image: eventImg2 },
-  { type: "package" as const, title: "Interview Prep Package", subtitle: "Comprehensive Package · Starting at $500", image: eventImg3 },
-  { type: "hourly" as const, title: "Custom hourly coaching", subtitle: "$150 per hour", image: "" },
-  { type: "course" as const, title: "GMAT Exam Prep Bootcamp", subtitle: "Next cohort starts June 1", image: bootcampImg1 },
-  {
-    type: "content" as const,
-    title: "How I Got Into Stanford GSB",
-    subtitle: "Marcus Thomas · 251 views",
-    image: lelandPlusImg1,
-  },
-  {
-    type: "content" as const,
-    title: "GMAT Study Plan: 3 Months to 750+",
-    subtitle: "Samantha Parker · 184 views",
-    image: lelandPlusImg2,
-  },
-];
+function FirstStepDropdown({ value, onChange }: { value: FirstStep; onChange: (v: FirstStep) => void }) {
+  return (
+    <div className="flex flex-1 flex-col justify-center p-6">
+      <p className="text-[15px] text-gray-light">First step</p>
+      <div className="group relative mt-1 flex items-center justify-between gap-3">
+        <p className="font-serif text-[24px] leading-tight text-gray-dark">
+          {value.type === "free" ? "Free intro call" : "Paid trial session"}
+        </p>
+        <span className={`${revealBtnClass} group-hover:bg-gray-hover`} aria-hidden>
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+        </span>
+        <select
+          value={value.type}
+          onChange={(e) => onChange({ ...value, type: e.target.value as FirstStep["type"] })}
+          aria-label="First step"
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        >
+          <option value="free">Free intro call</option>
+          <option value="trial">Paid trial session</option>
+        </select>
+      </div>
+
+      {value.type === "trial" && (
+        <div className="mt-4">
+          <p className="mb-2 text-[13px] font-medium text-gray-light">Discount off your hourly rate</p>
+          <div className="flex gap-2">
+            {DISCOUNT_OPTIONS.map((pct) => {
+              const on = value.discountPct === pct;
+              return (
+                <button
+                  key={pct}
+                  type="button"
+                  onClick={() => onChange({ ...value, discountPct: pct })}
+                  className={`flex-1 rounded-lg border py-1.5 text-[13px] font-semibold transition-colors ${on ? "border-gray-dark bg-gray-dark text-white" : "border-gray-stroke text-gray-dark hover:border-gray-dark"}`}
+                >
+                  {pct}%
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Hourly rate — a serif display with a pencil that swaps in a text input and a
+// Save button.
+function HourlyRateSection({ rate, onChange }: { rate: string; onChange: (v: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(rate);
+
+  const startEdit = () => { setDraft(rate); setEditing(true); };
+  const save = () => { onChange(draft); setEditing(false); };
+
+  return (
+    <div className="flex flex-1 flex-col justify-center p-6">
+      <p className="text-[15px] text-gray-light">Hourly rate</p>
+      {editing ? (
+        <div className="mt-2 flex items-center gap-2">
+          <div className="relative">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[16px] font-semibold text-gray-dark">$</span>
+            <input
+              autoFocus
+              inputMode="numeric"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value.replace(/[^0-9]/g, ""))}
+              onKeyDown={(e) => { if (e.key === "Enter") save(); }}
+              placeholder="0"
+              className="w-[110px] rounded-lg border border-gray-stroke bg-white py-2 pl-7 pr-3 text-[16px] font-semibold text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
+            />
+          </div>
+          <Button size="sm" variant="primary" rounded="rounded-full" onClick={save}>Save</Button>
+        </div>
+      ) : (
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <p className="font-serif text-[24px] leading-tight text-gray-dark">${rate || "0"} per hour</p>
+          <button onClick={startEdit} aria-label="Edit hourly rate" className={revealBtnClass}>
+            <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Right card — first step (dropdown) stacked over hourly rate (inline edit),
+// split by a divider.
+function CategoryPricingCard({ firstStep, onFirstStepChange, rate, onRateChange }: { firstStep: FirstStep; onFirstStepChange: (v: FirstStep) => void; rate: string; onRateChange: (v: string) => void }) {
+  return (
+    <section className="flex h-full flex-col divide-y divide-[#222222]/10 rounded-[20px] bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10">
+      <FirstStepDropdown value={firstStep} onChange={onFirstStepChange} />
+      <HourlyRateSection rate={rate} onChange={onRateChange} />
+    </section>
+  );
+}
+
+// Reusable modal chrome: portal, backdrop, animated panel, close button, a
+// serif title + subtitle, scrollable body, and a full-width "Done" footer.
+function ModalShell({ open, title, subtitle, onClose, children }: { open: boolean; title: string; subtitle: string; onClose: () => void; children: ReactNode }) {
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 32 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 32 }}
+            transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative flex max-h-[85vh] w-full max-w-[600px] flex-col overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)]"
+          >
+            <button onClick={onClose} aria-label="Close" className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gray-hover text-gray-dark transition-colors hover:bg-[#ebebeb]">
+              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            </button>
+
+            <div className="flex-1 overflow-y-auto px-7 pb-2 pt-8">
+              <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">{title}</h2>
+              <p className="mt-1.5 text-[15px] text-gray-light">{subtitle}</p>
+              <div className="mt-6">{children}</div>
+            </div>
+
+            <div className="px-7 pb-7 pt-3">
+              <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" onClick={onClose}>Done</Button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body,
+  );
+}
+
+// Modal for editing all of the "set it and forget it" listing settings.
+function ListingSettingsModal({ open, settings, allServices, onPatch, onClose }: { open: boolean; settings: ListingSettings; allServices: string[]; onPatch: (patch: Partial<ListingSettings>) => void; onClose: () => void }) {
+  const toggleService = (s: string) =>
+    onPatch({ services: settings.services.includes(s) ? settings.services.filter((x) => x !== s) : [...settings.services, s] });
+
+  return (
+    <ModalShell open={open} onClose={onClose} title="Edit listing details" subtitle="These details appear on your public listing for this category.">
+      <div className="flex flex-col gap-5">
+        <div>
+          <label className={labelClass}>Headline</label>
+          <input value={settings.headline} onChange={(e) => onPatch({ headline: e.target.value })} placeholder="A short headline for this category" className={inputClass} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={labelClass}>Years of experience</label>
+            <input inputMode="numeric" value={settings.yearsOfExperience} onChange={(e) => onPatch({ yearsOfExperience: e.target.value.replace(/[^0-9]/g, "") })} placeholder="0" className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>Level of experience</label>
+            <select value={settings.levelOfExperience} onChange={(e) => onPatch({ levelOfExperience: e.target.value })} className={inputClass}>
+              {LEVEL_OPTIONS.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className={labelClass}>Qualifications</label>
+          <textarea value={settings.qualifications} onChange={(e) => onPatch({ qualifications: e.target.value })} rows={6} placeholder="Describe your experience and qualifications for this category." className={`${inputClass} resize-none leading-relaxed`} />
+        </div>
+
+        <div>
+          <label className={labelClass}>Areas of expertise</label>
+          <div className="flex flex-wrap gap-2">
+            {allServices.map((s) => {
+              const on = settings.services.includes(s);
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => toggleService(s)}
+                  className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${on ? "bg-gray-dark text-white" : "bg-[#222222]/5 text-gray-extra-light hover:bg-[#222222]/10"}`}
+                >
+                  {s}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <label className={labelClass}>Category video</label>
+          <input value={settings.videoLink} onChange={(e) => onPatch({ videoLink: e.target.value })} placeholder="Paste a video link" className={inputClass} />
+          <p className="mt-1.5 text-[13px] text-gray-light">Adding a video here overrides the video from your Profile page for this category.</p>
+        </div>
+      </div>
+    </ModalShell>
+  );
+}
 
 export default function CoachCategoryEdit() {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
   const data = categoryData[category ?? ""];
 
-  const [productFilter, setProductFilter] = useState("All");
-  const [qualificationsExpanded, setQualificationsExpanded] = useState(false);
-  const activeFilter = productFilters.find((f) => f.label === productFilter);
-  const visibleOfferings = (activeFilter?.types
-    ? offerings.filter((o) => activeFilter.types!.includes(o.type))
-    : offerings
-  )
-    .map((o, i) => ({ o, i }))
-    .sort((a, b) => Number(b.o.type === "hourly") - Number(a.o.type === "hourly") || a.i - b.i)
-    .map(({ o }) => o);
+  const [settings, setSettings] = useState<ListingSettings | null>(() =>
+    data ? {
+      headline: data.headline,
+      yearsOfExperience: data.yearsOfExperience,
+      levelOfExperience: data.levelOfExperience,
+      qualifications: data.qualifications,
+      services: data.services,
+      videoLink: data.videoLink,
+    } : null,
+  );
+  const [editOpen, setEditOpen] = useState(false);
+  const [hourlyRate, setHourlyRate] = useState("150");
+  const [firstStep, setFirstStep] = useState<FirstStep>({ type: "free", discountPct: 50 });
+  const patchSettings = (patch: Partial<ListingSettings>) => setSettings((s) => (s ? { ...s, ...patch } : s));
 
   useEffect(() => {
     document.title = `Leland Prototype | Edit ${data?.name ?? "Category"}`;
   }, [data?.name]);
 
-  if (!data) {
+  if (!data || !settings) {
     return (
       <div className="max-w-[720px]">
         <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">Category not found</h1>
@@ -173,229 +421,75 @@ export default function CoachCategoryEdit() {
   }
 
   return (
-    <div className="max-w-[1280px]">
-      {/* Top actions — back */}
-      <div className="mb-6">
-        <Button size="sm" variant="secondary" iconOnly onClick={() => navigate("/coach/profile-new")} aria-label="Go back">
-          <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </Button>
-      </div>
-
-      <div className="flex flex-col gap-8 lg:flex-row-reverse lg:items-start lg:gap-16">
-        {/* Right column — wrap-up + price + video, divider-separated (mirrors the
-            profile template's expert sidebar rhythm). */}
-        <aside className="w-full lg:w-[360px] lg:shrink-0">
-          <div className="flex flex-col divide-y divide-gray-stroke text-[15px]">
-            {/* Profile preview — cover + avatar + name + headline */}
-            <div className="pb-6">
-              <div className="relative">
-                <img src={coverImage} alt="" className="h-36 w-full rounded-[6px] object-cover" />
-                <img
-                  src={pic6}
-                  alt="Samantha Parker"
-                  className="absolute -bottom-8 left-4 h-24 w-24 rounded-full border-4 border-white object-cover"
-                />
-              </div>
-              <p className="mt-11 text-[15px] font-medium leading-tight text-gray-light">Samantha Parker</p>
-              <h2 className="mt-1 font-serif text-[22px] leading-[1.2] text-gray-dark">{data.headline}</h2>
-              <div className="mt-4">
-                <EditButton label="Edit listing" className="w-full" />
-              </div>
-            </div>
-
-            {/* Experience */}
-            <div className="group py-6">
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-[15px] font-semibold text-gray-dark">Experience</p>
-                <SectionEditButton />
-              </div>
-              <div className="flex flex-col gap-2.5 text-[15px] font-normal text-gray-light">
-                <div className="flex items-center gap-2.5">
-                  <svg className="h-[17px] w-[17px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18.383 8H19.444C20.304 8 21 8.696 21 9.556V19.445C21 20.304 20.304 21 19.444 21H8.556C7.696 21 7 20.304 7 19.444V18" />
-                    <path d="M4.00109 18H15.3131C15.9821 18 16.6061 17.666 16.9771 17.109L17.7111 16.007C18.1491 15.35 18.3831 14.578 18.3831 13.788V6C18.3831 4.895 17.4881 4 16.3831 4H6.38309C5.27809 4 4.38309 4.895 4.38309 6V13.056C4.38309 13.677 4.23809 14.289 3.96109 14.845L3.10709 16.553C2.77409 17.218 3.25809 18 4.00109 18Z" />
-                    <path d="M8.38013 3V5" />
-                    <path d="M14.3801 3V5" />
-                  </svg>
-                  <span>{data.yearsOfExperience} years of experience</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <svg className="h-[17px] w-[17px] shrink-0" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22.1667 23.9167H5.83333C4.54417 23.9167 3.5 22.8725 3.5 21.5833V11.0833C3.5 9.79417 4.54417 8.75 5.83333 8.75H22.1667C23.4558 8.75 24.5 9.79417 24.5 11.0833V21.5833C24.5 22.8725 23.4558 23.9167 22.1667 23.9167Z" />
-                    <path d="M18.8697 8.75065V6.41732C18.8697 5.12815 17.8255 4.08398 16.5364 4.08398H11.4637C10.1745 4.08398 9.13037 5.12815 9.13037 6.41732V8.75065" />
-                    <path d="M3.5 11.084L10.9095 15.9735C11.291 16.2255 11.7378 16.3597 12.1952 16.3597H15.8048C16.2622 16.3597 16.709 16.2255 17.0905 15.9735L24.5 11.084" />
-                  </svg>
-                  <span>{data.levelOfExperience} level</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <svg className="h-[17px] w-[17px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9.48225 19.7413C9.77725 19.7023 10.0752 19.7823 10.3102 19.9633L11.3932 20.7943C11.7512 21.0693 12.2492 21.0693 12.6062 20.7943L13.7302 19.9313C13.9402 19.7703 14.2052 19.6993 14.4672 19.7343L15.8732 19.9193C16.3202 19.9783 16.7512 19.7293 16.9242 19.3123L17.4652 18.0043C17.5662 17.7593 17.7602 17.5653 18.0052 17.4643L19.3132 16.9233C19.7302 16.7513 19.9792 16.3193 19.9202 15.8723L19.7422 14.5173C19.7032 14.2223 19.7832 13.9243 19.9642 13.6893L20.7952 12.6063C21.0702 12.2483 21.0702 11.7503 20.7952 11.3933L19.9322 10.2693C19.7712 10.0593 19.7002 9.79425 19.7352 9.53225L19.9202 8.12625C19.9792 7.67925 19.7302 7.24825 19.3132 7.07525L18.0052 6.53425C17.7602 6.43325 17.5662 6.23925 17.4652 5.99425L16.9242 4.68625C16.7522 4.26925 16.3202 4.02025 15.8732 4.07925L14.4672 4.26425C14.2052 4.30025 13.9402 4.22925 13.7312 4.06925L12.6072 3.20625C12.2492 2.93125 11.7512 2.93125 11.3942 3.20625L10.2702 4.06925C10.0602 4.22925 9.79525 4.30025 9.53325 4.26625L8.12725 4.08125C7.68025 4.02225 7.24925 4.27125 7.07625 4.68825L6.53625 5.99625C6.43425 6.24025 6.24025 6.43425 5.99625 6.53625L4.68825 7.07625C4.27125 7.24925 4.02225 7.68025 4.08125 8.12725L4.26625 9.53325C4.30025 9.79525 4.22925 10.0603 4.06925 10.2693L3.20625 11.3933C2.93125 11.7513 2.93125 12.2493 3.20625 12.6063L4.06925 13.7303C4.23025 13.9403 4.30125 14.2053 4.26625 14.4673L4.08125 15.8733C4.02225 16.3203 4.27125 16.7513 4.68825 16.9243L5.99625 17.4653C6.24125 17.5663 6.43525 17.7603 6.53625 18.0053L7.07725 19.3133C7.24925 19.7303 7.68125 19.9793 8.12825 19.9203L9.48225 19.7413" />
-                    <path d="M14.7969 10.6031L11.2959 14.1041L9.19687 12.0041" />
-                  </svg>
-                  <span>Coaches professionally</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <svg className="h-[17px] w-[17px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                  <span>20+ people coached for {data.name}</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <svg className="h-[17px] w-[17px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 21C14.2091 21 16 16.9706 16 12C16 7.02944 14.2091 3 12 3C9.79086 3 8 7.02944 8 12C8 16.9706 9.79086 21 12 21Z" />
-                    <path d="M20.5 9H3.5" />
-                    <path d="M13 3H11C6.58172 3 3 6.58172 3 11V13C3 17.4183 6.58172 21 11 21H13C17.4183 21 21 17.4183 21 13V11C21 6.58172 17.4183 3 13 3Z" />
-                    <path d="M20.5 15H3.5" />
-                  </svg>
-                  <span>Open to working with clients outside the U.S.</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Qualifications */}
-            <div className="group py-6">
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-[15px] font-semibold text-gray-dark">{data.name} qualifications</p>
-                <SectionEditButton />
-              </div>
-              <div
-                className="cursor-pointer"
-                onClick={() => setQualificationsExpanded((p) => !p)}
-              >
-                <div className="relative">
-                  <motion.div
-                    initial={false}
-                    animate={{ height: qualificationsExpanded ? "auto" : 120 }}
-                    transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                    className="overflow-hidden"
-                  >
-                    <div className="flex flex-col gap-3 text-[15px] leading-relaxed text-[#4C4C4C]">
-                      {data.qualifications.split("\n\n").map((para, i) => (
-                        <p key={i}>{para}</p>
-                      ))}
-                    </div>
-                  </motion.div>
-                  {!qualificationsExpanded && (
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-white via-white to-transparent" />
-                  )}
-                </div>
-                <span className="mt-1 inline-block text-[15px] font-medium text-gray-dark">
-                  {qualificationsExpanded ? "Read less" : "Read more"}
-                </span>
-              </div>
-            </div>
-
-            {/* Areas of expertise */}
-            <div className="group py-6">
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-[15px] font-semibold text-gray-dark">Areas of expertise</p>
-                <SectionEditButton />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {data.services.map((service) => (
-                  <span
-                    key={service}
-                    className="rounded-full bg-[#222222]/5 px-3 py-1.5 text-[13px] font-medium text-gray-extra-light"
-                  >
-                    {service}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Category video — empty state */}
-            <div className="py-6">
-              <p className="mb-3 text-[15px] font-semibold text-gray-dark">Category video</p>
-              <div className="flex aspect-video w-full flex-col items-center justify-center gap-2.5 rounded-lg border border-dashed border-[#D4D4D4] bg-[#FAFAFA] px-4 text-center">
-                <img src={videoIcon} alt="" className="h-6 w-6 opacity-40" />
-                <Button size="sm" variant="secondary" rounded="rounded-full" className="text-[14px] font-semibold">
-                  <img src={addPlusIcon} alt="" className="h-[16px] w-[16px]" />
-                  Add video
-                </Button>
-              </div>
-              <p className="mt-3 text-[15px] leading-relaxed text-[#707070]">
-                Adding a video here overrides the video from your Profile page for this category.
-              </p>
-            </div>
+    <div>
+      {/* Hero — colored band bled to the edges of CoachLayout's flex-1 region
+          (flush to the sidebar on the left, the window on the right). Cancels
+          both the container's px padding and its mx-auto centering gutter: the
+          container is centered in flex-1, so the gutter is symmetric, and equal
+          negative margins reach both edges. The gutter only exists once flex-1
+          exceeds the max-w-[1280px] cap, hence the -24px floor. The constant
+          726 = (1280 max-width + 220 sidebar) / 2 - 24 padding. The overlapping
+          cards below pull up into it, matching the customer Dashboard hero. */}
+      <div
+        className="-ml-4 -mr-4 -mt-8 px-4 pb-28 pt-8 sm:-mt-10 sm:px-6 sm:pb-32 sm:pt-10 sm:[margin-left:min(-24px,calc(726px_-_50vw))] sm:[margin-right:min(-24px,calc(726px_-_50vw))]"
+        style={{ backgroundColor: HERO_BG }}
+      >
+        <div className="mx-auto max-w-[1040px]">
+          {/* Back + Preview listing */}
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <Button size="sm" variant="secondary" iconOnly onClick={() => navigate("/coach/profile-new")} aria-label="Go back">
+              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+            </Button>
+            <LinkButton size="md" variant="secondary" rounded="rounded-full" href={`/profile/samantha-parker/${category}`} className="text-[15px] font-semibold">
+              <img src={eyeIcon} alt="" className="h-[16px] w-[16px]" />
+              Preview listing
+            </LinkButton>
           </div>
-        </aside>
 
-        {/* Left column — products (main content) */}
-        <div className="min-w-0 flex-1">
-          {/* Page header */}
-          <div className="mb-10">
-            <h1 className="font-serif text-[48px] leading-[1.05] text-gray-dark">{data.name} listing</h1>
+          {/* Header */}
+          <div>
+            <h1 className="font-serif text-[42px] leading-[1.05] text-gray-dark md:text-[48px]">{data.name}</h1>
             <p className="mt-3 text-[18px] leading-relaxed text-gray-light">
-              Manage the products, pricing, and details that appear on your public listing for this category. Edits here only affect this category — your main profile stays untouched.
+              Manage the products, pricing, and details that appear on your public listing for this category.
             </p>
-            <div className="mt-6 flex items-center gap-3">
-              <Button
-                size="md"
-                variant="dark"
-                rounded="rounded-full"
-                className="text-[15px] font-semibold"
-                onClick={() => navigate(`/coach/manage/${category}/new-product`)}
-              >
-                <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-                New offering
-              </Button>
-              <LinkButton
-                size="md"
-                variant="secondary"
-                rounded="rounded-full"
-                href={`/profile/samantha-parker/${category}`}
-                className="text-[15px] font-semibold"
-              >
-                Preview listing
-                <img src={arrowDiagonalIcon} alt="" className="h-[16px] w-[16px]" />
-              </LinkButton>
-            </div>
           </div>
-
-          {/* Type filters */}
-          <div className="mb-4 flex flex-wrap gap-2">
-            {productFilters.map((f) => {
-              const active = productFilter === f.label;
-              return (
-                <button
-                  key={f.label}
-                  onClick={() => setProductFilter(f.label)}
-                  className={`cursor-pointer rounded-full border-[1.5px] px-3.5 py-2 text-[13px] font-medium text-gray-dark transition-colors ${
-                    active ? "border-gray-dark bg-[#f5f5f5]" : "border-transparent bg-[#f5f5f5] hover:bg-[#ebebeb]"
-                  }`}
-                >
-                  {f.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {visibleOfferings.length > 0 ? (
-            <div className="flex flex-col gap-1">
-              {visibleOfferings.map((o) => (
-                <OfferingCard
-                  key={o.title}
-                  type={o.type}
-                  title={o.title}
-                  subtitle={o.type === "content" ? (
-                    <span className="flex items-center gap-1.5">
-                      <img src={o.title.includes("Stanford") ? pic1 : pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />
-                      {o.subtitle}
-                    </span>
-                  ) : o.subtitle}
-                  image={o.image}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="py-8 text-center text-[14px] text-[#999999]">
-              No {productFilter.toLowerCase()} in this category yet.
-            </p>
-          )}
         </div>
       </div>
+
+      {/* Content — pulled up to overlap the hero band */}
+      <div className="relative z-10 mx-auto -mt-16 max-w-[1040px] sm:-mt-20">
+        {/* Category details, first step, and hourly rate */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} />
+          <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />
+        </div>
+
+        {/* Offerings grid */}
+        <div className="mt-12">
+          <h2 className="mb-4 text-[20px] font-semibold text-gray-dark">Offerings</h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Add-new tile */}
+            <button
+              onClick={() => navigate(`/coach/manage/${category}/new-product`)}
+              style={dashedBorderStyle}
+              className="group flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl bg-gray-hover transition-colors hover:bg-[#eeeeee]"
+            >
+              <svg className="h-7 w-7 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+              <span className="text-[15px] font-semibold leading-tight text-gray-light">New offering</span>
+            </button>
+            {OFFERINGS.map((o) => (
+              <CoachOfferingCard
+                key={o.slug}
+                offering={o}
+                onPreview={() => navigate(`/offering/${o.slug}`)}
+                onEdit={() => navigate(`/coach/manage/${category}/new-product`)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <ListingSettingsModal open={editOpen} settings={settings} allServices={data.allServices} onPatch={patchSettings} onClose={() => setEditOpen(false)} />
     </div>
   );
 }

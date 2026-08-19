@@ -43,6 +43,7 @@ import calendarIcon from "../assets/icons/calendar.svg";
 import calendarPageThinIcon from "../assets/icons/calendar-page-thin.svg";
 import chevronDownIcon from "../assets/icons/chevron-down.svg";
 import chevronRightIcon from "../assets/icons/chevron-right.svg";
+import arrowRightIcon from "../assets/icons/arrow-right.svg";
 import timeClockHourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import bookBookmarkIcon from "../assets/icons/book-bookmark.svg";
 import piggyBankIcon from "../assets/icons/Piggy bank, Coin.1.svg";
@@ -89,6 +90,7 @@ import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
 import bootcampImg1 from "../assets/placeholder images/bootcamp-1.webp";
 import aiBuilderCourseImg from "../assets/placeholder images/ai-builder-course.avif";
+import { OFFERINGS, AB_COLLAPSED_COUNT, type Offering } from "../lib/offerings";
 import lelandPlusImg1 from "../assets/placeholder images/leland-plus-images/3cf6e985-7397-4e50-8e06-ef9a8f40491c.webp";
 import lelandPlusImg2 from "../assets/placeholder images/leland-plus-images/b9669ad2-4b6f-4c32-83e1-d1370dbf9484.webp";
 import lelandPlusImg3 from "../assets/placeholder images/leland-plus-images/db2eb673-d212-41d5-8df9-6fa6de57bc23.webp";
@@ -541,7 +543,63 @@ function AltScheduleWidget() {
   );
 }
 
-export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = false, altSchedule = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; altSchedule?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void }) {
+// A/B "Offerings" grid — customer-facing offering cards. Mirrors the coach
+// builder's live preview card (cover, name, headline, price row) and links to
+// the standalone offering page. Bundled packages beat buying the products
+// separately, so most cards show the discounted price against a struck-through
+// original plus the % saved. Catalog lives in ../lib/offerings.
+function CustomerOfferingCard({ offering }: { offering: Offering }) {
+  const priceRow = (
+    <div>
+      {offering.startingAt && (
+        <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-gray-extra-light">Starting at</p>
+      )}
+      <p className="flex items-baseline gap-x-1 text-[14px] font-semibold text-gray-dark">
+        <span>{offering.price}</span>
+        {offering.origPrice && <span className="font-normal text-gray-extra-light line-through">{offering.origPrice}</span>}
+        {offering.savePct != null && <span className="ml-auto text-[12px] font-medium text-[#1B8A54]">Save {offering.savePct}%</span>}
+      </p>
+    </div>
+  );
+
+  return (
+    <Link to={`/offering/${offering.slug}`} className="flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white no-underline shadow-[0_1px_3px_rgba(16,24,40,0.06)] transition-shadow duration-200 hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]">
+      <img src={offering.image} alt="" className="aspect-[1200/630] w-full object-cover" />
+      <div className="flex flex-1 flex-col p-4">
+        <p className="text-[15px] font-semibold leading-tight text-gray-dark">{offering.title}</p>
+        <p className="mt-1 text-[14px] leading-snug text-gray-light">{offering.headline}</p>
+        <div className="mt-auto pt-3">{priceRow}</div>
+      </div>
+    </Link>
+  );
+}
+
+// Full-width hourly-coaching section shown below the offerings grid — larger,
+// left-aligned, with an icon tile, price, and a "Buy coaching" CTA.
+function CustomerHourlySection() {
+  return (
+    <div className="mt-6 flex cursor-pointer flex-col gap-4 rounded-2xl bg-gray-hover p-6 transition-colors hover:bg-gray-stroke sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 items-center gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#222222]/5">
+          <img src={timeClockHourglassIcon} alt="" className="h-6 w-6" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[15px] font-semibold text-gray-dark">
+            Custom hourly <span className="text-[#9B9B9B]">·</span> <span className="text-[#1B8A54]">$390/hr</span>
+          </p>
+          <p className="mt-1 text-[14px] text-gray-light">
+            Get help with Application Strategy, Cover Letters, and <span className="cursor-pointer underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">more</span>.
+          </p>
+        </div>
+      </div>
+      <Button size="md" variant="secondary" iconOnly className="shrink-0" aria-label="Buy coaching">
+        <img src={arrowRightIcon} alt="" className="h-5 w-5" />
+      </Button>
+    </div>
+  );
+}
+
+export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = false, altSchedule = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack, abTest = false, abVersion = "v1" }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; altSchedule?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void; abTest?: boolean; abVersion?: "v1" | "v2" | "v3" }) {
   const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
   const { dark: darkMode } = useDarkMode();
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
@@ -706,6 +764,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   const [inlineCategory, setInlineCategory] = useState(false);
   const [offeringsTypeOpen, setOfferingsTypeOpen] = useState(false);
   const [allOfferingsOpen, setAllOfferingsOpen] = useState(false);
+  // A/B offerings grid: collapsed to two rows until expanded.
+  const [offeringsExpanded, setOfferingsExpanded] = useState(false);
   const offeringsTypeRef = useRef<HTMLDivElement>(null);
 
   // In the unified template the identity (name + photo) comes from the slug and
@@ -719,7 +779,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   const adminRef = useRef<HTMLDivElement>(null);
   const moreMenuRef = useRef<HTMLDivElement>(null);
   const heroSentinelRef = useRef<HTMLDivElement>(null);
-  const sectionRefs = useRef<Record<string, HTMLHeadingElement | null>>({});
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const groupRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const navScrollRef = useRef<HTMLDivElement>(null);
   const customerTabStripRef = useRef<HTMLDivElement>(null);
@@ -741,7 +801,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   };
 
   const setSectionRef = useCallback(
-    (id: string) => (el: HTMLHeadingElement | null) => {
+    (id: string) => (el: HTMLElement | null) => {
       sectionRefs.current[id] = el;
     },
     [],
@@ -852,6 +912,42 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [catNavOpen]);
+
+  // Category switcher pill + dropdown, reused both as a standalone control and
+  // embedded on the right side of the A/B search bar.
+  const categorySwitcher = (
+    <div ref={catNavRef} className="relative shrink-0">
+      <button
+        onClick={() => setCatNavOpen(!catNavOpen)}
+        className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-4 py-2 text-[14px] font-semibold text-[#222222] transition-colors hover:bg-[#ebebeb]"
+      >
+        {categoryLabel ?? "All categories"}
+        <img src={chevronDownIcon} alt="" className={`h-4 w-4 transition-transform ${catNavOpen ? "rotate-180" : ""}`} />
+      </button>
+      <AnimatePresence>
+        {catNavOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+          >
+            {categories.map((c) => (
+              <button
+                key={c.slug}
+                onClick={() => { onSelectCategory?.(c.slug); setCatNavOpen(false); }}
+                className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${c.label === categoryLabel ? "bg-gray-hover" : ""}`}
+              >
+                {c.label}
+                {c.label === categoryLabel && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 
   useEffect(() => {
     if (!eventsCategoryOpen) return;
@@ -976,6 +1072,88 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
         </div>
       </div>
     </div>
+  );
+
+  // Profile badges (Customer favorite, etc.). Shown at the top of the Profile tab
+  // normally; in v3 they move below the "About" header instead.
+  const badgesRow = displayedBadges.length > 0 ? (
+    <div className="flex flex-col gap-6">
+      {displayedBadges.map((badge) => (
+        <div key={badge.headline} className="flex items-center gap-3">
+          {badge.emoji ? (
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[26px] leading-none">{badge.emoji}</span>
+          ) : (
+            <img src={badge.icon} alt="" className="h-8 w-8 shrink-0" />
+          )}
+          <div className="min-w-0">
+            <p className="text-[14px] font-semibold leading-tight text-gray-dark">{badge.headline}</p>
+            <p className="mt-0.5 text-[14px] leading-tight text-[#4C4C4C]">{badge.subheadline}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : null;
+
+  // The "Work with {firstName}" preview rendered as a plain profile section (A/B
+  // versions). Bracketed by dividers to match every other section. v1 uses the
+  // compact offering-card rows (no shadow); v2 & v3 swap in a one-row grid of the
+  // new offering cards. Placement differs by version: v3 renders it above the bio
+  // (topDivider off there — the tab bar already separates it — so pad the top).
+  const renderWorkWithPreview = (topDivider = true) => (
+    <>
+      {topDivider ? <div className="my-[36px] border-t border-gray-200" /> : <div className="pt-9" />}
+      <div ref={setSectionRef("offerings")} className="scroll-mt-[60px]">
+        <h2 className={`text-[22px] font-semibold text-gray-dark ${highLevel ? "mb-2" : "mb-4"}`}>
+          Work with {profileName.split(" ")[0]}
+        </h2>
+        {highLevel && (
+          <p className="mb-4 text-[15px] text-[#4C4C4C]">Select a category that you're looking for help in.</p>
+        )}
+        {highLevel ? (
+          renderCategoryButtons(false)
+        ) : abVersion === "v2" || abVersion === "v3" ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {OFFERINGS.slice(0, 3).map((o) => (
+              <CustomerOfferingCard key={o.slug} offering={o} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex w-full flex-col gap-2">
+            {coachConfig.offerings
+              .filter((o) => o.type === "package" || o.type === "hourly-package")
+              .slice(0, 4)
+              .map((o) => (
+                <OfferingCard
+                  key={o.title}
+                  type={o.type}
+                  title={o.title}
+                  subtitle={o.subtitle}
+                  image={o.image}
+                  ctaLabel={o.ctaLabel}
+                  href={o.href}
+                  showImage
+                  className="!px-3"
+                />
+              ))}
+          </div>
+        )}
+        <div className="mt-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
+          {!highLevel && (
+            <button
+              onClick={() => { setCoachTab("offerings"); scrollTabsIntoView(); }}
+              className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+            >
+              See {OFFERINGS.length - (abVersion === "v2" || abVersion === "v3" ? 3 : 4)} more offerings
+            </button>
+          )}
+          <div className="flex items-center gap-2 text-[13px] text-[#9b9b9b]">
+            <img src={shieldIcon} alt="" className="w-[12px]" />
+            <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
+          </div>
+        </div>
+      </div>
+      <div className="my-[36px] border-t border-gray-200" />
+    </>
   );
 
   return (
@@ -1860,8 +2038,13 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                       : "border-b-2 border-transparent text-gray-light hover:text-gray-dark"
                   }`}
                 >
-                  <span className="text-[16px] font-medium">
+                  <span className="inline-flex items-center gap-1.5 text-[16px] font-medium">
                     {tab === "about" ? "Profile" : tab === "offerings" ? "Offerings" : tab === "activity" ? "Activity" : tab === "saved" ? "Saved" : "Likes"}
+                    {tab === "offerings" && (
+                      <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-[#222222]/[0.06] px-[8px] py-[2px] text-[12px] font-medium text-gray-light/80">
+                        {OFFERINGS.length}
+                      </span>
+                    )}
                   </span>
                 </button>
               ))}
@@ -1873,39 +2056,36 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               these live inside the "About" tab (Offerings optionally in its own
               tab); otherwise they scroll inline. */}
           {!isCustomerProfile && (showOfferingsSection || showRestSections) && (<>
+          {/* v3 A/B: "Work with …" moves above the About group so the customer-
+              favorite badge + bio (now headed "About") sit below it. No top
+              divider here — it would collide with the tab bar's border. */}
+          {unified && coachTab === "about" && showOfferingsTab && abTest && abVersion === "v3" && renderWorkWithPreview(false)}
           {/* Legacy inline mobile Customer Favorite row (hidden for now). */}
           {unified && coachTab === "about" && showLegacyCustomerFavorite && effCustomerFavorite && (
             <div className="mt-2 flex flex-col">
               <div className="md:hidden">{customerFavoriteRow}</div>
             </div>
           )}
-          {/* Badges — up to 3, shown at the top of the Profile tab above the bio. */}
-          {unified && coachTab === "about" && displayedBadges.length > 0 && (
-            <div className="mt-6 flex flex-col gap-6">
-              {displayedBadges.map((badge) => (
-                <div key={badge.headline} className="flex items-center gap-3">
-                  {badge.emoji ? (
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[26px] leading-none">{badge.emoji}</span>
-                  ) : (
-                    <img src={badge.icon} alt="" className="h-8 w-8 shrink-0" />
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-[14px] font-semibold leading-tight text-gray-dark">{badge.headline}</p>
-                    <p className="mt-0.5 text-[14px] leading-tight text-[#4C4C4C]">{badge.subheadline}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          {/* Badges — up to 3, shown at the top of the Profile tab above the bio.
+              In v3 they move below the "About" header instead (see the bio block). */}
+          {unified && coachTab === "about" && !(abTest && abVersion === "v3") && badgesRow && (
+            <div className="mt-6">{badgesRow}</div>
           )}
 
           {/* Bio — long, clipped to 6 lines with a short white gradient fade. */}
           {unified && coachTab === "about" && (
             <div className="mt-6">
-              {/* Collapsed height = 6 lines (15px × leading 1.6 = 24px).
+              {abTest && abVersion === "v3" && (
+                <>
+                  <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">About</h2>
+                  {badgesRow && <div className="mb-6">{badgesRow}</div>}
+                </>
+              )}
+              {/* Collapsed height = 4 lines (15px × leading 1.6 = 24px).
                   Matches the "Note from …" expand/collapse animation. */}
               <motion.div
                 initial={false}
-                animate={{ height: bioExpanded ? "auto" : 144 }}
+                animate={{ height: bioExpanded ? "auto" : 96 }}
                 transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
                 className="relative overflow-hidden"
               >
@@ -1935,7 +2115,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                   className="pointer-events-none absolute inset-x-0 bottom-0 h-[3.2em] bg-gradient-to-t from-white to-transparent"
                 />
               </motion.div>
-              <Button size="md" variant="secondary" className="mt-3 mb-8 font-semibold" onClick={() => setBioExpanded((v) => !v)}>
+              <Button size="md" variant="secondary" className={`mt-3 font-semibold ${abTest ? "mb-8 min-[960px]:mb-0" : "mb-8"}`} onClick={() => setBioExpanded((v) => !v)}>
                 {bioExpanded ? "Read less" : "Read more"}
                 <img src={chevronDownIcon} alt="" className={`h-4 w-4 transition-transform ${bioExpanded ? "rotate-180" : ""}`} />
               </Button>
@@ -1961,7 +2141,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                  band and the Offerings tab sits right under the tab bar, so just
                  use plain spacing rather than a border divider. The Offerings tab
                  gets a bit more top padding. */
-              <div className={coachTab === "offerings" ? "pt-6" : "mt-4"} />
+              <div className={coachTab === "offerings" ? "pt-6" : abTest ? "" : "mt-4"} />
             ) : (
               <div className="my-[16px] border-t border-gray-200 md:my-[36px]" />
             )}
@@ -2138,7 +2318,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                     tab shows the full list. */}
                 {showOfferingsTab && (
                   coachTab === "about" ? (
-                    /* Preview band — beige background, tripled vertical padding,
+                    !abTest ? (
+                    /* Control — beige background, tripled vertical padding,
                        centered header in the hero-name style. Full-bleed on
                        mobile, contained + rounded on desktop. */
                     <div className="-mx-4 bg-[#F3F1E6] px-4 pt-8 pb-4 md:mx-0 md:rounded-2xl md:px-8 md:pt-10 md:pb-4">
@@ -2190,48 +2371,82 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                         </div>
                       </div>
                     </div>
+                    ) : abVersion === "v3" ? null : (
+                      /* v1 & v2 — plain section in its normal position. */
+                      renderWorkWithPreview()
+                    )
                   ) : (
                     <>
-                      <div className="mb-4 flex items-center justify-between gap-3">
-                        <h2 ref={setSectionRef("offerings")} className={`scroll-mt-[60px] ${highLevel ? "mt-4 text-[14px] font-medium text-gray-extra-light" : "text-[22px] font-semibold text-gray-dark"}`}>
-                          {highLevel ? "Select a category you're looking for help with:" : "Offerings"}
-                        </h2>
-                        {!highLevel && (
-                          <div ref={catNavRef} className="relative shrink-0">
-                            <button
-                              onClick={() => setCatNavOpen(!catNavOpen)}
-                              className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] transition-colors hover:bg-[#ebebeb]"
-                            >
-                              {categoryLabel ?? "All categories"}
-                              <img src={chevronDownIcon} alt="" className={`h-[14px] w-[14px] transition-transform ${catNavOpen ? "rotate-180" : ""}`} />
-                            </button>
-                            <AnimatePresence>
-                              {catNavOpen && (
-                                <motion.div
-                                  initial={{ opacity: 0, y: 6 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  exit={{ opacity: 0, y: 6 }}
-                                  transition={{ duration: 0.15, ease: "easeOut" }}
-                                  className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
-                                >
-                                  {categories.map((c) => (
-                                    <button
-                                      key={c.slug}
-                                      onClick={() => { onSelectCategory?.(c.slug); setCatNavOpen(false); }}
-                                      className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${c.label === categoryLabel ? "bg-gray-hover" : ""}`}
-                                    >
-                                      {c.label}
-                                      {c.label === categoryLabel && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
-                                    </button>
-                                  ))}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        )}
-                      </div>
+                      {abTest && !highLevel ? (
+                        /* Single search bar spanning the top, with the category
+                           switcher embedded on the far right. */
+                        <div ref={setSectionRef("offerings")} className="group mb-6 flex scroll-mt-[60px] items-center gap-2 rounded-full border border-gray-stroke bg-white py-1.5 pl-4 pr-1.5 transition-colors focus-within:border-gray-dark">
+                          <svg className="h-5 w-5 shrink-0 text-gray-extra-light transition-colors group-focus-within:text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="11" cy="11" r="7" />
+                            <path d="M21 21l-4.35-4.35" />
+                          </svg>
+                          <input
+                            type="text"
+                            placeholder="Search offerings"
+                            className="min-w-0 flex-1 bg-transparent text-[15px] text-gray-dark outline-none placeholder:text-gray-light"
+                          />
+                          {categorySwitcher}
+                        </div>
+                      ) : (
+                        <div className="mb-4 flex items-center justify-between gap-3">
+                          <h2 ref={setSectionRef("offerings")} className={`scroll-mt-[60px] ${highLevel ? "mt-4 text-[14px] font-medium text-gray-extra-light" : "text-[22px] font-semibold text-gray-dark"}`}>
+                            {highLevel ? "Select a category you're looking for help with:" : "Offerings"}
+                          </h2>
+                          {!highLevel && categorySwitcher}
+                        </div>
+                      )}
                       {highLevel ? (
                         renderCategoryButtons(false)
+                      ) : abTest ? (
+                        /* A/B improvement — customer-facing offering-card grid,
+                           truncated to two rows, with hourly coaching broken out
+                           into a full-width section below. */
+                        <>
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {OFFERINGS.slice(0, AB_COLLAPSED_COUNT).map((o) => (
+                              <CustomerOfferingCard key={o.title} offering={o} />
+                            ))}
+                          </div>
+                          <AnimatePresence initial={false}>
+                            {offeringsExpanded && (
+                              <motion.div
+                                key="more-offerings"
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                className="overflow-hidden"
+                              >
+                                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                  {OFFERINGS.slice(AB_COLLAPSED_COUNT).map((o) => (
+                                    <CustomerOfferingCard key={o.title} offering={o} />
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                          {OFFERINGS.length > AB_COLLAPSED_COUNT && (
+                            <div className="mt-6 flex items-center gap-4">
+                              <div className="h-px flex-1 bg-gray-stroke" />
+                              <Button
+                                size="md"
+                                variant="secondary"
+                                rounded="rounded-full"
+                                className="shrink-0 font-semibold"
+                                onClick={() => setOfferingsExpanded((v) => !v)}
+                              >
+                                {offeringsExpanded ? "Show less" : `See ${OFFERINGS.length - AB_COLLAPSED_COUNT} more offerings`}
+                              </Button>
+                              <div className="h-px flex-1 bg-gray-stroke" />
+                            </div>
+                          )}
+                          <CustomerHourlySection />
+                        </>
                       ) : (
                         <>
                           {/* Custom hourly banner — top of the offerings list. */}
@@ -2276,9 +2491,10 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
 
           {/* ── Rest of the coach detail (Events → Reviews) — lives in the About tab ── */}
           {showRestSections && (<>
-            {/* Events — on the unified template the beige offerings band above
-                already separates the sections, so skip the border divider. */}
-            <div className={`my-[36px] ${unified ? "" : "border-t border-gray-200"}`} />
+            {/* Events — on the unified template the offerings band above already
+                separates the sections, so skip the border divider. Except in v3,
+                where that band moved to the top, so restore the divider here. */}
+            <div className={`my-[36px] ${!unified || (abTest && abVersion === "v3") ? "border-t border-gray-200" : ""}`} />
             {inlineCategory ? (
               <div className="mb-4">
                 <h2 className="mb-[12px] flex items-center gap-0 text-[22px] leading-[1.1] font-medium text-gray-dark">
