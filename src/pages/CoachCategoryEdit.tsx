@@ -15,12 +15,16 @@ const categoryData: Record<string, {
   yearsOfExperience: string;
   levelOfExperience: string;
   videoLink: string;
+  hourlyRate: string;
+  analytics: { views: string; leads: string; bookings: string };
   services: string[];
   allServices: string[];
 }> = {
   "product-management": {
     name: "Product Management",
-    headline: "Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB",
+    headline: "Senior Product Leader | Ex-Meta & LinkedIn | Stanford GSB MBA",
+    hourlyRate: "175",
+    analytics: { views: "2.1k", leads: "27", bookings: "$3.2k" },
     qualifications: "8+ years of product management experience across consumer and enterprise products. I've led cross-functional teams at LinkedIn and Meta, shipping products used by hundreds of millions of people and owning roadmaps from early discovery through launch and iteration. My background spans 0-to-1 product bets, platform and infrastructure work, and large-scale growth initiatives, so I can meet you wherever you are in your PM journey.\n\nBefore moving into product, I started my career in software engineering, which gives me a strong technical foundation and a practical understanding of how to partner with design and engineering. I earned my MBA at Stanford GSB with a focus on strategic leadership and technology innovation, and I've spent the years since mentoring aspiring and early-career PMs.\n\nIn our sessions, I'll help you sharpen your product sense, prepare for behavioral and case-style interviews, and craft a resume and story that clearly communicate your impact. Whether you're breaking into product management, leveling up to senior or director roles, or preparing for interviews at top tech companies, we'll build a plan tailored to your goals.",
     yearsOfExperience: "8",
     levelOfExperience: "Director",
@@ -34,7 +38,9 @@ const categoryData: Record<string, {
   },
   "management-consulting": {
     name: "Management Consulting",
-    headline: "Ex-McKinsey Consultant | Wharton MBA | Case Prep Pro",
+    headline: "Ex-McKinsey Engagement Manager | Wharton MBA | 200+ MBB Case Preps",
+    hourlyRate: "200",
+    analytics: { views: "860", leads: "11", bookings: "$2.4k" },
     qualifications: "Former McKinsey engagement manager with a Wharton MBA and seven years of experience across strategy, operations, and organizational transformation engagements. I've led case teams serving Fortune 500 clients and worked directly with senior partners, so I know exactly what recruiters and interviewers at MBB and top boutique firms are looking for.\n\nOver the past several years I've coached candidates from a wide range of backgrounds — undergraduates, MBAs, advanced-degree holders, and experienced hires — into offers at McKinsey, Bain, BCG, and leading boutiques. My approach is structured but personal: we'll diagnose your specific gaps and build a focused plan rather than drilling generic frameworks.\n\nTogether we'll work through case interviews, market sizing, and fit and behavioral questions, and we'll position your resume and networking outreach to stand out in a competitive recruiting cycle. I'll give you honest, direct feedback and the reps you need to walk into interview day confident and prepared.",
     yearsOfExperience: "7",
     levelOfExperience: "Manager",
@@ -48,7 +54,9 @@ const categoryData: Record<string, {
   },
   mba: {
     name: "MBA",
-    headline: "MBA Expert | Stanford GSB | 100+ M7 Admits",
+    headline: "MBA Admissions Coach | Stanford GSB | 100+ M7 Admits",
+    hourlyRate: "150",
+    analytics: { views: "1.2k", leads: "18", bookings: "$1.8k" },
     qualifications: "Stanford GSB graduate with deep, hands-on expertise in MBA admissions. Over the past six years I've coached more than 100 candidates into M7 programs including HBS, Stanford GSB, and Wharton, as well as other top-15 schools. I've reviewed thousands of essays and mock interviews, and I understand what admissions committees are truly evaluating beneath the surface of an application.\n\nMy philosophy is that the strongest applications are authentic ones. Rather than manufacturing a polished-but-generic narrative, I'll help you uncover the genuine throughline in your experiences and articulate it with clarity and conviction. We'll define your positioning, build a balanced school list, and make sure every element of your application reinforces a consistent story.\n\nI offer end-to-end support across application strategy, essay development and editing, recommender guidance, and interview preparation, and I'm happy to jump in at any stage of the process. Whether you're just starting to explore programs or refining final drafts before the deadline, I'll help you present the most compelling version of yourself.",
     yearsOfExperience: "6",
     levelOfExperience: "Manager",
@@ -64,6 +72,8 @@ const categoryData: Record<string, {
   college: {
     name: "College",
     headline: "College Admissions Expert | Yale Grad | 50+ Ivy League Admits",
+    hourlyRate: "120",
+    analytics: { views: "540", leads: "7", bookings: "$1.1k" },
     qualifications: "Yale graduate and former admissions reader with firsthand experience evaluating applications from the other side of the desk. Over the past five years I've helped more than 50 students gain admission to Ivy League and top-20 universities, and I bring an insider's perspective on how committees actually read and compare candidates.\n\nI specialize in helping students find and tell their story. Many applicants have impressive accomplishments but struggle to communicate what makes them distinctive — that's where I focus my energy. We'll develop a personal essay that feels genuine and memorable, and shape supplemental essays that show real fit with each school.\n\nBeyond the essays, I'll help you build a balanced college list, strengthen your extracurricular narrative, and prepare for interviews with confidence. I work closely with both students and families throughout the process, keeping things organized and low-stress so you can put your best foot forward.",
     yearsOfExperience: "5",
     levelOfExperience: "Associate",
@@ -197,10 +207,10 @@ function CategoryInfoCard({ settings, onEdit, category, className = "" }: { sett
       <div className="mb-6">
         <div className="flex items-start justify-between gap-3">
           <img src={pic6} alt="Samantha Parker" className="h-[72px] w-[72px] rounded-full object-cover" />
-          <Button size="sm" variant="secondary" rounded="rounded-full" onClick={onEdit} className="text-[14px] font-semibold">
+          <button onClick={onEdit} className="flex shrink-0 items-center gap-1.5 text-[15px] font-medium text-gray-dark transition-opacity hover:opacity-70">
             <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
-            Edit
-          </Button>
+            <span className="underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">Edit</span>
+          </button>
         </div>
 
         <h2 className="mt-4 font-serif text-[26px] leading-tight text-gray-dark">{settings.headline}</h2>
@@ -330,10 +340,13 @@ function CategoryPricingCard({ firstStep, onFirstStepChange, rate, onRateChange 
 // roll-up (label + big value + mini area chart), trimmed to three metrics to
 // fit the two-column card. Sparkline logic matches the Dashboard's.
 const SPARK_COLOR = "#94370C";
-const ANALYTICS_METRICS = [
-  { key: "views", label: "Listing views", value: "1.2k", data: [40, 45, 50, 48, 55, 60, 58, 66, 70, 68, 75, 80, 78, 85, 90, 95] },
-  { key: "leads", label: "New leads", value: "18", data: [1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7] },
-  { key: "bookings", label: "Bookings", value: "$1.8k", data: [100, 150, 120, 200, 250, 220, 300, 350, 320, 400, 450, 420, 500, 550, 600, 650] },
+type CategoryAnalytics = { views: string; leads: string; bookings: string };
+// Label + decorative sparkline shape per metric; the numeric values come from
+// each category's data so the card reads differently per listing.
+const ANALYTICS_BASE = [
+  { key: "views" as const, label: "Listing views", data: [40, 45, 50, 48, 55, 60, 58, 66, 70, 68, 75, 80, 78, 85, 90, 95] },
+  { key: "leads" as const, label: "New leads", data: [1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7] },
+  { key: "bookings" as const, label: "Bookings", data: [100, 150, 120, 200, 250, 220, 300, 350, 320, 400, 450, 420, 500, 550, 600, 650] },
 ];
 
 function Sparkline({ id, data }: { id: string; data: number[] }) {
@@ -360,19 +373,19 @@ function Sparkline({ id, data }: { id: string; data: number[] }) {
   );
 }
 
-function CategoryAnalyticsCard({ className = "" }: { className?: string }) {
+function CategoryAnalyticsCard({ analytics, className = "" }: { analytics: CategoryAnalytics; className?: string }) {
   return (
     <section className={`${boxClass} ${className}`}>
       <div className="flex items-center justify-between">
         <h2 className="text-[19px] font-semibold leading-tight text-gray-dark">Analytics</h2>
-        <Link to="/coach/earnings" className="text-[14px] font-medium leading-none text-gray-extra-light transition-opacity hover:opacity-70">See all</Link>
+        <Link to="/coach/earnings" className="text-[15px] font-medium text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-opacity hover:opacity-70">See all</Link>
       </div>
       <div className="mt-6 flex flex-1 items-center">
         <div className="grid w-full grid-cols-3 gap-x-6">
-          {ANALYTICS_METRICS.map((m, i) => (
+          {ANALYTICS_BASE.map((m, i) => (
             <div key={m.key} className={`text-center ${i > 0 ? "border-l border-[#222222]/10 pl-6" : ""}`}>
               <p className="text-[13px] font-semibold leading-tight text-gray-extra-light">{m.label}</p>
-              <p className="mt-3 text-[24px] font-bold leading-none text-gray-dark">{m.value}</p>
+              <p className="mt-3 text-[24px] font-bold leading-none text-gray-dark">{analytics[m.key]}</p>
               <div className="mt-4 flex justify-center">
                 <Sparkline id={m.key} data={m.data} />
               </div>
@@ -503,9 +516,25 @@ export default function CoachCategoryEdit() {
     } : null,
   );
   const [editOpen, setEditOpen] = useState(false);
-  const [hourlyRate, setHourlyRate] = useState("150");
+  const [hourlyRate, setHourlyRate] = useState(() => data?.hourlyRate ?? "150");
   const [firstStep, setFirstStep] = useState<FirstStep>({ type: "free", discountPct: 50 });
   const patchSettings = (patch: Partial<ListingSettings>) => setSettings((s) => (s ? { ...s, ...patch } : s));
+
+  // Re-sync the data-derived state when the category param changes — React
+  // reuses this component instance across categories, so the useState
+  // initializers above only run for the first category visited.
+  useEffect(() => {
+    if (!data) return;
+    setSettings({
+      headline: data.headline,
+      yearsOfExperience: data.yearsOfExperience,
+      levelOfExperience: data.levelOfExperience,
+      qualifications: data.qualifications,
+      services: data.services,
+      videoLink: data.videoLink,
+    });
+    setHourlyRate(data.hourlyRate);
+  }, [category]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Admin: v1/v2 layout switch (bottom-right 3-dot menu), persisted for demos.
   const [version, setVersion] = useState<CategoryVersion>(() => (localStorage.getItem(VERSION_KEY) as CategoryVersion) || "v3");
@@ -653,7 +682,7 @@ export default function CoachCategoryEdit() {
               <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />
             </div>
             <div className="flex min-w-0 flex-col gap-8">
-              <CategoryAnalyticsCard />
+              <CategoryAnalyticsCard analytics={data.analytics} />
               <OfferingsSection category={category} gridClass="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3" />
             </div>
           </div>
@@ -663,7 +692,7 @@ export default function CoachCategoryEdit() {
                 category info moves up into the hero preview). */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {version === "v2"
-                ? <CategoryAnalyticsCard className="lg:col-span-2" />
+                ? <CategoryAnalyticsCard analytics={data.analytics} className="lg:col-span-2" />
                 : <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} category={category} className="lg:col-span-2" />}
               <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />
             </div>
