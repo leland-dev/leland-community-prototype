@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion, type Variants } from "motion/react";
 import {
   Briefcase,
   BarChart3,
@@ -25,7 +25,7 @@ import SituationStep from "../onboarding/steps/SituationStep";
 import InstitutionSuggestions from "../onboarding/steps/InstitutionSuggestions";
 import ProfileSetup from "../onboarding/steps/ProfileSetup";
 import { StepChrome } from "../onboarding/steps/flowUI";
-import { Joining, InLine, Front } from "./Waitlist";
+import { Joining, InLine, Front, Notify } from "./Waitlist";
 
 /* ─────────────────────────────────────────────────────────────────────────
  * Waitlist Onboarding — the v3 onboarding flow wearing the waitlist's coat:
@@ -73,13 +73,10 @@ type Stage =
   | "profile"
   | "joining"
   | "inline"
-  | "front";
+  | "front"
+  | "notify";
 
-const rise = {
-  initial: (reduced: boolean) => (reduced ? { opacity: 0 } : { opacity: 0, y: 40 }),
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] as const, delay: 0.1 },
-};
+const EASE = [0.32, 0.72, 0, 1] as const;
 
 export default function WaitlistOnboarding() {
   const navigate = useNavigate();
@@ -103,6 +100,19 @@ export default function WaitlistOnboarding() {
   }, [stage, reduced]);
 
   const exit = () => navigate("/");
+
+  const dirRef = useRef<1 | -1>(1);
+  const delayRef = useRef(0);
+
+  type Nav = { d: 1 | -1; delay: number };
+
+  const go = (next: Stage, dir: 1 | -1 = 1) => {
+    dirRef.current = dir;
+    // Leaving the opener: let the film fade to white before the next screen
+    // slides in.
+    delayRef.current = stage === "opener" ? 0.55 : 0;
+    setStage(next);
+  };
 
   const logoVisible = stage === "loading" || stage === "opener";
   const logoDocked = stage === "opener";
@@ -139,11 +149,52 @@ export default function WaitlistOnboarding() {
   const chrome =
     STEP_INDEX[stage] !== undefined
       ? {
-          onBack: () => setStage(STEP_BACK[stage]!),
-          onSkip: () => setStage(STEP_SKIP[stage]!),
+          onBack: () => go(STEP_BACK[stage]!, -1),
+          onSkip: () => go(STEP_SKIP[stage]!),
           step: { index: STEP_INDEX[stage]!, total: TOTAL_STEPS },
         }
       : null;
+
+  /* screens are absolutely stacked so exit + enter overlap, left to right */
+  const screenVariants = {
+    enter: (c: Nav) => (reduced ? { opacity: 0 } : { x: c.d > 0 ? 96 : -96, opacity: 0 }),
+    center: (c: Nav) => ({
+      x: 0,
+      opacity: 1,
+      transition: {
+        x: { type: "spring" as const, stiffness: 280, damping: 30, mass: 0.9, delay: c.delay },
+        opacity: { duration: 0.32, ease: "easeOut" as const, delay: c.delay },
+      },
+    }),
+    exit: (c: Nav) =>
+      reduced
+        ? { opacity: 0 }
+        : { x: c.d > 0 ? -96 : 96, opacity: 0, transition: { duration: 0.38, ease: EASE } },
+  };
+
+  /* the opener appears with the film (no slide in) but exits like a screen */
+  const openerVariants = {
+    enter: { opacity: 0 },
+    center: { opacity: 1, transition: { duration: 0.4, ease: "easeOut" as const } },
+    exit: (c: Nav) =>
+      reduced
+        ? { opacity: 0 }
+        : { x: (c?.d ?? 1) > 0 ? -96 : 96, opacity: 0, transition: { duration: 0.38, ease: EASE } },
+  };
+
+  const screen = (key: string, children: React.ReactNode, variants: Variants = screenVariants as Variants) => (
+    <motion.div
+      key={key}
+      custom={{ d: dirRef.current, delay: delayRef.current }}
+      variants={variants}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      className="absolute inset-0"
+    >
+      {children}
+    </motion.div>
+  );
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-white">
@@ -191,92 +242,96 @@ export default function WaitlistOnboarding() {
 
       {/* ── step stage ── */}
       <div className="relative z-10 mx-auto flex h-full w-full max-w-[440px] flex-col">
-        {chrome ? (
-          <StepChrome onBack={chrome.onBack} onSkip={chrome.onSkip} step={chrome.step} />
-        ) : null}
+        {/* constant-height chrome slot: content never reflows when it appears */}
+        <div className="h-[52px] shrink-0">
+          <AnimatePresence>
+            {chrome ? (
+              <motion.div
+                key="chrome"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+              >
+                <StepChrome onBack={chrome.onBack} onSkip={chrome.onSkip} step={chrome.step} />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </div>
 
         <div className="relative min-h-0 flex-1">
-          <AnimatePresence mode="wait">
-            {stage === "loading" ? null : stage === "opener" ? (
-              <motion.div
-                key="opener"
-                exit={
-                  reduced
-                    ? { opacity: 0 }
-                    : { opacity: 0, y: 40, transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] } }
-                }
-                className="h-full"
-              >
-                <Opener
-                  variant="getStarted"
-                  onGetStarted={() => setStage("signin")}
-                  onSignIn={() => setStage("signin")}
-                  onExpert={() => navigate("/onboarding", { state: { expert: true } })}
-                />
-              </motion.div>
-            ) : stage === "signin" ? (
-              <motion.div key="signin" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
-                <Auth
-                  cohortName="the Leland community"
-                  onBack={() => setStage("opener")}
-                  onExit={exit}
-                  onNext={() => setStage("goal")}
-                />
-              </motion.div>
-            ) : stage === "goal" ? (
-              <motion.div key="goal" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
-                <GoalSelect onSelect={() => setStage("reassurance")} />
-              </motion.div>
-            ) : stage === "reassurance" ? (
-              <motion.div key="reassurance" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
-                <ExpertReassurance onContinue={() => setStage("interested")} />
-              </motion.div>
-            ) : stage === "interested" ? (
-              <motion.div key="interested" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
-                <ChoiceQuestion
-                  title="What are you most interested in?"
-                  options={INTERESTED}
-                  multi
-                  onContinue={() => setStage("looking")}
-                />
-              </motion.div>
-            ) : stage === "looking" ? (
-              <motion.div key="looking" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
-                <ChoiceQuestion
-                  title="What are you looking to do?"
-                  options={LOOKING}
-                  multi
-                  onContinue={() => setStage("situation")}
-                />
-              </motion.div>
-            ) : stage === "situation" ? (
-              <motion.div key="situation" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
-                <SituationStep onContinue={() => setStage("institutions")} />
-              </motion.div>
-            ) : stage === "institutions" ? (
-              <motion.div key="institutions" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
-                <InstitutionSuggestions onContinue={() => setStage("profile")} />
-              </motion.div>
-            ) : stage === "profile" ? (
-              <motion.div key="profile" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
-                <ProfileSetup
-                  onContinue={() => setStage("joining")}
-                  onSkip={() => setStage("joining")}
-                />
-              </motion.div>
-            ) : stage === "joining" ? (
-              <motion.div key="joining" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="h-full">
-                <Joining reduced={reduced} onDone={() => setStage("inline")} />
-              </motion.div>
-            ) : stage === "inline" ? (
-              <motion.div key="inline" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
-                <InLine invited={false} reduced={reduced} onDone={() => navigate("/")} onFront={() => setStage("front")} />
-              </motion.div>
-            ) : (
-              <motion.div key="front" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
-                <Front reduced={reduced} onDone={() => navigate("/")} />
-              </motion.div>
-            )}
+          <AnimatePresence custom={{ d: dirRef.current, delay: delayRef.current }}>
+            {stage === "loading"
+              ? null
+              : stage === "opener"
+                ? screen(
+                    "opener",
+                    <Opener
+                      variant="getStarted"
+                      onGetStarted={() => go("signin")}
+                      onSignIn={() => go("signin")}
+                      onExpert={() => navigate("/onboarding", { state: { expert: true } })}
+                    />,
+                    openerVariants as Variants,
+                  )
+                : stage === "signin"
+                  ? screen(
+                      "signin",
+                      <Auth
+                        cohortName="the Leland community"
+                        onBack={() => go("opener", -1)}
+                        onExit={exit}
+                        onNext={() => go("goal")}
+                      />,
+                    )
+                  : stage === "goal"
+                    ? screen("goal", <GoalSelect onSelect={() => go("reassurance")} />)
+                    : stage === "reassurance"
+                      ? screen("reassurance", <ExpertReassurance onContinue={() => go("interested")} />)
+                      : stage === "interested"
+                        ? screen(
+                            "interested",
+                            <ChoiceQuestion
+                              title="What are you most interested in?"
+                              options={INTERESTED}
+                              multi
+                              onContinue={() => go("looking")}
+                            />,
+                          )
+                        : stage === "looking"
+                          ? screen(
+                              "looking",
+                              <ChoiceQuestion
+                                title="What are you looking to do?"
+                                options={LOOKING}
+                                multi
+                                onContinue={() => go("situation")}
+                              />,
+                            )
+                          : stage === "situation"
+                            ? screen("situation", <SituationStep onContinue={() => go("institutions")} />)
+                            : stage === "institutions"
+                              ? screen("institutions", <InstitutionSuggestions onContinue={() => go("profile")} />)
+                              : stage === "profile"
+                                ? screen(
+                                    "profile",
+                                    <ProfileSetup onContinue={() => go("joining")} onSkip={() => go("joining")} />,
+                                  )
+                                : stage === "joining"
+                                  ? screen("joining", <Joining reduced={reduced} onDone={() => go("inline")} />)
+                                  : stage === "inline"
+                                    ? screen(
+                                        "inline",
+                                        <InLine
+                                          invited={false}
+                                          reduced={reduced}
+                                          onDone={() => go("notify")}
+                                          onFront={() => go("front")}
+                                        />,
+                                      )
+                                    : stage === "front"
+                                      ? screen("front", <Front reduced={reduced} onDone={() => go("notify")} />)
+                                      : screen("notify", <Notify reduced={reduced} onDone={() => navigate("/profile-v2")} />)}
           </AnimatePresence>
         </div>
       </div>

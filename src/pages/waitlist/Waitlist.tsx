@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "motion/react";
-import { ArrowRight, Check, Copy, Ticket, Sparkles, TrendingUp, GraduationCap, MessageCircle, Mail, MoreHorizontal, X } from "lucide-react";
+import { ArrowRight, Bell, Check, Copy, Ticket, Sparkles, TrendingUp, GraduationCap, MessageCircle, Mail, MoreHorizontal, X } from "lucide-react";
 
 import { StepChrome, StepHeading, SharpStar } from "../onboarding/steps/flowUI";
 import { MEMBER_AVATARS } from "../onboarding/mockData";
@@ -17,10 +17,10 @@ import wordmark from "../../assets/leland-logos/leland-wordmark.svg";
  * landing cascades its elements off to the left with a stagger.
  * ──────────────────────────────────────────────────────────────────────── */
 
-type Stage = "landing" | "code" | "details" | "goal" | "joining" | "inline" | "front";
+type Stage = "landing" | "code" | "details" | "goal" | "joining" | "inline" | "front" | "notify";
 
-// Wave ladder by passes sent: 0, 1, 2. The third send goes to the finale.
-const WAVE_LADDER = { regular: [3, 2, 2], invited: [2, 1, 1] } as const;
+// Spot in line by passes sent: 0, 1, 2. The third send goes to the finale.
+const SPOT_LADDER = { regular: [158, 106, 54], invited: [42, 28, 15] } as const;
 const INVITE_CODES = ["7F3K2M", "Q2XM9A", "9BWD4T"];
 const CODE_RE = /^[A-Z0-9]{6}$/;
 
@@ -395,13 +395,13 @@ function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => voi
   );
 }
 
-/* ── in line: staged entrance, wave headline, passes, done ── */
+/* ── in line: staged entrance, spot-in-line headline, passes, done ── */
 export function InLine({ invited, reduced, onDone, onFront }: { invited: boolean; reduced: boolean; onDone: () => void; onFront: () => void }) {
   const [sent, setSent] = useState<boolean[]>([false, false, false]);
   const [sharing, setSharing] = useState<number | null>(null);
   const used = sent.filter(Boolean).length;
-  const ladder = invited ? WAVE_LADDER.invited : WAVE_LADDER.regular;
-  const wave = `You're in wave ${ladder[Math.min(used, 2)]}`;
+  const ladder = invited ? SPOT_LADDER.invited : SPOT_LADDER.regular;
+  const spot = ladder[Math.min(used, 2)];
 
   const markSent = (i: number) => {
     const next = sent.map((v, idx) => (idx === i ? true : v));
@@ -453,14 +453,14 @@ export function InLine({ invited, reduced, onDone, onFront }: { invited: boolean
           >
             <AnimatePresence mode="wait">
               <motion.h1
-                key={wave}
+                key={spot}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.35 }}
                 className="mt-4 text-balance font-serif text-[30px] leading-[1.12] text-gray-dark"
               >
-                {wave}
+                You're #{spot} in line
               </motion.h1>
             </AnimatePresence>
           </motion.div>
@@ -472,7 +472,7 @@ export function InLine({ invited, reduced, onDone, onFront }: { invited: boolean
           transition={{ delay: reduced ? 0.2 : 1.55, duration: 0.45, ease: EASE }}
           className="mx-auto mt-9 max-w-[30ch] text-[15px] leading-relaxed text-gray-light"
         >
-          Send these 3 passes and we'll bump you to the front of the line.
+          Invite your friends to move to the front of the line.
         </motion.p>
         <div className="mt-4 flex flex-col gap-2.5">
           {INVITE_CODES.map((code, i) => (
@@ -510,10 +510,6 @@ export function InLine({ invited, reduced, onDone, onFront }: { invited: boolean
           animate={{ opacity: 1 }}
           transition={{ delay: reduced ? 0.4 : 2.6, duration: 0.45 }}
         >
-          <p className="mt-6 text-[13px] text-gray-light">
-            We'll text you when your wave opens.
-          </p>
-
           <button onClick={onDone} className={`mt-8 ${DARK_CTA}`}>
             Done
           </button>
@@ -560,7 +556,7 @@ export function Front({ reduced, onDone }: { reduced: boolean; onDone: () => voi
           transition={{ delay: 0.45, duration: 0.45 }}
           className="mt-3 max-w-[28ch] text-[15px] leading-relaxed text-gray-light"
         >
-          All three passes spent. The moment the doors open, you're first through. We'll text you.
+          All three passes spent. The moment the doors open, you're first through.
         </motion.p>
       </div>
       <motion.div
@@ -570,6 +566,60 @@ export function Front({ reduced, onDone }: { reduced: boolean; onDone: () => voi
       >
         <button onClick={onDone} className={DARK_CTA}>
           Done
+        </button>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ── notifications: turn on texts before landing on the profile ── */
+export function Notify({ reduced, onDone }: { reduced: boolean; onDone: () => void }) {
+  // The real native permission prompt, where the browser supports it. Either
+  // answer moves on; the prototype only cares about the moment itself.
+  const request = async () => {
+    try {
+      if ("Notification" in window && Notification.permission === "default") {
+        await Notification.requestPermission();
+      }
+    } catch {
+      // unsupported context: just continue
+    }
+    onDone();
+  };
+
+  return (
+    <div className="flex h-full flex-col px-6 pb-8 pt-4 text-center">
+      <div className="flex flex-1 flex-col items-center justify-center pb-10">
+        <motion.span
+          initial={reduced ? { opacity: 0 } : { scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={reduced ? { duration: 0.2 } : { type: "spring", stiffness: 300, damping: 12 }}
+          className="flex h-20 w-20 items-center justify-center rounded-full bg-yellow"
+        >
+          <Bell size={34} strokeWidth={1.8} className="text-gray-dark" />
+        </motion.span>
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.45, ease: EASE }}
+          className="mt-6 max-w-[16ch] text-balance font-serif text-[34px] leading-[1.08] text-gray-dark"
+        >
+          We'll text you when the doors open
+        </motion.h1>
+      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.4 }}
+      >
+        <button onClick={request} className={DARK_CTA}>
+          Get notified
+        </button>
+        <button
+          onClick={onDone}
+          className="mt-3 flex h-11 w-full items-center justify-center text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark"
+        >
+          Not now
         </button>
       </motion.div>
     </div>
@@ -724,8 +774,10 @@ export default function Waitlist() {
                     : stage === "joining"
                       ? screen("joining", <Joining reduced={reduced} onDone={() => go("inline")} />)
                       : stage === "inline"
-                        ? screen("inline", <InLine invited={!!inviteCode} reduced={reduced} onDone={() => navigate("/")} onFront={() => go("front")} />)
-                        : screen("front", <Front reduced={reduced} onDone={() => navigate("/")} />)}
+                        ? screen("inline", <InLine invited={!!inviteCode} reduced={reduced} onDone={() => go("notify")} onFront={() => go("front")} />)
+                        : stage === "front"
+                          ? screen("front", <Front reduced={reduced} onDone={() => go("notify")} />)
+                          : screen("notify", <Notify reduced={reduced} onDone={() => navigate("/profile-v2")} />)}
           </AnimatePresence>
         </div>
       </div>

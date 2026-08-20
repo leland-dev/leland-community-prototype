@@ -50,9 +50,11 @@ export default function ProfileSetup({
           <h2 className="text-balance font-serif text-[28px] leading-[1.12] text-gray-dark md:text-[32px]">
             {photo ? "Here's the photo we found" : "Add a profile photo"}
           </h2>
-          <p className="mt-2 text-[15px] leading-relaxed text-gray-light">
-            {photo ? "Want to change it?" : "A face helps people connect with you."}
-          </p>
+          {photo ? null : (
+            <p className="mt-2 text-[15px] leading-relaxed text-gray-light">
+              A face helps people connect with you.
+            </p>
+          )}
         </div>
 
         {/* photo — centered in the remaining space */}
@@ -75,7 +77,7 @@ export default function ProfileSetup({
             onClick={() => fileRef.current?.click()}
             className="text-[15px] font-medium text-gray-dark underline decoration-gray-stroke underline-offset-4 transition-colors hover:decoration-gray-dark"
           >
-            {photo ? "Choose a different photo" : "Upload a photo"}
+            {photo ? "Change photo" : "Upload a photo"}
           </button>
           <input
             ref={fileRef}
