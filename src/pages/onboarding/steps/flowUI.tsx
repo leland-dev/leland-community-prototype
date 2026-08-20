@@ -8,13 +8,13 @@ import { Button } from "../../../components/Button";
 /* Fake iOS status bar: full-screen flows cover the real one, and emulators
    have no safe-area insets, so the prototype draws its own. Always occupies
    its row (no reflow); `visible` just fades it. */
-export function StatusBar({ visible = true }: { visible?: boolean }) {
+export function StatusBar({ visible = true, light = false }: { visible?: boolean; light?: boolean }) {
   return (
     <div
       aria-hidden
-      className={`flex h-[54px] shrink-0 items-center justify-between px-8 text-gray-dark transition-opacity duration-300 ${
-        visible ? "opacity-100" : "opacity-0"
-      }`}
+      className={`flex h-[54px] shrink-0 items-center justify-between px-8 transition-opacity duration-300 ${
+        light ? "text-white" : "text-gray-dark"
+      } ${visible ? "opacity-100" : "opacity-0"}`}
     >
       <span className="w-[54px] text-center text-[15px] font-semibold">9:41</span>
       <span className="flex items-center gap-1.5">

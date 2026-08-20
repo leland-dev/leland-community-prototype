@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "motion/react";
-import { ArrowRight, Bell, Check, Copy, Ticket, Sparkles, TrendingUp, GraduationCap, MessageCircle, Mail, MoreHorizontal, X } from "lucide-react";
+import { ArrowRight, Bell, Check, Copy, Ticket, Sparkles, TrendingUp, GraduationCap, Laptop, MessageCircle, Mail, X } from "lucide-react";
 
 import { StepChrome, StepHeading, SharpStar, StatusBar } from "../onboarding/steps/flowUI";
 import { MEMBER_AVATARS } from "../onboarding/mockData";
@@ -330,68 +330,162 @@ function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => voi
     onSend();
   };
 
+  const messagesBadge = (
+    <span className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-[6px] bg-gradient-to-b from-[#6BE36B] to-[#12B722] ring-2 ring-[#252527]">
+      <MessageCircle size={11} strokeWidth={0} fill="currentColor" className="text-white" />
+    </span>
+  );
+  const airdropBadge = (
+    <span className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-[6px] bg-[#0A84FF] ring-2 ring-[#252527]">
+      <svg width="12" height="12" viewBox="0 0 48 48" fill="none" stroke="white" strokeWidth="5">
+        <circle cx="24" cy="24" r="7" />
+        <circle cx="24" cy="24" r="18" opacity="0.6" />
+      </svg>
+    </span>
+  );
+
+  const contacts = [
+    { name: "June's MacBook Pro", avatar: null as string | null, airdrop: true },
+    { name: "Maya Chen", avatar: MEMBER_AVATARS[0], airdrop: false },
+    { name: "April Ross", avatar: MEMBER_AVATARS[1], airdrop: false },
+    { name: "Sean Park", avatar: MEMBER_AVATARS[2], airdrop: false },
+  ];
+
   return (
-    <>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      onClick={onClose}
+      className="fixed inset-0 z-[80] flex flex-col bg-black/85"
+    >
+      <StatusBar light />
+
+      {/* link preview: a demo of the first screen */}
       <motion.div
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="fixed inset-0 z-[80] bg-gradient-to-t from-black/60 via-black/30 to-transparent"
-      />
-      <motion.div
-        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-        transition={{ duration: 0.32, ease: EASE }}
-        className="fixed inset-x-0 bottom-0 z-[90] mx-auto w-full max-w-[440px] rounded-t-[18px] bg-[#F2F2F7] pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+        initial={{ opacity: 0, scale: 0.94 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.96 }}
+        transition={{ type: "spring", stiffness: 320, damping: 28, delay: 0.06 }}
+        onClick={(e) => e.stopPropagation()}
+        className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-8"
       >
-        <div className="flex items-center gap-3 px-4 pb-3 pt-4">
-          <video
-            src="/waitlist-broll.mp4"
-            muted autoPlay loop playsInline
-            className="h-12 w-12 shrink-0 rounded-[10px] object-cover"
+        <div className="w-full max-w-[340px] overflow-hidden rounded-[16px] bg-[#2C2C2E] shadow-2xl">
+          <img
+            src="/waitlist-preview.png"
+            alt=""
+            className="h-[238px] w-full object-cover"
+            style={{ objectPosition: "50% 30%" }}
           />
-          <div className="min-w-0 flex-1 text-left">
-            <p className="truncate text-[15px] font-semibold leading-tight text-[#1C1C1E]">
+          <div className="bg-[#3A3A3C] px-4 py-3 text-left">
+            <p className="text-[16px] font-medium leading-snug text-white">
               The community for ambition
             </p>
-            <p className="truncate text-[12.5px] text-[#8E8E93]">
-              community.leland-staging.com · 1 Link
+            <p className="mt-0.5 truncate text-[13px] text-white/55">
+              community.leland-staging.com
             </p>
+          </div>
+        </div>
+        <button
+          onClick={() => sendVia(true)}
+          className="flex items-center gap-2 rounded-full bg-[#A8C7FA] px-6 py-2.5 text-[16px] font-medium text-[#062E6F]"
+        >
+          Copy link <Copy size={17} />
+        </button>
+      </motion.div>
+
+      {/* the sheet */}
+      <motion.div
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={{ duration: 0.32, ease: EASE }}
+        onClick={(e) => e.stopPropagation()}
+        className="mx-auto w-full max-w-[440px] rounded-t-[18px] bg-[#252527] pb-[max(1.25rem,env(safe-area-inset-bottom))] text-left"
+      >
+        <div className="flex items-center gap-3 px-4 pb-3.5 pt-4">
+          <img src="/waitlist-preview.png" alt="" className="h-12 w-12 shrink-0 rounded-[10px] object-cover" style={{ objectPosition: "50% 30%" }} />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[15px] font-semibold leading-tight text-white">
+              The community for ambition
+            </p>
+            <p className="truncate text-[12.5px] text-white/50">community.leland-staging.com</p>
           </div>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-[#E3E3E8] text-[#7C7C82]"
+            className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-[#3A3A3C] text-[#9B9BA1]"
           >
             <X size={16} strokeWidth={2.5} />
           </button>
         </div>
-        <div className="h-px bg-black/[0.08]" />
+        <div className="h-px bg-white/10" />
 
-        <div className="flex gap-5 px-5 pb-1 pt-4">
-          {[
-            { label: "Messages", Icon: MessageCircle, cls: "bg-gradient-to-b from-[#6BE36B] to-[#12B722]" },
-            { label: "Mail", Icon: Mail, cls: "bg-gradient-to-b from-[#4FA8F8] to-[#1663D9]" },
-            { label: "More", Icon: MoreHorizontal, cls: "bg-[#D1D1D6]" },
-          ].map((a) => (
-            <button key={a.label} onClick={() => sendVia(false)} className="flex w-[60px] flex-col items-center gap-1.5">
-              <span className={`flex h-[60px] w-[60px] items-center justify-center rounded-[14px] text-white ${a.cls}`}>
-                <a.Icon size={30} strokeWidth={a.label === "More" ? 2.5 : 2} fill={a.label === "Messages" ? "currentColor" : "none"} />
+        {/* contacts */}
+        <div className="flex gap-2 overflow-x-auto px-4 pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {contacts.map((c) => (
+            <button
+              key={c.name}
+              onClick={() => sendVia(false)}
+              className="flex w-[82px] shrink-0 flex-col items-center gap-1.5"
+            >
+              <span className="relative">
+                {c.avatar ? (
+                  <img src={c.avatar} alt="" className="h-[60px] w-[60px] rounded-full object-cover" />
+                ) : (
+                  <span className="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-white">
+                    <Laptop size={30} strokeWidth={1.6} className="text-gray-dark" />
+                  </span>
+                )}
+                {c.airdrop ? airdropBadge : messagesBadge}
               </span>
-              <span className="text-[11px] text-[#3C3C43]">{a.label}</span>
+              <span className="text-center text-[11px] leading-[1.25] text-white/90">{c.name}</span>
             </button>
           ))}
         </div>
 
-        <div className="mx-4 mt-3 overflow-hidden rounded-xl bg-white">
-          <button
-            onClick={() => sendVia(true)}
-            className="flex w-full items-center justify-between px-4 py-3 text-[16px] text-[#1C1C1E]"
-          >
-            Copy
-            <Copy size={19} className="text-[#1C1C1E]" />
+        {/* apps */}
+        <div className="flex gap-2 px-4 pb-1 pt-4">
+          <button onClick={() => sendVia(false)} className="flex w-[82px] flex-col items-center gap-1.5">
+            <span className="flex h-[60px] w-[60px] items-center justify-center rounded-[14px] bg-[#2E3033]">
+              <svg width="36" height="36" viewBox="0 0 48 48" fill="none" stroke="#1FA3FF" strokeWidth="3.2">
+                <circle cx="24" cy="24" r="6" />
+                <circle cx="24" cy="24" r="13" opacity="0.7" />
+                <circle cx="24" cy="24" r="20" opacity="0.4" />
+              </svg>
+            </span>
+            <span className="text-[11px] text-white/80">AirDrop</span>
+          </button>
+          <button onClick={() => sendVia(false)} className="flex w-[82px] flex-col items-center gap-1.5">
+            <span className="flex h-[60px] w-[60px] items-center justify-center rounded-[14px] bg-gradient-to-b from-[#6BE36B] to-[#12B722] text-white">
+              <MessageCircle size={32} strokeWidth={0} fill="currentColor" />
+            </span>
+            <span className="text-[11px] text-white/80">Messages</span>
+          </button>
+          <button onClick={() => sendVia(false)} className="flex w-[82px] flex-col items-center gap-1.5">
+            <span className="flex h-[60px] w-[60px] items-center justify-center rounded-[14px] bg-gradient-to-b from-[#4FA8F8] to-[#1663D9] text-white">
+              <Mail size={30} strokeWidth={2} />
+            </span>
+            <span className="text-[11px] text-white/80">Mail</span>
+          </button>
+          <button onClick={() => sendVia(false)} className="flex w-[82px] flex-col items-center gap-1.5">
+            <span className="flex h-[60px] w-[60px] items-center justify-center rounded-[14px] bg-white">
+              {/* simplified Chrome roundel: three ring arcs + blue core */}
+              <svg width="32" height="32" viewBox="0 0 48 48">
+                <g fill="none" strokeWidth="11">
+                  <path d="M11.44 16.75 A14.5 14.5 0 0 1 36.56 16.75" stroke="#EA4335" />
+                  <path d="M36.56 16.75 A14.5 14.5 0 0 1 24 38.5" stroke="#34A853" />
+                  <path d="M24 38.5 A14.5 14.5 0 0 1 11.44 16.75" stroke="#FBBC05" />
+                </g>
+                <circle cx="24" cy="24" r="8" fill="#4285F4" stroke="#fff" strokeWidth="2.6" />
+              </svg>
+            </span>
+            <span className="text-[11px] text-white/80">Chrome</span>
           </button>
         </div>
       </motion.div>
-    </>
+    </motion.div>
   );
 }
 
