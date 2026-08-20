@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { motion } from "motion/react";
-import { Check, Plus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 import { StepHeading } from "./flowUI";
 
@@ -18,6 +18,43 @@ export type FollowItem = {
   /** leading element — avatar, logo, or icon. */
   media: ReactNode;
 };
+
+/* Plus → check morph: the plus lines shrink into a dot, the dot pops into
+   the check. Reverses quietly on deselect. */
+function PlusCheck({ on }: { on: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <motion.line
+        x1="6.5" y1="12" x2="17.5" y2="12"
+        initial={false}
+        animate={{ scale: on ? 0 : 1, opacity: on ? 0 : 1 }}
+        transition={{ duration: 0.16, ease: "easeIn" }}
+        style={{ transformOrigin: "center" }}
+      />
+      <motion.line
+        x1="12" y1="6.5" x2="12" y2="17.5"
+        initial={false}
+        animate={{ scale: on ? 0 : 1, opacity: on ? 0 : 1 }}
+        transition={{ duration: 0.16, ease: "easeIn" }}
+        style={{ transformOrigin: "center" }}
+      />
+      <motion.circle
+        cx="12" cy="12" r="2" fill="currentColor" stroke="none"
+        initial={false}
+        animate={{ scale: on ? [0, 1, 1, 0] : 0 }}
+        transition={on ? { duration: 0.3, times: [0, 0.45, 0.7, 1] } : { duration: 0.1 }}
+        style={{ transformOrigin: "center" }}
+      />
+      <motion.path
+        d="M6.8 12.6l3.4 3.4 6.9-7.6"
+        initial={false}
+        animate={{ scale: on ? 1 : 0, opacity: on ? 1 : 0 }}
+        transition={on ? { delay: 0.24, type: "spring", stiffness: 480, damping: 18 } : { duration: 0.1 }}
+        style={{ transformOrigin: "center" }}
+      />
+    </svg>
+  );
+}
 
 export default function FollowList({
   title,
@@ -59,10 +96,7 @@ export default function FollowList({
     <div className="flex h-full flex-col">
       {/* fixed header: title + search */}
       <div className="shrink-0 px-6 pb-3 pt-2">
-        <StepHeading
-          title={title}
-          subtitle={enough ? doneText : `${ctaVerb} ${remaining} or more to ${purpose}.`}
-        />
+        <StepHeading title={title} />
         <div className="relative">
           <Search
             size={17}
@@ -103,17 +137,13 @@ export default function FollowList({
                 <button
                   onClick={() => toggle(item.id)}
                   aria-label={active ? `Following ${item.title}` : `Follow ${item.title}`}
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${
                     active
                       ? "bg-gray-dark text-white"
                       : "bg-[#f4f4f4] text-gray-dark hover:bg-[#e9e9e9]"
                   }`}
                 >
-                  {active ? (
-                    <Check size={19} strokeWidth={2.75} />
-                  ) : (
-                    <Plus size={19} strokeWidth={2.75} />
-                  )}
+                  <PlusCheck on={active} />
                 </button>
               </motion.div>
             );
