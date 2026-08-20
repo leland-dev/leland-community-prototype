@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "motion/react";
-import { ArrowRight, Check, Share, Copy, MessageCircle, Mail, MoreHorizontal, X } from "lucide-react";
+import { ArrowRight, Check, Share, Copy, Ticket, MessageCircle, Mail, MoreHorizontal, X } from "lucide-react";
 
 import { StepChrome, StepHeading, SharpStar } from "../onboarding/steps/flowUI";
 import ChoiceQuestion, { type Choice } from "../onboarding/steps/ChoiceQuestion";
@@ -214,18 +214,16 @@ function Details({ invited, cascade, onContinue }: { invited: boolean; cascade: 
     >
       <motion.div variants={item}>
         {invited ? (
-          <div className="mb-6 flex items-start gap-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-yellow">
-              <img src={mark} alt="" className="h-6 w-6" style={{ filter: "brightness(0)" }} />
+          <div className="mb-6">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow text-gray-dark">
+              <Ticket size={22} />
             </span>
-            <div>
-              <h2 className="text-balance font-serif text-[28px] leading-[1.12] text-gray-dark">
-                A friend saved you a spot
-              </h2>
-              <p className="mt-1.5 text-[15px] leading-relaxed text-gray-light">
-                This pass skips you to the front of the line.
-              </p>
-            </div>
+            <h2 className="mt-4 text-balance font-serif text-[28px] leading-[1.12] text-gray-dark">
+              A friend saved you a spot
+            </h2>
+            <p className="mt-2 text-[15px] leading-relaxed text-gray-light">
+              This pass skips you to the front of the line.
+            </p>
           </div>
         ) : (
           <StepHeading title="Save your spot" />
