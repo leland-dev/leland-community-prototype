@@ -20,7 +20,7 @@ import wordmark from "../../assets/leland-logos/leland-wordmark.svg";
 
 type Stage = "landing" | "code" | "details" | "goal" | "joining" | "inline";
 
-const WAVES = ["the front of the line", "the first wave", "the second wave"];
+const WAVES = ["You're at the front of the line", "You're in wave 1", "You're in wave 2"];
 const INVITE_CODES = ["7F3K2M", "Q2XM9A", "9BWD4T"];
 const CODE_RE = /^[A-Z0-9]{6}$/;
 
@@ -400,18 +400,10 @@ function InLine({ invited, reduced, onDone }: { invited: boolean; reduced: boole
                 transition={{ duration: 0.35 }}
                 className="mt-4 text-balance font-serif text-[30px] leading-[1.12] text-gray-dark"
               >
-                You're in {wave}
+                {wave}
               </motion.h1>
             </AnimatePresence>
           </motion.div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: reduced ? 0.1 : 1.35, duration: 0.5 }}
-        >
-          <p className="mt-3 text-[13.5px] text-gray-light">Your spot is secure</p>
         </motion.div>
 
         <motion.div
@@ -565,7 +557,7 @@ export default function Waitlist() {
             key="broll"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, x: reduced ? 0 : -60 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.55, ease: "easeInOut" }}
             className="absolute inset-0 bg-[#1a1a1a]"
           >
