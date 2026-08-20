@@ -18,9 +18,10 @@ import wordmark from "../../assets/leland-logos/leland-wordmark.svg";
  * landing cascades its elements off to the left with a stagger.
  * ──────────────────────────────────────────────────────────────────────── */
 
-type Stage = "landing" | "code" | "details" | "goal" | "joining" | "inline";
+type Stage = "landing" | "code" | "details" | "goal" | "joining" | "inline" | "front";
 
-const WAVES = ["You're at the front of the line", "You're in wave 1", "You're in wave 2"];
+// Wave ladder by passes sent: 0, 1, 2. The third send goes to the finale.
+const WAVE_LADDER = { regular: [3, 2, 2], invited: [2, 1, 1] } as const;
 const INVITE_CODES = ["7F3K2M", "Q2XM9A", "9BWD4T"];
 const CODE_RE = /^[A-Z0-9]{6}$/;
 
@@ -80,7 +81,7 @@ const landItem = {
 const landFade = {
   enter: { x: 64, opacity: 0 },
   center: { x: 0, opacity: 1, transition: { x: { type: "spring" as const, stiffness: 260, damping: 28 }, opacity: { duration: 0.35 } } },
-  exit: { opacity: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+  exit: { opacity: 0, transition: { duration: 0.45, ease: "easeOut" as const } },
 };
 
 function Landing({ onJoin, onInvite }: { onJoin: () => void; onInvite: () => void }) {
@@ -365,15 +366,19 @@ function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => voi
 }
 
 /* ── in line: staged entrance, wave headline, passes, done ── */
-function InLine({ invited, reduced, onDone }: { invited: boolean; reduced: boolean; onDone: () => void }) {
+function InLine({ invited, reduced, onDone, onFront }: { invited: boolean; reduced: boolean; onDone: () => void; onFront: () => void }) {
   const [sent, setSent] = useState<boolean[]>([false, false, false]);
   const [sharing, setSharing] = useState<number | null>(null);
   const used = sent.filter(Boolean).length;
-  const wave = WAVES[Math.max(0, (invited ? 1 : 2) - used)];
+  const ladder = invited ? WAVE_LADDER.invited : WAVE_LADDER.regular;
+  const wave = `You're in wave ${ladder[Math.min(used, 2)]}`;
 
   const markSent = (i: number) => {
-    setSent((s) => s.map((v, idx) => (idx === i ? true : v)));
+    const next = sent.map((v, idx) => (idx === i ? true : v));
+    setSent(next);
     setSharing(null);
+    // last pass spent: give the check a beat, then the finale
+    if (next.every(Boolean)) window.setTimeout(onFront, 700);
   };
 
   return (
@@ -478,6 +483,49 @@ function InLine({ invited, reduced, onDone }: { invited: boolean; reduced: boole
   );
 }
 
+/* ── front of the line: the finale after all three passes are spent ── */
+function Front({ reduced, onDone }: { reduced: boolean; onDone: () => void }) {
+  return (
+    <div className="flex h-full flex-col px-6 pb-8 pt-4 text-center">
+      <div className="flex flex-1 flex-col items-center justify-center pb-10">
+        <motion.span
+          initial={reduced ? { opacity: 0 } : { scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={reduced ? { duration: 0.2 } : { type: "spring", stiffness: 300, damping: 11 }}
+          className="flex h-20 w-20 items-center justify-center rounded-full bg-yellow"
+        >
+          <img src={mark} alt="" className="h-10 w-10" style={{ filter: "brightness(0)" }} />
+        </motion.span>
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.45, ease: EASE }}
+          className="mt-6 text-balance font-serif text-[34px] leading-[1.08] text-gray-dark"
+        >
+          You're at the front of the line
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.45, duration: 0.45 }}
+          className="mt-3 max-w-[28ch] text-[15px] leading-relaxed text-gray-light"
+        >
+          All three passes spent. The moment the doors open, you're first through. We'll text you.
+        </motion.p>
+      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.7, duration: 0.4 }}
+      >
+        <button onClick={onDone} className={DARK_CTA}>
+          Done
+        </button>
+      </motion.div>
+    </div>
+  );
+}
+
 export default function Waitlist() {
   const navigate = useNavigate();
   const reduced = useReducedMotion() ?? false;
@@ -502,7 +550,7 @@ export default function Waitlist() {
     dirRef.current = dir;
     // Leaving the landing: let the cascade + video fade finish (screen goes
     // fully white) before the next screen enters.
-    delayRef.current = stage === "landing" ? 0.5 : 0;
+    delayRef.current = stage === "landing" ? 0.8 : 0;
     setStage(next);
   };
 
@@ -569,7 +617,7 @@ export default function Waitlist() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
             className="absolute inset-0 bg-[#1a1a1a]"
           >
             {reduced ? (
@@ -620,7 +668,9 @@ export default function Waitlist() {
                       ))
                     : stage === "joining"
                       ? screen("joining", <Joining reduced={reduced} onDone={() => go("inline")} />)
-                      : screen("inline", <InLine invited={!!inviteCode} reduced={reduced} onDone={() => navigate("/")} />)}
+                      : stage === "inline"
+                        ? screen("inline", <InLine invited={!!inviteCode} reduced={reduced} onDone={() => navigate("/")} onFront={() => go("front")} />)
+                        : screen("front", <Front reduced={reduced} onDone={() => navigate("/")} />)}
           </AnimatePresence>
         </div>
       </div>
