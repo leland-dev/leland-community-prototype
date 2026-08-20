@@ -48,7 +48,7 @@ export default function ProfileSetup({
       <div className="flex min-h-0 flex-1 flex-col px-6 pb-32 pt-2">
         <div className="pt-2">
           <h2 className="text-balance font-serif text-[28px] leading-[1.12] text-gray-dark md:text-[32px]">
-            {photo ? "Profile photo" : "Add a profile photo"}
+            {photo ? "Pick a profile photo" : "Add a profile photo"}
           </h2>
           {photo ? null : (
             <p className="mt-2 text-[15px] leading-relaxed text-gray-light">
