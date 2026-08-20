@@ -9,30 +9,20 @@ import { MEMBER_AVATARS } from "../onboarding/mockData";
 import { REVIEW_STATS } from "../onboarding/data";
 import mark from "../../assets/leland-logos/leland-mark.svg";
 import wordmark from "../../assets/leland-logos/leland-wordmark.svg";
-import LelandLoader from "./LelandLoader";
 
 /* ─────────────────────────────────────────────────────────────────────────
- * Waitlist — a dead-end, invite-only "grand opening line" flow:
- *   landing (b-roll bg) → details → goal → joining → in line (spot + passes).
- * Invited users arrive via a pass link (?code=LELAND-XXXX) that lands them on
- * a claim screen with the code already applied — no copy/paste. A manual code
- * screen exists as the fallback. Mirrors onboarding v3 chrome + CTAs.
+ * Waitlist: landing (b-roll) → details → goal → joining → in line (passes).
+ * Invite links (?code=XXXXXX) land on a claim moment with nothing to type;
+ * the manual code screen is six big boxes. Screens slide on a left-to-right
+ * axis with soft spring easing; back reverses the direction.
  * ──────────────────────────────────────────────────────────────────────── */
 
 type Stage = "landing" | "code" | "claim" | "details" | "goal" | "joining" | "inline";
 
-const START_SPOT = 1247;
-const INVITED_SPOT = 47; // a pass skips you (near) the front
-const JUMP = 100; // spots gained per accepted pass
-const INVITE_CODES = ["LELAND-7F3K", "LELAND-Q2XM", "LELAND-9BWD"];
-const CODE_RE = /^LELAND-[A-Z0-9]{4}$/;
-
-// Mock: who sent the pass (real impl resolves the code server-side).
-const INVITER_BY_CODE: Record<string, string> = {
-  "LELAND-7F3K": "Maya P.",
-  "LELAND-Q2XM": "Andre S.",
-  "LELAND-9BWD": "Karen J.",
-};
+// Wave ladder: passes sent walk you toward the front of the line.
+const WAVES = ["the front of the line", "the first wave", "the second wave"];
+const INVITE_CODES = ["7F3K2M", "Q2XM9A", "9BWD4T"];
+const CODE_RE = /^[A-Z0-9]{6}$/;
 
 const GOALS: Choice[] = [
   { label: "Get into a top school" },
@@ -58,7 +48,6 @@ function formatPhone(input: string): string {
   return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
 }
 
-/* Read ?code= from the URL — works for both /waitlist?code=X and hash URLs. */
 function codeFromUrl(): string | null {
   const fromSearch = new URLSearchParams(window.location.search).get("code");
   const hash = window.location.hash;
@@ -69,36 +58,7 @@ function codeFromUrl(): string | null {
   return CODE_RE.test(raw) ? raw : null;
 }
 
-/* Animated spot number: counts up on reveal, then eases to each new value. */
-function useAnimatedNumber(target: number, reduced: boolean) {
-  const [shown, setShown] = useState(reduced ? target : 0);
-  const shownRef = useRef(shown);
-  shownRef.current = shown;
-  useEffect(() => {
-    if (reduced) { setShown(target); return; }
-    const from = shownRef.current;
-    if (from === target) return;
-    const ms = from === 0 ? 1000 : 600;
-    let raf = 0, start = 0;
-    const tick = (t: number) => {
-      if (!start) start = t;
-      const p = Math.min((t - start) / ms, 1);
-      setShown(Math.round(from + (target - from) * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, reduced]);
-  return shown;
-}
-
-const rise = (reduced: boolean) => ({
-  initial: reduced ? { opacity: 0 } : { opacity: 0, y: 40 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] as const, delay: 0.05 },
-});
-
-/* ── landing — white text over the b-roll ── */
+/* ── landing ── */
 function Landing({ onJoin, onInvite }: { onJoin: () => void; onInvite: () => void }) {
   return (
     <div className="flex h-full flex-col px-6 pb-8 pt-[max(5.5rem,env(safe-area-inset-top))] text-center text-white">
@@ -150,15 +110,10 @@ function Landing({ onJoin, onInvite }: { onJoin: () => void; onInvite: () => voi
   );
 }
 
-/* ── manual code entry — the fallback when someone didn't tap their link ── */
+/* ── manual code entry: six big boxes, every letter matters ── */
 function CodeEntry({ onClaim }: { onClaim: (code: string) => void }) {
   const [code, setCode] = useState("");
   const valid = CODE_RE.test(code);
-  const format = (v: string) => {
-    let s = v.toUpperCase().replace(/[^A-Z0-9-]/g, "");
-    if (!s.startsWith("LELAND-") && s.length > 6 && s.startsWith("LELAND")) s = `LELAND-${s.slice(6)}`;
-    return s.slice(0, 11);
-  };
   return (
     <form
       onSubmit={(e) => { e.preventDefault(); if (valid) onClaim(code); }}
@@ -166,19 +121,42 @@ function CodeEntry({ onClaim }: { onClaim: (code: string) => void }) {
     >
       <StepHeading
         title="Enter your invite code"
-        subtitle="Got a link instead? Just tap it — the code fills in on its own."
+        subtitle="Got a link instead? Just tap it."
       />
-      <input
-        autoFocus
-        value={code}
-        onChange={(e) => setCode(format(e.target.value))}
-        autoCapitalize="characters"
-        autoCorrect="off"
-        spellCheck={false}
-        enterKeyHint="go"
-        placeholder="LELAND-XXXX"
-        className="w-full rounded-xl border border-gray-stroke bg-white px-4 py-3.5 text-center font-mono text-[18px] tracking-[0.08em] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-gray-dark/40"
-      />
+      <div className="relative">
+        <div className="flex justify-between gap-2">
+          {Array.from({ length: 6 }).map((_, i) => {
+            const filled = i < code.length;
+            const active = i === code.length;
+            return (
+              <div
+                key={i}
+                className={`flex h-16 flex-1 items-center justify-center rounded-2xl font-mono text-[26px] font-semibold text-gray-dark transition-colors ${
+                  active ? "bg-white ring-2 ring-gray-dark" : "bg-gray-hover"
+                }`}
+              >
+                {filled ? (
+                  code[i]
+                ) : active ? (
+                  <span className="h-7 w-[2px] animate-pulse rounded-full bg-gray-dark" />
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+        {/* real input overlaid, keeps paste + keyboard */}
+        <input
+          autoFocus
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))}
+          autoCapitalize="characters"
+          autoCorrect="off"
+          spellCheck={false}
+          enterKeyHint="go"
+          aria-label="6-character invite code"
+          className="absolute inset-0 h-full w-full cursor-pointer bg-transparent text-transparent caret-transparent outline-none"
+        />
+      </div>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[440px] bg-gradient-to-t from-white via-white/95 to-transparent px-6 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+1.5rem)] pt-8">
         <button
@@ -193,9 +171,8 @@ function CodeEntry({ onClaim }: { onClaim: (code: string) => void }) {
   );
 }
 
-/* ── claim — landing spot for a pass link; the code is already applied ── */
-function Claim({ code, onClaim }: { code: string; onClaim: () => void }) {
-  const inviter = INVITER_BY_CODE[code] ?? "A friend";
+/* ── claim: the moment. No code to re-enter, nothing to keep. ── */
+function Claim({ onClaim }: { onClaim: () => void }) {
   return (
     <div className="flex h-full flex-col px-6 pt-4 text-center">
       <div className="flex flex-1 flex-col items-center justify-center pb-16">
@@ -207,15 +184,12 @@ function Claim({ code, onClaim }: { code: string; onClaim: () => void }) {
         >
           <img src={mark} alt="" className="h-8 w-8" style={{ filter: "brightness(0)" }} />
         </motion.span>
-        <h1 className="mt-5 text-balance font-serif text-[30px] leading-[1.1] text-gray-dark">
-          {inviter} saved you a spot
+        <h1 className="mt-5 text-balance font-serif text-[32px] leading-[1.1] text-gray-dark">
+          A friend saved you a spot
         </h1>
         <p className="mt-3 max-w-[28ch] text-[15px] leading-relaxed text-gray-light">
           This pass skips you to the front of the line.
         </p>
-        <span className="mt-6 rounded-full bg-gray-hover px-4 py-2 font-mono text-[14px] tracking-[0.06em] text-gray-dark">
-          {code}
-        </span>
       </div>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[440px] bg-gradient-to-t from-white via-white/95 to-transparent px-6 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+1.5rem)] pt-8">
@@ -228,7 +202,7 @@ function Claim({ code, onClaim }: { code: string; onClaim: () => void }) {
   );
 }
 
-/* ── details — first name + phone ── */
+/* ── details ── */
 function Details({ onContinue }: { onContinue: () => void }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -274,7 +248,7 @@ function Details({ onContinue }: { onContinue: () => void }) {
   );
 }
 
-/* ── joining loader — logo animation + a bar that stalls, then finishes ── */
+/* ── joining loader: brand loader GIF on its matching cream surface ── */
 function Joining({ onDone, reduced }: { onDone: () => void; reduced: boolean }) {
   const dur = reduced ? 1.4 : 4.6;
   useEffect(() => {
@@ -282,9 +256,9 @@ function Joining({ onDone, reduced }: { onDone: () => void; reduced: boolean }) 
     return () => window.clearTimeout(t);
   }, [onDone, dur]);
   return (
-    <div className="flex h-full flex-col items-center justify-center px-10">
-      <LelandLoader size={140} ink="#222222" bg="#ffffff" />
-      <div className="mt-8 h-1.5 w-56 max-w-[70%] overflow-hidden rounded-full bg-gray-stroke">
+    <div className="flex h-full flex-col items-center justify-center px-10" style={{ backgroundColor: "#F8F7F4" }}>
+      <img src="/leland-loader.gif" alt="" className="w-[170px]" />
+      <div className="mt-6 h-1.5 w-56 max-w-[70%] overflow-hidden rounded-full bg-black/[0.08]">
         <motion.div
           initial={{ width: "0%" }}
           animate={{ width: reduced ? "100%" : ["0%", "58%", "58%", "100%"] }}
@@ -301,9 +275,7 @@ function Joining({ onDone, reduced }: { onDone: () => void; reduced: boolean }) 
   );
 }
 
-/* ── share sheet — iOS-fidelity mock: full-screen gradient scrim (light at
-      the top for the emulator's status bar), grey sheet, link preview with the
-      live b-roll video, squircle app tiles, grouped Copy row. ── */
+/* ── share sheet: iOS-fidelity mock ── */
 function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => void; onClose: () => void }) {
   const link = `${window.location.origin}/waitlist?code=${code}`;
   const message = `I saved you a spot in the Leland community. Tap to skip the line: ${link}`;
@@ -325,7 +297,6 @@ function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => voi
         transition={{ duration: 0.32, ease: [0.32, 0.72, 0, 1] }}
         className="fixed inset-x-0 bottom-0 z-[90] mx-auto w-full max-w-[440px] rounded-t-[18px] bg-[#F2F2F7] pb-[max(1.5rem,env(safe-area-inset-bottom))]"
       >
-        {/* header — link preview, like iOS shows the shared content */}
         <div className="flex items-center gap-3 px-4 pb-3 pt-4">
           <video
             src="/waitlist-broll.mp4"
@@ -350,7 +321,6 @@ function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => voi
         </div>
         <div className="h-px bg-black/[0.08]" />
 
-        {/* app tiles */}
         <div className="flex gap-5 px-5 pb-1 pt-4">
           {[
             { label: "Messages", Icon: MessageCircle, cls: "bg-gradient-to-b from-[#6BE36B] to-[#12B722]" },
@@ -366,7 +336,6 @@ function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => voi
           ))}
         </div>
 
-        {/* grouped action row */}
         <div className="mx-4 mt-3 overflow-hidden rounded-xl bg-white">
           <button
             onClick={() => sendVia(true)}
@@ -381,13 +350,12 @@ function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => voi
   );
 }
 
-/* ── in line — staged entrance: check pops, rises, then place + passes ── */
-function InLine({ invited, reduced }: { invited: boolean; reduced: boolean }) {
+/* ── in line: staged entrance, passes, done ── */
+function InLine({ invited, reduced, onDone }: { invited: boolean; reduced: boolean; onDone: () => void }) {
   const [sent, setSent] = useState<boolean[]>([false, false, false]);
   const [sharing, setSharing] = useState<number | null>(null);
   const used = sent.filter(Boolean).length;
-  const spot = Math.max(1, (invited ? INVITED_SPOT : START_SPOT) - used * JUMP);
-  const shown = useAnimatedNumber(spot, reduced);
+  const wave = WAVES[Math.max(0, (invited ? 1 : 2) - used)];
 
   const markSent = (i: number) => {
     setSent((s) => s.map((v, idx) => (idx === i ? true : v)));
@@ -399,7 +367,6 @@ function InLine({ invited, reduced }: { invited: boolean; reduced: boolean }) {
   return (
     <div className="relative h-full">
       <div className="h-full overflow-y-auto px-6 pb-10 pt-4 text-center">
-        {/* hero — pops centered, then rises to the top */}
         <motion.div
           initial={reduced ? undefined : { y: 170 }}
           animate={{ y: 0 }}
@@ -413,29 +380,34 @@ function InLine({ invited, reduced }: { invited: boolean; reduced: boolean }) {
           >
             <Check size={28} strokeWidth={3} />
           </motion.span>
-          <motion.h1
+          <motion.div
             initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: reduced ? 0 : 0.3, duration: 0.45, ease }}
-            className="mt-4 text-balance font-serif text-[28px] leading-[1.12] text-gray-dark"
           >
-            {invited ? "You skipped the line" : "You're in line"}
-          </motion.h1>
+            <AnimatePresence mode="wait">
+              <motion.h1
+                key={wave}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.35 }}
+                className="mt-4 text-balance font-serif text-[30px] leading-[1.12] text-gray-dark"
+              >
+                You're in {wave}
+              </motion.h1>
+            </AnimatePresence>
+          </motion.div>
         </motion.div>
 
-        {/* place in line — no bar, no fixed-total implication */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: reduced ? 0.1 : 1.35, duration: 0.5 }}
         >
-          <p className="mt-7 font-serif text-[44px] leading-none tabular-nums text-gray-dark">
-            {shown.toLocaleString()}
-          </p>
-          <p className="mt-2 text-[13.5px] text-gray-light">your place in line</p>
+          <p className="mt-3 text-[13.5px] text-gray-light">Your spot is secure</p>
         </motion.div>
 
-        {/* passes */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -460,7 +432,7 @@ function InLine({ invited, reduced }: { invited: boolean; reduced: boolean }) {
                   <span className={`block text-[15px] font-medium ${sent[i] ? "text-gray-light" : "text-gray-dark"}`}>
                     {sent[i] ? "Pass sent" : "Skip-the-line pass"}
                   </span>
-                  <span className="block truncate font-mono text-[12.5px] text-gray-light">{code}</span>
+                  <span className="block truncate font-mono text-[13px] tracking-[0.08em] text-gray-light">{code}</span>
                 </span>
                 {sent[i] ? (
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center text-gray-light">
@@ -482,6 +454,10 @@ function InLine({ invited, reduced }: { invited: boolean; reduced: boolean }) {
           <p className="mt-6 text-[13px] text-gray-light">
             We'll text you when your wave opens.
           </p>
+
+          <button onClick={onDone} className={`mt-8 ${DARK_CTA}`}>
+            Done
+          </button>
         </motion.div>
       </div>
 
@@ -503,10 +479,11 @@ export default function Waitlist() {
   const reduced = useReducedMotion() ?? false;
   const [stage, setStage] = useState<Stage>("landing");
   const [inviteCode, setInviteCode] = useState<string | null>(null);
+  // +1 = forward (new screen slides in from the right), -1 = back
+  const dirRef = useRef<1 | -1>(1);
 
   useEffect(() => { document.title = "Leland — Join the waitlist"; }, []);
 
-  // A tapped pass link carries the code — land straight on claim, prefilled.
   useEffect(() => {
     const code = codeFromUrl();
     if (code) {
@@ -515,35 +492,60 @@ export default function Waitlist() {
     }
   }, []);
 
-  const claim = (code: string) => {
-    setInviteCode(code);
-    setStage("claim");
+  const go = (next: Stage, dir: 1 | -1 = 1) => {
+    dirRef.current = dir;
+    setStage(next);
   };
 
-  // Same persistent chrome as onboarding — every page past the landing has a back.
   const chrome =
     stage === "code"
-      ? { onBack: () => setStage("landing"), step: undefined }
+      ? { onBack: () => go("landing", -1), step: undefined }
       : stage === "claim"
-        ? { onBack: () => setStage(inviteCode && !codeFromUrl() ? "code" : "landing"), step: undefined }
+        ? { onBack: () => go(inviteCode && !codeFromUrl() ? "code" : "landing", -1), step: undefined }
         : stage === "details"
-          ? { onBack: () => setStage(inviteCode ? "claim" : "landing"), step: { index: 1, total: 2 } }
+          ? { onBack: () => go(inviteCode ? "claim" : "landing", -1), step: { index: 1, total: 2 } }
           : stage === "goal"
-            ? { onBack: () => setStage("details"), step: { index: 2, total: 2 } }
+            ? { onBack: () => go("details", -1), step: { index: 2, total: 2 } }
             : stage === "inline"
-              ? { onBack: () => setStage("goal"), step: undefined }
+              ? { onBack: () => go("goal", -1), step: undefined }
               : null;
+
+  /* jelly slide: soft spring on x, quick fade; direction-aware */
+  const slideVariants = {
+    enter: (d: number) => (reduced ? { opacity: 0 } : { x: d > 0 ? 96 : -96, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (d: number) => (reduced ? { opacity: 0 } : { x: d > 0 ? -96 : 96, opacity: 0 }),
+  };
+  const slideTransition = {
+    x: { type: "spring" as const, stiffness: 300, damping: 30, mass: 0.9 },
+    opacity: { duration: 0.3, ease: "easeOut" as const },
+  };
+
+  const screen = (key: string, children: React.ReactNode) => (
+    <motion.div
+      key={key}
+      custom={dirRef.current}
+      variants={slideVariants}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      transition={slideTransition}
+      className="h-full"
+    >
+      {children}
+    </motion.div>
+  );
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-white">
-      {/* ── b-roll collage behind the landing, faded by a scrim ── */}
+      {/* b-roll behind the landing */}
       <AnimatePresence>
         {stage === "landing" ? (
           <motion.div
             key="broll"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, x: reduced ? 0 : -60 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
             className="absolute inset-0 bg-[#1a1a1a]"
           >
@@ -561,42 +563,28 @@ export default function Waitlist() {
         {chrome ? <StepChrome onBack={chrome.onBack} step={chrome.step} /> : null}
 
         <div className="relative min-h-0 flex-1">
-          <AnimatePresence mode="wait">
-            {stage === "landing" ? (
-              <motion.div key="landing" {...rise(reduced)} className="h-full">
-                <Landing onJoin={() => setStage("details")} onInvite={() => setStage("code")} />
-              </motion.div>
-            ) : stage === "code" ? (
-              <motion.div key="code" {...rise(reduced)} className="h-full">
-                <CodeEntry onClaim={claim} />
-              </motion.div>
-            ) : stage === "claim" ? (
-              <motion.div key="claim" {...rise(reduced)} className="h-full">
-                <Claim code={inviteCode ?? INVITE_CODES[0]} onClaim={() => setStage("details")} />
-              </motion.div>
-            ) : stage === "details" ? (
-              <motion.div key="details" {...rise(reduced)} className="h-full">
-                <Details onContinue={() => setStage("goal")} />
-              </motion.div>
-            ) : stage === "goal" ? (
-              <motion.div key="goal" {...rise(reduced)} className="h-full">
-                <ChoiceQuestion
-                  title="What brings you to Leland?"
-                  subtitle="Pick any that apply."
-                  options={GOALS}
-                  multi
-                  onContinue={() => setStage("joining")}
-                />
-              </motion.div>
-            ) : stage === "joining" ? (
-              <motion.div key="joining" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="h-full">
-                <Joining reduced={reduced} onDone={() => setStage("inline")} />
-              </motion.div>
-            ) : (
-              <motion.div key="inline" {...rise(reduced)} className="h-full">
-                <InLine invited={!!inviteCode} reduced={reduced} />
-              </motion.div>
-            )}
+          <AnimatePresence mode="wait" custom={dirRef.current}>
+            {stage === "landing"
+              ? screen("landing", <Landing onJoin={() => go("details")} onInvite={() => go("code")} />)
+              : stage === "code"
+                ? screen("code", <CodeEntry onClaim={(c) => { setInviteCode(c); go("claim"); }} />)
+                : stage === "claim"
+                  ? screen("claim", <Claim onClaim={() => go("details")} />)
+                  : stage === "details"
+                    ? screen("details", <Details onContinue={() => go("goal")} />)
+                    : stage === "goal"
+                      ? screen("goal", (
+                          <ChoiceQuestion
+                            title="What brings you to Leland?"
+                            subtitle="Pick any that apply."
+                            options={GOALS}
+                            multi
+                            onContinue={() => go("joining")}
+                          />
+                        ))
+                      : stage === "joining"
+                        ? screen("joining", <Joining reduced={reduced} onDone={() => go("inline")} />)
+                        : screen("inline", <InLine invited={!!inviteCode} reduced={reduced} onDone={() => navigate("/")} />)}
           </AnimatePresence>
         </div>
       </div>
