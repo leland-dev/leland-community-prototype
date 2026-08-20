@@ -293,7 +293,7 @@ function Goal({ onSelect }: { onSelect: () => void }) {
 }
 
 /* ── joining: tiny brand loader on pristine white ── */
-function Joining({ onDone, reduced }: { onDone: () => void; reduced: boolean }) {
+export function Joining({ onDone, reduced }: { onDone: () => void; reduced: boolean }) {
   const dur = reduced ? 1.4 : 4.6;
   useEffect(() => {
     const t = window.setTimeout(onDone, dur * 1000 + 200);
@@ -395,7 +395,7 @@ function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => voi
 }
 
 /* ── in line: staged entrance, wave headline, passes, done ── */
-function InLine({ invited, reduced, onDone, onFront }: { invited: boolean; reduced: boolean; onDone: () => void; onFront: () => void }) {
+export function InLine({ invited, reduced, onDone, onFront }: { invited: boolean; reduced: boolean; onDone: () => void; onFront: () => void }) {
   const [sent, setSent] = useState<boolean[]>([false, false, false]);
   const [sharing, setSharing] = useState<number | null>(null);
   const used = sent.filter(Boolean).length;
@@ -535,7 +535,7 @@ function InLine({ invited, reduced, onDone, onFront }: { invited: boolean; reduc
 }
 
 /* ── front of the line: the finale after all three passes are spent ── */
-function Front({ reduced, onDone }: { reduced: boolean; onDone: () => void }) {
+export function Front({ reduced, onDone }: { reduced: boolean; onDone: () => void }) {
   return (
     <div className="flex h-full flex-col px-6 pb-8 pt-4 text-center">
       <div className="flex flex-1 flex-col items-center justify-center pb-10">

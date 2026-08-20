@@ -15,24 +15,23 @@ import {
   Rocket,
 } from "lucide-react";
 
-import PersistentLogo from "./steps/PersistentLogo";
-import Opener from "./steps/Opener";
-import Auth from "./steps/Auth";
-import GoalSelect from "./steps/GoalSelect";
-import ExpertReassurance from "./steps/ExpertReassurance";
-import ChoiceQuestion, { type Choice } from "./steps/ChoiceQuestion";
-import { StepChrome } from "./steps/flowUI";
-import InstitutionSuggestions from "./steps/InstitutionSuggestions";
-import ProfileSetup from "./steps/ProfileSetup";
-import SituationStep from "./steps/SituationStep";
-import BuildingFeed from "./steps/BuildingFeed";
+import PersistentLogo from "../onboarding/steps/PersistentLogo";
+import Opener from "../onboarding/steps/Opener";
+import Auth from "../onboarding/steps/Auth";
+import GoalSelect from "../onboarding/steps/GoalSelect";
+import ExpertReassurance from "../onboarding/steps/ExpertReassurance";
+import ChoiceQuestion, { type Choice } from "../onboarding/steps/ChoiceQuestion";
+import SituationStep from "../onboarding/steps/SituationStep";
+import InstitutionSuggestions from "../onboarding/steps/InstitutionSuggestions";
+import ProfileSetup from "../onboarding/steps/ProfileSetup";
+import { StepChrome } from "../onboarding/steps/flowUI";
+import { Joining, InLine, Front } from "./Waitlist";
 
 /* ─────────────────────────────────────────────────────────────────────────
- * Minimal onboarding (v2).
- *
- *   splash → opener → sign-in → goal → expert reassurance →
- *   interests → intent → situation → schools & companies → experts →
- *   profile → building your feed.
+ * Waitlist Onboarding — the v3 onboarding flow wearing the waitlist's coat:
+ * the b-roll film runs behind the opener (v3 layout + copy, white text), and
+ * the flow dead-ends on the waitlist payoff — saving your spot, your wave,
+ * and three skip-the-line passes.
  * ──────────────────────────────────────────────────────────────────────── */
 
 const INTERESTED: Choice[] = [
@@ -59,7 +58,6 @@ const LOOKING: Choice[] = [
   { label: "Just exploring for now" },
 ];
 
-
 const TOTAL_STEPS = 7;
 
 type Stage =
@@ -73,7 +71,9 @@ type Stage =
   | "situation"
   | "institutions"
   | "profile"
-  | "building";
+  | "joining"
+  | "inline"
+  | "front";
 
 const rise = {
   initial: (reduced: boolean) => (reduced ? { opacity: 0 } : { opacity: 0, y: 40 }),
@@ -81,21 +81,17 @@ const rise = {
   transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] as const, delay: 0.1 },
 };
 
-export default function MinimalOnboardingV2() {
+export default function WaitlistOnboarding() {
   const navigate = useNavigate();
   const reduced = useReducedMotion() ?? false;
 
   const [stage, setStage] = useState<Stage>("loading");
   const [logoRevealed, setLogoRevealed] = useState(false);
-  // "signup" = full Get-started flow; "login" = short returning-user path
-  // (auth → profile photo → home).
-  const [intent, setIntent] = useState<"signup" | "login">("signup");
 
   useEffect(() => {
-    document.title = "Leland — Get started";
+    document.title = "Leland — Join the waitlist";
   }, []);
 
-  // Intro choreography: pop → reveal wordmark → dock at top.
   useEffect(() => {
     if (stage !== "loading") return;
     const tReveal = window.setTimeout(() => setLogoRevealed(true), reduced ? 100 : 800);
@@ -110,9 +106,8 @@ export default function MinimalOnboardingV2() {
 
   const logoVisible = stage === "loading" || stage === "opener";
   const logoDocked = stage === "opener";
+  const brollVisible = stage === "opener";
 
-  // Persistent header (back · dots · skip) config per question stage. Rendered
-  // once in the shell so it doesn't re-animate on every step transition.
   const STEP_BACK: Partial<Record<Stage, Stage>> = {
     goal: "signin",
     reassurance: "goal",
@@ -129,7 +124,7 @@ export default function MinimalOnboardingV2() {
     looking: "situation",
     situation: "institutions",
     institutions: "profile",
-    profile: "building",
+    profile: "joining",
   };
   const STEP_INDEX: Partial<Record<Stage, number>> = {
     goal: 1,
@@ -142,19 +137,36 @@ export default function MinimalOnboardingV2() {
   };
 
   const chrome =
-    stage === "profile" && intent === "login"
-      ? { onBack: () => setStage("signin"), onSkip: () => navigate("/"), step: undefined }
-      : STEP_INDEX[stage] !== undefined
-        ? {
-            onBack: () => setStage(STEP_BACK[stage]!),
-            onSkip: () => setStage(STEP_SKIP[stage]!),
-            step: { index: STEP_INDEX[stage]!, total: TOTAL_STEPS },
-          }
-        : null;
+    STEP_INDEX[stage] !== undefined
+      ? {
+          onBack: () => setStage(STEP_BACK[stage]!),
+          onSkip: () => setStage(STEP_SKIP[stage]!),
+          step: { index: STEP_INDEX[stage]!, total: TOTAL_STEPS },
+        }
+      : null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-white">
-      {/* v2: plain white background (no clouds) — ink text on the opener. */}
+      {/* ── waitlist b-roll behind the opener ── */}
+      <AnimatePresence>
+        {brollVisible ? (
+          <motion.div
+            key="broll"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="absolute inset-0 bg-[#1a1a1a]"
+          >
+            {reduced ? (
+              <video src="/waitlist-broll.mp4" muted playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover" />
+            ) : (
+              <video src="/waitlist-broll.mp4" autoPlay muted loop playsInline preload="auto" className="absolute inset-0 h-full w-full object-cover" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/40 to-black/75" />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       {/* ── white intro layer (fades out once we leave loading) ── */}
       <motion.div
@@ -165,7 +177,7 @@ export default function MinimalOnboardingV2() {
         style={{ pointerEvents: stage === "loading" ? "auto" : "none" }}
       />
 
-      {/* ── persistent Leland logo: intro → docks at top of the opener ── */}
+      {/* ── persistent Leland logo: black on the splash, white over the film ── */}
       <AnimatePresence>
         {logoVisible ? (
           <PersistentLogo
@@ -173,14 +185,12 @@ export default function MinimalOnboardingV2() {
             docked={logoDocked}
             revealed={logoRevealed}
             reduced={reduced}
-            light
           />
         ) : null}
       </AnimatePresence>
 
-      {/* ── step stage: mobile-first column, centered on desktop ── */}
+      {/* ── step stage ── */}
       <div className="relative z-10 mx-auto flex h-full w-full max-w-[440px] flex-col">
-        {/* persistent header — stays put across step transitions */}
         {chrome ? (
           <StepChrome onBack={chrome.onBack} onSkip={chrome.onSkip} step={chrome.step} />
         ) : null}
@@ -199,15 +209,8 @@ export default function MinimalOnboardingV2() {
               >
                 <Opener
                   variant="getStarted"
-                  light
-                  onGetStarted={() => {
-                    setIntent("signup");
-                    setStage("signin");
-                  }}
-                  onSignIn={() => {
-                    setIntent("login");
-                    setStage("signin");
-                  }}
+                  onGetStarted={() => setStage("signin")}
+                  onSignIn={() => setStage("signin")}
                   onExpert={() => navigate("/onboarding", { state: { expert: true } })}
                 />
               </motion.div>
@@ -217,7 +220,7 @@ export default function MinimalOnboardingV2() {
                   cohortName="the Leland community"
                   onBack={() => setStage("opener")}
                   onExit={exit}
-                  onNext={() => setStage(intent === "login" ? "profile" : "goal")}
+                  onNext={() => setStage("goal")}
                 />
               </motion.div>
             ) : stage === "goal" ? (
@@ -256,19 +259,21 @@ export default function MinimalOnboardingV2() {
             ) : stage === "profile" ? (
               <motion.div key="profile" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
                 <ProfileSetup
-                  onContinue={() => (intent === "login" ? navigate("/") : setStage("building"))}
-                  onSkip={() => (intent === "login" ? navigate("/") : setStage("building"))}
+                  onContinue={() => setStage("joining")}
+                  onSkip={() => setStage("joining")}
                 />
               </motion.div>
+            ) : stage === "joining" ? (
+              <motion.div key="joining" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="h-full">
+                <Joining reduced={reduced} onDone={() => setStage("inline")} />
+              </motion.div>
+            ) : stage === "inline" ? (
+              <motion.div key="inline" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
+                <InLine invited={false} reduced={reduced} onDone={() => navigate("/")} onFront={() => setStage("front")} />
+              </motion.div>
             ) : (
-              <motion.div
-                key="building"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
-                className="h-full"
-              >
-                <BuildingFeed onDone={() => navigate("/")} />
+              <motion.div key="front" initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
+                <Front reduced={reduced} onDone={() => navigate("/")} />
               </motion.div>
             )}
           </AnimatePresence>

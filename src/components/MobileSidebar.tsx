@@ -394,6 +394,13 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                 >
                   <span>Waitlist</span>
                 </NavLink>
+                <NavLink
+                  to="/waitlist-onboarding"
+                  onClick={onClose}
+                  className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
+                >
+                  <span>Waitlist Onboarding</span>
+                </NavLink>
               </div>
             </motion.div>
           )}

@@ -105,6 +105,7 @@ import ContentViewer from "./pages/ContentViewer";
 import LelandKitTest from "./pages/LelandKitTest";
 import LessonBlocksGallery from "./pages/LessonBlocksGallery";
 import Waitlist from "./pages/waitlist/Waitlist";
+import WaitlistOnboarding from "./pages/waitlist/WaitlistOnboarding";
 
 export default function App() {
   return (
@@ -130,6 +131,7 @@ export default function App() {
       <Route path="/onboarding-minimal" element={<MinimalOnboarding />} />
       <Route path="/onboarding-minimal-v2" element={<MinimalOnboardingV2 />} />
       <Route path="/waitlist" element={<Waitlist />} />
+      <Route path="/waitlist-onboarding" element={<WaitlistOnboarding />} />
       <Route path="/reply/:postId" element={<ReplyCompose />} />
       <Route path="/replay/:postId" element={<ReplayViewer />} />
       <Route path="/messages/:conversationId" element={<ConversationDetail />} />
