@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion, type Variants } from "motion/react";
 import { ArrowRight, Check, Share, Copy, MessageCircle, Mail, MoreHorizontal, X } from "lucide-react";
 
 import { StepChrome, StepHeading, SharpStar } from "../onboarding/steps/flowUI";
@@ -77,11 +77,11 @@ const landItem = {
   center: { x: 0, opacity: 1, transition: { x: { type: "spring" as const, stiffness: 260, damping: 28 }, opacity: { duration: 0.35 } } },
   exit: { x: -110, opacity: 0, transition: { duration: 0.45, ease: EASE } },
 };
-// CTAs don't cascade sideways: they dissolve with the video + overlay.
-const landFade = {
+
+// Cascade item for screens that build in element by element.
+const cascadeItem = {
   enter: { x: 64, opacity: 0 },
-  center: { x: 0, opacity: 1, transition: { x: { type: "spring" as const, stiffness: 260, damping: 28 }, opacity: { duration: 0.35 } } },
-  exit: { opacity: 0, transition: { duration: 0.45, ease: "easeOut" as const } },
+  center: { x: 0, opacity: 1, transition: { x: { type: "spring" as const, stiffness: 280, damping: 28 }, opacity: { duration: 0.3 } } },
 };
 
 function Landing({ onJoin, onInvite }: { onJoin: () => void; onInvite: () => void }) {
@@ -126,7 +126,7 @@ function Landing({ onJoin, onInvite }: { onJoin: () => void; onInvite: () => voi
         </motion.div>
       </div>
 
-      <motion.div variants={landFade} className="flex w-full flex-col items-center gap-3">
+      <motion.div variants={landItem} className="flex w-full flex-col items-center gap-3">
         <button onClick={onJoin} className={YELLOW_PILL}>
           Join the waitlist
           <ArrowRight size={18} className="shrink-0" />
@@ -201,63 +201,72 @@ function CodeEntry({ onClaim }: { onClaim: (code: string) => void }) {
 }
 
 /* ── details: doubles as the claim moment when they arrived with a pass ── */
-function Details({ invited, onContinue }: { invited: boolean; onContinue: () => void }) {
+function Details({ invited, cascade, onContinue }: { invited: boolean; cascade: boolean; onContinue: () => void }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const valid = name.trim().length >= 2 && phone.replace(/\D/g, "").length === 10;
-  const nameRef = useSettledFocus();
+  const nameRef = useSettledFocus(1300);
+  const item = cascade ? cascadeItem : undefined;
   return (
     <form
       onSubmit={(e) => { e.preventDefault(); if (valid) onContinue(); }}
       className="flex h-full flex-col px-6 pt-2"
     >
-      {invited ? (
-        <div className="mb-6 flex items-start gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-yellow">
-            <img src={mark} alt="" className="h-6 w-6" style={{ filter: "brightness(0)" }} />
-          </span>
-          <div>
-            <h2 className="text-balance font-serif text-[28px] leading-[1.12] text-gray-dark">
-              A friend saved you a spot
-            </h2>
-            <p className="mt-1.5 text-[15px] leading-relaxed text-gray-light">
-              This pass skips you to the front of the line.
-            </p>
+      <motion.div variants={item}>
+        {invited ? (
+          <div className="mb-6 flex items-start gap-3">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-yellow">
+              <img src={mark} alt="" className="h-6 w-6" style={{ filter: "brightness(0)" }} />
+            </span>
+            <div>
+              <h2 className="text-balance font-serif text-[28px] leading-[1.12] text-gray-dark">
+                A friend saved you a spot
+              </h2>
+              <p className="mt-1.5 text-[15px] leading-relaxed text-gray-light">
+                This pass skips you to the front of the line.
+              </p>
+            </div>
           </div>
-        </div>
-      ) : (
-        <StepHeading title="Save your spot" />
-      )}
+        ) : (
+          <StepHeading title="Save your spot" />
+        )}
+      </motion.div>
       <div className="flex flex-col gap-3">
-        <input
-          ref={nameRef}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          autoComplete="given-name"
-          enterKeyHint="next"
-          placeholder="First name"
-          className="w-full rounded-xl border border-gray-stroke bg-white px-4 py-3.5 text-[16px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-gray-dark/40"
-        />
-        <input
-          type="tel"
-          inputMode="numeric"
-          autoComplete="tel"
-          enterKeyHint="go"
-          value={phone}
-          onChange={(e) => setPhone(formatPhone(e.target.value))}
-          placeholder="(555) 123-4567"
-          className="w-full rounded-xl border border-gray-stroke bg-white px-4 py-3.5 text-[16px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-gray-dark/40"
-        />
+        <motion.div variants={item}>
+          <input
+            ref={nameRef}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoComplete="given-name"
+            enterKeyHint="next"
+            placeholder="First name"
+            className="w-full rounded-xl border border-gray-stroke bg-white px-4 py-3.5 text-[16px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-gray-dark/40"
+          />
+        </motion.div>
+        <motion.div variants={item}>
+          <input
+            type="tel"
+            inputMode="numeric"
+            autoComplete="tel"
+            enterKeyHint="go"
+            value={phone}
+            onChange={(e) => setPhone(formatPhone(e.target.value))}
+            placeholder="(555) 123-4567"
+            className="w-full rounded-xl border border-gray-stroke bg-white px-4 py-3.5 text-[16px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-gray-dark/40"
+          />
+        </motion.div>
       </div>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[440px] bg-gradient-to-t from-white via-white/95 to-transparent px-6 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+1.5rem)] pt-8">
-        <button
-          type="submit"
-          disabled={!valid}
-          className={`pointer-events-auto ${DARK_CTA} ${valid ? "" : "cursor-not-allowed !bg-gray-dark/30"}`}
-        >
-          {invited ? "Claim your spot" : "Continue"}
-        </button>
+        <motion.div variants={item}>
+          <button
+            type="submit"
+            disabled={!valid}
+            className={`pointer-events-auto ${DARK_CTA} w-full ${valid ? "" : "cursor-not-allowed !bg-gray-dark/30"}`}
+          >
+            {invited ? "Claim your spot" : "Continue"}
+          </button>
+        </motion.div>
       </div>
     </form>
   );
@@ -558,6 +567,8 @@ export default function Waitlist() {
     }
   }, []);
 
+  type Nav = { d: 1 | -1; delay: number };
+
   const go = (next: Stage, dir: 1 | -1 = 1) => {
     dirRef.current = dir;
     // Leaving the landing: let the cascade + video fade finish (screen goes
@@ -581,7 +592,6 @@ export default function Waitlist() {
             : null;
 
   /* screens are absolutely stacked so exit + enter overlap */
-  type Nav = { d: 1 | -1; delay: number };
   const screenVariants = {
     enter: (c: Nav) => (reduced ? { opacity: 0 } : { x: c.d > 0 ? 96 : -96, opacity: 0 }),
     center: (c: Nav) => ({
@@ -605,11 +615,23 @@ export default function Waitlist() {
     exit: { transition: { staggerChildren: 0.045 } },
   };
 
-  const screen = (key: string, children: React.ReactNode, variants: typeof screenVariants | typeof landingVariants = screenVariants) => (
+  /* details builds in element by element, left to right */
+  const detailsVariants = {
+    enter: {},
+    center: (c: Nav) => ({
+      transition: { delayChildren: (c?.delay ?? 0) + 0.05, staggerChildren: 0.09 },
+    }),
+    exit: (c: Nav) =>
+      reduced
+        ? { opacity: 0 }
+        : { x: (c?.d ?? 1) > 0 ? -96 : 96, opacity: 0, transition: { duration: 0.38, ease: EASE } },
+  };
+
+  const screen = (key: string, children: React.ReactNode, variants: Variants = screenVariants as Variants) => (
     <motion.div
       key={key}
       custom={{ d: dirRef.current, delay: delayRef.current }}
-      variants={variants as typeof screenVariants}
+      variants={variants}
       initial="enter"
       animate="center"
       exit="exit"
@@ -663,11 +685,11 @@ export default function Waitlist() {
         <div className="relative min-h-0 flex-1">
           <AnimatePresence custom={{ d: dirRef.current, delay: delayRef.current }}>
             {stage === "landing"
-              ? screen("landing", <Landing onJoin={() => go("details")} onInvite={() => go("code")} />, landingVariants)
+              ? screen("landing", <Landing onJoin={() => go("details")} onInvite={() => go("code")} />, landingVariants as Variants)
               : stage === "code"
                 ? screen("code", <CodeEntry onClaim={(c) => { setInviteCode(c); viaRef.current = "code"; go("details"); }} />)
                 : stage === "details"
-                  ? screen("details", <Details invited={!!inviteCode} onContinue={() => go("goal")} />)
+                  ? screen("details", <Details invited={!!inviteCode} cascade={!reduced} onContinue={() => go("goal")} />, (reduced ? screenVariants : detailsVariants) as Variants)
                   : stage === "goal"
                     ? screen("goal", (
                         <ChoiceQuestion
