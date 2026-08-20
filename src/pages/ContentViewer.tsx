@@ -2133,12 +2133,14 @@ function CourseViewerSectionNav({
   prevSectionLink,
   nextSectionLink,
   onNext,
+  onNavigate,
   completedCount,
   totalSections,
 }: {
   prevSectionLink: string | null;
   nextSectionLink: string | null;
   onNext: () => void;
+  onNavigate: () => void;
   completedCount: number;
   totalSections: number;
 }) {
@@ -2149,6 +2151,7 @@ function CourseViewerSectionNav({
       {prevSectionLink ? (
         <Link
           to={prevSectionLink}
+          onClick={onNavigate}
           className={`${navButtonBase} flex-1 justify-center md:flex-none border border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
         >
           <IconChevronLeft className="size-5" />
@@ -2166,7 +2169,7 @@ function CourseViewerSectionNav({
       {nextSectionLink ? (
         <Link
           to={nextSectionLink}
-          onClick={onNext}
+          onClick={() => { onNext(); onNavigate(); }}
           className={`${navButtonBase} flex-1 justify-center md:flex-none border border-leland-primary bg-leland-primary text-leland-on-primary-text hover:bg-leland-primary-hover hover:border-leland-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
         >
           Next
@@ -2207,14 +2210,16 @@ export default function ContentViewer() {
     contentScrollRef.current?.scrollTo({ top: 0 });
     // Below lg the sidebar is a drawer — selecting a section closes it.
     if (window.innerWidth < 1024) setSidebarOpen(false);
-    // Scroll the active section into view in the sidebar after render.
-    const id = params.sectionId;
-    const timer = setTimeout(() => {
-      document
-        .getElementById(`sidebar-section-${id}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
-    return () => clearTimeout(timer);
+    if (navigatedViaButtons.current) {
+      navigatedViaButtons.current = false;
+      const id = params.sectionId;
+      const timer = setTimeout(() => {
+        document
+          .getElementById(`sidebar-section-${id}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
   }, [params.sectionId]); // eslint-disable-line react-hooks/exhaustive-deps
   const [selectedSessionNumber, setSelectedSessionNumber] = useState<
     number | null
@@ -2224,6 +2229,7 @@ export default function ContentViewer() {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [hasSpent5Min, setHasSpent5Min] = useState(false);
   const engagementTriggered = useRef(false);
+  const navigatedViaButtons = useRef(false);
   const [addToCalendarModalOpen, setAddToCalendarModalOpen] = useState(false);
   const [calendarAdded, setCalendarAdded] = useState<Set<number>>(new Set());
   const markCalendarAdded = (n: number) =>
@@ -2688,6 +2694,7 @@ export default function ContentViewer() {
                       onContinue={() => {
                         markComplete(lesson.id, section.id);
                         if (nextSection) {
+                          navigatedViaButtons.current = true;
                           navigate(sectionUrl(lesson, nextSection));
                         }
                       }}
@@ -2729,6 +2736,7 @@ export default function ContentViewer() {
                     nextSection ? sectionUrl(lesson, nextSection) : null
                   }
                   onNext={() => markComplete(lesson.id, section.id)}
+                  onNavigate={() => { navigatedViaButtons.current = true; }}
                   completedCount={
                     visibleSections.filter((s) => isCompleted(s.id)).length
                   }
