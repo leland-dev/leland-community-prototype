@@ -992,6 +992,7 @@ function CombinedSidebar({
   const [courseInfoInView, setCourseInfoInView] = useState(true);
   const [linksStuck, setLinksStuck] = useState(false);
   const [linksOpen, setLinksOpen] = useState(false);
+  const [bottomLinksOpen, setBottomLinksOpen] = useState(false);
 
   useEffect(() => {
     const scroll = scrollRef.current;
@@ -1021,10 +1022,14 @@ function CombinedSidebar({
   const scrollToTop = () =>
     scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
 
+  useEffect(() => {
+    if (!linksStuck) setBottomLinksOpen(false);
+  }, [linksStuck]);
+
   return (
     <aside className="relative flex w-full shrink-0 flex-col overflow-hidden bg-white md:w-[360px] md:border-r md:border-leland-gray-stroke">
       {/* Persistent header — always visible, outside the scroll container */}
-      <div className={`flex shrink-0 items-center gap-6 bg-white px-6 pt-4 ${courseInfoInView ? "pb-2" : !liveProgram ? "pb-4" : "pb-0"}${!liveProgram && !courseInfoInView ? " shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)]" : ""}`}>
+      <div className={`flex shrink-0 items-center gap-6 bg-white px-6 pt-4 ${courseInfoInView ? "pb-2" : "pb-4"}${!liveProgram && !courseInfoInView ? " shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)]" : ""}`}>
         <div className="flex min-w-0 flex-1 items-center gap-2">
           {noHeader ? (
             <Link
@@ -1053,7 +1058,7 @@ function CombinedSidebar({
         </button>
       </div>
 
-      <div ref={scrollRef} className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pb-12">
+      <div ref={scrollRef} className={`sidebar-scrollbar min-h-0 flex-1 overflow-y-auto ${liveProgram ? "pb-[84px]" : "pb-12"}`}>
         {/* Program info card */}
         <div className={`w-full bg-white pb-5${!liveProgram ? " shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)]" : ""}`}>
           <div className="flex flex-col">
@@ -1112,7 +1117,7 @@ function CombinedSidebar({
         {liveProgram && (
           <>
           <div ref={linksSentinelRef} className="h-px" />
-          <div ref={resourcesRef} className={`sticky top-0 z-10 bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] border-b border-leland-gray-stroke${!linksStuck ? " border-t" : ""}`}>
+          <div ref={resourcesRef} className="border-b border-t border-leland-gray-stroke bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)]">
             <div className="px-3">
               <div className="flex flex-col gap-5 py-5">
                 <button
@@ -1154,49 +1159,6 @@ function CombinedSidebar({
                       label="Knowledge hub"
                       onClick={() => {}}
                     />
-                    {linksStuck ? (
-                      <div className="flex flex-wrap gap-2 px-1 pt-3">
-                        <button
-                          type="button"
-                          onClick={onSwitchCohort}
-                          className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-                        >
-                          <Tag
-                            text="May 16th cohort"
-                            tagColor={TagColor.GRAY}
-                            size={TagSize.LARGE}
-                            RightIcon={IconRecurring}
-                            hoverable
-                          />
-                        </button>
-                        {selectedTrack ? (
-                          <button
-                            type="button"
-                            onClick={onChangeTrack}
-                            className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-                          >
-                            <Tag
-                              text={selectedTrack.charAt(0).toUpperCase() + selectedTrack.slice(1)}
-                              tagColor={TagColor.GRAY}
-                              size={TagSize.LARGE}
-                              RightIcon={IconChevronDown}
-                              hoverable
-                            />
-                          </button>
-                        ) : null}
-                      </div>
-                    ) : null}
-                    <div className="mt-5">
-                      <Button
-                        label="Collapse"
-                        buttonColor={ButtonColor.BLACK}
-                        size={ButtonSize.MEDIUM}
-                        width={ButtonWidth.FULL}
-                        rounded
-                        RightIcon={IconChevronUp}
-                        onClick={() => setLinksOpen(false)}
-                      />
-                    </div>
                   </div>
                 )}
               </div>
@@ -1216,6 +1178,55 @@ function CombinedSidebar({
           />
         </div>
       </div>
+
+      {liveProgram && (
+        <div
+          className={`absolute bottom-0 left-0 right-0 border-t border-leland-gray-stroke bg-white shadow-[0_-4px_12px_-2px_rgba(0,0,0,0.08)] transition-transform duration-300 ease-out ${linksStuck ? "translate-y-0" : "translate-y-full"}`}
+        >
+          {bottomLinksOpen && (
+            <div className="flex flex-col gap-1 border-b border-leland-gray-stroke px-3 pb-2 pt-3">
+              <SidebarMenuItem
+                Icon={IconExperiences}
+                label="Office hours"
+                onClick={() => window.open("https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours", "_blank", "noopener")}
+              />
+              <SidebarMenuItem
+                Icon={IconUserProfileGroup}
+                label="Slack community"
+                onClick={() => window.open(`/groups/${COMMUNITY_GROUP_ID}`, "_blank", "noopener")}
+              />
+              <SidebarMenuItem
+                Icon={IconBooks}
+                label="Cohort showcase"
+                onClick={() => {}}
+              />
+              <SidebarMenuItem
+                Icon={IconBooks}
+                label="Knowledge hub"
+                onClick={() => {}}
+              />
+            </div>
+          )}
+          <div className="px-3 py-5">
+            <button
+              type="button"
+              onClick={() => setBottomLinksOpen(v => !v)}
+              className="flex w-full items-center gap-3 rounded-xl px-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-leland-gray-stroke">
+                <IconLink className="size-6 text-leland-gray-dark" />
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+                <p className="leland-heading-lg font-semibold text-leland-gray-dark">Resources</p>
+                <p className="leland-paragraph-sm text-leland-gray-extra-light">Office hours and 4 more</p>
+              </div>
+              <IconChevronDown
+                className={`size-5 shrink-0 text-leland-gray-dark transition-transform duration-200 ${bottomLinksOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }
