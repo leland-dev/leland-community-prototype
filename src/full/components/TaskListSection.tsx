@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import GoalCheck from "./GoalCheck";
+import GoalCheck from "../../components/GoalCheck";
 import QuickAddTask from "./QuickAddTask";
 import TaskDetailModal from "./TaskDetailModal";
 import { useCheckedLinger } from "../hooks/useCheckedLinger";

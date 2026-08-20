@@ -1,10 +1,12 @@
 // Goal-tracking data model for the customer dashboard (see
-// design_handoff_goal_dashboard/README.md). A goal contains milestones;
-// milestones contain tasks. No routines/streaks, no drag-to-reorder/resize
-// board, no on-track/needs-action health judgment, no content queue — see
-// the MVP scope doc for what this cut from the full-featured version.
+// design_handoff_goal_dashboard/README.md). A goal contains projects;
+// projects contain one-off tasks. Routines are recurring, streak-tracked
+// items that live on the goal directly, not inside a project.
 
-import pic7 from "../assets/profile photos/pic-7.png";
+import pic7 from "../../assets/profile photos/pic-7.png";
+import eventImg1 from "../../assets/placeholder images/placeholder-event-01.png";
+import eventImg2 from "../../assets/placeholder images/placeholder-event-02.png";
+import eventImg3 from "../../assets/placeholder images/placeholder-event-03.png";
 
 export type TaskStatus = "todo" | "in-progress" | "done";
 
@@ -15,21 +17,39 @@ export type Task = {
   status: TaskStatus;
   assignedBy?: { name: string; avatarUrl: string }; // → "via Priya"
   note?: string;
-  // Where the task sat before it was checked off, so unchecking it in list
-  // view (or dragging it out of Done in kanban view) returns it to "in
-  // progress" instead of dropping it back to "To do".
+  // Where the task sat before it was checked off, so unchecking a kanban card
+  // returns it to its column instead of dropping it back to "To do".
   previousStatus?: TaskStatus;
 };
 
-// A named group of tasks — e.g. "Application essays", "Quant rebuild".
-export type Milestone = {
+export type Routine = {
+  id: string;
+  label: string;
+  cadence: string;
+  streak: number;
+  lastCheckedAt?: string; // ISO date
+};
+
+export type Project = {
   id: string;
   name: string;
   note?: string;
   tasks: Task[];
-  // Per-milestone display: a plain checklist, or a todo/in-progress/done
-  // kanban board. No drag-to-reorder or resize — just this one toggle.
   view?: "list" | "kanban";
+  collapsed?: boolean;
+  // How wide this project sits in the board grid. Set per project rather than
+  // globally, so the page composes like Notion blocks — a wide kanban next to
+  // two narrow lists — instead of forcing one layout on everything.
+  span?: "full" | "half";
+};
+
+// An item in the goal's content queue ("Worth your time" on goal detail).
+export type GoalContentItem = {
+  id: string;
+  title: string;
+  meta: string;
+  image: string;
+  action: string; // "Watch" / "Read" / "Save"
 };
 
 // One sitting of a test — a practice run or the real thing. Sections are
@@ -47,6 +67,7 @@ export type TestAttempt = {
 };
 
 export type GoalType = "ai" | "career" | "school" | "test";
+export type GoalStatus = "on-track" | "needs-action" | "completed";
 
 export type Goal = {
   id: string;
@@ -62,9 +83,18 @@ export type Goal = {
   // creation and editable afterwards. Feeds category suggestions and gives the
   // expert context the structured fields don't carry.
   description?: string;
-  milestones: Milestone[];
-  otherTasks: Task[]; // standalone tasks with no milestone
+  projects: Project[];
+  routines: Routine[];
+  otherTasks: Task[]; // standalone tasks with no project (screen 2's "Other tasks")
+  // The "Other tasks" bucket sits in the same reorderable, resizable board as
+  // projects, so it carries the same per-tile view/span/collapsed state.
   otherTasksView?: "list" | "kanban";
+  otherTasksSpan?: "full" | "half";
+  otherTasksCollapsed?: boolean;
+  // Where "Other tasks" sits among `projects` in the board's render order.
+  // Undefined means "after every project" (today's default position).
+  otherTasksIndex?: number;
+  contentQueue: GoalContentItem[];
   // Set together, on the same action — a goal is either open or done, with the
   // result recorded at the moment it's closed out.
   completedAt?: string; // ISO date
@@ -125,35 +155,58 @@ export function buildTargetLabel(type: GoalType, targetDate?: string): string {
   return `${TARGET_PREFIX[type]} · ${shortDate(parseISODate(targetDate), true)}`;
 }
 
-export function goalTasks(goal: Goal): Task[] {
-  return [...goal.milestones.flatMap((m) => m.tasks), ...goal.otherTasks];
+export function isCheckedToday(routine: Routine): boolean {
+  return routine.lastCheckedAt === TODAY_ISO;
+}
+
+export function goalOneOffTasks(goal: Goal): Task[] {
+  return [...goal.projects.flatMap((p) => p.tasks), ...goal.otherTasks];
 }
 
 export function goalProgress(goal: Goal): { done: number; total: number; pct: number } {
-  const tasks = goalTasks(goal);
+  const tasks = goalOneOffTasks(goal);
   const done = tasks.filter((t) => t.status === "done").length;
   const total = tasks.length;
   return { done, total, pct: total ? Math.round((done / total) * 100) : 0 };
 }
 
 export function overdueCount(goal: Goal): number {
-  return goalTasks(goal).filter(isOverdue).length;
+  return goalOneOffTasks(goal).filter(isOverdue).length;
 }
 
-export type UpNext = { title: string; dueLabel: string; assignedBy?: Task["assignedBy"] };
+// Derived from the tasks underneath it, except completion — that's an
+// explicit customer action (see completedAt), not something task state implies.
+export function goalStatus(goal: Goal): GoalStatus {
+  if (goal.completedAt) return "completed";
+  return overdueCount(goal) > 0 ? "needs-action" : "on-track";
+}
 
-// What the goal card's "Up next" tile surfaces: the most urgent open task.
-// Priority: overdue, then soonest upcoming due date.
+export type UpNext =
+  | { kind: "routine"; title: string; dueLabel: string; streak: number }
+  | { kind: "task"; title: string; dueLabel: string; assignedBy?: Task["assignedBy"] };
+
+// What the goal card's "Up next" tile surfaces: the most urgent open item.
+// Priority: an overdue one-off task, then a routine not yet checked off
+// today, then the soonest upcoming task with a due date.
 export function upNextItem(goal: Goal): UpNext | null {
-  const tasks = goalTasks(goal).filter((t) => t.status !== "done");
+  const tasks = goalOneOffTasks(goal).filter((t) => t.status !== "done");
 
   const overdueTask = tasks.find(isOverdue);
-  if (overdueTask) return { title: overdueTask.title, dueLabel: dueLabel(overdueTask.dueDate!), assignedBy: overdueTask.assignedBy };
+  if (overdueTask) {
+    return { kind: "task", title: overdueTask.title, dueLabel: dueLabel(overdueTask.dueDate!), assignedBy: overdueTask.assignedBy };
+  }
+
+  const openRoutine = goal.routines.find((r) => !isCheckedToday(r));
+  if (openRoutine) {
+    return { kind: "routine", title: openRoutine.label, dueLabel: "Due today", streak: openRoutine.streak };
+  }
 
   const upcoming = tasks
     .filter((t): t is Task & { dueDate: string } => !!t.dueDate)
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
-  if (upcoming) return { title: upcoming.title, dueLabel: dueLabel(upcoming.dueDate), assignedBy: upcoming.assignedBy };
+  if (upcoming) {
+    return { kind: "task", title: upcoming.title, dueLabel: dueLabel(upcoming.dueDate), assignedBy: upcoming.assignedBy };
+  }
 
   return null;
 }
@@ -178,8 +231,17 @@ export const myGoals: Goal[] = [
       { id: "a-3", kind: "practice", date: "2026-07-18", total: 690, sections: { Quantitative: 45, Verbal: 39 }, note: "Pacing drills are working.", loggedBy: { name: "Priya", avatarUrl: pic7 } },
       { id: "a-4", kind: "practice", date: "2026-08-08", total: 700, sections: { Quantitative: 46, Verbal: 40 }, loggedBy: { name: "Priya", avatarUrl: pic7 } },
     ],
+    routines: [
+      { id: "r-gmat-drill", label: "Timed quant set", cadence: "Every weekday", streak: 6, lastCheckedAt: "2026-08-13" },
+      { id: "r-gmat-log", label: "Review error log", cadence: "Sundays", streak: 3 },
+    ],
     otherTasks: [{ id: "t-gmat-book", title: "Book the Oct 3 sitting", status: "todo", dueDate: "2026-08-20" }],
-    milestones: [
+    contentQueue: [
+      { id: "c-gmat-1", title: "How I raised my GMAT score 80 points", meta: "Marcus Thomas · 15 min video", image: eventImg1, action: "Watch" },
+      { id: "c-gmat-2", title: "Quant pacing framework", meta: "Priya Raman · Guide, 10 pages", image: eventImg2, action: "Read" },
+      { id: "c-gmat-3", title: "Data sufficiency shortcuts", meta: "Livestream · Wed, Aug 26 at 6:00 PM", image: eventImg3, action: "Save" },
+    ],
+    projects: [
       {
         id: "p-gmat-quant",
         name: "Quant rebuild",
@@ -194,6 +256,7 @@ export const myGoals: Goal[] = [
         id: "p-gmat-mocks",
         name: "Mocks",
         note: "Full-length, under real timing.",
+        span: "half",
         tasks: [
           { id: "t-m1", title: "Mock 4 under timing", status: "todo", dueDate: "2026-09-05" },
           { id: "t-m2", title: "Final mock the week before", status: "todo", dueDate: "2026-09-26" },
@@ -208,11 +271,17 @@ export const myGoals: Goal[] = [
     categories: ["MBA"],
     targetDate: "2026-09-15",
     targetLabel: "Round 1 · Sept 15, 2026",
+    routines: [{ id: "r-practice", label: "Daily practice set", cadence: "Daily", streak: 12, lastCheckedAt: "2026-08-13" }],
     otherTasks: [
       { id: "t-rec-1", title: "Request recommendation letter", status: "todo", dueDate: "2026-08-22" },
       { id: "t-submit-1", title: "Submit Round 1 application", status: "todo", dueDate: "2026-09-15" },
     ],
-    milestones: [
+    contentQueue: [
+      { id: "c-gsb-1", title: "How I got into Stanford GSB", meta: "Marcus Thomas · 18 min video", image: eventImg1, action: "Watch" },
+      { id: "c-gsb-2", title: "MBA essay framework", meta: "Jessica Lin · Guide, 12 pages", image: eventImg2, action: "Read" },
+      { id: "c-gsb-3", title: "Round 1 deadlines: what actually matters", meta: "Livestream · Wed, Aug 26 at 5:00 PM", image: eventImg3, action: "Save" },
+    ],
+    projects: [
       {
         id: "p-essays",
         name: "Application essays",
@@ -228,6 +297,7 @@ export const myGoals: Goal[] = [
         id: "p-test-prep",
         name: "GMAT prep",
         note: "Target 730. Test booked for Sept 8.",
+        view: "kanban",
         tasks: [
           { id: "t-prep-1", title: "Take diagnostic GMAT", status: "in-progress" },
           { id: "t-prep-2", title: "Quant review — sessions 1-4", status: "todo" },
@@ -243,11 +313,16 @@ export const myGoals: Goal[] = [
     categories: ["Product Management"],
     targetDate: "2026-12-01",
     targetLabel: "Offer signed by · Dec 2026",
+    routines: [],
     otherTasks: [
       { id: "t-network-1", title: "Reach out to 3 PMs in target companies", status: "todo" },
       { id: "t-network-2", title: "Update LinkedIn headline", status: "done" },
     ],
-    milestones: [
+    contentQueue: [
+      { id: "c-pm-1", title: "Breaking into senior PM", meta: "Priya Raman · 24 min video", image: eventImg2, action: "Watch" },
+      { id: "c-pm-2", title: "The PM resume that gets callbacks", meta: "David Kim · Guide, 9 pages", image: eventImg3, action: "Read" },
+    ],
+    projects: [
       {
         id: "p-target-list",
         name: "Target companies",
@@ -278,6 +353,15 @@ export const myGoals: Goal[] = [
       },
     ],
   },
+];
+
+// Tasks that belong to no goal. Real to-do lists always accumulate things that
+// don't ladder up to a goal yet ("book the flight"), and forcing every task
+// into a goal makes people either skip capture or invent junk goals. These can
+// be assigned to a goal (and optionally a project) later.
+export const myStandaloneTasks: Task[] = [
+  { id: "t-solo-1", title: "Renew passport", status: "todo", dueDate: "2026-09-01" },
+  { id: "t-solo-2", title: "Ask Jessica about her GSB interviewer", status: "todo" },
 ];
 
 // ─── Test outcomes ──────────────────────────────────────────────────────────

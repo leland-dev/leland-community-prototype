@@ -9,6 +9,8 @@ import { ProfileBarModeProvider } from "./contexts/ProfileBarModeContext";
 import { FeedDemoProvider } from "./contexts/FeedDemoContext";
 import { PageExitProvider } from "./contexts/PageExitContext";
 import { GoalsProvider } from "./contexts/GoalsContext";
+import { GoalsProvider as FullGoalsProvider } from "./full/contexts/GoalsContext";
+import { GoalsVersionProvider } from "./contexts/GoalsVersionContext";
 import PageExitOverlay from "./components/PageExitOverlay";
 import Layout from "./components/Layout";
 import { ContextLayout } from "./components/Layout";
@@ -56,10 +58,8 @@ import Events from "./pages/Events";
 import Courses from "./pages/Courses";
 import LelandPlus from "./pages/LelandPlus";
 import Dashboard from "./pages/Dashboard";
-import GoalsIndex from "./pages/GoalsIndex";
-import GoalDetail from "./pages/GoalDetail";
-import GoalNew from "./pages/GoalNew";
-import TaskList from "./pages/TaskList";
+import { GoalsIndexSwitch, GoalDetailSwitch, GoalNewSwitch } from "./components/GoalsRouteSwitch";
+import FullTaskList from "./full/pages/TaskList";
 import PostDetail, { CommentDetail } from "./pages/PostDetail";
 import ReplyCompose from "./pages/ReplyCompose";
 import ReplayViewer from "./pages/ReplayViewer";
@@ -114,7 +114,9 @@ export default function App() {
     <BookmarksProvider>
     <SavedToastProvider>
     <ProfileBarModeProvider>
+    <GoalsVersionProvider>
     <GoalsProvider>
+    <FullGoalsProvider>
     <FeedDemoProvider>
     <ScrollToTop />
     <PageExitProvider>
@@ -187,10 +189,10 @@ export default function App() {
           <Route path="/browse" element={<Browse />} />
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/goals" element={<GoalsIndex />} />
-          <Route path="/tasks" element={<TaskList />} />
-          <Route path="/goals/new" element={<GoalNew />} />
-          <Route path="/goals/:goalId" element={<GoalDetail />} />
+          <Route path="/goals" element={<GoalsIndexSwitch />} />
+          <Route path="/goals/new" element={<GoalNewSwitch />} />
+          <Route path="/goals/:goalId" element={<GoalDetailSwitch />} />
+          <Route path="/tasks" element={<FullTaskList />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/messages" element={<Messaging />} />
           <Route path="/profile" element={<Profile />} />
@@ -205,7 +207,9 @@ export default function App() {
     <PageExitOverlay />
     </PageExitProvider>
     </FeedDemoProvider>
+    </FullGoalsProvider>
     </GoalsProvider>
+    </GoalsVersionProvider>
     </ProfileBarModeProvider>
     </SavedToastProvider>
     </BookmarksProvider>

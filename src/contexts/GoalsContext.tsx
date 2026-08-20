@@ -2,12 +2,8 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import {
   buildTargetLabel,
   myGoals,
-  myStandaloneTasks,
-  TODAY_ISO,
   type Goal,
-  type GoalContentItem,
-  type Project,
-  type Routine,
+  type Milestone,
   type Task,
   type TaskStatus,
   type TestAttempt,
@@ -15,53 +11,31 @@ import {
 } from "../data/goals";
 import type { Plan } from "../data/goalPlans";
 
-// Sentinel id for the "Other tasks" tile in the goal-detail board — it isn't a
-// real Project, but reorderBoardItem treats it as one so it can sit anywhere
-// among the project cards.
-export const OTHER_TASKS_TILE_ID = "__other-tasks__";
-
 // Goals are mutated from three places — the dashboard card, goal detail, and
 // the new-goal flow — so they live in one shared store. Prototype-only:
 // in-memory, resets on reload.
 interface GoalsContextValue {
   goals: Goal[];
   getGoal: (id: string) => Goal | undefined;
-  // Tasks are addressed by their own id, not by (goalId, taskId) — a task can
-  // live in a project, directly on a goal, or on nothing at all, and callers
-  // shouldn't have to know which.
-  standaloneTasks: Task[];
   toggleTask: (taskId: string) => void;
-  toggleRoutine: (goalId: string, routineId: string) => void;
   moveTask: (taskId: string, status: TaskStatus) => void;
-  createTask: (input: { title: string; goalId?: string | null; projectId?: string | null; dueDate?: string }) => void;
-  // Move an existing task between containers. Omit both ids to unassign it.
-  assignTask: (taskId: string, target: { goalId?: string | null; projectId?: string | null }) => void;
-  taskLocation: (taskId: string) => { goal: Goal | null; projectId: string | null };
-  setProjectView: (goalId: string, projectId: string, view: "list" | "kanban") => void;
-  toggleProjectCollapsed: (goalId: string, projectId: string) => void;
-  // itemId/targetId are project ids or OTHER_TASKS_TILE_ID — the board treats
-  // "Other tasks" as just another reorderable tile.
-  reorderBoardItem: (goalId: string, itemId: string, targetId: string, edge?: "before" | "after", span?: "full" | "half") => void;
-  setProjectSpan: (goalId: string, projectId: string, span: "full" | "half") => void;
-  setOtherTasksView: (goalId: string, view: "list" | "kanban") => void;
-  setOtherTasksSpan: (goalId: string, span: "full" | "half") => void;
-  toggleOtherTasksCollapsed: (goalId: string) => void;
+  createTask: (input: { title: string; goalId: string; milestoneId?: string | null; dueDate?: string }) => void;
   createGoal: (input: CreateGoalInput) => Goal;
   // Edits
   updateGoal: (goalId: string, patch: Partial<Pick<Goal, "name" | "targetDate" | "description" | "targetScore" | "baselineScore" | "outcome" | "finalScore">>) => void;
   deleteGoal: (goalId: string) => void;
   completeGoal: (goalId: string, outcome?: string, finalScore?: number) => void;
   reopenGoal: (goalId: string) => void;
-  updateContentItem: (goalId: string, itemId: string, patch: Partial<Pick<GoalContentItem, "title" | "meta">>) => void;
-  deleteContentItem: (goalId: string, itemId: string) => void;
   updateTask: (taskId: string, patch: Partial<Pick<Task, "title" | "dueDate" | "note">>) => void;
   deleteTask: (taskId: string) => void;
-  addProject: (goalId: string, name: string) => void;
-  updateProject: (goalId: string, projectId: string, patch: Partial<Pick<Project, "name" | "note">>) => void;
-  deleteProject: (goalId: string, projectId: string) => void;
-  addRoutine: (goalId: string, label: string, cadence: string) => void;
-  updateRoutine: (goalId: string, routineId: string, patch: Partial<Pick<Routine, "label" | "cadence">>) => void;
-  deleteRoutine: (goalId: string, routineId: string) => void;
+  // Move a task to a different milestone (or null for "Other tasks") on the
+  // same goal. No cross-goal move — that needs the master task list.
+  reassignTask: (goalId: string, taskId: string, milestoneId: string | null) => void;
+  addMilestone: (goalId: string, name: string) => void;
+  updateMilestone: (goalId: string, milestoneId: string, patch: Partial<Pick<Milestone, "name" | "note">>) => void;
+  deleteMilestone: (goalId: string, milestoneId: string) => void;
+  setMilestoneView: (goalId: string, milestoneId: string, view: "list" | "kanban") => void;
+  setOtherTasksView: (goalId: string, view: "list" | "kanban") => void;
   // Test outcomes
   addAttempt: (goalId: string, attempt: Omit<TestAttempt, "id">) => void;
   updateAttempt: (goalId: string, attemptId: string, patch: Partial<Omit<TestAttempt, "id">>) => void;
@@ -85,15 +59,6 @@ const GoalsContext = createContext<GoalsContextValue | null>(null);
 let idCounter = 0;
 const nextId = (prefix: string) => `${prefix}-${++idCounter}`;
 
-// Checking a task parks it in Done; unchecking returns it to where it came
-// from, so a kanban card doesn't lose its column on a stray click.
-function flipTask(task: Task): Task {
-  if (task.status === "done") {
-    return { ...task, status: task.previousStatus ?? "todo", previousStatus: undefined };
-  }
-  return { ...task, status: "done", previousStatus: task.status };
-}
-
 function mapGoal(goals: Goal[], goalId: string, fn: (goal: Goal) => Goal): Goal[] {
   return goals.map((g) => (g.id === goalId ? fn(g) : g));
 }
@@ -101,199 +66,59 @@ function mapGoal(goals: Goal[], goalId: string, fn: (goal: Goal) => Goal): Goal[
 function mapTasks(goal: Goal, fn: (task: Task) => Task): Goal {
   return {
     ...goal,
-    projects: goal.projects.map((p) => ({ ...p, tasks: p.tasks.map(fn) })),
+    milestones: goal.milestones.map((m) => ({ ...m, tasks: m.tasks.map(fn) })),
     otherTasks: goal.otherTasks.map(fn),
   };
 }
 
+// Checking a task off parks it in Done; unchecking returns it to where it
+// came from (todo or in-progress) instead of always resetting to todo.
+function flipTask(task: Task): Task {
+  if (task.status === "done") {
+    return { ...task, status: task.previousStatus ?? "todo", previousStatus: undefined };
+  }
+  return { ...task, status: "done", previousStatus: task.status };
+}
+
 export function GoalsProvider({ children }: { children: ReactNode }) {
   const [goals, setGoals] = useState<Goal[]>(myGoals);
-  const [standaloneTasks, setStandaloneTasks] = useState<Task[]>(myStandaloneTasks);
 
   const getGoal = useCallback((id: string) => goals.find((g) => g.id === id), [goals]);
 
-  // Apply fn to whichever container holds taskId — a project, a goal's loose
-  // tasks, or the standalone list.
+  // Apply fn to whichever container holds taskId — a milestone or a goal's
+  // loose tasks.
   const patchTaskEverywhere = useCallback((taskId: string, fn: (t: Task) => Task) => {
     const apply = (t: Task) => (t.id === taskId ? fn(t) : t);
     setGoals((prev) => prev.map((goal) => mapTasks(goal, apply)));
-    setStandaloneTasks((prev) => prev.map(apply));
   }, []);
 
   const toggleTask = useCallback((taskId: string) => patchTaskEverywhere(taskId, flipTask), [patchTaskEverywhere]);
 
-  const taskLocation = useCallback(
-    (taskId: string) => {
-      for (const goal of goals) {
-        for (const p of goal.projects) {
-          if (p.tasks.some((t) => t.id === taskId)) return { goal, projectId: p.id };
-        }
-        if (goal.otherTasks.some((t) => t.id === taskId)) return { goal, projectId: null };
-      }
-      return { goal: null, projectId: null };
-    },
-    [goals],
-  );
-
-  const toggleRoutine = useCallback((goalId: string, routineId: string) => {
-    setGoals((prev) =>
-      mapGoal(prev, goalId, (goal) => ({
-        ...goal,
-        routines: goal.routines.map((r) => {
-          if (r.id !== routineId) return r;
-          const checkedToday = r.lastCheckedAt === TODAY_ISO;
-          return {
-            ...r,
-            streak: checkedToday ? Math.max(0, r.streak - 1) : r.streak + 1,
-            lastCheckedAt: checkedToday ? undefined : TODAY_ISO,
-          };
-        }),
-      })),
-    );
-  }, []);
-
   const moveTask = useCallback(
-    (taskId: string, status: TaskStatus) => {
+    (taskId: string, status: TaskStatus) =>
       patchTaskEverywhere(taskId, (t) =>
         t.status === status ? t : { ...t, status, previousStatus: status === "done" ? t.status : undefined },
-      );
-    },
+      ),
     [patchTaskEverywhere],
   );
 
   const createTask = useCallback(
-    ({ title, goalId, projectId, dueDate }: { title: string; goalId?: string | null; projectId?: string | null; dueDate?: string }) => {
+    ({ title, goalId, milestoneId, dueDate }: { title: string; goalId: string; milestoneId?: string | null; dueDate?: string }) => {
       const task: Task = { id: nextId("task"), title, status: "todo", dueDate };
-      if (!goalId) {
-        setStandaloneTasks((prev) => [...prev, task]);
-        return;
-      }
       setGoals((prev) =>
         mapGoal(prev, goalId, (goal) =>
-          !projectId
+          !milestoneId
             ? { ...goal, otherTasks: [...goal.otherTasks, task] }
-            : { ...goal, projects: goal.projects.map((p) => (p.id === projectId ? { ...p, tasks: [...p.tasks, task] } : p)) },
+            : { ...goal, milestones: goal.milestones.map((m) => (m.id === milestoneId ? { ...m, tasks: [...m.tasks, task] } : m)) },
         ),
       );
     },
     [],
   );
 
-  const assignTask = useCallback(
-    (taskId: string, target: { goalId?: string | null; projectId?: string | null }) => {
-      // Resolve the task up front from current state, then update each list
-      // independently — no cross-updater side effects, so this stays correct
-      // under StrictMode's double-invoked updaters.
-      const moved =
-        standaloneTasks.find((t) => t.id === taskId) ??
-        goals.flatMap((g) => [...g.projects.flatMap((p) => p.tasks), ...g.otherTasks]).find((t) => t.id === taskId);
-      if (!moved) return;
-
-      const without = (tasks: Task[]) => tasks.filter((t) => t.id !== taskId);
-
-      setStandaloneTasks((prev) => (target.goalId ? without(prev) : [...without(prev), moved]));
-
-      setGoals((prev) =>
-        prev
-          .map((goal) => ({
-            ...goal,
-            projects: goal.projects.map((p) => ({ ...p, tasks: without(p.tasks) })),
-            otherTasks: without(goal.otherTasks),
-          }))
-          .map((goal) =>
-            goal.id !== target.goalId
-              ? goal
-              : !target.projectId
-                ? { ...goal, otherTasks: [...goal.otherTasks, moved] }
-                : { ...goal, projects: goal.projects.map((p) => (p.id === target.projectId ? { ...p, tasks: [...p.tasks, moved] } : p)) },
-          ),
-      );
-    },
-    [goals, standaloneTasks],
-  );
-
-  const setProjectView = useCallback((goalId: string, projectId: string, view: "list" | "kanban") => {
-    setGoals((prev) =>
-      mapGoal(prev, goalId, (goal) => ({
-        ...goal,
-        projects: goal.projects.map((p) => (p.id === projectId ? { ...p, view } : p)),
-      })),
-    );
-  }, []);
-
-  const toggleProjectCollapsed = useCallback((goalId: string, projectId: string) => {
-    setGoals((prev) =>
-      mapGoal(prev, goalId, (goal) => ({
-        ...goal,
-        projects: goal.projects.map((p) => (p.id === projectId ? { ...p, collapsed: !p.collapsed } : p)),
-      })),
-    );
-  }, []);
-
-  // Drag-to-reorder, Notion-style: the dragged tile is lifted out and
-  // inserted before or after the drop target, depending on which edge of it
-  // the cursor was nearest. Projects and the "Other tasks" tile share one
-  // order — build a combined id list (projects, with OTHER_TASKS_TILE_ID
-  // spliced in at its stored position), reorder that, then split it back into
-  // `projects` plus a new `otherTasksIndex`.
-  //
-  // Dropping on the left/right edge tucks the tile in beside the target, so
-  // it's forced to half width; dropping on the top/bottom edge gives it a
-  // fresh row of its own, so it's forced back to full width.
-  const reorderBoardItem = useCallback(
-    (goalId: string, itemId: string, targetId: string, edge: "before" | "after" = "before", span: "full" | "half" = "full") => {
-      if (itemId === targetId) return;
-      setGoals((prev) =>
-        mapGoal(prev, goalId, (goal) => {
-          const order = goal.projects.map((p) => p.id);
-          const otherIdx = Math.min(goal.otherTasksIndex ?? order.length, order.length);
-          order.splice(otherIdx, 0, OTHER_TASKS_TILE_ID);
-
-          const from = order.indexOf(itemId);
-          if (from === -1) return goal;
-          const rest = [...order];
-          rest.splice(from, 1);
-          const targetIdx = rest.indexOf(targetId);
-          if (targetIdx === -1) return goal;
-          rest.splice(edge === "before" ? targetIdx : targetIdx + 1, 0, itemId);
-
-          const newOtherTasksIndex = rest.indexOf(OTHER_TASKS_TILE_ID);
-          const projectById = new Map(goal.projects.map((p) => [p.id, p]));
-          const projects = rest
-            .filter((id) => id !== OTHER_TASKS_TILE_ID)
-            .map((id) => (id === itemId ? { ...projectById.get(id)!, span } : projectById.get(id)!));
-          const otherTasksSpan = itemId === OTHER_TASKS_TILE_ID ? span : goal.otherTasksSpan;
-          return { ...goal, projects, otherTasksIndex: newOtherTasksIndex, otherTasksSpan };
-        }),
-      );
-    },
-    [],
-  );
-
-  const setProjectSpan = useCallback((goalId: string, projectId: string, span: "full" | "half") => {
-    setGoals((prev) =>
-      mapGoal(prev, goalId, (goal) => ({
-        ...goal,
-        projects: goal.projects.map((p) => (p.id === projectId ? { ...p, span } : p)),
-      })),
-    );
-  }, []);
-
-  const setOtherTasksView = useCallback((goalId: string, view: "list" | "kanban") => {
-    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, otherTasksView: view })));
-  }, []);
-
-  const setOtherTasksSpan = useCallback((goalId: string, span: "full" | "half") => {
-    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, otherTasksSpan: span })));
-  }, []);
-
-  const toggleOtherTasksCollapsed = useCallback((goalId: string) => {
-    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, otherTasksCollapsed: !goal.otherTasksCollapsed })));
-  }, []);
-
   const createGoal = useCallback((input: CreateGoalInput) => {
-    const projects: Project[] = input.plan.projects.map((p) => ({
-      id: nextId("project"),
+    const milestones: Milestone[] = input.plan.projects.map((p) => ({
+      id: nextId("milestone"),
       name: p.label,
       note: p.why,
       tasks: p.tasks.map((title) => ({ id: nextId("task"), title, status: "todo" as TaskStatus })),
@@ -309,10 +134,8 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
       description: input.description,
       targetScore: input.targetScore,
       baselineScore: input.baselineScore,
-      projects,
-      routines: input.plan.routines.map((r) => ({ id: nextId("routine"), label: r.label, cadence: r.cadence, streak: 0 })),
+      milestones,
       otherTasks: [],
-      contentQueue: [],
     };
 
     setGoals((prev) => [...prev, goal]);
@@ -337,24 +160,11 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const completeGoal = useCallback((goalId: string, outcome?: string, finalScore?: number) => {
-    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, completedAt: TODAY_ISO, outcome, finalScore })));
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, completedAt: new Date().toISOString().slice(0, 10), outcome, finalScore })));
   }, []);
 
   const reopenGoal = useCallback((goalId: string) => {
     setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, completedAt: undefined, outcome: undefined, finalScore: undefined })));
-  }, []);
-
-  const updateContentItem = useCallback((goalId: string, itemId: string, patch: Partial<Pick<GoalContentItem, "title" | "meta">>) => {
-    setGoals((prev) =>
-      mapGoal(prev, goalId, (goal) => ({
-        ...goal,
-        contentQueue: goal.contentQueue.map((item) => (item.id === itemId ? { ...item, ...patch } : item)),
-      })),
-    );
-  }, []);
-
-  const deleteContentItem = useCallback((goalId: string, itemId: string) => {
-    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, contentQueue: goal.contentQueue.filter((item) => item.id !== itemId) })));
   }, []);
 
   const updateTask = useCallback(
@@ -366,50 +176,64 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
     setGoals((prev) =>
       prev.map((goal) => ({
         ...goal,
-        projects: goal.projects.map((p) => ({ ...p, tasks: p.tasks.filter((t) => t.id !== taskId) })),
+        milestones: goal.milestones.map((m) => ({ ...m, tasks: m.tasks.filter((t) => t.id !== taskId) })),
         otherTasks: goal.otherTasks.filter((t) => t.id !== taskId),
       })),
     );
-    setStandaloneTasks((prev) => prev.filter((t) => t.id !== taskId));
   }, []);
 
-  const addProject = useCallback((goalId: string, name: string) => {
-    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, projects: [...goal.projects, { id: nextId("project"), name, tasks: [] }] })));
-  }, []);
-
-  const updateProject = useCallback((goalId: string, projectId: string, patch: Partial<Pick<Project, "name" | "note">>) => {
-    setGoals((prev) =>
-      mapGoal(prev, goalId, (goal) => ({ ...goal, projects: goal.projects.map((p) => (p.id === projectId ? { ...p, ...patch } : p)) })),
-    );
-  }, []);
-
-  // Deleting a project keeps its tasks — they fall back to "Other tasks"
-  // rather than disappearing with the container.
-  const deleteProject = useCallback((goalId: string, projectId: string) => {
+  const reassignTask = useCallback((goalId: string, taskId: string, milestoneId: string | null) => {
     setGoals((prev) =>
       mapGoal(prev, goalId, (goal) => {
-        const project = goal.projects.find((p) => p.id === projectId);
+        const found =
+          goal.milestones.flatMap((m) => m.tasks).find((t) => t.id === taskId) ?? goal.otherTasks.find((t) => t.id === taskId);
+        if (!found) return goal;
+        const without = (tasks: Task[]) => tasks.filter((t) => t.id !== taskId);
         return {
           ...goal,
-          projects: goal.projects.filter((p) => p.id !== projectId),
-          otherTasks: [...goal.otherTasks, ...(project?.tasks ?? [])],
+          milestones: goal.milestones.map((m) => ({
+            ...m,
+            tasks: m.id === milestoneId ? [...without(m.tasks), found] : without(m.tasks),
+          })),
+          otherTasks: milestoneId ? without(goal.otherTasks) : [...without(goal.otherTasks), found],
         };
       }),
     );
   }, []);
 
-  const addRoutine = useCallback((goalId: string, label: string, cadence: string) => {
-    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, routines: [...goal.routines, { id: nextId("routine"), label, cadence, streak: 0 }] })));
+  const addMilestone = useCallback((goalId: string, name: string) => {
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, milestones: [...goal.milestones, { id: nextId("milestone"), name, tasks: [] }] })));
   }, []);
 
-  const updateRoutine = useCallback((goalId: string, routineId: string, patch: Partial<Pick<Routine, "label" | "cadence">>) => {
+  const updateMilestone = useCallback((goalId: string, milestoneId: string, patch: Partial<Pick<Milestone, "name" | "note">>) => {
     setGoals((prev) =>
-      mapGoal(prev, goalId, (goal) => ({ ...goal, routines: goal.routines.map((r) => (r.id === routineId ? { ...r, ...patch } : r)) })),
+      mapGoal(prev, goalId, (goal) => ({ ...goal, milestones: goal.milestones.map((m) => (m.id === milestoneId ? { ...m, ...patch } : m)) })),
     );
   }, []);
 
-  const deleteRoutine = useCallback((goalId: string, routineId: string) => {
-    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, routines: goal.routines.filter((r) => r.id !== routineId) })));
+  // Deleting a milestone keeps its tasks — they fall back to "Other tasks"
+  // rather than disappearing with the container.
+  const deleteMilestone = useCallback((goalId: string, milestoneId: string) => {
+    setGoals((prev) =>
+      mapGoal(prev, goalId, (goal) => {
+        const milestone = goal.milestones.find((m) => m.id === milestoneId);
+        return {
+          ...goal,
+          milestones: goal.milestones.filter((m) => m.id !== milestoneId),
+          otherTasks: [...goal.otherTasks, ...(milestone?.tasks ?? [])],
+        };
+      }),
+    );
+  }, []);
+
+  const setMilestoneView = useCallback((goalId: string, milestoneId: string, view: "list" | "kanban") => {
+    setGoals((prev) =>
+      mapGoal(prev, goalId, (goal) => ({ ...goal, milestones: goal.milestones.map((m) => (m.id === milestoneId ? { ...m, view } : m)) })),
+    );
+  }, []);
+
+  const setOtherTasksView = useCallback((goalId: string, view: "list" | "kanban") => {
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, otherTasksView: view })));
   }, []);
 
   const addAttempt = useCallback((goalId: string, attempt: Omit<TestAttempt, "id">) => {
@@ -442,23 +266,15 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      goals, standaloneTasks, getGoal, toggleTask, toggleRoutine, moveTask, createTask, assignTask, taskLocation,
-      setProjectView, toggleProjectCollapsed, reorderBoardItem, setProjectSpan, createGoal,
-      setOtherTasksView, setOtherTasksSpan, toggleOtherTasksCollapsed,
-      updateGoal, deleteGoal, completeGoal, reopenGoal, updateTask, deleteTask,
-      addProject, updateProject, deleteProject,
-      addRoutine, updateRoutine, deleteRoutine,
-      updateContentItem, deleteContentItem,
+      goals, getGoal, toggleTask, moveTask, createTask, createGoal,
+      updateGoal, deleteGoal, completeGoal, reopenGoal, updateTask, deleteTask, reassignTask,
+      addMilestone, updateMilestone, deleteMilestone, setMilestoneView, setOtherTasksView,
       addAttempt, updateAttempt, deleteAttempt, setSectionTarget,
     }),
     [
-      goals, standaloneTasks, getGoal, toggleTask, toggleRoutine, moveTask, createTask, assignTask, taskLocation,
-      setProjectView, toggleProjectCollapsed, reorderBoardItem, setProjectSpan, createGoal,
-      setOtherTasksView, setOtherTasksSpan, toggleOtherTasksCollapsed,
-      updateGoal, deleteGoal, completeGoal, reopenGoal, updateTask, deleteTask,
-      addProject, updateProject, deleteProject,
-      addRoutine, updateRoutine, deleteRoutine,
-      updateContentItem, deleteContentItem,
+      goals, getGoal, toggleTask, moveTask, createTask, createGoal,
+      updateGoal, deleteGoal, completeGoal, reopenGoal, updateTask, deleteTask, reassignTask,
+      addMilestone, updateMilestone, deleteMilestone, setMilestoneView, setOtherTasksView,
       addAttempt, updateAttempt, deleteAttempt, setSectionTarget,
     ],
   );
