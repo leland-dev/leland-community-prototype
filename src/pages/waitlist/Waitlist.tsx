@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "motion/react";
 import { ArrowRight, Bell, Check, Copy, Ticket, Sparkles, TrendingUp, GraduationCap, MessageCircle, Mail, MoreHorizontal, X } from "lucide-react";
 
-import { StepChrome, StepHeading, SharpStar } from "../onboarding/steps/flowUI";
+import { StepChrome, StepHeading, SharpStar, StatusBar } from "../onboarding/steps/flowUI";
 import { MEMBER_AVATARS } from "../onboarding/mockData";
 import { REVIEW_STATS } from "../onboarding/data";
 import mark from "../../assets/leland-logos/leland-mark.svg";
@@ -744,6 +744,8 @@ export default function Waitlist() {
       </AnimatePresence>
 
       <div className="relative z-10 mx-auto flex h-full w-full max-w-[440px] flex-col">
+        <StatusBar visible={stage !== "landing"} />
+
         {/* constant-height chrome slot: content never reflows when it appears */}
         <div className="h-[52px] shrink-0">
           <AnimatePresence>

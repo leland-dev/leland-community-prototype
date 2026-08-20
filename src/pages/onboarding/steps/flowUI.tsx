@@ -1,10 +1,40 @@
-import { Check, ArrowLeft } from "lucide-react";
+import { Check, ArrowLeft, Wifi } from "lucide-react";
 import { Button } from "../../../components/Button";
 
 /* Shared presentational primitives for the member flow (screens 2–8). */
 
 /** Persistent step chrome — back · dots · skip. Lives in the shell (above the
  *  swapped content) so it stays put across step transitions. */
+/* Fake iOS status bar: full-screen flows cover the real one, and emulators
+   have no safe-area insets, so the prototype draws its own. Always occupies
+   its row (no reflow); `visible` just fades it. */
+export function StatusBar({ visible = true }: { visible?: boolean }) {
+  return (
+    <div
+      aria-hidden
+      className={`flex h-[54px] shrink-0 items-center justify-between px-8 text-gray-dark transition-opacity duration-300 ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      <span className="w-[54px] text-center text-[15px] font-semibold">9:41</span>
+      <span className="flex items-center gap-1.5">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor">
+          <rect x="0" y="7" width="3" height="5" rx="1" />
+          <rect x="5" y="4.5" width="3" height="7.5" rx="1" />
+          <rect x="10" y="2" width="3" height="10" rx="1" />
+          <rect x="15" y="0" width="3" height="12" rx="1" />
+        </svg>
+        <Wifi size={16} strokeWidth={2.6} />
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+          <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" opacity="0.35" />
+          <path d="M23 3.5v5a2.7 2.7 0 0 0 0-5Z" fill="currentColor" opacity="0.4" />
+          <rect x="2" y="2" width="18" height="8" rx="2.5" fill="currentColor" />
+        </svg>
+      </span>
+    </div>
+  );
+}
+
 export function StepChrome({
   onBack,
   onSkip,

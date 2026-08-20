@@ -46,7 +46,7 @@ export default function PersistentLogo({
         instant ? false : { top: "50%", y: "-50%", opacity: reduced ? 1 : 0 }
       }
       animate={{
-        top: docked ? "calc(env(safe-area-inset-top, 0px) + 9.5%)" : "50%",
+        top: docked ? "calc(env(safe-area-inset-top, 0px) + 13%)" : "50%",
         y: "-50%",
         opacity: 1,
       }}

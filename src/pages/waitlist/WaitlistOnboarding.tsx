@@ -24,7 +24,7 @@ import ChoiceQuestion, { type Choice } from "../onboarding/steps/ChoiceQuestion"
 import SituationStep from "../onboarding/steps/SituationStep";
 import InstitutionSuggestions from "../onboarding/steps/InstitutionSuggestions";
 import ProfileSetup from "../onboarding/steps/ProfileSetup";
-import { StepChrome } from "../onboarding/steps/flowUI";
+import { StepChrome, StatusBar } from "../onboarding/steps/flowUI";
 import { Joining, InLine, Front, Notify } from "./Waitlist";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -182,7 +182,12 @@ export default function WaitlistOnboarding() {
         : { x: (c?.d ?? 1) > 0 ? -96 : 96, opacity: 0, transition: { duration: 0.38, ease: EASE } },
   };
 
-  const screen = (key: string, children: React.ReactNode, variants: Variants = screenVariants as Variants) => (
+  const screen = (
+    key: string,
+    children: React.ReactNode,
+    variants: Variants = screenVariants as Variants,
+    className = "absolute inset-0",
+  ) => (
     <motion.div
       key={key}
       custom={{ d: dirRef.current, delay: delayRef.current }}
@@ -190,7 +195,7 @@ export default function WaitlistOnboarding() {
       initial="enter"
       animate="center"
       exit="exit"
-      className="absolute inset-0"
+      className={className}
     >
       {children}
     </motion.div>
@@ -242,6 +247,8 @@ export default function WaitlistOnboarding() {
 
       {/* ── step stage ── */}
       <div className="relative z-10 mx-auto flex h-full w-full max-w-[440px] flex-col">
+        <StatusBar visible={stage !== "loading" && stage !== "opener"} />
+
         {/* constant-height chrome slot: content never reflows when it appears */}
         <div className="h-[52px] shrink-0">
           <AnimatePresence>
@@ -273,6 +280,7 @@ export default function WaitlistOnboarding() {
                       onExpert={() => navigate("/onboarding", { state: { expert: true } })}
                     />,
                     openerVariants as Variants,
+                    "absolute inset-x-0 bottom-0 top-[-106px]",
                   )
                 : stage === "signin"
                   ? screen(
