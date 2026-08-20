@@ -388,6 +388,25 @@ function InLine({ invited, reduced, onDone, onFront }: { invited: boolean; reduc
     if (next.every(Boolean)) window.setTimeout(onFront, 700);
   };
 
+  // Real devices get the native share sheet (Web Share API); the mock sheet is
+  // the desktop fallback. A pass is only spent if the share actually completes.
+  const sharePass = async (i: number) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Leland",
+          text: "I saved you a spot in the Leland community. Tap to skip the line:",
+          url: `${window.location.origin}/waitlist?code=${INVITE_CODES[i]}`,
+        });
+        markSent(i);
+      } catch {
+        // canceled: leave the pass unspent
+      }
+    } else {
+      setSharing(i);
+    }
+  };
+
   return (
     <div className="relative h-full">
       <div className="h-full overflow-y-auto px-6 pb-10 pt-4 text-center">
@@ -463,7 +482,7 @@ function InLine({ invited, reduced, onDone, onFront }: { invited: boolean; reduc
                   </span>
                 ) : (
                   <button
-                    onClick={() => setSharing(i)}
+                    onClick={() => sharePass(i)}
                     aria-label="Share pass"
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-dark text-white transition-colors hover:bg-[#333]"
                   >
