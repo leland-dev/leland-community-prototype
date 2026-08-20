@@ -417,20 +417,27 @@ function InLine({ invited, reduced, onDone, onFront }: { invited: boolean; reduc
           </motion.div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: reduced ? 0.2 : 1.6, duration: 0.5 }}
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: reduced ? 0.2 : 1.55, duration: 0.45, ease: EASE }}
+          className="mx-auto mt-9 max-w-[30ch] text-[15px] leading-relaxed text-gray-light"
         >
-          <p className="mx-auto mt-9 max-w-[30ch] text-[15px] leading-relaxed text-gray-light">
-            Send these 3 passes and we'll bump you to the front of the line.
-          </p>
-          <div className="mt-4 flex flex-col gap-2.5">
-            {INVITE_CODES.map((code, i) => (
-              <div
-                key={code}
-                className="flex items-center gap-3 rounded-2xl bg-[#f4f4f4] p-4 text-left"
-              >
+          Send these 3 passes and we'll bump you to the front of the line.
+        </motion.p>
+        <div className="mt-4 flex flex-col gap-2.5">
+          {INVITE_CODES.map((code, i) => (
+            <motion.div
+              key={code}
+              initial={reduced ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={
+                reduced
+                  ? { duration: 0.3, delay: 0.3 }
+                  : { delay: 1.9 + i * 0.22, type: "spring", stiffness: 300, damping: 22 }
+              }
+              className="flex items-center gap-3 rounded-2xl bg-[#f4f4f4] p-4 text-left"
+            >
                 <img
                   src={mark}
                   alt=""
@@ -456,10 +463,15 @@ function InLine({ invited, reduced, onDone, onFront }: { invited: boolean; reduc
                     <Share size={17} />
                   </button>
                 )}
-              </div>
-            ))}
-          </div>
+            </motion.div>
+          ))}
+        </div>
 
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: reduced ? 0.4 : 2.6, duration: 0.45 }}
+        >
           <p className="mt-6 text-[13px] text-gray-light">
             We'll text you when your wave opens.
           </p>
