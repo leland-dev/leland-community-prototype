@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "motion/react";
-import { ArrowRight, Check, Share, Copy, Ticket, MessageCircle, Mail, MoreHorizontal, X } from "lucide-react";
+import { ArrowRight, Check, Copy, Ticket, Sparkles, TrendingUp, GraduationCap, MessageCircle, Mail, MoreHorizontal, X } from "lucide-react";
 
 import { StepChrome, StepHeading, SharpStar } from "../onboarding/steps/flowUI";
-import ChoiceQuestion, { type Choice } from "../onboarding/steps/ChoiceQuestion";
 import { MEMBER_AVATARS } from "../onboarding/mockData";
 import { REVIEW_STATS } from "../onboarding/data";
 import mark from "../../assets/leland-logos/leland-mark.svg";
@@ -24,14 +23,6 @@ type Stage = "landing" | "code" | "details" | "goal" | "joining" | "inline" | "f
 const WAVE_LADDER = { regular: [3, 2, 2], invited: [2, 1, 1] } as const;
 const INVITE_CODES = ["7F3K2M", "Q2XM9A", "9BWD4T"];
 const CODE_RE = /^[A-Z0-9]{6}$/;
-
-const GOALS: Choice[] = [
-  { label: "Get into a top school" },
-  { label: "Grow my career" },
-  { label: "Build with AI" },
-  { label: "Find a coach" },
-  { label: "Just exploring" },
-];
 
 const YELLOW_PILL =
   "flex w-full items-center justify-center gap-2 rounded-full bg-yellow py-3.5 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#F3C948]";
@@ -215,13 +206,13 @@ function Details({ invited, cascade, onContinue }: { invited: boolean; cascade: 
       <motion.div variants={item}>
         {invited ? (
           <div className="mb-6">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow text-gray-dark">
-              <Ticket size={22} />
+            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow text-gray-dark">
+              <Ticket size={24} />
             </span>
-            <h2 className="mt-4 text-balance font-serif text-[28px] leading-[1.12] text-gray-dark">
+            <h2 className="mt-5 text-balance font-serif text-[28px] leading-[1.12] text-gray-dark">
               A friend saved you a spot
             </h2>
-            <p className="mt-2 text-[15px] leading-relaxed text-gray-light">
+            <p className="mt-2 max-w-[30ch] text-balance text-[15px] leading-relaxed text-gray-light">
               This pass skips you to the front of the line.
             </p>
           </div>
@@ -267,6 +258,37 @@ function Details({ invited, cascade, onContinue }: { invited: boolean; cascade: 
         </motion.div>
       </div>
     </form>
+  );
+}
+
+/* ── goal: 1:1 with the v3 onboarding GoalSelect (same buckets + sizing) ── */
+const GOAL_BUCKETS = [
+  { label: "Build with AI", Icon: Sparkles },
+  { label: "Grow your career", Icon: TrendingUp },
+  { label: "Get into school", Icon: GraduationCap },
+];
+
+function Goal({ onSelect }: { onSelect: () => void }) {
+  return (
+    <div className="h-full overflow-y-auto px-6 pb-10 pt-2">
+      <StepHeading title="What brings you to Leland?" subtitle="Pick one to get started." />
+      <div className="flex flex-col gap-3">
+        {GOAL_BUCKETS.map((b, i) => (
+          <motion.button
+            key={b.label}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.05 + i * 0.07, ease: EASE }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onSelect}
+            className="flex items-center gap-3 rounded-2xl border border-gray-stroke bg-white px-5 py-5 text-left text-[17px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+          >
+            <b.Icon size={22} strokeWidth={1.9} className="shrink-0 text-gray-dark" />
+            {b.label}
+          </motion.button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -411,7 +433,7 @@ function InLine({ invited, reduced, onDone, onFront }: { invited: boolean; reduc
     <div className="relative h-full">
       <div className="h-full overflow-y-auto px-6 pb-10 pt-4 text-center">
         <motion.div
-          initial={reduced ? undefined : { y: 170 }}
+          initial={reduced ? undefined : { y: "36vh" }}
           animate={{ y: 0 }}
           transition={{ delay: 1.0, duration: 0.6, ease: EASE }}
         >
@@ -464,29 +486,20 @@ function InLine({ invited, reduced, onDone, onFront }: { invited: boolean; reduc
               }
               className="flex items-center gap-3 rounded-2xl bg-[#f4f4f4] p-4 text-left"
             >
-                <img
-                  src={mark}
-                  alt=""
-                  className={`ml-0.5 h-7 w-7 shrink-0 ${sent[i] ? "opacity-30" : ""}`}
-                  style={{ filter: "brightness(0)" }}
-                />
-                <span className="min-w-0 flex-1">
-                  <span className={`block text-[15px] font-medium ${sent[i] ? "text-gray-light" : "text-gray-dark"}`}>
-                    {sent[i] ? "Pass sent" : "Skip-the-line pass"}
-                  </span>
-                  <span className="block truncate font-mono text-[13px] tracking-[0.08em] text-gray-light">{code}</span>
+                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${sent[i] ? "bg-gray-stroke text-gray-light" : "bg-yellow text-gray-dark"}`}>
+                  <Ticket size={19} />
+                </span>
+                <span className={`min-w-0 flex-1 truncate font-mono text-[17px] font-semibold tracking-[0.14em] ${sent[i] ? "text-gray-light" : "text-gray-dark"}`}>
+                  {code}
                 </span>
                 {sent[i] ? (
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center text-gray-light">
-                    <Check size={19} strokeWidth={2.5} />
-                  </span>
+                  <span className="px-3 text-[14px] font-medium text-gray-light">Sent</span>
                 ) : (
                   <button
                     onClick={() => sharePass(i)}
-                    aria-label="Share pass"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-dark text-white transition-colors hover:bg-[#333]"
+                    className="shrink-0 rounded-full bg-yellow px-5 py-2 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#F3C948]"
                   >
-                    <Share size={17} />
+                    Invite
                   </button>
                 )}
             </motion.div>
@@ -708,15 +721,7 @@ export default function Waitlist() {
                 : stage === "details"
                   ? screen("details", <Details invited={!!inviteCode} cascade={!reduced} onContinue={() => go("goal")} />, (reduced ? screenVariants : detailsVariants) as Variants)
                   : stage === "goal"
-                    ? screen("goal", (
-                        <ChoiceQuestion
-                          title="What brings you to Leland?"
-                          subtitle="Pick any that apply."
-                          options={GOALS}
-                          multi
-                          onContinue={() => go("joining")}
-                        />
-                      ))
+                    ? screen("goal", <Goal onSelect={() => go("joining")} />)
                     : stage === "joining"
                       ? screen("joining", <Joining reduced={reduced} onDone={() => go("inline")} />)
                       : stage === "inline"
