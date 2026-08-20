@@ -45,10 +45,7 @@ export default function ChoiceQuestion({
     <div className="flex h-full flex-col">
       {/* sticky header — stays put while the options scroll */}
       <div className="shrink-0 px-6 pt-2">
-        <StepHeading
-          title={title}
-          subtitle={subtitle ?? (multi ? "Pick any that apply." : "Pick one.")}
-        />
+        <StepHeading title={title} subtitle={subtitle} />
       </div>
 
       {/* scrolling options */}
@@ -64,17 +61,17 @@ export default function ChoiceQuestion({
                 animate={{ opacity: 1, y: 0, scale: active ? 0.99 : 1 }}
                 transition={{ type: "spring", stiffness: 420, damping: 30, delay: i * 0.03 }}
                 onClick={() => toggle(opt.label)}
-                className={`relative flex items-center gap-3 rounded-2xl border px-5 py-4 pr-12 text-left transition-colors ${
+                className={`relative flex items-center gap-3 rounded-2xl border px-5 py-5 pr-12 text-left transition-colors ${
                   active
                     ? "border-gray-dark bg-gray-hover"
                     : "border-gray-stroke bg-white hover:bg-gray-hover"
                 }`}
               >
                 {opt.Icon ? (
-                  <opt.Icon size={20} strokeWidth={1.9} className="shrink-0 text-gray-dark" />
+                  <opt.Icon size={22} strokeWidth={1.9} className="shrink-0 text-gray-dark" />
                 ) : null}
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[15px] font-medium text-gray-dark">
+                  <span className="block text-[17px] font-medium text-gray-dark">
                     {opt.label}
                   </span>
                   {opt.sublabel ? (

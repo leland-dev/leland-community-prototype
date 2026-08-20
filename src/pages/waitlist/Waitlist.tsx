@@ -272,7 +272,7 @@ const GOAL_BUCKETS = [
 function Goal({ onSelect }: { onSelect: () => void }) {
   return (
     <div className="h-full overflow-y-auto px-6 pb-10 pt-2">
-      <StepHeading title="What brings you to Leland?" subtitle="Pick one to get started." />
+      <StepHeading title="What brings you to Leland?" />
       <div className="flex flex-col gap-3">
         {GOAL_BUCKETS.map((b, i) => (
           <motion.button

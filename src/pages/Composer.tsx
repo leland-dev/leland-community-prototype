@@ -347,6 +347,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const [clipStart, setClipStart] = useState(0);
   const [clipWindow, setClipWindow] = useState(15);
   const [clipLenOpen, setClipLenOpen] = useState(false);
+  const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
   const [clipEnd, setClipEnd] = useState(100);
   const trimTrackRef = useRef<HTMLDivElement>(null);
   // Zoomed window of the trim strip (Apple-style: trimming re-fits the view).
@@ -382,6 +383,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const editorImageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const savedRangeRef = useRef<Range | null>(null);
   const pendingEditorHtml = useRef<string | null>(null);
@@ -628,6 +630,28 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
     e.target.value = "";
   };
 
+  // A picked video drops straight into the livestream editor — same trim,
+  // crop, and burn-in tools — then posts like any other video.
+  const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadedVideo(URL.createObjectURL(file));
+    setSelectedRecording("upload");
+    setSelectedClip(null);
+    setClipStart(0);
+    setClipEnd(100);
+    setViewStart(0);
+    setViewEnd(100);
+    setEditorHistory([]);
+    setCropGrid(false);
+    setCropAspect("Original");
+    setCropX(50);
+    setCropY(50);
+    setMode("live");
+    setLiveStep("edit");
+    e.target.value = "";
+  };
+
   const buildPost = (): Post => {
     const base = { ...SELF, id: Date.now() };
     if (mode === "article") {
@@ -683,27 +707,29 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
       };
     }
     if (mode === "live") {
+      const isUpload = selectedRecording === "upload" && uploadedVideo !== null;
       const rec = RECORDINGS.find(r => r.id === selectedRecording) ?? RECORDINGS[0];
-      const total = toSeconds(rec.duration);
+      const recDuration = isUpload ? "1:00" : rec.duration;
+      const total = toSeconds(recDuration);
       const isClipped = clipStart > 0 || clipEnd < 100;
-      const clipLabel = isClipped ? toClock(((clipEnd - clipStart) / 100) * total) : rec.duration;
+      const clipLabel = isClipped ? toClock(((clipEnd - clipStart) / 100) * total) : recDuration;
       return {
         ...base,
         type: "live",
-        body: replayCaption.trim() || rec.title,
+        body: replayCaption.trim() || (isUpload ? "New video" : rec.title),
         live: {
           variant: "tiktok",
-          title: rec.title,
-          topic: "Replay",
+          title: isUpload ? (replayCaption.trim() || "New video") : rec.title,
+          topic: isUpload ? "Video" : "Replay",
           videoId: "1cfIAVasP6E",
-          videoSrc: rec.src,
+          videoSrc: isUpload ? uploadedVideo! : rec.src,
           viewers: 0,
           replay: true,
           duration: clipLabel,
           horizontal: true,
           showCaptions: captionsOn,
           showChat: chatOn,
-          peakViewers: rec.peak,
+          peakViewers: isUpload ? undefined : rec.peak,
           cropAspect,
           cropX,
           cropY,
@@ -840,8 +866,8 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   // Portal to <body>: Home's <main> is a z-0 stacking context, which would
   // trap the overlay underneath the app's fixed header and tab bar.
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex flex-col bg-white">
-      <div className="mx-auto flex h-full w-full max-w-[600px] flex-col">
+    <div className="fixed inset-0 z-[60] flex flex-col bg-white md:items-center md:justify-center md:bg-black/50 md:p-6">
+      <div className="mx-auto flex h-full w-full max-w-[600px] flex-col md:h-[min(880px,92dvh)] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white">
         {/* Header (the dark editor step brings its own chrome) */}
         {!(mode === "live" && liveStep === "edit") ? (
         <div className="flex h-14 shrink-0 items-center justify-between px-4">
@@ -894,7 +920,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                         onClick={() => { setMenuOpen(false); setScheduleOpen(true); }}
                         className="flex w-[calc(100%-8px)] mx-1 cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover active:bg-gray-hover"
                       >
-                        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
                         Schedule
                       </button>
                       {isDirty ? (
@@ -933,6 +959,9 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 className="inline-flex h-10 cursor-pointer items-center whitespace-nowrap rounded-full bg-gray-100 px-4 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-200"
               >
                 Drafts
+                {storedCount > 0 ? (
+                  <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gray-dark px-1.5 text-[11px] font-bold leading-none text-white">{storedCount}</span>
+                ) : null}
               </button>
             ) : (
               <button
@@ -976,6 +1005,10 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                   <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3.5" /></svg>
                 ))}
                 <input ref={cameraInputRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleImageSelect} />
+                {toolbarButton("Add video", () => videoInputRef.current?.click(), (
+                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m22 8-6 4 6 4V8Z" /><rect x="2" y="6" width="14" height="12" rx="2" /></svg>
+                ))}
+                <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleVideoSelect} />
                 {toolbarButton("Add poll", () => setPollOptions(opts => (opts === null ? ["", ""] : opts)), (
                   <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M6 20V10" /><path d="M12 20V4" /><path d="M18 20v-6" /></svg>
                 ), pollOptions !== null)}
@@ -1219,7 +1252,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                           className="absolute inset-0 rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.04)]"
                         />
                       ) : null}
-                      <span className={`relative z-10 transition-colors ${liveTab === t ? "text-gray-dark" : "text-gray-light"}`}>{t}</span>
+                      <span className={`relative z-10 transition-colors ${liveTab === t ? "text-gray-dark" : "text-gray-light"}`}>{t === "Livestreams" ? "Your livestreams" : t}</span>
                     </button>
                   ))}
                 </div>
@@ -1319,7 +1352,9 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             (() => {
               const media = selectedClip !== null
                 ? (() => { const c = CLIPS.find(x => x.id === selectedClip)!; return { src: c.src, duration: c.duration }; })()
-                : (() => { const r = RECORDINGS.find(x => x.id === selectedRecording)!; return { src: r.src, duration: r.duration }; })();
+                : selectedRecording === "upload" && uploadedVideo
+                  ? { src: uploadedVideo, duration: "1:00" }
+                  : (() => { const r = RECORDINGS.find(x => x.id === selectedRecording)!; return { src: r.src, duration: r.duration }; })();
               const total = toSeconds(media.duration);
               // The strip shows a window of the recording; trimming re-fits it.
               const span = Math.max(viewEnd - viewStart, 0.001);
@@ -1427,7 +1462,12 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                   {/* Editor chrome */}
                   <div className="flex shrink-0 items-center justify-between px-4 pt-3">
                     <button
-                      onClick={() => { setSelectedRecording(null); setSelectedClip(null); setLiveStep("list"); }}
+                      onClick={() => {
+                        setSelectedRecording(null);
+                        setSelectedClip(null);
+                        if (selectedRecording === "upload") { setUploadedVideo(null); setMode("post"); }
+                        else setLiveStep("list");
+                      }}
                       aria-label="Back to livestreams"
                       className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
                     >
@@ -1723,7 +1763,10 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             /* Step 3 — caption + exactly the card that lands in the feed */
             (() => {
               const clip = selectedClip !== null ? CLIPS.find(c => c.id === selectedClip)! : null;
+              const isUpload = selectedRecording === "upload" && uploadedVideo !== null;
               const rec = RECORDINGS.find(r => r.id === selectedRecording) ?? RECORDINGS[0];
+              const srcV = clip ? clip.src : isUpload ? uploadedVideo! : rec.src;
+              const durV = clip ? clip.duration : isUpload ? "1:00" : rec.duration;
               return (
                 <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6">
                   <div className="flex items-center gap-3">
@@ -1741,17 +1784,17 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                   />
                   {clip || cropAspect === "9:16" ? (
                     <div className="relative mt-3 w-[230px] overflow-hidden rounded-xl bg-black">
-                      <video src={clip ? clip.src : rec.src} autoPlay muted loop playsInline className={`${cropAspect === "9:16" ? "aspect-[9/16]" : "aspect-[9/13]"} w-full object-cover`} style={{ objectPosition: `${cropX}% ${cropY}%` }} />
+                      <video src={srcV} autoPlay muted loop playsInline className={`${cropAspect === "9:16" ? "aspect-[9/16]" : "aspect-[9/13]"} w-full object-cover`} style={{ objectPosition: `${cropX}% ${cropY}%` }} />
                       <div className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-black/25 px-2 py-1 backdrop-blur-sm">
                         <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
-                        <span className="text-[11px] font-medium text-white">{clip ? clip.duration : rec.duration}</span>
+                        <span className="text-[11px] font-medium text-white">{durV}</span>
                       </div>
                     </div>
                   ) : (
                     <LiveReplayCard
                       static
                       postId={0}
-                      live={{ title: rec.title, videoId: "1cfIAVasP6E", videoSrc: rec.src, viewers: 0, topic: "Replay", replay: true, duration: rec.duration, horizontal: true, showCaptions: captionsOn, showChat: chatOn, peakViewers: rec.peak, cropAspect, cropX, cropY }}
+                      live={{ title: isUpload ? (replayCaption.trim() || "New video") : rec.title, videoId: "1cfIAVasP6E", videoSrc: srcV, viewers: 0, topic: isUpload ? "Video" : "Replay", replay: true, duration: durV, horizontal: true, showCaptions: captionsOn, showChat: chatOn, peakViewers: isUpload ? undefined : rec.peak, cropAspect, cropX, cropY }}
                     />
                   )}
                 </div>
@@ -1989,7 +2032,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 ) : (
                   <div className="flex flex-col items-center px-8 pb-8 pt-12 text-center">
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-                      <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
+                      <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
                     </div>
                     <p className="mt-4 font-serif text-[20px] leading-tight text-gray-dark">Nothing scheduled</p>
                     <p className="mt-2 max-w-[260px] text-[13px] leading-[1.5] text-gray-light">

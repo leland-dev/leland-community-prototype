@@ -245,6 +245,7 @@ export default function WaitlistOnboarding() {
                 <ChoiceQuestion
                   title="What are you looking to do?"
                   options={LOOKING}
+                  multi
                   onContinue={() => setStage("situation")}
                 />
               </motion.div>
