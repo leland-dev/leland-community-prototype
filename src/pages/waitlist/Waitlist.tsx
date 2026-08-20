@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { ArrowRight, Check, Ticket, MessageCircle, Mail, Link as LinkIcon, MoreHorizontal, X } from "lucide-react";
+import { ArrowRight, Check, Share, Copy, MessageCircle, Mail, MoreHorizontal, X } from "lucide-react";
 
 import { StepChrome, StepHeading, SharpStar } from "../onboarding/steps/flowUI";
 import ChoiceQuestion, { type Choice } from "../onboarding/steps/ChoiceQuestion";
@@ -9,6 +9,7 @@ import { MEMBER_AVATARS } from "../onboarding/mockData";
 import { REVIEW_STATS } from "../onboarding/data";
 import mark from "../../assets/leland-logos/leland-mark.svg";
 import wordmark from "../../assets/leland-logos/leland-wordmark.svg";
+import LelandLoader from "./LelandLoader";
 
 /* ─────────────────────────────────────────────────────────────────────────
  * Waitlist — a dead-end, invite-only "grand opening line" flow:
@@ -202,9 +203,9 @@ function Claim({ code, onClaim }: { code: string; onClaim: () => void }) {
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 320, damping: 12 }}
-          className="flex h-16 w-16 items-center justify-center rounded-2xl bg-yellow text-gray-dark"
+          className="flex h-16 w-16 items-center justify-center rounded-2xl bg-yellow"
         >
-          <Ticket size={30} />
+          <img src={mark} alt="" className="h-8 w-8" style={{ filter: "brightness(0)" }} />
         </motion.span>
         <h1 className="mt-5 text-balance font-serif text-[30px] leading-[1.1] text-gray-dark">
           {inviter} saved you a spot
@@ -273,25 +274,25 @@ function Details({ onContinue }: { onContinue: () => void }) {
   );
 }
 
-/* ── joining loader ── */
+/* ── joining loader — logo animation + a bar that stalls, then finishes ── */
 function Joining({ onDone, reduced }: { onDone: () => void; reduced: boolean }) {
-  const dur = reduced ? 1 : 2.4;
+  const dur = reduced ? 1.4 : 4.6;
   useEffect(() => {
     const t = window.setTimeout(onDone, dur * 1000 + 200);
     return () => window.clearTimeout(t);
   }, [onDone, dur]);
   return (
     <div className="flex h-full flex-col items-center justify-center px-10">
-      <motion.img
-        src={mark} alt="Leland" style={{ filter: "brightness(0)" }}
-        initial={reduced ? { opacity: 1 } : { opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
-        className="h-11 w-11"
-      />
-      <div className="mt-7 h-1.5 w-56 max-w-[70%] overflow-hidden rounded-full bg-gray-stroke">
+      <LelandLoader size={140} ink="#222222" bg="#ffffff" />
+      <div className="mt-8 h-1.5 w-56 max-w-[70%] overflow-hidden rounded-full bg-gray-stroke">
         <motion.div
-          initial={{ width: "0%" }} animate={{ width: "100%" }}
-          transition={{ duration: dur, ease: [0.4, 0, 0.2, 1] }}
+          initial={{ width: "0%" }}
+          animate={{ width: reduced ? "100%" : ["0%", "58%", "58%", "100%"] }}
+          transition={
+            reduced
+              ? { duration: dur }
+              : { duration: dur, times: [0, 0.38, 0.64, 1], ease: "easeInOut" }
+          }
           className="h-full rounded-full bg-gray-dark"
         />
       </div>
@@ -300,77 +301,79 @@ function Joining({ onDone, reduced }: { onDone: () => void; reduced: boolean }) 
   );
 }
 
-/* ── share sheet — mock iOS sheet so the send moment reads in the prototype
-      (real devices would invoke the native sheet via navigator.share) ── */
+/* ── share sheet — iOS-fidelity mock: full-screen gradient scrim (light at
+      the top for the emulator's status bar), grey sheet, link preview with the
+      live b-roll video, squircle app tiles, grouped Copy row. ── */
 function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => void; onClose: () => void }) {
   const link = `${window.location.origin}/waitlist?code=${code}`;
-  const message = `I saved you a spot in the Leland community — tap to skip the line: ${link}`;
+  const message = `I saved you a spot in the Leland community. Tap to skip the line: ${link}`;
 
   const sendVia = (copy: boolean) => {
     if (copy) navigator.clipboard?.writeText(message).catch(() => {});
     onSend();
   };
 
-  const APPS = [
-    { label: "Messages", Icon: MessageCircle, bg: "#34C759" },
-    { label: "Mail", Icon: Mail, bg: "#007AFF" },
-    { label: "Copy link", Icon: LinkIcon, bg: "#8E8E93", copy: true },
-    { label: "More", Icon: MoreHorizontal, bg: "#8E8E93" },
-  ];
-
   return (
     <>
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 z-[80] bg-black/40"
+        className="fixed inset-0 z-[80] bg-gradient-to-t from-black/60 via-black/30 to-transparent"
       />
       <motion.div
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-        transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-        className="absolute inset-x-0 bottom-0 z-[90] rounded-t-3xl bg-[#f5f5f7] pb-[max(1rem,env(safe-area-inset-bottom))]"
+        transition={{ duration: 0.32, ease: [0.32, 0.72, 0, 1] }}
+        className="fixed inset-x-0 bottom-0 z-[90] mx-auto w-full max-w-[440px] rounded-t-[18px] bg-[#F2F2F7] pb-[max(1.5rem,env(safe-area-inset-bottom))]"
       >
-        <div className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-black/15" />
-        <div className="flex items-center justify-between px-5 pt-3">
-          <p className="text-[16px] font-semibold text-gray-dark">Send your pass</p>
+        {/* header — link preview, like iOS shows the shared content */}
+        <div className="flex items-center gap-3 px-4 pb-3 pt-4">
+          <video
+            src="/waitlist-broll.mp4"
+            muted autoPlay loop playsInline
+            className="h-12 w-12 shrink-0 rounded-[10px] object-cover"
+          />
+          <div className="min-w-0 flex-1 text-left">
+            <p className="truncate text-[15px] font-semibold leading-tight text-[#1C1C1E]">
+              The community for ambition
+            </p>
+            <p className="truncate text-[12.5px] text-[#8E8E93]">
+              community.leland-staging.com · 1 Link
+            </p>
+          </div>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-black/[0.06] text-gray-light"
+            className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-[#E3E3E8] text-[#7C7C82]"
           >
-            <X size={16} />
+            <X size={16} strokeWidth={2.5} />
           </button>
         </div>
+        <div className="h-px bg-black/[0.08]" />
 
-        {/* message preview */}
-        <div className="mx-5 mt-4 flex items-start gap-3 rounded-2xl bg-white p-3.5 shadow-card">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-yellow text-gray-dark">
-            <Ticket size={17} />
-          </span>
-          <p className="min-w-0 text-left text-[13.5px] leading-snug text-gray-dark">
-            I saved you a spot in the Leland community — tap to skip the line:
-            <span className="block truncate text-[#007AFF]">{link}</span>
-          </p>
-        </div>
-
-        {/* app targets */}
-        <div className="mt-5 flex justify-around px-6">
-          {APPS.map((a) => (
-            <button key={a.label} onClick={() => sendVia(!!a.copy)} className="flex w-16 flex-col items-center gap-1.5">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl text-white" style={{ backgroundColor: a.bg }}>
-                <a.Icon size={26} />
+        {/* app tiles */}
+        <div className="flex gap-5 px-5 pb-1 pt-4">
+          {[
+            { label: "Messages", Icon: MessageCircle, cls: "bg-gradient-to-b from-[#6BE36B] to-[#12B722]" },
+            { label: "Mail", Icon: Mail, cls: "bg-gradient-to-b from-[#4FA8F8] to-[#1663D9]" },
+            { label: "More", Icon: MoreHorizontal, cls: "bg-[#D1D1D6]" },
+          ].map((a) => (
+            <button key={a.label} onClick={() => sendVia(false)} className="flex w-[60px] flex-col items-center gap-1.5">
+              <span className={`flex h-[60px] w-[60px] items-center justify-center rounded-[14px] text-white ${a.cls}`}>
+                <a.Icon size={30} strokeWidth={a.label === "More" ? 2.5 : 2} fill={a.label === "Messages" ? "currentColor" : "none"} />
               </span>
-              <span className="text-[11.5px] text-gray-dark">{a.label}</span>
+              <span className="text-[11px] text-[#3C3C43]">{a.label}</span>
             </button>
           ))}
         </div>
 
-        <div className="px-5 pt-5">
+        {/* grouped action row */}
+        <div className="mx-4 mt-3 overflow-hidden rounded-xl bg-white">
           <button
-            onClick={onClose}
-            className="flex h-12 w-full items-center justify-center rounded-2xl bg-white text-[16px] font-medium text-gray-dark shadow-card"
+            onClick={() => sendVia(true)}
+            className="flex w-full items-center justify-between px-4 py-3 text-[16px] text-[#1C1C1E]"
           >
-            Cancel
+            Copy
+            <Copy size={19} className="text-[#1C1C1E]" />
           </button>
         </div>
       </motion.div>
@@ -378,85 +381,108 @@ function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => voi
   );
 }
 
-/* ── in line — spot + passes, one screen ── */
+/* ── in line — staged entrance: check pops, rises, then place + passes ── */
 function InLine({ invited, reduced }: { invited: boolean; reduced: boolean }) {
   const [sent, setSent] = useState<boolean[]>([false, false, false]);
   const [sharing, setSharing] = useState<number | null>(null);
   const used = sent.filter(Boolean).length;
   const spot = Math.max(1, (invited ? INVITED_SPOT : START_SPOT) - used * JUMP);
   const shown = useAnimatedNumber(spot, reduced);
-  const pct = invited ? 1 : 9;
 
   const markSent = (i: number) => {
     setSent((s) => s.map((v, idx) => (idx === i ? true : v)));
     setSharing(null);
   };
 
+  const ease = [0.32, 0.72, 0, 1] as const;
+
   return (
     <div className="relative h-full">
       <div className="h-full overflow-y-auto px-6 pb-10 pt-4 text-center">
-        <motion.span
-          initial={reduced ? { opacity: 0 } : { scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={reduced ? { duration: 0.2 } : { type: "spring", stiffness: 320, damping: 12 }}
-          className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-yellow text-gray-dark"
+        {/* hero — pops centered, then rises to the top */}
+        <motion.div
+          initial={reduced ? undefined : { y: 170 }}
+          animate={{ y: 0 }}
+          transition={{ delay: 1.0, duration: 0.6, ease }}
         >
-          <Check size={28} strokeWidth={3} />
-        </motion.span>
-        <h1 className="mt-4 text-balance font-serif text-[28px] leading-[1.12] text-gray-dark">
-          {invited ? "You skipped the line" : "You're in line"}
-        </h1>
+          <motion.span
+            initial={reduced ? { opacity: 0 } : { scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={reduced ? { duration: 0.2 } : { type: "spring", stiffness: 320, damping: 12 }}
+            className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-yellow text-gray-dark"
+          >
+            <Check size={28} strokeWidth={3} />
+          </motion.span>
+          <motion.h1
+            initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: reduced ? 0 : 0.3, duration: 0.45, ease }}
+            className="mt-4 text-balance font-serif text-[28px] leading-[1.12] text-gray-dark"
+          >
+            {invited ? "You skipped the line" : "You're in line"}
+          </motion.h1>
+        </motion.div>
 
-        <p className="mt-5 font-serif text-[44px] leading-none tabular-nums text-gray-dark">
-          {shown.toLocaleString()}
-        </p>
-        <div className="mx-auto mt-4 w-full max-w-[280px]">
-          <div className="h-1.5 overflow-hidden rounded-full bg-gray-stroke">
-            <motion.div
-              initial={{ width: "0%" }} animate={{ width: `${100 - pct}%` }}
-              transition={{ duration: 1, ease: [0.4, 0, 0.2, 1], delay: 0.4 }}
-              className="h-full rounded-full bg-gray-dark"
-            />
-          </div>
-          <p className="mt-2 text-[13.5px] font-medium text-gray-dark">Top {pct}%</p>
-        </div>
+        {/* place in line — no bar, no fixed-total implication */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: reduced ? 0.1 : 1.35, duration: 0.5 }}
+        >
+          <p className="mt-7 font-serif text-[44px] leading-none tabular-nums text-gray-dark">
+            {shown.toLocaleString()}
+          </p>
+          <p className="mt-2 text-[13.5px] text-gray-light">your place in line</p>
+        </motion.div>
 
-        <p className="mx-auto mt-9 max-w-[30ch] text-[15px] leading-relaxed text-gray-light">
-          Send these 3 passes and we'll bump you to the front of the line.
-        </p>
-        <div className="mt-4 flex flex-col gap-2.5">
-          {INVITE_CODES.map((code, i) => (
-            <div
-              key={code}
-              className={`flex items-center gap-3 rounded-2xl border border-gray-stroke p-3.5 text-left ${
-                sent[i] ? "bg-gray-hover" : "bg-white"
-              }`}
-            >
-              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${sent[i] ? "bg-gray-stroke text-gray-light" : "bg-yellow text-gray-dark"}`}>
-                <Ticket size={18} />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[15px] font-medium text-gray-dark">
-                  {sent[i] ? "Pass sent" : "Skip-the-line pass"}
-                </span>
-                <span className="block truncate font-mono text-[12.5px] text-gray-light">{code}</span>
-              </span>
-              <button
-                onClick={() => setSharing(i)}
-                disabled={sent[i]}
-                className={`shrink-0 rounded-full px-5 py-2 text-[14px] font-medium transition-colors ${
-                  sent[i] ? "text-gray-light" : "bg-gray-dark text-white hover:bg-[#333]"
-                }`}
+        {/* passes */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: reduced ? 0.2 : 1.6, duration: 0.5 }}
+        >
+          <p className="mx-auto mt-9 max-w-[30ch] text-[15px] leading-relaxed text-gray-light">
+            Send these 3 passes and we'll bump you to the front of the line.
+          </p>
+          <div className="mt-4 flex flex-col gap-2.5">
+            {INVITE_CODES.map((code, i) => (
+              <div
+                key={code}
+                className="flex items-center gap-3 rounded-2xl bg-[#f4f4f4] p-4 text-left"
               >
-                {sent[i] ? "Sent" : "Share"}
-              </button>
-            </div>
-          ))}
-        </div>
+                <img
+                  src={mark}
+                  alt=""
+                  className={`ml-0.5 h-7 w-7 shrink-0 ${sent[i] ? "opacity-30" : ""}`}
+                  style={{ filter: "brightness(0)" }}
+                />
+                <span className="min-w-0 flex-1">
+                  <span className={`block text-[15px] font-medium ${sent[i] ? "text-gray-light" : "text-gray-dark"}`}>
+                    {sent[i] ? "Pass sent" : "Skip-the-line pass"}
+                  </span>
+                  <span className="block truncate font-mono text-[12.5px] text-gray-light">{code}</span>
+                </span>
+                {sent[i] ? (
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center text-gray-light">
+                    <Check size={19} strokeWidth={2.5} />
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setSharing(i)}
+                    aria-label="Share pass"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-dark text-white transition-colors hover:bg-[#333]"
+                  >
+                    <Share size={17} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
 
-        <p className="mt-6 text-[13px] text-gray-light">
-          We'll text you when your wave opens.
-        </p>
+          <p className="mt-6 text-[13px] text-gray-light">
+            We'll text you when your wave opens.
+          </p>
+        </motion.div>
       </div>
 
       <AnimatePresence>
