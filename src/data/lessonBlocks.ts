@@ -198,4 +198,5 @@ export type BlockSection = {
     model?: string;
   };
   blocks: Block[];
+  track?: "claude" | "codex" | "gemini" | "copilot";
 };

@@ -80,6 +80,7 @@ import type {
 } from "../data/lessonBlocks";
 import { LESSON_1_SECTIONS, LESSON_1_TOP_BLOCKS } from "../data/sampleLesson";
 import { LESSON_2_SECTIONS, LESSON_2_TOP_BLOCKS } from "../data/sampleLesson2";
+import { TOOL_SETUP_CLAUDE, TOOL_SETUP_CODEX, TOOL_SETUP_GEMINI, TOOL_SETUP_COPILOT } from "../data/toolSetupSections";
 import {
   BlockList,
   LessonFooterActions,
@@ -160,7 +161,10 @@ const START_HERE: Lesson = {
   durationMin: 20,
   sections: [
     { id: "add-to-calendar", title: "Add sessions to your calendar", kind: "interactive", flow: "add-to-calendar" },
-    { id: "setup-tools", title: "Set up your tools & permissions", kind: "interactive", flow: "it-setup" },
+    TOOL_SETUP_CLAUDE,
+    TOOL_SETUP_CODEX,
+    TOOL_SETUP_GEMINI,
+    TOOL_SETUP_COPILOT,
     { id: "join-cohort", title: "Join your Slack community", kind: "interactive", flow: "join-cohort" },
     { id: "personalize", title: "Personalize your experience", kind: "interactive", flow: "personalization" },
   ],
@@ -375,12 +379,15 @@ function CircularProgress({ percent }: { percent: number }) {
   );
 }
 
-function lessonProgress(lesson: Lesson, completed: Set<string>): number {
-  const total = lesson.sections.length;
+function filterSectionsByTrack(sections: Section[], selectedTrack: CourseTrack | null): Section[] {
+  return sections.filter(s => s.kind !== "blocks" || !s.track || s.track === selectedTrack);
+}
+
+function lessonProgress(lesson: Lesson, completed: Set<string>, selectedTrack: CourseTrack | null): number {
+  const sections = filterSectionsByTrack(lesson.sections, selectedTrack);
+  const total = sections.length;
   if (total === 0) return 0;
-  const done = lesson.sections.filter((s) =>
-    completed.has(`${lesson.id}/${s.id}`),
-  ).length;
+  const done = sections.filter((s) => completed.has(`${lesson.id}/${s.id}`)).length;
   return (done / total) * 100;
 }
 
@@ -618,12 +625,14 @@ function LessonAccordion({
   completed,
   liveProgram = false,
   showSessionBanners = true,
+  selectedTrack = null,
 }: {
   currentLessonId: string;
   currentSectionId: string;
   completed: Set<string>;
   liveProgram?: boolean;
   showSessionBanners?: boolean;
+  selectedTrack?: CourseTrack | null;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(
     () => new Set([currentLessonId]),
@@ -648,11 +657,12 @@ function LessonAccordion({
     <div className="sidebar-scrollbar min-h-0 flex-1 overflow-y-auto pt-3">
       {ALL_LESSONS.map((l, idx) => {
         const isStartHere = l.id === "start-here";
-        const percent = lessonProgress(l, completed);
-        const completedCount = l.sections.filter((s) =>
+        const visibleSections = filterSectionsByTrack(l.sections, selectedTrack);
+        const percent = lessonProgress(l, completed, selectedTrack);
+        const completedCount = visibleSections.filter((s) =>
           completed.has(`${l.id}/${s.id}`),
         ).length;
-        const totalCount = l.sections.length;
+        const totalCount = visibleSections.length;
         const isOpen = expanded.has(l.id);
         return (
           <div
@@ -684,18 +694,18 @@ function LessonAccordion({
                 />
               </span>
             </button>
-            {liveProgram && showSessionBanners && !isStartHere && l.sections.length > 0 && (
+            {liveProgram && showSessionBanners && !isStartHere && visibleSections.length > 0 && (
               <div className="px-6">
                 <LiveSessionBanner
                   state={LESSON_BANNER_STATES[(idx - 1) % LESSON_BANNER_STATES.length]}
-                  href={`/content-viewer/${l.id}/${l.sections[0].id}`}
+                  href={`/content-viewer/${l.id}/${visibleSections[0].id}`}
                 />
               </div>
             )}
             </div>
             {isOpen ? (
               <div className="flex flex-col gap-1 px-3">
-                {l.sections.map((s, sIdx) => {
+                {visibleSections.map((s, sIdx) => {
                   const sectionDone = completed.has(`${l.id}/${s.id}`);
                   const active =
                     l.id === currentLessonId && s.id === currentSectionId;
@@ -1175,6 +1185,7 @@ function CombinedSidebar({
             completed={completed}
             liveProgram={liveProgram}
             showSessionBanners={showSessionBanners}
+            selectedTrack={selectedTrack}
           />
         </div>
       </div>
@@ -2234,11 +2245,12 @@ export default function ContentViewer() {
     ALL_LESSONS.findIndex((l) => l.id === params.lessonId),
   );
   const lesson = ALL_LESSONS[lessonIdx];
+  const visibleSections = filterSectionsByTrack(lesson.sections, selectedTrack);
   const sectionIdx = Math.max(
     0,
-    lesson.sections.findIndex((s) => s.id === params.sectionId),
+    visibleSections.findIndex((s) => s.id === params.sectionId),
   );
-  const section = lesson.sections[sectionIdx];
+  const section = visibleSections[sectionIdx];
 
   const sectionUrl = (l: Lesson, s: Section) =>
     `/content-viewer/${l.id}/${s.id}`;
@@ -2251,8 +2263,8 @@ export default function ContentViewer() {
     })),
   ];
 
-  const prevSection = lesson.sections[sectionIdx - 1] ?? null;
-  const nextSection = lesson.sections[sectionIdx + 1] ?? null;
+  const prevSection = visibleSections[sectionIdx - 1] ?? null;
+  const nextSection = visibleSections[sectionIdx + 1] ?? null;
 
   const exitDestination = DASHBOARD;
 
@@ -2280,13 +2292,13 @@ export default function ContentViewer() {
   // arrive at the last section. Fires at most once per page load.
   useEffect(() => {
     if (engagementTriggered.current || feedbackModalOpen) return;
-    const progressPct = (sectionIdx + 1) / lesson.sections.length;
-    const isLastSection = sectionIdx === lesson.sections.length - 1;
+    const progressPct = (sectionIdx + 1) / visibleSections.length;
+    const isLastSection = sectionIdx === visibleSections.length - 1;
     if ((progressPct >= 0.8 && hasSpent5Min) || isLastSection) {
       engagementTriggered.current = true;
       setFeedbackModalOpen(true);
     }
-  }, [sectionIdx, lesson.sections.length, hasSpent5Min, feedbackModalOpen]);
+  }, [sectionIdx, visibleSections.length, hasSpent5Min, feedbackModalOpen]);
 
   // Opening the drawer/sidebar jumps to the lesson + section the user is on.
   useEffect(() => {
@@ -2336,13 +2348,13 @@ export default function ContentViewer() {
             </div>
             <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbLabel}</span>
             <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-            <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {lesson.sections.length}</span>
+            <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {visibleSections.length}</span>
           </>
         ) : (
           <>
             <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbLabel}</span>
             <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-            <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {lesson.sections.length}</span>
+            <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {visibleSections.length}</span>
           </>
         )}
       </div>
@@ -2371,7 +2383,7 @@ export default function ContentViewer() {
             {COURSE_TITLE_FULL}
           </span>
           <span className="leland-paragraph-sm text-leland-gray-light">
-            {breadcrumbLabel} / {sectionIdx + 1} of {lesson.sections.length}
+            {breadcrumbLabel} / {sectionIdx + 1} of {visibleSections.length}
           </span>
         </div>
         <button
@@ -2400,7 +2412,7 @@ export default function ContentViewer() {
                 <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
                 <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbLabel}</span>
                 <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-                <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {lesson.sections.length}</span>
+                <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {visibleSections.length}</span>
               </>
             )}
           </div>
@@ -2718,9 +2730,9 @@ export default function ContentViewer() {
                   }
                   onNext={() => markComplete(lesson.id, section.id)}
                   completedCount={
-                    lesson.sections.filter((s) => isCompleted(s.id)).length
+                    visibleSections.filter((s) => isCompleted(s.id)).length
                   }
-                  totalSections={lesson.sections.length}
+                  totalSections={visibleSections.length}
                 />
               )}
             </>
