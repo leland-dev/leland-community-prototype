@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import PageShell from "../components/PageShell";
 import { useSetNavTheme } from "../components/NavThemeContext";
 import { GoalTile, NewGoalTile } from "../components/GoalTile";
-import TaskListSection from "../components/TaskListSection";
-import AdminToggle from "../components/AdminToggle";
 import { useGoals } from "../contexts/GoalsContext";
 
 // Destination for the dashboard card's "See all". Not part of the four
@@ -18,20 +16,6 @@ export default function GoalsIndex() {
   useEffect(() => {
     document.title = "My goals";
   }, []);
-
-  // Admin tool — same show/hide pattern as the dashboard's "Tasks widget"
-  // toggle, for reviewing this page with or without the master task list.
-  const [adminOpen, setAdminOpen] = useState(false);
-  const [tasksSection, setTasksSection] = useState(true);
-  const adminRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!adminOpen) return;
-    const onClick = (e: MouseEvent) => {
-      if (adminRef.current && !adminRef.current.contains(e.target as Node)) setAdminOpen(false);
-    };
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, [adminOpen]);
 
   return (
     <PageShell variant="standard">
@@ -59,40 +43,7 @@ export default function GoalsIndex() {
           ))}
           <NewGoalTile />
         </div>
-
-        {tasksSection && <TaskListSection title="My tasks" headingSize="section" />}
       </motion.div>
-
-      {/* Admin tool — 3-dot menu matching the dashboard's */}
-      <div
-        ref={adminRef}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-40 md:bottom-6 md:right-6"
-      >
-        <AnimatePresence>
-          {adminOpen && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 4 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 4 }}
-              transition={{ duration: 0.15 }}
-              className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
-            >
-              <AdminToggle label="Tasks section" checked={tasksSection} onChange={() => setTasksSection((v) => !v)} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <button
-          onClick={() => setAdminOpen((o) => !o)}
-          aria-label="Admin controls"
-          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-colors hover:bg-[#B1B1B1]/30"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="3" cy="8" r="1.5" fill="#222222" />
-            <circle cx="8" cy="8" r="1.5" fill="#222222" />
-            <circle cx="13" cy="8" r="1.5" fill="#222222" />
-          </svg>
-        </button>
-      </div>
     </PageShell>
   );
 }

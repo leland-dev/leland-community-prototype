@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Button } from "./Button";
+import { Button } from "../../components/Button";
 import { useGoals } from "../contexts/GoalsContext";
-import addPlusIcon from "../assets/icons/add-plus.svg";
+import addPlusIcon from "../../assets/icons/add-plus.svg";
 
 // Capture-first add task. A goal is optional: type a title and hit Add and the
 // task lands on nothing, which is how real to-do lists work. The assign picker

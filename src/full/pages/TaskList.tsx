@@ -1,8 +1,8 @@
 import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
-import PageShell from "../components/PageShell";
-import { useSetNavTheme } from "../components/NavThemeContext";
+import PageShell from "../../components/PageShell";
+import { useSetNavTheme } from "../../components/NavThemeContext";
 import TaskListSection from "../components/TaskListSection";
 
 export default function TaskList() {
