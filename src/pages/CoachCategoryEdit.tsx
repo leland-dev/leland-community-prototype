@@ -624,8 +624,11 @@ function OfferingsSection({ category, gridClass }: { category: string | undefine
 
 const boxClass ="flex h-full flex-col rounded-[20px] bg-white p-6 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10";
 
-type FirstStep = { type: "free" | "trial"; discountPct: number };
+type FirstStep = { type: "free" | "trial"; discountPct: number; durationMin: number };
 const DISCOUNT_OPTIONS = [25, 50, 75];
+// Trial-session length options, in 15-minute increments up to an hour.
+const DURATION_OPTIONS = [15, 30, 45, 60];
+const fmtDuration = (m: number) => (m === 60 ? "1 hr" : `${m} min`);
 
 // Left card (spans two columns) — avatar + name, an Edit link to the details
 // modal, the serif headline, service-tag chips, and a truncated qualifications
@@ -684,22 +687,42 @@ function FirstStepDropdown({ value, onChange }: { value: FirstStep; onChange: (v
       </div>
 
       {value.type === "trial" && (
-        <div className="mt-4">
-          <p className="mb-2 text-[13px] font-medium text-gray-light">Discount off your hourly rate</p>
-          <div className="flex gap-2">
-            {DISCOUNT_OPTIONS.map((pct) => {
-              const on = value.discountPct === pct;
-              return (
-                <button
-                  key={pct}
-                  type="button"
-                  onClick={() => onChange({ ...value, discountPct: pct })}
-                  className={`flex-1 rounded-lg border py-1.5 text-[13px] font-semibold transition-colors ${on ? "border-gray-dark bg-gray-dark text-white" : "border-gray-stroke text-gray-dark hover:border-gray-dark"}`}
-                >
-                  {pct}%
-                </button>
-              );
-            })}
+        <div className="mt-4 flex flex-col gap-4">
+          <div>
+            <p className="mb-2 text-[13px] font-medium text-gray-light">Session length</p>
+            <div className="flex gap-2">
+              {DURATION_OPTIONS.map((min) => {
+                const on = value.durationMin === min;
+                return (
+                  <button
+                    key={min}
+                    type="button"
+                    onClick={() => onChange({ ...value, durationMin: min })}
+                    className={`flex-1 rounded-lg border py-1.5 text-[13px] font-semibold transition-colors ${on ? "border-gray-dark bg-gray-dark text-white" : "border-gray-stroke text-gray-dark hover:border-gray-dark"}`}
+                  >
+                    {fmtDuration(min)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 text-[13px] font-medium text-gray-light">Discount off your hourly rate</p>
+            <div className="flex gap-2">
+              {DISCOUNT_OPTIONS.map((pct) => {
+                const on = value.discountPct === pct;
+                return (
+                  <button
+                    key={pct}
+                    type="button"
+                    onClick={() => onChange({ ...value, discountPct: pct })}
+                    className={`flex-1 rounded-lg border py-1.5 text-[13px] font-semibold transition-colors ${on ? "border-gray-dark bg-gray-dark text-white" : "border-gray-stroke text-gray-dark hover:border-gray-dark"}`}
+                  >
+                    {pct}%
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
@@ -946,7 +969,7 @@ export default function CoachCategoryEdit() {
   );
   const [editOpen, setEditOpen] = useState(false);
   const [hourlyRate, setHourlyRate] = useState(() => data?.hourlyRate ?? "150");
-  const [firstStep, setFirstStep] = useState<FirstStep>({ type: "free", discountPct: 50 });
+  const [firstStep, setFirstStep] = useState<FirstStep>({ type: "free", discountPct: 50, durationMin: 30 });
   const patchSettings = (patch: Partial<ListingSettings>) => setSettings((s) => (s ? { ...s, ...patch } : s));
 
   // Re-sync the data-derived state when the category param changes — React
