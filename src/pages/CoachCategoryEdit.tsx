@@ -1,17 +1,40 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, Reorder } from "motion/react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button, LinkButton } from "../components/Button";
 import { OFFERINGS, type Offering } from "../lib/offerings";
+import { LELAND_PACKAGES, fmtPrice, type LelandPackage } from "../lib/lelandPackages";
 import editIcon from "../assets/icons/edit.svg";
 import eyeIcon from "../assets/icons/eye.svg";
-import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
-import packageBoxOpenIcon from "../assets/icons/package-box-open.svg";
-import bookOpenIcon from "../assets/icons/book-open.svg";
-import myCoursesIcon from "../assets/icons/my-courses.svg";
-import giftIcon from "../assets/icons/gift.svg";
+import lockIcon from "../assets/icons/lock.svg";
+import sortIcon from "../assets/icons/sort.svg";
+import dragDotsIcon from "../assets/icons/drag-dots.svg";
+import shareArrowIcon from "../assets/icons/share-arrow.svg";
+import trashIcon from "../assets/icons/trash.svg";
+import lelandMark from "../assets/logos/Leland Profile Image Logo Icon White on black.png";
 import pic6 from "../assets/profile photos/pic-6.png";
+
+// Icons ship with hardcoded strokes, so tint them via CSS mask + bg-current to
+// follow the surrounding text color (e.g. red for the delete menu item).
+function MaskIcon({ src, className = "" }: { src: string; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={`shrink-0 bg-current ${className}`}
+      style={{
+        maskImage: `url("${src}")`,
+        WebkitMaskImage: `url("${src}")`,
+        maskSize: "contain",
+        WebkitMaskSize: "contain",
+        maskRepeat: "no-repeat",
+        WebkitMaskRepeat: "no-repeat",
+        maskPosition: "center",
+        WebkitMaskPosition: "center",
+      }}
+    />
+  );
+}
 
 const categoryData: Record<string, {
   name: string;
@@ -165,121 +188,441 @@ function CoachOfferingCard({ offering, onPreview, onEdit }: { offering: Offering
   );
 }
 
-// "Offerings" heading + a grid of offering cards led by the dashed "New
-// offering" tile. gridClass sets the column layout so the wide (v1/v2) and
-// two-column (v3) layouts can differ.
-function OfferingsSection({ category, gridClass }: { category: string | undefined; gridClass: string }) {
-  const navigate = useNavigate();
+// Small on/off switch used to toggle whether a coach offers a standardized
+// package. Green when on, neutral when off.
+function OfferToggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return (
-    <div>
-      <h2 className="mb-4 text-[20px] font-semibold text-gray-dark">Offerings</h2>
-      <div className={`grid gap-4 ${gridClass}`}>
-        {/* Add-new tile — the base dashed border is on the button so all four
-            sides render; a darker border fades in on hover via the overlay. */}
-        <button
-          onClick={() => navigate(`/coach/manage/${category}/new-product`)}
-          style={dashedBorderStyle}
-          className="group relative flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl bg-gray-hover transition-colors hover:bg-[#eeeeee]"
-        >
-          <span aria-hidden style={dashedBorderHoverStyle} className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100" />
-          <svg className="h-7 w-7 text-gray-extra-light transition-colors group-hover:text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-          <span className="text-[15px] font-semibold leading-tight text-gray-extra-light transition-colors group-hover:text-gray-light">New offering</span>
-        </button>
-        {OFFERINGS.map((o) => (
-          <CoachOfferingCard
-            key={o.slug}
-            offering={o}
-            onPreview={() => navigate(`/offering/${o.slug}`)}
-            onEdit={() => navigate(`/coach/manage/${category}/new-product`)}
-          />
-        ))}
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={on ? "Offering this package" : "Not offering this package"}
+      onClick={() => onChange(!on)}
+      className={`relative inline-flex h-6 w-10 shrink-0 items-center rounded-full transition-colors ${on ? "bg-[#1B8A54]" : "bg-[#222222]/15"}`}
+    >
+      <span className={`inline-block h-[18px] w-[18px] transform rounded-full bg-white shadow-[0_1px_2px_rgba(16,24,40,0.3)] transition-transform ${on ? "translate-x-[19px]" : "translate-x-[3px]"}`} />
+    </button>
+  );
+}
+
+// Standardized package card — a Leland-authored offering the coach can't edit
+// the contents of, only turn on/off and price. Matches CoachOfferingCard's hover
+// (darkened thumbnail + centered Preview + Edit); the "Created by Leland" badge
+// and the offer toggle distinguish it. Edit opens the price-only modal.
+function StandardizedPackageCard({ pkg, prices, offered, onToggle, onPreview, onEditPrice }: { pkg: LelandPackage; prices: number[]; offered: boolean; onToggle: (v: boolean) => void; onPreview: () => void; onEditPrice: () => void }) {
+  const lowest = Math.min(...prices);
+  const multiTier = pkg.tiers.length > 1;
+  return (
+    <div className={`group flex flex-col overflow-hidden rounded-2xl border bg-white shadow-[0_1px_3px_rgba(16,24,40,0.06)] transition-shadow duration-200 hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)] ${offered ? "border-[#222222]/20 ring-1 ring-[#222222]/[0.06]" : "border-gray-stroke"}`}>
+      <div className="relative">
+        <img src={pkg.image} alt="" className={`aspect-[1200/630] w-full object-cover transition duration-200 ${offered ? "" : "opacity-60 grayscale"}`} />
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 py-1 pl-1 pr-2.5 shadow-[0_1px_3px_rgba(16,24,40,0.18)]">
+          <img src={lelandMark} alt="" className="h-4 w-4 rounded-full" />
+          <span className="text-[12px] font-semibold text-gray-dark">Created by Leland</span>
+        </span>
+        {/* Hover: darken the thumbnail and reveal Preview + Edit (price only). */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-3 bg-black/45 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          <button onClick={onPreview} aria-label="Preview package" className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-gray-dark shadow-[0_2px_8px_rgba(16,24,40,0.2)] transition-colors hover:bg-gray-hover">
+            <img src={eyeIcon} alt="" className="h-5 w-5" />
+          </button>
+          <button onClick={onEditPrice} aria-label="Edit price" className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-gray-dark shadow-[0_2px_8px_rgba(16,24,40,0.2)] transition-colors hover:bg-gray-hover">
+            <img src={editIcon} alt="" className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col p-4">
+        <div className={offered ? "" : "opacity-60"}>
+          <p className="line-clamp-2 text-[15px] font-semibold leading-tight text-gray-dark">{pkg.title}</p>
+          <p className="mt-1 line-clamp-2 text-[14px] leading-snug text-gray-light">{pkg.headline}</p>
+        </div>
+        {/* Price + offer toggle share a line; the toggle stays full strength. */}
+        <div className="mt-auto flex items-end justify-between gap-3 pt-3">
+          <div className={offered ? "" : "opacity-60"}>
+            {multiTier && <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-gray-extra-light">Starting at</p>}
+            <p className="text-[14px] font-semibold text-gray-dark">{fmtPrice(lowest)}</p>
+          </div>
+          <OfferToggle on={offered} onChange={onToggle} />
+        </div>
       </div>
     </div>
   );
 }
 
-// Pre-configured starting points a coach can launch the offering builder from.
-const OFFERING_TEMPLATES = [
-  { slug: "coaching-package", title: "1:1 Coaching Package", blurb: "A bundle of one-on-one coaching hours.", icon: hourglassIcon },
-  { slug: "application-package", title: "Application Package", blurb: "End-to-end support, strategy to submission.", icon: packageBoxOpenIcon },
-  { slug: "digital-guide", title: "Digital Guide", blurb: "A downloadable guide, template, or resource.", icon: bookOpenIcon },
-  { slug: "cohort-bootcamp", title: "Cohort Bootcamp", blurb: "A structured, group program on a schedule.", icon: myCoursesIcon },
-  { slug: "free-intro", title: "Free Intro Offer", blurb: "A no-cost first step to attract new clients.", icon: giftIcon },
-];
+// Price-only editor for a standardized package. A sync toggle ties the price to
+// the coach's hourly rate (locking the inputs); with sync off, each package size
+// can be priced manually. Content is fixed by Leland and not editable here.
+function PackagePriceModal({ pkg, synced, prices, onClose, onSave, onPreview }: { pkg: LelandPackage | null; synced: boolean; prices: number[]; onClose: () => void; onSave: (synced: boolean, prices: number[]) => void; onPreview: () => void }) {
+  const [localSynced, setLocalSynced] = useState(synced);
+  const [localPrices, setLocalPrices] = useState<string[]>(prices.map(String));
 
-// Horizontal, scrollable row of template cards shown above the offerings grid.
-// Each card launches the offering builder pre-seeded with that template.
-function TemplatesSection({ category }: { category: string | undefined }) {
-  const navigate = useNavigate();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [atStart, setAtStart] = useState(true);
-  const [atEnd, setAtEnd] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-
+  // Re-seed the form whenever a different package is opened.
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const update = () => {
-      setAtStart(el.scrollLeft <= 1);
-      setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 1);
-    };
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => { el.removeEventListener("scroll", update); ro.disconnect(); };
-  }, []);
+    if (pkg) {
+      setLocalSynced(synced);
+      setLocalPrices(prices.map(String));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pkg?.slug]);
 
-  const scrollByCards = (dir: 1 | -1) => scrollRef.current?.scrollBy({ left: dir * 260, behavior: "smooth" });
+  const save = () => {
+    if (!pkg) return;
+    const parsed = localPrices.map((p, i) => {
+      const n = parseInt(p.replace(/[^0-9]/g, ""), 10);
+      return Number.isFinite(n) ? n : pkg.tiers[i].price;
+    });
+    onSave(localSynced, parsed);
+  };
 
-  const chevron = "flex h-9 w-9 items-center justify-center rounded-full border border-[#222222]/[0.12] text-gray-dark transition-colors hover:bg-[#222222]/5 disabled:opacity-30 disabled:hover:bg-transparent";
-
-  return (
-    <AnimatePresence initial={false}>
-      {!dismissed && (
+  return createPortal(
+    <AnimatePresence>
+      {pkg && (
         <motion.div
-          key="templates"
-          initial={false}
-          exit={{ opacity: 0, height: 0, marginTop: 0, overflow: "hidden" }}
-          transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4"
         >
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <h2 className="text-[20px] font-semibold text-gray-dark">Start from a template</h2>
-            <div className="flex shrink-0 items-center gap-2">
-              <button onClick={() => scrollByCards(-1)} disabled={atStart} aria-label="Previous templates" className={chevron}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-              </button>
-              <button onClick={() => scrollByCards(1)} disabled={atEnd} aria-label="More templates" className={chevron}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-              </button>
-              <button onClick={() => setDismissed(true)} aria-label="Dismiss templates" className="flex h-9 w-9 items-center justify-center rounded-full bg-[#222222]/5 text-gray-dark transition-colors hover:bg-[#222222]/10">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-              </button>
-            </div>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 32 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 32 }}
+            transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative flex max-h-[88vh] w-full max-w-[600px] flex-col overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)]"
+          >
+            <button onClick={onClose} aria-label="Close" className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-gray-stroke bg-white text-gray-dark transition-colors hover:bg-gray-hover">
+              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            </button>
 
-          <div ref={scrollRef} className="scrollbar-hide flex gap-4 overflow-x-auto pb-2">
-            {OFFERING_TEMPLATES.map((t) => (
-              <button
-                key={t.slug}
-                onClick={() => navigate(`/coach/manage/${category}/new-product?template=${t.slug}`)}
-                className="group flex w-[220px] shrink-0 flex-col rounded-2xl border border-gray-stroke bg-white p-4 text-left shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#222222]/5">
-                  <img src={t.icon} alt="" className="h-5 w-5" />
+            <div className="flex-1 overflow-y-auto px-7 pb-2 pt-8">
+              <h2 className="pr-12 font-serif text-[28px] leading-tight text-gray-dark">Update your price for this offering</h2>
+
+              {/* Offering summary — white card with a Preview button at the bottom */}
+              <div className="mt-6 rounded-2xl border border-gray-stroke bg-white p-4">
+                <div className="flex items-center gap-3">
+                  <img src={pkg.image} alt="" className="h-12 w-[72px] shrink-0 rounded-lg object-cover" />
+                  <div className="min-w-0">
+                    <p className="text-[15px] font-semibold leading-tight text-gray-dark">{pkg.title}</p>
+                    <p className="mt-1 flex items-center gap-1.5 text-[13px] text-gray-light">
+                      <img src={lelandMark} alt="" className="h-4 w-4 rounded-full" />
+                      Created by Leland · {pkg.hoursLabel}
+                    </p>
+                  </div>
                 </div>
-                <p className="mt-3 text-[15px] font-semibold leading-tight text-gray-dark">{t.title}</p>
-                <p className="mt-1 text-[13px] leading-snug text-gray-light">{t.blurb}</p>
-              </button>
-            ))}
-          </div>
+                <Button size="sm" variant="secondary" rounded="rounded-full" className="mt-4 w-full font-semibold" onClick={onPreview}>
+                  <img src={eyeIcon} alt="" className="h-[18px] w-[18px]" />
+                  Preview offering
+                </Button>
+              </div>
+
+              {/* Sync toggle — sits at the same level as the price options. */}
+              <div className="mt-6">
+                <div className="flex items-start justify-between gap-4">
+                  <p className="text-[15px] font-semibold text-gray-dark">Sync price to my hourly rate &amp; discounts</p>
+                  <OfferToggle on={localSynced} onChange={setLocalSynced} />
+                </div>
+                <p className="mt-1.5 text-[14px] leading-snug text-gray-light">Changing your hourly rate and bulk discounts will update your package price.</p>
+              </div>
+
+              {/* Per-tier price inputs — locked while synced. */}
+              <div className="mt-6 flex flex-col gap-5">
+                {pkg.tiers.map((t, i) => (
+                  <div key={t.name}>
+                    <label className="mb-1.5 block text-[15px] font-semibold text-gray-dark">{t.name} · {t.hours}</label>
+                    <div className={`flex items-stretch overflow-hidden rounded-lg border ${localSynced ? "border-gray-stroke bg-gray-hover" : "border-gray-stroke bg-white focus-within:border-gray-dark"}`}>
+                      <div className="flex flex-1 items-center gap-2 px-4">
+                        {localSynced && <img src={lockIcon} alt="" className="h-4 w-4 shrink-0 opacity-60" />}
+                        <input
+                          inputMode="numeric"
+                          disabled={localSynced}
+                          value={localPrices[i]}
+                          onChange={(e) => setLocalPrices((s) => s.map((v, j) => (j === i ? e.target.value.replace(/[^0-9]/g, "") : v)))}
+                          className="w-full bg-transparent py-3 text-[15px] text-gray-dark outline-none disabled:text-gray-light"
+                        />
+                      </div>
+                      <div className="flex items-center border-l border-gray-stroke px-4 text-[15px] font-medium text-gray-light">USD</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center gap-3 border-t border-gray-stroke px-7 py-5">
+              <Button size="lg" variant="white" rounded="rounded-full" className="flex-1 border border-gray-stroke font-semibold" onClick={onClose}>Back</Button>
+              <Button size="lg" variant="primary" rounded="rounded-full" className="flex-1 font-semibold" onClick={save}>Save changes</Button>
+            </div>
+          </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
 
-const boxClass = "flex h-full flex-col rounded-[20px] bg-white p-6 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10";
+const OFFERING_FILTERS = [
+  { key: "all", label: "All" },
+  { key: "you", label: "Created by you" },
+  { key: "leland", label: "Created by Leland" },
+] as const;
+type OfferingFilter = (typeof OFFERING_FILTERS)[number]["key"];
+
+// A flat view of every offering on the page — the coach's own and Leland's —
+// keyed by a stable id ("custom:slug" / "leland:slug"). Used to drive the grid
+// order and the reorder modal's rows.
+type OfferingRow = { id: string; title: string; subtitle: string; image?: string };
+const OFFERING_ROWS: OfferingRow[] = [
+  ...OFFERINGS.map((o) => ({
+    id: `custom:${o.slug}`,
+    title: o.title,
+    subtitle: `${o.startingAt ? "Starting at " : ""}${o.price}`,
+    image: o.image,
+  })),
+  ...LELAND_PACKAGES.map((p) => {
+    const low = Math.min(...p.tiers.map((t) => t.price));
+    return {
+      id: `leland:${p.slug}`,
+      title: p.title,
+      subtitle: `${p.tiers.length > 1 ? "Starting at " : ""}${fmtPrice(low)}`,
+      image: p.image,
+    };
+  }),
+];
+const ROW_BY_ID: Record<string, OfferingRow> = Object.fromEntries(OFFERING_ROWS.map((r) => [r.id, r]));
+const OFFERING_BY_SLUG: Record<string, Offering> = Object.fromEntries(OFFERINGS.map((o) => [o.slug, o]));
+const PACKAGE_BY_SLUG: Record<string, LelandPackage> = Object.fromEntries(LELAND_PACKAGES.map((p) => [p.slug, p]));
+const DEFAULT_OFFERING_ORDER = OFFERING_ROWS.map((r) => r.id);
+
+// Modal that lists every offering as a draggable row so the coach can reorder how
+// they appear on the listing. Rows mirror the horizontal cards on the public
+// profile (thumbnail + title + price), with a drag handle in place of "Details".
+function ReorderModal({ open, order, onClose, onSave }: { open: boolean; order: string[]; onClose: () => void; onSave: (order: string[]) => void }) {
+  const [localOrder, setLocalOrder] = useState(order);
+
+  useEffect(() => {
+    if (open) setLocalOrder(order);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 32 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 32 }}
+            transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative flex max-h-[88vh] w-full max-w-[600px] flex-col overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)]"
+          >
+            <div className="relative flex items-center justify-center border-b border-gray-stroke px-6 py-4">
+              <p className="text-[15px] font-semibold text-gray-dark">Reorder offerings</p>
+              <button onClick={onClose} aria-label="Close" className="absolute right-4 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-gray-stroke text-gray-dark transition-colors hover:bg-gray-hover">
+                <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 pb-2 pt-5">
+              <p className="mb-3 px-1 text-[14px] text-gray-light">Drag to change the order offerings appear on your profile.</p>
+              <Reorder.Group axis="y" values={localOrder} onReorder={setLocalOrder} className="flex flex-col gap-1">
+                {localOrder.map((id) => {
+                  const row = ROW_BY_ID[id];
+                  if (!row) return null;
+                  return (
+                    <Reorder.Item
+                      key={id}
+                      value={id}
+                      className="flex cursor-grab items-center gap-3 rounded-xl bg-white px-2 py-2.5 transition-colors hover:bg-gray-hover active:cursor-grabbing"
+                    >
+                      <img src={dragDotsIcon} alt="" className="h-5 w-auto shrink-0 opacity-50" />
+                      {row.image && <img src={row.image} alt="" className="h-10 w-[60px] shrink-0 rounded-md object-cover" />}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[15px] font-semibold leading-tight text-gray-dark">{row.title}</p>
+                        <p className="mt-0.5 truncate text-[13px] text-gray-light">{row.subtitle}</p>
+                      </div>
+                    </Reorder.Item>
+                  );
+                })}
+              </Reorder.Group>
+            </div>
+
+            <div className="flex items-center gap-3 border-t border-gray-stroke px-7 py-5">
+              <Button size="lg" variant="white" rounded="rounded-full" className="flex-1 border border-gray-stroke font-semibold" onClick={onClose}>Cancel</Button>
+              <Button size="lg" variant="primary" rounded="rounded-full" className="flex-1 font-semibold" onClick={() => onSave(localOrder)}>Save changes</Button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body,
+  );
+}
+
+// "Offerings" heading + a pill filter + a grid of offering cards. The coach's
+// own offerings lead the grid (behind the dashed "New offering" tile), and
+// Leland's standardized packages come last (each with a "Created by Leland"
+// badge + offer toggle). The filter narrows the grid to one source. gridClass
+// sets the column layout so the wide (v1/v2) and two-column (v3) layouts differ.
+function OfferingsSection({ category, gridClass }: { category: string | undefined; gridClass: string }) {
+  const navigate = useNavigate();
+  // Per-package offer state, seeded from each package's default.
+  const [offered, setOffered] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(LELAND_PACKAGES.map((p) => [p.slug, p.offered])),
+  );
+  // Whether each package's price is synced to the coach's hourly rate.
+  const [synced, setSynced] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(LELAND_PACKAGES.map((p) => [p.slug, true])),
+  );
+  // Per-package, per-tier prices, seeded from Leland's recommended prices.
+  const [prices, setPrices] = useState<Record<string, number[]>>(() =>
+    Object.fromEntries(LELAND_PACKAGES.map((p) => [p.slug, p.tiers.map((t) => t.price)])),
+  );
+  const [editingSlug, setEditingSlug] = useState<string | null>(null);
+  const editingPkg = LELAND_PACKAGES.find((p) => p.slug === editingSlug) ?? null;
+
+  // Display order of all offerings (custom + Leland), reorderable via the modal.
+  const [order, setOrder] = useState<string[]>(DEFAULT_OFFERING_ORDER);
+  const [reorderOpen, setReorderOpen] = useState(false);
+
+  const [filter, setFilter] = useState<OfferingFilter>("all");
+  const showYours = filter === "all" || filter === "you";
+  const showLeland = filter === "all" || filter === "leland";
+
+  // Filter dropdown (styled like "Sort by") + click-outside handling.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const filterMenuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (filterMenuRef.current && !filterMenuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [menuOpen]);
+  const currentFilterLabel = OFFERING_FILTERS.find((f) => f.key === filter)?.label ?? "All";
+
+  return (
+    <div>
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <h2 className="text-[20px] font-semibold text-gray-dark">Offerings</h2>
+        <div className="flex shrink-0 items-center gap-2">
+        <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={() => setReorderOpen(true)}>
+          <img src={sortIcon} alt="" className="h-4 w-4" />
+          Reorder
+        </Button>
+        <div className="relative" ref={filterMenuRef}>
+          <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={() => setMenuOpen((o) => !o)}>
+            {currentFilterLabel}
+            <svg className={`h-4 w-4 text-gray-light transition-transform ${menuOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+          </Button>
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-0 top-full z-30 mt-2 w-[200px] rounded-xl border border-gray-200 bg-white p-1.5 shadow-lg"
+              >
+                {OFFERING_FILTERS.map((f) => (
+                  <button
+                    key={f.key}
+                    onClick={() => { setFilter(f.key); setMenuOpen(false); }}
+                    className="flex w-full items-center justify-between gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                  >
+                    {f.label}
+                    {filter === f.key && (
+                      <svg className="h-[18px] w-[18px] shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                    )}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        </div>
+      </div>
+      <div className={`grid gap-4 ${gridClass}`}>
+        {/* Add-new tile — leads the coach's own offerings. */}
+        {showYours && (
+          <button
+            onClick={() => navigate(`/coach/manage/${category}/new-product`)}
+            style={dashedBorderStyle}
+            className="group relative flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl bg-gray-hover transition-colors hover:bg-[#eeeeee]"
+          >
+            <span aria-hidden style={dashedBorderHoverStyle} className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100" />
+            <svg className="h-7 w-7 text-gray-extra-light transition-colors group-hover:text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            <span className="text-[15px] font-semibold leading-tight text-gray-extra-light transition-colors group-hover:text-gray-light">New offering</span>
+          </button>
+        )}
+        {/* Cards rendered in the coach's chosen order; the filter hides sources. */}
+        {order.map((id) => {
+          const [kind, slug] = id.split(":");
+          if (kind === "custom") {
+            if (!showYours) return null;
+            const o = OFFERING_BY_SLUG[slug];
+            if (!o) return null;
+            return (
+              <CoachOfferingCard
+                key={id}
+                offering={o}
+                onPreview={() => navigate(`/offering/${o.slug}`)}
+                onEdit={() => navigate(`/coach/manage/${category}/new-product`)}
+              />
+            );
+          }
+          if (!showLeland) return null;
+          const p = PACKAGE_BY_SLUG[slug];
+          if (!p) return null;
+          return (
+            <StandardizedPackageCard
+              key={id}
+              pkg={p}
+              prices={prices[p.slug]}
+              offered={offered[p.slug]}
+              onToggle={(v) => setOffered((s) => ({ ...s, [p.slug]: v }))}
+              onPreview={() => navigate(`/offering/${p.slug}`)}
+              onEditPrice={() => setEditingSlug(p.slug)}
+            />
+          );
+        })}
+      </div>
+
+      <PackagePriceModal
+        pkg={editingPkg}
+        synced={editingSlug ? synced[editingSlug] : true}
+        prices={editingSlug ? prices[editingSlug] : []}
+        onPreview={() => { if (editingSlug) navigate(`/offering/${editingSlug}`); }}
+        onClose={() => setEditingSlug(null)}
+        onSave={(nextSynced, nextPrices) => {
+          if (!editingSlug) return;
+          setSynced((s) => ({ ...s, [editingSlug]: nextSynced }));
+          setPrices((s) => ({ ...s, [editingSlug]: nextPrices }));
+          setEditingSlug(null);
+        }}
+      />
+
+      <ReorderModal
+        open={reorderOpen}
+        order={order}
+        onClose={() => setReorderOpen(false)}
+        onSave={(next) => { setOrder(next); setReorderOpen(false); }}
+      />
+    </div>
+  );
+}
+
+const boxClass ="flex h-full flex-col rounded-[20px] bg-white p-6 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10";
 
 type FirstStep = { type: "free" | "trial"; discountPct: number };
 const DISCOUNT_OPTIONS = [25, 50, 75];
@@ -705,11 +1048,11 @@ export default function CoachCategoryEdit() {
                     className="absolute right-0 top-full z-30 mt-2 w-[200px] rounded-xl border border-gray-200 bg-white p-1.5 shadow-lg"
                   >
                     <button onClick={() => setCatMenuOpen(false)} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
-                      <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v14" /></svg>
+                      <MaskIcon src={shareArrowIcon} className="h-[18px] w-[18px]" />
                       Share
                     </button>
                     <button onClick={() => setCatMenuOpen(false)} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-[#DC2B23] transition-colors hover:bg-[#DC2B23]/[0.06]">
-                      <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V6" /></svg>
+                      <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
                       Delete category
                     </button>
                   </motion.div>
@@ -769,7 +1112,6 @@ export default function CoachCategoryEdit() {
             </div>
             <div className="flex min-w-0 flex-col gap-8">
               <CategoryAnalyticsCard analytics={data.analytics} />
-              <TemplatesSection category={category} />
               <OfferingsSection category={category} gridClass="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3" />
             </div>
           </div>
@@ -785,10 +1127,6 @@ export default function CoachCategoryEdit() {
             </div>
 
             <div className="mt-12">
-              <TemplatesSection category={category} />
-            </div>
-
-            <div className="mt-10">
               <OfferingsSection category={category} gridClass="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" />
             </div>
           </>
