@@ -705,7 +705,7 @@ function LessonAccordion({
                       key={s.id}
                       id={`sidebar-section-${s.id}`}
                       to={`/content-viewer/${l.id}/${s.id}`}
-                      className={`flex items-center gap-2.5 rounded-lg p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
+                      className={`scroll-mt-6 flex items-center gap-2.5 rounded-lg p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
                         active ? "bg-leland-gray-hover" : "hover:bg-leland-gray-hover"
                       }`}
                     >
@@ -2201,7 +2201,7 @@ export default function ContentViewer() {
     const timer = setTimeout(() => {
       document
         .getElementById(`sidebar-section-${id}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
     return () => clearTimeout(timer);
   }, [params.sectionId]); // eslint-disable-line react-hooks/exhaustive-deps
