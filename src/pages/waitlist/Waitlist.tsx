@@ -246,17 +246,18 @@ function Details({ invited, cascade, onContinue }: { invited: boolean; cascade: 
         </motion.div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[440px] bg-gradient-to-t from-white via-white/95 to-transparent px-6 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+1.5rem)] pt-8">
-        <motion.div variants={item}>
-          <button
-            type="submit"
-            disabled={!valid}
-            className={`pointer-events-auto ${DARK_CTA} w-full ${valid ? "" : "cursor-not-allowed !bg-gray-dark/30"}`}
-          >
-            {invited ? "Claim your spot" : "Continue"}
-          </button>
-        </motion.div>
-      </div>
+      <motion.div
+        variants={item}
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[440px] bg-gradient-to-t from-white via-white/95 to-transparent px-6 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+1.5rem)] pt-8"
+      >
+        <button
+          type="submit"
+          disabled={!valid}
+          className={`pointer-events-auto ${DARK_CTA} w-full ${valid ? "" : "cursor-not-allowed !bg-gray-dark/30"}`}
+        >
+          {invited ? "Claim your spot" : "Continue"}
+        </button>
+      </motion.div>
     </form>
   );
 }
@@ -486,9 +487,7 @@ export function InLine({ invited, reduced, onDone, onFront }: { invited: boolean
               }
               className="flex items-center gap-3 rounded-2xl bg-[#f4f4f4] p-4 text-left"
             >
-                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${sent[i] ? "bg-gray-stroke text-gray-light" : "bg-yellow text-gray-dark"}`}>
-                  <Ticket size={19} />
-                </span>
+                <Ticket size={20} className={`ml-1 shrink-0 ${sent[i] ? "text-gray-light" : "text-gray-dark"}`} />
                 <span className={`min-w-0 flex-1 truncate font-mono text-[17px] font-semibold tracking-[0.14em] ${sent[i] ? "text-gray-light" : "text-gray-dark"}`}>
                   {code}
                 </span>
@@ -497,7 +496,7 @@ export function InLine({ invited, reduced, onDone, onFront }: { invited: boolean
                 ) : (
                   <button
                     onClick={() => sharePass(i)}
-                    className="shrink-0 rounded-full bg-yellow px-5 py-2 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#F3C948]"
+                    className="shrink-0 rounded-full bg-yellow px-5 py-2 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
                   >
                     Invite
                   </button>
