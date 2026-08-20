@@ -74,7 +74,13 @@ function useSettledFocus<T extends HTMLInputElement>(delay = 520) {
 const landItem = {
   enter: { x: 64, opacity: 0 },
   center: { x: 0, opacity: 1, transition: { x: { type: "spring" as const, stiffness: 260, damping: 28 }, opacity: { duration: 0.35 } } },
-  exit: { x: -90, opacity: 0, transition: { duration: 0.38, ease: EASE } },
+  exit: { x: -110, opacity: 0, transition: { duration: 0.45, ease: EASE } },
+};
+// CTAs don't cascade sideways: they dissolve with the video + overlay.
+const landFade = {
+  enter: { x: 64, opacity: 0 },
+  center: { x: 0, opacity: 1, transition: { x: { type: "spring" as const, stiffness: 260, damping: 28 }, opacity: { duration: 0.35 } } },
+  exit: { opacity: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
 };
 
 function Landing({ onJoin, onInvite }: { onJoin: () => void; onInvite: () => void }) {
@@ -119,7 +125,7 @@ function Landing({ onJoin, onInvite }: { onJoin: () => void; onInvite: () => voi
         </motion.div>
       </div>
 
-      <motion.div variants={landItem} className="flex w-full flex-col items-center gap-3">
+      <motion.div variants={landFade} className="flex w-full flex-col items-center gap-3">
         <button onClick={onJoin} className={YELLOW_PILL}>
           Join the waitlist
           <ArrowRight size={18} className="shrink-0" />
@@ -479,6 +485,7 @@ export default function Waitlist() {
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const viaRef = useRef<"url" | "code" | null>(null);
   const dirRef = useRef<1 | -1>(1);
+  const delayRef = useRef(0);
 
   useEffect(() => { document.title = "Leland — Join the waitlist"; }, []);
 
@@ -493,6 +500,9 @@ export default function Waitlist() {
 
   const go = (next: Stage, dir: 1 | -1 = 1) => {
     dirRef.current = dir;
+    // Leaving the landing: let the cascade + video fade finish (screen goes
+    // fully white) before the next screen enters.
+    delayRef.current = stage === "landing" ? 0.5 : 0;
     setStage(next);
   };
 
@@ -511,20 +521,21 @@ export default function Waitlist() {
             : null;
 
   /* screens are absolutely stacked so exit + enter overlap */
+  type Nav = { d: 1 | -1; delay: number };
   const screenVariants = {
-    enter: (d: number) => (reduced ? { opacity: 0 } : { x: d > 0 ? 96 : -96, opacity: 0 }),
-    center: {
+    enter: (c: Nav) => (reduced ? { opacity: 0 } : { x: c.d > 0 ? 96 : -96, opacity: 0 }),
+    center: (c: Nav) => ({
       x: 0,
       opacity: 1,
       transition: {
-        x: { type: "spring" as const, stiffness: 280, damping: 30, mass: 0.9 },
-        opacity: { duration: 0.32, ease: "easeOut" as const },
+        x: { type: "spring" as const, stiffness: 280, damping: 30, mass: 0.9, delay: c.delay },
+        opacity: { duration: 0.32, ease: "easeOut" as const, delay: c.delay },
       },
-    },
-    exit: (d: number) =>
+    }),
+    exit: (c: Nav) =>
       reduced
         ? { opacity: 0 }
-        : { x: d > 0 ? -96 : 96, opacity: 0, transition: { duration: 0.38, ease: EASE } },
+        : { x: c.d > 0 ? -96 : 96, opacity: 0, transition: { duration: 0.38, ease: EASE } },
   };
 
   /* landing orchestrates its children instead of sliding as one block */
@@ -537,7 +548,7 @@ export default function Waitlist() {
   const screen = (key: string, children: React.ReactNode, variants: typeof screenVariants | typeof landingVariants = screenVariants) => (
     <motion.div
       key={key}
-      custom={dirRef.current}
+      custom={{ d: dirRef.current, delay: delayRef.current }}
       variants={variants as typeof screenVariants}
       initial="enter"
       animate="center"
@@ -558,7 +569,7 @@ export default function Waitlist() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.55, ease: "easeInOut" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="absolute inset-0 bg-[#1a1a1a]"
           >
             {reduced ? (
@@ -590,7 +601,7 @@ export default function Waitlist() {
         </div>
 
         <div className="relative min-h-0 flex-1">
-          <AnimatePresence custom={dirRef.current}>
+          <AnimatePresence custom={{ d: dirRef.current, delay: delayRef.current }}>
             {stage === "landing"
               ? screen("landing", <Landing onJoin={() => go("details")} onInvite={() => go("code")} />, landingVariants)
               : stage === "code"
