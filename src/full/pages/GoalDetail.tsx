@@ -15,6 +15,7 @@ import QuickAddTask from "../components/QuickAddTask";
 import TestOutcomes from "../components/TestOutcomes";
 import TaskDetailModal from "../components/TaskDetailModal";
 import ConfirmModal from "../../components/ConfirmModal";
+import GoalTasksIntro from "../../components/GoalTasksIntro";
 import { useGoals, OTHER_TASKS_TILE_ID } from "../contexts/GoalsContext";
 import { dueLabel, goalProgress, goalStatus, isCheckedToday, isOverdue, type Goal, type Task, type TaskStatus } from "../data/goals";
 import { scoreRangeFor } from "../../data/goalPlans";
@@ -496,6 +497,10 @@ export default function GoalDetail() {
   // an edit updates the underlying goal data.
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [confirmDeleteTarget, setConfirmDeleteTarget] = useState<Task | null>(null);
+  // The intro shows only while the goal has no projects yet — once one
+  // exists (drafted at creation, or added here), it's gone for good.
+  // "Continue" just unlocks the empty add-project view for this visit.
+  const [boardUnlocked, setBoardUnlocked] = useState(false);
 
   // Expert-assigned tasks get a confirmation step before they disappear —
   // everything else deletes right away, same as the modal's own delete flow.
@@ -529,6 +534,7 @@ export default function GoalDetail() {
 
   const status = goalStatus(goal);
   const { done, total, pct } = goalProgress(goal);
+  const showBoard = boardUnlocked || goal.projects.length > 0;
 
   // Re-derived from the live goal on every render — see the note on
   // selectedTaskId above.
@@ -826,46 +832,54 @@ export default function GoalDetail() {
         {/* The board — projects and "Other tasks" share one modular grid.
             Each tile sets its own width and view, so a wide kanban can sit
             above two narrow lists; drag any tile to reorder. */}
-        <div className="flex flex-col gap-3">
-          <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
-            {boardTiles.map((tile) => {
-              const isOtherTasks = tile.id === OTHER_TASKS_TILE_ID;
-              return (
-                <ProjectBoard
-                  key={tile.id}
-                  tile={tile}
-                  dragging={dragBoardId === tile.id}
-                  onDragStart={() => setDragBoardId(tile.id)}
-                  onDragEnd={() => setDragBoardId(null)}
-                  onDropOn={(edge, draggedId, span) => {
-                    reorderBoardItem(goal.id, draggedId, tile.id, edge, span);
-                    setDragBoardId(null);
-                  }}
-                  onOpenTaskDetail={(task) => setSelectedTaskId(task.id)}
-                  onDeleteTask={requestDeleteTask}
-                  onSetView={(view) => (isOtherTasks ? setOtherTasksView(goal.id, view) : setProjectView(goal.id, tile.id, view))}
-                  onSetSpan={(span) => (isOtherTasks ? setOtherTasksSpan(goal.id, span) : setProjectSpan(goal.id, tile.id, span))}
-                  onToggleCollapsed={() => (isOtherTasks ? toggleOtherTasksCollapsed(goal.id) : toggleProjectCollapsed(goal.id, tile.id))}
-                  onRename={isOtherTasks ? undefined : (name) => updateProject(goal.id, tile.id, { name })}
-                  onSetNote={isOtherTasks ? undefined : (note) => updateProject(goal.id, tile.id, { note })}
-                  onDelete={isOtherTasks ? undefined : () => deleteProject(goal.id, tile.id)}
-                  onAddTask={(title) => createTask({ title, goalId: goal.id, projectId: isOtherTasks ? null : tile.id })}
-                />
-              );
-            })}
+        {showBoard ? (
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
+              {boardTiles.map((tile) => {
+                const isOtherTasks = tile.id === OTHER_TASKS_TILE_ID;
+                return (
+                  <ProjectBoard
+                    key={tile.id}
+                    tile={tile}
+                    dragging={dragBoardId === tile.id}
+                    onDragStart={() => setDragBoardId(tile.id)}
+                    onDragEnd={() => setDragBoardId(null)}
+                    onDropOn={(edge, draggedId, span) => {
+                      reorderBoardItem(goal.id, draggedId, tile.id, edge, span);
+                      setDragBoardId(null);
+                    }}
+                    onOpenTaskDetail={(task) => setSelectedTaskId(task.id)}
+                    onDeleteTask={requestDeleteTask}
+                    onSetView={(view) => (isOtherTasks ? setOtherTasksView(goal.id, view) : setProjectView(goal.id, tile.id, view))}
+                    onSetSpan={(span) => (isOtherTasks ? setOtherTasksSpan(goal.id, span) : setProjectSpan(goal.id, tile.id, span))}
+                    onToggleCollapsed={() => (isOtherTasks ? toggleOtherTasksCollapsed(goal.id) : toggleProjectCollapsed(goal.id, tile.id))}
+                    onRename={isOtherTasks ? undefined : (name) => updateProject(goal.id, tile.id, { name })}
+                    onSetNote={isOtherTasks ? undefined : (note) => updateProject(goal.id, tile.id, { note })}
+                    onDelete={isOtherTasks ? undefined : () => deleteProject(goal.id, tile.id)}
+                    onAddTask={(title) => createTask({ title, goalId: goal.id, projectId: isOtherTasks ? null : tile.id })}
+                  />
+                );
+              })}
+            </div>
+            {/* Pre-assigned to this goal, but the picker lets you send a new task
+                to a project, another goal, or nowhere. */}
+            <div className="flex flex-wrap items-center gap-2">
+              <QuickAddTask defaultGoalId={goal.id} className="font-medium" />
+              <AddTask
+                label="Add project"
+                placeholder="What's the project called?"
+                className="font-medium"
+                onAdd={(name) => addProject(goal.id, name)}
+              />
+            </div>
           </div>
-          {/* Pre-assigned to this goal, but the picker lets you send a new task
-              to a project, another goal, or nowhere. */}
-          <div className="flex flex-wrap items-center gap-2">
-            <QuickAddTask defaultGoalId={goal.id} className="font-medium" />
-            <AddTask
-              label="Add project"
-              placeholder="What's the project called?"
-              className="font-medium"
-              onAdd={(name) => addProject(goal.id, name)}
-            />
-          </div>
-        </div>
+        ) : (
+          <GoalTasksIntro
+            heading="Break it into projects"
+            body="Projects split this goal into the big steps it'll take to get there, each with its own list or kanban board of tasks. Add a project, then the tasks under it — check them off as you go."
+            onContinue={() => setBoardUnlocked(true)}
+          />
+        )}
 
         {/* Content queue — horizontal discovery row, pinned at the bottom.
             Always present, even with nothing queued yet, so every goal has
