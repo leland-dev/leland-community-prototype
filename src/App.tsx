@@ -59,6 +59,7 @@ import Courses from "./pages/Courses";
 import LelandPlus from "./pages/LelandPlus";
 import Dashboard from "./pages/Dashboard";
 import { GoalsIndexSwitch, GoalDetailSwitch, GoalNewSwitch } from "./components/GoalsRouteSwitch";
+import GoalNew from "./pages/GoalNew";
 import FullTaskList from "./full/pages/TaskList";
 import PostDetail, { CommentDetail } from "./pages/PostDetail";
 import ReplyCompose from "./pages/ReplyCompose";
@@ -193,6 +194,8 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/goals" element={<GoalsIndexSwitch />} />
           <Route path="/goals/new" element={<GoalNewSwitch />} />
+          {/* MVP-only: resumes the draft-plan step for a goal created blank. */}
+          <Route path="/goals/:goalId/plan" element={<GoalNew />} />
           <Route path="/goals/:goalId" element={<GoalDetailSwitch />} />
           <Route path="/tasks" element={<FullTaskList />} />
           <Route path="/notifications" element={<Notifications />} />
