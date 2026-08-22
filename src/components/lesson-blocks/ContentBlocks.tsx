@@ -28,6 +28,7 @@ import type {
   EmbedBlock as EmbedBlockType,
   HtmlBlock as HtmlBlockType,
   ImageBlock as ImageBlockType,
+  SlackJoinBlock as SlackJoinBlockType,
   StepsBlock as StepsBlockType,
   TableBlock as TableBlockType,
   TagsBlock as TagsBlockType,
@@ -105,16 +106,10 @@ export function BannerBlock({ block }: { block: BannerBlockType }) {
     </>
   );
 
-  return block.href ? (
-    <Link
-      to={block.href}
-      className={`flex items-center gap-6 rounded-xl px-6 py-5 transition-colors hover:brightness-95 ${color.container}`}
-    >
-      {content}
-    </Link>
-  ) : (
-    <div className={`flex items-center gap-6 rounded-xl px-6 py-5 ${color.container}`}>{content}</div>
-  );
+  const sharedClass = `flex items-center gap-6 rounded-xl px-6 py-5 transition-colors hover:brightness-95 ${color.container}`;
+  if (!block.href) return <div className={`flex items-center gap-6 rounded-xl px-6 py-5 ${color.container}`}>{content}</div>;
+  if (block.href.startsWith("http")) return <a href={block.href} target="_blank" rel="noreferrer" className={sharedClass}>{content}</a>;
+  return <Link to={block.href} className={sharedClass}>{content}</Link>;
 }
 
 export function EmbedBlock({ block }: { block: EmbedBlockType }) {
@@ -330,7 +325,31 @@ export function StepsBlock({ block }: { block: StepsBlockType }) {
   );
 }
 
-// Escape hatch: bespoke markup that isn't worth a typed block yet.
+export function SlackJoinBlock({ block }: { block: SlackJoinBlockType }) {
+  const SlackIcon = (LelandIcons as Record<string, typeof IconInfo>).IconSlackBlack ?? IconInfo;
+  return (
+    <a
+      href={block.href}
+      target="_blank"
+      rel="noreferrer"
+      className="flex w-full items-center gap-3 rounded-lg border border-leland-gray-stroke bg-white p-4 hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+    >
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-leland-gray-stroke bg-white">
+        <SlackIcon className="size-7" />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <p className="leland-heading-base font-semibold text-leland-gray-dark">
+          {block.channel ?? "Join the Slack community"}
+        </p>
+        <p className="leland-paragraph-base text-leland-gray-extra-light">Leland AI Builders</p>
+      </div>
+      <span className="shrink-0 rounded-lg bg-leland-gray-dark px-4 py-3 leland-heading-base font-semibold text-white">
+        Join →
+      </span>
+    </a>
+  );
+}
+
 export function HtmlBlock({ block }: { block: HtmlBlockType }) {
   return <div dangerouslySetInnerHTML={{ __html: block.html }} />;
 }

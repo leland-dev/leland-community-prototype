@@ -10,6 +10,7 @@ import {
   EmbedBlock,
   HtmlBlock,
   ImageBlock,
+  SlackJoinBlock,
   StepsBlock,
   TableBlock,
   TagsBlock,
@@ -48,6 +49,8 @@ export function BlockRenderer({ block, allowH1 = true }: { block: Block; allowH1
       return <TagsBlock block={block} />;
     case "steps":
       return <StepsBlock block={block} />;
+    case "slackJoin":
+      return <SlackJoinBlock block={block} />;
     case "liveSessionBanner":
       return <LiveSessionBanner block={block} />;
     default: {

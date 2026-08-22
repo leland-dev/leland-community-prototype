@@ -81,6 +81,7 @@ import type {
 import { LESSON_1_SECTIONS, LESSON_1_TOP_BLOCKS } from "../data/sampleLesson";
 import { LESSON_2_SECTIONS, LESSON_2_TOP_BLOCKS } from "../data/sampleLesson2";
 import { TOOL_SETUP_CLAUDE, TOOL_SETUP_CODEX, TOOL_SETUP_GEMINI, TOOL_SETUP_COPILOT } from "../data/toolSetupSections";
+import { JOIN_SLACK_SECTION } from "../data/joinSlackSection";
 import {
   BlockList,
   LessonFooterActions,
@@ -165,7 +166,7 @@ const START_HERE: Lesson = {
     TOOL_SETUP_CODEX,
     TOOL_SETUP_GEMINI,
     TOOL_SETUP_COPILOT,
-    { id: "join-cohort", title: "Join your Slack community", kind: "interactive", flow: "join-cohort" },
+    JOIN_SLACK_SECTION,
     { id: "personalize", title: "Personalize your experience", kind: "interactive", flow: "personalization" },
   ],
 };
@@ -2727,7 +2728,7 @@ export default function ContentViewer() {
                 open={feedbackModalOpen}
                 onOpenChange={setFeedbackModalOpen}
               />
-              {lesson.id !== "start-here" && (
+              {(lesson.id !== "start-here" || section.kind === "blocks") && (
                 <CourseViewerSectionNav
                   prevSectionLink={
                     prevSection ? sectionUrl(lesson, prevSection) : null

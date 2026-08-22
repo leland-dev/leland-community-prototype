@@ -164,6 +164,12 @@ export type LiveSessionBannerBlock = {
   recordingVideoSrc?: string;
 };
 
+export type SlackJoinBlock = {
+  kind: "slackJoin";
+  href: string;
+  channel?: string;
+};
+
 export type Block =
   | MarkdownBlock
   | CalloutBlock
@@ -179,6 +185,7 @@ export type Block =
   | BannerBlock
   | TagsBlock
   | StepsBlock
+  | SlackJoinBlock
   | LiveSessionBannerBlock;
 
 // A section rendered as native blocks. Coexists with the legacy html/video/pdf
