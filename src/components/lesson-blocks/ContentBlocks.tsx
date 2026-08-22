@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import {
+  BrandSlack,
   IconCheck,
   IconChevronDown,
   IconChevronRight,
@@ -326,7 +327,6 @@ export function StepsBlock({ block }: { block: StepsBlockType }) {
 }
 
 export function SlackJoinBlock({ block }: { block: SlackJoinBlockType }) {
-  const SlackIcon = (LelandIcons as Record<string, typeof IconInfo>).IconSlackBlack ?? IconInfo;
   return (
     <a
       href={block.href}
@@ -335,7 +335,7 @@ export function SlackJoinBlock({ block }: { block: SlackJoinBlockType }) {
       className="flex w-full items-center gap-3 rounded-lg border border-leland-gray-stroke bg-white p-4 hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
     >
       <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-leland-gray-stroke bg-white">
-        <SlackIcon className="size-7" />
+        <BrandSlack className="size-7" />
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="leland-heading-base font-semibold text-leland-gray-dark">

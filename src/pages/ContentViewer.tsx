@@ -2728,7 +2728,7 @@ export default function ContentViewer() {
                 open={feedbackModalOpen}
                 onOpenChange={setFeedbackModalOpen}
               />
-              {(lesson.id !== "start-here" || section.kind === "blocks") && (
+              {(lesson.id !== "start-here" || section.kind === "blocks" || section.kind === "interactive") && (
                 <CourseViewerSectionNav
                   prevSectionLink={
                     prevSection ? sectionUrl(lesson, prevSection) : null
