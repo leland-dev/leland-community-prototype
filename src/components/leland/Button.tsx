@@ -45,6 +45,7 @@ export enum ButtonColor {
   SECONDARY_NEUTRAL = 'SECONDARY_NEUTRAL',
   TERTIARY = 'TERTIARY',
   DESTRUCTIVE = 'DESTRUCTIVE',
+  OVERLAY = 'OVERLAY',
 }
 
 export enum ButtonSize {
@@ -140,6 +141,10 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
       selected
         ? 'text-leland-red bg-white border-leland-red shadow-leland-red'
         : 'text-white bg-leland-red disabled:bg-leland-red border-leland-red hover:bg-leland-red-hover hover:border-leland-red-hover shadow-transparent',
+    [ButtonColor.OVERLAY]: (selected) =>
+      selected
+        ? 'text-leland-white bg-leland-black/80 border-transparent shadow-transparent backdrop-blur-md'
+        : 'text-leland-white bg-leland-black/50 disabled:bg-leland-black/50 border-transparent hover:bg-leland-black/80 shadow-transparent backdrop-blur-md',
   };
 
 // Production sizes: monorepo text-sm = 0.75rem, text-base = 0.875rem.

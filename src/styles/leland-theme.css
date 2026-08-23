@@ -73,6 +73,9 @@
   --color-leland-yellow-dark: rgb(148 55 12);
 
   --color-leland-beige: rgb(243 241 230);
+  --color-leland-cream: rgb(243 241 230);
+  /* Warm page canvas, distinct from white surfaces that sit on top of it. */
+  --color-leland-warm: rgb(249 248 243);
   /* Light page background for lesson pages — distinct from leland-beige
      (used for callout-style surfaces like the accordion). */
   --color-leland-page-bg: #fcfcfa;
@@ -146,6 +149,10 @@
   --text-eyebrow--line-height: 120%;
   --text-eyebrow--letter-spacing: 0.1em;
 
+  /* ── Aspect ratios ───────────────────────────────────────────────────── */
+  --aspect-profile-cover: 7 / 2;
+  --aspect-profile-cover-narrow: 3 / 1;
+
   /* ── Spacing additions ───────────────────────────────────────────────── */
   --spacing-26: 6.5rem;
 
@@ -178,6 +185,7 @@
 @utility z-modal { z-index: 1010; }
 /* The tallest a modal card may grow (leaves overlay padding visible). */
 @utility max-h-modal { max-height: 90vh; }
+@utility max-h-document { max-height: 34rem; }
 @utility z-takeoverModal { z-index: 1011; }
 @utility z-dropdown { z-index: 1012; }
 @utility z-toast { z-index: 1013; }
