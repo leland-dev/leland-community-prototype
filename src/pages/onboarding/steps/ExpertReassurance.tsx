@@ -22,8 +22,8 @@ import pic14 from "../../../assets/profile photos/pic-14.png";
 
 const ORGS = ["McKinsey", "Google", "Harvard", "Stanford", "Goldman Sachs", "Meta", "OpenAI"];
 
-type Review = { quote: string; name: string; role: string; avatar: string };
-const REVIEWS: Review[] = [
+export type Review = { quote: string; name: string; role: string; avatar: string };
+export const DEFAULT_REVIEWS: Review[] = [
   { quote: "I got into HBS, Stanford, AND Wharton. Six months on Leland.", name: "Maya P.", role: "HBS '27", avatar: pic10 },
   { quote: "Went from rejected to a McKinsey offer. My coach saw everything.", name: "Karen J.", role: "Associate, McKinsey", avatar: pic12 },
   { quote: "Shipped a real AI product in 8 weeks and quit my job a month later.", name: "Andre S.", role: "Founder, Loomly AI", avatar: pic11 },
@@ -34,8 +34,23 @@ const REVIEWS: Review[] = [
 
 const MASK = "linear-gradient(to right, transparent, black 6%, black 94%, transparent)";
 
-export default function ExpertReassurance({ onContinue }: { onContinue: () => void }) {
+export default function ExpertReassurance({
+  onContinue,
+  title = "Thousands of experts are here to help with that",
+  subline,
+  orgs = ORGS,
+  reviews = DEFAULT_REVIEWS,
+}: {
+  onContinue: () => void;
+  /** headline — v4 adapts this to the category the member picked */
+  title?: string;
+  subline?: string;
+  /** org badges shown on the coach cards */
+  orgs?: string[];
+  reviews?: Review[];
+}) {
   const reduced = useReducedMotion() ?? false;
+  const REVIEWS = reviews;
 
   const coaches = [...COACH_FACES, ...COACH_FACES];
 
@@ -57,8 +72,11 @@ export default function ExpertReassurance({ onContinue }: { onContinue: () => vo
     <div className="flex h-full flex-col">
       <div className="min-h-0 flex-1 overflow-hidden pb-32 pt-2">
         <h2 className="px-6 font-serif text-[28px] leading-[1.15] text-gray-dark md:text-[32px]">
-          Thousands of experts are here to help with that
+          {title}
         </h2>
+        {subline ? (
+          <p className="mt-3 px-6 text-[15px] leading-snug text-gray-light">{subline}</p>
+        ) : null}
 
         {/* coach cards — slow loop */}
         <div className="mt-6 overflow-hidden" style={{ maskImage: MASK, WebkitMaskImage: MASK }}>
@@ -82,7 +100,7 @@ export default function ExpertReassurance({ onContinue }: { onContinue: () => vo
                 </span>
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-2.5 pb-2.5 pt-7">
                   <p className="text-[12px] font-semibold leading-tight text-white">
-                    {ORGS[i % ORGS.length]}
+                    {orgs[i % orgs.length]}
                   </p>
                 </div>
               </div>

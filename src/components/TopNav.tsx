@@ -448,6 +448,14 @@ export default function TopNav() {
                       Onboarding v3
                     </NavLink>
                     <NavLink
+                      to="/onboarding-v4"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
+                    >
+                      <img src={compassIcon} alt="Onboarding v4" className="h-6 w-6 shrink-0" />
+                      Onboarding v4
+                    </NavLink>
+                    <NavLink
                       to="/waitlist"
                       onClick={() => setProfileOpen(false)}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"

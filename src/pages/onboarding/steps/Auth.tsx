@@ -733,6 +733,7 @@ export default function Auth({
   onBack,
   onExit,
   onNext,
+  primary = "email",
 }: {
   cohortName: string;
   /** accepted for back-compat with callers; no longer displayed */
@@ -740,6 +741,8 @@ export default function Auth({
   onBack: () => void;
   onExit: () => void;
   onNext: () => void;
+  /** which pill gets the black "primary" treatment (the other is bordered/white) */
+  primary?: "email" | "phone";
 }) {
   const reduced = useReducedMotion() ?? false;
   const [emailOpen, setEmailOpen] = useState(false);
@@ -751,6 +754,34 @@ export default function Auth({
     setLoading(provider);
     window.setTimeout(onNext, 1100);
   };
+
+  const PILL_PRIMARY =
+    "flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-gray-dark text-[16px] font-medium text-white transition-colors hover:bg-[#333] disabled:opacity-60";
+  const PILL_SECONDARY =
+    "flex h-[52px] w-full items-center justify-center gap-2 rounded-full border border-gray-stroke bg-white text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover disabled:opacity-60";
+  const phonePill = (
+    <motion.button
+      key="phone"
+      whileTap={{ scale: 0.98 }}
+      onClick={() => setPhoneOpen(true)}
+      disabled={!!loading}
+      className={primary === "phone" ? PILL_PRIMARY : PILL_SECONDARY}
+    >
+      <Phone size={17} />
+      Continue with phone
+    </motion.button>
+  );
+  const emailPill = (
+    <motion.button
+      key="email"
+      whileTap={{ scale: 0.98 }}
+      onClick={() => setEmailOpen(true)}
+      disabled={!!loading}
+      className={primary === "email" ? PILL_PRIMARY : PILL_SECONDARY}
+    >
+      Continue with email
+    </motion.button>
+  );
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -819,26 +850,11 @@ export default function Auth({
           </CircleButton>
         </div>
 
-        {/* phone — bordered pill */}
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setPhoneOpen(true)}
-          disabled={!!loading}
-          className="mb-3 mt-5 flex h-[52px] w-full items-center justify-center gap-2 rounded-full border border-gray-stroke bg-white text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover disabled:opacity-60"
-        >
-          <Phone size={17} />
-          Continue with phone
-        </motion.button>
-
-        {/* email — black pill */}
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setEmailOpen(true)}
-          disabled={!!loading}
-          className="flex h-[52px] w-full items-center justify-center rounded-full bg-gray-dark text-[16px] font-medium text-white transition-colors hover:bg-[#333] disabled:opacity-60"
-        >
-          Continue with email
-        </motion.button>
+        {/* secondary (bordered) pill on top, primary (black) pill on the bottom */}
+        <div className="mt-5 flex flex-col gap-3">
+          {primary === "phone" ? emailPill : phonePill}
+          {primary === "phone" ? phonePill : emailPill}
+        </div>
 
         <p className="mt-3 text-center text-[12px] text-gray-xlight">
           By continuing you agree to Leland's Terms & Privacy Policy.
