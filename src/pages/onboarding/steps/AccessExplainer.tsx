@@ -15,13 +15,11 @@ import { SharpStar } from "./flowUI";
 const EASE = [0.32, 0.72, 0, 1] as const;
 
 export default function AccessExplainer({
-  school,
   category,
   orgs,
   expertHeadline,
   onContinue,
 }: {
-  school: string;
   category: string;
   orgs: string[];
   /** "200+ consulting experts" */
@@ -29,7 +27,6 @@ export default function AccessExplainer({
   onContinue: () => void;
 }) {
   const reduced = useReducedMotion() ?? false;
-  const short = school.replace(/^University of /, "").replace(/ University$/, "").replace(/ College$/, "");
   const cat = category.toLowerCase();
 
   const ROWS = [
@@ -41,12 +38,12 @@ export default function AccessExplainer({
     {
       Icon: DoorOpen,
       title: "Experts are seated first",
-      body: `We fill each ${cat} cohort with experts before we open it to members, so every member gets real attention. ${short} is in the first wave.`,
+      body: `We fill each ${cat} cohort with experts before we open it to members, so every member gets real attention. You're pre-approved for the first wave.`,
     },
     {
       Icon: Ticket,
-      title: "Peers move you up",
-      body: `Every ${short} peer you bring moves you forward in line. Three unlocks your access.`,
+      title: "Invite 3, skip the line",
+      body: "Every person you bring moves you forward. Three within 24 hours locks you in at the front.",
     },
   ];
 

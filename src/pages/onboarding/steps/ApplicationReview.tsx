@@ -171,15 +171,15 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
                 transition={{ delay: 0.25, duration: 0.5, ease: EASE }}
                 className="mt-5 font-serif text-[36px] leading-[1.05] text-gray-dark"
               >
-                You're approved.
+                You're pre-approved.
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.45, duration: 0.5 }}
-                className="mt-2 max-w-[30ch] text-[15px] leading-relaxed text-gray-light"
+                className="mt-2 max-w-[34ch] text-[15px] leading-relaxed text-gray-light"
               >
-                Welcome to the {input.category} cohort. Here's your pass.
+                We're limiting access while we seat the {input.category.toLowerCase()} experts — but we want you in early. Here's your pass.
               </motion.p>
 
               {/* admission pass */}
@@ -193,7 +193,7 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
                 <div className="flex items-center justify-between px-5 pt-5">
                   <img src={mark} alt="Leland" className="h-6 w-6" style={{ filter: "brightness(0) invert(1)" }} />
                   <span className="flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/85">
-                    <ShieldCheck size={12} /> Approved
+                    <ShieldCheck size={12} /> Pre-approved
                   </span>
                 </div>
                 <div className="px-5 pb-5 pt-7">

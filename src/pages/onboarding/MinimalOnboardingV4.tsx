@@ -21,6 +21,8 @@ import ProfileSetup from "./steps/ProfileSetup";
 import ApplicationReview from "./steps/ApplicationReview";
 import AccessExplainer from "./steps/AccessExplainer";
 import WaitlistGate from "./steps/WaitlistGate";
+import LineLeaderboard from "./steps/LineLeaderboard";
+import foundPhoto from "../../assets/profile photos/pic-1.png";
 
 /* ─────────────────────────────────────────────────────────────────────────
  * Onboarding v4 (Chandler's take on v3). Three acts:
@@ -28,8 +30,9 @@ import WaitlistGate from "./steps/WaitlistGate";
  *   Ambition   — goal → category → "experts are here for you" (adaptive)
  *   Credential — situation → student status → university + grad year →
  *                "{School} is on Leland" → connect LinkedIn (or photo)
- *   The gate   — "reviewing your application" → approved (the pass) →
- *                how access works → waitlist: bring 3 peers to unlock
+ *   The gate   — "reviewing your application" → pre-approved (the pass) →
+ *                how access works → waitlist: invite 3 in 24h to skip the
+ *                line (+ a blurred leaderboard of who's in line)
  *
  * It's a dead end on purpose: the doors aren't open yet, and the whole flow
  * builds toward wanting in badly enough to bring three peers.
@@ -62,7 +65,8 @@ type Stage =
   | "photo"
   | "review"
   | "access"
-  | "gate";
+  | "gate"
+  | "line";
 
 const rise = {
   initial: (reduced: boolean) => (reduced ? { opacity: 0 } : { opacity: 0, y: 40 }),
@@ -86,6 +90,7 @@ export default function MinimalOnboardingV4() {
   const [studentStatus, setStudentStatus] = useState<StudentStatus>("enrolled");
   const [school, setSchool] = useState<SchoolAnswer | null>(null);
   const [linkedin, setLinkedin] = useState<LinkedInProfile | null>(null);
+  const [invitesSent, setInvitesSent] = useState(0);
 
   useEffect(() => {
     document.title = "Leland — Get started";
@@ -331,20 +336,35 @@ export default function MinimalOnboardingV4() {
             ) : stage === "access" && school ? (
               screen("access",
                 <AccessExplainer
-                  school={school.school}
                   category={primaryCategory}
                   orgs={resonance.orgs}
                   expertHeadline={expertHeadline}
                   onContinue={() => setStage("gate")}
                 />,
               )
-            ) : school ? (
+            ) : stage === "gate" && school ? (
               screen("gate",
                 <WaitlistGate
-                  school={school.school}
-                  logoKey={school.logoKey}
+                  sent={invitesSent}
+                  onSent={() => setInvitesSent((n) => Math.min(n + 1, 3))}
                   category={primaryCategory}
+                  onSeeLine={() => setStage("line")}
                   onDone={() => navigate("/")}
+                />,
+              )
+            ) : stage === "line" && school ? (
+              screen("line",
+                <LineLeaderboard
+                  sent={invitesSent}
+                  you={{
+                    name: linkedin?.name ?? "June Allen",
+                    aff: `${school.school.replace(/^University of /, "").replace(/ University$/, "").replace(/ College$/, "")} · ${
+                      school.gradYear === "earlier" ? "Alum" : `Class of '${String(school.gradYear).slice(2)}`
+                    }`,
+                    avatar: linkedin?.photo ?? foundPhoto,
+                  }}
+                  onBack={() => setStage("gate")}
+                  onInvite={() => setStage("gate")}
                 />,
               )
             ) : (
