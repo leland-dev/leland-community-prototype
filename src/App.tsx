@@ -87,6 +87,7 @@ import CoachProfileNew from "./pages/CoachProfileNew";
 import CoachOpportunities from "./pages/CoachOpportunities";
 import CoachLivestreams from "./pages/CoachLivestreams";
 import CoachContent from "./pages/CoachContent";
+import CoachPricing from "./pages/CoachPricing";
 import CoachCalendar from "./pages/CoachCalendar";
 import CoachEarnings from "./pages/CoachEarnings";
 import CoachReviews from "./pages/CoachReviews";
@@ -140,11 +141,11 @@ export default function App() {
       {/* Product-creation flow — standalone full-screen surface (no app chrome) */}
       <Route path="/coach/manage/:category/new-product" element={<CoachProductNew />} />
       <Route path="/coach/manage/:category/new-product/:type" element={<CoachProductNew />} />
-      {/* Customer-facing offering page — standalone full-screen surface */}
-      <Route path="/offering/:slug" element={<OfferingPage />} />
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
         <Route path="/profile-v2" element={<ProfileV2 />} />
+        {/* Customer-facing offering page — uses the default customer top nav */}
+        <Route path="/offering/:slug" element={<OfferingPage />} />
         <Route path="/profile/:slug" element={<ProfileTemplate />} />
         <Route path="/profile/:slug/:category" element={<ProfileTemplate />} />
         <Route path="/coach-profile" element={<ProfileV2 coach coachId="samantha" />} />
@@ -168,6 +169,7 @@ export default function App() {
           <Route path="/coach/opportunities" element={<CoachOpportunities />} />
           <Route path="/coach/livestreams" element={<CoachLivestreams />} />
           <Route path="/coach/content" element={<CoachContent />} />
+          <Route path="/coach/pricing" element={<CoachPricing />} />
           <Route path="/coach/calendar" element={<CoachCalendar />} />
           <Route path="/coach/earnings" element={<CoachEarnings />} />
           <Route path="/coach/reviews" element={<CoachReviews />} />
@@ -188,6 +190,8 @@ export default function App() {
         <Route element={<ContextLayout />}>
           <Route path="/groups/law" element={<GroupCommunity />} />
           <Route path="/" element={<Home />} />
+          {/* Experimental: home feed with a desktop sidebar instead of the top navbar */}
+          <Route path="/alt-nav" element={<Home />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />

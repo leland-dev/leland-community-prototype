@@ -160,7 +160,12 @@ const offeringAddDescription: Record<string, string> = {
 };
 
 // The kinds of section a coach can add to the customer-facing page.
-type PageSectionKind = "text" | "faqs" | "checklist" | "media" | "reviews";
+type PageSectionKind = "text" | "faqs" | "checklist" | "media" | "reviews" | "included";
+
+// The always-present "What's included" section (a preview of the offering's
+// products + total). It can be reordered but not added or removed, so it lives
+// at a reserved id that never collides with user-added sections.
+const INCLUDED_SECTION_ID = -1;
 
 // A single Q&A pair inside a FAQs section.
 type FaqItem = { id: number; question: string; answer: string };
@@ -175,7 +180,8 @@ type PageSection =
   | { id: number; kind: "faqs"; heading: string; faqs: FaqItem[] }
   | { id: number; kind: "checklist"; heading: string; items: ChecklistItem[] }
   | { id: number; kind: "media"; heading: string; fileName: string }
-  | { id: number; kind: "reviews"; heading: string; slots: (number | null)[] };
+  | { id: number; kind: "reviews"; heading: string; slots: (number | null)[] }
+  | { id: number; kind: "included"; heading: string };
 
 // Section types a coach can add to the customer-facing page. `kind` maps to the
 // PageSection built when the button is clicked.
@@ -198,6 +204,7 @@ function newPageSection(kind: PageSectionKind, id: number): PageSection {
     case "checklist": return { id, kind, heading: "", items: [{ id: 1, text: "" }] };
     case "media": return { id, kind, heading: "", fileName: "" };
     case "reviews": return { id, kind, heading: "", slots: [] };
+    case "included": return { id, kind, heading: "What's included" };
   }
 }
 
@@ -704,7 +711,9 @@ export default function CoachProductNew() {
   // Thumbnail image (demo-only object URL) — set on the Details step, previewed
   // in the sidebar card and on the Page step.
   const [thumbnail, setThumbnail] = useState<string | null>(null);
-  const [sections, setSections] = useState<PageSection[]>([]);
+  const [sections, setSections] = useState<PageSection[]>(() => [
+    { id: INCLUDED_SECTION_ID, kind: "included", heading: "What's included" },
+  ]);
   const nextOfferingId = useRef(0);
   const nextSectionId = useRef(0);
 
@@ -824,7 +833,11 @@ export default function CoachProductNew() {
   // Page sections (step 3). New sections append to the end; reorder swaps with a
   // neighbor so "move up/down" stays a single-step nudge.
   const addSection = (kind: PageSectionKind) => setSections((s) => [...s, newPageSection(kind, nextSectionId.current++)]);
-  const removeSection = (id: number) => setSections((s) => s.filter((sec) => sec.id !== id));
+  // The "What's included" preview can't be removed (only reordered).
+  const removeSection = (id: number) => {
+    if (id === INCLUDED_SECTION_ID) return;
+    setSections((s) => s.filter((sec) => sec.id !== id));
+  };
   const updateSection = (next: PageSection) => setSections((s) => s.map((sec) => (sec.id === next.id ? next : sec)));
   // Drag-and-drop reorder — the Reorder list hands back the new order live.
   const reorderSections = (next: PageSection[]) => setSections(next);
@@ -4120,6 +4133,57 @@ function Stars({ n }: { n: number }) {
   );
 }
 
+// Read-only preview of the customer-facing "What's included" roll-up: the
+// offering's products with their prices (free items struck to $0) and the
+// discounted total. Illustrative here; the live page derives it from the
+// offering's real products.
+function IncludedSectionPreview() {
+  const products = [
+    {
+      icon: hourglassIcon,
+      title: "10h of coaching",
+      detail: (<>$150/hr<span className="text-gray-extra-light"> · Live Sessions</span></>),
+      price: 1500,
+      free: false,
+    },
+    { icon: bookOpenIcon, title: "MBA Essay Playbook", detail: "Guide", price: 99, free: true },
+  ];
+  const subtotal = 1500;
+  const total = 1200;
+  return (
+    <div>
+      <div className="overflow-hidden rounded-2xl border border-gray-stroke px-4">
+        {products.map((p, i) => (
+          <div key={p.title} className={`flex items-center gap-3 py-4 ${i < products.length - 1 ? "border-b border-gray-stroke" : ""}`}>
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+              <img src={p.icon} alt="" className="h-[26px] w-[26px]" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold text-gray-dark">{p.title}</span>
+              <span className="block text-[15px] text-gray-light">{p.detail}</span>
+            </span>
+            {p.free ? (
+              <span className="flex shrink-0 items-center gap-1.5 text-[15px]">
+                <span className="text-gray-extra-light line-through decoration-1 opacity-60">{`$${formatMoney(p.price)}`}</span>
+                <span className="text-gray-light">$0</span>
+              </span>
+            ) : (
+              <span className="shrink-0 text-[15px] text-gray-dark">{`$${formatMoney(p.price)}`}</span>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="mt-5 flex items-center justify-between">
+        <span className="text-[16px] font-semibold text-gray-dark">Total</span>
+        <span className="flex items-baseline gap-2">
+          <span className="text-[16px] text-gray-extra-light line-through decoration-1">{`$${formatMoney(subtotal)}`}</span>
+          <span className="text-[18px] font-semibold text-gray-dark">{`$${formatMoney(total)}`}</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function PageSectionCard({ section, onChange, onRemove }: {
   section: PageSection;
   onChange: (next: PageSection) => void; onRemove: () => void;
@@ -4143,26 +4207,39 @@ function PageSectionCard({ section, onChange, onRemove }: {
         <MaskIcon src={dragDotsIcon} className="h-[18px] w-[18px]" />
       </span>
 
-      {/* Optional headline (every section) + a remove "X" across from it, on hover. */}
-      <div className="mb-3 flex items-center gap-3">
-        <input
-          value={section.heading}
-          onChange={(e) => onChange({ ...section, heading: e.target.value })}
-          placeholder="Add an optional header..."
-          className="min-w-0 flex-1 bg-transparent text-[24px] font-semibold leading-tight text-gray-dark outline-none placeholder:text-[#B1B1B1]"
-        />
-        <span className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
-          <IconBtn label="Remove section" danger onClick={onRemove}>
-            <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
-          </IconBtn>
-        </span>
-      </div>
+      {section.kind === "included" ? (
+        // Auto-generated preview — a fixed header and read-only product roll-up.
+        // Reorderable via the drag handle, but not editable or removable.
+        <>
+          <div className="mb-3 flex items-center gap-3">
+            <h3 className="min-w-0 flex-1 text-[24px] font-semibold leading-tight text-gray-dark">{section.heading}</h3>
+          </div>
+          <IncludedSectionPreview />
+        </>
+      ) : (
+        <>
+          {/* Optional headline (every section) + a remove "X" across from it, on hover. */}
+          <div className="mb-3 flex items-center gap-3">
+            <input
+              value={section.heading}
+              onChange={(e) => onChange({ ...section, heading: e.target.value })}
+              placeholder="Add an optional header..."
+              className="min-w-0 flex-1 bg-transparent text-[24px] font-semibold leading-tight text-gray-dark outline-none placeholder:text-[#B1B1B1]"
+            />
+            <span className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+              <IconBtn label="Remove section" danger onClick={onRemove}>
+                <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
+              </IconBtn>
+            </span>
+          </div>
 
-      {section.kind === "text" && <TextSectionEditor section={section} onChange={onChange} />}
-      {section.kind === "faqs" && <FaqsSectionEditor section={section} onChange={onChange} />}
-      {section.kind === "checklist" && <ChecklistSectionEditor section={section} onChange={onChange} />}
-      {section.kind === "media" && <MediaSectionEditor section={section} onChange={onChange} />}
-      {section.kind === "reviews" && <ReviewsSectionEditor section={section} onChange={onChange} />}
+          {section.kind === "text" && <TextSectionEditor section={section} onChange={onChange} />}
+          {section.kind === "faqs" && <FaqsSectionEditor section={section} onChange={onChange} />}
+          {section.kind === "checklist" && <ChecklistSectionEditor section={section} onChange={onChange} />}
+          {section.kind === "media" && <MediaSectionEditor section={section} onChange={onChange} />}
+          {section.kind === "reviews" && <ReviewsSectionEditor section={section} onChange={onChange} />}
+        </>
+      )}
     </Reorder.Item>
   );
 }
