@@ -144,7 +144,7 @@ function SidebarV1() {
           }`}
         >
           <NavIcon src={storeIcon} className="h-[22px] w-[22px]" />
-          <span className="flex-1 text-left">Storefront</span>
+          <span className="flex-1 text-left">Offerings</span>
           <svg
             className={`h-4 w-4 shrink-0 transition-transform ${listingsOpen ? "rotate-180" : ""}`}
             viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
