@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Check, Loader2, UserRound, ShieldCheck, Zap } from "lucide-react";
 
 import foundPhoto from "../../../assets/profile photos/pic-1.png";
+import linkedinIcon from "../../../assets/onboarding/linkedin-app-icon.webp";
 
 /* ─────────────────────────────────────────────────────────────────────────
  * LinkedInConnect (v4) — borrow LinkedIn's credibility instead of building a
@@ -56,7 +57,16 @@ export default function LinkedInConnect({
   return (
     <div className="flex h-full flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-40 pt-2">
-        <h2 className="text-balance font-serif text-[28px] leading-[1.12] text-gray-dark md:text-[32px]">
+        {/* the app icon itself — borrowed credibility, front and center */}
+        <motion.img
+          src={linkedinIcon}
+          alt="LinkedIn"
+          initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.8, y: 8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 280, damping: 20 }}
+          className="mt-4 h-[88px] w-[88px] rounded-[20px] shadow-[0_12px_32px_rgba(10,102,194,0.28)]"
+        />
+        <h2 className="mt-6 text-balance font-serif text-[28px] leading-[1.12] text-gray-dark md:text-[32px]">
           Bring your LinkedIn with you
         </h2>
         <p className="mt-2 text-[15px] leading-relaxed text-gray-light">
