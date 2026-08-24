@@ -162,7 +162,7 @@ function SidebarV1() {
               transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
               className="overflow-hidden"
             >
-              <div className="relative mt-1 flex flex-col gap-2 pl-[34px]">
+              <div className="relative mb-2 mt-1 flex flex-col gap-2 pl-[34px]">
                 {/* Vertical guide line, aligned under the parent icon */}
                 <span className="absolute bottom-0 left-[23px] top-0 w-[1.5px] bg-gray-stroke" />
                 {/* Fixed settings — always present */}
@@ -182,8 +182,8 @@ function SidebarV1() {
                 <button className="group flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-1 text-[15px] font-medium text-gray-light transition-colors hover:text-gray-dark">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-gray-stroke shadow-[0_1px_1.5px_rgba(0,0,0,0.06)] transition-colors group-hover:border-gray-light">
                     <svg
-                      className="h-3.5 w-3.5"
-                      viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                      className="h-3.5 w-3.5 text-gray-light"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
                       strokeLinecap="round" strokeLinejoin="round"
                       style={{ vectorEffect: "non-scaling-stroke" }}
                       aria-hidden
