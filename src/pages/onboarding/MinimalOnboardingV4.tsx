@@ -334,6 +334,7 @@ export default function MinimalOnboardingV4() {
                   school={school.school}
                   category={primaryCategory}
                   orgs={resonance.orgs}
+                  expertHeadline={expertHeadline}
                   onContinue={() => setStage("gate")}
                 />,
               )
