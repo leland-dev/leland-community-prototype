@@ -23,7 +23,7 @@ function LinkedInMark({ size = 20, color = "#0A66C2" }: { size?: number; color?:
 const BENEFITS = [
   { Icon: UserRound, text: "Your name, photo, and headline — done." },
   { Icon: ShieldCheck, text: "Your school and work history, verified." },
-  { Icon: Zap, text: "Experts respond 3× faster to complete profiles." },
+  { Icon: Zap, text: "Applications with LinkedIn attached are reviewed first." },
 ];
 
 export default function LinkedInConnect({

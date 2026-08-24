@@ -321,9 +321,24 @@ export function Joining({ onDone, reduced }: { onDone: () => void; reduced: bool
 }
 
 /* ── share sheet: iOS-fidelity mock ── */
-function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => void; onClose: () => void }) {
-  const link = `${window.location.origin}/waitlist?code=${code}`;
-  const message = `I saved you a spot in the Leland community. Tap to skip the line: ${link}`;
+export function ShareSheet({
+  code,
+  onSend,
+  onClose,
+  link: linkProp,
+  message: messageProp,
+  title = "The community for ambition",
+}: {
+  code: string;
+  onSend: () => void;
+  onClose: () => void;
+  /** override the shared link / message (v4 anchors these on the member's school) */
+  link?: string;
+  message?: string;
+  title?: string;
+}) {
+  const link = linkProp ?? `${window.location.origin}/waitlist?code=${code}`;
+  const message = messageProp ?? `I saved you a spot in the Leland community. Tap to skip the line: ${link}`;
 
   const sendVia = (copy: boolean) => {
     if (copy) navigator.clipboard?.writeText(message).catch(() => {});
@@ -380,7 +395,7 @@ function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => voi
           />
           <div className="bg-[#3A3A3C] px-4 py-3 text-left">
             <p className="text-[16px] font-medium leading-snug text-white">
-              The community for ambition
+              {title}
             </p>
             <p className="mt-0.5 truncate text-[13px] text-white/55">
               community.leland-staging.com
@@ -408,7 +423,7 @@ function ShareSheet({ code, onSend, onClose }: { code: string; onSend: () => voi
           <img src="/waitlist-preview.png" alt="" className="h-12 w-12 shrink-0 rounded-[10px] object-cover" style={{ objectPosition: "50% 30%" }} />
           <div className="min-w-0 flex-1">
             <p className="truncate text-[15px] font-semibold leading-tight text-white">
-              The community for ambition
+              {title}
             </p>
             <p className="truncate text-[12.5px] text-white/50">community.leland-staging.com</p>
           </div>

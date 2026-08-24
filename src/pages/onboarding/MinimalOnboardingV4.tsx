@@ -18,7 +18,9 @@ import UniversitySearch, { type SchoolAnswer } from "./steps/UniversitySearch";
 import SchoolProof from "./steps/SchoolProof";
 import LinkedInConnect, { type LinkedInProfile } from "./steps/LinkedInConnect";
 import ProfileSetup from "./steps/ProfileSetup";
-import BuildingFeed from "./steps/BuildingFeed";
+import ApplicationReview from "./steps/ApplicationReview";
+import AccessExplainer from "./steps/AccessExplainer";
+import WaitlistGate from "./steps/WaitlistGate";
 
 /* ─────────────────────────────────────────────────────────────────────────
  * Onboarding v4 (Chandler's take on v3). Three acts:
@@ -26,7 +28,11 @@ import BuildingFeed from "./steps/BuildingFeed";
  *   Ambition   — goal → category → "experts are here for you" (adaptive)
  *   Credential — situation → student status → university + grad year →
  *                "{School} is on Leland" → connect LinkedIn (or photo)
- *   Arrival    — building your feed
+ *   The gate   — "reviewing your application" → approved (the pass) →
+ *                how access works → waitlist: bring 3 peers to unlock
+ *
+ * It's a dead end on purpose: the doors aren't open yet, and the whole flow
+ * builds toward wanting in badly enough to bring three peers.
  *
  * The university step has no Skip on purpose: you come in through a school.
  * Narrative beats (reassurance, schoolproof, building) render no dots.
@@ -54,7 +60,9 @@ type Stage =
   | "schoolproof"
   | "linkedin"
   | "photo"
-  | "building";
+  | "review"
+  | "access"
+  | "gate";
 
 const rise = {
   initial: (reduced: boolean) => (reduced ? { opacity: 0 } : { opacity: 0, y: 40 }),
@@ -78,7 +86,6 @@ export default function MinimalOnboardingV4() {
   const [studentStatus, setStudentStatus] = useState<StudentStatus>("enrolled");
   const [school, setSchool] = useState<SchoolAnswer | null>(null);
   const [linkedin, setLinkedin] = useState<LinkedInProfile | null>(null);
-  void linkedin; // held for the profile; the prototype doesn't render it yet
 
   useEffect(() => {
     document.title = "Leland — Get started";
@@ -124,7 +131,7 @@ export default function MinimalOnboardingV4() {
     situation: "student",
     student: "school",
     schoolproof: "linkedin",
-    photo: "building",
+    photo: "review",
   };
   const STEP_INDEX: Partial<Record<Stage, number>> = {
     goal: 1,
@@ -150,11 +157,21 @@ export default function MinimalOnboardingV4() {
           }
         : null;
 
-  const buildingCaptions = [
-    "Building your feed…",
-    school ? `Finding ${school.school} members…` : "Finding your people…",
-    "Setting up your profile…",
-  ];
+  const primaryCategory = categories[0] ?? "Career";
+  // "350+ MBA admissions experts are here…" → "350+ MBA admissions experts"
+  const expertHeadline = resonance.title.includes(" experts")
+    ? `${resonance.title.split(" experts")[0]} experts`
+    : "thousands of experts";
+  const reviewInput = school
+    ? {
+        school: school.school,
+        logoKey: school.logoKey,
+        gradYear: school.gradYear,
+        category: primaryCategory,
+        expertHeadline,
+        name: linkedin?.name,
+      }
+    : null;
 
   const screen = (key: string, node: React.ReactNode) => (
     <motion.div key={key} initial={rise.initial(reduced)} animate={rise.animate} transition={rise.transition} className="h-full">
@@ -294,7 +311,7 @@ export default function MinimalOnboardingV4() {
                   gradYear={school?.gradYear}
                   onConnected={(p) => {
                     setLinkedin(p);
-                    setStage("building");
+                    setStage("review");
                   }}
                   onSkip={() => setStage("photo")}
                 />,
@@ -303,14 +320,34 @@ export default function MinimalOnboardingV4() {
               screen("photo",
                 <ProfileSetup
                   oauthPhoto={intent === "login"}
-                  onContinue={() => (intent === "login" ? navigate("/") : setStage("building"))}
-                  onSkip={() => (intent === "login" ? navigate("/") : setStage("building"))}
+                  onContinue={() => (intent === "login" ? navigate("/") : setStage("review"))}
+                  onSkip={() => (intent === "login" ? navigate("/") : setStage("review"))}
+                />,
+              )
+            ) : stage === "review" && reviewInput ? (
+              <motion.div key="review" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="h-full">
+                <ApplicationReview input={reviewInput} onContinue={() => setStage("access")} />
+              </motion.div>
+            ) : stage === "access" && school ? (
+              screen("access",
+                <AccessExplainer
+                  school={school.school}
+                  category={primaryCategory}
+                  orgs={resonance.orgs}
+                  onContinue={() => setStage("gate")}
+                />,
+              )
+            ) : school ? (
+              screen("gate",
+                <WaitlistGate
+                  school={school.school}
+                  logoKey={school.logoKey}
+                  category={primaryCategory}
+                  onDone={() => navigate("/")}
                 />,
               )
             ) : (
-              <motion.div key="building" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="h-full">
-                <BuildingFeed captions={buildingCaptions} onDone={() => navigate("/")} />
-              </motion.div>
+              <motion.div key="fallback" className="h-full" />
             )}
           </AnimatePresence>
         </div>
