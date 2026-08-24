@@ -121,7 +121,7 @@ const childNavLinkClass = ({ isActive }: { isActive: boolean }) =>
 // Sidebar v1 — the current, shipping layout.
 // ---------------------------------------------------------------------------
 function SidebarV1() {
-  const [listingsOpen, setListingsOpen] = useState(true);
+  const [listingsOpen, setListingsOpen] = useState(false);
   const { pathname } = useLocation();
   const onStorefront = pathname.startsWith("/coach/manage") || storefrontRoutes.includes(pathname);
 
