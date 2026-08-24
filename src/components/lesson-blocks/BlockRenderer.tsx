@@ -10,10 +10,12 @@ import {
   EmbedBlock,
   HtmlBlock,
   ImageBlock,
+  RadioCardGroup,
   SlackJoinBlock,
   StepsBlock,
   TableBlock,
   TagsBlock,
+  ToggleChipGroup,
   VideoBlock,
 } from "./ContentBlocks";
 import { Prose } from "./Prose";
@@ -51,6 +53,10 @@ export function BlockRenderer({ block, allowH1 = true }: { block: Block; allowH1
       return <StepsBlock block={block} />;
     case "slackJoin":
       return <SlackJoinBlock block={block} />;
+    case "radioCardGroup":
+      return <RadioCardGroup block={block} />;
+    case "toggleChipGroup":
+      return <ToggleChipGroup block={block} />;
     case "liveSessionBanner":
       return <LiveSessionBanner block={block} />;
     default: {

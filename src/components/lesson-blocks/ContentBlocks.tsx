@@ -29,10 +29,12 @@ import type {
   EmbedBlock as EmbedBlockType,
   HtmlBlock as HtmlBlockType,
   ImageBlock as ImageBlockType,
+  RadioCardGroupBlock as RadioCardGroupBlockType,
   SlackJoinBlock as SlackJoinBlockType,
   StepsBlock as StepsBlockType,
   TableBlock as TableBlockType,
   TagsBlock as TagsBlockType,
+  ToggleChipGroupBlock as ToggleChipGroupBlockType,
   VideoBlock as VideoBlockType,
 } from "../../data/lessonBlocks";
 
@@ -347,6 +349,109 @@ export function SlackJoinBlock({ block }: { block: SlackJoinBlockType }) {
         Join →
       </span>
     </a>
+  );
+}
+
+function QuestionHeader({ eyebrow, question, subtext }: { eyebrow?: string; question: string; subtext?: string }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      {eyebrow ? (
+        <span className="leland-subtext-sm font-semibold uppercase tracking-[1.3px] text-leland-gray-extra-light">
+          {eyebrow}
+        </span>
+      ) : null}
+      <p className="leland-heading-xl font-semibold text-leland-gray-dark">{question}</p>
+      {subtext ? (
+        <p className="leland-paragraph-base text-leland-gray-light">{subtext}</p>
+      ) : null}
+    </div>
+  );
+}
+
+export function RadioCardGroup({ block }: { block: RadioCardGroupBlockType }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  return (
+    <div className="flex flex-col gap-4">
+      <QuestionHeader eyebrow={block.eyebrow} question={block.question} subtext={block.subtext} />
+      <div className="flex flex-col gap-3">
+        {block.options.map((opt) => {
+          const isSelected = selected === opt.value;
+          const Icon = opt.icon
+            ? (LelandIcons as Record<string, typeof IconInfo>)[opt.icon] ?? null
+            : null;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setSelected(isSelected ? null : opt.value)}
+              className={`flex w-full items-center gap-3 rounded-lg border-2 p-5 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
+                isSelected
+                  ? "border-leland-gray-dark bg-white"
+                  : "border-leland-gray-stroke bg-white hover:bg-leland-gray-hover"
+              }`}
+            >
+              {Icon ? (
+                <div className="flex shrink-0 items-center justify-center rounded-[4px] bg-leland-gray-hover p-2.5">
+                  <Icon className="size-6" />
+                </div>
+              ) : null}
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="leland-paragraph-lg font-semibold text-leland-gray-dark">{opt.label}</span>
+                {opt.subtext ? (
+                  <span className="leland-paragraph-base text-leland-gray-light">{opt.subtext}</span>
+                ) : null}
+              </div>
+              <div
+                className={`flex size-[18px] shrink-0 items-center justify-center rounded-full border-2 ${isSelected ? "border-leland-gray-dark" : "border-leland-gray-stroke"}`}
+              >
+                {isSelected ? <div className="size-2 rounded-full bg-leland-gray-dark" /> : null}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function ToggleChipGroup({ block }: { block: ToggleChipGroupBlockType }) {
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggle = (value: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (block.multiple === false) {
+        next.clear();
+        if (!prev.has(value)) next.add(value);
+      } else {
+        if (next.has(value)) next.delete(value);
+        else next.add(value);
+      }
+      return next;
+    });
+  };
+  return (
+    <div className="flex flex-col gap-4">
+      <QuestionHeader eyebrow={block.eyebrow} question={block.question} subtext={block.subtext} />
+      <div className="flex flex-wrap gap-2">
+        {block.options.map((opt) => {
+          const isSelected = selected.has(opt.value);
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => toggle(opt.value)}
+              className={`rounded-full border-2 px-4 py-3 leland-heading-base font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
+                isSelected
+                  ? "border-leland-gray-dark bg-leland-gray-hover text-leland-gray-dark"
+                  : "border-transparent bg-leland-gray-hover text-leland-gray-dark hover:border-leland-gray-stroke"
+              }`}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

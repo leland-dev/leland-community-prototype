@@ -170,6 +170,37 @@ export type SlackJoinBlock = {
   channel?: string;
 };
 
+export type RadioCardOption = {
+  value: string;
+  label: string;
+  subtext?: string;
+  icon?: string;
+};
+
+export type RadioCardGroupBlock = {
+  kind: "radioCardGroup";
+  id: string;
+  eyebrow?: string;
+  question: string;
+  subtext?: string;
+  options: RadioCardOption[];
+};
+
+export type ToggleChipOption = {
+  value: string;
+  label: string;
+};
+
+export type ToggleChipGroupBlock = {
+  kind: "toggleChipGroup";
+  id: string;
+  eyebrow?: string;
+  question: string;
+  subtext?: string;
+  multiple?: boolean;
+  options: ToggleChipOption[];
+};
+
 export type Block =
   | MarkdownBlock
   | CalloutBlock
@@ -186,7 +217,9 @@ export type Block =
   | TagsBlock
   | StepsBlock
   | SlackJoinBlock
-  | LiveSessionBannerBlock;
+  | LiveSessionBannerBlock
+  | RadioCardGroupBlock
+  | ToggleChipGroupBlock;
 
 // A section rendered as native blocks. Coexists with the legacy html/video/pdf
 // sections (see the Section union in ContentViewer.tsx) — chosen per-section by

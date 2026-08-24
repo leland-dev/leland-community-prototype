@@ -82,6 +82,7 @@ import { LESSON_1_SECTIONS, LESSON_1_TOP_BLOCKS } from "../data/sampleLesson";
 import { LESSON_2_SECTIONS, LESSON_2_TOP_BLOCKS } from "../data/sampleLesson2";
 import { TOOL_SETUP_CLAUDE, TOOL_SETUP_CODEX, TOOL_SETUP_GEMINI, TOOL_SETUP_COPILOT } from "../data/toolSetupSections";
 import { JOIN_SLACK_SECTION } from "../data/joinSlackSection";
+import { PERSONALIZATION_SECTION } from "../data/personalizationSection";
 import {
   BlockList,
   LessonFooterActions,
@@ -167,7 +168,7 @@ const START_HERE: Lesson = {
     TOOL_SETUP_GEMINI,
     TOOL_SETUP_COPILOT,
     JOIN_SLACK_SECTION,
-    { id: "personalize", title: "Personalize your experience", kind: "interactive", flow: "personalization" },
+    PERSONALIZATION_SECTION,
   ],
 };
 
