@@ -11,7 +11,7 @@ import { StepHeading } from "./flowUI";
  * selecting draws a ring around the circle before filling it.
  * ──────────────────────────────────────────────────────────────────────── */
 
-type Situation = { label: string; Icon: ComponentType<LucideProps> };
+export type Situation = { label: string; Icon: ComponentType<LucideProps> };
 
 const SITUATIONS: Situation[] = [
   { label: "Just starting to explore", Icon: Compass },
@@ -47,20 +47,32 @@ function RingCheck({ on }: { on: boolean }) {
   );
 }
 
-export default function SituationStep({ onContinue }: { onContinue: () => void }) {
+export default function SituationStep({
+  onContinue,
+  title = "What's your current situation?",
+  options = SITUATIONS,
+  single = false,
+}: {
+  onContinue: (picked: string[]) => void;
+  title?: string;
+  options?: Situation[];
+  single?: boolean;
+}) {
   const [picked, setPicked] = useState<string[]>([]);
   const toggle = (label: string) =>
-    setPicked((p) => (p.includes(label) ? p.filter((x) => x !== label) : [...p, label]));
+    setPicked((p) =>
+      p.includes(label) ? p.filter((x) => x !== label) : single ? [label] : [...p, label],
+    );
 
   return (
     <div className="flex h-full flex-col">
       <div className="shrink-0 px-6 pt-2">
-        <StepHeading title="What's your current situation?" />
+        <StepHeading title={title} />
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-32">
         <div className="flex flex-col">
-          {SITUATIONS.map((sit, i) => {
+          {options.map((sit, i) => {
             const on = picked.includes(sit.label);
             return (
               <Fragment key={sit.label}>
@@ -100,7 +112,7 @@ export default function SituationStep({ onContinue }: { onContinue: () => void }
             className="fixed inset-x-0 bottom-[calc(max(1.5rem,env(safe-area-inset-bottom))+1.5rem)] z-20 mx-auto w-full max-w-[440px] px-6"
           >
             <button
-              onClick={onContinue}
+              onClick={() => onContinue(picked)}
               className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
             >
               Continue
