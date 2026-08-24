@@ -38,7 +38,6 @@ import attachIcon from "../assets/icons/attach.svg";
 import trashIcon from "../assets/icons/trash.svg";
 import editIcon from "../assets/icons/edit.svg";
 import editFilledIcon from "../assets/icons/edit-filled.svg";
-import infoFilledIcon from "../assets/icons/info-filled.svg";
 import dotsVerticalIcon from "../assets/icons/dots-vertical.svg";
 import dragDotsIcon from "../assets/icons/drag-dots.svg";
 import globeIcon from "../assets/icons/globe.svg";
@@ -1448,7 +1447,7 @@ function PriceFields({ option, products, onChange, mvp }: { option: PricingOptio
 // Total. The products themselves are already listed above, so this only carries
 // the totals; the rows share the product list's rhythm (py-4 + dividers) so they
 // read as an extension of it.
-function PricingRollup({ products, option, onChange, multiEnabled = false, onToggleMulti }: { products: OfferingItem[]; option: PricingOption; onChange: (patch: Partial<PricingOption>) => void; multiEnabled?: boolean; onToggleMulti?: () => void }) {
+function PricingRollup({ products, option, onChange }: { products: OfferingItem[]; option: PricingOption; onChange: (patch: Partial<PricingOption>) => void }) {
   const { items, subtotal, freeAmount, discount, total } = optionRollup(products, option);
   // Discount has three states: idle (an "Add discount" link), editing (the
   // %/$ controls + an "Apply" action), and done (the applied amount, editable,
@@ -1566,29 +1565,6 @@ function PricingRollup({ products, option, onChange, multiEnabled = false, onTog
         </AnimatePresence>
       </div>
 
-      {/* Multiple pricing options — a line-item above the Total, matching the
-          other rows. The whole row toggles; the toggle stops propagation so a
-          direct click doesn't double-fire. */}
-      {onToggleMulti && (
-        <div
-          onClick={onToggleMulti}
-          className="flex cursor-pointer items-center justify-between gap-3 border-t border-gray-stroke py-4 text-[15px]"
-        >
-          <span className="flex items-center gap-1.5">
-            <span className="text-gray-light">Multiple pricing options</span>
-            <span className="group relative flex" onClick={(e) => e.stopPropagation()}>
-              <MaskIcon src={infoFilledIcon} className="h-[18px] w-[18px] text-gray-extra-light opacity-50 transition-opacity group-hover:opacity-100" />
-              <span role="tooltip" className="pointer-events-none absolute bottom-full left-0 z-20 mb-2 hidden w-max max-w-[260px] rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
-                Offer varied sets of products at different price points. Buyers pick the one that fits them.
-              </span>
-            </span>
-          </span>
-          <span className="flex items-center" onClick={(e) => e.stopPropagation()}>
-            <Toggle checked={multiEnabled} onChange={onToggleMulti} size="sm" />
-          </span>
-        </div>
-      )}
-
       <div className="flex items-center justify-between border-t border-gray-stroke py-4">
         <span className="text-[16px] font-semibold text-gray-dark">Total</span>
         <span className="text-[18px] font-semibold text-gray-dark">{total === 0 ? "Free" : `$${formatMoney(total)}`}</span>
@@ -1601,7 +1577,7 @@ function PricingRollup({ products, option, onChange, multiEnabled = false, onTog
 // When `bare` (the single-option default), renders as two flat labeled sections
 // ("Add products" and "Pricing"). Otherwise wraps in card chrome with an
 // editable option name — used when there are multiple options.
-function PricingOptionCard({ option, index, products, available, comingSoon = [], bare, canDelete, mvp, multiEnabled = false, onToggleMulti, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct, onToggleFreeProduct }: {
+function PricingOptionCard({ option, index, products, available, comingSoon = [], bare, canDelete, mvp, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct, onToggleFreeProduct }: {
   option: PricingOption;
   index: number;
   products: OfferingItem[];
@@ -1610,8 +1586,6 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
   bare: boolean;
   canDelete: boolean;
   mvp: boolean;
-  multiEnabled?: boolean;
-  onToggleMulti?: () => void;
   onRemove: () => void;
   onChange: (patch: Partial<PricingOption>) => void;
   onAddProduct: (slug: string) => void;
@@ -1669,7 +1643,7 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
             <section className="mt-14">
               <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
               <div className="mt-5 border-t border-gray-stroke">
-                <PricingRollup products={products} option={option} onChange={onChange} multiEnabled={multiEnabled} onToggleMulti={onToggleMulti} />
+                <PricingRollup products={products} option={option} onChange={onChange} />
               </div>
             </section>
           )
@@ -1952,7 +1926,7 @@ function AskQuestions() {
 // an "X" to remove on hover, and a trailing "+" to add another.
 function OptionTabs({ options, activeId, onSelect, onAdd, onRemove }: { options: PricingOption[]; activeId: number; onSelect: (id: number) => void; onAdd: () => void; onRemove: (id: number) => void }) {
   return (
-    <div className="flex items-center gap-1 overflow-x-auto border-b border-gray-stroke">
+    <div className="flex items-center gap-1 overflow-x-auto">
       {options.map((opt, i) => {
         const active = opt.id === activeId;
         const label = opt.name || `Option ${i + 1}`;
@@ -2108,8 +2082,6 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
         bare
         canDelete={false}
         mvp={mvp}
-        multiEnabled={multiEnabled}
-        onToggleMulti={handleToggleMulti}
         onRemove={() => onRemovePricingOption(opt.id)}
         onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
         onAddProduct={(slug) => addProduct(opt.id, slug)}
@@ -2170,34 +2142,59 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
           )}
         </>
       ) : (
-        // v2: the products + pricing card stays put; the tabs + name/description
-        // block animates in/out above it when multiple options are toggled. The
-        // active option is the first when multiple options are off.
+        // v2: the products + pricing card stays put. A persistent bar above it
+        // carries the "Enable tiers" toggle on the right; its left side shows the
+        // option tabs when tiers are on (nothing when off). Name/description
+        // animate in below the bar when tiers are on.
         <>
-          <AnimatePresence initial={false}>
-            {multiEnabled && (
-              <motion.div
-                key="multi-header"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={offeringTransition}
-                className="overflow-hidden"
-              >
-                <div className="pt-6">
-                  <OptionTabs
-                    options={pricingOptions}
-                    activeId={activeOption.id}
-                    onSelect={setActiveId}
-                    onAdd={() => setActiveId(onAddPricingOption())}
-                    onRemove={removeOption}
-                  />
-                  <OptionMetaFields option={activeOption} onChange={(patch) => onUpdatePricingOption(activeOption.id, patch)} />
+          {(multiEnabled || optionData(activeOption).items.length > 0) && (
+            <div className="mt-6">
+              <div className={`flex items-end justify-between gap-4 ${multiEnabled ? "border-b border-gray-stroke" : ""}`}>
+                <div className="min-w-0 flex-1">
+                  {multiEnabled && (
+                    <OptionTabs
+                      options={pricingOptions}
+                      activeId={activeOption.id}
+                      onSelect={setActiveId}
+                      onAdd={() => setActiveId(onAddPricingOption())}
+                      onRemove={removeOption}
+                    />
+                  )}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <div className="mt-6">
+                {/* Enable tiers toggle — sits on the right, toggle trailing the
+                    label. The label carries the tooltip (dotted underline). */}
+                <div className="flex shrink-0 items-center gap-2.5 pb-2.5">
+                  <span className="group relative flex">
+                    <span className={`cursor-help text-[14px] font-medium underline decoration-dotted underline-offset-2 transition-colors ${multiEnabled ? "text-gray-light" : "text-gray-extra-light"}`}>
+                      Enable tiers
+                    </span>
+                    <span role="tooltip" className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 hidden w-max max-w-[260px] rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
+                      Offer varied sets of products at different price points. Buyers pick the one that fits them.
+                    </span>
+                  </span>
+                  <Toggle checked={multiEnabled} onChange={handleToggleMulti} size="sm" />
+                </div>
+              </div>
+              <AnimatePresence initial={false}>
+                {multiEnabled && (
+                  <motion.div
+                    key="multi-meta"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={offeringTransition}
+                    className="overflow-hidden"
+                  >
+                    <OptionMetaFields option={activeOption} onChange={(patch) => onUpdatePricingOption(activeOption.id, patch)} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+          {/* Tighter gap to the product list when the default-view toggle bar is
+              shown; the ON view (and the bar-less empty state) keep roomier
+              spacing. */}
+          <div className={!multiEnabled && optionData(activeOption).items.length > 0 ? "mt-1" : "mt-6"}>
             {renderOptionCard(activeOption)}
           </div>
         </>
