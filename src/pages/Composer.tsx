@@ -81,24 +81,24 @@ const CAPTION_CLIP = {
   id: "clip-cap",
   title: "What's the best way to make my resume stand out?",
   from: "Resume teardown",
-  duration: "0:30",
+  duration: "0:18",
   reason: "Best questions of the session",
   segments: [
     {
       q: "What's the best way to make my resume stand out?",
-      a: "Pick one story and make every bullet earn its place in it. Recruiters skim, so front-load the verbs and cut anything you can't defend out loud.",
+      a: "One story. Every bullet earns its place in it.",
       qAudio: "/audio/clip-q.m4a",
       aAudio: "/audio/clip-a.m4a",
     },
     {
       q: "Is a non-target school a dealbreaker?",
-      a: "No. It just moves your proof of hustle up the page. Lead with outcomes nobody can argue with.",
+      a: "No. Just lead with outcomes nobody can argue with.",
       qAudio: "/audio/clip-q2.m4a",
       aAudio: "/audio/clip-a2.m4a",
     },
     {
       q: "How many bullets should each role get?",
-      a: "Three, maybe four. If everything is important, nothing is. Save the rest for the interview.",
+      a: "Three, max. If everything's important, nothing is.",
       qAudio: "/audio/clip-q3.m4a",
       aAudio: "/audio/clip-a3.m4a",
     },

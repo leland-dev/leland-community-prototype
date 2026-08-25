@@ -2972,7 +2972,7 @@ export function CaptionClip({ segments, className = "" }: { segments: { q: strin
           if (!live()) return;
           setRevealed(true);
           if (soundOn) await audioPlain(sg.aAudio, sg.a.split(" ").length * 105);
-          else await wait(Math.max(1500, sg.a.split(" ").length * 105));
+          else await wait(Math.max(1800, sg.a.split(" ").length * 150));
           if (!live()) return;
           await wait(1100);
         }
@@ -2999,9 +2999,9 @@ export function CaptionClip({ segments, className = "" }: { segments: { q: strin
         key={segIdx}
         className="absolute inset-0"
         style={{ backgroundColor: pal.bg }}
-        initial={{ clipPath: "circle(0% at 8% 6%)" }}
-        animate={{ clipPath: "circle(165% at 8% 6%)" }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ clipPath: "inset(0 100% 0 0)" }}
+        animate={{ clipPath: "inset(0 0% 0 0)" }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       />
       <div className="relative flex h-full flex-col p-6">
         <p className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: pal.fg, opacity: 0.5 }}>Q</p>
@@ -3018,7 +3018,7 @@ export function CaptionClip({ segments, className = "" }: { segments: { q: strin
           transition={{ duration: 0.4, ease: "easeOut" }}
         >
           <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: pal.fg, opacity: 0.5 }}>A</p>
-          <p className="mt-1.5 text-[15px] font-medium leading-[1.5]" style={{ color: pal.fg, opacity: 0.92 }}>{seg.a}</p>
+          <p className="mt-1.5 text-[17px] font-medium leading-[1.45]" style={{ color: pal.fg, opacity: 0.92 }}>{seg.a}</p>
         </motion.div>
       </div>
       {/* The badge breathes while muted, begging for the tap. */}
