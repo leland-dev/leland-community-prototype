@@ -31,52 +31,7 @@ function Countdown({ deadline }: { deadline: number }) {
   const [left, setLeft] = useState(() => Math.max(0, deadline - Date.now()));
   useEffect(() => {
     const t = window.setInterval(() => setLeft(Math.max(0, deadline - Date.now())), 1000);
-    const cta = (
-    <div className="w-full">
-        {!unlocked ? (
-          <>
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              onClick={share}
-              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-yellow text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
-            >
-              <Share size={17} />
-              {sent === 0 ? "Send your first invite" : sent === 1 ? "Send your second invite" : "Send your last invite"}
-            </motion.button>
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-[13px] text-gray-light">
-              <Clock size={14} className="text-gray-dark" />
-              <Countdown deadline={deadline} />
-              to lock in the front of the line
-            </p>
-          </>
-        ) : notified ? (
-          <button
-            onClick={onDone}
-            className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
-          >
-            Done
-          </button>
-        ) : (
-          <>
-            <button
-              onClick={notify}
-              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
-            >
-              <Bell size={17} />
-              Text me when the doors open
-            </button>
-            <button
-              onClick={onDone}
-              className="mt-1 flex h-10 w-full items-center justify-center text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark"
-            >
-              Not now
-            </button>
-          </>
-        )}
-    </div>
-  );
-
-  return () => window.clearInterval(t);
+    return () => window.clearInterval(t);
   }, [deadline]);
   const h = Math.floor(left / 3_600_000);
   const m = Math.floor((left % 3_600_000) / 60_000);
@@ -221,6 +176,51 @@ export default function WaitlistGate({
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.5, delay, ease: EASE },
   });
+
+  const cta = (
+    <div className="w-full">
+        {!unlocked ? (
+          <>
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={share}
+              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-yellow text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
+            >
+              <Share size={17} />
+              {sent === 0 ? "Send your first invite" : sent === 1 ? "Send your second invite" : "Send your last invite"}
+            </motion.button>
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-[13px] text-gray-light">
+              <Clock size={14} className="text-gray-dark" />
+              <Countdown deadline={deadline} />
+              to lock in the front of the line
+            </p>
+          </>
+        ) : notified ? (
+          <button
+            onClick={onDone}
+            className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
+          >
+            Done
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={notify}
+              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
+            >
+              <Bell size={17} />
+              Text me when the doors open
+            </button>
+            <button
+              onClick={onDone}
+              className="mt-1 flex h-10 w-full items-center justify-center text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark"
+            >
+              Not now
+            </button>
+          </>
+        )}
+    </div>
+  );
 
   return (
     <div className="relative flex h-full flex-col">
