@@ -65,12 +65,12 @@ export default function LinkedInConnect({
           initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.8, y: 8 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 280, damping: 20 }}
-          className="mt-4 h-[88px] w-[88px] rounded-[20px] shadow-[0_12px_32px_rgba(10,102,194,0.28)]"
+          className="mx-auto mt-6 h-[88px] w-[88px] rounded-[20px] shadow-[0_12px_32px_rgba(10,102,194,0.28)]"
         />
-        <h2 className="mt-6 text-balance font-serif text-[28px] leading-[1.12] text-gray-dark md:text-[32px]">
+        <h2 className="mt-6 text-balance text-center font-serif text-[28px] leading-[1.12] text-gray-dark md:text-[32px]">
           Bring your LinkedIn with you
         </h2>
-        <p className="mt-2 text-[15px] leading-relaxed text-gray-light">
+        <p className="mx-auto mt-2 max-w-[34ch] text-center text-[15px] leading-relaxed text-gray-light">
           Experts and members see a real profile, not an empty one. Takes five seconds.
         </p>
 
