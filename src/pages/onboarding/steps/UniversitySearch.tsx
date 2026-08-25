@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, Check, Plus, X, ShieldCheck } from "lucide-react";
+import { Search, Check, Plus, X, ShieldCheck, ChevronDown } from "lucide-react";
 
 import { StepHeading } from "./flowUI";
 import type { StudentStatus } from "./StudentStatusStep";
@@ -56,7 +56,7 @@ const COPY: Record<StudentStatus, { title: string; yearTitle: string; years: Gra
   graduated: {
     title: "Where did you go to school?",
     yearTitle: "When did you graduate?",
-    years: [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, "earlier"],
+    years: [...Array.from({ length: 30 }, (_, i) => 2025 - i), "earlier"],
     defaultYear: 2023,
   },
   applying: {
@@ -203,21 +203,20 @@ export default function UniversitySearch({
                 className="mt-8"
               >
                 <h3 className="font-serif text-[22px] leading-tight text-gray-dark">{copy.yearTitle}</h3>
-                <div className="-mx-6 mt-4 flex gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none]">
-                  {copy.years.map((y) => {
-                    const on = y === year;
-                    return (
-                      <button
-                        key={String(y)}
-                        onClick={() => setYear(y)}
-                        className={`shrink-0 rounded-full border px-4 py-2 text-[15px] font-medium transition-colors ${
-                          on ? "border-transparent bg-gray-dark text-white" : "border-gray-stroke bg-white text-gray-dark hover:bg-gray-hover"
-                        }`}
-                      >
+                {/* native select: iOS gets the wheel picker, desktop a dropdown */}
+                <div className="relative mt-4">
+                  <select
+                    value={String(year)}
+                    onChange={(e) => setYear(e.target.value === "earlier" ? "earlier" : Number(e.target.value))}
+                    className="w-full appearance-none rounded-xl border border-gray-stroke bg-white py-3.5 pl-4 pr-11 text-[17px] font-medium text-gray-dark outline-none focus:border-gray-dark/40"
+                  >
+                    {copy.years.map((y) => (
+                      <option key={String(y)} value={String(y)}>
                         {y === "earlier" ? "Earlier" : y}
-                      </button>
-                    );
-                  })}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={18} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-light" />
                 </div>
                 <AnimatePresence mode="wait">
                   <motion.p
