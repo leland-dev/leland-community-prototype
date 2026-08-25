@@ -81,7 +81,7 @@ const CAPTION_CLIP = {
   id: "clip-cap",
   title: "What's the best way to make my resume stand out?",
   from: "Resume teardown",
-  duration: "0:21",
+  duration: "0:30",
   reason: "Best questions of the session",
   segments: [
     {
@@ -95,6 +95,12 @@ const CAPTION_CLIP = {
       a: "No. It just moves your proof of hustle up the page. Lead with outcomes nobody can argue with.",
       qAudio: "/audio/clip-q2.m4a",
       aAudio: "/audio/clip-a2.m4a",
+    },
+    {
+      q: "How many bullets should each role get?",
+      a: "Three, maybe four. If everything is important, nothing is. Save the rest for the interview.",
+      qAudio: "/audio/clip-q3.m4a",
+      aAudio: "/audio/clip-a3.m4a",
     },
   ],
 };

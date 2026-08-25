@@ -2896,19 +2896,25 @@ function CaptionsTicker() {
 export function CaptionClip({ segments, className = "" }: { segments: { q: string; a: string; qAudio: string; aAudio: string }[]; className?: string }) {
   const [segIdx, setSegIdx] = useState(0);
   const [qShown, setQShown] = useState(0);
-  const [aShown, setAShown] = useState(0);
+  const [revealed, setRevealed] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
+  // The layer beneath the paint sweep — trails the active color by one beat.
+  const [baseBg, setBaseBg] = useState("#FFD96F");
   const tokenRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  // Each question gets its own board color; the swap is part of the rhythm.
   const PALETTES = [
     { bg: "#FFD96F", fg: "#111111", badge: "rgba(17,17,17,0.14)" },
-    { bg: "#4F86DB", fg: "#FFFFFF", badge: "rgba(255,255,255,0.28)" },
+    { bg: "#475569", fg: "#FFFFFF", badge: "rgba(255,255,255,0.25)" },
+    { bg: "#AECBFA", fg: "#111111", badge: "rgba(17,17,17,0.14)" },
   ];
   const pal = PALETTES[segIdx % PALETTES.length];
   const seg = segments[segIdx] ?? segments[0];
   const qWords = seg.q.split(" ");
-  const aWords = seg.a.split(" ");
+
+  useEffect(() => {
+    const t = window.setTimeout(() => setBaseBg(pal.bg), 650);
+    return () => clearTimeout(t);
+  }, [pal.bg]);
 
   useEffect(() => {
     const token = ++tokenRef.current;
@@ -2942,25 +2948,33 @@ export function CaptionClip({ segments, className = "" }: { segments: { q: strin
           .then(() => { raf = requestAnimationFrame(step); })
           .catch(() => { silentPhase(n, set, 150).then(res); });
       });
+    const audioPlain = (srcUrl: string, fallbackMs: number) =>
+      new Promise<void>(res => {
+        const audio = new Audio(srcUrl);
+        audioRef.current = audio;
+        audio.onended = () => { if (live()) res(); };
+        audio.play().catch(() => { wait(fallbackMs).then(res); });
+      });
     const run = async () => {
       while (live()) {
         for (let s = 0; s < segments.length; s++) {
           if (!live()) return;
           const sg = segments[s];
           setSegIdx(s);
+          setRevealed(false);
           setQShown(0);
-          setAShown(0);
-          await wait(320);
+          await wait(380);
           if (!live()) return;
           if (soundOn) await audioPhase(sg.qAudio, sg.q.split(" ").length, setQShown);
           else await silentPhase(sg.q.split(" ").length, setQShown, 140);
           if (!live()) return;
-          await wait(200);
+          await wait(650);
           if (!live()) return;
-          if (soundOn) await audioPhase(sg.aAudio, sg.a.split(" ").length, setAShown);
-          else await silentPhase(sg.a.split(" ").length, setAShown, 110);
+          setRevealed(true);
+          if (soundOn) await audioPlain(sg.aAudio, sg.a.split(" ").length * 105);
+          else await wait(Math.max(1500, sg.a.split(" ").length * 105));
           if (!live()) return;
-          await wait(1300);
+          await wait(1100);
         }
       }
     };
@@ -2976,11 +2990,20 @@ export function CaptionClip({ segments, className = "" }: { segments: { q: strin
 
   return (
     <div
-      onClick={e => { e.stopPropagation(); setSoundOn(v => !v); }}
+      onClick={e => { e.stopPropagation(); if (!revealed) setRevealed(true); else setSoundOn(v => !v); }}
       className={`relative cursor-pointer overflow-hidden ${className}`}
-      style={{ backgroundColor: pal.bg, transition: "background-color 450ms ease" }}
+      style={{ backgroundColor: baseBg }}
     >
-      <div className="flex h-full flex-col p-6">
+      {/* Each question's color paints across the board from the corner */}
+      <motion.div
+        key={segIdx}
+        className="absolute inset-0"
+        style={{ backgroundColor: pal.bg }}
+        initial={{ clipPath: "circle(0% at 8% 6%)" }}
+        animate={{ clipPath: "circle(165% at 8% 6%)" }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      />
+      <div className="relative flex h-full flex-col p-6">
         <p className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: pal.fg, opacity: 0.5 }}>Q</p>
         <p className="mt-1.5 min-h-[87px] font-serif text-[22px] leading-[1.3]" style={{ color: pal.fg }}>
           {qWords.slice(0, qShown).map((w, i) => (
@@ -2989,21 +3012,18 @@ export function CaptionClip({ segments, className = "" }: { segments: { q: strin
             </motion.span>
           ))}
         </p>
-        {aShown > 0 ? (
-          <>
-            <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: pal.fg, opacity: 0.5 }}>A</p>
-            <p className="mt-1.5 text-[15px] font-medium leading-[1.5]" style={{ color: pal.fg, opacity: 0.92 }}>
-              {aWords.slice(0, aShown).map((w, i) => (
-                <motion.span key={`${segIdx}-${i}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.14 }} className="inline-block whitespace-pre">
-                  {w}{" "}
-                </motion.span>
-              ))}
-            </p>
-          </>
-        ) : null}
+        {/* The answer sits under blur from the start — tap to reveal early */}
+        <motion.div
+          animate={{ filter: revealed ? "blur(0px)" : "blur(9px)", opacity: revealed ? 1 : 0.5, scale: revealed ? 1 : 1.015 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: pal.fg, opacity: 0.5 }}>A</p>
+          <p className="mt-1.5 text-[15px] font-medium leading-[1.5]" style={{ color: pal.fg, opacity: 0.92 }}>{seg.a}</p>
+        </motion.div>
       </div>
       {/* The badge breathes while muted, begging for the tap. */}
       <motion.div
+        onClick={e => { e.stopPropagation(); setSoundOn(v => !v); }}
         animate={soundOn ? { scale: 1, opacity: 1 } : { scale: [1, 1.14, 1], opacity: [0.6, 1, 0.6] }}
         transition={soundOn ? { duration: 0.2 } : { duration: 1.3, repeat: Infinity, ease: "easeInOut" }}
         className="absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center rounded-full"
