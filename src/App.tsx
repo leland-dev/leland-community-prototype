@@ -46,6 +46,7 @@ import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
 import Messaging from "./pages/Messaging";
 import ConversationDetail from "./pages/ConversationDetail";
+import { LelandThread } from "./components/promo/AppPromo";
 import ConversationRelationship from "./pages/ConversationRelationship";
 import Profile from "./pages/Profile";
 import ProfileV2 from "./pages/ProfileV2";
@@ -135,6 +136,7 @@ export default function App() {
       <Route path="/waitlist-onboarding" element={<WaitlistOnboarding />} />
       <Route path="/reply/:postId" element={<ReplyCompose />} />
       <Route path="/replay/:postId" element={<ReplayViewer />} />
+      <Route path="/messages/leland" element={<LelandThread />} />
       <Route path="/messages/:conversationId" element={<ConversationDetail />} />
       <Route path="/messages/:conversationId/relationship" element={<ConversationRelationship />} />
       <Route path="/content-viewer/:lessonId?/:sectionId?" element={<ContentViewer />} />

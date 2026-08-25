@@ -53,7 +53,7 @@ export default function MobileTopNav() {
     {navTheme.bgGradient && (
       <motion.div
         className="fixed left-0 right-0 top-0 z-30"
-        style={{ height: "env(safe-area-inset-top, 0px)", backgroundColor: navTheme.bg }}
+        style={{ top: "var(--promo-banner-offset, 0px)", borderRadius: "var(--promo-banner-radius, 0px) var(--promo-banner-radius, 0px) 0 0", transition: "top 600ms cubic-bezier(0.45,0,0.25,1), border-radius 600ms cubic-bezier(0.45,0,0.25,1)", height: "env(safe-area-inset-top, 0px)", backgroundColor: navTheme.bg }}
         initial={slideIn ? { x: "100%" } : false}
         animate={{ x: 0 }}
         transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
@@ -71,6 +71,9 @@ export default function MobileTopNav() {
             : ""
       }`}
       style={{
+        top: "var(--promo-banner-offset, 0px)",
+        borderRadius: "var(--promo-banner-radius, 0px) var(--promo-banner-radius, 0px) 0 0",
+        transition: "top 600ms cubic-bezier(0.45,0,0.25,1), border-radius 600ms cubic-bezier(0.45,0,0.25,1), background 200ms ease, box-shadow 200ms ease",
         background: darkNav
           ? "#111111"
           : navTheme.scrollReveal && scrolled

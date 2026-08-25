@@ -2,6 +2,14 @@ import { motion } from "motion/react";
 import { useNavigationType } from "react-router-dom";
 import ConversationListItem from "../components/ConversationListItem";
 import { conversations } from "../lib/conversations";
+import {
+  AppPromoCallout,
+  AppPromoTakeover,
+  AppPromoPushToast,
+  AppPromoToast,
+  LelandConversationRow,
+  PromoTogglePanel,
+} from "../components/promo/AppPromo";
 
 export default function Messaging() {
   const navigationType = useNavigationType();
@@ -12,6 +20,7 @@ export default function Messaging() {
       animate={{ x: 0 }}
       transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
     >
+      <AppPromoPushToast className="-mt-2 mb-6" />
       <h1 className="font-serif text-[36px] font-medium text-gray-dark">Messages</h1>
       <p className="mt-2 text-[16px] text-gray-light">
         Your conversations with experts and peers.
@@ -26,12 +35,22 @@ export default function Messaging() {
         />
       </div>
 
+      {/* App promo: inline callout */}
+      <div className="mt-4">
+        <AppPromoCallout />
+      </div>
+
       {/* Conversation list */}
       <div className="mt-4">
+        <LelandConversationRow />
         {conversations.map((conversation) => (
           <ConversationListItem key={conversation.id} conversation={conversation} />
         ))}
       </div>
+
+      <PromoTogglePanel options={["modal", "toast", "push", "callout", "message"]} />
+      <AppPromoTakeover />
+      <AppPromoToast />
     </motion.div>
   );
 }

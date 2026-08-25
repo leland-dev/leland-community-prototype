@@ -159,9 +159,15 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   // Safari is picky: we update the existing tag's content in-place, then
   // force a re-parse by briefly removing and re-appending it.
   useEffect(() => {
-    const color = sidebarOpen
-      ? "#f5f5f5"
-      : navTheme.themeColor ?? (navTheme.bg === "white" || navTheme.bg === "transparent" ? "#ffffff" : navTheme.bg);
+    // The app-promo smart banner owns the status bar while it's up.
+    const bannerUp =
+      document.documentElement.style.getPropertyValue("--promo-banner-offset").trim() !== "" &&
+      document.documentElement.style.getPropertyValue("--promo-banner-offset").trim() !== "0px";
+    const color = bannerUp
+      ? "#000000"
+      : sidebarOpen
+        ? "#f5f5f5"
+        : navTheme.themeColor ?? (navTheme.bg === "white" || navTheme.bg === "transparent" ? "#ffffff" : navTheme.bg);
 
     let meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
     if (!meta) {
