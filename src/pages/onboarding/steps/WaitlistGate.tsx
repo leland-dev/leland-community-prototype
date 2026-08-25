@@ -210,7 +210,7 @@ export default function WaitlistGate({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -12 }}
                   transition={{ duration: 0.35 }}
-                  className="mt-1 font-serif text-[72px] leading-none text-gray-dark"
+                  className="mt-1 font-serif text-[68px] leading-none text-gray-dark"
                 >
                   #{spot}
                 </motion.h1>
@@ -219,26 +219,19 @@ export default function WaitlistGate({
               <motion.div {...rise(0.15)} className="mt-7">
                 <InviteRing n={sent} />
               </motion.div>
-              <motion.h2 {...rise(0.25)} className="mt-5 font-serif text-[24px] leading-tight text-gray-dark">
-                Invite 3 to skip the line
-              </motion.h2>
-              <motion.p {...rise(0.32)} className="mt-1.5 max-w-[30ch] text-[14.5px] leading-relaxed text-gray-light">
+              <motion.h2 {...rise(0.25)} className="mt-4 font-serif text-[20px] leading-tight text-gray-dark">
                 {sent === 0
-                  ? "Anyone counts — friends, classmates, coworkers. Each one moves you up."
+                  ? "Invite 3 to skip the line"
                   : sent === 1
                     ? `You jumped ${SPOT_LADDER[0] - SPOT_LADDER[1]} spots. Two more.`
                     : "One more and you're first through the door."}
-              </motion.p>
+              </motion.h2>
             </>
           )}
         </div>
 
         {/* ── below the fold: the line ── */}
-        <motion.div {...rise(0.45)} className="mt-12">
-          <div className="mb-3 flex items-end justify-between">
-            <h3 className="font-serif text-[22px] leading-tight text-gray-dark">The line</h3>
-            <p className="text-[13px] text-gray-light">{unlocked ? "You're first" : `${spot - 1} ahead of you`}</p>
-          </div>
+        <motion.div {...rise(0.45)} className="mt-8">
           <LineList spot={spot} you={you} />
         </motion.div>
       </div>
