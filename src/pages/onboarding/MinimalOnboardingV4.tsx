@@ -17,7 +17,6 @@ import StudentStatusStep, { type StudentStatus } from "./steps/StudentStatusStep
 import UniversitySearch, { type SchoolAnswer } from "./steps/UniversitySearch";
 import SchoolProof from "./steps/SchoolProof";
 import LinkedInConnect, { type LinkedInProfile } from "./steps/LinkedInConnect";
-import ProfileSetup from "./steps/ProfileSetup";
 import ApplicationReview from "./steps/ApplicationReview";
 import AccessExplainer from "./steps/AccessExplainer";
 import WaitlistGate from "./steps/WaitlistGate";
@@ -28,7 +27,7 @@ import foundPhoto from "../../assets/profile photos/pic-1.png";
  *
  *   Ambition   — goal → category → "experts are here for you" (adaptive)
  *   Credential — situation → student status → university + grad year →
- *                "{School} is on Leland" → connect LinkedIn (or photo)
+ *                "{School} is on Leland" → connect LinkedIn (skippable)
  *   The gate   — "reviewing your application" → pre-approved (the pass) →
  *                how access works → waitlist: invite 3 in 24h to skip the
  *                line, with the blurred line itself below the fold
@@ -61,7 +60,6 @@ type Stage =
   | "school"
   | "schoolproof"
   | "linkedin"
-  | "photo"
   | "review"
   | "access"
   | "gate";
@@ -125,7 +123,6 @@ export default function MinimalOnboardingV4() {
     school: "student",
     schoolproof: "school",
     linkedin: hasProof ? "schoolproof" : "school",
-    photo: "linkedin",
   };
   const STEP_SKIP: Partial<Record<Stage, Stage>> = {
     goal: "category",
@@ -134,8 +131,7 @@ export default function MinimalOnboardingV4() {
     situation: "student",
     student: "school",
     schoolproof: "linkedin",
-    linkedin: "photo",
-    photo: "review",
+    linkedin: "review",
   };
   const STEP_INDEX: Partial<Record<Stage, number>> = {
     goal: 1,
@@ -144,13 +140,10 @@ export default function MinimalOnboardingV4() {
     student: 4,
     school: 5,
     linkedin: 6,
-    photo: 6,
   };
 
   const chrome =
-    stage === "photo" && intent === "login"
-      ? { onBack: () => setStage("signin"), onSkip: () => navigate("/"), step: undefined }
-      : STEP_BACK[stage] !== undefined
+    STEP_BACK[stage] !== undefined
         ? {
             onBack: () => setStage(STEP_BACK[stage]!),
             onSkip: STEP_SKIP[stage] ? () => setStage(STEP_SKIP[stage]!) : undefined,
@@ -233,7 +226,7 @@ export default function MinimalOnboardingV4() {
                   cohortName="the Leland community"
                   onBack={() => setStage("opener")}
                   onExit={exit}
-                  onNext={() => setStage(intent === "login" ? "photo" : "goal")}
+                  onNext={() => (intent === "login" ? navigate("/") : setStage("goal"))}
                   primary="phone"
                 />,
               )
@@ -318,14 +311,6 @@ export default function MinimalOnboardingV4() {
                     setLinkedin(p);
                     setStage("review");
                   }}
-                />,
-              )
-            ) : stage === "photo" ? (
-              screen("photo",
-                <ProfileSetup
-                  oauthPhoto={intent === "login"}
-                  onContinue={() => (intent === "login" ? navigate("/") : setStage("review"))}
-                  onSkip={() => (intent === "login" ? navigate("/") : setStage("review"))}
                 />,
               )
             ) : stage === "review" && reviewInput ? (
