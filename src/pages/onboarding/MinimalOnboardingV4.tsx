@@ -21,7 +21,6 @@ import ProfileSetup from "./steps/ProfileSetup";
 import ApplicationReview from "./steps/ApplicationReview";
 import AccessExplainer from "./steps/AccessExplainer";
 import WaitlistGate from "./steps/WaitlistGate";
-import LineLeaderboard from "./steps/LineLeaderboard";
 import foundPhoto from "../../assets/profile photos/pic-1.png";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -32,7 +31,7 @@ import foundPhoto from "../../assets/profile photos/pic-1.png";
  *                "{School} is on Leland" → connect LinkedIn (or photo)
  *   The gate   — "reviewing your application" → pre-approved (the pass) →
  *                how access works → waitlist: invite 3 in 24h to skip the
- *                line (+ a blurred leaderboard of who's in line)
+ *                line, with the blurred line itself below the fold
  *
  * It's a dead end on purpose: the doors aren't open yet, and the whole flow
  * builds toward wanting in badly enough to bring three peers.
@@ -65,8 +64,7 @@ type Stage =
   | "photo"
   | "review"
   | "access"
-  | "gate"
-  | "line";
+  | "gate";
 
 const rise = {
   initial: (reduced: boolean) => (reduced ? { opacity: 0 } : { opacity: 0, y: 40 }),
@@ -342,20 +340,12 @@ export default function MinimalOnboardingV4() {
                   onContinue={() => setStage("gate")}
                 />,
               )
-            ) : stage === "gate" && school ? (
+            ) : school ? (
               screen("gate",
                 <WaitlistGate
                   sent={invitesSent}
                   onSent={() => setInvitesSent((n) => Math.min(n + 1, 3))}
                   category={primaryCategory}
-                  onSeeLine={() => setStage("line")}
-                  onDone={() => navigate("/")}
-                />,
-              )
-            ) : stage === "line" && school ? (
-              screen("line",
-                <LineLeaderboard
-                  sent={invitesSent}
                   you={{
                     name: linkedin?.name ?? "June Allen",
                     aff: `${school.school.replace(/^University of /, "").replace(/ University$/, "").replace(/ College$/, "")} · ${
@@ -363,8 +353,7 @@ export default function MinimalOnboardingV4() {
                     }`,
                     avatar: linkedin?.photo ?? foundPhoto,
                   }}
-                  onBack={() => setStage("gate")}
-                  onInvite={() => setStage("gate")}
+                  onDone={() => navigate("/")}
                 />,
               )
             ) : (

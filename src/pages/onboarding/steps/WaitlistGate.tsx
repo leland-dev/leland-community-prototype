@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Check, Bell, Share, Ticket, ChevronRight, Clock } from "lucide-react";
+import { Check, Bell, Share, Clock } from "lucide-react";
 
 import { ShareSheet } from "../../waitlist/Waitlist";
+import LineList from "./LineLeaderboard";
 
 /* ─────────────────────────────────────────────────────────────────────────
- * WaitlistGate (v4) — the dead end, centered on one thing: 0/3 invites.
+ * WaitlistGate (v4) — the dead end, one scrollable screen:
  *
- *  · Spot in line (ladders down with each invite)
- *  · A three-segment progress bar — the whole screen is about filling it
- *  · 24-hour clock: three invites before it runs out locks the front spot
- *  · "See who's in line" → the leaderboard (separate screen)
+ *  · Spot in line + a circular 0/3 invite ring (three milestone dots, a
+ *    bubble that travels as invites go out)
+ *  · The line itself below the fold — blurred faces/names, crisp affiliations
+ *  · Opaque bottom sheet: the invite CTA with the 24h clock right under it
  *  · At 3: front of the line → text-me-when-the-doors-open
  * ──────────────────────────────────────────────────────────────────────── */
 
@@ -35,24 +36,85 @@ function useCountdown(deadline: number) {
   return `${pad(h)}:${pad(m)}:${pad(s)}`;
 }
 
+/* ── the ring: track, progress arc, three milestone dots, a travelling bubble ── */
+function InviteRing({ n, size = 148 }: { n: number; size?: number }) {
+  const stroke = 10;
+  const r = (size - stroke) / 2 - 6; // leave room for the bubble
+  const cx = size / 2;
+  const c = 2 * Math.PI * r;
+  const frac = n / 3;
+  const pt = (f: number) => {
+    const a = -Math.PI / 2 + f * 2 * Math.PI;
+    return { x: cx + r * Math.cos(a), y: cx + r * Math.sin(a) };
+  };
+  const bubble = pt(frac);
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={cx} cy={cx} r={r} fill="none" stroke="#ececec" strokeWidth={stroke} />
+        <motion.circle
+          cx={cx}
+          cy={cx}
+          r={r}
+          fill="none"
+          stroke="#FFD96F"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={c}
+          initial={false}
+          animate={{ strokeDashoffset: c * (1 - frac) }}
+          transition={{ duration: 0.7, ease: EASE }}
+          style={{ transform: "rotate(-90deg)", transformOrigin: "center" }}
+        />
+        {/* milestone dots at 1/3, 2/3, 3/3 */}
+        {[1, 2, 3].map((k) => {
+          const p = pt(k / 3);
+          const reached = n >= k;
+          return (
+            <motion.circle
+              key={k}
+              cx={p.x}
+              cy={p.y}
+              r={reached ? 6 : 5}
+              initial={false}
+              animate={{ fill: reached ? "#222222" : "#ffffff", stroke: reached ? "#222222" : "#d9d9d9" }}
+              transition={{ duration: 0.3 }}
+              strokeWidth={2}
+            />
+          );
+        })}
+        {/* the bubble: sits at the start for 0/3, travels the arc as invites go out */}
+        <motion.g initial={false} animate={{ x: bubble.x - cx, y: bubble.y - cx }} transition={{ duration: 0.7, ease: EASE }}>
+          <circle cx={cx} cy={cx} r={11} fill="#222222" stroke="#ffffff" strokeWidth={3} />
+          <circle cx={cx} cy={cx} r={3.5} fill="#FFD96F" />
+        </motion.g>
+      </svg>
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+        <span className="font-serif text-[34px] leading-none text-gray-dark">
+          {n}<span className="text-[18px] text-gray-light">/3</span>
+        </span>
+        <span className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-light">invites</span>
+      </div>
+    </div>
+  );
+}
+
 export default function WaitlistGate({
   sent,
   onSent,
   category,
-  onSeeLine,
+  you,
   onDone,
 }: {
   sent: number;
   onSent: () => void;
   category: string;
-  onSeeLine: () => void;
+  you: { name: string; aff: string; avatar?: string };
   onDone: () => void;
 }) {
   const reduced = useReducedMotion() ?? false;
   const [sharing, setSharing] = useState(false);
   const [notified, setNotified] = useState(false);
-  // clock starts the first time the gate mounts, then persists across the
-  // leaderboard round-trip
   const [deadline] = useState(() => {
     const k = "leland-v4-gate-deadline";
     try {
@@ -111,8 +173,9 @@ export default function WaitlistGate({
 
   return (
     <div className="relative flex h-full flex-col">
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 pb-44 pt-[max(1.5rem,env(safe-area-inset-top))] text-center">
-        <AnimatePresence mode="wait">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-44 pt-[max(1.5rem,env(safe-area-inset-top))]">
+        {/* ── above the fold: spot + ring ── */}
+        <div className="flex flex-col items-center text-center">
           {unlocked ? (
             <motion.div key="front" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex flex-col items-center">
               <motion.span
@@ -131,8 +194,7 @@ export default function WaitlistGate({
               </p>
             </motion.div>
           ) : (
-            <motion.div key="waiting" className="flex w-full flex-col items-center">
-              {/* spot */}
+            <>
               <motion.p {...rise(0)} className="text-[12px] font-semibold uppercase tracking-[0.14em] text-gray-light">
                 Your spot in line
               </motion.p>
@@ -143,87 +205,61 @@ export default function WaitlistGate({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -12 }}
                   transition={{ duration: 0.35 }}
-                  className="mt-1 font-serif text-[80px] leading-none text-gray-dark"
+                  className="mt-1 font-serif text-[72px] leading-none text-gray-dark"
                 >
                   #{spot}
                 </motion.h1>
               </AnimatePresence>
 
-              {/* progress — the center of the screen */}
-              <motion.div {...rise(0.15)} className="mt-9 w-full">
-                <div className="flex items-end justify-between">
-                  <p className="text-[16px] font-semibold text-gray-dark">Invite 3 to skip the line</p>
-                  <p className="font-serif text-[22px] leading-none text-gray-dark">
-                    {sent}<span className="text-[14px] text-gray-light">/3</span>
-                  </p>
-                </div>
-                <div className="mt-3 flex gap-1.5">
-                  {[0, 1, 2].map((i) => (
-                    <div key={i} className="relative h-3 flex-1 overflow-hidden rounded-full bg-gray-stroke">
-                      <motion.div
-                        initial={false}
-                        animate={{ width: i < sent ? "100%" : "0%" }}
-                        transition={{ duration: 0.6, ease: EASE, delay: i < sent ? 0.05 : 0 }}
-                        className="absolute inset-y-0 left-0 rounded-full bg-yellow"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-2.5 flex gap-1.5">
-                  {[0, 1, 2].map((i) => (
-                    <div key={i} className="flex flex-1 items-center justify-center gap-1 text-[12px] font-medium">
-                      <Ticket size={13} className={i < sent ? "text-gray-dark" : "text-gray-xlight"} />
-                      <span className={i < sent ? "text-gray-dark" : "text-gray-xlight"}>
-                        {i < sent ? "Sent" : `→ #${SPOT_LADDER[i + 1]}`}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+              <motion.div {...rise(0.15)} className="mt-7">
+                <InviteRing n={sent} />
               </motion.div>
-
-              {/* 24h clock */}
-              <motion.div {...rise(0.3)} className="mt-6 flex w-full items-center gap-3 rounded-2xl bg-gray-hover px-4 py-3 text-left">
-                <Clock size={18} className="shrink-0 text-gray-dark" />
-                <p className="min-w-0 flex-1 text-[13.5px] leading-snug text-gray-dark">
-                  Send all 3 in the next{" "}
-                  <span className="font-mono font-semibold tabular-nums">{clock}</span> and we lock you in at the front.
-                </p>
-              </motion.div>
-
-              {/* leaderboard link */}
-              <motion.button
-                {...rise(0.42)}
-                onClick={onSeeLine}
-                className="mt-5 flex items-center gap-1 text-[14px] font-medium text-gray-dark underline decoration-gray-stroke underline-offset-4 transition-colors hover:decoration-gray-dark"
-              >
-                See who's in line
-                <ChevronRight size={15} />
-              </motion.button>
-            </motion.div>
+              <motion.h2 {...rise(0.25)} className="mt-5 font-serif text-[24px] leading-tight text-gray-dark">
+                Invite 3 to skip the line
+              </motion.h2>
+              <motion.p {...rise(0.32)} className="mt-1.5 max-w-[30ch] text-[14.5px] leading-relaxed text-gray-light">
+                {sent === 0
+                  ? "Anyone counts — friends, classmates, coworkers. Each one moves you up."
+                  : sent === 1
+                    ? `You jumped ${SPOT_LADDER[0] - SPOT_LADDER[1]} spots. Two more.`
+                    : "One more and you're first through the door."}
+              </motion.p>
+            </>
           )}
-        </AnimatePresence>
+        </div>
+
+        {/* ── below the fold: the line ── */}
+        <motion.div {...rise(0.45)} className="mt-12">
+          <div className="mb-3 flex items-end justify-between">
+            <h3 className="font-serif text-[22px] leading-tight text-gray-dark">The line</h3>
+            <p className="text-[13px] text-gray-light">{unlocked ? "You're first" : `${spot - 1} ahead of you`}</p>
+          </div>
+          <LineList spot={spot} you={you} />
+        </motion.div>
       </div>
 
-      {/* bottom CTA */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[440px] bg-gradient-to-t from-white via-white/95 to-transparent px-6 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+1rem)] pt-8">
+      {/* ── bottom sheet: opaque, CTA + the clock right under it ── */}
+      <div className="absolute inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[440px] rounded-t-[24px] border-t border-gray-stroke bg-white px-6 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+0.75rem)] pt-4 shadow-[0_-12px_32px_rgba(0,0,0,0.06)]">
         {!unlocked ? (
           <>
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={share}
-              className="pointer-events-auto flex h-14 w-full items-center justify-center gap-2 rounded-full bg-yellow text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
+              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-yellow text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
             >
               <Share size={17} />
               {sent === 0 ? "Send your first invite" : sent === 1 ? "Send your second invite" : "Send your last invite"}
             </motion.button>
-            <p className="pointer-events-auto mt-2.5 text-center text-[12px] text-gray-xlight">
-              Anyone counts — friends, classmates, coworkers.
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-[13px] text-gray-light">
+              <Clock size={14} className="text-gray-dark" />
+              <span className="font-mono font-semibold tabular-nums text-gray-dark">{clock}</span>
+              to lock in the front of the line
             </p>
           </>
         ) : notified ? (
           <button
             onClick={onDone}
-            className="pointer-events-auto flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
+            className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
           >
             Done
           </button>
@@ -231,16 +267,16 @@ export default function WaitlistGate({
           <>
             <button
               onClick={notify}
-              className="pointer-events-auto flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
+              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
             >
               <Bell size={17} />
               Text me when the doors open
             </button>
             <button
-              onClick={onSeeLine}
-              className="pointer-events-auto mt-2 flex h-11 w-full items-center justify-center text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark"
+              onClick={onDone}
+              className="mt-1 flex h-10 w-full items-center justify-center text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark"
             >
-              See who's in line
+              Not now
             </button>
           </>
         )}
