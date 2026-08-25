@@ -77,7 +77,7 @@ export default function MinimalOnboardingV4() {
   const [stage, setStage] = useState<Stage>("loading");
   const [logoRevealed, setLogoRevealed] = useState(false);
   // "signup" = full Get-started flow; "login" = short returning-user path
-  // (auth → profile photo → home).
+  // (auth → home).
   const [intent, setIntent] = useState<"signup" | "login">("signup");
 
   // answers
