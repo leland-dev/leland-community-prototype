@@ -24,7 +24,9 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
-function useCountdown(deadline: number) {
+/* Owns the 1s interval so the ticks re-render only this span, not the whole
+   gate (which would remount the line list and replay its animations). */
+function Countdown({ deadline }: { deadline: number }) {
   const [left, setLeft] = useState(() => Math.max(0, deadline - Date.now()));
   useEffect(() => {
     const t = window.setInterval(() => setLeft(Math.max(0, deadline - Date.now())), 1000);
@@ -32,8 +34,12 @@ function useCountdown(deadline: number) {
   }, [deadline]);
   const h = Math.floor(left / 3_600_000);
   const m = Math.floor((left % 3_600_000) / 60_000);
-  const s = Math.floor((left % 60_000) / 1000);
-  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  const sec = Math.floor((left % 60_000) / 1000);
+  return (
+    <span className="font-mono font-semibold tabular-nums text-gray-dark">
+      {pad(h)}:{pad(m)}:{pad(sec)}
+    </span>
+  );
 }
 
 /* ── the ring: track, progress arc, three milestone dots, a travelling bubble ── */
@@ -127,7 +133,6 @@ export default function WaitlistGate({
       return Date.now() + WINDOW_MS;
     }
   });
-  const clock = useCountdown(deadline);
 
   const unlocked = sent >= 3;
   const spot = SPOT_LADDER[Math.min(sent, 3)];
@@ -252,7 +257,7 @@ export default function WaitlistGate({
             </motion.button>
             <p className="mt-3 flex items-center justify-center gap-1.5 text-[13px] text-gray-light">
               <Clock size={14} className="text-gray-dark" />
-              <span className="font-mono font-semibold tabular-nums text-gray-dark">{clock}</span>
+              <Countdown deadline={deadline} />
               to lock in the front of the line
             </p>
           </>

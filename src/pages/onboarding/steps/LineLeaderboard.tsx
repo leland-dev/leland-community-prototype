@@ -33,18 +33,23 @@ function row(pos: number): LineRow {
   };
 }
 
-export default function LineList({ spot, you }: { spot: number; you: { name: string; aff: string; avatar?: string } }) {
-  const reduced = useReducedMotion() ?? false;
-  const front = spot === 1;
-
-  // top of the line, a gap, then the rows around you
-  const rows = useMemo(() => {
-    const top = [1, 2, 3, 4, 5, 6].filter((p) => p !== spot).map(row);
-    const around = [spot - 2, spot - 1, spot + 1, spot + 2, spot + 3].filter((p) => p > 6).map(row);
-    return { top, around };
-  }, [spot]);
-
-  const Row = ({ r, blurred = true, highlight = false, delay = 0 }: { r: LineRow; blurred?: boolean; highlight?: boolean; delay?: number }) => (
+/* Module-scope so React keeps the same component type across renders — a
+   Row declared inside LineList would remount (and replay its entrance) on
+   every parent re-render. */
+function Row({
+  r,
+  reduced,
+  blurred = true,
+  highlight = false,
+  delay = 0,
+}: {
+  r: LineRow;
+  reduced: boolean;
+  blurred?: boolean;
+  highlight?: boolean;
+  delay?: number;
+}) {
+  return (
     <motion.div
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -70,14 +75,26 @@ export default function LineList({ spot, you }: { spot: number; you: { name: str
       ) : null}
     </motion.div>
   );
+}
+
+export default function LineList({ spot, you }: { spot: number; you: { name: string; aff: string; avatar?: string } }) {
+  const reduced = useReducedMotion() ?? false;
+  const front = spot === 1;
+
+  // top of the line, a gap, then the rows around you
+  const rows = useMemo(() => {
+    const top = [1, 2, 3, 4, 5, 6].filter((p) => p !== spot).map(row);
+    const around = [spot - 2, spot - 1, spot + 1, spot + 2, spot + 3].filter((p) => p > 6).map(row);
+    return { top, around };
+  }, [spot]);
 
   const youRow: LineRow = { pos: spot, name: you.name, aff: you.aff, avatar: you.avatar };
 
   return (
     <div className="flex flex-col">
-      {front ? <Row r={youRow} blurred={false} highlight /> : null}
+      {front ? <Row r={youRow} reduced={reduced} blurred={false} highlight /> : null}
       {rows.top.map((r, i) => (
-        <Row key={r.pos} r={r} delay={0.05 + i * 0.04} />
+        <Row key={r.pos} r={r} reduced={reduced} delay={0.05 + i * 0.04} />
       ))}
       {!front ? (
         <>
@@ -86,11 +103,11 @@ export default function LineList({ spot, you }: { spot: number; you: { name: str
             {spot - 7 > 0 ? `${spot - 7} more` : ""}
           </div>
           {rows.around.filter((r) => r.pos < spot).map((r, i) => (
-            <Row key={r.pos} r={r} delay={0.3 + i * 0.04} />
+            <Row key={r.pos} r={r} reduced={reduced} delay={0.3 + i * 0.04} />
           ))}
-          <Row r={youRow} blurred={false} highlight delay={0.4} />
+          <Row r={youRow} reduced={reduced} blurred={false} highlight delay={0.4} />
           {rows.around.filter((r) => r.pos > spot).map((r, i) => (
-            <Row key={r.pos} r={r} delay={0.45 + i * 0.04} />
+            <Row key={r.pos} r={r} reduced={reduced} delay={0.45 + i * 0.04} />
           ))}
         </>
       ) : null}
