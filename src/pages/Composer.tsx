@@ -81,13 +81,23 @@ const CAPTION_CLIP = {
   id: "clip-cap",
   title: "What's the best way to make my resume stand out?",
   from: "Resume teardown",
-  duration: "0:13",
-  reason: "Best question of the session",
-  q: "What's the best way to make my resume stand out?",
-  a: "Pick one story and make every bullet earn its place in it. Recruiters skim — front-load the verbs and cut anything you can't defend out loud.",
-  qAudio: "/audio/clip-q.m4a",
-  aAudio: "/audio/clip-a.m4a",
-} as const;
+  duration: "0:21",
+  reason: "Best questions of the session",
+  segments: [
+    {
+      q: "What's the best way to make my resume stand out?",
+      a: "Pick one story and make every bullet earn its place in it. Recruiters skim, so front-load the verbs and cut anything you can't defend out loud.",
+      qAudio: "/audio/clip-q.m4a",
+      aAudio: "/audio/clip-a.m4a",
+    },
+    {
+      q: "Is a non-target school a dealbreaker?",
+      a: "No. It just moves your proof of hustle up the page. Lead with outcomes nobody can argue with.",
+      qAudio: "/audio/clip-q2.m4a",
+      aAudio: "/audio/clip-a2.m4a",
+    },
+  ],
+};
 
 // Each clip is anchored on the question that was asked — an LLM reads the
 // transcript and picks the moments worth posting; `reason` says why.
@@ -710,7 +720,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
           replay: true,
           duration: CAPTION_CLIP.duration,
           horizontal: true,
-          captionCard: { q: CAPTION_CLIP.q, a: CAPTION_CLIP.a, qAudio: CAPTION_CLIP.qAudio, aAudio: CAPTION_CLIP.aAudio },
+          captionCard: CAPTION_CLIP.segments,
         },
       };
     }
@@ -1356,7 +1366,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                         <div className="flex gap-3.5">
                           <div className="relative h-[124px] w-[88px] shrink-0 overflow-hidden rounded-xl bg-[#FFD96F] p-2.5">
                             <p className="text-[8px] font-bold uppercase tracking-[0.1em] text-[#111]/45">Q</p>
-                            <p className="mt-0.5 font-serif text-[11px] leading-[1.35] text-[#111]">{CAPTION_CLIP.q}</p>
+                            <p className="mt-0.5 font-serif text-[11px] leading-[1.35] text-[#111]">{CAPTION_CLIP.segments[0].q}</p>
                             <span className="absolute bottom-1.5 left-1.5 rounded bg-black/70 px-1 py-0.5 text-[10px] font-semibold text-white">{CAPTION_CLIP.duration}</span>
                           </div>
                           <div className="flex min-w-0 flex-1 flex-col">
@@ -1880,7 +1890,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                   />
                   {captionSel ? (
                     <div className="mt-3 w-[290px] overflow-hidden rounded-xl">
-                      <CaptionClip q={CAPTION_CLIP.q} a={CAPTION_CLIP.a} qAudio={CAPTION_CLIP.qAudio} aAudio={CAPTION_CLIP.aAudio} className="aspect-[4/5] w-full" />
+                      <CaptionClip segments={CAPTION_CLIP.segments} className="aspect-[4/5] w-full" />
                     </div>
                   ) : clip || cropAspect === "9:16" ? (
                     <div className="relative mt-3 w-[230px] overflow-hidden rounded-xl bg-black">

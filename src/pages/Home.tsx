@@ -220,7 +220,7 @@ interface LivePost extends PostBase {
     peakViewers?: number;
     // LLM-composed caption clip: animated Q&A type over brand yellow with the
     // real session audio — no footage of the host needed.
-    captionCard?: { q: string; a: string; qAudio: string; aAudio: string };
+    captionCard?: { q: string; a: string; qAudio: string; aAudio: string }[];
     // Crop chosen in the composer: card ratio + the user's framing pan.
     cropAspect?: "Original" | "16:9" | "1:1" | "4:5" | "9:16";
     cropX?: number;
@@ -2893,14 +2893,22 @@ function CaptionsTicker() {
 // Animated Q&A clip: words trickle in over brand yellow. Silent by default
 // (autoplay-safe); tapping toggles the real audio, whose clock then drives the
 // word timing so type lands with the voice.
-export function CaptionClip({ q, a, qAudio, aAudio, className = "" }: { q: string; a: string; qAudio: string; aAudio: string; className?: string }) {
-  const qWords = q.split(" ");
-  const aWords = a.split(" ");
+export function CaptionClip({ segments, className = "" }: { segments: { q: string; a: string; qAudio: string; aAudio: string }[]; className?: string }) {
+  const [segIdx, setSegIdx] = useState(0);
   const [qShown, setQShown] = useState(0);
   const [aShown, setAShown] = useState(0);
   const [soundOn, setSoundOn] = useState(false);
   const tokenRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Each question gets its own board color; the swap is part of the rhythm.
+  const PALETTES = [
+    { bg: "#FFD96F", fg: "#111111", badge: "rgba(17,17,17,0.14)" },
+    { bg: "#4F86DB", fg: "#FFFFFF", badge: "rgba(255,255,255,0.28)" },
+  ];
+  const pal = PALETTES[segIdx % PALETTES.length];
+  const seg = segments[segIdx] ?? segments[0];
+  const qWords = seg.q.split(" ");
+  const aWords = seg.a.split(" ");
 
   useEffect(() => {
     const token = ++tokenRef.current;
@@ -2932,23 +2940,28 @@ export function CaptionClip({ q, a, qAudio, aAudio, className = "" }: { q: strin
         audio.onended = () => { if (live()) { set(n); res(); } };
         audio.play()
           .then(() => { raf = requestAnimationFrame(step); })
-          .catch(() => { silentPhase(n, set, 300).then(res); });
+          .catch(() => { silentPhase(n, set, 150).then(res); });
       });
     const run = async () => {
       while (live()) {
-        setQShown(0);
-        setAShown(0);
-        await wait(500);
-        if (!live()) return;
-        if (soundOn) await audioPhase(qAudio, qWords.length, setQShown);
-        else await silentPhase(qWords.length, setQShown, 300);
-        if (!live()) return;
-        await wait(350);
-        if (!live()) return;
-        if (soundOn) await audioPhase(aAudio, aWords.length, setAShown);
-        else await silentPhase(aWords.length, setAShown, 240);
-        if (!live()) return;
-        await wait(2000);
+        for (let s = 0; s < segments.length; s++) {
+          if (!live()) return;
+          const sg = segments[s];
+          setSegIdx(s);
+          setQShown(0);
+          setAShown(0);
+          await wait(320);
+          if (!live()) return;
+          if (soundOn) await audioPhase(sg.qAudio, sg.q.split(" ").length, setQShown);
+          else await silentPhase(sg.q.split(" ").length, setQShown, 140);
+          if (!live()) return;
+          await wait(200);
+          if (!live()) return;
+          if (soundOn) await audioPhase(sg.aAudio, sg.a.split(" ").length, setAShown);
+          else await silentPhase(sg.a.split(" ").length, setAShown, 110);
+          if (!live()) return;
+          await wait(1300);
+        }
       }
     };
     run();
@@ -2959,28 +2972,29 @@ export function CaptionClip({ q, a, qAudio, aAudio, className = "" }: { q: strin
       audioRef.current?.pause();
       audioRef.current = null;
     };
-  }, [soundOn, q, a, qAudio, aAudio, qWords.length, aWords.length]);
+  }, [soundOn, segments]);
 
   return (
     <div
       onClick={e => { e.stopPropagation(); setSoundOn(v => !v); }}
-      className={`relative cursor-pointer overflow-hidden bg-[#FFD96F] ${className}`}
+      className={`relative cursor-pointer overflow-hidden ${className}`}
+      style={{ backgroundColor: pal.bg, transition: "background-color 450ms ease" }}
     >
       <div className="flex h-full flex-col p-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#111]/45">Q</p>
-        <p className="mt-1.5 min-h-[87px] font-serif text-[22px] leading-[1.3] text-[#111]">
+        <p className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: pal.fg, opacity: 0.5 }}>Q</p>
+        <p className="mt-1.5 min-h-[87px] font-serif text-[22px] leading-[1.3]" style={{ color: pal.fg }}>
           {qWords.slice(0, qShown).map((w, i) => (
-            <motion.span key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: "easeOut" }} className="inline-block whitespace-pre">
+            <motion.span key={`${segIdx}-${i}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.16 }} className="inline-block whitespace-pre">
               {w}{" "}
             </motion.span>
           ))}
         </p>
         {aShown > 0 ? (
           <>
-            <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.1em] text-[#111]/45">A</p>
-            <p className="mt-1.5 text-[15px] font-medium leading-[1.5] text-[#111]/90">
+            <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: pal.fg, opacity: 0.5 }}>A</p>
+            <p className="mt-1.5 text-[15px] font-medium leading-[1.5]" style={{ color: pal.fg, opacity: 0.92 }}>
               {aWords.slice(0, aShown).map((w, i) => (
-                <motion.span key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="inline-block whitespace-pre">
+                <motion.span key={`${segIdx}-${i}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.14 }} className="inline-block whitespace-pre">
                   {w}{" "}
                 </motion.span>
               ))}
@@ -2988,13 +3002,19 @@ export function CaptionClip({ q, a, qAudio, aAudio, className = "" }: { q: strin
           </>
         ) : null}
       </div>
-      <div className="absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#111]/12 text-[#111]">
+      {/* The badge breathes while muted, begging for the tap. */}
+      <motion.div
+        animate={soundOn ? { scale: 1, opacity: 1 } : { scale: [1, 1.14, 1], opacity: [0.6, 1, 0.6] }}
+        transition={soundOn ? { duration: 0.2 } : { duration: 1.3, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center rounded-full"
+        style={{ backgroundColor: pal.badge, color: pal.fg }}
+      >
         {soundOn ? (
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" /><path d="M15.5 8.5a5 5 0 0 1 0 7" /><path d="M18.5 5.5a9 9 0 0 1 0 13" /></svg>
         ) : (
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" /><path d="m22 9-6 6" /><path d="m16 9 6 6" /></svg>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -3005,7 +3025,7 @@ export function LiveReplayCard({ live, postId, static: isStatic }: { live: LiveP
   if (live.captionCard) {
     return (
       <div className="mt-3 w-[290px] overflow-hidden rounded-xl">
-        <CaptionClip {...live.captionCard} className="aspect-[4/5] w-full" />
+        <CaptionClip segments={live.captionCard} className="aspect-[4/5] w-full" />
       </div>
     );
   }
