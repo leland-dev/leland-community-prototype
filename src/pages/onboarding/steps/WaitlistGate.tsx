@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Check, Bell, Share, Clock } from "lucide-react";
+import { Check, Share, Clock, BellRing } from "lucide-react";
 
 import { ShareSheet } from "../../waitlist/Waitlist";
 import LineList from "./LineLeaderboard";
@@ -121,7 +121,6 @@ export default function WaitlistGate({
 }) {
   const reduced = useReducedMotion() ?? false;
   const [sharing, setSharing] = useState(false);
-  const [notified, setNotified] = useState(false);
   const [deadline] = useState(() => {
     const k = "leland-v4-gate-deadline";
     try {
@@ -160,17 +159,6 @@ export default function WaitlistGate({
     }
   };
 
-  const notify = async () => {
-    try {
-      if ("Notification" in window && Notification.permission === "default") {
-        await Notification.requestPermission();
-      }
-    } catch {
-      /* unsupported */
-    }
-    setNotified(true);
-  };
-
   const rise = (delay: number) => ({
     initial: reduced ? { opacity: 0 } : { opacity: 0, y: 14 },
     animate: { opacity: 1, y: 0 },
@@ -195,36 +183,25 @@ export default function WaitlistGate({
               to lock in the front of the line
             </p>
           </>
-        ) : notified ? (
+        ) : (
           <button
             onClick={onDone}
             className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
           >
             Done
           </button>
-        ) : (
-          <>
-            <button
-              onClick={notify}
-              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
-            >
-              <Bell size={17} />
-              Text me when the doors open
-            </button>
-            <button
-              onClick={onDone}
-              className="mt-1 flex h-10 w-full items-center justify-center text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark"
-            >
-              Not now
-            </button>
-          </>
         )}
     </div>
   );
 
   return (
     <div className="relative flex h-full flex-col">
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-[calc(max(1.5rem,env(safe-area-inset-bottom))+0.5rem)] pt-[calc(max(1.5rem,env(safe-area-inset-top))+16px)]">
+      {/* pinned: you're all set */}
+      <div className="flex shrink-0 items-center justify-center gap-2 bg-yellow px-4 py-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] text-[13px] font-medium text-gray-dark">
+        <BellRing size={14} />
+        You're all set — we'll text you the moment the doors open.
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-[calc(max(1.5rem,env(safe-area-inset-bottom))+0.5rem)] pt-8">
         {/* ── above the fold: spot + ring ── */}
         <div className="flex flex-col items-center text-center">
           {unlocked ? (

@@ -20,6 +20,7 @@ import LinkedInConnect, { type LinkedInProfile } from "./steps/LinkedInConnect";
 import ApplicationReview from "./steps/ApplicationReview";
 import AccessExplainer from "./steps/AccessExplainer";
 import WaitlistGate from "./steps/WaitlistGate";
+import { Notify } from "../waitlist/Waitlist";
 import foundPhoto from "../../assets/profile photos/pic-1.png";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -29,7 +30,7 @@ import foundPhoto from "../../assets/profile photos/pic-1.png";
  *   Credential — situation → student status → university + grad year →
  *                "{School} is on Leland" → connect LinkedIn (skippable)
  *   The gate   — "reviewing your application" → pre-approved (the pass) →
- *                how access works → waitlist: invite 3 in 24h to skip the
+ *                how access works → push notifs → waitlist: invite 3 in 24h to skip the
  *                line, with the blurred line itself below the fold
  *
  * It's a dead end on purpose: the doors aren't open yet, and the whole flow
@@ -62,6 +63,7 @@ type Stage =
   | "linkedin"
   | "review"
   | "access"
+  | "notify"
   | "gate";
 
 const rise = {
@@ -323,9 +325,11 @@ export default function MinimalOnboardingV4() {
                   category={primaryCategory}
                   orgs={resonance.orgs}
                   expertHeadline={expertHeadline}
-                  onContinue={() => setStage("gate")}
+                  onContinue={() => setStage("notify")}
                 />,
               )
+            ) : stage === "notify" ? (
+              screen("notify", <Notify reduced={reduced} onDone={() => setStage("gate")} />)
             ) : school ? (
               screen("gate",
                 <WaitlistGate
