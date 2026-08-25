@@ -65,6 +65,8 @@ export const CATEGORY_QUESTION: Record<Branch, string> = {
 
 export type Resonance = {
   title: string;
+  /** substring of `title` rendered with emphasis — the category words ("consulting", "MBA admissions") */
+  emphasis?: string;
   subline: string;
   orgs: string[];
   reviews: Review[];
@@ -313,5 +315,8 @@ const FALLBACK: Resonance = {
 /** Copy for the reassurance screen. Uses the primary (first-picked) category. */
 export function resonanceFor(categories: string[]): Resonance {
   const primary = categories[0];
-  return (primary && RESONANCE[primary]) || FALLBACK;
+  const r = (primary && RESONANCE[primary]) || FALLBACK;
+  // "200+ consulting experts are here…" → "consulting"; "120+ founders & operators…" → "founders & operators"
+  const emphasis = r.title.match(/^\S+ (.+?) (?:experts|are here)/)?.[1];
+  return { ...r, emphasis };
 }

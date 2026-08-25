@@ -263,6 +263,7 @@ export default function MinimalOnboardingV4() {
               screen("reassurance",
                 <ExpertReassurance
                   title={resonance.title}
+                  emphasis={resonance.emphasis}
                   subline={resonance.subline}
                   orgs={resonance.orgs}
                   reviews={resonance.reviews}

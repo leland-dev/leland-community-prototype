@@ -37,6 +37,7 @@ const MASK = "linear-gradient(to right, transparent, black 6%, black 94%, transp
 export default function ExpertReassurance({
   onContinue,
   title = "Thousands of experts are here to help with that",
+  emphasis,
   subline,
   orgs = ORGS,
   reviews = DEFAULT_REVIEWS,
@@ -44,6 +45,8 @@ export default function ExpertReassurance({
   onContinue: () => void;
   /** headline — v4 adapts this to the category the member picked */
   title?: string;
+  /** substring of title to highlight (italic + yellow marker) */
+  emphasis?: string;
   subline?: string;
   /** org badges shown on the coach cards */
   orgs?: string[];
@@ -72,7 +75,21 @@ export default function ExpertReassurance({
     <div className="flex h-full flex-col">
       <div className="min-h-0 flex-1 overflow-hidden pb-32 pt-2">
         <h2 className="px-6 font-serif text-[28px] leading-[1.15] text-gray-dark md:text-[32px]">
-          {title}
+          {emphasis && title.includes(emphasis) ? (
+            <>
+              {title.slice(0, title.indexOf(emphasis))}
+              <span className="relative inline-block italic">
+                <span
+                  aria-hidden
+                  className="absolute inset-x-[-0.12em] bottom-[0.08em] top-[0.2em] -z-0 -rotate-[0.6deg] rounded-[3px] bg-yellow/70"
+                />
+                <span className="relative">{emphasis}</span>
+              </span>
+              {title.slice(title.indexOf(emphasis) + emphasis.length)}
+            </>
+          ) : (
+            title
+          )}
         </h2>
         {subline ? (
           <p className="mt-3 px-6 text-[15px] leading-snug text-gray-light">{subline}</p>
