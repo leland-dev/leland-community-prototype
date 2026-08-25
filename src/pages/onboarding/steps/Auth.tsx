@@ -850,10 +850,10 @@ export default function Auth({
           </CircleButton>
         </div>
 
-        {/* secondary (bordered) pill on top, primary (black) pill on the bottom */}
+        {/* phone-primary: phone on top; email-primary (v2/v3): email on the bottom */}
         <div className="mt-5 flex flex-col gap-3">
-          {primary === "phone" ? emailPill : phonePill}
-          {primary === "phone" ? phonePill : emailPill}
+          {phonePill}
+          {emailPill}
         </div>
 
         <p className="mt-3 text-center text-[12px] text-gray-xlight">
