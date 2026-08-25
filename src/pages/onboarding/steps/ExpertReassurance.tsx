@@ -78,7 +78,7 @@ export default function ExpertReassurance({
           {emphasis && title.includes(emphasis) ? (
             <>
               {title.slice(0, title.indexOf(emphasis))}
-              <span className="relative inline-block italic">
+              <span className="relative inline-block">
                 <span
                   aria-hidden
                   className="absolute inset-x-[-0.12em] bottom-[0.08em] top-[0.2em] -z-0 -rotate-[0.6deg] rounded-[3px] bg-yellow/70"
