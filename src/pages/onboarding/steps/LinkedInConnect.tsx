@@ -2,6 +2,9 @@ import { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Check, Loader2, UserRound, ShieldCheck, Zap } from "lucide-react";
 
+import { MEMBER_AVATARS } from "../mockData";
+import { SharpStar } from "./flowUI";
+
 import foundPhoto from "../../../assets/profile photos/pic-1.png";
 import linkedinIcon from "../../../assets/onboarding/linkedin-app-icon.webp";
 
@@ -31,12 +34,10 @@ export default function LinkedInConnect({
   school,
   gradYear,
   onConnected,
-  onSkip,
 }: {
   school?: string;
   gradYear?: number | "earlier";
   onConnected: (p: LinkedInProfile) => void;
-  onSkip: () => void;
 }) {
   const reduced = useReducedMotion() ?? false;
   const [phase, setPhase] = useState<"idle" | "loading" | "connected">("idle");
@@ -131,29 +132,53 @@ export default function LinkedInConnect({
           </button>
         ) : (
           <>
+            {/* the magic button: LinkedIn-blue gradient, soft glow, a slow
+                shimmer sweep, and a gentle breath so it feels alive */}
             <motion.button
-              whileTap={{ scale: 0.98 }}
+              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.015 }}
+              animate={reduced || phase === "loading" ? {} : { scale: [1, 1.012, 1] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
               onClick={connect}
               disabled={phase === "loading"}
-              className="pointer-events-auto flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333] disabled:opacity-80"
+              className="pointer-events-auto relative flex h-14 w-full items-center justify-center gap-2.5 overflow-hidden rounded-full text-[16px] font-semibold text-white shadow-[0_10px_30px_rgba(10,102,194,0.38),inset_0_1px_0_rgba(255,255,255,0.28)] disabled:opacity-90"
+              style={{ background: "linear-gradient(180deg, #1B7FE0 0%, #0A66C2 55%, #0956A6 100%)" }}
             >
+              {!reduced && phase !== "loading" ? (
+                <motion.span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 w-[45%]"
+                  style={{ background: "linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.32) 50%, transparent 100%)" }}
+                  initial={{ x: "-150%" }}
+                  animate={{ x: "350%" }}
+                  transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.6, ease: "easeInOut" }}
+                />
+              ) : null}
               {phase === "loading" ? (
                 <Loader2 size={18} className="animate-spin" />
               ) : (
                 <>
-                  <LinkedInMark size={18} color="#ffffff" />
+                  <span className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-white">
+                    <LinkedInMark size={17} />
+                  </span>
                   Connect LinkedIn
                 </>
               )}
             </motion.button>
-            <button
-              onClick={onSkip}
-              disabled={phase === "loading"}
-              className="pointer-events-auto mt-2 flex h-12 w-full flex-col items-center justify-center text-[15px] font-medium text-gray-light transition-colors hover:text-gray-dark"
-            >
-              I'll build it myself
-              <span className="text-[12px] font-normal text-gray-xlight">You can connect later in Settings</span>
-            </button>
+
+            {/* trust signal */}
+            <div className="pointer-events-auto mt-3.5 flex items-center justify-center gap-2.5">
+              <div className="flex -space-x-2">
+                {MEMBER_AVATARS.slice(0, 4).map((src, i) => (
+                  <img key={i} src={src} alt="" className="h-6 w-6 rounded-full object-cover ring-2 ring-white" />
+                ))}
+              </div>
+              <p className="flex items-center gap-1 text-[13px] text-gray-light">
+                <span className="font-semibold text-gray-dark">30k+ people</span> trust Leland
+                <SharpStar size={11} className="ml-0.5 text-yellow" />
+                <span className="font-medium text-gray-dark">4.99</span>
+              </p>
+            </div>
           </>
         )}
       </div>

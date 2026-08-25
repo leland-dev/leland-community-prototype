@@ -136,6 +136,7 @@ export default function MinimalOnboardingV4() {
     situation: "student",
     student: "school",
     schoolproof: "linkedin",
+    linkedin: "photo",
     photo: "review",
   };
   const STEP_INDEX: Partial<Record<Stage, number>> = {
@@ -318,7 +319,6 @@ export default function MinimalOnboardingV4() {
                     setLinkedin(p);
                     setStage("review");
                   }}
-                  onSkip={() => setStage("photo")}
                 />,
               )
             ) : stage === "photo" ? (
