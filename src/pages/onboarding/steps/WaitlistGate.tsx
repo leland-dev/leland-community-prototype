@@ -178,7 +178,7 @@ export default function WaitlistGate({
 
   return (
     <div className="relative flex h-full flex-col">
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-44 pt-[max(1.5rem,env(safe-area-inset-top))]">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-44 pt-[calc(max(1.5rem,env(safe-area-inset-top))+16px)]">
         {/* ── above the fold: spot + ring ── */}
         <div className="flex flex-col items-center text-center">
           {unlocked ? (

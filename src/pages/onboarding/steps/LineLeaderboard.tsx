@@ -54,9 +54,9 @@ function Row({
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay, ease: [0.32, 0.72, 0, 1] }}
-      className={`flex items-center gap-3 px-4 py-3 ${highlight ? "rounded-2xl bg-gray-dark text-white" : ""}`}
+      className={`flex items-center gap-2.5 py-3 pl-2 pr-3 ${highlight ? "rounded-2xl bg-gray-dark text-white" : ""}`}
     >
-      <span className={`w-9 shrink-0 font-serif text-[18px] tabular-nums ${highlight ? "text-yellow" : "text-gray-dark"}`}>
+      <span className={`w-8 shrink-0 font-serif text-[18px] tabular-nums ${highlight ? "text-yellow" : "text-gray-dark"}`}>
         {r.pos}
       </span>
       <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-hover">
@@ -98,8 +98,8 @@ export default function LineList({ spot, you }: { spot: number; you: { name: str
       ))}
       {!front ? (
         <>
-          <div className="flex items-center gap-3 py-2 pl-4 text-[13px] text-gray-xlight">
-            <span className="w-9 text-center tracking-[0.2em]">···</span>
+          <div className="flex items-center gap-2.5 py-2 pl-2 text-[13px] text-gray-xlight">
+            <span className="w-8 tracking-[0.2em]">···</span>
             {spot - 7 > 0 ? `${spot - 7} more` : ""}
           </div>
           {rows.around.filter((r) => r.pos < spot).map((r, i) => (
