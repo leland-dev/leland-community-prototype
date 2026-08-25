@@ -11,7 +11,8 @@ import LineList from "./LineLeaderboard";
  *  · Spot in line + a circular 0/3 invite ring (three milestone dots, a
  *    bubble that travels as invites go out)
  *  · The line itself below the fold — blurred faces/names, crisp affiliations
- *  · Opaque bottom sheet: the invite CTA with the 24h clock right under it
+ *  · The invite CTA (with the 24h clock) appears twice: above the line and
+ *    again at the bottom, so it's there wherever you stop scrolling
  *  · At 3: front of the line → text-me-when-the-doors-open
  * ──────────────────────────────────────────────────────────────────────── */
 
@@ -30,7 +31,52 @@ function Countdown({ deadline }: { deadline: number }) {
   const [left, setLeft] = useState(() => Math.max(0, deadline - Date.now()));
   useEffect(() => {
     const t = window.setInterval(() => setLeft(Math.max(0, deadline - Date.now())), 1000);
-    return () => window.clearInterval(t);
+    const cta = (
+    <div className="w-full">
+        {!unlocked ? (
+          <>
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={share}
+              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-yellow text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
+            >
+              <Share size={17} />
+              {sent === 0 ? "Send your first invite" : sent === 1 ? "Send your second invite" : "Send your last invite"}
+            </motion.button>
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-[13px] text-gray-light">
+              <Clock size={14} className="text-gray-dark" />
+              <Countdown deadline={deadline} />
+              to lock in the front of the line
+            </p>
+          </>
+        ) : notified ? (
+          <button
+            onClick={onDone}
+            className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
+          >
+            Done
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={notify}
+              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
+            >
+              <Bell size={17} />
+              Text me when the doors open
+            </button>
+            <button
+              onClick={onDone}
+              className="mt-1 flex h-10 w-full items-center justify-center text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark"
+            >
+              Not now
+            </button>
+          </>
+        )}
+    </div>
+  );
+
+  return () => window.clearInterval(t);
   }, [deadline]);
   const h = Math.floor(left / 3_600_000);
   const m = Math.floor((left % 3_600_000) / 60_000);
@@ -178,7 +224,7 @@ export default function WaitlistGate({
 
   return (
     <div className="relative flex h-full flex-col">
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-44 pt-[calc(max(1.5rem,env(safe-area-inset-top))+16px)]">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-[calc(max(1.5rem,env(safe-area-inset-bottom))+0.5rem)] pt-[calc(max(1.5rem,env(safe-area-inset-top))+16px)]">
         {/* ── above the fold: spot + ring ── */}
         <div className="flex flex-col items-center text-center">
           {unlocked ? (
@@ -230,54 +276,15 @@ export default function WaitlistGate({
           )}
         </div>
 
-        {/* ── below the fold: the line ── */}
-        <motion.div {...rise(0.45)} className="mt-8">
+        <motion.div {...rise(0.4)} className="mt-6">
+          {cta}
+        </motion.div>
+
+        {/* ── the line, then the CTA again at the bottom ── */}
+        <motion.div {...rise(0.5)} className="mt-8">
           <LineList spot={spot} you={you} />
         </motion.div>
-      </div>
-
-      {/* ── bottom sheet: opaque, CTA + the clock right under it ── */}
-      <div className="absolute inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[440px] rounded-t-[24px] border-t border-gray-stroke bg-white px-6 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+0.75rem)] pt-4 shadow-[0_-12px_32px_rgba(0,0,0,0.06)]">
-        {!unlocked ? (
-          <>
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              onClick={share}
-              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-yellow text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
-            >
-              <Share size={17} />
-              {sent === 0 ? "Send your first invite" : sent === 1 ? "Send your second invite" : "Send your last invite"}
-            </motion.button>
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-[13px] text-gray-light">
-              <Clock size={14} className="text-gray-dark" />
-              <Countdown deadline={deadline} />
-              to lock in the front of the line
-            </p>
-          </>
-        ) : notified ? (
-          <button
-            onClick={onDone}
-            className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
-          >
-            Done
-          </button>
-        ) : (
-          <>
-            <button
-              onClick={notify}
-              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
-            >
-              <Bell size={17} />
-              Text me when the doors open
-            </button>
-            <button
-              onClick={onDone}
-              className="mt-1 flex h-10 w-full items-center justify-center text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark"
-            >
-              Not now
-            </button>
-          </>
-        )}
+        <div className="mt-8">{cta}</div>
       </div>
 
       <AnimatePresence>
