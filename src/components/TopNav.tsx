@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useSubNavStyle } from "./SubNavStyleContext";
+import browserIcon from "../assets/icons/browser.svg";
+import codeIcon from "../assets/icons/code.svg";
 import { useIsCoachMode } from "../hooks/useIsCoachMode";
 import { useNavTheme } from "./NavThemeContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
@@ -360,6 +362,30 @@ export default function TopNav() {
                     <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-[#999999]">
                       Admin Controls
                     </p>
+                    <NavLink
+                      to="/partner-dashboard"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
+                    >
+                      <img src={browserIcon} alt="" className="h-5 w-5 shrink-0" />
+                      Partner dashboard
+                    </NavLink>
+                    <NavLink
+                      to="/components"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
+                    >
+                      <img src={codeIcon} alt="" className="h-5 w-5 shrink-0" />
+                      Components
+                    </NavLink>
+                    <NavLink
+                      to="/alt-nav"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
+                    >
+                      <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></svg>
+                      Switch to alt navigation
+                    </NavLink>
                     <NavLink
                       to="/onboarding-minimal-v2"
                       onClick={() => setProfileOpen(false)}
