@@ -1,4 +1,5 @@
 import openAiLogo from "../assets/org-logos/openai.png";
+import anthropicLogo from "../assets/org-logos/Anthropic.jpg";
 import {
   Modal,
   ModalContent,
@@ -17,10 +18,10 @@ const TRACKS: { id: CourseTrack; label: string; maker: string }[] = [
   { id: "copilot", label: "Copilot", maker: "Microsoft" },
 ];
 
-function getLogoSrc(id: CourseTrack): string {
+export function getLogoSrc(id: CourseTrack): string {
   const base = import.meta.env.BASE_URL;
   switch (id) {
-    case "claude": return `${base}logo-claude.webp`;
+    case "claude": return anthropicLogo;
     case "codex": return openAiLogo;
     case "gemini": return `${base}logo-gemini.webp`;
     case "copilot": return `${base}logo-copilot.jpg`;

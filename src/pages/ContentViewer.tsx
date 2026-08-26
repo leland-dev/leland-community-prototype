@@ -94,7 +94,7 @@ import { SwitchInput } from "../components/leland";
 import { GettingStartedFlow, type FlowKey } from "../components/getting-started";
 import { COHORT_MEMBERS } from "./Group";
 import { SelectCohortModal } from "../components/LiveCourseCard";
-import { TrackPickerModal, type CourseTrack, TRACK_STORAGE_KEY } from "../components/TrackPickerModal";
+import { TrackPickerModal, type CourseTrack, TRACK_STORAGE_KEY, getLogoSrc } from "../components/TrackPickerModal";
 
 // ─── Types & seed data ───────────────────────────────────────────────────────
 
@@ -1079,7 +1079,7 @@ function CombinedSidebar({
               <p ref={courseInfoRef} className="text-heading-3xl font-season font-normal text-leland-gray-dark">{COURSE_TITLE_FULL}</p>
 
               {liveProgram && (
-                <div className="mt-3 flex flex-wrap gap-2 self-start">
+                <div className="mt-3 flex flex-wrap items-stretch gap-2 self-start">
                   <button
                     type="button"
                     onClick={onSwitchCohort}
@@ -1097,15 +1097,15 @@ function CombinedSidebar({
                     <button
                       type="button"
                       onClick={onChangeTrack}
-                      className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                      aria-label={`${selectedTrack.charAt(0).toUpperCase() + selectedTrack.slice(1)} — change AI track`}
+                      className="flex h-9 items-center gap-1.5 rounded-full border border-transparent bg-leland-gray-hover py-1 pl-1 pr-2 text-leland-gray-light hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
                     >
-                      <Tag
-                        text={selectedTrack.charAt(0).toUpperCase() + selectedTrack.slice(1)}
-                        tagColor={TagColor.GRAY}
-                        size={TagSize.LARGE}
-                        RightIcon={IconChevronDown}
-                        hoverable
+                      <img
+                        src={getLogoSrc(selectedTrack)}
+                        alt=""
+                        className="aspect-square h-full shrink-0 rounded-full object-cover"
                       />
+                      <IconChevronDown className="size-4 shrink-0" />
                     </button>
                   ) : null}
                 </div>
