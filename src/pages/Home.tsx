@@ -3,6 +3,7 @@ import { Button } from "../components/Button";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { FADE_IN, FADE_TRANSITION } from "../lib/pushTransition";
 import { nameToSlug } from "../lib/profileSlug";
 import { Image as ImageIcon } from "lucide-react";
 import { useVersion } from "../contexts/VersionContext";
@@ -1274,17 +1275,17 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
         onUndoRepost={() => onUndoRepost?.(post)}
         onQuote={() => onQuote?.(post)}
       />
-      {/* Share */}
+      {/* Bookmark / save */}
+      <FeedBookmarkButton post={post} />
+      {/* Share — fifth action */}
       <div className="relative">
         <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-extra-light transition-colors hover:bg-gray-hover hover:text-gray-light">
-          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 15V4" /><path d="m8 8 4-4 4 4" /><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" /></svg>
+          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M11.082 8.95158V8.95158C6.196 9.503 2.50256 13.6346 2.5 18.5516V19.1636H2.5C4.62349 16.6055 7.75786 15.1019 11.082 15.0466V18.2736V18.2733C11.082 18.9482 11.6291 19.4953 12.304 19.4953C12.5786 19.4953 12.8452 19.4028 13.0608 19.2328L21.0508 12.9238V12.9238C21.5622 12.5207 21.65 11.7794 21.247 11.268C21.1895 11.1951 21.1237 11.1292 21.0508 11.0718L13.0608 4.76276V4.76276C12.531 4.34468 11.7626 4.43525 11.3445 4.96505C11.1744 5.18061 11.0818 5.44717 11.0818 5.72176L11.082 8.95158Z" /></svg>
         </button>
         <AnimatePresence>
           {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
         </AnimatePresence>
       </div>
-      {/* Bookmark / save — fifth action */}
-      <FeedBookmarkButton post={post} />
     </div>
   );
 }
@@ -1384,13 +1385,8 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
             onClick={(e) => e.stopPropagation()}
             className="cursor-pointer truncate text-[15px] leading-tight font-semibold text-gray-dark"
           >{groupPoster ? groupPoster.name : author}</Link>
-          {/* Minimal mode: company favicon sits next to the name (in place of
-              the title line the other modes show). */}
           {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
-          {profileBarMode === 1 && companyLogo ? (
-            <img src={companyLogo} alt="" className="h-[18px] w-[18px] shrink-0 rounded-[4px] object-contain" />
-          ) : null}
-          <span className="shrink-0 text-[13px] leading-tight text-gray-xlight">{displayTime}</span>
+          <span className="shrink-0 text-[15px] leading-tight text-gray-extra-light">{displayTime}</span>
         </div>
         {/* Title / description line — surfaced in the "Title" (2) and "Dated"
             (3) profile-bar modes; hidden in "Minimal" (1). */}
@@ -2870,7 +2866,7 @@ function LiveCardMinimal({ post }: { post: LivePost }) {
             <span className="text-[13px] font-medium">{post.reposts}</span>
           </button>
           <button className="flex cursor-pointer items-center text-white drop-shadow" aria-label="Share">
-            <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15V4" /><path d="m8 8 4-4 4 4" /><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" /></svg>
+            <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11.082 8.95158V8.95158C6.196 9.503 2.50256 13.6346 2.5 18.5516V19.1636H2.5C4.62349 16.6055 7.75786 15.1019 11.082 15.0466V18.2736V18.2733C11.082 18.9482 11.6291 19.4953 12.304 19.4953C12.5786 19.4953 12.8452 19.4028 13.0608 19.2328L21.0508 12.9238V12.9238C21.5622 12.5207 21.65 11.7794 21.247 11.268C21.1895 11.1951 21.1237 11.1292 21.0508 11.0718L13.0608 4.76276V4.76276C12.531 4.34468 11.7626 4.43525 11.3445 4.96505C11.1744 5.18061 11.0818 5.44717 11.0818 5.72176L11.082 8.95158Z" /></svg>
           </button>
           <button className="flex cursor-pointer items-center text-white drop-shadow" aria-label="Save">
             <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
@@ -3498,7 +3494,7 @@ function QuotedPostCard({ quoted }: { quoted: QuotedSnapshot }) {
   );
 }
 
-export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void }) {
+export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOpen }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void; onOpen?: () => void }) {
   const navigate = useNavigate();
   const postBase = usePostBase();
   const [editOpen, setEditOpen] = useState(false);
@@ -3531,8 +3527,9 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { 
         </div>
       )}
       <div
-        className="flex gap-3 cursor-pointer"
+        className="flex cursor-pointer gap-3"
         onClick={(e) => {
+          if (onOpen) { onOpen(); return; }
           const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
           navigate(`${postBase}/${navId}`, { state: { sourceY: rect.top } });
         }}
@@ -4966,6 +4963,9 @@ const composerPrompts = [
 export default function Home() {
   useEffect(() => { document.title = "Leland Prototype | Feed"; }, []);
   const { version } = useVersion();
+  // In alt-nav the feed card fades in on mount, matching the post detail.
+  const { pathname } = useLocation();
+  const isAltNav = pathname.startsWith("/alt-nav");
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
   const [navHidden, setNavHidden] = useState(false);
@@ -5170,7 +5170,10 @@ export default function Home() {
           post list, so the border runs around all edges. Horizontal padding
           lives on the composer and each post row (dividers run full-bleed to
           the border while post content stays inset). */}
-      <div className="rounded-2xl border border-[#D5D5D5]">
+      <motion.div
+        {...(isAltNav ? { initial: FADE_IN.initial, animate: FADE_IN.animate, transition: FADE_TRANSITION } : {})}
+        className="rounded-2xl border border-[#D5D5D5]"
+      >
       {/* Post composer — hidden on mobile (composer lives in the floating
           + button there). */}
       <div className="hidden md:flex items-center gap-3 border-b border-[#D5D5D5] px-4 py-4 sm:px-6">
@@ -5220,7 +5223,7 @@ export default function Home() {
           </div>
         ))}
       </div>
-      </div>{/* /Feed card */}
+      </motion.div>{/* /Feed card */}
 
       {/* Mobile floating compose button — sits 24px above the bottom nav
           (matching its 24px inset from the right edge), and slides down when

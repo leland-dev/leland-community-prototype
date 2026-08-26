@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useExpertMode } from "../contexts/ExpertModeContext";
@@ -148,6 +148,7 @@ export default function DesktopSidebar() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [expertMoreOpen, setExpertMoreOpen] = useState(false);
+  const { pathname } = useLocation();
 
   const textColor = darkMode ? "text-white" : "text-[#4c4c4c]";
   const headerColor = darkMode ? "text-white/50" : "text-gray-extra-light";
@@ -203,34 +204,34 @@ export default function DesktopSidebar() {
 
       {/* Navigation — top-level links (styled to match the /coach sidebar) */}
       <div className="flex flex-col gap-1 pt-2">
-        {navItems.map((item) => (
-          <NavLink key={item.label} to={item.to} end={item.to === "/alt-nav"} className={navLinkClass}>
-            {({ isActive }) => {
-              // The overlay ring matches the row background so the bubble/dot
-              // reads as floating: white normally, the row's active wash when
-              // the row is active.
-              const ring = darkMode
-                ? (isActive ? "border-[#2b2b2b]" : "border-[#131313]")
-                : (isActive ? "border-[#f4f4f4]" : "border-white");
-              return (
-                <>
-                  <span className="relative inline-flex h-[22px] w-[22px] shrink-0">
-                    <MaskIcon src={item.icon} className="h-[22px] w-[22px]" />
-                    {item.badge ? (
-                      <span className={`absolute -right-1.5 -top-1.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full border bg-[#FF003D] px-[3px] text-[10px] font-semibold leading-none text-white ${ring}`}>
-                        {item.badge}
-                      </span>
-                    ) : null}
-                    {item.dot ? (
-                      <span className={`absolute right-0 top-0 h-[9px] w-[9px] rounded-full border bg-[#FF003D] ${ring}`} />
-                    ) : null}
+        {navItems.map((item) => {
+          // Active computed from the path so "For you" also stays lit on the
+          // alt-nav post detail (/alt-nav/post/*), not just the exact feed.
+          const active = item.to === "/alt-nav"
+            ? pathname === "/alt-nav" || pathname.startsWith("/alt-nav/post")
+            : pathname === item.to || pathname.startsWith(`${item.to}/`);
+          // The overlay ring matches the row background so the bubble/dot reads
+          // as floating: white normally, the active wash when the row is active.
+          const ring = darkMode
+            ? (active ? "border-[#2b2b2b]" : "border-[#131313]")
+            : (active ? "border-[#f4f4f4]" : "border-white");
+          return (
+            <NavLink key={item.label} to={item.to} end={item.to === "/alt-nav"} className={`${navRowBase} ${active ? navActive : navInactive}`}>
+              <span className="relative inline-flex h-[22px] w-[22px] shrink-0">
+                <MaskIcon src={item.icon} className="h-[22px] w-[22px]" />
+                {item.badge ? (
+                  <span className={`absolute -right-1.5 -top-1.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full border bg-[#FF003D] px-[3px] text-[10px] font-semibold leading-none text-white ${ring}`}>
+                    {item.badge}
                   </span>
-                  <span>{item.label}</span>
-                </>
-              );
-            }}
-          </NavLink>
-        ))}
+                ) : null}
+                {item.dot ? (
+                  <span className={`absolute right-0 top-0 h-[9px] w-[9px] rounded-full border bg-[#FF003D] ${ring}`} />
+                ) : null}
+              </span>
+              <span>{item.label}</span>
+            </NavLink>
+          );
+        })}
       </div>
 
       {/* Discover (was "More") — now sits above Expert tools */}

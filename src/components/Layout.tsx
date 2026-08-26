@@ -358,7 +358,15 @@ export function ContextLayout() {
   // Both swap the left column for the desktop sidebar (which replaces the nav).
   const isAltNavFeed = pathname === "/alt-nav";
   const isAltNavSubpage = pathname.startsWith("/alt-nav/");
+  // The post detail shares the feed's card, so it also shares the 640px width.
+  const isAltNavPost = pathname.startsWith("/alt-nav/post");
   const isAltNav = isAltNavFeed || isAltNavSubpage;
+  // The regular (non-alt-nav) post detail now mirrors the feed's 3-col frame too
+  // — same boxed card, same persistent sidebars. Scoped to the top-level post so
+  // the older comment-thread page (which only sets a right sidebar) is untouched.
+  const isRegularPost = pathname.startsWith("/post/") && !pathname.includes("/comment/");
+  // Any post detail (alt-nav or regular) shares the feed's 640/356 treatment.
+  const isPostDetail = isAltNavPost || isRegularPost;
   // Keep the 3-col feed treatment (and the "/" home) bound to the EXACT feed
   // so sub-pages and the default home are unaffected.
   const isHomeFeed = pathname === "/" || isAltNavFeed;
@@ -370,11 +378,11 @@ export function ContextLayout() {
       variant={isAltNav && variant === "thin" ? "standard" : variant}
       leftSidebar={isAltNav ? <DesktopSidebar /> : leftSidebar}
       rightSidebar={rightSidebar}
-      contentMaxWidth={isHomeFeed ? 640 : isAltNavSubpage ? 720 : contentMaxWidth}
+      contentMaxWidth={isHomeFeed || isPostDetail ? 640 : isAltNavSubpage ? 720 : contentMaxWidth}
       // Sub-pages share the feed's edge-to-edge frame so the sidebar sits
       // flush-left and content centers in the remaining space.
-      edgeToEdge={isHomeFeed || isAltNavSubpage}
-      sidebarWidth={isHomeFeed ? 356 : undefined}
+      edgeToEdge={isHomeFeed || isAltNavSubpage || isRegularPost}
+      sidebarWidth={isHomeFeed || isPostDetail ? 356 : undefined}
       // alt-nav has no top navbar (the sidebar replaces it), so its left column
       // pins 20px from the top (not the 81px that clears a navbar) and is capped
       // at 250px. Padding drops to 20px on these pages too.
@@ -388,7 +396,7 @@ export function ContextLayout() {
       paddingXClassName={isAltNav ? "px-4" : undefined}
       // Start the row at the sidebar's sticky pin point (nav 61px + 20px gap) so
       // the columns don't slide up 20px before locking as you scroll.
-      paddingYClassName={isHomeFeed || isAltNavSubpage ? "py-4 sm:pt-5 sm:pb-10" : undefined}
+      paddingYClassName={isHomeFeed || isAltNavSubpage || isRegularPost ? "py-4 sm:pt-5 sm:pb-10" : undefined}
     >
       {/* On alt-nav sub-pages the department sub-nav renders here, at the top of
           the content column, instead of the suppressed full-width chrome bar. */}
