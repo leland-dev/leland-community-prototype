@@ -5,6 +5,7 @@ import TopNav from "./TopNav";
 import BottomNav from "./BottomNav";
 import MobileTopNav from "./MobileTopNav";
 import MobileSidebar from "./MobileSidebar";
+import DesktopSidebar from "./DesktopSidebar";
 import PageShell from "./PageShell";
 import {
   RightSidebarProvider,
@@ -117,6 +118,9 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   const pathname = location.pathname;
   const isPostDetail = pathname.startsWith("/post/");
   const isOwnSurface = isPostDetail || pathname.startsWith("/profile/");
+  // Alt-navigation: the home feed AND its sub-pages (/alt-nav/*) render with a
+  // persistent desktop sidebar in place of the top navbar.
+  const isAltNav = pathname === "/alt-nav" || pathname.startsWith("/alt-nav/");
   // Embed mode (?embed=1): strip the global nav chrome so the page renders as
   // bare content — used when a page is loaded inside another surface (e.g. the
   // course viewer's Community tab iframes this route).
@@ -237,9 +241,11 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
           )}
         </AnimatePresence>
 
-        {/* Mobile top nav */}
+        {/* Mobile top nav. On alt-nav it must stay until the desktop sidebar
+            appears (min-[960px]) — otherwise the 768–960px range shows neither
+            the sidebar nor a nav, leaving no way to reach the menu. */}
         {!isEmbed && (
-          <div className="md:hidden">
+          <div className={isAltNav ? "min-[960px]:hidden" : "md:hidden"}>
             <MobileTopNav />
           </div>
         )}
@@ -250,14 +256,16 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
             element room to scroll within. When sticky lived on <header>, its
             immediate parent (this same wrapper) was already collapsed to the
             header's height, so there was no scroll room and it never stuck. */}
-        {!isEmbed && (
+        {!isEmbed && !isAltNav && (
           <div className="sticky top-0 z-30 hidden md:block">
             <TopNav />
           </div>
         )}
 
-        {/* Sub-nav */}
-        {!isEmbed && subNav && showSubNav && (
+        {/* Sub-nav — the full-width bar belongs to the top-nav chrome, so it's
+            suppressed on alt-nav (ContextLayout renders the sub-nav inside the
+            content column there instead). */}
+        {!isEmbed && !isAltNav && subNav && showSubNav && (
           <div className="hidden bg-gray-hover md:block">
             <div className="relative mx-auto max-w-[1280px] px-6">
               {/* Left arrow */}
@@ -301,9 +309,10 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        {/* Main content area */}
+        {/* Main content area. The top padding clears the fixed MobileTopNav; on
+            alt-nav that nav persists to 960px, so the reset must too. */}
         <main
-          className={`relative z-0 md:pt-0 ${
+          className={`relative z-0 ${isAltNav ? "min-[960px]:pt-0" : "md:pt-0"} ${
             isEmbed
               ? "pt-0 pb-0"
               : `pb-20 md:pb-0 ${isOwnSurface ? "pt-0" : "pt-14"}`
@@ -338,24 +347,56 @@ export function ContextLayout() {
   const leftSidebar = useLeftSidebarContent();
   const variant = useLayoutVariant();
   const contentMaxWidth = useContentMaxWidth();
+  const subNav = useSubNavContent();
   const { pathname } = useLocation();
 
   // Home feed uses a full-bleed 3-col layout: sidebars pinned to the window
   // edges (356px each), the feed capped at 640px in the middle.
-  const isHomeFeed = pathname === "/";
+  //   isAltNavFeed  — the feed itself (/alt-nav): 3-col edge-to-edge.
+  //   isAltNavSubpage — a recreated destination (/alt-nav/*): DesktopSidebar
+  //     flush-left + centered content, no right column, no top navbar.
+  // Both swap the left column for the desktop sidebar (which replaces the nav).
+  const isAltNavFeed = pathname === "/alt-nav";
+  const isAltNavSubpage = pathname.startsWith("/alt-nav/");
+  const isAltNav = isAltNavFeed || isAltNavSubpage;
+  // Keep the 3-col feed treatment (and the "/" home) bound to the EXACT feed
+  // so sub-pages and the default home are unaffected.
+  const isHomeFeed = pathname === "/" || isAltNavFeed;
 
   return (
     <PageShell
-      variant={variant}
-      leftSidebar={leftSidebar}
+      // Sub-pages that request the "thin" variant (e.g. Notifications) would
+      // drop the sidebar — force standard on alt-nav so the sidebar stays.
+      variant={isAltNav && variant === "thin" ? "standard" : variant}
+      leftSidebar={isAltNav ? <DesktopSidebar /> : leftSidebar}
       rightSidebar={rightSidebar}
-      contentMaxWidth={isHomeFeed ? 640 : contentMaxWidth}
-      edgeToEdge={isHomeFeed}
+      contentMaxWidth={isHomeFeed ? 640 : isAltNavSubpage ? 720 : contentMaxWidth}
+      // Sub-pages share the feed's edge-to-edge frame so the sidebar sits
+      // flush-left and content centers in the remaining space.
+      edgeToEdge={isHomeFeed || isAltNavSubpage}
       sidebarWidth={isHomeFeed ? 356 : undefined}
+      // alt-nav has no top navbar (the sidebar replaces it), so its left column
+      // pins 20px from the top (not the 81px that clears a navbar) and is capped
+      // at 250px. Padding drops to 20px on these pages too.
+      leftSidebarWidth={isAltNav ? 250 : undefined}
+      leftSidebarTop={isAltNav ? 20 : undefined}
+      // Pin the sidebar to the viewport (full height, never scrolls with the page).
+      leftSidebarFixed={isAltNav}
+      // Right column gets the same top treatment as the left — pinned 20px from
+      // the top instead of the 81px that clears the (absent) navbar.
+      rightSidebarTop={isAltNav ? 20 : undefined}
+      paddingXClassName={isAltNav ? "px-4" : undefined}
       // Start the row at the sidebar's sticky pin point (nav 61px + 20px gap) so
       // the columns don't slide up 20px before locking as you scroll.
-      paddingYClassName={isHomeFeed ? "py-4 sm:pt-5 sm:pb-10" : undefined}
+      paddingYClassName={isHomeFeed || isAltNavSubpage ? "py-4 sm:pt-5 sm:pb-10" : undefined}
     >
+      {/* On alt-nav sub-pages the department sub-nav renders here, at the top of
+          the content column, instead of the suppressed full-width chrome bar. */}
+      {isAltNavSubpage && subNav ? (
+        <div className="mb-5 flex gap-1 overflow-x-auto scrollbar-hide border-b border-[#E5E5E5] pb-2">
+          {subNav}
+        </div>
+      ) : null}
       <Outlet />
     </PageShell>
   );

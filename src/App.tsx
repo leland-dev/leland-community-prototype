@@ -108,6 +108,7 @@ import LelandKitTest from "./pages/LelandKitTest";
 import LessonBlocksGallery from "./pages/LessonBlocksGallery";
 import Waitlist from "./pages/waitlist/Waitlist";
 import WaitlistOnboarding from "./pages/waitlist/WaitlistOnboarding";
+import AltNavExpertPage from "./pages/AltNavExpertPage";
 
 export default function App() {
   return (
@@ -158,6 +159,10 @@ export default function App() {
         <Route path="/site" element={<Site />} />
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/calendar" element={<Calendar />} />
+        {/* alt-nav Calendar: self-shells (like /calendar) but with the desktop
+            sidebar instead of the top navbar. Kept OUT of ContextLayout to
+            avoid a double PageShell. */}
+        <Route path="/alt-nav/calendar" element={<Calendar altNav />} />
         <Route path="/my-programs" element={<MyCourses />} />
         <Route path="/course/:courseId" element={<CourseDetail />} />
         <Route path="/program/session/:urn" element={<LiveSession />} />
@@ -194,6 +199,27 @@ export default function App() {
           <Route path="/" element={<Home />} />
           {/* Experimental: home feed with a desktop sidebar instead of the top navbar */}
           <Route path="/alt-nav" element={<Home />} />
+          {/* alt-nav sub-pages — the sidebar's destinations recreated inside the
+              alt-nav shell (DesktopSidebar left, no top navbar). Reuse the same
+              page components; ContextLayout supplies the shell. */}
+          <Route path="/alt-nav/discover" element={<Browse />} />
+          <Route path="/alt-nav/search" element={<Search />} />
+          <Route path="/alt-nav/messages" element={<Messaging />} />
+          <Route path="/alt-nav/notifications" element={<Notifications />} />
+          <Route path="/alt-nav/events" element={<Events />} />
+          <Route path="/alt-nav/courses" element={<Courses />} />
+          <Route path="/alt-nav/plus" element={<LelandPlus />} />
+          <Route path="/alt-nav/jobs" element={<AltNavExpertPage title="Jobs" eyebrow="Discover" />} />
+          {/* Expert tools — POC placeholder pages recreated inside alt-nav
+              (the real coach pages live under /coach/*). */}
+          <Route path="/alt-nav/offerings" element={<AltNavExpertPage title="Offerings" />} />
+          <Route path="/alt-nav/opportunities" element={<AltNavExpertPage title="Opportunities" />} />
+          <Route path="/alt-nav/livestreams" element={<AltNavExpertPage title="Livestreams" />} />
+          <Route path="/alt-nav/availability" element={<AltNavExpertPage title="Calendar" />} />
+          <Route path="/alt-nav/earnings" element={<AltNavExpertPage title="Earnings" />} />
+          <Route path="/alt-nav/reviews" element={<AltNavExpertPage title="Reviews" />} />
+          <Route path="/alt-nav/discount-codes" element={<AltNavExpertPage title="Discount Codes" />} />
+          <Route path="/alt-nav/analytics" element={<AltNavExpertPage title="Analytics" />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />

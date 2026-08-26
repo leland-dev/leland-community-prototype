@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 type PageShellProps = {
   variant?: "standard" | "thin";
@@ -13,6 +13,16 @@ type PageShellProps = {
   edgeToEdge?: boolean;
   // Overrides the width of BOTH sidebars (defaults to the per-side widths).
   sidebarWidth?: number;
+  // Left-sidebar-only overrides (win over sidebarWidth / the default top).
+  // leftSidebarTop also re-derives the sidebar's max-height so it keeps an
+  // equal gap at the bottom (top + bottom of the same size).
+  leftSidebarWidth?: number;
+  leftSidebarTop?: number;
+  // When true, the left sidebar is pinned to the viewport with position:fixed
+  // (full height, never scrolls with the page). An in-flow spacer reserves its
+  // column width. Assumes an edge-to-edge layout with the standard horizontal
+  // padding (px-4), so the fixed sidebar aligns to a 16px left inset.
+  leftSidebarFixed?: boolean;
   // When true, the right sidebar stacks below main content at narrow viewports
   // instead of being hidden.
   stackRight?: boolean;
@@ -33,6 +43,9 @@ export default function PageShell({
   contentMaxWidth,
   edgeToEdge = false,
   sidebarWidth,
+  leftSidebarWidth,
+  leftSidebarTop,
+  leftSidebarFixed = false,
   stackRight = false,
   paddingYClassName = "py-4 sm:py-10",
   paddingXClassName = "px-4 sm:px-6",
@@ -88,23 +101,77 @@ export default function PageShell({
 
   const outerClass = edgeToEdge ? "w-full" : "mx-auto max-w-[1280px]";
   const effectiveRightWidth = sidebarWidth ?? rightSidebarWidth;
+  const effectiveLeftWidth = leftSidebarWidth ?? sidebarWidth;
+  // Inline overrides for the left aside — win over the literal Tailwind classes
+  // in leftClass (width / sticky top / max-height).
+  const leftStyle: CSSProperties = {
+    ...(effectiveLeftWidth != null ? { width: effectiveLeftWidth } : {}),
+    ...(leftSidebarTop != null
+      ? {
+          top: leftSidebarTop,
+          // Fixed height (not just a cap) so an inner flex column can pin a
+          // footer to the bottom while the rest scrolls. Only the top offset is
+          // subtracted — the column runs to the viewport bottom, and the pinned
+          // profile footer supplies its own bottom padding.
+          height: `calc(100vh - ${leftSidebarTop}px)`,
+          maxHeight: `calc(100vh - ${leftSidebarTop}px)`,
+        }
+      : {}),
+  };
 
   return (
     <div className={`${outerClass} ${paddingXClassName} ${paddingYClassName}`}>
       <div className={rowClass} style={{ gap: 40 }}>
         {hasLeft && (
-          <aside className={leftClass} style={sidebarWidth != null ? { width: sidebarWidth } : undefined}>
-            {leftSidebar}
-          </aside>
+          leftSidebarFixed ? (
+            <>
+              {/* Spacer reserves the sidebar's column width in the flow… */}
+              <div aria-hidden className="hidden shrink-0 min-[960px]:block" style={{ width: effectiveLeftWidth }} />
+              {/* …while the sidebar itself is pinned to the viewport, so it's
+                  always full height and never scrolls with the page. */}
+              <aside
+                className="fixed z-20 hidden min-[960px]:block"
+                style={{
+                  left: 16,
+                  top: leftSidebarTop ?? 0,
+                  width: effectiveLeftWidth,
+                  height: `calc(100vh - ${leftSidebarTop ?? 0}px)`,
+                }}
+              >
+                {leftSidebar}
+              </aside>
+            </>
+          ) : (
+            <aside className={leftClass} style={leftStyle}>
+              {leftSidebar}
+            </aside>
+          )
         )}
         <div
           className="min-w-0"
-          style={(hasLeft || hasRight) ? { flex: "1 1 0%", maxWidth: effectiveMaxWidth } : { flex: "1 1 0%" }}
+          // edgeToEdge: let the middle column GROW to fill the space between the
+          // sidebars (cap moves to an inner mx-auto wrapper), so the feed stays
+          // centered in whatever room is left — even after the right sidebar
+          // drops out at narrower widths. Otherwise the cap sits on the flex
+          // item and the content keeps its own max-width behavior.
+          style={
+            edgeToEdge
+              ? { flex: "1 1 0%" }
+              : (hasLeft || hasRight)
+                ? { flex: "1 1 0%", maxWidth: effectiveMaxWidth }
+                : { flex: "1 1 0%" }
+          }
         >
-          {children}
+          {edgeToEdge ? (
+            <div className="mx-auto w-full" style={{ maxWidth: effectiveMaxWidth }}>
+              {children}
+            </div>
+          ) : (
+            children
+          )}
         </div>
         {hasRight && (
-          <aside className={rightClass} style={{ ...(!stackRight ? { width: effectiveRightWidth } : {}), ...(rightSidebarTop != null ? { top: rightSidebarTop } : {}) }}>
+          <aside className={rightClass} style={{ ...(!stackRight ? { width: effectiveRightWidth } : {}), ...(rightSidebarTop != null ? { top: rightSidebarTop, maxHeight: `calc(100vh - ${rightSidebarTop + 20}px)` } : {}) }}>
             {rightSidebar}
           </aside>
         )}
