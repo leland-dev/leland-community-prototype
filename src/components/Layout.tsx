@@ -116,7 +116,7 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   // the mobile top padding (which normally clears the shared nav) is dropped.
   const location = useLocation();
   const pathname = location.pathname;
-  const isPostDetail = pathname.startsWith("/post/");
+  const isPostDetail = pathname.startsWith("/post/") || pathname.startsWith("/alt-nav/post/");
   const isOwnSurface = isPostDetail || pathname.startsWith("/profile/");
   // Alt-navigation: the home feed AND its sub-pages (/alt-nav/*) render with a
   // persistent desktop sidebar in place of the top navbar.

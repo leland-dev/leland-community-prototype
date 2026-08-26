@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, type CSSProperties, type RefObject } from 
 import { Button } from "../components/Button";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { nameToSlug } from "../lib/profileSlug";
 import { Image as ImageIcon } from "lucide-react";
 import { useVersion } from "../contexts/VersionContext";
@@ -29,8 +29,6 @@ import lelandCompass from "../assets/leland-compass.svg";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
-import bootcampImg from "../assets/placeholder images/bootcamp-2.webp";
-import bootcampInstructorImg from "../assets/placeholder images/bootcamp-1.webp";
 import categoryInvestmentBanking from "../assets/placeholder images/category images/investment-banking.png";
 import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
 import categoryGMAT from "../assets/placeholder images/category images/gmat-tutoring.png";
@@ -77,10 +75,24 @@ import pic12 from "../assets/profile photos/pic-12.png";
 import pic13 from "../assets/profile photos/pic-13.png";
 import pic14 from "../assets/profile photos/pic-14.png";
 
+// Post images — sourced from src/assets/placeholder post assets. Single-image
+// posts use the three top-level files; multi-image posts use the stanford-post
+// and stripe-office folders.
+import postImgA from "../assets/placeholder post assets/1786570620765.jpg";
+import postImgB from "../assets/placeholder post assets/1787660900685.jpg";
+import postImgLinkedIn from "../assets/placeholder post assets/LinkedIn-8png.jpg";
 import stanford1 from "../assets/placeholder post assets/stanford-post/00c1e12547190979b4db2978dbe211e2.jpg";
 import stanford2 from "../assets/placeholder post assets/stanford-post/39a9980b59e79fa3b58e8d7d5145b9a9.jpg";
 import stanford3 from "../assets/placeholder post assets/stanford-post/989ac1d56cf981c783808b83154d8a25.jpg";
 import stanford4 from "../assets/placeholder post assets/stanford-post/eb80edada3b3db7955379d433ca2861a.jpg";
+import stripe1 from "../assets/placeholder post assets/stripe-office/1787349143622.jpg";
+import stripe2 from "../assets/placeholder post assets/stripe-office/1787349143698.jpg";
+import stripe3 from "../assets/placeholder post assets/stripe-office/1787349145262.jpg";
+import stripe4 from "../assets/placeholder post assets/stripe-office/1787349147111.jpg";
+import stripe5 from "../assets/placeholder post assets/stripe-office/1787349147131.jpg";
+import stripe6 from "../assets/placeholder post assets/stripe-office/1787349147226.jpg";
+import stripe7 from "../assets/placeholder post assets/stripe-office/1787349147888.jpg";
+import stripe8 from "../assets/placeholder post assets/stripe-office/1787349148103.jpg";
 
 // ─── Types ────────────────────────────────────────────
 
@@ -309,7 +321,7 @@ export const posts: Post[] = [
     companyLogo: logoMeta,
     feed: "AI BP April 26",
     body: "Reviewed every week 2 submission this morning ☕️ The standouts had one thing in common — they didn't just automate a task, they redesigned the workflow first. Tools second.",
-    images: [bootcampInstructorImg],
+    images: [postImgA],
     likes: 89,
     comments: 12,
     reposts: 7,
@@ -342,7 +354,7 @@ export const posts: Post[] = [
     companyLogo: logoCoinbase,
     feed: "AI BP April 26",
     body: "Wild — asked Claude to rewrite our team's weekly status update template and this is what it came back with. Three years of 'what shipped / what's blocked' and nobody thought to add the third column. Trying it at standup Monday. 👀",
-    images: [bootcampImg],
+    images: [postImgB],
     likes: 64,
     comments: 14,
     reposts: 4,
@@ -643,9 +655,7 @@ export const posts: Post[] = [
     time: "10h",
     headline: "MBA Admissions Expert | Ex-Deloitte | Wharton '22",
     body: "Coaching session with an incredible candidate today. Went from a shaky \"tell me about yourself\" to a compelling 2-minute narrative. Love this work.",
-    images: [
-      "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&h=750&fit=crop",
-    ],
+    images: [postImgLinkedIn],
     likes: 67,
     comments: 4,
     reposts: 1,
@@ -721,11 +731,7 @@ export const posts: Post[] = [
     time: "1d",
     headline: "Wharton MBA '24 | Product Strategy | Ex-Google",
     body: "Throwback to our Wharton study group that turned into lifelong friends. Two years later and we still meet every month. Business school is really about the people.",
-    images: [
-      "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&h=750&fit=crop",
-      "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=600&h=750&fit=crop",
-      "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=750&fit=crop",
-    ],
+    images: [stripe1, stripe2, stripe3, stripe4, stripe5, stripe6, stripe7, stripe8],
     likes: 445,
     comments: 31,
     reposts: 8,
@@ -797,6 +803,14 @@ function MoreDotsIcon() {
 export function formatCount(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}K`;
   return n.toString();
+}
+
+// Post links stay inside whichever experience you're in: under /alt-nav they
+// point at /alt-nav/post/:id (keeping the sidebar shell), everywhere else at
+// /post/:id. Consumed by every card/action that opens a post.
+export function usePostBase(): string {
+  const { pathname } = useLocation();
+  return pathname.startsWith("/alt-nav") ? "/alt-nav/post" : "/post";
 }
 
 // iOS Safari only opens the soft keyboard when focus() is called synchronously
@@ -883,20 +897,22 @@ export function FeedLikeButton({ initialCount }: { initialCount: number }) {
       </div>
       <button
         onClick={handleClick}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${liked ? "text-red-500" : "text-[#555555]"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-gray-hover ${liked ? "text-red-500" : "text-gray-extra-light hover:text-gray-light"}`}
       >
+        {/* Heart geometry mirrors the uploaded heart.svg / heart-filled.svg —
+            inlined so the fill can animate gray→red via currentColor. */}
         <motion.svg
           className="h-[22px] w-[22px]"
           viewBox="0 0 24 24"
           fill={liked ? "currentColor" : "none"}
           stroke="currentColor"
-          strokeWidth="1.75"
+          strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           animate={liked ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1] } : { scale: 1 }}
           transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
         >
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          <path d="M15.696 4C18.871 4 21 6.98 21 9.755C21 15.388 12.161 20 12 20C11.839 20 3 15.388 3 9.755C3 6.98 5.129 4 8.304 4C10.119 4 11.311 4.905 12 5.711C12.689 4.905 13.881 4 15.696 4V4Z"/>
         </motion.svg>
         <motion.span
           className="text-[13px] font-medium"
@@ -1074,7 +1090,7 @@ export function FeedRepostButton({ initialCount, initialReposted = false, onRepo
 
       <button
         onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${reposted ? "text-[#4F86DB]" : "text-[#555555]"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-gray-hover ${reposted ? "text-[#4F86DB]" : "text-gray-extra-light hover:text-gray-light"}`}
       >
         <motion.svg
           className="h-[22px] w-[22px]"
@@ -1189,7 +1205,7 @@ export function FeedBookmarkButton({ post }: { post: Post }) {
       <button
         onClick={handleClick}
         aria-label={saved ? "Remove from saved" : "Save"}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 transition-colors hover:bg-gray-hover ${saved ? "text-[#FFD96F]" : "text-[#555555]"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-gray-hover ${saved ? "text-[#FFD96F]" : "text-gray-extra-light hover:text-gray-light"}`}
       >
         <motion.svg
           className="h-[22px] w-[22px]"
@@ -1239,14 +1255,15 @@ export function FeedBookmarkButton({ post }: { post: Post }) {
 
 function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRepost, onQuote }: { post: Post; likes: number; comments: number; reposts: number; shares: number; postId: number; authorName: string; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void }) {
   const navigate = useNavigate();
+  const postBase = usePostBase();
   const [shareOpen, setShareOpen] = useState(false);
 
   return (
-    <div className="mt-1 flex items-center justify-between pl-[44px] pr-1">
+    <div className="mt-1 flex items-center gap-px pl-[44px] pr-1">
       <FeedLikeButton initialCount={likes} />
-      {/* Comment */}
-      <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`/post/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-[#555555] transition-colors hover:bg-gray-hover">
-        <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 21C13.486 21.0018 14.9492 20.6339 16.2576 19.9293L20.3676 20.9755C20.4517 20.9969 20.5398 20.9961 20.6234 20.9731C20.707 20.9502 20.7832 20.9058 20.8445 20.8445C20.9058 20.7832 20.9501 20.707 20.9731 20.6234C20.9961 20.5398 20.9969 20.4517 20.9755 20.3676L19.9293 16.2576C20.8609 14.5226 21.1978 12.5299 20.8882 10.5851C20.5786 8.64022 19.6396 6.85061 18.2152 5.49065C16.7909 4.13068 14.9598 3.27543 13.0027 3.05604C11.0457 2.83664 9.07066 3.26522 7.38054 4.27604C5.69042 5.28687 4.3785 6.82414 3.64594 8.65215C2.91338 10.4802 2.80062 12.498 3.32495 14.3962C3.84928 16.2945 4.98176 17.9684 6.54873 19.1612C8.1157 20.354 10.0307 21 12 21Z" /></svg>
+      {/* Comment — outline chat bubble (chat-inactive.svg), stays outlined */}
+      <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`${postBase}/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-extra-light transition-colors hover:bg-gray-hover hover:text-gray-light">
+        <svg className="h-[22px] w-[22px] fill-none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4.541 17.003C3.577 15.571 3 13.857 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12C21 16.971 16.971 21 12 21C10.474 21 9.04 20.613 7.78 19.943C6.434 20.661 4.907 21.084 3.276 21.084C2.842 21.084 2.419 21.045 2 20.99C3.173 19.923 4.055 18.553 4.541 17.003Z" /></svg>
         {comments > 0 && <span className="text-[13px] font-medium">{formatCount(comments)}</span>}
       </button>
       {/* Repost */}
@@ -1259,7 +1276,7 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
       />
       {/* Share */}
       <div className="relative">
-        <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2 py-1.5 text-[#555555] transition-colors hover:bg-gray-hover">
+        <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-extra-light transition-colors hover:bg-gray-hover hover:text-gray-light">
           <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 15V4" /><path d="m8 8 4-4 4 4" /><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" /></svg>
         </button>
         <AnimatePresence>
@@ -1722,6 +1739,7 @@ function EventCard({ event }: { event: EventPost["event"] }) {
 
 function MilestoneCard({ milestone, postId, authorName }: { milestone: MilestonePost["milestone"]; postId: number; authorName: string }) {
   const navigate = useNavigate();
+  const postBase = usePostBase();
   return (
     <div className="mt-3 rounded-xl border border-gray-stroke p-4">
       <div className="flex items-center gap-4">
@@ -1760,7 +1778,7 @@ function MilestoneCard({ milestone, postId, authorName }: { milestone: Milestone
         onClick={(e) => {
           e.stopPropagation();
           primeKeyboard();
-          navigate(`/post/${postId}`, { state: { focusInput: true, prefillComment: `@${authorName} Congratulations! 🎉` } });
+          navigate(`${postBase}/${postId}`, { state: { focusInput: true, prefillComment: `@${authorName} Congratulations! 🎉` } });
         }}
         className="mt-4 w-full cursor-pointer rounded-lg bg-gray-100 py-2.5 text-[13px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
       >
@@ -1814,10 +1832,11 @@ function SessionCompletedCard({ session }: { session: SessionPost["session"] }) 
 // the post page.
 function ArticleCard({ post }: { post: ArticlePost }) {
   const navigate = useNavigate();
+  const postBase = usePostBase();
   const heroSrc = post.bodyHtml?.match(/<img[^>]+src="([^"]+)"/)?.[1];
   return (
     <div
-      onClick={() => navigate(`/post/${post.id}`)}
+      onClick={() => navigate(`${postBase}/${post.id}`)}
       className="mt-3 cursor-pointer overflow-hidden rounded-xl border border-gray-stroke transition-colors hover:bg-gray-50"
     >
       {heroSrc ? <img src={heroSrc} alt="" className="h-40 w-full object-cover" /> : null}
@@ -2765,6 +2784,7 @@ function WorkshopSlide({ title, subtitle }: { title: string; subtitle: string })
 // carries bare chat and the post's action bar.
 function LiveCardMinimal({ post }: { post: LivePost }) {
   const navigate = useNavigate();
+  const postBase = usePostBase();
   const comments = useRotatingComments(3);
   const [liked, setLiked] = useState(false);
   const { live } = post;
@@ -2835,7 +2855,7 @@ function LiveCardMinimal({ post }: { post: LivePost }) {
             <span className="text-[13px] font-medium">{post.likes + (liked ? 1 : 0)}</span>
           </button>
           <button
-            onClick={() => { primeKeyboard(); navigate(`/post/${post.id}`, { state: { focusInput: true } }); }}
+            onClick={() => { primeKeyboard(); navigate(`${postBase}/${post.id}`, { state: { focusInput: true } }); }}
             className="flex cursor-pointer items-center gap-1.5 text-white drop-shadow"
             aria-label="Comment"
           >
@@ -3117,10 +3137,11 @@ const eventAsLive = (event: EventPost["event"]): LivePost["live"] => ({
 // continues after the event ends.
 function EventWrappedCard({ event, postId }: { event: EventPost["event"]; postId: number }) {
   const navigate = useNavigate();
+  const postBase = usePostBase();
   return (
     <div className="mt-3 overflow-hidden rounded-xl border border-gray-stroke">
       <button
-        onClick={() => navigate(`/post/${postId}`)}
+        onClick={() => navigate(`${postBase}/${postId}`)}
         className="relative block w-full cursor-pointer"
       >
         <img src={event.image} alt={event.title} className="aspect-[1200/628] w-full object-cover" />
@@ -3151,7 +3172,7 @@ function EventWrappedCard({ event, postId }: { event: EventPost["event"]; postId
             onClick={(e) => {
               e.stopPropagation();
               primeKeyboard();
-              navigate(`/post/${postId}`, { state: { focusInput: true } });
+              navigate(`${postBase}/${postId}`, { state: { focusInput: true } });
             }}
             className="shrink-0 cursor-pointer rounded-lg bg-gray-100 px-4 py-2.5 text-[12px] font-medium text-gray-dark transition-colors hover:bg-gray-200"
           >
@@ -3479,6 +3500,7 @@ function QuotedPostCard({ quoted }: { quoted: QuotedSnapshot }) {
 
 export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void }) {
   const navigate = useNavigate();
+  const postBase = usePostBase();
   const [editOpen, setEditOpen] = useState(false);
   const { mode: profileBarMode } = useProfileBarMode();
   const { liveCardStyle, eventStage } = useFeedDemo();
@@ -3512,7 +3534,7 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { 
         className="flex gap-3 cursor-pointer"
         onClick={(e) => {
           const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-          navigate(`/post/${navId}`, { state: { sourceY: rect.top } });
+          navigate(`${postBase}/${navId}`, { state: { sourceY: rect.top } });
         }}
       >
         {/* Left column: avatar with hover card */}
@@ -3535,7 +3557,7 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { 
               <ImageGallery
                 images={post.images}
                 imageAspectRatios={post.imageAspectRatios}
-                onImageClick={(idx) => navigate(`/post/${post.id}`, { state: { focusImage: idx } })}
+                onImageClick={(idx) => navigate(`${postBase}/${post.id}`, { state: { focusImage: idx } })}
               />
             )}
             {post.type === "link" && <LinkCard link={post.link} />}
@@ -3563,7 +3585,7 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote }: { 
                   : <LiveCard live={post.live} author={post.author} avatar={post.avatar} />
             )}
             {post.type === "quote" && (
-              <div onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.quoted.id}`); }}>
+              <div onClick={(e) => { e.stopPropagation(); navigate(`${postBase}/${post.quoted.id}`); }}>
                 <QuotedPostCard quoted={post.quoted} />
               </div>
             )}
@@ -5144,9 +5166,14 @@ export default function Home() {
 
   return (
     <div className="-mt-3 md:mt-0">
+      {/* Feed card — one bordered container wrapping the composer and the whole
+          post list, so the border runs around all edges. Horizontal padding
+          lives on the composer and each post row (dividers run full-bleed to
+          the border while post content stays inset). */}
+      <div className="rounded-2xl border border-[#D5D5D5]">
       {/* Post composer — hidden on mobile (composer lives in the floating
           + button there). */}
-      <div className="hidden md:flex items-center gap-3 border-b border-gray-stroke pb-5">
+      <div className="hidden md:flex items-center gap-3 border-b border-[#D5D5D5] px-4 py-4 sm:px-6">
         <img
           src={profilePhoto}
           alt="Your profile"
@@ -5185,14 +5212,15 @@ export default function Home() {
       )}
 
       {/* Feed */}
-      <div className="divide-y divide-gray-stroke/50">
+      <div className="divide-y divide-[#D5D5D5]">
         {feedPosts.map((post, i) => (
-          <div key={post.id}>
+          <div key={post.id} className="px-4 sm:px-6">
             <FeedPost post={post} onUpdate={handleEdit} onRepost={handleRepost} onUndoRepost={handleUndoRepost} onQuote={setQuoteTarget} />
             {i === 3 && <SuggestedExperts />}
           </div>
         ))}
       </div>
+      </div>{/* /Feed card */}
 
       {/* Mobile floating compose button — sits 24px above the bottom nav
           (matching its 24px inset from the right edge), and slides down when

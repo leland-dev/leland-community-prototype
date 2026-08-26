@@ -11,7 +11,7 @@ import { useSetNavBackHandler } from "../components/NavThemeContext";
 import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { usePageExit } from "../contexts/PageExitContext";
 import { PUSH_TRANSITION } from "../lib/pushTransition";
-import { posts, type Post, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar, PollCard } from "./Home";
+import { posts, type Post, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar, PollCard, usePostBase } from "./Home";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import verifiedIconSrc from "../assets/icons/verified.svg";
@@ -623,6 +623,7 @@ function HeartButton({ liked, count, onToggle }: { liked: boolean; count: number
 // its replies become the comments. Nested replies are never inlined here.
 function CommentItem({ comment, postId }: { comment: CommentData; postId: number }) {
   const navigate = useNavigate();
+  const postBase = usePostBase();
   const [liked, setLiked] = useState(false);
   const [reposted, setReposted] = useState(false);
   const replies = comment.replies ?? [];
@@ -631,7 +632,7 @@ function CommentItem({ comment, postId }: { comment: CommentData; postId: number
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      onClick={() => navigate(`/post/${postId}/comment/${comment.id}`)}
+      onClick={() => navigate(`${postBase}/${postId}/comment/${comment.id}`)}
       className="flex cursor-pointer gap-3 border-b border-gray-stroke/60 pt-3"
     >
       <img

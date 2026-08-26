@@ -20,7 +20,7 @@ export default function MobileTopNav() {
   const { dark: darkMode } = useDarkMode();
   // On a post detail page the left slot becomes a Back button (returns the
   // user to wherever they came from) instead of the menu.
-  const isPostDetail = location.pathname.startsWith("/post/");
+  const isPostDetail = location.pathname.startsWith("/post/") || location.pathname.startsWith("/alt-nav/post/");
   // The profile template (/profile/:slug) also uses a Back button instead of
   // the sidebar menu.
   const isProfileTemplate = location.pathname.startsWith("/profile/");

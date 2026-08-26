@@ -220,6 +220,9 @@ export default function App() {
           <Route path="/alt-nav/reviews" element={<AltNavExpertPage title="Reviews" />} />
           <Route path="/alt-nav/discount-codes" element={<AltNavExpertPage title="Discount Codes" />} />
           <Route path="/alt-nav/analytics" element={<AltNavExpertPage title="Analytics" />} />
+          {/* Post detail inside the alt-nav shell (sidebars persist, no top nav) */}
+          <Route path="/alt-nav/post/:postId" element={<PostDetail />} />
+          <Route path="/alt-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />
