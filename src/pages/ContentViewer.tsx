@@ -2129,7 +2129,7 @@ function SessionDetailView({
 
 // Matches production ButtonSize.LARGE (p-4, 14px) at semibold weight
 const navButtonBase =
-  "flex shrink-0 items-center gap-2 rounded-full md:rounded-lg p-4 text-[0.875rem] font-semibold leading-tight";
+  "flex shrink-0 items-center gap-2 rounded-full p-4 text-[0.875rem] font-semibold leading-tight";
 
 function CourseViewerSectionNav({
   prevSectionLink,
@@ -2147,21 +2147,26 @@ function CourseViewerSectionNav({
   totalSections: number;
 }) {
   return (
-    <div className="relative bg-[#F9F8F3] px-4 pb-[calc(1rem_+_env(safe-area-inset-bottom))] md:px-6">
+    <div className="relative bg-[#F9F8F3] px-4 pb-[calc(1rem_+_env(safe-area-inset-bottom))] md:px-6 md:pb-8">
       <div className="pointer-events-none absolute inset-x-0 bottom-full h-16 bg-gradient-to-b from-transparent to-[#F9F8F3]" />
       <div className="relative mx-auto flex w-full max-w-[1280px] items-center justify-between gap-3">
+      {/* Below md, Back is hidden entirely when there's no previous section
+          (see the disabled span below), so Next fills the full width. The
+          200px cap only kicks in on mobile/tablet once both buttons are
+          actually shown together — it always applies at md+ since the
+          disabled Back placeholder keeps both slots visible there. */}
       {prevSectionLink ? (
         <Link
           to={prevSectionLink}
           onClick={onNavigate}
-          className={`${navButtonBase} flex-1 justify-center md:flex-none border border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
+          className={`${navButtonBase} flex-1 justify-center max-w-[200px] border border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
         >
           <IconChevronLeft className="size-5" />
           Back
         </Link>
       ) : (
         <span
-          className={`${navButtonBase} flex-1 justify-center md:flex-none cursor-not-allowed border border-leland-gray-stroke bg-white text-leland-gray-dark opacity-40`}
+          className={`${navButtonBase} hidden flex-1 justify-center md:flex md:max-w-[200px] cursor-not-allowed border border-leland-gray-stroke bg-white text-leland-gray-dark opacity-40`}
           aria-hidden
         >
           <IconChevronLeft className="size-5" />
@@ -2172,14 +2177,14 @@ function CourseViewerSectionNav({
         <Link
           to={nextSectionLink}
           onClick={() => { onNext(); onNavigate(); }}
-          className={`${navButtonBase} flex-1 justify-center md:flex-none border border-leland-primary bg-leland-primary text-leland-on-primary-text hover:bg-leland-primary-hover hover:border-leland-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
+          className={`${navButtonBase} flex-1 justify-center md:max-w-[200px] ${prevSectionLink ? "max-w-[200px]" : ""} border border-leland-primary bg-leland-primary text-leland-on-primary-text hover:bg-leland-primary-hover hover:border-leland-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
         >
           Next
           <IconChevronRight className="size-5" />
         </Link>
       ) : (
         <span
-          className={`${navButtonBase} flex-1 justify-center md:flex-none cursor-not-allowed border border-leland-primary bg-leland-primary text-leland-on-primary-text opacity-40`}
+          className={`${navButtonBase} flex-1 justify-center md:max-w-[200px] ${prevSectionLink ? "max-w-[200px]" : ""} cursor-not-allowed border border-leland-primary bg-leland-primary text-leland-on-primary-text opacity-40`}
           aria-hidden
         >
           Next
@@ -2229,6 +2234,11 @@ export default function ContentViewer() {
   const [showRecording, setShowRecording] = useState(false);
   const [lessonShowRecording, setLessonShowRecording] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [feedbackThumb, setFeedbackThumb] = useState<"yes" | "no" | null>(null);
+  const openFeedbackModal = (thumb?: "yes" | "no") => {
+    setFeedbackThumb(thumb ?? null);
+    setFeedbackModalOpen(true);
+  };
   const [hasSpent5Min, setHasSpent5Min] = useState(false);
   const engagementTriggered = useRef(false);
   const navigatedViaButtons = useRef(false);
@@ -2297,24 +2307,29 @@ export default function ContentViewer() {
 
   // Auto-open the feedback modal when the user reaches 80% of the lesson
   // (by section navigation) and has spent at least 5 minutes, or when they
-  // arrive at the last section. Fires at most once per page load.
+  // arrive at the last section. Fires at most once per page load. Skipped in
+  // "Before you begin" — it's setup, not a lesson, so it shouldn't ask for
+  // feedback.
   useEffect(() => {
-    if (engagementTriggered.current || feedbackModalOpen) return;
+    if (lesson.id === "start-here" || engagementTriggered.current || feedbackModalOpen) return;
     const progressPct = (sectionIdx + 1) / visibleSections.length;
     const isLastSection = sectionIdx === visibleSections.length - 1;
     if ((progressPct >= 0.8 && hasSpent5Min) || isLastSection) {
       engagementTriggered.current = true;
       setFeedbackModalOpen(true);
     }
-  }, [sectionIdx, visibleSections.length, hasSpent5Min, feedbackModalOpen]);
+  }, [lesson.id, sectionIdx, visibleSections.length, hasSpent5Min, feedbackModalOpen]);
 
   // Opening the drawer/sidebar jumps to the lesson + section the user is on.
+  // "nearest" only scrolls when the row is actually out of view, so opening
+  // near the top of the list (e.g. the first few sections) doesn't drag the
+  // course title/header off-screen for no reason.
   useEffect(() => {
     if (!sidebarOpen) return;
     const timer = setTimeout(() => {
       document
         .getElementById(`sidebar-section-${section.id}`)
-        ?.scrollIntoView({ block: "center" });
+        ?.scrollIntoView({ block: "nearest" });
     }, 60);
     return () => clearTimeout(timer);
   }, [sidebarOpen]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -2386,14 +2401,19 @@ export default function ContentViewer() {
         >
           <IconArrowLeft className="size-5" aria-hidden />
         </Link>
-        <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5 py-1">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open menu"
+          className="flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-lg py-1 hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+        >
           <span className="w-full truncate text-center leland-heading-base font-semibold text-leland-gray-dark">
             {COURSE_TITLE_FULL}
           </span>
           <span className="leland-paragraph-sm text-leland-gray-light">
             {breadcrumbLabel} / {sectionIdx + 1} of {visibleSections.length}
           </span>
-        </div>
+        </button>
         <button
           type="button"
           onClick={() => setSidebarOpen(true)}
@@ -2581,7 +2601,7 @@ export default function ContentViewer() {
                 <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
                   <LessonPageProvider
                     actions={{
-                      onShareFeedback: () => setFeedbackModalOpen(true),
+                      onShareFeedback: openFeedbackModal,
                       onOpenCalendar: () => setAddToCalendarModalOpen(true),
                       liveSessionVariant: options.liveSessionVariant,
                       liveProgram: options.liveProgram,
@@ -2602,7 +2622,7 @@ export default function ContentViewer() {
                     {/* Larger gap-10 between product-level blocks (top banner,
                         bottom feedback) and the lesson content zone; gap-6
                         within the content zone. */}
-                    <div className="mx-auto flex w-full max-w-[720px] flex-col gap-10 px-4 md:px-8 pt-4">
+                    <div className="mx-auto flex w-full max-w-[720px] flex-col gap-10 px-4 md:px-8 pt-8 md:pt-4">
                       <div className="flex flex-col gap-8">
                         {!options.noHeader && (
                           <p className="leland-paragraph-base font-medium text-leland-gray-dark">
@@ -2623,39 +2643,41 @@ export default function ContentViewer() {
                               {section.description}
                             </p>
                           ) : null}
-                          <div className="flex flex-wrap items-center gap-2">
-                            {sectionIdx === 0 && section.meta?.minsTotal ? (
-                              <Tag
-                                text={`${section.meta.minsTotal} mins total`}
-                                tagColor={TagColor.GRAY}
-                                size={TagSize.LARGE}
-                                LeftIcon={IconClock}
-                              />
-                            ) : !section.meta?.minsTotal && section.durationMin ? (
-                              <Tag
-                                text={`${section.durationMin} min`}
-                                tagColor={TagColor.GRAY}
-                                size={TagSize.LARGE}
-                                LeftIcon={IconClock}
-                              />
-                            ) : null}
-                            {sectionIdx === 0 && section.meta?.builds ? (
-                              <Tag
-                                text={`${section.meta.builds} builds`}
-                                tagColor={TagColor.GRAY}
-                                size={TagSize.LARGE}
-                                LeftIcon={IconLightning}
-                              />
-                            ) : null}
-                            {sectionIdx === 0 && section.meta?.model ? (
-                              <Tag
-                                text={section.meta.model}
-                                tagColor={TagColor.GRAY}
-                                size={TagSize.LARGE}
-                                LeftIcon={IconLightning}
-                              />
-                            ) : null}
-                          </div>
+                          {(sectionIdx === 0 && (section.meta?.minsTotal || section.meta?.builds || section.meta?.model)) || section.durationMin ? (
+                            <div className="flex flex-wrap items-center gap-2">
+                              {sectionIdx === 0 && section.meta?.minsTotal ? (
+                                <Tag
+                                  text={`${section.meta.minsTotal} mins total`}
+                                  tagColor={TagColor.GRAY}
+                                  size={TagSize.LARGE}
+                                  LeftIcon={IconClock}
+                                />
+                              ) : !section.meta?.minsTotal && section.durationMin ? (
+                                <Tag
+                                  text={`${section.durationMin} min`}
+                                  tagColor={TagColor.GRAY}
+                                  size={TagSize.LARGE}
+                                  LeftIcon={IconClock}
+                                />
+                              ) : null}
+                              {sectionIdx === 0 && section.meta?.builds ? (
+                                <Tag
+                                  text={`${section.meta.builds} builds`}
+                                  tagColor={TagColor.GRAY}
+                                  size={TagSize.LARGE}
+                                  LeftIcon={IconLightning}
+                                />
+                              ) : null}
+                              {sectionIdx === 0 && section.meta?.model ? (
+                                <Tag
+                                  text={section.meta.model}
+                                  tagColor={TagColor.GRAY}
+                                  size={TagSize.LARGE}
+                                  LeftIcon={IconLightning}
+                                />
+                              ) : null}
+                            </div>
+                          ) : null}
                         </div>
                         <BlockList blocks={section.blocks} />
                       </div>
@@ -2688,7 +2710,7 @@ export default function ContentViewer() {
               ) : section.kind === 'interactive' ? (
                 <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
                   {breadcrumbBar}
-                  <div className={`mx-auto w-full max-w-[720px] px-4 md:px-8 pb-16 ${options.noHeader ? "pt-4" : "pt-10"}`}>
+                  <div className={`mx-auto w-full max-w-[720px] px-4 md:px-8 pb-8 md:pb-16 ${options.noHeader ? "pt-8 md:pt-4" : "pt-8 md:pt-10"}`}>
                     <GettingStartedFlow
                       key={`${lesson.id}/${section.id}`}
                       flow={section.flow}
@@ -2727,7 +2749,11 @@ export default function ContentViewer() {
               )}
               <CourseFeedbackModal
                 open={feedbackModalOpen}
-                onOpenChange={setFeedbackModalOpen}
+                onOpenChange={(next) => {
+                  setFeedbackModalOpen(next);
+                  if (!next) setFeedbackThumb(null);
+                }}
+                initialThumb={feedbackThumb}
               />
               {(lesson.id !== "start-here" || section.kind === "blocks" || section.kind === "interactive") && (
                 <CourseViewerSectionNav

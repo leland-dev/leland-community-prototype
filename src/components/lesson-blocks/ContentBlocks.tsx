@@ -280,16 +280,28 @@ export function CodeBlock({ block }: { block: CodeBlockType }) {
 // and gets built-in keyboard/accessibility support.
 export function AccordionBlock({ block }: { block: AccordionBlockType }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl bg-leland-beige">
+    <div className="flex flex-col overflow-hidden rounded-2xl bg-leland-gray-hover">
       {block.rows.map((row, i) => (
-        <details key={i} className={`group px-6 py-2 ${i > 0 ? "border-t-[1.5px] border-white" : ""}`}>
-          <summary className="flex cursor-pointer list-none items-center gap-2 py-4 [&::-webkit-details-marker]:hidden">
-            <span className={`flex-1 ${H3_CLASS}`}>{row.title}</span>
-            <span className="flex shrink-0 items-center justify-center rounded-lg bg-leland-gray-hover p-2.5">
+        <details key={i} className={`group px-6 ${i > 0 ? "border-t-[1.5px] border-white" : ""}`}>
+          <summary className="flex cursor-pointer list-none items-center gap-2 py-3 [&::-webkit-details-marker]:hidden">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
+              {row.icon ? (
+                <span className="flex shrink-0 items-center py-2">
+                  <IconInfo className="size-6 text-leland-gray-dark" />
+                </span>
+              ) : null}
+              <span className="min-w-0 flex-1 py-2 leland-paragraph-lg font-semibold text-leland-gray-dark">
+                {row.title}
+              </span>
+            </div>
+            <span className="flex shrink-0 items-center justify-center rounded-lg bg-black/5 p-2.5">
               <IconChevronDown className="size-3.5 text-leland-gray-dark transition-transform group-open:rotate-180" />
             </span>
           </summary>
-          <div className="pb-4">
+          <div>
+            <hr className="border-t border-white" />
+          </div>
+          <div className="pt-6 pb-8">
             <Prose body={row.body} className="gap-2" />
           </div>
         </details>
@@ -384,10 +396,10 @@ export function RadioCardGroup({ block }: { block: RadioCardGroupBlockType }) {
               key={opt.value}
               type="button"
               onClick={() => setSelected(isSelected ? null : opt.value)}
-              className={`flex w-full items-center gap-3 rounded-lg border-2 p-5 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
+              className={`flex w-full items-center gap-3 rounded-lg p-5 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
                 isSelected
-                  ? "border-leland-gray-dark bg-white"
-                  : "border-leland-gray-stroke bg-white hover:bg-leland-gray-hover"
+                  ? "border-[1.5px] border-leland-gray-dark bg-white"
+                  : "border border-leland-gray-stroke bg-white hover:bg-leland-gray-hover"
               }`}
             >
               {Icon ? (
@@ -396,7 +408,7 @@ export function RadioCardGroup({ block }: { block: RadioCardGroupBlockType }) {
                 </div>
               ) : null}
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="leland-paragraph-lg font-semibold text-leland-gray-dark">{opt.label}</span>
+                <span className="leland-paragraph-lg font-medium text-leland-gray-dark">{opt.label}</span>
                 {opt.subtext ? (
                   <span className="leland-paragraph-base text-leland-gray-light">{opt.subtext}</span>
                 ) : null}

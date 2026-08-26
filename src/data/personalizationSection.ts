@@ -12,7 +12,6 @@ export const PERSONALIZATION_SECTION: BlockSection = {
     {
       kind: "radioCardGroup",
       id: "employment",
-      eyebrow: "About you",
       question: "What best describes your current situation?",
       options: [
         { value: "full-time", label: "Employed full-time" },
@@ -22,6 +21,7 @@ export const PERSONALIZATION_SECTION: BlockSection = {
         { value: "student", label: "Student" },
       ],
     },
+    { kind: "divider" },
     {
       kind: "toggleChipGroup",
       id: "role",
@@ -43,6 +43,7 @@ export const PERSONALIZATION_SECTION: BlockSection = {
         { value: "other", label: "Other" },
       ],
     },
+    { kind: "divider" },
     {
       kind: "toggleChipGroup",
       id: "industry",
@@ -63,10 +64,10 @@ export const PERSONALIZATION_SECTION: BlockSection = {
         { value: "other", label: "Other" },
       ],
     },
+    { kind: "divider" },
     {
       kind: "toggleChipGroup",
       id: "motivation",
-      eyebrow: "Your goals",
       question: "Why are you joining the AI Builders program?",
       subtext: "Select everything that applies.",
       multiple: true,
@@ -79,10 +80,10 @@ export const PERSONALIZATION_SECTION: BlockSection = {
         { value: "other", label: "Other" },
       ],
     },
+    { kind: "divider" },
     {
       kind: "radioCardGroup",
       id: "ai-sentiment",
-      eyebrow: "Your AI experience",
       question: "How do you feel AI is performing for you so far?",
       options: [
         { value: "great", label: "Great", subtext: "It's already saving me significant time" },
@@ -91,6 +92,7 @@ export const PERSONALIZATION_SECTION: BlockSection = {
         { value: "not-yet", label: "Haven't really used AI yet" },
       ],
     },
+    { kind: "divider" },
     {
       kind: "toggleChipGroup",
       id: "ai-use",

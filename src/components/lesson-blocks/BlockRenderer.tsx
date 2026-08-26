@@ -67,9 +67,11 @@ export function BlockRenderer({ block, allowH1 = true }: { block: Block; allowH1
   }
 }
 
+const isTextBlock = (block: Block) => block.kind === "markdown";
+
 export function BlockList({
   blocks,
-  className = "flex flex-col gap-8",
+  className = "flex flex-col",
   allowH1 = true,
 }: {
   blocks: Block[];
@@ -78,9 +80,18 @@ export function BlockList({
 }) {
   return (
     <div className={className}>
-      {blocks.map((block, i) => (
-        <BlockRenderer key={i} block={block} allowH1={allowH1} />
-      ))}
+      {blocks.map((block, i) => {
+        // Consecutive text blocks read as one flow of prose (16px); a gap
+        // touching any non-text block (image, callout, accordion, etc.) gets
+        // full separation (32px) so it reads as a distinct element.
+        const spacing =
+          i === 0 ? "" : isTextBlock(block) && isTextBlock(blocks[i - 1]) ? "mt-4" : "mt-8";
+        return (
+          <div key={i} className={spacing}>
+            <BlockRenderer block={block} allowH1={allowH1} />
+          </div>
+        );
+      })}
     </div>
   );
 }

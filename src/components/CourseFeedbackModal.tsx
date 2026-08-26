@@ -24,8 +24,9 @@ const THUMBS: { id: Thumb; emoji: string; label: string }[] = [
 const CourseFeedbackModalImpl = ({
   open,
   onOpenChange,
-}: ModalProps) => {
-  const [thumb, setThumb] = useState<Thumb | null>(null);
+  initialThumb = null,
+}: ModalProps & { initialThumb?: Thumb | null }) => {
+  const [thumb, setThumb] = useState<Thumb | null>(initialThumb);
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
 

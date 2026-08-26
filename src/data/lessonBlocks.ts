@@ -115,6 +115,7 @@ export type CodeBlock = {
 export type AccordionRow = {
   title: string;
   body: Markdown;
+  icon?: boolean;
 };
 
 export type AccordionBlock = {

@@ -12,7 +12,10 @@ import {
   IconPlayVideo,
   IconQuestion,
   IconShare,
-  IconStarOutline,
+  IconThumbsDown,
+  IconThumbsDownFilled,
+  IconThumbsUpPlain,
+  IconThumbsUpPlainFilled,
   IconX,
 } from "../leland";
 
@@ -508,32 +511,57 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
   }
 }
 
-// Bottom-of-page action row: a top divider with 32px vertical padding and
-// medium gray-fill buttons mirroring the header actions (Get help / Feedback /
-// Share). Subtle, page-level actions separated from the lesson content.
+// Bottom-of-page action row: a top divider with 32px vertical padding.
+// Get help / Share sit on the left; "Was this section helpful?" with Yes/No
+// buttons is right-aligned on desktop and stacks below on mobile.
 export function LessonFooterActions() {
   const { onShareFeedback } = useLessonPage();
+  const [selectedThumb, setSelectedThumb] = useState<"yes" | "no" | null>(null);
   return (
-    <div className="-mx-3 flex flex-wrap items-center gap-1 border-t border-leland-gray-stroke pt-8 pb-16">
-      <Button
-        label="Get help"
-        buttonColor={ButtonColor.REVEAL}
-        size={ButtonSize.MEDIUM}
-        LeftIcon={IconQuestion}
-      />
-      <Button
-        label="Feedback"
-        buttonColor={ButtonColor.REVEAL}
-        size={ButtonSize.MEDIUM}
-        LeftIcon={IconStarOutline}
-        onClick={onShareFeedback}
-      />
-      <Button
-        label="Share"
-        buttonColor={ButtonColor.REVEAL}
-        size={ButtonSize.MEDIUM}
-        LeftIcon={IconShare}
-      />
+    <div className="flex flex-col gap-6 border-t border-leland-gray-stroke pt-8 pb-8 md:pb-16 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          label="Get help"
+          buttonColor={ButtonColor.GRAY}
+          size={ButtonSize.MEDIUM}
+          LeftIcon={IconQuestion}
+        />
+        <Button
+          label="Share"
+          buttonColor={ButtonColor.GRAY}
+          size={ButtonSize.MEDIUM}
+          LeftIcon={IconShare}
+        />
+      </div>
+      <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+        <span className="leland-paragraph-base text-leland-gray-dark">
+          Was this section helpful?
+        </span>
+        <div className="-mx-3 flex items-center gap-0">
+          <Button
+            label="No"
+            ariaLabel="Not helpful"
+            buttonColor={ButtonColor.REVEAL}
+            size={ButtonSize.MEDIUM}
+            LeftIcon={selectedThumb === "no" ? IconThumbsDownFilled : IconThumbsDown}
+            onClick={() => {
+              setSelectedThumb("no");
+              onShareFeedback("no");
+            }}
+          />
+          <Button
+            label="Yes"
+            ariaLabel="Helpful"
+            buttonColor={ButtonColor.REVEAL}
+            size={ButtonSize.MEDIUM}
+            LeftIcon={selectedThumb === "yes" ? IconThumbsUpPlainFilled : IconThumbsUpPlain}
+            onClick={() => {
+              setSelectedThumb("yes");
+              onShareFeedback("yes");
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

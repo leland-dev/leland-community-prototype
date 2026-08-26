@@ -92,7 +92,7 @@ export function AddToCalendarFlow({ onComplete }: FlowProps) {
     <div className="flex flex-col gap-8">
       {/* Heading */}
       <div className="flex flex-col gap-4">
-        <h1 className="font-season text-heading-5xl font-normal text-leland-gray-dark">
+        <h1 className="font-season text-heading-4xl md:text-heading-5xl font-normal text-leland-gray-dark">
           Live sessions
         </h1>
         <p className="leland-paragraph-lg text-leland-gray-light">
@@ -101,11 +101,11 @@ export function AddToCalendarFlow({ onComplete }: FlowProps) {
       </div>
 
       {/* Calendar card */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-leland-gray-stroke bg-white px-8 pb-6 pt-8">
+      <div className="flex flex-col gap-4 rounded-2xl border border-leland-gray-stroke bg-white px-6 py-6 md:px-8 md:pb-6 md:pt-8">
         <p className="text-[19px] font-semibold leading-snug text-leland-gray-dark">
           Add all upcoming sessions to...
         </p>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 md:flex-row">
           <CalendarButton icon={<GoogleCalIcon />} label="Google Calendar" onClick={handleAction} />
           <CalendarButton icon={<OutlookIcon />} label="Outlook" onClick={handleAction} />
           <CalendarButton icon={<AppleCalIcon />} label="Apple Calendar" onClick={handleAction} />
