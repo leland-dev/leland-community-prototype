@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
-import { LiveReplayCard } from "./Home";
+import { CaptionClip, LiveReplayCard } from "./Home";
 import type { Post, ImageEntry } from "./Home";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import articlePhoto from "../assets/photography/talking.jpeg";
@@ -23,7 +23,7 @@ type EditorSnap = {
   clipEnd: number;
   viewStart: number;
   viewEnd: number;
-  cropAspect: "Original" | "16:9" | "1:1" | "9:16";
+  cropAspect: "Original" | "16:9" | "1:1" | "4:5" | "9:16";
   cropX: number;
   cropY: number;
   captionsOn: boolean;
@@ -74,6 +74,37 @@ const RECORDINGS = [
 
 // Auto-generated highlight clips, chopped from the coach's livestreams and
 // served back ready to post — short and vertical.
+// Footage-free caption clip: the LLM pairs the best audience question with
+// the host's answer and renders it as animated type over brand yellow, using
+// the real session audio — no need for the host to look camera-ready.
+const CAPTION_CLIP = {
+  id: "clip-cap",
+  title: "What's the best way to make my resume stand out?",
+  from: "Resume teardown",
+  duration: "0:18",
+  reason: "Best questions of the session",
+  segments: [
+    {
+      q: "What's the best way to make my resume stand out?",
+      a: "One story. Every bullet earns its place in it.",
+      qAudio: "/audio/clip-q.m4a",
+      aAudio: "/audio/clip-a.m4a",
+    },
+    {
+      q: "Is a non-target school a dealbreaker?",
+      a: "No. Just lead with outcomes nobody can argue with.",
+      qAudio: "/audio/clip-q2.m4a",
+      aAudio: "/audio/clip-a2.m4a",
+    },
+    {
+      q: "How many bullets should each role get?",
+      a: "Three, max. If everything's important, nothing is.",
+      qAudio: "/audio/clip-q3.m4a",
+      aAudio: "/audio/clip-a3.m4a",
+    },
+  ],
+};
+
 // Each clip is anchored on the question that was asked — an LLM reads the
 // transcript and picks the moments worth posting; `reason` says why.
 const CLIPS = [
@@ -108,7 +139,7 @@ const toSeconds = (clock: string) => {
 const toClock = (secs: number) => `${Math.floor(secs / 60)}:${String(Math.round(secs % 60)).padStart(2, "0")}`;
 
 const editedLabel = (ts: number) =>
-  `Edited ${new Date(ts).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`;
+  new Date(ts).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 // ─── Calendar sheet ────────────────────
 
@@ -335,7 +366,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const [liveStep, setLiveStep] = useState<"list" | "edit" | "share">("list");
   const [liveTab, setLiveTab] = useState<"Livestreams" | "Clips">("Livestreams");
   const [cropGrid, setCropGrid] = useState(false);
-  const [cropAspect, setCropAspect] = useState<"Original" | "16:9" | "1:1" | "9:16">("Original");
+  const [cropAspect, setCropAspect] = useState<"Original" | "16:9" | "1:1" | "4:5" | "9:16">("Original");
   const [cropX, setCropX] = useState(50);
   const [cropY, setCropY] = useState(50);
   const [editorPlaying, setEditorPlaying] = useState(true);
@@ -353,7 +384,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   // Zoomed window of the trim strip (Apple-style: trimming re-fits the view).
   const [viewStart, setViewStart] = useState(0);
   const [viewEnd, setViewEnd] = useState(100);
-  const [trimDrag, setTrimDrag] = useState<"start" | "end" | null>(null);
+  const [trimDrag, setTrimDrag] = useState<"start" | "end" | "move" | null>(null);
   const [editorHistory, setEditorHistory] = useState<EditorSnap[]>([]);
   const replayCaptionRef = useRef<HTMLTextAreaElement>(null);
   const articleTitleRef = useRef<HTMLTextAreaElement>(null);
@@ -372,8 +403,8 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [draftsOpen, setDraftsOpen] = useState(openDraftsOnMount ?? false);
   const [draftsTab, setDraftsTab] = useState<DraftTab>(draftsTabOnMount ?? "Drafts");
-  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [discardOpen, setDiscardOpen] = useState(false);
+  const [confirmTrash, setConfirmTrash] = useState<{ kind: "draft" | "scheduled"; id: number } | null>(null);
   const [linkOpen, setLinkOpen] = useState(false);
   const [styleMenuOpen, setStyleMenuOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
@@ -681,6 +712,24 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
         },
       };
     }
+    if (mode === "live" && selectedClip === CAPTION_CLIP.id) {
+      return {
+        ...base,
+        type: "live",
+        body: replayCaption.trim() || CAPTION_CLIP.title,
+        live: {
+          variant: "tiktok",
+          title: CAPTION_CLIP.title,
+          topic: "Clip",
+          videoId: "1cfIAVasP6E",
+          viewers: 0,
+          replay: true,
+          duration: CAPTION_CLIP.duration,
+          horizontal: true,
+          captionCard: CAPTION_CLIP.segments,
+        },
+      };
+    }
     if (mode === "live" && selectedClip !== null) {
       const clip = CLIPS.find(c => c.id === selectedClip) ?? CLIPS[0];
       return {
@@ -883,7 +932,8 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             <button
               onClick={() => {
                 if (mode === "live" && liveStep === "share") {
-                  setLiveStep("edit");
+                  if (selectedClip === CAPTION_CLIP.id) { setSelectedClip(null); setLiveStep("list"); }
+                  else setLiveStep("edit");
                 } else if (mode === "live" && liveStep === "edit") {
                   setSelectedRecording(null);
                   setSelectedClip(null);
@@ -925,7 +975,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                       </button>
                       {isDirty ? (
                         <button
-                          onClick={() => { setMenuOpen(false); setDraftsTab("Drafts"); setConfirmDeleteId(null); setDraftsOpen(true); }}
+                          onClick={() => { setMenuOpen(false); setDraftsTab("Drafts"); setDraftsOpen(true); }}
                           className="flex w-[calc(100%-8px)] mx-1 cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover active:bg-gray-hover"
                         >
                           <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /></svg>
@@ -955,7 +1005,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               </button>
             ) : !isDirty ? (
               <button
-                onClick={() => { setDraftsTab("Drafts"); setConfirmDeleteId(null); setDraftsOpen(true); }}
+                onClick={() => { setDraftsTab("Drafts"); setDraftsOpen(true); }}
                 className="inline-flex h-10 cursor-pointer items-center whitespace-nowrap rounded-full bg-gray-100 px-4 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-200"
               >
                 Drafts
@@ -1315,6 +1365,31 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                       Highlights cut from your livestreams.
                     </p>
                     <div className="mt-4 space-y-3">
+                      <button
+                        onClick={() => { setSelectedClip(CAPTION_CLIP.id); setSelectedRecording(null); setReplayCaption(c => c.trim() ? c : CAPTION_CLIP.title); setLiveStep("share"); }}
+                        className="w-full cursor-pointer rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200/60"
+                      >
+                        <div className="flex gap-3.5">
+                          <div className="relative h-[124px] w-[88px] shrink-0 overflow-hidden rounded-xl bg-[#FFD96F] p-2.5">
+                            <p className="text-[8px] font-bold uppercase tracking-[0.1em] text-[#111]/45">Q</p>
+                            <p className="mt-0.5 font-serif text-[11px] leading-[1.35] text-[#111]">{CAPTION_CLIP.segments[0].q}</p>
+                            <span className="absolute bottom-1.5 left-1.5 rounded bg-black/70 px-1 py-0.5 text-[10px] font-semibold text-white">{CAPTION_CLIP.duration}</span>
+                          </div>
+                          <div className="flex min-w-0 flex-1 flex-col">
+                            <div className="flex items-start gap-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="line-clamp-2 text-[15px] font-semibold leading-snug text-gray-dark">{CAPTION_CLIP.title}</p>
+                                <p className="mt-1 text-[12px] text-gray-light">From {CAPTION_CLIP.from} · Caption clip</p>
+                              </div>
+                              <svg className="mt-1 h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+                            </div>
+                            <div className="mt-auto flex items-center gap-1.5 text-[13px]">
+                              <svg className="h-3.5 w-3.5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.9 5.7a2 2 0 0 0 1.3 1.3L21 11l-5.8 2a2 2 0 0 0-1.3 1.3L12 20l-1.9-5.7a2 2 0 0 0-1.3-1.3L3 11l5.8-2a2 2 0 0 0 1.3-1.3L12 2z"/></svg>
+                              <span className="font-medium text-gray-dark">{CAPTION_CLIP.reason}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </button>
                       {CLIPS.map(clip => (
                         <button
                           key={clip.id}
@@ -1382,6 +1457,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 setEditorHistory(h => h.slice(0, -1));
               };
               const dragHandle = (which: "start" | "end") => (e: React.PointerEvent<HTMLDivElement>) => {
+                e.stopPropagation();
                 e.currentTarget.setPointerCapture(e.pointerId);
                 pushEditorSnap();
                 setTrimDrag(which);
@@ -1414,6 +1490,36 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 window.addEventListener("pointermove", move);
                 window.addEventListener("pointerup", up);
               };
+              // Drag the film to pan it UNDER the stationary yellow box —
+              // view and selection slide together, so the box never moves.
+              const dragFilm = (e: React.PointerEvent<HTMLDivElement>) => {
+                if (viewEnd - viewStart >= 99.9) return;
+                e.currentTarget.setPointerCapture(e.pointerId);
+                pushEditorSnap();
+                setTrimDrag("move");
+                const startX = e.clientX;
+                const v0 = viewStart;
+                const v1 = viewEnd;
+                const s0 = clipStart;
+                const len = clipEnd - clipStart;
+                const move = (ev: PointerEvent) => {
+                  const r = trimTrackRef.current?.getBoundingClientRect();
+                  if (!r) return;
+                  const dRaw = -((ev.clientX - startX) / r.width) * (v1 - v0);
+                  const d = Math.max(-v0, Math.min(100 - v1, dRaw));
+                  setViewStart(v0 + d);
+                  setViewEnd(v1 + d);
+                  setClipStart(s0 + d);
+                  setClipEnd(s0 + len + d);
+                };
+                const up = () => {
+                  window.removeEventListener("pointermove", move);
+                  window.removeEventListener("pointerup", up);
+                  setTrimDrag(null);
+                };
+                window.addEventListener("pointermove", move);
+                window.addEventListener("pointerup", up);
+              };
               // True-to-post crop: the stage itself takes the chosen ratio and the
               // oversized video is dragged into place behind it (object-position pan).
               // Pixel dims + a CSS width/height transition resize the box smoothly
@@ -1421,10 +1527,13 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               const stageW = Math.min(window.innerWidth, 600) - 32;
               const stageDims =
                 cropAspect === "16:9" ? { width: stageW, height: (stageW * 9) / 16 }
-                : cropAspect === "1:1" ? { width: 280, height: 280 }
-                : cropAspect === "9:16" ? { width: (window.innerHeight * 0.52 * 9) / 16, height: window.innerHeight * 0.52 }
+                : cropAspect === "1:1" ? { width: stageW, height: stageW }
+                : cropAspect === "4:5" ? { width: stageW * 0.8, height: stageW }
                 : selectedClip !== null ? { width: 256, height: (256 * 13) / 9 }
                 : { width: stageW, height: (stageW * 3) / 4 };
+              // Tallest possible stage for this media — the box never resizes,
+              // only the video inside morphs.
+              const stageBoxH = selectedClip !== null ? Math.max((256 * 13) / 9, stageW) : stageW;
               const dragVideo = (e: React.PointerEvent<HTMLDivElement>) => {
                 if (!cropGrid) return;
                 e.preventDefault();
@@ -1486,6 +1595,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
 
                   {/* Preview — crop chips render below, so toggling never shifts it */}
                   <div className="shrink-0 px-4">
+                    <div className="flex items-center justify-center" style={{ height: stageBoxH }}>
                     <div
                       data-crop-stage
                       onPointerDown={dragVideo}
@@ -1533,6 +1643,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                         </div>
                       ) : null}
                     </div>
+                    </div>
                   </div>
 
                   {/* Crop aspect chips slide open; everything below eases down */}
@@ -1547,7 +1658,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                         className="shrink-0 overflow-hidden"
                       >
                         <div className="flex items-center justify-center gap-2 pb-1 pt-4">
-                          {(["Original", "16:9", "1:1", "9:16"] as const).map(a => (
+                          {(["Original", "16:9", "1:1", "4:5"] as const).map(a => (
                             <button
                               key={a}
                               onClick={() => { pushEditorSnap(); setCropAspect(a); setCropX(50); setCropY(50); }}
@@ -1686,7 +1797,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z" /></svg>
                       )}
                     </button>
-                    <div ref={trimTrackRef} className="relative h-14 flex-1 touch-none select-none">
+                    <div ref={trimTrackRef} onPointerDown={dragFilm} className="relative h-14 flex-1 cursor-grab touch-none select-none active:cursor-grabbing">
                       <div className="absolute inset-x-0 inset-y-[3px] flex overflow-hidden rounded-xl bg-gray-100">
                         {[0, 1, 2, 3, 4, 5].map(i => (
                           <video
@@ -1726,7 +1837,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                         <svg className="h-3.5 w-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
                       </div>
                       {/* Trim time pops up over the handle being dragged */}
-                      {trimDrag ? (
+                      {trimDrag && trimDrag !== "move" ? (
                         <div
                           className="pointer-events-none absolute -top-9 z-20 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-dark px-2 py-1 text-[11px] font-semibold tabular-nums text-white"
                           style={{ left: `${Math.min(96, Math.max(4, trimDrag === "start" ? dispStart : dispEnd))}%` }}
@@ -1762,7 +1873,8 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
           ) : (
             /* Step 3 — caption + exactly the card that lands in the feed */
             (() => {
-              const clip = selectedClip !== null ? CLIPS.find(c => c.id === selectedClip)! : null;
+              const captionSel = selectedClip === CAPTION_CLIP.id;
+              const clip = selectedClip !== null && !captionSel ? CLIPS.find(c => c.id === selectedClip)! : null;
               const isUpload = selectedRecording === "upload" && uploadedVideo !== null;
               const rec = RECORDINGS.find(r => r.id === selectedRecording) ?? RECORDINGS[0];
               const srcV = clip ? clip.src : isUpload ? uploadedVideo! : rec.src;
@@ -1782,7 +1894,11 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                     rows={1}
                     className="zoom-ok mt-3 w-full resize-none text-[19px] leading-[1.45] text-gray-dark outline-none placeholder:text-gray-light"
                   />
-                  {clip || cropAspect === "9:16" ? (
+                  {captionSel ? (
+                    <div className="mt-3 w-[290px] overflow-hidden rounded-xl">
+                      <CaptionClip segments={CAPTION_CLIP.segments} className="aspect-[4/5] w-full" />
+                    </div>
+                  ) : clip || cropAspect === "9:16" ? (
                     <div className="relative mt-3 w-[230px] overflow-hidden rounded-xl bg-black">
                       <video src={srcV} autoPlay muted loop playsInline className={`${cropAspect === "9:16" ? "aspect-[9/16]" : "aspect-[9/13]"} w-full object-cover`} style={{ objectPosition: `${cropX}% ${cropY}%` }} />
                       <div className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-black/25 px-2 py-1 backdrop-blur-sm">
@@ -1924,7 +2040,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                   {DRAFT_TABS.map(tab => (
                     <button
                       key={tab}
-                      onClick={() => { setDraftsTab(tab); setConfirmDeleteId(null); }}
+                      onClick={() => { setDraftsTab(tab); }}
                       className="relative flex-1 cursor-pointer rounded-full py-2.5 text-[14px] font-semibold"
                     >
                       {draftsTab === tab ? (
@@ -1952,35 +2068,22 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                   tabDrafts.length > 0 ? (
                     <div className="space-y-2">
                       {tabDrafts.map(d => (
-                        <div key={d.id} className="flex items-center gap-3 rounded-2xl border border-gray-stroke/70 px-3.5 py-3">
-                          <button onClick={() => loadDraft(d)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left">
-                            <img src={profilePhoto} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
-                            <div className="min-w-0">
-                              <p className="truncate text-[15px] font-medium text-gray-dark">
-                                {d.title || d.text || RECORDINGS.find(r => r.id === d.topic)?.title || stripHtml(d.articleHtml) || "Untitled"}
-                              </p>
-                              <p className="mt-0.5 flex items-center gap-1 text-[12px] text-gray-light">
-                                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-                                {editedLabel(d.editedAt)}{d.mode === "live" ? " · Live" : d.mode === "article" ? " · Article" : ""}
-                              </p>
-                            </div>
+                        <div key={d.id} className="flex items-center gap-3 rounded-2xl bg-gray-100 px-4 py-3.5 transition-colors hover:bg-gray-200/60">
+                          <button onClick={() => loadDraft(d)} className="min-w-0 flex-1 cursor-pointer text-left">
+                            <p className="truncate text-[15px] font-semibold text-gray-dark">
+                              {d.title || d.text || RECORDINGS.find(r => r.id === d.topic)?.title || stripHtml(d.articleHtml) || "Untitled"}
+                            </p>
+                            <p className="mt-0.5 text-[12px] text-gray-light">
+                              {editedLabel(d.editedAt)}{d.mode === "live" ? " · Live" : d.mode === "article" ? " · Article" : ""}
+                            </p>
                           </button>
-                          {confirmDeleteId === d.id ? (
-                            <button
-                              onClick={() => { draftStore.splice(draftStore.indexOf(d), 1); setConfirmDeleteId(null); setStoreVersion(v => v + 1); }}
-                              className="shrink-0 cursor-pointer rounded-full bg-red-50 px-3 py-1.5 text-[13px] font-semibold text-red-500 transition-colors hover:bg-red-100"
-                            >
-                              Delete
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => setConfirmDeleteId(d.id)}
-                              aria-label="Draft options"
-                              className="shrink-0 cursor-pointer rounded-full p-1.5 text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
-                            >
-                              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
-                            </button>
-                          )}
+                          <button
+                            onClick={() => setConfirmTrash({ kind: "draft", id: d.id })}
+                            aria-label="Delete draft"
+                            className="shrink-0 cursor-pointer rounded-full p-2 text-[#D6204C] transition-colors hover:bg-red-50"
+                          >
+                            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -2004,28 +2107,18 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 ) : scheduledStore.length > 0 ? (
                   <div className="space-y-2">
                     {scheduledStore.map(s => (
-                      <div key={s.id} onClick={() => loadScheduled(s)} className="flex cursor-pointer items-center gap-3 rounded-2xl border border-gray-stroke/70 px-3.5 py-3 transition-colors hover:bg-gray-hover">
-                        <img src={profilePhoto} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
+                      <div key={s.id} onClick={() => loadScheduled(s)} className="flex cursor-pointer items-center gap-3 rounded-2xl bg-gray-100 px-4 py-3.5 transition-colors hover:bg-gray-200/60">
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-[15px] font-medium text-gray-dark">{s.snippet || "Untitled"}</p>
+                          <p className="truncate text-[15px] font-semibold text-gray-dark">{s.snippet || "Untitled"}</p>
                           <p className="mt-0.5 text-[12px] text-gray-light">{s.mode === "article" ? "Article · " : ""}Posts {s.scheduledFor}</p>
                         </div>
-                        {confirmDeleteId === s.id ? (
-                          <button
-                            onClick={e => { e.stopPropagation(); scheduledStore.splice(scheduledStore.indexOf(s), 1); setConfirmDeleteId(null); setStoreVersion(v => v + 1); }}
-                            className="shrink-0 cursor-pointer rounded-full bg-red-50 px-3 py-1.5 text-[13px] font-semibold text-red-500 transition-colors hover:bg-red-100"
-                          >
-                            Unschedule
-                          </button>
-                        ) : (
-                          <button
-                            onClick={e => { e.stopPropagation(); setConfirmDeleteId(s.id); }}
-                            aria-label="Scheduled post options"
-                            className="shrink-0 cursor-pointer rounded-full p-1.5 text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
-                          >
-                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
-                          </button>
-                        )}
+                        <button
+                          onClick={e => { e.stopPropagation(); setConfirmTrash({ kind: "scheduled", id: s.id }); }}
+                          aria-label="Unschedule"
+                          className="shrink-0 cursor-pointer rounded-full p-2 text-[#D6204C] transition-colors hover:bg-red-50"
+                        >
+                          <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -2050,6 +2143,53 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 </AnimatePresence>
               </div>
             </motion.div>
+          </>
+        ) : null}
+      </AnimatePresence>
+
+      {/* Delete / unschedule confirmation */}
+      <AnimatePresence>
+        {confirmTrash ? (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setConfirmTrash(null)} className="fixed inset-0 z-[72] bg-black/40" />
+            <div className="pointer-events-none fixed inset-0 z-[73] flex items-center justify-center px-8">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 480, damping: 32 }}
+                className="pointer-events-auto w-full max-w-[300px] rounded-2xl bg-white p-5 text-center"
+                style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.18)" }}
+              >
+                <p className="text-[16px] font-semibold text-gray-dark">
+                  {confirmTrash.kind === "draft" ? "Delete this draft?" : "Unschedule this post?"}
+                </p>
+                <p className="mt-1 text-[13px] leading-snug text-gray-light">
+                  {confirmTrash.kind === "draft" ? "This can't be undone." : "It moves out of the queue and won't post."}
+                </p>
+                <div className="mt-4 flex gap-2">
+                  <button onClick={() => setConfirmTrash(null)} className="flex-1 cursor-pointer rounded-full bg-gray-100 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
+                    Keep it
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirmTrash.kind === "draft") {
+                        const d = draftStore.find(x => x.id === confirmTrash.id);
+                        if (d) draftStore.splice(draftStore.indexOf(d), 1);
+                      } else {
+                        const s = scheduledStore.find(x => x.id === confirmTrash.id);
+                        if (s) scheduledStore.splice(scheduledStore.indexOf(s), 1);
+                      }
+                      setStoreVersion(v => v + 1);
+                      setConfirmTrash(null);
+                    }}
+                    className="flex-1 cursor-pointer rounded-full bg-[#D6204C] py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#b81b41]"
+                  >
+                    {confirmTrash.kind === "draft" ? "Delete" : "Unschedule"}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
           </>
         ) : null}
       </AnimatePresence>

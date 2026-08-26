@@ -1006,6 +1006,19 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
     }
   };
 
+  // Deep-link support: `?section=reviews` (e.g. "See all reviews" from an
+  // offering page) scrolls to that section on load, once its ref is registered
+  // and after ScrollToTop's reset has run.
+  useEffect(() => {
+    const section = searchParams.get("section");
+    if (!section) return;
+    const t = setTimeout(() => {
+      sectionRefs.current[section]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Modular coach sections reused in two places: the hero block (non-unified
   // profiles) and the top of the About tab (unified template).
   const customerFavoriteRow = (

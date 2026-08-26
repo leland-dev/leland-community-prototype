@@ -291,6 +291,8 @@ export default function WaitlistOnboarding() {
                         onExit={exit}
                         onNext={() => go("goal")}
                       />,
+                      screenVariants as Variants,
+                      "absolute inset-x-0 bottom-0 top-[-52px]",
                     )
                   : stage === "goal"
                     ? screen("goal", <GoalSelect onSelect={() => go("reassurance")} />)

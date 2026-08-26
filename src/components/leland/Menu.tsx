@@ -44,6 +44,7 @@ export type MenuItemProps = {
   disabled?: boolean;
   fontWeight?: FontWeight;
   selected?: boolean;
+  destructive?: boolean;
 } & (MenuItemWithoutItems | MenuItemWithItems);
 
 type MenuItemWithItems = {
@@ -74,6 +75,7 @@ type InternalMenuItemProps = Omit<MenuItemProps, "onSelect"> & {
   ignoreCollisions?: boolean;
   childRefs: RefObject<(HTMLDivElement | null)[]> | undefined;
   selected?: boolean;
+  destructive?: boolean;
 };
 
 const MenuItem = forwardRef<HTMLDivElement, InternalMenuItemProps>(
@@ -96,6 +98,7 @@ const MenuItem = forwardRef<HTMLDivElement, InternalMenuItemProps>(
       ignoreCollisions = false,
       childRefs,
       selected = false,
+      destructive = false,
     },
     ref,
   ) => {
@@ -126,7 +129,17 @@ const MenuItem = forwardRef<HTMLDivElement, InternalMenuItemProps>(
       [alignSubmenuWithParent, parentMenuRef, triggerRef, childRefs],
     );
 
-    const itemClassName = `flex w-full group cursor-pointer select-none items-center justify-between gap-x-2.5 rounded-md p-2.5 text-[0.875rem] leading-tight text-leland-gray-dark outline-none hover:bg-leland-gray-hover focus:bg-leland-gray-hover active:bg-leland-gray-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-leland-gray-dark data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 ${selected ? "bg-leland-gray-hover" : ""} ${FontWeightToStyles[fontWeight]}`;
+    const toneClassName = destructive
+      ? 'text-leland-red hover:bg-leland-red-light focus:bg-leland-red-light active:bg-leland-red-light focus-visible:ring-leland-red'
+      : 'text-leland-gray-dark hover:bg-leland-gray-hover focus:bg-leland-gray-hover active:bg-leland-gray-hover focus-visible:ring-leland-gray-dark';
+
+    const selectedClassName = selected
+      ? destructive
+        ? 'bg-leland-red-light'
+        : 'bg-leland-gray-hover'
+      : '';
+
+    const itemClassName = `flex w-full group cursor-pointer select-none items-center justify-between gap-x-2.5 rounded-md p-2.5 text-[0.875rem] leading-tight outline-none focus-visible:ring-2 focus-visible:ring-inset data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 ${toneClassName} ${selectedClassName} ${FontWeightToStyles[fontWeight]}`;
 
     const menuItem = (
       <>

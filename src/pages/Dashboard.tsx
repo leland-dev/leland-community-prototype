@@ -7,6 +7,13 @@ import { useSetNavTheme } from "../components/NavThemeContext";
 import SessionCard from "../components/SessionCard";
 import OfferingCard, { type OfferingType } from "../components/OfferingCard";
 import { Button, LinkButton } from "../components/Button";
+import {
+  AppPromoCallout,
+  AppPromoTakeover,
+  AppPromoPushToast,
+  AppPromoToast,
+  PromoTogglePanel,
+} from "../components/promo/AppPromo";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic2 from "../assets/profile photos/pic-2.png";
@@ -775,6 +782,9 @@ export default function Dashboard() {
 
   return (
     <div className="pb-[180px]">
+      {/* In-flow app-promo banner; bottom margin absorbs the hero's negative
+          top margin so it isn't overlapped. */}
+      <AppPromoPushToast className="mb-[72px] md:mb-10" />
       {/* Hero — full-window beige band with a headline + help link */}
       <div
         className="-mt-[72px] pb-32 pt-[120px] md:-mt-10 md:pb-36 md:pt-16"
@@ -817,6 +827,9 @@ export default function Dashboard() {
 
           {/* Right — stacked section cards */}
           <div className="flex min-w-0 flex-col gap-5">
+            {/* App promo: inline callout */}
+            <AppPromoCallout variant="card" />
+
             {/* 1. Upcoming sessions */}
             <DashCard title="Upcoming sessions">
               <div className="-mx-2 flex flex-col gap-1">
@@ -870,6 +883,11 @@ export default function Dashboard() {
           </div>
         </div>
       </motion.div>
+
+      {/* App promo demo: toggle panel + overlays */}
+      <PromoTogglePanel options={["modal", "toast", "push", "callout"]} />
+      <AppPromoTakeover />
+      <AppPromoToast />
 
       {/* Admin tool — 3-dot menu matching the profile template */}
       <div

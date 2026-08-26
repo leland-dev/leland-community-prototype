@@ -38,7 +38,6 @@ import attachIcon from "../assets/icons/attach.svg";
 import trashIcon from "../assets/icons/trash.svg";
 import editIcon from "../assets/icons/edit.svg";
 import editFilledIcon from "../assets/icons/edit-filled.svg";
-import infoFilledIcon from "../assets/icons/info-filled.svg";
 import dotsVerticalIcon from "../assets/icons/dots-vertical.svg";
 import dragDotsIcon from "../assets/icons/drag-dots.svg";
 import globeIcon from "../assets/icons/globe.svg";
@@ -161,7 +160,12 @@ const offeringAddDescription: Record<string, string> = {
 };
 
 // The kinds of section a coach can add to the customer-facing page.
-type PageSectionKind = "text" | "faqs" | "checklist" | "media" | "reviews";
+type PageSectionKind = "text" | "faqs" | "checklist" | "media" | "reviews" | "included";
+
+// The always-present "What's included" section (a preview of the offering's
+// products + total). It can be reordered but not added or removed, so it lives
+// at a reserved id that never collides with user-added sections.
+const INCLUDED_SECTION_ID = -1;
 
 // A single Q&A pair inside a FAQs section.
 type FaqItem = { id: number; question: string; answer: string };
@@ -176,7 +180,8 @@ type PageSection =
   | { id: number; kind: "faqs"; heading: string; faqs: FaqItem[] }
   | { id: number; kind: "checklist"; heading: string; items: ChecklistItem[] }
   | { id: number; kind: "media"; heading: string; fileName: string }
-  | { id: number; kind: "reviews"; heading: string; slots: (number | null)[] };
+  | { id: number; kind: "reviews"; heading: string; slots: (number | null)[] }
+  | { id: number; kind: "included"; heading: string };
 
 // Section types a coach can add to the customer-facing page. `kind` maps to the
 // PageSection built when the button is clicked.
@@ -199,6 +204,7 @@ function newPageSection(kind: PageSectionKind, id: number): PageSection {
     case "checklist": return { id, kind, heading: "", items: [{ id: 1, text: "" }] };
     case "media": return { id, kind, heading: "", fileName: "" };
     case "reviews": return { id, kind, heading: "", slots: [] };
+    case "included": return { id, kind, heading: "What's included" };
   }
 }
 
@@ -705,7 +711,9 @@ export default function CoachProductNew() {
   // Thumbnail image (demo-only object URL) — set on the Details step, previewed
   // in the sidebar card and on the Page step.
   const [thumbnail, setThumbnail] = useState<string | null>(null);
-  const [sections, setSections] = useState<PageSection[]>([]);
+  const [sections, setSections] = useState<PageSection[]>(() => [
+    { id: INCLUDED_SECTION_ID, kind: "included", heading: "What's included" },
+  ]);
   const nextOfferingId = useRef(0);
   const nextSectionId = useRef(0);
 
@@ -825,7 +833,11 @@ export default function CoachProductNew() {
   // Page sections (step 3). New sections append to the end; reorder swaps with a
   // neighbor so "move up/down" stays a single-step nudge.
   const addSection = (kind: PageSectionKind) => setSections((s) => [...s, newPageSection(kind, nextSectionId.current++)]);
-  const removeSection = (id: number) => setSections((s) => s.filter((sec) => sec.id !== id));
+  // The "What's included" preview can't be removed (only reordered).
+  const removeSection = (id: number) => {
+    if (id === INCLUDED_SECTION_ID) return;
+    setSections((s) => s.filter((sec) => sec.id !== id));
+  };
   const updateSection = (next: PageSection) => setSections((s) => s.map((sec) => (sec.id === next.id ? next : sec)));
   // Drag-and-drop reorder — the Reorder list hands back the new order live.
   const reorderSections = (next: PageSection[]) => setSections(next);
@@ -1448,7 +1460,7 @@ function PriceFields({ option, products, onChange, mvp }: { option: PricingOptio
 // Total. The products themselves are already listed above, so this only carries
 // the totals; the rows share the product list's rhythm (py-4 + dividers) so they
 // read as an extension of it.
-function PricingRollup({ products, option, onChange, multiEnabled = false, onToggleMulti }: { products: OfferingItem[]; option: PricingOption; onChange: (patch: Partial<PricingOption>) => void; multiEnabled?: boolean; onToggleMulti?: () => void }) {
+function PricingRollup({ products, option, onChange }: { products: OfferingItem[]; option: PricingOption; onChange: (patch: Partial<PricingOption>) => void }) {
   const { items, subtotal, freeAmount, discount, total } = optionRollup(products, option);
   // Discount has three states: idle (an "Add discount" link), editing (the
   // %/$ controls + an "Apply" action), and done (the applied amount, editable,
@@ -1566,29 +1578,6 @@ function PricingRollup({ products, option, onChange, multiEnabled = false, onTog
         </AnimatePresence>
       </div>
 
-      {/* Multiple pricing options — a line-item above the Total, matching the
-          other rows. The whole row toggles; the toggle stops propagation so a
-          direct click doesn't double-fire. */}
-      {onToggleMulti && (
-        <div
-          onClick={onToggleMulti}
-          className="flex cursor-pointer items-center justify-between gap-3 border-t border-gray-stroke py-4 text-[15px]"
-        >
-          <span className="flex items-center gap-1.5">
-            <span className="text-gray-light">Multiple pricing options</span>
-            <span className="group relative flex" onClick={(e) => e.stopPropagation()}>
-              <MaskIcon src={infoFilledIcon} className="h-[18px] w-[18px] text-gray-extra-light opacity-50 transition-opacity group-hover:opacity-100" />
-              <span role="tooltip" className="pointer-events-none absolute bottom-full left-0 z-20 mb-2 hidden w-max max-w-[260px] rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
-                Offer varied sets of products at different price points. Buyers pick the one that fits them.
-              </span>
-            </span>
-          </span>
-          <span className="flex items-center" onClick={(e) => e.stopPropagation()}>
-            <Toggle checked={multiEnabled} onChange={onToggleMulti} size="sm" />
-          </span>
-        </div>
-      )}
-
       <div className="flex items-center justify-between border-t border-gray-stroke py-4">
         <span className="text-[16px] font-semibold text-gray-dark">Total</span>
         <span className="text-[18px] font-semibold text-gray-dark">{total === 0 ? "Free" : `$${formatMoney(total)}`}</span>
@@ -1601,7 +1590,7 @@ function PricingRollup({ products, option, onChange, multiEnabled = false, onTog
 // When `bare` (the single-option default), renders as two flat labeled sections
 // ("Add products" and "Pricing"). Otherwise wraps in card chrome with an
 // editable option name — used when there are multiple options.
-function PricingOptionCard({ option, index, products, available, comingSoon = [], bare, canDelete, mvp, multiEnabled = false, onToggleMulti, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct, onToggleFreeProduct }: {
+function PricingOptionCard({ option, index, products, available, comingSoon = [], bare, canDelete, mvp, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct, onToggleFreeProduct }: {
   option: PricingOption;
   index: number;
   products: OfferingItem[];
@@ -1610,8 +1599,6 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
   bare: boolean;
   canDelete: boolean;
   mvp: boolean;
-  multiEnabled?: boolean;
-  onToggleMulti?: () => void;
   onRemove: () => void;
   onChange: (patch: Partial<PricingOption>) => void;
   onAddProduct: (slug: string) => void;
@@ -1669,7 +1656,7 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
             <section className="mt-14">
               <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
               <div className="mt-5 border-t border-gray-stroke">
-                <PricingRollup products={products} option={option} onChange={onChange} multiEnabled={multiEnabled} onToggleMulti={onToggleMulti} />
+                <PricingRollup products={products} option={option} onChange={onChange} />
               </div>
             </section>
           )
@@ -1952,7 +1939,7 @@ function AskQuestions() {
 // an "X" to remove on hover, and a trailing "+" to add another.
 function OptionTabs({ options, activeId, onSelect, onAdd, onRemove }: { options: PricingOption[]; activeId: number; onSelect: (id: number) => void; onAdd: () => void; onRemove: (id: number) => void }) {
   return (
-    <div className="flex items-center gap-1 overflow-x-auto border-b border-gray-stroke">
+    <div className="flex items-center gap-1 overflow-x-auto">
       {options.map((opt, i) => {
         const active = opt.id === activeId;
         const label = opt.name || `Option ${i + 1}`;
@@ -2108,8 +2095,6 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
         bare
         canDelete={false}
         mvp={mvp}
-        multiEnabled={multiEnabled}
-        onToggleMulti={handleToggleMulti}
         onRemove={() => onRemovePricingOption(opt.id)}
         onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
         onAddProduct={(slug) => addProduct(opt.id, slug)}
@@ -2170,34 +2155,59 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
           )}
         </>
       ) : (
-        // v2: the products + pricing card stays put; the tabs + name/description
-        // block animates in/out above it when multiple options are toggled. The
-        // active option is the first when multiple options are off.
+        // v2: the products + pricing card stays put. A persistent bar above it
+        // carries the "Enable tiers" toggle on the right; its left side shows the
+        // option tabs when tiers are on (nothing when off). Name/description
+        // animate in below the bar when tiers are on.
         <>
-          <AnimatePresence initial={false}>
-            {multiEnabled && (
-              <motion.div
-                key="multi-header"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={offeringTransition}
-                className="overflow-hidden"
-              >
-                <div className="pt-6">
-                  <OptionTabs
-                    options={pricingOptions}
-                    activeId={activeOption.id}
-                    onSelect={setActiveId}
-                    onAdd={() => setActiveId(onAddPricingOption())}
-                    onRemove={removeOption}
-                  />
-                  <OptionMetaFields option={activeOption} onChange={(patch) => onUpdatePricingOption(activeOption.id, patch)} />
+          {(multiEnabled || optionData(activeOption).items.length > 0) && (
+            <div className="mt-6">
+              <div className={`flex items-end justify-between gap-4 ${multiEnabled ? "border-b border-gray-stroke" : ""}`}>
+                <div className="min-w-0 flex-1">
+                  {multiEnabled && (
+                    <OptionTabs
+                      options={pricingOptions}
+                      activeId={activeOption.id}
+                      onSelect={setActiveId}
+                      onAdd={() => setActiveId(onAddPricingOption())}
+                      onRemove={removeOption}
+                    />
+                  )}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <div className="mt-6">
+                {/* Enable tiers toggle — sits on the right, toggle trailing the
+                    label. The label carries the tooltip (dotted underline). */}
+                <div className="flex shrink-0 items-center gap-2.5 pb-2.5">
+                  <span className="group relative flex">
+                    <span className={`cursor-help text-[14px] font-medium underline decoration-dotted underline-offset-2 transition-colors ${multiEnabled ? "text-gray-light" : "text-gray-extra-light"}`}>
+                      Enable tiers
+                    </span>
+                    <span role="tooltip" className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 hidden w-max max-w-[260px] rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
+                      Offer varied sets of products at different price points. Buyers pick the one that fits them.
+                    </span>
+                  </span>
+                  <Toggle checked={multiEnabled} onChange={handleToggleMulti} size="sm" />
+                </div>
+              </div>
+              <AnimatePresence initial={false}>
+                {multiEnabled && (
+                  <motion.div
+                    key="multi-meta"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={offeringTransition}
+                    className="overflow-hidden"
+                  >
+                    <OptionMetaFields option={activeOption} onChange={(patch) => onUpdatePricingOption(activeOption.id, patch)} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+          {/* Tighter gap to the product list when the default-view toggle bar is
+              shown; the ON view (and the bar-less empty state) keep roomier
+              spacing. */}
+          <div className={!multiEnabled && optionData(activeOption).items.length > 0 ? "mt-1" : "mt-6"}>
             {renderOptionCard(activeOption)}
           </div>
         </>
@@ -4123,6 +4133,57 @@ function Stars({ n }: { n: number }) {
   );
 }
 
+// Read-only preview of the customer-facing "What's included" roll-up: the
+// offering's products with their prices (free items struck to $0) and the
+// discounted total. Illustrative here; the live page derives it from the
+// offering's real products.
+function IncludedSectionPreview() {
+  const products = [
+    {
+      icon: hourglassIcon,
+      title: "10h of coaching",
+      detail: (<>$150/hr<span className="text-gray-extra-light"> · Live Sessions</span></>),
+      price: 1500,
+      free: false,
+    },
+    { icon: bookOpenIcon, title: "MBA Essay Playbook", detail: "Guide", price: 99, free: true },
+  ];
+  const subtotal = 1500;
+  const total = 1200;
+  return (
+    <div>
+      <div className="overflow-hidden rounded-2xl border border-gray-stroke px-4">
+        {products.map((p, i) => (
+          <div key={p.title} className={`flex items-center gap-3 py-4 ${i < products.length - 1 ? "border-b border-gray-stroke" : ""}`}>
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+              <img src={p.icon} alt="" className="h-[26px] w-[26px]" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold text-gray-dark">{p.title}</span>
+              <span className="block text-[15px] text-gray-light">{p.detail}</span>
+            </span>
+            {p.free ? (
+              <span className="flex shrink-0 items-center gap-1.5 text-[15px]">
+                <span className="text-gray-extra-light line-through decoration-1 opacity-60">{`$${formatMoney(p.price)}`}</span>
+                <span className="text-gray-light">$0</span>
+              </span>
+            ) : (
+              <span className="shrink-0 text-[15px] text-gray-dark">{`$${formatMoney(p.price)}`}</span>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="mt-5 flex items-center justify-between">
+        <span className="text-[16px] font-semibold text-gray-dark">Total</span>
+        <span className="flex items-baseline gap-2">
+          <span className="text-[16px] text-gray-extra-light line-through decoration-1">{`$${formatMoney(subtotal)}`}</span>
+          <span className="text-[18px] font-semibold text-gray-dark">{`$${formatMoney(total)}`}</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function PageSectionCard({ section, onChange, onRemove }: {
   section: PageSection;
   onChange: (next: PageSection) => void; onRemove: () => void;
@@ -4146,26 +4207,39 @@ function PageSectionCard({ section, onChange, onRemove }: {
         <MaskIcon src={dragDotsIcon} className="h-[18px] w-[18px]" />
       </span>
 
-      {/* Optional headline (every section) + a remove "X" across from it, on hover. */}
-      <div className="mb-3 flex items-center gap-3">
-        <input
-          value={section.heading}
-          onChange={(e) => onChange({ ...section, heading: e.target.value })}
-          placeholder="Add an optional header..."
-          className="min-w-0 flex-1 bg-transparent text-[24px] font-semibold leading-tight text-gray-dark outline-none placeholder:text-[#B1B1B1]"
-        />
-        <span className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
-          <IconBtn label="Remove section" danger onClick={onRemove}>
-            <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
-          </IconBtn>
-        </span>
-      </div>
+      {section.kind === "included" ? (
+        // Auto-generated preview — a fixed header and read-only product roll-up.
+        // Reorderable via the drag handle, but not editable or removable.
+        <>
+          <div className="mb-3 flex items-center gap-3">
+            <h3 className="min-w-0 flex-1 text-[24px] font-semibold leading-tight text-gray-dark">{section.heading}</h3>
+          </div>
+          <IncludedSectionPreview />
+        </>
+      ) : (
+        <>
+          {/* Optional headline (every section) + a remove "X" across from it, on hover. */}
+          <div className="mb-3 flex items-center gap-3">
+            <input
+              value={section.heading}
+              onChange={(e) => onChange({ ...section, heading: e.target.value })}
+              placeholder="Add an optional header..."
+              className="min-w-0 flex-1 bg-transparent text-[24px] font-semibold leading-tight text-gray-dark outline-none placeholder:text-[#B1B1B1]"
+            />
+            <span className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+              <IconBtn label="Remove section" danger onClick={onRemove}>
+                <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
+              </IconBtn>
+            </span>
+          </div>
 
-      {section.kind === "text" && <TextSectionEditor section={section} onChange={onChange} />}
-      {section.kind === "faqs" && <FaqsSectionEditor section={section} onChange={onChange} />}
-      {section.kind === "checklist" && <ChecklistSectionEditor section={section} onChange={onChange} />}
-      {section.kind === "media" && <MediaSectionEditor section={section} onChange={onChange} />}
-      {section.kind === "reviews" && <ReviewsSectionEditor section={section} onChange={onChange} />}
+          {section.kind === "text" && <TextSectionEditor section={section} onChange={onChange} />}
+          {section.kind === "faqs" && <FaqsSectionEditor section={section} onChange={onChange} />}
+          {section.kind === "checklist" && <ChecklistSectionEditor section={section} onChange={onChange} />}
+          {section.kind === "media" && <MediaSectionEditor section={section} onChange={onChange} />}
+          {section.kind === "reviews" && <ReviewsSectionEditor section={section} onChange={onChange} />}
+        </>
+      )}
     </Reorder.Item>
   );
 }

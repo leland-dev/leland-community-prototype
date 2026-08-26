@@ -115,6 +115,7 @@ export interface TagProps {
   hoverable?: boolean;
   selected?: boolean;
   shadow?: boolean;
+  decreasedPadding?: boolean;
 }
 
 export const Tag: FC<TagProps> = ({
@@ -131,6 +132,7 @@ export const Tag: FC<TagProps> = ({
   hoverable = false,
   selected = false,
   shadow = false,
+  decreasedPadding = false,
 }) => {
   const hasLeftIcon = !!LeftIcon || !!CustomLeftIcon;
   const hasRightIcon = !!RightIcon || !!CustomRightIcon;
@@ -141,8 +143,8 @@ export const Tag: FC<TagProps> = ({
     <div
       className={`inline-flex items-center justify-center max-w-full ${TagColorToStyles[tagColor](hoverable, selected)} ${getTagSizeStyles(size, {
         decreasedYPadding: largeIcons && (hasLeftIcon || hasRightIcon),
-        decreasedLeftPadding: largeIcons && hasLeftIcon,
-        decreasedRightPadding: largeIcons && hasRightIcon,
+        decreasedLeftPadding: decreasedPadding || (largeIcons && hasLeftIcon),
+        decreasedRightPadding: decreasedPadding || (largeIcons && hasRightIcon),
       })} ${FontWeightToStyles[fontWeight]} ${TagRoundingToStyles[rounding]} ${shadow ? 'shadow-sm' : 'shadow-none'}`}
     >
       {CustomLeftIcon ? (

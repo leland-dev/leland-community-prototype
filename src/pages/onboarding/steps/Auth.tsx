@@ -819,19 +819,12 @@ export default function Auth({
           </CircleButton>
         </div>
 
-        {/* or */}
-        <div className="my-4 flex items-center gap-3 text-[12px] text-gray-xlight">
-          <span className="h-px flex-1 bg-gray-stroke" />
-          or
-          <span className="h-px flex-1 bg-gray-stroke" />
-        </div>
-
         {/* phone — bordered pill */}
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={() => setPhoneOpen(true)}
           disabled={!!loading}
-          className="mb-3 flex h-[52px] w-full items-center justify-center gap-2 rounded-full border border-gray-stroke bg-white text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover disabled:opacity-60"
+          className="mb-3 mt-5 flex h-[52px] w-full items-center justify-center gap-2 rounded-full border border-gray-stroke bg-white text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover disabled:opacity-60"
         >
           <Phone size={17} />
           Continue with phone
