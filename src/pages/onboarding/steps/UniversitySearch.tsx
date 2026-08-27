@@ -19,7 +19,7 @@ import {
  * but it's clear you come in through a school. No Skip on this step.
  * ──────────────────────────────────────────────────────────────────────── */
 
-export type GradYear = number | "earlier";
+export type GradYear = number | "earlier" | "unknown";
 export type SchoolAnswer = { school: string; custom: boolean; logoKey?: string; gradYear: GradYear };
 
 const ORG_LOGOS = import.meta.glob("../../../assets/org-logos/*.png", { eager: true, import: "default" }) as Record<string, string>;
@@ -207,7 +207,10 @@ export default function UniversitySearch({
                 <div className="relative mt-4">
                   <select
                     value={String(year)}
-                    onChange={(e) => setYear(e.target.value === "earlier" ? "earlier" : Number(e.target.value))}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setYear(v === "earlier" || v === "unknown" ? v : Number(v));
+                    }}
                     className="w-full appearance-none rounded-xl border border-gray-stroke bg-white py-3.5 pl-4 pr-11 text-[17px] font-medium text-gray-dark outline-none focus:border-gray-dark/40"
                   >
                     {copy.years.map((y) => (
@@ -215,6 +218,7 @@ export default function UniversitySearch({
                         {y === "earlier" ? "Earlier" : y}
                       </option>
                     ))}
+                    <option value="unknown">I don't know yet</option>
                   </select>
                   <ChevronDown size={18} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-light" />
                 </div>
@@ -227,11 +231,13 @@ export default function UniversitySearch({
                     transition={{ duration: 0.2 }}
                     className="mt-4 font-serif text-[17px] italic text-gray-light"
                   >
-                    {status === "applying"
-                      ? `Starting ${year}`
-                      : year === "earlier"
-                        ? "Alumni"
-                        : `Class of ${year}`}
+                    {year === "unknown"
+                      ? "No rush — you can set this later"
+                      : status === "applying"
+                        ? `Starting ${year}`
+                        : year === "earlier"
+                          ? "Alumni"
+                          : `Class of ${year}`}
                   </motion.p>
                 </AnimatePresence>
               </motion.div>

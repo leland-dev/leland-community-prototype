@@ -35,7 +35,11 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
   const short = shortName(input.school);
   const experts = expertCountFor(input.school);
   const classLine =
-    input.gradYear === "earlier" ? `${short} alum` : `${short} · Class of ${input.gradYear}`;
+    input.gradYear === "earlier"
+      ? `${short} alum`
+      : input.gradYear === "unknown"
+        ? short
+        : `${short} · Class of ${input.gradYear}`;
 
   const CHECKS = [
     `Verifying ${short} affiliation`,

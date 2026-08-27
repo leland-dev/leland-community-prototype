@@ -339,7 +339,7 @@ export default function MinimalOnboardingV4() {
                   you={{
                     name: linkedin?.name ?? "June Allen",
                     aff: `${school.school.replace(/^University of /, "").replace(/ University$/, "").replace(/ College$/, "")} · ${
-                      school.gradYear === "earlier" ? "Alum" : `Class of '${String(school.gradYear).slice(2)}`
+                      school.gradYear === "earlier" ? "Alum" : school.gradYear === "unknown" ? "Member" : `Class of '${String(school.gradYear).slice(2)}`
                     }`,
                     avatar: linkedin?.photo ?? foundPhoto,
                   }}

@@ -36,7 +36,7 @@ export default function LinkedInConnect({
   onConnected,
 }: {
   school?: string;
-  gradYear?: number | "earlier";
+  gradYear?: number | "earlier" | "unknown";
   onConnected: (p: LinkedInProfile) => void;
 }) {
   const reduced = useReducedMotion() ?? false;
