@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useReducedMotion } from "motion/react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, Check, Plus, X, ShieldCheck, ChevronDown } from "lucide-react";
+import { Search, Check, Plus, X, ShieldCheck, ChevronDown, Loader2 } from "lucide-react";
 
 import { StepHeading } from "./flowUI";
 import type { StudentStatus } from "./StudentStatusStep";
@@ -79,6 +80,21 @@ export default function UniversitySearch({
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<{ name: string; custom: boolean; logoKey?: string } | null>(null);
   const [year, setYear] = useState<GradYear>(copy.defaultYear);
+  // the gate moment: "is your school approved to join?" — theatre, but it
+  // makes the school feel like the credential it is
+  const [checking, setChecking] = useState<"idle" | "checking" | "approved">("idle");
+  const reduced = useReducedMotion() ?? false;
+
+  const submit = () => {
+    if (!picked || checking !== "idle") return;
+    setChecking("checking");
+    const t1 = reduced ? 400 : 1500;
+    window.setTimeout(() => setChecking("approved"), t1);
+    window.setTimeout(
+      () => onContinue({ school: picked.name, custom: picked.custom, logoKey: picked.logoKey, gradYear: year }),
+      t1 + (reduced ? 300 : 850),
+    );
+  };
 
   useEffect(() => {
     if (!picked) inputRef.current?.focus();
@@ -171,9 +187,17 @@ export default function UniversitySearch({
                 <Logo name={picked.name} logoKey={picked.logoKey} size={44} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[16px] font-medium text-gray-dark">{picked.name}</span>
-                  {picked.custom ? (
+                  {checking === "checking" ? (
+                    <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-black/[0.06] px-2 py-0.5 text-[11.5px] font-medium text-gray-dark">
+                      <Loader2 size={12} className="animate-spin" /> Checking eligibility…
+                    </span>
+                  ) : checking === "approved" ? (
+                    <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-yellow px-2 py-0.5 text-[11.5px] font-semibold text-gray-dark">
+                      <ShieldCheck size={12} /> Approved to join Leland
+                    </span>
+                  ) : picked.custom ? (
                     <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-yellow/40 px-2 py-0.5 text-[11.5px] font-medium text-gray-dark">
-                      <ShieldCheck size={12} /> Pending verification
+                      <ShieldCheck size={12} /> New to Leland
                     </span>
                   ) : (
                     <span className="block text-[12.5px] text-gray-light">
@@ -182,18 +206,17 @@ export default function UniversitySearch({
                   )}
                 </span>
                 <button
-                  onClick={() => setPicked(null)}
+                  onClick={() => {
+                    setPicked(null);
+                    setChecking("idle");
+                  }}
                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-light hover:bg-black/[0.05]"
                   aria-label="Change school"
                 >
                   <X size={16} />
                 </button>
               </div>
-              {picked.custom ? (
-                <p className="mt-2 text-[13px] text-gray-light">
-                  We verify new schools within a day. You can keep going.
-                </p>
-              ) : null}
+
 
               {/* grad year — revealed inline */}
               <motion.div
@@ -255,11 +278,30 @@ export default function UniversitySearch({
             className="fixed inset-x-0 bottom-[calc(max(1.5rem,env(safe-area-inset-bottom))+1.5rem)] z-20 mx-auto w-full max-w-[440px] px-6"
           >
             <button
-              onClick={() => onContinue({ school: picked.name, custom: picked.custom, logoKey: picked.logoKey, gradYear: year })}
-              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
+              onClick={submit}
+              disabled={checking !== "idle"}
+              className={`flex h-14 w-full items-center justify-center gap-2 rounded-full text-[15px] font-medium transition-colors ${
+                checking === "approved"
+                  ? "bg-yellow text-gray-dark"
+                  : "bg-gray-dark text-white hover:bg-[#333] disabled:opacity-90"
+              }`}
             >
-              <Check size={17} />
-              Continue
+              {checking === "checking" ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Checking {picked.name}…
+                </>
+              ) : checking === "approved" ? (
+                <>
+                  <Check size={17} strokeWidth={3} />
+                  {picked.name} is approved
+                </>
+              ) : (
+                <>
+                  <Check size={17} />
+                  Continue
+                </>
+              )}
             </button>
           </motion.div>
         ) : null}
