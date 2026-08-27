@@ -204,6 +204,7 @@ export default function App() {
           {/* alt-nav sub-pages — the sidebar's destinations recreated inside the
               alt-nav shell (DesktopSidebar left, no top navbar). Reuse the same
               page components; ContextLayout supplies the shell. */}
+          <Route path="/alt-nav/dashboard" element={<Dashboard />} />
           <Route path="/alt-nav/discover" element={<Browse />} />
           <Route path="/alt-nav/search" element={<Search />} />
           <Route path="/alt-nav/messages" element={<Messaging />} />

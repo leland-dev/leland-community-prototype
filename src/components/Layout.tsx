@@ -358,6 +358,9 @@ export function ContextLayout() {
   // Both swap the left column for the desktop sidebar (which replaces the nav).
   const isAltNavFeed = pathname === "/alt-nav";
   const isAltNavSubpage = pathname.startsWith("/alt-nav/");
+  // The dashboard is a wide 2-col layout, so it gets a roomier content cap than
+  // the standard single-column alt-nav sub-pages.
+  const isAltNavDashboard = pathname === "/alt-nav/dashboard";
   // The post detail shares the feed's card, so it also shares the 640px width.
   const isAltNavPost = pathname.startsWith("/alt-nav/post");
   const isAltNav = isAltNavFeed || isAltNavSubpage;
@@ -382,7 +385,8 @@ export function ContextLayout() {
       // Sub-pages share the feed's edge-to-edge frame so the sidebar sits
       // flush-left and content centers in the remaining space.
       edgeToEdge={isHomeFeed || isAltNavSubpage || isRegularPost}
-      sidebarWidth={isHomeFeed || isPostDetail ? 356 : undefined}
+      // The dashboard adds the feed's right sidebar, so it gets the 356px column.
+      sidebarWidth={isHomeFeed || isPostDetail || isAltNavDashboard ? 356 : undefined}
       // alt-nav has no top navbar (the sidebar replaces it), so its left column
       // pins 20px from the top (not the 81px that clears a navbar) and is capped
       // at 250px. Padding drops to 20px on these pages too.

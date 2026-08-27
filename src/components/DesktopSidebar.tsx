@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
@@ -13,7 +13,7 @@ import homeIcon from "../assets/icons/nav-icons/home-inactive.svg";
 import searchIcon from "../assets/icons/search.svg";
 import chatNavIcon from "../assets/icons/nav-icons/chat-inactive.svg";
 import notificationsNavIcon from "../assets/icons/nav-icons/notifications-inactive.svg";
-import calendarPageIcon from "../assets/icons/calendar-page.svg";
+import userCircleIcon from "../assets/icons/user-circle.svg";
 
 // Menu icons (shared with MobileSidebar)
 import lightningIcon from "../assets/icons/lightning.svg";
@@ -71,7 +71,7 @@ function MaskIcon({ src, className = "" }: { src: string; className?: string }) 
 type NavItem = { icon: string; label: string; to: string; badge?: number; dot?: boolean };
 const navItems: NavItem[] = [
   { icon: homeIcon, label: "For you", to: "/alt-nav" },
-  { icon: calendarPageIcon, label: "Calendar", to: "/alt-nav/calendar" },
+  { icon: userCircleIcon, label: "My Leland", to: "/alt-nav/dashboard" },
   { icon: chatNavIcon, label: "Messages", to: "/alt-nav/messages", badge: 1 },
   { icon: notificationsNavIcon, label: "Notifications", to: "/alt-nav/notifications", dot: true },
 ];
@@ -101,16 +101,17 @@ const myLelandItems = [
 ];
 
 // Admin Tools segmented pill control — one row per demo toggle.
-function AdminSegControl<T extends string | number>({ label, darkMode, value, onChange, options }: {
+function AdminSegControl<T extends string | number>({ label, icon, darkMode, value, onChange, options }: {
   label: string;
+  icon?: ReactNode;
   darkMode: boolean;
   value: T;
   onChange: (v: T) => void;
   options: { value: T; label: string }[];
 }) {
   return (
-    <div className="flex w-full items-center justify-between gap-3 py-[10px] text-[16px] font-normal">
-      <span className={`${darkMode ? "text-white" : "text-[#4c4c4c]"} shrink-0 whitespace-nowrap`}>{label}</span>
+    <div className="flex w-full items-center justify-between gap-3 py-[10px] text-[14px] font-medium">
+      <span className={`${darkMode ? "text-white" : "text-gray-dark"} flex shrink-0 items-center gap-3 whitespace-nowrap`}>{icon}{label}</span>
       <div className={`flex shrink-0 overflow-hidden rounded-full p-[2px] ${darkMode ? "bg-white/15" : "bg-[#E5E5E5]"}`}>
         {options.map((o) => {
           const active = value === o.value;
@@ -147,6 +148,7 @@ export default function DesktopSidebar() {
   const { liveCardStyle, setLiveCardStyle, eventStage, setEventStage, hasLivestreams, setHasLivestreams } = useFeedDemo();
   const [accountOpen, setAccountOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [featuresOpen, setFeaturesOpen] = useState(false);
   const [expertMoreOpen, setExpertMoreOpen] = useState(false);
   const { pathname } = useLocation();
 
@@ -181,8 +183,12 @@ export default function DesktopSidebar() {
     `flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium transition-colors ${
       danger ? "text-[#D92D20]" : (darkMode ? "text-white" : "text-gray-dark")
     } ${darkMode ? "hover:bg-white/10" : "hover:bg-[#222222]/5"}`;
-  // Text-only sub-rows (admin onboarding links), indented under the tools icon.
-  const accountItemClass = `flex w-full items-center gap-3 rounded-lg py-2 pl-[46px] pr-3 text-[14px] font-medium ${textColor} transition-colors ${hoverBg}`;
+  // Admin Tools sub-rows — icon + label, mirroring the mobile drawer's admin
+  // menu. Toggle rows push the switch to the right; link/trigger rows don't.
+  const adminRowText = darkMode ? "text-white" : "text-gray-dark";
+  const adminToggleRow = `flex w-full items-center justify-between gap-3 rounded-lg py-2 px-3 text-[14px] font-medium ${adminRowText} ${hoverBg} transition-colors`;
+  const adminLinkRow = `flex w-full items-center gap-3 rounded-lg py-2 px-3 text-[14px] font-medium ${adminRowText} ${hoverBg} transition-colors`;
+  const adminIcon = "h-[18px] w-[18px] shrink-0";
 
   // Navigation items match the /coach sidebar exactly: inactive rows read as
   // gray-light (text + icon), darkening to gray-dark on hover; the active row
@@ -383,36 +389,60 @@ export default function DesktopSidebar() {
                     <AnimatePresence initial={false}>
                       {adminOpen && (
                         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-                          <button onClick={toggleExpertMode} className={`flex w-full items-center justify-between gap-3 rounded-lg py-2 pl-[46px] pr-3 text-[14px] font-medium ${darkMode ? "text-white" : "text-gray-dark"} ${hoverBg} transition-colors`}>
-                            <span>Expert</span>{toggleSwitch(expertMode)}
-                          </button>
-                          <button onClick={toggleDarkMode} className={`flex w-full items-center justify-between gap-3 rounded-lg py-2 pl-[46px] pr-3 text-[14px] font-medium ${darkMode ? "text-white" : "text-gray-dark"} ${hoverBg} transition-colors`}>
-                            <span>Dark Mode</span>{toggleSwitch(darkMode)}
-                          </button>
-                          <button onClick={() => setHasLivestreams(!hasLivestreams)} className={`flex w-full items-center justify-between gap-3 rounded-lg py-2 pl-[46px] pr-3 text-[14px] font-medium ${darkMode ? "text-white" : "text-gray-dark"} ${hoverBg} transition-colors`}>
-                            <span>Livestreams</span>{toggleSwitch(hasLivestreams)}
-                          </button>
-                          <div className="pl-[46px] pr-3">
-                            <AdminSegControl label="Profile bar" darkMode={darkMode} value={profileBarMode} onChange={setProfileBarMode} options={[
-                              { value: 1 as ProfileBarMode, label: "Min" },
-                              { value: 2 as ProfileBarMode, label: "Title" },
-                              { value: 3 as ProfileBarMode, label: "Date" },
-                            ]} />
-                            <AdminSegControl label="Live card" darkMode={darkMode} value={liveCardStyle} onChange={setLiveCardStyle} options={[
-                              { value: "video" as LiveCardStyle, label: "Video" },
-                              { value: "min" as LiveCardStyle, label: "Min" },
-                            ]} />
-                            <AdminSegControl label="Event stage" darkMode={darkMode} value={eventStage} onChange={setEventStage} options={[
-                              { value: "upcoming" as EventStage, label: "Soon" },
-                              { value: "live" as EventStage, label: "Live" },
-                              { value: "wrapped" as EventStage, label: "Done" },
-                            ]} />
+                          <div className={`ml-[22px] border-l-[1.5px] ${darkMode ? "border-white/15" : "border-gray-stroke"} pl-2`}>
+                            {/* Expert — top-level toggle */}
+                            <button onClick={toggleExpertMode} className={adminToggleRow}>
+                              <span className="flex items-center gap-3"><svg className={adminIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5" /><path d="M8.5 12.5 7 22l5-3 5 3-1.5-9.5" /></svg>Expert</span>
+                              {toggleSwitch(expertMode)}
+                            </button>
+                            {/* Features — rarely-touched demo switches, nested one level down */}
+                            <button onClick={() => setFeaturesOpen((v) => !v)} className={adminToggleRow}>
+                              <span className="flex items-center gap-3"><svg className={adminIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" /><line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" /><line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" /><line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="17" y1="16" x2="23" y2="16" /></svg>Features</span>
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 transition-transform ${featuresOpen ? "rotate-180" : ""}`} aria-hidden>
+                                <polyline points="4 6 8 10 12 6" />
+                              </svg>
+                            </button>
+                            <AnimatePresence initial={false}>
+                              {featuresOpen && (
+                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+                                  <div className="pl-[10px]">
+                                    <button onClick={toggleDarkMode} className={adminToggleRow}>
+                                      <span className="flex items-center gap-3"><svg className={adminIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>Dark Mode</span>
+                                      {toggleSwitch(darkMode)}
+                                    </button>
+                                    <button onClick={() => setHasLivestreams(!hasLivestreams)} className={adminToggleRow}>
+                                      <span className="flex items-center gap-3"><svg className={adminIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4.9 19.1a10 10 0 0 1 0-14.2M19.1 4.9a10 10 0 0 1 0 14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4" /><circle cx="12" cy="12" r="1.5" /></svg>Livestreams</span>
+                                      {toggleSwitch(hasLivestreams)}
+                                    </button>
+                                    <AdminSegControl label="Profile bar" icon={<svg className={adminIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18" /></svg>} darkMode={darkMode} value={profileBarMode} onChange={setProfileBarMode} options={[
+                                      { value: 1 as ProfileBarMode, label: "Min" },
+                                      { value: 2 as ProfileBarMode, label: "Title" },
+                                      { value: 3 as ProfileBarMode, label: "Date" },
+                                    ]} />
+                                    <AdminSegControl label="Live card" icon={<svg className={adminIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m10 9 5 3-5 3z" /></svg>} darkMode={darkMode} value={liveCardStyle} onChange={setLiveCardStyle} options={[
+                                      { value: "video" as LiveCardStyle, label: "Video" },
+                                      { value: "min" as LiveCardStyle, label: "Min" },
+                                    ]} />
+                                    <AdminSegControl label="Event stage" icon={<svg className={adminIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>} darkMode={darkMode} value={eventStage} onChange={setEventStage} options={[
+                                      { value: "upcoming" as EventStage, label: "Soon" },
+                                      { value: "live" as EventStage, label: "Live" },
+                                      { value: "wrapped" as EventStage, label: "Done" },
+                                    ]} />
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {/* Onboarding + waitlist demos */}
+                            <NavLink to="/onboarding-minimal-v2" onClick={() => setAccountOpen(false)} className={adminLinkRow}>
+                              <svg className={adminIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" /></svg><span>Onboarding</span>
+                            </NavLink>
+                            <NavLink to="/waitlist" onClick={() => setAccountOpen(false)} className={adminLinkRow}>
+                              <svg className={adminIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M5 22h14" /><path d="M5 2h14" /><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" /><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" /></svg><span>Waitlist</span>
+                            </NavLink>
+                            <NavLink to="/waitlist-onboarding" onClick={() => setAccountOpen(false)} className={adminLinkRow}>
+                              <svg className={adminIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="m9 14 2 2 4-4" /></svg><span>Waitlist Onboarding</span>
+                            </NavLink>
                           </div>
-                          <NavLink to="/onboarding" onClick={() => setAccountOpen(false)} className={accountItemClass}><span>Onboarding v1</span></NavLink>
-                          <NavLink to="/onboarding-minimal" onClick={() => setAccountOpen(false)} className={accountItemClass}><span>Onboarding v2</span></NavLink>
-                          <NavLink to="/onboarding-minimal-v2" onClick={() => setAccountOpen(false)} className={accountItemClass}><span>Onboarding v3</span></NavLink>
-                          <NavLink to="/waitlist" onClick={() => setAccountOpen(false)} className={accountItemClass}><span>Waitlist</span></NavLink>
-                          <NavLink to="/waitlist-onboarding" onClick={() => setAccountOpen(false)} className={accountItemClass}><span>Waitlist Onboarding</span></NavLink>
                         </motion.div>
                       )}
                     </AnimatePresence>

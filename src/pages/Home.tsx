@@ -27,12 +27,12 @@ import calendarPageIcon from "../assets/icons/calendar-page.svg";
 import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
 import eventImageSrc from "../assets/img/EventImage.avif";
 import lelandCompass from "../assets/leland-compass.svg";
-import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
-import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
-import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
 import categoryInvestmentBanking from "../assets/placeholder images/category images/investment-banking.png";
 import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
 import categoryGMAT from "../assets/placeholder images/category images/gmat-tutoring.png";
+import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
+import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
+import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
 
 // Organisation logos
 import orgWharton   from "../assets/org-logos/wharton.png";
@@ -59,7 +59,7 @@ import logoMcKinsey   from "../assets/logos/mckinsey.png";
 import commentsIcon from "../assets/icons/comments.svg";
 import repostsIcon from "../assets/icons/reposts.svg";
 import sharesIcon from "../assets/icons/shares.svg";
-import verifiedIcon from "../assets/icons/verified.svg";
+import verifiedIcon from "../assets/icons/verified-new.svg";
 
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic2 from "../assets/profile photos/pic-2.png";
@@ -1290,7 +1290,7 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
   );
 }
 
-function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, groupId, groupPoster, companyLogo, onEdit }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; companyLogo?: string; onEdit?: () => void}) {
+function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, groupId, groupPoster, companyLogo, onEdit, nameHover }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; companyLogo?: string; onEdit?: () => void; nameHover?: HoverProps }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [following, setFollowing] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -1383,9 +1383,9 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
           <Link
             to={groupPoster ? `/profile/${nameToSlug(groupPoster.name)}` : isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `/profile/${nameToSlug(author)}`}
             onClick={(e) => e.stopPropagation()}
-            className="cursor-pointer truncate text-[15px] leading-tight font-semibold text-gray-dark"
+            {...(nameHover ?? {})}
+            className="cursor-pointer truncate text-[15px] leading-tight font-semibold text-gray-dark hover:underline"
           >{groupPoster ? groupPoster.name : author}</Link>
-          {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
           <span className="shrink-0 text-[15px] leading-tight text-gray-extra-light">{displayTime}</span>
         </div>
         {/* Title / description line — surfaced in the "Title" (2) and "Dated"
@@ -3355,50 +3355,75 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
 
   return (
     <motion.div
-      className="absolute left-0 top-12 z-50 w-[305px] overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_8px_32px_rgba(0,0,0,0.13)]"
+      className="absolute left-0 top-12 z-50 w-[340px] overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_8px_32px_rgba(0,0,0,0.13)]"
       initial={{ opacity: 0, y: 6, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 4, scale: 0.97 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
       onMouseEnter={(e) => e.stopPropagation()}
     >
-      <CoachCardContent
+      <ProfileHoverContent
         avatar={avatar}
         name={author}
         verified={verified}
         headline={headline}
-        ctaLabel="Book a session"
         p={p}
       />
     </motion.div>
   );
 }
 
-function AvatarWithHoverCard({ post }: { post: Post }) {
+// Inline verified badge so the white separator can be a thin, crisp
+// non-scaling stroke that hugs the scalloped contour (a bg-white ring reads too
+// thick at this size). Blue scallop + explicit white check (the raw asset's
+// check is a cut-out hole, so it needs a solid fill behind it here).
+export function VerifiedBadge({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 22 22" className={className} aria-hidden>
+      <path
+        d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816z"
+        fill="#1d9bf0"
+        stroke="#fff"
+        strokeWidth="2"
+        vectorEffect="non-scaling-stroke"
+        strokeLinejoin="round"
+      />
+      <path d="M9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z" fill="#fff" />
+    </svg>
+  );
+}
+
+type HoverProps = { onMouseEnter: () => void; onMouseLeave: () => void };
+
+// Shared hover-card controller: the avatar AND the author name drive the SAME
+// coach preview card, so hovering either opens it and moving between them (or
+// onto the card) keeps it open. Disabled for events / group posts, which don't
+// map to a coach profile.
+function useCoachHover(post: Post): { open: boolean; enabled: boolean; hoverProps: HoverProps } {
   const [open, setOpen] = useState(false);
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const enabled = post.type !== "event" && !post.isGroupPost && !post.groupPoster;
+
+  const onMouseEnter = () => {
+    if (!enabled) return;
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    openTimer.current = setTimeout(() => setOpen(true), 350);
+  };
+  const onMouseLeave = () => {
+    if (openTimer.current) clearTimeout(openTimer.current);
+    closeTimer.current = setTimeout(() => setOpen(false), 200);
+  };
+  return { open, enabled, hoverProps: { onMouseEnter, onMouseLeave } };
+}
+
+function AvatarWithHoverCard({ post, open, hoverProps }: { post: Post; open: boolean; hoverProps: HoverProps }) {
   const navigate = useNavigate();
   const isEvent = post.type === "event";
   const isGroupPost = post.isGroupPost || !!post.groupPoster;
 
-  const handleMouseEnter = () => {
-    if (isEvent || isGroupPost) return;
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    openTimer.current = setTimeout(() => setOpen(true), 350);
-  };
-
-  const handleMouseLeave = () => {
-    if (openTimer.current) clearTimeout(openTimer.current);
-    closeTimer.current = setTimeout(() => setOpen(false), 200);
-  };
-
   return (
-    <div
-      className="relative shrink-0"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className="relative shrink-0" {...hoverProps}>
       <div
         className="group relative h-10 w-10 cursor-pointer"
         onClick={(e) => {
@@ -3453,6 +3478,11 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
           />
         )}
         <div className={`absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10 ${isGroupPost && !post.groupPoster ? "rounded-[8px]" : "rounded-full"}`} />
+        {/* Verified badge — bottom-right of the avatar, ringed in white to lift
+            off the photo. Skipped for group/event avatars (which own that spot). */}
+        {post.verified && !isGroupPost && !isEvent ? (
+          <VerifiedBadge className="absolute -bottom-1 -right-1 h-5 w-5" />
+        ) : null}
       </div>
 
       <AnimatePresence>
@@ -3494,12 +3524,19 @@ function QuotedPostCard({ quoted }: { quoted: QuotedSnapshot }) {
   );
 }
 
+// Per-post hover treatment: a crisp (non-feathered) inner border — a 5px inset
+// shadow with 0 blur, so the edge is hard rather than fading out. gray-dark #222
+// at 3%. Applied to the post's full-bleed row wrapper so it reaches the card edges.
+export const POST_HOVER_SHADOW = "transition-shadow hover:shadow-[inset_0_0_0_5px_rgba(34,34,34,0.03)]";
+
 export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOpen }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void; onOpen?: () => void }) {
   const navigate = useNavigate();
   const postBase = usePostBase();
   const [editOpen, setEditOpen] = useState(false);
   const { mode: profileBarMode } = useProfileBarMode();
   const { liveCardStyle, eventStage } = useFeedDemo();
+  // Avatar + name share one coach hover-card (see useCoachHover).
+  const hover = useCoachHover(post);
 
   // Media-only live post: identity and actions live on the card itself.
   if (post.type === "live" && post.live.variant === "minimal" && post.live.bare) {
@@ -3536,11 +3573,11 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
       >
         {/* Left column: avatar with hover card */}
         <div onClick={e => e.stopPropagation()}>
-          <AvatarWithHoverCard post={post} />
+          <AvatarWithHoverCard post={post} open={hover.open} hoverProps={hover.hoverProps} />
         </div>
         {/* Right column: content */}
         <div className="min-w-0 flex-1">
-          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} companyLogo={post.companyLogo} onEdit={onUpdate ? () => setEditOpen(true) : undefined} />
+          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} companyLogo={post.companyLogo} onEdit={onUpdate ? () => setEditOpen(true) : undefined} nameHover={hover.enabled ? hover.hoverProps : undefined} />
           {/* Minimal mode has no title line, so the body tucks up tight to the
               identity row (negative margin trims the line-height leading); the
               title modes give the body a touch more air. */}
@@ -3623,6 +3660,71 @@ const suggestedExperts = [
   { name: "Lauren Hayes",   avatar: pic13, verified: true, headline: "HBS Admissions Expert | Former Reader | 5.0 Rated Expert" },
   { name: "Jason Park",     avatar: pic14, verified: false, headline: "Deloitte Strategy Lead | MBA Career Expert | Finance & Consulting" },
 ];
+
+// The hover popover shown over a post's avatar/name: identity (name + handle +
+// avatar), a short bio, follower count, and two equal-weight CTAs — Follow
+// (toggles to Following) and Message.
+function ProfileHoverContent({ avatar, name, verified, headline, p }: {
+  avatar: string;
+  name: string;
+  verified?: boolean;
+  headline?: string;
+  p: CoachProfile | undefined;
+}) {
+  const navigate = useNavigate();
+  const [following, setFollowing] = useState(false);
+  const handle = name.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const bio = headline ?? p?.affiliation;
+  const profileTo = `/profile/${nameToSlug(name)}`;
+
+  return (
+    <div className="p-4">
+      {/* Identity: name + handle on the left, circular avatar on the right */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <Link to={profileTo} className="truncate text-[17px] font-semibold leading-tight text-gray-dark hover:underline">{name}</Link>
+            {verified ? <img src={verifiedIcon} alt="" className="h-4 w-4 shrink-0" /> : null}
+          </div>
+          <p className="mt-1 truncate text-[14px] leading-tight text-gray-light">@{handle}</p>
+        </div>
+        <Link to={profileTo} className="shrink-0">
+          <img src={avatar} alt={name} className="h-14 w-14 rounded-full object-cover" style={{ objectPosition: "50% 15%" }} />
+        </Link>
+      </div>
+
+      {bio ? <p className="mt-3 text-[14px] leading-snug text-gray-dark">{bio}</p> : null}
+
+      {p ? (
+        <p className="mt-2 text-[13px] leading-tight text-gray-light">
+          <span className="font-semibold text-gray-dark">{formatCount(p.followers)}</span> followers
+        </p>
+      ) : null}
+
+      {/* Two primary CTAs */}
+      <div className="mt-4 flex gap-2">
+        <Button
+          size="md"
+          rounded="rounded-xl"
+          variant={following ? "outline" : "dark"}
+          onClick={() => setFollowing(f => !f)}
+          className="flex-1"
+        >
+          {following ? "Following" : "Follow"}
+        </Button>
+        <Button
+          size="md"
+          rounded="rounded-xl"
+          variant="outline"
+          onClick={() => navigate("/messages")}
+          className="flex-1"
+        >
+          Message
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function CoachCardContent({ avatar, name, verified, headline, price, ctaLabel, showFollow = true, isOnline, p }: {
   avatar: string;
@@ -4797,9 +4899,22 @@ function PopularExperts() {
   );
 }
 
-export function HomeRightSidebar() {
+export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = {}) {
+  const { pathname } = useLocation();
+  const isAltNav = pathname.startsWith("/alt-nav");
+  // Defaults to the alt-nav behavior, but callers (e.g. the dashboard, which
+  // already lists upcoming sessions in its main column) can suppress the card.
+  const upcoming = showUpcoming ?? isAltNav;
   return (
     <div className="flex flex-col gap-[14px]">
+      {/* Upcoming sessions — alt-nav only */}
+      {upcoming && (
+        <SidebarSectionCard title="Upcoming sessions" to="/alt-nav/calendar" bleed>
+          <SessionCard size="small" title="Alex <> Jessica" dateTime="Today, 5:45 PM" duration="30m" day={16} image={pic6} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
+          <SessionCard size="small" title="Resume Review" dateTime="Tomorrow, 11:00 AM" duration="45m" day={17} image={pic4} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
+        </SidebarSectionCard>
+      )}
+
       {/* Livestreams */}
       <SidebarSectionCard title="Livestreams" to="/events" bleed={false}>
         <SidebarCard
@@ -4824,27 +4939,29 @@ export function HomeRightSidebar() {
         />
       </SidebarSectionCard>
 
-      {/* Popular categories */}
-      <SidebarSectionCard title="Popular categories" bleed={false}>
-        <SidebarCard
-          variant="category"
-          image={categoryInvestmentBanking}
-          title="Investment Banking"
-          subtitle={<CategorySubtitle photos={[pic1, pic4, pic5]} experts="234 experts" />}
-        />
-        <SidebarCard
-          variant="category"
-          image={categoryAI}
-          title="AI Automation & Agents"
-          subtitle={<CategorySubtitle photos={[pic6, pic7, pic8]} experts="300 experts" />}
-        />
-        <SidebarCard
-          variant="category"
-          image={categoryGMAT}
-          title="GMAT Tutoring"
-          subtitle={<CategorySubtitle photos={[pic2, pic3, pic10]} experts="156 experts" />}
-        />
-      </SidebarSectionCard>
+      {/* Popular categories — hidden in alt-nav */}
+      {!isAltNav && (
+        <SidebarSectionCard title="Popular categories" bleed={false}>
+          <SidebarCard
+            variant="category"
+            image={categoryInvestmentBanking}
+            title="Investment Banking"
+            subtitle={<CategorySubtitle photos={[pic1, pic4, pic5]} experts="234 experts" />}
+          />
+          <SidebarCard
+            variant="category"
+            image={categoryAI}
+            title="AI Automation & Agents"
+            subtitle={<CategorySubtitle photos={[pic6, pic7, pic8]} experts="300 experts" />}
+          />
+          <SidebarCard
+            variant="category"
+            image={categoryGMAT}
+            title="GMAT Tutoring"
+            subtitle={<CategorySubtitle photos={[pic2, pic3, pic10]} experts="156 experts" />}
+          />
+        </SidebarSectionCard>
+      )}
 
       {/* Popular experts */}
       <PopularExperts />
@@ -5217,7 +5334,7 @@ export default function Home() {
       {/* Feed */}
       <div className="divide-y divide-[#D5D5D5]">
         {feedPosts.map((post, i) => (
-          <div key={post.id} className="px-4 sm:px-6">
+          <div key={post.id} className={`px-4 sm:px-6 ${POST_HOVER_SHADOW}`}>
             <FeedPost post={post} onUpdate={handleEdit} onRepost={handleRepost} onUndoRepost={handleUndoRepost} onQuote={setQuoteTarget} />
             {i === 3 && <SuggestedExperts />}
           </div>

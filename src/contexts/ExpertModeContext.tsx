@@ -13,7 +13,7 @@ const ExpertModeContext = createContext<ExpertModeContextValue>({
 });
 
 export function ExpertModeProvider({ children }: { children: ReactNode }) {
-  const [expert, setExpert] = useState(true);
+  const [expert, setExpert] = useState(false);
   const toggle = () => setExpert((v) => !v);
 
   return (
