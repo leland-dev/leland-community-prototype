@@ -173,7 +173,7 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25, duration: 0.5, ease: EASE }}
-                className="mt-5 font-serif text-[36px] leading-[1.05] text-gray-dark"
+                className="mt-5 max-w-[15ch] text-balance font-serif text-[32px] leading-[1.1] text-gray-dark"
               >
                 You qualify for the Leland community.
               </motion.h2>
