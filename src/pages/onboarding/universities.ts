@@ -4,7 +4,13 @@
  * `aliases` widen the type-ahead ("cal", "hbs", "penn").
  * ──────────────────────────────────────────────────────────────────────── */
 
-export type University = { name: string; key?: string; aliases?: string[] };
+export type University = {
+  name: string;
+  key?: string;
+  aliases?: string[];
+  /** searchable but not yet established on Leland — first member gets the pioneer beat */
+  pioneer?: boolean;
+};
 
 export const UNIVERSITIES: University[] = [
   { name: "Harvard University", key: "harvard", aliases: ["hbs", "harvard"] },
@@ -65,6 +71,13 @@ export const UNIVERSITIES: University[] = [
   { name: "IIT Delhi" },
   { name: "National University of Singapore", aliases: ["nus"] },
   { name: "Tsinghua University" },
+  /* small schools, searchable for the pioneer / first-member demo */
+  { name: "Tacoma Community College", pioneer: true, aliases: ["tcc"] },
+  { name: "Provo Community College", pioneer: true },
+  { name: "Salt Lake Community College", pioneer: true, aliases: ["slcc"] },
+  { name: "Utah Valley University", pioneer: true, aliases: ["uvu"] },
+  { name: "Weber State University", pioneer: true },
+  { name: "Boise State University", pioneer: true },
 ];
 
 /** Shown before the member types anything — all have logos. */

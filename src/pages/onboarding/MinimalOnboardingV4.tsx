@@ -299,7 +299,7 @@ export default function MinimalOnboardingV4() {
                 <SchoolProof
                   school={school.school}
                   logoKey={school.logoKey}
-                  pioneer={school.custom}
+                  pioneer={school.pioneer}
                   resonance={resonance}
                   onContinue={() => setStage("linkedin")}
                 />,

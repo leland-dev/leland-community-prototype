@@ -21,7 +21,7 @@ import {
  * ──────────────────────────────────────────────────────────────────────── */
 
 export type GradYear = number | "earlier" | "unknown";
-export type SchoolAnswer = { school: string; custom: boolean; logoKey?: string; gradYear: GradYear };
+export type SchoolAnswer = { school: string; custom: boolean; pioneer: boolean; logoKey?: string; gradYear: GradYear };
 
 const ORG_LOGOS = import.meta.glob("../../../assets/org-logos/*.png", { eager: true, import: "default" }) as Record<string, string>;
 const LOGOS = import.meta.glob("../../../assets/logos/*.png", { eager: true, import: "default" }) as Record<string, string>;
@@ -78,7 +78,7 @@ export default function UniversitySearch({
   const copy = COPY[status];
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
-  const [picked, setPicked] = useState<{ name: string; custom: boolean; logoKey?: string } | null>(null);
+  const [picked, setPicked] = useState<{ name: string; custom: boolean; pioneer: boolean; logoKey?: string } | null>(null);
   const [year, setYear] = useState<GradYear>(copy.defaultYear);
   // the gate moment: "is your school approved to join?" — theatre, but it
   // makes the school feel like the credential it is
@@ -91,7 +91,7 @@ export default function UniversitySearch({
     const t1 = reduced ? 400 : 1500;
     window.setTimeout(() => setChecking("approved"), t1);
     window.setTimeout(
-      () => onContinue({ school: picked.name, custom: picked.custom, logoKey: picked.logoKey, gradYear: year }),
+      () => onContinue({ school: picked.name, custom: picked.custom, pioneer: picked.pioneer, logoKey: picked.logoKey, gradYear: year }),
       t1 + (reduced ? 300 : 850),
     );
   };
@@ -106,11 +106,11 @@ export default function UniversitySearch({
   const showCustom = q.length >= 2 && !exact;
 
   const pick = (u: University) => {
-    setPicked({ name: u.name, custom: false, logoKey: u.key });
+    setPicked({ name: u.name, custom: false, pioneer: !!u.pioneer, logoKey: u.key });
     setQuery("");
   };
   const addCustom = () => {
-    setPicked({ name: q, custom: true });
+    setPicked({ name: q, custom: true, pioneer: true });
     setQuery("");
   };
 
@@ -156,7 +156,7 @@ export default function UniversitySearch({
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[15px] font-medium text-gray-dark">{u.name}</span>
                       <span className="block text-[12.5px] text-gray-light">
-                        {memberCountFor(u.name)} Leland members · {expertCountFor(u.name)} experts
+                        {u.pioneer ? "New to Leland" : `${memberCountFor(u.name)} Leland members · ${expertCountFor(u.name)} experts`}
                       </span>
                     </span>
                   </motion.button>
@@ -195,7 +195,7 @@ export default function UniversitySearch({
                     <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-yellow px-2 py-0.5 text-[11.5px] font-semibold text-gray-dark">
                       <ShieldCheck size={12} /> Approved to join Leland
                     </span>
-                  ) : picked.custom ? (
+                  ) : picked.custom || picked.pioneer ? (
                     <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-yellow/40 px-2 py-0.5 text-[11.5px] font-medium text-gray-dark">
                       <ShieldCheck size={12} /> New to Leland
                     </span>
