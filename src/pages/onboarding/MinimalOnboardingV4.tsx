@@ -111,8 +111,7 @@ export default function MinimalOnboardingV4() {
   const logoDocked = stage === "opener";
 
   const resonance = resonanceFor(categories);
-  // the proof beat only earns its place for a school we actually know
-  const hasProof = !!school && !school.custom;
+
 
   // Persistent header (back · dots · skip) per stage. Narrative beats have a
   // back target but no dot index; the school step has no skip (intentional).
@@ -124,7 +123,7 @@ export default function MinimalOnboardingV4() {
     student: "situation",
     school: "student",
     schoolproof: "school",
-    linkedin: hasProof ? "schoolproof" : "school",
+    linkedin: "schoolproof",
   };
   const STEP_SKIP: Partial<Record<Stage, Stage>> = {
     goal: "category",
@@ -291,7 +290,7 @@ export default function MinimalOnboardingV4() {
                   status={studentStatus}
                   onContinue={(a) => {
                     setSchool(a);
-                    setStage(a.custom ? "linkedin" : "schoolproof");
+                    setStage("schoolproof");
                   }}
                 />,
               )
@@ -300,6 +299,7 @@ export default function MinimalOnboardingV4() {
                 <SchoolProof
                   school={school.school}
                   logoKey={school.logoKey}
+                  pioneer={school.custom}
                   resonance={resonance}
                   onContinue={() => setStage("linkedin")}
                 />,
