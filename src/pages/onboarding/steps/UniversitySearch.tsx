@@ -41,6 +41,47 @@ export function universityLogo(key?: string, name?: string): string | undefined 
   return undefined;
 }
 
+/* Resolve a logo for a free-form org/affiliation label ("Analyst, Morgan
+   Stanley", "GSB '27", "Meta AI"). Aliases first, then the label and its
+   tokens against the logo folders. Returns undefined when we have nothing. */
+const ORG_ALIASES: [string, string | undefined, string | undefined][] = [
+  ["stanford gsb", "gsb", undefined],
+  ["gsb", "gsb", undefined],
+  ["hbs", "hbs", undefined],
+  ["yls", "yale", undefined],
+  ["mit sloan", "mit-sloan", undefined],
+  ["sloan", "mit-sloan", undefined],
+  ["nyu stern", "nyu-stern", undefined],
+  ["stern", "nyu-stern", undefined],
+  ["bain capital", "bain", undefined],
+  ["meta ai", "meta", undefined],
+  ["l.e.k", "lek", undefined],
+  ["morgan stanley", "morgan-stanley", undefined],
+  ["goldman", "goldman-sachs", undefined],
+  ["cmu", undefined, "Carnegie Mellon University"],
+  ["carnegie", undefined, "Carnegie Mellon University"],
+  ["hopkins", undefined, "Johns Hopkins University"],
+  ["duke", undefined, "Duke University"],
+  ["brown", undefined, "Brown University"],
+  ["georgetown", undefined, "Georgetown University"],
+  ["northwestern", undefined, "Northwestern University"],
+];
+
+export function logoForOrg(label: string): string | undefined {
+  const clean = label.toLowerCase();
+  for (const [kw, key, name] of ORG_ALIASES) {
+    if (clean.includes(kw)) return universityLogo(key, name);
+  }
+  const whole = universityLogo(slugify(label), label);
+  if (whole) return whole;
+  for (const w of clean.split(/[^a-z0-9]+/)) {
+    if (w.length < 3) continue;
+    const hit = universityLogo(w, w);
+    if (hit) return hit;
+  }
+  return undefined;
+}
+
 function Logo({ name, logoKey, size = 40 }: { name: string; logoKey?: string; size?: number }) {
   const url = universityLogo(logoKey, name);
   return url ? (

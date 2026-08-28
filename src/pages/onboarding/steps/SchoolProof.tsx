@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 
 import { COACH_FACES } from "../mockData";
 import { memberCountFor, expertCountFor } from "../universities";
-import { universityLogo } from "./UniversitySearch";
+import { universityLogo, logoForOrg } from "./UniversitySearch";
 import type { Resonance } from "../resonanceV4";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -102,6 +102,9 @@ export default function SchoolProof({
                     <span className="block text-[14px] font-semibold text-gray-dark">{e.org}</span>
                     <span className="block text-[13px] text-gray-light">{resonance.title.includes(" experts") ? resonance.title.split(" experts")[0].split(" ").slice(1).join(" ") : "Expert"} coach</span>
                   </span>
+                  {logoForOrg(e.org) ? (
+                    <img src={logoForOrg(e.org)} alt="" className="h-7 w-7 shrink-0 object-contain" />
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -165,6 +168,9 @@ export default function SchoolProof({
                   → now at {a.org}
                 </span>
               </span>
+              {logoForOrg(a.org) ? (
+                <img src={logoForOrg(a.org)} alt="" className="h-7 w-7 shrink-0 object-contain" />
+              ) : null}
             </div>
           ))}
         </motion.div>

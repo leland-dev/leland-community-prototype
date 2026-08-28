@@ -191,12 +191,29 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
                 initial={reduced ? { opacity: 0 } : { opacity: 0, y: 28, rotateX: 12 }}
                 animate={{ opacity: 1, y: 0, rotateX: 0 }}
                 transition={{ delay: 0.6, duration: 0.6, ease: EASE }}
-                style={{ transformPerspective: 900 }}
-                className="mt-8 w-full max-w-[340px] overflow-hidden rounded-[22px] bg-gray-dark text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.28)]"
+                style={{
+                  transformPerspective: 900,
+                  background: "radial-gradient(130% 100% at 15% 0%, #262624 0%, #171716 52%, #101010 100%)",
+                }}
+                className="relative mt-8 w-full max-w-[340px] overflow-hidden rounded-[22px] text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] ring-1 ring-white/10"
               >
+                {/* one slow glint across the pass after it lands */}
+                {!reduced ? (
+                  <motion.span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-y-[-30%] w-[55%]"
+                    style={{
+                      background:
+                        "linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.09) 50%, transparent 100%)",
+                    }}
+                    initial={{ x: "-120%", rotate: 10 }}
+                    animate={{ x: "320%" }}
+                    transition={{ delay: 1.4, duration: 1.6, ease: "easeInOut" }}
+                  />
+                ) : null}
                 <div className="flex items-center justify-between px-5 pt-5">
                   <img src={mark} alt="Leland" className="h-6 w-6" style={{ filter: "brightness(0) invert(1)" }} />
-                  <span className="flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/85">
+                  <span className="flex items-center gap-1 rounded-full bg-yellow/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-yellow">
                     <ShieldCheck size={12} /> Pre-approved
                   </span>
                 </div>
@@ -217,10 +234,7 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
                     </div>
                   </div>
                   <div className="mt-5 border-t border-white/10 pt-4">
-                    <div className="flex items-center justify-between text-[12px]">
-                      <span className="text-white/55">Application strength</span>
-                      <span className="font-semibold text-yellow">Strong</span>
-                    </div>
+                    <p className="text-[12px] text-white/55">Application strength</p>
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                       <motion.div
                         initial={{ width: "0%" }}
@@ -229,9 +243,12 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
                         className="h-full rounded-full bg-yellow"
                       />
                     </div>
-                    <p className="mt-2.5 text-[11.5px] text-white/45">
-                      {experts} {short} experts already inside
-                    </p>
+                    <div className="mt-2.5 flex items-center justify-between text-[11.5px] text-white/45">
+                      <span>
+                        {experts} {short} experts already inside
+                      </span>
+                      <span className="font-mono tracking-[0.08em] text-white/35">Nº 000142</span>
+                    </div>
                   </div>
                 </div>
               </motion.div>

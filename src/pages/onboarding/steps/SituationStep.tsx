@@ -64,7 +64,7 @@ export default function SituationStep({
         {topic ? (
           <div className="mb-3 flex items-center gap-1.5">
             <TrendingUp size={15} strokeWidth={2.2} className="shrink-0 text-gray-dark" />
-            <span className="rounded-[4px] bg-yellow px-1.5 py-0.5 text-[13px] font-semibold text-gray-dark">
+            <span className="rounded-[4px] bg-gray-hover px-1.5 py-0.5 text-[13px] font-semibold text-gray-dark">
               {topic}
             </span>
           </div>

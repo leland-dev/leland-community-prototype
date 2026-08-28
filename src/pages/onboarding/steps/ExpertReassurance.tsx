@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 import { COACH_FACES } from "../mockData";
 import { SharpStar } from "./flowUI";
+import { logoForOrg } from "./UniversitySearch";
 
 import pic2 from "../../../assets/profile photos/pic-2.png";
 import pic10 from "../../../assets/profile photos/pic-10.png";
@@ -160,10 +161,13 @@ export default function ExpertReassurance({
               </p>
               <div className="mt-4 flex items-center gap-2.5">
                 <img src={r.avatar} alt="" className="h-8 w-8 rounded-full object-cover" />
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-semibold text-gray-dark">{r.name}</p>
                   <p className="truncate text-[12px] text-gray-light">{r.role}</p>
                 </div>
+                {logoForOrg(r.role) ? (
+                  <img src={logoForOrg(r.role)} alt="" className="h-7 w-7 shrink-0 object-contain" />
+                ) : null}
               </div>
             </div>
           ))}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Check, Loader2, UserRound, ShieldCheck, Zap } from "lucide-react";
+import { Check, Loader2, PenLine, UserRound, ShieldCheck, Zap } from "lucide-react";
 
 import { MEMBER_AVATARS } from "../mockData";
 import { SharpStar } from "./flowUI";
@@ -105,7 +105,16 @@ export default function LinkedInConnect({
                   </div>
                 )}
               </div>
-              <div className="mt-4 flex items-center justify-between">
+              {/* corner edit: quiet, out of the reading path */}
+              <button
+                onClick={() => setEditing((e) => !e)}
+                aria-label={editing ? "Save" : "Edit profile info"}
+                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-black/[0.05] hover:text-gray-dark"
+              >
+                {editing ? <Check size={16} strokeWidth={2.5} /> : <PenLine size={15} />}
+              </button>
+              {/* status pill starts where the name starts */}
+              <div className="mt-3 flex items-center pl-[78px]">
                 {/* the mark and the status live together: one animated pill */}
                 <motion.span
                   initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.85 }}
@@ -128,21 +137,6 @@ export default function LinkedInConnect({
                     />
                   </svg>
                 </motion.span>
-                {editing ? (
-                  <button
-                    onClick={() => setEditing(false)}
-                    className="rounded-full bg-gray-dark px-4 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-[#333]"
-                  >
-                    Save
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setEditing(true)}
-                    className="text-[13px] font-medium text-gray-light underline decoration-gray-stroke underline-offset-4 transition-colors hover:text-gray-dark"
-                  >
-                    Not right? Edit
-                  </button>
-                )}
               </div>
             </motion.div>
           ) : (

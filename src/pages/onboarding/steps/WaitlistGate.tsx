@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Check, Clock, BellRing, Ticket } from "lucide-react";
+import { Check, Clock, BellRing, Ticket, X } from "lucide-react";
 
 import { ShareSheet } from "../../waitlist/Waitlist";
 import LineList from "./LineLeaderboard";
@@ -59,6 +59,7 @@ export default function WaitlistGate({
   onDevBack?: () => void;
 }) {
   const reduced = useReducedMotion() ?? false;
+  const [toast, setToast] = useState(true);
   const [sharing, setSharing] = useState<number | null>(null);
   const [spent, setSpent] = useState<boolean[]>([false, false, false]);
   const [deadline] = useState(() => {
@@ -140,15 +141,36 @@ export default function WaitlistGate({
 
   return (
     <div className="relative flex h-full flex-col">
-      {/* pinned: you're all set */}
-      <div
-        onDoubleClick={import.meta.env.DEV && onDevBack ? onDevBack : undefined}
-        className="flex shrink-0 items-center justify-center gap-2 bg-[#f4f4f4] px-4 py-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] text-[13px] font-medium text-gray-dark"
-      >
-        <BellRing size={14} />
-        We'll text you the moment the doors open.
-      </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-[calc(max(1.5rem,env(safe-area-inset-bottom))+0.5rem)] pt-8">
+      {/* system-style toast: black, floating, dismissible */}
+      <AnimatePresence>
+        {toast ? (
+          <motion.div
+            initial={{ opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -14 }}
+            transition={{ duration: 0.3, ease: EASE }}
+            onDoubleClick={import.meta.env.DEV && onDevBack ? onDevBack : undefined}
+            className="absolute inset-x-4 top-[calc(env(safe-area-inset-top,0px)+0.75rem)] z-30 flex items-center gap-2.5 rounded-2xl bg-gray-dark py-3 pl-4 pr-2 text-[13px] font-medium text-white shadow-[0_12px_32px_rgba(0,0,0,0.28)]"
+          >
+            <BellRing size={14} className="shrink-0" />
+            <span className="min-w-0 flex-1">We'll text you the moment the doors open.</span>
+            <button
+              onClick={() => setToast(false)}
+              aria-label="Dismiss"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <X size={15} />
+            </button>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-[calc(max(1.5rem,env(safe-area-inset-bottom))+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.75rem)]">
+        {/* a way out, always */}
+        <div className="-mt-6 mb-2 flex justify-end">
+          <button onClick={onDone} className="py-1 text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark">
+            Skip
+          </button>
+        </div>
         {/* ── above the fold: spot + ring ── */}
         <div className="flex flex-col items-center text-center">
           {unlocked ? (
@@ -161,8 +183,7 @@ export default function WaitlistGate({
               >
                 <Check size={30} strokeWidth={3} />
               </motion.span>
-              <p className="mt-6 text-[12px] font-semibold uppercase tracking-[0.14em] text-gray-light">Your spot</p>
-              <h1 className="mt-1 font-serif text-[72px] leading-none text-gray-dark">#1</h1>
+              <h1 className="mt-6 font-serif text-[72px] leading-none text-gray-dark">#1</h1>
               <h2 className="mt-4 text-balance font-serif text-[28px] leading-[1.1] text-gray-dark">You're at the front of the line</h2>
               <p className="mx-auto mt-2 max-w-[30ch] text-[15px] leading-relaxed text-gray-light">
                 Locked in. The moment the doors open, you're first through.
@@ -170,9 +191,6 @@ export default function WaitlistGate({
             </motion.div>
           ) : (
             <>
-              <motion.p {...rise(0)} className="text-[12px] font-semibold uppercase tracking-[0.14em] text-gray-light">
-                Your spot in line
-              </motion.p>
               <AnimatePresence mode="wait">
                 <motion.h1
                   key={spot}
@@ -180,7 +198,7 @@ export default function WaitlistGate({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -12 }}
                   transition={{ duration: 0.35 }}
-                  className="mt-1 font-serif text-[68px] leading-none text-gray-dark"
+                  className="font-serif text-[68px] leading-none text-gray-dark"
                 >
                   #{spot}
                 </motion.h1>

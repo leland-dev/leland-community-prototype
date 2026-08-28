@@ -81,7 +81,7 @@ export default function AccessExplainer({
               {REVIEW_STATS.avg.toFixed(2)}
               <span className="font-normal text-gray-light">· {REVIEW_STATS.reviews.toLocaleString()} reviews</span>
             </p>
-            <p className="text-[12.5px] text-gray-light">from members coached 1:1</p>
+            <p className="text-[12.5px] text-gray-light">from 1:1 coaching sessions</p>
           </div>
         </motion.div>
 
@@ -101,27 +101,12 @@ export default function AccessExplainer({
       </div>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[440px] bg-gradient-to-t from-white via-white/95 to-transparent px-6 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+1.5rem)] pt-8">
-        {/* the special one — same treatment as the LinkedIn button, in Leland yellow */}
         <motion.div {...rise(0.9)} className="pointer-events-auto">
           <motion.button
             whileTap={{ scale: 0.97 }}
-            whileHover={{ scale: 1.015 }}
-            animate={reduced ? {} : { scale: [1, 1.012, 1] }}
-            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
             onClick={onContinue}
-            className="relative flex h-14 w-full items-center justify-center gap-1.5 overflow-hidden rounded-full text-[16px] font-semibold text-gray-dark shadow-[0_10px_30px_rgba(244,201,72,0.5),inset_0_1px_0_rgba(255,255,255,0.5)]"
-            style={{ background: "linear-gradient(180deg, #FFE291 0%, #FFD96F 55%, #F3C948 100%)" }}
+            className="flex h-14 w-full items-center justify-center gap-1.5 rounded-full bg-yellow text-[16px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
           >
-            {!reduced ? (
-              <motion.span
-                aria-hidden
-                className="pointer-events-none absolute inset-y-0 w-[45%]"
-                style={{ background: "linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%)" }}
-                initial={{ x: "-150%" }}
-                animate={{ x: "350%" }}
-                transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.6, ease: "easeInOut" }}
-              />
-            ) : null}
             See my spot
             <ArrowRight size={16} strokeWidth={2.4} />
           </motion.button>
