@@ -88,7 +88,7 @@ export default function UniversitySearch({
   const copy = COPY[status];
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
-  const [picked, setPicked] = useState<{ name: string; custom: boolean; pioneer: boolean; logoKey?: string } | null>(null);
+  const [picked, setPicked] = useState<{ name: string; custom: boolean; pioneer: boolean; logoKey?: string; location?: string } | null>(null);
   const [year, setYear] = useState<GradYear>(copy.defaultYear);
   // the gate moment: "is your school approved to join?" — theatre, but it
   // makes the school feel like the credential it is
@@ -116,7 +116,7 @@ export default function UniversitySearch({
   const showCustom = q.length >= 2 && !exact;
 
   const pick = (u: University) => {
-    setPicked({ name: u.name, custom: false, pioneer: !!u.pioneer, logoKey: u.key });
+    setPicked({ name: u.name, custom: false, pioneer: !!u.pioneer, logoKey: u.key, location: u.location });
     setQuery("");
   };
   const addCustom = () => {
@@ -166,7 +166,7 @@ export default function UniversitySearch({
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[15px] font-medium text-gray-dark">{u.name}</span>
                       <span className="block text-[12.5px] text-gray-light">
-                        {u.pioneer ? "New to Leland" : `${memberCountFor(u.name)} Leland members · ${expertCountFor(u.name)} experts`}
+                        {u.pioneer ? (u.location ?? "University") : `${memberCountFor(u.name)} Leland members · ${expertCountFor(u.name)} experts`}
                       </span>
                     </span>
                   </motion.button>
@@ -206,9 +206,7 @@ export default function UniversitySearch({
                       <ShieldCheck size={12} /> Approved to join Leland
                     </span>
                   ) : picked.custom || picked.pioneer ? (
-                    <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-yellow/40 px-2 py-0.5 text-[11.5px] font-medium text-gray-dark">
-                      <ShieldCheck size={12} /> New to Leland
-                    </span>
+                    <span className="block text-[12.5px] text-gray-light">{picked.location ?? "University"}</span>
                   ) : (
                     <span className="block text-[12.5px] text-gray-light">
                       {memberCountFor(picked.name)} Leland members · {expertCountFor(picked.name)} experts

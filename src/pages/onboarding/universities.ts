@@ -10,6 +10,8 @@ export type University = {
   aliases?: string[];
   /** searchable but not yet established on Leland — first member gets the pioneer beat */
   pioneer?: boolean;
+  /** shown in place of member/expert counts for pioneer schools */
+  location?: string;
 };
 
 export const UNIVERSITIES: University[] = [
@@ -72,12 +74,12 @@ export const UNIVERSITIES: University[] = [
   { name: "National University of Singapore", aliases: ["nus"] },
   { name: "Tsinghua University" },
   /* small schools, searchable for the pioneer / first-member demo */
-  { name: "Tacoma Community College", pioneer: true, aliases: ["tcc"] },
-  { name: "Provo Community College", pioneer: true },
-  { name: "Salt Lake Community College", pioneer: true, aliases: ["slcc"] },
-  { name: "Utah Valley University", pioneer: true, aliases: ["uvu"] },
-  { name: "Weber State University", pioneer: true },
-  { name: "Boise State University", pioneer: true },
+  { name: "Tacoma Community College", pioneer: true, aliases: ["tcc"], location: "Tacoma, WA" },
+  { name: "Provo Community College", pioneer: true, location: "Provo, UT" },
+  { name: "Salt Lake Community College", pioneer: true, aliases: ["slcc"], location: "Salt Lake City, UT" },
+  { name: "Utah Valley University", pioneer: true, aliases: ["uvu"], location: "Orem, UT" },
+  { name: "Weber State University", pioneer: true, location: "Ogden, UT" },
+  { name: "Boise State University", pioneer: true, location: "Boise, ID" },
 ];
 
 /** Shown before the member types anything — all have logos. */
