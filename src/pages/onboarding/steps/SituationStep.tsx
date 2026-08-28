@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Compass, BookOpen, Send, RefreshCw, Trophy, TrendingUp, type LucideProps } from "lucide-react";
+import { Check, Compass, BookOpen, Send, RefreshCw, Trophy, TrendingUp, type LucideProps } from "lucide-react";
 import { type ComponentType, Fragment } from "react";
 
 import { StepHeading } from "./flowUI";
@@ -21,29 +21,16 @@ const SITUATIONS: Situation[] = [
   { label: "Already in, leveling up", Icon: Trophy },
 ];
 
-/* ring draws around the circle, then the center fills; fully hidden until
-   selected so no stroke artifacts show on idle circles */
+/* quiet check — no ring-draw choreography, just a fast fill */
 function RingCheck({ on }: { on: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" style={{ transform: "rotate(-90deg)" }}>
-      <circle cx="12" cy="12" r="9" fill="none" stroke="#e5e5e5" strokeWidth="2" />
-      <motion.circle
-        cx="12" cy="12" r="9" fill="none" stroke="#222222" strokeWidth="2" strokeLinecap="round"
-        initial={false}
-        animate={{ pathLength: on ? 1 : 0, opacity: on ? 1 : 0 }}
-        transition={{
-          pathLength: { duration: 0.35, ease: [0.32, 0.72, 0, 1] },
-          opacity: { duration: on ? 0.01 : 0.15 },
-        }}
-      />
-      <motion.circle
-        cx="12" cy="12" r="5" fill="#222222"
-        initial={false}
-        animate={{ scale: on ? 1 : 0 }}
-        transition={on ? { delay: 0.28, type: "spring", stiffness: 500, damping: 22 } : { duration: 0.15 }}
-        style={{ transformOrigin: "center" }}
-      />
-    </svg>
+    <span
+      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-150 ${
+        on ? "border-gray-dark bg-gray-dark text-white" : "border-gray-stroke bg-white text-transparent"
+      }`}
+    >
+      <Check size={13} strokeWidth={3} />
+    </span>
   );
 }
 
