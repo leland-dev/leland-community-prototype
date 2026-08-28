@@ -45,6 +45,7 @@ export const CATEGORIES_BY_BRANCH: Record<Branch, Category[]> = {
     { label: "Private Equity", Icon: Briefcase },
     { label: "Venture Capital", Icon: TrendingUp },
     { label: "Software Engineering", Icon: Code2 },
+    { label: "Startups & entrepreneurship", Icon: Rocket },
   ],
   "build-with-ai": [
     { label: "Build with AI in my current role", Icon: Sparkles },
@@ -320,6 +321,7 @@ const ALIASES: Record<string, string> = {
   "Private Equity": "Venture capital & PE",
   "Venture Capital": "Venture capital & PE",
   "Software Engineering": "Software engineering",
+  "Startups & entrepreneurship": "Entrepreneurship",
 };
 
 /** Copy for the reassurance screen. Uses the primary (first-picked) category. */
