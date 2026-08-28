@@ -16,9 +16,9 @@ export type StudentStatus = "enrolled" | "graduated" | "applying";
 type Option = { status: StudentStatus; label: string; sub: string; Icon: ComponentType<LucideProps> };
 
 const OPTIONS: Option[] = [
-  { status: "enrolled", label: "Yes, I'm currently enrolled", sub: "Undergrad, grad, or professional program", Icon: GraduationCap },
-  { status: "graduated", label: "No, I've graduated", sub: "We'll ask where", Icon: Building2 },
-  { status: "applying", label: "Not yet — I'm applying", sub: "Tell us where you're applying from", Icon: Send },
+  { status: "enrolled", label: "I'm a currently enrolled student", sub: "Undergrad, grad, or professional program", Icon: GraduationCap },
+  { status: "graduated", label: "I've graduated", sub: "Working, between things, or back at it", Icon: Building2 },
+  { status: "applying", label: "I'm applying to school", sub: "Getting ready for the next chapter", Icon: Send },
 ];
 
 export default function StudentStatusStep({
@@ -32,7 +32,7 @@ export default function StudentStatusStep({
   return (
     <div className="h-full overflow-y-auto px-6 pb-10 pt-2">
       <StepHeading
-        title="Are you a student right now?"
+        title="Tell us about your education"
         subtitle="Leland is built around universities — it's how we match you with people who've walked your exact path."
       />
       <div className="flex flex-col gap-3">
