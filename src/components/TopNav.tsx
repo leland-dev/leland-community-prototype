@@ -399,7 +399,7 @@ export default function TopNav() {
                       onClick={() => setProfileOpen(false)}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                     >
-                      <img src={compassIcon} alt="Onboarding v4" className="h-6 w-6 shrink-0" />
+                      <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg>
                       Onboarding v4
                     </NavLink>
                     <NavLink
