@@ -267,7 +267,7 @@ export default function MinimalOnboardingV4() {
             ) : stage === "situation" ? (
               screen("situation",
                 <SituationStep
-                  title="Where are you in the journey?"
+                  title="Where are you at in the process currently?"
                   options={SITUATIONS}
                   single
                   onContinue={() => setStage("student")}
