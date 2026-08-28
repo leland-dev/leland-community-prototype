@@ -141,13 +141,9 @@ export default function MinimalOnboardingV4() {
     schoolproof: "school",
     linkedin: "schoolproof",
   };
+  // Only genuinely optional screens offer a corner Skip.
   const STEP_SKIP: Partial<Record<Stage, Stage>> = {
-    goal: "category",
-    category: "reassurance",
-    reassurance: "situation",
     situation: "student",
-    student: "school",
-    schoolproof: "linkedin",
     linkedin: "review",
   };
   const STEP_INDEX: Partial<Record<Stage, number>> = {
