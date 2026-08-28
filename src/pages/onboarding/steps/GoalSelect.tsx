@@ -20,7 +20,7 @@ const BUCKETS: { label: string; Icon: ComponentType<LucideProps>; branch: Branch
 export default function GoalSelect({ onSelect }: { onSelect: (b: Branch) => void }) {
   return (
     <div className="h-full overflow-y-auto px-6 pb-10 pt-2">
-      <StepHeading title="What's your goal?" />
+      <StepHeading title="What's your primary goal right now?" />
       <div className="flex flex-col gap-3">
         {BUCKETS.map((b, i) => (
           <motion.button
