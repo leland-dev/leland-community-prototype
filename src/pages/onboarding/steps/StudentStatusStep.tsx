@@ -33,7 +33,7 @@ export default function StudentStatusStep({
     <div className="h-full overflow-y-auto px-6 pb-10 pt-2">
       <StepHeading
         title="Tell us about your education"
-        subtitle="Your background helps us match you with experts who've been exactly where you are — and where you're headed."
+        subtitle="Your background helps us match you with experts who've been exactly where you are, and where you're headed."
       />
       <div className="flex flex-col gap-3">
         {options.map((o, i) => (
