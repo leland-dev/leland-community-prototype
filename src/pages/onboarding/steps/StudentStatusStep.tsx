@@ -16,7 +16,7 @@ export type StudentStatus = "enrolled" | "graduated" | "applying";
 type Option = { status: StudentStatus; label: string; sub: string; Icon: ComponentType<LucideProps> };
 
 const OPTIONS: Option[] = [
-  { status: "enrolled", label: "I'm a currently enrolled student", sub: "Undergrad, grad, or professional program", Icon: GraduationCap },
+  { status: "enrolled", label: "I'm a current student", sub: "Undergrad, grad, or professional program", Icon: GraduationCap },
   { status: "graduated", label: "I've graduated", sub: "Working, between things, or back at it", Icon: Building2 },
   { status: "applying", label: "I'm applying to school", sub: "Getting ready for the next chapter", Icon: Send },
 ];
