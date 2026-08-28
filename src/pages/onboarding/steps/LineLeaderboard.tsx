@@ -54,9 +54,9 @@ function Row({
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay, ease: [0.32, 0.72, 0, 1] }}
-      className={`flex items-center gap-2.5 py-3 pl-2 pr-3 ${highlight ? "rounded-2xl bg-gray-dark text-white" : ""}`}
+      className={`flex items-center gap-2.5 py-3 pl-2 pr-3 ${highlight ? "rounded-2xl bg-gray-hover" : ""}`}
     >
-      <span className={`w-8 shrink-0 font-serif text-[18px] tabular-nums ${highlight ? "text-yellow" : "text-gray-dark"}`}>
+      <span className="w-8 shrink-0 text-[15px] font-medium tabular-nums text-gray-dark">
         {r.pos}
       </span>
       <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-hover">
@@ -65,14 +65,11 @@ function Row({
         ) : null}
       </span>
       <span className="min-w-0 flex-1">
-        <span className={`block truncate text-[14.5px] font-medium ${blurred ? "select-none blur-[4px]" : ""} ${highlight ? "text-white" : "text-gray-dark"}`}>
+        <span className={`block truncate text-[14.5px] font-medium text-gray-dark ${blurred ? "select-none blur-[4px]" : ""}`}>
           {r.name}
         </span>
-        <span className={`block truncate text-[12.5px] ${highlight ? "text-white/65" : "text-gray-light"}`}>{r.aff}</span>
+        <span className="block truncate text-[12.5px] text-gray-light">{r.aff}</span>
       </span>
-      {highlight ? (
-        <span className="rounded-full bg-yellow px-2.5 py-1 text-[11px] font-semibold text-gray-dark">You</span>
-      ) : null}
     </motion.div>
   );
 }

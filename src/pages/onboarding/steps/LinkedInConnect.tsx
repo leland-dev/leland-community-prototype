@@ -25,7 +25,7 @@ function LinkedInMark({ size = 20, color = "#0A66C2" }: { size?: number; color?:
 }
 
 const BENEFITS = [
-  { Icon: UserRound, text: "Your name, photo, and headline — done." },
+  { Icon: UserRound, text: "Your name, photo, and headline. Done." },
   { Icon: ShieldCheck, text: "Your school and work history, verified." },
   { Icon: Zap, text: "Applications with LinkedIn attached are reviewed first." },
 ];
@@ -42,12 +42,12 @@ export default function LinkedInConnect({
   const reduced = useReducedMotion() ?? false;
   const [phase, setPhase] = useState<"idle" | "loading" | "connected">("idle");
 
+  // Editable so a wrong import never forces anyone out of the flow.
   const yr = typeof gradYear === "number" ? ` '${String(gradYear).slice(2)}` : "";
-  const profile: LinkedInProfile = {
-    name: "June Allen",
-    headline: `Product Manager at Stripe${school ? ` · ${school}${yr}` : ""}`,
-    photo: foundPhoto,
-  };
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState("June Allen");
+  const [headline, setHeadline] = useState(`Product Manager at Stripe${school ? ` · ${school}${yr}` : ""}`);
+  const profile: LinkedInProfile = { name, headline, photo: foundPhoto };
 
   const connect = () => {
     if (phase !== "idle") return;
@@ -83,21 +83,66 @@ export default function LinkedInConnect({
               transition={{ type: "spring", stiffness: 300, damping: 26 }}
               className="relative mt-8 rounded-2xl border border-gray-stroke bg-white p-4 shadow-card"
             >
-              <span className="absolute right-3 top-3">
-                <LinkedInMark size={18} />
-              </span>
               <div className="flex items-center gap-3.5">
                 <img src={profile.photo} alt="" className="h-16 w-16 rounded-full object-cover ring-1 ring-black/[0.06]" />
-                <div className="min-w-0 flex-1 pr-6">
-                  <p className="text-[17px] font-semibold text-gray-dark">{profile.name}</p>
-                  <p className="mt-0.5 text-[13.5px] leading-snug text-gray-light">{profile.headline}</p>
-                </div>
+                {editing ? (
+                  <div className="min-w-0 flex-1">
+                    <input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full rounded-lg border border-gray-stroke px-2.5 py-1.5 text-[15px] font-semibold text-gray-dark outline-none focus:border-gray-dark/40"
+                    />
+                    <input
+                      value={headline}
+                      onChange={(e) => setHeadline(e.target.value)}
+                      className="mt-1.5 w-full rounded-lg border border-gray-stroke px-2.5 py-1.5 text-[13.5px] text-gray-dark outline-none focus:border-gray-dark/40"
+                    />
+                  </div>
+                ) : (
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[17px] font-semibold text-gray-dark">{profile.name}</p>
+                    <p className="mt-0.5 text-[13.5px] leading-snug text-gray-light">{profile.headline}</p>
+                  </div>
+                )}
               </div>
-              <div className="mt-4 flex items-center gap-1.5 text-[13px] font-medium text-[#1a7f4b]">
-                <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#1a7f4b] text-white">
-                  <Check size={11} strokeWidth={3} />
-                </span>
-                Connected
+              <div className="mt-4 flex items-center justify-between">
+                {/* the mark and the status live together: one animated pill */}
+                <motion.span
+                  initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3, type: "spring", stiffness: 380, damping: 22 }}
+                  className="inline-flex items-center gap-2 rounded-full bg-[#0A66C2]/[0.08] py-1.5 pl-2.5 pr-3"
+                >
+                  <LinkedInMark size={14} />
+                  <span className="text-[13px] font-semibold text-[#0A66C2]">Connected</span>
+                  <svg viewBox="0 0 24 24" width={13} height={13} fill="none" aria-hidden>
+                    <motion.path
+                      d="M5 12.5l4.4 4.3L19 7.5"
+                      stroke="#0A66C2"
+                      strokeWidth={3}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ delay: 0.65, duration: 0.35, ease: "easeOut" }}
+                    />
+                  </svg>
+                </motion.span>
+                {editing ? (
+                  <button
+                    onClick={() => setEditing(false)}
+                    className="rounded-full bg-gray-dark px-4 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-[#333]"
+                  >
+                    Save
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setEditing(true)}
+                    className="text-[13px] font-medium text-gray-light underline decoration-gray-stroke underline-offset-4 transition-colors hover:text-gray-dark"
+                  >
+                    Not right? Edit
+                  </button>
+                )}
               </div>
             </motion.div>
           ) : (
@@ -141,17 +186,21 @@ export default function LinkedInConnect({
               transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
               onClick={connect}
               disabled={phase === "loading"}
-              className="pointer-events-auto relative flex h-14 w-full items-center justify-center gap-2.5 overflow-hidden rounded-full text-[16px] font-semibold text-white shadow-[0_10px_30px_rgba(10,102,194,0.38),inset_0_1px_0_rgba(255,255,255,0.28)] disabled:opacity-90"
-              style={{ background: "linear-gradient(180deg, #1B7FE0 0%, #0A66C2 55%, #0956A6 100%)" }}
+              className="pointer-events-auto relative flex h-14 w-full items-center justify-center gap-2.5 overflow-hidden rounded-full text-[16px] font-semibold text-white shadow-[0_10px_30px_rgba(10,102,194,0.32)] disabled:opacity-90"
+              style={{ background: "#0A66C2" }}
             >
               {!reduced && phase !== "loading" ? (
                 <motion.span
                   aria-hidden
-                  className="pointer-events-none absolute inset-y-0 w-[45%]"
-                  style={{ background: "linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.32) 50%, transparent 100%)" }}
-                  initial={{ x: "-150%" }}
-                  animate={{ x: "350%" }}
-                  transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.6, ease: "easeInOut" }}
+                  className="pointer-events-none absolute inset-y-[-40%] w-[85%]"
+                  style={{
+                    background:
+                      "radial-gradient(ellipse at center, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 45%, transparent 72%)",
+                    filter: "blur(6px)",
+                  }}
+                  initial={{ x: "-90%", rotate: 14 }}
+                  animate={{ x: ["-90%", "35%", "190%"] }}
+                  transition={{ duration: 5.4, times: [0, 0.6, 1], repeat: Infinity, repeatDelay: 0.4, ease: "easeInOut" }}
                 />
               ) : null}
               {phase === "loading" ? (

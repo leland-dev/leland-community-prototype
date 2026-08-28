@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, Check, Plus, X, ShieldCheck, ChevronDown, Loader2 } from "lucide-react";
+import { Search, Check, Plus, X, ChevronDown, Loader2 } from "lucide-react";
 
 import { StepHeading } from "./flowUI";
 import type { StudentStatus } from "./StudentStatusStep";
@@ -43,16 +43,14 @@ export function universityLogo(key?: string, name?: string): string | undefined 
 
 function Logo({ name, logoKey, size = 40 }: { name: string; logoKey?: string; size?: number }) {
   const url = universityLogo(logoKey, name);
-  return (
+  return url ? (
+    <img src={url} alt="" className="shrink-0 object-contain" style={{ width: size, height: size }} />
+  ) : (
     <span
-      className="flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-black/[0.06]"
+      className="flex shrink-0 items-center justify-center rounded-full bg-gray-hover text-[15px] font-semibold text-gray-dark"
       style={{ width: size, height: size }}
     >
-      {url ? (
-        <img src={url} alt="" className="h-full w-full object-contain p-1" />
-      ) : (
-        <span className="text-[15px] font-semibold text-gray-dark">{name.charAt(0)}</span>
-      )}
+      {name.charAt(0)}
     </span>
   );
 }
@@ -202,10 +200,6 @@ export default function UniversitySearch({
                     <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-black/[0.06] px-2 py-0.5 text-[11.5px] font-medium text-gray-dark">
                       <Loader2 size={12} className="animate-spin" /> Checking eligibility…
                     </span>
-                  ) : checking === "approved" ? (
-                    <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-yellow px-2 py-0.5 text-[11.5px] font-semibold text-gray-dark">
-                      <ShieldCheck size={12} /> Approved to join Leland
-                    </span>
                   ) : picked.custom || picked.pioneer ? (
                     <span className="block text-[12.5px] text-gray-light">{picked.location ?? "University"}</span>
                   ) : (
@@ -270,9 +264,9 @@ export default function UniversitySearch({
                     className="mt-4 font-serif text-[17px] italic text-gray-light"
                   >
                     {year === "unknown"
-                      ? "No rush — you can set this later"
+                      ? "No rush, you can set this later"
                       : year === "none"
-                        ? "All good — your school still counts"
+                        ? "All good, your school still counts"
                         : status === "applying"
                           ? `Starting ${year}`
                           : year === "earlier"

@@ -183,7 +183,7 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
                 transition={{ delay: 0.45, duration: 0.5 }}
                 className="mt-2 max-w-[34ch] text-[15px] leading-relaxed text-gray-light"
               >
-                Your application is approved — you're in the first wave of members we're admitting. Here's your member pass.
+                Your application is approved. You're in the first wave of members we're admitting. Here's your member pass.
               </motion.p>
 
               {/* admission pass */}

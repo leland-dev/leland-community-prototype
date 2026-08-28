@@ -47,7 +47,7 @@ const SITUATIONS_BY_BRANCH: Record<Branch, Situation[]> = {
     { label: "Starting to explore", Icon: Compass },
     { label: "Studying for the test", Icon: BookOpen },
     { label: "Writing essays & applications", Icon: PenLine },
-    { label: "Admitted — getting ready to start", Icon: Trophy },
+    { label: "Admitted, getting ready to start", Icon: Trophy },
   ],
   "grow-career": [
     { label: "Starting to explore", Icon: Compass },
@@ -107,7 +107,7 @@ export default function MinimalOnboardingV4() {
   const [invitesSent, setInvitesSent] = useState(0);
 
   useEffect(() => {
-    document.title = "Leland — Get started";
+    document.title = "Get started with Leland";
   }, []);
 
   // Intro choreography: pop → reveal wordmark → dock at top.

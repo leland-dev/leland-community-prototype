@@ -89,6 +89,7 @@ export default function ChoiceQuestion({
                   {opt.label === OTHER && active ? (
                     <input
                       autoFocus
+                      ref={(el) => el?.focus({ preventScroll: true })}
                       value={otherText}
                       onChange={(e) => setOtherText(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
@@ -101,7 +102,7 @@ export default function ChoiceQuestion({
                         )
                       }
                       placeholder="Tell us more"
-                      className="mt-2 w-full border-b border-gray-stroke bg-transparent pb-1 text-[15px] font-normal text-gray-dark outline-none placeholder:text-gray-xlight focus:border-gray-dark/50"
+                      className="mt-2 w-full bg-transparent pb-1 text-[15px] font-normal text-gray-dark outline-none placeholder:text-gray-xlight"
                     />
                   ) : null}
                 </span>

@@ -33,7 +33,7 @@ export default function AccessExplainer({
     {
       Icon: MessagesSquare,
       title: "Real people, not content",
-      body: `${expertHeadline} — current and former people at ${orgs[0]}, ${orgs[1]}, and ${orgs[2]} — share advice with you directly. Every one is vetted and reviewed.`,
+      body: `${expertHeadline}: current and former people at ${orgs[0]}, ${orgs[1]}, and ${orgs[2]} who share advice with you directly. Every one is vetted and reviewed.`,
     },
     {
       Icon: DoorOpen,
@@ -60,7 +60,7 @@ export default function AccessExplainer({
           How access works
         </motion.h2>
         <motion.p {...rise(0.08)} className="mt-2 text-[15px] leading-relaxed text-gray-light">
-          Leland is a marketplace of real experts — people who've done exactly what you're trying to do.
+          Leland is a marketplace of real experts: people who've done exactly what you're trying to do.
         </motion.p>
 
         {/* proof strip: expert faces + rating */}

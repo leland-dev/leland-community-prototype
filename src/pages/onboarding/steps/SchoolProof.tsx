@@ -85,7 +85,7 @@ export default function SchoolProof({
           </motion.h2>
           <motion.p {...rise(0.25)} className="mt-3 max-w-[32ch] text-[15px] leading-relaxed text-gray-light">
             Every school on Leland started with one person.{" "}
-            <span className="font-semibold text-gray-dark">{short} starts with you</span> — founding-member status is
+            <span className="font-semibold text-gray-dark">{short} starts with you</span>. Founding-member status is
             locked to your account.
           </motion.p>
 
@@ -102,7 +102,6 @@ export default function SchoolProof({
                     <span className="block text-[14px] font-semibold text-gray-dark">{e.org}</span>
                     <span className="block text-[13px] text-gray-light">{resonance.title.includes(" experts") ? resonance.title.split(" experts")[0].split(" ").slice(1).join(" ") : "Expert"} coach</span>
                   </span>
-                  <span className="rounded-full bg-gray-hover px-2.5 py-1 text-[11.5px] font-medium text-gray-dark">Expert</span>
                 </div>
               ))}
             </div>
@@ -133,10 +132,10 @@ export default function SchoolProof({
           initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: "spring", stiffness: 260, damping: 22 }}
-          className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl bg-white shadow-card ring-1 ring-black/[0.06]"
+          className="flex h-24 w-24 items-center justify-center"
         >
           {logo ? (
-            <img src={logo} alt="" className="h-full w-full object-contain p-3" />
+            <img src={logo} alt="" className="h-full w-full object-contain" />
           ) : (
             <span className="font-serif text-[36px] text-gray-dark">{school.charAt(0)}</span>
           )}
@@ -147,7 +146,7 @@ export default function SchoolProof({
         </motion.h2>
         <motion.p {...rise(0.25)} className="mt-3 max-w-[330px] text-[15px] leading-relaxed text-gray-light">
           <span className="font-semibold text-gray-dark">{members} members</span> and{" "}
-          <span className="font-semibold text-gray-dark">{experts} experts</span> from {short} are already here —
+          <span className="font-semibold text-gray-dark">{experts} experts</span> from {short} are already here,
           including people now at {orgs[0]} and {orgs[1]}.
         </motion.p>
 
@@ -165,9 +164,6 @@ export default function SchoolProof({
                 <span className="block text-[13px] text-gray-light">
                   → now at {a.org}
                 </span>
-              </span>
-              <span className="rounded-full bg-gray-hover px-2.5 py-1 text-[11.5px] font-medium text-gray-dark">
-                Expert
               </span>
             </div>
           ))}

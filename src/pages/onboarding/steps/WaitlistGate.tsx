@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Check, Share, Clock, BellRing, Plus } from "lucide-react";
+import { Check, Clock, BellRing, Ticket } from "lucide-react";
 
 import { ShareSheet } from "../../waitlist/Waitlist";
 import LineList from "./LineLeaderboard";
@@ -42,40 +42,6 @@ function Countdown({ deadline }: { deadline: number }) {
   );
 }
 
-/* ── the three seats: your invites as people, not a gauge. Empty seats are
-      dashed with a plus; each send fills one with a springy check. ── */
-function InviteSeats({ n }: { n: number }) {
-  return (
-    <div className="flex items-center gap-4">
-      {[0, 1, 2].map((i) => {
-        const filled = i < n;
-        const next = i === n;
-        return (
-          <div key={i} className="flex flex-col items-center gap-1.5">
-            <motion.span
-              initial={false}
-              animate={filled ? { scale: [1, 1.15, 1] } : { scale: 1 }}
-              transition={{ duration: 0.45, ease: EASE }}
-              className={`flex h-14 w-14 items-center justify-center rounded-full ${
-                filled
-                  ? "bg-gray-dark text-white"
-                  : next
-                    ? "border-2 border-dashed border-gray-dark/50 bg-yellow/25 text-gray-dark"
-                    : "border-2 border-dashed border-gray-stroke bg-white text-gray-xlight"
-              }`}
-            >
-              {filled ? <Check size={22} strokeWidth={3} /> : <Plus size={20} strokeWidth={2.2} />}
-            </motion.span>
-            <span className={`text-[11px] font-medium ${filled ? "text-gray-dark" : "text-gray-xlight"}`}>
-              {filled ? "Sent" : `Invite ${i + 1}`}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 export default function WaitlistGate({
   sent,
   onSent,
@@ -93,7 +59,8 @@ export default function WaitlistGate({
   onDevBack?: () => void;
 }) {
   const reduced = useReducedMotion() ?? false;
-  const [sharing, setSharing] = useState(false);
+  const [sharing, setSharing] = useState<number | null>(null);
+  const [spent, setSpent] = useState<boolean[]>([false, false, false]);
   const [deadline] = useState(() => {
     const k = "leland-v4-gate-deadline";
     try {
@@ -109,26 +76,27 @@ export default function WaitlistGate({
 
   const unlocked = sent >= 3;
   const spot = SPOT_LADDER[Math.min(sent, 3)];
-  const code = INVITE_CODES[Math.min(sent, 2)];
 
-  const link = `${window.location.origin}/onboarding-v4?code=${code}`;
-  const message = `I just got pre-approved for Leland — early access to ${category.toLowerCase()} experts who are exactly where I'm trying to go. Skip the line with my invite: ${link}`;
+  const linkFor = (i: number) => `${window.location.origin}/onboarding-v4?code=${INVITE_CODES[i]}`;
+  const messageFor = (i: number) =>
+    `I just got pre-approved for Leland: early access to ${category.toLowerCase()} experts who are exactly where I'm trying to go. Skip the line with my invite: ${linkFor(i)}`;
 
-  const markSent = () => {
-    setSharing(false);
+  const markSent = (i: number) => {
+    setSpent((prev) => prev.map((v, idx) => (idx === i ? true : v)));
+    setSharing(null);
     onSent();
   };
-  const share = async () => {
-    if (unlocked) return;
+  const share = async (i: number) => {
+    if (unlocked || spent[i]) return;
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Leland", text: message, url: link });
-        markSent();
+        await navigator.share({ title: "Leland", text: messageFor(i), url: linkFor(i) });
+        markSent(i);
       } catch {
         /* canceled: nothing spent */
       }
     } else {
-      setSharing(true);
+      setSharing(i);
     }
   };
 
@@ -138,32 +106,35 @@ export default function WaitlistGate({
     transition: { duration: 0.5, delay, ease: EASE },
   });
 
-  const cta = (
-    <div className="w-full">
-        {!unlocked ? (
-          <>
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              onClick={share}
-              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-yellow text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
-            >
-              <Share size={17} />
-              {sent === 0 ? "Send your first invite" : sent === 1 ? "Send your second invite" : "Send your last invite"}
-            </motion.button>
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-[13px] text-gray-light">
-              <Clock size={14} className="text-gray-dark" />
-              <Countdown deadline={deadline} />
-              to lock in the front of the line
-            </p>
-          </>
-        ) : (
-          <button
-            onClick={onDone}
-            className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
+  const tickets = (
+    <div className="flex flex-col gap-2.5">
+      {INVITE_CODES.map((c, i) => (
+        <div key={c} className="flex items-center gap-3 rounded-2xl bg-[#f4f4f4] p-4 text-left">
+          <Ticket size={20} className={`ml-1 shrink-0 ${spent[i] ? "text-gray-light" : "text-gray-dark"}`} />
+          <span
+            className={`min-w-0 flex-1 truncate font-mono text-[17px] font-semibold tracking-[0.14em] ${
+              spent[i] ? "text-gray-light" : "text-gray-dark"
+            }`}
           >
-            Done
-          </button>
-        )}
+            {c}
+          </span>
+          {spent[i] ? (
+            <span className="px-3 text-[14px] font-medium text-gray-light">Sent</span>
+          ) : (
+            <button
+              onClick={() => share(i)}
+              className="shrink-0 rounded-full bg-yellow px-5 py-2 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
+            >
+              Invite
+            </button>
+          )}
+        </div>
+      ))}
+      <p className="mt-1.5 flex items-center justify-center gap-1.5 text-[13px] text-gray-light">
+        <Clock size={14} className="text-gray-dark" />
+        <Countdown deadline={deadline} />
+        to lock in the front of the line
+      </p>
     </div>
   );
 
@@ -172,10 +143,10 @@ export default function WaitlistGate({
       {/* pinned: you're all set */}
       <div
         onDoubleClick={import.meta.env.DEV && onDevBack ? onDevBack : undefined}
-        className="flex shrink-0 items-center justify-center gap-2 bg-yellow px-4 py-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] text-[13px] font-medium text-gray-dark"
+        className="flex shrink-0 items-center justify-center gap-2 bg-[#f4f4f4] px-4 py-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] text-[13px] font-medium text-gray-dark"
       >
         <BellRing size={14} />
-        You're all set — we'll text you the moment the doors open.
+        We'll text you the moment the doors open.
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-[calc(max(1.5rem,env(safe-area-inset-bottom))+0.5rem)] pt-8">
         {/* ── above the fold: spot + ring ── */}
@@ -215,10 +186,7 @@ export default function WaitlistGate({
                 </motion.h1>
               </AnimatePresence>
 
-              <motion.div {...rise(0.15)} className="mt-7">
-                <InviteSeats n={sent} />
-              </motion.div>
-              <motion.h2 {...rise(0.25)} className="mt-4 font-serif text-[20px] leading-tight text-gray-dark">
+              <motion.h2 {...rise(0.2)} className="mt-4 font-serif text-[20px] leading-tight text-gray-dark">
                 {sent === 0
                   ? "Invite 3 to skip the line"
                   : sent === 1
@@ -229,26 +197,34 @@ export default function WaitlistGate({
           )}
         </div>
 
-        <motion.div {...rise(0.4)} className="mt-6">
-          {cta}
+        <motion.div {...rise(0.35)} className="mt-7">
+          {unlocked ? (
+            <button
+              onClick={onDone}
+              className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
+            >
+              Done
+            </button>
+          ) : (
+            tickets
+          )}
         </motion.div>
 
-        {/* ── the line, then the CTA again at the bottom ── */}
+        {/* ── the line itself, below the fold ── */}
         <motion.div {...rise(0.5)} className="mt-8">
           <LineList spot={spot} you={you} />
         </motion.div>
-        <div className="mt-8">{cta}</div>
       </div>
 
       <AnimatePresence>
-        {sharing ? (
+        {sharing !== null ? (
           <ShareSheet
-            code={code}
-            link={link}
-            message={message}
-            title="Skip the line — Leland early access"
-            onSend={markSent}
-            onClose={() => setSharing(false)}
+            code={INVITE_CODES[sharing]}
+            link={linkFor(sharing)}
+            message={messageFor(sharing)}
+            title="Leland early access"
+            onSend={() => markSent(sharing)}
+            onClose={() => setSharing(null)}
           />
         ) : null}
       </AnimatePresence>
