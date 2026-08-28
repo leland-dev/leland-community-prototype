@@ -56,7 +56,7 @@ export default function ChoiceQuestion({
       </div>
 
       {/* scrolling options */}
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-32">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-44">
         <div className="flex flex-col gap-2.5">
           {allOptions.map((opt, i) => {
             const active = picked.includes(opt.label);
@@ -92,6 +92,14 @@ export default function ChoiceQuestion({
                       value={otherText}
                       onChange={(e) => setOtherText(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
+                      onFocus={(e) =>
+                        // the card lives at the bottom of the list — lift it
+                        // above the floating Continue when it expands
+                        window.setTimeout(
+                          () => e.target.scrollIntoView({ behavior: "smooth", block: "center" }),
+                          80,
+                        )
+                      }
                       placeholder="Tell us more (optional)"
                       className="mt-2 w-full border-b border-gray-stroke bg-transparent pb-1 text-[15px] font-normal text-gray-dark outline-none placeholder:text-gray-xlight focus:border-gray-dark/50"
                     />
