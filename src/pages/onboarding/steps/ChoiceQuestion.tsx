@@ -100,7 +100,7 @@ export default function ChoiceQuestion({
                           80,
                         )
                       }
-                      placeholder="Tell us more (optional)"
+                      placeholder="Tell us more"
                       className="mt-2 w-full border-b border-gray-stroke bg-transparent pb-1 text-[15px] font-normal text-gray-dark outline-none placeholder:text-gray-xlight focus:border-gray-dark/50"
                     />
                   ) : null}

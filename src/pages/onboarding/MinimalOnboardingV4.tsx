@@ -44,19 +44,19 @@ import foundPhoto from "../../assets/profile photos/pic-1.png";
    into a career vs learning AI. Same timeline UI, tailored beats. */
 const SITUATIONS_BY_BRANCH: Record<Branch, Situation[]> = {
   "get-into-school": [
-    { label: "Just starting to explore programs", Icon: Compass },
+    { label: "Starting to explore", Icon: Compass },
     { label: "Studying for the test", Icon: BookOpen },
     { label: "Writing essays & applications", Icon: PenLine },
     { label: "Admitted — getting ready to start", Icon: Trophy },
   ],
   "grow-career": [
-    { label: "Exploring what's next", Icon: Compass },
+    { label: "Starting to explore", Icon: Compass },
     { label: "Building skills & experience", Icon: BookOpen },
     { label: "Applying & interviewing", Icon: MessagesSquare },
     { label: "In the role, pushing for the next level", Icon: TrendingUp },
   ],
   "build-with-ai": [
-    { label: "Curious, haven't started", Icon: Compass },
+    { label: "Starting to explore", Icon: Compass },
     { label: "Experimenting with AI tools", Icon: FlaskConical },
     { label: "Building something real", Icon: Hammer },
     { label: "Already using AI at work", Icon: Zap },
