@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Check, Compass, BookOpen, Send, RefreshCw, Trophy, TrendingUp, type LucideProps } from "lucide-react";
+import { Compass, BookOpen, Send, RefreshCw, Trophy, TrendingUp, type LucideProps } from "lucide-react";
 import { type ComponentType, Fragment } from "react";
 
 import { StepHeading } from "./flowUI";
@@ -21,16 +21,20 @@ const SITUATIONS: Situation[] = [
   { label: "Already in, leveling up", Icon: Trophy },
 ];
 
-/* quiet check — no ring-draw choreography, just a fast fill */
+/* ring + center dot, as before — just without the draw-on choreography */
 function RingCheck({ on }: { on: boolean }) {
   return (
-    <span
-      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-150 ${
-        on ? "border-gray-dark bg-gray-dark text-white" : "border-gray-stroke bg-white text-transparent"
-      }`}
-    >
-      <Check size={13} strokeWidth={3} />
-    </span>
+    <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0">
+      <circle
+        cx="12" cy="12" r="9" fill="none" strokeWidth="2"
+        stroke={on ? "#222222" : "#e5e5e5"}
+        style={{ transition: "stroke 150ms" }}
+      />
+      <circle
+        cx="12" cy="12" r="5" fill="#222222"
+        style={{ opacity: on ? 1 : 0, transition: "opacity 120ms" }}
+      />
+    </svg>
   );
 }
 
