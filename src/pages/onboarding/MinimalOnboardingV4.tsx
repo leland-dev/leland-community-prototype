@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Compass, BookOpen, Send, Trophy } from "lucide-react";
+import { Compass, BookOpen, Send, Trophy, PenLine, Users, MessagesSquare, TrendingUp, FlaskConical, Hammer, Zap } from "lucide-react";
 
 import type { Branch } from "./data";
 import { CATEGORIES_BY_BRANCH, CATEGORY_QUESTION, resonanceFor } from "./resonanceV4";
@@ -40,12 +40,31 @@ import foundPhoto from "../../assets/profile photos/pic-1.png";
  * Narrative beats (reassurance, schoolproof, building) render no dots.
  * ──────────────────────────────────────────────────────────────────────── */
 
-const SITUATIONS: Situation[] = [
-  { label: "Just starting to explore", Icon: Compass },
-  { label: "Actively preparing", Icon: BookOpen },
-  { label: "Applying and interviewing", Icon: Send },
-  { label: "Already in, leveling up", Icon: Trophy },
-];
+/* The journey reads differently per goal: applying to programs vs breaking
+   into a career vs learning AI. Same timeline UI, tailored beats. */
+const SITUATIONS_BY_BRANCH: Record<Branch, Situation[]> = {
+  "get-into-school": [
+    { label: "Just starting to explore programs", Icon: Compass },
+    { label: "Studying for the test", Icon: BookOpen },
+    { label: "Writing essays & applications", Icon: PenLine },
+    { label: "Interviewing & waiting on decisions", Icon: Send },
+    { label: "Admitted — getting ready to start", Icon: Trophy },
+  ],
+  "grow-career": [
+    { label: "Exploring what's next", Icon: Compass },
+    { label: "Building skills & experience", Icon: BookOpen },
+    { label: "Networking & applying", Icon: Users },
+    { label: "Interviewing right now", Icon: MessagesSquare },
+    { label: "In the role, pushing for the next level", Icon: TrendingUp },
+  ],
+  "build-with-ai": [
+    { label: "Curious, haven't started", Icon: Compass },
+    { label: "Experimenting with AI tools", Icon: FlaskConical },
+    { label: "Building something real", Icon: Hammer },
+    { label: "Already using AI at work", Icon: Zap },
+    { label: "Leading AI adoption for others", Icon: Users },
+  ],
+};
 
 const TOTAL_STEPS = 6;
 
@@ -265,10 +284,10 @@ export default function MinimalOnboardingV4() {
                 />,
               )
             ) : stage === "situation" ? (
-              screen("situation",
+              screen(`situation-${branch}`,
                 <SituationStep
                   title="Where are you at in the process currently?"
-                  options={SITUATIONS}
+                  options={SITUATIONS_BY_BRANCH[branch]}
                   single
                   onContinue={() => setStage("student")}
                 />,
