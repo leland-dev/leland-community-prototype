@@ -740,8 +740,11 @@ export default function Auth({
   onExit,
   onNext,
   primary = "email",
+  title,
 }: {
   cohortName: string;
+  /** override the default "Save your spot in {cohortName}" headline */
+  title?: string;
   /** accepted for back-compat with callers; no longer displayed */
   memberCount?: number;
   onBack: () => void;
@@ -805,7 +808,7 @@ export default function Auth({
       {/* headline */}
       <div className="shrink-0 px-6 pt-1 text-center">
         <h2 className="font-serif text-[26px] leading-tight text-gray-dark">
-          Save your spot in {cohortName}
+          {title ?? `Save your spot in ${cohortName}`}
         </h2>
       </div>
 

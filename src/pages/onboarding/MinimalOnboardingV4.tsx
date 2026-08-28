@@ -237,6 +237,7 @@ export default function MinimalOnboardingV4() {
               screen("signin",
                 <Auth
                   cohortName="the Leland community"
+                  title="Create your account to join the Leland community"
                   onBack={() => setStage("opener")}
                   onExit={exit}
                   onNext={() => (intent === "login" ? navigate("/") : setStage("goal"))}
