@@ -20,7 +20,7 @@ import {
  * but it's clear you come in through a school. No Skip on this step.
  * ──────────────────────────────────────────────────────────────────────── */
 
-export type GradYear = number | "earlier" | "unknown";
+export type GradYear = number | "earlier" | "unknown" | "none";
 export type SchoolAnswer = { school: string; custom: boolean; pioneer: boolean; logoKey?: string; gradYear: GradYear };
 
 const ORG_LOGOS = import.meta.glob("../../../assets/org-logos/*.png", { eager: true, import: "default" }) as Record<string, string>;
@@ -89,7 +89,8 @@ export default function UniversitySearch({
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<{ name: string; custom: boolean; pioneer: boolean; logoKey?: string; location?: string } | null>(null);
-  const [year, setYear] = useState<GradYear>(copy.defaultYear);
+  // optional — no prefill; unset continues as "unknown"
+  const [year, setYear] = useState<GradYear | null>(null);
   // the gate moment: "is your school approved to join?" — theatre, but it
   // makes the school feel like the credential it is
   const [checking, setChecking] = useState<"idle" | "checking" | "approved">("idle");
@@ -101,7 +102,7 @@ export default function UniversitySearch({
     const t1 = reduced ? 400 : 1500;
     window.setTimeout(() => setChecking("approved"), t1);
     window.setTimeout(
-      () => onContinue({ school: picked.name, custom: picked.custom, pioneer: picked.pioneer, logoKey: picked.logoKey, gradYear: year }),
+      () => onContinue({ school: picked.name, custom: picked.custom, pioneer: picked.pioneer, logoKey: picked.logoKey, gradYear: year ?? "unknown" }),
       t1 + (reduced ? 300 : 850),
     );
   };
@@ -237,24 +238,30 @@ export default function UniversitySearch({
                 {/* native select: iOS gets the wheel picker, desktop a dropdown */}
                 <div className="relative mt-4">
                   <select
-                    value={String(year)}
+                    value={year === null ? "" : String(year)}
                     onChange={(e) => {
                       const v = e.target.value;
-                      setYear(v === "earlier" || v === "unknown" ? v : Number(v));
+                      if (v === "") return setYear(null);
+                      setYear(v === "earlier" || v === "unknown" || v === "none" ? v : Number(v));
                     }}
-                    className="w-full appearance-none rounded-xl border border-gray-stroke bg-white py-3.5 pl-4 pr-11 text-[17px] font-medium text-gray-dark outline-none focus:border-gray-dark/40"
+                    className={`w-full appearance-none rounded-xl border border-gray-stroke bg-white py-3.5 pl-4 pr-11 text-[17px] font-medium outline-none focus:border-gray-dark/40 ${
+                      year === null ? "text-gray-xlight" : "text-gray-dark"
+                    }`}
                   >
+                    <option value="">Select year (optional)</option>
+                    {/* the outs come first — never buried under a long year list */}
+                    <option value="unknown">I don't know yet</option>
+                    {status === "graduated" ? <option value="none">Didn't graduate</option> : null}
                     {copy.years.map((y) => (
                       <option key={String(y)} value={String(y)}>
                         {y === "earlier" ? "Earlier" : y}
                       </option>
                     ))}
-                    <option value="unknown">I don't know yet</option>
                   </select>
                   <ChevronDown size={18} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-light" />
                 </div>
                 <AnimatePresence mode="wait">
-                  <motion.p
+                  {year === null ? null : <motion.p
                     key={String(year)}
                     initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -264,12 +271,14 @@ export default function UniversitySearch({
                   >
                     {year === "unknown"
                       ? "No rush — you can set this later"
-                      : status === "applying"
-                        ? `Starting ${year}`
-                        : year === "earlier"
-                          ? "Alumni"
-                          : `Class of ${year}`}
-                  </motion.p>
+                      : year === "none"
+                        ? "All good — your school still counts"
+                        : status === "applying"
+                          ? `Starting ${year}`
+                          : year === "earlier"
+                            ? "Alumni"
+                            : `Class of ${year}`}
+                  </motion.p>}
                 </AnimatePresence>
               </motion.div>
             </motion.div>
@@ -302,10 +311,7 @@ export default function UniversitySearch({
                   {picked.name} is approved
                 </>
               ) : (
-                <>
-                  <Check size={17} />
-                  Continue
-                </>
+                "Continue"
               )}
             </button>
           </motion.div>

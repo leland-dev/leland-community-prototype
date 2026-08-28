@@ -37,7 +37,7 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
   const classLine =
     input.gradYear === "earlier"
       ? `${short} alum`
-      : input.gradYear === "unknown"
+      : input.gradYear === "unknown" || input.gradYear === "none"
         ? short
         : `${short} · Class of ${input.gradYear}`;
 
