@@ -59,7 +59,7 @@ export const CATEGORIES_BY_BRANCH: Record<Branch, Category[]> = {
 
 export const CATEGORY_QUESTION: Record<Branch, string> = {
   "get-into-school": "What are you applying to?",
-  "grow-career": "Where are you headed?",
+  "grow-career": "What path are you pursuing?",
   "build-with-ai": "What do you want to do with AI?",
 };
 
