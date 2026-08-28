@@ -20,7 +20,7 @@ import LinkedInConnect, { type LinkedInProfile } from "./steps/LinkedInConnect";
 import ApplicationReview from "./steps/ApplicationReview";
 import AccessExplainer from "./steps/AccessExplainer";
 import WaitlistGate from "./steps/WaitlistGate";
-import { Notify } from "../waitlist/Waitlist";
+import NotifyStep from "./steps/NotifyStep";
 import foundPhoto from "../../assets/profile photos/pic-1.png";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -343,7 +343,7 @@ export default function MinimalOnboardingV4() {
                 />,
               )
             ) : stage === "notify" ? (
-              screen("notify", <Notify reduced={reduced} onDone={() => setStage("gate")} />)
+              screen("notify", <NotifyStep onDone={() => setStage("gate")} />)
             ) : school ? (
               screen("gate",
                 <WaitlistGate
