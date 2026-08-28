@@ -127,7 +127,7 @@ export default function UniversitySearch({
   return (
     <div className="flex h-full flex-col">
       <div className="shrink-0 px-6 pt-2">
-        <StepHeading title={copy.title} subtitle="Members join through their school. Search yours." />
+        <StepHeading title={copy.title} subtitle="This helps us understand more about you." />
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-36">
