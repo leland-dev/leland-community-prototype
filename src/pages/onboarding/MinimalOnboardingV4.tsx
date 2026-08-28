@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Compass, BookOpen, Send, Trophy, PenLine, Users, MessagesSquare, TrendingUp, FlaskConical, Hammer, Zap } from "lucide-react";
+import { Compass, BookOpen, Trophy, PenLine, MessagesSquare, TrendingUp, FlaskConical, Hammer, Zap } from "lucide-react";
 
 import type { Branch } from "./data";
 import { CATEGORIES_BY_BRANCH, CATEGORY_QUESTION, resonanceFor } from "./resonanceV4";
@@ -47,14 +47,12 @@ const SITUATIONS_BY_BRANCH: Record<Branch, Situation[]> = {
     { label: "Just starting to explore programs", Icon: Compass },
     { label: "Studying for the test", Icon: BookOpen },
     { label: "Writing essays & applications", Icon: PenLine },
-    { label: "Interviewing & waiting on decisions", Icon: Send },
     { label: "Admitted — getting ready to start", Icon: Trophy },
   ],
   "grow-career": [
     { label: "Exploring what's next", Icon: Compass },
     { label: "Building skills & experience", Icon: BookOpen },
-    { label: "Networking & applying", Icon: Users },
-    { label: "Interviewing right now", Icon: MessagesSquare },
+    { label: "Applying & interviewing", Icon: MessagesSquare },
     { label: "In the role, pushing for the next level", Icon: TrendingUp },
   ],
   "build-with-ai": [
@@ -62,7 +60,6 @@ const SITUATIONS_BY_BRANCH: Record<Branch, Situation[]> = {
     { label: "Experimenting with AI tools", Icon: FlaskConical },
     { label: "Building something real", Icon: Hammer },
     { label: "Already using AI at work", Icon: Zap },
-    { label: "Leading AI adoption for others", Icon: Users },
   ],
 };
 
