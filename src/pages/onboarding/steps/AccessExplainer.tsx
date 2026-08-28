@@ -33,17 +33,17 @@ export default function AccessExplainer({
     {
       Icon: MessagesSquare,
       title: "Real people, not content",
-      body: `${expertHeadline}: current and former people at ${orgs[0]}, ${orgs[1]}, and ${orgs[2]} who share advice with you directly. Every one is vetted and reviewed.`,
+      body: `${expertHeadline} from ${orgs[0]}, ${orgs[1]}, and ${orgs[2]} share advice with you directly.`,
     },
     {
       Icon: DoorOpen,
       title: "Experts are seated first",
-      body: `We fill each ${cat} cohort with experts before we open it to members, so every member gets real attention. You're pre-approved for the first wave.`,
+      body: `We seat ${cat} experts before opening the doors, so every member gets real attention.`,
     },
     {
       Icon: Ticket,
       title: "Invite 3, skip the line",
-      body: "Every person you bring moves you forward. Three within 24 hours locks you in at the front.",
+      body: "Every invite moves you up. Three within 24 hours locks in the front of the line.",
     },
   ];
 
@@ -57,10 +57,10 @@ export default function AccessExplainer({
     <div className="flex h-full flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-32 pt-[max(2rem,env(safe-area-inset-top))]">
         <motion.h2 {...rise(0)} className="text-balance font-serif text-[30px] leading-[1.12] text-gray-dark">
-          How access works
+          How the community works
         </motion.h2>
         <motion.p {...rise(0.08)} className="mt-2 text-[15px] leading-relaxed text-gray-light">
-          Leland is a marketplace of real experts: people who've done exactly what you're trying to do.
+          Leland is the #1 place to help you reach your professional goals.
         </motion.p>
 
         {/* proof strip: expert faces + rating */}
