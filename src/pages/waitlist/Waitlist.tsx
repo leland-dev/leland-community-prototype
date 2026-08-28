@@ -744,7 +744,7 @@ export default function Waitlist() {
   const dirRef = useRef<1 | -1>(1);
   const delayRef = useRef(0);
 
-  useEffect(() => { document.title = "Leland — Join the waitlist"; }, []);
+  useEffect(() => { document.title = "Join the Leland waitlist"; }, []);
 
   useEffect(() => {
     const code = codeFromUrl();

@@ -86,7 +86,7 @@ export default function WaitlistOnboarding() {
   const [logoRevealed, setLogoRevealed] = useState(false);
 
   useEffect(() => {
-    document.title = "Leland — Join the waitlist";
+    document.title = "Join the Leland waitlist";
   }, []);
 
   useEffect(() => {
