@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Check, Share, Clock, BellRing } from "lucide-react";
+import { Check, Share, Clock, BellRing, Plus } from "lucide-react";
 
 import { ShareSheet } from "../../waitlist/Waitlist";
 import LineList from "./LineLeaderboard";
@@ -8,8 +8,7 @@ import LineList from "./LineLeaderboard";
 /* ─────────────────────────────────────────────────────────────────────────
  * WaitlistGate (v4) — the dead end, one scrollable screen:
  *
- *  · Spot in line + a circular 0/3 invite ring (three milestone dots, a
- *    bubble that travels as invites go out)
+ *  · Spot in line + three invite "seats" that fill as invites go out
  *  · The line itself below the fold — blurred faces/names, crisp affiliations
  *  · The invite CTA (with the 24h clock) appears twice: above the line and
  *    again at the bottom, so it's there wherever you stop scrolling
@@ -43,65 +42,36 @@ function Countdown({ deadline }: { deadline: number }) {
   );
 }
 
-/* ── the ring: track, progress arc, three milestone dots, a travelling bubble ── */
-function InviteRing({ n, size = 148 }: { n: number; size?: number }) {
-  const stroke = 10;
-  const r = (size - stroke) / 2 - 6; // leave room for the bubble
-  const cx = size / 2;
-  const c = 2 * Math.PI * r;
-  const frac = n / 3;
-  const pt = (f: number) => {
-    const a = -Math.PI / 2 + f * 2 * Math.PI;
-    return { x: cx + r * Math.cos(a), y: cx + r * Math.sin(a) };
-  };
-  const bubble = pt(frac);
+/* ── the three seats: your invites as people, not a gauge. Empty seats are
+      dashed with a plus; each send fills one with a springy check. ── */
+function InviteSeats({ n }: { n: number }) {
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <circle cx={cx} cy={cx} r={r} fill="none" stroke="#ececec" strokeWidth={stroke} />
-        <motion.circle
-          cx={cx}
-          cy={cx}
-          r={r}
-          fill="none"
-          stroke="#FFD96F"
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={c}
-          initial={false}
-          animate={{ strokeDashoffset: c * (1 - frac) }}
-          transition={{ duration: 0.7, ease: EASE }}
-          style={{ transform: "rotate(-90deg)", transformOrigin: "center" }}
-        />
-        {/* milestone dots at 1/3, 2/3, 3/3 */}
-        {[1, 2, 3].map((k) => {
-          const p = pt(k / 3);
-          const reached = n >= k;
-          return (
-            <motion.circle
-              key={k}
-              cx={p.x}
-              cy={p.y}
-              r={reached ? 6 : 5}
+    <div className="flex items-center gap-4">
+      {[0, 1, 2].map((i) => {
+        const filled = i < n;
+        const next = i === n;
+        return (
+          <div key={i} className="flex flex-col items-center gap-1.5">
+            <motion.span
               initial={false}
-              animate={{ fill: reached ? "#222222" : "#ffffff", stroke: reached ? "#222222" : "#d9d9d9" }}
-              transition={{ duration: 0.3 }}
-              strokeWidth={2}
-            />
-          );
-        })}
-        {/* the bubble: sits at the start for 0/3, travels the arc as invites go out */}
-        <motion.g initial={false} animate={{ x: bubble.x - cx, y: bubble.y - cx }} transition={{ duration: 0.7, ease: EASE }}>
-          <circle cx={cx} cy={cx} r={11} fill="#222222" stroke="#ffffff" strokeWidth={3} />
-          <circle cx={cx} cy={cx} r={3.5} fill="#FFD96F" />
-        </motion.g>
-      </svg>
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-serif text-[34px] leading-none text-gray-dark">
-          {n}<span className="text-[18px] text-gray-light">/3</span>
-        </span>
-        <span className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-light">invites</span>
-      </div>
+              animate={filled ? { scale: [1, 1.15, 1] } : { scale: 1 }}
+              transition={{ duration: 0.45, ease: EASE }}
+              className={`flex h-14 w-14 items-center justify-center rounded-full ${
+                filled
+                  ? "bg-gray-dark text-white"
+                  : next
+                    ? "border-2 border-dashed border-gray-dark/50 bg-yellow/25 text-gray-dark"
+                    : "border-2 border-dashed border-gray-stroke bg-white text-gray-xlight"
+              }`}
+            >
+              {filled ? <Check size={22} strokeWidth={3} /> : <Plus size={20} strokeWidth={2.2} />}
+            </motion.span>
+            <span className={`text-[11px] font-medium ${filled ? "text-gray-dark" : "text-gray-xlight"}`}>
+              {filled ? "Sent" : `Invite ${i + 1}`}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -112,12 +82,15 @@ export default function WaitlistGate({
   category,
   you,
   onDone,
+  onDevBack,
 }: {
   sent: number;
   onSent: () => void;
   category: string;
   you: { name: string; aff: string; avatar?: string };
   onDone: () => void;
+  /** dev-only easter egg: double-tap the banner to step back into the flow */
+  onDevBack?: () => void;
 }) {
   const reduced = useReducedMotion() ?? false;
   const [sharing, setSharing] = useState(false);
@@ -197,7 +170,10 @@ export default function WaitlistGate({
   return (
     <div className="relative flex h-full flex-col">
       {/* pinned: you're all set */}
-      <div className="flex shrink-0 items-center justify-center gap-2 bg-yellow px-4 py-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] text-[13px] font-medium text-gray-dark">
+      <div
+        onDoubleClick={import.meta.env.DEV && onDevBack ? onDevBack : undefined}
+        className="flex shrink-0 items-center justify-center gap-2 bg-yellow px-4 py-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] text-[13px] font-medium text-gray-dark"
+      >
         <BellRing size={14} />
         You're all set — we'll text you the moment the doors open.
       </div>
@@ -240,7 +216,7 @@ export default function WaitlistGate({
               </AnimatePresence>
 
               <motion.div {...rise(0.15)} className="mt-7">
-                <InviteRing n={sent} />
+                <InviteSeats n={sent} />
               </motion.div>
               <motion.h2 {...rise(0.25)} className="mt-4 font-serif text-[20px] leading-tight text-gray-dark">
                 {sent === 0

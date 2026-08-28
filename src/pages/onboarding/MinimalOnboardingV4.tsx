@@ -356,6 +356,7 @@ export default function MinimalOnboardingV4() {
                     avatar: linkedin?.photo ?? foundPhoto,
                   }}
                   onDone={() => navigate("/")}
+                  onDevBack={() => setStage("linkedin")}
                 />,
               )
             ) : (
