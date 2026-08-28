@@ -40,7 +40,7 @@ export default function SchoolProof({
   onContinue: () => void;
 }) {
   const reduced = useReducedMotion() ?? false;
-  const logo = universityLogo(logoKey);
+  const logo = universityLogo(logoKey, school);
   const members = memberCountFor(school);
   const experts = expertCountFor(school);
   const short = shortName(school);

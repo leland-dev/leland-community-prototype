@@ -64,7 +64,7 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
     };
   }, [reduced]);
 
-  const logo = universityLogo(input.logoKey);
+  const logo = universityLogo(input.logoKey, input.school);
 
   return (
     <div className="relative flex h-full flex-col">

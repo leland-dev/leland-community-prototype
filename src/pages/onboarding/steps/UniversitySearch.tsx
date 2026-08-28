@@ -25,14 +25,24 @@ export type SchoolAnswer = { school: string; custom: boolean; pioneer: boolean; 
 
 const ORG_LOGOS = import.meta.glob("../../../assets/org-logos/*.png", { eager: true, import: "default" }) as Record<string, string>;
 const LOGOS = import.meta.glob("../../../assets/logos/*.png", { eager: true, import: "default" }) as Record<string, string>;
+/* per-school favicons (128px), fetched for every school in the searchable list */
+const SCHOOL_LOGOS = import.meta.glob("../../../assets/school-logos/*.png", { eager: true, import: "default" }) as Record<string, string>;
 
-export function universityLogo(key?: string): string | undefined {
-  if (!key) return undefined;
-  return LOGOS[`../../../assets/logos/${key}.png`] ?? ORG_LOGOS[`../../../assets/org-logos/${key}.png`];
+function slugify(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+export function universityLogo(key?: string, name?: string): string | undefined {
+  if (key) {
+    const curated = LOGOS[`../../../assets/logos/${key}.png`] ?? ORG_LOGOS[`../../../assets/org-logos/${key}.png`];
+    if (curated) return curated;
+  }
+  if (name) return SCHOOL_LOGOS[`../../../assets/school-logos/${slugify(name)}.png`];
+  return undefined;
 }
 
 function Logo({ name, logoKey, size = 40 }: { name: string; logoKey?: string; size?: number }) {
-  const url = universityLogo(logoKey);
+  const url = universityLogo(logoKey, name);
   return (
     <span
       className="flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-black/[0.06]"
