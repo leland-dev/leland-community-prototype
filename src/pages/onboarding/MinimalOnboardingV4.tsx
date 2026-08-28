@@ -259,6 +259,7 @@ export default function MinimalOnboardingV4() {
                   title={CATEGORY_QUESTION[branch]}
                   options={CATEGORIES_BY_BRANCH[branch]}
                   multi
+                  allowOther
                   onContinue={(picked) => {
                     setCategories(picked);
                     setStage("reassurance");

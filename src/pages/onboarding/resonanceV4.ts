@@ -38,14 +38,13 @@ export const CATEGORIES_BY_BRANCH: Record<Branch, Category[]> = {
     { label: "PhD programs", Icon: FlaskConical },
   ],
   "grow-career": [
-    { label: "Consulting", Icon: BarChart3 },
-    { label: "Product management", Icon: Boxes },
-    { label: "Investment banking & finance", Icon: Landmark },
-    { label: "Software engineering", Icon: Code2 },
-    { label: "Venture capital & PE", Icon: TrendingUp },
-    { label: "Marketing & growth", Icon: Megaphone },
-    { label: "Data & analytics", Icon: LineChart },
-    { label: "Entrepreneurship", Icon: Rocket },
+    { label: "Break into AI careers", Icon: Bot },
+    { label: "Management Consulting", Icon: BarChart3 },
+    { label: "Product Management", Icon: Boxes },
+    { label: "Investment Banking", Icon: Landmark },
+    { label: "Private Equity", Icon: Briefcase },
+    { label: "Venture Capital", Icon: TrendingUp },
+    { label: "Software Engineering", Icon: Code2 },
   ],
   "build-with-ai": [
     { label: "Build with AI in my current role", Icon: Sparkles },
@@ -59,7 +58,7 @@ export const CATEGORIES_BY_BRANCH: Record<Branch, Category[]> = {
 
 export const CATEGORY_QUESTION: Record<Branch, string> = {
   "get-into-school": "What are you applying to?",
-  "grow-career": "What path are you pursuing?",
+  "grow-career": "What are you most interested in?",
   "build-with-ai": "What do you want to do with AI?",
 };
 
@@ -312,10 +311,22 @@ const FALLBACK: Resonance = {
   reviews: DEFAULT_REVIEWS,
 };
 
+/* label → resonance-entry aliases (career labels mirror the Typeform wording) */
+const ALIASES: Record<string, string> = {
+  "Break into AI careers": "Break into an AI career",
+  "Management Consulting": "Consulting",
+  "Product Management": "Product management",
+  "Investment Banking": "Investment banking & finance",
+  "Private Equity": "Venture capital & PE",
+  "Venture Capital": "Venture capital & PE",
+  "Software Engineering": "Software engineering",
+};
+
 /** Copy for the reassurance screen. Uses the primary (first-picked) category. */
 export function resonanceFor(categories: string[]): Resonance {
   const primary = categories[0];
-  const r = (primary && RESONANCE[primary]) || FALLBACK;
+  const key = primary ? (ALIASES[primary] ?? primary) : undefined;
+  const r = (key && RESONANCE[key]) || FALLBACK;
   // "200+ consulting experts are here…" → "consulting"; "120+ founders & operators…" → "founders & operators"
   const emphasis = r.title.match(/^\S+ (.+?) (?:experts|are here)/)?.[1];
   return { ...r, emphasis };
