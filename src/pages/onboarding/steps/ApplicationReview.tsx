@@ -175,7 +175,7 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
                 transition={{ delay: 0.25, duration: 0.5, ease: EASE }}
                 className="mt-5 max-w-[15ch] text-balance font-serif text-[32px] leading-[1.1] text-gray-dark"
               >
-                You qualify for the Leland community.
+                Congrats - you qualify for the Leland community.
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0 }}
@@ -183,7 +183,7 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
                 transition={{ delay: 0.45, duration: 0.5 }}
                 className="mt-2 max-w-[34ch] text-[15px] leading-relaxed text-gray-light"
               >
-                Your application is approved. You're in the first wave of members we're admitting. Here's your member pass.
+                Your application is pre-approved in the first wave of members we're admitting. Here's your member pass:
               </motion.p>
 
               {/* admission pass */}
