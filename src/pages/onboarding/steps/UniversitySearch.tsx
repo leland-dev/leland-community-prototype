@@ -295,10 +295,7 @@ export default function UniversitySearch({
               }`}
             >
               {checking === "checking" ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  Checking {picked.name}…
-                </>
+                <Loader2 size={20} className="animate-spin" />
               ) : checking === "approved" ? (
                 <>
                   <Check size={17} strokeWidth={3} />
