@@ -12,9 +12,9 @@ import { StepHeading } from "./flowUI";
  * ──────────────────────────────────────────────────────────────────────── */
 
 const BUCKETS: { label: string; Icon: ComponentType<LucideProps>; branch: Branch }[] = [
-  { label: "Build with AI", Icon: Sparkles, branch: "build-with-ai" },
   { label: "Grow your career", Icon: TrendingUp, branch: "grow-career" },
   { label: "Get into school", Icon: GraduationCap, branch: "get-into-school" },
+  { label: "Build with AI", Icon: Sparkles, branch: "build-with-ai" },
 ];
 
 export default function GoalSelect({ onSelect }: { onSelect: (b: Branch) => void }) {
