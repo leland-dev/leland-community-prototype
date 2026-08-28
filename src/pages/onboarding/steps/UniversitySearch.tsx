@@ -308,7 +308,7 @@ export default function UniversitySearch({
               ) : checking === "approved" ? (
                 <>
                   <Check size={17} strokeWidth={3} />
-                  {picked.name} is approved
+                  School approved
                 </>
               ) : (
                 "Continue"
