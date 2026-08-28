@@ -57,7 +57,7 @@ export default function AccessExplainer({
     <div className="flex h-full flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-32 pt-[max(2rem,env(safe-area-inset-top))]">
         <motion.h2 {...rise(0)} className="text-balance font-serif text-[30px] leading-[1.12] text-gray-dark">
-          How the community works
+          What makes the Leland community different
         </motion.h2>
         <motion.p {...rise(0.08)} className="mt-2 text-[15px] leading-relaxed text-gray-light">
           Leland is the #1 place to help you reach your professional goals.
