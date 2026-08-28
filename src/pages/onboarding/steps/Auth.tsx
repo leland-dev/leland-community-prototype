@@ -64,7 +64,7 @@ function PhoneMock({ reduced }: { reduced: boolean }) {
   return (
     <div className="flex h-full justify-center" style={{ perspective: 1000 }}>
       <div
-        className="relative w-[320px] max-w-full overflow-hidden"
+        className="relative w-[280px] max-w-full overflow-hidden"
         style={{
           maskImage: "linear-gradient(to bottom, #000 68%, transparent 96%)",
           WebkitMaskImage: "linear-gradient(to bottom, #000 68%, transparent 96%)",
