@@ -791,21 +791,14 @@ export default function Auth({
 
   return (
     <div className="flex h-full flex-col bg-white">
-      {/* top chrome */}
-      <div className="flex shrink-0 items-center justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
+      {/* top chrome — back only */}
+      <div className="flex shrink-0 items-center px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
         <button
           onClick={onBack}
           className="flex h-9 w-9 items-center justify-center rounded-full text-gray-dark hover:bg-black/[0.05]"
           aria-label="Back"
         >
           <ArrowLeft size={19} />
-        </button>
-        <button
-          onClick={onExit}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-gray-light hover:bg-black/[0.05]"
-          aria-label="Exit"
-        >
-          <X size={18} />
         </button>
       </div>
 
