@@ -51,9 +51,9 @@ const SITUATIONS_BY_BRANCH: Record<Branch, Situation[]> = {
   ],
   "grow-career": [
     { label: "Starting to explore", Icon: Compass },
-    { label: "Building skills & experience", Icon: BookOpen },
+    { label: "Preparing my resume & experience", Icon: PenLine },
     { label: "Applying & interviewing", Icon: MessagesSquare },
-    { label: "In the role, pushing for the next level", Icon: TrendingUp },
+    { label: "I've landed a job, now just trying to be successful", Icon: TrendingUp },
   ],
   "build-with-ai": [
     { label: "Starting to explore", Icon: Compass },
