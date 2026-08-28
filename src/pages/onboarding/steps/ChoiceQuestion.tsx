@@ -16,12 +16,15 @@ export type Choice = {
   Icon?: ComponentType<LucideProps>;
 };
 
+const OTHER = "Other";
+
 export default function ChoiceQuestion({
   title,
   subtitle,
   options,
   multi = false,
   minSelect = 1,
+  allowOther = false,
   onContinue,
 }: {
   title: string;
@@ -29,9 +32,13 @@ export default function ChoiceQuestion({
   options: Choice[];
   multi?: boolean;
   minSelect?: number;
+  /** append an "Other" card that expands into an optional inline text field */
+  allowOther?: boolean;
   onContinue: (picked: string[]) => void;
 }) {
   const [picked, setPicked] = useState<string[]>([]);
+  const [otherText, setOtherText] = useState("");
+  const allOptions = allowOther ? [...options, { label: OTHER }] : options;
 
   const toggle = (label: string) =>
     setPicked((p) => {
@@ -49,9 +56,9 @@ export default function ChoiceQuestion({
       </div>
 
       {/* scrolling options */}
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-32">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-44">
         <div className="flex flex-col gap-2.5">
-          {options.map((opt, i) => {
+          {allOptions.map((opt, i) => {
             const active = picked.includes(opt.label);
             return (
               <motion.button
@@ -78,6 +85,24 @@ export default function ChoiceQuestion({
                     <span className="mt-0.5 block text-[13px] text-gray-light">
                       {opt.sublabel}
                     </span>
+                  ) : null}
+                  {opt.label === OTHER && active ? (
+                    <input
+                      autoFocus
+                      value={otherText}
+                      onChange={(e) => setOtherText(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={(e) =>
+                        // the card lives at the bottom of the list — lift it
+                        // above the floating Continue when it expands
+                        window.setTimeout(
+                          () => e.target.scrollIntoView({ behavior: "smooth", block: "center" }),
+                          80,
+                        )
+                      }
+                      placeholder="Tell us more"
+                      className="mt-2 w-full border-b border-gray-stroke bg-transparent pb-1 text-[15px] font-normal text-gray-dark outline-none placeholder:text-gray-xlight focus:border-gray-dark/50"
+                    />
                   ) : null}
                 </span>
                 <span className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -111,7 +136,11 @@ export default function ChoiceQuestion({
             className="fixed inset-x-0 bottom-[calc(max(1.5rem,env(safe-area-inset-bottom))+1.5rem)] z-20 mx-auto w-full max-w-[440px] px-6"
           >
             <button
-              onClick={() => onContinue(picked)}
+              onClick={() =>
+                onContinue(
+                  picked.map((p) => (p === OTHER && otherText.trim() ? `Other — ${otherText.trim()}` : p)),
+                )
+              }
               className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
             >
               Continue

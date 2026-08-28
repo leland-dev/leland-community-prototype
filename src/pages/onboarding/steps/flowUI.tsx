@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { Check, ArrowLeft, Wifi } from "lucide-react";
 import { Button } from "../../../components/Button";
 
@@ -79,20 +80,22 @@ export function StepChrome({
 /** Step dots — one per question screen, current emphasized. Interstitials are
  *  excluded by callers (they simply don't render this). */
 export function ProgressDots({ index, total }: { index: number; total: number }) {
+  // A smooth, continuous pill bar (kept the old name so callers don't change).
   return (
     <div
-      className="flex items-center gap-1.5"
-      role="group"
+      className="h-1.5 w-24 overflow-hidden rounded-full bg-gray-stroke"
+      role="progressbar"
+      aria-valuenow={index}
+      aria-valuemin={1}
+      aria-valuemax={total}
       aria-label={`Step ${index} of ${total}`}
     >
-      {Array.from({ length: total }).map((_, i) => (
-        <span
-          key={i}
-          className={`h-1.5 rounded-full transition-all ${
-            i === index - 1 ? "w-4 bg-gray-dark" : "w-1.5 bg-gray-stroke"
-          }`}
-        />
-      ))}
+      <motion.div
+        className="h-full rounded-full bg-gray-dark"
+        initial={false}
+        animate={{ width: `${(index / total) * 100}%` }}
+        transition={{ type: "spring", stiffness: 220, damping: 30 }}
+      />
     </div>
   );
 }

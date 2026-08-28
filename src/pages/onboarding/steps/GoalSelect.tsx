@@ -12,15 +12,15 @@ import { StepHeading } from "./flowUI";
  * ──────────────────────────────────────────────────────────────────────── */
 
 const BUCKETS: { label: string; Icon: ComponentType<LucideProps>; branch: Branch }[] = [
-  { label: "Build with AI", Icon: Sparkles, branch: "build-with-ai" },
   { label: "Grow your career", Icon: TrendingUp, branch: "grow-career" },
   { label: "Get into school", Icon: GraduationCap, branch: "get-into-school" },
+  { label: "Build with AI", Icon: Sparkles, branch: "build-with-ai" },
 ];
 
 export default function GoalSelect({ onSelect }: { onSelect: (b: Branch) => void }) {
   return (
     <div className="h-full overflow-y-auto px-6 pb-10 pt-2">
-      <StepHeading title="What's your goal?" />
+      <StepHeading title="What's your primary goal right now?" />
       <div className="flex flex-col gap-3">
         {BUCKETS.map((b, i) => (
           <motion.button

@@ -371,6 +371,13 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                   <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" /></svg><span>Onboarding</span>
                 </NavLink>
                 <NavLink
+                  to="/onboarding-v4"
+                  onClick={onClose}
+                  className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
+                >
+                  <span>Onboarding v4</span>
+                </NavLink>
+                <NavLink
                   to="/waitlist"
                   onClick={onClose}
                   className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
