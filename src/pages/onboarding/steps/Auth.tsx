@@ -128,6 +128,9 @@ function EmailSignup({
     } else if (phase === "password") {
       if (pw.length < 6) return setErr(true);
       setErr(false);
+    // dismiss the keyboard before the success beat — otherwise iOS keeps it
+    // up over the next screen
+    (document.activeElement as HTMLElement | null)?.blur?.();
       setPhase("success");
       window.setTimeout(onSuccess, 3200);
     }
@@ -399,6 +402,9 @@ function PhoneSignup({
 
   const verify = (value: string) => {
     if (value.length < 6) return;
+    // dismiss the keyboard before the success beat — otherwise iOS keeps it
+    // up over the next screen
+    (document.activeElement as HTMLElement | null)?.blur?.();
     setPhase("success");
     window.setTimeout(onSuccess, 1000);
   };
