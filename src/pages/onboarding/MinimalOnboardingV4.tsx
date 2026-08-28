@@ -281,6 +281,7 @@ export default function MinimalOnboardingV4() {
               screen(`situation-${branch}`,
                 <SituationStep
                   title="Where are you at in the process currently?"
+                  topic={primaryCategory.startsWith("Other") ? undefined : primaryCategory}
                   options={SITUATIONS_BY_BRANCH[branch]}
                   single
                   onContinue={() => setStage("student")}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Compass, BookOpen, Send, RefreshCw, Trophy, type LucideProps } from "lucide-react";
+import { Compass, BookOpen, Send, RefreshCw, Trophy, TrendingUp, type LucideProps } from "lucide-react";
 import { type ComponentType, Fragment } from "react";
 
 import { StepHeading } from "./flowUI";
@@ -52,11 +52,14 @@ export default function SituationStep({
   title = "What's your current situation?",
   options = SITUATIONS,
   single = false,
+  topic,
 }: {
   onContinue: (picked: string[]) => void;
   title?: string;
   options?: Situation[];
   single?: boolean;
+  /** eyebrow chip carrying forward the previously-picked path */
+  topic?: string;
 }) {
   const [picked, setPicked] = useState<string[]>([]);
   const toggle = (label: string) =>
@@ -67,6 +70,14 @@ export default function SituationStep({
   return (
     <div className="flex h-full flex-col">
       <div className="shrink-0 px-6 pt-2">
+        {topic ? (
+          <div className="mb-3 flex items-center gap-1.5">
+            <TrendingUp size={15} strokeWidth={2.2} className="shrink-0 text-gray-dark" />
+            <span className="rounded-[4px] bg-yellow px-1.5 py-0.5 text-[13px] font-medium text-gray-dark">
+              Your path: <span className="font-bold">{topic}</span>
+            </span>
+          </div>
+        ) : null}
         <StepHeading title={title} />
       </div>
 
