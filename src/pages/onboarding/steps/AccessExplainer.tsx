@@ -32,8 +32,8 @@ export default function AccessExplainer({
   const ROWS = [
     {
       Icon: MessagesSquare,
-      title: "Real people, not content",
-      body: `${expertHeadline} from ${orgs[0]}, ${orgs[1]}, and ${orgs[2]} share advice with you directly.`,
+      title: "Real humans, real expertise",
+      body: `The home for ambitious people. ${expertHeadline} from ${orgs[0]}, ${orgs[1]}, and ${orgs[2]} share what actually worked — person to person.`,
     },
     {
       Icon: DoorOpen,
