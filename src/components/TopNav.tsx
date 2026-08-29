@@ -2,8 +2,9 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useSubNavStyle } from "./SubNavStyleContext";
+import browserIcon from "../assets/icons/browser.svg";
+import codeIcon from "../assets/icons/code.svg";
 import { useIsCoachMode } from "../hooks/useIsCoachMode";
-import { useDarkMode } from "../contexts/DarkModeContext";
 import { useNavTheme } from "./NavThemeContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import notificationsInactive from "../assets/icons/nav-icons/notifications-inactive.svg";
@@ -18,9 +19,6 @@ import settingsIcon from "../assets/icons/settings.svg";
 import switchIcon from "../assets/icons/switch.svg";
 import helpIcon from "../assets/icons/help.svg";
 import logOutIcon from "../assets/icons/log out.svg";
-import browserIcon from "../assets/icons/browser.svg";
-import codeIcon from "../assets/icons/code.svg";
-import compassIcon from "../assets/leland-compass.svg";
 import lelandWordmark from "../assets/leland-wordmark.svg";
 
 /* ── Nav links ── */
@@ -72,10 +70,9 @@ export default function TopNav() {
   const [browseOpen, setBrowseOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const { showSubNav, setShowSubNav } = useSubNavStyle();
+  const [showSearch] = useState(false);
+  const { showSubNav } = useSubNavStyle();
   const isCoachMode = useIsCoachMode();
-  const { dark, toggle: toggleDark } = useDarkMode();
   const navTheme = useNavTheme();
 
   // scrollReveal pages (e.g. Dashboard) start with the nav matching the hero
@@ -365,54 +362,12 @@ export default function TopNav() {
                     <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-[#999999]">
                       Admin Controls
                     </p>
-                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5">
-                      Search bar
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={showSearch}
-                        onClick={() => setShowSearch(!showSearch)}
-                        className={`relative h-6 w-11 rounded-full transition-colors ${showSearch ? "bg-[#222222]" : "bg-[#d9d9d9]"}`}
-                      >
-                        <span
-                          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${showSearch ? "translate-x-5" : ""}`}
-                        />
-                      </button>
-                    </label>
-                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5">
-                      Sub-nav
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={showSubNav}
-                        onClick={() => setShowSubNav(!showSubNav)}
-                        className={`relative h-6 w-11 rounded-full transition-colors ${showSubNav ? "bg-[#222222]" : "bg-[#d9d9d9]"}`}
-                      >
-                        <span
-                          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${showSubNav ? "translate-x-5" : ""}`}
-                        />
-                      </button>
-                    </label>
-                    <label className="flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5">
-                      Dark mode
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={dark}
-                        onClick={toggleDark}
-                        className={`relative h-6 w-11 rounded-full transition-colors ${dark ? "bg-[#FFD96F]" : "bg-[#d9d9d9]"}`}
-                      >
-                        <span
-                          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${dark ? "translate-x-5" : ""}`}
-                        />
-                      </button>
-                    </label>
                     <NavLink
                       to="/partner-dashboard"
                       onClick={() => setProfileOpen(false)}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                     >
-                      <img src={browserIcon} alt="Partner dashboard" className="h-6 w-6 shrink-0" />
+                      <img src={browserIcon} alt="" className="h-5 w-5 shrink-0" />
                       Partner dashboard
                     </NavLink>
                     <NavLink
@@ -420,47 +375,47 @@ export default function TopNav() {
                       onClick={() => setProfileOpen(false)}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                     >
-                      <img src={codeIcon} alt="Components" className="h-6 w-6 shrink-0" />
+                      <img src={codeIcon} alt="" className="h-5 w-5 shrink-0" />
                       Components
                     </NavLink>
                     <NavLink
-                      to="/onboarding"
+                      to="/alt-nav"
                       onClick={() => setProfileOpen(false)}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                     >
-                      <img src={compassIcon} alt="Onboarding v1" className="h-6 w-6 shrink-0" />
-                      Onboarding v1
-                    </NavLink>
-                    <NavLink
-                      to="/onboarding-minimal"
-                      onClick={() => setProfileOpen(false)}
-                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
-                    >
-                      <img src={compassIcon} alt="Onboarding v2" className="h-6 w-6 shrink-0" />
-                      Onboarding v2
+                      <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></svg>
+                      Switch to alt navigation
                     </NavLink>
                     <NavLink
                       to="/onboarding-minimal-v2"
                       onClick={() => setProfileOpen(false)}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                     >
-                      <img src={compassIcon} alt="Onboarding v3" className="h-6 w-6 shrink-0" />
-                      Onboarding v3
+                      <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" /></svg>
+                      Onboarding
+                    </NavLink>
+                    <NavLink
+                      to="/onboarding-v4"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
+                    >
+                      <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg>
+                      Onboarding v4
                     </NavLink>
                     <NavLink
                       to="/waitlist"
                       onClick={() => setProfileOpen(false)}
-                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                     >
-                      <img src={compassIcon} alt="Waitlist" className="h-6 w-6 shrink-0" />
+                      <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M5 22h14" /><path d="M5 2h14" /><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" /><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" /></svg>
                       Waitlist
                     </NavLink>
                     <NavLink
                       to="/waitlist-onboarding"
                       onClick={() => setProfileOpen(false)}
-                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                     >
-                      <img src={compassIcon} alt="Waitlist Onboarding" className="h-6 w-6 shrink-0" />
+                      <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="m9 14 2 2 4-4" /></svg>
                       Waitlist Onboarding
                     </NavLink>
                   </div>

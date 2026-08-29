@@ -12,7 +12,7 @@ import {
   AppPromoTakeover,
   AppPromoPushToast,
   AppPromoToast,
-  PromoTogglePanel,
+  PromoToggleList,
 } from "../components/promo/AppPromo";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import pic1 from "../assets/profile photos/pic-1.png";
@@ -885,11 +885,12 @@ export default function Dashboard() {
       </motion.div>
 
       {/* App promo demo: toggle panel + overlays */}
-      <PromoTogglePanel options={["modal", "toast", "push", "callout"]} />
       <AppPromoTakeover />
       <AppPromoToast />
 
-      {/* Admin tool — 3-dot menu matching the profile template */}
+      {/* Admin tool — 3-dot menu matching the profile template (hidden inside
+          the takeover's mini phone iframe) */}
+      {!new URLSearchParams(window.location.search).has("mini") && (
       <div
         ref={adminRef}
         className="fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-40 md:bottom-6 md:right-6"
@@ -915,13 +916,17 @@ export default function Dashboard() {
                   onChange={() => setGoalsVersion(goalsVersion === "full" ? "mvp" : "full")}
                 />
               )}
+              <div className="mt-1 border-t border-gray-stroke/60 px-2 pb-1 pt-2">
+                <p className="pb-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-light">App promo</p>
+                <PromoToggleList options={["modal", "toast", "push", "callout"]} />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
         <button
           onClick={() => setAdminOpen((o) => !o)}
           aria-label="Admin controls"
-          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-colors hover:bg-[#B1B1B1]/30"
+          className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-opacity ${adminOpen ? "opacity-100" : "opacity-20 hover:opacity-100"}`}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <circle cx="3" cy="8" r="1.5" fill="#222222" />
@@ -930,6 +935,7 @@ export default function Dashboard() {
           </svg>
         </button>
       </div>
+      )}
     </div>
   );
 }

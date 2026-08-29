@@ -128,6 +128,9 @@ function EmailSignup({
     } else if (phase === "password") {
       if (pw.length < 6) return setErr(true);
       setErr(false);
+    // dismiss the keyboard before the success beat — otherwise iOS keeps it
+    // up over the next screen
+    (document.activeElement as HTMLElement | null)?.blur?.();
       setPhase("success");
       window.setTimeout(onSuccess, 3200);
     }
@@ -399,6 +402,9 @@ function PhoneSignup({
 
   const verify = (value: string) => {
     if (value.length < 6) return;
+    // dismiss the keyboard before the success beat — otherwise iOS keeps it
+    // up over the next screen
+    (document.activeElement as HTMLElement | null)?.blur?.();
     setPhase("success");
     window.setTimeout(onSuccess, 1000);
   };
@@ -733,6 +739,7 @@ export default function Auth({
   onBack,
   onExit,
   onNext,
+  primary = "email",
 }: {
   cohortName: string;
   /** accepted for back-compat with callers; no longer displayed */
@@ -740,6 +747,8 @@ export default function Auth({
   onBack: () => void;
   onExit: () => void;
   onNext: () => void;
+  /** which pill gets the black "primary" treatment (the other is bordered/white) */
+  primary?: "email" | "phone";
 }) {
   const reduced = useReducedMotion() ?? false;
   const [emailOpen, setEmailOpen] = useState(false);
@@ -752,23 +761,44 @@ export default function Auth({
     window.setTimeout(onNext, 1100);
   };
 
+  const PILL_PRIMARY =
+    "flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-gray-dark text-[16px] font-medium text-white transition-colors hover:bg-[#333] disabled:opacity-60";
+  const PILL_SECONDARY =
+    "flex h-[52px] w-full items-center justify-center gap-2 rounded-full border border-gray-stroke bg-white text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover disabled:opacity-60";
+  const phonePill = (
+    <motion.button
+      key="phone"
+      whileTap={{ scale: 0.98 }}
+      onClick={() => setPhoneOpen(true)}
+      disabled={!!loading}
+      className={primary === "phone" ? PILL_PRIMARY : PILL_SECONDARY}
+    >
+      <Phone size={17} />
+      Continue with phone
+    </motion.button>
+  );
+  const emailPill = (
+    <motion.button
+      key="email"
+      whileTap={{ scale: 0.98 }}
+      onClick={() => setEmailOpen(true)}
+      disabled={!!loading}
+      className={primary === "email" ? PILL_PRIMARY : PILL_SECONDARY}
+    >
+      Continue with email
+    </motion.button>
+  );
+
   return (
     <div className="flex h-full flex-col bg-white">
-      {/* top chrome */}
-      <div className="flex shrink-0 items-center justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
+      {/* top chrome — back only */}
+      <div className="flex shrink-0 items-center px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
         <button
           onClick={onBack}
           className="flex h-9 w-9 items-center justify-center rounded-full text-gray-dark hover:bg-black/[0.05]"
           aria-label="Back"
         >
           <ArrowLeft size={19} />
-        </button>
-        <button
-          onClick={onExit}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-gray-light hover:bg-black/[0.05]"
-          aria-label="Exit"
-        >
-          <X size={18} />
         </button>
       </div>
 
@@ -819,26 +849,11 @@ export default function Auth({
           </CircleButton>
         </div>
 
-        {/* phone — bordered pill */}
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setPhoneOpen(true)}
-          disabled={!!loading}
-          className="mb-3 mt-5 flex h-[52px] w-full items-center justify-center gap-2 rounded-full border border-gray-stroke bg-white text-[16px] font-medium text-gray-dark transition-colors hover:bg-gray-hover disabled:opacity-60"
-        >
-          <Phone size={17} />
-          Continue with phone
-        </motion.button>
-
-        {/* email — black pill */}
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setEmailOpen(true)}
-          disabled={!!loading}
-          className="flex h-[52px] w-full items-center justify-center rounded-full bg-gray-dark text-[16px] font-medium text-white transition-colors hover:bg-[#333] disabled:opacity-60"
-        >
-          Continue with email
-        </motion.button>
+        {/* phone-primary: phone on top; email-primary (v2/v3): email on the bottom */}
+        <div className="mt-5 flex flex-col gap-3">
+          {phonePill}
+          {emailPill}
+        </div>
 
         <p className="mt-3 text-center text-[12px] text-gray-xlight">
           By continuing you agree to Leland's Terms & Privacy Policy.

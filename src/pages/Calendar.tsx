@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useSetNavTheme } from "../components/NavThemeContext";
 import PageShell from "../components/PageShell";
+import DesktopSidebar from "../components/DesktopSidebar";
 import { Button } from "../components/Button";
 import SessionCard from "../components/SessionCard";
 import profilePhoto from "../assets/profile photos/profile photo.png";
@@ -244,11 +245,18 @@ function AdminToggle({ label, checked, onChange }: { label: string; checked: boo
   );
 }
 
-export default function Calendar() {
+export default function Calendar({ altNav = false }: { altNav?: boolean }) {
   const navigate = useNavigate();
   const { dark: darkMode } = useDarkMode();
   const heroBg = darkMode ? "#5E6E79" : HERO_BG;
-  const navTheme = useMemo(() => ({ bg: heroBg, light: darkMode, hideWordmark: false, scrollReveal: true }), [heroBg, darkMode]);
+  // On alt-nav there's no top navbar to theme, so the theme is inert (and the
+  // scroll listener is off). Otherwise the beige hero drives the nav color.
+  const navTheme = useMemo(
+    () => altNav
+      ? { bg: "#ffffff", light: false, hideWordmark: false, scrollReveal: false }
+      : { bg: heroBg, light: darkMode, hideWordmark: false, scrollReveal: true },
+    [altNav, heroBg, darkMode],
+  );
   useSetNavTheme(navTheme);
 
   const [view, setView] = useState<"calendar" | "list">("list");
@@ -267,10 +275,29 @@ export default function Calendar() {
   }, [adminOpen]);
 
   return (
-    <PageShell variant="standard">
+    <PageShell
+      variant="standard"
+      // alt-nav: render inside the sidebar shell (no top navbar) instead of the
+      // default single-column standard shell.
+      edgeToEdge={altNav}
+      leftSidebar={altNav ? <DesktopSidebar /> : undefined}
+      leftSidebarWidth={altNav ? 250 : undefined}
+      leftSidebarTop={altNav ? 20 : undefined}
+      leftSidebarFixed={altNav}
+      contentMaxWidth={altNav ? 720 : undefined}
+      paddingXClassName={altNav ? "px-4" : undefined}
+      paddingYClassName={altNav ? "py-4 sm:pt-5 sm:pb-10" : undefined}
+    >
       <div className="pb-[180px]">
-        {/* Hero — full-window beige band, mirrors the Dashboard */}
-        <div className="-mt-[72px] pb-28 pt-[150px] md:-mt-10 md:pb-36 md:pt-16" style={{ backgroundColor: heroBg, ...fullBleed }}>
+        {/* Hero — a beige band. Default: full-window bleed tucked under the top
+            nav. alt-nav: a contained rounded band inside the content column
+            (no navbar to tuck under, no full-bleed past the sidebar). */}
+        <div
+          className={altNav
+            ? "rounded-2xl pb-28 pt-10 md:pb-36 md:pt-12"
+            : "-mt-[72px] pb-28 pt-[150px] md:-mt-10 md:pb-36 md:pt-16"}
+          style={{ backgroundColor: heroBg, ...(altNav ? {} : fullBleed) }}
+        >
           <motion.div
             className={`${WRAP} flex items-start justify-between gap-4`}
             initial={{ opacity: 0, y: 8 }}

@@ -10,9 +10,17 @@ import mark from "../../../assets/leland-logos/leland-mark.svg";
  * Purely theatrical — waits out the bar, then calls onDone.
  * ──────────────────────────────────────────────────────────────────────── */
 
-const CAPTIONS = ["Building your feed…", "Setting up your profile…"];
+const DEFAULT_CAPTIONS = ["Building your feed…", "Setting up your profile…"];
 
-export default function BuildingFeed({ onDone }: { onDone: () => void }) {
+export default function BuildingFeed({
+  onDone,
+  captions = DEFAULT_CAPTIONS,
+}: {
+  onDone: () => void;
+  /** override the caption sequence; evenly spaced across the bar */
+  captions?: string[];
+}) {
+  const CAPTIONS = captions;
   const reduced = useReducedMotion() ?? false;
   const dur = reduced ? 1.4 : 4.6; // total seconds
 
@@ -22,12 +30,14 @@ export default function BuildingFeed({ onDone }: { onDone: () => void }) {
     const done = window.setTimeout(onDone, dur * 1000 + 300);
     if (reduced) return () => window.clearTimeout(done);
     // swap the caption around when the bar resumes after its pause
-    const swap = window.setTimeout(() => setCaption(1), dur * 1000 * 0.6);
+    const swaps = CAPTIONS.slice(1).map((_, i) =>
+      window.setTimeout(() => setCaption(i + 1), (dur * 1000 * (i + 1)) / CAPTIONS.length + 400),
+    );
     return () => {
       window.clearTimeout(done);
-      window.clearTimeout(swap);
+      swaps.forEach((t) => window.clearTimeout(t));
     };
-  }, [onDone, dur, reduced]);
+  }, [onDone, dur, reduced, CAPTIONS]);
 
   return (
     <div className="flex h-full flex-col items-center justify-center px-10">

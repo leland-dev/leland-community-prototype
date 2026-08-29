@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 import { COACH_FACES } from "../mockData";
 import { SharpStar } from "./flowUI";
+import { logoForOrg } from "./UniversitySearch";
 
 import pic2 from "../../../assets/profile photos/pic-2.png";
 import pic10 from "../../../assets/profile photos/pic-10.png";
@@ -22,8 +23,8 @@ import pic14 from "../../../assets/profile photos/pic-14.png";
 
 const ORGS = ["McKinsey", "Google", "Harvard", "Stanford", "Goldman Sachs", "Meta", "OpenAI"];
 
-type Review = { quote: string; name: string; role: string; avatar: string };
-const REVIEWS: Review[] = [
+export type Review = { quote: string; name: string; role: string; avatar: string };
+export const DEFAULT_REVIEWS: Review[] = [
   { quote: "I got into HBS, Stanford, AND Wharton. Six months on Leland.", name: "Maya P.", role: "HBS '27", avatar: pic10 },
   { quote: "Went from rejected to a McKinsey offer. My coach saw everything.", name: "Karen J.", role: "Associate, McKinsey", avatar: pic12 },
   { quote: "Shipped a real AI product in 8 weeks and quit my job a month later.", name: "Andre S.", role: "Founder, Loomly AI", avatar: pic11 },
@@ -34,8 +35,26 @@ const REVIEWS: Review[] = [
 
 const MASK = "linear-gradient(to right, transparent, black 6%, black 94%, transparent)";
 
-export default function ExpertReassurance({ onContinue }: { onContinue: () => void }) {
+export default function ExpertReassurance({
+  onContinue,
+  title = "Thousands of experts are here to help with that",
+  emphasis,
+  subline,
+  orgs = ORGS,
+  reviews = DEFAULT_REVIEWS,
+}: {
+  onContinue: () => void;
+  /** headline — v4 adapts this to the category the member picked */
+  title?: string;
+  /** substring of title to highlight (italic + yellow marker) */
+  emphasis?: string;
+  subline?: string;
+  /** org badges shown on the coach cards */
+  orgs?: string[];
+  reviews?: Review[];
+}) {
   const reduced = useReducedMotion() ?? false;
+  const REVIEWS = reviews;
 
   const coaches = [...COACH_FACES, ...COACH_FACES];
 
@@ -57,8 +76,25 @@ export default function ExpertReassurance({ onContinue }: { onContinue: () => vo
     <div className="flex h-full flex-col">
       <div className="min-h-0 flex-1 overflow-hidden pb-32 pt-2">
         <h2 className="px-6 font-serif text-[28px] leading-[1.15] text-gray-dark md:text-[32px]">
-          Thousands of experts are here to help with that
+          {emphasis && title.includes(emphasis) ? (
+            <>
+              {title.slice(0, title.indexOf(emphasis))}
+              <span className="relative inline-block">
+                <span
+                  aria-hidden
+                  className="absolute inset-x-[-0.12em] bottom-[0.08em] top-[0.2em] -z-0 -rotate-[0.6deg] rounded-[3px] bg-yellow/70"
+                />
+                <span className="relative">{emphasis}</span>
+              </span>
+              {title.slice(title.indexOf(emphasis) + emphasis.length)}
+            </>
+          ) : (
+            title
+          )}
         </h2>
+        {subline ? (
+          <p className="mt-3 px-6 text-[15px] leading-snug text-gray-light">{subline}</p>
+        ) : null}
 
         {/* coach cards — slow loop */}
         <div className="mt-6 overflow-hidden" style={{ maskImage: MASK, WebkitMaskImage: MASK }}>
@@ -82,7 +118,7 @@ export default function ExpertReassurance({ onContinue }: { onContinue: () => vo
                 </span>
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-2.5 pb-2.5 pt-7">
                   <p className="text-[12px] font-semibold leading-tight text-white">
-                    {ORGS[i % ORGS.length]}
+                    {orgs[i % orgs.length]}
                   </p>
                 </div>
               </div>
@@ -125,10 +161,13 @@ export default function ExpertReassurance({ onContinue }: { onContinue: () => vo
               </p>
               <div className="mt-4 flex items-center gap-2.5">
                 <img src={r.avatar} alt="" className="h-8 w-8 rounded-full object-cover" />
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-semibold text-gray-dark">{r.name}</p>
                   <p className="truncate text-[12px] text-gray-light">{r.role}</p>
                 </div>
+                {logoForOrg(r.role) ? (
+                  <img src={logoForOrg(r.role)} alt="" className="h-7 w-7 shrink-0 object-contain" />
+                ) : null}
               </div>
             </div>
           ))}
