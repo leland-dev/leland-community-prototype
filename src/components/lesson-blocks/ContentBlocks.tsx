@@ -13,12 +13,12 @@ import {
   TagColor,
 } from "../leland";
 import * as LelandIcons from "../leland/svg/icons";
+import * as LelandBrands from "../leland/svg/brands";
 
 import { BlockRenderer } from "./BlockRenderer";
 import { H3_CLASS, Prose } from "./Prose";
 
 import type {
-  AccordionBlock as AccordionBlockType,
   BannerBlock as BannerBlockType,
   BannerColor,
   Block,
@@ -34,6 +34,7 @@ import type {
   StepsBlock as StepsBlockType,
   TableBlock as TableBlockType,
   TagsBlock as TagsBlockType,
+  ToggleBlock as ToggleBlockType,
   ToggleChipGroupBlock as ToggleChipGroupBlockType,
   VideoBlock as VideoBlockType,
 } from "../../data/lessonBlocks";
@@ -92,14 +93,24 @@ const BANNER_COLORS: Record<BannerColor, { container: string; icon: string; text
 
 export function BannerBlock({ block }: { block: BannerBlockType }) {
   const color = BANNER_COLORS[block.color ?? "gray"];
-  const Icon = (LelandIcons as Record<string, typeof IconInfo>)[block.icon ?? "IconInfo"] ?? IconInfo;
+  // image > named icon > default IconInfo > nothing (icon: "" opts out entirely).
+  const Image = block.image
+    ? (LelandBrands as Record<string, typeof BrandSlack>)[block.image] ?? null
+    : null;
+  const Icon = !Image && block.icon !== ""
+    ? (LelandIcons as Record<string, typeof IconInfo>)[block.icon ?? "IconInfo"] ?? IconInfo
+    : null;
   const headingClass = `leland-paragraph-lg font-semibold! ${color.text ?? "text-leland-gray-dark"}`;
   const subtextClass = `leland-paragraph-base ${color.text ?? "text-[#222222]/80"}`;
 
   const content = (
     <>
       <span className="flex min-w-0 flex-1 items-start gap-3">
-        <Icon className={`size-6 shrink-0 ${color.icon}`} />
+        {Image ? (
+          <Image className="size-11 shrink-0" />
+        ) : Icon ? (
+          <Icon className={`size-6 shrink-0 ${color.icon}`} />
+        ) : null}
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className={headingClass}>{block.text}</span>
           {block.subtext ? <span className={subtextClass}>{block.subtext}</span> : null}
@@ -277,12 +288,13 @@ export function CodeBlock({ block }: { block: CodeBlockType }) {
 
 // Expandable rows for optional deep dives or FAQs. Built on native
 // <details>/<summary> so each row toggles independently with no extra state
-// and gets built-in keyboard/accessibility support.
-export function AccordionBlock({ block }: { block: AccordionBlockType }) {
+// and gets built-in keyboard/accessibility support. Each row is its own
+// bordered card (12px gap between them), rather than sharing one container.
+export function ToggleBlock({ block }: { block: ToggleBlockType }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl bg-leland-gray-hover">
+    <div className="flex flex-col gap-3">
       {block.rows.map((row, i) => (
-        <details key={i} className={`group px-6 ${i > 0 ? "border-t-[1.5px] border-white" : ""}`}>
+        <details key={i} className="group rounded-2xl border border-leland-gray-stroke bg-white/50 px-6">
           <summary className="flex cursor-pointer list-none items-center gap-2 py-3 [&::-webkit-details-marker]:hidden">
             <div className="flex min-w-0 flex-1 items-start gap-3">
               {row.icon ? (
@@ -299,7 +311,7 @@ export function AccordionBlock({ block }: { block: AccordionBlockType }) {
             </span>
           </summary>
           <div>
-            <hr className="border-t border-white" />
+            <hr className="border-t border-leland-gray-stroke" />
           </div>
           <div className="pt-6 pb-8">
             <Prose body={row.body} className="gap-2" />

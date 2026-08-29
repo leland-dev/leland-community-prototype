@@ -27,7 +27,7 @@ export const TOOL_SETUP_CLAUDE: BlockSection = {
       ],
     },
     {
-      kind: "accordion",
+      kind: "toggle",
       rows: [
         {
           title: "Mac · Co-Work (Recommended)",
@@ -113,7 +113,7 @@ export const TOOL_SETUP_CODEX: BlockSection = {
       ],
     },
     {
-      kind: "accordion",
+      kind: "toggle",
       rows: [
         {
           title: "Mac",
@@ -170,7 +170,7 @@ export const TOOL_SETUP_GEMINI: BlockSection = {
       ],
     },
     {
-      kind: "accordion",
+      kind: "toggle",
       rows: [
         {
           title: "Mac",
@@ -227,7 +227,7 @@ export const TOOL_SETUP_COPILOT: BlockSection = {
       ],
     },
     {
-      kind: "accordion",
+      kind: "toggle",
       rows: [
         {
           title: "Mac",

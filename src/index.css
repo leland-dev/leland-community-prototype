@@ -418,6 +418,20 @@ input[name="phone"]:-webkit-autofill:focus {
   }
 }
 
+/* "Was this section helpful?" — the Yes icon pops (grows then settles back
+   down) instead of opening a follow-up modal. */
+@keyframes icon-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 /* ── Article rich text — shared by the composer's contenteditable editor and
    the article read page. Tailwind preflight strips list/quote styling, so the
    handful of elements execCommand can produce get restyled here. ── */

@@ -1,7 +1,7 @@
 // Course lesson viewer — mirrors the monorepo course viewer
 // (CourseViewerShell / CourseViewerSidebar / CourseViewerSectionNav on the
 // feature/course-viewer branch) using the ported leland design system:
-// leland tokens, icons, Button/Menu/ProgressBar, and the CourseFeedbackModal.
+// leland tokens, icons, Button/Menu/ProgressBar, and the SectionFeedbackModal.
 import {
   useCallback,
   useEffect,
@@ -13,7 +13,8 @@ import {
 } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { CourseFeedbackModal } from "../components/CourseFeedbackModal";
+import { CourseSentimentModal } from "../components/CourseSentimentModal";
+import { SectionFeedbackModal } from "../components/SectionFeedbackModal";
 import TopNav from "../components/TopNav";
 import {
   IconLeftSidebarClose,
@@ -1451,12 +1452,14 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onToggle,
   onSetVariant,
   onOpenFeedback,
+  onOpenSentiment,
   ...modalProps
 }: ModalProps & {
   options: PrototypeOptions;
   onToggle: (key: BooleanOptionKey) => void;
   onSetVariant: (variant: LiveSessionVariant) => void;
   onOpenFeedback: () => void;
+  onOpenSentiment: () => void;
 }) {
   return (
     <Modal {...modalProps}>
@@ -1503,6 +1506,14 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
             >
               <IconStar className="size-4 shrink-0 text-leland-gray-light" />
               <span className="leland-paragraph-base text-leland-gray-dark">Trigger feedback modal</span>
+            </button>
+            <button
+              type="button"
+              onClick={onOpenSentiment}
+              className="flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconStar className="size-4 shrink-0 text-leland-gray-light" />
+              <span className="leland-paragraph-base text-leland-gray-dark">Trigger sentiment modal</span>
             </button>
           </div>
         </div>
@@ -2234,13 +2245,8 @@ export default function ContentViewer() {
   const [showRecording, setShowRecording] = useState(false);
   const [lessonShowRecording, setLessonShowRecording] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
-  const [feedbackThumb, setFeedbackThumb] = useState<"yes" | "no" | null>(null);
-  const openFeedbackModal = (thumb?: "yes" | "no") => {
-    setFeedbackThumb(thumb ?? null);
-    setFeedbackModalOpen(true);
-  };
-  const [hasSpent5Min, setHasSpent5Min] = useState(false);
-  const engagementTriggered = useRef(false);
+  const [sentimentModalOpen, setSentimentModalOpen] = useState(false);
+  const sentimentModalTriggered = useRef(false);
   const navigatedViaButtons = useRef(false);
   const [addToCalendarModalOpen, setAddToCalendarModalOpen] = useState(false);
   const [calendarAdded, setCalendarAdded] = useState<Set<number>>(new Set());
@@ -2284,18 +2290,27 @@ export default function ContentViewer() {
   const prevSection = visibleSections[sectionIdx - 1] ?? null;
   const nextSection = visibleSections[sectionIdx + 1] ?? null;
 
+  // At a lesson's first/last section, "Back"/"Next" should carry across into
+  // the adjacent lesson rather than dead-ending — otherwise finishing e.g.
+  // "Before you begin" leaves Next permanently disabled instead of moving
+  // into Lesson 1.
+  const adjacentLessonSection = (direction: 1 | -1): { lesson: Lesson; section: Section } | null => {
+    for (let i = lessonIdx + direction; i >= 0 && i < ALL_LESSONS.length; i += direction) {
+      const secs = filterSectionsByTrack(ALL_LESSONS[i].sections, selectedTrack);
+      const edgeSection = direction === 1 ? secs[0] : secs[secs.length - 1];
+      if (edgeSection) return { lesson: ALL_LESSONS[i], section: edgeSection };
+    }
+    return null;
+  };
+  const prevNavTarget = prevSection ? { lesson, section: prevSection } : adjacentLessonSection(-1);
+  const nextNavTarget = nextSection ? { lesson, section: nextSection } : adjacentLessonSection(1);
+
   const exitDestination = DASHBOARD;
 
   const isCompleted = useMemo(
     () => (sectionId: string) => completed.has(`${lesson.id}/${sectionId}`),
     [completed, lesson.id],
   );
-
-  // Start a 5-minute timer once on mount.
-  useEffect(() => {
-    const timer = setTimeout(() => setHasSpent5Min(true), 5 * 60 * 1000);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Auto-open the track picker on first load if the feature is enabled and
   // no track has been chosen yet.
@@ -2305,20 +2320,18 @@ export default function ContentViewer() {
     }
   }, [options.showTrackPicker]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-open the feedback modal when the user reaches 80% of the lesson
-  // (by section navigation) and has spent at least 5 minutes, or when they
-  // arrive at the last section. Fires at most once per page load. Skipped in
-  // "Before you begin" — it's setup, not a lesson, so it shouldn't ask for
-  // feedback.
+  // Course-level sentiment check-in — separate from the per-section "Was
+  // this helpful?" flow. Fires once, 50% of the way through lesson 2 (by
+  // section navigation), for any course with at least two lessons.
   useEffect(() => {
-    if (lesson.id === "start-here" || engagementTriggered.current || feedbackModalOpen) return;
+    if (sentimentModalTriggered.current || sentimentModalOpen) return;
+    if (LESSONS.length < 2 || lesson.number !== 2) return;
     const progressPct = (sectionIdx + 1) / visibleSections.length;
-    const isLastSection = sectionIdx === visibleSections.length - 1;
-    if ((progressPct >= 0.8 && hasSpent5Min) || isLastSection) {
-      engagementTriggered.current = true;
-      setFeedbackModalOpen(true);
+    if (progressPct >= 0.5) {
+      sentimentModalTriggered.current = true;
+      setSentimentModalOpen(true);
     }
-  }, [lesson.id, sectionIdx, visibleSections.length, hasSpent5Min, feedbackModalOpen]);
+  }, [lesson.number, sectionIdx, visibleSections.length, sentimentModalOpen]);
 
   // Opening the drawer/sidebar jumps to the lesson + section the user is on.
   // "nearest" only scrolls when the row is actually out of view, so opening
@@ -2601,7 +2614,7 @@ export default function ContentViewer() {
                 <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
                   <LessonPageProvider
                     actions={{
-                      onShareFeedback: openFeedbackModal,
+                      onShareFeedback: () => setFeedbackModalOpen(true),
                       onOpenCalendar: () => setAddToCalendarModalOpen(true),
                       liveSessionVariant: options.liveSessionVariant,
                       liveProgram: options.liveProgram,
@@ -2622,7 +2635,7 @@ export default function ContentViewer() {
                     {/* Larger gap-10 between product-level blocks (top banner,
                         bottom feedback) and the lesson content zone; gap-6
                         within the content zone. */}
-                    <div className="mx-auto flex w-full max-w-[720px] flex-col gap-10 px-4 md:px-8 pt-8 md:pt-4">
+                    <div className="mx-auto flex w-full max-w-[720px] flex-col gap-10 px-4 md:px-8 pt-8 md:pt-4 pb-16">
                       <div className="flex flex-col gap-8">
                         {!options.noHeader && (
                           <p className="leland-paragraph-base font-medium text-leland-gray-dark">
@@ -2747,21 +2760,22 @@ export default function ContentViewer() {
                   </div>
                 </>
               )}
-              <CourseFeedbackModal
+              <SectionFeedbackModal
                 open={feedbackModalOpen}
-                onOpenChange={(next) => {
-                  setFeedbackModalOpen(next);
-                  if (!next) setFeedbackThumb(null);
-                }}
-                initialThumb={feedbackThumb}
+                onOpenChange={setFeedbackModalOpen}
+                sectionTitle={section.title}
+              />
+              <CourseSentimentModal
+                open={sentimentModalOpen}
+                onOpenChange={setSentimentModalOpen}
               />
               {(lesson.id !== "start-here" || section.kind === "blocks" || section.kind === "interactive") && (
                 <CourseViewerSectionNav
                   prevSectionLink={
-                    prevSection ? sectionUrl(lesson, prevSection) : null
+                    prevNavTarget ? sectionUrl(prevNavTarget.lesson, prevNavTarget.section) : null
                   }
                   nextSectionLink={
-                    nextSection ? sectionUrl(lesson, nextSection) : null
+                    nextNavTarget ? sectionUrl(nextNavTarget.lesson, nextNavTarget.section) : null
                   }
                   onNext={() => markComplete(lesson.id, section.id)}
                   onNavigate={() => { navigatedViaButtons.current = true; }}
@@ -2791,6 +2805,7 @@ export default function ContentViewer() {
         onToggle={toggleOption}
         onSetVariant={(variant) => setOption("liveSessionVariant", variant)}
         onOpenFeedback={() => { setPrototypeOptionsOpen(false); setFeedbackModalOpen(true); }}
+        onOpenSentiment={() => { setPrototypeOptionsOpen(false); setSentimentModalOpen(true); }}
       />
       <SelectCohortModal
         open={cohortModalOpen}

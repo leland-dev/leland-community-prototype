@@ -10,8 +10,11 @@ export const JOIN_SLACK_SECTION: BlockSection = {
       body: "Your cohort, TAs, and the Leland team are all in Slack. This is where announcements go out, where you can ask questions, and where other builders in your cohort are sharing what they're working on.",
     },
     {
-      kind: "slackJoin",
-      channel: "Join #ai-builder-jul-26",
+      kind: "banner",
+      text: "Join #ai-builder-jul-26",
+      subtext: "Leland AI Builders",
+      color: "white",
+      image: "BrandSlack",
       href: "https://join.slack.com/t/lelandaibuilders/shared_invite/zt-3y9fgg4a9-qQBHHWe8ZlHYmr9oQ6mp7w",
     },
     {

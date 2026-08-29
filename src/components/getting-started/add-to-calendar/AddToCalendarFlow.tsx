@@ -1,10 +1,40 @@
+import { Button, ButtonColor, ButtonSize, ButtonWidth } from "../../leland";
+
 import type { FlowProps } from "../index";
 
 const SESSIONS = [
-  { month: "MAY", day: "24", title: "Build a real product with world-class design", datetime: "Tue, May 24, 10:00 AM" },
-  { month: "MAY", day: "26", title: "Automate Communication in Your Voice", datetime: "Thu, May 26, 10:00 AM" },
-  { month: "MAY", day: "31", title: "Analyze data and design presentations", datetime: "Tue, May 31, 10:00 AM" },
-  { month: "JUN", day: "2", title: "Launch Your Custom AI System", datetime: "Thu, Jun 2, 10:00 AM" },
+  {
+    month: "MAY",
+    day: "24",
+    title: "Build a real product with world-class design",
+    datetime: "Tue, May 24, 10:00 AM",
+    description:
+      "Vibe code a portfolio website, extract design DNA from a site you love, turn it into a reusable design skill, and publish your styled portfolio live at a shareable URL.",
+  },
+  {
+    month: "MAY",
+    day: "26",
+    title: "Automate Communication in Your Voice",
+    datetime: "Thu, May 26, 10:00 AM",
+    description:
+      "Connect your real tools, teach Claude how you write, and set up your first automation that runs on its own.",
+  },
+  {
+    month: "MAY",
+    day: "31",
+    title: "Analyze data and design presentations",
+    datetime: "Tue, May 31, 10:00 AM",
+    description:
+      "Go from raw spreadsheet to polished, shareable presentation - analyze your data, find the story, structure it, and build the deck.",
+  },
+  {
+    month: "JUN",
+    day: "2",
+    title: "Launch Your Custom AI System",
+    datetime: "Thu, Jun 2, 10:00 AM",
+    description:
+      "Build an AI context file, expand your skills library, organize your folder, and cap it off with Demo Day.",
+  },
 ] as const;
 
 function GoogleCalIcon() {
@@ -101,7 +131,7 @@ export function AddToCalendarFlow({ onComplete }: FlowProps) {
       </div>
 
       {/* Calendar card */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-leland-gray-stroke bg-white px-6 py-6 md:px-8 md:pb-6 md:pt-8">
+      <div className="flex flex-col gap-4 rounded-2xl border border-leland-gray-stroke bg-white px-6 py-6 md:pb-6 md:pt-8">
         <p className="text-[19px] font-semibold leading-snug text-leland-gray-dark">
           Add all upcoming sessions to...
         </p>
@@ -110,14 +140,14 @@ export function AddToCalendarFlow({ onComplete }: FlowProps) {
           <CalendarButton icon={<OutlookIcon />} label="Outlook" onClick={handleAction} />
           <CalendarButton icon={<AppleCalIcon />} label="Apple Calendar" onClick={handleAction} />
         </div>
-        <button
-          type="button"
+        <Button
+          label="Download ICS file"
+          buttonColor={ButtonColor.GRAY}
+          size={ButtonSize.LARGE}
+          width={ButtonWidth.FULL}
+          RightIcon={DownloadIcon}
           onClick={handleAction}
-          className="flex w-full items-center justify-center gap-3 rounded-lg bg-leland-gray-solid-hover px-6 py-4 hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-        >
-          <span className="text-[17px] font-semibold text-leland-gray-dark">Download ICS file</span>
-          <DownloadIcon className="size-5 shrink-0 text-leland-gray-dark" />
-        </button>
+        />
       </div>
 
       {/* Session timeline */}
@@ -137,13 +167,16 @@ export function AddToCalendarFlow({ onComplete }: FlowProps) {
               />
             </div>
             {/* Session row */}
-            <div className="flex flex-1 min-w-0 items-center gap-3 p-3">
+            <div className="flex flex-1 min-w-0 items-start gap-3 p-3">
               <DateChip month={session.month} day={session.day} />
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <p className="leland-heading-lg font-semibold text-leland-gray-dark">
                   {session.title}
                 </p>
                 <p className="leland-paragraph-base text-leland-gray-light">{session.datetime}</p>
+                <p className="leland-paragraph-base text-leland-gray-extra-light">
+                  {session.description}
+                </p>
               </div>
             </div>
           </div>

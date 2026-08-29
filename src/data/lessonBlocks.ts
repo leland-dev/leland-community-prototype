@@ -72,14 +72,18 @@ export type TableBlock = {
 // Matches the design system's tag color palette (see leland/Tag.tsx).
 export type BannerColor = "gray" | "white" | "green" | "yellow" | "blue" | "red" | "beige" | "black";
 
-// Compact single/two-line banner with an icon. Informational when no href;
-// clickable (chevron shown as the affordance) when href is set.
+// Compact single/two-line banner with an icon, a 44x44 image, or neither.
+// Informational when no href; clickable (chevron shown as the affordance)
+// when href is set.
 export type BannerBlock = {
   kind: "banner";
   text: string;
   subtext?: string;
   href?: string;
+  // Mutually exclusive with `image` — if both are set, `image` wins. Leave
+  // both unset for no leading visual at all.
   icon?: string; // any icon component name from the leland icon set, e.g. "IconInfo" (default)
+  image?: string; // a brand/logo component name from the leland brand set, e.g. "BrandSlack" — rendered at 44x44 instead of the 24px icon
   color?: BannerColor; // defaults to "gray"
 };
 
@@ -110,17 +114,17 @@ export type CodeBlock = {
   filename?: string;
 };
 
-// One expandable row in an AccordionBlock (deep dives, FAQs). Each row toggles
+// One expandable row in a ToggleBlock (deep dives, FAQs). Each row toggles
 // independently; only the currently open rows show their body.
-export type AccordionRow = {
+export type ToggleRow = {
   title: string;
   body: Markdown;
   icon?: boolean;
 };
 
-export type AccordionBlock = {
-  kind: "accordion";
-  rows: AccordionRow[];
+export type ToggleBlock = {
+  kind: "toggle";
+  rows: ToggleRow[];
 };
 
 // Escape hatch for bespoke markup that isn't worth a typed block yet.
@@ -210,7 +214,7 @@ export type Block =
   | VideoBlock
   | DividerBlock
   | HtmlBlock
-  | AccordionBlock
+  | ToggleBlock
   | CodeBlock
   | TableBlock
   | DownloadBlock

@@ -10,7 +10,7 @@ const isBlockCode = (className?: string, children?: React.ReactNode) =>
   /language-/.test(className ?? "") || String(children ?? "").includes("\n");
 
 const H2_CLASS = "leland-heading-2xl font-semibold! text-leland-gray-dark md:leland-heading-3xl";
-// Exported so other components (e.g. the accordion row title) can reuse the
+// Exported so other components (e.g. the toggle row title) can reuse the
 // real H3 treatment instead of hard-coding a one-off size.
 export const H3_CLASS = "leland-heading-xl font-semibold! text-leland-gray-dark";
 

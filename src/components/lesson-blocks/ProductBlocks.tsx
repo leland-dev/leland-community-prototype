@@ -517,6 +517,8 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
 export function LessonFooterActions() {
   const { onShareFeedback } = useLessonPage();
   const [selectedThumb, setSelectedThumb] = useState<"yes" | "no" | null>(null);
+  const [yesPopKey, setYesPopKey] = useState(0);
+  const [noPopKey, setNoPopKey] = useState(0);
   return (
     <div className="flex flex-col gap-6 border-t border-leland-gray-stroke pt-8 pb-8 md:pb-16 md:flex-row md:items-center md:justify-between">
       <div className="flex flex-wrap items-center gap-2">
@@ -528,38 +530,50 @@ export function LessonFooterActions() {
         />
         <Button
           label="Share"
+          hideLabel
           buttonColor={ButtonColor.GRAY}
           size={ButtonSize.MEDIUM}
           LeftIcon={IconShare}
         />
       </div>
-      <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         <span className="leland-paragraph-base text-leland-gray-dark">
           Was this section helpful?
         </span>
-        <div className="-mx-3 flex items-center gap-0">
-          <Button
-            label="No"
-            ariaLabel="Not helpful"
-            buttonColor={ButtonColor.REVEAL}
-            size={ButtonSize.MEDIUM}
-            LeftIcon={selectedThumb === "no" ? IconThumbsDownFilled : IconThumbsDown}
+        <div className="flex items-center gap-6">
+          <button
+            type="button"
+            aria-label="Not helpful"
             onClick={() => {
               setSelectedThumb("no");
-              onShareFeedback("no");
+              setNoPopKey((k) => k + 1);
+              onShareFeedback();
             }}
-          />
-          <Button
-            label="Yes"
-            ariaLabel="Helpful"
-            buttonColor={ButtonColor.REVEAL}
-            size={ButtonSize.MEDIUM}
-            LeftIcon={selectedThumb === "yes" ? IconThumbsUpPlainFilled : IconThumbsUpPlain}
+            className="flex items-center gap-2 text-[0.875rem] font-semibold text-leland-gray-dark hover:text-leland-gray-light focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+          >
+            {selectedThumb === "no" ? (
+              <IconThumbsDownFilled key={noPopKey} className="size-5 animate-[icon-pop_400ms_ease-out]" />
+            ) : (
+              <IconThumbsDown className="size-5" />
+            )}
+            No
+          </button>
+          <button
+            type="button"
+            aria-label="Helpful"
             onClick={() => {
               setSelectedThumb("yes");
-              onShareFeedback("yes");
+              setYesPopKey((k) => k + 1);
             }}
-          />
+            className="flex items-center gap-2 text-[0.875rem] font-semibold text-leland-gray-dark hover:text-leland-gray-light focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+          >
+            {selectedThumb === "yes" ? (
+              <IconThumbsUpPlainFilled key={yesPopKey} className="size-5 animate-[icon-pop_400ms_ease-out]" />
+            ) : (
+              <IconThumbsUpPlain className="size-5" />
+            )}
+            Yes
+          </button>
         </div>
       </div>
     </div>

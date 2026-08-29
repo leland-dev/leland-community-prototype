@@ -1,7 +1,6 @@
 import type { Block } from "../../data/lessonBlocks";
 
 import {
-  AccordionBlock,
   BannerBlock,
   CalloutBlock,
   CodeBlock,
@@ -15,6 +14,7 @@ import {
   StepsBlock,
   TableBlock,
   TagsBlock,
+  ToggleBlock,
   ToggleChipGroup,
   VideoBlock,
 } from "./ContentBlocks";
@@ -37,8 +37,8 @@ export function BlockRenderer({ block, allowH1 = true }: { block: Block; allowH1
       return <DividerBlock block={block} />;
     case "html":
       return <HtmlBlock block={block} />;
-    case "accordion":
-      return <AccordionBlock block={block} />;
+    case "toggle":
+      return <ToggleBlock block={block} />;
     case "code":
       return <CodeBlock block={block} />;
     case "table":
@@ -82,7 +82,7 @@ export function BlockList({
     <div className={className}>
       {blocks.map((block, i) => {
         // Consecutive text blocks read as one flow of prose (16px); a gap
-        // touching any non-text block (image, callout, accordion, etc.) gets
+        // touching any non-text block (image, callout, toggle, etc.) gets
         // full separation (32px) so it reads as a distinct element.
         const spacing =
           i === 0 ? "" : isTextBlock(block) && isTextBlock(blocks[i - 1]) ? "mt-4" : "mt-8";

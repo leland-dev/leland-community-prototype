@@ -160,9 +160,9 @@ const DIVIDER: Block[] = [
   { kind: "markdown", body: "Content below the divider." },
 ];
 
-const ACCORDION: Block[] = [
+const TOGGLE: Block[] = [
   {
-    kind: "accordion",
+    kind: "toggle",
     rows: [
       {
         title: "The four modes of working with AI",
@@ -227,7 +227,7 @@ function GalleryContent() {
       <GallerySection title="Tags" blocks={TAGS} />
       <GallerySection title="Embed" blocks={EMBED} />
       <GallerySection title="Divider" blocks={DIVIDER} />
-      <GallerySection title="Expandable / accordion" blocks={ACCORDION} />
+      <GallerySection title="Expandable / toggle" blocks={TOGGLE} />
     </LessonPageProvider>
   );
 }

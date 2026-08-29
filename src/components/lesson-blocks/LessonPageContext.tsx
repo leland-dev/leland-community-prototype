@@ -6,7 +6,7 @@ import { createContext, useContext, type ReactNode } from "react";
 import type { LiveSessionVariant } from "../../data/lessonBlocks";
 
 type LessonPageActions = {
-  onShareFeedback: (thumb?: "yes" | "no") => void;
+  onShareFeedback: () => void;
   onOpenCalendar: () => void;
   onViewRecording: () => void;
   liveSessionVariant: LiveSessionVariant;
