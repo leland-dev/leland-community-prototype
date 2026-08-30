@@ -46,6 +46,8 @@ export enum ButtonColor {
   TERTIARY = 'TERTIARY',
   DESTRUCTIVE = 'DESTRUCTIVE',
   OVERLAY = 'OVERLAY',
+  OVERLAY_WHITE = 'OVERLAY_WHITE',
+  OVERLAY_DESTRUCTIVE = 'OVERLAY_DESTRUCTIVE',
 }
 
 export enum ButtonSize {
@@ -145,6 +147,10 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
       selected
         ? 'text-leland-white bg-leland-black/80 border-transparent shadow-transparent backdrop-blur-md'
         : 'text-leland-white bg-leland-black/50 disabled:bg-leland-black/50 border-transparent hover:bg-leland-black/80 shadow-transparent backdrop-blur-md',
+    [ButtonColor.OVERLAY_WHITE]: () =>
+      'text-leland-gray-dark bg-white disabled:text-leland-gray-light disabled:bg-white border-transparent hover:bg-leland-gray-solid-hover shadow-xs',
+    [ButtonColor.OVERLAY_DESTRUCTIVE]: () =>
+      'text-leland-red bg-white disabled:text-leland-gray-light disabled:bg-white border-transparent hover:bg-leland-gray-solid-hover shadow-xs',
   };
 
 // Production sizes: monorepo text-sm = 0.75rem, text-base = 0.875rem.
@@ -181,6 +187,8 @@ const ButtonRoundedSideToStyles: Record<
 const BORDERLESS_COLORS = new Set([
   ButtonColor.GRAY,
   ButtonColor.SECONDARY_NEUTRAL,
+  ButtonColor.OVERLAY_WHITE,
+  ButtonColor.OVERLAY_DESTRUCTIVE,
 ]);
 
 interface ButtonStyleProps {
