@@ -23,6 +23,9 @@ import pic14 from "../../../assets/profile photos/pic-14.png";
 
 const ORGS = ["McKinsey", "Google", "Harvard", "Stanford", "Goldman Sachs", "Meta", "OpenAI"];
 
+/* coach names, first name + last initial — indexed alongside COACH_FACES */
+const COACH_NAMES = ["Sarah K.", "Dev P.", "Yvonne M.", "Marcus L.", "Elena R.", "James O.", "Priya N.", "Tom B."];
+
 export type Review = { quote: string; name: string; role: string; avatar: string };
 export const DEFAULT_REVIEWS: Review[] = [
   { quote: "I got into HBS, Stanford, AND Wharton. Six months on Leland.", name: "Maya P.", role: "HBS '27", avatar: pic10 },
@@ -118,7 +121,7 @@ export default function ExpertReassurance({
                 </span>
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-2.5 pb-2.5 pt-7">
                   <p className="text-[12px] font-semibold leading-tight text-white">
-                    {orgs[i % orgs.length]}
+                    {COACH_NAMES[i % COACH_NAMES.length]}
                   </p>
                 </div>
               </div>
