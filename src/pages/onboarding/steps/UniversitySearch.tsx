@@ -229,6 +229,16 @@ export default function UniversitySearch({
                   <p className="py-2 text-[14px] text-gray-light">No matches</p>
                 ) : null}
               </div>
+
+              {!q ? (
+                <button
+                  onClick={() => inputRef.current?.focus()}
+                  className="mx-auto mt-4 flex items-center gap-1.5 text-[14px] font-medium text-gray-dark underline decoration-gray-stroke underline-offset-4 transition-colors hover:decoration-gray-dark"
+                >
+                  <Search size={14} />
+                  Search all schools
+                </button>
+              ) : null}
             </motion.div>
           ) : (
             <motion.div key="picked" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}>
