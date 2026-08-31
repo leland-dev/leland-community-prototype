@@ -51,9 +51,9 @@ export default function SchoolProof({
     : "Expert";
   const expertiseLabel = expertise.charAt(0).toUpperCase() + expertise.slice(1);
   const alumni = [
-    { face: COACH_FACES[0], name: "Sarah K.", headline: `${orgs[0]} alum | ${expertiseLabel} coach` },
-    { face: COACH_FACES[2], name: "Yvonne M.", headline: `${orgs[1]} alum | ${expertiseLabel} coach` },
-    { face: COACH_FACES[4], name: "Elena R.", headline: `${orgs[2]} alum | Interview specialist` },
+    { face: COACH_FACES[0], name: "Sarah K.", org: orgs[0], headline: `${orgs[0]} alum | ${expertiseLabel} coach` },
+    { face: COACH_FACES[2], name: "Yvonne M.", org: orgs[1], headline: `${orgs[1]} alum | ${expertiseLabel} coach` },
+    { face: COACH_FACES[4], name: "Elena R.", org: orgs[2], headline: `${orgs[2]} alum | Interview specialist` },
   ];
 
   const rise = (delay: number) => ({
