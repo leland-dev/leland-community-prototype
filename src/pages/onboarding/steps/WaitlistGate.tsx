@@ -26,7 +26,7 @@ const INVITE_CODES = ["7F3K2M", "Q2XM9A", "9BWD4T"];
 export const SPOT_LADDER = [142, 61, 19, 1];
 const WINDOW_MS = 24 * 60 * 60 * 1000;
 const PEEK_Y = 17;
-const FLIP_S = 1.5;
+const FLIP_S = 1.7;
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -211,21 +211,30 @@ export default function WaitlistGate({
   );
 
   /* One persistent element carries the whole bridge: member on the front,
-     guest pass 1 on the back. It never unmounts mid-animation, so there is
-     nothing to blip. Beats: raise (no spin) → flip at the apex → land. */
+     guest pass 1 on the back — one and a half turns (540°), so it lands on
+     the back. Never unmounted mid-motion. The 3D cues: a dark core gives
+     the card thickness at edge-on, each face catches a sheen as it sweeps
+     past the light, and a ground shadow detaches while it's airborne. */
+  const flipping = act === "flip";
   const flipCard = (
     <motion.div
       initial={false}
       animate={
         act === "card"
           ? { y: 0, rotateY: 0, scale: 1 }
-          : act === "flip"
-            ? { y: [0, -22, -22, 0], rotateY: [0, 0, 180, 180], scale: [1, 1.06, 1.06, 1] }
-            : { y: 0, rotateY: 180, scale: 1 }
+          : flipping
+            ? { y: [0, -34, -34, 0], rotateY: [0, 0, 540, 540], scale: [1, 1.09, 1.09, 1] }
+            : { y: 0, rotateY: 540, scale: 1 }
       }
       transition={
-        act === "flip"
-          ? { duration: FLIP_S, times: [0, 0.22, 0.8, 1], ease: "easeInOut" }
+        flipping
+          ? {
+              duration: FLIP_S,
+              times: [0, 0.18, 0.82, 1],
+              y: { duration: FLIP_S, times: [0, 0.18, 0.82, 1], ease: "easeInOut" },
+              scale: { duration: FLIP_S, times: [0, 0.18, 0.82, 1], ease: "easeInOut" },
+              rotateY: { duration: FLIP_S, times: [0, 0.18, 0.82, 1], ease: ["linear", "easeInOut", "linear"] },
+            }
           : { duration: 0 }
       }
       onAnimationComplete={() => {
@@ -234,9 +243,36 @@ export default function WaitlistGate({
       style={{ transformStyle: "preserve-3d" }}
       className="grid"
     >
-      <div style={{ backfaceVisibility: "hidden", gridArea: "1 / 1" }}>{memberCard}</div>
-      <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", gridArea: "1 / 1" }}>
+      {/* dark core: the card's thickness when seen edge-on */}
+      <div className="m-[1px] rounded-[22px] bg-[#131312]" style={{ gridArea: "1 / 1" }} />
+      <div className="relative" style={{ backfaceVisibility: "hidden", transform: "translateZ(2px)", gridArea: "1 / 1" }}>
+        {memberCard}
+        {flipping && !reduced ? (
+          <motion.span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-20 rounded-[22px]"
+            style={{ background: "linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.55, 0] }}
+            transition={{ duration: FLIP_S, times: [0.14, 0.3, 0.48] }}
+          />
+        ) : null}
+      </div>
+      <div
+        className="relative"
+        style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg) translateZ(2px)", gridArea: "1 / 1" }}
+      >
         {guestCard(0)}
+        {flipping && !reduced ? (
+          <motion.span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-20 rounded-[22px]"
+            style={{ background: "linear-gradient(-100deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.55, 0] }}
+            transition={{ duration: FLIP_S, times: [0.55, 0.72, 0.88] }}
+          />
+        ) : null}
       </div>
     </motion.div>
   );
@@ -268,8 +304,12 @@ export default function WaitlistGate({
                 key="intro"
                 animate={{ opacity: act === "card" ? 1 : 0 }}
                 transition={{ duration: 0.4, ease: EASE }}
-                exit={{ opacity: 0, transition: { duration: 0.01 } }}
-                className="flex flex-col items-center"
+                exit={{
+                  opacity: 0,
+                  height: 0,
+                  transition: { opacity: { duration: 0.2 }, height: { duration: 0.65, ease: EASE, delay: 0.05 } },
+                }}
+                className="flex flex-col items-center overflow-hidden"
               >
                 <motion.span
                   initial={reduced ? { opacity: 0 } : { scale: 0, opacity: 0 }}
@@ -301,10 +341,10 @@ export default function WaitlistGate({
             ) : (
               <motion.div
                 key="spot"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.4, ease: EASE }}
-                className="flex flex-col items-center"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                transition={{ height: { duration: 0.5, ease: EASE }, opacity: { delay: 0.25, duration: 0.4 } }}
+                className="flex flex-col items-center overflow-hidden"
               >
                 <div onDoubleClick={import.meta.env.DEV && onDevBack ? onDevBack : undefined}>
                   <AnimatePresence mode="wait">
@@ -336,12 +376,11 @@ export default function WaitlistGate({
 
         {/* ── the deck: the flip card stays item zero until it's sent ── */}
         <motion.div
-          layout
           initial={reduced ? { opacity: 0 } : { opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ layout: { duration: 0.55, ease: EASE }, opacity: { delay: 0.6, duration: 0.6, ease: EASE }, y: { delay: 0.6, duration: 0.6, ease: EASE } }}
+          transition={{ opacity: { delay: 0.6, duration: 0.6, ease: EASE }, y: { delay: 0.6, duration: 0.6, ease: EASE } }}
           className="mx-auto mt-7 w-full max-w-[340px]"
-          style={{ perspective: 1200 }}
+          style={{ perspective: 900 }}
         >
           {gate && unlocked ? (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: EASE }}>
@@ -359,6 +398,16 @@ export default function WaitlistGate({
               <div className="invisible" aria-hidden>
                 {guestCard(0)}
               </div>
+              {/* ground shadow: separates from the card while it's in the air */}
+              {flipping && !reduced ? (
+                <motion.div
+                  aria-hidden
+                  className="absolute inset-x-8 -bottom-1.5 h-5 rounded-[50%] bg-black/35 blur-md"
+                  initial={{ opacity: 0, scale: 1 }}
+                  animate={{ opacity: [0, 0.5, 0.5, 0], scale: [1, 0.78, 0.78, 1] }}
+                  transition={{ duration: FLIP_S, times: [0, 0.22, 0.8, 1] }}
+                />
+              ) : null}
               <AnimatePresence>
                 {INVITE_CODES.map((code, i) => {
                   if (i < sent) return null;
@@ -372,9 +421,15 @@ export default function WaitlistGate({
                       exit={
                         reduced
                           ? { opacity: 0 }
-                          : { x: 260, y: -10, rotate: 6, opacity: 0, transition: { duration: 0.4, ease: EASE } }
+                          : {
+                              x: [0, 36, 300],
+                              y: [0, -26, -14],
+                              rotate: [0, 2, 7],
+                              opacity: [1, 1, 0],
+                              transition: { duration: 0.75, times: [0, 0.4, 1], ease: "easeInOut" },
+                            }
                       }
-                      transition={{ type: "spring", stiffness: 320, damping: 22, delay: gate ? 0.25 + depth * 0.08 : 0 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 24, delay: gate ? 0.2 + depth * 0.07 : 0 }}
                       style={{ zIndex: 30 - i }}
                       className="absolute inset-x-0 top-0"
                     >
