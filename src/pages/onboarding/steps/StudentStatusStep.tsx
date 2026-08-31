@@ -13,12 +13,12 @@ import { StepHeading } from "./flowUI";
 
 export type StudentStatus = "enrolled" | "graduated" | "applying";
 
-type Option = { status: StudentStatus; label: string; sub: string; Icon: ComponentType<LucideProps> };
+type Option = { status: StudentStatus; label: string; Icon: ComponentType<LucideProps> };
 
 const OPTIONS: Option[] = [
-  { status: "enrolled", label: "I'm a current student", sub: "Undergrad, grad, or professional program", Icon: GraduationCap },
-  { status: "graduated", label: "I've graduated", sub: "Working, between things, or back at it", Icon: Building2 },
-  { status: "applying", label: "I'm applying to school", sub: "Getting ready for the next chapter", Icon: Send },
+  { status: "enrolled", label: "I'm a current student", Icon: GraduationCap },
+  { status: "graduated", label: "I've graduated", Icon: Building2 },
+  { status: "applying", label: "I'm applying to school", Icon: Send },
 ];
 
 export default function StudentStatusStep({
@@ -47,10 +47,7 @@ export default function StudentStatusStep({
             className="flex items-center gap-3 rounded-2xl border border-gray-stroke bg-white px-5 py-4 text-left transition-colors hover:bg-gray-hover"
           >
             <o.Icon size={22} strokeWidth={1.9} className="shrink-0 text-gray-dark" />
-            <span className="min-w-0 flex-1">
-              <span className="block text-[17px] font-medium text-gray-dark">{o.label}</span>
-              <span className="mt-0.5 block text-[13px] text-gray-light">{o.sub}</span>
-            </span>
+            <span className="min-w-0 flex-1 text-[17px] font-medium text-gray-dark">{o.label}</span>
           </motion.button>
         ))}
       </div>
