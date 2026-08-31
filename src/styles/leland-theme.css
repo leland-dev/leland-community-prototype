@@ -160,6 +160,7 @@
   /* Starts one band-width before the leading edge and ends past the trailing
      one so the band never rests anywhere visible. Assumes a w-1/2 band. */
   --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+  --animate-waveform: waveform 0.9s ease-in-out infinite;
 
   /* ── Shadows / misc ──────────────────────────────────────────────────── */
   --shadow-border: 0 0 0 1px;
@@ -175,6 +176,15 @@
   }
   100% {
     transform: translateX(200%);
+  }
+}
+
+@keyframes waveform {
+  0%, 100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
   }
 }
 

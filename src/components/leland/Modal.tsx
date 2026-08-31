@@ -118,7 +118,7 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
         // Position-only wrapper so Close merges onto the single Button via
         // asChild — a RdxDialog.Close button wrapping a Button nests two
         // interactive controls (axe nested-interactive).
-        <div className="absolute right-2 top-2">
+        <div className="absolute right-2 top-2 z-5">
           <RdxDialog.Close asChild>
             <Button
               label="Close"
