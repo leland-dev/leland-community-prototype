@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button, LinkButton } from "../components/Button";
 import coverImage from "../assets/img/cover-image-2.png";
 import samanthaPhoto from "../assets/profile photos/pic-6.png";
-import verifiedIcon from "../assets/icons/verified.svg";
+import verifiedIcon from "../assets/icons/verified-new.svg";
 import editIcon from "../assets/icons/edit.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import videoThumbnail from "../assets/img/Video-Thumbnail.png";

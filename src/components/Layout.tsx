@@ -30,6 +30,7 @@ import { SessionLayoutProvider } from "./SessionLayoutContext";
 import { NavThemeProvider, useNavTheme } from "./NavThemeContext";
 import { MobileSidebarProvider, useMobileSidebar } from "./MobileSidebarContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
+import { useTopNavStyle } from "../contexts/TopNavStyleContext";
 
 /**
  * Layout — nav chrome (TopNav, MobileTopNav, BottomNav) + context providers + <Outlet />
@@ -125,6 +126,11 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   // bare content — used when a page is loaded inside another surface (e.g. the
   // course viewer's Community tab iframes this route).
   const isEmbed = new URLSearchParams(location.search).get("embed") === "1";
+  // Soft beige page bg (50% of the brand beige) so the white feed/cards read as
+  // distinct surfaces rather than blending into a white page. Scoped to the
+  // isolated /linkedin-nav experience. Embed / dark mode keep their own bg.
+  const onLinkedInPath = pathname === "/linkedin-nav" || pathname.startsWith("/linkedin-nav/");
+  const linkedinPageBg = onLinkedInPath && !isEmbed && !darkMode;
 
   // Keep height/overflow constrained while the close animation plays out,
   // so the content doesn't snap to full height mid-transition.
@@ -218,9 +224,9 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
           Important: no transform when closed so fixed children (nav bars)
           remain viewport-fixed. */}
       <div
-        className={`relative z-10 min-h-full bg-white transition-all duration-[300ms] ease-in-out ${
-          sidebarOpen ? "rounded-[12px] shadow-2xl" : ""
-        }`}
+        className={`relative z-10 min-h-full transition-all duration-[300ms] ease-in-out ${
+          linkedinPageBg ? "bg-white" : "bg-white"
+        } ${sidebarOpen ? "rounded-[12px] shadow-2xl" : ""}`}
         style={{
           ...(sidebarOpen ? { transform: `translateX(${SIDEBAR_WIDTH}px) scale(0.92)`, transformOrigin: "right center" } : undefined),
           ...(constrainContent ? { height: "100dvh", overflow: "hidden", overscrollBehavior: "none", touchAction: "none" } : {}),
@@ -358,18 +364,37 @@ export function ContextLayout() {
   // Both swap the left column for the desktop sidebar (which replaces the nav).
   const isAltNavFeed = pathname === "/alt-nav";
   const isAltNavSubpage = pathname.startsWith("/alt-nav/");
+  // The dashboard is a wide 2-col layout, so it gets a roomier content cap than
+  // the standard single-column alt-nav sub-pages.
+  const isAltNavDashboard = pathname === "/alt-nav/dashboard";
   // The post detail shares the feed's card, so it also shares the 640px width.
   const isAltNavPost = pathname.startsWith("/alt-nav/post");
   const isAltNav = isAltNavFeed || isAltNavSubpage;
-  // The regular (non-alt-nav) post detail now mirrors the feed's 3-col frame too
-  // — same boxed card, same persistent sidebars. Scoped to the top-level post so
-  // the older comment-thread page (which only sets a right sidebar) is untouched.
-  const isRegularPost = pathname.startsWith("/post/") && !pathname.includes("/comment/");
+  // The regular (non-alt-nav) post detail mirrors the feed's 3-col frame — same
+  // boxed card, same persistent sidebars. Comment pages (/post/:id/comment/:cid)
+  // render a comment AS a post, so they share the exact same frame.
+  const isRegularPost = pathname.startsWith("/post/");
   // Any post detail (alt-nav or regular) shares the feed's 640/356 treatment.
   const isPostDetail = isAltNavPost || isRegularPost;
-  // Keep the 3-col feed treatment (and the "/" home) bound to the EXACT feed
-  // so sub-pages and the default home are unaffected.
-  const isHomeFeed = pathname === "/" || isAltNavFeed;
+  // The isolated LinkedIn-nav experience lives under /linkedin-nav: its feed and
+  // post detail use a centered 1280 / 240·348 / 30-gap layout with a beige page
+  // bg. This is the ONLY place that treatment applies now — "/" is the classic
+  // home again (edge-to-edge 640 / 356), keeping the directions isolated.
+  const isLinkedInNavFeed = pathname === "/linkedin-nav";
+  const isLinkedInNavPost = pathname.startsWith("/linkedin-nav/post");
+  const isLinkedInLayout = isLinkedInNavFeed || isLinkedInNavPost;
+  // The classic home ("/") and the alt-nav feed share the 3-col frame.
+  const isClassicHome = pathname === "/";
+  const isHomeFeed = isClassicHome || isAltNavFeed;
+  // The classic feed ("/") and classic post detail ("/post/:id") share ONE frame,
+  // toggled from the Navigation admin dropdown between:
+  //   centered   — feed + 298px sidebars centered within 1280, feed fills the middle
+  //   classicEdge — feed capped at 640 with 356px sidebars pinned to the window edges
+  // Both default to centered; feedEdgeToEdge flips them together.
+  const { feedEdgeToEdge } = useTopNavStyle();
+  const isClassicFeed = isClassicHome || isRegularPost;
+  const centered = isClassicFeed && !feedEdgeToEdge;
+  const classicEdge = isClassicFeed && feedEdgeToEdge;
 
   return (
     <PageShell
@@ -378,15 +403,26 @@ export function ContextLayout() {
       variant={isAltNav && variant === "thin" ? "standard" : variant}
       leftSidebar={isAltNav ? <DesktopSidebar /> : leftSidebar}
       rightSidebar={rightSidebar}
-      contentMaxWidth={isHomeFeed || isPostDetail ? 640 : isAltNavSubpage ? 720 : contentMaxWidth}
-      // Sub-pages share the feed's edge-to-edge frame so the sidebar sits
-      // flush-left and content centers in the remaining space.
-      edgeToEdge={isHomeFeed || isAltNavSubpage || isRegularPost}
-      sidebarWidth={isHomeFeed || isPostDetail ? 356 : undefined}
+      // The LinkedIn-layout pages and the centered classic feed/post let their center
+      // column fill the remaining space (no cap); the alt-nav feed / post detail and
+      // the edge-to-edge classic feed/post stay at 640, alt-nav sub-pages at 720.
+      contentMaxWidth={isLinkedInLayout || centered ? undefined : isHomeFeed || isPostDetail ? 640 : isAltNavSubpage ? 720 : contentMaxWidth}
+      // LinkedIn-layout pages and the centered classic feed/post are centered within
+      // 1280; the alt-nav feed / sub-pages and the edge-to-edge classic feed/post
+      // stay edge-to-edge so their left sidebar sits flush-left.
+      edgeToEdge={(isHomeFeed && !isClassicHome) || isAltNavSubpage || classicEdge}
+      // Right column: 348px on the LinkedIn-layout pages, 298px on the centered
+      // classic feed/post, 356px on the alt-nav feed / post / dashboard and the
+      // edge-to-edge classic feed/post.
+      sidebarWidth={isLinkedInLayout ? 348 : centered ? 298 : isHomeFeed || isPostDetail || isAltNavDashboard ? 356 : undefined}
+      // Left column: 240px on the LinkedIn-layout pages, 298px on the centered
+      // classic feed/post; alt-nav pins its sidebar at 250px.
+      leftSidebarWidth={isAltNav ? 250 : isLinkedInLayout ? 240 : centered ? 298 : undefined}
+      // 30px gaps between the columns on the LinkedIn-layout pages and the centered
+      // classic feed/post; default 40px elsewhere.
+      columnGap={isLinkedInLayout || centered ? 30 : undefined}
       // alt-nav has no top navbar (the sidebar replaces it), so its left column
-      // pins 20px from the top (not the 81px that clears a navbar) and is capped
-      // at 250px. Padding drops to 20px on these pages too.
-      leftSidebarWidth={isAltNav ? 250 : undefined}
+      // pins 20px from the top (not the 81px that clears a navbar).
       leftSidebarTop={isAltNav ? 20 : undefined}
       // Pin the sidebar to the viewport (full height, never scrolls with the page).
       leftSidebarFixed={isAltNav}
@@ -396,7 +432,7 @@ export function ContextLayout() {
       paddingXClassName={isAltNav ? "px-4" : undefined}
       // Start the row at the sidebar's sticky pin point (nav 61px + 20px gap) so
       // the columns don't slide up 20px before locking as you scroll.
-      paddingYClassName={isHomeFeed || isAltNavSubpage || isRegularPost ? "py-4 sm:pt-5 sm:pb-10" : undefined}
+      paddingYClassName={isLinkedInLayout || isHomeFeed || isAltNavSubpage || isRegularPost ? "py-4 sm:pt-5 sm:pb-10" : undefined}
     >
       {/* On alt-nav sub-pages the department sub-nav renders here, at the top of
           the content column, instead of the suppressed full-width chrome bar. */}

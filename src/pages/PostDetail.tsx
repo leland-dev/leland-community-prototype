@@ -9,14 +9,19 @@ import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetNavBackHandler } from "../components/NavThemeContext";
 import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
-import { PUSH_TRANSITION, FADE_TRANSITION, FADE_IN, FADE_OUT } from "../lib/pushTransition";
-import { posts, type Post, FeedPost, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar, HomeSidebar, PollCard, usePostBase } from "./Home";
+import { FADE_TRANSITION, FADE_IN, FADE_OUT } from "../lib/pushTransition";
+import { posts, type Post, FeedPost, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar, HomeSidebar, PollCard, usePostBase, POST_HOVER_SHADOW, VerifiedBadge } from "./Home";
 import { Button } from "../components/Button";
+import ImageLightbox from "../components/ImageLightbox";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
-import verifiedIconSrc from "../assets/icons/verified.svg";
 import commentsIcon from "../assets/icons/comments.svg";
 import sharesIcon from "../assets/icons/shares.svg";
+import trashIcon from "../assets/icons/trash.svg";
+import eyeClosedIcon from "../assets/icons/eye-closed.svg";
+import reportFlagIcon from "../assets/icons/report-flag.svg";
+import addPlusIcon from "../assets/icons/add-plus.svg";
+import checkIcon from "../assets/icons/check.svg";
 
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic2 from "../assets/profile photos/pic-2.png";
@@ -195,6 +200,9 @@ function AuthorRow({ post, featured = false }: { post: Post; featured?: boolean 
   const avatarSrc = gp?.avatar ?? post.avatar;
   const displayHeadline = gp?.headline ?? post.headline;
   const displayTime = profileBarMode === 3 ? "Aug 12" : post.time;
+  // Verified experts show their headline as the subtext; everyone else gets a
+  // "View profile" link.
+  const isVerifiedExpert = Boolean(post.verified) && !gp && !post.isGroupPost;
   // Pure group announcements point at the group; people (incl. group posters)
   // link to their profile template.
   const profileTo = post.isGroupPost && !gp
@@ -228,140 +236,50 @@ function AuthorRow({ post, featured = false }: { post: Post; featured?: boolean 
             {post.author.charAt(0)}
           </div>
         ) : null}
+        {/* Verified badge — bottom-right of the avatar, thin white outline. */}
+        {post.verified && !gp && !post.isGroupPost ? (
+          <VerifiedBadge className="absolute -bottom-1 -right-1 h-5 w-5" />
+        ) : null}
       </Link>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <Link to={profileTo} className="text-[15px] font-semibold leading-tight text-gray-dark hover:underline">{name}</Link>
-          {post.verified ? <img src={verifiedIconSrc} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
           {/* The featured post drops the inline "30m" timestamp in favour of the
               full date/time line below the name. */}
           {!featured ? <span className="shrink-0 text-[15px] leading-tight text-gray-extra-light">{displayTime}</span> : null}
         </div>
         {featured ? (
-          <p className="mt-0.5 text-[13px] leading-tight text-gray-light">9:41 AM on July 7, 2026</p>
+          isVerifiedExpert && displayHeadline ? (
+            <p className="mt-0.5 truncate text-[14px] font-medium leading-tight text-gray-extra-light">{displayHeadline}</p>
+          ) : (
+            <p className="mt-0.5 truncate text-[14px] font-medium leading-tight text-gray-extra-light">Member since 2024</p>
+          )
         ) : profileBarMode !== 1 && displayHeadline ? (
           <p className="mt-0.5 truncate text-[13px] leading-tight text-gray-light">{displayHeadline}</p>
         ) : null}
       </div>
-      {/* Follow — snappy, staged morph, symmetric both ways: the outgoing
-          content (label or check) shrinks/fades away fast, the pill grows +
-          color shifts on a spring, then the new content pops/eases in after a
-          short delay. Width animates as a real CSS value (not `layout`), so the
-          label never stretches. */}
-      <motion.button
-        type="button"
+      {/* Follow — dark pill by default; toggles to the gray (secondary) style
+          with a checkmark once following. */}
+      <Button
+        size="sm"
+        variant={following ? "secondary" : "dark"}
+        rounded="rounded-full"
         onClick={() => setFollowing((f) => !f)}
-        whileTap={{ scale: 0.9 }}
-        initial={false}
-        animate={{ width: following ? 36 : 73, backgroundColor: "#F0F0F0" }}
-        transition={{ type: "spring", stiffness: 700, damping: 34, mass: 0.7 }}
         aria-label={following ? "Following" : "Follow"}
-        className="relative flex h-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-[13px] font-semibold"
+        className="shrink-0 self-start font-semibold"
       >
-        <AnimatePresence mode="wait" initial={false}>
-          {following ? (
-            <motion.svg
-              key="check"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0, transition: { duration: 0.09, ease: "easeIn" } }}
-              transition={{ type: "spring", stiffness: 900, damping: 19, delay: 0.12 }}
-              className="h-[18px] w-[18px] text-gray-dark"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><polyline points="16 11 18 13 22 9" />
-            </motion.svg>
-          ) : (
-            <motion.span
-              key="follow"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.06 } }}
-              transition={{ duration: 0.12, delay: 0.12 }}
-              className="whitespace-nowrap text-gray-dark"
-            >
-              Follow
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </motion.button>
+        {following ? (
+          <>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Following
+          </>
+        ) : (
+          "Follow"
+        )}
+      </Button>
     </div>
-  );
-}
-
-function ImageLightbox({ images, index, onClose, onChangeIndex }: {
-  images: string[];
-  index: number;
-  onClose: () => void;
-  onChangeIndex: (i: number) => void;
-}) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft" && index > 0) onChangeIndex(index - 1);
-      if (e.key === "ArrowRight" && index < images.length - 1) onChangeIndex(index + 1);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [index, images.length, onClose, onChangeIndex]);
-
-  return createPortal(
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95"
-      onClick={onClose}
-    >
-      <button
-        onClick={e => { e.stopPropagation(); onClose(); }}
-        className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-
-      <motion.img
-        key={index}
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.18 }}
-        src={images[index]}
-        alt=""
-        className="max-h-[90vh] max-w-[90vw] rounded-xl object-contain"
-        onClick={e => e.stopPropagation()}
-      />
-
-      {index > 0 && (
-        <button
-          onClick={e => { e.stopPropagation(); onChangeIndex(index - 1); }}
-          className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-      )}
-      {index < images.length - 1 && (
-        <button
-          onClick={e => { e.stopPropagation(); onChangeIndex(index + 1); }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      )}
-
-      {images.length > 1 && (
-        <div className="absolute bottom-5 flex gap-2">
-          {images.map((_, i) => (
-            <button
-              key={i}
-              onClick={e => { e.stopPropagation(); onChangeIndex(i); }}
-              className={`h-1.5 rounded-full transition-all ${i === index ? "w-4 bg-white" : "w-1.5 bg-white/40"}`}
-            />
-          ))}
-        </div>
-      )}
-    </motion.div>,
-    document.body
   );
 }
 
@@ -512,55 +430,50 @@ function PostOverflowMenu() {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
+  // Menu-row icon — 20px asset-folder svg (4px smaller than the profile dropdown).
+  const menuIcon = (src: string) => <img src={src} alt="" className="h-5 w-5 shrink-0" />;
+  // Danger rows tint their icon to the row's red via a CSS mask (asset svgs are
+  // pre-colored, so a plain <img> can't inherit the text color).
+  const dangerIcon = (src: string) => (
+    <span
+      aria-hidden
+      className="h-5 w-5 shrink-0 bg-current"
+      style={{ maskImage: `url("${src}")`, WebkitMaskImage: `url("${src}")`, maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat", maskPosition: "center", WebkitMaskPosition: "center" }}
+    />
+  );
   const items: { label: string; icon: ReactNode; danger: boolean; onClick?: () => void }[] = [
     {
       label: following ? "Following" : "Follow",
-      icon: (
-        <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v6M22 11h-6" />
-        </svg>
-      ),
+      icon: menuIcon(following ? checkIcon : addPlusIcon),
       danger: false,
       onClick: () => setFollowing(f => !f),
     },
     {
-      label: "Delete post",
-      icon: (
-        <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-        </svg>
-      ),
-      danger: true,
-    },
-    {
       label: "Not interested",
-      icon: (
-        <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M17 14c.34-.57.54-1.26.54-2 0-2.21-1.91-4-4.27-4-1.89 0-3.5 1.16-4.12 2.8" /><path d="M9.17 9.17L3 3m18 18-5.18-5.18" /><path d="M6.5 6.5C5.57 7.4 5 8.63 5 10c0 2.76 2.24 5 5 5 1.37 0 2.6-.57 3.5-1.5" /><line x1="2" y1="2" x2="22" y2="22" />
-        </svg>
-      ),
+      icon: menuIcon(eyeClosedIcon),
       danger: false,
     },
     {
       label: "Report post",
-      icon: (
-        <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" />
-        </svg>
-      ),
+      icon: menuIcon(reportFlagIcon),
       danger: false,
+    },
+    {
+      label: "Delete post",
+      icon: dangerIcon(trashIcon),
+      danger: true,
     },
   ];
 
   return (
-    <div ref={ref} className="relative ml-auto">
+    <div ref={ref} className="relative ml-auto shrink-0">
       <button
         onClick={() => setOpen(o => !o)}
         aria-label="More"
-        className="flex cursor-pointer items-center justify-center rounded-[100px] px-2.5 py-1.5 text-gray-extra-light transition-colors hover:bg-gray-hover hover:text-gray-light"
+        className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
       >
-        <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-          <circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" />
+        <svg className="h-[20px] w-[20px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" />
         </svg>
       </button>
       <AnimatePresence>
@@ -572,14 +485,14 @@ function PostOverflowMenu() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -4 }}
               transition={{ duration: 0.12, ease: [0.25, 0.1, 0.25, 1] }}
-              className="absolute right-0 top-10 z-50 w-48 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+              className="absolute right-0 top-10 z-50 w-56 rounded-2xl border border-gray-stroke bg-white shadow-lg"
             >
               <div className="px-2 py-2">
                 {items.map(item => (
                   <button
                     key={item.label}
                     onClick={() => { if (item.onClick) { item.onClick(); } else { setOpen(false); } }}
-                    className={`flex w-full items-center gap-3 rounded-lg p-3 text-left text-[14px] font-medium transition-colors hover:bg-gray-hover ${item.danger ? "text-[#D92D20]" : "text-gray-dark"}`}
+                    className={`flex w-full items-center gap-[10px] rounded-lg p-3 text-left text-[14px] font-medium transition-colors hover:bg-[#222222]/5 ${item.danger ? "text-[#D92D20]" : "text-gray-dark"}`}
                   >
                     {item.icon}
                     {item.label}
@@ -594,19 +507,18 @@ function PostOverflowMenu() {
   );
 }
 
-function StatsRow({ post, onCommentFocus, spread = true, overflowMenu = false }: { post: Post; onCommentFocus: () => void; spread?: boolean; overflowMenu?: boolean }) {
+function StatsRow({ post, onCommentFocus }: { post: Post; onCommentFocus: () => void }) {
   const [shareOpen, setShareOpen] = useState(false);
 
   // -mx-2.5 cancels the buttons' px-2.5 so the heart glyph lines up flush with
-  // the paragraph left edge. `spread` justifies the icons across the full width;
-  // otherwise they sit left-aligned with the same tight gap as the feed row.
+  // the paragraph left edge. All five actions spread equally across the row.
   return (
-    <div className={`mt-2 -mx-2.5 flex items-center py-1.5 ${spread ? "justify-between" : "gap-px"}`}>
+    <div className="-mx-2.5 flex items-center justify-between py-1.5">
       <FeedLikeButton initialCount={post.likes} />
       {/* Comment — outline chat bubble, matches the feed action row */}
       <button
         onClick={onCommentFocus}
-        className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-extra-light transition-colors hover:bg-gray-hover hover:text-gray-light"
+        className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-light transition-colors hover:bg-[#222222]/8"
       >
         <svg className="h-[22px] w-[22px] fill-none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4.541 17.003C3.577 15.571 3 13.857 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12C21 16.971 16.971 21 12 21C10.474 21 9.04 20.613 7.78 19.943C6.434 20.661 4.907 21.084 3.276 21.084C2.842 21.084 2.419 21.045 2 20.99C3.173 19.923 4.055 18.553 4.541 17.003Z" /></svg>
         {post.comments > 0 && <span className="text-[13px] font-medium">{post.comments.toLocaleString()}</span>}
@@ -615,20 +527,18 @@ function StatsRow({ post, onCommentFocus, spread = true, overflowMenu = false }:
       <FeedRepostButton initialCount={post.reposts} />
       {/* Save */}
       <FeedBookmarkButton post={post} />
-      {/* Share */}
+      {/* Share — swapped to the uploaded share.svg (upload glyph) */}
       <div className="relative">
         <button
           onClick={() => setShareOpen(o => !o)}
-          className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-extra-light transition-colors hover:bg-gray-hover hover:text-gray-light"
+          className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-light transition-colors hover:bg-[#222222]/8"
         >
-          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M11.082 8.95158V8.95158C6.196 9.503 2.50256 13.6346 2.5 18.5516V19.1636H2.5C4.62349 16.6055 7.75786 15.1019 11.082 15.0466V18.2736V18.2733C11.082 18.9482 11.6291 19.4953 12.304 19.4953C12.5786 19.4953 12.8452 19.4028 13.0608 19.2328L21.0508 12.9238V12.9238C21.5622 12.5207 21.65 11.7794 21.247 11.268C21.1895 11.1951 21.1237 11.1292 21.0508 11.0718L13.0608 4.76276V4.76276C12.531 4.34468 11.7626 4.43525 11.3445 4.96505C11.1744 5.18061 11.0818 5.44717 11.0818 5.72176L11.082 8.95158Z" /></svg>
+          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M15 9h2c1.10457 0 2 .89543 2 2v8c0 1.10457-.89543 2-2 2h-10c-1.10457 0-2-.89543-2-2v-8c0-1.10457.89543-2 2-2h2" /><line x1="12" x2="12" y1="15" y2="3" /><polyline points="15,6 12,3 9,6" /></svg>
         </button>
         <AnimatePresence>
           {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
         </AnimatePresence>
       </div>
-      {/* Overflow menu — pinned to the far right of the row */}
-      {overflowMenu ? <PostOverflowMenu /> : null}
     </div>
   );
 }
@@ -862,7 +772,7 @@ function FeaturedPost({ post, onImageClick, onCommentFocus }: {
   onCommentFocus: () => void;
 }) {
   return (
-    <div className="pt-5 pb-[14px]">
+    <div className="pt-5">
       <AuthorRow post={post} featured />
       {post.type === "article" ? (
         <>
@@ -882,8 +792,16 @@ function FeaturedPost({ post, onImageClick, onCommentFocus }: {
       )}
       {post.type === "poll" ? <PollCard poll={post.poll} /> : null}
       <PostMedia post={post} onImageClick={post.type === "image" ? onImageClick : undefined} />
-      {/* Views line hidden for now — time/date lives under the name (AuthorRow featured). */}
-      <StatsRow post={post} onCommentFocus={onCommentFocus} spread={false} overflowMenu />
+      {/* Action row, then a bordered stat row: views (left) · date (right). */}
+      <StatsRow post={post} onCommentFocus={onCommentFocus} />
+      <div className="mt-2 flex items-center justify-between border-y border-gray-stroke py-2.5 text-[14px] leading-tight text-gray-extra-light">
+        <span className="flex items-center gap-1.5">
+          {/* chart-2.svg, 14px, inherits the row's gray-extra-light */}
+          <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" aria-hidden><path d="M9 13v8" vectorEffect="non-scaling-stroke" /><path d="M21 8v13" vectorEffect="non-scaling-stroke" /><path d="M15 3v18" vectorEffect="non-scaling-stroke" /><path d="M3 8v13" vectorEffect="non-scaling-stroke" /></svg>
+          {formatViews(post.likes * 24 + post.comments * 18 + post.reposts * 40)} Views
+        </span>
+        <span>Jul 7, 2026 at 9:41 AM</span>
+      </div>
     </div>
   );
 }
@@ -944,26 +862,24 @@ function PostSurface({ post, comments, onBack, onImageClick, boxed = false }: {
   );
 }
 
-// Plausible impressions count derived from the post's engagement.
-function impressionsFor(post: Post): string {
-  return formatViews(post.likes * 91 + post.comments * 47 + post.reposts * 133 + post.shares * 20);
-}
-
-// alt-nav thread header — styled like the feed's "Create post" bar: a back
-// arrow, a bold "Thread" title, and the impressions count below it.
-function ThreadHeader({ onBack, post }: { onBack: () => void; post: Post }) {
+// alt-nav thread header — sits ABOVE the content card: a back arrow, a bold
+// "Post" title, and a trailing overflow menu.
+function ThreadHeader({ onBack }: { onBack: () => void }) {
   return (
-    <div className="flex items-center gap-3 border-b border-[#D5D5D5] px-4 py-3.5 sm:px-6">
-      <Button size="sm" variant="secondary" iconOnly onClick={onBack} aria-label="Go back" className="shrink-0">
-        <svg className="h-[20px] w-[20px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <div className="mb-3 flex items-center gap-3 px-1">
+      <button
+        onClick={onBack}
+        aria-label="Go back"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover"
+      >
+        <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 12H5" />
           <path d="M12 19l-7-7 7-7" />
         </svg>
-      </Button>
-      <div className="min-w-0">
-        <p className="text-[16px] font-semibold leading-tight text-gray-dark">Thread</p>
-        <p className="mt-0.5 text-[13px] leading-tight text-gray-light">{impressionsFor(post)} impressions</p>
-      </div>
+      </button>
+      <p className="min-w-0 text-[18px] font-semibold leading-tight text-gray-dark">Post</p>
+      {/* The post's action dropdown lives here now (dropped from the action row). */}
+      <PostOverflowMenu />
     </div>
   );
 }
@@ -988,7 +904,7 @@ function commentToPost(c: CommentData): Post {
   };
 }
 
-function ThreadBody({ post, comments, onBack, boxed, onImageClick, composer, onCommentFocus }: {
+function ThreadBody({ post, comments, onBack, boxed, onImageClick, composer, onCommentFocus, urlPostId }: {
   post: Post;
   comments: CommentData[];
   onBack: () => void;
@@ -996,8 +912,13 @@ function ThreadBody({ post, comments, onBack, boxed, onImageClick, composer, onC
   onImageClick?: (i: number) => void;
   composer?: ReactNode;
   onCommentFocus: () => void;
+  // The post id used to build nested-comment links. Defaults to post.id; on a
+  // comment page it's the top-level post id (so replies open under /post/:id).
+  urlPostId?: number;
 }) {
   const navigate = useNavigate();
+  const postBase = usePostBase();
+  const linkPostId = urlPostId ?? post.id;
   // Default (non-boxed) keeps the bare post surface.
   if (!boxed) {
     return <PostSurface post={post} comments={comments} onBack={onBack} boxed={false} onImageClick={onImageClick} />;
@@ -1007,16 +928,18 @@ function ThreadBody({ post, comments, onBack, boxed, onImageClick, composer, onC
   // a full-width row; each comment renders through the compact FeedPost and
   // opens its own thread.
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#D5D5D5]">
-      <ThreadHeader onBack={onBack} post={post} />
-      <div className="divide-y divide-[#D5D5D5]">
+    <div>
+      <ThreadHeader onBack={onBack} />
+      <div className="overflow-hidden rounded-2xl border border-gray-stroke bg-white">
         <div className="px-4 sm:px-6">
           <FeaturedPost post={post} onImageClick={onImageClick} onCommentFocus={onCommentFocus} />
         </div>
+        {/* Composer's top border is inset (lives inside the px padding) so it
+            aligns with the sections' content, not the card edges. */}
         {composer ? <div className="px-4 sm:px-6">{composer}</div> : null}
         {comments.map(c => (
-          <div key={c.id} className="px-4 sm:px-6">
-            <FeedPost post={commentToPost(c)} onOpen={() => navigate(`/alt-nav/post/${post.id}/comment/${c.id}`)} />
+          <div key={c.id} className={`border-t border-gray-stroke px-4 sm:px-6 ${POST_HOVER_SHADOW}`}>
+            <FeedPost post={commentToPost(c)} onOpen={() => navigate(`${postBase}/${linkPostId}/comment/${c.id}`)} />
           </div>
         ))}
       </div>
@@ -1026,21 +949,75 @@ function ThreadBody({ post, comments, onBack, boxed, onImageClick, composer, onC
 
 // ─── Page ─────────────────────────────────────────────
 
-export default function PostDetail() {
+function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={onChange}
+      className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${checked ? "bg-[#222222]" : "bg-[#d9d9d9]"}`}
+    >
+      <span className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${checked ? "translate-x-4" : ""}`} />
+    </button>
+  );
+}
+
+// Prototype-only admin menu — a 3-dot button pinned to the bottom-right that
+// toggles preview states to show the team (starting with the sort section).
+function PostAdminMenu({ showSort, onToggleSort }: { showSort: boolean; onToggleSort: () => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="fixed bottom-4 right-4 z-40">
+      {open && (
+        <>
+          <div className="fixed inset-0" onClick={() => setOpen(false)} />
+          <div className="absolute bottom-full right-0 z-10 mb-2 w-56 rounded-xl border border-gray-stroke bg-white p-1 shadow-lg">
+            <p className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-light">Admin</p>
+            <div className="flex items-center justify-between gap-3 rounded-lg px-3 py-2">
+              <span className="text-[14px] font-medium text-gray-dark">Show sort</span>
+              <Toggle checked={showSort} onChange={onToggleSort} />
+            </div>
+          </div>
+        </>
+      )}
+      <button
+        type="button"
+        aria-label="Admin menu"
+        onClick={() => setOpen(o => !o)}
+        className={`flex h-10 w-10 items-center justify-center rounded-full border border-gray-stroke bg-white shadow-lg transition-colors ${open ? "text-gray-dark" : "text-gray-light hover:text-gray-dark"}`}
+      >
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <circle cx="5" cy="12" r="1.6" />
+          <circle cx="12" cy="12" r="1.6" />
+          <circle cx="19" cy="12" r="1.6" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+// Renders a thread — either a top-level post or a comment promoted to a post —
+// using the same boxed card, sidebars, composer and animation. On a comment
+// page the comment is the featured post and its replies render as the comments,
+// so comments feel exactly like posts.
+function PostThread() {
   const navigate = useNavigate();
 
-  // Framer push transition — mirrors the messages → conversation interaction
-  // exactly. Entrance: the whole surface (sticky header + content) slides in
-  // from the right (from the left when revealed via a back/POP). Back: hand a
-  // frozen copy of the surface to a persistent overlay and navigate at once, so
-  // the feed is revealed underneath as the post slides off — no pause-then-pop.
   useSetRightSidebar(<HomeRightSidebar />);
-  const { postId } = useParams<{ postId: string }>();
+  const { postId, commentId } = useParams<{ postId: string; commentId?: string }>();
+  const pid = Number(postId);
+  const isComment = commentId != null;
   const location = useLocation();
   // Back fades the card out in place before navigating away.
   const [exiting, setExiting] = useState(false);
   const { focusInput = false, prefillComment = "", focusImage } = (location.state as { sourceY?: number; focusInput?: boolean; prefillComment?: string; focusImage?: number }) ?? {};
-  const post = posts.find(p => p.id === Number(postId));
+  // On a comment page, promote the comment to the featured post; its replies
+  // become the comment list. Otherwise feature the top-level post.
+  const sourceComment = isComment ? findComment(getPostComments(pid), Number(commentId)) : undefined;
+  const post = isComment
+    ? (sourceComment ? commentToPost(sourceComment) : undefined)
+    : posts.find(p => p.id === pid);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
   // Only scroll to top on initial mount when not arriving via Comment tap —
@@ -1080,8 +1057,19 @@ export default function PostDetail() {
 
 
   const [commentText, setCommentText] = useState(prefillComment);
+  // When the reply field is focused, reveal the media toolbar (mirrors the
+  // compose modal's icons) with an expand animation.
+  const [replyFocused, setReplyFocused] = useState(focusInput);
+  // Admin preview toggles (bottom-right 3-dot menu). Sort section is OFF by
+  // default; persisted so it survives navigation.
+  const [showSort, setShowSort] = useState<boolean>(() => localStorage.getItem("postdetail-show-sort") === "1");
+  const toggleShowSort = () => setShowSort(v => {
+    const next = !v;
+    localStorage.setItem("postdetail-show-sort", next ? "1" : "0");
+    return next;
+  });
   const [comments, setComments] = useState<CommentData[]>(() =>
-    post ? getPostComments(post.id) : []
+    isComment ? (sourceComment?.replies ?? []) : (post ? getPostComments(pid) : [])
   );
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(
     typeof focusImage === "number" ? focusImage : null
@@ -1119,39 +1107,96 @@ export default function PostDetail() {
       text: commentText.trim(),
       likes: 0,
     };
-    addPostComment(post.id, newComment);
-    setComments(getPostComments(post.id));
+    if (isComment) {
+      addPostReply(pid, Number(commentId), newComment);
+      setComments(findComment(getPostComments(pid), Number(commentId))?.replies ?? []);
+    } else {
+      addPostComment(pid, newComment);
+      setComments(getPostComments(pid));
+    }
     setCommentText("");
   };
 
   // alt-nav: the comment composer is a full-width row at the top of the replies
   // (directly under the post) instead of a fixed bar at the bottom.
   const inlineComposer = (
-    <div className="flex items-center gap-3 py-3">
-      <img src={profilePhoto} alt="You" className="h-10 w-10 shrink-0 rounded-full object-cover" />
-      <textarea
-        ref={commentInputRef}
-        autoFocus={focusInput}
-        value={commentText}
-        onChange={e => { setCommentText(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${e.target.scrollHeight}px`; }}
-        placeholder="Add a comment…"
-        rows={1}
-        className="scrollbar-hide max-h-24 flex-1 resize-none overflow-y-auto rounded-full border border-gray-stroke px-4 py-2.5 text-[14px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
-        onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
-      />
-      <AnimatePresence>
-        {commentText.trim() ? (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.85 }}
+    <div className="py-3">
+      {/* Sort control (activity link hidden) — toggled via the admin menu. */}
+      {showSort ? (
+        <div className="mb-3 flex items-center justify-between">
+          <button className="flex items-center gap-1.5 text-[15px] font-bold text-gray-dark transition-opacity hover:opacity-70">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+              <path d="M7 3v18" /><path d="m3 17 4 4 4-4" />
+              <path d="M17 21V3" /><path d="m13 7 4-4 4 4" />
+            </svg>
+            Top
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+              <polyline points="4 6 8 10 12 6" />
+            </svg>
+          </button>
+        </div>
+      ) : null}
+
+      {/* Reply field — mirrors the feed's "What's new?" composer: avatar +
+          borderless prompt + an outline Post button. Focusing the field reveals
+          the same media toolbar the compose modal shows, animated in below. */}
+      <div>
+        <div className="flex items-center gap-3">
+          <img src={profilePhoto} alt="You" className="h-10 w-10 shrink-0 rounded-full object-cover" />
+          <textarea
+            ref={commentInputRef}
+            autoFocus={focusInput}
+            value={commentText}
+            onFocus={() => setReplyFocused(true)}
+            onBlur={() => setReplyFocused(false)}
+            onChange={e => { setCommentText(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${e.target.scrollHeight}px`; }}
+            placeholder="Add a comment…"
+            rows={1}
+            className="scrollbar-hide max-h-24 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent text-[15px] text-gray-dark outline-none placeholder:text-gray-light"
+            onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
+          />
+          <Button
+            size="md"
+            variant="outline"
+            rounded="rounded-[6px]"
             onClick={submitComment}
-            className="shrink-0 rounded-[8px] bg-gray-dark px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#222]"
+            className="shrink-0 font-semibold shadow-[0_1px_2px_0_rgba(16,24,40,0.06)]"
           >
             Post
-          </motion.button>
-        ) : null}
-      </AnimatePresence>
+          </Button>
+        </div>
+        <AnimatePresence initial={false}>
+          {replyFocused ? (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+              className="overflow-hidden pl-[52px]"
+            >
+              {/* -ml-2 aligns the first glyph under the input text (cancels p-2);
+                  onMouseDown-preventDefault keeps the field focused on tap. */}
+              <div className="-ml-2 mt-1.5 flex items-center gap-3">
+                {[
+                  { label: "Add image", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.5-3.5a2 2 0 0 0-2.83 0L6 20" /></svg> },
+                  { label: "Take photo", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3.5" /></svg> },
+                  { label: "Add video", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m22 8-6 4 6 4V8Z" /><rect x="2" y="6" width="14" height="12" rx="2" /></svg> },
+                  { label: "Add poll", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M6 20V10" /><path d="M12 20V4" /><path d="M18 20v-6" /></svg> },
+                ].map(t => (
+                  <button
+                    key={t.label}
+                    aria-label={t.label}
+                    onMouseDown={e => e.preventDefault()}
+                    className="shrink-0 cursor-pointer rounded-full p-2 text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+                  >
+                    {t.icon}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </div>
     </div>
   );
 
@@ -1167,7 +1212,7 @@ export default function PostDetail() {
       onAnimationComplete={() => { if (exiting) navigate(-1); }}
       className="min-h-[100dvh] pb-36"
     >
-      <ThreadBody post={post} comments={comments} onBack={handleBack} boxed onImageClick={setLightboxIndex} composer={inlineComposer} onCommentFocus={() => commentInputRef.current?.focus()} />
+      <ThreadBody post={post} comments={comments} onBack={handleBack} boxed onImageClick={setLightboxIndex} composer={inlineComposer} onCommentFocus={() => commentInputRef.current?.focus()} urlPostId={pid} />
     </motion.div>
 
     <AnimatePresence>
@@ -1180,6 +1225,8 @@ export default function PostDetail() {
         />
       )}
     </AnimatePresence>
+
+    <PostAdminMenu showSort={showSort} onToggleSort={toggleShowSort} />
     </>
   );
 }
@@ -1198,129 +1245,16 @@ function findComment(list: CommentData[], id: number): CommentData | undefined {
   return undefined;
 }
 
-function CommentThread() {
-  const navigate = useNavigate();
-  const { postId, commentId } = useParams<{ postId: string; commentId: string }>();
-  const pid = Number(postId);
-  useSetRightSidebar(<HomeRightSidebar />);
-
-  // Bumped after posting a reply so the store re-read shows it immediately.
-  const [storeVersion, setStoreVersion] = useState(0);
-  void storeVersion;
-  const comment = findComment(getPostComments(pid), Number(commentId));
-
-  const [replyText, setReplyText] = useState("");
-  const [liked, setLiked] = useState(false);
-
-  useEffect(() => { window.scrollTo(0, 0); }, []);
-
-  if (!comment) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-gray-light">
-        <p className="text-[15px]">Post not found.</p>
-        <button onClick={() => navigate(-1)} className="mt-4 text-primary hover:underline">← Go back</button>
-      </div>
-    );
-  }
-
-  const replies = comment.replies ?? [];
-
-  const submitReply = () => {
-    if (!replyText.trim()) return;
-    addPostReply(pid, comment.id, {
-      id: Date.now(),
-      author: "You",
-      avatar: profilePhoto,
-      time: "just now",
-      text: replyText.trim(),
-      likes: 0,
-    });
-    setReplyText("");
-    setStoreVersion(v => v + 1);
-  };
-
-  return (
-    <>
-      <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} transition={PUSH_TRANSITION} className="min-h-[100dvh] bg-white">
-        <PostHeaderBar onBack={() => navigate(-1)} />
-        <div className="min-w-0 pb-36">
-          {/* The comment, promoted to the main post */}
-          <div className="border-b border-gray-stroke pt-4 pb-3">
-            <div className="flex items-center gap-3">
-              <img src={comment.avatar} alt={comment.author} className="h-11 w-11 shrink-0 rounded-full object-cover" style={{ objectPosition: "50% 15%" }} />
-              <div className="min-w-0">
-                <p className="text-[15px] font-semibold leading-tight text-gray-dark">{comment.author}</p>
-                {comment.headline ? <p className="truncate text-[13px] leading-tight text-[#707070]">{comment.headline}</p> : null}
-              </div>
-            </div>
-            <p className="mt-3 whitespace-pre-wrap text-[17px] leading-[1.5] text-gray-dark">{comment.text}</p>
-            <div className="mt-3 flex flex-wrap items-center gap-x-1.5 text-[14px] leading-tight text-gray-light">
-              <span>{comment.time}</span>
-              <span aria-hidden>·</span>
-              <span><span className="font-semibold text-gray-dark">{replies.length}</span> {replies.length === 1 ? "Reply" : "Replies"}</span>
-              <span aria-hidden>·</span>
-              <span><span className="font-semibold text-gray-dark">{comment.likes + (liked ? 1 : 0)}</span> Likes</span>
-            </div>
-            <div className="mt-2 -ml-2">
-              <HeartButton liked={liked} count={comment.likes + (liked ? 1 : 0)} onToggle={() => setLiked(l => !l)} />
-            </div>
-          </div>
-          {/* Its replies, as comments — each one a post again */}
-          <div className="mt-1">
-            {replies.map(r => (
-              <CommentItem key={r.id} comment={r} postId={pid} />
-            ))}
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Reply composer */}
-      {createPortal(
-        <motion.div
-          initial={{ x: "100%" }}
-          animate={{ x: 0 }}
-          transition={PUSH_TRANSITION}
-          style={{ bottom: "calc(env(safe-area-inset-bottom) + 60px)" }}
-          className="fixed inset-x-0 z-40 bg-white px-4 py-2.5 shadow-[0_-6px_16px_-6px_rgba(0,0,0,0.08)]"
-        >
-          <div className="mx-auto flex max-w-[600px] items-center gap-2">
-            <img src={profilePhoto} alt="You" className="h-9 w-9 shrink-0 rounded-full object-cover" />
-            <textarea
-              value={replyText}
-              onChange={e => {
-                setReplyText(e.target.value);
-                e.target.style.height = "auto";
-                e.target.style.height = `${e.target.scrollHeight}px`;
-              }}
-              placeholder={`Reply to ${comment.author}…`}
-              rows={1}
-              className="scrollbar-hide max-h-24 flex-1 resize-none overflow-y-auto rounded-xl border border-gray-stroke px-3 py-2.5 text-[14px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
-              onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitReply(); }}
-            />
-            <AnimatePresence>
-              {replyText.trim() ? (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.85 }}
-                  onClick={submitReply}
-                  className="shrink-0 rounded-[8px] bg-gray-dark px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[#222]"
-                >
-                  Reply
-                </motion.button>
-              ) : null}
-            </AnimatePresence>
-          </div>
-        </motion.div>,
-        document.getElementById("saved-toast-root") ?? document.body,
-      )}
-    </>
-  );
+// Remounts the thread when the post changes so effects/state re-seed cleanly.
+export default function PostDetail() {
+  const { postId } = useParams<{ postId: string }>();
+  return <PostThread key={postId} />;
 }
 
-// Remounts the thread when navigating from one comment's page to another —
-// the route stays the same, so React would otherwise keep stale state.
+// A comment opens as its own post page (Twitter model), rendered by the exact
+// same PostThread. Keyed so navigating comment → comment remounts (the route
+// pattern stays the same, only params change).
 export function CommentDetail() {
   const { postId, commentId } = useParams<{ postId: string; commentId: string }>();
-  return <CommentThread key={`${postId}-${commentId}`} />;
+  return <PostThread key={`${postId}-${commentId}`} />;
 }

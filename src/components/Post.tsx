@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import commentsIcon from "../assets/icons/comments.svg";
 import repostsIcon from "../assets/icons/reposts.svg";
 import sharesIcon from "../assets/icons/shares.svg";
-import verifiedIcon from "../assets/icons/verified.svg";
+import verifiedIcon from "../assets/icons/verified-new.svg";
 
 // ─── Types ─────────────────────────────────────────────
 

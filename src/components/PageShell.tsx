@@ -30,6 +30,8 @@ type PageShellProps = {
   paddingYClassName?: string;
   // Override the outer horizontal padding classes (defaults to "px-4 sm:px-6").
   paddingXClassName?: string;
+  // Gap (px) between the columns. Defaults to 40.
+  columnGap?: number;
   children: ReactNode;
 };
 
@@ -49,6 +51,7 @@ export default function PageShell({
   stackRight = false,
   paddingYClassName = "py-4 sm:py-10",
   paddingXClassName = "px-4 sm:px-6",
+  columnGap = 40,
 
   children,
 }: PageShellProps) {
@@ -121,7 +124,7 @@ export default function PageShell({
 
   return (
     <div className={`${outerClass} ${paddingXClassName} ${paddingYClassName}`}>
-      <div className={rowClass} style={{ gap: 40 }}>
+      <div className={rowClass} style={{ gap: columnGap }}>
         {hasLeft && (
           leftSidebarFixed ? (
             <>

@@ -5,6 +5,7 @@ import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { BookmarksProvider } from "./contexts/BookmarksContext";
 import { SavedToastProvider } from "./contexts/SavedToastContext";
 import { ExpertModeProvider } from "./contexts/ExpertModeContext";
+import { TopNavStyleProvider } from "./contexts/TopNavStyleContext";
 import { ProfileBarModeProvider } from "./contexts/ProfileBarModeContext";
 import { FeedDemoProvider } from "./contexts/FeedDemoContext";
 import { PageExitProvider } from "./contexts/PageExitContext";
@@ -77,6 +78,7 @@ import GroupCommunity from "./pages/GroupCommunity";
 import Events from "./pages/Events";
 import Courses from "./pages/Courses";
 import LelandPlus from "./pages/LelandPlus";
+import Jobs from "./pages/Jobs";
 import Dashboard from "./pages/Dashboard";
 import { GoalsIndexSwitch, GoalDetailSwitch, GoalNewSwitch } from "./components/GoalsRouteSwitch";
 import FullTaskList from "./full/pages/TaskList";
@@ -135,6 +137,7 @@ export default function App() {
     <VersionProvider>
     <DarkModeProvider>
     <ExpertModeProvider>
+    <TopNavStyleProvider>
     <BookmarksProvider>
     <SavedToastProvider>
     <ProfileBarModeProvider>
@@ -225,6 +228,7 @@ export default function App() {
           {/* alt-nav sub-pages — the sidebar's destinations recreated inside the
               alt-nav shell (DesktopSidebar left, no top navbar). Reuse the same
               page components; ContextLayout supplies the shell. */}
+          <Route path="/alt-nav/dashboard" element={<Dashboard />} />
           <Route path="/alt-nav/discover" element={<Browse />} />
           <Route path="/alt-nav/search" element={<Search />} />
           <Route path="/alt-nav/messages" element={<Messaging />} />
@@ -258,9 +262,20 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/post/:postId" element={<PostDetail />} />
           <Route path="/post/:postId/comment/:commentId" element={<CommentDetail />} />
+          {/* Isolated LinkedIn-nav experience — feed, post detail, and the
+              destinations behind the top-nav items. */}
+          <Route path="/linkedin-nav" element={<Home />} />
+          <Route path="/linkedin-nav/post/:postId" element={<PostDetail />} />
+          <Route path="/linkedin-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
+          <Route path="/linkedin-nav/dashboard" element={<Dashboard />} />
+          <Route path="/linkedin-nav/jobs" element={<Jobs />} />
+          <Route path="/linkedin-nav/plus" element={<LelandPlus />} />
+          <Route path="/linkedin-nav/messages" element={<Messaging />} />
+          <Route path="/linkedin-nav/notifications" element={<Notifications />} />
           <Route path="/events" element={<Events />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/plus" element={<LelandPlus />} />
+          <Route path="/jobs" element={<Jobs />} />
         </Route>
       </Route>
     </Routes>
@@ -273,6 +288,7 @@ export default function App() {
     </ProfileBarModeProvider>
     </SavedToastProvider>
     </BookmarksProvider>
+    </TopNavStyleProvider>
     </ExpertModeProvider>
     </DarkModeProvider>
     </VersionProvider>

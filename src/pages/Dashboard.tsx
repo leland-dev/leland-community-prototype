@@ -1,9 +1,11 @@
 import { useMemo, useRef, useState, useEffect, type ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSetLayoutVariant } from "../components/LayoutVariantContext";
 import { useSetNavTheme } from "../components/NavThemeContext";
+import { useSetRightSidebar } from "../components/RightSidebarContext";
+import { HomeRightSidebar } from "./Home";
 import SessionCard from "../components/SessionCard";
 import OfferingCard, { type OfferingType } from "../components/OfferingCard";
 import { Button, LinkButton } from "../components/Button";
@@ -36,8 +38,8 @@ import automationsImg from "../assets/placeholder images/courses/HERO-10-automat
 import courseImg4 from "../assets/placeholder images/courses/c10-hero-1920x1280.webp";
 import airplaneIcon from "../assets/icons/airplane.svg";
 import chevronRightIcon from "../assets/icons/chevron-right.svg";
-import starIcon from "../assets/icons/star.svg";
 import editIcon from "../assets/icons/edit.svg";
+import DashboardProfileCard from "../components/DashboardProfileCard";
 import { GoalTile, NewGoalTile } from "../components/GoalTile";
 import { useGoals } from "../contexts/GoalsContext";
 import { GoalTile as FullGoalTile, NewGoalTile as FullNewGoalTile } from "../full/components/GoalTile";
@@ -704,65 +706,22 @@ function AltAnalyticsPreview() {
 // Left-column profile card — mirrors the profile template hero, differentiated
 // by whether the user is an expert (credentials, reviews, expert mins) or a
 // customer (bio + followers).
-function ProfileCard({ expert }: { expert: boolean }) {
-  return (
-    <div className="rounded-2xl bg-white p-6 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10">
-      <img src={profilePhoto} alt="Alex Rivera" className="h-[72px] w-[72px] rounded-full object-cover" />
-      <h2 className="mt-4 font-serif text-[26px] font-medium leading-tight text-gray-dark">Alex Rivera</h2>
-
-      {/* Reviews — experts only */}
-      {expert && (
-        <div className="mt-3 flex items-center gap-1.5">
-          <div className="flex items-center gap-[1px]">
-            {[...Array(5)].map((_, i) => (
-              <img key={i} src={starIcon} alt="" className="h-[15px] w-[15px]" />
-            ))}
-          </div>
-          <span className="text-[14px] font-semibold leading-none text-gray-dark">4.9</span>
-          <span className="text-[14px] leading-none text-[#707070]">52 Reviews</span>
-        </div>
-      )}
-
-      {/* Stats */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-7 gap-y-3">
-        {expert && (
-          <div className="flex flex-col gap-[2px]">
-            <span className="text-[16px] font-semibold leading-none text-gray-dark">6.6k</span>
-            <span className="text-[13px] leading-tight text-[#707070]">Expert mins</span>
-          </div>
-        )}
-        <div className="flex flex-col gap-[2px]">
-          <span className="text-[16px] font-semibold leading-none text-gray-dark">84</span>
-          <span className="text-[13px] leading-tight text-[#707070]">Followers</span>
-        </div>
-        <div className="flex flex-col gap-[2px]">
-          <span className="text-[16px] font-semibold leading-none text-gray-dark">112</span>
-          <span className="text-[13px] leading-tight text-[#707070]">Following</span>
-        </div>
-      </div>
-
-      <LinkButton
-        href="/coach-profile"
-        size="sm"
-        variant="secondary"
-        className="mt-5 w-full text-[15px] font-semibold"
-      >
-        <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
-        Edit profile
-      </LinkButton>
-    </div>
-  );
-}
-
-
 export default function Dashboard() {
   useSetLayoutVariant("standard");
   useEffect(() => { document.title = "Dashboard"; }, []);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  // Recreated inside the alt-nav shell: no top navbar, narrower content column.
+  // Drop the full-bleed beige hero (it doesn't fit this layout) for a plain
+  // white, in-flow header.
+  const isAltNav = pathname.startsWith("/alt-nav");
   const { dark: darkMode } = useDarkMode();
   const heroBg = darkMode ? "#5E6E79" : HERO_BG;
   const navTheme = useMemo(() => ({ bg: heroBg, light: darkMode, hideWordmark: false, scrollReveal: true }), [heroBg, darkMode]);
   useSetNavTheme(navTheme);
+  // In the alt-nav shell the dashboard adopts the feed's right sidebar (minus the
+  // Upcoming sessions card, which the main column already covers).
+  useSetRightSidebar(isAltNav ? <HomeRightSidebar showUpcoming={false} /> : null);
 
   // Admin menu (bottom-right) — matches the profile template's 3-dot control.
   const [adminOpen, setAdminOpen] = useState(false);
@@ -785,25 +744,48 @@ export default function Dashboard() {
       {/* In-flow app-promo banner; bottom margin absorbs the hero's negative
           top margin so it isn't overlapped. */}
       <AppPromoPushToast className="mb-[72px] md:mb-10" />
-      {/* Hero — full-window beige band with a headline + help link */}
+      {/* Hero — full-window beige band with a headline + help link. In alt-nav
+          it's a plain white, in-flow header (no full-bleed, no overlap). */}
       <div
-        className="-mt-[72px] pb-32 pt-[120px] md:-mt-10 md:pb-36 md:pt-16"
-        style={{ backgroundColor: heroBg, ...fullBleed }}
+        className={isAltNav ? "pb-2 pt-1" : "-mt-[72px] pb-32 pt-[120px] md:-mt-10 md:pb-36 md:pt-16"}
+        style={isAltNav ? undefined : { backgroundColor: heroBg, ...fullBleed }}
       >
         <motion.div
-          className={`${WRAP} text-center md:text-left`}
+          className={isAltNav ? "text-left" : `${WRAP} text-center md:text-left`}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
-          <h1 className="font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">
-            Good morning, Alex
-          </h1>
-          {todaySessionCount > 0 && (
-            <p className="mt-2 text-[16px] text-gray-dark md:text-[17px]">
-              You have {todaySessionCount} session{todaySessionCount === 1 ? "" : "s"} today.
-            </p>
+          {isAltNav ? (
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <img src={profilePhoto} alt="Alex Rivera" className="h-[64px] w-[64px] rounded-full object-cover" />
+                <h1 className="mt-4 font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">
+                  Good morning, Alex
+                </h1>
+                {todaySessionCount > 0 && (
+                  <p className="mt-2 text-[16px] text-gray-dark md:text-[17px]">
+                    You have {todaySessionCount} session{todaySessionCount === 1 ? "" : "s"} today.
+                  </p>
+                )}
+              </div>
+              <LinkButton href="/coach-profile" size="sm" variant="secondary" className="mt-1 shrink-0 font-semibold">
+                <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
+                Edit profile
+              </LinkButton>
+            </div>
+          ) : (
+            <>
+              <h1 className="font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">
+                Good morning, Alex
+              </h1>
+              {todaySessionCount > 0 && (
+                <p className="mt-2 text-[16px] text-gray-dark md:text-[17px]">
+                  You have {todaySessionCount} session{todaySessionCount === 1 ? "" : "s"} today.
+                </p>
+              )}
+            </>
           )}
         </motion.div>
       </div>
@@ -812,18 +794,21 @@ export default function Dashboard() {
           already sits inside PageShell's padded container, so it aligns with the
           hero's inner wrapper without re-adding max-width/padding. */}
       <motion.div
-        className="relative z-10 -mt-20 md:-mt-28"
+        className={`relative z-10 ${isAltNav ? "" : "-mt-20 md:-mt-28"}`}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
+        <div className={isAltNav ? "flex flex-col gap-5" : "grid grid-cols-1 gap-5 lg:grid-cols-[320px_minmax(0,1fr)]"}>
           {/* Left — profile preview (hidden on mobile; mirrors the profile
-              template hero, differentiated by expert vs customer) */}
-          <aside className="hidden self-start lg:block lg:sticky lg:top-[92px]">
-            <ProfileCard expert={expert} />
-          </aside>
+              template hero, differentiated by expert vs customer). In alt-nav the
+              profile moves into the header, so this column is dropped. */}
+          {!isAltNav && (
+            <aside className="hidden self-start lg:block lg:sticky lg:top-[92px]">
+              <DashboardProfileCard expert={expert} />
+            </aside>
+          )}
 
           {/* Right — stacked section cards */}
           <div className="flex min-w-0 flex-col gap-5">

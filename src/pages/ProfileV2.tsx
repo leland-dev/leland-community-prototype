@@ -36,7 +36,7 @@ import groupImg2 from "../assets/placeholder images/group images/419a6944d25e95b
 import groupImg3 from "../assets/placeholder images/group images/6c168007b1aef00bedc192e802c413e5.jpg";
 import checkIcon from "../assets/icons/check.svg";
 import editIcon from "../assets/icons/edit.svg";
-import verifiedIcon from "../assets/icons/verified.svg";
+import verifiedIcon from "../assets/icons/verified-new.svg";
 import shieldIcon from "../assets/icons/shield-light.svg";
 import airplaneIcon from "../assets/icons/airplane.svg";
 import calendarIcon from "../assets/icons/calendar.svg";
