@@ -44,7 +44,7 @@ const CARD_TONES = [
 ] as const;
 const cardBg = (depth = 0) => {
   const [a, b, c] = CARD_TONES[Math.min(depth, 2)];
-  return `linear-gradient(155deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 24%, transparent 46%), radial-gradient(130% 100% at 15% 0%, ${a} 0%, ${b} 52%, ${c} 100%)`;
+  return `radial-gradient(130% 100% at 15% 0%, ${a} 0%, ${b} 52%, ${c} 100%)`;
 };
 const CARD_CHROME =
   "relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_8px_22px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.14]";
@@ -60,6 +60,11 @@ function FloatTilt({ children, reduced }: { children: React.ReactNode; reduced: 
   const gx = useTransform(mx, [-1, 1], [22, 78]);
   const gy = useTransform(my, [-1, 1], [15, 85]);
   const glare = useMotionTemplate`radial-gradient(130% 90% at ${gx}% ${gy}%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.05) 38%, transparent 68%)`;
+  // at rest the card is clean; the reflection exists only while tilting
+  const glareOpacity = useSpring(
+    useTransform(() => Math.min(1, Math.abs(mx.get()) + Math.abs(my.get()))),
+    { stiffness: 150, damping: 22 },
+  );
 
   useEffect(() => {
     if (reduced) return;
@@ -98,7 +103,11 @@ function FloatTilt({ children, reduced }: { children: React.ReactNode; reduced: 
       >
         {children}
         {!reduced ? (
-          <motion.div aria-hidden className="pointer-events-none absolute inset-0 z-20 rounded-[22px]" style={{ background: glare }} />
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-20 rounded-[22px]"
+            style={{ background: glare, opacity: glareOpacity }}
+          />
         ) : null}
       </motion.div>
     </motion.div>
