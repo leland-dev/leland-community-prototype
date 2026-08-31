@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Check, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
 
@@ -51,18 +51,39 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
   // 0..CHECKS.length = number of checks resolved; then "approved"
   const [done, setDone] = useState(0);
   const [phase, setPhase] = useState<"review" | "approved">("review");
+  // pre-permission ask, shown as the review wraps (only if not already decided)
+  const [askNotify, setAskNotify] = useState(false);
+
+  const finishReview = useCallback(() => {
+    const undecided =
+      typeof window !== "undefined" && "Notification" in window && Notification.permission === "default";
+    if (undecided) setAskNotify(true);
+    else setPhase("approved");
+  }, []);
 
   useEffect(() => {
     const speed = reduced ? 0.25 : 1;
     // the last check deliberately hangs — that's where the tension lives
     const delays = [1100, 2100, 3100, 5200].map((d) => d * speed);
     const ts = delays.map((d, i) => window.setTimeout(() => setDone(i + 1), d));
-    const tApproved = window.setTimeout(() => setPhase("approved"), (5200 + 900) * speed);
+    const tApproved = window.setTimeout(finishReview, (5200 + 900) * speed);
     return () => {
       ts.forEach((t) => window.clearTimeout(t));
       window.clearTimeout(tApproved);
     };
-  }, [reduced]);
+  }, [reduced, finishReview]);
+
+  const answerNotify = async (yes: boolean) => {
+    setAskNotify(false);
+    if (yes) {
+      try {
+        await Notification.requestPermission();
+      } catch {
+        /* unsupported */
+      }
+    }
+    setPhase("approved");
+  };
 
   const logo = universityLogo(input.logoKey, input.school);
 
@@ -173,9 +194,9 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25, duration: 0.5, ease: EASE }}
-                className="mt-5 max-w-[15ch] text-balance font-serif text-[32px] leading-[1.1] text-gray-dark"
+                className="mt-5 max-w-[16ch] text-balance font-serif text-[32px] leading-[1.1] text-gray-dark"
               >
-                You qualify for the Leland community.
+                You're qualified for the Leland community.
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0 }}
@@ -183,7 +204,9 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
                 transition={{ delay: 0.45, duration: 0.5 }}
                 className="mt-2 max-w-[34ch] text-[15px] leading-relaxed text-gray-light"
               >
-                Your application is approved. You're in the first wave of members we're admitting. Here's your member pass.
+                Congrats! Your application is approved in the first wave of members we're admitting.
+                <br />
+                Here's your member pass:
               </motion.p>
 
               {/* admission pass */}
@@ -266,6 +289,47 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
             </motion.button>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* pre-permission ask — iOS-alert style, right as the review wraps */}
+      <AnimatePresence>
+        {askNotify ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="absolute inset-0 z-[90] flex items-center justify-center bg-black/40 px-10"
+          >
+            <motion.div
+              initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 380, damping: 28 }}
+              className="w-full max-w-[300px] overflow-hidden rounded-2xl bg-white text-center shadow-2xl"
+            >
+              <div className="px-5 pb-4 pt-5">
+                <p className="text-[16px] font-semibold leading-snug text-gray-dark">
+                  Do you want to get notified when the waitlist opens?
+                </p>
+              </div>
+              <div className="flex divide-x divide-gray-stroke border-t border-gray-stroke">
+                <button
+                  onClick={() => answerNotify(false)}
+                  className="flex h-12 flex-1 items-center justify-center text-[16px] font-medium text-[#FF3B30] transition-colors hover:bg-gray-hover"
+                >
+                  No
+                </button>
+                <button
+                  onClick={() => answerNotify(true)}
+                  className="flex h-12 flex-1 items-center justify-center text-[16px] font-semibold text-[#0A84FF] transition-colors hover:bg-gray-hover"
+                >
+                  Yes
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
       </AnimatePresence>
     </div>
   );
