@@ -24,7 +24,7 @@ const EASE = [0.32, 0.72, 0, 1] as const;
 const INVITE_CODES = ["7F3K2M", "Q2XM9A", "9BWD4T"];
 export const SPOT_LADDER = [142, 61, 19, 1];
 const WINDOW_MS = 24 * 60 * 60 * 1000;
-const PEEK_Y = 14;
+const PEEK_Y = 17;
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -34,7 +34,16 @@ function shortName(school: string): string {
   return school.replace(/^University of /, "").replace(/ University$/, "").replace(/ College$/, "");
 }
 
-const CARD_BG = "radial-gradient(130% 100% at 15% 0%, #262624 0%, #171716 52%, #101010 100%)";
+/* stacked cards lighten as they go down, like edges catching light */
+const CARD_TONES = [
+  ["#262624", "#171716", "#101010"],
+  ["#2e2e2b", "#201f1e", "#161615"],
+  ["#363633", "#282826", "#1d1d1b"],
+] as const;
+const cardBg = (depth = 0) => {
+  const [a, b, c] = CARD_TONES[Math.min(depth, 2)];
+  return `linear-gradient(155deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 24%, transparent 46%), radial-gradient(130% 100% at 15% 0%, ${a} 0%, ${b} 52%, ${c} 100%)`;
+};
 
 /* Owns the 1s interval so the ticks re-render only this span, not the whole
    gate (which would remount the line list and replay its animations). */
@@ -129,8 +138,8 @@ export default function WaitlistGate({
   /* ── the front: your membership ── */
   const memberCard = (
     <div
-      className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] ring-1 ring-white/10"
-      style={{ background: CARD_BG }}
+      className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.14]"
+      style={{ background: cardBg() }}
     >
       {act === "card" && !reduced ? (
         <motion.span
@@ -170,28 +179,37 @@ export default function WaitlistGate({
     </div>
   );
 
-  /* ── the back: a referral card you hand out ── */
-  const guestCard = (i: number) => (
+  /* ── the back: a referral card, almost a credit card ── */
+  const guestCard = (i: number, depth = 0) => (
     <div
-      className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] ring-1 ring-white/10"
-      style={{ background: CARD_BG }}
+      className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.14]"
+      style={{ background: cardBg(depth) }}
     >
-      <div className="flex items-center justify-between px-5 pt-5">
-        <img src={mark} alt="Leland" className="h-6 w-6" style={{ filter: "brightness(0) invert(1)" }} />
-        <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70">
-          Guest pass · {i + 1} of 3
-        </span>
-      </div>
-      <div className="px-5 pb-5 pt-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Admit one</p>
-        <p className="mt-1 font-mono text-[27px] font-semibold tracking-[0.18em]">{INVITE_CODES[i]}</p>
-        <p className="mt-1.5 text-[12.5px] text-white/55">Pre-approved by {memberName}. Skips the line.</p>
-        <button
-          onClick={share}
-          className="mt-5 flex h-12 w-full items-center justify-center rounded-full bg-yellow text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
+      {/* magstripe */}
+      <div className="mt-4 h-9 w-full bg-black/45" />
+      <div className="px-5 pb-5 pt-4">
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Admit one</p>
+          <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-white/70">
+            Guest pass · {i + 1} of 3
+          </span>
+        </div>
+        {/* embossed, card-number style */}
+        <p
+          className="mt-2.5 font-mono text-[25px] font-semibold tracking-[0.22em]"
+          style={{ textShadow: "0 1px 0 rgba(255,255,255,0.16), 0 -1px 1px rgba(0,0,0,0.65)" }}
         >
-          Invite
-        </button>
+          {INVITE_CODES[i]}
+        </p>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <p className="min-w-0 truncate text-[12.5px] text-white/55">Pre-approved by {memberName}</p>
+          <button
+            onClick={share}
+            className="shrink-0 rounded-full bg-yellow px-5 py-2 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
+          >
+            Invite
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -293,14 +311,11 @@ export default function WaitlistGate({
                     #{spot}
                   </motion.p>
                 </AnimatePresence>
-                <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-gray-light">
-                  in line
-                </p>
                 <h2 className="mt-4 max-w-[24ch] text-balance font-serif text-[20px] leading-tight text-gray-dark">
                   {unlocked
                     ? "You're at the front of the line"
                     : sent === 0
-                      ? "Each invite gets you closer to the front."
+                      ? "Each invite gets you closer to the front of the line."
                       : sent === 1
                         ? `You jumped ${SPOT_LADDER[0] - SPOT_LADDER[1]} spots. Two passes left.`
                         : "One more and you're first through the door."}
@@ -331,7 +346,7 @@ export default function WaitlistGate({
                       <motion.div
                         key={code}
                         initial={false}
-                        animate={{ y: depth * PEEK_Y, scale: 1 - depth * 0.04 }}
+                        animate={{ y: depth * PEEK_Y, scale: 1 - depth * 0.035 }}
                         exit={
                           reduced
                             ? { opacity: 0 }
@@ -341,7 +356,7 @@ export default function WaitlistGate({
                         style={{ zIndex: 10 - depth, transformOrigin: "center bottom" }}
                         className={depth === 0 ? "relative" : "absolute inset-x-0 top-0"}
                       >
-                        {guestCard(i)}
+                        {guestCard(i, depth)}
                       </motion.div>
                     );
                   })}
