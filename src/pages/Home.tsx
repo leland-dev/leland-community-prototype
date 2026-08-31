@@ -1,5 +1,6 @@
-import { useRef, useState, useEffect, type CSSProperties, type RefObject } from "react";
+import { useRef, useState, useEffect, Fragment, type CSSProperties, type RefObject } from "react";
 import { Button } from "../components/Button";
+import ImageLightbox from "../components/ImageLightbox";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
@@ -65,7 +66,7 @@ import logoMcKinsey   from "../assets/logos/mckinsey.png";
 import commentsIcon from "../assets/icons/comments.svg";
 import repostsIcon from "../assets/icons/reposts.svg";
 import sharesIcon from "../assets/icons/shares.svg";
-import verifiedIcon from "../assets/icons/verified-new.svg";
+import verifiedIcon from "../assets/icons/verified.svg";
 
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic2 from "../assets/profile photos/pic-2.png";
@@ -81,6 +82,10 @@ import pic11 from "../assets/profile photos/pic-11.png";
 import pic12 from "../assets/profile photos/pic-12.png";
 import pic13 from "../assets/profile photos/pic-13.png";
 import pic14 from "../assets/profile photos/pic-14.png";
+// OG preview images for embedded link posts.
+import linkOg1 from "../assets/placeholder post assets/link-OGs/Property 1=AIBP.png";
+import linkOg2 from "../assets/placeholder post assets/link-OGs/Property 1=B2B.png";
+import linkOg3 from "../assets/placeholder post assets/link-OGs/Property 1=Variant11.png";
 
 // Post images — sourced from src/assets/placeholder post assets. Single-image
 // posts use the three top-level files; multi-image posts use the stanford-post
@@ -425,8 +430,7 @@ export const posts: Post[] = [
       url: "https://example.com/mba-networking",
       domain: "hbr.org",
       title: "The Art of Networking in Business School Admissions",
-      image:
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=340&fit=crop",
+      image: linkOg1,
     },
     likes: 89,
     comments: 7,
@@ -708,8 +712,7 @@ export const posts: Post[] = [
       url: "https://example.com/consulting-2026",
       domain: "strategyand.pwc.com",
       title: "State of the Consulting Industry: 2026 Market Landscape",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=340&fit=crop",
+      image: linkOg2,
     },
     likes: 156,
     comments: 21,
@@ -770,8 +773,7 @@ export const posts: Post[] = [
       url: "https://example.com/hbs-essay",
       domain: "poetsandquants.com",
       title: "Breaking Down the HBS Essay Prompt for 2027 Applicants",
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=340&fit=crop",
+      image: linkOg3,
     },
     likes: 203,
     comments: 35,
@@ -1552,16 +1554,33 @@ function PostImageGrid({
   className = "",
   maxHeight,
   onImageClick,
+  avatarInset = false,
 }: {
   images: { src: string; aspectRatio?: number }[];
   renderOverlay?: (idx: number) => React.ReactNode;
   className?: string;
   maxHeight?: number;
   onImageClick?: (idx: number) => void;
+  // Feed layout only: the post body is indented past a 40px avatar + 12px gap
+  // inside the px-4/sm:px-6 gutter, so the 4+ carousel bleeds left by that full
+  // offset (68px / 76px) and pads back so it starts aligned with the text.
+  avatarInset?: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const scroll = (dir: "left" | "right") =>
     scrollRef.current?.scrollBy({ left: dir === "right" ? 175 : -175, behavior: "smooth" });
+
+  // Track scroll position so each chevron only shows when there's room to scroll
+  // that way (hidden at the respective end). Only the 4+ carousel uses these.
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+  const updateArrows = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setAtStart(el.scrollLeft <= 1);
+    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 1);
+  };
+  useEffect(() => { updateArrows(); }, [images.length]);
 
   const count = images.length;
   if (count === 0) return null;
@@ -1615,10 +1634,13 @@ function PostImageGrid({
     );
   }
 
-  // 4 images: horizontal scroll strip with arrow buttons
+  // 4 images: horizontal scroll strip with arrow buttons. Negative margins
+  // cancel the post's gutters (and, in the feed, the avatar indent) so the strip
+  // scrolls edge-to-edge across the whole post; the matching scroll padding keeps
+  // the first image aligned with the text at rest.
   return (
-    <div className={`relative ${className}`}>
-      <div ref={scrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide rounded-xl">
+    <div className={`relative -mr-4 sm:-mr-6 ${avatarInset ? "-ml-[68px] sm:-ml-[76px]" : ""} ${className}`}>
+      <div ref={scrollRef} onScroll={updateArrows} className={`flex gap-2 overflow-x-auto scrollbar-hide pr-4 sm:pr-6 ${avatarInset ? "pl-[68px] sm:pl-[76px]" : ""}`}>
         {images.map((img, i) => (
           <div
             key={i}
@@ -1631,18 +1653,22 @@ function PostImageGrid({
           </div>
         ))}
       </div>
-      <button
-        onClick={() => scroll("left")}
-        className="absolute left-2 top-1/2 z-0 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/60 text-gray-dark shadow-sm backdrop-blur-sm transition-colors hover:bg-white/85"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button
-        onClick={() => scroll("right")}
-        className="absolute right-2 top-1/2 z-0 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/60 text-gray-dark shadow-sm backdrop-blur-sm transition-colors hover:bg-white/85"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
+      {!atStart ? (
+        <button
+          onClick={() => scroll("left")}
+          className="absolute left-2 top-1/2 z-0 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/60 text-gray-dark shadow-sm backdrop-blur-sm transition-colors hover:bg-white/85"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      ) : null}
+      {!atEnd ? (
+        <button
+          onClick={() => scroll("right")}
+          className="absolute right-2 top-1/2 z-0 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/60 text-gray-dark shadow-sm backdrop-blur-sm transition-colors hover:bg-white/85"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -1651,6 +1677,7 @@ function ImageGallery({ images, imageAspectRatios, onImageClick }: { images: str
   return (
     <PostImageGrid
       className="mt-3"
+      avatarInset
       images={images.map((src, i) => ({ src, aspectRatio: imageAspectRatios?.[i] }))}
       onImageClick={onImageClick}
     />
@@ -1672,9 +1699,18 @@ function LinkCard({ link }: { link: LinkPost["link"] }) {
           className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
-      <div className="px-4 py-3">
-        <p className="text-[11px] text-gray-light">{link.domain}</p>
-        <p className="mt-0.5 text-[13px] font-medium text-gray-dark leading-snug">{link.title}</p>
+      <div className="px-4 py-3.5">
+        {/* Domain with a favicon (derived from the domain); hides if it fails. */}
+        <div className="flex items-center gap-1.5">
+          <img
+            src={`https://www.google.com/s2/favicons?domain=${link.domain}&sz=64`}
+            alt=""
+            className="h-4 w-4 shrink-0 rounded-sm"
+            onError={e => { e.currentTarget.style.display = "none"; }}
+          />
+          <p className="text-[13px] text-gray-light">{link.domain}</p>
+        </div>
+        <p className="mt-1 text-[15px] font-medium text-gray-dark leading-snug">{link.title}</p>
       </div>
     </a>
   );
@@ -3386,19 +3422,9 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
 // thick at this size). Blue scallop + explicit white check (the raw asset's
 // check is a cut-out hole, so it needs a solid fill behind it here).
 export function VerifiedBadge({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 22 22" className={className} aria-hidden>
-      <path
-        d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816z"
-        fill="#1d9bf0"
-        stroke="#fff"
-        strokeWidth="2"
-        vectorEffect="non-scaling-stroke"
-        strokeLinejoin="round"
-      />
-      <path d="M9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z" fill="#fff" />
-    </svg>
-  );
+  // Uses the uploaded verified.svg (self-contained blue badge with a white
+  // outline), matching the verified icon shown next to names in posts.
+  return <img src={verifiedIcon} alt="" aria-hidden className={className} />;
 }
 
 type HoverProps = { onMouseEnter: () => void; onMouseLeave: () => void };
@@ -3544,6 +3570,9 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
   const { liveCardStyle, eventStage } = useFeedDemo();
   // Avatar + name share one coach hover-card (see useCoachHover).
   const hover = useCoachHover(post);
+  // Clicking a post image expands it in a lightbox in place (no navigation), so
+  // dismissing leaves the feed exactly where it was.
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Media-only live post: identity and actions live on the card itself.
   if (post.type === "live" && post.live.variant === "minimal" && post.live.bare) {
@@ -3598,7 +3627,7 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
               <ImageGallery
                 images={post.images}
                 imageAspectRatios={post.imageAspectRatios}
-                onImageClick={(idx) => navigate(`${postBase}/${post.id}`, { state: { focusImage: idx } })}
+                onImageClick={(idx) => setLightboxIndex(idx)}
               />
             )}
             {post.type === "link" && <LinkCard link={post.link} />}
@@ -3652,20 +3681,48 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
           isMVP={true}
         />
       )}
+      {/* Expand-in-place image viewer — no navigation, so closing returns to the
+          exact scroll position. */}
+      <AnimatePresence>
+        {lightboxIndex !== null && post.type === "image" && (
+          <ImageLightbox
+            images={post.images}
+            index={lightboxIndex}
+            onClose={() => setLightboxIndex(null)}
+            onChangeIndex={setLightboxIndex}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-// ─── Suggested experts ────────────────────────────────
+// ─── People to follow ─────────────────────────────────
 
-const suggestedExperts = [
-  { name: "James Allen",     avatar: pic1,  verified: true, headline: "Former Director of Admissions at Stanford GSB | 200+ M7 Admits" },
-  { name: "David Kim",      avatar: pic4,  verified: true, headline: "MBA Admissions Consultant | Ex-Bain, HBS '19 | Ranked Top 4 on P&Q" },
-  { name: "Nina Kowalski",  avatar: pic7,  verified: true, headline: "Partner at McKinsey & Company | Consulting Recruiting Lead" },
-  { name: "Alex Thompson",  avatar: pic8,  verified: false, headline: "Career Expert | Ex-Google PM | Tech & MBA Transitions" },
-  { name: "Michael Chen",   avatar: pic10, verified: true, headline: "Ex-BCG Consultant | Kellogg Adm. Insider | 130+ M7 Admits" },
-  { name: "Lauren Hayes",   avatar: pic13, verified: true, headline: "HBS Admissions Expert | Former Reader | 5.0 Rated Expert" },
-  { name: "Jason Park",     avatar: pic14, verified: false, headline: "Deloitte Strategy Lead | MBA Career Expert | Finance & Consulting" },
+// Any user, not just experts — verified experts get a badge on their avatar.
+type FollowPerson = { name: string; avatar: string; verified: boolean; subtitle: string };
+
+const peopleToFollow: FollowPerson[] = [
+  { name: "Dylan Allen",       avatar: pic1,  verified: false, subtitle: "techocarrott" },
+  { name: "Claire Vo",         avatar: pic13, verified: false, subtitle: "Claire's Substack" },
+  { name: "Julie Zhuo",        avatar: pic7,  verified: true,  subtitle: "The Looking Glass" },
+  { name: "Molly Baz",         avatar: pic2,  verified: false, subtitle: "mollybaz" },
+  { name: "Jordan Allen",      avatar: pic8,  verified: false, subtitle: "jordanallen1" },
+  { name: "Nina Kowalski",     avatar: pic5,  verified: true,  subtitle: "McKinsey & Company" },
+  { name: "Garry Tan",         avatar: pic10, verified: false, subtitle: "Garry Tan" },
+  { name: "Dwarkesh Patel",    avatar: pic4,  verified: true,  subtitle: "Dwarkesh Podcast" },
+  { name: "Michael Brandley",  avatar: pic6,  verified: false, subtitle: "Followed by Austin Winfield" },
+  { name: "Paul Graham",       avatar: pic9,  verified: false, subtitle: "Paul Graham" },
+  { name: "Andrew Huberman",   avatar: pic11, verified: true,  subtitle: "Andrew Huberman" },
+  { name: "Patrick Collison",  avatar: pic12, verified: false, subtitle: "Patrick Collison" },
+  { name: "Michael Pollan",    avatar: pic14, verified: false, subtitle: "The Microdose" },
+  { name: "Andrej Karpathy",   avatar: pic3,  verified: false, subtitle: "Andrej's Substack" },
+  { name: "Lauren Hayes",      avatar: pic13, verified: true,  subtitle: "HBS Admissions" },
+  { name: "Emily Oster",       avatar: pic2,  verified: false, subtitle: "emilyoster" },
+  { name: "Samin Nosrat",      avatar: pic7,  verified: true,  subtitle: "a grain of salt" },
+  { name: "Alison Roman",      avatar: pic1,  verified: false, subtitle: "a newsletter" },
+  { name: "Jake Reni",         avatar: pic8,  verified: false, subtitle: "Jake Reni" },
+  { name: "Marc Andreessen",   avatar: pic10, verified: true,  subtitle: "Marc Andreessen Substack" },
 ];
 
 // The hover popover shown over a post's avatar/name: identity (name + handle +
@@ -3733,158 +3790,120 @@ function ProfileHoverContent({ avatar, name, verified, headline, p }: {
   );
 }
 
-function CoachCardContent({ avatar, name, verified, headline, price, ctaLabel, showFollow = true, isOnline, p }: {
-  avatar: string;
-  name: string;
-  verified?: boolean;
-  headline?: string;
-  price?: string;
-  ctaLabel: string;
-  showFollow?: boolean;
-  isOnline?: boolean;
-  p: typeof coachProfiles[string] | undefined;
-}) {
+// A person's avatar with the verified badge overlaid bottom-right (experts only).
+function FollowAvatar({ person, size, badge }: { person: FollowPerson; size: number; badge: string }) {
   return (
-    <>
-      {/* Square left-aligned image with price badge top-right */}
-      <div className="relative flex items-start p-3">
-        <img
-          src={avatar}
-          alt={name}
-          className="h-[175px] w-[175px] shrink-0 rounded-xl object-cover"
-          style={{ objectPosition: "50% 15%" }}
-        />
-        <div className="absolute right-3 top-3 rounded-lg bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-dark">
-          {price ?? "$150/hr"}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-4">
-        {/* Name + rating */}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-          <span className="text-[15px] font-medium text-gray-dark">{name}</span>
-          {verified ? <img src={verifiedIcon} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
-          {p ? (
-            <>
-              <span className="flex items-center gap-0.5">
-                <span className="text-yellow-400">★</span>
-                <span className="text-[13px] text-gray-dark">{p.rating.toFixed(1)}</span>
-              </span>
-              <span className="text-[13px] text-[#C0C0C0]">{p.reviews} reviews</span>
-            </>
-          ) : null}
-        </div>
-
-        {/* Headline */}
-        {headline ? (
-          <p className="mt-2 line-clamp-2 text-[13px] leading-snug text-gray-dark">{headline}</p>
-        ) : null}
-
-        {/* Successful clients */}
-        {p && p.successfulClients.length > 0 ? (
-          <div className="mt-3">
-            <p className="text-[12px] text-gray-light">Successful clients at:</p>
-            <div className="mt-1.5 flex items-center gap-1.5">
-              {p.successfulClients.slice(0, 5).map((c, i) => (
-                <OrgLogo key={i} logo={c.logo} name={c.name} size={26} />
-              ))}
-              {p.successfulClientsMore ? (
-                <span className="ml-0.5 text-[10px] text-gray-light">+{p.successfulClientsMore}</span>
-              ) : null}
-            </div>
-          </div>
-        ) : null}
-
-        {/* CTAs */}
-        <div className="mt-4 flex gap-2">
-          <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-dark py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-[#333]">
-            {isOnline ? (
-              <>
-                <style>{`@keyframes talk-now-blink { 0%,100%{background-color:#4b5563} 50%{background-color:#4ade80} }`}</style>
-                <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ animation: 'talk-now-blink 1s ease-in-out infinite' }} />
-                Talk now
-              </>
-            ) : ctaLabel}
-          </button>
-          <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Message">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-          </button>
-          {showFollow ? (
-            <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Follow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <line x1="19" y1="8" x2="19" y2="14" />
-                <line x1="22" y1="11" x2="16" y2="11" />
-              </svg>
-            </button>
-          ) : null}
-        </div>
-      </div>
-    </>
-  );
-}
-
-function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[number]; isOnline?: boolean }) {
-  const p = coachProfiles[expert.name];
-  return (
-    <div
-      className="flex shrink-0 flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white"
-      style={{ width: "305px", minWidth: "305px" }}
-    >
-      <CoachCardContent
-        avatar={expert.avatar}
-        name={expert.name}
-        verified={expert.verified}
-        headline={expert.headline}
-        ctaLabel="Free intro call"
-        showFollow={false}
-        isOnline={isOnline}
-        p={p}
-      />
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <img src={person.avatar} alt={person.name} className="h-full w-full rounded-full object-cover" style={{ objectPosition: "50% 15%" }} />
+      {person.verified ? <VerifiedBadge className={`absolute -bottom-0.5 -right-0.5 ${badge}`} /> : null}
     </div>
   );
 }
 
-function SuggestedExperts() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scrollBy = (dir: 1 | -1) => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: dir * scrollRef.current.clientWidth * 0.75, behavior: "smooth" });
-    }
-  };
-
-  const NavBtn = ({ dir, label }: { dir: 1 | -1; label: string }) => (
-    <button
-      onClick={() => scrollBy(dir)}
-      className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-stroke text-gray-dark transition-colors hover:bg-gray-hover"
-      aria-label={label}
+// Simple follow toggle — gray-dark by default, gray (secondary) once following.
+function FollowToggle({ className = "" }: { className?: string }) {
+  const [following, setFollowing] = useState(false);
+  return (
+    <Button
+      size="sm"
+      variant={following ? "secondary" : "dark"}
+      rounded="rounded-lg"
+      onClick={() => setFollowing(f => !f)}
+      className={`font-semibold ${className}`}
     >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        {dir === 1
-          ? <polyline points="9 18 15 12 9 6" />
-          : <polyline points="15 18 9 12 15 6" />}
+      {following ? "Following" : "Follow"}
+    </Button>
+  );
+}
+
+function DismissButton({ label, onClick, className = "" }: { label: string; onClick: () => void; className?: string }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label}
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark ${className}`}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M6 6l12 12M18 6L6 18" />
       </svg>
     </button>
   );
+}
 
+// Carousel card: dismissable, centered avatar (+badge), name, subtitle, Follow.
+function PersonToFollowCard({ person, onDismiss }: { person: FollowPerson; onDismiss: () => void }) {
   return (
-    <div className="py-5">
-      <div className="flex items-center justify-between">
-        <p className="text-[15px] font-medium text-gray-dark">Suggested experts</p>
-        <div className="flex items-center gap-1.5">
-          <NavBtn dir={-1} label="Scroll left" />
-          <NavBtn dir={1} label="Scroll right" />
-        </div>
+    <div className="relative flex shrink-0 flex-col items-center rounded-2xl border border-gray-stroke bg-white px-4 pb-4 pt-8" style={{ width: 200, minWidth: 200 }}>
+      <DismissButton label={`Dismiss ${person.name}`} onClick={onDismiss} className="absolute right-2 top-2" />
+      <FollowAvatar person={person} size={88} badge="h-6 w-6" />
+      <p className="mt-3 max-w-full truncate text-center text-[15px] font-semibold text-gray-dark">{person.name}</p>
+      <p className="mt-0.5 max-w-full truncate text-center text-[13px] text-gray-light">{person.subtitle}</p>
+      <FollowToggle className="mt-4 w-full" />
+    </div>
+  );
+}
+
+// Full-list row (the "See all" view): avatar (+badge), name, subtitle, Follow · X.
+function PersonRow({ person, onDismiss }: { person: FollowPerson; onDismiss: () => void }) {
+  return (
+    <div className="flex items-center gap-3 py-3">
+      <FollowAvatar person={person} size={48} badge="h-[18px] w-[18px]" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[15px] font-semibold text-gray-dark">{person.name}</p>
+        <p className="truncate text-[14px] text-gray-light">{person.subtitle}</p>
       </div>
-      <div ref={scrollRef} className="scrollbar-hide mt-4 flex gap-3 overflow-x-auto">
-        {suggestedExperts.map((expert, i) => (
-          <ExpertCard key={expert.name} expert={expert} isOnline={i === 0} />
+      <FollowToggle />
+      <DismissButton label={`Dismiss ${person.name}`} onClick={onDismiss} />
+    </div>
+  );
+}
+
+// Feed section — a horizontal carousel of people to follow, with a "See all"
+// link that swaps the center feed for the full list (PeopleToFollowFull).
+function PeopleToFollow({ onSeeAll }: { onSeeAll: () => void }) {
+  const [people, setPeople] = useState(() => peopleToFollow.slice(0, 9));
+  if (people.length === 0) return null;
+  return (
+    // Its own feed row — the parent divide-y provides the full-width top border,
+    // and there's no post hover state here.
+    <div className="px-4 py-5 sm:px-6">
+      <div className="flex items-center justify-between">
+        <p className="text-[19px] font-semibold text-gray-dark">People to follow</p>
+        <button onClick={onSeeAll} className="text-[14px] font-medium text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-opacity hover:opacity-70">See all</button>
+      </div>
+      {/* Full-bleed scroll area: negative margins cancel the section padding so
+          cards scroll to the section edges; the matching px keeps the first card
+          aligned under the header (scroll padding). */}
+      <div className="scrollbar-hide -mx-4 mt-4 flex gap-3 overflow-x-auto px-4 sm:-mx-6 sm:px-6">
+        {people.map(p => (
+          <PersonToFollowCard key={p.name} person={p} onDismiss={() => setPeople(prev => prev.filter(x => x.name !== p.name))} />
         ))}
+      </div>
+    </div>
+  );
+}
+
+// The "See all" view — replaces the center feed with a long list of accounts.
+// Mirrors the Post Details layout: a back + title header ABOVE the boxed card.
+function PeopleToFollowFull({ onBack }: { onBack: () => void }) {
+  const [people, setPeople] = useState(peopleToFollow);
+  // Always open at the top, regardless of the feed scroll position on entry.
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+  return (
+    <div>
+      {/* Header sits outside the card, like the post thread header. */}
+      <div className="mb-3 flex items-center gap-3 px-1">
+        <button onClick={onBack} aria-label="Back to feed" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover">
+          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5" /><path d="M12 19l-7-7 7-7" /></svg>
+        </button>
+        <p className="min-w-0 text-[18px] font-semibold leading-tight text-gray-dark">People to follow</p>
+      </div>
+      <div className="rounded-2xl border border-gray-stroke bg-white">
+        <div className="divide-y divide-gray-stroke px-4 sm:px-6">
+          {people.map(p => (
+            <PersonRow key={p.name} person={p} onDismiss={() => setPeople(prev => prev.filter(x => x.name !== p.name))} />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -5086,6 +5105,8 @@ export default function Home() {
   const isAltNav = pathname.startsWith("/alt-nav");
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
+  // "People to follow → See all" swaps the center feed for the full accounts list.
+  const [peopleView, setPeopleView] = useState(false);
   const [navHidden, setNavHidden] = useState(false);
   const lastScrollY = useRef(0);
   const isMobile = useIsMobile();
@@ -5282,6 +5303,14 @@ export default function Home() {
     setFeedPosts(prev => [quote, ...prev]);
   };
 
+  if (peopleView) {
+    return (
+      <div className="-mt-3 md:mt-0">
+        <PeopleToFollowFull onBack={() => setPeopleView(false)} />
+      </div>
+    );
+  }
+
   return (
     <div className="-mt-3 md:mt-0">
       {/* Feed card — one bordered container wrapping the composer and the whole
@@ -5345,10 +5374,15 @@ export default function Home() {
       {/* Feed */}
       <div className="divide-y divide-gray-stroke">
         {feedPosts.map((post, i) => (
-          <div key={post.id} className={`px-4 sm:px-6 ${POST_HOVER_SHADOW}`}>
-            <FeedPost post={post} onUpdate={handleEdit} onRepost={handleRepost} onUndoRepost={handleUndoRepost} onQuote={setQuoteTarget} />
-            {i === 3 && <SuggestedExperts />}
-          </div>
+          <Fragment key={post.id}>
+            <div className={`px-4 sm:px-6 ${POST_HOVER_SHADOW}`}>
+              <FeedPost post={post} onUpdate={handleEdit} onRepost={handleRepost} onUndoRepost={handleUndoRepost} onQuote={setQuoteTarget} />
+            </div>
+            {/* Rendered as its own feed row (not inside the post's hover div) so
+                it doesn't share the post's hover state; divide-y gives its top
+                border. */}
+            {i === 3 && <PeopleToFollow onSeeAll={() => setPeopleView(true)} />}
+          </Fragment>
         ))}
       </div>
       </motion.div>{/* /Feed card */}
