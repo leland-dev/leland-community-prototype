@@ -8,7 +8,7 @@ import {
   IconCheck,
   IconChevronRight,
   IconMoney,
-  IconSparkle,
+  IconHeartLoveEmphasis,
   IconThumbsDown,
   IconThumbsUpPlain,
   Modal,
@@ -23,7 +23,7 @@ type Sentiment = "notGreat" | "likeIt" | "loveIt";
 const SENTIMENTS: { id: Sentiment; label: string; Icon: typeof IconThumbsDown }[] = [
   { id: "notGreat", label: "Not great", Icon: IconThumbsDown },
   { id: "likeIt", label: "Like it", Icon: IconThumbsUpPlain },
-  { id: "loveIt", label: "Love it", Icon: IconSparkle },
+  { id: "loveIt", label: "Love it", Icon: IconHeartLoveEmphasis },
 ];
 
 const FORM_COPY: Record<"notGreat" | "loveIt", { heading: string; subtext: string }> = {

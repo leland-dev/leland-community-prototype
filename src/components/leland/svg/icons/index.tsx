@@ -88,6 +88,7 @@ export * from './icon-graduate-hat';
 export * from './icon-group';
 export * from './icon-headset';
 export * from './icon-heart-filled';
+export * from './icon-heart-love-emphasis';
 export * from './icon-heart';
 export * from './icon-help';
 export * from './icon-home-thin';

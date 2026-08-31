@@ -14,7 +14,9 @@ import {
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { CourseSentimentModal } from "../components/CourseSentimentModal";
+import { ReviewModal } from "../components/ReviewModal";
 import { SectionFeedbackModal } from "../components/SectionFeedbackModal";
+import { SupportModal } from "../components/SupportModal";
 import TopNav from "../components/TopNav";
 import {
   IconLeftSidebarClose,
@@ -1453,6 +1455,8 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onSetVariant,
   onOpenFeedback,
   onOpenSentiment,
+  onOpenReview,
+  onOpenSupport,
   ...modalProps
 }: ModalProps & {
   options: PrototypeOptions;
@@ -1460,6 +1464,8 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onSetVariant: (variant: LiveSessionVariant) => void;
   onOpenFeedback: () => void;
   onOpenSentiment: () => void;
+  onOpenReview: () => void;
+  onOpenSupport: () => void;
 }) {
   return (
     <Modal {...modalProps}>
@@ -1514,6 +1520,22 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
             >
               <IconStar className="size-4 shrink-0 text-leland-gray-light" />
               <span className="leland-paragraph-base text-leland-gray-dark">Trigger sentiment modal</span>
+            </button>
+            <button
+              type="button"
+              onClick={onOpenReview}
+              className="flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconStar className="size-4 shrink-0 text-leland-gray-light" />
+              <span className="leland-paragraph-base text-leland-gray-dark">Trigger review modal</span>
+            </button>
+            <button
+              type="button"
+              onClick={onOpenSupport}
+              className="flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconStar className="size-4 shrink-0 text-leland-gray-light" />
+              <span className="leland-paragraph-base text-leland-gray-dark">Trigger support modal</span>
             </button>
           </div>
         </div>
@@ -2247,6 +2269,10 @@ export default function ContentViewer() {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [sentimentModalOpen, setSentimentModalOpen] = useState(false);
   const sentimentModalTriggered = useRef(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [supportModalOpen, setSupportModalOpen] = useState(false);
+  const reviewModalTriggered = useRef(false);
+  const [activeOnLesson10Min, setActiveOnLesson10Min] = useState(false);
   const navigatedViaButtons = useRef(false);
   const [addToCalendarModalOpen, setAddToCalendarModalOpen] = useState(false);
   const [calendarAdded, setCalendarAdded] = useState<Set<number>>(new Set());
@@ -2332,6 +2358,27 @@ export default function ContentViewer() {
       setSentimentModalOpen(true);
     }
   }, [lesson.number, sectionIdx, visibleSections.length, sentimentModalOpen]);
+
+  // Tracks 10 minutes of activity on the current lesson (resets whenever the
+  // learner moves to a different lesson) — a gate for the review prompt below.
+  useEffect(() => {
+    setActiveOnLesson10Min(false);
+    const timer = setTimeout(() => setActiveOnLesson10Min(true), 10 * 60 * 1000);
+    return () => clearTimeout(timer);
+  }, [lesson.id]);
+
+  // Public review-collection prompt — separate from the internal feedback
+  // flows. Fires once, 80% of the way through Lesson 1, once the learner has
+  // been active on it for 10+ minutes.
+  useEffect(() => {
+    if (reviewModalTriggered.current || reviewModalOpen) return;
+    if (lesson.number !== 1 || !activeOnLesson10Min) return;
+    const progressPct = (sectionIdx + 1) / visibleSections.length;
+    if (progressPct >= 0.8) {
+      reviewModalTriggered.current = true;
+      setReviewModalOpen(true);
+    }
+  }, [lesson.number, sectionIdx, visibleSections.length, activeOnLesson10Min, reviewModalOpen]);
 
   // Opening the drawer/sidebar jumps to the lesson + section the user is on.
   // "nearest" only scrolls when the row is actually out of view, so opening
@@ -2769,6 +2816,18 @@ export default function ContentViewer() {
                 open={sentimentModalOpen}
                 onOpenChange={setSentimentModalOpen}
               />
+              <ReviewModal
+                open={reviewModalOpen}
+                onOpenChange={setReviewModalOpen}
+                onTalkToSupport={() => {
+                  setReviewModalOpen(false);
+                  setSupportModalOpen(true);
+                }}
+              />
+              <SupportModal
+                open={supportModalOpen}
+                onOpenChange={setSupportModalOpen}
+              />
               {(lesson.id !== "start-here" || section.kind === "blocks" || section.kind === "interactive") && (
                 <CourseViewerSectionNav
                   prevSectionLink={
@@ -2806,6 +2865,8 @@ export default function ContentViewer() {
         onSetVariant={(variant) => setOption("liveSessionVariant", variant)}
         onOpenFeedback={() => { setPrototypeOptionsOpen(false); setFeedbackModalOpen(true); }}
         onOpenSentiment={() => { setPrototypeOptionsOpen(false); setSentimentModalOpen(true); }}
+        onOpenReview={() => { setPrototypeOptionsOpen(false); setReviewModalOpen(true); }}
+        onOpenSupport={() => { setPrototypeOptionsOpen(false); setSupportModalOpen(true); }}
       />
       <SelectCohortModal
         open={cohortModalOpen}
