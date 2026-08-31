@@ -15,6 +15,7 @@ import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
+import DashboardProfileCard from "../components/DashboardProfileCard";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
 import SessionCard from "../components/SessionCard";
@@ -23,6 +24,11 @@ import SidebarCard from "../components/SidebarCard";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import profileCover from "../assets/img/cover-image-2.png";
 import editIcon from "../assets/icons/edit.svg";
+import trashIcon from "../assets/icons/trash.svg";
+import eyeClosedIcon from "../assets/icons/eye-closed.svg";
+import reportFlagIcon from "../assets/icons/report-flag.svg";
+import addPlusIcon from "../assets/icons/add-plus.svg";
+import checkIcon from "../assets/icons/check.svg";
 import calendarPageIcon from "../assets/icons/calendar-page.svg";
 import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
 import eventImageSrc from "../assets/img/EventImage.avif";
@@ -807,11 +813,14 @@ export function formatCount(n: number): string {
 }
 
 // Post links stay inside whichever experience you're in: under /alt-nav they
-// point at /alt-nav/post/:id (keeping the sidebar shell), everywhere else at
-// /post/:id. Consumed by every card/action that opens a post.
+// point at /alt-nav/post/:id (keeping the sidebar shell), under /linkedin-nav at
+// /linkedin-nav/post/:id, everywhere else at /post/:id. Consumed by every
+// card/action that opens a post.
 export function usePostBase(): string {
   const { pathname } = useLocation();
-  return pathname.startsWith("/alt-nav") ? "/alt-nav/post" : "/post";
+  if (pathname.startsWith("/alt-nav")) return "/alt-nav/post";
+  if (pathname.startsWith("/linkedin-nav")) return "/linkedin-nav/post";
+  return "/post";
 }
 
 // iOS Safari only opens the soft keyboard when focus() is called synchronously
@@ -898,7 +907,7 @@ export function FeedLikeButton({ initialCount }: { initialCount: number }) {
       </div>
       <button
         onClick={handleClick}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-gray-hover ${liked ? "text-red-500" : "text-gray-extra-light hover:text-gray-light"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-[#222222]/8 ${liked ? "text-red-500" : "text-gray-light"}`}
       >
         {/* Heart geometry mirrors the uploaded heart.svg / heart-filled.svg —
             inlined so the fill can animate gray→red via currentColor. */}
@@ -915,13 +924,15 @@ export function FeedLikeButton({ initialCount }: { initialCount: number }) {
         >
           <path d="M15.696 4C18.871 4 21 6.98 21 9.755C21 15.388 12.161 20 12 20C11.839 20 3 15.388 3 9.755C3 6.98 5.129 4 8.304 4C10.119 4 11.311 4.905 12 5.711C12.689 4.905 13.881 4 15.696 4V4Z"/>
         </motion.svg>
-        <motion.span
-          className="text-[13px] font-medium"
-          animate={liked ? { scale: [1, 1.4, 1] } : { scale: 1 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          {formatCount(initialCount + (liked ? 1 : 0))}
-        </motion.span>
+        {initialCount + (liked ? 1 : 0) > 0 && (
+          <motion.span
+            className="text-[13px] font-medium"
+            animate={liked ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            {formatCount(initialCount + (liked ? 1 : 0))}
+          </motion.span>
+        )}
       </button>
     </div>
   );
@@ -1091,7 +1102,7 @@ export function FeedRepostButton({ initialCount, initialReposted = false, onRepo
 
       <button
         onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-gray-hover ${reposted ? "text-[#4F86DB]" : "text-gray-extra-light hover:text-gray-light"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-[#222222]/8 ${reposted ? "text-[#4F86DB]" : "text-gray-light"}`}
       >
         <motion.svg
           className="h-[22px] w-[22px]"
@@ -1110,13 +1121,15 @@ export function FeedRepostButton({ initialCount, initialReposted = false, onRepo
           <path d="M1.992 12L3.994 10L5.995 12" />
           <path d="M17.658 17.6555C16.209 19.1035 14.208 19.9995 11.997 19.9995C7.576 19.9995 3.992 16.4175 3.992 11.9975C3.992 11.3895 4.066 10.7995 4.194 10.2305" />
         </motion.svg>
-        <motion.span
-          className="text-[13px] font-medium"
-          animate={reposted && burst ? { scale: [1, 1.4, 1] } : { scale: 1 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          {formatCount(initialCount + (reposted ? 1 : 0))}
-        </motion.span>
+        {initialCount + (reposted ? 1 : 0) > 0 && (
+          <motion.span
+            className="text-[13px] font-medium"
+            animate={reposted && burst ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            {formatCount(initialCount + (reposted ? 1 : 0))}
+          </motion.span>
+        )}
       </button>
 
       {(() => {
@@ -1206,20 +1219,22 @@ export function FeedBookmarkButton({ post }: { post: Post }) {
       <button
         onClick={handleClick}
         aria-label={saved ? "Remove from saved" : "Save"}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-gray-hover ${saved ? "text-[#FFD96F]" : "text-gray-extra-light hover:text-gray-light"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-[#222222]/8 ${saved ? "text-[#FFD96F]" : "text-gray-light"}`}
       >
+        {/* Bookmark geometry mirrors the uploaded bookmark.svg / bookmark-filled.svg
+            — inlined so the fill toggles via currentColor on save. */}
         <motion.svg
           className="h-[22px] w-[22px]"
           viewBox="0 0 24 24"
           fill={saved ? "currentColor" : "none"}
           stroke="currentColor"
-          strokeWidth="1.75"
+          strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           animate={saved ? { scale: [1, 0.7, 1.25, 1] } : { scale: 1 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
         >
-          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+          <path d="M7.70001 3H16.3C17.405 3 18.3 3.895 18.3 5V21L12.008 17.727L5.70001 21V5C5.70001 3.895 6.59501 3 7.70001 3Z" />
         </motion.svg>
       </button>
       {createPortal(
@@ -1260,10 +1275,11 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
   const [shareOpen, setShareOpen] = useState(false);
 
   return (
-    <div className="mt-1 flex items-center gap-px pl-[44px] pr-1">
+    // All five actions spread equally across the full row width.
+    <div className="mt-1 flex items-center justify-between pl-[44px] pr-1">
       <FeedLikeButton initialCount={likes} />
       {/* Comment — outline chat bubble (chat-inactive.svg), stays outlined */}
-      <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`${postBase}/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-extra-light transition-colors hover:bg-gray-hover hover:text-gray-light">
+      <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`${postBase}/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-light transition-colors hover:bg-[#222222]/8">
         <svg className="h-[22px] w-[22px] fill-none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4.541 17.003C3.577 15.571 3 13.857 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12C21 16.971 16.971 21 12 21C10.474 21 9.04 20.613 7.78 19.943C6.434 20.661 4.907 21.084 3.276 21.084C2.842 21.084 2.419 21.045 2 20.99C3.173 19.923 4.055 18.553 4.541 17.003Z" /></svg>
         {comments > 0 && <span className="text-[13px] font-medium">{formatCount(comments)}</span>}
       </button>
@@ -1277,10 +1293,10 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
       />
       {/* Bookmark / save */}
       <FeedBookmarkButton post={post} />
-      {/* Share — fifth action */}
+      {/* Share — swapped to the uploaded share.svg (upload glyph) */}
       <div className="relative">
-        <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-extra-light transition-colors hover:bg-gray-hover hover:text-gray-light">
-          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M11.082 8.95158V8.95158C6.196 9.503 2.50256 13.6346 2.5 18.5516V19.1636H2.5C4.62349 16.6055 7.75786 15.1019 11.082 15.0466V18.2736V18.2733C11.082 18.9482 11.6291 19.4953 12.304 19.4953C12.5786 19.4953 12.8452 19.4028 13.0608 19.2328L21.0508 12.9238V12.9238C21.5622 12.5207 21.65 11.7794 21.247 11.268C21.1895 11.1951 21.1237 11.1292 21.0508 11.0718L13.0608 4.76276V4.76276C12.531 4.34468 11.7626 4.43525 11.3445 4.96505C11.1744 5.18061 11.0818 5.44717 11.0818 5.72176L11.082 8.95158Z" /></svg>
+        <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-light transition-colors hover:bg-[#222222]/8">
+          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M15 9h2c1.10457 0 2 .89543 2 2v8c0 1.10457-.89543 2-2 2h-10c-1.10457 0-2-.89543-2-2v-8c0-1.10457.89543-2 2-2h2" /><line x1="12" x2="12" y1="15" y2="3" /><polyline points="15,6 12,3 9,6" /></svg>
         </button>
         <AnimatePresence>
           {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
@@ -1321,17 +1337,18 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
     return () => document.removeEventListener("mousedown", handler);
   }, [menuOpen, isMobile]);
 
+  // Menu-row icon — 20px asset-folder svg (4px smaller than the profile dropdown).
+  const menuIcon = (src: string, alt = "") => <img src={src} alt={alt} className="h-5 w-5 shrink-0" />;
+  // Danger rows tint their icon to the row's red via a CSS mask (asset svgs are
+  // pre-colored, so a plain <img> can't inherit the text color).
+  const dangerIcon = (src: string) => (
+    <span
+      aria-hidden
+      className="h-5 w-5 shrink-0 bg-current"
+      style={{ maskImage: `url("${src}")`, WebkitMaskImage: `url("${src}")`, maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat", maskPosition: "center", WebkitMaskPosition: "center" }}
+    />
+  );
   const menuItems = [
-    ...(onEdit ? [{
-      label: "Edit post",
-      icon: (
-        <svg width={isMobile ? 22 : 16} height={isMobile ? 22 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-        </svg>
-      ),
-      danger: false,
-      onClick: onEdit,
-    }] : []),
     {
       label: "Follow",
       follow: true,
@@ -1340,35 +1357,27 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
       onClick: undefined as (() => void) | undefined,
     },
     {
-      label: "Delete post",
-      icon: (
-        <svg width={isMobile ? 22 : 16} height={isMobile ? 22 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
-        </svg>
-      ),
-      danger: true,
-      onClick: undefined as (() => void) | undefined,
-    },
-    {
       label: "Not interested",
-      icon: (
-        <svg width={isMobile ? 22 : 16} height={isMobile ? 22 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M17 14c.34-.57.54-1.26.54-2 0-2.21-1.91-4-4.27-4-1.89 0-3.5 1.16-4.12 2.8"/><path d="M9.17 9.17L3 3m18 18-5.18-5.18"/>
-          <path d="M6.5 6.5C5.57 7.4 5 8.63 5 10c0 2.76 2.24 5 5 5 1.37 0 2.6-.57 3.5-1.5"/>
-          <line x1="2" y1="2" x2="22" y2="22"/>
-        </svg>
-      ),
+      icon: menuIcon(eyeClosedIcon),
       danger: false,
       onClick: undefined as (() => void) | undefined,
     },
     {
       label: "Report post",
-      icon: (
-        <svg width={isMobile ? 22 : 16} height={isMobile ? 22 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
-        </svg>
-      ),
+      icon: menuIcon(reportFlagIcon),
       danger: false,
+      onClick: undefined as (() => void) | undefined,
+    },
+    ...(onEdit ? [{
+      label: "Edit post",
+      icon: menuIcon(editIcon),
+      danger: false,
+      onClick: onEdit,
+    }] : []),
+    {
+      label: "Delete post",
+      icon: dangerIcon(trashIcon),
+      danger: true,
       onClick: undefined as (() => void) | undefined,
     },
   ];
@@ -1424,15 +1433,14 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
                     className={
                       isMobile
                         ? "fixed inset-x-0 bottom-0 z-[70] rounded-t-2xl border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)] shadow-lg"
-                        : "absolute right-0 top-7 z-50 w-48 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+                        : "absolute right-0 top-7 z-50 w-56 rounded-2xl border border-gray-stroke bg-white shadow-lg"
                     }
                   >
                     {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1 w-10 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
                     <div className={isMobile ? "px-3 pt-1 pb-3" : "px-2 py-2"}>
                       {menuItems.map((item) => {
                         const { label, icon, danger, onClick } = item;
-                        const itemClass = `flex w-full items-center gap-3 rounded-lg text-left font-medium transition-colors hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`;
-                        const sz = isMobile ? 22 : 16;
+                        const itemClass = `flex w-full items-center gap-[10px] rounded-lg text-left font-medium transition-colors hover:bg-[#222222]/5 ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`;
                         if ((item as { follow?: boolean }).follow) {
                           // Tapping Follow flips the icon to a check + the label
                           // to "Following". The sheet stays put and dismisses
@@ -1454,11 +1462,13 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
                               onClick={onFollowTap}
                               className={`${itemClass} text-gray-dark`}
                             >
-                              <span className="relative shrink-0" style={{ width: sz, height: sz }}>
+                              <span className="relative h-5 w-5 shrink-0">
                                 <AnimatePresence initial={false} mode="popLayout">
                                   {following ? (
-                                    <motion.svg
+                                    <motion.img
                                       key="check"
+                                      src={checkIcon}
+                                      alt=""
                                       initial={{ scale: 0, opacity: 0 }}
                                       animate={{ scale: 1, opacity: 1 }}
                                       exit={{ scale: 0, opacity: 0 }}
@@ -1469,21 +1479,19 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
                                           window.setTimeout(() => setMenuOpen(false), 450);
                                         }
                                       }}
-                                      className="absolute inset-0 h-full w-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
-                                    >
-                                      <polyline points="20 6 9 17 4 12" />
-                                    </motion.svg>
+                                      className="absolute inset-0 h-full w-full"
+                                    />
                                   ) : (
-                                    <motion.svg
+                                    <motion.img
                                       key="plus"
+                                      src={addPlusIcon}
+                                      alt=""
                                       initial={{ scale: 0, opacity: 0 }}
                                       animate={{ scale: 1, opacity: 1 }}
                                       exit={{ scale: 0, opacity: 0 }}
                                       transition={iconSpring}
-                                      className="absolute inset-0 h-full w-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
-                                    >
-                                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>
-                                    </motion.svg>
+                                      className="absolute inset-0 h-full w-full"
+                                    />
                                   )}
                                 </AnimatePresence>
                               </span>
@@ -3524,10 +3532,9 @@ function QuotedPostCard({ quoted }: { quoted: QuotedSnapshot }) {
   );
 }
 
-// Per-post hover treatment: a crisp (non-feathered) inner border — a 5px inset
-// shadow with 0 blur, so the edge is hard rather than fading out. gray-dark #222
-// at 3%. Applied to the post's full-bleed row wrapper so it reaches the card edges.
-export const POST_HOVER_SHADOW = "transition-shadow hover:shadow-[inset_0_0_0_5px_rgba(34,34,34,0.03)]";
+// Per-post hover treatment: the whole row tints to gray-dark (#222) at 3%.
+// Applied to the post's full-bleed row wrapper so it reaches the card edges.
+export const POST_HOVER_SHADOW = "transition-colors hover:bg-[rgba(34,34,34,0.03)]";
 
 export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOpen }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void; onOpen?: () => void }) {
   const navigate = useNavigate();
@@ -4869,7 +4876,7 @@ function ExpertRow({ expert, onDismiss }: { expert: (typeof POPULAR_EXPERTS)[num
       subtitle={expert.headline}
       right={
         <div className="flex items-center gap-1.5">
-          <Button size="sm" variant="secondary" onClick={() => setFollowing((f) => !f)} className="min-w-[74px]">
+          <Button size="sm" variant="secondary" rounded="rounded-full" onClick={() => setFollowing((f) => !f)} className="min-w-[74px] font-semibold">
             {following ? "Following" : "Follow"}
           </Button>
           <button
@@ -5017,14 +5024,8 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
   const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-[14px]">
-      {/* Profile preview */}
-      <div className="flex items-center gap-3">
-        <img src={profilePhoto} alt="Alex" className="h-12 w-12 shrink-0 rounded-full object-cover" />
-        <div className="min-w-0">
-          <p className="truncate text-[16px] font-semibold leading-tight text-gray-dark">Alex Rivera</p>
-          <p className="mt-0.5 truncate text-[13px] leading-tight text-gray-light">MBA Applicant · Class of 2027</p>
-        </div>
-      </div>
+      {/* Profile card — the dashboard's profile summary, in its non-expert form */}
+      <DashboardProfileCard expert={false} />
 
       {/* Next session + calendar link */}
       <div className="rounded-[12px] border border-[#222222]/[0.12] bg-white">
@@ -5289,22 +5290,32 @@ export default function Home() {
           the border while post content stays inset). */}
       <motion.div
         {...(isAltNav ? { initial: FADE_IN.initial, animate: FADE_IN.animate, transition: FADE_TRANSITION } : {})}
-        className="rounded-2xl border border-[#D5D5D5]"
+        className="rounded-2xl border border-gray-stroke bg-white"
       >
       {/* Post composer — hidden on mobile (composer lives in the floating
-          + button there). */}
-      <div className="hidden md:flex items-center gap-3 border-b border-[#D5D5D5] px-4 py-4 sm:px-6">
+          + button there). A borderless prompt with a Post button; clicking
+          anywhere in the row opens the compose modal. */}
+      <div
+        onClick={() => setComposeOpen(true)}
+        className="hidden cursor-pointer md:flex items-center gap-3 border-b border-gray-stroke px-4 py-3 sm:px-6"
+      >
         <img
           src={profilePhoto}
           alt="Your profile"
           className="h-10 w-10 shrink-0 rounded-full object-cover"
         />
-        <button
+        <span className="flex-1 truncate text-left text-[15px] text-gray-light">
+          What's on your mind?
+        </span>
+        <Button
+          size="md"
+          variant="outline"
+          rounded="rounded-[6px]"
           onClick={() => setComposeOpen(true)}
-          className="flex-1 rounded-full bg-gray-hover px-4 py-[10px] text-left text-[14px] text-gray-light transition-shadow hover:shadow-[0_0_0_1.5px_#111111]"
+          className="shrink-0 font-semibold shadow-[0_1px_2px_0_rgba(16,24,40,0.06)]"
         >
-          Create post
-        </button>
+          Post
+        </Button>
       </div>
 
       {/* Pull-to-refresh slot — sits between the composer and the feed (top
@@ -5332,7 +5343,7 @@ export default function Home() {
       )}
 
       {/* Feed */}
-      <div className="divide-y divide-[#D5D5D5]">
+      <div className="divide-y divide-gray-stroke">
         {feedPosts.map((post, i) => (
           <div key={post.id} className={`px-4 sm:px-6 ${POST_HOVER_SHADOW}`}>
             <FeedPost post={post} onUpdate={handleEdit} onRepost={handleRepost} onUndoRepost={handleUndoRepost} onQuote={setQuoteTarget} />
