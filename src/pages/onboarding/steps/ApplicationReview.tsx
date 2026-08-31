@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Check, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 
 import mark from "../../../assets/leland-logos/leland-mark.svg";
-import { expertCountFor } from "../universities";
-import { universityLogo } from "./UniversitySearch";
 import type { GradYear } from "./UniversitySearch";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -33,13 +31,6 @@ function shortName(school: string): string {
 export default function ApplicationReview({ input, onContinue }: { input: ReviewInput; onContinue: () => void }) {
   const reduced = useReducedMotion() ?? false;
   const short = shortName(input.school);
-  const experts = expertCountFor(input.school);
-  const classLine =
-    input.gradYear === "earlier"
-      ? `${short} alum`
-      : input.gradYear === "unknown" || input.gradYear === "none"
-        ? short
-        : `${short} · Class of ${input.gradYear}`;
 
   const CHECKS = [
     `Verifying ${short} affiliation`,
@@ -48,9 +39,8 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
     "Determining application strength",
   ];
 
-  // 0..CHECKS.length = number of checks resolved; then "approved"
+  // 0..CHECKS.length = number of checks resolved; then the gate takes over
   const [done, setDone] = useState(0);
-  const [phase, setPhase] = useState<"review" | "approved">("review");
   // pre-permission ask, shown as the review wraps (only if not already decided)
   const [askNotify, setAskNotify] = useState(false);
 
@@ -58,8 +48,8 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
     const undecided =
       typeof window !== "undefined" && "Notification" in window && Notification.permission === "default";
     if (undecided) setAskNotify(true);
-    else setPhase("approved");
-  }, []);
+    else onContinue();
+  }, [onContinue]);
 
   useEffect(() => {
     const speed = reduced ? 0.25 : 1;
@@ -82,20 +72,12 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
         /* unsupported */
       }
     }
-    setPhase("approved");
+    onContinue();
   };
-
-  const logo = universityLogo(input.logoKey, input.school);
 
   return (
     <div className="relative flex h-full flex-col">
-      <AnimatePresence mode="wait">
-        {phase === "review" ? (
-          <motion.div
-            key="review"
-            exit={{ opacity: 0, y: -16, transition: { duration: 0.35 } }}
-            className="flex h-full flex-col px-6 pb-10 pt-[max(2rem,env(safe-area-inset-top))]"
-          >
+      <div className="flex h-full flex-col px-6 pb-10 pt-[max(2rem,env(safe-area-inset-top))]">
             <div className="flex flex-1 flex-col justify-center">
               <motion.img
                 src={mark}
@@ -173,123 +155,7 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
             >
               We admit in cohorts. Not every application is approved.
             </motion.p>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="approved"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex h-full flex-col px-6 pb-8 pt-[max(2rem,env(safe-area-inset-top))]"
-          >
-            <div className="flex flex-1 flex-col items-center justify-center text-center">
-              <motion.span
-                initial={reduced ? { opacity: 0 } : { scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={reduced ? { duration: 0.2 } : { type: "spring", stiffness: 320, damping: 13 }}
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-yellow text-gray-dark"
-              >
-                <Check size={28} strokeWidth={3} />
-              </motion.span>
-              <motion.h2
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25, duration: 0.5, ease: EASE }}
-                className="mt-5 max-w-[16ch] text-balance font-serif text-[32px] leading-[1.1] text-gray-dark"
-              >
-                You're qualified for the Leland community.
-              </motion.h2>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.45, duration: 0.5 }}
-                className="mt-2 max-w-[34ch] text-[15px] leading-relaxed text-gray-light"
-              >
-                Congrats! Your application is approved in the first wave of members we're admitting.
-                <br />
-                Here's your member pass:
-              </motion.p>
-
-              {/* admission pass */}
-              <motion.div
-                initial={reduced ? { opacity: 0 } : { opacity: 0, y: 28, rotateX: 12 }}
-                animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                transition={{ delay: 0.6, duration: 0.6, ease: EASE }}
-                style={{
-                  transformPerspective: 900,
-                  background: "radial-gradient(130% 100% at 15% 0%, #262624 0%, #171716 52%, #101010 100%)",
-                }}
-                className="relative mt-8 w-full max-w-[340px] overflow-hidden rounded-[22px] text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] ring-1 ring-white/10"
-              >
-                {/* one slow glint across the pass after it lands */}
-                {!reduced ? (
-                  <motion.span
-                    aria-hidden
-                    className="pointer-events-none absolute inset-y-[-30%] w-[55%]"
-                    style={{
-                      background:
-                        "linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.09) 50%, transparent 100%)",
-                    }}
-                    initial={{ x: "-120%", rotate: 10 }}
-                    animate={{ x: "320%" }}
-                    transition={{ delay: 1.4, duration: 1.6, ease: "easeInOut" }}
-                  />
-                ) : null}
-                <div className="flex items-center justify-between px-5 pt-5">
-                  <img src={mark} alt="Leland" className="h-6 w-6" style={{ filter: "brightness(0) invert(1)" }} />
-                  <span className="flex items-center gap-1 rounded-full bg-yellow/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-yellow">
-                    <ShieldCheck size={12} /> Pre-approved
-                  </span>
-                </div>
-                <div className="px-5 pb-5 pt-7">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Member</p>
-                  <p className="mt-1 font-serif text-[26px] leading-tight">{input.name ?? "June Allen"}</p>
-                  <div className="mt-4 flex items-center gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
-                      {logo ? (
-                        <img src={logo} alt="" className="h-full w-full object-contain p-1.5" />
-                      ) : (
-                        <span className="text-[15px] font-semibold text-gray-dark">{short.charAt(0)}</span>
-                      )}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="truncate text-[14px] font-medium">{classLine}</p>
-                      <p className="truncate text-[12.5px] text-white/55">{input.category} cohort</p>
-                    </div>
-                  </div>
-                  <div className="mt-5 border-t border-white/10 pt-4">
-                    <p className="text-[12px] text-white/55">Application strength</p>
-                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-                      <motion.div
-                        initial={{ width: "0%" }}
-                        animate={{ width: "86%" }}
-                        transition={{ delay: 1.2, duration: 1.1, ease: EASE }}
-                        className="h-full rounded-full bg-yellow"
-                      />
-                    </div>
-                    <div className="mt-2.5 flex items-center justify-between text-[11.5px] text-white/45">
-                      <span>
-                        {experts} {short} experts already inside
-                      </span>
-                      <span className="font-mono tracking-[0.08em] text-white/35">Nº 000142</span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5, duration: 0.4 }}
-              onClick={onContinue}
-              className="flex h-14 w-full items-center justify-center gap-1.5 rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
-            >
-              Continue
-              <ArrowRight size={16} />
-            </motion.button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </div>
 
       {/* pre-permission ask — iOS-alert style, right as the review wraps */}
       <AnimatePresence>
