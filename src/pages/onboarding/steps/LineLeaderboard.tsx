@@ -54,7 +54,7 @@ function Row({
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay, ease: [0.32, 0.72, 0, 1] }}
-      className={`flex items-center gap-2.5 ${highlight ? "-mx-3 rounded-2xl bg-gray-hover py-3 pl-5 pr-5" : "py-3 pl-2 pr-3"}`}
+      className={`flex items-center gap-2.5 ${highlight ? "-mx-3 rounded-2xl border border-gray-dark py-3 pl-5 pr-5" : "py-3 pl-2 pr-3"}`}
     >
       <span className="w-8 shrink-0 text-[15px] font-medium tabular-nums text-gray-dark">
         {r.pos}

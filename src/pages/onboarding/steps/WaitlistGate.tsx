@@ -1,30 +1,30 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Check, Clock, BellRing, ShieldCheck, Ticket, X } from "lucide-react";
+import { Check, Clock, BellRing, ShieldCheck, X } from "lucide-react";
 
 import { ShareSheet } from "../../waitlist/Waitlist";
 import mark from "../../../assets/leland-logos/leland-mark.svg";
-import { expertCountFor } from "../universities";
 import { universityLogo } from "./UniversitySearch";
 import type { ReviewInput } from "./ApplicationReview";
 import LineList from "./LineLeaderboard";
 
 /* ─────────────────────────────────────────────────────────────────────────
- * WaitlistGate (v4) — the finale, one continuous screen in two acts:
+ * WaitlistGate (v4) — the finale, one continuous screen:
  *
- *  Act 1 ("card")  · "You're qualified" copy around the member pass.
- *  The bridge      · copy fades, the pass does a full 3D flip with a glint,
- *                    and three guest-pass stubs unfold from under it —
- *                    perforated tear-offs, each with its own invite code.
- *  Act 2 ("gate")  · your spot in line above the pass, the 24h countdown
- *                    and the blurred line below. Sending a stub IS sending
- *                    your pass: the VIP-connection moment.
+ *  Act 1      · "You're qualified" copy around the member pass.
+ *  The bridge · copy fades and the pass flips over: the front is your
+ *               membership, the back is a referral card. Behind it, two
+ *               more peek out — a stack of three guest passes to hand out.
+ *  Act 2      · your spot in line above, the 24h countdown and the blurred
+ *               line below. Sending the top card flings it off the stack;
+ *               three sends bring your member card back, front of the line.
  * ──────────────────────────────────────────────────────────────────────── */
 
 const EASE = [0.32, 0.72, 0, 1] as const;
 const INVITE_CODES = ["7F3K2M", "Q2XM9A", "9BWD4T"];
 export const SPOT_LADDER = [142, 61, 19, 1];
 const WINDOW_MS = 24 * 60 * 60 * 1000;
+const PEEK_Y = 14;
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -33,6 +33,8 @@ function pad(n: number) {
 function shortName(school: string): string {
   return school.replace(/^University of /, "").replace(/ University$/, "").replace(/ College$/, "");
 }
+
+const CARD_BG = "radial-gradient(130% 100% at 15% 0%, #262624 0%, #171716 52%, #101010 100%)";
 
 /* Owns the 1s interval so the ticks re-render only this span, not the whole
    gate (which would remount the line list and replay its animations). */
@@ -69,11 +71,11 @@ export default function WaitlistGate({
   onDevBack?: () => void;
 }) {
   const reduced = useReducedMotion() ?? false;
-  const [act, setAct] = useState<"card" | "gate">("card");
-  const gate = act === "gate";
+  // card → flip (mid-turn) → stack (guest passes live)
+  const [act, setAct] = useState<"card" | "flip" | "stack">("card");
+  const gate = act !== "card";
   const [toast, setToast] = useState(true);
-  const [sharing, setSharing] = useState<number | null>(null);
-  const [spent, setSpent] = useState<boolean[]>([false, false, false]);
+  const [sharing, setSharing] = useState(false);
   const [deadline] = useState(() => {
     const k = "leland-v4-gate-deadline";
     try {
@@ -91,8 +93,8 @@ export default function WaitlistGate({
   const spot = SPOT_LADDER[Math.min(sent, 3)];
 
   const short = shortName(pass.school);
-  const experts = expertCountFor(pass.school);
   const logo = universityLogo(pass.logoKey, pass.school);
+  const memberName = pass.name ?? "June Allen";
   const classLine =
     typeof pass.gradYear === "number"
       ? `Class of ${pass.gradYear}`
@@ -104,24 +106,95 @@ export default function WaitlistGate({
   const messageFor = (i: number) =>
     `Here's one of my 3 Leland guest passes for early access to ${pass.category.toLowerCase()} experts. It gets you pre-approved at the front of the line: ${linkFor(i)}`;
 
-  const markSent = (i: number) => {
-    setSpent((prev) => prev.map((v, idx) => (idx === i ? true : v)));
-    setSharing(null);
+  const markSent = () => {
+    setSharing(false);
     onSent();
   };
-  const share = async (i: number) => {
-    if (unlocked || spent[i]) return;
+  const share = async () => {
+    if (unlocked) return;
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Leland", text: messageFor(i), url: linkFor(i) });
-        markSent(i);
+        await navigator.share({ title: "Leland", text: messageFor(sent), url: linkFor(sent) });
+        markSent();
       } catch {
         /* canceled: nothing spent */
       }
     } else {
-      setSharing(i);
+      setSharing(true);
     }
   };
+
+  const beginGate = () => setAct(reduced ? "stack" : "flip");
+
+  /* ── the front: your membership ── */
+  const memberCard = (
+    <div
+      className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] ring-1 ring-white/10"
+      style={{ background: CARD_BG }}
+    >
+      {act === "card" && !reduced ? (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute inset-y-[-30%] z-10 w-[55%]"
+          style={{
+            background: "linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.09) 50%, transparent 100%)",
+          }}
+          initial={{ x: "-120%", rotate: 10 }}
+          animate={{ x: "320%" }}
+          transition={{ delay: 1.4, duration: 1.6, ease: "easeInOut" }}
+        />
+      ) : null}
+      <div className="flex items-center justify-between px-5 pt-5">
+        <img src={mark} alt="Leland" className="h-6 w-6" style={{ filter: "brightness(0) invert(1)" }} />
+        <span className="flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70">
+          <ShieldCheck size={12} /> Pre-approved
+        </span>
+      </div>
+      <div className="px-5 pb-6 pt-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Member</p>
+        <p className="mt-1 font-serif text-[26px] leading-tight">{memberName}</p>
+        <div className="mt-4 flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
+            {logo ? (
+              <img src={logo} alt="" className="h-full w-full object-contain p-1.5" />
+            ) : (
+              <span className="text-[15px] font-semibold text-gray-dark">{short.charAt(0)}</span>
+            )}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-[14px] font-medium">{short}</p>
+            <p className="truncate text-[12.5px] text-white/55">{classLine}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ── the back: a referral card you hand out ── */
+  const guestCard = (i: number) => (
+    <div
+      className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] ring-1 ring-white/10"
+      style={{ background: CARD_BG }}
+    >
+      <div className="flex items-center justify-between px-5 pt-5">
+        <img src={mark} alt="Leland" className="h-6 w-6" style={{ filter: "brightness(0) invert(1)" }} />
+        <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70">
+          Guest pass · {i + 1} of 3
+        </span>
+      </div>
+      <div className="px-5 pb-5 pt-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Admit one</p>
+        <p className="mt-1 font-mono text-[27px] font-semibold tracking-[0.18em]">{INVITE_CODES[i]}</p>
+        <p className="mt-1.5 text-[12.5px] text-white/55">Pre-approved by {memberName}. Skips the line.</p>
+        <button
+          onClick={share}
+          className="mt-5 flex h-12 w-full items-center justify-center rounded-full bg-yellow text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
+        >
+          Invite
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="relative flex h-full flex-col">
@@ -208,30 +281,28 @@ export default function WaitlistGate({
                 transition={{ delay: 0.9, duration: 0.45, ease: EASE }}
                 className="flex flex-col items-center"
               >
-                <div className="rounded-[22px] bg-[#f4f4f4] px-9 pb-3.5 pt-3 text-center">
-                  <AnimatePresence mode="wait">
-                    <motion.p
-                      key={spot}
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -12 }}
-                      transition={{ duration: 0.35 }}
-                      className="font-serif text-[52px] leading-none text-gray-dark"
-                    >
-                      #{spot}
-                    </motion.p>
-                  </AnimatePresence>
-                  <p className="mt-1.5 text-[12px] font-semibold uppercase tracking-[0.12em] text-gray-light">
-                    in line
-                  </p>
-                </div>
-                <h2 className="mt-5 text-balance font-serif text-[20px] leading-tight text-gray-dark">
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={spot}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.35 }}
+                    className="font-serif text-[56px] leading-none text-gray-dark"
+                  >
+                    #{spot}
+                  </motion.p>
+                </AnimatePresence>
+                <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-gray-light">
+                  in line
+                </p>
+                <h2 className="mt-4 max-w-[24ch] text-balance font-serif text-[20px] leading-tight text-gray-dark">
                   {unlocked
                     ? "You're at the front of the line"
                     : sent === 0
-                      ? "Send a guest pass to 3 friends to skip the line"
+                      ? "Each invite gets you closer to the front."
                       : sent === 1
-                        ? `You jumped ${SPOT_LADDER[0] - SPOT_LADDER[1]} spots. Two more.`
+                        ? `You jumped ${SPOT_LADDER[0] - SPOT_LADDER[1]} spots. Two passes left.`
                         : "One more and you're first through the door."}
                 </h2>
               </motion.div>
@@ -239,166 +310,119 @@ export default function WaitlistGate({
           </AnimatePresence>
         </div>
 
-        {/* ── the pass: persists across both acts, flips at the bridge ── */}
-        <div className="mx-auto mt-7 w-full max-w-[340px]" style={{ perspective: 1200 }}>
-          <motion.div
-            initial={reduced ? { opacity: 0 } : { opacity: 0, y: 28, rotateX: 12 }}
-            animate={{ opacity: 1, y: 0, rotateX: 0, rotateY: gate && !reduced ? 360 : 0 }}
-            transition={{
-              opacity: { delay: 0.6, duration: 0.6, ease: EASE },
-              y: { delay: 0.6, duration: 0.6, ease: EASE },
-              rotateX: { delay: 0.6, duration: 0.6, ease: EASE },
-              rotateY: { duration: 1.1, ease: EASE },
-            }}
-            style={{
-              transformStyle: "preserve-3d",
-              background: "radial-gradient(130% 100% at 15% 0%, #262624 0%, #171716 52%, #101010 100%)",
-            }}
-            className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] ring-1 ring-white/10"
-          >
-            {/* a glint on arrival, and again as it flips */}
-            {!reduced ? (
-              <motion.span
-                key={act}
-                aria-hidden
-                className="pointer-events-none absolute inset-y-[-30%] z-10 w-[55%]"
-                style={{
-                  background: "linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.09) 50%, transparent 100%)",
-                }}
-                initial={{ x: "-120%", rotate: 10 }}
-                animate={{ x: "320%" }}
-                transition={{ delay: gate ? 0.2 : 1.4, duration: gate ? 1.1 : 1.6, ease: "easeInOut" }}
-              />
-            ) : null}
-
-            <div className="flex items-center justify-between px-5 pt-5">
-              <img src={mark} alt="Leland" className="h-6 w-6" style={{ filter: "brightness(0) invert(1)" }} />
-              <span className="flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70">
-                <ShieldCheck size={12} /> Pre-approved
-              </span>
-            </div>
-            <div className="px-5 pb-5 pt-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Member</p>
-              <p className="mt-1 font-serif text-[26px] leading-tight">{pass.name ?? "June Allen"}</p>
-              <div className="mt-4 flex items-center gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
-                  {logo ? (
-                    <img src={logo} alt="" className="h-full w-full object-contain p-1.5" />
-                  ) : (
-                    <span className="text-[15px] font-semibold text-gray-dark">{short.charAt(0)}</span>
-                  )}
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate text-[14px] font-medium">{short}</p>
-                  <p className="truncate text-[12.5px] text-white/55">{classLine}</p>
-                </div>
+        {/* ── the pass: membership front, referral stack on the back ── */}
+        <motion.div
+          initial={reduced ? { opacity: 0 } : { opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.6, ease: EASE }}
+          className="mx-auto mt-7 w-full max-w-[340px]"
+          style={{ perspective: 1200 }}
+        >
+          {act === "stack" ? (
+            unlocked ? (
+              memberCard
+            ) : (
+              <div className="relative" style={{ paddingBottom: (2 - sent) * PEEK_Y }}>
+                <AnimatePresence initial={false}>
+                  {INVITE_CODES.map((code, i) => {
+                    if (i < sent) return null;
+                    const depth = i - sent;
+                    return (
+                      <motion.div
+                        key={code}
+                        initial={false}
+                        animate={{ y: depth * PEEK_Y, scale: 1 - depth * 0.04 }}
+                        exit={
+                          reduced
+                            ? { opacity: 0 }
+                            : { x: 480, rotate: 10, opacity: 0, transition: { duration: 0.45, ease: EASE } }
+                        }
+                        transition={{ type: "spring", stiffness: 300, damping: 28 }}
+                        style={{ zIndex: 10 - depth, transformOrigin: "center bottom" }}
+                        className={depth === 0 ? "relative" : "absolute inset-x-0 top-0"}
+                      >
+                        {guestCard(i)}
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
               </div>
-              <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4 text-[11.5px] text-white/45">
-                <span>
-                  {experts} {short} experts already inside
-                </span>
-                <span className="font-mono tracking-[0.08em] text-white/35">Nº 000142</span>
-              </div>
-            </div>
-
-            {/* ── guest-pass stubs: unfold from under the pass after the flip ── */}
+            )
+          ) : (
             <motion.div
               initial={false}
-              animate={{ height: gate ? "auto" : 0, opacity: gate ? 1 : 0 }}
-              transition={{ delay: gate ? (reduced ? 0 : 0.85) : 0, duration: 0.5, ease: EASE }}
+              animate={{ rotateY: act === "flip" ? 180 : 0 }}
+              transition={{ duration: 1.1, ease: EASE }}
+              onAnimationComplete={() => {
+                if (act === "flip") setAct("stack");
+              }}
+              style={{ transformStyle: "preserve-3d" }}
+              className="grid"
             >
-              <div className="px-5 pb-1 pt-0.5">
-                <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/35">Guest passes</p>
+              <div style={{ backfaceVisibility: "hidden", gridArea: "1 / 1" }}>{memberCard}</div>
+              <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", gridArea: "1 / 1" }}>
+                {guestCard(0)}
               </div>
-              {INVITE_CODES.map((c, i) => (
-                <div key={c} className="relative border-t border-dashed border-white/20 px-5 py-3.5">
-                  {/* punched notches, clipped to half-moons by the card edge */}
-                  <span className="absolute -left-2 -top-2 h-4 w-4 rounded-full bg-white" />
-                  <span className="absolute -right-2 -top-2 h-4 w-4 rounded-full bg-white" />
-                  <div className="flex items-center gap-3">
-                    <Ticket size={18} className={`shrink-0 ${spent[i] ? "text-white/25" : "text-white/70"}`} />
-                    <span
-                      className={`min-w-0 flex-1 truncate font-mono text-[15px] font-semibold tracking-[0.14em] ${
-                        spent[i] ? "text-white/25" : "text-white"
-                      }`}
-                    >
-                      {c}
-                    </span>
-                    {spent[i] ? (
-                      <span className="flex items-center gap-1 px-2 text-[13px] font-medium text-white/40">
-                        <Check size={13} strokeWidth={3} /> Sent
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => share(i)}
-                        className="shrink-0 rounded-full bg-yellow px-4 py-1.5 text-[13px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
-                      >
-                        Invite
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
             </motion.div>
-          </motion.div>
-        </div>
+          )}
+        </motion.div>
 
         {/* ── slot below the pass: continue, then countdown + the line ── */}
         <AnimatePresence mode="wait">
-        {!gate ? (
-          <motion.div
-            key="continue"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.25 } }}
-            transition={{ delay: 1.3, duration: 0.4 }}
-            className="mt-8"
-          >
-            <button
-              onClick={() => setAct("gate")}
-              className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
+          {!gate ? (
+            <motion.div
+              key="continue"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.25 } }}
+              transition={{ delay: 1.3, duration: 0.4 }}
+              className="mt-8"
             >
-              Continue
-            </button>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="line"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.15, duration: 0.45, ease: EASE }}
-          >
-            {unlocked ? (
               <button
-                onClick={onDone}
-                className="mt-7 flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
+                onClick={beginGate}
+                className="flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
               >
-                Done
+                Continue
               </button>
-            ) : (
-              <p className="mt-5 flex items-center justify-center gap-1.5 text-[13px] text-gray-light">
-                <Clock size={14} className="text-gray-dark" />
-                <Countdown deadline={deadline} />
-                to lock in the front of the line
-              </p>
-            )}
-            <div className="mt-7">
-              <LineList spot={spot} you={you} />
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="line"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.15, duration: 0.45, ease: EASE }}
+            >
+              {unlocked ? (
+                <button
+                  onClick={onDone}
+                  className="mt-7 flex h-14 w-full items-center justify-center rounded-full bg-gray-dark text-[15px] font-medium text-white transition-colors hover:bg-[#333]"
+                >
+                  Done
+                </button>
+              ) : (
+                <p className="mt-6 flex items-center justify-center gap-1.5 text-[13px] text-gray-light">
+                  <Clock size={14} className="text-gray-dark" />
+                  <Countdown deadline={deadline} />
+                  to lock in the front of the line
+                </p>
+              )}
+              <div className="mt-7">
+                <LineList spot={spot} you={you} />
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
 
       <AnimatePresence>
-        {sharing !== null ? (
+        {sharing ? (
           <ShareSheet
-            code={INVITE_CODES[sharing]}
-            link={linkFor(sharing)}
-            message={messageFor(sharing)}
+            code={INVITE_CODES[Math.min(sent, 2)]}
+            link={linkFor(Math.min(sent, 2))}
+            message={messageFor(Math.min(sent, 2))}
             title="Leland early access"
-            onSend={() => markSent(sharing)}
-            onClose={() => setSharing(null)}
+            onSend={markSent}
+            onClose={() => setSharing(false)}
           />
         ) : null}
       </AnimatePresence>
