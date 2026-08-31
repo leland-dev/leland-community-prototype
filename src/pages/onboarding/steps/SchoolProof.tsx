@@ -45,10 +45,15 @@ export default function SchoolProof({
   const experts = expertCountFor(school);
   const short = shortName(school);
   const orgs = resonance.orgs.slice(0, 3);
+  // "200+ consulting experts are here…" → "Consulting"
+  const expertise = resonance.title.includes(" experts")
+    ? resonance.title.split(" experts")[0].split(" ").slice(1).join(" ")
+    : "Expert";
+  const expertiseLabel = expertise.charAt(0).toUpperCase() + expertise.slice(1);
   const alumni = [
-    { face: COACH_FACES[0], year: "'19", org: orgs[0] },
-    { face: COACH_FACES[2], year: "'22", org: orgs[1] },
-    { face: COACH_FACES[4], year: "'17", org: orgs[2] },
+    { face: COACH_FACES[0], name: "Sarah K.", headline: `${orgs[0]} alum | ${expertiseLabel} coach` },
+    { face: COACH_FACES[2], name: "Yvonne M.", headline: `${orgs[1]} alum | ${expertiseLabel} coach` },
+    { face: COACH_FACES[4], name: "Elena R.", headline: `${orgs[2]} alum | Interview specialist` },
   ];
 
   const rise = (delay: number) => ({
@@ -161,12 +166,8 @@ export default function SchoolProof({
             >
               <img src={a.face.photo} alt="" className="h-11 w-11 shrink-0 rounded-full object-cover object-top" />
               <span className="min-w-0 flex-1">
-                <span className="block text-[14px] font-semibold text-gray-dark">
-                  {short} {a.year}
-                </span>
-                <span className="block text-[13px] text-gray-light">
-                  → now at {a.org}
-                </span>
+                <span className="block text-[14px] font-semibold text-gray-dark">{a.name}</span>
+                <span className="block truncate text-[13px] text-gray-light">{a.headline}</span>
               </span>
               {logoForOrg(a.org) ? (
                 <img src={logoForOrg(a.org)} alt="" className="h-7 w-7 shrink-0 object-contain" />
