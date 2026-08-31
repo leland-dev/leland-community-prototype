@@ -12,12 +12,13 @@ import LineList from "./LineLeaderboard";
  * WaitlistGate (v4) — the finale, one continuous screen:
  *
  *  Act 1      · "You're qualified" copy around the member pass.
- *  The bridge · copy fades and the pass flips over: the front is your
- *               membership, the back is a referral card. Behind it, two
- *               more peek out — a stack of three guest passes to hand out.
- *  Act 2      · your spot in line above, the 24h countdown and the blurred
- *               line below. Sending the top card flings it off the stack;
- *               three sends bring your member card back, front of the line.
+ *  The bridge · three clean beats on ONE persistent element: the card
+ *               raises, flips at the apex, lands. Then the layout above it
+ *               swaps (copy → your spot) and the card rides up on a layout
+ *               animation. Then the two lower cards pop down. List last.
+ *  Act 2      · sending the top card slides it off the deck; the rest
+ *               square up on a shared spring. Three sends bring the member
+ *               card back at the front of the line.
  * ──────────────────────────────────────────────────────────────────────── */
 
 const EASE = [0.32, 0.72, 0, 1] as const;
@@ -25,6 +26,7 @@ const INVITE_CODES = ["7F3K2M", "Q2XM9A", "9BWD4T"];
 export const SPOT_LADDER = [142, 61, 19, 1];
 const WINDOW_MS = 24 * 60 * 60 * 1000;
 const PEEK_Y = 17;
+const FLIP_S = 1.5;
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -44,6 +46,8 @@ const cardBg = (depth = 0) => {
   const [a, b, c] = CARD_TONES[Math.min(depth, 2)];
   return `linear-gradient(155deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 24%, transparent 46%), radial-gradient(130% 100% at 15% 0%, ${a} 0%, ${b} 52%, ${c} 100%)`;
 };
+const CARD_CHROME =
+  "relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_8px_22px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.14]";
 
 /* Owns the 1s interval so the ticks re-render only this span, not the whole
    gate (which would remount the line list and replay its animations). */
@@ -76,13 +80,13 @@ export default function WaitlistGate({
   onSent: () => void;
   you: { name: string; aff: string; avatar?: string };
   onDone: () => void;
-  /** dev-only easter egg: double-tap the toast to step back into the flow */
+  /** dev-only easter egg: double-tap the spot number to step back */
   onDevBack?: () => void;
 }) {
   const reduced = useReducedMotion() ?? false;
-  // card → flip (mid-turn) → stack (guest passes live)
-  const [act, setAct] = useState<"card" | "flip" | "stack">("card");
-  const gate = act !== "card";
+  // card (act 1) → flip (the bridge, one keyframe pass) → gate (act 2)
+  const [act, setAct] = useState<"card" | "flip" | "gate">("card");
+  const gate = act === "gate";
   const [sharing, setSharing] = useState(false);
   const [deadline] = useState(() => {
     const k = "leland-v4-gate-deadline";
@@ -132,14 +136,11 @@ export default function WaitlistGate({
     }
   };
 
-  const beginGate = () => setAct(reduced ? "stack" : "flip");
+  const beginGate = () => setAct(reduced ? "gate" : "flip");
 
   /* ── the front: your membership ── */
   const memberCard = (
-    <div
-      className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_8px_22px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.14]"
-      style={{ background: cardBg() }}
-    >
+    <div className={CARD_CHROME} style={{ background: cardBg() }}>
       {act === "card" && !reduced ? (
         <motion.span
           aria-hidden
@@ -180,10 +181,7 @@ export default function WaitlistGate({
 
   /* ── the back: a referral card, almost a credit card ── */
   const guestCard = (i: number, depth = 0) => (
-    <div
-      className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_8px_22px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.14]"
-      style={{ background: cardBg(depth) }}
-    >
+    <div className={CARD_CHROME} style={{ background: cardBg(depth) }}>
       <div className="flex items-center justify-between px-5 pt-5">
         <img src={mark} alt="Leland" className="h-6 w-6" style={{ filter: "brightness(0) invert(1)" }} />
         <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-white/70">
@@ -212,6 +210,37 @@ export default function WaitlistGate({
     </div>
   );
 
+  /* One persistent element carries the whole bridge: member on the front,
+     guest pass 1 on the back. It never unmounts mid-animation, so there is
+     nothing to blip. Beats: raise (no spin) → flip at the apex → land. */
+  const flipCard = (
+    <motion.div
+      initial={false}
+      animate={
+        act === "card"
+          ? { y: 0, rotateY: 0, scale: 1 }
+          : act === "flip"
+            ? { y: [0, -22, -22, 0], rotateY: [0, 0, 180, 180], scale: [1, 1.06, 1.06, 1] }
+            : { y: 0, rotateY: 180, scale: 1 }
+      }
+      transition={
+        act === "flip"
+          ? { duration: FLIP_S, times: [0, 0.22, 0.8, 1], ease: "easeInOut" }
+          : { duration: 0 }
+      }
+      onAnimationComplete={() => {
+        if (act === "flip") setAct("gate");
+      }}
+      style={{ transformStyle: "preserve-3d" }}
+      className="grid"
+    >
+      <div style={{ backfaceVisibility: "hidden", gridArea: "1 / 1" }}>{memberCard}</div>
+      <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", gridArea: "1 / 1" }}>
+        {guestCard(0)}
+      </div>
+    </motion.div>
+  );
+
   return (
     <div className="relative flex h-full flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-[calc(max(1.5rem,env(safe-area-inset-bottom))+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.25rem)]">
@@ -221,7 +250,7 @@ export default function WaitlistGate({
             <motion.button
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.85, duration: 0.4 }}
+              transition={{ delay: 1.0, duration: 0.4 }}
               onClick={onDone}
               className="py-1 text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark"
             >
@@ -230,13 +259,16 @@ export default function WaitlistGate({
           ) : null}
         </div>
 
-        {/* ── slot above the pass: approval copy, then your spot ── */}
+        {/* ── slot above the pass: approval copy fades during the flip, then
+              unmounts at landing so the card rides up on a layout animation ── */}
         <div className="flex flex-col items-center text-center">
           <AnimatePresence mode="wait">
             {!gate ? (
               <motion.div
                 key="intro"
-                exit={{ opacity: 0, y: -10, transition: { duration: 0.3, ease: EASE } }}
+                animate={{ opacity: act === "card" ? 1 : 0 }}
+                transition={{ duration: 0.4, ease: EASE }}
+                exit={{ opacity: 0, transition: { duration: 0.01 } }}
                 className="flex flex-col items-center"
               >
                 <motion.span
@@ -269,9 +301,9 @@ export default function WaitlistGate({
             ) : (
               <motion.div
                 key="spot"
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.75, duration: 0.45, ease: EASE }}
+                transition={{ delay: 0.3, duration: 0.4, ease: EASE }}
                 className="flex flex-col items-center"
               >
                 <div onDoubleClick={import.meta.env.DEV && onDevBack ? onDevBack : undefined}>
@@ -302,89 +334,67 @@ export default function WaitlistGate({
           </AnimatePresence>
         </div>
 
-        {/* ── the pass: membership front, referral stack on the back ── */}
+        {/* ── the deck: the flip card stays item zero until it's sent ── */}
         <motion.div
+          layout
           initial={reduced ? { opacity: 0 } : { opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.6, ease: EASE }}
+          transition={{ layout: { duration: 0.55, ease: EASE }, opacity: { delay: 0.6, duration: 0.6, ease: EASE }, y: { delay: 0.6, duration: 0.6, ease: EASE } }}
           className="mx-auto mt-7 w-full max-w-[340px]"
           style={{ perspective: 1200 }}
         >
-          {act === "stack" ? (
-            unlocked ? (
-              memberCard
-            ) : (
-              <motion.div
-                className="relative"
-                initial={false}
-                animate={{ paddingBottom: (2 - sent) * PEEK_Y }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              >
-                {/* invisible sizer keeps the column height stable so every
-                    reorder is a pure transform, never a reflow */}
-                <div className="invisible" aria-hidden>
-                  {guestCard(0)}
-                </div>
-                <AnimatePresence>
-                  {INVITE_CODES.map((code, i) => {
-                    if (i < sent) return null;
-                    const depth = i - sent;
-                    return (
-                      <motion.div
-                        key={code}
-                        initial={depth === 0 ? false : { y: 0, scale: 1 - depth * 0.035 }}
-                        animate={{ y: depth * PEEK_Y, scale: 1 - depth * 0.035 }}
-                        exit={
-                          reduced
-                            ? { opacity: 0 }
-                            : { x: 260, y: -10, rotate: 6, opacity: 0, transition: { duration: 0.4, ease: EASE } }
-                        }
-                        transition={{ type: "spring", stiffness: 320, damping: 22, delay: depth * 0.07 }}
-                        style={{ zIndex: 30 - i }}
-                        className="absolute inset-x-0 top-0"
-                      >
-                        {guestCard(i, depth)}
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-              </motion.div>
-            )
+          {gate && unlocked ? (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: EASE }}>
+              {memberCard}
+            </motion.div>
           ) : (
             <motion.div
+              className="relative"
               initial={false}
-              animate={{
-                rotateY: act === "flip" ? 180 : 0,
-                scale: act === "flip" ? [1, 1.09, 1.09, 1] : 1,
-                y: act === "flip" ? [0, -18, -18, 0] : 0,
-              }}
-              transition={{
-                rotateY: { duration: 1.1, ease: EASE },
-                scale: { duration: 1.1, times: [0, 0.3, 0.7, 1], ease: "easeInOut" },
-                y: { duration: 1.1, times: [0, 0.3, 0.7, 1], ease: "easeInOut" },
-              }}
-              onAnimationComplete={() => {
-                if (act === "flip") setAct("stack");
-              }}
-              style={{ transformStyle: "preserve-3d" }}
-              className="grid"
+              animate={{ paddingBottom: gate ? (2 - sent) * PEEK_Y : 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              <div style={{ backfaceVisibility: "hidden", gridArea: "1 / 1" }}>{memberCard}</div>
-              <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", gridArea: "1 / 1" }}>
+              {/* invisible sizer keeps the column height stable so every
+                  reorder is a pure transform, never a reflow */}
+              <div className="invisible" aria-hidden>
                 {guestCard(0)}
               </div>
+              <AnimatePresence>
+                {INVITE_CODES.map((code, i) => {
+                  if (i < sent) return null;
+                  if (!gate && i > 0) return null;
+                  const depth = i - sent;
+                  return (
+                    <motion.div
+                      key={code}
+                      initial={depth === 0 ? false : { y: 0, scale: 1 - depth * 0.035 }}
+                      animate={{ y: depth * PEEK_Y, scale: 1 - depth * 0.035 }}
+                      exit={
+                        reduced
+                          ? { opacity: 0 }
+                          : { x: 260, y: -10, rotate: 6, opacity: 0, transition: { duration: 0.4, ease: EASE } }
+                      }
+                      transition={{ type: "spring", stiffness: 320, damping: 22, delay: gate ? 0.25 + depth * 0.08 : 0 }}
+                      style={{ zIndex: 30 - i }}
+                      className="absolute inset-x-0 top-0"
+                    >
+                      {i === 0 && sent === 0 ? flipCard : guestCard(i, depth)}
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
             </motion.div>
           )}
         </motion.div>
 
         {/* ── slot below the pass: continue, then countdown + the line ── */}
         <AnimatePresence mode="wait">
-          {!gate ? (
+          {act === "card" ? (
             <motion.div
               key="continue"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.25 } }}
+              exit={{ opacity: 0, transition: { duration: 0.3 } }}
               transition={{ delay: 1.3, duration: 0.4 }}
               className="mt-8"
             >
@@ -395,12 +405,12 @@ export default function WaitlistGate({
                 Continue
               </button>
             </motion.div>
-          ) : (
+          ) : gate ? (
             <motion.div
               key="line"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.65, duration: 0.45, ease: EASE }}
+              transition={{ delay: 0.75, duration: 0.45, ease: EASE }}
             >
               {unlocked ? (
                 <button
@@ -420,7 +430,7 @@ export default function WaitlistGate({
                 <LineList spot={spot} you={you} />
               </div>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
 
