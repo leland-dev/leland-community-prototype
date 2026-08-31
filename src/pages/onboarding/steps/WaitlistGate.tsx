@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { motion, AnimatePresence, useMotionTemplate, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import { Check, Clock, ShieldCheck } from "lucide-react";
 
 import { ShareSheet } from "../../waitlist/Waitlist";
@@ -48,6 +48,62 @@ const cardBg = (depth = 0) => {
 };
 const CARD_CHROME =
   "relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_8px_22px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.14]";
+
+/* FloatTilt — the "real card" treatment for the top of the deck: a gentle
+   idle float, and 3D tilt that follows the phone's gyroscope (pointer on
+   desktop) with a light reflection that tracks the tilt. */
+function FloatTilt({ children, reduced }: { children: React.ReactNode; reduced: boolean }) {
+  const mx = useMotionValue(0); // -1..1 across the card / device roll
+  const my = useMotionValue(0);
+  const rx = useSpring(useTransform(my, [-1, 1], [8, -8]), { stiffness: 150, damping: 18 });
+  const ry = useSpring(useTransform(mx, [-1, 1], [-9, 9]), { stiffness: 150, damping: 18 });
+  const gx = useTransform(mx, [-1, 1], [22, 78]);
+  const gy = useTransform(my, [-1, 1], [15, 85]);
+  const glare = useMotionTemplate`radial-gradient(130% 90% at ${gx}% ${gy}%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.05) 38%, transparent 68%)`;
+
+  useEffect(() => {
+    if (reduced) return;
+    let base: number | null = null;
+    const onOrient = (e: DeviceOrientationEvent) => {
+      if (e.gamma == null || e.beta == null) return;
+      if (base === null) base = e.beta; // however they're holding it is neutral
+      mx.set(Math.max(-1, Math.min(1, e.gamma / 26)));
+      my.set(Math.max(-1, Math.min(1, (e.beta - base) / 26)));
+    };
+    window.addEventListener("deviceorientation", onOrient);
+    return () => window.removeEventListener("deviceorientation", onOrient);
+  }, [reduced, mx, my]);
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (reduced) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    mx.set(((e.clientX - r.left) / r.width) * 2 - 1);
+    my.set(((e.clientY - r.top) / r.height) * 2 - 1);
+  };
+  const reset = () => {
+    mx.set(0);
+    my.set(0);
+  };
+
+  return (
+    <motion.div
+      animate={reduced ? undefined : { y: [0, -5, 0] }}
+      transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <motion.div
+        onPointerMove={onPointerMove}
+        onPointerLeave={reset}
+        style={{ rotateX: rx, rotateY: ry, transformStyle: "preserve-3d" }}
+        className="relative"
+      >
+        {children}
+        {!reduced ? (
+          <motion.div aria-hidden className="pointer-events-none absolute inset-0 z-20 rounded-[22px]" style={{ background: glare }} />
+        ) : null}
+      </motion.div>
+    </motion.div>
+  );
+}
 
 /* Owns the 1s interval so the ticks re-render only this span, not the whole
    gate (which would remount the line list and replay its animations). */
@@ -136,7 +192,12 @@ export default function WaitlistGate({
     }
   };
 
-  const beginGate = () => setAct(reduced ? "gate" : "flip");
+  const beginGate = () => {
+    // iOS only grants gyroscope access from a user gesture; this is one
+    type DOE = typeof DeviceOrientationEvent & { requestPermission?: () => Promise<string> };
+    (DeviceOrientationEvent as DOE).requestPermission?.().catch(() => {});
+    setAct(reduced ? "gate" : "flip");
+  };
 
   /* ── the front: your membership ── */
   const memberCard = (
@@ -223,7 +284,7 @@ export default function WaitlistGate({
         act === "card"
           ? { y: 0, rotateY: 0, scale: 1 }
           : flipping
-            ? { y: [0, -34, -34, 0], rotateY: [0, 0, 540, 540], scale: [1, 1.09, 1.09, 1] }
+            ? { y: [0, -16, -16, 0], rotateY: [0, 0, 540, 540], scale: [1, 1.045, 1.045, 1] }
             : { y: 0, rotateY: 540, scale: 1 }
       }
       transition={
@@ -279,7 +340,7 @@ export default function WaitlistGate({
 
   return (
     <div className="relative flex h-full flex-col">
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-[calc(max(1.5rem,env(safe-area-inset-bottom))+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.25rem)]">
+      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-6 pb-[calc(max(1.5rem,env(safe-area-inset-bottom))+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.25rem)]">
         {/* a way out, once you're at the gate */}
         <div className="-mt-7 mb-2 flex h-7 justify-end">
           {gate ? (
@@ -384,7 +445,7 @@ export default function WaitlistGate({
         >
           {gate && unlocked ? (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: EASE }}>
-              {memberCard}
+              <FloatTilt reduced={reduced}>{memberCard}</FloatTilt>
             </motion.div>
           ) : (
             <motion.div
@@ -422,18 +483,21 @@ export default function WaitlistGate({
                         reduced
                           ? { opacity: 0 }
                           : {
-                              x: [0, 36, 300],
-                              y: [0, -26, -14],
-                              rotate: [0, 2, 7],
-                              opacity: [1, 1, 0],
-                              transition: { duration: 0.75, times: [0, 0.4, 1], ease: "easeInOut" },
+                              x: [0, 30, 620],
+                              y: [0, -22, -6],
+                              rotate: [0, 2, 8],
+                              transition: { duration: 0.8, times: [0, 0.35, 1], ease: "easeInOut" },
                             }
                       }
                       transition={{ type: "spring", stiffness: 300, damping: 24, delay: gate ? 0.2 + depth * 0.07 : 0 }}
                       style={{ zIndex: 30 - i }}
                       className="absolute inset-x-0 top-0"
                     >
-                      {i === 0 && sent === 0 ? flipCard : guestCard(i, depth)}
+                      {depth === 0 ? (
+                        <FloatTilt reduced={reduced}>{i === 0 && sent === 0 ? flipCard : guestCard(i, depth)}</FloatTilt>
+                      ) : (
+                        guestCard(i, depth)
+                      )}
                     </motion.div>
                   );
                 })}
