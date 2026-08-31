@@ -185,18 +185,17 @@ export default function WaitlistGate({
       className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.14]"
       style={{ background: cardBg(depth) }}
     >
-      {/* magstripe */}
-      <div className="mt-4 h-9 w-full bg-black/45" />
-      <div className="px-5 pb-5 pt-4">
-        <div className="flex items-center justify-between">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Admit one</p>
-          <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-white/70">
-            Guest pass · {i + 1} of 3
-          </span>
-        </div>
+      <div className="flex items-center justify-between px-5 pt-5">
+        <img src={mark} alt="Leland" className="h-6 w-6" style={{ filter: "brightness(0) invert(1)" }} />
+        <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-white/70">
+          Guest pass · {i + 1} of 3
+        </span>
+      </div>
+      <div className="px-5 pb-5 pt-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Admit one</p>
         {/* embossed, card-number style */}
         <p
-          className="mt-2.5 font-mono text-[25px] font-semibold tracking-[0.22em]"
+          className="mt-1.5 font-mono text-[25px] font-semibold tracking-[0.22em]"
           style={{ textShadow: "0 1px 0 rgba(255,255,255,0.16), 0 -1px 1px rgba(0,0,0,0.65)" }}
         >
           {INVITE_CODES[i]}
@@ -221,7 +220,7 @@ export default function WaitlistGate({
         {gate && toast ? (
           <motion.div
             initial={{ opacity: 0, y: -14 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.35, delay: 1.3, ease: EASE } }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.35, delay: 1.8, ease: EASE } }}
             exit={{ opacity: 0, y: -14, transition: { duration: 0.25 } }}
             onDoubleClick={import.meta.env.DEV && onDevBack ? onDevBack : undefined}
             className="absolute inset-x-4 top-[calc(env(safe-area-inset-top,0px)+0.75rem)] z-30 flex items-center gap-2.5 rounded-2xl bg-gray-dark py-3 pl-4 pr-2 text-[13px] font-medium text-white shadow-[0_12px_32px_rgba(0,0,0,0.28)]"
@@ -246,7 +245,7 @@ export default function WaitlistGate({
             <motion.button
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.4, duration: 0.4 }}
+              transition={{ delay: 1.85, duration: 0.4 }}
               onClick={onDone}
               className="py-1 text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark"
             >
@@ -296,21 +295,23 @@ export default function WaitlistGate({
                 key="spot"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9, duration: 0.45, ease: EASE }}
+                transition={{ delay: 0.75, duration: 0.45, ease: EASE }}
                 className="flex flex-col items-center"
               >
-                <AnimatePresence mode="wait">
-                  <motion.p
-                    key={spot}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.35 }}
-                    className="font-serif text-[56px] leading-none text-gray-dark"
-                  >
-                    #{spot}
-                  </motion.p>
-                </AnimatePresence>
+                <div className="rounded-[20px] bg-gray-dark px-7 pb-3.5 pt-3 text-white shadow-[0_12px_32px_rgba(0,0,0,0.22)]">
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={spot}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      transition={{ duration: 0.35 }}
+                      className="font-serif text-[44px] leading-none"
+                    >
+                      #{spot}
+                    </motion.p>
+                  </AnimatePresence>
+                </div>
                 <h2 className="mt-4 max-w-[24ch] text-balance font-serif text-[20px] leading-tight text-gray-dark">
                   {unlocked
                     ? "You're at the front of the line"
@@ -337,37 +338,55 @@ export default function WaitlistGate({
             unlocked ? (
               memberCard
             ) : (
-              <div className="relative" style={{ paddingBottom: (2 - sent) * PEEK_Y }}>
-                <AnimatePresence initial={false}>
+              <motion.div
+                className="relative"
+                initial={false}
+                animate={{ paddingBottom: (2 - sent) * PEEK_Y }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
+                {/* invisible sizer keeps the column height stable so every
+                    reorder is a pure transform, never a reflow */}
+                <div className="invisible" aria-hidden>
+                  {guestCard(0)}
+                </div>
+                <AnimatePresence>
                   {INVITE_CODES.map((code, i) => {
                     if (i < sent) return null;
                     const depth = i - sent;
                     return (
                       <motion.div
                         key={code}
-                        initial={false}
+                        initial={depth === 0 ? false : { y: 0, scale: 1 - depth * 0.035 }}
                         animate={{ y: depth * PEEK_Y, scale: 1 - depth * 0.035 }}
                         exit={
                           reduced
                             ? { opacity: 0 }
-                            : { x: 480, rotate: 10, opacity: 0, transition: { duration: 0.45, ease: EASE } }
+                            : { x: 260, y: -10, rotate: 6, opacity: 0, transition: { duration: 0.4, ease: EASE } }
                         }
-                        transition={{ type: "spring", stiffness: 300, damping: 28 }}
-                        style={{ zIndex: 10 - depth, transformOrigin: "center bottom" }}
-                        className={depth === 0 ? "relative" : "absolute inset-x-0 top-0"}
+                        transition={{ type: "spring", stiffness: 320, damping: 22, delay: depth * 0.07 }}
+                        style={{ zIndex: 30 - i }}
+                        className="absolute inset-x-0 top-0"
                       >
                         {guestCard(i, depth)}
                       </motion.div>
                     );
                   })}
                 </AnimatePresence>
-              </div>
+              </motion.div>
             )
           ) : (
             <motion.div
               initial={false}
-              animate={{ rotateY: act === "flip" ? 180 : 0 }}
-              transition={{ duration: 1.1, ease: EASE }}
+              animate={{
+                rotateY: act === "flip" ? 180 : 0,
+                scale: act === "flip" ? [1, 1.09, 1.09, 1] : 1,
+                y: act === "flip" ? [0, -18, -18, 0] : 0,
+              }}
+              transition={{
+                rotateY: { duration: 1.1, ease: EASE },
+                scale: { duration: 1.1, times: [0, 0.3, 0.7, 1], ease: "easeInOut" },
+                y: { duration: 1.1, times: [0, 0.3, 0.7, 1], ease: "easeInOut" },
+              }}
               onAnimationComplete={() => {
                 if (act === "flip") setAct("stack");
               }}
@@ -405,7 +424,7 @@ export default function WaitlistGate({
               key="line"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.15, duration: 0.45, ease: EASE }}
+              transition={{ delay: 1.65, duration: 0.45, ease: EASE }}
             >
               {unlocked ? (
                 <button
