@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Check, Loader2 } from "lucide-react";
+import { BellRing, Check, Loader2, X } from "lucide-react";
 
 import mark from "../../../assets/leland-logos/leland-mark.svg";
 import type { GradYear } from "./UniversitySearch";
@@ -43,6 +43,7 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
   const [done, setDone] = useState(0);
   // pre-permission ask, shown as the review wraps (only if not already decided)
   const [askNotify, setAskNotify] = useState(false);
+  const [toast, setToast] = useState(true);
 
   const finishReview = useCallback(() => {
     const undecided =
@@ -77,6 +78,27 @@ export default function ApplicationReview({ input, onContinue }: { input: Review
 
   return (
     <div className="relative flex h-full flex-col">
+      {/* confirmation of the notify choice, system-toast style */}
+      <AnimatePresence>
+        {toast ? (
+          <motion.div
+            initial={{ opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.35, delay: 0.5, ease: EASE } }}
+            exit={{ opacity: 0, y: -14, transition: { duration: 0.25 } }}
+            className="absolute inset-x-4 top-[calc(env(safe-area-inset-top,0px)+0.75rem)] z-30 flex items-center gap-2.5 rounded-2xl bg-gray-dark py-3 pl-4 pr-2 text-[13px] font-medium text-white shadow-[0_12px_32px_rgba(0,0,0,0.28)]"
+          >
+            <BellRing size={14} className="shrink-0" />
+            <span className="min-w-0 flex-1">We'll text you the moment the doors open.</span>
+            <button
+              onClick={() => setToast(false)}
+              aria-label="Dismiss"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <X size={15} />
+            </button>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
       <div className="flex h-full flex-col px-6 pb-10 pt-[max(2rem,env(safe-area-inset-top))]">
             <div className="flex flex-1 flex-col justify-center">
               <motion.img

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Check, Clock, BellRing, ShieldCheck, X } from "lucide-react";
+import { Check, Clock, ShieldCheck } from "lucide-react";
 
 import { ShareSheet } from "../../waitlist/Waitlist";
 import mark from "../../../assets/leland-logos/leland-mark.svg";
@@ -83,7 +83,6 @@ export default function WaitlistGate({
   // card → flip (mid-turn) → stack (guest passes live)
   const [act, setAct] = useState<"card" | "flip" | "stack">("card");
   const gate = act !== "card";
-  const [toast, setToast] = useState(true);
   const [sharing, setSharing] = useState(false);
   const [deadline] = useState(() => {
     const k = "leland-v4-gate-deadline";
@@ -138,7 +137,7 @@ export default function WaitlistGate({
   /* ── the front: your membership ── */
   const memberCard = (
     <div
-      className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.14]"
+      className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_8px_22px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.14]"
       style={{ background: cardBg() }}
     >
       {act === "card" && !reduced ? (
@@ -182,7 +181,7 @@ export default function WaitlistGate({
   /* ── the back: a referral card, almost a credit card ── */
   const guestCard = (i: number, depth = 0) => (
     <div
-      className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_24px_60px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.14]"
+      className="relative overflow-hidden rounded-[22px] text-left text-white shadow-[0_8px_22px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.14)] ring-1 ring-white/[0.14]"
       style={{ background: cardBg(depth) }}
     >
       <div className="flex items-center justify-between px-5 pt-5">
@@ -215,29 +214,6 @@ export default function WaitlistGate({
 
   return (
     <div className="relative flex h-full flex-col">
-      {/* system-style toast: enters with act two */}
-      <AnimatePresence>
-        {gate && toast ? (
-          <motion.div
-            initial={{ opacity: 0, y: -14 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.35, delay: 1.8, ease: EASE } }}
-            exit={{ opacity: 0, y: -14, transition: { duration: 0.25 } }}
-            onDoubleClick={import.meta.env.DEV && onDevBack ? onDevBack : undefined}
-            className="absolute inset-x-4 top-[calc(env(safe-area-inset-top,0px)+0.75rem)] z-30 flex items-center gap-2.5 rounded-2xl bg-gray-dark py-3 pl-4 pr-2 text-[13px] font-medium text-white shadow-[0_12px_32px_rgba(0,0,0,0.28)]"
-          >
-            <BellRing size={14} className="shrink-0" />
-            <span className="min-w-0 flex-1">We'll text you the moment the doors open.</span>
-            <button
-              onClick={() => setToast(false)}
-              aria-label="Dismiss"
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              <X size={15} />
-            </button>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-
       <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-[calc(max(1.5rem,env(safe-area-inset-bottom))+0.5rem)] pt-[calc(env(safe-area-inset-top,0px)+4.25rem)]">
         {/* a way out, once you're at the gate */}
         <div className="-mt-7 mb-2 flex h-7 justify-end">
@@ -298,7 +274,7 @@ export default function WaitlistGate({
                 transition={{ delay: 0.75, duration: 0.45, ease: EASE }}
                 className="flex flex-col items-center"
               >
-                <div className="rounded-[20px] bg-gray-dark px-7 pb-3.5 pt-3 text-white shadow-[0_12px_32px_rgba(0,0,0,0.22)]">
+                <div onDoubleClick={import.meta.env.DEV && onDevBack ? onDevBack : undefined}>
                   <AnimatePresence mode="wait">
                     <motion.p
                       key={spot}
@@ -306,7 +282,7 @@ export default function WaitlistGate({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -12 }}
                       transition={{ duration: 0.35 }}
-                      className="font-serif text-[44px] leading-none"
+                      className="font-serif text-[52px] leading-none text-gray-dark"
                     >
                       #{spot}
                     </motion.p>
