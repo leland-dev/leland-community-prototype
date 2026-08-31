@@ -21,21 +21,40 @@ import { ContextLayout } from "./components/Layout";
 function ScrollToTop() {
   const { pathname } = useLocation();
   const navigationType = useNavigationType();
+  // The app-promo takeover embeds pages in a ?mini=1 iframe, which shares this
+  // tab's sessionStorage — skip restore/save there so the demo neither
+  // inherits nor pollutes the real tab's scroll positions.
+  const isMini = new URLSearchParams(window.location.search).has("mini");
 
   useEffect(() => {
+    if (isMini) {
+      // Chrome restores per-URL scroll on iframe reloads; opt out entirely.
+      try {
+        window.history.scrollRestoration = "manual";
+      } catch {
+        /* noop */
+      }
+      window.scrollTo(0, 0);
+      return;
+    }
     const saved = sessionStorage.getItem(`scrollY:${pathname}`);
     if (navigationType === "POP" && saved !== null) {
       window.scrollTo({ top: Number(saved), behavior: "smooth" });
     } else {
       window.scrollTo(0, 0);
     }
-  }, [pathname, navigationType]);
+  }, [pathname, navigationType, isMini]);
 
   useEffect(() => {
+    if (isMini) return;
     const onScroll = () => sessionStorage.setItem(`scrollY:${pathname}`, String(window.scrollY));
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [pathname]);
+  }, [pathname, isMini]);
+
+  // The mini stylesheet (scrollbar hiding, nav head-room, entrance cascade) is
+  // injected synchronously by the inline script in index.html so the page never
+  // paints un-animated content for a frame.
 
   return null;
 }
@@ -46,7 +65,7 @@ import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
 import Messaging from "./pages/Messaging";
 import ConversationDetail from "./pages/ConversationDetail";
-import { LelandThread } from "./components/promo/AppPromo";
+import { CaptureDashboard, CaptureInbox, LelandThread } from "./components/promo/AppPromo";
 import ConversationRelationship from "./pages/ConversationRelationship";
 import Profile from "./pages/Profile";
 import ProfileV2 from "./pages/ProfileV2";
@@ -139,6 +158,8 @@ export default function App() {
       <Route path="/waitlist-onboarding" element={<WaitlistOnboarding />} />
       <Route path="/reply/:postId" element={<ReplyCompose />} />
       <Route path="/replay/:postId" element={<ReplayViewer />} />
+      <Route path="/capture/inbox" element={<CaptureInbox />} />
+      <Route path="/capture/dashboard" element={<CaptureDashboard />} />
       <Route path="/messages/leland" element={<LelandThread />} />
       <Route path="/messages/:conversationId" element={<ConversationDetail />} />
       <Route path="/messages/:conversationId/relationship" element={<ConversationRelationship />} />
