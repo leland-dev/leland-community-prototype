@@ -1117,6 +1117,27 @@ function PostThread() {
     setCommentText("");
   };
 
+  const hasComment = commentText.trim().length > 0;
+  // Shared Post button — reused in both positions (top row when idle, icon row
+  // when focused) with the SAME layoutId so it slides between them. Disabled +
+  // gray until there's input, then black. onMouseDown-preventDefault keeps the
+  // field focused so clicking Post doesn't collapse the toolbar mid-animation.
+  const postButton = (
+    <motion.div layoutId="reply-post-btn" className="shrink-0" transition={{ type: "spring", stiffness: 500, damping: 40 }}>
+      <Button
+        size="md"
+        variant={hasComment ? "dark" : "secondary"}
+        rounded="rounded-full"
+        disabled={!hasComment}
+        onMouseDown={e => e.preventDefault()}
+        onClick={submitComment}
+        className="font-semibold"
+      >
+        Post
+      </Button>
+    </motion.div>
+  );
+
   // alt-nav: the comment composer is a full-width row at the top of the replies
   // (directly under the post) instead of a fixed bar at the bottom.
   const inlineComposer = (
@@ -1137,9 +1158,9 @@ function PostThread() {
         </div>
       ) : null}
 
-      {/* Reply field — mirrors the feed's "What's new?" composer: avatar +
-          borderless prompt + an outline Post button. Focusing the field reveals
-          the same media toolbar the compose modal shows, animated in below. */}
+      {/* Reply field — avatar + borderless prompt. When idle, the Post button
+          sits inline on the top row; focusing reveals the media toolbar and the
+          Post button slides down onto that row (shared layoutId animation). */}
       <div>
         <div className="flex items-center gap-3">
           <img src={profilePhoto} alt="You" className="h-10 w-10 shrink-0 rounded-full object-cover" />
@@ -1155,15 +1176,8 @@ function PostThread() {
             className="scrollbar-hide max-h-24 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent text-[15px] text-gray-dark outline-none placeholder:text-gray-light"
             onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
           />
-          <Button
-            size="md"
-            variant="outline"
-            rounded="rounded-[6px]"
-            onClick={submitComment}
-            className="shrink-0 font-semibold shadow-[0_1px_2px_0_rgba(16,24,40,0.06)]"
-          >
-            Post
-          </Button>
+          {/* Post lives here only while idle; when focused it moves to the row below. */}
+          {!replyFocused ? postButton : null}
         </div>
         <AnimatePresence initial={false}>
           {replyFocused ? (
@@ -1172,26 +1186,30 @@ function PostThread() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-              className="overflow-hidden pl-[52px]"
+              className="overflow-hidden"
             >
-              {/* -ml-2 aligns the first glyph under the input text (cancels p-2);
+              {/* Icons (left) + Post (right, slid down from the top row). The row's
+                  right edge matches the top row, so Post moves straight down.
                   onMouseDown-preventDefault keeps the field focused on tap. */}
-              <div className="-ml-2 mt-1.5 flex items-center gap-3">
-                {[
-                  { label: "Add image", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.5-3.5a2 2 0 0 0-2.83 0L6 20" /></svg> },
-                  { label: "Take photo", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3.5" /></svg> },
-                  { label: "Add video", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m22 8-6 4 6 4V8Z" /><rect x="2" y="6" width="14" height="12" rx="2" /></svg> },
-                  { label: "Add poll", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M6 20V10" /><path d="M12 20V4" /><path d="M18 20v-6" /></svg> },
-                ].map(t => (
-                  <button
-                    key={t.label}
-                    aria-label={t.label}
-                    onMouseDown={e => e.preventDefault()}
-                    className="shrink-0 cursor-pointer rounded-full p-2 text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
-                  >
-                    {t.icon}
-                  </button>
-                ))}
+              <div className="mt-2 flex items-center justify-between pl-[52px]">
+                <div className="-ml-2 flex items-center gap-3">
+                  {[
+                    { label: "Add image", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.5-3.5a2 2 0 0 0-2.83 0L6 20" /></svg> },
+                    { label: "Take photo", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3.5" /></svg> },
+                    { label: "Add video", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m22 8-6 4 6 4V8Z" /><rect x="2" y="6" width="14" height="12" rx="2" /></svg> },
+                    { label: "Add poll", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M6 20V10" /><path d="M12 20V4" /><path d="M18 20v-6" /></svg> },
+                  ].map(t => (
+                    <button
+                      key={t.label}
+                      aria-label={t.label}
+                      onMouseDown={e => e.preventDefault()}
+                      className="shrink-0 cursor-pointer rounded-full p-2 text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+                    >
+                      {t.icon}
+                    </button>
+                  ))}
+                </div>
+                {postButton}
               </div>
             </motion.div>
           ) : null}

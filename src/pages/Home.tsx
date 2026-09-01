@@ -3703,12 +3703,13 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
 type FollowPerson = { name: string; avatar: string; verified: boolean; subtitle: string };
 
 const peopleToFollow: FollowPerson[] = [
-  { name: "Dylan Allen",       avatar: pic1,  verified: false, subtitle: "techocarrott" },
-  { name: "Claire Vo",         avatar: pic13, verified: false, subtitle: "Claire's Substack" },
+  // First and third are verified experts (showcase).
   { name: "Julie Zhuo",        avatar: pic7,  verified: true,  subtitle: "The Looking Glass" },
+  { name: "Dylan Allen",       avatar: pic1,  verified: false, subtitle: "techocarrott" },
+  { name: "Nina Kowalski",     avatar: pic5,  verified: true,  subtitle: "McKinsey & Company" },
+  { name: "Claire Vo",         avatar: pic13, verified: false, subtitle: "Claire's Substack" },
   { name: "Molly Baz",         avatar: pic2,  verified: false, subtitle: "mollybaz" },
   { name: "Jordan Allen",      avatar: pic8,  verified: false, subtitle: "jordanallen1" },
-  { name: "Nina Kowalski",     avatar: pic5,  verified: true,  subtitle: "McKinsey & Company" },
   { name: "Garry Tan",         avatar: pic10, verified: false, subtitle: "Garry Tan" },
   { name: "Dwarkesh Patel",    avatar: pic4,  verified: true,  subtitle: "Dwarkesh Podcast" },
   { name: "Michael Brandley",  avatar: pic6,  verified: false, subtitle: "Followed by Austin Winfield" },
@@ -4878,14 +4879,14 @@ export function CategorySubtitle({ photos, experts }: { photos: string[]; expert
   );
 }
 
-// Popular experts — each row can be dismissed; the whole card hides once empty.
+// Popular experts shown in the right sidebar (follow-only, no dismiss).
 const POPULAR_EXPERTS = [
   { name: "Jasmine Singer", photo: pic1, headline: "Experienced Product Leader at LinkedIn | Ex-..." },
   { name: "Jackson Ringger", photo: pic3, headline: "Ex-McKinsey Consultant | Wharton MBA" },
   { name: "Erika Mah", photo: pic5, headline: "MBA Expert | Stanford GSB | 100+ M7 Admits" },
 ];
 
-function ExpertRow({ expert, onDismiss }: { expert: (typeof POPULAR_EXPERTS)[number]; onDismiss: () => void }) {
+function ExpertRow({ expert }: { expert: (typeof POPULAR_EXPERTS)[number] }) {
   const [following, setFollowing] = useState(false);
   return (
     <SidebarCard
@@ -4894,32 +4895,19 @@ function ExpertRow({ expert, onDismiss }: { expert: (typeof POPULAR_EXPERTS)[num
       title={expert.name}
       subtitle={expert.headline}
       right={
-        <div className="flex items-center gap-1.5">
-          <Button size="sm" variant="secondary" rounded="rounded-full" onClick={() => setFollowing((f) => !f)} className="min-w-[74px] font-semibold">
-            {following ? "Following" : "Follow"}
-          </Button>
-          <button
-            onClick={onDismiss}
-            aria-label={`Dismiss ${expert.name}`}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </button>
-        </div>
+        <Button size="sm" variant="secondary" rounded="rounded-full" onClick={() => setFollowing((f) => !f)} className="min-w-[74px] font-semibold">
+          {following ? "Following" : "Follow"}
+        </Button>
       }
     />
   );
 }
 
 function PopularExperts() {
-  const [experts, setExperts] = useState(POPULAR_EXPERTS);
-  if (experts.length === 0) return null;
   return (
     <SidebarSectionCard title="Popular experts" to="/browse" bleed={false}>
-      {experts.map((e) => (
-        <ExpertRow key={e.name} expert={e} onDismiss={() => setExperts((prev) => prev.filter((x) => x.name !== e.name))} />
+      {POPULAR_EXPERTS.map((e) => (
+        <ExpertRow key={e.name} expert={e} />
       ))}
     </SidebarSectionCard>
   );
