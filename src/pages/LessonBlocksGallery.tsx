@@ -193,6 +193,7 @@ const LIVE_SESSION: Block[] = [
 
 const LESSON_PAGE_STUB_ACTIONS = {
   onShareFeedback: () => {},
+  onOpenSupport: () => {},
   onOpenCalendar: () => {},
   onViewRecording: () => {},
   liveSessionVariant: "addToCalendar" as const,

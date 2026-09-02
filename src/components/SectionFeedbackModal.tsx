@@ -81,15 +81,7 @@ const SectionFeedbackModalImpl = ({
                 />
               </div>
             </div>
-            <div className="flex items-center gap-3 pt-8">
-              <Button
-                label="Skip"
-                buttonColor={ButtonColor.WHITE}
-                size={ButtonSize.LARGE}
-                rounded
-                width={ButtonWidth.FULL}
-                onClick={() => setStep("thanks")}
-              />
+            <div className="pt-8">
               <Button
                 label="Submit feedback"
                 buttonColor={ButtonColor.PRIMARY}
