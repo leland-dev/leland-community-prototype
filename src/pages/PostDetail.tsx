@@ -13,6 +13,11 @@ import { FADE_TRANSITION, FADE_IN, FADE_OUT } from "../lib/pushTransition";
 import { posts, type Post, FeedPost, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar, HomeSidebar, PollCard, usePostBase, POST_HOVER_SHADOW, VerifiedBadge } from "./Home";
 import { Button } from "../components/Button";
 import ImageLightbox from "../components/ImageLightbox";
+import ComposerMediaButton from "../components/ComposerMediaButton";
+import composerImageIcon from "../assets/icons/image.svg";
+import composerCameraIcon from "../assets/icons/camera.svg";
+import composerVideoIcon from "../assets/icons/video-icon.svg";
+import composerPollIcon from "../assets/icons/bar-chart.svg";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import commentsIcon from "../assets/icons/comments.svg";
@@ -1173,7 +1178,7 @@ function PostThread() {
             onChange={e => { setCommentText(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${e.target.scrollHeight}px`; }}
             placeholder="Add a comment…"
             rows={1}
-            className="scrollbar-hide max-h-24 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent text-[15px] text-gray-dark outline-none placeholder:text-gray-light"
+            className="scrollbar-hide max-h-24 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent text-[15px] text-gray-dark outline-none placeholder:text-gray-extra-light"
             onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitComment(); }}
           />
           {/* Post lives here only while idle; when focused it moves to the row below. */}
@@ -1192,21 +1197,14 @@ function PostThread() {
                   right edge matches the top row, so Post moves straight down.
                   onMouseDown-preventDefault keeps the field focused on tap. */}
               <div className="mt-2 flex items-center justify-between pl-[52px]">
-                <div className="-ml-2 flex items-center gap-3">
+                <div className="-ml-2.5 flex items-center gap-1">
                   {[
-                    { label: "Add image", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.5-3.5a2 2 0 0 0-2.83 0L6 20" /></svg> },
-                    { label: "Take photo", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3.5" /></svg> },
-                    { label: "Add video", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m22 8-6 4 6 4V8Z" /><rect x="2" y="6" width="14" height="12" rx="2" /></svg> },
-                    { label: "Add poll", icon: <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M6 20V10" /><path d="M12 20V4" /><path d="M18 20v-6" /></svg> },
+                    { label: "Add image", src: composerImageIcon },
+                    { label: "Take photo", src: composerCameraIcon },
+                    { label: "Add video", src: composerVideoIcon },
+                    { label: "Add poll", src: composerPollIcon },
                   ].map(t => (
-                    <button
-                      key={t.label}
-                      aria-label={t.label}
-                      onMouseDown={e => e.preventDefault()}
-                      className="shrink-0 cursor-pointer rounded-full p-2 text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
-                    >
-                      {t.icon}
-                    </button>
+                    <ComposerMediaButton key={t.label} src={t.src} label={t.label} onMouseDown={e => e.preventDefault()} />
                   ))}
                 </div>
                 {postButton}

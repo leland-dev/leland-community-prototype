@@ -61,6 +61,7 @@ function ScrollToTop() {
 }
 
 import Home from "./pages/Home";
+import Topic from "./pages/Topic";
 import Browse from "./pages/Browse";
 import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
@@ -131,6 +132,7 @@ import LessonBlocksGallery from "./pages/LessonBlocksGallery";
 import Waitlist from "./pages/waitlist/Waitlist";
 import WaitlistOnboarding from "./pages/waitlist/WaitlistOnboarding";
 import AltNavExpertPage from "./pages/AltNavExpertPage";
+import { FeedAdminProvider } from "./contexts/FeedAdminContext";
 
 export default function App() {
   return (
@@ -145,6 +147,7 @@ export default function App() {
     <GoalsProvider>
     <FullGoalsProvider>
     <FeedDemoProvider>
+    <FeedAdminProvider>
     <ScrollToTop />
     <PageExitProvider>
     <Routes>
@@ -262,6 +265,8 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/post/:postId" element={<PostDetail />} />
           <Route path="/post/:postId/comment/:commentId" element={<CommentDetail />} />
+          {/* Topic pages — hashtag-like filtered feeds (Trending topics sidebar) */}
+          <Route path="/topic/:slug" element={<Topic />} />
           {/* Isolated LinkedIn-nav experience — feed, post detail, and the
               destinations behind the top-nav items. */}
           <Route path="/linkedin-nav" element={<Home />} />
@@ -281,6 +286,7 @@ export default function App() {
     </Routes>
     <PageExitOverlay />
     </PageExitProvider>
+    </FeedAdminProvider>
     </FeedDemoProvider>
     </FullGoalsProvider>
     </GoalsProvider>

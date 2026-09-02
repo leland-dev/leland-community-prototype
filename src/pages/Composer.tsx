@@ -6,6 +6,11 @@ import type { Post, ImageEntry } from "./Home";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import articlePhoto from "../assets/photography/talking.jpeg";
 import { useFeedDemo } from "../contexts/FeedDemoContext";
+import ComposerMediaButton from "../components/ComposerMediaButton";
+import composerImageIcon from "../assets/icons/image.svg";
+import composerCameraIcon from "../assets/icons/camera.svg";
+import composerVideoIcon from "../assets/icons/video-icon.svg";
+import composerPollIcon from "../assets/icons/bar-chart.svg";
 
 // ─── Composer — Substack architecture, Leland skin ────────────────────
 // Default surface is a quick post (text, images, poll). Long-form and live are
@@ -401,6 +406,10 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const [scheduledFor, setScheduledFor] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  // Drives the modal's entrance/exit. dismiss() plays the exit; the real onClose
+  // (which unmounts us in the parent) fires on AnimatePresence's onExitComplete.
+  const [open, setOpen] = useState(true);
+  const dismiss = () => setOpen(false);
   const [draftsOpen, setDraftsOpen] = useState(openDraftsOnMount ?? false);
   const [draftsTab, setDraftsTab] = useState<DraftTab>(draftsTabOnMount ?? "Drafts");
   const [discardOpen, setDiscardOpen] = useState(false);
@@ -824,16 +833,16 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
         poll: pollOptions,
         articleHtml,
       });
-      onClose();
+      dismiss();
       return;
     }
     onPublish(buildPost());
-    onClose();
+    dismiss();
   };
 
   const saveDraft = () => {
     draftStore.unshift({ id: Date.now(), mode, text: mode === "live" ? replayCaption : text, title: mode === "golive" ? goLiveTitle : title, subtitle, topic: mode === "live" ? (selectedRecording ?? "") : topic, poll: pollOptions, articleHtml, editedAt: Date.now() });
-    onClose();
+    dismiss();
     onDraftSaved?.();
   };
 
@@ -881,7 +890,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const handleCancel = () => {
     demoToken.current++;
     if (isDirty) setDiscardOpen(true);
-    else onClose();
+    else dismiss();
   };
 
   const storedCount = draftStore.length + scheduledStore.length;
@@ -915,8 +924,23 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   // Portal to <body>: Home's <main> is a z-0 stacking context, which would
   // trap the overlay underneath the app's fixed header and tab bar.
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex flex-col bg-white md:items-center md:justify-center md:bg-black/50 md:p-6">
-      <div className="mx-auto flex h-full w-full max-w-[600px] flex-col md:h-[min(880px,92dvh)] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white">
+    <AnimatePresence onExitComplete={onClose}>
+      {open && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+      onClick={e => { if (e.target === e.currentTarget) handleCancel(); }}
+      className="fixed inset-0 z-[60] flex flex-col bg-white md:items-center md:justify-center md:bg-black/50 md:p-6"
+    >
+      <motion.div
+        initial={{ scale: 0.98, y: 8 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.98, y: 8 }}
+        transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mx-auto flex h-full w-full max-w-[600px] flex-col md:h-[min(880px,92dvh)] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white"
+      >
         {/* Header (the dark editor step brings its own chrome) */}
         {!(mode === "live" && liveStep === "edit") ? (
         <div className="flex h-14 shrink-0 items-center justify-between px-4">
@@ -1046,22 +1070,14 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               />
 
               {/* Media toolbar sits right under the input */}
-              <div className="-ml-2 mt-1.5 flex items-center gap-3">
-                {toolbarButton("Add image", () => fileInputRef.current?.click(), (
-                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.5-3.5a2 2 0 0 0-2.83 0L6 20" /></svg>
-                ), images.length > 0)}
+              <div className="-ml-2.5 mt-1.5 flex items-center gap-1">
+                <ComposerMediaButton label="Add image" src={composerImageIcon} onClick={() => fileInputRef.current?.click()} active={images.length > 0} />
                 <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelect} />
-                {toolbarButton("Take photo", () => cameraInputRef.current?.click(), (
-                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                ))}
+                <ComposerMediaButton label="Take photo" src={composerCameraIcon} onClick={() => cameraInputRef.current?.click()} />
                 <input ref={cameraInputRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleImageSelect} />
-                {toolbarButton("Add video", () => videoInputRef.current?.click(), (
-                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m22 8-6 4 6 4V8Z" /><rect x="2" y="6" width="14" height="12" rx="2" /></svg>
-                ))}
+                <ComposerMediaButton label="Add video" src={composerVideoIcon} onClick={() => videoInputRef.current?.click()} />
                 <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleVideoSelect} />
-                {toolbarButton("Add poll", () => setPollOptions(opts => (opts === null ? ["", ""] : opts)), (
-                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M6 20V10" /><path d="M12 20V4" /><path d="M18 20v-6" /></svg>
-                ), pollOptions !== null)}
+                <ComposerMediaButton label="Add poll" src={composerPollIcon} onClick={() => setPollOptions(opts => (opts === null ? ["", ""] : opts))} active={pollOptions !== null} />
               </div>
 
               {scheduledChip}
@@ -1942,7 +1958,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             </div>
           </>
         ) : null}
-      </div>
+      </motion.div>
 
       {/* Clip length sheet — minutes + seconds wheels */}
       <AnimatePresence>
@@ -1978,7 +1994,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 setScheduleOpen(false);
                 if (canSubmit) {
                   scheduledStore.unshift({ id: Date.now(), mode, snippet: mode === "article" ? title.trim() : text.trim(), scheduledFor: label, editedAt: Date.now(), text, title, subtitle, topic, poll: pollOptions, articleHtml });
-                  onClose();
+                  dismiss();
                   onScheduled?.();
                 } else {
                   setScheduledFor(label);
@@ -2207,7 +2223,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               <button onClick={saveDraft} className="w-full cursor-pointer rounded-full bg-gray-dark py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[#333]">
                 Save draft
               </button>
-              <button onClick={onClose} className="mt-2 w-full cursor-pointer rounded-full bg-gray-100 py-3 text-[15px] font-semibold text-red-500 transition-colors hover:bg-gray-200">
+              <button onClick={() => { setDiscardOpen(false); dismiss(); }} className="mt-2 w-full cursor-pointer rounded-full bg-gray-100 py-3 text-[15px] font-semibold text-red-500 transition-colors hover:bg-gray-200">
                 Discard
               </button>
               <button onClick={() => setDiscardOpen(false)} className="mt-1 w-full cursor-pointer rounded-full py-3 text-[15px] font-medium text-gray-dark">
@@ -2217,7 +2233,9 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
           </>
         ) : null}
       </AnimatePresence>
-    </div>,
+    </motion.div>
+      )}
+    </AnimatePresence>,
     document.body
   );
 }

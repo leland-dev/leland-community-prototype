@@ -374,6 +374,8 @@ export function ContextLayout() {
   // boxed card, same persistent sidebars. Comment pages (/post/:id/comment/:cid)
   // render a comment AS a post, so they share the exact same frame.
   const isRegularPost = pathname.startsWith("/post/");
+  // Topic pages (/topic/:slug) share the classic feed's boxed 640/298 frame.
+  const isTopicPage = pathname.startsWith("/topic/");
   // Any post detail (alt-nav or regular) shares the feed's 640/356 treatment.
   const isPostDetail = isAltNavPost || isRegularPost;
   // The isolated LinkedIn-nav experience lives under /linkedin-nav: its feed and
@@ -392,7 +394,7 @@ export function ContextLayout() {
   //   classicEdge — feed capped at 640 with 356px sidebars pinned to the window edges
   // Both default to centered; feedEdgeToEdge flips them together.
   const { feedEdgeToEdge } = useTopNavStyle();
-  const isClassicFeed = isClassicHome || isRegularPost;
+  const isClassicFeed = isClassicHome || isRegularPost || isTopicPage;
   const centered = isClassicFeed && !feedEdgeToEdge;
   const classicEdge = isClassicFeed && feedEdgeToEdge;
 
@@ -406,7 +408,7 @@ export function ContextLayout() {
       // The LinkedIn-layout pages and the centered classic feed/post let their center
       // column fill the remaining space (no cap); the alt-nav feed / post detail and
       // the edge-to-edge classic feed/post stay at 640, alt-nav sub-pages at 720.
-      contentMaxWidth={isLinkedInLayout || centered ? undefined : isHomeFeed || isPostDetail ? 640 : isAltNavSubpage ? 720 : contentMaxWidth}
+      contentMaxWidth={isLinkedInLayout || centered ? undefined : isHomeFeed || isPostDetail || isTopicPage ? 640 : isAltNavSubpage ? 720 : contentMaxWidth}
       // LinkedIn-layout pages and the centered classic feed/post are centered within
       // 1280; the alt-nav feed / sub-pages and the edge-to-edge classic feed/post
       // stay edge-to-edge so their left sidebar sits flush-left.
@@ -414,7 +416,7 @@ export function ContextLayout() {
       // Right column: 348px on the LinkedIn-layout pages, 298px on the centered
       // classic feed/post, 356px on the alt-nav feed / post / dashboard and the
       // edge-to-edge classic feed/post.
-      sidebarWidth={isLinkedInLayout ? 348 : centered ? 298 : isHomeFeed || isPostDetail || isAltNavDashboard ? 356 : undefined}
+      sidebarWidth={isLinkedInLayout ? 348 : centered ? 298 : isHomeFeed || isPostDetail || isAltNavDashboard || isTopicPage ? 356 : undefined}
       // Left column: 240px on the LinkedIn-layout pages, 298px on the centered
       // classic feed/post; alt-nav pins its sidebar at 250px.
       leftSidebarWidth={isAltNav ? 250 : isLinkedInLayout ? 240 : centered ? 298 : undefined}
@@ -432,7 +434,7 @@ export function ContextLayout() {
       paddingXClassName={isAltNav ? "px-4" : undefined}
       // Start the row at the sidebar's sticky pin point (nav 61px + 20px gap) so
       // the columns don't slide up 20px before locking as you scroll.
-      paddingYClassName={isLinkedInLayout || isHomeFeed || isAltNavSubpage || isRegularPost ? "py-4 sm:pt-5 sm:pb-10" : undefined}
+      paddingYClassName={isLinkedInLayout || isHomeFeed || isAltNavSubpage || isRegularPost || isTopicPage ? "py-4 sm:pt-5 sm:pb-10" : undefined}
     >
       {/* On alt-nav sub-pages the department sub-nav renders here, at the top of
           the content column, instead of the suppressed full-width chrome bar. */}
