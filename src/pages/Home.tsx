@@ -25,6 +25,9 @@ import SidebarCard from "../components/SidebarCard";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import profileCover from "../assets/img/cover-image-2.png";
 import topicHash from "../assets/img/topic-hash.svg";
+import aibpImg from "../assets/placeholder images/courses/AIBP.png";
+import samWielenImg from "../assets/placeholder images/courses/HERO-Sam-Vander-Wielen-case-study-scaled.avif";
+import automationsImg from "../assets/placeholder images/courses/HERO-10-automations-scaled.avif";
 import editIcon from "../assets/icons/edit.svg";
 import trashIcon from "../assets/icons/trash.svg";
 import eyeClosedIcon from "../assets/icons/eye-closed.svg";
@@ -5224,7 +5227,22 @@ function SidebarSectionCard({ title, to, bleed = true, children }: { title: stri
   );
 }
 
-export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
+// Sessions the user has coming up — previewed (up to 2) in the v2 sidebar.
+const UPCOMING_SESSIONS = [
+  { title: "Alex <> Jessica", dateTime: "Today, 5:45 PM", duration: "30m", day: 16, image: pic6 },
+  { title: "Resume Review", dateTime: "Tomorrow, 11:00 AM", duration: "45m", day: 17, image: pic4 },
+];
+
+// Programs the user is mid-way through — previewed in the v2 sidebar with a
+// progress bar (the "continue learning" job-to-be-done).
+const MY_PROGRAMS = [
+  { title: "AI Builder Program: Level 1", author: "Leland", pct: 60, image: aibpImg, href: "/course/1" },
+  { title: "MBA Application Masterclass", author: "Sam Wielen", pct: 25, image: samWielenImg, href: "/courses" },
+  { title: "Consulting Case Interview Prep", author: "Jessica Lin", pct: 0, image: automationsImg, href: "/courses" },
+];
+
+// v1 — original: profile card, next session + calendar, my experts.
+function HomeSidebarV1() {
   const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-[14px]">
@@ -5267,6 +5285,71 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
   );
 }
 
+// v2 — reorganized around the two jobs-to-be-done: upcoming sessions and
+// in-progress programs. Profile card on top.
+function HomeSidebarV2() {
+  const navigate = useNavigate();
+  return (
+    <div className="flex flex-col gap-[14px]">
+      {/* 1. Profile card */}
+      <DashboardProfileCard expert={false} compact />
+
+      {/* 2. Upcoming sessions — preview up to 2 */}
+      <SidebarSectionCard title="Upcoming sessions" to="/dashboard" bleed>
+        {UPCOMING_SESSIONS.slice(0, 2).map((s) => (
+          <SessionCard key={s.title} size="small" title={s.title} dateTime={s.dateTime} duration={s.duration} day={s.day} image={s.image} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
+        ))}
+      </SidebarSectionCard>
+
+      {/* 3. Continue learning — in-progress programs show a progress bar; a
+          not-started program shows a Start CTA instead. */}
+      <SidebarSectionCard title="Continue learning" to="/my-programs" bleed>
+        {/* Demo: show the AI Builder Program and the not-started Consulting one */}
+        {[MY_PROGRAMS[0], MY_PROGRAMS[2]].map((p) => {
+          const started = p.pct > 0;
+          return (
+            <div
+              key={p.title}
+              onClick={() => navigate(p.href)}
+              className="group flex cursor-pointer items-center gap-3 rounded-[8px] px-2 py-2 transition-colors hover:bg-gray-hover"
+            >
+              <img src={p.image} alt="" className="h-[42px] w-[68px] shrink-0 rounded-[6px] object-cover" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[14px] font-semibold leading-tight text-gray-dark group-hover:underline">{p.title}</p>
+                <p className="mt-0.5 truncate text-[12px] leading-tight text-gray-light">
+                  {p.author} · {started ? `${p.pct}% complete` : "Not started"}
+                </p>
+                {started && (
+                  <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-[#222222]/[0.08]">
+                    <div className="h-full rounded-full bg-gray-dark" style={{ width: `${p.pct}%` }} />
+                  </div>
+                )}
+              </div>
+              {!started && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  rounded="rounded-full"
+                  className="shrink-0 font-semibold"
+                  onClick={(e) => { e.stopPropagation(); navigate(p.href); }}
+                >
+                  Start
+                </Button>
+              )}
+            </div>
+          );
+        })}
+      </SidebarSectionCard>
+    </div>
+  );
+}
+
+export function HomeSidebar(_props: { onCreatePost: () => void }) {
+  const { sidebarVersion } = useFeedAdmin();
+  // v3 is reserved for the next iteration — mirror v2 until it's specced.
+  return sidebarVersion === "v1" ? <HomeSidebarV1 /> : <HomeSidebarV2 />;
+}
+
 // ─── Composer prompts ────────────────────────────────
 
 const composerPrompts = [
@@ -5287,12 +5370,22 @@ const composerPrompts = [
 // position).
 function FeedAdminMenu() {
   const [open, setOpen] = useState(false);
-  const { verifiedBadgePosition, setVerifiedBadgePosition } = useFeedAdmin();
+  const { verifiedBadgePosition, setVerifiedBadgePosition, sidebarVersion, setSidebarVersion } = useFeedAdmin();
   const segBtn = (value: "avatar" | "name", label: string) => (
     <button
       onClick={() => setVerifiedBadgePosition(value)}
       className={`flex-1 rounded-md px-2 py-1 text-[12px] font-medium transition-colors ${
         verifiedBadgePosition === value ? "bg-white text-gray-dark shadow-sm" : "text-gray-light hover:text-gray-dark"
+      }`}
+    >
+      {label}
+    </button>
+  );
+  const sidebarBtn = (value: "v1" | "v2" | "v3", label: string) => (
+    <button
+      onClick={() => setSidebarVersion(value)}
+      className={`flex-1 rounded-md px-2 py-1 text-[12px] font-medium transition-colors ${
+        sidebarVersion === value ? "bg-white text-gray-dark shadow-sm" : "text-gray-light hover:text-gray-dark"
       }`}
     >
       {label}
@@ -5310,6 +5403,14 @@ function FeedAdminMenu() {
               <div className="mt-1.5 flex rounded-lg bg-gray-100 p-0.5">
                 {segBtn("avatar", "On photo")}
                 {segBtn("name", "By name")}
+              </div>
+            </div>
+            <div className="px-3 py-2">
+              <p className="text-[14px] font-medium text-gray-dark">Left sidebar</p>
+              <div className="mt-1.5 flex rounded-lg bg-gray-100 p-0.5">
+                {sidebarBtn("v1", "V1")}
+                {sidebarBtn("v2", "V2")}
+                {sidebarBtn("v3", "V3")}
               </div>
             </div>
           </div>

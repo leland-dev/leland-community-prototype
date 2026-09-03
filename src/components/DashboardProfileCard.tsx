@@ -7,9 +7,15 @@ import editIcon from "../assets/icons/edit.svg";
 // non-expert form, at the top of the home feed's right sidebar. Experts get an
 // extra rating row + "Expert mins" stat; everyone shows Followers / Following
 // and an "Edit profile" button.
-export default function DashboardProfileCard({ expert }: { expert: boolean }) {
+export default function DashboardProfileCard({ expert, compact = false }: { expert: boolean; compact?: boolean }) {
   return (
-    <div className="rounded-2xl border border-[#222222]/10 bg-white p-6 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)]">
+    <div
+      className={
+        compact
+          ? "rounded-[12px] border border-[#222222]/[0.12] bg-white p-4"
+          : "rounded-2xl border border-[#222222]/10 bg-white p-6 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)]"
+      }
+    >
       <img src={profilePhoto} alt="Alex Rivera" className="h-[72px] w-[72px] rounded-full object-cover" />
       <h2 className="mt-4 font-serif text-[26px] font-medium leading-tight text-gray-dark">Alex Rivera</h2>
 
