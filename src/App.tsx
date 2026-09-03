@@ -131,7 +131,6 @@ import LelandKitTest from "./pages/LelandKitTest";
 import LessonBlocksGallery from "./pages/LessonBlocksGallery";
 import Waitlist from "./pages/waitlist/Waitlist";
 import WaitlistOnboarding from "./pages/waitlist/WaitlistOnboarding";
-import AltNavExpertPage from "./pages/AltNavExpertPage";
 import { FeedAdminProvider } from "./contexts/FeedAdminContext";
 
 export default function App() {
@@ -188,10 +187,6 @@ export default function App() {
         <Route path="/site" element={<Site />} />
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/calendar" element={<Calendar />} />
-        {/* alt-nav Calendar: self-shells (like /calendar) but with the desktop
-            sidebar instead of the top navbar. Kept OUT of ContextLayout to
-            avoid a double PageShell. */}
-        <Route path="/alt-nav/calendar" element={<Calendar altNav />} />
         <Route path="/my-programs" element={<MyCourses />} />
         <Route path="/course/:courseId" element={<CourseDetail />} />
         <Route path="/program/session/:urn" element={<LiveSession />} />
@@ -211,6 +206,26 @@ export default function App() {
           <Route path="/coach/reviews" element={<CoachReviews />} />
           <Route path="/coach/discount-codes" element={<CoachDiscountCodes />} />
         </Route>
+        {/* "My Store" — the coach dashboard recreated inside the LinkedIn-nav
+            shell (LinkedIn top nav via TopNav's path dispatch, coach sidebar via
+            CoachLayout's base-path awareness). Reuses the coach page components;
+            reachable from the expert-only "My Store" top-nav item. */}
+        <Route element={<CoachLayout />}>
+          <Route path="/linkedin-nav/store" element={<Dashboard shell expert />} />
+          <Route path="/linkedin-nav/store/inbox" element={<CoachInbox />} />
+          <Route path="/linkedin-nav/store/manage" element={<CoachManage />} />
+          <Route path="/linkedin-nav/store/profile-new" element={<CoachProfileNew />} />
+          <Route path="/linkedin-nav/store/products" element={<CoachProducts />} />
+          <Route path="/linkedin-nav/store/manage/:category" element={<CoachCategoryEdit />} />
+          <Route path="/linkedin-nav/store/opportunities" element={<CoachOpportunities />} />
+          <Route path="/linkedin-nav/store/livestreams" element={<CoachLivestreams />} />
+          <Route path="/linkedin-nav/store/content" element={<CoachContent />} />
+          <Route path="/linkedin-nav/store/pricing" element={<CoachPricing />} />
+          <Route path="/linkedin-nav/store/calendar" element={<CoachCalendar />} />
+          <Route path="/linkedin-nav/store/earnings" element={<CoachEarnings />} />
+          <Route path="/linkedin-nav/store/reviews" element={<CoachReviews />} />
+          <Route path="/linkedin-nav/store/discount-codes" element={<CoachDiscountCodes />} />
+        </Route>
         <Route path="/components" element={<Components />} />
         <Route path="/components/leland" element={<LelandKitTest />} />
         <Route path="/components/lesson-blocks" element={<LessonBlocksGallery />} />
@@ -226,33 +241,6 @@ export default function App() {
         <Route element={<ContextLayout />}>
           <Route path="/groups/law" element={<GroupCommunity />} />
           <Route path="/" element={<Home />} />
-          {/* Experimental: home feed with a desktop sidebar instead of the top navbar */}
-          <Route path="/alt-nav" element={<Home />} />
-          {/* alt-nav sub-pages — the sidebar's destinations recreated inside the
-              alt-nav shell (DesktopSidebar left, no top navbar). Reuse the same
-              page components; ContextLayout supplies the shell. */}
-          <Route path="/alt-nav/dashboard" element={<Dashboard />} />
-          <Route path="/alt-nav/discover" element={<Browse />} />
-          <Route path="/alt-nav/search" element={<Search />} />
-          <Route path="/alt-nav/messages" element={<Messaging />} />
-          <Route path="/alt-nav/notifications" element={<Notifications />} />
-          <Route path="/alt-nav/events" element={<Events />} />
-          <Route path="/alt-nav/courses" element={<Courses />} />
-          <Route path="/alt-nav/plus" element={<LelandPlus />} />
-          <Route path="/alt-nav/jobs" element={<AltNavExpertPage title="Jobs" eyebrow="Discover" />} />
-          {/* Expert tools — POC placeholder pages recreated inside alt-nav
-              (the real coach pages live under /coach/*). */}
-          <Route path="/alt-nav/offerings" element={<AltNavExpertPage title="Offerings" />} />
-          <Route path="/alt-nav/opportunities" element={<AltNavExpertPage title="Opportunities" />} />
-          <Route path="/alt-nav/livestreams" element={<AltNavExpertPage title="Livestreams" />} />
-          <Route path="/alt-nav/availability" element={<AltNavExpertPage title="Calendar" />} />
-          <Route path="/alt-nav/earnings" element={<AltNavExpertPage title="Earnings" />} />
-          <Route path="/alt-nav/reviews" element={<AltNavExpertPage title="Reviews" />} />
-          <Route path="/alt-nav/discount-codes" element={<AltNavExpertPage title="Discount Codes" />} />
-          <Route path="/alt-nav/analytics" element={<AltNavExpertPage title="Analytics" />} />
-          {/* Post detail inside the alt-nav shell (sidebars persist, no top nav) */}
-          <Route path="/alt-nav/post/:postId" element={<PostDetail />} />
-          <Route path="/alt-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />

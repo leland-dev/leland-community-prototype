@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useSetNavTheme } from "../components/NavThemeContext";
 import PageShell from "../components/PageShell";
-import DesktopSidebar from "../components/DesktopSidebar";
 import { Button } from "../components/Button";
 import SessionCard from "../components/SessionCard";
 import profilePhoto from "../assets/profile photos/profile photo.png";
@@ -280,7 +279,7 @@ export default function Calendar({ altNav = false }: { altNav?: boolean }) {
       // alt-nav: render inside the sidebar shell (no top navbar) instead of the
       // default single-column standard shell.
       edgeToEdge={altNav}
-      leftSidebar={altNav ? <DesktopSidebar /> : undefined}
+      leftSidebar={undefined}
       leftSidebarWidth={altNav ? 250 : undefined}
       leftSidebarTop={altNav ? 20 : undefined}
       leftSidebarFixed={altNav}

@@ -407,14 +407,6 @@ export default function TopNavClassic() {
                         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                           <div className="ml-[22px] border-l-[1.5px] border-gray-stroke pl-2">
                             <NavLink
-                              to="/alt-nav"
-                              onClick={() => setProfileOpen(false)}
-                              className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
-                            >
-                              <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></svg>
-                              Switch to Sidebar nav
-                            </NavLink>
-                            <NavLink
                               to="/linkedin-nav"
                               onClick={() => setProfileOpen(false)}
                               className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import moreIcon from "../assets/icons/nav-icons/more-active.svg";
+import notificationsIcon from "../assets/icons/nav-icons/notifications-active.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import logoIcon from "../assets/logos/leland-logo-split/Icon.svg";
 import logoWordmark from "../assets/logos/leland-logo-split/Wordmark.svg";
@@ -101,9 +101,9 @@ export default function MobileTopNav() {
           className="flex h-8 w-8 items-center justify-center"
         >
           <img
-            src={moreIcon}
+            src={profilePhoto}
             alt="Menu"
-            className={`h-[23px] w-[23px] ${iconFilter}`}
+            className="h-8 w-8 rounded-full object-cover"
           />
         </button>
       )}
@@ -140,17 +140,20 @@ export default function MobileTopNav() {
         )}
       </button>
 
-      {/* Right: custom slot or default profile photo */}
+      {/* Right: custom slot or default Notifications (moved here from the
+          bottom tab bar; the profile photo now lives on the left as the menu). */}
       {rightSlot ?? (
         <NavLink
-          to="/profile/june-allen?me=1"
-          className="flex h-8 w-8 items-center justify-center"
+          to="/notifications"
+          aria-label="Notifications"
+          className="relative flex h-8 w-8 items-center justify-center"
         >
           <img
-            src={profilePhoto}
-            alt="Profile"
-            className="h-8 w-8 rounded-full object-cover"
+            src={notificationsIcon}
+            alt="Notifications"
+            className={`h-[23px] w-[23px] ${iconFilter}`}
           />
+          <span className="absolute right-[3px] top-[3px] h-2 w-2 rounded-full bg-[#F5334F] ring-2 ring-white" />
         </NavLink>
       )}
     </motion.header>

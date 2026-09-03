@@ -5130,7 +5130,7 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
     <div className="flex flex-col gap-[14px]">
       {/* Upcoming sessions — alt-nav only */}
       {upcoming && (
-        <SidebarSectionCard title="Upcoming sessions" to="/alt-nav/calendar" bleed>
+        <SidebarSectionCard title="Upcoming sessions" to="/calendar" bleed>
           <SessionCard size="small" title="Alex <> Jessica" dateTime="Today, 5:45 PM" duration="30m" day={16} image={pic6} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
           <SessionCard size="small" title="Resume Review" dateTime="Tomorrow, 11:00 AM" duration="45m" day={17} image={pic4} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
         </SidebarSectionCard>

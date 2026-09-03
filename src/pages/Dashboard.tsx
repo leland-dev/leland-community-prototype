@@ -706,7 +706,14 @@ function AltAnalyticsPreview() {
 // Left-column profile card — mirrors the profile template hero, differentiated
 // by whether the user is an expert (credentials, reviews, expert mins) or a
 // customer (bio + followers).
-export default function Dashboard() {
+// Neutral nav theme for the embedded (shell) dashboard — the coach store keeps
+// its normal white LinkedIn top nav rather than the scroll-reveal beige hero.
+const SHELL_NAV_THEME = { bg: "#ffffff", light: false, hideWordmark: false, scrollReveal: false };
+
+// `shell` renders the embedded, in-flow treatment (no full-bleed hero, single
+// column) used inside a shell with its own sidebar — the alt-nav pages and the
+// LinkedIn-nav "My Store". `expert` seeds the expert-dashboard variant.
+export default function Dashboard({ shell = false, expert: expertInit = false }: { shell?: boolean; expert?: boolean } = {}) {
   useSetLayoutVariant("standard");
   useEffect(() => { document.title = "Dashboard"; }, []);
   const navigate = useNavigate();
@@ -714,18 +721,18 @@ export default function Dashboard() {
   // Recreated inside the alt-nav shell: no top navbar, narrower content column.
   // Drop the full-bleed beige hero (it doesn't fit this layout) for a plain
   // white, in-flow header.
-  const isAltNav = pathname.startsWith("/alt-nav");
+  const isAltNav = shell || pathname.startsWith("/alt-nav");
   const { dark: darkMode } = useDarkMode();
   const heroBg = darkMode ? "#5E6E79" : HERO_BG;
   const navTheme = useMemo(() => ({ bg: heroBg, light: darkMode, hideWordmark: false, scrollReveal: true }), [heroBg, darkMode]);
-  useSetNavTheme(navTheme);
+  useSetNavTheme(shell ? SHELL_NAV_THEME : navTheme);
   // In the alt-nav shell the dashboard adopts the feed's right sidebar (minus the
   // Upcoming sessions card, which the main column already covers).
   useSetRightSidebar(isAltNav ? <HomeRightSidebar showUpcoming={false} /> : null);
 
   // Admin menu (bottom-right) — matches the profile template's 3-dot control.
   const [adminOpen, setAdminOpen] = useState(false);
-  const [expert, setExpert] = useState(false);
+  const [expert, setExpert] = useState(expertInit);
   const [altAnalytics, setAltAnalytics] = useState(false);
   const [goalsFeature, setGoalsFeature] = useState(true);
   const { version: goalsVersion, setVersion: setGoalsVersion } = useGoalsVersion();

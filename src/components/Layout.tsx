@@ -5,7 +5,6 @@ import TopNav from "./TopNav";
 import BottomNav from "./BottomNav";
 import MobileTopNav from "./MobileTopNav";
 import MobileSidebar from "./MobileSidebar";
-import DesktopSidebar from "./DesktopSidebar";
 import PageShell from "./PageShell";
 import {
   RightSidebarProvider,
@@ -397,32 +396,36 @@ export function ContextLayout() {
   const isClassicFeed = isClassicHome || isRegularPost || isTopicPage;
   const centered = isClassicFeed && !feedEdgeToEdge;
   const classicEdge = isClassicFeed && feedEdgeToEdge;
+  // The LinkedIn-nav feed/post honor the same feed toggle: centered = 298px
+  // sidebars centered within 1280; edge = 640 feed + 356px sidebars at the edges.
+  const linkedInCentered = isLinkedInLayout && !feedEdgeToEdge;
+  const linkedInEdge = isLinkedInLayout && feedEdgeToEdge;
 
   return (
     <PageShell
       // Sub-pages that request the "thin" variant (e.g. Notifications) would
       // drop the sidebar — force standard on alt-nav so the sidebar stays.
       variant={isAltNav && variant === "thin" ? "standard" : variant}
-      leftSidebar={isAltNav ? <DesktopSidebar /> : leftSidebar}
+      leftSidebar={leftSidebar}
       rightSidebar={rightSidebar}
       // The LinkedIn-layout pages and the centered classic feed/post let their center
       // column fill the remaining space (no cap); the alt-nav feed / post detail and
       // the edge-to-edge classic feed/post stay at 640, alt-nav sub-pages at 720.
-      contentMaxWidth={isLinkedInLayout || centered ? undefined : isHomeFeed || isPostDetail || isTopicPage ? 640 : isAltNavSubpage ? 720 : contentMaxWidth}
+      contentMaxWidth={linkedInCentered || centered ? undefined : isHomeFeed || isPostDetail || isTopicPage || linkedInEdge ? 640 : isAltNavSubpage ? 720 : contentMaxWidth}
       // LinkedIn-layout pages and the centered classic feed/post are centered within
       // 1280; the alt-nav feed / sub-pages and the edge-to-edge classic feed/post
       // stay edge-to-edge so their left sidebar sits flush-left.
-      edgeToEdge={(isHomeFeed && !isClassicHome) || isAltNavSubpage || classicEdge}
+      edgeToEdge={(isHomeFeed && !isClassicHome) || isAltNavSubpage || classicEdge || linkedInEdge}
       // Right column: 298px on the LinkedIn-layout pages and the centered classic
       // feed/post, 356px on the alt-nav feed / post / dashboard and the
       // edge-to-edge classic feed/post.
-      sidebarWidth={isLinkedInLayout || centered ? 298 : isHomeFeed || isPostDetail || isAltNavDashboard || isTopicPage ? 356 : undefined}
+      sidebarWidth={linkedInCentered || centered ? 298 : isHomeFeed || isPostDetail || isAltNavDashboard || isTopicPage || linkedInEdge ? 356 : undefined}
       // Left column: 298px on the LinkedIn-layout pages and the centered classic
       // feed/post (matching the right column); alt-nav pins its sidebar at 250px.
-      leftSidebarWidth={isAltNav ? 250 : isLinkedInLayout || centered ? 298 : undefined}
+      leftSidebarWidth={isAltNav ? 250 : linkedInCentered || centered ? 298 : undefined}
       // 30px gaps between the columns on the LinkedIn-layout pages and the centered
       // classic feed/post; default 40px elsewhere.
-      columnGap={isLinkedInLayout || centered ? 30 : undefined}
+      columnGap={linkedInCentered || centered ? 30 : undefined}
       // alt-nav has no top navbar (the sidebar replaces it), so its left column
       // pins 20px from the top (not the 81px that clears a navbar).
       leftSidebarTop={isAltNav ? 20 : undefined}

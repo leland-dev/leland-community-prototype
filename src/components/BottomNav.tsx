@@ -3,17 +3,19 @@ import { NavLink } from "react-router-dom";
 import { useDarkMode } from "../contexts/DarkModeContext";
 
 import homeActive from "../assets/icons/nav-icons/home-active.svg";
-import searchActive from "../assets/icons/nav-icons/search-active.svg";
 import browseActive from "../assets/icons/nav-icons/browse-active.svg";
 import chatActive from "../assets/icons/nav-icons/chat-active.svg";
-import notificationsActive from "../assets/icons/nav-icons/notifications-active.svg";
+import userCircleIcon from "../assets/icons/user-circle-filled.svg";
+import briefcaseFilledIcon from "../assets/icons/briefcase-filled.svg";
 
+// Mirrors the LinkedIn-style top nav: For you · Browse · My Leland · Jobs ·
+// Messages. Notifications moved to the mobile top-right corner.
 const navItems = [
-  { to: "/", icon: homeActive, label: "Home" },
-  { to: "/search", icon: searchActive, label: "Search" },
-  { to: "/dashboard", icon: browseActive, label: "Dashboard" },
-  { to: "/notifications", icon: notificationsActive, label: "Notifications" },
-  { to: "/messages", icon: chatActive, label: "Messages" },
+  { to: "/", icon: homeActive, label: "For you", end: true },
+  { to: "/browse", icon: browseActive, label: "Browse" },
+  { to: "/dashboard", icon: userCircleIcon, label: "My Leland" },
+  { to: "/jobs", icon: briefcaseFilledIcon, label: "Jobs" },
+  { to: "/messages", icon: chatActive, label: "Messages", badge: 1 },
 ];
 
 export default function BottomNav() {
@@ -35,22 +37,29 @@ export default function BottomNav() {
   }, []);
 
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 z-30 ${darkMode ? "bg-[#131313]" : "bg-white"} shadow-[0_-4px_12px_rgba(0,0,0,0.06)] pb-[max(env(safe-area-inset-bottom),20px)] transition-transform duration-200 ease-out ${hidden ? "translate-y-full" : "translate-y-0"}`}>
+    <nav className={`fixed bottom-0 left-0 right-0 z-30 ${darkMode ? "bg-[#131313]" : "bg-white"} shadow-[0_-4px_12px_rgba(0,0,0,0.06)] pt-1 pb-[max(env(safe-area-inset-bottom),8px)] transition-transform duration-200 ease-out ${hidden ? "translate-y-full" : "translate-y-0"}`}>
       <ul className="flex items-center">
-        {navItems.map(({ to, icon, label }) => (
+        {navItems.map(({ to, icon, label, end, badge }) => (
           <li key={to} className="flex-1">
             <NavLink
               to={to}
-              end={to === "/"}
+              end={end}
               className="flex flex-col items-center justify-center gap-1 py-2"
             >
               {({ isActive }) => (
                 <>
-                  <img
-                    src={icon}
-                    alt={label}
-                    className={`h-6 w-6 ${isActive ? "" : "opacity-40"}`}
-                  />
+                  <span className="relative">
+                    <img
+                      src={icon}
+                      alt={label}
+                      className={`h-7 w-7 ${isActive ? "" : "opacity-40"}`}
+                    />
+                    {badge ? (
+                      <span className="absolute -right-1.5 -top-1 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-[#F5334F] px-[3px] text-[10px] font-semibold leading-none text-white">
+                        {badge}
+                      </span>
+                    ) : null}
+                  </span>
                   <span className={`text-[11px] ${isActive ? "font-semibold text-gray-dark" : "font-medium text-gray-light"}`}>
                     {label}
                   </span>

@@ -12,6 +12,7 @@ import livestreamIcon from "../assets/icons/lte-signal.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import userIcon from "../assets/icons/user.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
+import layoutGridIcon from "../assets/icons/layout-grid.svg";
 import mbaIcon from "../assets/icons/category-icons/mba.svg";
 import consultingIcon from "../assets/icons/category-icons/consulting.svg";
 import pmIcon from "../assets/icons/category-icons/product-management.svg";
@@ -53,6 +54,18 @@ const categoryChildren = categories.map((c) => ({ to: c.to, label: c.label }));
 // Routes that live inside the Storefront section (keeps the accordion marked
 // active/expanded when any of them is open).
 const storefrontRoutes = ["/coach/pricing", "/coach/content"];
+
+// The coach dashboard is reused in two places: the real /coach/* section and
+// the LinkedIn-nav "My Store" (/linkedin-nav/store/*). All nav data is authored
+// against /coach; rebase() swaps that prefix for the current base so links and
+// active-state checks stay within whichever shell is mounted.
+function useCoachBase() {
+  const { pathname } = useLocation();
+  return pathname.startsWith("/linkedin-nav/store") ? "/linkedin-nav/store" : "/coach";
+}
+function rebase(to: string, base: string) {
+  return base === "/coach" ? to : base + to.slice("/coach".length);
+}
 
 // --- v2 nav data -----------------------------------------------------------
 // v2 flattens Pricing and Content into top-level items and drops the Storefront
@@ -123,89 +136,116 @@ const childNavLinkClass = ({ isActive }: { isActive: boolean }) =>
 function SidebarV1() {
   const [listingsOpen, setListingsOpen] = useState(false);
   const { pathname } = useLocation();
-  const onStorefront = pathname.startsWith("/coach/manage") || storefrontRoutes.includes(pathname);
+  const base = useCoachBase();
+  const onStorefront = pathname.startsWith(rebase("/coach/manage", base)) || storefrontRoutes.some((r) => rebase(r, base) === pathname);
 
+  const inStore = base !== "/coach";
+
+  // A single top-level nav row from an item definition.
+  const navRow = ({ to, label, icon }: { to: string; label: string; icon: string }) => (
+    <NavLink key={to} to={rebase(to, base)} className={navLinkClass}>
+      <NavIcon src={icon} className="h-[22px] w-[22px]" />
+      {label}
+    </NavLink>
+  );
+  const findItem = (to: string) => [...topItems, ...bottomItems].find((i) => i.to === to)!;
+
+  // Storefront accordion — shared between both layouts (lives in "Expert tools").
+  const offeringsAccordion = (
+    <div>
+      <button
+        onClick={() => setListingsOpen((o) => !o)}
+        className={`flex w-full items-center gap-3 rounded-lg px-3 py-[10px] text-[15px] transition-colors ${
+          onStorefront ? "bg-[#222222]/5 font-semibold text-gray-dark" : "font-medium text-gray-light hover:text-gray-dark"
+        }`}
+      >
+        <NavIcon src={storeIcon} className="h-[22px] w-[22px]" />
+        <span className="flex-1 text-left">Offerings</span>
+        <svg
+          className={`h-4 w-4 shrink-0 transition-transform ${listingsOpen ? "rotate-180" : ""}`}
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+      <AnimatePresence initial={false}>
+        {listingsOpen && (
+          <motion.div
+            key="listings-children"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="relative mb-2 mt-1 flex flex-col gap-2 pl-[34px]">
+              {/* Vertical guide line, aligned under the parent icon */}
+              <span className="absolute bottom-0 left-[23px] top-0 w-[1.5px] bg-gray-stroke" />
+              {/* Fixed settings — always present */}
+              {storefrontChildren.map(({ to, label }) => (
+                <NavLink key={to} to={rebase(to, base)} end className={childNavLinkClass}>
+                  <span className="truncate">{label}</span>
+                </NavLink>
+              ))}
+              {/* Divider between fixed settings and coach-editable categories */}
+              <span className="mx-3 my-1 h-px bg-gray-stroke" />
+              {/* Per-category listings — coach-editable */}
+              {categoryChildren.map(({ to, label }) => (
+                <NavLink key={to} to={rebase(to, base)} end className={childNavLinkClass}>
+                  <span className="truncate">{label}</span>
+                </NavLink>
+              ))}
+              <button className="group flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-1 text-[15px] font-medium text-gray-light transition-colors hover:text-gray-dark">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-gray-stroke shadow-[0_1px_1.5px_rgba(0,0,0,0.06)] transition-colors group-hover:border-gray-light">
+                  <svg
+                    className="h-3.5 w-3.5 text-gray-light"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
+                    strokeLinecap="round" strokeLinejoin="round"
+                    style={{ vectorEffect: "non-scaling-stroke" }}
+                    aria-hidden
+                  >
+                    <path d="M12 6v12M6 12h12" vectorEffect="non-scaling-stroke" />
+                  </svg>
+                </span>
+                New category
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
+  // Store: two groups — a personal set on top, then "Expert tools" below.
+  if (inStore) {
+    return (
+      <nav className="flex flex-col gap-1">
+        <NavLink to={base} end className={navLinkClass}>
+          <NavIcon src={layoutGridIcon} className="h-[22px] w-[22px]" />
+          Dashboard
+        </NavLink>
+        {navRow(findItem("/coach/profile-new"))}
+        {navRow(findItem("/coach/calendar"))}
+        {navRow(findItem("/coach/reviews"))}
+
+        <p className="px-3 pb-1 pt-4 text-[13px] font-medium text-gray-extra-light">
+          Expert tools
+        </p>
+        {offeringsAccordion}
+        {navRow(findItem("/coach/opportunities"))}
+        {navRow(findItem("/coach/livestreams"))}
+        {navRow(findItem("/coach/earnings"))}
+        {navRow(findItem("/coach/discount-codes"))}
+      </nav>
+    );
+  }
+
+  // /coach — original single list.
   return (
     <nav className="flex flex-col gap-1">
-      {/* Inbox, Profile */}
-      {topItems.map(({ to, label, icon }) => (
-        <NavLink key={to} to={to} className={navLinkClass}>
-          <NavIcon src={icon} className="h-[22px] w-[22px]" />
-          {label}
-        </NavLink>
-      ))}
-
-      {/* Storefront — accordion of fixed settings + per-category listings */}
-      <div>
-        <button
-          onClick={() => setListingsOpen((o) => !o)}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-[10px] text-[15px] transition-colors ${
-            onStorefront ? "bg-[#222222]/5 font-semibold text-gray-dark" : "font-medium text-gray-light hover:text-gray-dark"
-          }`}
-        >
-          <NavIcon src={storeIcon} className="h-[22px] w-[22px]" />
-          <span className="flex-1 text-left">Offerings</span>
-          <svg
-            className={`h-4 w-4 shrink-0 transition-transform ${listingsOpen ? "rotate-180" : ""}`}
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-        </button>
-        <AnimatePresence initial={false}>
-          {listingsOpen && (
-            <motion.div
-              key="listings-children"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-              className="overflow-hidden"
-            >
-              <div className="relative mb-2 mt-1 flex flex-col gap-2 pl-[34px]">
-                {/* Vertical guide line, aligned under the parent icon */}
-                <span className="absolute bottom-0 left-[23px] top-0 w-[1.5px] bg-gray-stroke" />
-                {/* Fixed settings — always present */}
-                {storefrontChildren.map(({ to, label }) => (
-                  <NavLink key={to} to={to} end className={childNavLinkClass}>
-                    <span className="truncate">{label}</span>
-                  </NavLink>
-                ))}
-                {/* Divider between fixed settings and coach-editable categories */}
-                <span className="mx-3 my-1 h-px bg-gray-stroke" />
-                {/* Per-category listings — coach-editable */}
-                {categoryChildren.map(({ to, label }) => (
-                  <NavLink key={to} to={to} end className={childNavLinkClass}>
-                    <span className="truncate">{label}</span>
-                  </NavLink>
-                ))}
-                <button className="group flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-1 text-[15px] font-medium text-gray-light transition-colors hover:text-gray-dark">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-gray-stroke shadow-[0_1px_1.5px_rgba(0,0,0,0.06)] transition-colors group-hover:border-gray-light">
-                    <svg
-                      className="h-3.5 w-3.5 text-gray-light"
-                      viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-                      strokeLinecap="round" strokeLinejoin="round"
-                      style={{ vectorEffect: "non-scaling-stroke" }}
-                      aria-hidden
-                    >
-                      <path d="M12 6v12M6 12h12" vectorEffect="non-scaling-stroke" />
-                    </svg>
-                  </span>
-                  New category
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Remaining nav items */}
-      {bottomItems.map(({ to, label, icon }) => (
-        <NavLink key={to} to={to} className={navLinkClass}>
-          <NavIcon src={icon} className="h-[22px] w-[22px]" />
-          {label}
-        </NavLink>
-      ))}
+      {topItems.map(navRow)}
+      {offeringsAccordion}
+      {bottomItems.map(navRow)}
     </nav>
   );
 }
@@ -219,12 +259,21 @@ function SidebarV1() {
 function SidebarV2() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(true);
+  const base = useCoachBase();
 
   return (
     <nav className="flex flex-col gap-1">
-      {/* Primary items, Inbox through Earnings */}
-      {v2PrimaryItems.map(({ to, label, icon }) => (
-        <NavLink key={to} to={to} className={navLinkClass}>
+      {/* Dashboard — store only (the expert dashboard lives at the store root) */}
+      {base !== "/coach" && (
+        <NavLink to={base} end className={navLinkClass}>
+          <NavIcon src={layoutGridIcon} className="h-[22px] w-[22px]" />
+          Dashboard
+        </NavLink>
+      )}
+
+      {/* Primary items, Inbox through Earnings — Inbox dropped in the store */}
+      {v2PrimaryItems.filter((i) => base === "/coach" || i.to !== "/coach/inbox").map(({ to, label, icon }) => (
+        <NavLink key={to} to={rebase(to, base)} className={navLinkClass}>
           <NavIcon src={icon} className="h-[22px] w-[22px]" />
           {label}
         </NavLink>
@@ -255,7 +304,7 @@ function SidebarV2() {
           >
             <div className="flex flex-col gap-1">
               {v2MoreItems.map(({ to, label, icon }) => (
-                <NavLink key={to} to={to} className={navLinkClass}>
+                <NavLink key={to} to={rebase(to, base)} className={navLinkClass}>
                   <NavIcon src={icon} className="h-[22px] w-[22px]" />
                   {label}
                 </NavLink>
@@ -291,7 +340,7 @@ function SidebarV2() {
             >
               <div className="mt-1 flex flex-col gap-1">
                 {categories.map(({ to, label, icon }) => (
-                  <NavLink key={to} to={to} end className={navLinkClass}>
+                  <NavLink key={to} to={rebase(to, base)} end className={navLinkClass}>
                     <NavIcon src={icon} className="h-[22px] w-[22px]" />
                     <span className="truncate">{label}</span>
                   </NavLink>

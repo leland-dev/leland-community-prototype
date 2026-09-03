@@ -12,9 +12,20 @@ const ExpertModeContext = createContext<ExpertModeContextValue>({
   toggle: () => {},
 });
 
+const STORAGE_KEY = "expert-mode";
+
 export function ExpertModeProvider({ children }: { children: ReactNode }) {
-  const [expert, setExpert] = useState(false);
-  const toggle = () => setExpert((v) => !v);
+  const [expert, setExpertState] = useState(() => localStorage.getItem(STORAGE_KEY) === "true");
+  const setExpert = (v: boolean) => {
+    localStorage.setItem(STORAGE_KEY, String(v));
+    setExpertState(v);
+  };
+  const toggle = () =>
+    setExpertState((v) => {
+      const next = !v;
+      localStorage.setItem(STORAGE_KEY, String(next));
+      return next;
+    });
 
   return (
     <ExpertModeContext.Provider value={{ expert, setExpert, toggle }}>
