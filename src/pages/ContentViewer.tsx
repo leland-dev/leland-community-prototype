@@ -55,6 +55,7 @@ import {
   IconHelp,
   IconShare,
   IconMenuBurger,
+  IconRefresh,
   IconStar,
   IconStarOutline,
   IconWrite,
@@ -86,7 +87,7 @@ import { LESSON_2_SECTIONS, LESSON_2_TOP_BLOCKS } from "../data/sampleLesson2";
 import { LESSON_3_SECTIONS, LESSON_3_TOP_BLOCKS } from "../data/sampleLesson3";
 import { TOOL_SETUP_CLAUDE, TOOL_SETUP_CODEX, TOOL_SETUP_GEMINI, TOOL_SETUP_COPILOT } from "../data/toolSetupSections";
 import { JOIN_SLACK_SECTION } from "../data/joinSlackSection";
-import { PERSONALIZATION_SECTION } from "../data/personalizationSection";
+import { PERSONALIZATION_SECTION, AI_CONFIDENCE_QUESTION } from "../data/personalizationSection";
 import {
   BlockList,
   LessonFooterActions,
@@ -99,6 +100,7 @@ import { GettingStartedFlow, type FlowKey } from "../components/getting-started"
 import { COHORT_MEMBERS } from "./Group";
 import { SelectCohortModal } from "../components/LiveCourseCard";
 import { TrackPickerModal, type CourseTrack, TRACK_STORAGE_KEY, getLogoSrc } from "../components/TrackPickerModal";
+import { PersonalizationModal, PERSONALIZATION_KEY } from "../components/PersonalizationModal";
 
 // ─── Types & seed data ───────────────────────────────────────────────────────
 
@@ -128,11 +130,14 @@ type InteractiveSection = {
 
 // Course-completion page: the terminal "you did it" screen after the last
 // lesson's last section. No footer actions, share button, or section nav —
-// just the rating/review-collection modal chain (see the trigger effect).
+// just the rating/review-collection modal chain (see the trigger effect)
+// plus whatever benchmarking blocks (e.g. the repeated confidence question)
+// are listed here.
 type CompletionSection = {
   id: string;
   title: string;
   kind: "completion";
+  blocks?: Block[];
 };
 
 // A section is either a legacy media section, a native block section
@@ -165,6 +170,9 @@ const COURSE_COMPLETION_SECTION: CompletionSection = {
   id: "course-complete",
   title: "Course complete",
   kind: "completion",
+  // Same question, same wording, as the intake "Getting to know you" section
+  // — a clean pre/post pair for self-reported confidence improvement.
+  blocks: [AI_CONFIDENCE_QUESTION],
 };
 
 // Lessons 3–4 come from the generated manifest (legacy HTML iframe sections).
@@ -1507,6 +1515,7 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onOpenSupport,
   hasRated,
   onToggleHasRated,
+  onResetProgress,
   ...modalProps
 }: ModalProps & {
   options: PrototypeOptions;
@@ -1517,6 +1526,7 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onOpenSupport: () => void;
   hasRated: boolean;
   onToggleHasRated: () => void;
+  onResetProgress: () => void;
 }) {
   return (
     <Modal {...modalProps}>
@@ -1586,6 +1596,20 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
             >
               <IconStar className="size-4 shrink-0 text-leland-gray-light" />
               <span className="leland-paragraph-base text-leland-gray-dark">Trigger support modal</span>
+            </button>
+          </div>
+          <div className="mt-1 border-t border-leland-gray-stroke pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Reset all course progress and selections? This simulates a first-time visit.")) {
+                  onResetProgress();
+                }
+              }}
+              className="flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconRefresh className="size-4 shrink-0 text-leland-red" />
+              <span className="leland-paragraph-base text-leland-red">Reset all progress</span>
             </button>
           </div>
         </div>
@@ -2333,6 +2357,7 @@ export default function ContentViewer() {
   const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
   const [trackPickerOpen, setTrackPickerOpen] = useState(false);
+  const [personalizationModalOpen, setPersonalizationModalOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<CourseTrack | null>(
     () => localStorage.getItem(TRACK_STORAGE_KEY) as CourseTrack | null,
   );
@@ -2854,10 +2879,11 @@ export default function ContentViewer() {
               ) : section.kind === 'completion' ? (
                 <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
                   {breadcrumbBar}
-                  <div className={`mx-auto w-full max-w-[720px] px-4 md:px-8 pb-16 ${options.noHeader ? "pt-8 md:pt-4" : "pt-8 md:pt-10"}`}>
+                  <div className={`mx-auto flex w-full max-w-[720px] flex-col gap-10 px-4 md:px-8 pb-16 ${options.noHeader ? "pt-8 md:pt-4" : "pt-8 md:pt-10"}`}>
                     <h1 className="text-heading-4xl md:text-heading-5xl font-season font-normal text-leland-gray-dark">
                       {section.title}
                     </h1>
+                    {section.blocks?.length ? <BlockList blocks={section.blocks} /> : null}
                   </div>
                 </div>
               ) : (
@@ -2961,6 +2987,13 @@ export default function ContentViewer() {
         onOpenSupport={() => { setPrototypeOptionsOpen(false); setSupportModalOpen(true); }}
         hasRated={hasRated}
         onToggleHasRated={toggleHasRated}
+        onResetProgress={() => {
+          localStorage.removeItem(COMPLETION_KEY);
+          localStorage.removeItem(COURSE_RATING_KEY);
+          localStorage.removeItem(TRACK_STORAGE_KEY);
+          localStorage.removeItem(PERSONALIZATION_KEY);
+          window.location.reload();
+        }}
       />
       <SelectCohortModal
         open={cohortModalOpen}
@@ -2970,8 +3003,15 @@ export default function ContentViewer() {
       <TrackPickerModal
         open={trackPickerOpen}
         onOpenChange={setTrackPickerOpen}
-        onSelect={(track) => setSelectedTrack(track)}
+        onSelect={(track) => {
+          setSelectedTrack(track);
+          setPersonalizationModalOpen(true);
+        }}
         currentTrack={selectedTrack}
+      />
+      <PersonalizationModal
+        open={personalizationModalOpen}
+        onOpenChange={setPersonalizationModalOpen}
       />
       <AddToCalendarModal
         open={addToCalendarModalOpen}

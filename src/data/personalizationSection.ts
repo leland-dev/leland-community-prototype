@@ -1,74 +1,36 @@
-import type { BlockSection } from "./lessonBlocks";
+import type { BlockSection, RadioCardGroupBlock } from "./lessonBlocks";
+
+// Asked at intake and again, verbatim, on the course-completion page — a 1-5
+// scale (rather than qualitative buckets like "Great"/"Decent") so there's
+// headroom to show improvement even for someone who already rates
+// themselves reasonably confident going in.
+export const AI_CONFIDENCE_QUESTION: RadioCardGroupBlock = {
+  kind: "radioCardGroup",
+  id: "ai-confidence",
+  question: "How confident are you using AI to get real work done?",
+  options: [
+    { value: "1", label: "1 - Not at all confident" },
+    { value: "2", label: "2" },
+    { value: "3", label: "3" },
+    { value: "4", label: "4" },
+    { value: "5", label: "5 - Very confident" },
+  ],
+};
 
 export const PERSONALIZATION_SECTION: BlockSection = {
   id: "personalize",
   kind: "blocks",
-  title: "Personalize your experience",
+  title: "Getting to know you",
   blocks: [
     {
       kind: "markdown",
-      body: "Your answers help us tailor exercises, examples, and recommendations throughout the program. This takes about 3 minutes.",
-    },
-    {
-      kind: "radioCardGroup",
-      id: "employment",
-      question: "What best describes your current situation?",
-      options: [
-        { value: "full-time", label: "Employed full-time" },
-        { value: "part-time", label: "Employed part-time" },
-        { value: "self-employed", label: "Self-employed / freelance" },
-        { value: "between-roles", label: "Between roles" },
-        { value: "student", label: "Student" },
-      ],
-    },
-    { kind: "divider" },
-    {
-      kind: "toggleChipGroup",
-      id: "role",
-      question: "What's your role?",
-      multiple: false,
-      options: [
-        { value: "swe", label: "Software Engineer / Developer" },
-        { value: "pm", label: "Product Manager" },
-        { value: "design", label: "Designer / UX" },
-        { value: "data", label: "Data Analyst / Scientist" },
-        { value: "marketing", label: "Marketing" },
-        { value: "sales", label: "Sales" },
-        { value: "ops", label: "Operations" },
-        { value: "finance", label: "Finance / Accounting" },
-        { value: "hr", label: "HR / People" },
-        { value: "legal", label: "Legal" },
-        { value: "exec", label: "Executive / Leadership" },
-        { value: "founder", label: "Founder / Entrepreneur" },
-        { value: "other", label: "Other" },
-      ],
-    },
-    { kind: "divider" },
-    {
-      kind: "toggleChipGroup",
-      id: "industry",
-      question: "What industry are you in?",
-      multiple: false,
-      options: [
-        { value: "tech", label: "Technology" },
-        { value: "finance", label: "Finance / Banking" },
-        { value: "healthcare", label: "Healthcare" },
-        { value: "education", label: "Education" },
-        { value: "consulting", label: "Consulting" },
-        { value: "retail", label: "Retail / E-commerce" },
-        { value: "media", label: "Media / Entertainment" },
-        { value: "manufacturing", label: "Manufacturing" },
-        { value: "realestate", label: "Real Estate" },
-        { value: "gov", label: "Government / Nonprofit" },
-        { value: "legal-industry", label: "Legal" },
-        { value: "other", label: "Other" },
-      ],
+      body: "A few quick questions about your experience with AI. This takes about 2 minutes.",
     },
     { kind: "divider" },
     {
       kind: "toggleChipGroup",
       id: "motivation",
-      question: "Why are you joining the AI Builders program?",
+      question: "Why are you joining the AI Builder program?",
       subtext: "Select everything that applies.",
       multiple: true,
       options: [
@@ -81,17 +43,7 @@ export const PERSONALIZATION_SECTION: BlockSection = {
       ],
     },
     { kind: "divider" },
-    {
-      kind: "radioCardGroup",
-      id: "ai-sentiment",
-      question: "How do you feel AI is performing for you so far?",
-      options: [
-        { value: "great", label: "Great", subtext: "It's already saving me significant time" },
-        { value: "decent", label: "Decent", subtext: "But I'm not getting the most out of it" },
-        { value: "underwhelming", label: "Underwhelming", subtext: "The outputs aren't where I need them" },
-        { value: "not-yet", label: "Haven't really used AI yet" },
-      ],
-    },
+    AI_CONFIDENCE_QUESTION,
     { kind: "divider" },
     {
       kind: "toggleChipGroup",
