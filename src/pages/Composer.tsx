@@ -1053,28 +1053,43 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
         </div>
         ) : null}
 
-        {/* Desktop discard prompt lives INSIDE the card — never a modal on a modal */}
+        {/* Desktop discard prompt — the same compact confirm dialog used for
+            trash/unschedule, per the app-wide pattern */}
         <AnimatePresence>
           {discardOpen ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="absolute inset-0 z-[75] hidden flex-col items-center justify-center gap-2 rounded-2xl bg-white/95 px-10 backdrop-blur-sm md:flex"
-            >
-              <p className="text-[17px] font-semibold text-gray-dark">Save this as a draft?</p>
-              <p className="pb-3 text-[13px] text-gray-light">You can pick it back up anytime from Drafts.</p>
-              <button onClick={saveDraft} className="w-full max-w-[280px] cursor-pointer rounded-full bg-gray-dark py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#333]">
-                Save draft
-              </button>
-              <button onClick={onClose} className="w-full max-w-[280px] cursor-pointer rounded-full bg-gray-100 py-2.5 text-[14px] font-semibold text-red-500 transition-colors hover:bg-gray-200">
-                Discard
-              </button>
-              <button onClick={() => setDiscardOpen(false)} className="mt-1 cursor-pointer text-[14px] font-medium text-gray-dark hover:underline">
-                Keep editing
-              </button>
-            </motion.div>
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setDiscardOpen(false)}
+                className="fixed inset-0 z-[74] hidden bg-black/30 md:block"
+              />
+              <div className="pointer-events-none fixed inset-0 z-[75] hidden items-center justify-center px-8 md:flex">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 480, damping: 32 }}
+                  className="pointer-events-auto w-full max-w-[320px] rounded-2xl bg-white p-5 text-center"
+                  style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.18)" }}
+                >
+                  <p className="text-[16px] font-semibold text-gray-dark">Save this as a draft?</p>
+                  <p className="mt-1 text-[13px] leading-snug text-gray-light">You can pick it back up anytime from Drafts.</p>
+                  <div className="mt-4 flex flex-col gap-2">
+                    <button onClick={saveDraft} className="w-full cursor-pointer rounded-full bg-gray-dark py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#333]">
+                      Save draft
+                    </button>
+                    <button onClick={onClose} className="w-full cursor-pointer rounded-full bg-gray-100 py-2.5 text-[14px] font-semibold text-red-500 transition-colors hover:bg-gray-200">
+                      Discard
+                    </button>
+                    <button onClick={() => setDiscardOpen(false)} className="w-full cursor-pointer rounded-full py-2 text-[14px] font-medium text-gray-dark hover:underline">
+                      Keep editing
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            </>
           ) : null}
         </AnimatePresence>
 
