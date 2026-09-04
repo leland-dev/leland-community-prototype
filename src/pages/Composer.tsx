@@ -1071,20 +1071,26 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ type: "spring", stiffness: 480, damping: 32 }}
-                  className="pointer-events-auto w-full max-w-[320px] rounded-2xl bg-white p-5 text-center"
+                  className="pointer-events-auto w-full max-w-[380px] rounded-3xl border border-gray-stroke bg-white px-6 pb-6 pt-5"
                   style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.18)" }}
                 >
-                  <p className="text-[16px] font-semibold text-gray-dark">Save this as a draft?</p>
-                  <p className="mt-1 text-[13px] leading-snug text-gray-light">You can pick it back up anytime from Drafts.</p>
-                  <div className="mt-4 flex flex-col gap-2">
-                    <button onClick={saveDraft} className="w-full cursor-pointer rounded-full bg-gray-dark py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#333]">
+                  <div className="relative flex h-10 items-center justify-center">
+                    <button
+                      onClick={() => setDiscardOpen(false)}
+                      aria-label="Keep editing"
+                      className="absolute left-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+                    <p className="text-[16px] font-semibold text-gray-dark">Save as draft?</p>
+                  </div>
+                  <p className="mt-2 text-center text-[13px] leading-snug text-gray-light">You can pick it back up anytime from Drafts.</p>
+                  <div className="mt-5 flex flex-col gap-2">
+                    <button onClick={saveDraft} className="w-full cursor-pointer rounded-full bg-gray-dark py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[#333]">
                       Save draft
                     </button>
-                    <button onClick={onClose} className="w-full cursor-pointer rounded-full bg-gray-100 py-2.5 text-[14px] font-semibold text-red-500 transition-colors hover:bg-gray-200">
+                    <button onClick={onClose} className="w-full cursor-pointer rounded-full bg-gray-100 py-3 text-[15px] font-semibold text-red-500 transition-colors hover:bg-gray-200">
                       Discard
-                    </button>
-                    <button onClick={() => setDiscardOpen(false)} className="w-full cursor-pointer rounded-full py-2 text-[14px] font-medium text-gray-dark hover:underline">
-                      Keep editing
                     </button>
                   </div>
                 </motion.div>
@@ -2260,17 +2266,26 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 480, damping: 32 }}
-                className="pointer-events-auto w-full max-w-[300px] rounded-2xl bg-white p-5 text-center"
+                className="pointer-events-auto w-full max-w-[380px] rounded-3xl border border-gray-stroke bg-white px-6 pb-6 pt-5"
                 style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.18)" }}
               >
-                <p className="text-[16px] font-semibold text-gray-dark">
-                  {confirmTrash.kind === "draft" ? "Delete this draft?" : "Unschedule this post?"}
-                </p>
-                <p className="mt-1 text-[13px] leading-snug text-gray-light">
+                <div className="relative flex h-10 items-center justify-center">
+                  <button
+                    onClick={() => setConfirmTrash(null)}
+                    aria-label="Keep it"
+                    className="absolute left-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                  </button>
+                  <p className="text-[16px] font-semibold text-gray-dark">
+                    {confirmTrash.kind === "draft" ? "Delete this draft?" : "Unschedule this post?"}
+                  </p>
+                </div>
+                <p className="mt-2 text-center text-[13px] leading-snug text-gray-light">
                   {confirmTrash.kind === "draft" ? "This can't be undone." : "It moves out of the queue and won't post."}
                 </p>
-                <div className="mt-4 flex gap-2">
-                  <button onClick={() => setConfirmTrash(null)} className="flex-1 cursor-pointer rounded-full bg-gray-100 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
+                <div className="mt-5 flex gap-2">
+                  <button onClick={() => setConfirmTrash(null)} className="flex-1 cursor-pointer rounded-full bg-gray-100 py-3 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
                     Keep it
                   </button>
                   <button
@@ -2285,7 +2300,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                       setStoreVersion(v => v + 1);
                       setConfirmTrash(null);
                     }}
-                    className="flex-1 cursor-pointer rounded-full bg-[#D6204C] py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#b81b41]"
+                    className="flex-1 cursor-pointer rounded-full bg-[#D6204C] py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[#b81b41]"
                   >
                     {confirmTrash.kind === "draft" ? "Delete" : "Unschedule"}
                   </button>
