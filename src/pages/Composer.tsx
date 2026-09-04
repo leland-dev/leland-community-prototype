@@ -442,14 +442,25 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
     }
   }, [mode]);
 
-  // Size the subtitle after render — programmatic sets (typewriter demo,
-  // draft restore) never fire onChange, so autoGrow alone leaves it clipped.
+  // Size the title and subtitle after render — programmatic sets (typewriter
+  // demo, draft restore) never fire onChange, and width changes (desktop
+  // insets, resizes) reflow the wrap, so a one-time autoGrow goes stale and
+  // leaves a phantom scrollbar.
   useEffect(() => {
-    const el = subtitleRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  }, [subtitle, mode]);
+    const fit = (el: HTMLTextAreaElement | null) => {
+      if (!el) return;
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+    };
+    fit(articleTitleRef.current);
+    fit(subtitleRef.current);
+    const onResize = () => {
+      fit(articleTitleRef.current);
+      fit(subtitleRef.current);
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [title, subtitle, mode]);
 
   const articlePlain = stripHtml(articleHtml);
   const isDirty =
@@ -1266,7 +1277,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 onChange={e => { setTitle(e.target.value); autoGrow(e); }}
                 placeholder="Title"
                 rows={1}
-                className="zoom-ok mt-4 w-full resize-none font-serif text-[32px] leading-[1.2] text-gray-dark outline-none placeholder:text-gray-xlight"
+                className="zoom-ok mt-4 w-full resize-none overflow-hidden font-serif text-[32px] leading-[1.2] text-gray-dark outline-none placeholder:text-gray-xlight"
               />
               <textarea
                 ref={subtitleRef}
@@ -1274,7 +1285,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 onChange={e => { setSubtitle(e.target.value); autoGrow(e); }}
                 placeholder="Add a subtitle…"
                 rows={1}
-                className="zoom-ok mt-3 w-full resize-none text-[18px] leading-[1.45] text-gray-light outline-none placeholder:text-gray-xlight"
+                className="zoom-ok mt-3 w-full resize-none overflow-hidden text-[18px] leading-[1.45] text-gray-light outline-none placeholder:text-gray-xlight"
               />
               <div
                 ref={editorRef}
