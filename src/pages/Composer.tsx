@@ -945,7 +945,14 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   // trap the overlay underneath the app's fixed header and tab bar.
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col bg-white md:items-center md:justify-center md:bg-black/50 md:p-6">
-      <div className="relative mx-auto flex h-full w-full max-w-[600px] flex-col md:h-auto md:max-h-[92dvh] md:min-h-[560px] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white">
+      <div
+        className={`relative mx-auto flex h-full w-full max-w-[600px] flex-col md:h-auto md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white md:transition-[max-width,min-height,max-height] md:duration-300 md:ease-out ${
+          discardOpen ? "md:max-w-[440px] md:min-h-[280px] md:max-h-[320px]" : "md:min-h-[560px] md:max-h-[92dvh]"
+        }`}
+      >
+        {/* Everything the composer shows — hidden on desktop while the card
+            is morphed into the save-as-draft confirm */}
+        <div className={`flex min-h-0 flex-1 flex-col ${discardOpen ? "md:hidden" : ""}`}>
         {/* Header (the dark editor step brings its own chrome) */}
         {!(mode === "live" && liveStep === "edit") ? (
         <div className="flex h-14 shrink-0 items-center justify-between px-4 md:h-auto md:px-6 md:pb-1 md:pt-5">
@@ -1054,52 +1061,6 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
           </div>
         </div>
         ) : null}
-
-        {/* Desktop discard prompt — the same compact confirm dialog used for
-            trash/unschedule, per the app-wide pattern */}
-        <AnimatePresence>
-          {discardOpen ? (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setDiscardOpen(false)}
-                className="fixed inset-0 z-[74] hidden bg-black/30 md:block"
-              />
-              <div className="pointer-events-none fixed inset-0 z-[75] hidden items-center justify-center px-8 md:flex">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.92 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 480, damping: 32 }}
-                  className="pointer-events-auto w-full max-w-[380px] rounded-3xl border border-gray-stroke bg-white px-6 pb-6 pt-5"
-                  style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.18)" }}
-                >
-                  <div className="relative flex h-10 items-center justify-center">
-                    <button
-                      onClick={() => setDiscardOpen(false)}
-                      aria-label="Keep editing"
-                      className="absolute left-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
-                    >
-                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                    </button>
-                    <p className="text-[16px] font-semibold text-gray-dark">Save as draft?</p>
-                  </div>
-                  <p className="mt-2 text-center text-[13px] leading-snug text-gray-light">You can pick it back up anytime from Drafts.</p>
-                  <div className="mt-5 flex flex-col gap-2">
-                    <button onClick={saveDraft} className="w-full cursor-pointer rounded-full bg-gray-dark py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[#333]">
-                      Save draft
-                    </button>
-                    <button onClick={onClose} className="w-full cursor-pointer rounded-full bg-gray-100 py-3 text-[15px] font-semibold text-red-500 transition-colors hover:bg-gray-200">
-                      Discard
-                    </button>
-                  </div>
-                </motion.div>
-              </div>
-            </>
-          ) : null}
-        </AnimatePresence>
 
         {mode === "post" ? (
           <>
@@ -2053,6 +2014,37 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               </p>
             </div>
           </>
+        ) : null}
+        </div>
+
+        {/* The card, morphed: same shell, confirm content */}
+        {discardOpen ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2, delay: 0.12 }}
+            className="hidden flex-1 flex-col justify-center px-8 pb-7 pt-5 md:flex"
+          >
+            <div className="relative flex h-10 items-center justify-center">
+              <button
+                onClick={() => setDiscardOpen(false)}
+                aria-label="Keep editing"
+                className="absolute left-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+              </button>
+              <p className="text-[16px] font-semibold text-gray-dark">Save as draft?</p>
+            </div>
+            <p className="mt-1 text-center text-[13px] leading-snug text-gray-light">You can pick it back up anytime from Drafts.</p>
+            <div className="mx-auto mt-5 flex w-full max-w-[320px] flex-col gap-2">
+              <button onClick={saveDraft} className="w-full cursor-pointer rounded-full bg-gray-dark py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[#333]">
+                Save draft
+              </button>
+              <button onClick={onClose} className="w-full cursor-pointer rounded-full bg-gray-100 py-3 text-[15px] font-semibold text-red-500 transition-colors hover:bg-gray-200">
+                Discard
+              </button>
+            </div>
+          </motion.div>
         ) : null}
       </div>
 
