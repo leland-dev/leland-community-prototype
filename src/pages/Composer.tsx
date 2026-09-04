@@ -175,9 +175,9 @@ function ClipLengthSheet({ seconds, maxSeconds, onDone, onClose }: { seconds: nu
   return (
     <motion.div
       initial={{ y: "110%" }} animate={{ y: 0 }} exit={{ y: "110%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
-      className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[600px] rounded-t-3xl bg-white px-5 pb-[max(env(safe-area-inset-bottom),20px)] pt-1"
+      className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[600px] rounded-t-3xl bg-white px-5 pb-[max(env(safe-area-inset-bottom),20px)] pt-1 md:bottom-auto md:top-[8vh] md:max-h-[84vh] md:max-w-[440px] md:overflow-y-auto md:rounded-3xl md:border md:border-gray-stroke md:px-6 md:pb-6"
     >
-      <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke" />
+      <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke md:hidden" />
       <div className="relative flex h-10 items-center justify-center">
         <button
           onClick={onClose}
@@ -262,9 +262,9 @@ function CalendarSheet({ onSave, onClose }: { onSave: (label: string) => void; o
   return (
     <motion.div
       initial={{ y: "110%" }} animate={{ y: 0 }} exit={{ y: "110%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
-      className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[600px] rounded-t-3xl bg-white px-5 pb-[max(env(safe-area-inset-bottom),20px)] pt-1"
+      className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[600px] rounded-t-3xl bg-white px-5 pb-[max(env(safe-area-inset-bottom),20px)] pt-1 md:bottom-auto md:top-[8vh] md:max-h-[84vh] md:max-w-[440px] md:overflow-y-auto md:rounded-3xl md:border md:border-gray-stroke md:px-6 md:pb-6"
     >
-      <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke" />
+      <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke md:hidden" />
       <div className="relative flex h-9 items-center justify-center">
         <button onClick={onClose} className="absolute left-0 cursor-pointer text-[15px] text-gray-light transition-colors hover:text-gray-dark">Cancel</button>
         <p className="text-[16px] font-semibold text-gray-dark">Schedule post</p>
@@ -1137,21 +1137,21 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               <div className="flex gap-3 overflow-x-auto px-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <button
                   onClick={() => { setMode("article"); runArticleDemo(); }}
-                  className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200"
+                  className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200 md:w-auto md:flex-1"
                 >
                   <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /><path d="M8 13h8" /><path d="M8 17h5" /></svg>
                   <span className="text-[15px] font-semibold text-gray-dark">Write an article</span>
                 </button>
                 <button
                   onClick={() => { setMode("live"); setLiveStep("list"); setSelectedRecording(null); setSelectedClip(null); setCropGrid(false); setCropAspect("Original"); setCropX(50); setCropY(50); }}
-                  className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200"
+                  className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200 md:w-auto md:flex-1"
                 >
                   <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="m22 8-6 4 6 4V8Z" /><rect x="2" y="6" width="14" height="12" rx="2" /></svg>
                   <span className="text-[15px] font-semibold text-gray-dark">Post Livestream</span>
                 </button>
                 <button
                   onClick={() => setMode("golive")}
-                  className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200"
+                  className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200 md:w-auto md:flex-1"
                 >
                   <span className="rounded bg-[#D6204C] px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white">LIVE</span>
                   <span className="text-[15px] font-semibold text-gray-dark">Go Live</span>
@@ -1200,7 +1200,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
 
             <div className="shrink-0 pb-[max(env(safe-area-inset-bottom),28px)]">
               {/* Formatting toolbar — Substack's editing row */}
-              <div className="flex items-center gap-1.5 overflow-x-auto border-t border-gray-stroke/60 px-4 pb-1 pt-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex items-center gap-1.5 overflow-x-auto border-t border-gray-stroke/60 px-4 pb-1 pt-2.5 md:overflow-visible [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <div className="relative">
                   {toolbarButton("Text style", () => setStyleMenuOpen(o => !o), (
                     <span className="flex h-[22px] items-center text-[16px] font-semibold leading-none">Aa</span>
@@ -1208,7 +1208,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                   {styleMenuOpen ? (
                     <>
                       <div className="fixed inset-0 z-[65]" onMouseDown={() => setStyleMenuOpen(false)} />
-                      <div className="fixed bottom-[calc(max(env(safe-area-inset-bottom),28px)+50px)] left-4 z-[66] w-44 overflow-hidden rounded-xl border border-gray-stroke bg-white py-1">
+                      <div className="fixed bottom-[calc(max(env(safe-area-inset-bottom),28px)+50px)] left-4 z-[66] w-44 overflow-hidden rounded-xl border border-gray-stroke bg-white py-1 md:absolute md:bottom-11 md:left-0">
                         <button
                           onMouseDown={e => e.preventDefault()}
                           onClick={() => { exec("formatBlock", "h2"); setStyleMenuOpen(false); }}
@@ -1997,9 +1997,9 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setLinkOpen(false)} className="fixed inset-0 z-[70] bg-black/40" />
             <motion.div
               initial={{ y: "110%" }} animate={{ y: 0 }} exit={{ y: "110%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
-              className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[600px] rounded-t-3xl bg-white px-5 pb-[max(env(safe-area-inset-bottom),20px)] pt-1"
+              className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[600px] rounded-t-3xl bg-white px-5 pb-[max(env(safe-area-inset-bottom),20px)] pt-1 md:bottom-auto md:top-[8vh] md:max-h-[84vh] md:max-w-[440px] md:overflow-y-auto md:rounded-3xl md:border md:border-gray-stroke md:px-6 md:pb-6"
             >
-              <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke" />
+              <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke md:hidden" />
               <p className="text-[16px] font-semibold text-gray-dark">Add link</p>
               <input
                 autoFocus
@@ -2028,9 +2028,9 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDraftsOpen(false)} className="fixed inset-0 z-[70] bg-black/40" />
             <motion.div
               initial={{ y: "110%" }} animate={{ y: 0 }} exit={{ y: "110%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
-              className="fixed inset-x-0 bottom-0 top-14 z-[71] mx-auto flex max-w-[600px] flex-col rounded-t-3xl bg-white"
+              className="fixed inset-x-0 bottom-0 top-14 z-[71] mx-auto flex max-w-[600px] flex-col rounded-t-3xl bg-white md:bottom-auto md:top-[10vh] md:max-h-[76vh] md:max-w-[480px] md:rounded-3xl md:border md:border-gray-stroke"
             >
-              <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke" />
+              <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke md:hidden" />
               <div className="relative flex h-11 shrink-0 items-center justify-center px-5">
                 <button onClick={() => setDraftsOpen(false)} className="absolute left-5 cursor-pointer text-[15px] text-gray-light transition-colors hover:text-gray-dark">Cancel</button>
                 <p className="text-[16px] font-semibold text-gray-dark">Drafts</p>
@@ -2201,9 +2201,9 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDiscardOpen(false)} className="fixed inset-0 z-[70] bg-black/40" />
             <motion.div
               initial={{ y: "110%" }} animate={{ y: 0 }} exit={{ y: "110%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
-              className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[600px] rounded-t-3xl bg-white px-4 pb-[max(env(safe-area-inset-bottom),16px)] pt-1"
+              className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[600px] rounded-t-3xl bg-white px-4 pb-[max(env(safe-area-inset-bottom),16px)] pt-1 md:bottom-auto md:top-[24vh] md:max-w-[400px] md:rounded-3xl md:border md:border-gray-stroke md:px-5 md:pb-5"
             >
-              <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke" />
+              <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke md:hidden" />
               <button onClick={saveDraft} className="w-full cursor-pointer rounded-full bg-gray-dark py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[#333]">
                 Save draft
               </button>

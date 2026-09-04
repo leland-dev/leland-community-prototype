@@ -5406,7 +5406,7 @@ export default function Home() {
       {createPortal(
         <AnimatePresence>
           {draftToast ? (
-            <div key="draft" className="pointer-events-none fixed inset-x-0 bottom-[calc(max(env(safe-area-inset-bottom),20px)+76px)] z-[80] flex justify-center">
+            <div key="draft" className="pointer-events-none fixed inset-x-0 bottom-[calc(max(env(safe-area-inset-bottom),20px)+76px)] z-[80] flex justify-center md:bottom-10">
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -5421,7 +5421,7 @@ export default function Home() {
             </div>
           ) : null}
           {schedToast ? (
-            <div key="sched" className="pointer-events-none fixed inset-x-0 bottom-[calc(max(env(safe-area-inset-bottom),20px)+76px)] z-[80] flex justify-center">
+            <div key="sched" className="pointer-events-none fixed inset-x-0 bottom-[calc(max(env(safe-area-inset-bottom),20px)+76px)] z-[80] flex justify-center md:bottom-10">
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
