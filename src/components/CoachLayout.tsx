@@ -214,7 +214,8 @@ function SidebarV1() {
             {navRow(findItem("/coach/profile-new"))}
             {navRow(findItem("/coach/calendar"))}
             {navRow({ to: "/coach/my-content", label: "Content", icon: bookOpenIcon })}
-            {navRow(findItem("/coach/reviews"))}
+            {/* Reviews lives here (as a customer) only until Expert tools are on */}
+            {!expert && navRow(findItem("/coach/reviews"))}
           </nav>
         </div>
 
@@ -230,6 +231,7 @@ function SidebarV1() {
               {navRow(findItem("/coach/livestreams"))}
               {navRow(findItem("/coach/earnings"))}
               {navRow({ to: "/coach/analytics", label: "Analytics", icon: chartIcon })}
+              {navRow(findItem("/coach/reviews"))}
               {navRow(findItem("/coach/discount-codes"))}
             </nav>
           </div>

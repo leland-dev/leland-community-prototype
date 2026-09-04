@@ -107,6 +107,7 @@ import CoachProducts from "./pages/CoachProducts";
 import CoachInbox from "./pages/CoachInbox";
 import CoachManage from "./pages/CoachManage";
 import CoachProfileNew from "./pages/CoachProfileNew";
+import CoachProfilePlaceholder from "./pages/CoachProfilePlaceholder";
 import CoachOpportunities from "./pages/CoachOpportunities";
 import CoachLivestreams from "./pages/CoachLivestreams";
 import CoachContent from "./pages/CoachContent";
@@ -218,7 +219,7 @@ export default function App() {
           <Route path="/my-leland" element={<Dashboard shell />} />
           <Route path="/my-leland/inbox" element={<CoachInbox />} />
           <Route path="/my-leland/manage" element={<CoachManage />} />
-          <Route path="/my-leland/profile-new" element={<CoachProfileNew />} />
+          <Route path="/my-leland/profile-new" element={<CoachProfilePlaceholder />} />
           <Route path="/my-leland/products" element={<CoachProducts />} />
           <Route path="/my-leland/manage/:category" element={<CoachCategoryEdit />} />
           <Route path="/my-leland/opportunities" element={<CoachOpportunities />} />
