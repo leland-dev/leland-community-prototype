@@ -268,6 +268,7 @@ export default function App() {
           <Route path="/alt-nav/post/:postId" element={<PostDetail />} />
           <Route path="/alt-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
           <Route path="/alt-nav/dashboard" element={<Dashboard />} />
+          <Route path="/alt-nav/browse" element={<Browse />} />
           <Route path="/alt-nav/jobs" element={<Jobs />} />
           <Route path="/alt-nav/plus" element={<LelandPlus />} />
           <Route path="/alt-nav/messages" element={<Messaging />} />

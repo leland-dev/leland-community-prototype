@@ -5240,7 +5240,7 @@ function HomeSidebarV1() {
   return (
     <div className="flex flex-col gap-[14px]">
       {/* Profile card — the dashboard's profile summary, in its non-expert form */}
-      <DashboardProfileCard expert={false} />
+      <DashboardProfileCard expert={false} hideEdit />
 
       {/* Next session + calendar link */}
       <div className="rounded-[12px] border border-[#222222]/[0.12] bg-white">
@@ -5291,7 +5291,7 @@ function HomeSidebarV2() {
   return (
     <div className="flex flex-col gap-[14px]">
       {/* 1. Profile card */}
-      <DashboardProfileCard expert={false} compact />
+      <DashboardProfileCard expert={false} compact hideEdit />
 
       {/* 2. Upcoming sessions — preview up to 2 */}
       <SidebarSectionCard title="Upcoming sessions" to={sessionsTo} bleed>
@@ -5647,17 +5647,18 @@ export default function Home() {
       {/* Feed card — one bordered container wrapping the composer and the whole
           post list, so the border runs around all edges. Horizontal padding
           lives on the composer and each post row (dividers run full-bleed to
-          the border while post content stays inset). */}
+          the border while post content stays inset). On mobile it breaks out of
+          the page padding to run full-bleed: no rounding, no left/right borders
+          (the per-post dividers remain). */}
       <motion.div
-        className="rounded-2xl border border-gray-stroke bg-white"
+        className="-mx-4 rounded-none border border-x-0 border-gray-stroke bg-white sm:-mx-6 md:mx-0 md:rounded-2xl md:border-x"
       >
-      {/* Post composer — hidden on mobile (composer lives in the floating
-          + button there). Mirrors the post-detail comment composer's active
-          state: avatar + prompt on top, media icons + Post button beneath.
-          Clicking anywhere opens the compose modal. */}
+      {/* Post composer — shown on all screens. Mirrors the post-detail comment
+          composer's active state: avatar + prompt on top, media icons + Post
+          button beneath. Clicking anywhere opens the compose modal. */}
       <div
         onClick={() => setComposeOpen(true)}
-        className="hidden cursor-pointer md:block border-b border-gray-stroke px-4 py-3 sm:px-6"
+        className="block cursor-pointer border-b border-gray-stroke px-4 py-3 sm:px-6"
       >
         <div className="flex items-center gap-3">
           <img

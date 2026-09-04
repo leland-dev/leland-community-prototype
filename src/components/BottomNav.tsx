@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useDarkMode } from "../contexts/DarkModeContext";
 
 import homeActive from "../assets/icons/nav-icons/home-active.svg";
@@ -9,17 +9,21 @@ import userCircleIcon from "../assets/icons/user-circle-filled.svg";
 import briefcaseFilledIcon from "../assets/icons/briefcase-filled.svg";
 
 // Mirrors the LinkedIn-style top nav: For you · Browse · My Leland · Jobs ·
-// Messages. Notifications moved to the mobile top-right corner.
+// Messages. Notifications moved to the mobile top-right corner. When the user
+// is already inside the /alt-nav experience, `altTo` keeps them there instead
+// of bouncing back to the classic-nav routes.
 const navItems = [
-  { to: "/", icon: homeActive, label: "For you", end: true },
-  { to: "/browse", icon: browseActive, label: "Browse" },
-  { to: "/dashboard", icon: userCircleIcon, label: "My Leland" },
-  { to: "/jobs", icon: briefcaseFilledIcon, label: "Jobs" },
-  { to: "/messages", icon: chatActive, label: "Messages", badge: 1 },
+  { to: "/", altTo: "/alt-nav", icon: homeActive, label: "For you", end: true },
+  { to: "/browse", altTo: "/alt-nav/browse", icon: browseActive, label: "Browse" },
+  { to: "/dashboard", altTo: "/my-leland", icon: userCircleIcon, label: "My Leland" },
+  { to: "/jobs", altTo: "/alt-nav/jobs", icon: briefcaseFilledIcon, label: "Jobs" },
+  { to: "/messages", altTo: "/alt-nav/messages", icon: chatActive, label: "Messages", badge: 1 },
 ];
 
 export default function BottomNav() {
   const { dark: darkMode } = useDarkMode();
+  const { pathname } = useLocation();
+  const inAltNav = pathname.startsWith("/alt-nav") || pathname.startsWith("/my-leland");
   const [hidden, setHidden] = useState(false);
   const lastY = useRef(0);
 
@@ -39,10 +43,10 @@ export default function BottomNav() {
   return (
     <nav className={`fixed bottom-0 left-0 right-0 z-30 ${darkMode ? "bg-[#131313]" : "bg-white"} shadow-[0_-4px_12px_rgba(0,0,0,0.06)] pt-1 pb-[max(env(safe-area-inset-bottom),8px)] transition-transform duration-200 ease-out ${hidden ? "translate-y-full" : "translate-y-0"}`}>
       <ul className="flex items-center">
-        {navItems.map(({ to, icon, label, end, badge }) => (
+        {navItems.map(({ to, altTo, icon, label, end, badge }) => (
           <li key={to} className="flex-1">
             <NavLink
-              to={to}
+              to={inAltNav && altTo ? altTo : to}
               end={end}
               className="flex flex-col items-center justify-center gap-1 py-2"
             >

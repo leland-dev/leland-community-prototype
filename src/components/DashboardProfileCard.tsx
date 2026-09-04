@@ -7,7 +7,7 @@ import editIcon from "../assets/icons/edit.svg";
 // non-expert form, at the top of the home feed's right sidebar. Experts get an
 // extra rating row + "Expert mins" stat; everyone shows Followers / Following
 // and an "Edit profile" button.
-export default function DashboardProfileCard({ expert, compact = false }: { expert: boolean; compact?: boolean }) {
+export default function DashboardProfileCard({ expert, compact = false, hideEdit = false }: { expert: boolean; compact?: boolean; hideEdit?: boolean }) {
   return (
     <div
       className={
@@ -45,20 +45,26 @@ export default function DashboardProfileCard({ expert, compact = false }: { expe
           <span className="text-[13px] leading-tight text-[#707070]">Followers</span>
         </div>
         <div className="flex flex-col gap-[2px]">
-          <span className="text-[16px] font-semibold leading-none text-gray-dark">112</span>
-          <span className="text-[13px] leading-tight text-[#707070]">Following</span>
+          <span className="text-[16px] font-semibold leading-none text-gray-dark">47</span>
+          <span className="text-[13px] leading-tight text-[#707070]">Posts</span>
+        </div>
+        <div className="flex flex-col gap-[2px]">
+          <span className="text-[16px] font-semibold leading-none text-gray-dark">22.9k</span>
+          <span className="text-[13px] leading-tight text-[#707070]">Likes</span>
         </div>
       </div>
 
-      <LinkButton
-        href="/coach-profile"
-        size="sm"
-        variant="secondary"
-        className="mt-5 w-full text-[15px] font-semibold"
-      >
-        <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
-        Edit profile
-      </LinkButton>
+      {!hideEdit && (
+        <LinkButton
+          href="/coach-profile"
+          size="sm"
+          variant="secondary"
+          className="mt-5 w-full text-[15px] font-semibold"
+        >
+          <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
+          Edit profile
+        </LinkButton>
+      )}
     </div>
   );
 }
