@@ -999,14 +999,12 @@ export function formatCount(n: number): string {
   return n.toString();
 }
 
-// Post links stay inside whichever experience you're in: under /alt-nav they
-// point at /alt-nav/post/:id (keeping the sidebar shell), under /linkedin-nav at
-// /linkedin-nav/post/:id, everywhere else at /post/:id. Consumed by every
-// card/action that opens a post.
+// Post links stay inside whichever experience you're in: under /alt-nav
+// they point at /alt-nav/post/:id, everywhere else at /post/:id. Consumed
+// by every card/action that opens a post.
 export function usePostBase(): string {
   const { pathname } = useLocation();
   if (pathname.startsWith("/alt-nav")) return "/alt-nav/post";
-  if (pathname.startsWith("/linkedin-nav")) return "/linkedin-nav/post";
   return "/post";
 }
 
@@ -5121,14 +5119,11 @@ function PopularExperts() {
 }
 
 export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = {}) {
-  const { pathname } = useLocation();
-  const isAltNav = pathname.startsWith("/alt-nav");
-  // Defaults to the alt-nav behavior, but callers (e.g. the dashboard, which
-  // already lists upcoming sessions in its main column) can suppress the card.
-  const upcoming = showUpcoming ?? isAltNav;
+  // Opt-in via the showUpcoming prop; off by default.
+  const upcoming = showUpcoming ?? false;
   return (
     <div className="flex flex-col gap-[14px]">
-      {/* Upcoming sessions — alt-nav only */}
+      {/* Upcoming sessions */}
       {upcoming && (
         <SidebarSectionCard title="Upcoming sessions" to="/calendar" bleed>
           <SessionCard size="small" title="Alex <> Jessica" dateTime="Today, 5:45 PM" duration="30m" day={16} image={pic6} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
@@ -5160,22 +5155,20 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
         />
       </SidebarSectionCard>
 
-      {/* Trending topics — hidden in alt-nav */}
-      {!isAltNav && (
-        <SidebarSectionCard title="Trending topics" to="/topic/mba-r1-admissions" bleed={false}>
-          {TOPICS.map(topic => (
-            <SidebarCard
-              key={topic.slug}
-              variant="topic"
-              align="top"
-              to={`/topic/${topic.slug}`}
-              icon={<img src={topicHash} alt="" className="h-[20px] w-[20px] shrink-0" />}
-              title={topic.name}
-              subtitle={`${topic.postsToday} posts today`}
-            />
-          ))}
-        </SidebarSectionCard>
-      )}
+      {/* Trending topics */}
+      <SidebarSectionCard title="Trending topics" to="/topic/mba-r1-admissions" bleed={false}>
+        {TOPICS.map(topic => (
+          <SidebarCard
+            key={topic.slug}
+            variant="topic"
+            align="top"
+            to={`/topic/${topic.slug}`}
+            icon={<img src={topicHash} alt="" className="h-[20px] w-[20px] shrink-0" />}
+            title={topic.name}
+            subtitle={`${topic.postsToday} posts today`}
+          />
+        ))}
+      </SidebarSectionCard>
 
       {/* Popular experts */}
       <PopularExperts />
@@ -5435,9 +5428,6 @@ function FeedAdminMenu() {
 export default function Home() {
   useEffect(() => { document.title = "Leland Prototype | Feed"; }, []);
   const { version } = useVersion();
-  // In alt-nav the feed card fades in on mount, matching the post detail.
-  const { pathname } = useLocation();
-  const isAltNav = pathname.startsWith("/alt-nav");
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
   // "People to follow → See all" swaps the center feed for the full accounts list.
@@ -5653,7 +5643,6 @@ export default function Home() {
           lives on the composer and each post row (dividers run full-bleed to
           the border while post content stays inset). */}
       <motion.div
-        {...(isAltNav ? { initial: FADE_IN.initial, animate: FADE_IN.animate, transition: FADE_TRANSITION } : {})}
         className="rounded-2xl border border-gray-stroke bg-white"
       >
       {/* Post composer — hidden on mobile (composer lives in the floating

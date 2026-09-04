@@ -726,7 +726,7 @@ export default function CoachReviews() {
   const visibleOutcomes = [...outcomes, ...schoolOutcomes].filter((o) => !o.hidden);
 
   return (
-    <div className="mx-auto max-w-[880px]">
+    <div className="mx-auto max-w-[1080px]">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="font-serif text-[30px] font-medium text-gray-dark md:text-[38px]">37 reviews</h1>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
+import { useExpertMode } from "../contexts/ExpertModeContext";
 import chatIcon from "../assets/icons/nav-icons/chat-inactive.svg";
 import storeIcon from "../assets/icons/store.svg";
 import lightningIcon from "../assets/icons/lightning.svg";
@@ -56,12 +57,12 @@ const categoryChildren = categories.map((c) => ({ to: c.to, label: c.label }));
 const storefrontRoutes = ["/coach/pricing", "/coach/content"];
 
 // The coach dashboard is reused in two places: the real /coach/* section and
-// the LinkedIn-nav "My Store" (/linkedin-nav/store/*). All nav data is authored
+// the LinkedIn-nav "My Store" (/my-leland/*). All nav data is authored
 // against /coach; rebase() swaps that prefix for the current base so links and
 // active-state checks stay within whichever shell is mounted.
 function useCoachBase() {
   const { pathname } = useLocation();
-  return pathname.startsWith("/linkedin-nav/store") ? "/linkedin-nav/store" : "/coach";
+  return pathname.startsWith("/my-leland") ? "/my-leland" : "/coach";
 }
 function rebase(to: string, base: string) {
   return base === "/coach" ? to : base + to.slice("/coach".length);
@@ -137,6 +138,7 @@ function SidebarV1() {
   const [listingsOpen, setListingsOpen] = useState(false);
   const { pathname } = useLocation();
   const base = useCoachBase();
+  const { expert } = useExpertMode();
   const onStorefront = pathname.startsWith(rebase("/coach/manage", base)) || storefrontRoutes.some((r) => rebase(r, base) === pathname);
 
   const inStore = base !== "/coach";
@@ -228,14 +230,19 @@ function SidebarV1() {
         {navRow(findItem("/coach/calendar"))}
         {navRow(findItem("/coach/reviews"))}
 
-        <p className="px-3 pb-1 pt-4 text-[13px] font-medium text-gray-extra-light">
-          Expert tools
-        </p>
-        {offeringsAccordion}
-        {navRow(findItem("/coach/opportunities"))}
-        {navRow(findItem("/coach/livestreams"))}
-        {navRow(findItem("/coach/earnings"))}
-        {navRow(findItem("/coach/discount-codes"))}
+        {/* Expert tools — only for experts; a non-expert sees just the group above */}
+        {expert && (
+          <>
+            <p className="px-3 pb-1 pt-4 text-[13px] font-medium text-gray-extra-light">
+              Expert tools
+            </p>
+            {offeringsAccordion}
+            {navRow(findItem("/coach/opportunities"))}
+            {navRow(findItem("/coach/livestreams"))}
+            {navRow(findItem("/coach/earnings"))}
+            {navRow(findItem("/coach/discount-codes"))}
+          </>
+        )}
       </nav>
     );
   }
@@ -457,7 +464,7 @@ export default function CoachLayout() {
 
       {/* Main content — fills remaining space, capped at 1280px */}
       <div className="min-w-0 flex-1">
-        <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-10">
+        <div className="mx-auto max-w-[1080px] px-4 py-8 sm:px-6 sm:py-10">
           <Outlet />
         </div>
       </div>

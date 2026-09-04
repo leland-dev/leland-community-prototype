@@ -211,20 +211,20 @@ export default function App() {
             CoachLayout's base-path awareness). Reuses the coach page components;
             reachable from the expert-only "My Store" top-nav item. */}
         <Route element={<CoachLayout />}>
-          <Route path="/linkedin-nav/store" element={<Dashboard shell expert />} />
-          <Route path="/linkedin-nav/store/inbox" element={<CoachInbox />} />
-          <Route path="/linkedin-nav/store/manage" element={<CoachManage />} />
-          <Route path="/linkedin-nav/store/profile-new" element={<CoachProfileNew />} />
-          <Route path="/linkedin-nav/store/products" element={<CoachProducts />} />
-          <Route path="/linkedin-nav/store/manage/:category" element={<CoachCategoryEdit />} />
-          <Route path="/linkedin-nav/store/opportunities" element={<CoachOpportunities />} />
-          <Route path="/linkedin-nav/store/livestreams" element={<CoachLivestreams />} />
-          <Route path="/linkedin-nav/store/content" element={<CoachContent />} />
-          <Route path="/linkedin-nav/store/pricing" element={<CoachPricing />} />
-          <Route path="/linkedin-nav/store/calendar" element={<CoachCalendar />} />
-          <Route path="/linkedin-nav/store/earnings" element={<CoachEarnings />} />
-          <Route path="/linkedin-nav/store/reviews" element={<CoachReviews />} />
-          <Route path="/linkedin-nav/store/discount-codes" element={<CoachDiscountCodes />} />
+          <Route path="/my-leland" element={<Dashboard shell />} />
+          <Route path="/my-leland/inbox" element={<CoachInbox />} />
+          <Route path="/my-leland/manage" element={<CoachManage />} />
+          <Route path="/my-leland/profile-new" element={<CoachProfileNew />} />
+          <Route path="/my-leland/products" element={<CoachProducts />} />
+          <Route path="/my-leland/manage/:category" element={<CoachCategoryEdit />} />
+          <Route path="/my-leland/opportunities" element={<CoachOpportunities />} />
+          <Route path="/my-leland/livestreams" element={<CoachLivestreams />} />
+          <Route path="/my-leland/content" element={<CoachContent />} />
+          <Route path="/my-leland/pricing" element={<CoachPricing />} />
+          <Route path="/my-leland/calendar" element={<Calendar shell />} />
+          <Route path="/my-leland/earnings" element={<CoachEarnings />} />
+          <Route path="/my-leland/reviews" element={<CoachReviews />} />
+          <Route path="/my-leland/discount-codes" element={<CoachDiscountCodes />} />
         </Route>
         <Route path="/components" element={<Components />} />
         <Route path="/components/leland" element={<LelandKitTest />} />
@@ -257,14 +257,14 @@ export default function App() {
           <Route path="/topic/:slug" element={<Topic />} />
           {/* Isolated LinkedIn-nav experience — feed, post detail, and the
               destinations behind the top-nav items. */}
-          <Route path="/linkedin-nav" element={<Home />} />
-          <Route path="/linkedin-nav/post/:postId" element={<PostDetail />} />
-          <Route path="/linkedin-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
-          <Route path="/linkedin-nav/dashboard" element={<Dashboard />} />
-          <Route path="/linkedin-nav/jobs" element={<Jobs />} />
-          <Route path="/linkedin-nav/plus" element={<LelandPlus />} />
-          <Route path="/linkedin-nav/messages" element={<Messaging />} />
-          <Route path="/linkedin-nav/notifications" element={<Notifications />} />
+          <Route path="/alt-nav" element={<Home />} />
+          <Route path="/alt-nav/post/:postId" element={<PostDetail />} />
+          <Route path="/alt-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
+          <Route path="/alt-nav/dashboard" element={<Dashboard />} />
+          <Route path="/alt-nav/jobs" element={<Jobs />} />
+          <Route path="/alt-nav/plus" element={<LelandPlus />} />
+          <Route path="/alt-nav/messages" element={<Messaging />} />
+          <Route path="/alt-nav/notifications" element={<Notifications />} />
           <Route path="/events" element={<Events />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/plus" element={<LelandPlus />} />

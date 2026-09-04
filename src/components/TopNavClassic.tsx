@@ -407,7 +407,7 @@ export default function TopNavClassic() {
                         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                           <div className="ml-[22px] border-l-[1.5px] border-gray-stroke pl-2">
                             <NavLink
-                              to="/linkedin-nav"
+                              to="/alt-nav"
                               onClick={() => setProfileOpen(false)}
                               className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                             >

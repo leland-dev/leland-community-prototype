@@ -141,11 +141,11 @@ export default function TopNavLinkedIn() {
   const { pathname } = useLocation();
   const { variant, setVariant, showNavLabels, setShowNavLabels, navEdgeToEdge, setNavEdgeToEdge, feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
   const { expert, setExpert } = useExpertMode();
-  // Inside the isolated /linkedin-nav experience, the nav destinations stay within
-  // it (e.g. /linkedin-nav/messages); elsewhere they point at the normal routes.
-  const inLinkedInNav = pathname.startsWith("/linkedin-nav");
-  const homeTo = inLinkedInNav ? "/linkedin-nav" : "/";
-  const navTo = (path: string) => (inLinkedInNav ? `/linkedin-nav${path}` : path);
+  // Inside the isolated /alt-nav experience, the nav destinations stay within
+  // it (e.g. /alt-nav/messages); elsewhere they point at the normal routes.
+  const inLinkedInNav = pathname.startsWith("/alt-nav") || pathname.startsWith("/my-leland");
+  const homeTo = inLinkedInNav ? "/alt-nav" : "/";
+  const navTo = (path: string) => (inLinkedInNav ? `/alt-nav${path}` : path);
   // All three variants share the same v1 nav items + "Me" dropdown; they differ
   // only in where the icon group and search live:
   //   v1 — search bar on the left, icons on the right (before Me)
@@ -168,12 +168,10 @@ export default function TopNavLinkedIn() {
   // Discover (Browse) opens a browse-by-category list; it reads as active while
   // on the browse surface or whenever its dropdown is open.
   const discoverActive = discoverOpen || pathname === "/browse" || pathname.startsWith("/browse/");
-  // Expert: "My Leland" points to the coach store and reads active there;
-  // otherwise it points to the personal dashboard as before.
-  const myLelandTo = expert ? navTo("/store") : navTo("/dashboard");
-  const myLelandActive = expert
-    ? pathname.startsWith("/linkedin-nav/store")
-    : pathname === "/dashboard" || pathname.startsWith("/dashboard/") || pathname.startsWith("/linkedin-nav/dashboard");
+  // "My Leland" always opens the store shell (/my-leland); the Expert
+  // toggle only controls whether the sidebar's "Expert tools" group shows.
+  const myLelandTo = "/my-leland";
+  const myLelandActive = pathname.startsWith("/my-leland");
 
   const activeProfileMenuGroups = useMemo(() => {
     // My Leland always lives in the top nav now, so the Me dropdown keeps its
@@ -299,15 +297,15 @@ export default function TopNavLinkedIn() {
   const searchBar = (
     <form
       onSubmit={(e) => e.preventDefault()}
-      className="hidden md:flex h-10 w-[300px] items-center gap-2 self-center rounded-full border border-gray-stroke bg-white px-3.5 focus-within:border-gray-dark"
+      className="hidden md:flex h-11 w-[300px] items-center gap-2.5 self-center rounded-full bg-[#222222]/[0.06] px-4 transition-colors focus-within:bg-[#222222]/[0.09]"
     >
-      <img src={searchIcon} alt="" className="h-[18px] w-[18px] shrink-0 opacity-60" />
+      <img src={searchIcon} alt="" className="h-5 w-5 shrink-0" />
       <input
         type="text"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="Search Leland"
-        className="w-full bg-transparent text-[14px] text-gray-dark placeholder:text-gray-light outline-none"
+        className="w-full bg-transparent text-[15px] text-gray-dark placeholder:text-gray-light outline-none"
       />
     </form>
   );
@@ -328,7 +326,7 @@ export default function TopNavLinkedIn() {
       <div className={`relative flex min-h-[60px] items-stretch justify-between gap-4 px-4 sm:px-6 ${navEdgeToEdge ? "w-full" : "mx-auto max-w-[1280px]"}`}>
         {/* Left: logo + (search bar on v1 / icon group on v2) */}
         <div className={`flex gap-5 ${variant === 2 ? "items-stretch" : "items-center py-2.5"}`}>
-          <NavLink to={isCoachMode ? "/coach/inbox" : "/"} className="flex shrink-0 items-center">
+          <NavLink to={isCoachMode ? "/coach/inbox" : homeTo} className="flex shrink-0 items-center">
             <img src={lelandWordmark} alt="Leland" className="h-6 w-auto" />
           </NavLink>
           {variant === 1 && searchBar}
