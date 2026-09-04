@@ -1253,7 +1253,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
 
         {mode === "article" ? (
           <>
-            <div className="flex-1 overflow-y-auto px-4 pt-1 pb-6">
+            <div className="flex-1 overflow-y-auto px-4 pt-1 pb-6 md:px-6">
               <div className="flex items-center gap-2">
                 <img src={profilePhoto} alt="You" className="h-5 w-5 rounded-full object-cover" />
                 <span className="text-[13px] font-medium text-gray-light">{SELF.author}</span>
@@ -1289,7 +1289,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
 
             <div className="shrink-0 pb-[max(env(safe-area-inset-bottom),28px)]">
               {/* Formatting toolbar — Substack's editing row */}
-              <div className="flex items-center gap-1.5 overflow-x-auto border-t border-gray-stroke/60 px-4 pb-1 pt-2.5 md:overflow-visible [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex items-center gap-1.5 overflow-x-auto border-t border-gray-stroke/60 px-4 pb-1 pt-2.5 md:overflow-visible md:px-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <div className="relative">
                   {toolbarButton("Text style", () => setStyleMenuOpen(o => !o), (
                     <span className="flex h-[22px] items-center text-[16px] font-semibold leading-none">Aa</span>
@@ -1376,7 +1376,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               </div>
             ) : (
               /* Step 1 — pick a livestream or an auto-generated clip */
-              <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6">
+              <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6 md:px-6">
                 <div className="flex rounded-full bg-gray-100 p-1">
                   {(["Livestreams", "Clips"] as const).map(t => (
                     <button
@@ -1977,7 +1977,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 ? (uploadedMeta.aspect < 0.9 ? "9:16" : uploadedMeta.aspect > 1.45 ? "16:9" : "Original")
                 : cropAspect;
               return (
-                <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6">
+                <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6 md:px-6">
                   <div className="flex items-center gap-3">
                     <img src={profilePhoto} alt="You" className="h-10 w-10 rounded-full object-cover" />
                     <span className="text-[16px] font-semibold text-gray-dark">{SELF.author}</span>
@@ -2018,7 +2018,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
 
         {mode === "golive" ? (
           <>
-            <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6">
+            <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6 md:px-6">
               <input
                 autoFocus
                 value={goLiveTitle}
