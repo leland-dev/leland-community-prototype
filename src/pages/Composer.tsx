@@ -895,6 +895,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
 
   const handleCancel = () => {
     demoToken.current++;
+    setEmojiOpen(false);
     if (isDirty) setDiscardOpen(true);
     else onClose();
   };
@@ -931,18 +932,29 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   // trap the overlay underneath the app's fixed header and tab bar.
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col bg-white md:items-center md:justify-center md:bg-black/50 md:p-6">
-      <div className="mx-auto flex h-full w-full max-w-[600px] flex-col md:h-auto md:max-h-[92dvh] md:min-h-[400px] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white">
+      <div className="relative mx-auto flex h-full w-full max-w-[600px] flex-col md:h-auto md:max-h-[92dvh] md:min-h-[560px] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white">
         {/* Header (the dark editor step brings its own chrome) */}
         {!(mode === "live" && liveStep === "edit") ? (
         <div className="flex h-14 shrink-0 items-center justify-between px-4 md:h-auto md:px-6 md:pb-1 md:pt-5">
           {mode === "post" || mode === "article" ? (
-            <button
-              onClick={handleCancel}
-              aria-label="Close composer"
-              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
-            >
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleCancel}
+                aria-label="Close composer"
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+              </button>
+              {mode === "article" ? (
+                <button
+                  onClick={() => { demoToken.current++; setMode("post"); }}
+                  aria-label="Back to composer"
+                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                </button>
+              ) : null}
+            </div>
           ) : (
             <button
               onClick={() => {
@@ -1041,9 +1053,34 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
         </div>
         ) : null}
 
+        {/* Desktop discard prompt lives INSIDE the card — never a modal on a modal */}
+        <AnimatePresence>
+          {discardOpen ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="absolute inset-0 z-[75] hidden flex-col items-center justify-center gap-2 rounded-2xl bg-white/95 px-10 backdrop-blur-sm md:flex"
+            >
+              <p className="text-[17px] font-semibold text-gray-dark">Save this as a draft?</p>
+              <p className="pb-3 text-[13px] text-gray-light">You can pick it back up anytime from Drafts.</p>
+              <button onClick={saveDraft} className="w-full max-w-[280px] cursor-pointer rounded-full bg-gray-dark py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#333]">
+                Save draft
+              </button>
+              <button onClick={onClose} className="w-full max-w-[280px] cursor-pointer rounded-full bg-gray-100 py-2.5 text-[14px] font-semibold text-red-500 transition-colors hover:bg-gray-200">
+                Discard
+              </button>
+              <button onClick={() => setDiscardOpen(false)} className="mt-1 cursor-pointer text-[14px] font-medium text-gray-dark hover:underline">
+                Keep editing
+              </button>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+
         {mode === "post" ? (
           <>
-            <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6 md:min-h-[210px] md:px-6">
+            <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6 md:min-h-[340px] md:px-6">
               {/* Identity row above the input, Substack-style */}
               <div className="flex items-center gap-3">
                 <img src={profilePhoto} alt="You" className="h-10 w-10 rounded-full object-cover" />
@@ -1178,7 +1215,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             <div className="shrink-0 pb-[max(env(safe-area-inset-bottom),16px)] md:pb-6">
               <div className="flex gap-3 overflow-x-auto px-4 md:px-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <button
-                  onClick={() => { setMode("article"); runArticleDemo(); }}
+                  onClick={() => { setMode("article"); if (!title.trim() && !stripHtml(articleHtml).trim()) runArticleDemo(); }}
                   className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200 md:w-auto md:flex-1"
                 >
                   <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /><path d="M8 13h8" /><path d="M8 17h5" /></svg>
@@ -2251,7 +2288,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDiscardOpen(false)} className="fixed inset-0 z-[70] bg-black/40" />
             <motion.div
               initial={{ y: "110%" }} animate={{ y: 0 }} exit={{ y: "110%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
-              className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[600px] rounded-t-3xl bg-white px-4 pb-[max(env(safe-area-inset-bottom),16px)] pt-1 md:bottom-auto md:top-[24vh] md:max-w-[400px] md:rounded-3xl md:border md:border-gray-stroke md:px-5 md:pb-5"
+              className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[600px] rounded-t-3xl bg-white px-4 pb-[max(env(safe-area-inset-bottom),16px)] pt-1 md:hidden"
             >
               <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke md:hidden" />
               <button onClick={saveDraft} className="w-full cursor-pointer rounded-full bg-gray-dark py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[#333]">
