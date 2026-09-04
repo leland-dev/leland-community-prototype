@@ -946,8 +946,8 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col bg-white md:items-center md:justify-center md:bg-black/50 md:p-6">
       <div
-        className={`relative mx-auto flex h-full w-full max-w-[600px] flex-col md:h-auto md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white md:transition-[max-width,min-height,max-height] md:duration-300 md:ease-out ${
-          discardOpen ? "md:max-w-[440px] md:min-h-[280px] md:max-h-[320px]" : "md:min-h-[560px] md:max-h-[92dvh]"
+        className={`relative mx-auto flex h-full w-full max-w-[600px] flex-col md:h-auto md:max-h-[92dvh] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white md:transition-[max-width,min-height] md:duration-300 md:ease-out ${
+          discardOpen ? "md:max-w-[440px] md:min-h-0" : "md:min-h-[560px]"
         }`}
       >
         {/* Everything the composer shows — hidden on desktop while the card
@@ -2023,7 +2023,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2, delay: 0.12 }}
-            className="hidden flex-1 flex-col justify-center px-8 pb-7 pt-5 md:flex"
+            className="hidden flex-col px-6 pb-6 pt-5 md:flex"
           >
             <div className="relative flex h-10 items-center justify-center">
               <button
@@ -2311,7 +2311,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
       <AnimatePresence>
         {discardOpen ? (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDiscardOpen(false)} className="fixed inset-0 z-[70] bg-black/40" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDiscardOpen(false)} className="fixed inset-0 z-[70] bg-black/40 md:hidden" />
             <motion.div
               initial={{ y: "110%" }} animate={{ y: 0 }} exit={{ y: "110%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
               className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[600px] rounded-t-3xl bg-white px-4 pb-[max(env(safe-area-inset-bottom),16px)] pt-1 md:hidden"
