@@ -59,6 +59,8 @@ interface ScheduledEntry {
 const draftStore: DraftEntry[] = [];
 const scheduledStore: ScheduledEntry[] = [];
 
+const EMOJIS = ["😀", "😂", "🥹", "😍", "🤔", "😮", "😅", "🙌", "👏", "🔥", "💯", "✨", "🎉", "🚀", "💪", "🙏", "👀", "💡", "📈", "✅", "❤️", "😎", "🤝", "🫡"];
+
 const POLL_DURATIONS = ["1 day", "3 days", "7 days"] as const;
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const DRAFT_TABS = ["Drafts", "Scheduled"] as const;
@@ -379,6 +381,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const [clipWindow, setClipWindow] = useState(15);
   const [clipLenOpen, setClipLenOpen] = useState(false);
   const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
+  const [uploadedMeta, setUploadedMeta] = useState<{ aspect: number; duration: string } | null>(null);
   const [clipEnd, setClipEnd] = useState(100);
   const trimTrackRef = useRef<HTMLDivElement>(null);
   // Zoomed window of the trim strip (Apple-style: trimming re-fits the view).
@@ -400,6 +403,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const [pollDuration, setPollDuration] = useState<string>(POLL_DURATIONS[0]);
   const [scheduledFor, setScheduledFor] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [draftsOpen, setDraftsOpen] = useState(openDraftsOnMount ?? false);
   const [draftsTab, setDraftsTab] = useState<DraftTab>(draftsTabOnMount ?? "Drafts");
@@ -666,7 +670,16 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploadedVideo(URL.createObjectURL(file));
+    const url = URL.createObjectURL(file);
+    // Probe the file so the editor and post match its real shape and length.
+    setUploadedMeta(null);
+    const probe = document.createElement("video");
+    probe.preload = "metadata";
+    probe.onloadedmetadata = () => {
+      setUploadedMeta({ aspect: probe.videoWidth / Math.max(1, probe.videoHeight), duration: toClock(probe.duration || 60) });
+    };
+    probe.src = url;
+    setUploadedVideo(url);
     setSelectedRecording("upload");
     setSelectedClip(null);
     setClipStart(0);
@@ -758,7 +771,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
     if (mode === "live") {
       const isUpload = selectedRecording === "upload" && uploadedVideo !== null;
       const rec = RECORDINGS.find(r => r.id === selectedRecording) ?? RECORDINGS[0];
-      const recDuration = isUpload ? "1:00" : rec.duration;
+      const recDuration = isUpload ? (uploadedMeta?.duration ?? "1:00") : rec.duration;
       const total = toSeconds(recDuration);
       const isClipped = clipStart > 0 || clipEnd < 100;
       const clipLabel = isClipped ? toClock(((clipEnd - clipStart) / 100) * total) : recDuration;
@@ -779,7 +792,9 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
           showCaptions: captionsOn,
           showChat: chatOn,
           peakViewers: isUpload ? undefined : rec.peak,
-          cropAspect,
+          cropAspect: isUpload && cropAspect === "Original" && uploadedMeta
+            ? (uploadedMeta.aspect < 0.9 ? "9:16" : uploadedMeta.aspect > 1.45 ? "16:9" : "Original")
+            : cropAspect,
           cropX,
           cropY,
         },
@@ -916,10 +931,10 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   // trap the overlay underneath the app's fixed header and tab bar.
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col bg-white md:items-center md:justify-center md:bg-black/50 md:p-6">
-      <div className="mx-auto flex h-full w-full max-w-[600px] flex-col md:h-[min(880px,92dvh)] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white">
+      <div className="mx-auto flex h-full w-full max-w-[600px] flex-col md:h-auto md:max-h-[92dvh] md:min-h-[400px] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white">
         {/* Header (the dark editor step brings its own chrome) */}
         {!(mode === "live" && liveStep === "edit") ? (
-        <div className="flex h-14 shrink-0 items-center justify-between px-4">
+        <div className="flex h-14 shrink-0 items-center justify-between px-4 md:h-auto md:px-6 md:pb-1 md:pt-5">
           {mode === "post" || mode === "article" ? (
             <button
               onClick={handleCancel}
@@ -1028,7 +1043,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
 
         {mode === "post" ? (
           <>
-            <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6">
+            <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6 md:min-h-[210px] md:px-6">
               {/* Identity row above the input, Substack-style */}
               <div className="flex items-center gap-3">
                 <img src={profilePhoto} alt="You" className="h-10 w-10 rounded-full object-cover" />
@@ -1062,6 +1077,28 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 {toolbarButton("Add poll", () => setPollOptions(opts => (opts === null ? ["", ""] : opts)), (
                   <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M6 20V10" /><path d="M12 20V4" /><path d="M18 20v-6" /></svg>
                 ), pollOptions !== null)}
+                <div className="relative">
+                  {toolbarButton("Add emoji", () => setEmojiOpen(o => !o), (
+                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><path d="M9 9h.01" /><path d="M15 9h.01" /></svg>
+                  ), emojiOpen)}
+                  {emojiOpen ? (
+                    <>
+                      <div className="fixed inset-0 z-[65]" onMouseDown={() => setEmojiOpen(false)} />
+                      <div className="absolute left-1/2 top-11 z-[66] grid w-[296px] max-w-[calc(100vw-24px)] -translate-x-1/2 grid-cols-8 gap-0.5 rounded-xl border border-gray-stroke bg-white p-2">
+                        {EMOJIS.map(em => (
+                          <button
+                            key={em}
+                            onMouseDown={e => e.preventDefault()}
+                            onClick={() => setText(t => t + em)}
+                            className="cursor-pointer rounded-lg p-1 text-[20px] leading-none transition-colors hover:bg-gray-hover"
+                          >
+                            {em}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
+                </div>
               </div>
 
               {scheduledChip}
@@ -1070,7 +1107,12 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 <div className={`mt-3 grid gap-2 ${images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
                   {images.map((img, i) => (
                     <div key={img.cropped} className="relative overflow-hidden rounded-xl border border-gray-stroke/60">
-                      <img src={img.cropped} alt="" className="h-full max-h-[280px] w-full object-cover" />
+                      <img
+                        src={img.cropped}
+                        alt=""
+                        className={images.length === 1 ? "max-h-[480px] w-full object-cover" : "h-full max-h-[280px] w-full object-cover"}
+                        style={images.length === 1 ? { aspectRatio: String(Math.min(1.9, Math.max(0.8, img.aspectRatio))) } : undefined}
+                      />
                       <button
                         onClick={() => setImages(prev => prev.filter((_, j) => j !== i))}
                         aria-label="Remove image"
@@ -1133,8 +1175,8 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             {/* Long-form entry points, Substack-style cards — hidden while a
                 poll is being built so the focused card isn't crowded out */}
             {pollOptions === null ? (
-            <div className="shrink-0 pb-[max(env(safe-area-inset-bottom),16px)]">
-              <div className="flex gap-3 overflow-x-auto px-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="shrink-0 pb-[max(env(safe-area-inset-bottom),16px)] md:pb-6">
+              <div className="flex gap-3 overflow-x-auto px-4 md:px-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <button
                   onClick={() => { setMode("article"); runArticleDemo(); }}
                   className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200 md:w-auto md:flex-1"
@@ -1428,7 +1470,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               const media = selectedClip !== null
                 ? (() => { const c = CLIPS.find(x => x.id === selectedClip)!; return { src: c.src, duration: c.duration }; })()
                 : selectedRecording === "upload" && uploadedVideo
-                  ? { src: uploadedVideo, duration: "1:00" }
+                  ? { src: uploadedVideo, duration: uploadedMeta?.duration ?? "1:00" }
                   : (() => { const r = RECORDINGS.find(x => x.id === selectedRecording)!; return { src: r.src, duration: r.duration }; })();
               const total = toSeconds(media.duration);
               // The strip shows a window of the recording; trimming re-fits it.
@@ -1530,10 +1572,15 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 : cropAspect === "1:1" ? { width: stageW, height: stageW }
                 : cropAspect === "4:5" ? { width: stageW * 0.8, height: stageW }
                 : selectedClip !== null ? { width: 256, height: (256 * 13) / 9 }
+                : selectedRecording === "upload" && uploadedMeta
+                  ? (uploadedMeta.aspect < 1
+                      ? { width: ((256 * 13) / 9) * uploadedMeta.aspect, height: (256 * 13) / 9 }
+                      : { width: stageW, height: Math.min(stageW / uploadedMeta.aspect, stageW) })
                 : { width: stageW, height: (stageW * 3) / 4 };
               // Tallest possible stage for this media — the box never resizes,
               // only the video inside morphs.
-              const stageBoxH = selectedClip !== null ? Math.max((256 * 13) / 9, stageW) : stageW;
+              const isPortraitUpload = selectedRecording === "upload" && (uploadedMeta?.aspect ?? 1.33) < 1;
+              const stageBoxH = selectedClip !== null || isPortraitUpload ? Math.max((256 * 13) / 9, stageW) : stageW;
               const dragVideo = (e: React.PointerEvent<HTMLDivElement>) => {
                 if (!cropGrid) return;
                 e.preventDefault();
@@ -1574,7 +1621,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                       onClick={() => {
                         setSelectedRecording(null);
                         setSelectedClip(null);
-                        if (selectedRecording === "upload") { setUploadedVideo(null); setMode("post"); }
+                        if (selectedRecording === "upload") { setUploadedVideo(null); setUploadedMeta(null); setMode("post"); }
                         else setLiveStep("list");
                       }}
                       aria-label="Back to livestreams"
@@ -1878,7 +1925,10 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               const isUpload = selectedRecording === "upload" && uploadedVideo !== null;
               const rec = RECORDINGS.find(r => r.id === selectedRecording) ?? RECORDINGS[0];
               const srcV = clip ? clip.src : isUpload ? uploadedVideo! : rec.src;
-              const durV = clip ? clip.duration : isUpload ? "1:00" : rec.duration;
+              const durV = clip ? clip.duration : isUpload ? (uploadedMeta?.duration ?? "1:00") : rec.duration;
+              const shareAspect = isUpload && cropAspect === "Original" && uploadedMeta
+                ? (uploadedMeta.aspect < 0.9 ? "9:16" : uploadedMeta.aspect > 1.45 ? "16:9" : "Original")
+                : cropAspect;
               return (
                 <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6">
                   <div className="flex items-center gap-3">
@@ -1898,9 +1948,9 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                     <div className="mt-3 w-[290px] overflow-hidden rounded-xl">
                       <CaptionClip segments={CAPTION_CLIP.segments} className="aspect-[4/5] w-full" />
                     </div>
-                  ) : clip || cropAspect === "9:16" ? (
+                  ) : clip || shareAspect === "9:16" ? (
                     <div className="relative mt-3 w-[230px] overflow-hidden rounded-xl bg-black">
-                      <video src={srcV} autoPlay muted loop playsInline className={`${cropAspect === "9:16" ? "aspect-[9/16]" : "aspect-[9/13]"} w-full object-cover`} style={{ objectPosition: `${cropX}% ${cropY}%` }} />
+                      <video src={srcV} autoPlay muted loop playsInline className={`${shareAspect === "9:16" ? "aspect-[9/16]" : "aspect-[9/13]"} w-full object-cover`} style={{ objectPosition: `${cropX}% ${cropY}%` }} />
                       <div className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-black/25 px-2 py-1 backdrop-blur-sm">
                         <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
                         <span className="text-[11px] font-medium text-white">{durV}</span>
@@ -1910,7 +1960,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                     <LiveReplayCard
                       static
                       postId={0}
-                      live={{ title: isUpload ? (replayCaption.trim() || "New video") : rec.title, videoId: "1cfIAVasP6E", videoSrc: srcV, viewers: 0, topic: isUpload ? "Video" : "Replay", replay: true, duration: durV, horizontal: true, showCaptions: captionsOn, showChat: chatOn, peakViewers: isUpload ? undefined : rec.peak, cropAspect, cropX, cropY }}
+                      live={{ title: isUpload ? (replayCaption.trim() || "New video") : rec.title, videoId: "1cfIAVasP6E", videoSrc: srcV, viewers: 0, topic: isUpload ? "Video" : "Replay", replay: true, duration: durV, horizontal: true, showCaptions: captionsOn, showChat: chatOn, peakViewers: isUpload ? undefined : rec.peak, cropAspect: shareAspect, cropX, cropY }}
                     />
                   )}
                 </div>
