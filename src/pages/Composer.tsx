@@ -28,6 +28,7 @@ type EditorSnap = {
   cropY: number;
   captionsOn: boolean;
   chatOn: boolean;
+  viewersOn: boolean;
 };
 
 interface DraftEntry {
@@ -394,6 +395,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const subtitleRef = useRef<HTMLTextAreaElement>(null);
   const demoToken = useRef(0);
   const [captionsOn, setCaptionsOn] = useState(true);
+  const [viewersOn, setViewersOn] = useState(true);
   const [chatOn, setChatOn] = useState(false);
   const [subtitle, setSubtitle] = useState("");
   const [topic, setTopic] = useState("");
@@ -802,7 +804,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
           horizontal: true,
           showCaptions: captionsOn,
           showChat: chatOn,
-          peakViewers: isUpload ? undefined : rec.peak,
+          peakViewers: isUpload || !viewersOn ? undefined : rec.peak,
           cropAspect: isUpload && cropAspect === "Original" && uploadedMeta
             ? (uploadedMeta.aspect < 0.9 ? "9:16" : uploadedMeta.aspect > 1.45 ? "16:9" : "Original")
             : cropAspect,
@@ -1184,41 +1186,41 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               ) : null}
 
               {pollOptions !== null ? (
-                <div className="mt-3 rounded-2xl border border-gray-stroke p-3.5">
-                  <div className="mb-2.5 flex items-center justify-between">
-                    <span className="text-[13px] font-semibold text-gray-dark">Poll</span>
+                <div className="mt-3 rounded-2xl border border-gray-stroke p-4 md:p-5">
+                  <div className="mb-3.5 flex items-center justify-between">
+                    <span className="text-[14px] font-semibold text-gray-dark">Poll</span>
                     <button
                       onClick={() => setPollOptions(null)}
                       aria-label="Remove poll"
-                      className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
+                      className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
                     >
-                      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                     </button>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {pollOptions.map((option, i) => (
                       <input
                         key={i}
                         value={option}
                         onChange={e => setPollOptions(opts => opts!.map((o, j) => (j === i ? e.target.value : o)))}
                         placeholder={`Choice ${i + 1}${i >= 2 ? " (optional)" : ""}`}
-                        className="w-full rounded-xl border border-gray-stroke px-3.5 py-2.5 text-[14px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
+                        className="h-12 w-full rounded-xl border border-gray-stroke px-4 text-[15px] text-gray-dark outline-none transition-[border] focus:border-gray-dark"
                       />
                     ))}
                   </div>
-                  <div className="mt-3 flex items-center justify-between">
+                  <div className="mt-4 flex items-center justify-between">
                     {pollOptions.length < 4 ? (
-                      <button onClick={() => setPollOptions(opts => [...opts!, ""])} className="cursor-pointer text-[13px] font-medium text-gray-dark hover:underline">
+                      <button onClick={() => setPollOptions(opts => [...opts!, ""])} className="cursor-pointer text-[14px] font-semibold text-gray-dark hover:underline">
                         + Add option
                       </button>
                     ) : <span />}
-                    <div className="flex gap-1.5">
+                    <div className="flex rounded-full bg-gray-100 p-0.5">
                       {POLL_DURATIONS.map(d => (
                         <button
                           key={d}
                           onClick={() => setPollDuration(d)}
-                          className={`cursor-pointer rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${
-                            pollDuration === d ? "bg-gray-dark text-white" : "bg-gray-100 text-gray-dark hover:bg-gray-200"
+                          className={`cursor-pointer rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-colors ${
+                            pollDuration === d ? "bg-gray-dark text-white" : "text-gray-light hover:text-gray-dark"
                           }`}
                         >
                           {d}
@@ -1388,21 +1390,18 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             ) : (
               /* Step 1 — pick a livestream or an auto-generated clip */
               <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6 md:px-6">
-                <div className="flex rounded-full bg-gray-100 p-1">
+                <div className="relative flex rounded-full bg-gray-100 p-1">
+                  <span
+                    className="absolute inset-y-1 rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.04)] transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                    style={{ left: liveTab === "Livestreams" ? "4px" : "50%", width: "calc(50% - 4px)" }}
+                  />
                   {(["Livestreams", "Clips"] as const).map(t => (
                     <button
                       key={t}
                       onClick={() => setLiveTab(t)}
-                      className="relative flex-1 cursor-pointer rounded-full py-2.5 text-[14px] font-semibold"
+                      className="relative z-10 flex-1 cursor-pointer rounded-full py-2.5 text-[14px] font-semibold"
                     >
-                      {liveTab === t ? (
-                        <motion.span
-                          layoutId="liveTabPill"
-                          transition={{ type: "spring", stiffness: 520, damping: 42 }}
-                          className="absolute inset-0 rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.04)]"
-                        />
-                      ) : null}
-                      <span className={`relative z-10 transition-colors ${liveTab === t ? "text-gray-dark" : "text-gray-light"}`}>{t === "Livestreams" ? "Your livestreams" : t}</span>
+                      <span className={`transition-colors ${liveTab === t ? "text-gray-dark" : "text-gray-light"}`}>{t === "Livestreams" ? "Your livestreams" : t}</span>
                     </button>
                   ))}
                 </div>
@@ -1540,7 +1539,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               const refitEase = "cubic-bezier(0.22, 1, 0.36, 1)";
               const trimTrans = trimDrag ? undefined : `left 320ms ${refitEase}, width 320ms ${refitEase}`;
               const pushEditorSnap = () => {
-                setEditorHistory(h => [...h.slice(-19), { clipStart, clipEnd, viewStart, viewEnd, cropAspect, cropX, cropY, captionsOn, chatOn }]);
+                setEditorHistory(h => [...h.slice(-19), { clipStart, clipEnd, viewStart, viewEnd, cropAspect, cropX, cropY, captionsOn, chatOn, viewersOn }]);
               };
               const undoEditor = () => {
                 const last = editorHistory[editorHistory.length - 1];
@@ -1554,6 +1553,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                 setCropY(last.cropY);
                 setCaptionsOn(last.captionsOn);
                 setChatOn(last.chatOn);
+                setViewersOn(last.viewersOn);
                 setEditorHistory(h => h.slice(0, -1));
               };
               const dragHandle = (which: "start" | "end") => (e: React.PointerEvent<HTMLDivElement>) => {
@@ -1624,21 +1624,24 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               // oversized video is dragged into place behind it (object-position pan).
               // Pixel dims + a CSS width/height transition resize the box smoothly
               // while object-cover re-crops each frame — no transform stretch.
-              const stageW = Math.min(window.innerWidth, 600) - 32;
+              const mdUp = window.innerWidth >= 768;
+              const stageW = Math.min(Math.min(window.innerWidth, 600) - 32, mdUp ? Math.round(window.innerHeight * 0.5) : 10000);
+              // Tall (portrait) media height: phone-tuned on mobile, generous on desktop.
+              const tallH = mdUp ? Math.min(Math.round(window.innerHeight * 0.58), 540) : (256 * 13) / 9;
               const stageDims =
                 cropAspect === "16:9" ? { width: stageW, height: (stageW * 9) / 16 }
                 : cropAspect === "1:1" ? { width: stageW, height: stageW }
                 : cropAspect === "4:5" ? { width: stageW * 0.8, height: stageW }
-                : selectedClip !== null ? { width: 256, height: (256 * 13) / 9 }
+                : selectedClip !== null ? { width: Math.round((tallH * 9) / 13), height: tallH }
                 : selectedRecording === "upload" && uploadedMeta
                   ? (uploadedMeta.aspect < 1
-                      ? { width: ((256 * 13) / 9) * uploadedMeta.aspect, height: (256 * 13) / 9 }
+                      ? { width: Math.round(tallH * uploadedMeta.aspect), height: tallH }
                       : { width: stageW, height: Math.min(stageW / uploadedMeta.aspect, stageW) })
                 : { width: stageW, height: (stageW * 3) / 4 };
               // Tallest possible stage for this media — the box never resizes,
               // only the video inside morphs.
               const isPortraitUpload = selectedRecording === "upload" && (uploadedMeta?.aspect ?? 1.33) < 1;
-              const stageBoxH = selectedClip !== null || isPortraitUpload ? Math.max((256 * 13) / 9, stageW) : stageW;
+              const stageBoxH = selectedClip !== null || isPortraitUpload ? Math.max(tallH, mdUp ? 0 : stageW) : stageW;
               const dragVideo = (e: React.PointerEvent<HTMLDivElement>) => {
                 if (!cropGrid) return;
                 e.preventDefault();
@@ -1957,10 +1960,11 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                   )}
 
                   {/* What gets burned into the post */}
-                  <div className="flex shrink-0 items-start justify-center gap-7 px-5 pb-[max(env(safe-area-inset-bottom),80px)] pt-4">
+                  <div className="flex shrink-0 items-start justify-center gap-6 px-5 pb-[max(env(safe-area-inset-bottom),80px)] pt-4">
                     {editorTool("Crop", <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14" /><path d="M18 22V8a2 2 0 0 0-2-2H2" /></svg>, () => setCropGrid(v => !v), cropGrid)}
                     {editorTool("Captions", <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="3" /><path d="M6 14h6" /><path d="M15 14h3" /><path d="M6 10h3" /><path d="M12 10h6" /></svg>, () => { pushEditorSnap(); setCaptionsOn(v => !v); }, captionsOn)}
                     {editorTool("Comments", <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 8.5-8.5 8.38 8.38 0 0 1 8.5 8.5Z" /></svg>, () => { pushEditorSnap(); setChatOn(v => !v); }, chatOn)}
+                    {selectedClip === null ? editorTool("Viewers", <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>, () => { pushEditorSnap(); setViewersOn(v => !v); }, viewersOn) : null}
                     <button
                       onClick={undoEditor}
                       disabled={editorHistory.length === 0}
@@ -2018,7 +2022,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                     <LiveReplayCard
                       static
                       postId={0}
-                      live={{ title: isUpload ? (replayCaption.trim() || "New video") : rec.title, videoId: "1cfIAVasP6E", videoSrc: srcV, viewers: 0, topic: isUpload ? "Video" : "Replay", replay: true, duration: durV, horizontal: true, showCaptions: captionsOn, showChat: chatOn, peakViewers: isUpload ? undefined : rec.peak, cropAspect: shareAspect, cropX, cropY }}
+                      live={{ title: isUpload ? (replayCaption.trim() || "New video") : rec.title, videoId: "1cfIAVasP6E", videoSrc: srcV, viewers: 0, topic: isUpload ? "Video" : "Replay", replay: true, duration: durV, horizontal: true, showCaptions: captionsOn, showChat: chatOn, peakViewers: isUpload || !viewersOn ? undefined : rec.peak, cropAspect: shareAspect, cropX, cropY }}
                     />
                   )}
                 </div>
