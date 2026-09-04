@@ -113,6 +113,8 @@ import CoachContent from "./pages/CoachContent";
 import CoachPricing from "./pages/CoachPricing";
 import CoachCalendar from "./pages/CoachCalendar";
 import CoachEarnings from "./pages/CoachEarnings";
+import CoachAnalytics from "./pages/CoachAnalytics";
+import CoachMyContent from "./pages/CoachMyContent";
 import CoachReviews from "./pages/CoachReviews";
 import CoachDiscountCodes from "./pages/CoachDiscountCodes";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
@@ -202,7 +204,9 @@ export default function App() {
           <Route path="/coach/content" element={<CoachContent />} />
           <Route path="/coach/pricing" element={<CoachPricing />} />
           <Route path="/coach/calendar" element={<CoachCalendar />} />
+          <Route path="/coach/my-content" element={<CoachMyContent />} />
           <Route path="/coach/earnings" element={<CoachEarnings />} />
+          <Route path="/coach/analytics" element={<CoachAnalytics />} />
           <Route path="/coach/reviews" element={<CoachReviews />} />
           <Route path="/coach/discount-codes" element={<CoachDiscountCodes />} />
         </Route>
@@ -222,7 +226,9 @@ export default function App() {
           <Route path="/my-leland/content" element={<CoachContent />} />
           <Route path="/my-leland/pricing" element={<CoachPricing />} />
           <Route path="/my-leland/calendar" element={<Calendar shell />} />
+          <Route path="/my-leland/my-content" element={<CoachMyContent />} />
           <Route path="/my-leland/earnings" element={<CoachEarnings />} />
+          <Route path="/my-leland/analytics" element={<CoachAnalytics />} />
           <Route path="/my-leland/reviews" element={<CoachReviews />} />
           <Route path="/my-leland/discount-codes" element={<CoachDiscountCodes />} />
         </Route>

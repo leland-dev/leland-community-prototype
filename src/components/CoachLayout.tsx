@@ -14,6 +14,7 @@ import addPlusIcon from "../assets/icons/add-plus.svg";
 import userIcon from "../assets/icons/user.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
 import layoutGridIcon from "../assets/icons/layout-grid.svg";
+import chartIcon from "../assets/icons/chart.svg";
 import mbaIcon from "../assets/icons/category-icons/mba.svg";
 import consultingIcon from "../assets/icons/category-icons/consulting.svg";
 import pmIcon from "../assets/icons/category-icons/product-management.svg";
@@ -67,26 +68,6 @@ function useCoachBase() {
 function rebase(to: string, base: string) {
   return base === "/coach" ? to : base + to.slice("/coach".length);
 }
-
-// --- v2 nav data -----------------------------------------------------------
-// v2 flattens Pricing and Content into top-level items and drops the Storefront
-// accordion; categories move to their own section at the bottom.
-const v2PrimaryItems = [
-  { to: "/coach/inbox", label: "Inbox", icon: chatIcon },
-  { to: "/coach/profile-new", label: "Profile", icon: userIcon },
-  { to: "/coach/pricing", label: "Pricing", icon: moneyIcon },
-  { to: "/coach/content", label: "Content", icon: bookOpenIcon },
-  { to: "/coach/opportunities", label: "Opportunities", icon: lightningIcon },
-  { to: "/coach/livestreams", label: "Livestreams", icon: livestreamIcon },
-  { to: "/coach/calendar", label: "Calendar", icon: calendarIcon },
-  { to: "/coach/earnings", label: "Earnings", icon: moneyIcon },
-];
-
-// Hidden behind the "More" toggle, below Earnings.
-const v2MoreItems = [
-  { to: "/coach/reviews", label: "Reviews", icon: starIcon },
-  { to: "/coach/discount-codes", label: "Discount Codes", icon: discountIcon },
-];
 
 // Icons are tinted via CSS mask + bg-current so they follow the link's text
 // color (gray-extra-light when inactive, gray-dark when active/hovered) — the
@@ -218,36 +199,70 @@ function SidebarV1() {
     </div>
   );
 
-  // Store: two groups — a personal set on top, then "Expert tools" below.
+  // Store: two floating cards — a personal set on top, then an "Expert tools"
+  // card (with its own header) below.
   if (inStore) {
     return (
-      <nav className="flex flex-col gap-1">
-        <NavLink to={base} end className={navLinkClass}>
-          <NavIcon src={layoutGridIcon} className="h-[22px] w-[22px]" />
-          Dashboard
-        </NavLink>
-        {navRow(findItem("/coach/profile-new"))}
-        {navRow(findItem("/coach/calendar"))}
-        {navRow(findItem("/coach/reviews"))}
+      <>
+        {/* Personal group */}
+        <div className="shrink-0 rounded-[12px] border border-[#222222]/[0.12] bg-white p-2 shadow-[0px_4px_8px_-2px_rgba(16,24,40,0.10),0px_2px_4px_-2px_rgba(16,24,40,0.06)]">
+          <nav className="flex flex-col gap-1">
+            <NavLink to={base} end className={navLinkClass}>
+              <NavIcon src={layoutGridIcon} className="h-[22px] w-[22px]" />
+              Dashboard
+            </NavLink>
+            {navRow(findItem("/coach/profile-new"))}
+            {navRow(findItem("/coach/calendar"))}
+            {navRow({ to: "/coach/my-content", label: "Content", icon: bookOpenIcon })}
+            {navRow(findItem("/coach/reviews"))}
+          </nav>
+        </div>
 
-        {/* Expert tools — only for experts; a non-expert sees just the group above */}
+        {/* Expert tools — only for experts; a non-expert sees just the card above */}
         {expert && (
-          <>
-            <p className="px-3 pb-1 pt-4 text-[13px] font-medium text-gray-extra-light">
+          <div className="shrink-0 overflow-hidden rounded-[12px] border border-[#222222]/[0.12] bg-white shadow-[0px_4px_8px_-2px_rgba(16,24,40,0.10),0px_2px_4px_-2px_rgba(16,24,40,0.06)]">
+            <p className="bg-gray-hover px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-gray-extra-light">
               Expert tools
             </p>
-            {offeringsAccordion}
-            {navRow(findItem("/coach/opportunities"))}
-            {navRow(findItem("/coach/livestreams"))}
-            {navRow(findItem("/coach/earnings"))}
-            {navRow(findItem("/coach/discount-codes"))}
-          </>
+            <nav className="flex flex-col gap-1 p-2">
+              {offeringsAccordion}
+              {navRow(findItem("/coach/opportunities"))}
+              {navRow(findItem("/coach/livestreams"))}
+              {navRow(findItem("/coach/earnings"))}
+              {navRow({ to: "/coach/analytics", label: "Analytics", icon: chartIcon })}
+              {navRow(findItem("/coach/discount-codes"))}
+            </nav>
+          </div>
         )}
-      </nav>
+
+        {/* Non-experts get a prompt to set up their expert tools instead */}
+        {!expert && (
+          <div
+            className="shrink-0 rounded-[12px] bg-[#222222]/[0.04] p-5"
+            style={{
+              // Custom dashed outline: 3px dashes in gray-dark (#222222) at 30% opacity.
+              // border-dashed can't control dash length, so draw it as an SVG background.
+              backgroundImage:
+                "url(\"data:image/svg+xml,%3csvg%20width='100%25'%20height='100%25'%20xmlns='http://www.w3.org/2000/svg'%3e%3crect%20width='100%25'%20height='100%25'%20fill='none'%20rx='12'%20ry='12'%20stroke='%23222222'%20stroke-opacity='0.3'%20stroke-width='2'%20stroke-dasharray='3%204'/%3e%3c/svg%3e\")",
+            }}
+          >
+            <h2 className="text-[15px] font-bold leading-tight text-gray-dark">Sell on Leland</h2>
+            <p className="mt-2 text-[15px] leading-snug text-gray-light">
+              You haven't set up your expert tools yet.
+            </p>
+            <button
+              type="button"
+              className="mt-6 text-[15px] font-semibold text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-opacity hover:opacity-70"
+            >
+              Get started
+            </button>
+          </div>
+        )}
+      </>
     );
   }
 
-  // /coach — original single list.
+  // /coach — original single flush list (no card treatment).
   return (
     <nav className="flex flex-col gap-1">
       {topItems.map(navRow)}
@@ -258,214 +273,86 @@ function SidebarV1() {
 }
 
 // ---------------------------------------------------------------------------
-// Sidebar v2 — work-in-progress. Pricing/Content are top-level items, the top
-// list truncates behind a "More" toggle after Earnings, and categories live in
-// their own collapsible section at the bottom (labelled group, full nav rows —
-// not the parent/child accordion paradigm).
+// Admin Expert toggle — a shortcut/copy of the "Expert" tool in the top-nav
+// dropdown, pinned to the sidebar's bottom so both states are quick to test.
+// Prototype-only; reads/writes the shared ExpertMode context (localStorage).
 // ---------------------------------------------------------------------------
-function SidebarV2() {
-  const [moreOpen, setMoreOpen] = useState(false);
-  const [categoriesOpen, setCategoriesOpen] = useState(true);
-  const base = useCoachBase();
+function AdminExpertToggle() {
+  const { expert, toggle } = useExpertMode();
 
   return (
-    <nav className="flex flex-col gap-1">
-      {/* Dashboard — store only (the expert dashboard lives at the store root) */}
-      {base !== "/coach" && (
-        <NavLink to={base} end className={navLinkClass}>
-          <NavIcon src={layoutGridIcon} className="h-[22px] w-[22px]" />
-          Dashboard
-        </NavLink>
-      )}
-
-      {/* Primary items, Inbox through Earnings — Inbox dropped in the store */}
-      {v2PrimaryItems.filter((i) => base === "/coach" || i.to !== "/coach/inbox").map(({ to, label, icon }) => (
-        <NavLink key={to} to={rebase(to, base)} className={navLinkClass}>
-          <NavIcon src={icon} className="h-[22px] w-[22px]" />
-          {label}
-        </NavLink>
-      ))}
-
-      {/* More — expands to reveal the remaining top-level items */}
+    <div className="rounded-[12px] border border-[#222222]/[0.12] bg-white p-1">
       <button
-        onClick={() => setMoreOpen((o) => !o)}
-        className="flex w-full items-center gap-3 rounded-lg px-3 py-[10px] text-[15px] font-medium text-gray-light transition-colors hover:text-gray-dark"
+        type="button"
+        role="switch"
+        aria-checked={expert}
+        onClick={toggle}
+        className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors hover:bg-[#222222]/5"
       >
-        <svg
-          className={`h-[22px] w-[22px] shrink-0 transition-transform ${moreOpen ? "rotate-180" : ""}`}
-          viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-        >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
-        {moreOpen ? "Less" : "More"}
-      </button>
-      <AnimatePresence initial={false}>
-        {moreOpen && (
-          <motion.div
-            key="v2-more"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="flex flex-col gap-1">
-              {v2MoreItems.map(({ to, label, icon }) => (
-                <NavLink key={to} to={rebase(to, base)} className={navLinkClass}>
-                  <NavIcon src={icon} className="h-[22px] w-[22px]" />
-                  {label}
-                </NavLink>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Categories — collapsible labelled section with full nav rows */}
-      <div className="mt-3">
-        <button
-          onClick={() => setCategoriesOpen((o) => !o)}
-          className="flex w-full items-center justify-between px-3 py-1.5 text-[14px] text-gray-extra-light transition-colors hover:text-gray-dark"
-        >
-          <span>Categories</span>
-          <svg
-            className={`h-4 w-4 shrink-0 transition-transform ${categoriesOpen ? "rotate-180" : ""}`}
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-        </button>
-        <AnimatePresence initial={false}>
-          {categoriesOpen && (
-            <motion.div
-              key="v2-categories"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-              className="overflow-hidden"
-            >
-              <div className="mt-1 flex flex-col gap-1">
-                {categories.map(({ to, label, icon }) => (
-                  <NavLink key={to} to={rebase(to, base)} end className={navLinkClass}>
-                    <NavIcon src={icon} className="h-[22px] w-[22px]" />
-                    <span className="truncate">{label}</span>
-                  </NavLink>
-                ))}
-                <button className="flex w-full items-center gap-3 rounded-lg px-3 py-[10px] text-[15px] font-medium text-gray-light transition-colors hover:text-gray-dark">
-                  <NavIcon src={addPlusIcon} className="h-[22px] w-[22px]" />
-                  Add category
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </nav>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Admin version switcher — a 3-dot menu pinned to the sidebar's bottom-right
-// that swaps between sidebar versions. Prototype-only tool; the choice is
-// persisted to localStorage so it survives reloads.
-// ---------------------------------------------------------------------------
-const SIDEBAR_VERSIONS = [
-  { id: "v1", label: "Sidebar v1" },
-  { id: "v2", label: "Sidebar v2" },
-] as const;
-
-type SidebarVersion = (typeof SIDEBAR_VERSIONS)[number]["id"];
-const SIDEBAR_VERSION_KEY = "coach-sidebar-version";
-
-function AdminVersionMenu({
-  version,
-  onChange,
-}: {
-  version: SidebarVersion;
-  onChange: (v: SidebarVersion) => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="relative shrink-0 border-t border-gray-stroke p-2">
-      <div className="flex justify-end">
-        <button
-          type="button"
-          aria-label="Switch sidebar version"
-          onClick={() => setOpen((o) => !o)}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-            open ? "bg-[#222222]/5 text-gray-dark" : "text-gray-light hover:bg-[#222222]/5 hover:text-gray-dark"
+        <span className="text-[14px] font-medium text-gray-dark">Expert</span>
+        <span
+          className={`relative h-[22px] w-[38px] shrink-0 rounded-full transition-colors ${
+            expert ? "bg-gray-dark" : "bg-[#222222]/20"
           }`}
         >
-          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-            <circle cx="5" cy="12" r="1.6" />
-            <circle cx="12" cy="12" r="1.6" />
-            <circle cx="19" cy="12" r="1.6" />
-          </svg>
-        </button>
-      </div>
-
-      {open && (
-        <>
-          {/* Click-away backdrop */}
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute bottom-full right-2 z-20 mb-1 w-44 rounded-xl border border-gray-stroke bg-white p-1 shadow-lg">
-            <p className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-light">
-              Sidebar version
-            </p>
-            {SIDEBAR_VERSIONS.map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => {
-                  onChange(id);
-                  setOpen(false);
-                }}
-                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-[14px] transition-colors ${
-                  version === id ? "font-semibold text-gray-dark" : "font-medium text-gray-light hover:bg-[#222222]/5 hover:text-gray-dark"
-                }`}
-              >
-                {label}
-                {version === id && (
-                  <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
+          <span
+            className={`absolute top-[3px] h-4 w-4 rounded-full bg-white shadow-sm transition-all ${
+              expert ? "left-[19px]" : "left-[3px]"
+            }`}
+          />
+        </span>
+      </button>
     </div>
   );
 }
 
 export default function CoachLayout() {
-  const [version, setVersion] = useState<SidebarVersion>(() => {
-    const stored = localStorage.getItem(SIDEBAR_VERSION_KEY);
-    return stored === "v1" || stored === "v2" ? stored : "v1";
-  });
-
-  const changeVersion = (v: SidebarVersion) => {
-    setVersion(v);
-    localStorage.setItem(SIDEBAR_VERSION_KEY, v);
-  };
+  const { pathname } = useLocation();
+  // The My Leland dashboard (store root) and calendar get a subtle beige tint
+  // (brand beige at 50% opacity) across the whole content region.
+  const beigePage = pathname === "/my-leland" || pathname === "/my-leland/calendar";
+  const inMyLeland = pathname.startsWith("/my-leland");
 
   return (
-    <div className="flex min-h-[calc(100vh-61px)]">
-      {/* Sidebar — flush left, right border. Nav scrolls; admin menu pinned to the bottom. */}
-      <aside className="hidden w-[220px] shrink-0 self-start sticky top-[61px] h-[calc(100vh-61px)] flex-col border-r border-gray-stroke md:flex">
-        <div className="min-h-0 flex-1 overflow-y-auto p-2">
-          {version === "v1" ? <SidebarV1 /> : <SidebarV2 />}
-        </div>
-        <AdminVersionMenu version={version} onChange={changeVersion} />
-      </aside>
+    <div className={`flex min-h-[calc(100vh-61px)] ${beigePage ? "bg-[#F3F1E6]/50" : ""}`}>
+      {inMyLeland ? (
+        /* My Leland — floating cards on the page background. The aside itself is the
+           scroll container (matching PageShell), so a tall list scrolls internally
+           while keeping its top margin. The Expert admin toggle sits at the bottom
+           via mt-auto, and scrolls with the list once it overflows. */
+        <aside className="hidden w-[264px] shrink-0 self-start sticky top-[61px] h-[calc(100vh-61px)] flex-col gap-4 overflow-y-auto px-4 pb-4 pt-5 md:flex">
+          <SidebarV1 />
+          {/* Pinned to the bottom while there's free space (mt-auto); once the cards
+              overflow, the auto margin collapses to 0 and everything scrolls together. */}
+          <div className="mt-auto shrink-0">
+            <AdminExpertToggle />
+          </div>
+        </aside>
+      ) : (
+        /* /coach — original flush, bordered sidebar. */
+        <aside className="hidden w-[220px] shrink-0 self-start sticky top-[61px] h-[calc(100vh-61px)] flex-col border-r border-gray-stroke md:flex">
+          <div className="min-h-0 flex-1 overflow-y-auto p-2">
+            <SidebarV1 />
+          </div>
+        </aside>
+      )}
 
-      {/* Main content — fills remaining space, capped at 1280px */}
+      {/* Main content — fills remaining space, capped at 1280px. My Leland tabs
+          share the Dashboard's fade-up entrance, re-triggered per tab. */}
       <div className="min-w-0 flex-1">
         <div className="mx-auto max-w-[1080px] px-4 py-8 sm:px-6 sm:py-10">
-          <Outlet />
+          {inMyLeland ? (
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Outlet />
+            </motion.div>
+          ) : (
+            <Outlet />
+          )}
         </div>
       </div>
     </div>

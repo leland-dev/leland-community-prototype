@@ -264,10 +264,11 @@ function CardCarousel({ title, seeAllLabel, seeAllTo, headerLinkTo, gapClass = "
   );
 }
 
-function MyCourses() {
+function MyCourses({ shell }: { shell?: boolean }) {
   const navigate = useNavigate();
+  const myContentTo = shell ? "/my-leland/my-content" : "/coach/my-content";
   return (
-    <CardCarousel title="My programs" seeAllLabel="See all programs" seeAllTo="/my-programs">
+    <CardCarousel title="My programs" seeAllLabel="See all programs" seeAllTo={myContentTo}>
       {myCourses.slice(0, 3).map((c) => (
         <CourseCard key={c.title} course={c} />
       ))}
@@ -771,22 +772,15 @@ export default function Dashboard({ shell = false, expert: expertInit = false }:
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
           {embedded ? (
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <img src={profilePhoto} alt="Alex Rivera" className="h-[64px] w-[64px] rounded-full object-cover" />
-                <h1 className="mt-4 font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">
-                  Good morning, Alex
-                </h1>
-                {todaySessionCount > 0 && (
-                  <p className="mt-2 text-[16px] text-gray-dark md:text-[17px]">
-                    You have {todaySessionCount} session{todaySessionCount === 1 ? "" : "s"} today.
-                  </p>
-                )}
-              </div>
-              <LinkButton href="/coach-profile" size="sm" variant="secondary" className="mt-1 shrink-0 font-semibold">
-                <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
-                Edit profile
-              </LinkButton>
+            <div>
+              <h1 className="font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">
+                Good morning, Alex
+              </h1>
+              {todaySessionCount > 0 && (
+                <p className="mt-2 mb-4 text-[16px] text-gray-dark md:text-[17px]">
+                  You have {todaySessionCount} session{todaySessionCount === 1 ? "" : "s"} today.
+                </p>
+              )}
             </div>
           ) : (
             <>
@@ -845,7 +839,7 @@ export default function Dashboard({ shell = false, expert: expertInit = false }:
             {expert && (altAnalytics ? <AnalyticsPreview /> : <AltAnalyticsPreview />)}
 
             {/* My programs — hidden for experts */}
-            {!expert && <MyCourses />}
+            {!expert && <MyCourses shell={shell} />}
 
             {/* Conversations */}
             <MyExperts title="Conversations" />
@@ -867,7 +861,7 @@ export default function Dashboard({ shell = false, expert: expertInit = false }:
                     />
                   ))}
                 </div>
-                <Button onClick={() => navigate("/courses")} size="md" variant="secondary" className="mt-4 font-semibold">
+                <Button onClick={() => navigate(shell ? "/my-leland/my-content" : "/coach/my-content")} size="md" variant="secondary" className="mt-4 font-semibold">
                   See all
                 </Button>
               </DashCard>

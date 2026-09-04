@@ -5282,13 +5282,19 @@ function HomeSidebarV1() {
 // in-progress programs. Profile card on top.
 function HomeSidebarV2() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  // Inside the /alt-nav experience, "See all" links stay within My Leland
+  // rather than jumping back into the classic-nav routes.
+  const inAltNav = pathname === "/alt-nav" || pathname.startsWith("/alt-nav/");
+  const sessionsTo = inAltNav ? "/my-leland/calendar" : "/dashboard";
+  const learningTo = inAltNav ? "/my-leland" : "/my-programs";
   return (
     <div className="flex flex-col gap-[14px]">
       {/* 1. Profile card */}
       <DashboardProfileCard expert={false} compact />
 
       {/* 2. Upcoming sessions — preview up to 2 */}
-      <SidebarSectionCard title="Upcoming sessions" to="/dashboard" bleed>
+      <SidebarSectionCard title="Upcoming sessions" to={sessionsTo} bleed>
         {UPCOMING_SESSIONS.slice(0, 2).map((s) => (
           <SessionCard key={s.title} size="small" title={s.title} dateTime={s.dateTime} duration={s.duration} day={s.day} image={s.image} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
         ))}
@@ -5296,7 +5302,7 @@ function HomeSidebarV2() {
 
       {/* 3. Continue learning — in-progress programs show a progress bar; a
           not-started program shows a Start CTA instead. */}
-      <SidebarSectionCard title="Continue learning" to="/my-programs" bleed>
+      <SidebarSectionCard title="Continue learning" to={learningTo} bleed>
         {/* Demo: show the AI Builder Program and the not-started Consulting one */}
         {[MY_PROGRAMS[0], MY_PROGRAMS[2]].map((p) => {
           const started = p.pct > 0;
