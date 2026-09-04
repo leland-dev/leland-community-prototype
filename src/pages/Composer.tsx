@@ -936,25 +936,14 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
         {/* Header (the dark editor step brings its own chrome) */}
         {!(mode === "live" && liveStep === "edit") ? (
         <div className="flex h-14 shrink-0 items-center justify-between px-4 md:h-auto md:px-6 md:pb-1 md:pt-5">
-          {mode === "post" || mode === "article" ? (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleCancel}
-                aria-label="Close composer"
-                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-              </button>
-              {mode === "article" ? (
-                <button
-                  onClick={() => { demoToken.current++; setMode("post"); }}
-                  aria-label="Back to composer"
-                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
-                </button>
-              ) : null}
-            </div>
+          {mode === "post" ? (
+            <button
+              onClick={handleCancel}
+              aria-label="Close composer"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+            </button>
           ) : (
             <button
               onClick={() => {
@@ -1674,7 +1663,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               return (
                 <div className="flex min-h-0 flex-1 flex-col">
                   {/* Editor chrome */}
-                  <div className="flex shrink-0 items-center justify-between px-4 pt-3">
+                  <div className="flex shrink-0 items-center justify-between px-4 pt-3 md:px-6 md:pt-5">
                     <button
                       onClick={() => {
                         setSelectedRecording(null);
