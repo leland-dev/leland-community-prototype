@@ -119,7 +119,7 @@ function SidebarV1() {
   const [listingsOpen, setListingsOpen] = useState(false);
   const { pathname } = useLocation();
   const base = useCoachBase();
-  const { expert } = useExpertMode();
+  const { expert, setExpert } = useExpertMode();
   const onStorefront = pathname.startsWith(rebase("/coach/manage", base)) || storefrontRoutes.some((r) => rebase(r, base) === pathname);
 
   const inStore = base !== "/coach";
@@ -254,6 +254,7 @@ function SidebarV1() {
             </p>
             <button
               type="button"
+              onClick={() => setExpert(true)}
               className="mt-6 text-[15px] font-semibold text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-opacity hover:opacity-70"
             >
               Get started
