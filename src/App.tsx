@@ -61,6 +61,7 @@ function ScrollToTop() {
 }
 
 import Home from "./pages/Home";
+import Topic from "./pages/Topic";
 import Browse from "./pages/Browse";
 import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
@@ -106,12 +107,15 @@ import CoachProducts from "./pages/CoachProducts";
 import CoachInbox from "./pages/CoachInbox";
 import CoachManage from "./pages/CoachManage";
 import CoachProfileNew from "./pages/CoachProfileNew";
+import CoachProfilePlaceholder from "./pages/CoachProfilePlaceholder";
 import CoachOpportunities from "./pages/CoachOpportunities";
 import CoachLivestreams from "./pages/CoachLivestreams";
 import CoachContent from "./pages/CoachContent";
 import CoachPricing from "./pages/CoachPricing";
 import CoachCalendar from "./pages/CoachCalendar";
 import CoachEarnings from "./pages/CoachEarnings";
+import CoachAnalytics from "./pages/CoachAnalytics";
+import CoachMyContent from "./pages/CoachMyContent";
 import CoachReviews from "./pages/CoachReviews";
 import CoachDiscountCodes from "./pages/CoachDiscountCodes";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
@@ -130,7 +134,7 @@ import LelandKitTest from "./pages/LelandKitTest";
 import LessonBlocksGallery from "./pages/LessonBlocksGallery";
 import Waitlist from "./pages/waitlist/Waitlist";
 import WaitlistOnboarding from "./pages/waitlist/WaitlistOnboarding";
-import AltNavExpertPage from "./pages/AltNavExpertPage";
+import { FeedAdminProvider } from "./contexts/FeedAdminContext";
 
 export default function App() {
   return (
@@ -145,6 +149,7 @@ export default function App() {
     <GoalsProvider>
     <FullGoalsProvider>
     <FeedDemoProvider>
+    <FeedAdminProvider>
     <ScrollToTop />
     <PageExitProvider>
     <Routes>
@@ -185,10 +190,6 @@ export default function App() {
         <Route path="/site" element={<Site />} />
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/calendar" element={<Calendar />} />
-        {/* alt-nav Calendar: self-shells (like /calendar) but with the desktop
-            sidebar instead of the top navbar. Kept OUT of ContextLayout to
-            avoid a double PageShell. */}
-        <Route path="/alt-nav/calendar" element={<Calendar altNav />} />
         <Route path="/my-programs" element={<MyCourses />} />
         <Route path="/course/:courseId" element={<CourseDetail />} />
         <Route path="/program/session/:urn" element={<LiveSession />} />
@@ -204,9 +205,33 @@ export default function App() {
           <Route path="/coach/content" element={<CoachContent />} />
           <Route path="/coach/pricing" element={<CoachPricing />} />
           <Route path="/coach/calendar" element={<CoachCalendar />} />
+          <Route path="/coach/my-content" element={<CoachMyContent />} />
           <Route path="/coach/earnings" element={<CoachEarnings />} />
+          <Route path="/coach/analytics" element={<CoachAnalytics />} />
           <Route path="/coach/reviews" element={<CoachReviews />} />
           <Route path="/coach/discount-codes" element={<CoachDiscountCodes />} />
+        </Route>
+        {/* "My Store" — the coach dashboard recreated inside the LinkedIn-nav
+            shell (LinkedIn top nav via TopNav's path dispatch, coach sidebar via
+            CoachLayout's base-path awareness). Reuses the coach page components;
+            reachable from the expert-only "My Store" top-nav item. */}
+        <Route element={<CoachLayout />}>
+          <Route path="/my-leland" element={<Dashboard shell />} />
+          <Route path="/my-leland/inbox" element={<CoachInbox />} />
+          <Route path="/my-leland/manage" element={<CoachManage />} />
+          <Route path="/my-leland/profile-new" element={<CoachProfilePlaceholder />} />
+          <Route path="/my-leland/products" element={<CoachProducts />} />
+          <Route path="/my-leland/manage/:category" element={<CoachCategoryEdit />} />
+          <Route path="/my-leland/opportunities" element={<CoachOpportunities />} />
+          <Route path="/my-leland/livestreams" element={<CoachLivestreams />} />
+          <Route path="/my-leland/content" element={<CoachContent />} />
+          <Route path="/my-leland/pricing" element={<CoachPricing />} />
+          <Route path="/my-leland/calendar" element={<Calendar shell />} />
+          <Route path="/my-leland/my-content" element={<CoachMyContent />} />
+          <Route path="/my-leland/earnings" element={<CoachEarnings />} />
+          <Route path="/my-leland/analytics" element={<CoachAnalytics />} />
+          <Route path="/my-leland/reviews" element={<CoachReviews />} />
+          <Route path="/my-leland/discount-codes" element={<CoachDiscountCodes />} />
         </Route>
         <Route path="/components" element={<Components />} />
         <Route path="/components/leland" element={<LelandKitTest />} />
@@ -223,33 +248,6 @@ export default function App() {
         <Route element={<ContextLayout />}>
           <Route path="/groups/law" element={<GroupCommunity />} />
           <Route path="/" element={<Home />} />
-          {/* Experimental: home feed with a desktop sidebar instead of the top navbar */}
-          <Route path="/alt-nav" element={<Home />} />
-          {/* alt-nav sub-pages — the sidebar's destinations recreated inside the
-              alt-nav shell (DesktopSidebar left, no top navbar). Reuse the same
-              page components; ContextLayout supplies the shell. */}
-          <Route path="/alt-nav/dashboard" element={<Dashboard />} />
-          <Route path="/alt-nav/discover" element={<Browse />} />
-          <Route path="/alt-nav/search" element={<Search />} />
-          <Route path="/alt-nav/messages" element={<Messaging />} />
-          <Route path="/alt-nav/notifications" element={<Notifications />} />
-          <Route path="/alt-nav/events" element={<Events />} />
-          <Route path="/alt-nav/courses" element={<Courses />} />
-          <Route path="/alt-nav/plus" element={<LelandPlus />} />
-          <Route path="/alt-nav/jobs" element={<AltNavExpertPage title="Jobs" eyebrow="Discover" />} />
-          {/* Expert tools — POC placeholder pages recreated inside alt-nav
-              (the real coach pages live under /coach/*). */}
-          <Route path="/alt-nav/offerings" element={<AltNavExpertPage title="Offerings" />} />
-          <Route path="/alt-nav/opportunities" element={<AltNavExpertPage title="Opportunities" />} />
-          <Route path="/alt-nav/livestreams" element={<AltNavExpertPage title="Livestreams" />} />
-          <Route path="/alt-nav/availability" element={<AltNavExpertPage title="Calendar" />} />
-          <Route path="/alt-nav/earnings" element={<AltNavExpertPage title="Earnings" />} />
-          <Route path="/alt-nav/reviews" element={<AltNavExpertPage title="Reviews" />} />
-          <Route path="/alt-nav/discount-codes" element={<AltNavExpertPage title="Discount Codes" />} />
-          <Route path="/alt-nav/analytics" element={<AltNavExpertPage title="Analytics" />} />
-          {/* Post detail inside the alt-nav shell (sidebars persist, no top nav) */}
-          <Route path="/alt-nav/post/:postId" element={<PostDetail />} />
-          <Route path="/alt-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -262,16 +260,19 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/post/:postId" element={<PostDetail />} />
           <Route path="/post/:postId/comment/:commentId" element={<CommentDetail />} />
+          {/* Topic pages — hashtag-like filtered feeds (Trending topics sidebar) */}
+          <Route path="/topic/:slug" element={<Topic />} />
           {/* Isolated LinkedIn-nav experience — feed, post detail, and the
               destinations behind the top-nav items. */}
-          <Route path="/linkedin-nav" element={<Home />} />
-          <Route path="/linkedin-nav/post/:postId" element={<PostDetail />} />
-          <Route path="/linkedin-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
-          <Route path="/linkedin-nav/dashboard" element={<Dashboard />} />
-          <Route path="/linkedin-nav/jobs" element={<Jobs />} />
-          <Route path="/linkedin-nav/plus" element={<LelandPlus />} />
-          <Route path="/linkedin-nav/messages" element={<Messaging />} />
-          <Route path="/linkedin-nav/notifications" element={<Notifications />} />
+          <Route path="/alt-nav" element={<Home />} />
+          <Route path="/alt-nav/post/:postId" element={<PostDetail />} />
+          <Route path="/alt-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
+          <Route path="/alt-nav/dashboard" element={<Dashboard />} />
+          <Route path="/alt-nav/browse" element={<Browse />} />
+          <Route path="/alt-nav/jobs" element={<Jobs />} />
+          <Route path="/alt-nav/plus" element={<LelandPlus />} />
+          <Route path="/alt-nav/messages" element={<Messaging />} />
+          <Route path="/alt-nav/notifications" element={<Notifications />} />
           <Route path="/events" element={<Events />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/plus" element={<LelandPlus />} />
@@ -281,6 +282,7 @@ export default function App() {
     </Routes>
     <PageExitOverlay />
     </PageExitProvider>
+    </FeedAdminProvider>
     </FeedDemoProvider>
     </FullGoalsProvider>
     </GoalsProvider>

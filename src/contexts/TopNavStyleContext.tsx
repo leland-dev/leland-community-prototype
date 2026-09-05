@@ -25,6 +25,10 @@ interface TopNavStyleContextValue {
   // from the Navigation admin dropdown.
   feedEdgeToEdge: boolean;
   setFeedEdgeToEdge: (v: boolean) => void;
+  // LinkedIn-style navbar content: false = constrained to 1280 (default),
+  // true = extends to the window edges. Toggled from the Navigation dropdown.
+  navEdgeToEdge: boolean;
+  setNavEdgeToEdge: (v: boolean) => void;
 }
 
 const TopNavStyleContext = createContext<TopNavStyleContextValue>({
@@ -37,12 +41,15 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
   setShowNavLabels: () => {},
   feedEdgeToEdge: false,
   setFeedEdgeToEdge: () => {},
+  navEdgeToEdge: false,
+  setNavEdgeToEdge: () => {},
 });
 
 const STORAGE_KEY = "prototype-topnav-style";
 const VARIANT_STORAGE_KEY = "prototype-topnav-variant";
 const LABELS_STORAGE_KEY = "prototype-topnav-labels";
 const FEED_EDGE_STORAGE_KEY = "prototype-feed-edge-to-edge";
+const NAV_EDGE_STORAGE_KEY = "prototype-nav-edge-to-edge";
 
 export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const [style, setStyleState] = useState<TopNavStyle>(() => {
@@ -59,6 +66,10 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const [feedEdgeToEdge, setFeedEdgeToEdgeState] = useState<boolean>(() => {
     // Centered (constrained) by default; only an explicit "1" pushes to edges.
     return localStorage.getItem(FEED_EDGE_STORAGE_KEY) === "1";
+  });
+  const [navEdgeToEdge, setNavEdgeToEdgeState] = useState<boolean>(() => {
+    // Constrained by default; only an explicit "1" extends the nav to the edges.
+    return localStorage.getItem(NAV_EDGE_STORAGE_KEY) === "1";
   });
 
   const setStyle = (v: TopNavStyle) => {
@@ -81,10 +92,15 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
     setFeedEdgeToEdgeState(v);
   };
 
+  const setNavEdgeToEdge = (v: boolean) => {
+    localStorage.setItem(NAV_EDGE_STORAGE_KEY, v ? "1" : "0");
+    setNavEdgeToEdgeState(v);
+  };
+
   const toggle = () => setStyle(style === "linkedin" ? "classic" : "linkedin");
 
   return (
-    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, variant, setVariant, showNavLabels, setShowNavLabels, feedEdgeToEdge, setFeedEdgeToEdge }}>
+    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, variant, setVariant, showNavLabels, setShowNavLabels, feedEdgeToEdge, setFeedEdgeToEdge, navEdgeToEdge, setNavEdgeToEdge }}>
       {children}
     </TopNavStyleContext.Provider>
   );

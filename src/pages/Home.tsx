@@ -24,6 +24,10 @@ import OfferingCard from "../components/OfferingCard";
 import SidebarCard from "../components/SidebarCard";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import profileCover from "../assets/img/cover-image-2.png";
+import topicHash from "../assets/img/topic-hash.svg";
+import aibpImg from "../assets/placeholder images/courses/AIBP.png";
+import samWielenImg from "../assets/placeholder images/courses/HERO-Sam-Vander-Wielen-case-study-scaled.avif";
+import automationsImg from "../assets/placeholder images/courses/HERO-10-automations-scaled.avif";
 import editIcon from "../assets/icons/edit.svg";
 import trashIcon from "../assets/icons/trash.svg";
 import eyeClosedIcon from "../assets/icons/eye-closed.svg";
@@ -34,9 +38,6 @@ import calendarPageIcon from "../assets/icons/calendar-page.svg";
 import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
 import eventImageSrc from "../assets/img/EventImage.avif";
 import lelandCompass from "../assets/leland-compass.svg";
-import categoryInvestmentBanking from "../assets/placeholder images/category images/investment-banking.png";
-import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
-import categoryGMAT from "../assets/placeholder images/category images/gmat-tutoring.png";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
@@ -67,6 +68,12 @@ import commentsIcon from "../assets/icons/comments.svg";
 import repostsIcon from "../assets/icons/reposts.svg";
 import sharesIcon from "../assets/icons/shares.svg";
 import verifiedIcon from "../assets/icons/verified.svg";
+import ComposerMediaButton from "../components/ComposerMediaButton";
+import { useFeedAdmin } from "../contexts/FeedAdminContext";
+import composerImageIcon from "../assets/icons/image.svg";
+import composerCameraIcon from "../assets/icons/camera.svg";
+import composerVideoIcon from "../assets/icons/video-icon.svg";
+import composerPollIcon from "../assets/icons/bar-chart.svg";
 
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic2 from "../assets/profile photos/pic-2.png";
@@ -116,6 +123,10 @@ interface PostBase {
   verified?: boolean;
   headline?: string;
   feed?: string;
+  // Hashtag-like topic this post belongs to (slug into TOPICS). Surfaces a
+  // clickable topic pill at the top of the post and includes it in the topic's
+  // filtered feed at /topic/:slug.
+  topic?: string;
   isGroupPost?: boolean;
   groupId?: string;
   groupColor?: string;
@@ -297,6 +308,61 @@ interface PollPost extends PostBase {
 export type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost | SessionPost | LivePost | QuotePost | ArticlePost | PollPost;
 export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, SessionPost, LivePost, QuotePost, ArticlePost, PollPost };
 
+// ─── Topics ───────────────────────────────────────────
+// Hashtag-like threads that group posts across the feed. Each has a dedicated
+// page (/topic/:slug) that filters the feed to just that topic, and surfaces a
+// clickable pill at the top of any post tagged with its slug.
+export interface Topic {
+  slug: string;
+  name: string;
+  tagline: string;      // one-liner shown under the title
+  description: string;  // longer "about" copy on the topic page
+  postsToday: number;
+  postCount: number;    // total posts, shown bucketed (e.g. "1.5k posts")
+  followers: number;
+  gradient: string;     // tailwind color stops for the topic-page hero band
+}
+
+export const TOPICS: Topic[] = [
+  {
+    slug: "mba-r1-admissions",
+    name: "MBA R1 Admissions",
+    tagline: "Round 1 essays, deadlines & decisions",
+    description:
+      "Everything Round 1 — essay drafts, school selection, recommender strategy, and interview debriefs from applicants and admissions coaches going through the cycle together.",
+    postsToday: 234,
+    postCount: 1500,
+    followers: 4820,
+    gradient: "from-[#1F5F4B] to-[#2E8B6B]",
+  },
+  {
+    slug: "breaking-into-pm",
+    name: "Breaking into Product",
+    tagline: "Landing your first PM role",
+    description:
+      "Resumes, portfolios, and interview prep for aspiring product managers — plus real talk from PMs who broke in from engineering, consulting, and non-traditional backgrounds.",
+    postsToday: 189,
+    postCount: 960,
+    followers: 3610,
+    gradient: "from-[#3B4CA0] to-[#5A6FD0]",
+  },
+  {
+    slug: "law-school-prep",
+    name: "Law School Prep",
+    tagline: "LSAT, personal statements & admits",
+    description:
+      "From LSAT logic games to personal statements and scholarship negotiations — advice and wins from pre-law applicants and admitted students.",
+    postsToday: 156,
+    postCount: 720,
+    followers: 2940,
+    gradient: "from-[#6B3F8C] to-[#9A5FC0]",
+  },
+];
+
+export function topicBySlug(slug: string | undefined): Topic | undefined {
+  return TOPICS.find(t => t.slug === slug);
+}
+
 function shuffle<T>(items: T[]): T[] {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {
@@ -306,9 +372,124 @@ function shuffle<T>(items: T[]): T[] {
   return result;
 }
 
+// Space topic-tagged posts through the feed at roughly one every four posts
+// (rotating across topics so the same topic doesn't appear back to back),
+// rather than letting them cluster wherever they sit in the source array.
+function arrangeFeed(all: Post[]): Post[] {
+  const rest = all.filter(p => !p.topic);
+  // Round-robin the topical posts across their topics.
+  const byTopic = new Map<string, Post[]>();
+  for (const p of all) {
+    if (!p.topic) continue;
+    const arr = byTopic.get(p.topic) ?? [];
+    arr.push(p);
+    byTopic.set(p.topic, arr);
+  }
+  const queues = [...byTopic.values()];
+  const topical: Post[] = [];
+  for (let added = true; added; ) {
+    added = false;
+    for (const q of queues) {
+      const next = q.shift();
+      if (next) { topical.push(next); added = true; }
+    }
+  }
+  // Interleave: place a topic post in every fourth slot.
+  const out: Post[] = [];
+  let ti = 0, ri = 0;
+  for (let i = 0; ti < topical.length || ri < rest.length; i++) {
+    if (i % 4 === 3 && ti < topical.length) out.push(topical[ti++]);
+    else if (ri < rest.length) out.push(rest[ri++]);
+    else if (ti < topical.length) out.push(topical[ti++]);
+  }
+  return out;
+}
+
 // ─── Sample data ──────────────────────────────────────
 
 export const posts: Post[] = [
+  {
+    id: 101,
+    topic: "breaking-into-pm",
+    type: "text",
+    author: "Alex Rivera",
+    avatar: pic10,
+    time: "18m",
+    verified: false,
+    headline: "APM @ Google · Ex-founder",
+    companyLogo: logoGoogle,
+    body: "The thing nobody tells you about breaking into PM: your \"case study\" is worth more than your resume. I got three first-round interviews off a 4-page teardown of a product I loved — zero off my polished one-pager. Show them how you think, don't just tell them where you worked.",
+    likes: 156,
+    comments: 27,
+    reposts: 14,
+    shares: 6,
+  },
+  {
+    id: 102,
+    topic: "breaking-into-pm",
+    type: "link",
+    author: "Dana Liu",
+    avatar: pic7,
+    time: "1h",
+    verified: true,
+    headline: "Senior PM at Stripe",
+    body: "Best breakdown of the PM interview loop I've read in a while. The section on \"product sense\" vs \"execution\" rounds is exactly how we actually calibrate at most tech companies.",
+    link: {
+      url: "https://example.com/pm-interview-loop",
+      domain: "lennysnewsletter.com",
+      title: "How to Actually Prep for the Product Management Interview Loop",
+      image: linkOg2,
+    },
+    likes: 203,
+    comments: 19,
+    reposts: 41,
+    shares: 22,
+  },
+  {
+    id: 103,
+    topic: "breaking-into-pm",
+    type: "text",
+    author: "Chris Bennett",
+    avatar: pic8,
+    time: "3h",
+    verified: false,
+    headline: "Product Manager at Figma · Ex-Bain",
+    body: "Transitioned from consulting to PM last year and the hardest habit to unlearn was needing to have the answer. In consulting you're paid to be the expert in the room. In product you're paid to find the truth — usually by admitting you don't know yet and running the smallest experiment that will tell you. Took me two quarters to get comfortable saying \"let's test it.\"",
+    likes: 118,
+    comments: 15,
+    reposts: 9,
+    shares: 3,
+  },
+  {
+    id: 104,
+    topic: "law-school-prep",
+    type: "text",
+    author: "Rachel Kim",
+    avatar: pic13,
+    time: "2h",
+    verified: false,
+    headline: "1L at Columbia Law",
+    body: "Personal statement advice I wish I'd gotten sooner: admissions officers read thousands of \"I want to fight for justice\" essays. They remember the one about the summer you spent translating for your grandmother at the immigration office. Specific beats noble every single time.",
+    likes: 174,
+    comments: 21,
+    reposts: 12,
+    shares: 8,
+  },
+  {
+    id: 105,
+    topic: "law-school-prep",
+    type: "text",
+    author: "Jordan Ellis",
+    avatar: pic12,
+    time: "5h",
+    verified: true,
+    headline: "Pre-law Advisor · Former Admissions, Georgetown Law",
+    body: "Reminder for anyone sitting on a scholarship offer: the number in the letter is a starting point, not a verdict. Politely share competing offers, reaffirm your interest, and ask if there's room. I've watched students add five figures to their aid package with one well-written email. The worst they can say is no.",
+    likes: 261,
+    comments: 33,
+    reposts: 28,
+    shares: 19,
+  },
   {
     id: 36,
     type: "text",
@@ -420,6 +601,7 @@ export const posts: Post[] = [
   },
   {
     id: 3,
+    topic: "mba-r1-admissions",
     type: "link",
     author: "Priya Patel",
     avatar: pic3,
@@ -619,6 +801,7 @@ export const posts: Post[] = [
   },
   {
     id: 39,
+    topic: "mba-r1-admissions",
     type: "article",
     author: "Lauren Hayes",
     avatar: pic13,
@@ -637,6 +820,7 @@ export const posts: Post[] = [
   },
   {
     id: 40,
+    topic: "mba-r1-admissions",
     type: "poll",
     author: "David Kim",
     avatar: pic4,
@@ -687,6 +871,7 @@ export const posts: Post[] = [
   },
   {
     id: 18,
+    topic: "law-school-prep",
     type: "text",
     author: "Rachel Nguyen",
     avatar: pic9,
@@ -814,14 +999,12 @@ export function formatCount(n: number): string {
   return n.toString();
 }
 
-// Post links stay inside whichever experience you're in: under /alt-nav they
-// point at /alt-nav/post/:id (keeping the sidebar shell), under /linkedin-nav at
-// /linkedin-nav/post/:id, everywhere else at /post/:id. Consumed by every
-// card/action that opens a post.
+// Post links stay inside whichever experience you're in: under /alt-nav
+// they point at /alt-nav/post/:id, everywhere else at /post/:id. Consumed
+// by every card/action that opens a post.
 export function usePostBase(): string {
   const { pathname } = useLocation();
   if (pathname.startsWith("/alt-nav")) return "/alt-nav/post";
-  if (pathname.startsWith("/linkedin-nav")) return "/linkedin-nav/post";
   return "/post";
 }
 
@@ -1308,7 +1491,8 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
   );
 }
 
-function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, groupId, groupPoster, companyLogo, onEdit, nameHover }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; companyLogo?: string; onEdit?: () => void; nameHover?: HoverProps }) {
+function PostHeaderRow({ author, time, verified, headline, feed, topic, isGroupPost, groupId, groupPoster, companyLogo, onEdit, nameHover }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; topic?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; companyLogo?: string; onEdit?: () => void; nameHover?: HoverProps }) {
+  const postTopic = topicBySlug(topic);
   const [menuOpen, setMenuOpen] = useState(false);
   const [following, setFollowing] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -1319,6 +1503,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
   useLockBodyScroll(menuOpen && isMobile);
 
   const { mode: profileBarMode } = useProfileBarMode();
+  const { verifiedBadgePosition } = useFeedAdmin();
   // The title/description line the older profile-bar versions surface.
   const displayHeadline = groupPoster?.headline ?? headline;
   // Mode 3 demonstrates an older post: show an absolute date instead of a
@@ -1390,13 +1575,32 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
         {/* Person leads: for a member's group post we surface the person, not
             the group; the group is shown as a small badge on the avatar. Pure
             group announcements (no groupPoster) still read as the group. */}
-        <div className="flex min-w-0 items-center gap-2">
+        <div className={`flex min-w-0 items-center ${verified && !isGroupPost && verifiedBadgePosition === "name" ? "gap-1" : "gap-2"}`}>
           <Link
             to={groupPoster ? `/profile/${nameToSlug(groupPoster.name)}` : isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `/profile/${nameToSlug(author)}`}
             onClick={(e) => e.stopPropagation()}
             {...(nameHover ?? {})}
             className="cursor-pointer truncate text-[15px] leading-tight font-semibold text-gray-dark hover:underline"
           >{groupPoster ? groupPoster.name : author}</Link>
+          {/* Verified badge sits inline (between name and time) when the admin
+              menu selects the "name" position; otherwise it's on the avatar. */}
+          {verified && !isGroupPost && verifiedBadgePosition === "name" ? (
+            <VerifiedBadge className="h-5 w-5 shrink-0" />
+          ) : null}
+          {/* Topic — inline between the poster and the timestamp, chevron-separated
+              (mirrors the "poster › topic · time" reference treatment). */}
+          {postTopic && (
+            <>
+              <svg className="shrink-0 text-gray-xlight" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+              <Link
+                to={`/topic/${postTopic.slug}`}
+                onClick={(e) => e.stopPropagation()}
+                className="truncate text-[15px] font-semibold leading-tight text-[#3963D7] hover:underline"
+              >
+                {postTopic.name}
+              </Link>
+            </>
+          )}
           <span className="shrink-0 text-[15px] leading-tight text-gray-extra-light">{displayTime}</span>
         </div>
         {/* Title / description line — surfaced in the "Title" (2) and "Dated"
@@ -3453,6 +3657,7 @@ function useCoachHover(post: Post): { open: boolean; enabled: boolean; hoverProp
 
 function AvatarWithHoverCard({ post, open, hoverProps }: { post: Post; open: boolean; hoverProps: HoverProps }) {
   const navigate = useNavigate();
+  const { verifiedBadgePosition } = useFeedAdmin();
   const isEvent = post.type === "event";
   const isGroupPost = post.isGroupPost || !!post.groupPoster;
 
@@ -3514,7 +3719,7 @@ function AvatarWithHoverCard({ post, open, hoverProps }: { post: Post; open: boo
         <div className={`absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10 ${isGroupPost && !post.groupPoster ? "rounded-[8px]" : "rounded-full"}`} />
         {/* Verified badge — bottom-right of the avatar, ringed in white to lift
             off the photo. Skipped for group/event avatars (which own that spot). */}
-        {post.verified && !isGroupPost && !isEvent ? (
+        {post.verified && !isGroupPost && !isEvent && verifiedBadgePosition === "avatar" ? (
           <VerifiedBadge className="absolute -bottom-1 -right-1 h-5 w-5" />
         ) : null}
       </div>
@@ -3562,7 +3767,7 @@ function QuotedPostCard({ quoted }: { quoted: QuotedSnapshot }) {
 // Applied to the post's full-bleed row wrapper so it reaches the card edges.
 export const POST_HOVER_SHADOW = "transition-colors hover:bg-[rgba(34,34,34,0.03)]";
 
-export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOpen }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void; onOpen?: () => void }) {
+export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOpen, hideTopic }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void; onOpen?: () => void; hideTopic?: boolean }) {
   const navigate = useNavigate();
   const postBase = usePostBase();
   const [editOpen, setEditOpen] = useState(false);
@@ -3613,7 +3818,7 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
         </div>
         {/* Right column: content */}
         <div className="min-w-0 flex-1">
-          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} companyLogo={post.companyLogo} onEdit={onUpdate ? () => setEditOpen(true) : undefined} nameHover={hover.enabled ? hover.hoverProps : undefined} />
+          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} topic={hideTopic ? undefined : post.topic} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} companyLogo={post.companyLogo} onEdit={onUpdate ? () => setEditOpen(true) : undefined} nameHover={hover.enabled ? hover.hoverProps : undefined} />
           {/* Minimal mode has no title line, so the body tucks up tight to the
               identity row (negative margin trims the line-height leading); the
               title modes give the body a touch more air. */}
@@ -3703,12 +3908,13 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
 type FollowPerson = { name: string; avatar: string; verified: boolean; subtitle: string };
 
 const peopleToFollow: FollowPerson[] = [
-  { name: "Dylan Allen",       avatar: pic1,  verified: false, subtitle: "techocarrott" },
-  { name: "Claire Vo",         avatar: pic13, verified: false, subtitle: "Claire's Substack" },
+  // First and third are verified experts (showcase).
   { name: "Julie Zhuo",        avatar: pic7,  verified: true,  subtitle: "The Looking Glass" },
+  { name: "Dylan Allen",       avatar: pic1,  verified: false, subtitle: "techocarrott" },
+  { name: "Nina Kowalski",     avatar: pic5,  verified: true,  subtitle: "McKinsey & Company" },
+  { name: "Claire Vo",         avatar: pic13, verified: false, subtitle: "Claire's Substack" },
   { name: "Molly Baz",         avatar: pic2,  verified: false, subtitle: "mollybaz" },
   { name: "Jordan Allen",      avatar: pic8,  verified: false, subtitle: "jordanallen1" },
-  { name: "Nina Kowalski",     avatar: pic5,  verified: true,  subtitle: "McKinsey & Company" },
   { name: "Garry Tan",         avatar: pic10, verified: false, subtitle: "Garry Tan" },
   { name: "Dwarkesh Patel",    avatar: pic4,  verified: true,  subtitle: "Dwarkesh Podcast" },
   { name: "Michael Brandley",  avatar: pic6,  verified: false, subtitle: "Followed by Austin Winfield" },
@@ -4878,14 +5084,14 @@ export function CategorySubtitle({ photos, experts }: { photos: string[]; expert
   );
 }
 
-// Popular experts — each row can be dismissed; the whole card hides once empty.
+// Popular experts shown in the right sidebar (follow-only, no dismiss).
 const POPULAR_EXPERTS = [
   { name: "Jasmine Singer", photo: pic1, headline: "Experienced Product Leader at LinkedIn | Ex-..." },
   { name: "Jackson Ringger", photo: pic3, headline: "Ex-McKinsey Consultant | Wharton MBA" },
   { name: "Erika Mah", photo: pic5, headline: "MBA Expert | Stanford GSB | 100+ M7 Admits" },
 ];
 
-function ExpertRow({ expert, onDismiss }: { expert: (typeof POPULAR_EXPERTS)[number]; onDismiss: () => void }) {
+function ExpertRow({ expert }: { expert: (typeof POPULAR_EXPERTS)[number] }) {
   const [following, setFollowing] = useState(false);
   return (
     <SidebarCard
@@ -4894,48 +5100,32 @@ function ExpertRow({ expert, onDismiss }: { expert: (typeof POPULAR_EXPERTS)[num
       title={expert.name}
       subtitle={expert.headline}
       right={
-        <div className="flex items-center gap-1.5">
-          <Button size="sm" variant="secondary" rounded="rounded-full" onClick={() => setFollowing((f) => !f)} className="min-w-[74px] font-semibold">
-            {following ? "Following" : "Follow"}
-          </Button>
-          <button
-            onClick={onDismiss}
-            aria-label={`Dismiss ${expert.name}`}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </button>
-        </div>
+        <Button size="sm" variant="secondary" rounded="rounded-full" onClick={() => setFollowing((f) => !f)} className="min-w-[74px] font-semibold">
+          {following ? "Following" : "Follow"}
+        </Button>
       }
     />
   );
 }
 
 function PopularExperts() {
-  const [experts, setExperts] = useState(POPULAR_EXPERTS);
-  if (experts.length === 0) return null;
   return (
     <SidebarSectionCard title="Popular experts" to="/browse" bleed={false}>
-      {experts.map((e) => (
-        <ExpertRow key={e.name} expert={e} onDismiss={() => setExperts((prev) => prev.filter((x) => x.name !== e.name))} />
+      {POPULAR_EXPERTS.map((e) => (
+        <ExpertRow key={e.name} expert={e} />
       ))}
     </SidebarSectionCard>
   );
 }
 
 export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = {}) {
-  const { pathname } = useLocation();
-  const isAltNav = pathname.startsWith("/alt-nav");
-  // Defaults to the alt-nav behavior, but callers (e.g. the dashboard, which
-  // already lists upcoming sessions in its main column) can suppress the card.
-  const upcoming = showUpcoming ?? isAltNav;
+  // Opt-in via the showUpcoming prop; off by default.
+  const upcoming = showUpcoming ?? false;
   return (
     <div className="flex flex-col gap-[14px]">
-      {/* Upcoming sessions — alt-nav only */}
+      {/* Upcoming sessions */}
       {upcoming && (
-        <SidebarSectionCard title="Upcoming sessions" to="/alt-nav/calendar" bleed>
+        <SidebarSectionCard title="Upcoming sessions" to="/calendar" bleed>
           <SessionCard size="small" title="Alex <> Jessica" dateTime="Today, 5:45 PM" duration="30m" day={16} image={pic6} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
           <SessionCard size="small" title="Resume Review" dateTime="Tomorrow, 11:00 AM" duration="45m" day={17} image={pic4} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
         </SidebarSectionCard>
@@ -4965,29 +5155,20 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
         />
       </SidebarSectionCard>
 
-      {/* Popular categories — hidden in alt-nav */}
-      {!isAltNav && (
-        <SidebarSectionCard title="Popular categories" bleed={false}>
+      {/* Trending topics */}
+      <SidebarSectionCard title="Trending topics" to="/topic/mba-r1-admissions" bleed={false}>
+        {TOPICS.map(topic => (
           <SidebarCard
-            variant="category"
-            image={categoryInvestmentBanking}
-            title="Investment Banking"
-            subtitle={<CategorySubtitle photos={[pic1, pic4, pic5]} experts="234 experts" />}
+            key={topic.slug}
+            variant="topic"
+            align="top"
+            to={`/topic/${topic.slug}`}
+            icon={<img src={topicHash} alt="" className="h-[20px] w-[20px] shrink-0" />}
+            title={topic.name}
+            subtitle={`${topic.postsToday} posts today`}
           />
-          <SidebarCard
-            variant="category"
-            image={categoryAI}
-            title="AI Automation & Agents"
-            subtitle={<CategorySubtitle photos={[pic6, pic7, pic8]} experts="300 experts" />}
-          />
-          <SidebarCard
-            variant="category"
-            image={categoryGMAT}
-            title="GMAT Tutoring"
-            subtitle={<CategorySubtitle photos={[pic2, pic3, pic10]} experts="156 experts" />}
-          />
-        </SidebarSectionCard>
-      )}
+        ))}
+      </SidebarSectionCard>
 
       {/* Popular experts */}
       <PopularExperts />
@@ -4996,10 +5177,10 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
       <div className="px-2 pt-1">
         <p className="text-[12px] leading-[1.7] text-gray-extra-light">
           {["About", "Help", "Careers", "Blog", "Coaches", "Privacy", "Terms"].map((l, i) => (
-            <span key={l}>
-              {i > 0 && <span className="mx-1">·</span>}
+            <Fragment key={l}>
+              {i > 0 && " · "}
               <a href="#" className="transition-opacity hover:opacity-70">{l}</a>
-            </span>
+            </Fragment>
           ))}
         </p>
         <p className="mt-3 text-[12px] text-gray-extra-light">© 2026 Leland</p>
@@ -5039,12 +5220,27 @@ function SidebarSectionCard({ title, to, bleed = true, children }: { title: stri
   );
 }
 
-export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
+// Sessions the user has coming up — previewed (up to 2) in the v2 sidebar.
+const UPCOMING_SESSIONS = [
+  { title: "Alex <> Jessica", dateTime: "Today, 5:45 PM", duration: "30m", day: 16, image: pic6 },
+  { title: "Resume Review", dateTime: "Tomorrow, 11:00 AM", duration: "45m", day: 17, image: pic4 },
+];
+
+// Programs the user is mid-way through — previewed in the v2 sidebar with a
+// progress bar (the "continue learning" job-to-be-done).
+const MY_PROGRAMS = [
+  { title: "AI Builder Program: Level 1", author: "Leland", pct: 60, image: aibpImg, href: "/course/1" },
+  { title: "MBA Application Masterclass", author: "Sam Wielen", pct: 25, image: samWielenImg, href: "/courses" },
+  { title: "Consulting Case Interview Prep", author: "Jessica Lin", pct: 0, image: automationsImg, href: "/courses" },
+];
+
+// v1 — original: profile card, next session + calendar, my experts.
+function HomeSidebarV1() {
   const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-[14px]">
       {/* Profile card — the dashboard's profile summary, in its non-expert form */}
-      <DashboardProfileCard expert={false} />
+      <DashboardProfileCard expert={false} hideEdit />
 
       {/* Next session + calendar link */}
       <div className="rounded-[12px] border border-[#222222]/[0.12] bg-white">
@@ -5082,6 +5278,77 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
   );
 }
 
+// v2 — reorganized around the two jobs-to-be-done: upcoming sessions and
+// in-progress programs. Profile card on top.
+function HomeSidebarV2() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  // Inside the /alt-nav experience, "See all" links stay within My Leland
+  // rather than jumping back into the classic-nav routes.
+  const inAltNav = pathname === "/alt-nav" || pathname.startsWith("/alt-nav/");
+  const sessionsTo = inAltNav ? "/my-leland/calendar" : "/dashboard";
+  const learningTo = inAltNav ? "/my-leland" : "/my-programs";
+  return (
+    <div className="flex flex-col gap-[14px]">
+      {/* 1. Profile card */}
+      <DashboardProfileCard expert={false} compact hideEdit />
+
+      {/* 2. Upcoming sessions — preview up to 2 */}
+      <SidebarSectionCard title="Upcoming sessions" to={sessionsTo} bleed>
+        {UPCOMING_SESSIONS.slice(0, 2).map((s) => (
+          <SessionCard key={s.title} size="small" title={s.title} dateTime={s.dateTime} duration={s.duration} day={s.day} image={s.image} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
+        ))}
+      </SidebarSectionCard>
+
+      {/* 3. Continue learning — in-progress programs show a progress bar; a
+          not-started program shows a Start CTA instead. */}
+      <SidebarSectionCard title="Continue learning" to={learningTo} bleed>
+        {/* Demo: show the AI Builder Program and the not-started Consulting one */}
+        {[MY_PROGRAMS[0], MY_PROGRAMS[2]].map((p) => {
+          const started = p.pct > 0;
+          return (
+            <div
+              key={p.title}
+              onClick={() => navigate(p.href)}
+              className="group flex cursor-pointer items-center gap-3 rounded-[8px] px-2 py-2 transition-colors hover:bg-gray-hover"
+            >
+              <img src={p.image} alt="" className="h-[42px] w-[68px] shrink-0 rounded-[6px] object-cover" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[14px] font-semibold leading-tight text-gray-dark group-hover:underline">{p.title}</p>
+                <p className="mt-0.5 truncate text-[12px] leading-tight text-gray-light">
+                  {p.author} · {started ? `${p.pct}% complete` : "Not started"}
+                </p>
+                {started && (
+                  <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-[#222222]/[0.08]">
+                    <div className="h-full rounded-full bg-gray-dark" style={{ width: `${p.pct}%` }} />
+                  </div>
+                )}
+              </div>
+              {!started && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  rounded="rounded-full"
+                  className="shrink-0 font-semibold"
+                  onClick={(e) => { e.stopPropagation(); navigate(p.href); }}
+                >
+                  Start
+                </Button>
+              )}
+            </div>
+          );
+        })}
+      </SidebarSectionCard>
+    </div>
+  );
+}
+
+export function HomeSidebar(_props: { onCreatePost: () => void }) {
+  const { sidebarVersion } = useFeedAdmin();
+  // v3 is reserved for the next iteration — mirror v2 until it's specced.
+  return sidebarVersion === "v1" ? <HomeSidebarV1 /> : <HomeSidebarV2 />;
+}
+
 // ─── Composer prompts ────────────────────────────────
 
 const composerPrompts = [
@@ -5097,12 +5364,76 @@ const composerPrompts = [
 
 // ─── Page ─────────────────────────────────────────────
 
+// Prototype-only admin menu — a 3-dot button pinned to the bottom-right that
+// toggles preview states to show the team (starting with the verified-badge
+// position).
+function FeedAdminMenu() {
+  const [open, setOpen] = useState(false);
+  const { verifiedBadgePosition, setVerifiedBadgePosition, sidebarVersion, setSidebarVersion } = useFeedAdmin();
+  const segBtn = (value: "avatar" | "name", label: string) => (
+    <button
+      onClick={() => setVerifiedBadgePosition(value)}
+      className={`flex-1 rounded-md px-2 py-1 text-[12px] font-medium transition-colors ${
+        verifiedBadgePosition === value ? "bg-white text-gray-dark shadow-sm" : "text-gray-light hover:text-gray-dark"
+      }`}
+    >
+      {label}
+    </button>
+  );
+  const sidebarBtn = (value: "v1" | "v2" | "v3", label: string) => (
+    <button
+      onClick={() => setSidebarVersion(value)}
+      className={`flex-1 rounded-md px-2 py-1 text-[12px] font-medium transition-colors ${
+        sidebarVersion === value ? "bg-white text-gray-dark shadow-sm" : "text-gray-light hover:text-gray-dark"
+      }`}
+    >
+      {label}
+    </button>
+  );
+  return (
+    <div className="fixed bottom-4 right-4 z-40">
+      {open && (
+        <>
+          <div className="fixed inset-0" onClick={() => setOpen(false)} />
+          <div className="absolute bottom-full right-0 z-10 mb-2 w-60 rounded-xl border border-gray-stroke bg-white p-1 shadow-lg">
+            <p className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-light">Admin</p>
+            <div className="px-3 py-2">
+              <p className="text-[14px] font-medium text-gray-dark">Verified badge</p>
+              <div className="mt-1.5 flex rounded-lg bg-gray-100 p-0.5">
+                {segBtn("avatar", "On photo")}
+                {segBtn("name", "By name")}
+              </div>
+            </div>
+            <div className="px-3 py-2">
+              <p className="text-[14px] font-medium text-gray-dark">Left sidebar</p>
+              <div className="mt-1.5 flex rounded-lg bg-gray-100 p-0.5">
+                {sidebarBtn("v1", "V1")}
+                {sidebarBtn("v2", "V2")}
+                {sidebarBtn("v3", "V3")}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      <button
+        type="button"
+        aria-label="Admin menu"
+        onClick={() => setOpen(o => !o)}
+        className={`flex h-10 w-10 items-center justify-center rounded-full border border-gray-stroke bg-white shadow-lg transition-colors ${open ? "text-gray-dark" : "text-gray-light hover:text-gray-dark"}`}
+      >
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <circle cx="5" cy="12" r="1.6" />
+          <circle cx="12" cy="12" r="1.6" />
+          <circle cx="19" cy="12" r="1.6" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 export default function Home() {
   useEffect(() => { document.title = "Leland Prototype | Feed"; }, []);
   const { version } = useVersion();
-  // In alt-nav the feed card fades in on mount, matching the post detail.
-  const { pathname } = useLocation();
-  const isAltNav = pathname.startsWith("/alt-nav");
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
   // "People to follow → See all" swaps the center feed for the full accounts list.
@@ -5117,7 +5448,7 @@ export default function Home() {
   useSetRightSidebar(<HomeRightSidebar />);
   // Copy, don't alias: handlePublish mutates `posts` (so /post/:id resolves),
   // which would double-insert if this state shared the same array reference.
-  const [feedPosts, setFeedPosts] = useState<Post[]>(() => [...posts]);
+  const [feedPosts, setFeedPosts] = useState<Post[]>(() => arrangeFeed(posts));
   // The post the user is quoting ("repost with your thoughts"); drives the
   // quote composer modal.
   const [quoteTarget, setQuoteTarget] = useState<Post | null>(null);
@@ -5316,35 +5647,51 @@ export default function Home() {
       {/* Feed card — one bordered container wrapping the composer and the whole
           post list, so the border runs around all edges. Horizontal padding
           lives on the composer and each post row (dividers run full-bleed to
-          the border while post content stays inset). */}
+          the border while post content stays inset). On mobile it breaks out of
+          the page padding to run full-bleed: no rounding, no left/right borders
+          (the per-post dividers remain). */}
       <motion.div
-        {...(isAltNav ? { initial: FADE_IN.initial, animate: FADE_IN.animate, transition: FADE_TRANSITION } : {})}
-        className="rounded-2xl border border-gray-stroke bg-white"
+        className="-mx-4 rounded-none border border-x-0 border-gray-stroke bg-white sm:-mx-6 md:mx-0 md:rounded-2xl md:border-x"
       >
-      {/* Post composer — hidden on mobile (composer lives in the floating
-          + button there). A borderless prompt with a Post button; clicking
-          anywhere in the row opens the compose modal. */}
+      {/* Post composer — shown on all screens. Mirrors the post-detail comment
+          composer's active state: avatar + prompt on top, media icons + Post
+          button beneath. Clicking anywhere opens the compose modal. */}
       <div
         onClick={() => setComposeOpen(true)}
-        className="hidden cursor-pointer md:flex items-center gap-3 border-b border-gray-stroke px-4 py-3 sm:px-6"
+        className="block cursor-pointer border-b border-gray-stroke px-4 py-3 sm:px-6"
       >
-        <img
-          src={profilePhoto}
-          alt="Your profile"
-          className="h-10 w-10 shrink-0 rounded-full object-cover"
-        />
-        <span className="flex-1 truncate text-left text-[15px] text-gray-light">
-          What's on your mind?
-        </span>
-        <Button
-          size="md"
-          variant="outline"
-          rounded="rounded-[6px]"
-          onClick={() => setComposeOpen(true)}
-          className="shrink-0 font-semibold shadow-[0_1px_2px_0_rgba(16,24,40,0.06)]"
-        >
-          Post
-        </Button>
+        <div className="flex items-center gap-3">
+          <img
+            src={profilePhoto}
+            alt="Your profile"
+            className="h-10 w-10 shrink-0 rounded-full object-cover"
+          />
+          <span className="flex-1 truncate text-left text-[17px] text-gray-extra-light">
+            What's on your mind?
+          </span>
+        </div>
+        {/* Media icons (left) + Post (right), indented under the prompt text. */}
+        <div className="mt-2 flex items-center justify-between pl-[52px]">
+          <div className="-ml-2.5 flex items-center gap-1">
+            {[
+              { label: "Add image", src: composerImageIcon },
+              { label: "Take photo", src: composerCameraIcon },
+              { label: "Add video", src: composerVideoIcon },
+              { label: "Add poll", src: composerPollIcon },
+            ].map(t => (
+              <ComposerMediaButton key={t.label} src={t.src} label={t.label} tone="extra-light" />
+            ))}
+          </div>
+          <Button
+            size="md"
+            variant="secondary"
+            rounded="rounded-full"
+            onClick={() => setComposeOpen(true)}
+            className="shrink-0 font-semibold opacity-50"
+          >
+            Post
+          </Button>
+        </div>
       </div>
 
       {/* Pull-to-refresh slot — sits between the composer and the feed (top
@@ -5402,6 +5749,8 @@ export default function Home() {
       </button>
 
       {composeOpen ? <Composer onClose={() => { setComposeOpen(false); setComposeInDrafts(false); }} onPublish={handlePublish} onDraftSaved={handleDraftSaved} onScheduled={handleScheduled} openDraftsOnMount={composeInDrafts} draftsTabOnMount={composeDraftsTab} /> : null}
+      {/* Prototype admin controls — bottom-right 3-dot menu. */}
+      <FeedAdminMenu />
       {/* Draft-saved toast — portaled so the tab bar's stacking context can't cover it */}
       {createPortal(
         <AnimatePresence>

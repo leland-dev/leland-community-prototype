@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, useEffect, type ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
+import { useExpertMode } from "../contexts/ExpertModeContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSetLayoutVariant } from "../components/LayoutVariantContext";
 import { useSetNavTheme } from "../components/NavThemeContext";
@@ -263,10 +264,11 @@ function CardCarousel({ title, seeAllLabel, seeAllTo, headerLinkTo, gapClass = "
   );
 }
 
-function MyCourses() {
+function MyCourses({ shell }: { shell?: boolean }) {
   const navigate = useNavigate();
+  const myContentTo = shell ? "/my-leland/my-content" : "/coach/my-content";
   return (
-    <CardCarousel title="My programs" seeAllLabel="See all programs" seeAllTo="/my-programs">
+    <CardCarousel title="My programs" seeAllLabel="See all programs" seeAllTo={myContentTo}>
       {myCourses.slice(0, 3).map((c) => (
         <CourseCard key={c.title} course={c} />
       ))}
@@ -706,7 +708,14 @@ function AltAnalyticsPreview() {
 // Left-column profile card — mirrors the profile template hero, differentiated
 // by whether the user is an expert (credentials, reviews, expert mins) or a
 // customer (bio + followers).
-export default function Dashboard() {
+// Neutral nav theme for the embedded (shell) dashboard — the coach store keeps
+// its normal white LinkedIn top nav rather than the scroll-reveal beige hero.
+const SHELL_NAV_THEME = { bg: "#ffffff", light: false, hideWordmark: false, scrollReveal: false };
+
+// `shell` renders the embedded, in-flow treatment (no full-bleed hero, single
+// column) used inside a shell with its own sidebar — the alt-nav pages and the
+// LinkedIn-nav "My Store". `expert` seeds the expert-dashboard variant.
+export default function Dashboard({ shell = false, expert: expertInit = false }: { shell?: boolean; expert?: boolean } = {}) {
   useSetLayoutVariant("standard");
   useEffect(() => { document.title = "Dashboard"; }, []);
   const navigate = useNavigate();
@@ -714,18 +723,23 @@ export default function Dashboard() {
   // Recreated inside the alt-nav shell: no top navbar, narrower content column.
   // Drop the full-bleed beige hero (it doesn't fit this layout) for a plain
   // white, in-flow header.
-  const isAltNav = pathname.startsWith("/alt-nav");
+  const embedded = shell;
   const { dark: darkMode } = useDarkMode();
   const heroBg = darkMode ? "#5E6E79" : HERO_BG;
   const navTheme = useMemo(() => ({ bg: heroBg, light: darkMode, hideWordmark: false, scrollReveal: true }), [heroBg, darkMode]);
-  useSetNavTheme(navTheme);
+  useSetNavTheme(shell ? SHELL_NAV_THEME : navTheme);
   // In the alt-nav shell the dashboard adopts the feed's right sidebar (minus the
   // Upcoming sessions card, which the main column already covers).
-  useSetRightSidebar(isAltNav ? <HomeRightSidebar showUpcoming={false} /> : null);
+  useSetRightSidebar(embedded ? <HomeRightSidebar showUpcoming={false} /> : null);
 
   // Admin menu (bottom-right) — matches the profile template's 3-dot control.
   const [adminOpen, setAdminOpen] = useState(false);
-  const [expert, setExpert] = useState(false);
+  // In the store shell the Expert admin toggle mirrors the top navbar's global
+  // Expert toggle (so they stay in sync); elsewhere it's a local admin preview.
+  const { expert: globalExpert, toggle: toggleGlobalExpert } = useExpertMode();
+  const [localExpert, setLocalExpert] = useState(expertInit);
+  const expert = shell ? globalExpert : localExpert;
+  const toggleExpert = () => (shell ? toggleGlobalExpert() : setLocalExpert((v) => !v));
   const [altAnalytics, setAltAnalytics] = useState(false);
   const [goalsFeature, setGoalsFeature] = useState(true);
   const { version: goalsVersion, setVersion: setGoalsVersion } = useGoalsVersion();
@@ -747,33 +761,26 @@ export default function Dashboard() {
       {/* Hero — full-window beige band with a headline + help link. In alt-nav
           it's a plain white, in-flow header (no full-bleed, no overlap). */}
       <div
-        className={isAltNav ? "pb-2 pt-1" : "-mt-[72px] pb-32 pt-[120px] md:-mt-10 md:pb-36 md:pt-16"}
-        style={isAltNav ? undefined : { backgroundColor: heroBg, ...fullBleed }}
+        className={embedded ? "pb-2 pt-1" : "-mt-[72px] pb-32 pt-[120px] md:-mt-10 md:pb-36 md:pt-16"}
+        style={embedded ? undefined : { backgroundColor: heroBg, ...fullBleed }}
       >
         <motion.div
-          className={isAltNav ? "text-left" : `${WRAP} text-center md:text-left`}
+          className={embedded ? "text-left" : `${WRAP} text-center md:text-left`}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
-          {isAltNav ? (
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <img src={profilePhoto} alt="Alex Rivera" className="h-[64px] w-[64px] rounded-full object-cover" />
-                <h1 className="mt-4 font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">
-                  Good morning, Alex
-                </h1>
-                {todaySessionCount > 0 && (
-                  <p className="mt-2 text-[16px] text-gray-dark md:text-[17px]">
-                    You have {todaySessionCount} session{todaySessionCount === 1 ? "" : "s"} today.
-                  </p>
-                )}
-              </div>
-              <LinkButton href="/coach-profile" size="sm" variant="secondary" className="mt-1 shrink-0 font-semibold">
-                <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
-                Edit profile
-              </LinkButton>
+          {embedded ? (
+            <div>
+              <h1 className="font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">
+                Good morning, Alex
+              </h1>
+              {todaySessionCount > 0 && (
+                <p className="mt-2 mb-4 text-[16px] text-gray-dark md:text-[17px]">
+                  You have {todaySessionCount} session{todaySessionCount === 1 ? "" : "s"} today.
+                </p>
+              )}
             </div>
           ) : (
             <>
@@ -794,17 +801,17 @@ export default function Dashboard() {
           already sits inside PageShell's padded container, so it aligns with the
           hero's inner wrapper without re-adding max-width/padding. */}
       <motion.div
-        className={`relative z-10 ${isAltNav ? "" : "-mt-20 md:-mt-28"}`}
+        className={`relative z-10 ${embedded ? "" : "-mt-20 md:-mt-28"}`}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className={isAltNav ? "flex flex-col gap-5" : "grid grid-cols-1 gap-5 lg:grid-cols-[320px_minmax(0,1fr)]"}>
+        <div className={embedded ? "flex flex-col gap-5" : "grid grid-cols-1 gap-5 lg:grid-cols-[320px_minmax(0,1fr)]"}>
           {/* Left — profile preview (hidden on mobile; mirrors the profile
               template hero, differentiated by expert vs customer). In alt-nav the
               profile moves into the header, so this column is dropped. */}
-          {!isAltNav && (
+          {!embedded && (
             <aside className="hidden self-start lg:block lg:sticky lg:top-[92px]">
               <DashboardProfileCard expert={expert} />
             </aside>
@@ -822,7 +829,7 @@ export default function Dashboard() {
                   <SessionCard key={i} size="auto" {...event} />
                 ))}
               </div>
-              <Button onClick={() => navigate("/calendar")} size="md" variant="secondary" className="mt-4 font-semibold">
+              <Button onClick={() => navigate(shell ? "/my-leland/calendar" : "/calendar")} size="md" variant="secondary" className="mt-4 font-semibold">
                 See full calendar
               </Button>
             </DashCard>
@@ -832,7 +839,7 @@ export default function Dashboard() {
             {expert && (altAnalytics ? <AnalyticsPreview /> : <AltAnalyticsPreview />)}
 
             {/* My programs — hidden for experts */}
-            {!expert && <MyCourses />}
+            {!expert && <MyCourses shell={shell} />}
 
             {/* Conversations */}
             <MyExperts title="Conversations" />
@@ -854,7 +861,7 @@ export default function Dashboard() {
                     />
                   ))}
                 </div>
-                <Button onClick={() => navigate("/courses")} size="md" variant="secondary" className="mt-4 font-semibold">
+                <Button onClick={() => navigate(shell ? "/my-leland/my-content" : "/coach/my-content")} size="md" variant="secondary" className="mt-4 font-semibold">
                   See all
                 </Button>
               </DashCard>
@@ -889,7 +896,7 @@ export default function Dashboard() {
               transition={{ duration: 0.15 }}
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
-              <AdminToggle label="Expert" checked={expert} onChange={() => setExpert((v) => !v)} />
+              <AdminToggle label="Expert" checked={expert} onChange={toggleExpert} />
               {expert && <AdminToggle label="Alt Analytics" checked={altAnalytics} onChange={() => setAltAnalytics((v) => !v)} />}
               {!expert && (
                 <AdminToggle label="Goals & tasks" checked={goalsFeature} onChange={() => setGoalsFeature((v) => !v)} />

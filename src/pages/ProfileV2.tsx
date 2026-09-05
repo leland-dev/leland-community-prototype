@@ -576,9 +576,9 @@ function CustomerOfferingCard({ offering }: { offering: Offering }) {
 
 // Full-width hourly-coaching section shown below the offerings grid — larger,
 // left-aligned, with an icon tile, price, and a "Buy coaching" CTA.
-function CustomerHourlySection() {
+function CustomerHourlySection({ marginClass = "mt-6", paddingClass = "p-6" }: { marginClass?: string; paddingClass?: string }) {
   return (
-    <div className="mt-6 flex cursor-pointer flex-col gap-4 rounded-2xl bg-gray-hover p-6 transition-colors hover:bg-gray-stroke sm:flex-row sm:items-center sm:justify-between">
+    <div className={`${marginClass} ${paddingClass} flex cursor-pointer flex-col gap-4 rounded-2xl bg-gray-hover transition-colors hover:bg-gray-stroke sm:flex-row sm:items-center sm:justify-between`}>
       <div className="flex min-w-0 items-center gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#222222]/5">
           <img src={timeClockHourglassIcon} alt="" className="h-6 w-6" />
@@ -1150,6 +1150,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               ))}
           </div>
         )}
+        {/* Custom hourly card — sits under the 3-offering grid (v2/v3), above the
+            "See more offerings" button. */}
+        {!highLevel && (abVersion === "v2" || abVersion === "v3") ? <CustomerHourlySection marginClass="mt-4" paddingClass="p-4" /> : null}
         <div className="mt-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
           {!highLevel && (
             <button

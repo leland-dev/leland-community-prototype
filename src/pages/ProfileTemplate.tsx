@@ -72,8 +72,8 @@ export default function ProfileTemplate() {
   const [myProfile, setMyProfile] = useState(isMe);
   // A/B test toggle for profile-page improvements (defaults ON).
   const [abTest, setAbTest] = useState(true);
-  // Which improvement variant to show when A/B testing is on.
-  const [abVersion, setAbVersion] = useState<"v1" | "v2" | "v3">("v1");
+  // Which improvement variant to show when A/B testing is on. Defaults to v3.
+  const [abVersion, setAbVersion] = useState<"v1" | "v2" | "v3">("v3");
   const coachId = person?.coachId ?? "samantha";
 
   // Identity (name + photo + cover) is fixed per profile and stays constant

@@ -71,27 +71,27 @@ export default function PageShell({
   // larger viewport than a sidebar in a 2-col layout. Any single sidebar
   // (2-col) shows at the smaller threshold.
   //
-  // Sticky offset clears the 61px sticky TopNav (61 + 20px gap = 81px) so the
-  // columns pin BELOW the nav instead of scrolling up underneath it. Each
-  // sidebar also caps its height to the remaining viewport and scrolls its own
-  // overflow, so a tall sidebar stays fully reachable on short screens rather
-  // than being clipped.
+  // Sticky offset clears the 61px TopNav plus a 20px gap (81px) so the columns
+  // keep a top margin below the nav instead of butting against it as the page
+  // scrolls. Height caps at the rest of the viewport (100vh - 81px) with its
+  // own overflow, so a sidebar taller than a short window scrolls internally
+  // rather than being clipped.
   // NOTE: keep full class strings literal so Tailwind's JIT scanner picks them
   // up. Building arbitrary variants like `min-[1200px]:block` via template
   // strings causes the rule to be silently dropped from the generated CSS.
   const leftClass = leftSidebarMobile
-    ? "w-full shrink-0 md:w-[300px] md:sticky md:top-[81px] md:self-start md:max-h-[calc(100vh-101px)] md:overflow-y-auto"
-    : "hidden w-[300px] shrink-0 sticky top-[81px] self-start max-h-[calc(100vh-101px)] overflow-y-auto min-[960px]:block";
+    ? "w-full shrink-0 md:w-[300px] md:sticky md:top-[81px] md:self-start md:max-h-[calc(100vh-81px)] md:overflow-y-auto"
+    : "hidden w-[300px] shrink-0 sticky top-[81px] self-start max-h-[calc(100vh-81px)] overflow-y-auto min-[960px]:block";
 
   // stackRight: always visible, becomes sticky column at the breakpoint.
   // Default: hidden until the breakpoint.
   const rightClass = stackRight
     ? hasBoth
-      ? "w-full shrink-0 min-[1200px]:w-auto min-[1200px]:sticky min-[1200px]:top-[81px] min-[1200px]:self-start min-[1200px]:max-h-[calc(100vh-101px)] min-[1200px]:overflow-y-auto"
-      : "w-full shrink-0 min-[960px]:w-auto min-[960px]:sticky min-[960px]:top-[81px] min-[960px]:self-start min-[960px]:max-h-[calc(100vh-101px)] min-[960px]:overflow-y-auto"
+      ? "w-full shrink-0 min-[1200px]:w-auto min-[1200px]:sticky min-[1200px]:top-[81px] min-[1200px]:self-start min-[1200px]:max-h-[calc(100vh-81px)] min-[1200px]:overflow-y-auto"
+      : "w-full shrink-0 min-[960px]:w-auto min-[960px]:sticky min-[960px]:top-[81px] min-[960px]:self-start min-[960px]:max-h-[calc(100vh-81px)] min-[960px]:overflow-y-auto"
     : hasBoth
-      ? "hidden shrink-0 sticky top-[81px] self-start max-h-[calc(100vh-101px)] overflow-y-auto min-[1200px]:block"
-      : "hidden shrink-0 sticky top-[81px] self-start max-h-[calc(100vh-101px)] overflow-y-auto min-[960px]:block";
+      ? "hidden shrink-0 sticky top-[81px] self-start max-h-[calc(100vh-81px)] overflow-y-auto min-[1200px]:block"
+      : "hidden shrink-0 sticky top-[81px] self-start max-h-[calc(100vh-81px)] overflow-y-auto min-[960px]:block";
 
   const effectiveMaxWidth = contentMaxWidth ?? 800;
 

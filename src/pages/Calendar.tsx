@@ -2,9 +2,9 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useDarkMode } from "../contexts/DarkModeContext";
+import { useExpertMode } from "../contexts/ExpertModeContext";
 import { useSetNavTheme } from "../components/NavThemeContext";
 import PageShell from "../components/PageShell";
-import DesktopSidebar from "../components/DesktopSidebar";
 import { Button } from "../components/Button";
 import SessionCard from "../components/SessionCard";
 import profilePhoto from "../assets/profile photos/profile photo.png";
@@ -245,25 +245,29 @@ function AdminToggle({ label, checked, onChange }: { label: string; checked: boo
   );
 }
 
-export default function Calendar({ altNav = false }: { altNav?: boolean }) {
+// `shell` renders the calendar bare (no PageShell / beige hero) so it can be
+// embedded inside the "My Leland" store shell as its Calendar tab.
+export default function Calendar({ shell = false }: { shell?: boolean }) {
   const navigate = useNavigate();
   const { dark: darkMode } = useDarkMode();
   const heroBg = darkMode ? "#5E6E79" : HERO_BG;
-  // On alt-nav there's no top navbar to theme, so the theme is inert (and the
-  // scroll listener is off). Otherwise the beige hero drives the nav color.
+  // The shell (store) has no beige-driven top navbar, so keep the nav plain white.
   const navTheme = useMemo(
-    () => altNav
+    () => shell
       ? { bg: "#ffffff", light: false, hideWordmark: false, scrollReveal: false }
       : { bg: heroBg, light: darkMode, hideWordmark: false, scrollReveal: true },
-    [altNav, heroBg, darkMode],
+    [shell, heroBg, darkMode],
   );
   useSetNavTheme(navTheme);
 
   const [view, setView] = useState<"calendar" | "list">("list");
 
-  // Admin menu (bottom-right) — matches the dashboard's 3-dot control.
+  // Admin menu (bottom-right) — matches the dashboard's 3-dot control. In the
+  // store shell the Expert state mirrors the global (top-nav) toggle.
   const [adminOpen, setAdminOpen] = useState(false);
-  const [expert, setExpert] = useState(false);
+  const { expert: globalExpert } = useExpertMode();
+  const [localExpert, setLocalExpert] = useState(false);
+  const expert = shell ? globalExpert : localExpert;
   const adminRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!adminOpen) return;
@@ -274,29 +278,60 @@ export default function Calendar({ altNav = false }: { altNav?: boolean }) {
     return () => document.removeEventListener("mousedown", onClick);
   }, [adminOpen]);
 
+  // Upcoming-sessions card — shared by the standalone page and the store shell.
+  const sessionsSection = (
+    <section className="rounded-2xl border border-[#222222]/[0.10] bg-white p-5 sm:p-6">
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <h2 className="text-[19px] font-semibold leading-tight text-gray-dark">Upcoming sessions</h2>
+        {/* Experts get an availability shortcut across from the header */}
+        {expert && (
+          <Button size="md" variant="secondary" onClick={() => navigate(shell ? "/my-leland/calendar" : "/coach/calendar")} className="shrink-0 font-semibold">
+            Edit availability
+          </Button>
+        )}
+        {/* View toggle — hidden for now */}
+        <div className="hidden shrink-0 items-center gap-1 rounded-full bg-gray-hover p-1">
+          {VIEWS.map((v) => (
+            <button
+              key={v.key}
+              onClick={() => setView(v.key)}
+              aria-label={v.label}
+              aria-pressed={view === v.key}
+              className={`flex h-8 w-9 items-center justify-center rounded-full transition-colors ${
+                view === v.key
+                  ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
+                  : "text-gray-extra-light hover:text-gray-light"
+              }`}
+            >
+              <span aria-hidden className="h-[18px] w-[18px] bg-current" style={maskStyle(v.icon)} />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {view === "calendar" ? <CalendarView /> : <ListView />}
+    </section>
+  );
+
+  // Store shell: bare content (heading + sessions), no PageShell / beige hero.
+  if (shell) {
+    return (
+      <div className="pb-6">
+        <h1 className="font-serif text-[30px] font-medium leading-[1.1] text-gray-dark md:text-[38px]">Calendar</h1>
+        <div className="mt-6">{sessionsSection}</div>
+      </div>
+    );
+  }
+
   return (
     <PageShell
       variant="standard"
-      // alt-nav: render inside the sidebar shell (no top navbar) instead of the
-      // default single-column standard shell.
-      edgeToEdge={altNav}
-      leftSidebar={altNav ? <DesktopSidebar /> : undefined}
-      leftSidebarWidth={altNav ? 250 : undefined}
-      leftSidebarTop={altNav ? 20 : undefined}
-      leftSidebarFixed={altNav}
-      contentMaxWidth={altNav ? 720 : undefined}
-      paddingXClassName={altNav ? "px-4" : undefined}
-      paddingYClassName={altNav ? "py-4 sm:pt-5 sm:pb-10" : undefined}
     >
       <div className="pb-[180px]">
-        {/* Hero — a beige band. Default: full-window bleed tucked under the top
-            nav. alt-nav: a contained rounded band inside the content column
-            (no navbar to tuck under, no full-bleed past the sidebar). */}
+        {/* Hero — a full-window beige band tucked under the top nav. */}
         <div
-          className={altNav
-            ? "rounded-2xl pb-28 pt-10 md:pb-36 md:pt-12"
-            : "-mt-[72px] pb-28 pt-[150px] md:-mt-10 md:pb-36 md:pt-16"}
-          style={{ backgroundColor: heroBg, ...(altNav ? {} : fullBleed) }}
+          className="-mt-[72px] pb-28 pt-[150px] md:-mt-10 md:pb-36 md:pt-16"
+          style={{ backgroundColor: heroBg, ...fullBleed }}
         >
           <motion.div
             className={`${WRAP} flex items-start justify-between gap-4`}
@@ -329,37 +364,7 @@ export default function Calendar({ altNav = false }: { altNav?: boolean }) {
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
-          <section className="rounded-2xl border border-[#222222]/[0.10] bg-white p-5 sm:p-6">
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <h2 className="text-[19px] font-semibold leading-tight text-gray-dark">Upcoming sessions</h2>
-              {/* Experts get an availability shortcut across from the header */}
-              {expert && (
-                <Button size="md" variant="secondary" onClick={() => navigate("/coach/calendar")} className="shrink-0 font-semibold">
-                  Edit availability
-                </Button>
-              )}
-              {/* View toggle — hidden for now */}
-              <div className="hidden shrink-0 items-center gap-1 rounded-full bg-gray-hover p-1">
-                {VIEWS.map((v) => (
-                  <button
-                    key={v.key}
-                    onClick={() => setView(v.key)}
-                    aria-label={v.label}
-                    aria-pressed={view === v.key}
-                    className={`flex h-8 w-9 items-center justify-center rounded-full transition-colors ${
-                      view === v.key
-                        ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
-                        : "text-gray-extra-light hover:text-gray-light"
-                    }`}
-                  >
-                    <span aria-hidden className="h-[18px] w-[18px] bg-current" style={maskStyle(v.icon)} />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {view === "calendar" ? <CalendarView /> : <ListView />}
-          </section>
+          {sessionsSection}
         </motion.div>
       </div>
 
@@ -377,7 +382,7 @@ export default function Calendar({ altNav = false }: { altNav?: boolean }) {
               transition={{ duration: 0.15 }}
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
-              <AdminToggle label="Expert" checked={expert} onChange={() => setExpert((v) => !v)} />
+              <AdminToggle label="Expert" checked={expert} onChange={() => setLocalExpert((v) => !v)} />
             </motion.div>
           )}
         </AnimatePresence>
