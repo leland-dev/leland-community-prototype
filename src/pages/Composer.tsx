@@ -945,9 +945,11 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   // trap the overlay underneath the app's fixed header and tab bar.
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col bg-white md:items-center md:justify-center md:bg-black/50 md:p-6">
-      <div
-        className={`relative mx-auto flex h-full w-full max-w-[600px] flex-col md:h-auto md:max-h-[92dvh] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white md:transition-[max-width,min-height] md:duration-300 md:ease-out ${
-          discardOpen ? "md:max-w-[440px] md:min-h-0" : "md:min-h-[560px]"
+      <motion.div
+        layout
+        transition={{ layout: { duration: 0.22, ease: [0.4, 0, 0.2, 1] } }}
+        className={`relative mx-auto flex h-full w-full flex-col md:h-auto md:max-h-[92dvh] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white ${
+          discardOpen ? "max-w-[600px] md:max-w-[440px]" : "max-w-[600px] md:min-h-[560px]"
         }`}
       >
         {/* Everything the composer shows — hidden on desktop while the card
@@ -2022,7 +2024,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.2, delay: 0.12 }}
+            transition={{ duration: 0.15, delay: 0.08 }}
             className="hidden flex-col px-6 pb-6 pt-5 md:flex"
           >
             <div className="relative flex h-10 items-center justify-center">
@@ -2046,7 +2048,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             </div>
           </motion.div>
         ) : null}
-      </div>
+      </motion.div>
 
       {/* Clip length sheet — minutes + seconds wheels */}
       <AnimatePresence>
