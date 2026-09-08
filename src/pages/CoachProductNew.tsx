@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion, Reorder, useDragControls } from "motion/react";
 import { Button } from "../components/Button";
+import { useCollections, upsertCollection, newCollectionId, type Collection } from "../lib/collections";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import crownIcon from "../assets/icons/crown-membership.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
@@ -316,10 +317,10 @@ const ORGANIZATION_OPTIONS = ["Harvard Business School", "Stanford GSB", "Wharto
 
 // Previously-uploaded content the coach can reuse in a new content/collection
 // item (mock library for the prototype).
-type LibraryContent = { id: string; name: string; kind: "pdf" | "doc" | "video" | "image"; title: string; description: string; resourceType: string; size: string; date: string; thumb: string; views: number; price: number };
+export type LibraryContent = { id: string; name: string; kind: "pdf" | "doc" | "video" | "image"; title: string; description: string; resourceType: string; size: string; date: string; thumb: string; views: number; price: number };
 // Bucket a view count, e.g. 4210 → "4.2k", 980 → "980".
-const formatViews = (n: number): string => (n < 1000 ? String(n) : `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`);
-const CONTENT_LIBRARY: LibraryContent[] = [
+export const formatViews = (n: number): string => (n < 1000 ? String(n) : `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`);
+export const CONTENT_LIBRARY: LibraryContent[] = [
   { id: "c1", name: "MBA Essay Framework.pdf", kind: "pdf", title: "MBA Essay Framework", description: "A step-by-step framework for structuring standout MBA essays.", resourceType: "guide", size: "2.4 MB", date: "Mar 12", thumb: libThumb1, views: 4210, price: 18 },
   { id: "c2", name: "Consulting Resume Template.docx", kind: "doc", title: "Consulting Resume Template", description: "The exact resume template I used to land offers at McKinsey and Bain.", resourceType: "template", size: "180 KB", date: "Feb 28", thumb: libThumb2, views: 8940, price: 12 },
   { id: "c3", name: "Mock Interview Walkthrough.mp4", kind: "video", title: "Mock Interview Walkthrough", description: "A full recording of a mock case interview with live feedback.", resourceType: "example", size: "412 MB", date: "Feb 10", thumb: libThumb3, views: 2180, price: 29 },
@@ -338,14 +339,14 @@ const CONTENT_LIBRARY: LibraryContent[] = [
   { id: "c16", name: "Wharton Interview Debrief.mp4", kind: "video", title: "Wharton Team-Based Discussion Debrief", description: "A walkthrough of the TBD format and how to stand out.", resourceType: "example", size: "298 MB", date: "Aug 14", thumb: libThumb8, views: 2940, price: 32 },
 ];
 // Effective title of a content item, respecting its mode (uploaded vs reused).
-const contentItemTitle = (c: Record<string, string>): string =>
+export const contentItemTitle = (c: Record<string, string>): string =>
   c.source === "reuse" ? (c.r_title || CONTENT_LIBRARY.find((l) => l.id === c.libraryId)?.title || "") : (c.title || "");
 
 // File-type label + view count for a content item's row detail. Reused library
 // items carry both; a fresh upload only has a file name, so we infer the type
 // from its extension and have no views to show.
 const CONTENT_KIND_LABEL: Record<string, string> = { pdf: "PDF", doc: "Doc", docx: "Doc", xlsx: "Doc", video: "Video", mp4: "Video", mov: "Video", image: "Image", png: "Image", jpg: "Image", jpeg: "Image" };
-function contentMeta(c: Record<string, string>): { typeLabel: string | null; views: number | null } {
+export function contentMeta(c: Record<string, string>): { typeLabel: string | null; views: number | null } {
   const lib = c.libraryId ? CONTENT_LIBRARY.find((l) => l.id === c.libraryId) : null;
   if (lib) return { typeLabel: CONTENT_KIND_LABEL[lib.kind] ?? null, views: lib.views };
   const ext = (c.assetName || "").split(".").pop()?.toLowerCase() ?? "";
@@ -2006,12 +2007,17 @@ function OptionMetaFields({ option, onChange }: { option: PricingOption; onChang
 }
 
 function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, multiEnabled, onToggleMulti, mvp }: { added: OfferingItem[]; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; pricingOptions: PricingOption[]; onAddPricingOption: () => number; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => number; onRemoveProductFromOption: (optionId: number, itemId: number) => void; multiEnabled: boolean; onToggleMulti: () => void; mvp: boolean }) {
-  // When MVP is on: Agent / Private group are hidden entirely, while Collection,
-  // Course, and Livestream are shown as non-clickable "coming soon" options.
+  // When MVP is on: Agent / Private group are hidden entirely, while Course and
+  // Livestream are shown as non-clickable "coming soon" options. Collection is
+  // fully available — it reuses buckets built on the Content page.
   const mvpHidden = ["agent", "membership"];
-  const mvpComingSoon = ["collection", "course", "paid-livestream"];
+  const mvpComingSoon = ["course", "paid-livestream"];
   const [configuringId, setConfiguringId] = useState<number | null>(null);
   const configuring = added.find((item) => item.id === configuringId) ?? null;
+  // A collection product waiting on the reuse-first picker (pick existing or
+  // create new). Kept separate from `configuringId` (the builder modal).
+  const [pickingId, setPickingId] = useState<number | null>(null);
+  const picking = added.find((item) => item.id === pickingId) ?? null;
   const v2 = useV2();
 
   // All coaching-time products in an offering must share one mode (a fixed
@@ -2042,16 +2048,51 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
   // they dismiss the modal without configuring.
   const addProduct = (optionId: number, slug: string) => {
     const id = onAddProductToOption(optionId, slug);
-    setConfiguringId(id);
+    // Collections open the reuse-first picker; everything else goes straight to
+    // its config modal.
+    if (slug === "collection") setPickingId(id);
+    else setConfiguringId(id);
   };
 
   // Open a product's config modal. Content always lands on the "reuse existing"
   // view, so re-opening a product that had been switched to "upload new" doesn't
-  // reopen there — reset its source first.
+  // reopen there — reset its source first. An unlinked collection reopens the
+  // picker; a linked one edits its contents in the builder.
   const openConfigure = (id: number) => {
     const it = added.find((a) => a.id === id);
+    if (it && it.slug === "collection") {
+      if (it.config.collectionId) setConfiguringId(id);
+      else setPickingId(id);
+      return;
+    }
     if (it && it.slug === "content") onConfigChange(id, { editing: "", ...(it.config.source === "upload" ? { source: "reuse" } : {}) });
     setConfiguringId(id);
+  };
+
+  // Attach an existing collection from the Content page to the offering: copy
+  // its title/description/items in and stamp the link, then mark it configured.
+  const attachCollection = (productId: number, collection: Collection) => {
+    onConfigChange(productId, { collectionId: collection.id, title: collection.title, description: collection.description });
+    onItemsChange(productId, collection.items.map((it) => ({ id: it.id, config: { ...it.config } })));
+    onConfigured(productId);
+    setPickingId(null);
+  };
+
+  // Save a collection built (or edited) in the builder: mint a link on first
+  // save, push it back to the shared store so it shows on the Content page, and
+  // mark the product configured.
+  const saveCollection = () => {
+    if (!configuring) return;
+    const id = configuring.config.collectionId || newCollectionId();
+    if (!configuring.config.collectionId) onConfigChange(configuring.id, { collectionId: id });
+    upsertCollection({
+      id,
+      title: configuring.config.title || "Untitled collection",
+      description: configuring.config.description || "",
+      items: (configuring.items ?? []).map((it) => ({ id: it.id, config: { ...it.config } })),
+    });
+    onConfigured(configuring.id);
+    setConfiguringId(null);
   };
 
   // Toggle a product's "free" flag (zeroes its price in the roll-up).
@@ -2229,11 +2270,17 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
         onSave={() => { if (configuring) { onConfigured(configuring.id); setConfiguringId(null); } }}
         onClose={() => setConfiguringId(null)}
       />
+      <CollectionPickerModal
+        open={!!picking}
+        onPick={(c) => picking && attachCollection(picking.id, c)}
+        onCreateNew={() => { if (picking) { setPickingId(null); setConfiguringId(picking.id); } }}
+        onClose={() => setPickingId(null)}
+      />
       <ListConfigModal
         item={configuring && configuring.slug === "collection" ? configuring : null}
         onGeneralChange={(patch) => configuring && onConfigChange(configuring.id, patch)}
         onItemsChange={(items) => configuring && onItemsChange(configuring.id, items)}
-        onSave={() => { if (configuring) { onConfigured(configuring.id); setConfiguringId(null); } }}
+        onSave={saveCollection}
         onClose={() => setConfiguringId(null)}
       />
       <CourseModal
@@ -2610,6 +2657,11 @@ function AddedOfferingRow({ item, onRemove, onConfigure, onToggleFree, isLast = 
     headline = contentItemTitle(item.config) || o.label;
     const meta = [typeLabel, views != null ? `${formatViews(views)} views` : null].filter(Boolean).join(" · ");
     detail = meta ? <span className="truncate">{meta}</span> : null;
+  } else if (finished && isListOffering(item.slug)) {
+    // Collections / courses lead with their name; the summary ("N resources")
+    // becomes the secondary detail.
+    headline = item.config.title || o.label;
+    detail = <span className="truncate">{configSummary(item)}</span>;
   } else if (v2Priced) {
     detail = <span className="truncate">{configSummary(item)}</span>;
   }
@@ -2941,10 +2993,146 @@ function ListGeneralFields({ config, onChange, heading }: { config: Record<strin
   );
 }
 
+/* ---------- Collections ---------- */
+
+// A collection's cover thumbnails — the library thumbs of its first few items.
+export function collectionThumbs(items: { config: Record<string, string> }[]): string[] {
+  return items
+    .map((it) => CONTENT_LIBRARY.find((l) => l.id === it.config.libraryId)?.thumb)
+    .filter((t): t is string => Boolean(t));
+}
+
+// A stacked-paper cover for a collection: the front thumbnail with a couple of
+// tinted cards peeking out behind it (or a stack-icon placeholder when empty).
+export function CollectionCover({ thumbs, className = "h-14 w-20" }: { thumbs: string[]; className?: string }) {
+  const front = thumbs[0];
+  return (
+    <span className={`relative shrink-0 ${className}`}>
+      {thumbs[2] && <span className="absolute inset-0 rounded-lg bg-[#222222]/15" style={{ transform: "translate(6px, -5px)" }} />}
+      {thumbs[1] && <span className="absolute inset-0 rounded-lg bg-[#222222]/25" style={{ transform: "translate(3px, -2.5px)" }} />}
+      {front ? (
+        <img src={front} alt="" className="absolute inset-0 h-full w-full rounded-lg border border-white object-cover shadow-[0_1px_3px_rgba(16,24,40,0.18)]" />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center rounded-lg bg-[#222222]/5 text-gray-light">
+          <MaskIcon src={stackIcon} className="h-5 w-5" />
+        </span>
+      )}
+    </span>
+  );
+}
+
+// Item-count label, e.g. "4 resources".
+export const collectionCountLabel = (n: number): string => `${n} ${n === 1 ? "resource" : "resources"}`;
+
+// Reuse-first picker shown when adding a Collection to an offering: browse the
+// buckets built on the Content page and attach one, or jump into the builder to
+// create a new one. Mirrors the content library's "reuse existing" pattern.
+function CollectionPickerModal({ open, onClose, onPick, onCreateNew }: { open: boolean; onClose: () => void; onPick: (c: Collection) => void; onCreateNew: () => void }) {
+  const collections = useCollections();
+  const [query, setQuery] = useState("");
+  useEffect(() => { if (open) setQuery(""); }, [open]);
+
+  const q = query.trim().toLowerCase();
+  const results = q ? collections.filter((c) => c.title.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)) : collections;
+
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 32 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 32 }}
+            transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative flex max-h-[85vh] w-full max-w-[600px] flex-col overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)]"
+          >
+            <button onClick={onClose} aria-label="Close" className="absolute right-5 top-5 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-gray-hover text-gray-dark transition-colors hover:bg-[#ebebeb]">
+              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            </button>
+
+            <div className="flex-1 overflow-y-auto px-7 pb-2">
+              <div className="pt-8">
+                <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">Add a collection</h2>
+                <p className="mt-1.5 text-[15px] text-gray-light">Reuse a bucket of content you've built, or create a new one.</p>
+              </div>
+
+              <div className="mt-5 flex flex-col gap-3 pb-4">
+                {/* Create new — separate card at the top; opens the builder */}
+                <button
+                  type="button"
+                  onClick={onCreateNew}
+                  className="flex items-center gap-3 rounded-2xl bg-gray-hover px-3 py-2.5 text-left transition-colors hover:bg-[#ededed]"
+                >
+                  <span className="flex h-14 w-20 shrink-0 items-center justify-center rounded-lg bg-[#222222]/5 text-gray-dark">
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[15px] font-semibold text-gray-dark">Create a new collection</span>
+                    <span className="block text-[13px] text-gray-light">Bundle content into a fresh collection</span>
+                  </span>
+                  <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                </button>
+
+                {collections.length > 3 && (
+                  <div className="relative mt-1">
+                    <svg className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
+                    <input
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Search your collections…"
+                      autoComplete="off"
+                      className="w-full rounded-full border border-transparent bg-gray-hover px-4 py-3 pl-11 text-[15px] text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
+                    />
+                  </div>
+                )}
+
+                {collections.length > 0 && <p className="mt-1 px-1 text-[13px] font-medium uppercase tracking-wide text-gray-extra-light">Your collections</p>}
+
+                {results.length === 0 ? (
+                  <p className="py-8 text-center text-[14px] text-gray-light">{collections.length === 0 ? "You haven't built any collections yet." : `No collections match “${query}”.`}</p>
+                ) : (
+                  <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-stroke">
+                    {results.map((c, i) => (
+                      <Fragment key={c.id}>
+                        {i > 0 && <div className="mx-5 border-t border-gray-stroke" />}
+                        <button
+                          type="button"
+                          onClick={() => onPick(c)}
+                          className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-gray-hover"
+                        >
+                          <CollectionCover thumbs={collectionThumbs(c.items)} className="h-12 w-[72px]" />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[15px] font-semibold text-gray-dark">{c.title}</span>
+                            <span className="block truncate text-[13px] text-gray-light">{collectionCountLabel(c.items.length)}</span>
+                          </span>
+                          <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                        </button>
+                      </Fragment>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body,
+  );
+}
+
 // Shared by Collection and Course — a sidebar list of content items (with a
 // General tab) plus a content-editing pane. Copy (heading, item noun) comes
 // from the offering's slug via listOfferingCopy.
-function ListConfigModal({ item, onGeneralChange, onItemsChange, onSave, onClose }: { item: OfferingItem | null; onGeneralChange: (patch: Record<string, string>) => void; onItemsChange: (items: CollectionItem[]) => void; onSave: () => void; onClose: () => void }) {
+export function ListConfigModal({ item, onGeneralChange, onItemsChange, onSave, onClose, saveLabel }: { item: OfferingItem | null; onGeneralChange: (patch: Record<string, string>) => void; onItemsChange: (items: CollectionItem[]) => void; onSave: () => void; onClose: () => void; saveLabel?: string }) {
   const [selected, setSelected] = useState<number | "general">("general");
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
@@ -3064,7 +3252,7 @@ function ListConfigModal({ item, onGeneralChange, onItemsChange, onSave, onClose
 
               <div className="border-t border-gray-stroke px-7 py-4">
                 <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" disabled={!complete} onClick={onSave}>
-                  Save {copy.heading.toLowerCase()}
+                  {saveLabel ?? `Save ${copy.heading.toLowerCase()}`}
                 </Button>
               </div>
             </div>
@@ -3684,12 +3872,13 @@ function ContentFields({ config, onChange, priced = false, backSignal = 0, scrol
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0, transition: { duration: 0.26, ease: [0, 0, 0.2, 1], delay: enterDelay("editor") } }}
             exit={{ opacity: 0, y: 8, transition: { duration: 0.16, ease: [0.4, 0, 1, 1] } }}
+            className="@container"
           >
-            <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start lg:gap-10">
+            <div className="flex flex-col gap-6 @3xl:grid @3xl:grid-cols-[minmax(0,360px)_minmax(0,1fr)] @3xl:items-start @3xl:gap-10">
               {/* Left column — header + asset upload, sticky as a group while the
                   right column scrolls (Back now lives in the footer). top-8 matches
                   the content wrapper's pt-8 so it doesn't jump when it sticks. */}
-              <div className="lg:sticky lg:top-8">
+              <div className="@3xl:sticky @3xl:top-8">
                 <h2 className="font-serif text-[28px] leading-tight text-gray-dark">Upload new content</h2>
                 <p className="mt-1.5 text-[15px] text-gray-light">Add your file and fill in the details below.</p>
                 <div className="mt-6">
@@ -3844,10 +4033,10 @@ function ContentFields({ config, onChange, priced = false, backSignal = 0, scrol
               <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
             </button>
 
-            <div className="flex-1 overflow-y-auto px-7 pb-1 pt-8">
-              <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start lg:gap-10">
+            <div className="@container flex-1 overflow-y-auto px-7 pb-1 pt-8">
+              <div className="flex flex-col gap-6 @3xl:grid @3xl:grid-cols-[minmax(0,360px)_minmax(0,1fr)] @3xl:items-start @3xl:gap-10">
                 {/* Left column — header + preview + warning, sticky */}
-                <div className="lg:sticky lg:top-8">
+                <div className="@3xl:sticky @3xl:top-8">
                   <h2 className="font-serif text-[28px] leading-tight text-gray-dark">Edit content</h2>
                   <p className="mt-1.5 text-[15px] text-gray-light">{selectedLib.title} <span className="text-gray-extra-light">· Uploaded {selectedLib.date}</span></p>
                   <div className="mt-6">
