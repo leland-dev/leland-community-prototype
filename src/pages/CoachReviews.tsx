@@ -853,7 +853,6 @@ function ExpertReviews() {
         <div className="flex gap-8">
           {[
             { key: "reviews" as const, label: "Reviews for you" },
-            { key: "pending" as const, label: "Haven’t reviewed yet" },
             { key: "submitted" as const, label: "Reviews you’ve submitted" },
           ].map(({ key, label }) => (
             <button

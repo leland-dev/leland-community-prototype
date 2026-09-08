@@ -6,8 +6,8 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 //     "name"             — inline, between the name and the timestamp
 export type VerifiedBadgePosition = "avatar" | "name";
 //   sidebarVersion — which left-sidebar layout the main feed shows:
-//     "v1" (default) — original: profile card, next session, my experts
-//     "v2"           — profile card, upcoming sessions, continue-learning programs
+//     "v1"           — original: profile card, next session, my experts
+//     "v2" (default) — profile card, upcoming sessions, continue-learning programs
 //     "v3"           — reserved for the next iteration (currently mirrors v2)
 export type SidebarVersion = "v1" | "v2" | "v3";
 
@@ -21,7 +21,7 @@ interface FeedAdminContextValue {
 const FeedAdminContext = createContext<FeedAdminContextValue>({
   verifiedBadgePosition: "avatar",
   setVerifiedBadgePosition: () => {},
-  sidebarVersion: "v1",
+  sidebarVersion: "v2",
   setSidebarVersion: () => {},
 });
 
@@ -38,7 +38,7 @@ export function FeedAdminProvider({ children }: { children: ReactNode }) {
   };
   const [sidebarVersion, setVer] = useState<SidebarVersion>(() => {
     const saved = localStorage.getItem(SIDEBAR_KEY);
-    return saved === "v2" || saved === "v3" ? saved : "v1";
+    return saved === "v1" || saved === "v3" ? saved : "v2";
   });
   const setSidebarVersion = (v: SidebarVersion) => {
     localStorage.setItem(SIDEBAR_KEY, v);
