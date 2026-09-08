@@ -287,6 +287,8 @@ interface QuotePost extends PostBase {
 // preview card in the feed and full-length on its post page.
 interface ArticlePost extends PostBase {
   type: "article";
+  // Optional post text shown above the article card in the feed.
+  caption?: string;
   title: string;
   subtitle?: string;
   body: string;
@@ -2074,7 +2076,7 @@ function SessionCompletedCard({ session }: { session: SessionPost["session"] }) 
 
 // Substack-style article preview: title + snippet in the feed, full read on
 // the post page.
-function ArticleCard({ post }: { post: ArticlePost }) {
+export function ArticleCard({ post }: { post: ArticlePost }) {
   const navigate = useNavigate();
   const postBase = usePostBase();
   const heroSrc = post.bodyHtml?.match(/<img[^>]+src="([^"]+)"/)?.[1];
@@ -3826,6 +3828,8 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
               the raw body would dump the whole essay into the feed. */}
           {post.type !== "article" ? (
             <p className={`${profileBarMode === 1 ? "-mt-1.5" : "mt-1.5"} text-[15px] leading-[1.4] text-gray-dark`}>{post.body}</p>
+          ) : post.caption ? (
+            <p className={`${profileBarMode === 1 ? "-mt-1.5" : "mt-1.5"} text-[15px] leading-[1.4] text-gray-dark`}>{post.caption}</p>
           ) : null}
           <div className={post.type !== "text" ? "pb-1" : ""} onClick={e => e.stopPropagation()}>
             {post.type === "image" && (

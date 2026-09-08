@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
-import { CaptionClip, LiveReplayCard } from "./Home";
+import { ArticleCard, CaptionClip, LiveReplayCard } from "./Home";
 import type { Post, ImageEntry } from "./Home";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import articlePhoto from "../assets/photography/talking.jpeg";
@@ -145,68 +145,6 @@ const editedLabel = (ts: number) =>
   new Date(ts).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 // ─── Calendar sheet ────────────────────
-
-// Shared snap-wheel column for the pickers (time of day, clip length).
-const WHEEL_ITEM_H = 36;
-function pickerWheel(items: string[], selected: number, onPick: (i: number) => void) {
-  return (
-    <div
-      ref={el => {
-        if (el && el.dataset.init !== "1") { el.dataset.init = "1"; el.scrollTop = selected * WHEEL_ITEM_H; }
-      }}
-      onScroll={e => {
-        const i = Math.max(0, Math.min(items.length - 1, Math.round(e.currentTarget.scrollTop / WHEEL_ITEM_H)));
-        if (i !== selected) onPick(i);
-      }}
-      className="relative z-10 h-[144px] w-16 snap-y snap-mandatory overflow-y-auto py-[54px] text-center [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-    >
-      {items.map((it, i) => (
-        <div key={it} className={`flex h-9 snap-center items-center justify-center text-[16px] tabular-nums transition-colors ${i === selected ? "font-semibold text-gray-dark" : "text-gray-xlight"}`}>
-          {it}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ClipLengthSheet({ seconds, maxSeconds, onDone, onClose }: { seconds: number; maxSeconds: number; onDone: (s: number) => void; onClose: () => void }) {
-  const [min, setMin] = useState(Math.floor(seconds / 60));
-  const [sec, setSec] = useState(seconds % 60);
-  const maxMin = Math.max(0, Math.floor(maxSeconds / 60));
-  const MINS = Array.from({ length: maxMin + 1 }, (_, i) => String(i));
-  const SECS = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
-  return (
-    <motion.div
-      initial={{ y: "110%" }} animate={{ y: 0 }} exit={{ y: "110%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
-      className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[600px] rounded-t-3xl bg-white px-5 pb-[max(env(safe-area-inset-bottom),20px)] pt-1 md:bottom-auto md:top-[8vh] md:max-h-[84vh] md:max-w-[440px] md:overflow-y-auto md:rounded-3xl md:border md:border-gray-stroke md:px-6 md:pb-6"
-    >
-      <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke md:hidden" />
-      <div className="relative flex h-10 items-center justify-center">
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute left-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
-        >
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-        </button>
-        <p className="text-[16px] font-semibold text-gray-dark">Clip length</p>
-      </div>
-      <div className="relative mt-2 flex items-stretch justify-center gap-2">
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-9 w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-gray-100" />
-        {pickerWheel(MINS, Math.min(min, maxMin), i => setMin(i))}
-        <span className="z-10 self-center text-[13px] font-medium text-gray-light">min</span>
-        {pickerWheel(SECS, Math.min(11, Math.round(sec / 5)), i => setSec(i * 5))}
-        <span className="z-10 self-center text-[13px] font-medium text-gray-light">sec</span>
-      </div>
-      <button
-        onClick={() => onDone(Math.max(5, Math.min(maxSeconds, min * 60 + sec)))}
-        className="mt-4 w-full cursor-pointer rounded-full bg-gray-dark py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[#333]"
-      >
-        Done
-      </button>
-    </motion.div>
-  );
-}
 
 function CalendarSheet({ onSave, onClose }: { onSave: (label: string) => void; onClose: () => void }) {
   const today = new Date();
@@ -379,8 +317,6 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const [goLiveTitle, setGoLiveTitle] = useState("");
   // Clip window, as percentages of the recording (Instagram-style trim).
   const [clipStart, setClipStart] = useState(0);
-  const [clipWindow, setClipWindow] = useState(15);
-  const [clipLenOpen, setClipLenOpen] = useState(false);
   const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
   const [uploadedMeta, setUploadedMeta] = useState<{ aspect: number; duration: string } | null>(null);
   const [clipEnd, setClipEnd] = useState(100);
@@ -400,6 +336,8 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const [subtitle, setSubtitle] = useState("");
   const [topic, setTopic] = useState("");
   const [articleHtml, setArticleHtml] = useState("");
+  const [articleStep, setArticleStep] = useState<"write" | "share">("write");
+  const [articleCaption, setArticleCaption] = useState("");
   const [images, setImages] = useState<ImageEntry[]>([]);
   const [pollOptions, setPollOptions] = useState<string[] | null>(null);
   const [pollDuration, setPollDuration] = useState<string>(POLL_DURATIONS[0]);
@@ -477,13 +415,15 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
 
   const primaryLabel =
     scheduledFor && mode !== "live" ? "Schedule"
-    : mode === "article" ? "Publish"
+    : mode === "article" ? (articleStep === "write" ? "Next" : "Post")
     : mode === "live" ? "Post"
     : "Post";
 
   // Prototype magic: entering article mode writes a complete article in a
   // typewriter effect — title, subtitle, bold, headings, list, quote, image —
   // to demo every element of the editor.
+  // Typewriter show-piece — currently disabled; the entry card opens a blank
+  // editor. Re-wire the entry card's onClick to runArticleDemo() to bring it back.
   const runArticleDemo = async () => {
     const token = ++demoToken.current;
     const live = () => demoToken.current === token;
@@ -709,6 +649,8 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
     e.target.value = "";
   };
 
+  void runArticleDemo;
+
   const buildPost = (): Post => {
     const base = { ...SELF, id: Date.now() };
     if (mode === "article") {
@@ -716,6 +658,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
       return {
         ...base,
         type: "article",
+        caption: articleCaption.trim() || undefined,
         title: title.trim(),
         subtitle: subtitle.trim() || undefined,
         body: articlePlain,
@@ -881,6 +824,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
     setPollOptions(draft.poll);
     setArticleHtml(draft.articleHtml);
     if (draft.mode === "article") {
+      setArticleStep("write");
       if (editorRef.current) editorRef.current.innerHTML = draft.articleHtml;
       else pendingEditorHtml.current = draft.articleHtml;
     }
@@ -941,6 +885,116 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
     </button>
   );
 
+  // Drafts tabs + list — shared by the mobile sheet and the desktop in-card view.
+  const draftsBody = (
+    <>
+              <div className="shrink-0 px-5 pb-3">
+                <div className="relative flex rounded-full bg-gray-100 p-1">
+                  <span
+                    className="absolute inset-y-1 rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.04)] transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                    style={{ left: draftsTab === "Drafts" ? "4px" : "50%", width: "calc(50% - 4px)" }}
+                  />
+                  {DRAFT_TABS.map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => { setDraftsTab(tab); }}
+                      className="relative z-10 flex-1 cursor-pointer rounded-full py-2.5 text-[14px] font-semibold"
+                    >
+                      <span className={`relative z-10 transition-colors ${draftsTab === tab ? "text-gray-dark" : "text-gray-light"}`}>{tab}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto px-5 pb-[max(env(safe-area-inset-bottom),20px)]">
+                <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={draftsTab}
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.13, ease: "easeOut" }}
+                >
+                {draftsTab !== "Scheduled" ? (
+                  tabDrafts.length > 0 ? (
+                    <div className="space-y-2">
+                      {tabDrafts.map(d => (
+                        <div key={d.id} className="flex items-center gap-3 rounded-2xl bg-gray-100 px-4 py-3.5 transition-colors hover:bg-gray-200/60">
+                          <button onClick={() => loadDraft(d)} className="min-w-0 flex-1 cursor-pointer text-left">
+                            <p className="truncate text-[15px] font-semibold text-gray-dark">
+                              {d.title || d.text || RECORDINGS.find(r => r.id === d.topic)?.title || stripHtml(d.articleHtml) || "Untitled"}
+                            </p>
+                            <p className="mt-0.5 text-[12px] text-gray-light">
+                              {editedLabel(d.editedAt)}{d.mode === "live" ? " · Live" : d.mode === "article" ? " · Article" : ""}
+                            </p>
+                          </button>
+                          <button
+                            onClick={() => setConfirmTrash({ kind: "draft", id: d.id })}
+                            aria-label="Delete draft"
+                            className="shrink-0 cursor-pointer rounded-full p-2 text-[#D6204C] transition-colors hover:bg-red-50"
+                          >
+                            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center px-8 pb-8 pt-12 text-center">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
+                        <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
+                      </div>
+                      <p className="mt-4 font-serif text-[20px] leading-tight text-gray-dark">No drafts</p>
+                      <p className="mt-2 max-w-[260px] text-[13px] leading-[1.5] text-gray-light">
+                        Half-formed thoughts are welcome. Posts and articles you save land here.
+                      </p>
+                      <button
+                        onClick={() => { setDraftsOpen(false); setMode("post"); }}
+                        className="mt-5 cursor-pointer rounded-full bg-gray-dark px-5 py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#333]"
+                      >
+                        Write a post
+                      </button>
+                    </div>
+                  )
+                ) : scheduledStore.length > 0 ? (
+                  <div className="space-y-2">
+                    {scheduledStore.map(s => (
+                      <div key={s.id} onClick={() => loadScheduled(s)} className="flex cursor-pointer items-center gap-3 rounded-2xl bg-gray-100 px-4 py-3.5 transition-colors hover:bg-gray-200/60">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[15px] font-semibold text-gray-dark">{s.snippet || "Untitled"}</p>
+                          <p className="mt-0.5 text-[12px] text-gray-light">{s.mode === "article" ? "Article · " : ""}Posts {s.scheduledFor}</p>
+                        </div>
+                        <button
+                          onClick={e => { e.stopPropagation(); setConfirmTrash({ kind: "scheduled", id: s.id }); }}
+                          aria-label="Unschedule"
+                          className="shrink-0 cursor-pointer rounded-full p-2 text-[#D6204C] transition-colors hover:bg-red-50"
+                        >
+                          <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center px-8 pb-8 pt-12 text-center">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
+                      <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                    </div>
+                    <p className="mt-4 font-serif text-[20px] leading-tight text-gray-dark">Nothing scheduled</p>
+                    <p className="mt-2 max-w-[260px] text-[13px] leading-[1.5] text-gray-light">
+                      Write once, post at the right moment.
+                    </p>
+                    <button
+                      onClick={() => { setDraftsOpen(false); setScheduleOpen(true); }}
+                      className="mt-5 cursor-pointer rounded-full bg-gray-dark px-5 py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#333]"
+                    >
+                      Schedule a post
+                    </button>
+                  </div>
+                )}
+                </motion.div>
+                </AnimatePresence>
+              </div>
+    </>
+  );
+
   // Portal to <body>: Home's <main> is a z-0 stacking context, which would
   // trap the overlay underneath the app's fixed header and tab bar.
   return createPortal(
@@ -954,7 +1008,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
       >
         {/* Everything the composer shows — hidden on desktop while the card
             is morphed into the save-as-draft confirm */}
-        <div className={`flex min-h-0 flex-1 flex-col ${discardOpen ? "md:hidden" : ""}`}>
+        <div className={`flex min-h-0 flex-1 flex-col ${discardOpen || draftsOpen ? "md:hidden" : ""}`}>
         {/* Header (the dark editor step brings its own chrome) */}
         {!(mode === "live" && liveStep === "edit") ? (
         <div className="flex h-14 shrink-0 items-center justify-between px-4 md:h-auto md:px-6 md:pb-1 md:pt-5">
@@ -969,7 +1023,9 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
           ) : (
             <button
               onClick={() => {
-                if (mode === "live" && liveStep === "share") {
+                if (mode === "article" && articleStep === "share") {
+                  setArticleStep("write");
+                } else if (mode === "live" && liveStep === "share") {
                   if (selectedClip === CAPTION_CLIP.id) { setSelectedClip(null); setLiveStep("list"); }
                   else setLiveStep("edit");
                 } else if (mode === "live" && liveStep === "edit") {
@@ -1053,7 +1109,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               </button>
             ) : (
               <button
-                onClick={submit}
+                onClick={mode === "article" && articleStep === "write" ? () => setArticleStep("share") : submit}
                 disabled={!canSubmit}
                 className="inline-flex h-10 cursor-pointer items-center whitespace-nowrap rounded-full bg-gray-dark px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[#333] disabled:cursor-default disabled:opacity-35"
               >
@@ -1201,7 +1257,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             <div className="shrink-0 pb-[max(env(safe-area-inset-bottom),16px)] md:pb-6">
               <div className="flex gap-3 overflow-x-auto px-4 md:px-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <button
-                  onClick={() => { setMode("article"); if (!title.trim() && !stripHtml(articleHtml).trim()) runArticleDemo(); }}
+                  onClick={() => { setArticleStep("write"); setMode("article"); }}
                   className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200 md:w-auto md:flex-1"
                 >
                   <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /><path d="M8 13h8" /><path d="M8 17h5" /></svg>
@@ -1227,7 +1283,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
           </>
         ) : null}
 
-        {mode === "article" ? (
+        {mode === "article" && articleStep === "write" ? (
           <>
             <div className="flex-1 overflow-y-auto px-4 pt-1 pb-6 md:px-6">
               <div className="flex items-center gap-2">
@@ -1455,7 +1511,7 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                       {CLIPS.map(clip => (
                         <button
                           key={clip.id}
-                          onClick={() => { setSelectedClip(clip.id); setClipWindow(15); setClipStart(0); setClipEnd(Math.min(100, (15 / toSeconds(clip.duration)) * 100)); setViewStart(0); setViewEnd(100); setEditorHistory([]); setLiveStep("edit"); setCropGrid(false); setReplayCaption(c => c.trim() ? c : clip.title); }}
+                          onClick={() => { setSelectedClip(clip.id); setClipStart(0); setClipEnd(100); setViewStart(0); setViewEnd(100); setEditorHistory([]); setLiveStep("edit"); setCropGrid(false); setReplayCaption(c => c.trim() ? c : clip.title); }}
                           className="w-full cursor-pointer rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200/60"
                         >
                           <div className="flex gap-3.5">
@@ -1699,8 +1755,14 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                           </p>
                         </div>
                       ) : null}
+                      {viewersOn && selectedClip === null && selectedRecording !== "upload" ? (
+                        <div className="pointer-events-none absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-black/25 px-2 py-1 backdrop-blur-sm">
+                          <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                          <span className="text-[11px] font-medium text-white">{(RECORDINGS.find(x => x.id === selectedRecording)?.peak ?? 87).toLocaleString()}</span>
+                        </div>
+                      ) : null}
                       {chatOn ? (
-                        <div className="pointer-events-none absolute left-3 top-3 flex w-[70%] flex-col gap-1">
+                        <div className="pointer-events-none absolute left-3 top-10 flex w-[70%] flex-col gap-1">
                           <p className="text-[11px] leading-snug text-white/70 drop-shadow"><span className="font-semibold">priya_t</span> Should I cold email partners?</p>
                           <p className="text-[11px] leading-snug text-white/70 drop-shadow"><span className="font-semibold">jliu_biz</span> This is so useful 🙌</p>
                         </div>
@@ -1747,91 +1809,6 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
 
                   <div className="min-h-3 flex-1" />
 
-                  {selectedClip !== null ? (
-                    (() => {
-                      const winPct = Math.min(100, (clipWindow / total) * 100);
-                      const stripPct = Math.max((total / clipWindow) * 58, 58);
-                      const nTiles = Math.min(24, Math.max(6, Math.round((total / clipWindow) * 3)));
-                      const progress = Math.min(100, Math.max(0, ((playheadPct - clipStart) / Math.max(clipEnd - clipStart, 0.001)) * 100));
-                      const dragStrip = (e: React.PointerEvent<HTMLDivElement>) => {
-                        if (e.pointerType !== "mouse") return;
-                        const el = e.currentTarget;
-                        const startX = e.clientX;
-                        const startScroll = el.scrollLeft;
-                        const move = (ev: PointerEvent) => { el.scrollLeft = startScroll - (ev.clientX - startX); };
-                        const up = () => {
-                          window.removeEventListener("pointermove", move);
-                          window.removeEventListener("pointerup", up);
-                        };
-                        window.addEventListener("pointermove", move);
-                        window.addEventListener("pointerup", up);
-                      };
-                      return (
-                        <>
-                          {/* Stories-style transport: pause left, progress through the window, length right */}
-                          <div className="flex shrink-0 items-center gap-3 px-6 pb-3">
-                            <button
-                              onClick={togglePlay}
-                              aria-label={editorPlaying ? "Pause" : "Play"}
-                              className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
-                            >
-                              {editorPlaying ? (
-                                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
-                              ) : (
-                                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z" /></svg>
-                              )}
-                            </button>
-                            <div className="relative h-[3px] flex-1 overflow-hidden rounded-full bg-gray-stroke">
-                              <div className="absolute inset-y-0 left-0 rounded-full bg-[#FFD60A]" style={{ width: `${progress}%` }} />
-                            </div>
-                            <button
-                              onClick={() => setClipLenOpen(true)}
-                              aria-label="Clip length"
-                              className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-[11px] font-bold tabular-nums text-gray-dark transition-colors hover:bg-gray-200"
-                            >
-                              {toClock(clipWindow)}
-                            </button>
-                          </div>
-                          {/* The yellow window stays put — drag the film underneath it */}
-                          <div className="shrink-0 px-6 pb-3">
-                            <div className="relative">
-                              <div
-                                onPointerDown={dragStrip}
-                                onScroll={e => {
-                                  const scroller = e.currentTarget;
-                                  const strip = scroller.querySelector("[data-strip]") as HTMLElement | null;
-                                  if (!strip) return;
-                                  const startPct = Math.max(0, Math.min(100 - winPct, (scroller.scrollLeft / strip.offsetWidth) * 100));
-                                  setClipStart(startPct);
-                                  setClipEnd(Math.min(100, startPct + winPct));
-                                }}
-                                className="h-14 cursor-grab touch-pan-x overflow-x-auto active:cursor-grabbing [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                              >
-                                <div className="flex h-full items-stretch">
-                                  <div style={{ flex: "0 0 21%" }} />
-                                  <div data-strip className="flex h-full overflow-hidden rounded-xl bg-gray-100" style={{ flex: `0 0 ${stripPct}%` }}>
-                                    {Array.from({ length: nTiles }, (_, i) => (
-                                      <video
-                                        key={i}
-                                        src={`${media.src}#t=${Math.max(0.5, ((i + 0.5) / nTiles) * total).toFixed(1)}`}
-                                        muted
-                                        playsInline
-                                        preload="metadata"
-                                        className="h-full min-w-0 flex-1 object-cover"
-                                      />
-                                    ))}
-                                  </div>
-                                  <div style={{ flex: "0 0 21%" }} />
-                                </div>
-                              </div>
-                              <div className="pointer-events-none absolute inset-y-0 left-1/2 w-[58%] -translate-x-1/2 rounded-xl border-[3px] border-[#FFD60A]" />
-                            </div>
-                          </div>
-                        </>
-                      );
-                    })()
-                  ) : (
-                  <>
                   {/* Engagement — SoundCloud-style columns, windowed to the zoom; bars darken as the playhead passes */}
                   <div className="shrink-0 pl-[72px] pr-5">
                     {/* Bars resample to the zoom window: constant column width, more
@@ -1919,15 +1896,13 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
                     </div>
                   </div>
 
-                  </>
-                  )}
 
                   {/* What gets burned into the post */}
                   <div className="flex shrink-0 items-start justify-center gap-6 px-5 pb-[max(env(safe-area-inset-bottom),80px)] pt-4">
                     {editorTool("Crop", <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14" /><path d="M18 22V8a2 2 0 0 0-2-2H2" /></svg>, () => setCropGrid(v => !v), cropGrid)}
                     {editorTool("Captions", <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="3" /><path d="M6 14h6" /><path d="M15 14h3" /><path d="M6 10h3" /><path d="M12 10h6" /></svg>, () => { pushEditorSnap(); setCaptionsOn(v => !v); }, captionsOn)}
                     {editorTool("Comments", <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 8.5-8.5 8.38 8.38 0 0 1 8.5 8.5Z" /></svg>, () => { pushEditorSnap(); setChatOn(v => !v); }, chatOn)}
-                    {selectedClip === null ? editorTool("Viewers", <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>, () => { pushEditorSnap(); setViewersOn(v => !v); }, viewersOn) : null}
+                    {selectedClip === null && selectedRecording !== "upload" ? editorTool("Viewers", <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>, () => { pushEditorSnap(); setViewersOn(v => !v); }, viewersOn) : null}
                     <button
                       onClick={undoEditor}
                       disabled={editorHistory.length === 0}
@@ -1994,6 +1969,38 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
           )
         ) : null}
 
+        {mode === "article" && articleStep === "share" ? (
+          /* Article share step — caption + exactly the card that lands in the feed */
+          <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6 md:px-6">
+            <div className="flex items-center gap-3">
+              <img src={profilePhoto} alt="You" className="h-10 w-10 rounded-full object-cover" />
+              <span className="text-[16px] font-semibold text-gray-dark">{SELF.author}</span>
+            </div>
+            <textarea
+              autoFocus
+              value={articleCaption}
+              onChange={e => { setArticleCaption(e.target.value); autoGrow(e); }}
+              placeholder="Say something about your article…"
+              rows={1}
+              className="zoom-ok mt-3 w-full resize-none text-[19px] leading-[1.45] text-gray-dark outline-none placeholder:text-gray-light"
+            />
+            <div className="pointer-events-none mt-1 max-w-[520px]">
+              <ArticleCard
+                post={{
+                  ...SELF,
+                  id: 0,
+                  type: "article",
+                  title: title.trim(),
+                  subtitle: subtitle.trim() || undefined,
+                  body: articlePlain,
+                  bodyHtml: articleHtml,
+                  readMinutes: Math.max(1, Math.round(articlePlain.split(/\s+/).length / 200)),
+                }}
+              />
+            </div>
+          </div>
+        ) : null}
+
         {mode === "golive" ? (
           <>
             <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6 md:px-6">
@@ -2048,31 +2055,76 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
             </div>
           </motion.div>
         ) : null}
-      </motion.div>
 
-      {/* Clip length sheet — minutes + seconds wheels */}
-      <AnimatePresence>
-        {clipLenOpen ? (
-          <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setClipLenOpen(false)} className="fixed inset-0 z-[70] bg-black/40" />
-            <ClipLengthSheet
-              seconds={clipWindow}
-              maxSeconds={selectedClip !== null ? toSeconds(CLIPS.find(c => c.id === selectedClip)!.duration) : 60}
-              onClose={() => setClipLenOpen(false)}
-              onDone={s => {
-                const clip = CLIPS.find(c => c.id === selectedClip);
-                const total = clip ? toSeconds(clip.duration) : 60;
-                const wp = Math.min(100, (s / total) * 100);
-                const st = Math.max(0, Math.min(clipStart, 100 - wp));
-                setClipWindow(s);
-                setClipStart(st);
-                setClipEnd(Math.min(100, st + wp));
-                setClipLenOpen(false);
-              }}
-            />
-          </>
+        {/* The card as Drafts: back button returns to the composer */}
+        {draftsOpen && !confirmTrash ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.15, delay: 0.08 }}
+            className="hidden min-h-[420px] flex-1 flex-col pt-5 md:flex"
+          >
+            <div className="relative mb-3 flex h-10 shrink-0 items-center justify-center px-6">
+              <button
+                onClick={() => setDraftsOpen(false)}
+                aria-label="Back to composer"
+                className="absolute left-6 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+              </button>
+              <p className="text-[16px] font-semibold text-gray-dark">Drafts</p>
+            </div>
+            {draftsBody}
+          </motion.div>
         ) : null}
-      </AnimatePresence>
+
+        {/* The card as delete confirm */}
+        {confirmTrash ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.15, delay: 0.08 }}
+            className="hidden flex-col px-6 pb-6 pt-5 md:flex"
+          >
+            <div className="relative flex h-10 items-center justify-center">
+              <button
+                onClick={() => setConfirmTrash(null)}
+                aria-label="Keep it"
+                className="absolute left-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-dark transition-colors hover:bg-gray-200"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+              </button>
+              <p className="text-[16px] font-semibold text-gray-dark">
+                {confirmTrash.kind === "draft" ? "Delete this draft?" : "Unschedule this post?"}
+              </p>
+            </div>
+            <p className="mt-1 text-center text-[13px] leading-snug text-gray-light">
+              {confirmTrash.kind === "draft" ? "This can't be undone." : "It moves out of the queue and won't post."}
+            </p>
+            <div className="mx-auto mt-5 flex w-full max-w-[320px] gap-2">
+              <button onClick={() => setConfirmTrash(null)} className="flex-1 cursor-pointer rounded-full bg-gray-100 py-3 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-gray-200">
+                Keep it
+              </button>
+              <button
+                onClick={() => {
+                  if (confirmTrash.kind === "draft") {
+                    const d = draftStore.find(x => x.id === confirmTrash.id);
+                    if (d) draftStore.splice(draftStore.indexOf(d), 1);
+                  } else {
+                    const sc = scheduledStore.find(x => x.id === confirmTrash.id);
+                    if (sc) scheduledStore.splice(scheduledStore.indexOf(sc), 1);
+                  }
+                  setStoreVersion(v => v + 1);
+                  setConfirmTrash(null);
+                }}
+                className="flex-1 cursor-pointer rounded-full bg-[#D6204C] py-3 text-[15px] font-semibold text-white transition-colors hover:bg-[#b81b41]"
+              >
+                {confirmTrash.kind === "draft" ? "Delete" : "Unschedule"}
+              </button>
+            </div>
+          </motion.div>
+        ) : null}
+      </motion.div>
 
       {/* Schedule sheet — calendar picker */}
       <AnimatePresence>
@@ -2131,123 +2183,17 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
       <AnimatePresence>
         {draftsOpen ? (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDraftsOpen(false)} className="fixed inset-0 z-[70] bg-black/40" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDraftsOpen(false)} className="fixed inset-0 z-[70] bg-black/40 md:hidden" />
             <motion.div
               initial={{ y: "110%" }} animate={{ y: 0 }} exit={{ y: "110%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
-              className="fixed inset-x-0 bottom-0 top-14 z-[71] mx-auto flex max-w-[600px] flex-col rounded-t-3xl bg-white md:bottom-auto md:top-[10vh] md:max-h-[76vh] md:max-w-[480px] md:rounded-3xl md:border md:border-gray-stroke"
+              className="fixed inset-x-0 bottom-0 top-14 z-[71] mx-auto flex max-w-[600px] flex-col rounded-t-3xl bg-white md:hidden"
             >
               <div className="mx-auto mb-3 mt-2 h-1 w-10 rounded-full bg-gray-stroke md:hidden" />
               <div className="relative flex h-11 shrink-0 items-center justify-center px-5">
                 <button onClick={() => setDraftsOpen(false)} className="absolute left-5 cursor-pointer text-[15px] text-gray-light transition-colors hover:text-gray-dark">Cancel</button>
                 <p className="text-[16px] font-semibold text-gray-dark">Drafts</p>
               </div>
-              <div className="shrink-0 px-5 pb-3">
-                <div className="flex rounded-full bg-gray-100 p-1">
-                  {DRAFT_TABS.map(tab => (
-                    <button
-                      key={tab}
-                      onClick={() => { setDraftsTab(tab); }}
-                      className="relative flex-1 cursor-pointer rounded-full py-2.5 text-[14px] font-semibold"
-                    >
-                      {draftsTab === tab ? (
-                        <motion.span
-                          layoutId="draftsTabPill"
-                          transition={{ type: "spring", stiffness: 520, damping: 42 }}
-                          className="absolute inset-0 rounded-full bg-white"
-                        />
-                      ) : null}
-                      <span className={`relative z-10 transition-colors ${draftsTab === tab ? "text-gray-dark" : "text-gray-light"}`}>{tab}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex-1 overflow-y-auto px-5 pb-[max(env(safe-area-inset-bottom),20px)]">
-                <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={draftsTab}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ duration: 0.13, ease: "easeOut" }}
-                >
-                {draftsTab !== "Scheduled" ? (
-                  tabDrafts.length > 0 ? (
-                    <div className="space-y-2">
-                      {tabDrafts.map(d => (
-                        <div key={d.id} className="flex items-center gap-3 rounded-2xl bg-gray-100 px-4 py-3.5 transition-colors hover:bg-gray-200/60">
-                          <button onClick={() => loadDraft(d)} className="min-w-0 flex-1 cursor-pointer text-left">
-                            <p className="truncate text-[15px] font-semibold text-gray-dark">
-                              {d.title || d.text || RECORDINGS.find(r => r.id === d.topic)?.title || stripHtml(d.articleHtml) || "Untitled"}
-                            </p>
-                            <p className="mt-0.5 text-[12px] text-gray-light">
-                              {editedLabel(d.editedAt)}{d.mode === "live" ? " · Live" : d.mode === "article" ? " · Article" : ""}
-                            </p>
-                          </button>
-                          <button
-                            onClick={() => setConfirmTrash({ kind: "draft", id: d.id })}
-                            aria-label="Delete draft"
-                            className="shrink-0 cursor-pointer rounded-full p-2 text-[#D6204C] transition-colors hover:bg-red-50"
-                          >
-                            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center px-8 pb-8 pt-12 text-center">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-                        <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
-                      </div>
-                      <p className="mt-4 font-serif text-[20px] leading-tight text-gray-dark">No drafts</p>
-                      <p className="mt-2 max-w-[260px] text-[13px] leading-[1.5] text-gray-light">
-                        Half-formed thoughts are welcome. Posts and articles you save land here.
-                      </p>
-                      <button
-                        onClick={() => { setDraftsOpen(false); setMode("post"); }}
-                        className="mt-5 cursor-pointer rounded-full bg-gray-dark px-5 py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#333]"
-                      >
-                        Write a post
-                      </button>
-                    </div>
-                  )
-                ) : scheduledStore.length > 0 ? (
-                  <div className="space-y-2">
-                    {scheduledStore.map(s => (
-                      <div key={s.id} onClick={() => loadScheduled(s)} className="flex cursor-pointer items-center gap-3 rounded-2xl bg-gray-100 px-4 py-3.5 transition-colors hover:bg-gray-200/60">
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-[15px] font-semibold text-gray-dark">{s.snippet || "Untitled"}</p>
-                          <p className="mt-0.5 text-[12px] text-gray-light">{s.mode === "article" ? "Article · " : ""}Posts {s.scheduledFor}</p>
-                        </div>
-                        <button
-                          onClick={e => { e.stopPropagation(); setConfirmTrash({ kind: "scheduled", id: s.id }); }}
-                          aria-label="Unschedule"
-                          className="shrink-0 cursor-pointer rounded-full p-2 text-[#D6204C] transition-colors hover:bg-red-50"
-                        >
-                          <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center px-8 pb-8 pt-12 text-center">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-                      <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
-                    </div>
-                    <p className="mt-4 font-serif text-[20px] leading-tight text-gray-dark">Nothing scheduled</p>
-                    <p className="mt-2 max-w-[260px] text-[13px] leading-[1.5] text-gray-light">
-                      Write once, post at the right moment.
-                    </p>
-                    <button
-                      onClick={() => { setDraftsOpen(false); setScheduleOpen(true); }}
-                      className="mt-5 cursor-pointer rounded-full bg-gray-dark px-5 py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#333]"
-                    >
-                      Schedule a post
-                    </button>
-                  </div>
-                )}
-                </motion.div>
-                </AnimatePresence>
-              </div>
+              {draftsBody}
             </motion.div>
           </>
         ) : null}
@@ -2257,8 +2203,8 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
       <AnimatePresence>
         {confirmTrash ? (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setConfirmTrash(null)} className="fixed inset-0 z-[72] bg-black/40" />
-            <div className="pointer-events-none fixed inset-0 z-[73] flex items-center justify-center px-8">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setConfirmTrash(null)} className="fixed inset-0 z-[72] bg-black/40 md:hidden" />
+            <div className="pointer-events-none fixed inset-0 z-[73] hidden items-center justify-center px-8 max-md:flex">
               <motion.div
                 initial={{ opacity: 0, scale: 0.92 }}
                 animate={{ opacity: 1, scale: 1 }}
