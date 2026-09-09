@@ -101,6 +101,7 @@ import { COHORT_MEMBERS } from "./Group";
 import { SelectCohortModal } from "../components/LiveCourseCard";
 import { TrackPickerModal, type CourseTrack, TRACK_STORAGE_KEY, getLogoSrc } from "../components/TrackPickerModal";
 import { PersonalizationModal, PERSONALIZATION_KEY } from "../components/PersonalizationModal";
+import { NoAccessModal } from "../components/NoAccessModal";
 
 // ─── Types & seed data ───────────────────────────────────────────────────────
 
@@ -1443,6 +1444,7 @@ type PrototypeOptions = {
   showSiteNav: boolean;
   showTrackPicker: boolean;
   hasOfficeHours: boolean;
+  hasAccess: boolean;
   liveSessionVariant: LiveSessionVariant;
 };
 
@@ -1459,6 +1461,7 @@ const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
   showSiteNav: false,
   showTrackPicker: true,
   hasOfficeHours: true,
+  hasAccess: true,
   liveSessionVariant: "addToCalendar",
 };
 
@@ -1468,6 +1471,7 @@ const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
   { key: "showSiteNav", label: "Show site nav" },
   { key: "showTrackPicker", label: "Track picker" },
   { key: "hasOfficeHours", label: "Has office hours" },
+  { key: "hasAccess", label: "Has course access" },
 ];
 
 
@@ -2358,6 +2362,7 @@ export default function ContentViewer() {
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
   const [trackPickerOpen, setTrackPickerOpen] = useState(false);
   const [personalizationModalOpen, setPersonalizationModalOpen] = useState(false);
+  const [noAccessModalOpen, setNoAccessModalOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<CourseTrack | null>(
     () => localStorage.getItem(TRACK_STORAGE_KEY) as CourseTrack | null,
   );
@@ -2422,6 +2427,14 @@ export default function ContentViewer() {
       setTrackPickerOpen(true);
     }
   }, [options.showTrackPicker]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Paywall for anyone without course access — waits a beat after load
+  // rather than slamming over the page the instant it renders.
+  useEffect(() => {
+    if (options.hasAccess) return;
+    const timer = setTimeout(() => setNoAccessModalOpen(true), 2000);
+    return () => clearTimeout(timer);
+  }, [options.hasAccess]);
 
   // Tracks 10 minutes of activity on the current lesson (resets whenever the
   // learner moves to a different lesson) — a gate for the review prompt below.
@@ -3012,6 +3025,11 @@ export default function ContentViewer() {
       <PersonalizationModal
         open={personalizationModalOpen}
         onOpenChange={setPersonalizationModalOpen}
+      />
+      <NoAccessModal
+        open={noAccessModalOpen}
+        onOpenChange={setNoAccessModalOpen}
+        purchaseHref={COURSE_HOME}
       />
       <AddToCalendarModal
         open={addToCalendarModalOpen}
