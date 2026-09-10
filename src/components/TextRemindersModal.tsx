@@ -119,7 +119,7 @@ const TextRemindersModalImpl = ({ open, onOpenChange }: ModalProps) => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="(555) 123-4567"
-                    className="w-full rounded-xl border border-leland-gray-stroke bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark placeholder:text-leland-gray-extra-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                    className="w-full rounded-xl border border-leland-gray-stroke bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark placeholder:text-leland-gray-extra-light focus:border-leland-gray-dark focus:outline-none"
                   />
                 </div>
               </div>
@@ -169,8 +169,8 @@ const TextRemindersModalImpl = ({ open, onOpenChange }: ModalProps) => {
                       setCodeError(false);
                     }}
                     placeholder="123456"
-                    className={`w-full rounded-xl border bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark tracking-[0.3em] placeholder:tracking-normal placeholder:text-leland-gray-extra-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
-                      codeError ? "border-leland-red" : "border-leland-gray-stroke"
+                    className={`w-full rounded-xl border bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark tracking-[0.3em] placeholder:tracking-normal placeholder:text-leland-gray-extra-light focus:outline-none ${
+                      codeError ? "border-leland-red focus:border-leland-red" : "border-leland-gray-stroke focus:border-leland-gray-dark"
                     }`}
                   />
                   {codeError ? (

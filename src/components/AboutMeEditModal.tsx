@@ -1,10 +1,6 @@
 import { useState } from "react";
 
 import {
-  Button,
-  ButtonColor,
-  ButtonSize,
-  ButtonWidth,
   IconChevronLeft,
   Modal,
   ModalContent,
@@ -15,12 +11,14 @@ import {
   ChipGroup,
   INDUSTRY_OPTIONS_BY_STATUS,
   INDUSTRY_QUESTION,
+  OtherTextField,
   PERSONALIZATION_KEY,
   RadioList,
   ROLE_OPTIONS_BY_STATUS,
   ROLE_QUESTION,
   STATUS_OPTIONS,
   TENSE_BY_STATUS,
+  useChipGroupWithOther,
   type PersonalizationData,
   type PersonalizationStatus,
 } from "./PersonalizationModal";
@@ -59,7 +57,7 @@ const AboutMeEditModalImpl = ({
 
   const handleStatusSelect = (next: PersonalizationStatus) => {
     setStatus(next);
-    if (next === "retired_exploring") {
+    if (next === "not_working") {
       handleSave(next, null, null);
     } else {
       setStep("role");
@@ -72,13 +70,13 @@ const AboutMeEditModalImpl = ({
     finalIndustry: string | null,
   ) => {
     const tense = TENSE_BY_STATUS[finalStatus];
-    const isRetired = finalStatus === "retired_exploring";
+    const isNotWorking = finalStatus === "not_working";
     const data: PersonalizationData = {
       status: finalStatus,
-      role: isRetired ? null : finalRole,
-      roleTense: isRetired ? "n/a" : tense,
-      industry: isRetired ? null : finalIndustry,
-      industryTense: isRetired ? "n/a" : tense,
+      role: isNotWorking ? null : finalRole,
+      roleTense: isNotWorking ? "n/a" : tense,
+      industry: isNotWorking ? null : finalIndustry,
+      industryTense: isNotWorking ? "n/a" : tense,
       aiGoalText: initialData?.aiGoalText ?? "",
     };
     localStorage.setItem(PERSONALIZATION_KEY, JSON.stringify(data));
@@ -86,10 +84,19 @@ const AboutMeEditModalImpl = ({
     handleOpenChange(false);
   };
 
-  const roleQuestion = status && status !== "retired_exploring" ? ROLE_QUESTION[status] : "";
-  const industryQuestion = status && status !== "retired_exploring" ? INDUSTRY_QUESTION[status] : "";
-  const roleOptions = status && status !== "retired_exploring" ? ROLE_OPTIONS_BY_STATUS[status] : [];
-  const industryOptions = status && status !== "retired_exploring" ? INDUSTRY_OPTIONS_BY_STATUS[status] : [];
+  const roleQuestion = status && status !== "not_working" ? ROLE_QUESTION[status] : "";
+  const industryQuestion = status && status !== "not_working" ? INDUSTRY_QUESTION[status] : "";
+  const roleOptions = status && status !== "not_working" ? ROLE_OPTIONS_BY_STATUS[status] : [];
+  const industryOptions = status && status !== "not_working" ? INDUSTRY_OPTIONS_BY_STATUS[status] : [];
+
+  const roleChip = useChipGroupWithOther(roleOptions, role, (next) => {
+    setRole(next);
+    setStep("industry");
+  });
+  const industryChip = useChipGroupWithOther(industryOptions, industry, (next) => {
+    setIndustry(next);
+    if (status) handleSave(status, role, next);
+  });
 
   return (
     <Modal open={open} onOpenChange={handleOpenChange}>
@@ -116,17 +123,16 @@ const AboutMeEditModalImpl = ({
               </button>
               <h2 className="shrink-0 text-heading-3xl font-season font-normal text-leland-gray-dark">{roleQuestion}</h2>
               <div className="min-h-0 flex-1 overflow-y-auto">
-                <ChipGroup options={roleOptions} selected={role} onSelect={setRole} />
+                <ChipGroup options={roleOptions} selected={roleChip.selected} onSelect={roleChip.handleSelect} />
               </div>
-              <Button
-                label="Continue"
-                buttonColor={ButtonColor.PRIMARY}
-                size={ButtonSize.LARGE}
-                rounded
-                width={ButtonWidth.FULL}
-                disabled={!role}
-                onClick={() => setStep("industry")}
-              />
+              {roleChip.isOther ? (
+                <OtherTextField
+                  value={roleChip.otherText}
+                  onChange={roleChip.setOtherText}
+                  placeholder="e.g. Software Engineer"
+                  onSubmit={roleChip.submitOther}
+                />
+              ) : null}
             </div>
           ) : (
             <div className="flex min-h-0 flex-1 flex-col gap-6">
@@ -140,17 +146,16 @@ const AboutMeEditModalImpl = ({
               </button>
               <h2 className="shrink-0 text-heading-3xl font-season font-normal text-leland-gray-dark">{industryQuestion}</h2>
               <div className="min-h-0 flex-1 overflow-y-auto">
-                <ChipGroup options={industryOptions} selected={industry} onSelect={setIndustry} />
+                <ChipGroup options={industryOptions} selected={industryChip.selected} onSelect={industryChip.handleSelect} />
               </div>
-              <Button
-                label="Save"
-                buttonColor={ButtonColor.PRIMARY}
-                size={ButtonSize.LARGE}
-                rounded
-                width={ButtonWidth.FULL}
-                disabled={!industry || !status}
-                onClick={() => status && handleSave(status, role, industry)}
-              />
+              {industryChip.isOther ? (
+                <OtherTextField
+                  value={industryChip.otherText}
+                  onChange={industryChip.setOtherText}
+                  placeholder="e.g. Healthcare"
+                  onSubmit={industryChip.submitOther}
+                />
+              ) : null}
             </div>
           )}
         </div>
