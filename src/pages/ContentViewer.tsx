@@ -101,6 +101,7 @@ import { COHORT_MEMBERS } from "./Group";
 import { SelectCohortModal } from "../components/LiveCourseCard";
 import { TrackPickerModal, type CourseTrack, TRACK_STORAGE_KEY, getLogoSrc } from "../components/TrackPickerModal";
 import { PersonalizationModal, PERSONALIZATION_KEY } from "../components/PersonalizationModal";
+import { TextRemindersModal, TEXT_REMINDERS_KEY, hasVerifiedPhone } from "../components/TextRemindersModal";
 import { NoAccessModal } from "../components/NoAccessModal";
 
 // ─── Types & seed data ───────────────────────────────────────────────────────
@@ -2362,6 +2363,7 @@ export default function ContentViewer() {
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
   const [trackPickerOpen, setTrackPickerOpen] = useState(false);
   const [personalizationModalOpen, setPersonalizationModalOpen] = useState(false);
+  const [textRemindersModalOpen, setTextRemindersModalOpen] = useState(false);
   const [noAccessModalOpen, setNoAccessModalOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<CourseTrack | null>(
     () => localStorage.getItem(TRACK_STORAGE_KEY) as CourseTrack | null,
@@ -2428,12 +2430,9 @@ export default function ContentViewer() {
     }
   }, [options.showTrackPicker]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Paywall for anyone without course access — waits a beat after load
-  // rather than slamming over the page the instant it renders.
+  // Paywall for anyone without course access.
   useEffect(() => {
-    if (options.hasAccess) return;
-    const timer = setTimeout(() => setNoAccessModalOpen(true), 2000);
-    return () => clearTimeout(timer);
+    setNoAccessModalOpen(!options.hasAccess);
   }, [options.hasAccess]);
 
   // Tracks 10 minutes of activity on the current lesson (resets whenever the
@@ -3005,6 +3004,7 @@ export default function ContentViewer() {
           localStorage.removeItem(COURSE_RATING_KEY);
           localStorage.removeItem(TRACK_STORAGE_KEY);
           localStorage.removeItem(PERSONALIZATION_KEY);
+          localStorage.removeItem(TEXT_REMINDERS_KEY);
           window.location.reload();
         }}
       />
@@ -3024,7 +3024,16 @@ export default function ContentViewer() {
       />
       <PersonalizationModal
         open={personalizationModalOpen}
-        onOpenChange={setPersonalizationModalOpen}
+        onOpenChange={(next) => {
+          setPersonalizationModalOpen(next);
+          // Mirrors openModalIfNecessary from usePhoneNumberModal — don't
+          // ask again if there's already a verified number on file.
+          if (!next && !hasVerifiedPhone()) setTextRemindersModalOpen(true);
+        }}
+      />
+      <TextRemindersModal
+        open={textRemindersModalOpen}
+        onOpenChange={setTextRemindersModalOpen}
       />
       <NoAccessModal
         open={noAccessModalOpen}
