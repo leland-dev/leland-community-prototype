@@ -3028,8 +3028,9 @@ export default function ContentViewer() {
       />
       <NoAccessModal
         open={noAccessModalOpen}
-        onOpenChange={setNoAccessModalOpen}
+        onDismiss={() => setNoAccessModalOpen(false)}
         purchaseHref={COURSE_HOME}
+        courseDescription="Learn to build AI workflows, automations and agents that amplify your impact and give you more time for what matters"
       />
       <AddToCalendarModal
         open={addToCalendarModalOpen}
