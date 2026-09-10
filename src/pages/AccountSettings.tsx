@@ -20,6 +20,8 @@ import mobilePhoneIcon from "../assets/icons/mobile-phone.svg";
 import lockIcon from "../assets/icons/lock.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
+import { AboutMeEditModal } from "../components/AboutMeEditModal";
+import { loadPersonalizationData, summarizePersonalization, type PersonalizationData } from "../components/PersonalizationModal";
 
 const tabs = [
   { key: "account", label: "Account", icon: settingsIcon },
@@ -140,6 +142,8 @@ export default function AccountSettings() {
   const [smsReminders, setSmsReminders] = useState(true);
   const [smsOffers, setSmsOffers] = useState(false);
   const [sessionSummaries, setSessionSummaries] = useState(true);
+  const [aboutMe, setAboutMe] = useState<PersonalizationData | null>(() => loadPersonalizationData());
+  const [aboutMeModalOpen, setAboutMeModalOpen] = useState(false);
 
   const dashedBorderStyle = {
     backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")`,
@@ -388,6 +392,24 @@ export default function AccountSettings() {
                 </div>
               </div>
 
+              {/* About me */}
+              <div className="mt-6 border-t border-gray-stroke pt-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-[16px] font-semibold text-gray-dark">About me</h3>
+                    <p className="mt-1 text-[14px] text-gray-light">
+                      {aboutMe ? summarizePersonalization(aboutMe) : "Add your work situation, role, and industry"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setAboutMeModalOpen(true)}
+                    className="text-[14px] font-medium text-gray-dark underline underline-offset-2"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+
               {/* Phone number */}
               <div className="mt-6 border-t border-gray-stroke pt-6">
                 <div className="flex items-start justify-between">
@@ -467,6 +489,12 @@ export default function AccountSettings() {
             </div>
           )}
       </div>
+      <AboutMeEditModal
+        open={aboutMeModalOpen}
+        onOpenChange={setAboutMeModalOpen}
+        initialData={aboutMe}
+        onSave={setAboutMe}
+      />
     </PageShell>
   );
 }

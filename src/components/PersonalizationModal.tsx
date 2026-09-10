@@ -25,7 +25,7 @@ export type PersonalizationData = {
   aiGoalText: string;
 };
 
-const STATUS_OPTIONS: { value: PersonalizationStatus; label: string }[] = [
+export const STATUS_OPTIONS: { value: PersonalizationStatus; label: string }[] = [
   { value: "working", label: "Working" },
   { value: "job_searching", label: "Job searching / between roles" },
   { value: "in_school", label: "In school" },
@@ -71,32 +71,32 @@ function withNotSure(options: ToggleChipOption[]): ToggleChipOption[] {
   return [...options.slice(0, -1), NOT_SURE_OPTION, options[options.length - 1]];
 }
 
-const ROLE_QUESTION: Record<Exclude<PersonalizationStatus, "retired_exploring">, string> = {
+export const ROLE_QUESTION: Record<Exclude<PersonalizationStatus, "retired_exploring">, string> = {
   working: "What's your role?",
   job_searching: "What role are you targeting?",
   in_school: "What kind of work are you hoping to move into?",
 };
 
-const INDUSTRY_QUESTION: Record<Exclude<PersonalizationStatus, "retired_exploring">, string> = {
+export const INDUSTRY_QUESTION: Record<Exclude<PersonalizationStatus, "retired_exploring">, string> = {
   working: "What industry are you in?",
   job_searching: "What industry are you targeting?",
   in_school: "What industry are you interested in?",
 };
 
-const TENSE_BY_STATUS: Record<PersonalizationStatus, PersonalizationTense> = {
+export const TENSE_BY_STATUS: Record<PersonalizationStatus, PersonalizationTense> = {
   working: "current",
   job_searching: "targeting",
   in_school: "interested_in",
   retired_exploring: "n/a",
 };
 
-const ROLE_OPTIONS_BY_STATUS: Record<Exclude<PersonalizationStatus, "retired_exploring">, ToggleChipOption[]> = {
+export const ROLE_OPTIONS_BY_STATUS: Record<Exclude<PersonalizationStatus, "retired_exploring">, ToggleChipOption[]> = {
   working: BASE_ROLE_OPTIONS,
   job_searching: BASE_ROLE_OPTIONS,
   in_school: withNotSure(BASE_ROLE_OPTIONS),
 };
 
-const INDUSTRY_OPTIONS_BY_STATUS: Record<Exclude<PersonalizationStatus, "retired_exploring">, ToggleChipOption[]> = {
+export const INDUSTRY_OPTIONS_BY_STATUS: Record<Exclude<PersonalizationStatus, "retired_exploring">, ToggleChipOption[]> = {
   working: BASE_INDUSTRY_OPTIONS,
   job_searching: BASE_INDUSTRY_OPTIONS,
   in_school: withNotSure(BASE_INDUSTRY_OPTIONS),
@@ -106,9 +106,33 @@ const INDUSTRY_OPTIONS_BY_STATUS: Record<Exclude<PersonalizationStatus, "retired
 // selections elsewhere in the course viewer — no real backend here.
 export const PERSONALIZATION_KEY = "content-viewer-personalization";
 
-type Step = "status" | "role" | "industry" | "goal";
+export function loadPersonalizationData(): PersonalizationData | null {
+  try {
+    const raw = localStorage.getItem(PERSONALIZATION_KEY);
+    return raw ? (JSON.parse(raw) as PersonalizationData) : null;
+  } catch {
+    return null;
+  }
+}
 
-function RadioList<T extends string>({
+// Used on the account-settings "About me" row — general profile info (not
+// course-specific), so it deliberately excludes the AI-goal free text.
+export function summarizePersonalization(data: PersonalizationData): string {
+  const statusLabel = STATUS_OPTIONS.find((o) => o.value === data.status)?.label ?? "";
+  if (data.status === "retired_exploring") return statusLabel;
+  const roleLabel = data.role
+    ? ROLE_OPTIONS_BY_STATUS[data.status].find((o) => o.value === data.role)?.label
+    : null;
+  const industryLabel = data.industry
+    ? INDUSTRY_OPTIONS_BY_STATUS[data.status].find((o) => o.value === data.industry)?.label
+    : null;
+  const parts = [roleLabel, industryLabel].filter(Boolean);
+  return parts.length ? parts.join(" · ") : statusLabel;
+}
+
+export type Step = "status" | "role" | "industry" | "goal";
+
+export function RadioList<T extends string>({
   options,
   selected,
   onSelect,
@@ -147,7 +171,7 @@ function RadioList<T extends string>({
   );
 }
 
-function ChipGroup({
+export function ChipGroup({
   options,
   selected,
   onSelect,
