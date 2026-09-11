@@ -13,8 +13,9 @@ import RowDelete from "../components/RowDelete";
 import TestOutcomes from "../components/TestOutcomes";
 import TaskDetailModal from "../components/TaskDetailModal";
 import ConfirmModal from "../components/ConfirmModal";
+import GoalTasksIntro from "../components/GoalTasksIntro";
 import { useGoals } from "../contexts/GoalsContext";
-import { dueLabel, goalProgress, isOverdue, type Goal, type Task, type TaskStatus } from "../data/goals";
+import { dueLabel, goalProgress, isOverdue, type Goal, type Milestone, type Task, type TaskStatus } from "../data/goals";
 import { scoreRangeFor } from "../data/goalPlans";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 
@@ -173,7 +174,16 @@ function AddRow({
   }
 
   return (
-    <div className={`flex gap-2 ${variant === "column" ? "flex-col" : "mt-3 flex-wrap"}`}>
+    <div
+      className={`flex gap-2 ${variant === "column" ? "flex-col" : "mt-3 flex-wrap"}`}
+      onBlur={(e) => {
+        // Clicking the Add button moves focus there, not out of the row —
+        // only closing when focus actually leaves the row (or hits nothing,
+        // e.g. a non-focusable background) is what makes "click away" work
+        // without swallowing the Add click itself.
+        if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false);
+      }}
+    >
       <input
         autoFocus
         value={draft}
@@ -292,15 +302,17 @@ function TaskGroup({
 function MilestoneCard({
   goalId,
   milestone,
+  onRequestDelete,
   onRequestDeleteTask,
   onOpenTaskDetail,
 }: {
   goalId: string;
   milestone: Goal["milestones"][number];
+  onRequestDelete: () => void;
   onRequestDeleteTask: (task: Task) => void;
   onOpenTaskDetail: (task: Task) => void;
 }) {
-  const { updateMilestone, deleteMilestone, createTask, setMilestoneView } = useGoals();
+  const { updateMilestone, createTask, setMilestoneView } = useGoals();
   const done = milestone.tasks.filter((t) => t.status === "done").length;
   const view = milestone.view ?? "list";
 
@@ -314,9 +326,7 @@ function MilestoneCard({
           <span className="whitespace-nowrap text-[13px] text-gray-extra-light">
             {done} of {milestone.tasks.length} done
           </span>
-          <span className="opacity-0 transition-opacity group-hover/milestone:opacity-100">
-            <RowDelete onDelete={() => deleteMilestone(goalId, milestone.id)} label={milestone.name} />
-          </span>
+          <RowDelete alwaysVisible onDelete={onRequestDelete} label={milestone.name} />
         </div>
       </div>
       <p className="mb-3 text-[14px] text-[#707070]">
@@ -344,7 +354,7 @@ export default function GoalDetail() {
   const { goalId } = useParams<{ goalId: string }>();
   const navigate = useNavigate();
   const {
-    getGoal, updateGoal, deleteGoal, completeGoal, reopenGoal, addMilestone, deleteTask, createTask, setOtherTasksView,
+    getGoal, updateGoal, deleteGoal, completeGoal, reopenGoal, addMilestone, deleteMilestone, deleteTask, createTask, setOtherTasksView,
     toggleTask, updateTask, reassignTask,
   } = useGoals();
   const { dark: darkMode } = useDarkMode();
@@ -357,6 +367,7 @@ export default function GoalDetail() {
   const [outcomeDraft, setOutcomeDraft] = useState("");
   const [finalScoreStr, setFinalScoreStr] = useState("");
   const [confirmDeleteTarget, setConfirmDeleteTarget] = useState<Task | null>(null);
+  const [confirmDeleteMilestone, setConfirmDeleteMilestone] = useState<Milestone | null>(null);
   // Store just the id and look the task up fresh below — holding onto the
   // task object itself would freeze the modal on a stale snapshot the moment
   // an edit updates the underlying goal data.
@@ -406,6 +417,7 @@ export default function GoalDetail() {
 
   const completed = !!goal.completedAt;
   const { done, total, pct } = goalProgress(goal);
+  const showMilestones = goal.milestones.length > 0;
 
   const confirmDeleteGoal = () => {
     if (!window.confirm(`Delete "${goal.name}"? Its milestones and tasks go with it.`)) return;
@@ -614,18 +626,28 @@ export default function GoalDetail() {
 
         {/* Milestones — each is a plain checklist or kanban board (todo/
             in-progress/done). No card-level drag-to-reorder or resize. */}
-        <div className="flex flex-col gap-3">
-          {goal.milestones.map((milestone) => (
-            <MilestoneCard
-              key={milestone.id}
-              goalId={goal.id}
-              milestone={milestone}
-              onRequestDeleteTask={requestDeleteTask}
-              onOpenTaskDetail={(task) => setSelectedTaskId(task.id)}
-            />
-          ))}
-          <AddRow label="Add milestone" placeholder="What's the milestone called?" className="self-start font-medium" onAdd={(name) => addMilestone(goal.id, name)} />
-        </div>
+        {showMilestones ? (
+          <div className="flex flex-col gap-3">
+            {goal.milestones.map((milestone) => (
+              <MilestoneCard
+                key={milestone.id}
+                goalId={goal.id}
+                milestone={milestone}
+                onRequestDelete={() => setConfirmDeleteMilestone(milestone)}
+                onRequestDeleteTask={requestDeleteTask}
+                onOpenTaskDetail={(task) => setSelectedTaskId(task.id)}
+              />
+            ))}
+            <AddRow label="Add milestone" placeholder="What's the milestone called?" className="self-start font-medium" onAdd={(name) => addMilestone(goal.id, name)} />
+          </div>
+        ) : (
+          <GoalTasksIntro
+            heading="Break it into milestones"
+            body="Milestones split this goal into the big steps it'll take to get there, each with its own tasks to check off. We can draft a starting plan for you to edit, or you can build it from scratch."
+            ctaLabel="Draft my plan"
+            onContinue={() => navigate(`/goals/${goal.id}/plan`)}
+          />
+        )}
 
         {/* Other tasks — not part of any milestone. */}
         <section className={CARD}>
@@ -659,6 +681,18 @@ export default function GoalDetail() {
           setConfirmDeleteTarget(null);
         }}
         onClose={() => setConfirmDeleteTarget(null)}
+      />
+
+      <ConfirmModal
+        open={!!confirmDeleteMilestone}
+        title="Delete this milestone?"
+        body={`"${confirmDeleteMilestone?.name ?? "This milestone"}" and its ${confirmDeleteMilestone?.tasks.length ?? 0} task${confirmDeleteMilestone?.tasks.length === 1 ? "" : "s"} go with it.`}
+        confirmLabel="Delete milestone"
+        onConfirm={() => {
+          if (confirmDeleteMilestone) deleteMilestone(goal.id, confirmDeleteMilestone.id);
+          setConfirmDeleteMilestone(null);
+        }}
+        onClose={() => setConfirmDeleteMilestone(null)}
       />
 
       <TaskDetailModal
