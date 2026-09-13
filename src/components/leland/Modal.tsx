@@ -70,6 +70,7 @@ export interface ModalContentProps {
    * screen reads as having navigated somewhere instead of as a dialog.
    */
   popupOnMobile?: boolean;
+  srTitle?: string;
   /** Extra classes appended to the modal content root — use `md:!min-w-0` and a tighter `sm:!max-w-*` to override default sizing. */
   className?: string;
 }
@@ -84,6 +85,7 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
   preventCloseOnOverlayClick,
   preventScroll,
   popupOnMobile,
+  srTitle,
   className,
 }) => {
   // The overlay already centres and gutters its child, so a popup only needs to
@@ -112,7 +114,9 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
           </header>
         </RdxDialog.Title>
       ) : (
-        <RdxDialog.Title className="sr-only">Dialog</RdxDialog.Title>
+        <RdxDialog.Title className="sr-only">
+          {srTitle ?? 'Dialog'}
+        </RdxDialog.Title>
       )}
       {hideCloseButton ? null : (
         // Position-only wrapper so Close merges onto the single Button via

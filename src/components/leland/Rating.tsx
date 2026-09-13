@@ -115,9 +115,13 @@ export const Rating: FC<RatingProps> = ({
             <button
               type="button"
               key={index}
+              className="rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-gray-dark"
               aria-label={`Rate ${index} star${index === 1 ? "" : "s"}`}
+              aria-pressed={index <= overallRate}
               onMouseEnter={() => setHoverRate(index)}
               onMouseLeave={() => setHoverRate(0)}
+              onFocus={() => setHoverRate(index)}
+              onBlur={() => setHoverRate(0)}
               onClick={() => onSaveRating?.(index)}
             >
               {star}
