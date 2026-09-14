@@ -65,7 +65,6 @@ import logoCoinbase   from "../assets/logos/coinbase.png";
 import logoMcKinsey   from "../assets/logos/mckinsey.png";
 
 import commentsIcon from "../assets/icons/comments.svg";
-import repostsIcon from "../assets/icons/reposts.svg";
 import sharesIcon from "../assets/icons/shares.svg";
 import verifiedIcon from "../assets/icons/verified.svg";
 import ComposerMediaButton from "../components/ComposerMediaButton";
@@ -1301,10 +1300,10 @@ export function FeedRepostButton({ initialCount, initialReposted = false, onRepo
           animate={reposted && burst ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1], rotate: [0, 360] } : { scale: 1, rotate: 0 }}
           transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
         >
-          <path d="M22.008 12L20.006 14L18.005 12" />
-          <path d="M6.341 6.344C7.79 4.896 9.791 4 12.002 4C16.423 4 20.007 7.582 20.007 12.002C20.007 12.61 19.933 13.2 19.805 13.769" />
-          <path d="M1.992 12L3.994 10L5.995 12" />
-          <path d="M17.658 17.6555C16.209 19.1035 14.208 19.9995 11.997 19.9995C7.576 19.9995 3.992 16.4175 3.992 11.9975C3.992 11.3895 4.066 10.7995 4.194 10.2305" />
+          <path d="m17 2 4 4-4 4" />
+          <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
+          <path d="m7 22-4-4 4-4" />
+          <path d="M21 13v1a4 4 0 0 1-4 4H3" />
         </motion.svg>
         {initialCount + (reposted ? 1 : 0) > 0 && (
           <motion.span
@@ -3746,17 +3745,17 @@ function AvatarWithHoverCard({ post, open, hoverProps }: { post: Post; open: boo
 function QuotedPostCard({ quoted }: { quoted: QuotedSnapshot }) {
   const body = quoted.body.length > 220 ? `${quoted.body.slice(0, 220).trimEnd()}…` : quoted.body;
   return (
-    <div className="mt-2 overflow-hidden rounded-2xl border border-gray-stroke">
-      <div className="flex flex-col gap-2 p-3">
+    <div className="mt-2 overflow-hidden rounded-2xl border border-gray-stroke transition-colors hover:bg-gray-hover">
+      <div className="flex flex-col gap-1 p-3">
         <div className="flex items-center gap-2">
           {quoted.avatar
             ? <img src={quoted.avatar} alt={quoted.author} className="h-6 w-6 shrink-0 rounded-full object-cover" />
             : <div className="h-6 w-6 shrink-0 rounded-full bg-gray-hover" />}
-          <span className="truncate text-[14px] font-medium text-gray-dark">{quoted.author}</span>
+          <span className="truncate text-[15px] font-semibold leading-tight text-gray-dark">{quoted.author}</span>
           {quoted.verified && <img src={verifiedIcon} alt="Verified" className="h-[13px] w-[13px] shrink-0" />}
-          <span className="shrink-0 text-[13px] text-gray-xlight">{quoted.time}</span>
+          <span className="shrink-0 text-[15px] leading-tight text-gray-extra-light">{quoted.time}</span>
         </div>
-        {body && <p className="whitespace-pre-wrap text-[14px] leading-[1.4] text-gray-dark">{body}</p>}
+        {body && <p className="whitespace-pre-wrap text-[15px] leading-[1.4] text-gray-dark">{body}</p>}
         {quoted.image && <img src={quoted.image} alt="" className="mt-1 max-h-64 w-full rounded-xl object-cover" />}
       </div>
     </div>
@@ -3799,8 +3798,23 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
   return (
     <div className="pt-5 pb-[14px]">
       {post.repostedBy && (
-        <div className="mb-2 flex items-center gap-1.5 pl-[44px] text-[13px] font-medium text-gray-light">
-          <img src={repostsIcon} alt="" className="h-4 w-4 [filter:invert(44%)]" />
+        <div className="mb-2 flex items-center gap-1.5 pl-[44px] text-[13px] font-semibold text-gray-extra-light">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4"
+            aria-hidden="true"
+          >
+            <g stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke">
+              <path d="m17 2 4 4-4 4" />
+              <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
+              <path d="m7 22-4-4 4-4" />
+              <path d="M21 13v1a4 4 0 0 1-4 4H3" />
+            </g>
+          </svg>
           <span>{post.repostedBy === "You" ? "You reposted" : `${post.repostedBy} reposted`}</span>
         </div>
       )}
