@@ -10,7 +10,7 @@ import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetNavBackHandler } from "../components/NavThemeContext";
 import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { FADE_TRANSITION, FADE_IN, FADE_OUT } from "../lib/pushTransition";
-import { posts, type Post, FeedPost, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar, HomeSidebar, PollCard, usePostBase, POST_HOVER_SHADOW, VerifiedBadge } from "./Home";
+import { posts, type Post, FeedPost, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar, HomeSidebar, PollCard, usePostBase, POST_HOVER_SHADOW, VerifiedBadge, formatViews, postViewCount } from "./Home";
 import { Button } from "../components/Button";
 import ImageLightbox from "../components/ImageLightbox";
 import ComposerMediaButton from "../components/ComposerMediaButton";
@@ -412,13 +412,6 @@ function PostMedia({ post, onImageClick }: { post: Post; onImageClick?: (idx: nu
   return null;
 }
 
-// Compact view-count formatting (e.g. 2632 → "2.6K", 14500 → "15K").
-function formatViews(n: number): string {
-  if (n < 1000) return `${n}`;
-  const k = n / 1000;
-  return `${k >= 10 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, "")}K`;
-}
-
 // The overflow (3-dot) menu that normally sits at a post's top-right; on the
 // featured post it lives at the far right of the action row instead.
 function PostOverflowMenu() {
@@ -803,7 +796,7 @@ function FeaturedPost({ post, onImageClick, onCommentFocus }: {
         <span className="flex items-center gap-1.5">
           {/* chart-2.svg, 14px, inherits the row's gray-extra-light */}
           <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" aria-hidden><path d="M9 13v8" vectorEffect="non-scaling-stroke" /><path d="M21 8v13" vectorEffect="non-scaling-stroke" /><path d="M15 3v18" vectorEffect="non-scaling-stroke" /><path d="M3 8v13" vectorEffect="non-scaling-stroke" /></svg>
-          {formatViews(post.likes * 24 + post.comments * 18 + post.reposts * 40)} Views
+          {formatViews(postViewCount(post))} Views
         </span>
         <span>Jul 7, 2026 at 9:41 AM</span>
       </div>

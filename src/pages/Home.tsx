@@ -1000,6 +1000,20 @@ export function formatCount(n: number): string {
   return n.toString();
 }
 
+// Derived impression/view count for a post. Prototype has no real analytics, so
+// we weight the visible engagement numbers; kept in one place so the feed action
+// row and the post-detail stat row always show the same figure.
+export function postViewCount(post: Post): number {
+  return post.likes * 24 + post.comments * 18 + post.reposts * 40;
+}
+
+// Compact view-count formatting (e.g. 2632 → "2.6K", 14500 → "15K").
+export function formatViews(n: number): string {
+  if (n < 1000) return `${n}`;
+  const k = n / 1000;
+  return `${k >= 10 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, "")}K`;
+}
+
 // Post links stay inside whichever experience you're in: under /alt-nav
 // they point at /alt-nav/post/:id, everywhere else at /post/:id. Consumed
 // by every card/action that opens a post.
@@ -1295,17 +1309,17 @@ export function FeedRepostButton({ initialCount, initialReposted = false, onRepo
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.75"
+          strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           aria-hidden
           animate={reposted && burst ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1], rotate: [0, 360] } : { scale: 1, rotate: 0 }}
           transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
         >
-          <path d="m17 2 4 4-4 4" />
-          <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
-          <path d="m7 22-4-4 4-4" />
-          <path d="M21 13v1a4 4 0 0 1-4 4H3" />
+          <path d="M13 19h-6c-1.105 0-2-0.895-2-2v-12" />
+          <path d="M11 5h6c1.105 0 2 0.895 2 2v12" />
+          <path d="M7.5 7.5l-2.5-2.5-2.5 2.5" />
+          <path d="M16 16l3 3 3-3" />
         </motion.svg>
         {initialCount + (reposted ? 1 : 0) > 0 && (
           <motion.span
@@ -1352,7 +1366,7 @@ export function FeedRepostButton({ initialCount, initialReposted = false, onRepo
                   </button>
                 ) : (
                   <button onClick={triggerRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
-                    <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+                    <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 19h-6c-1.105 0-2-0.895-2-2v-12"/><path d="M11 5h6c1.105 0 2 0.895 2 2v12"/><path d="M7.5 7.5l-2.5-2.5-2.5 2.5"/><path d="M16 16l3 3 3-3"/></svg>
                     Repost to feed
                   </button>
                 )}
@@ -1459,6 +1473,7 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
   const navigate = useNavigate();
   const postBase = usePostBase();
   const [shareOpen, setShareOpen] = useState(false);
+  const [impressionsOpen, setImpressionsOpen] = useState(false);
 
   return (
     // All five actions spread equally across the full row width.
@@ -1477,6 +1492,14 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
         onUndoRepost={() => onUndoRepost?.(post)}
         onQuote={() => onQuote?.(post)}
       />
+      {/* Impressions / views — chart-small.svg glyph, inlined so it inherits the
+          row's gray via currentColor. Opens an explainer modal. Not shown on the
+          detail page's main post (that uses StatsRow, which surfaces Views in its
+          own bordered row), so it only appears on feed posts and replies. */}
+      <button onClick={(e) => { e.stopPropagation(); setImpressionsOpen(true); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-light transition-colors hover:bg-[#222222]/8">
+        <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M10 13V18" /><path d="M18 9V18" /><path d="M14 6V18" /><path d="M6 9V18" /></svg>
+        <span className="text-[13px] font-medium">{formatViews(postViewCount(post))}</span>
+      </button>
       {/* Bookmark / save */}
       <FeedBookmarkButton post={post} />
       {/* Share — swapped to the uploaded share.svg (upload glyph) */}
@@ -1488,7 +1511,52 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
           {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
         </AnimatePresence>
       </div>
+      <ImpressionsInfoModal open={impressionsOpen} onClose={() => setImpressionsOpen(false)} />
     </div>
+  );
+}
+
+// Explainer modal for the impressions/views action. Prototype has no real
+// analytics drill-down, so tapping the count just defines what it means.
+function ImpressionsInfoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  useLockBodyScroll(open);
+  return createPortal(
+    <AnimatePresence>
+      {open ? (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-6" onClick={(e) => { e.stopPropagation(); onClose(); }}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 bg-black/30"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Impressions"
+            className="relative z-[81] w-full max-w-md rounded-3xl bg-white p-8 shadow-xl"
+          >
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="absolute right-5 top-5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#222222]/5 text-gray-dark transition-colors hover:bg-[#222222]/10"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+            </button>
+            <h2 className="pr-10 font-serif text-[32px] leading-tight text-gray-dark">Impressions</h2>
+            <p className="mt-2 text-[17px] text-gray-light">Number of times this post was seen.</p>
+            <Button size="lg" variant="outline" onClick={onClose} className="mt-6 w-full">Dismiss</Button>
+          </motion.div>
+        </div>
+      ) : null}
+    </AnimatePresence>,
+    document.body,
   );
 }
 
@@ -3810,11 +3878,11 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
             className="h-4 w-4"
             aria-hidden="true"
           >
-            <g stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke">
-              <path d="m17 2 4 4-4 4" />
-              <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
-              <path d="m7 22-4-4 4-4" />
-              <path d="M21 13v1a4 4 0 0 1-4 4H3" />
+            <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke">
+              <path d="M13 19h-6c-1.105 0-2-0.895-2-2v-12" />
+              <path d="M11 5h6c1.105 0 2 0.895 2 2v12" />
+              <path d="M7.5 7.5l-2.5-2.5-2.5 2.5" />
+              <path d="M16 16l3 3 3-3" />
             </g>
           </svg>
           <span>{post.repostedBy === "You" ? "You reposted" : `${post.repostedBy} reposted`}</span>
