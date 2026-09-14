@@ -5,7 +5,7 @@ import browserIcon from "../assets/icons/browser.svg";
 import codeIcon from "../assets/icons/code.svg";
 import { useIsCoachMode } from "../hooks/useIsCoachMode";
 import { useNavTheme } from "./NavThemeContext";
-import { useTopNavStyle } from "../contexts/TopNavStyleContext";
+import { useTopNavStyle, type TopNavVariant } from "../contexts/TopNavStyleContext";
 import { useExpertMode } from "../contexts/ExpertModeContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 // Primary nav icons — always the filled variant; inactive states just fade to
@@ -19,6 +19,8 @@ import searchInactiveIcon from "../assets/icons/nav-icons/search-inactive.svg";
 import userCircleIcon from "../assets/icons/user-circle-filled.svg";
 // Discover dropdown + profile menu icons.
 import briefcaseFilledIcon from "../assets/icons/briefcase-filled.svg";
+import livestreamIcon from "../assets/icons/video-filled-dark.svg";
+import contentBookIcon from "../assets/icons/content-book-filled.svg";
 import myCoursesIcon from "../assets/icons/my-courses.svg";
 import giftIcon from "../assets/icons/gift.svg";
 import settingsIcon from "../assets/icons/settings.svg";
@@ -42,6 +44,18 @@ const browseCategories = [
   { to: "#", label: "Law & Public Service" },
   { to: "#", label: "Arts, Media, and Entertainment" },
   { to: "#", label: "More" },
+];
+
+/* ── v2 "Browse" dropdown — a browse hub. "Categories" reveals the category
+   list above as a hover flyout; the rest are direct links. `path: null` marks
+   the flyout row; "#" is a placeholder destination. Real paths run through
+   navTo() so they stay inside /alt-nav. ── */
+const browseMenuV2: { path: string | null; label: string }[] = [
+  { path: null, label: "Categories" },
+  { path: "#", label: "Free Livestreams" },
+  { path: "/jobs", label: "Jobs" },
+  { path: "#", label: "Programs" },
+  { path: "#", label: "Content" },
 ];
 
 /* ── "Me" dropdown menu groups ── */
@@ -70,7 +84,7 @@ function NavBadge({ count, dot }: { count?: number; dot?: boolean }) {
   }
   if (!count) return null;
   return (
-    <span className="absolute -right-2 -top-1.5 flex h-[16px] min-w-[16px] items-center justify-center rounded-full border border-white bg-[#FF003D] px-1 text-[10px] font-semibold leading-none text-white">
+    <span className="absolute -right-2 -top-1.5 flex min-h-[16px] min-w-[16px] items-center justify-center rounded-full border border-white bg-[#FF003D] px-1 py-0.5 text-[11px] font-semibold leading-none text-white">
       {count}
     </span>
   );
@@ -105,6 +119,7 @@ function IconNavLink({
   icon,
   badge,
   dot,
+  hideLabel,
 }: {
   to: string;
   end?: boolean;
@@ -112,17 +127,26 @@ function IconNavLink({
   icon: string;
   badge?: number;
   dot?: boolean;
+  // Force an icon-only item (snug, no text) regardless of the global label
+  // toggle — used for Messages/Notifications on v4.
+  hideLabel?: boolean;
 }) {
   const { showNavLabels } = useTopNavStyle();
+  const showLabel = showNavLabels && !hideLabel;
   return (
-    <NavLink to={to} end={end} className={itemBase}>
+    <NavLink
+      to={to}
+      end={end}
+      className={hideLabel ? compactItemBase : itemBase}
+      aria-label={hideLabel ? label : undefined}
+    >
       {({ isActive }) => (
         <>
           <span className={iconWrap}>
             <img src={icon} alt="" className={iconCls(isActive)} />
             <NavBadge count={badge} dot={dot} />
           </span>
-          {showNavLabels && <span className={labelCls(isActive)}>{label}</span>}
+          {showLabel && <span className={labelCls(isActive)}>{label}</span>}
           {underline(isActive)}
         </>
       )}
@@ -133,6 +157,8 @@ function IconNavLink({
 export default function TopNavLinkedIn() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [discoverOpen, setDiscoverOpen] = useState(false);
+  // v2 Browse dropdown: whether the "Categories" hover flyout is showing.
+  const [browseFlyoutOpen, setBrowseFlyoutOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -146,12 +172,23 @@ export default function TopNavLinkedIn() {
   const inLinkedInNav = pathname.startsWith("/alt-nav") || pathname.startsWith("/my-leland");
   const homeTo = inLinkedInNav ? "/alt-nav" : "/";
   const navTo = (path: string) => (inLinkedInNav ? `/alt-nav${path}` : path);
-  // All three variants share the same v1 nav items + "Me" dropdown; they differ
-  // only in where the icon group and search live:
+  // We're rebuilding v2 and v3 from scratch, so for now all three variants
+  // render the shared v1 layout. `layoutVariant` drives the layout branches
+  // below; the raw `variant` still tracks the selected toggle (v1/v2/v3) so we
+  // can diverge each one as we design it.
   //   v1 — search bar on the left, icons on the right (before Me)
   //   v2 — icons on the left, search bar on the right (before Me)
   //   v3 — icons centered on the page, search collapses to an icon before Me
-  const iconsCentered = variant === 3;
+  const layoutVariant = 1 as TopNavVariant;
+  const iconsCentered = layoutVariant === 3;
+  // Each higher variant inherits the previous one's behavior:
+  //   v4 = v3 + Livestreams/Content items and Messages/Notifications moved to
+  //        the right of the divider (label-less).
+  //   v5 = v4 + the main nav group centered on the page (search stays left,
+  //        Messages/Notifications/My Leland on the right).
+  const isV5 = variant === 5;
+  const isV4Like = variant === 4 || isV5;
+  const isV3Like = variant === 3 || isV4Like;
 
   // scrollReveal pages (e.g. Dashboard) start with the nav matching the hero
   // color, then swap to white + a subtle shadow once the user scrolls.
@@ -190,6 +227,11 @@ export default function TopNavLinkedIn() {
   const profileRef = useRef<HTMLDivElement>(null);
   const discoverRef = useRef<HTMLDivElement>(null);
 
+  // Collapse the v2 category flyout whenever the Browse dropdown closes.
+  useEffect(() => {
+    if (!discoverOpen) setBrowseFlyoutOpen(false);
+  }, [discoverOpen]);
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
@@ -217,6 +259,26 @@ export default function TopNavLinkedIn() {
     </svg>
   );
 
+  // A right-pointing chevron used to mark rows that lead somewhere / expand.
+  const chevronRight = (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-light">
+      <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+
+  // A single dropdown row (used for the category list and the v2 Browse links).
+  const menuRow = (to: string, label: string, showChevron: boolean) => (
+    <NavLink
+      key={label}
+      to={to}
+      onClick={() => setDiscoverOpen(false)}
+      className="flex w-full items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/5"
+    >
+      {label}
+      {showChevron && chevronRight}
+    </NavLink>
+  );
+
   // Shared across all three variants — positioned right (v1), left (v2), or
   // centered (v3) by the layout below.
   const iconGroup = (
@@ -236,7 +298,7 @@ export default function TopNavLinkedIn() {
             <img src={browseIcon} alt="" className={iconCls(discoverActive)} />
           </span>
           <span className={`flex items-center gap-0.5 ${labelCls(discoverActive)}`}>
-            {showNavLabels && "Browse"}
+            {showNavLabels && (variant === 2 ? "Browse" : "Categories")}
             {caret(discoverOpen)}
           </span>
           {underline(discoverActive)}
@@ -251,45 +313,79 @@ export default function TopNavLinkedIn() {
               transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
               className="absolute left-0 top-full z-50 mt-1 w-64 rounded-2xl border border-gray-stroke bg-white p-2 shadow-lg"
             >
-              {browseCategories.map(({ to, label }) => (
-                <NavLink
-                  key={label}
-                  to={to}
-                  onClick={() => setDiscoverOpen(false)}
-                  className="flex w-full items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/5"
-                >
-                  {label}
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gray-light">
-                    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </NavLink>
-              ))}
+              {variant === 2
+                ? browseMenuV2.map((item) =>
+                    item.path === null ? (
+                      // Categories — reveals the category list as a hover flyout.
+                      // The flyout is a DOM child of this wrapper, so moving onto
+                      // it doesn't fire the wrapper's mouseleave (stays open).
+                      <div
+                        key={item.label}
+                        className="relative"
+                        onMouseEnter={() => setBrowseFlyoutOpen(true)}
+                        onMouseLeave={() => setBrowseFlyoutOpen(false)}
+                      >
+                        <button
+                          type="button"
+                          className={`flex w-full items-center justify-between rounded-lg p-3 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/5 ${
+                            browseFlyoutOpen ? "bg-[#222222]/5" : ""
+                          }`}
+                          aria-expanded={browseFlyoutOpen}
+                        >
+                          {item.label}
+                          {chevronRight}
+                        </button>
+                        <AnimatePresence>
+                          {browseFlyoutOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, x: -6 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -6 }}
+                              transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+                              className="absolute left-full top-0 z-50 max-h-[70vh] w-64 overflow-y-auto rounded-2xl border border-gray-stroke bg-white p-2 shadow-lg"
+                            >
+                              {browseCategories.map(({ to, label }) => menuRow(to, label, true))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ) : (
+                      menuRow(item.path === "#" ? "#" : navTo(item.path), item.label, false)
+                    )
+                  )
+                : browseCategories.map(({ to, label }) => menuRow(to, label, true))}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* My Leland */}
-      <NavLink to={myLelandTo} className={itemBase}>
-        {({ isActive }) => (
-          <>
-            <span className={iconWrap}>
-              <img src={userCircleIcon} alt="" className={iconCls(isActive || myLelandActive)} />
-            </span>
-            {showNavLabels && <span className={labelCls(isActive || myLelandActive)}>My Leland</span>}
-            {underline(isActive || myLelandActive)}
-          </>
-        )}
-      </NavLink>
+      {/* My Leland — on v3/v4 it moves out to the far right (a label-less
+          profile photo after the divider), so it's dropped from the icon group */}
+      {!isV3Like && (
+        <NavLink to={myLelandTo} className={itemBase}>
+          {({ isActive }) => (
+            <>
+              <span className={iconWrap}>
+                <img src={userCircleIcon} alt="" className={iconCls(isActive || myLelandActive)} />
+              </span>
+              {showNavLabels && <span className={labelCls(isActive || myLelandActive)}>My Leland</span>}
+              {underline(isActive || myLelandActive)}
+            </>
+          )}
+        </NavLink>
+      )}
 
-      {/* Jobs */}
-      <IconNavLink to={navTo("/jobs")} label="Jobs" icon={briefcaseFilledIcon} />
+      {/* Jobs — moved into the v2 Browse dropdown, so hidden from the top nav there */}
+      {variant !== 2 && <IconNavLink to={navTo("/jobs")} label="Jobs" icon={briefcaseFilledIcon} />}
 
-      {/* Messages */}
-      <IconNavLink to={navTo("/messages")} label="Messages" icon={chatIcon} badge={1} />
+      {/* Livestreams + Content — v4 adds these next to Jobs */}
+      {isV4Like && <IconNavLink to={navTo("/livestreams")} label="Livestreams" icon={livestreamIcon} />}
+      {isV4Like && <IconNavLink to={navTo("/content")} label="Content" icon={contentBookIcon} />}
 
-      {/* Notifications */}
-      <IconNavLink to={navTo("/notifications")} label="Notifications" icon={notificationsIcon} dot />
+      {/* Messages + Notifications — v4 relocates these to the right of the
+          divider (icon-only), so they're dropped from the icon group there */}
+      {!isV4Like && <IconNavLink to={navTo("/messages")} label="Messages" icon={chatIcon} badge={1} />}
+      {!isV4Like && <IconNavLink to={navTo("/notifications")} label="Notifications" icon={notificationsIcon} badge={3} />}
     </>
   );
 
@@ -310,6 +406,25 @@ export default function TopNavLinkedIn() {
     </form>
   );
 
+  // v3's My Leland: a larger, label-less profile photo pinned to the far right
+  // (after the divider), standing in for the removed Me dropdown.
+  const myLelandProfileItem = (
+    <NavLink to={myLelandTo} className={compactItemBase} aria-label="My Leland">
+      {({ isActive }) => (
+        <>
+          <span className="relative flex items-center justify-center">
+            <img
+              src={profilePhoto}
+              alt=""
+              className={`h-8 w-8 rounded-full object-cover ${isActive || myLelandActive ? "ring-2 ring-gray-dark" : ""}`}
+            />
+          </span>
+          {underline(isActive || myLelandActive)}
+        </>
+      )}
+    </NavLink>
+  );
+
   return (
     <header
       // data-nav-variant exposes the active v1/v2/v3 variant — branch on
@@ -325,16 +440,18 @@ export default function TopNavLinkedIn() {
     >
       <div className={`relative flex min-h-[60px] items-stretch justify-between gap-4 px-4 sm:px-6 ${navEdgeToEdge ? "w-full" : "mx-auto max-w-[1280px]"}`}>
         {/* Left: logo + (search bar on v1 / icon group on v2) */}
-        <div className={`flex gap-5 ${variant === 2 ? "items-stretch" : "items-center py-2.5"}`}>
+        <div className={`flex gap-5 ${layoutVariant === 2 ? "items-stretch" : "items-center py-2.5"}`}>
           <NavLink to={isCoachMode ? "/coach/inbox" : homeTo} className="flex shrink-0 items-center">
             <img src={lelandWordmark} alt="Leland" className="h-6 w-auto" />
           </NavLink>
-          {variant === 1 && searchBar}
-          {variant === 2 && !isCoachMode && <div className="flex items-stretch">{iconGroup}</div>}
+          {layoutVariant === 1 && searchBar}
+          {layoutVariant === 2 && !isCoachMode && <div className="flex items-stretch">{iconGroup}</div>}
         </div>
 
-        {/* Center: icon group — v3 only (absolute overlay so it's page-centered) */}
-        {iconsCentered && !isCoachMode && (
+        {/* Center: main nav group — v5 (and the dormant v3 centered layout).
+            Absolute overlay so it's centered on the page independent of the
+            search bar (left) and Messages/Notifications/profile (right). */}
+        {(iconsCentered || isV5) && !isCoachMode && (
           <div className="absolute left-1/2 top-0 flex h-full -translate-x-1/2 items-stretch">
             {iconGroup}
           </div>
@@ -342,13 +459,29 @@ export default function TopNavLinkedIn() {
 
         {/* Right: (icons on v1 / search bar on v2 / search icon on v3) + Me */}
         <div className="flex items-stretch">
-          {variant === 1 && !isCoachMode && (
+          {layoutVariant === 1 && !isCoachMode && (
             <>
-              <div className="flex items-stretch">{iconGroup}</div>
-              <span className="my-3 mx-1 w-px self-stretch bg-gray-stroke" />
+              {/* Main nav group + its divider sit on the right for v1–v4; v5
+                  centers the group instead, so they're omitted here. */}
+              {!isV5 && (
+                <>
+                  <div className="flex items-stretch">{iconGroup}</div>
+                  {/* Divider before the trailing items — the Me dropdown (v1/v2),
+                      or the far-right My Leland profile (v3/v4). v4 also groups
+                      the label-less Messages + Notifications here. */}
+                  <span className="my-3 mx-1 w-px self-stretch bg-gray-stroke" />
+                </>
+              )}
+              {isV4Like && (
+                <>
+                  <IconNavLink to={navTo("/messages")} label="Messages" icon={chatIcon} badge={1} hideLabel />
+                  <IconNavLink to={navTo("/notifications")} label="Notifications" icon={notificationsIcon} badge={3} hideLabel />
+                </>
+              )}
+              {isV3Like && myLelandProfileItem}
             </>
           )}
-          {variant === 2 && <div className="flex items-stretch">{searchBar}</div>}
+          {layoutVariant === 2 && <div className="flex items-stretch">{searchBar}</div>}
           {iconsCentered && !isCoachMode && (
             <NavLink to={navTo("/search")} aria-label="Search" className={compactItemBase}>
               {({ isActive }) => (
@@ -362,23 +495,25 @@ export default function TopNavLinkedIn() {
             </NavLink>
           )}
 
-          {/* Me trigger + dropdown */}
+          {/* Me trigger + dropdown — removed on v3/v4; its contents live on the
+              My Leland "Account" tab instead */}
+          {!isV3Like && (
           <div ref={profileRef} className="relative flex items-stretch">
             <button
               type="button"
               onClick={() => setProfileOpen((v) => !v)}
-              className={`${variant === 1 ? itemBase : compactItemBase}${showNavLabels ? "" : " !flex-row"}`}
+              className={`${layoutVariant === 1 ? itemBase : compactItemBase}${showNavLabels ? "" : " !flex-row"}`}
               aria-expanded={profileOpen}
             >
-              <span className={iconsCentered || variant === 2 ? "relative flex items-center justify-center" : iconWrap}>
+              <span className={iconsCentered || layoutVariant === 2 ? "relative flex items-center justify-center" : iconWrap}>
                 <img
                   src={profilePhoto}
                   alt="Profile"
-                  className={`rounded-full object-cover ${iconsCentered || variant === 2 ? "h-[31px] w-[31px]" : "h-[24px] w-[24px]"} ${profileOpen ? "ring-2 ring-gray-dark" : ""}`}
+                  className={`rounded-full object-cover ${iconsCentered || layoutVariant === 2 ? "h-[31px] w-[31px]" : "h-[24px] w-[24px]"} ${profileOpen ? "ring-2 ring-gray-dark" : ""}`}
                 />
               </span>
               {/* v2/v3 drop the "Me" label + chevron in favor of a larger photo */}
-              {variant === 1 && (
+              {layoutVariant === 1 && (
                 <span className={`flex items-center gap-0.5 ${labelCls(profileOpen)}`}>
                   {showNavLabels && "Me"}
                   {caret(profileOpen)}
@@ -507,7 +642,7 @@ export default function TopNavLinkedIn() {
                             <div className="flex items-center justify-between gap-3 py-2 pl-3 pr-1">
                               <span className="text-[14px] font-medium text-gray-dark">Variant</span>
                               <div className="flex shrink-0 overflow-hidden rounded-full bg-[#E5E5E5] p-[2px]">
-                                {([1, 2, 3] as const).map((v) => (
+                                {([1, 2, 3, 4, 5] as const).map((v) => (
                                   <button
                                     key={v}
                                     onClick={() => setVariant(v)}
@@ -607,6 +742,7 @@ export default function TopNavLinkedIn() {
               )}
             </AnimatePresence>
           </div>
+          )}
         </div>
       </div>
     </header>
