@@ -118,6 +118,9 @@ import CoachAnalytics from "./pages/CoachAnalytics";
 import CoachMyContent from "./pages/CoachMyContent";
 import CoachReviews from "./pages/CoachReviews";
 import CoachDiscountCodes from "./pages/CoachDiscountCodes";
+import Account from "./pages/Account";
+import AltNavLivestreams from "./pages/AltNavLivestreams";
+import AltNavContent from "./pages/AltNavContent";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
 import CoachProductNew from "./pages/CoachProductNew";
 import OfferingPage from "./pages/OfferingPage";
@@ -232,6 +235,7 @@ export default function App() {
           <Route path="/my-leland/analytics" element={<CoachAnalytics />} />
           <Route path="/my-leland/reviews" element={<CoachReviews />} />
           <Route path="/my-leland/discount-codes" element={<CoachDiscountCodes />} />
+          <Route path="/my-leland/account" element={<Account />} />
         </Route>
         <Route path="/components" element={<Components />} />
         <Route path="/components/leland" element={<LelandKitTest />} />
@@ -270,6 +274,8 @@ export default function App() {
           <Route path="/alt-nav/dashboard" element={<Dashboard />} />
           <Route path="/alt-nav/browse" element={<Browse />} />
           <Route path="/alt-nav/jobs" element={<Jobs />} />
+          <Route path="/alt-nav/livestreams" element={<AltNavLivestreams />} />
+          <Route path="/alt-nav/content" element={<AltNavContent />} />
           <Route path="/alt-nav/plus" element={<LelandPlus />} />
           <Route path="/alt-nav/messages" element={<Messaging />} />
           <Route path="/alt-nav/notifications" element={<Notifications />} />

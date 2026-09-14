@@ -10,7 +10,7 @@ export type TopNavStyle = "classic" | "linkedin";
 // Design variants of the LinkedIn-style nav (v1/v2/v3) — a scratch space for
 // presenting minor styling alternatives to the team. Only meaningful when
 // style === "linkedin"; toggled from the Navigation dropdown.
-export type TopNavVariant = 1 | 2 | 3;
+export type TopNavVariant = 1 | 2 | 3 | 4 | 5;
 
 interface TopNavStyleContextValue {
   style: TopNavStyle;
@@ -57,7 +57,7 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   });
   const [variant, setVariantState] = useState<TopNavVariant>(() => {
     const v = Number(localStorage.getItem(VARIANT_STORAGE_KEY));
-    return v === 2 || v === 3 ? (v as TopNavVariant) : 1;
+    return v === 2 || v === 3 || v === 4 || v === 5 ? (v as TopNavVariant) : 1;
   });
   const [showNavLabels, setShowNavLabelsState] = useState<boolean>(() => {
     // Labels shown by default; only an explicit "0" hides them.

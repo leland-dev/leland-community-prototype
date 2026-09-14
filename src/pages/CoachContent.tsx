@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { Button } from "../components/Button";
-import { ConfigModal, defaultConfigFor, type OfferingItem } from "./CoachProductNew";
+import { ConfigModal, ListConfigModal, CollectionCover, collectionThumbs, collectionCountLabel, CONTENT_LIBRARY, formatViews, defaultConfigFor, type OfferingItem } from "./CoachProductNew";
+import { useCollections, upsertCollection, deleteCollection, newCollectionId, type Collection } from "../lib/collections";
 import { RESOURCES, type Resource } from "../lib/resources";
 import AnalyticsCard, { type AnalyticsMetric } from "../components/AnalyticsCard";
 import CoachContentResourceSheet from "./CoachContentResourceSheet";
+import ConfirmModal from "../components/ConfirmModal";
 import chevronDownIcon from "../assets/icons/chevron-down.svg";
+import stackIcon from "../assets/icons/stack.svg";
+import trashIcon from "../assets/icons/trash.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
 import documentIcon from "../assets/icons/document.svg";
 import playVideoIcon from "../assets/icons/play-video.svg";
@@ -31,6 +36,226 @@ function MaskIcon({ src, className = "" }: { src: string; className?: string }) 
         WebkitMaskPosition: "center",
       }}
     />
+  );
+}
+
+// ── Collections — named buckets of uploaded content, shown alongside the raw
+// resources. Created / edited here via the same builder the offering flow uses
+// (ListConfigModal); the shared store keeps both surfaces in sync. Three admin-
+// selectable display modes: cards (default), interwoven into the content list,
+// and a minimal horizontal carousel. ──
+function collectionToItem(c: Collection): OfferingItem {
+  return {
+    id: Date.now(),
+    slug: "collection",
+    config: { title: c.title, description: c.description, collectionId: c.id },
+    configured: true,
+    items: c.items.map((it) => ({ id: it.id, config: { ...it.config } })),
+  };
+}
+
+// Total views across a collection's items, summed from the shared library.
+function collectionTotalViews(items: Collection["items"]): number {
+  return items.reduce((sum, it) => sum + (CONTENT_LIBRARY.find((l) => l.id === it.config.libraryId)?.views ?? 0), 0);
+}
+
+// One-line metadata for a collection, e.g. "4 resources · 8.5k views".
+function collectionMeta(c: Collection): string {
+  return `${collectionCountLabel(c.items.length)} · ${formatViews(collectionTotalViews(c.items))} views`;
+}
+
+// Editor state + modals for creating / editing / deleting collections. Shared
+// across every display mode so a collection can be opened from anywhere on the
+// page (cards, carousel, or a row in the interwoven content list).
+function useCollectionEditor() {
+  // The collection currently open in the builder (null = closed). Carries a
+  // `collectionId` in config so save knows which bucket to write back.
+  const [editItem, setEditItem] = useState<OfferingItem | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Collection | null>(null);
+
+  const openNew = () =>
+    setEditItem({ id: Date.now(), slug: "collection", config: { title: "", description: "", collectionId: newCollectionId() }, configured: false, items: [] });
+  const openEdit = (c: Collection) => setEditItem(collectionToItem(c));
+  const requestDelete = (c: Collection) => setConfirmDelete(c);
+
+  const patchGeneral = (patch: Record<string, string>) =>
+    setEditItem((it) => (it ? { ...it, config: { ...it.config, ...patch } } : it));
+  const setItems = (items: OfferingItem["items"]) =>
+    setEditItem((it) => (it ? { ...it, items } : it));
+  const save = () => {
+    setEditItem((it) => {
+      if (it) {
+        upsertCollection({
+          id: it.config.collectionId,
+          title: it.config.title || "Untitled collection",
+          description: it.config.description || "",
+          items: (it.items ?? []).map((r) => ({ id: r.id, config: { ...r.config } })),
+        });
+      }
+      return null;
+    });
+  };
+
+  const modals = (
+    <>
+      <ListConfigModal
+        item={editItem}
+        onGeneralChange={patchGeneral}
+        onItemsChange={setItems}
+        onSave={save}
+        onClose={() => setEditItem(null)}
+        saveLabel="Save collection"
+      />
+      <ConfirmModal
+        open={!!confirmDelete}
+        title={`Delete “${confirmDelete?.title ?? ""}”?`}
+        body="This removes the collection. The content inside it stays in your library — only the bucket goes away."
+        confirmLabel="Delete collection"
+        onConfirm={() => { if (confirmDelete) deleteCollection(confirmDelete.id); setConfirmDelete(null); }}
+        onClose={() => setConfirmDelete(null)}
+      />
+    </>
+  );
+
+  return { openNew, openEdit, requestDelete, modals };
+}
+
+const PLUS_ICON = <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>;
+
+type CollectionViewProps = {
+  collections: Collection[];
+  onNew: () => void;
+  onOpen: (c: Collection) => void;
+  onDelete: (c: Collection) => void;
+};
+
+// Shared section title block.
+function CollectionsTitle() {
+  return (
+    <div>
+      <h2 className="text-[22px] font-semibold text-gray-dark">Collections</h2>
+      <p className="mt-0.5 text-[15px] text-gray-light">Bundle your content into buckets you can add to an offering.</p>
+    </div>
+  );
+}
+
+// V1 — grid of cards with cover, title, description, and item count.
+function CollectionCardsView({ collections, onNew, onOpen, onDelete }: CollectionViewProps) {
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-4">
+        <CollectionsTitle />
+        <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={onNew}>
+          {PLUS_ICON}
+          New collection
+        </Button>
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {collections.map((c) => (
+          <div
+            key={c.id}
+            onClick={() => onOpen(c)}
+            className="group relative flex cursor-pointer flex-col rounded-2xl border border-gray-stroke bg-white p-4 text-left shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]"
+          >
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onDelete(c); }}
+              aria-label={`Delete ${c.title}`}
+              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-gray-light opacity-0 shadow-[0_1px_3px_rgba(16,24,40,0.15)] transition-all hover:text-[#E5484D] focus-visible:opacity-100 group-hover:opacity-100"
+            >
+              <MaskIcon src={trashIcon} className="h-[16px] w-[16px]" />
+            </button>
+            <CollectionCover thumbs={collectionThumbs(c.items)} className="h-16 w-24" />
+            <p className="mt-3.5 text-[15px] font-semibold leading-tight text-gray-dark">{c.title}</p>
+            <p className="mt-1.5 line-clamp-2 flex-1 text-[14px] leading-snug text-gray-light">{c.description}</p>
+            <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-[#222222]/5 px-2.5 py-1 text-[12px] font-medium text-gray-light">
+              <MaskIcon src={stackIcon} className="h-3.5 w-3.5" />
+              {collectionCountLabel(c.items.length)}
+            </span>
+          </div>
+        ))}
+
+        {/* Create tile — dashed, always the last cell */}
+        <button
+          type="button"
+          onClick={onNew}
+          className="flex min-h-[172px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-stroke text-gray-light transition-colors hover:border-gray-dark hover:text-gray-dark"
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#222222]/5">{PLUS_ICON}</span>
+          <span className="text-[14px] font-semibold">New collection</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// V3 — minimal horizontal carousel: a larger thumbnail stack, title, and a bit
+// of metadata. Prev/next chevrons that fade out at the scroll extents.
+function CollectionCarouselView({ collections, onNew, onOpen }: CollectionViewProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => {
+      setAtStart(el.scrollLeft <= 1);
+      setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 1);
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => { el.removeEventListener("scroll", update); ro.disconnect(); };
+  }, [collections.length]);
+
+  const scrollByCards = (dir: 1 | -1) => scrollRef.current?.scrollBy({ left: dir * 280, behavior: "smooth" });
+  const chevron = "flex h-9 w-9 items-center justify-center rounded-full border border-[#222222]/[0.12] text-gray-dark transition-colors hover:bg-[#222222]/5 disabled:opacity-30 disabled:hover:bg-transparent";
+
+  return (
+    <div>
+      <div className="flex items-end justify-between gap-4">
+        <CollectionsTitle />
+        <div className="flex shrink-0 items-center gap-2">
+          <button onClick={() => scrollByCards(-1)} disabled={atStart} aria-label="Previous collections" className={chevron}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <button onClick={() => scrollByCards(1)} disabled={atEnd} aria-label="More collections" className={chevron}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          </button>
+          <Button size="sm" variant="dark" rounded="rounded-full" className="ml-1 shrink-0 font-semibold" onClick={onNew}>
+            {PLUS_ICON}
+            New
+          </Button>
+        </div>
+      </div>
+
+      <div ref={scrollRef} className="scrollbar-hide mt-5 flex items-stretch gap-4 overflow-x-auto pb-2">
+        {collections.map((c) => (
+          <button
+            key={c.id}
+            onClick={() => onOpen(c)}
+            className="group flex w-[240px] shrink-0 flex-col rounded-2xl border border-gray-stroke bg-white p-3 text-left shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]"
+          >
+            <CollectionCover thumbs={collectionThumbs(c.items)} className="h-36 w-full" />
+            <p className="mt-3.5 truncate text-[15px] font-semibold text-gray-dark">{c.title}</p>
+            <p className="mt-1 truncate text-[13px] text-gray-light">{collectionMeta(c)}</p>
+          </button>
+        ))}
+
+        {/* Create card — dashed, at the end of the row */}
+        <button
+          type="button"
+          onClick={onNew}
+          className="flex w-[240px] shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-stroke text-gray-light transition-colors hover:border-gray-dark hover:text-gray-dark"
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#222222]/5">{PLUS_ICON}</span>
+          <span className="text-[14px] font-semibold">New collection</span>
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -165,8 +390,33 @@ const RESOURCE_TABS = [
   { key: "leland", label: "Added to Leland+" },
 ] as const;
 
+// Admin-selectable ways to display collections on this page.
+const COLLECTION_VIEWS = [
+  { key: "cards", label: "Cards" },
+  { key: "interwoven", label: "In content list" },
+  { key: "carousel", label: "Carousel" },
+] as const;
+type CollectionView = (typeof COLLECTION_VIEWS)[number]["key"];
+
 export default function CoachContent() {
   const [resourceTab, setResourceTab] = useState<(typeof RESOURCE_TABS)[number]["key"]>("all");
+  // Which collections display mode is active (toggled via the admin 3-dot menu).
+  const [collectionsView, setCollectionsView] = useState<CollectionView>("cards");
+  const collections = useCollections();
+  const editor = useCollectionEditor();
+
+  // Admin 3-dot menu (bottom-right) — closes on outside click.
+  const [adminOpen, setAdminOpen] = useState(false);
+  const adminRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!adminOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (adminRef.current && !adminRef.current.contains(e.target as Node)) setAdminOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [adminOpen]);
+
   // The resource whose details sheet is open (null = closed).
   const [openResource, setOpenResource] = useState<Resource | null>(null);
   // "Submit a resource" opens the content upload/configure modal (the same one
@@ -204,10 +454,22 @@ export default function CoachContent() {
         <AnalyticsCard title="Your Leland+ stats" metrics={CONTENT_METRICS} collapsible />
       </div>
 
+      {/* ── Collections (cards / carousel views; the interwoven view folds them
+          into the resources list below instead) ── */}
+      {collectionsView !== "interwoven" && (
+        <div className="mt-12">
+          {collectionsView === "carousel" ? (
+            <CollectionCarouselView collections={collections} onNew={editor.openNew} onOpen={editor.openEdit} onDelete={editor.requestDelete} />
+          ) : (
+            <CollectionCardsView collections={collections} onNew={editor.openNew} onOpen={editor.openEdit} onDelete={editor.requestDelete} />
+          )}
+        </div>
+      )}
+
       {/* ── Your resources (simplified — styled like the offering builder's
           product list) ── */}
       <div className="mt-12">
-        <h2 className="text-[22px] font-semibold text-gray-dark">Your resources</h2>
+        <h2 className="text-[22px] font-semibold text-gray-dark">{collectionsView === "interwoven" ? "Your content" : "Your resources"}</h2>
         <div className="mt-4 flex items-center justify-between gap-4">
           <div className="inline-flex items-center gap-1 rounded-full bg-gray-hover p-1">
             {RESOURCE_TABS.map((t) => (
@@ -220,12 +482,43 @@ export default function CoachContent() {
               </button>
             ))}
           </div>
-          <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold">
-            Sort by
-            <MaskIcon src={chevronDownIcon} className="h-4 w-4 text-gray-light" />
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            {collectionsView === "interwoven" && (
+              <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={editor.openNew}>
+                {PLUS_ICON}
+                New collection
+              </Button>
+            )}
+            <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold">
+              Sort by
+              <MaskIcon src={chevronDownIcon} className="h-4 w-4 text-gray-light" />
+            </Button>
+          </div>
         </div>
         <div className="mt-5 overflow-hidden rounded-xl border border-gray-stroke bg-white px-6">
+          {/* Interwoven view: collection rows lead the list, then standalone
+              content. Each collection opens the builder; the stacked cover and
+              "Collection" tag set them apart from single resources. */}
+          {collectionsView === "interwoven" && collections.map((c) => (
+            <div key={c.id} className="flex items-center gap-3 border-b border-gray-stroke">
+              <button onClick={() => editor.openEdit(c)} className="flex min-w-0 flex-1 items-center gap-3 py-4 text-left">
+                <CollectionCover thumbs={collectionThumbs(c.items)} className="h-10 w-[60px]" />
+                <span className="min-w-0 flex-1">
+                  <span className="inline-block max-w-full truncate align-top text-[15px] font-semibold text-gray-dark hover:underline">{c.title}</span>
+                  <span className="mt-0.5 block truncate text-[15px] text-gray-light">{collectionMeta(c)}</span>
+                </span>
+              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#222222]/5 px-2 py-0.5 text-[12px] font-medium text-gray-light">
+                  <MaskIcon src={stackIcon} className="h-3.5 w-3.5" />
+                  Collection
+                </span>
+              </div>
+              <button onClick={() => editor.openEdit(c)} aria-label={`Edit ${c.title}`} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
+                <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </button>
+            </div>
+          ))}
           {(resourceTab === "leland" ? RESOURCES.filter((r) => r.lelandPlus) : RESOURCES).map((r, i, list) => {
             const views = r.views < 1000 ? String(r.views) : `${(r.views / 1000).toFixed(1).replace(/\.0$/, "")}k`;
             const offeringsText = `${r.offerings.length} offering${r.offerings.length === 1 ? "" : "s"}`;
@@ -286,6 +579,53 @@ export default function CoachContent() {
       />
 
       <CoachContentResourceSheet resource={openResource} onClose={() => setOpenResource(null)} />
+
+      {/* Collection builder + delete confirm — rendered once, shared by every
+          display mode so a collection opens from cards, carousel, or the list */}
+      {editor.modals}
+
+      {/* Admin tool — 3-dot menu (bottom-right) to switch how collections show */}
+      <div ref={adminRef} className="fixed bottom-6 right-6 z-40">
+        <AnimatePresence>
+          {adminOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 4 }}
+              transition={{ duration: 0.15 }}
+              className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+            >
+              <p className="px-2 pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wide text-gray-light">Collections display</p>
+              {COLLECTION_VIEWS.map((v) => {
+                const active = collectionsView === v.key;
+                return (
+                  <button
+                    key={v.key}
+                    onClick={() => setCollectionsView(v.key)}
+                    className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left transition-colors hover:bg-[#f5f5f5]"
+                  >
+                    <span className={`text-[14px] font-medium ${active ? "text-gray-dark" : "text-gray-light"}`}>{v.label}</span>
+                    {active && (
+                      <svg className="h-4 w-4 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                    )}
+                  </button>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <button
+          onClick={() => setAdminOpen((o) => !o)}
+          aria-label="Admin controls"
+          className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-opacity ${adminOpen ? "opacity-100" : "opacity-20 hover:opacity-100"}`}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="3" cy="8" r="1.5" fill="#222222" />
+            <circle cx="8" cy="8" r="1.5" fill="#222222" />
+            <circle cx="13" cy="8" r="1.5" fill="#222222" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
