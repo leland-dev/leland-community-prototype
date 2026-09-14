@@ -19,6 +19,8 @@ import lockIcon from "../assets/icons/lock.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import aiIcon from "../assets/icons/ai.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
+import { AboutMeEditModal } from "./AboutMeEditModal";
+import { loadPersonalizationData, summarizePersonalization, type PersonalizationData } from "./PersonalizationModal";
 
 // The account/settings surface is shown in two places: the standalone /settings
 // page (sidebar layout) and the v3 "My Leland → Account" tab (horizontal nav).
@@ -129,6 +131,8 @@ export function AccountProfileSection({ hidePhoneToggles = false }: { hidePhoneT
   const [smsReminders, setSmsReminders] = useState(true);
   const [smsOffers, setSmsOffers] = useState(false);
   const [sessionSummaries, setSessionSummaries] = useState(true);
+  const [aboutMe, setAboutMe] = useState<PersonalizationData | null>(() => loadPersonalizationData());
+  const [aboutMeModalOpen, setAboutMeModalOpen] = useState(false);
 
   return (
     <div className="mt-8">
@@ -173,6 +177,24 @@ export function AccountProfileSection({ hidePhoneToggles = false }: { hidePhoneT
             <p className="mt-1 text-[14px] text-gray-light">She/Her</p>
           </div>
           <button className="text-[14px] font-medium text-gray-dark underline underline-offset-2">Edit</button>
+        </div>
+      </div>
+
+      {/* About me */}
+      <div className="mt-6 border-t border-gray-stroke pt-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="text-[16px] font-semibold text-gray-dark">About me</h3>
+            <p className="mt-1 text-[14px] text-gray-light">
+              {aboutMe ? summarizePersonalization(aboutMe) : "Add your work situation, role, and industry"}
+            </p>
+          </div>
+          <button
+            onClick={() => setAboutMeModalOpen(true)}
+            className="text-[14px] font-medium text-gray-dark underline underline-offset-2"
+          >
+            Edit
+          </button>
         </div>
       </div>
 
@@ -241,6 +263,13 @@ export function AccountProfileSection({ hidePhoneToggles = false }: { hidePhoneT
         </div>
         <p className="mt-1 text-[14px] text-gray-light">Leland can generate text summaries of your sessions, making it easy to revisit important concepts and stay aligned on your action items.</p>
       </div>
+
+      <AboutMeEditModal
+        open={aboutMeModalOpen}
+        onOpenChange={setAboutMeModalOpen}
+        initialData={aboutMe}
+        onSave={setAboutMe}
+      />
     </div>
   );
 }

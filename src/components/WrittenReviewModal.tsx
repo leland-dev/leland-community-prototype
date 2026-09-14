@@ -69,7 +69,7 @@ const WrittenReviewModalImpl = ({
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 placeholder="What do you want others to know about this course?"
-                className="w-full flex-1 resize-none rounded-xl border border-leland-gray-stroke bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark placeholder:text-leland-gray-extra-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                className="w-full flex-1 resize-none rounded-xl border border-leland-gray-stroke bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark placeholder:text-leland-gray-extra-light focus:border-leland-gray-dark focus:outline-none"
               />
             </div>
             <div className="flex shrink-0 flex-col gap-2">
@@ -82,7 +82,7 @@ const WrittenReviewModalImpl = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Write a short headline"
-                className="w-full rounded-xl border border-leland-gray-stroke bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark placeholder:text-leland-gray-extra-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                className="w-full rounded-xl border border-leland-gray-stroke bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark placeholder:text-leland-gray-extra-light focus:border-leland-gray-dark focus:outline-none"
               />
             </div>
           </div>

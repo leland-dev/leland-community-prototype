@@ -155,6 +155,7 @@
 
   /* ── Spacing additions ───────────────────────────────────────────────── */
   --spacing-26: 6.5rem;
+  --spacing-50: 50rem;
 
   /* ── Animations ──────────────────────────────────────────────────────── */
   /* Starts one band-width before the leading edge and ends past the trailing
@@ -166,8 +167,8 @@
   --shadow-border: 0 0 0 1px;
   --shadow-bottomBorder: inset 0 -2px 0 0;
   --shadow-xs: 0 1px 2px 0 rgba(16, 24, 40, 0.05);
-  /* Separator under the fixed nav shell, in place of a bottom border. */
   --shadow-nav: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --shadow-popover: 0 12px 32px rgba(16, 24, 40, 0.12), 0 2px 8px rgba(16, 24, 40, 0.06);
 }
 
 @keyframes shimmer {

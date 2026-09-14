@@ -20,7 +20,7 @@ export const AI_CONFIDENCE_QUESTION: RadioCardGroupBlock = {
 export const PERSONALIZATION_SECTION: BlockSection = {
   id: "personalize",
   kind: "blocks",
-  title: "Getting to know you",
+  title: "Tell us about yourself",
   blocks: [
     {
       kind: "markdown",

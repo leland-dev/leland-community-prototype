@@ -57,6 +57,7 @@ import {
   IconMenuBurger,
   IconRefresh,
   IconStar,
+  IconUser,
   IconStarOutline,
   IconWrite,
   IconX,
@@ -100,7 +101,16 @@ import { GettingStartedFlow, type FlowKey } from "../components/getting-started"
 import { COHORT_MEMBERS } from "./Group";
 import { SelectCohortModal } from "../components/LiveCourseCard";
 import { TrackPickerModal, type CourseTrack, TRACK_STORAGE_KEY, getLogoSrc } from "../components/TrackPickerModal";
-import { PersonalizationModal, PERSONALIZATION_KEY } from "../components/PersonalizationModal";
+import {
+  PersonalizationModal,
+  PERSONALIZATION_KEY,
+  loadPersonalizationData,
+  summarizePersonalizationParts,
+  type PersonalizationData,
+} from "../components/PersonalizationModal";
+import { AboutMeEditModal } from "../components/AboutMeEditModal";
+import { TextRemindersModal, TEXT_REMINDERS_KEY, hasVerifiedPhone } from "../components/TextRemindersModal";
+import { NoAccessModal } from "../components/NoAccessModal";
 
 // ─── Types & seed data ───────────────────────────────────────────────────────
 
@@ -1443,6 +1453,7 @@ type PrototypeOptions = {
   showSiteNav: boolean;
   showTrackPicker: boolean;
   hasOfficeHours: boolean;
+  hasAccess: boolean;
   liveSessionVariant: LiveSessionVariant;
 };
 
@@ -1459,6 +1470,7 @@ const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
   showSiteNav: false,
   showTrackPicker: true,
   hasOfficeHours: true,
+  hasAccess: true,
   liveSessionVariant: "addToCalendar",
 };
 
@@ -1468,6 +1480,7 @@ const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
   { key: "showSiteNav", label: "Show site nav" },
   { key: "showTrackPicker", label: "Track picker" },
   { key: "hasOfficeHours", label: "Has office hours" },
+  { key: "hasAccess", label: "Has course access" },
 ];
 
 
@@ -2358,6 +2371,11 @@ export default function ContentViewer() {
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
   const [trackPickerOpen, setTrackPickerOpen] = useState(false);
   const [personalizationModalOpen, setPersonalizationModalOpen] = useState(false);
+  const [aboutMe, setAboutMe] = useState<PersonalizationData | null>(() => loadPersonalizationData());
+  const aboutMeParts = aboutMe ? summarizePersonalizationParts(aboutMe) : null;
+  const [aboutMeModalOpen, setAboutMeModalOpen] = useState(false);
+  const [textRemindersModalOpen, setTextRemindersModalOpen] = useState(false);
+  const [noAccessModalOpen, setNoAccessModalOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<CourseTrack | null>(
     () => localStorage.getItem(TRACK_STORAGE_KEY) as CourseTrack | null,
   );
@@ -2422,6 +2440,11 @@ export default function ContentViewer() {
       setTrackPickerOpen(true);
     }
   }, [options.showTrackPicker]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Paywall for anyone without course access.
+  useEffect(() => {
+    setNoAccessModalOpen(!options.hasAccess);
+  }, [options.hasAccess]);
 
   // Tracks 10 minutes of activity on the current lesson (resets whenever the
   // learner moves to a different lesson) — a gate for the review prompt below.
@@ -2830,6 +2853,28 @@ export default function ContentViewer() {
                             </div>
                           ) : null}
                         </div>
+                        {section.id === "personalize" ? (
+                          <button
+                            type="button"
+                            onClick={() => setAboutMeModalOpen(true)}
+                            className="flex w-full items-center gap-4 rounded-xl border border-leland-gray-stroke bg-white px-5 py-4 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                          >
+                            <span className="flex size-11 shrink-0 items-center justify-center rounded-[4px] bg-leland-gray-hover">
+                              <IconUser className="size-5 text-leland-gray-dark" />
+                            </span>
+                            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                              <span className="truncate leland-heading-base font-semibold text-leland-gray-dark">
+                                {aboutMeParts?.primary ?? "Add your work situation, role, and industry"}
+                              </span>
+                              {aboutMeParts?.secondary ? (
+                                <span className="truncate leland-paragraph-base text-leland-gray-light">
+                                  {aboutMeParts.secondary}
+                                </span>
+                              ) : null}
+                            </span>
+                            <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
+                          </button>
+                        ) : null}
                         <BlockList blocks={section.blocks} />
                       </div>
                       <LessonFooterActions />
@@ -2992,6 +3037,7 @@ export default function ContentViewer() {
           localStorage.removeItem(COURSE_RATING_KEY);
           localStorage.removeItem(TRACK_STORAGE_KEY);
           localStorage.removeItem(PERSONALIZATION_KEY);
+          localStorage.removeItem(TEXT_REMINDERS_KEY);
           window.location.reload();
         }}
       />
@@ -3011,7 +3057,31 @@ export default function ContentViewer() {
       />
       <PersonalizationModal
         open={personalizationModalOpen}
-        onOpenChange={setPersonalizationModalOpen}
+        onOpenChange={(next) => {
+          setPersonalizationModalOpen(next);
+          if (!next) {
+            setAboutMe(loadPersonalizationData());
+            // Mirrors openModalIfNecessary from usePhoneNumberModal — don't
+            // ask again if there's already a verified number on file.
+            if (!hasVerifiedPhone()) setTextRemindersModalOpen(true);
+          }
+        }}
+      />
+      <AboutMeEditModal
+        open={aboutMeModalOpen}
+        onOpenChange={setAboutMeModalOpen}
+        initialData={aboutMe}
+        onSave={setAboutMe}
+      />
+      <TextRemindersModal
+        open={textRemindersModalOpen}
+        onOpenChange={setTextRemindersModalOpen}
+      />
+      <NoAccessModal
+        open={noAccessModalOpen}
+        onDismiss={() => setNoAccessModalOpen(false)}
+        purchaseHref={COURSE_HOME}
+        courseDescription="Learn to build AI workflows, automations and agents that amplify your impact and give you more time for what matters"
       />
       <AddToCalendarModal
         open={addToCalendarModalOpen}
