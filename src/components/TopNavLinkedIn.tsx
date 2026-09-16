@@ -70,13 +70,13 @@ const profileMenuGroups: { items: MenuItem[] }[] = [
   {
     items: [
       { to: "/my-leland/profile-new", icon: profilePhoto, label: "Profile", danger: false, isProfile: true },
+      { to: null, icon: giftIcon, label: "Refer a friend", danger: false },
+      { to: "/settings", icon: settingsIcon, label: "Settings", danger: false },
     ],
   },
   {
     items: [
-      { to: null, icon: giftIcon, label: "Refer a friend", danger: false },
       { to: null, icon: helpIcon, label: "Help", danger: false },
-      { to: "/settings", icon: settingsIcon, label: "Settings", danger: false },
       { to: null, icon: logOutIcon, label: "Log out", danger: true },
     ],
   },
@@ -249,11 +249,13 @@ export default function TopNavLinkedIn() {
     const notificationsItem: MenuItem[] = isV3
       ? [{ to: navTo("/notifications"), icon: notificationsInactiveIcon, label: "Notifications", danger: false, badge: 3 }]
       : [];
-    return profileMenuGroups.map((group, gi) =>
-      gi === 0
-        ? { ...group, items: [group.items[0], ...notificationsItem, ...browseItems, ...group.items.slice(1)] }
-        : group
-    );
+    const [topGroup, bottomGroup] = profileMenuGroups;
+    return [
+      // Profile (+ Notifications on v3) then Refer a friend + Settings
+      { items: [topGroup.items[0], ...notificationsItem, ...topGroup.items.slice(1)] },
+      // Browse shortcuts join Help + Log out as one lower section
+      { items: [...browseItems, ...bottomGroup.items] },
+    ];
   }, [navTo, isV3, isV3Like]);
 
   const profileRef = useRef<HTMLDivElement>(null);
