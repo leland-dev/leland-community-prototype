@@ -921,6 +921,9 @@ function ThreadBody({ post, comments, onBack, boxed, onImageClick, composer, onC
   if (!boxed) {
     return <PostSurface post={post} comments={comments} onBack={onBack} boxed={false} onImageClick={onImageClick} />;
   }
+  // "Related posts" lets the reader keep scrolling past the replies. Prototype
+  // has no recommender, so we just surface other feed posts (excluding this one).
+  const related = posts.filter(p => p.id !== linkPostId).slice(0, 3);
   // alt-nav: the featured post uses the expanded layout (author row on top,
   // content full-width below); the comment composer sits directly beneath it as
   // a full-width row; each comment renders through the compact FeedPost and
@@ -941,6 +944,21 @@ function ThreadBody({ post, comments, onBack, boxed, onImageClick, composer, onC
           </div>
         ))}
       </div>
+
+      {/* Related posts — a second feed card so the page keeps scrolling past the
+          replies. Appears on every post detail page. */}
+      {related.length > 0 ? (
+        <div className="mt-6">
+          <h2 className="mb-3 px-1 text-[18px] font-semibold leading-tight text-gray-dark">Related posts</h2>
+          <div className="overflow-hidden rounded-2xl border border-gray-stroke bg-white">
+            {related.map((p, i) => (
+              <div key={p.id} className={`px-4 sm:px-6 ${i > 0 ? "border-t border-gray-stroke" : ""} ${POST_HOVER_SHADOW}`}>
+                <FeedPost post={p} onOpen={() => navigate(`${postBase}/${p.id}`)} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -825,12 +825,12 @@ export default function Dashboard({ shell = false, expert: expertInit = false }:
             {/* 1. Upcoming sessions */}
             <DashCard title="Upcoming sessions">
               <div className="-mx-2 flex flex-col gap-1">
-                {upcomingEvents.map((event, i) => (
+                {upcomingEvents.slice(0, 2).map((event, i) => (
                   <SessionCard key={i} size="auto" {...event} />
                 ))}
               </div>
               <Button onClick={() => navigate(shell ? "/my-leland/calendar" : "/calendar")} size="md" variant="secondary" className="mt-4 font-semibold">
-                See full calendar
+                See {upcomingEvents.length - 2} more
               </Button>
             </DashCard>
 

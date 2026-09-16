@@ -5739,12 +5739,12 @@ export default function Home() {
       <motion.div
         className="-mx-4 rounded-none border border-x-0 border-gray-stroke bg-white sm:-mx-6 md:mx-0 md:rounded-2xl md:border-x"
       >
-      {/* Post composer — shown on all screens. Mirrors the post-detail comment
-          composer's active state: avatar + prompt on top, media icons + Post
-          button beneath. Clicking anywhere opens the compose modal. */}
+      {/* Post composer — desktop only (hidden on mobile). Mirrors the post-detail
+          comment composer's active state: avatar + prompt on top, media icons +
+          Post button beneath. Clicking anywhere opens the compose modal. */}
       <div
         onClick={() => setComposeOpen(true)}
-        className="block cursor-pointer border-b border-gray-stroke px-4 py-3 sm:px-6"
+        className="hidden cursor-pointer border-b border-gray-stroke px-4 py-3 sm:px-6 md:block"
       >
         <div className="flex items-center gap-3">
           <img

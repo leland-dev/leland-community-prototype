@@ -133,7 +133,7 @@ function AdminSection() {
           <Toggle
             label="Variant"
             value={variant}
-            options={([1, 2, 3] as TopNavVariant[]).map((v) => ({ v, l: `V${v}` }))}
+            options={([1, 2, 3, 4] as TopNavVariant[]).map((v) => ({ v, l: `V${v}` }))}
             onChange={setVariant}
           />
           {/* Alt icons — v1 only */}

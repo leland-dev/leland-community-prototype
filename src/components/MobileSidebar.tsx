@@ -6,8 +6,6 @@ import { useExpertMode } from "../contexts/ExpertModeContext";
 import { useProfileBarMode, type ProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { Button } from "./Button";
 import profilePhoto from "../assets/profile photos/profile photo.png";
-import groupImg1 from "../assets/placeholder images/group images/18603db620e37b489d2d52da4c9c1f86.jpg";
-import groupImg2 from "../assets/placeholder images/group images/419a6944d25e95be7012699559c7b0be.jpg";
 
 // Menu icons
 import settingsIcon from "../assets/icons/settings.svg";
@@ -22,8 +20,12 @@ import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
 import lteSignalIcon from "../assets/icons/lte-signal.svg";
 import myCoursesIcon from "../assets/icons/my-courses.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
-import arrowDiagonalIcon from "../assets/icons/arrow-diagonal.svg";
 import toolsIcon from "../assets/icons/tools-wrench-ruler.svg";
+import userIcon from "../assets/icons/user.svg";
+import chartIcon from "../assets/icons/chart.svg";
+import starIcon from "../assets/icons/star-icon.svg";
+import discountIcon from "../assets/icons/discount.svg";
+import giftIcon from "../assets/icons/gift.svg";
 
 interface MobileSidebarProps {
   open: boolean;
@@ -36,21 +38,33 @@ const sectionHeaderBase =
 const menuItemBase =
   "flex items-center gap-3 px-5 py-[10px] text-[16px] font-normal transition-colors";
 
-const groups = [
-  { name: "AI BP April 26", image: groupImg1, to: "/groups/ai-bp-apr-26" },
-  { name: "MBA Admissions 2027", image: groupImg2, to: "/groups/mba-admissions-2027" },
+// My Leland tabs — mirrors the personal (non-expert) nav in the My Leland shell.
+// Dashboard is omitted: the bottom navbar's "My Leland" tab already lands there.
+const myLelandTabs = [
+  { icon: userIcon, label: "Profile", to: "/my-leland/profile-new" },
+  { icon: calendarPageIcon, label: "Calendar", to: "/my-leland/calendar" },
+  { icon: giftIcon, label: "Refer a friend", to: "/my-leland/refer" },
 ];
 
+// Show at most this many expert tools inline; the rest collapse behind a "More"
+// accordion.
+const MAX_EXPERT_ITEMS = 4;
+
+// Expert tools — mirrors the "Expert tools" card in the My Leland sidebar.
 const expertItems = [
-  { icon: lightningIcon, label: "Opportunities", to: "/coach/opportunities", external: false },
-  { icon: storeIcon, label: "Offerings", to: "/coach/offerings", external: true },
-  { icon: moneyIcon, label: "Earnings", to: "/coach/earnings", external: true },
+  { icon: storeIcon, label: "Offerings", to: "/my-leland/pricing" },
+  { icon: lightningIcon, label: "Opportunities", to: "/my-leland/opportunities" },
+  { icon: lteSignalIcon, label: "Livestreams", to: "/my-leland/livestreams" },
+  { icon: moneyIcon, label: "Earnings", to: "/my-leland/earnings" },
+  { icon: chartIcon, label: "Analytics", to: "/my-leland/analytics" },
+  { icon: starIcon, label: "Reviews", to: "/my-leland/reviews" },
+  { icon: discountIcon, label: "Discount Codes", to: "/my-leland/discount-codes" },
 ];
 
 const myLelandItems = [
-  { icon: lteSignalIcon, label: "Free Livestreams", to: "/events", external: true },
-  { icon: myCoursesIcon, label: "Live Programs", to: "/courses", external: true },
-  { icon: bookOpenIcon, label: "Leland+", to: "/plus", external: true },
+  { icon: lteSignalIcon, label: "Free Livestreams", to: "/events" },
+  { icon: myCoursesIcon, label: "Live Programs", to: "/courses" },
+  { icon: bookOpenIcon, label: "Content", to: "/plus" },
 ];
 
 // Admin Tools segmented pill control — one row per demo toggle.
@@ -98,6 +112,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const [accountOpen, setAccountOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
+  const [expertMoreOpen, setExpertMoreOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const textColor = darkMode ? "text-white" : "text-[#4c4c4c]";
@@ -133,13 +148,14 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
     } else {
       setAccountOpen(false);
       setAdminOpen(false);
+      setExpertMoreOpen(false);
     }
   }, [open]);
 
   return (
     <motion.div
       ref={scrollRef}
-      className={`flex h-full w-[280px] flex-col overflow-y-auto pb-[120px] scrollbar-hide ${darkMode ? "bg-[#131313]" : "bg-white"}`}
+      className={`flex h-full w-[280px] flex-col overflow-y-auto pb-6 scrollbar-hide ${darkMode ? "bg-[#131313]" : "bg-white"}`}
       animate={{ scale: open ? 1 : 0.95, opacity: open ? 1 : 0 }}
       transition={{ duration: 0.3, ease: [0.42, 0, 0.58, 1] }}
       style={{ transformOrigin: "left center" }}
@@ -164,22 +180,18 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
         </NavLink>
       </div>
 
-      {/* My Groups */}
+      {/* My Leland */}
       <div className="pt-2">
-        <p className={sectionHeader}>My groups</p>
-        {groups.map((group) => (
+        <p className={sectionHeader}>My Leland</p>
+        {myLelandTabs.map((item) => (
           <NavLink
-            key={group.to}
-            to={group.to}
+            key={item.to}
+            to={item.to}
             onClick={onClose}
             className={menuItemClass}
           >
-            <img
-              src={group.image}
-              alt={group.name}
-              className="h-6 w-6 rounded object-cover"
-            />
-            <span>{group.name}</span>
+            <img src={item.icon} alt="" className={iconClass} aria-hidden />
+            <span>{item.label}</span>
           </NavLink>
         ))}
       </div>
@@ -188,18 +200,69 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
       <div className="pt-4">
         <p className={sectionHeader}>Expert tools</p>
         {expertMode ? (
-          expertItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              onClick={onClose}
-              className={menuItemClass}
-            >
-              <img src={item.icon} alt="" className={iconClass} aria-hidden />
-              <span>{item.label}</span>
-              {item.external && <img src={arrowDiagonalIcon} alt="" className={`h-[18px] w-[18px] -ml-2 ${darkMode ? "" : "opacity-50"}`} aria-hidden />}
-            </NavLink>
-          ))
+          <>
+            {expertItems.slice(0, MAX_EXPERT_ITEMS).map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={onClose}
+                className={menuItemClass}
+              >
+                <img src={item.icon} alt="" className={iconClass} aria-hidden />
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
+            {/* Overflow items reveal above the toggle, so the "More" / "See less"
+                row stays pinned at the bottom of the expert tools list. */}
+            {expertItems.length > MAX_EXPERT_ITEMS && (
+              <>
+                <AnimatePresence initial={false}>
+                  {expertMoreOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      {expertItems.slice(MAX_EXPERT_ITEMS).map((item) => (
+                        <NavLink
+                          key={item.to}
+                          to={item.to}
+                          onClick={onClose}
+                          className={menuItemClass}
+                        >
+                          <img src={item.icon} alt="" className={iconClass} aria-hidden />
+                          <span>{item.label}</span>
+                        </NavLink>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <button
+                  onClick={() => setExpertMoreOpen((v) => !v)}
+                  className={`${menuItemClass} w-full`}
+                >
+                  <img src={dotsHorizontalIcon} alt="" className={`${iconClass} shrink-0`} aria-hidden />
+                  <span className="flex-1 text-left">{expertMoreOpen ? "See less" : "More"}</span>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={`shrink-0 transition-transform ${expertMoreOpen ? "rotate-180" : ""}`}
+                    aria-hidden
+                  >
+                    <polyline points="4 6 8 10 12 6" />
+                  </svg>
+                </button>
+              </>
+            )}
+          </>
         ) : (
           <p className="px-5 py-[10px] text-[16px] font-normal text-gray-extra-light">
             You haven't set up your expert profile yet.{" "}
@@ -222,7 +285,6 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
           >
             <img src={item.icon} alt="" className={iconClass} aria-hidden />
             <span>{item.label}</span>
-            {item.external && <img src={arrowDiagonalIcon} alt="" className={`h-[18px] w-[18px] -ml-2 ${darkMode ? "" : "opacity-50"}`} aria-hidden />}
           </NavLink>
         ))}
 
@@ -263,15 +325,12 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                 </NavLink>
                 <button onClick={onClose} className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}>
                   <span>Order History</span>
-                  <img src={arrowDiagonalIcon} alt="" className={`h-[18px] w-[18px] -ml-2 ${darkMode ? "" : "opacity-50"}`} aria-hidden />
                 </button>
                 <button onClick={onClose} className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}>
                   <span>Refer a Friend</span>
-                  <img src={arrowDiagonalIcon} alt="" className={`h-[18px] w-[18px] -ml-2 ${darkMode ? "" : "opacity-50"}`} aria-hidden />
                 </button>
                 <button onClick={onClose} className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}>
                   <span>Help</span>
-                  <img src={arrowDiagonalIcon} alt="" className={`h-[18px] w-[18px] -ml-2 ${darkMode ? "" : "opacity-50"}`} aria-hidden />
                 </button>
                 <button onClick={onClose} className={`flex w-full items-center gap-3 py-[10px] text-[16px] font-normal text-[#D92D20] transition-colors ${hoverBg}`}>
                   <span>Log out</span>
@@ -280,7 +339,12 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
 
+      {/* Admin Tools — mt-auto pins it to the bottom of the sidebar when the
+          list is short; when the list overflows the screen the auto margin
+          collapses and it flows inline right after the More section. */}
+      <div className="mt-auto pt-4">
         {/* Admin Tools accordion */}
         <button
           onClick={() => setAdminOpen((v) => !v)}

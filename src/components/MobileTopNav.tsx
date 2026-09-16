@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import notificationsIcon from "../assets/icons/nav-icons/notifications-active.svg";
+import notificationsActive from "../assets/icons/nav-icons/notifications-active.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import logoIcon from "../assets/logos/leland-logo-split/Icon.svg";
 import logoWordmark from "../assets/logos/leland-logo-split/Wordmark.svg";
@@ -24,6 +24,8 @@ export default function MobileTopNav() {
   // The profile template (/profile/:slug) also uses a Back button instead of
   // the sidebar menu.
   const isProfileTemplate = location.pathname.startsWith("/profile/");
+  // Inside the /alt-nav experience, keep Notifications on the alt route.
+  const inAltNav = location.pathname.startsWith("/alt-nav") || location.pathname.startsWith("/my-leland");
   // In dark mode, override nav to #111111 only when the page uses the default (white) nav theme.
   // Pages that set their own bg (profile, dashboard) keep their custom color.
   const darkNav = darkMode && navTheme.bg === "white";
@@ -140,20 +142,27 @@ export default function MobileTopNav() {
         )}
       </button>
 
-      {/* Right: custom slot or default Notifications (moved here from the
-          bottom tab bar; the profile photo now lives on the left as the menu). */}
+      {/* Right: page-provided custom slot, otherwise the Notifications icon
+          (pinned here in the top-right; Jobs took its old spot in the bottom
+          tab bar). */}
       {rightSlot ?? (
         <NavLink
-          to="/notifications"
+          to={inAltNav ? "/alt-nav/notifications" : "/notifications"}
           aria-label="Notifications"
           className="relative flex h-8 w-8 items-center justify-center"
         >
-          <img
-            src={notificationsIcon}
-            alt="Notifications"
-            className={`h-[23px] w-[23px] ${iconFilter}`}
-          />
-          <span className="absolute right-[3px] top-[3px] h-2 w-2 rounded-full bg-[#F5334F] ring-2 ring-white" />
+          {({ isActive }) => (
+            <>
+              <img
+                src={notificationsActive}
+                alt="Notifications"
+                className={`h-[26px] w-[26px] ${iconFilter} ${isActive ? "" : "opacity-40"}`}
+              />
+              <span className="absolute -right-1 -top-0.5 flex min-h-[16px] min-w-[16px] items-center justify-center rounded-full border border-white bg-[#FF003D] px-1 py-0.5 text-[11px] font-semibold leading-none text-white">
+                3
+              </span>
+            </>
+          )}
         </NavLink>
       )}
     </motion.header>
