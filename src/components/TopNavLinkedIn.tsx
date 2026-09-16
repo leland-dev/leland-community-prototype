@@ -25,6 +25,7 @@ import livestreamIcon from "../assets/icons/video-filled-dark.svg";
 import contentBookIcon from "../assets/icons/content-book-filled.svg";
 // Outlined variants — used in the "More" dropdown list (the top nav uses the filled ones)
 import livestreamsMenuIcon from "../assets/icons/lte-signal.svg";
+import myCoursesIcon from "../assets/icons/my-courses.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
 import giftIcon from "../assets/icons/gift.svg";
 import settingsIcon from "../assets/icons/settings.svg";
@@ -239,7 +240,8 @@ export default function TopNavLinkedIn() {
       ? []
       : [
           { to: navTo("/livestreams"), icon: livestreamsMenuIcon, label: "Free Livestreams", danger: false, isProfile: false },
-          { to: navTo("/content"), icon: bookOpenIcon, label: "Content", danger: false, isProfile: false },
+          { to: navTo("/courses"), icon: myCoursesIcon, label: "Live Programs", danger: false, isProfile: false },
+          { to: navTo("/content"), icon: bookOpenIcon, label: "Leland+", danger: false, isProfile: false },
         ];
     // v3 folds Notifications into this menu (with its badge), directly under
     // Profile. v1 shares the menu but keeps Notifications out; v4 pulls it back

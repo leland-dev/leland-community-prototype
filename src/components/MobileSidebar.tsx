@@ -64,7 +64,7 @@ const expertItems = [
 const myLelandItems = [
   { icon: lteSignalIcon, label: "Free Livestreams", to: "/events" },
   { icon: myCoursesIcon, label: "Live Programs", to: "/courses" },
-  { icon: bookOpenIcon, label: "Content", to: "/plus" },
+  { icon: bookOpenIcon, label: "Leland+", to: "/plus" },
 ];
 
 // Admin Tools segmented pill control — one row per demo toggle.
