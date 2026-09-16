@@ -43,7 +43,7 @@ export default function BottomNav() {
   return (
     <nav className={`fixed bottom-0 left-0 right-0 z-30 ${darkMode ? "bg-[#131313]" : "bg-white"} shadow-[0_-4px_12px_rgba(0,0,0,0.06)] pt-1 pb-[max(env(safe-area-inset-bottom),8px)] transition-transform duration-200 ease-out ${hidden ? "translate-y-full" : "translate-y-0"}`}>
       <ul className="flex items-center">
-        {navItems.map(({ to, altTo, icon, label, end, badge, round }) => (
+        {navItems.map(({ to, altTo, icon, label, end, badge }) => (
           <li key={to} className="flex-1">
             <NavLink
               to={inAltNav && altTo ? altTo : to}
@@ -56,14 +56,7 @@ export default function BottomNav() {
                     <img
                       src={icon}
                       alt={label}
-                      className={`h-7 w-7 ${
-                        round
-                          ? // My Leland photo: always full opacity; gains a 1.5px border when active
-                            `rounded-full object-cover${isActive ? " ring-[1.5px] ring-gray-dark" : ""}`
-                          : isActive
-                            ? ""
-                            : "opacity-40"
-                      }`}
+                      className={`h-7 w-7 ${isActive ? "" : "opacity-40"}`}
                     />
                     {badge ? (
                       <span className="absolute -right-2 -top-1 flex min-h-[16px] min-w-[16px] items-center justify-center rounded-full border border-white bg-[#FF003D] px-1 py-0.5 text-[11px] font-semibold leading-none text-white">
