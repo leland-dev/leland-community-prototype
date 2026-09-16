@@ -119,6 +119,7 @@ import CoachMyContent from "./pages/CoachMyContent";
 import CoachReviews from "./pages/CoachReviews";
 import CoachDiscountCodes from "./pages/CoachDiscountCodes";
 import Account from "./pages/Account";
+import ReferFriend from "./pages/ReferFriend";
 import AltNavLivestreams from "./pages/AltNavLivestreams";
 import AltNavContent from "./pages/AltNavContent";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
@@ -235,6 +236,7 @@ export default function App() {
           <Route path="/my-leland/analytics" element={<CoachAnalytics />} />
           <Route path="/my-leland/reviews" element={<CoachReviews />} />
           <Route path="/my-leland/discount-codes" element={<CoachDiscountCodes />} />
+          <Route path="/my-leland/refer" element={<ReferFriend />} />
           <Route path="/my-leland/account" element={<Account />} />
         </Route>
         <Route path="/components" element={<Components />} />

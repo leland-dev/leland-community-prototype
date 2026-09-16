@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useExpertMode } from "../contexts/ExpertModeContext";
-import { useTopNavStyle } from "../contexts/TopNavStyleContext";
 import chatIcon from "../assets/icons/nav-icons/chat-inactive.svg";
 import settingsIcon from "../assets/icons/settings.svg";
+import giftIcon from "../assets/icons/gift.svg";
 import storeIcon from "../assets/icons/store.svg";
 import lightningIcon from "../assets/icons/lightning.svg";
 import calendarIcon from "../assets/icons/calendar-page.svg";
@@ -14,7 +14,6 @@ import discountIcon from "../assets/icons/discount.svg";
 import livestreamIcon from "../assets/icons/lte-signal.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import userIcon from "../assets/icons/user.svg";
-import bookOpenIcon from "../assets/icons/book-open.svg";
 import layoutGridIcon from "../assets/icons/layout-grid.svg";
 import chartIcon from "../assets/icons/chart.svg";
 import mbaIcon from "../assets/icons/category-icons/mba.svg";
@@ -122,10 +121,6 @@ function SidebarV1() {
   const { pathname } = useLocation();
   const base = useCoachBase();
   const { expert, setExpert } = useExpertMode();
-  // v3, v4, and v5 drop the top-nav "Me" dropdown, so the Account tab (which
-  // rehomes its links + toggles) surfaces on those variants.
-  const { variant } = useTopNavStyle();
-  const hasAccountTab = variant === 3 || variant === 4 || variant === 5;
   const onStorefront = pathname.startsWith(rebase("/coach/manage", base)) || storefrontRoutes.some((r) => rebase(r, base) === pathname);
 
   const inStore = base !== "/coach";
@@ -219,11 +214,12 @@ function SidebarV1() {
             </NavLink>
             {navRow(findItem("/coach/profile-new"))}
             {navRow(findItem("/coach/calendar"))}
-            {navRow({ to: "/coach/my-content", label: "Content", icon: bookOpenIcon })}
             {/* Reviews only exists for experts (in the Expert tools card below) —
                 when Expert is off it's removed from My Leland entirely */}
-            {/* Account — v3 only; houses the links + toggles from the old Me menu */}
-            {hasAccountTab && navRow({ to: "/coach/account", label: "Account", icon: settingsIcon })}
+            {/* Refer a friend — promoted from the Account page into its own tab */}
+            {navRow({ to: "/coach/refer", label: "Refer a friend", icon: giftIcon })}
+            {/* Account — houses the links + toggles from the old Me menu */}
+            {navRow({ to: "/coach/account", label: "Account", icon: settingsIcon })}
           </nav>
         </div>
 
@@ -324,13 +320,11 @@ function AdminExpertToggle() {
 function MobileSectionNav() {
   const base = useCoachBase();
   const { expert } = useExpertMode();
-  const { variant } = useTopNavStyle();
 
   const items: { to: string; label: string; end?: boolean }[] = [
     { to: base, label: "Dashboard", end: true },
     { to: rebase("/coach/profile-new", base), label: "Profile" },
     { to: rebase("/coach/calendar", base), label: "Calendar" },
-    { to: rebase("/coach/my-content", base), label: "Content" },
     ...(expert
       ? [
           { to: rebase("/coach/pricing", base), label: "Offerings" },
@@ -342,7 +336,8 @@ function MobileSectionNav() {
           { to: rebase("/coach/discount-codes", base), label: "Discount Codes" },
         ]
       : []),
-    ...(variant === 3 || variant === 4 || variant === 5 ? [{ to: rebase("/coach/account", base), label: "Account" }] : []),
+    { to: rebase("/coach/refer", base), label: "Refer a friend" },
+    { to: rebase("/coach/account", base), label: "Account" },
   ];
 
   return (

@@ -15,8 +15,11 @@ import codeIcon from "../assets/icons/code.svg";
 // extra "Admin" tab holds everything else that used to live in the dropdown.
 const tabs = [
   // The shared settings "Account" tab reads as "General" here, since the page
-  // itself is already titled Account.
-  ...settingsTabs.map((t) => (t.key === "account" ? { ...t, label: "General" } : t)),
+  // itself is already titled Account. "Refer a friend" is dropped — it's been
+  // promoted to its own My Leland sidebar tab (still present on /settings).
+  ...settingsTabs
+    .filter((t) => t.key !== "refer")
+    .map((t) => (t.key === "account" ? { ...t, label: "General" } : t)),
   { key: "admin", label: "Admin", icon: codeIcon },
 ];
 
@@ -75,8 +78,8 @@ function AdminSection() {
     setStyle,
     variant,
     setVariant,
-    showNavLabels,
-    setShowNavLabels,
+    altIcons,
+    setAltIcons,
     navEdgeToEdge,
     setNavEdgeToEdge,
     feedEdgeToEdge,
@@ -130,18 +133,21 @@ function AdminSection() {
           <Toggle
             label="Variant"
             value={variant}
-            options={([1, 2, 3, 4, 5] as TopNavVariant[]).map((v) => ({ v, l: `V${v}` }))}
+            options={([1, 2, 3] as TopNavVariant[]).map((v) => ({ v, l: `V${v}` }))}
             onChange={setVariant}
           />
-          <Toggle
-            label="Labels"
-            value={showNavLabels}
-            options={[
-              { v: true, l: "Show" },
-              { v: false, l: "Hide" },
-            ]}
-            onChange={setShowNavLabels}
-          />
+          {/* Alt icons — v1 only */}
+          {variant === 1 && (
+            <Toggle
+              label="Alt icons"
+              value={altIcons}
+              options={[
+                { v: true, l: "On" },
+                { v: false, l: "Off" },
+              ]}
+              onChange={setAltIcons}
+            />
+          )}
           <Toggle
             label="Nav width"
             value={navEdgeToEdge}

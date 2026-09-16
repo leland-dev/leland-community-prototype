@@ -10,7 +10,7 @@ export type TopNavStyle = "classic" | "linkedin";
 // Design variants of the LinkedIn-style nav (v1/v2/v3) — a scratch space for
 // presenting minor styling alternatives to the team. Only meaningful when
 // style === "linkedin"; toggled from the Navigation dropdown.
-export type TopNavVariant = 1 | 2 | 3 | 4 | 5;
+export type TopNavVariant = 1 | 2 | 3;
 
 interface TopNavStyleContextValue {
   style: TopNavStyle;
@@ -20,6 +20,10 @@ interface TopNavStyleContextValue {
   setVariant: (v: TopNavVariant) => void;
   showNavLabels: boolean;
   setShowNavLabels: (v: boolean) => void;
+  // v1-only "alt icons" experiment: My Leland shows the profile photo, the "Me"
+  // item becomes "More" with a hamburger icon, and the Explore/More carets hide.
+  altIcons: boolean;
+  setAltIcons: (v: boolean) => void;
   // Classic-nav feed + post-detail frame: false = feed/sidebars centered within
   // 1280 (default), true = pushed to the window edges (edge-to-edge). Toggled
   // from the Navigation admin dropdown.
@@ -39,6 +43,8 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
   setVariant: () => {},
   showNavLabels: true,
   setShowNavLabels: () => {},
+  altIcons: false,
+  setAltIcons: () => {},
   feedEdgeToEdge: false,
   setFeedEdgeToEdge: () => {},
   navEdgeToEdge: false,
@@ -48,6 +54,7 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
 const STORAGE_KEY = "prototype-topnav-style";
 const VARIANT_STORAGE_KEY = "prototype-topnav-variant";
 const LABELS_STORAGE_KEY = "prototype-topnav-labels";
+const ALT_ICONS_STORAGE_KEY = "prototype-topnav-alt-icons";
 const FEED_EDGE_STORAGE_KEY = "prototype-feed-edge-to-edge";
 const NAV_EDGE_STORAGE_KEY = "prototype-nav-edge-to-edge";
 
@@ -57,11 +64,15 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   });
   const [variant, setVariantState] = useState<TopNavVariant>(() => {
     const v = Number(localStorage.getItem(VARIANT_STORAGE_KEY));
-    return v === 2 || v === 3 || v === 4 || v === 5 ? (v as TopNavVariant) : 1;
+    return v === 2 || v === 3 ? (v as TopNavVariant) : 1;
   });
   const [showNavLabels, setShowNavLabelsState] = useState<boolean>(() => {
     // Labels shown by default; only an explicit "0" hides them.
     return localStorage.getItem(LABELS_STORAGE_KEY) !== "0";
+  });
+  const [altIcons, setAltIconsState] = useState<boolean>(() => {
+    // Off by default; only an explicit "1" enables the alt-icons experiment.
+    return localStorage.getItem(ALT_ICONS_STORAGE_KEY) === "1";
   });
   const [feedEdgeToEdge, setFeedEdgeToEdgeState] = useState<boolean>(() => {
     // Centered (constrained) by default; only an explicit "1" pushes to edges.
@@ -87,6 +98,11 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
     setShowNavLabelsState(v);
   };
 
+  const setAltIcons = (v: boolean) => {
+    localStorage.setItem(ALT_ICONS_STORAGE_KEY, v ? "1" : "0");
+    setAltIconsState(v);
+  };
+
   const setFeedEdgeToEdge = (v: boolean) => {
     localStorage.setItem(FEED_EDGE_STORAGE_KEY, v ? "1" : "0");
     setFeedEdgeToEdgeState(v);
@@ -100,7 +116,7 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const toggle = () => setStyle(style === "linkedin" ? "classic" : "linkedin");
 
   return (
-    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, variant, setVariant, showNavLabels, setShowNavLabels, feedEdgeToEdge, setFeedEdgeToEdge, navEdgeToEdge, setNavEdgeToEdge }}>
+    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, variant, setVariant, showNavLabels, setShowNavLabels, altIcons, setAltIcons, feedEdgeToEdge, setFeedEdgeToEdge, navEdgeToEdge, setNavEdgeToEdge }}>
       {children}
     </TopNavStyleContext.Provider>
   );
