@@ -69,7 +69,7 @@ type MenuItem = { to: string | null; icon: string; label: string; danger: boolea
 const profileMenuGroups: { items: MenuItem[] }[] = [
   {
     items: [
-      { to: "/my-leland/profile-new", icon: profilePhoto, label: "Profile", danger: false, isProfile: true },
+      { to: "/my-leland/profile", icon: profilePhoto, label: "Profile", danger: false, isProfile: true },
       { to: null, icon: giftIcon, label: "Refer a friend", danger: false },
       { to: "/settings", icon: settingsIcon, label: "Settings", danger: false },
     ],
@@ -174,7 +174,7 @@ export default function TopNavLinkedIn() {
   const isCoachMode = useIsCoachMode();
   const navTheme = useNavTheme();
   const { pathname } = useLocation();
-  const { variant, setVariant, showNavLabels, altIcons, setAltIcons, showSearch, setShowSearch, navEdgeToEdge, setNavEdgeToEdge, feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
+  const { setStyle, variant, setVariant, showNavLabels, altIcons, setAltIcons, showSearch, setShowSearch, navEdgeToEdge, setNavEdgeToEdge, feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
   const { expert, setExpert } = useExpertMode();
   // Inside the isolated /alt-nav experience, the nav destinations stay within
   // it (e.g. /alt-nav/messages); elsewhere they point at the normal routes.
@@ -713,7 +713,7 @@ export default function TopNavLinkedIn() {
                           <div className="ml-[22px] border-l-[1.5px] border-gray-stroke pl-2">
                             <NavLink
                               to="/"
-                              onClick={() => setProfileOpen(false)}
+                              onClick={() => { setStyle("classic"); setProfileOpen(false); }}
                               className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                             >
                               <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18" /></svg>

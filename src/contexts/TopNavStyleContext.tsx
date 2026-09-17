@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
-// Which top navbar to render on the customer (non-alt-nav) experience:
+// Which top navbar to render on the customer experience:
 //   "classic"  — the original Leland top nav (text links + avatar dropdown)
 //   "linkedin" — the LinkedIn-style icon nav (stacked icon items + search)
-// Defaults to "classic" so the original is preserved; switchable via an admin
-// tool in the profile dropdown.
+// Defaults to "linkedin" — the alt-nav is now the default experience; the
+// classic nav is opt-in via the "Switch to Classic nav" toggle in the profile
+// dropdown / Account admin panel.
 export type TopNavStyle = "classic" | "linkedin";
 
 // Design variants of the LinkedIn-style nav (v1/v2/v3) — a scratch space for
@@ -40,7 +41,7 @@ interface TopNavStyleContextValue {
 }
 
 const TopNavStyleContext = createContext<TopNavStyleContextValue>({
-  style: "classic",
+  style: "linkedin",
   setStyle: () => {},
   toggle: () => {},
   variant: 1,
@@ -57,7 +58,10 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
   setNavEdgeToEdge: () => {},
 });
 
-const STORAGE_KEY = "prototype-topnav-style";
+// v2: the default flipped to "linkedin" (alt-nav is now the default experience).
+// Bumped so stale "classic" values written by the old (no-op, path-based) toggle
+// don't force the classic nav on load.
+const STORAGE_KEY = "prototype-topnav-style-v2";
 const VARIANT_STORAGE_KEY = "prototype-topnav-variant";
 const LABELS_STORAGE_KEY = "prototype-topnav-labels";
 const ALT_ICONS_STORAGE_KEY = "prototype-topnav-alt-icons";
@@ -67,7 +71,8 @@ const NAV_EDGE_STORAGE_KEY = "prototype-nav-edge-to-edge";
 
 export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const [style, setStyleState] = useState<TopNavStyle>(() => {
-    return localStorage.getItem(STORAGE_KEY) === "linkedin" ? "linkedin" : "classic";
+    // Alt-nav (LinkedIn) is the default; only an explicit "classic" opts out.
+    return localStorage.getItem(STORAGE_KEY) === "classic" ? "classic" : "linkedin";
   });
   const [variant, setVariantState] = useState<TopNavVariant>(() => {
     const v = Number(localStorage.getItem(VARIANT_STORAGE_KEY));

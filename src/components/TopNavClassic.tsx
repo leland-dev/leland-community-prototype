@@ -75,7 +75,7 @@ export default function TopNavClassic() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [showSearch] = useState(false);
   const { showSubNav } = useSubNavStyle();
-  const { feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
+  const { setStyle, feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
   const isCoachMode = useIsCoachMode();
   const navTheme = useNavTheme();
 
@@ -407,8 +407,8 @@ export default function TopNavClassic() {
                         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                           <div className="ml-[22px] border-l-[1.5px] border-gray-stroke pl-2">
                             <NavLink
-                              to="/alt-nav"
-                              onClick={() => setProfileOpen(false)}
+                              to="/"
+                              onClick={() => { setStyle("linkedin"); setProfileOpen(false); }}
                               className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
                             >
                               <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
