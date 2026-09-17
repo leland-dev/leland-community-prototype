@@ -201,7 +201,7 @@ export default function App() {
           <Route path="/coach/home" element={<CoachHome />} />
           <Route path="/coach/inbox" element={<CoachInbox />} />
           <Route path="/coach/manage" element={<CoachManage />} />
-          <Route path="/coach/profile-new" element={<CoachProfileNew />} />
+          <Route path="/coach/profile" element={<CoachProfileNew />} />
           <Route path="/coach/products" element={<CoachProducts />} />
           <Route path="/coach/manage/:category" element={<CoachCategoryEdit />} />
           <Route path="/coach/opportunities" element={<CoachOpportunities />} />
@@ -223,7 +223,7 @@ export default function App() {
           <Route path="/my-leland" element={<Dashboard shell />} />
           <Route path="/my-leland/inbox" element={<CoachInbox />} />
           <Route path="/my-leland/manage" element={<CoachManage />} />
-          <Route path="/my-leland/profile-new" element={<CoachProfilePlaceholder />} />
+          <Route path="/my-leland/profile" element={<CoachProfilePlaceholder />} />
           <Route path="/my-leland/products" element={<CoachProducts />} />
           <Route path="/my-leland/manage/:category" element={<CoachCategoryEdit />} />
           <Route path="/my-leland/opportunities" element={<CoachOpportunities />} />

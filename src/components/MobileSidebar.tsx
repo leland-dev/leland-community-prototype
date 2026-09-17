@@ -41,7 +41,7 @@ const menuItemBase =
 // My Leland tabs — mirrors the personal (non-expert) nav in the My Leland shell.
 // Dashboard is omitted: the bottom navbar's "My Leland" tab already lands there.
 const myLelandTabs = [
-  { icon: userIcon, label: "Profile", to: "/my-leland/profile-new" },
+  { icon: userIcon, label: "Profile", to: "/my-leland/profile" },
   { icon: calendarPageIcon, label: "Calendar", to: "/my-leland/calendar" },
   { icon: giftIcon, label: "Refer a friend", to: "/my-leland/refer" },
 ];

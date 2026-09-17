@@ -24,7 +24,7 @@ import pmIcon from "../assets/icons/category-icons/product-management.svg";
 // and Content live inside the accordion.
 const topItems = [
   { to: "/coach/inbox", label: "Inbox", icon: chatIcon },
-  { to: "/coach/profile-new", label: "Profile", icon: userIcon },
+  { to: "/coach/profile", label: "Profile", icon: userIcon },
 ];
 
 // Top-level items below the Storefront accordion.
@@ -212,7 +212,7 @@ function SidebarV1() {
               <NavIcon src={layoutGridIcon} className="h-[22px] w-[22px]" />
               Dashboard
             </NavLink>
-            {navRow(findItem("/coach/profile-new"))}
+            {navRow(findItem("/coach/profile"))}
             {navRow(findItem("/coach/calendar"))}
             {/* Reviews only exists for experts (in the Expert tools card below) —
                 when Expert is off it's removed from My Leland entirely */}
@@ -323,7 +323,7 @@ function MobileSectionNav() {
 
   const items: { to: string; label: string; end?: boolean }[] = [
     { to: base, label: "Dashboard", end: true },
-    { to: rebase("/coach/profile-new", base), label: "Profile" },
+    { to: rebase("/coach/profile", base), label: "Profile" },
     { to: rebase("/coach/calendar", base), label: "Calendar" },
     ...(expert
       ? [

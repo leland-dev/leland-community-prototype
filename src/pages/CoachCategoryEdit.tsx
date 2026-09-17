@@ -1023,7 +1023,7 @@ export default function CoachCategoryEdit() {
       <div className="max-w-[720px]">
         <h1 className="text-[30px] font-medium text-gray-dark md:text-[38px]">Category not found</h1>
         <p className="mt-2 text-[14px] text-[#707070]">
-          <Link to="/coach/profile-new" className="text-gray-dark underline">Back to Profile</Link>
+          <Link to="/coach/profile" className="text-gray-dark underline">Back to Profile</Link>
         </p>
       </div>
     );
@@ -1054,7 +1054,7 @@ export default function CoachCategoryEdit() {
           <div className={`mx-auto ${contentMax}`}>
           {/* Back + Preview listing */}
           <div className="mb-6 flex items-center justify-between gap-3">
-            <Button size="sm" variant="secondary" iconOnly onClick={() => navigate("/coach/profile-new")} aria-label="Go back">
+            <Button size="sm" variant="secondary" iconOnly onClick={() => navigate("/coach/profile")} aria-label="Go back">
               <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
             </Button>
             <div className="relative" ref={catMenuRef}>
