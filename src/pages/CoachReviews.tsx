@@ -315,7 +315,7 @@ function ReviewBody({ text }: { text: string }) {
   );
 }
 
-type Outcome = {
+export type Outcome = {
   id: string;
   name: string;
   logo: string;
@@ -323,7 +323,7 @@ type Outcome = {
   hidden: boolean;
 };
 
-const initialOutcomes: Outcome[] = [
+export const initialOutcomes: Outcome[] = [
   { id: "stripe", name: "Stripe", logo: clientLogo1, clients: 12, hidden: false },
   { id: "airbnb", name: "Airbnb", logo: clientLogo2, clients: 9, hidden: false },
   { id: "apple", name: "Apple", logo: clientLogo3, clients: 8, hidden: false },
@@ -340,7 +340,7 @@ const initialOutcomes: Outcome[] = [
   { id: "goldman", name: "Goldman Sachs", logo: goldmanSachsLogo, clients: 1, hidden: false },
 ];
 
-const initialSchools: Outcome[] = [
+export const initialSchools: Outcome[] = [
   { id: "hbs", name: "Harvard Business School", logo: hbsLogo, clients: 11, hidden: false },
   { id: "wharton", name: "The Wharton School (UPenn)", logo: whartonLogo, clients: 9, hidden: false },
   { id: "kellogg", name: "Kellogg School of Management", logo: kelloggLogo, clients: 8, hidden: false },
@@ -648,7 +648,7 @@ function AddOutcomeButton() {
 
 // Single-line logo strip: fits as many 36px logos as the container allows,
 // then caps with a "+X" chip for the remainder (mirrors the profile template).
-function LogoStrip({ outcomes }: { outcomes: Outcome[] }) {
+export function LogoStrip({ outcomes }: { outcomes: Outcome[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const [slots, setSlots] = useState(outcomes.length);
 
