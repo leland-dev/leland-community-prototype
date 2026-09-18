@@ -43,6 +43,7 @@ import calendarIcon from "../assets/icons/calendar.svg";
 import calendarPageThinIcon from "../assets/icons/calendar-page-thin.svg";
 import chevronDownIcon from "../assets/icons/chevron-down.svg";
 import chevronRightIcon from "../assets/icons/chevron-right.svg";
+import addPlusIcon from "../assets/icons/add-plus.svg";
 import arrowRightIcon from "../assets/icons/arrow-right.svg";
 import timeClockHourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import bookBookmarkIcon from "../assets/icons/book-bookmark.svg";
@@ -101,6 +102,13 @@ import stanford4 from "../assets/placeholder post assets/stanford-post/eb80edada
 import { FeedPost, type Post } from "./Home";
 import { useBookmarks } from "../contexts/BookmarksContext";
 import { useSetNavTheme, useSetNavRightSlot } from "../components/NavThemeContext";
+import { LogoStrip, initialOutcomes, initialSchools } from "./CoachReviews";
+// Profile-tab (Edit-mode-parity) sections
+import linkedinLogo from "../assets/org-logos/linkedin-logo.png";
+import metaLogo from "../assets/logos/meta.png";
+import gsbLogo from "../assets/logos/gsb.png";
+import starOutlineIcon from "../assets/icons/star-icon.svg";
+import trashIcon from "../assets/icons/trash.svg";
 
 const CATEGORY_ALIASES: Record<string, string> = {
   MBA: "MBA Admissions",
@@ -599,17 +607,138 @@ function CustomerHourlySection({ marginClass = "mt-6", paddingClass = "p-6" }: {
   );
 }
 
+/* ── Profile-tab sections (Edit-mode parity) ──────────────────────────────
+   The My Leland Profile tab renders the same sections as the beige "Edit mode"
+   editor (Categories, About, Intro Video, Why I coach, Education, Experience,
+   Reviews), but as divided sections inside the bottom box rather than separate
+   cards — same 20px headers and section padding, no inner card borders. */
+
+const PROFILE_ABOUT_TEXT =
+  "I help ambitious professionals break into top MBA programs and land PM roles at leading tech companies. With 8+ years in product at LinkedIn and Meta, plus my own Stanford GSB journey, I bring firsthand experience to every conversation. Over the years I've reviewed thousands of applications, sat on both sides of the admissions and hiring table, and developed a repeatable framework for helping people tell the story only they can tell. My approach is direct but supportive: we start by getting crystal clear on your goals, then work backwards to a plan that fits your timeline, your background, and the specific programs or companies you're targeting. I care less about polishing a generic profile and more about surfacing the moments that actually make you memorable. Whether you're staring at a blank essay doc, prepping for a case interview, or trying to figure out whether an MBA is even the right move, I'll meet you where you are. Expect candid feedback, a lot of questions, and a partner who's genuinely invested in the outcome. The applicants I work with don't just get in — they leave the process knowing themselves better and telling a sharper story about where they're headed next.";
+const PROFILE_WHY_TEXT =
+  "I remember how overwhelming the application process felt, and how much a great mentor changed my trajectory. Coaching is my way of paying that forward — helping people tell their most honest, compelling story. When I was applying, I almost talked myself out of it entirely; I didn't think my background was impressive enough, and I had no idea how to translate what I'd done into something an admissions committee would care about. One conversation with the right person changed everything, and it wasn't about gaming the system — it was about helping me see my own experience clearly. That's the feeling I try to recreate for every person I work with. I coach because I love the moment when someone realizes their story is stronger than they thought, and because I've seen how much a single acceptance can change the shape of a career and a life. It's the most rewarding work I do, and I don't take the trust that comes with it lightly.";
+
+type ProfileCredential = { logo: string; title: string; subtitle: string; featured?: boolean };
+const PROFILE_EDUCATION: ProfileCredential[] = [
+  { logo: gsbLogo, title: "Stanford Graduate School of Business", subtitle: "MBA · 2016 – 2018", featured: true },
+  { logo: yaleLogo, title: "Yale University", subtitle: "BA, Economics · 2008 – 2012" },
+];
+const PROFILE_EXPERIENCE: ProfileCredential[] = [
+  { logo: linkedinLogo, title: "Senior Product Manager", subtitle: "LinkedIn · 2019 – Present", featured: true },
+  { logo: metaLogo, title: "Product Manager", subtitle: "Meta · 2016 – 2019" },
+  { logo: googleLogo, title: "Associate Product Manager", subtitle: "Google · 2012 – 2015" },
+];
+const PROFILE_REVIEW_OUTCOMES = [...initialOutcomes, ...initialSchools].filter((o) => !o.hidden);
+
+// Section heading row — 20px semibold title with an optional right-aligned
+// action (matches Edit mode's CardHead).
+function ProfileSectionHead({ title, action }: { title: string; action?: ReactNode }) {
+  return (
+    <div className="mb-4 flex items-center justify-between gap-3">
+      <h2 className="text-[20px] font-semibold text-gray-dark">{title}</h2>
+      {action}
+    </div>
+  );
+}
+
+// A pill "Edit"/"Add" action button (matches Edit mode's EditButton).
+function ProfileEditButton({ label, icon }: { label: string; icon: string }) {
+  return (
+    <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 text-[14px] font-semibold">
+      <img src={icon} alt="" className="h-[16px] w-[16px]" />
+      {label}
+    </Button>
+  );
+}
+
+// Long editable-text section (About, Why I coach): clamps to ~6 lines with a
+// gradient fade + Read more/less toggle. Mirrors Edit mode's EditableTextCard
+// view state, minus the card wrapper.
+const PROFILE_TEXT_COLLAPSED = 154; // ~6 lines at 16px / 1.6
+function ProfileTextSection({ title, text }: { title: string; text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const [overflow, setOverflow] = useState(false);
+  const pRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    const el = pRef.current;
+    if (el) setOverflow(el.scrollHeight > PROFILE_TEXT_COLLAPSED + 4);
+  }, [text]);
+  return (
+    <section className="py-6">
+      <ProfileSectionHead title={title} action={<ProfileEditButton label="Edit" icon={editIcon} />} />
+      <motion.div
+        initial={false}
+        animate={{ height: expanded ? "auto" : PROFILE_TEXT_COLLAPSED }}
+        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+        className="relative overflow-hidden"
+      >
+        <p ref={pRef} className="whitespace-pre-line text-[16px] leading-[1.6] text-[#4C4C4C]">{text}</p>
+        {overflow && (
+          <motion.div
+            initial={false}
+            animate={{ opacity: expanded ? 0 : 1 }}
+            transition={{ duration: 0.35, ease: [0.42, 0, 0.58, 1] }}
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[3.2em] bg-gradient-to-t from-white to-transparent"
+          />
+        )}
+      </motion.div>
+      {overflow && (
+        <Button size="md" variant="secondary" className="mt-3 font-semibold" onClick={() => setExpanded((v) => !v)}>
+          {expanded ? "Read less" : "Read more"}
+          <img src={chevronDownIcon} alt="" className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
+        </Button>
+      )}
+    </section>
+  );
+}
+
+// Education / Experience row: colored org tile + title/subtitle, with a
+// persistent featured star and hover-revealed feature/edit/delete actions.
+function ProfileCredentialRow({ logo, title, subtitle, featured }: ProfileCredential) {
+  return (
+    <div className="group flex items-center gap-4 rounded-xl px-2 py-2 transition-colors hover:bg-[#fafafa]">
+      <div className="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-[4px]">
+        <img src={logo} alt="" className="h-full w-full object-cover" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[16px] font-medium text-gray-dark">{title}</p>
+        <p className="mt-[2px] text-[14px] text-[#707070]">{subtitle}</p>
+      </div>
+      <div className="flex shrink-0 items-center justify-end">
+        {featured && (
+          <span className="flex items-center justify-center p-3"><img src={starIcon} alt="Featured" className="h-[18px] w-[18px]" /></span>
+        )}
+        <div className="flex items-center overflow-hidden opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          {!featured && (
+            <button type="button" aria-label="Feature" className="flex items-center justify-center rounded-full p-3 text-gray-dark transition-colors hover:bg-gray-hover"><img src={starOutlineIcon} alt="" className="h-[18px] w-[18px]" /></button>
+          )}
+          <button type="button" aria-label="Edit" className="flex items-center justify-center rounded-full p-3 text-gray-dark transition-colors hover:bg-gray-hover"><img src={editIcon} alt="" className="h-[18px] w-[18px]" /></button>
+          <button type="button" aria-label="Delete" className="flex items-center justify-center rounded-full p-3 text-gray-dark transition-colors hover:bg-gray-hover"><img src={trashIcon} alt="" className="h-[18px] w-[18px]" /></button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // The My Leland → Profile view. Forked from ProfileV2 so the signed-in user's
 // own-profile edit experience can diverge freely from the public-facing profile
 // template without affecting it. Shares only low-level primitives (Button,
 // PageShell, OfferingCard, icons) — the coach config here is a private copy.
-export default function MyLelandProfileView({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = true, altSchedule = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack, embedded = false, abTest = true, abVersion = "v3" }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; altSchedule?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void; embedded?: boolean; abTest?: boolean; abVersion?: "v1" | "v2" | "v3" }) {
+export default function MyLelandProfileView({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = true, altSchedule = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack, embedded = false, boxed = false, abTest = true, abVersion = "v3" }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; altSchedule?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string; headline?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void; embedded?: boolean; boxed?: boolean; abTest?: boolean; abVersion?: "v1" | "v2" | "v3" }) {
   const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
   const { dark: darkMode } = useDarkMode();
+  // Boxed mode (Inline): confine the hero and the tab-bar + content into two
+  // white cards on the beige page (a `contents` wrapper is transparent when off).
+  const boxCard = "overflow-hidden rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10";
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
   const [isFollowing, setIsFollowing] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [stickyNavVisible, setStickyNavVisible] = useState(false);
+  // Boxed (Inline) mode: true once the content card's tab bar has pinned to the
+  // page top. Drives a page-colored cap above the tab bar that clips content
+  // scrolling up through the gap between the app nav and the pinned tabs (see
+  // the boxedTabCap below).
+  const [boxedTabsPinned, setBoxedTabsPinned] = useState(false);
   const [activeSection, setActiveSection] = useState("offerings");
   const [adminOpen, setAdminOpen] = useState(false);
   const [showCustomerFavorite, setShowCustomerFavorite] = useState(true);
@@ -621,7 +750,6 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
   const [showSidebar, setShowSidebar] = useState(!embedded);
   const [showCoachNote, setShowCoachNote] = useState(unified ? true : coach);
   const [coachNoteExpanded, setCoachNoteExpanded] = useState(false);
-  const [bioExpanded, setBioExpanded] = useState(false);
   const [showCoachVideo, setShowCoachVideo] = useState(true);
   const [showSupercoach, setShowSupercoach] = useState(false);
   // In the unified template, coaches use a tabbed layout (About first) instead
@@ -696,13 +824,13 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
   const viewingOwnProfile = unified ? Boolean(ownProfile) : viewingOwnProfileState;
   // "Offerings tab" (coach + unified only) promotes Offerings to its own tab.
   const showOfferingsTab = unified && !isCustomerProfile && Boolean(offeringsTab);
-  // Where the coach's Offerings section renders vs the rest (Events → Reviews):
-  // scroll layout shows both; the template splits Offerings into its own tab
-  // when the toggle is on, otherwise Offerings stays at the top of About.
-  // With the Offerings tab on, offerings render in BOTH the Profile tab (a short
-  // preview) and the Offerings tab (the full list). Otherwise they sit in About.
-  const showOfferingsSection = !unified || (showOfferingsTab ? (coachTab === "offerings" || coachTab === "about") : coachTab === "about");
-  const showRestSections = !unified || coachTab === "about";
+  // Where the coach's Offerings section renders vs the rest (Events → Reviews).
+  // In the unified My Leland view the Profile tab now shows the Edit-mode
+  // sections instead (see profileTabSections), so Offerings lives only in its
+  // own tab and the Events/Reviews "rest" block is dropped from Profile. The
+  // non-unified public layout is unchanged (both render inline).
+  const showOfferingsSection = !unified || (showOfferingsTab ? coachTab === "offerings" : false);
+  const showRestSections = !unified;
   // The coach CTA sidebar (video, availability, CTAs, note, Questions) shows for
   // every coach profile — including when viewing your own — so the desktop
   // sidebar stays consistent. Customer profiles get the discovery sidebar.
@@ -783,7 +911,33 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
   // stays constant across the coach/customer toggle. Elsewhere it keeps the
   // original per-mode defaults.
   const profilePhoto = unified ? (photo ?? coachConfig.photo) : (isCustomerProfile ? customerPhoto : coachConfig.photo);
-  const profileName = unified ? (name ?? coachConfig.name) : (isCustomerProfile ? "June Allen" : coachConfig.name);
+  const baseName = unified ? (name ?? coachConfig.name) : (isCustomerProfile ? "June Allen" : coachConfig.name);
+  // Inline hero editing (own profile): editable name + headline. Name derives
+  // from first/last so every profileName usage reflects an edit.
+  const [firstName, setFirstName] = useState(baseName.split(" ")[0] ?? "");
+  const [lastName, setLastName] = useState(baseName.split(" ").slice(1).join(" "));
+  const profileName = `${firstName} ${lastName}`.trim();
+  const [heroHeadline, setHeroHeadline] = useState(
+    isCustomerProfile
+      ? "Building products that matter. Passionate about AI, design, and helping others break into tech."
+      : "MBA Admissions Coach | Stanford GSB | 100+ M7 Admits",
+  );
+  const [editingHero, setEditingHero] = useState(false);
+  const [firstDraft, setFirstDraft] = useState(firstName);
+  const [lastDraft, setLastDraft] = useState(lastName);
+  const [headlineDraft, setHeadlineDraft] = useState(heroHeadline);
+  const startEditHero = () => {
+    setFirstDraft(firstName);
+    setLastDraft(lastName);
+    setHeadlineDraft(heroHeadline);
+    setEditingHero(true);
+  };
+  const saveHero = () => {
+    setFirstName(firstDraft.trim());
+    setLastName(lastDraft.trim());
+    setHeroHeadline(headlineDraft);
+    setEditingHero(false);
+  };
 
   const categoryRef = useRef<HTMLDivElement>(null);
   const eventsCategoryRef = useRef<HTMLDivElement>(null);
@@ -865,6 +1019,21 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Boxed mode: flag when the tab bar has pinned (its non-sticky anchor has
+  // scrolled above the 81px pin line). Toggles the page-colored cap that hides
+  // content passing through the app-nav → tabs gap.
+  useEffect(() => {
+    if (!boxed) return;
+    const el = tabAnchorRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setBoxedTabsPinned(!entry.isIntersecting && entry.boundingClientRect.top < 81),
+      { threshold: 0, rootMargin: "-81px 0px 0px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [boxed, isCustomerProfile, coachTab, customerTab]);
 
   // Auto-scroll active tab into view
   useEffect(() => {
@@ -1127,14 +1296,36 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
     <>
       {topDivider ? <div className="my-[36px] border-t border-gray-200" /> : <div className="pt-9" />}
       <div ref={setSectionRef("offerings")} className="scroll-mt-[60px]">
-        <h2 className={`text-[22px] font-semibold text-gray-dark ${highLevel ? "mb-2" : "mb-4"}`}>
-          Work with {profileName.split(" ")[0]}
-        </h2>
-        {highLevel && (
-          <p className="mb-4 text-[15px] text-[#4C4C4C]">Select a category that you're looking for help in.</p>
+        {highLevel ? (
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-[22px] font-semibold text-gray-dark">Categories</h2>
+            <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 text-[14px] font-semibold">
+              <img src={addPlusIcon} alt="" className="h-[16px] w-[16px]" />
+              Add category
+            </Button>
+          </div>
+        ) : (
+          <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">Work with {profileName.split(" ")[0]}</h2>
         )}
         {highLevel ? (
-          renderCategoryButtons(false)
+          <div className="flex flex-col gap-1">
+            {categories.map((c) => (
+              <button
+                key={c.slug}
+                onClick={() => onSelectCategory?.(c.slug)}
+                className="group flex w-full items-center gap-3 rounded-xl px-2 py-3 text-left transition-colors hover:bg-gray-hover"
+              >
+                <div className="icon-tile flex h-11 w-11 shrink-0 items-center justify-center rounded-[6px] bg-[#f5f5f5]">
+                  {c.icon && <img src={c.icon} alt="" className="h-6 w-6" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[15px] font-semibold leading-tight text-gray-dark">{c.label}</p>
+                  {c.headline && <p className="mt-[2px] truncate text-[15px] leading-tight text-[#707070]">{c.headline}</p>}
+                </div>
+                <img src={chevronRightIcon} alt="" className="h-6 w-6 shrink-0 opacity-60" />
+              </button>
+            ))}
+          </div>
         ) : abVersion === "v2" || abVersion === "v3" ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {OFFERINGS.slice(0, 3).map((o) => (
@@ -1182,6 +1373,31 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
       <div className="my-[36px] border-t border-gray-200" />
     </>
   );
+
+  // Boxed mode: while the tab bar is pinned, a solid page-colored box-shadow
+  // caps the gap between the 61px app nav and the tabs (pinned at 81px). It
+  // clips content scrolling up through that gap instead of letting it peek above
+  // the tabs, and — because a solid shadow hugs the border-radius — it wraps the
+  // tab bar's rounded top corners so they read cleanly against the beige page.
+  // Gated on `boxedTabsPinned` so it never paints over the hero card above when
+  // unpinned. Color matches the page (#F3F1E6 at 50% over the body).
+  // Three 1px OUTSET shadows redraw the card's top + side border on top of that
+  // cap: the real top ring has scrolled away and the outset cap covers the side
+  // ring, so without these the outline vanishes where the tab bar sits. Offset
+  // (not spread) so they land exactly where box2's `ring-[#222222]/10` sits —
+  // continuing it flush past the bar with no jog — and hugging rounded-t-2xl.
+  // Listed before the cap so they paint over it. No layout shift (unlike a real
+  // border). Cap color matches the page (#F3F1E6 at 50% over the body).
+  const boxedTabCapStyle = boxed && boxedTabsPinned
+    ? {
+        boxShadow: [
+          "0 -1px 0 0 rgba(34,34,34,0.1)",
+          "1px 0 0 0 rgba(34,34,34,0.1)",
+          "-1px 0 0 0 rgba(34,34,34,0.1)",
+          `0 -16px 0 16px ${darkMode ? "#82817C" : "#F9F8F2"}`,
+        ].join(", "),
+      }
+    : undefined;
 
   return (
     <>
@@ -1513,7 +1729,8 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
             </div>
           )
         ) : undefined} rightSidebarWidth={showCoachSidebar ? 340 : 300} rightSidebarTop={stickyNavVisible ? 76 : 20}>
-        <div>
+        <div className={boxed ? "flex flex-col gap-5" : ""}>
+          <div className={boxed ? boxCard : "contents"}>{/* Box 1 — hero */}
           {/* Unified template — self-rendered mobile top nav that slides in/out
               with the page (the shared fixed nav is hidden on /profile). It
               overlays the cover: transparent + white icons over the cover, solid
@@ -1553,7 +1770,7 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
               reaches the very top — no white gap above the cover. */}
           {heroCustomer ? (
             <div
-              className={`relative -mx-4 md:mx-0 md:rounded-[6px] ${unified ? "-mt-4 sm:-mt-10 md:mt-0" : "-mt-[72px] md:mt-0"} ${showCoverImage ? "" : "md:hidden"}`}
+              className={`group/cover relative -mx-4 md:mx-0 ${boxed ? "" : "md:rounded-[6px]"} ${unified ? "-mt-4 sm:-mt-10 md:mt-0" : "-mt-[72px] md:mt-0"} ${showCoverImage ? "" : "md:hidden"}`}
               style={{ backgroundColor: coverBg }}
             >
               {coverMode === "default" ? (
@@ -1561,13 +1778,11 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
                   <img
                     src={unified && cover ? cover : customerCoverImage}
                     alt="Cover"
-                    className="block aspect-[3/1] md:aspect-[7/2] w-full object-cover md:rounded-[6px]"
+                    className={`block aspect-[4/1] w-full object-cover ${boxed ? "" : "md:rounded-[6px]"}`}
                   />
-                  <div className="absolute inset-0 bg-black/25 md:rounded-[6px]" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-transparent to-[#111111] md:hidden" />
                 </>
               ) : (
-                <div className={`aspect-[3/1] w-full md:rounded-[6px] ${coverMode === "none" ? "md:hidden" : "md:aspect-[7/2]"}`} style={{ backgroundColor: coverBg }} />
+                <div className={`aspect-[4/1] w-full md:rounded-[6px] ${coverMode === "none" ? "md:hidden" : "md:aspect-[4/1]"}`} style={{ backgroundColor: coverBg }} />
               )}
 
               {/* Desktop floating cover actions — frosted-glass round buttons in
@@ -1594,8 +1809,8 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
                 ) : (
                   <>
                     {/* Back — hidden on the high-level profile (nothing to go back
-                        to yet); shown on category-specific variants. */}
-                    {!highLevel && (
+                        to yet) and on the customer view. */}
+                    {!highLevel && !isCustomerProfile && (
                     <button
                       onClick={onBack}
                       aria-label="Go back"
@@ -1606,11 +1821,13 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
                       </svg>
                     </button>
                     )}
+                    {/* Edit cover — reveals on cover hover (matches Edit mode). */}
                     <button
-                      aria-label="Share"
-                      className={`absolute right-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-colors md:flex ${coverActionBg}`}
+                      type="button"
+                      className="absolute right-4 top-4 hidden items-center gap-1.5 rounded-full bg-[#222222]/25 px-3 py-1.5 text-[13px] font-semibold text-white opacity-0 backdrop-blur-[12px] transition-all hover:bg-[#222222]/35 group-hover/cover:opacity-100 md:flex"
                     >
-                      <img src={shareArrowFilledIcon} alt="" className="h-[17px] w-[17px] brightness-0 invert" />
+                      <img src={editIcon} alt="" className="h-[14px] w-[14px] brightness-0 invert" />
+                      Edit cover
                     </button>
                   </>
                 )
@@ -1630,8 +1847,9 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
               cover scrolls off (rather than waiting for the whole hero). */}
           {unified && <div ref={heroSentinelRef} />}
 
+          <div className={boxed ? "px-5 pb-5" : "contents"}>{/* hero padded inner */}
           {/* Profile photo + CTA buttons */}
-          <div className={`${heroCustomer ? "-mt-[80px] md:pl-4 items-end" : showCoverImage ? "-mt-[80px] pl-4 items-start" : showGrayHeader ? "-mt-[100px] items-start" : "mt-0 items-start"} mb-2 flex justify-between md:mb-4 ${heroCustomer || showCoverImage || showGrayHeader ? "md:items-end" : ""} ${heroCustomer && !showCoverImage ? "md:mt-0 md:pl-0" : ""} ${coverMode === "none" ? "md:mt-0" : ""}`}>
+          <div className={`${heroCustomer ? "-mt-[80px] items-end" : showCoverImage ? "-mt-[80px] pl-4 items-start" : showGrayHeader ? "-mt-[100px] items-start" : "mt-0 items-start"} mb-2 flex justify-between md:mb-4 ${heroCustomer || showCoverImage || showGrayHeader ? "md:items-end" : ""} ${heroCustomer && !showCoverImage ? "md:mt-0 md:pl-0" : ""} ${coverMode === "none" ? "md:mt-0" : ""}`}>
             <div className={`group relative z-20 cursor-pointer border-[4px] ${darkMode ? "border-[#131313] bg-[#131313]" : "border-white bg-white"} ${heroCustomer ? "rounded-full" : "rounded-lg md:rounded-lg"}`} onClick={() => setLightboxOpen(true)}>
               <div className={`relative overflow-hidden ${heroCustomer ? "rounded-full" : "rounded-[4px] md:rounded-[4px]"}`}>
                 <motion.img
@@ -1640,15 +1858,31 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
                   alt={profileName}
                   className="block h-[132px] w-[132px] object-cover"
                 />
-                <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
+                {viewingOwnProfile ? (
+                  /* Hover (own profile): darken the photo + reveal a centered
+                     Edit pill — mirrors the Edit-mode hero avatar. */
+                  <>
+                    <div className="pointer-events-none absolute inset-0 bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <span className="flex translate-y-1 items-center gap-1 rounded-full bg-[#222222]/25 px-3 py-1.5 text-[13px] font-semibold text-white opacity-0 backdrop-blur-[12px] transition-[transform,opacity] duration-200 ease-out group-hover:translate-y-0 group-hover:opacity-100">
+                        <img src={editIcon} alt="" className="h-[13px] w-[13px] brightness-0 invert" />
+                        Edit
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
+                )}
               </div>
             </div>
             <div className={`flex items-center gap-2 ${showCoverImage || heroCustomer ? "pb-1" : showGrayHeader ? "pb-[90px]" : "pb-1"} ${heroCustomer && !showCoverImage ? "md:pb-1" : ""}`}>
               {viewingOwnProfile ? (
-                <Link to="/settings?tab=account" className="flex cursor-pointer items-center gap-2 rounded-xl bg-[#F5F5F5] px-5 py-2.5 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#ebebeb]">
-                  <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
+                editingHero ? null : (
+                <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 text-[14px] font-semibold" onClick={startEditHero}>
+                  <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
                   Edit
-                </Link>
+                </Button>
+                )
               ) : (
                 <>
                   {/* Message — icon-only circle next to Follow on all sizes. */}
@@ -1735,7 +1969,32 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
           {/* Name → stats wrapper (padded when cover image is on). In the unified
               template the text is flush-left on mobile (matching the photo, which
               only pads on desktop) — drop the mobile pl-4 there. */}
-          <div className={showCoverImage ? (unified ? "md:pl-4" : "pl-4") : ""}>
+          <div className={showCoverImage && !unified ? "pl-4" : ""}>
+
+          {editingHero ? (
+          /* Inline edit — editable name + headline in place of the identity. */
+          <div className="flex max-w-[640px] flex-col gap-3 pb-2">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <label className="flex-1">
+                <span className="mb-1 block text-[13px] font-medium text-gray-light">First name</span>
+                <input value={firstDraft} onChange={(e) => setFirstDraft(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-[16px] text-gray-dark outline-none focus:border-gray-dark" />
+              </label>
+              <label className="flex-1">
+                <span className="mb-1 block text-[13px] font-medium text-gray-light">Last name</span>
+                <input value={lastDraft} onChange={(e) => setLastDraft(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-[16px] text-gray-dark outline-none focus:border-gray-dark" />
+              </label>
+            </div>
+            <label className="block">
+              <span className="mb-1 block text-[13px] font-medium text-gray-light">Headline</span>
+              <input value={headlineDraft} onChange={(e) => setHeadlineDraft(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-[16px] text-gray-dark outline-none focus:border-gray-dark" />
+            </label>
+            <div className="mt-1 flex items-center justify-between">
+              <Button size="lg" variant="secondary" className="font-semibold" onClick={() => setEditingHero(false)}>Cancel</Button>
+              <Button size="lg" variant="dark" className="font-semibold" onClick={saveHero}>Save</Button>
+            </div>
+          </div>
+          ) : (
+          <>
 
           {/* Name + Verified badge + Supercoach badge. In the unified template the
               name always keeps the large serif styling (it never shrinks when a
@@ -1769,19 +2028,9 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
           {/* Headline — sits directly under the name. Large serif in the
               category-specific coach view; body text (bio) for customers. The
               high-level profile hides it (no category yet). */}
-          {(isCustomerProfile || (unified && !highLevel)) && (
-            <p className={categoryMode ? "mb-2 font-serif text-[26px] font-medium leading-[1.3] text-gray-dark" : "mb-2 text-[15px] leading-[1.4] text-gray-dark"}>
-              {isCustomerProfile ? (
-                "Building products that matter. Passionate about AI, design, and helping others break into tech."
-              ) : unified ? (
-                categoryHeadline ?? "Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB"
-              ) : sectionFilter === "College" ? (
-                <>College Admissions Expert | Yale Grad | 50+ Ivy League Admits</>
-              ) : sectionFilter === "MBA" ? (
-                <>MBA Coach | Stanford GSB | 100+ M7 Admits</>
-              ) : (
-                <>Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB</>
-              )}
+          {(isCustomerProfile || unified) && (
+            <p className={categoryMode ? "mb-2 font-serif text-[26px] font-medium leading-[1.3] text-gray-dark" : "mb-2 text-[16px] leading-[1.45] text-gray-light"}>
+              {heroHeadline}
             </p>
           )}
 
@@ -1798,33 +2047,7 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
             }
           </p>
 
-          {/* Credentials row */}
-          <div className="mb-3 flex flex-wrap items-center gap-x-[20px] gap-y-[2px] text-[14px] leading-tight text-gray-light">
-            {/* Atlassian */}
-            <div className="flex items-center gap-[6px]">
-              <img src={atlassianLogo} alt="Atlassian" className="h-[18px] w-[18px] rounded" />
-              <span>Atlassian</span>
-            </div>
-
-            {/* Yale University */}
-            <div className="flex items-center gap-[6px]">
-              <img src={yaleLogo} alt="Yale University" className="h-[18px] w-[18px] rounded" />
-              <span>Yale University</span>
-            </div>
-
-            {/* Successful clients at */}
-            {!isCustomerProfile && <div className="hidden items-center gap-[6px] sm:flex">
-              <span>Successful clients at</span>
-              <div className="flex items-center -space-x-[2px]">
-                <img src={clientLogo1} alt="" className="h-[18px] w-[18px] rounded border border-white" />
-                <img src={clientLogo2} alt="" className="h-[18px] w-[18px] rounded border border-white" />
-                <img src={clientLogo3} alt="" className="h-[18px] w-[18px] rounded border border-white" />
-                <img src={clientLogo4} alt="" className="h-[18px] w-[18px] rounded border border-white" />
-              </div>
-            </div>}
-          </div>
-
-          {/* Reviews — a 5-star row below the featured companies. */}
+          {/* Reviews — a 5-star row below the headline. */}
           {!isCustomerProfile && altReviews && (
             <div
               className="mb-3 flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-70 md:mb-4"
@@ -1907,6 +2130,35 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
               </motion.div>
               </>)}
             </div>
+
+          {/* Featured experience — moved below the stats row. */}
+          <div className="mt-3 flex flex-wrap items-center gap-x-[20px] gap-y-[2px] text-[14px] leading-tight text-gray-light md:mt-4">
+            {/* Atlassian */}
+            <div className="flex items-center gap-[6px]">
+              <img src={atlassianLogo} alt="Atlassian" className="h-[18px] w-[18px] rounded" />
+              <span>Atlassian</span>
+            </div>
+
+            {/* Yale University */}
+            <div className="flex items-center gap-[6px]">
+              <img src={yaleLogo} alt="Yale University" className="h-[18px] w-[18px] rounded" />
+              <span>Yale University</span>
+            </div>
+
+            {/* Successful clients at */}
+            {!isCustomerProfile && <div className="hidden items-center gap-[6px] sm:flex">
+              <span>Successful clients at</span>
+              <div className="flex items-center -space-x-[2px]">
+                <img src={clientLogo1} alt="" className="h-[18px] w-[18px] rounded border border-white" />
+                <img src={clientLogo2} alt="" className="h-[18px] w-[18px] rounded border border-white" />
+                <img src={clientLogo3} alt="" className="h-[18px] w-[18px] rounded border border-white" />
+                <img src={clientLogo4} alt="" className="h-[18px] w-[18px] rounded border border-white" />
+              </div>
+            </div>}
+          </div>
+
+          </>
+          )}
 
           </div>{/* end name → stats wrapper */}
 
@@ -2013,32 +2265,10 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
             </div>
           )}
 
-          {/* Coach video — desktop horizontal banner (no sidebar) */}
-          {showCoachVideo && !isCustomerProfile && !showSidebar && (
-            <div className="group mt-4 hidden cursor-pointer items-center gap-4 overflow-hidden rounded-lg bg-[#f5f5f5] p-3 transition-colors hover:bg-[#ebebeb] lg:flex">
-              <div className="relative h-[56px] w-[90px] shrink-0 overflow-hidden rounded-md">
-                <img
-                  src={videoThumbnail}
-                  alt="Coach video"
-                  className="h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 transition-colors group-hover:bg-black/10" />
-                <div className="absolute bottom-1.5 left-1.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/40 backdrop-blur-[6px]">
-                    <svg width="9" height="11" viewBox="0 0 18 20" fill="none">
-                      <path d="M17 10L1 19V1L17 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <p className="text-[14px] font-medium text-gray-dark">Get to know {profileName.split(" ")[0]}</p>
-                <p className="text-[14px] text-[#707070]">1:40</p>
-              </div>
-            </div>
-          )}
+          </div>{/* end hero padded inner */}
+          </div>{/* end Box 1 — hero */}
 
-
+          <div className={boxed ? "rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10 px-5 pb-5" : "contents"}>{/* Box 2 — tab bar + content (tab bar pins to the page top) */}
           {/* Hero sentinel for sticky nav detection (non-unified position). */}
           {!unified && <div ref={heroSentinelRef} />}
 
@@ -2046,8 +2276,8 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
               Offerings, with Offerings only when the "Offerings tab" toggle is on. */}
           {!isCustomerProfile && unified && (
             <>
-            <div ref={tabAnchorRef} aria-hidden className="mt-3 h-0" />
-            <div className="sticky top-14 z-10 -mx-4 flex border-b border-gray-stroke bg-white md:top-0 md:mx-0">
+            <div ref={tabAnchorRef} aria-hidden className={boxed ? "h-0" : "mt-3 h-0"} />
+            <div style={boxedTabCapStyle} className={`sticky z-10 flex border-b border-gray-stroke bg-white ${boxed ? "top-[81px] -mx-5 rounded-t-2xl" : "top-14 md:top-0 -mx-4 md:mx-0"}`}>
               {([
                 "about" as const,
                 // Activity is hidden in MVP mode.
@@ -2082,81 +2312,160 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
           {/* Coach detail sections (Offerings → Reviews). In the unified template
               these live inside the "About" tab (Offerings optionally in its own
               tab); otherwise they scroll inline. */}
-          {!isCustomerProfile && (showOfferingsSection || showRestSections) && (<>
-          {/* v3 A/B: "Work with …" moves above the About group so the customer-
-              favorite badge + bio (now headed "About") sit below it. No top
-              divider here — it would collide with the tab bar's border. */}
-          {unified && coachTab === "about" && showOfferingsTab && abTest && abVersion === "v3" && renderWorkWithPreview(false)}
-          {/* Legacy inline mobile Customer Favorite row (hidden for now). */}
-          {unified && coachTab === "about" && showLegacyCustomerFavorite && effCustomerFavorite && (
-            <div className="mt-2 flex flex-col">
-              <div className="md:hidden">{customerFavoriteRow}</div>
-            </div>
-          )}
-          {/* Badges — up to 3, shown at the top of the Profile tab above the bio.
-              In v3 they move below the "About" header instead (see the bio block). */}
-          {unified && coachTab === "about" && !(abTest && abVersion === "v3") && badgesRow && (
-            <div className="mt-6">{badgesRow}</div>
-          )}
-
-          {/* Bio — long, clipped to 6 lines with a short white gradient fade. */}
+          {!isCustomerProfile && (showOfferingsSection || showRestSections || (unified && coachTab === "about")) && (<>
+          {/* Profile tab (My Leland own profile) — the same sections as the beige
+              "Edit mode" editor, rendered as divided sections inside the bottom
+              box: 20px headers + Edit-mode section padding, hairline dividers,
+              no inner card borders. */}
           {unified && coachTab === "about" && (
-            <div className="mt-6">
-              {abTest && abVersion === "v3" && (
-                <>
-                  <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">About</h2>
-                  {badgesRow && <div className="mb-6">{badgesRow}</div>}
-                </>
-              )}
-              {/* Collapsed height = 4 lines (15px × leading 1.6 = 24px).
-                  Matches the "Note from …" expand/collapse animation. */}
-              <motion.div
-                initial={false}
-                animate={{ height: bioExpanded ? "auto" : 96 }}
-                transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                className="relative overflow-hidden"
-              >
-                <p className="whitespace-pre-line text-[15px] leading-[1.6] text-gray-dark">
-                  {BIO_PLACEHOLDER}
-                </p>
-                {categories.length > 0 && (
-                  <p className="mt-4 mb-4 text-[15px] leading-[1.6] text-gray-extra-light">
-                    {coachConfig.firstName} can help with{" "}
-                    {categories.map((c, i) => (
-                      <span key={c.slug}>
-                        <span
-                          onClick={() => onSelectCategory?.(c.slug)}
-                          className="cursor-pointer text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px]"
-                        >
-                          {c.label}
-                        </span>
-                        {i < categories.length - 2 ? ", " : i === categories.length - 2 ? ", and " : "."}
-                      </span>
+            <div className="divide-y divide-gray-stroke/70">
+              {/* Categories */}
+              {categories.length > 0 && (
+                <section className="py-6">
+                  <ProfileSectionHead title="Categories" action={<ProfileEditButton label="Add category" icon={addPlusIcon} />} />
+                  <div className="flex flex-col gap-1">
+                    {categories.map((c) => (
+                      <button
+                        key={c.slug}
+                        onClick={() => onSelectCategory?.(c.slug)}
+                        className="group flex cursor-pointer items-center gap-3 rounded-xl px-2 py-3 text-left transition-colors hover:bg-gray-hover"
+                      >
+                        <div className="icon-tile flex h-11 w-11 shrink-0 items-center justify-center rounded-[6px] bg-[#f5f5f5]">
+                          {c.icon && <img src={c.icon} alt="" className="h-6 w-6" />}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[15px] font-semibold leading-tight text-gray-dark">{c.label}</p>
+                          {c.headline && <p className="mt-[2px] truncate text-[15px] leading-tight text-[#707070]">{c.headline}</p>}
+                        </div>
+                        <img src={chevronRightIcon} alt="" className="h-6 w-6 shrink-0 opacity-60" />
+                      </button>
                     ))}
-                  </p>
-                )}
-                <motion.div
-                  initial={false}
-                  animate={{ opacity: bioExpanded ? 0 : 1 }}
-                  transition={{ duration: 0.35, ease: [0.42, 0, 0.58, 1] }}
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-[3.2em] bg-gradient-to-t from-white to-transparent"
-                />
-              </motion.div>
-              <Button size="md" variant="secondary" className={`mt-3 font-semibold ${abTest ? "mb-8 min-[960px]:mb-0" : "mb-8"}`} onClick={() => setBioExpanded((v) => !v)}>
-                {bioExpanded ? "Read less" : "Read more"}
-                <img src={chevronDownIcon} alt="" className={`h-4 w-4 transition-transform ${bioExpanded ? "rotate-180" : ""}`} />
-              </Button>
+                  </div>
+                </section>
+              )}
+
+              {/* About */}
+              <ProfileTextSection title="About" text={PROFILE_ABOUT_TEXT} />
+
+              {/* Intro Video — compact banner (thumbnail + link + actions) */}
+              <section className="py-6">
+                <ProfileSectionHead title="Intro Video" />
+                <div className="flex items-center gap-3.5 rounded-xl bg-gray-hover p-3">
+                  <div className="relative h-16 w-[112px] shrink-0 overflow-hidden rounded-lg bg-black">
+                    <img src={videoThumbnail} alt="" className="h-full w-full object-cover" />
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#222222"><path d="M8 5v14l11-7z" /></svg>
+                      </div>
+                    </div>
+                    <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1.5 py-[1px] text-[11px] font-medium leading-none text-white">1:24</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[15px] font-semibold text-gray-dark">Intro video</p>
+                    <a href="https://youtu.be/dQw4w9WgXcQ" target="_blank" rel="noreferrer" className="mt-0.5 block truncate text-[13px] text-gray-light transition-colors hover:text-gray-dark hover:underline">https://youtu.be/dQw4w9WgXcQ</a>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <button type="button" aria-label="Edit" className="flex items-center justify-center rounded-full p-3 text-gray-dark transition-colors hover:bg-gray-hover"><img src={editIcon} alt="" className="h-[18px] w-[18px]" /></button>
+                    <button type="button" aria-label="More" className="flex items-center justify-center rounded-full p-3 text-gray-dark transition-colors hover:bg-gray-hover"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><circle cx="3" cy="8" r="1.5" /><circle cx="8" cy="8" r="1.5" /><circle cx="13" cy="8" r="1.5" /></svg></button>
+                  </div>
+                </div>
+              </section>
+
+              {/* Why I coach */}
+              <ProfileTextSection title="Why I coach" text={PROFILE_WHY_TEXT} />
+
+              {/* Education */}
+              <section className="py-6">
+                <ProfileSectionHead title="Education" action={<ProfileEditButton label="Add" icon={addPlusIcon} />} />
+                <div className="flex flex-col gap-1">
+                  {PROFILE_EDUCATION.map((item) => (
+                    <ProfileCredentialRow key={item.title} logo={item.logo} title={item.title} subtitle={item.subtitle} featured={item.featured} />
+                  ))}
+                </div>
+              </section>
+
+              {/* Experience */}
+              <section className="py-6">
+                <ProfileSectionHead title="Experience" action={<ProfileEditButton label="Add" icon={addPlusIcon} />} />
+                <div className="flex flex-col gap-1">
+                  {PROFILE_EXPERIENCE.map((item) => (
+                    <ProfileCredentialRow key={item.title} logo={item.logo} title={item.title} subtitle={item.subtitle} featured={item.featured} />
+                  ))}
+                </div>
+              </section>
+
+              {/* Reviews — summary + rating breakdown + outcomes */}
+              <section className="py-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-[20px] font-semibold text-gray-dark">37 reviews</h2>
+                    <div className="mt-2 flex items-center gap-2.5">
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <svg key={i} width="20" height="20" viewBox="0 0 24 24" fill="#222222">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <span className="text-[18px] font-normal text-gray-light">4.9 avg</span>
+                    </div>
+                  </div>
+                  <LinkButton size="md" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold" href="/my-leland/reviews">
+                    See all reviews
+                  </LinkButton>
+                </div>
+
+                <div className="my-5 border-t border-gray-200" />
+
+                {/* Rating breakdown — overall distribution + category scores */}
+                <div className="flex flex-col gap-4 md:grid md:grid-cols-5">
+                  <div className="md:col-span-1">
+                    <p className="mb-1 text-[14px] font-medium text-gray-light">Overall rating</p>
+                    <div className="flex flex-col gap-1">
+                      {[
+                        { star: 5, count: 3 },
+                        { star: 4, count: 0 },
+                        { star: 3, count: 0 },
+                        { star: 2, count: 0 },
+                        { star: 1, count: 0 },
+                      ].map((row) => (
+                        <div key={row.star} className="flex items-center gap-1.5">
+                          <span className="w-[10px] shrink-0 text-[10px] text-[#707070]">{row.star}</span>
+                          <div className="h-[4px] flex-1 overflow-hidden rounded-full bg-[#e5e5e5]">
+                            <div className="h-full rounded-full bg-gray-dark" style={{ width: `${(row.count / 3) * 100}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="-mx-4 scrollbar-hide col-span-4 flex gap-3 overflow-x-auto px-4 md:mx-0 md:contents md:px-0">
+                    {[
+                      { label: "Knowledge", score: 5.0, icon: bookBookmarkIcon },
+                      { label: "Value", score: 5.0, icon: piggyBankIcon },
+                      { label: "Responsiveness", score: 5.0, icon: stopwatchIcon },
+                      { label: "Supportiveness", score: 5.0, icon: supportivenessIcon },
+                    ].map((item) => (
+                      <div key={item.label} className="flex w-[60vw] shrink-0 flex-col justify-between rounded-lg border border-gray-200 p-4 md:w-auto md:shrink md:rounded-none md:border-0 md:border-l md:p-0 md:pl-4">
+                        <div>
+                          <p className="text-[14px] font-medium text-gray-light">{item.label}</p>
+                          <p className="text-[22px] font-semibold text-gray-dark">{item.score.toFixed(1)}</p>
+                        </div>
+                        <div className="mt-3 text-gray-dark"><img src={item.icon} alt="" className="h-[32px] w-[32px]" /></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-6 border-t border-gray-200" />
+
+                {/* Outcomes from your reviews */}
+                <div className="mt-6">
+                  <p className="mb-3 text-[14px] font-medium text-gray-light">Outcomes from your reviews</p>
+                  <LogoStrip outcomes={PROFILE_REVIEW_OUTCOMES} />
+                </div>
+              </section>
             </div>
-          )}
-          {/* Video — on mobile it sits below the bio's Read more button; on
-              desktop (≥960) it lives in the coach sidebar instead. */}
-          {unified && coachTab === "about" && effCoachVideo && (
-            <div className={hideForCoachSidebar}>{coachVideoRow}</div>
-          )}
-          {/* Coach note — on mobile it sits below the video; on desktop (≥960)
-              it lives in the coach sidebar instead. */}
-          {unified && coachTab === "about" && effCoachNote && (
-            <div className={hideForCoachSidebar}>{coachNoteRow}</div>
           )}
           {/* ── Offerings section (its own tab when "Offerings tab" is on) ── */}
           {showOfferingsSection && (
@@ -2872,7 +3181,7 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
           {isCustomerProfile && (
             <>
                 {unified && <div ref={tabAnchorRef} aria-hidden className="mt-2 h-0" />}
-                <div ref={customerTabStripRef} className={`sticky top-14 z-10 -mx-4 md:mx-0 ${unified ? "" : "mt-2"} flex border-b border-gray-stroke bg-white md:top-0`}>
+                <div ref={customerTabStripRef} style={boxedTabCapStyle} className={`sticky z-10 ${boxed ? "top-[81px] -mx-5 rounded-t-2xl" : "top-14 md:top-0 -mx-4 md:mx-0"} ${unified ? "" : "mt-2"} flex border-b border-gray-stroke bg-white`}>
                   {(viewingOwnProfile ? ["about", "more", "saved", "likes"] as const : unified ? ["about", "more"] as const : ["about", "more", "likes"] as const).map((tab) => (
                     <button
                       key={tab}
@@ -2990,6 +3299,7 @@ export default function MyLelandProfileView({ coach = false, coachId = "samantha
             </>
           )}
           <div className="h-[120px]" />
+          </div>{/* end Box 2 — tab bar + content */}
         </div>
       </PageShell>
       </motion.div>

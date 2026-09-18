@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import MyLelandProfileView from "./MyLelandProfileView";
 import ProfileEditMode from "./ProfileEditMode";
@@ -67,9 +68,10 @@ const categories = [
 export default function MyLelandProfile() {
   // Expert vs. customer follows the global My Leland Expert toggle.
   const { expert } = useExpertMode();
+  const navigate = useNavigate();
   // "Inline" (the faithful public-template view) vs. "Edit mode" (the beige,
   // card-based editor). In context so CoachLayout can paint the page beige.
-  const { editMode, setEditMode } = useProfileEditMode();
+  const { editMode, setEditMode, boxedMode, setBoxedMode } = useProfileEditMode();
 
   // Coaching-section demo toggles — default on so the expert profile shows rich.
   const [customerFavorite, setCustomerFavorite] = useState(true);
@@ -131,7 +133,10 @@ export default function MyLelandProfile() {
           offeringsTab
           coverMode={coverMode}
           ownProfile
+          highLevel={expert}
+          boxed={boxedMode}
           categories={categories}
+          onSelectCategory={(slug) => navigate(`/my-leland/manage/${slug}`)}
         />
       )}
 
@@ -166,6 +171,8 @@ export default function MyLelandProfile() {
               {/* Inline-only preview controls (irrelevant in Edit mode) */}
               {!editMode && (
                 <>
+                  <div className="my-1 border-t border-gray-100" />
+                  <AdminToggle label="Boxed mode" checked={boxedMode} onChange={() => setBoxedMode(!boxedMode)} />
                   <div className="my-1 border-t border-gray-100" />
                   {/* Coaching sections — only meaningful when Expert is on */}
                   <AdminToggle label="Customer favorite" checked={customerFavorite} onChange={() => setCustomerFavorite((v) => !v)} disabled={!expert} />

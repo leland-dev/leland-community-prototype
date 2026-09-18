@@ -313,14 +313,14 @@ function AdminExpertToggle() {
 
 export default function CoachLayout() {
   const { pathname } = useLocation();
-  const { editMode } = useProfileEditMode();
+  const { editMode, boxedMode } = useProfileEditMode();
   // The My Leland dashboard (store root) and calendar get a subtle beige tint
   // (brand beige at 50% opacity) across the whole content region — as does the
-  // Profile tab when it's in the card-based Edit mode (to match the Dashboard).
+  // Profile tab in Edit mode or in Inline's Boxed mode (to match the Dashboard).
   const beigePage =
     pathname === "/my-leland" ||
     pathname === "/my-leland/calendar" ||
-    (pathname === "/my-leland/profile" && editMode);
+    (pathname === "/my-leland/profile" && (editMode || boxedMode));
   const inMyLeland = pathname.startsWith("/my-leland");
 
   return (
