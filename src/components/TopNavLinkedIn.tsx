@@ -332,8 +332,8 @@ export default function TopNavLinkedIn() {
             <img src={exploreIcon} alt="" className={iconCls(discoverActive)} />
           </span>
           <span className={`flex items-center gap-0.5 ${labelCls(discoverActive)}`}>
-            {showNavLabels && "Explore"}
-            {!altIconsOn && !isV4 && caret(discoverOpen)}
+            {showNavLabels && "Browse"}
+            {caret(discoverOpen)}
           </span>
           {underline(discoverActive)}
         </button>

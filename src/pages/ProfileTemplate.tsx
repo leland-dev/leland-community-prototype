@@ -65,15 +65,8 @@ export default function ProfileTemplate() {
   const [coachNote, setCoachNote] = useState(true);
   const [video, setVideo] = useState(true);
   const [supercoach, setSupercoach] = useState(true);
-  const [altReviews, setAltReviews] = useState(true);
-  const [altSchedule, setAltSchedule] = useState(false);
-  const [mvp, setMvp] = useState(true);
   const [coverMode, setCoverMode] = useState<"default" | "dark" | "beige" | "none">("default");
   const [myProfile, setMyProfile] = useState(isMe);
-  // A/B test toggle for profile-page improvements (defaults ON).
-  const [abTest, setAbTest] = useState(true);
-  // Which improvement variant to show when A/B testing is on. Defaults to v3.
-  const [abVersion, setAbVersion] = useState<"v1" | "v2" | "v3">("v3");
   const coachId = person?.coachId ?? "samantha";
 
   // Identity (name + photo + cover) is fixed per profile and stays constant
@@ -199,9 +192,6 @@ export default function ProfileTemplate() {
         coachVideo={video}
         supercoach={supercoach}
         offeringsTab
-        altReviews={altReviews}
-        altSchedule={altSchedule}
-        mvp={mvp}
         coverMode={coverMode}
         ownProfile={myProfile}
         highLevel={highLevel}
@@ -209,8 +199,6 @@ export default function ProfileTemplate() {
         categoryHeadline={categoryHeadline}
         categories={categories}
         onSelectCategory={(c) => navigate(c ? `/profile/${slug}/${c}` : `/profile/${slug}`)}
-        abTest={abTest}
-        abVersion={abVersion}
       />
       </div>
 
@@ -229,32 +217,14 @@ export default function ProfileTemplate() {
               transition={{ duration: 0.15 }}
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
-              <AdminToggle label="A/B Test Improvements" checked={abTest} onChange={() => setAbTest((v) => !v)} />
-              {abTest && (
-                <AdminSelect
-                  label="Version"
-                  value={abVersion}
-                  onChange={(v) => setAbVersion(v as "v1" | "v2" | "v3")}
-                  cols={3}
-                  options={[
-                    { value: "v1", label: "v1" },
-                    { value: "v2", label: "v2" },
-                    { value: "v3", label: "v3" },
-                  ]}
-                />
-              )}
-              <div className="my-1 border-t border-gray-100" />
               <AdminToggle label="Expert" checked={expert} onChange={() => setExpert((v) => !v)} />
               <AdminToggle label="My profile" checked={myProfile} onChange={() => setMyProfile((v) => !v)} />
               <div className="my-1 border-t border-gray-100" />
               {/* Coach-specific toggles stay visible but disabled when Expert is off */}
-              <AdminToggle label="MVP" checked={mvp} onChange={() => setMvp((v) => !v)} disabled={!expert} />
               <AdminToggle label="Customer favorite" checked={customerFavorite} onChange={() => setCustomerFavorite((v) => !v)} disabled={!expert} />
               <AdminToggle label="Coach note" checked={coachNote} onChange={() => setCoachNote((v) => !v)} disabled={!expert} />
               <AdminToggle label="Video" checked={video} onChange={() => setVideo((v) => !v)} disabled={!expert} />
               <AdminToggle label="Top Expert" checked={supercoach} onChange={() => setSupercoach((v) => !v)} disabled={!expert} />
-              <AdminToggle label="Alt reviews" checked={altReviews} onChange={() => setAltReviews((v) => !v)} disabled={!expert} />
-              <AdminToggle label="Alt schedule" checked={altSchedule} onChange={() => setAltSchedule((v) => !v)} disabled={!expert} />
               <div className="my-1 border-t border-gray-100" />
               <AdminSelect
                 label="Cover image"

@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useExpertMode } from "../contexts/ExpertModeContext";
+import { useProfileEditMode } from "../contexts/ProfileEditModeContext";
 import chatIcon from "../assets/icons/nav-icons/chat-inactive.svg";
-import settingsIcon from "../assets/icons/settings.svg";
-import giftIcon from "../assets/icons/gift.svg";
 import storeIcon from "../assets/icons/store.svg";
 import lightningIcon from "../assets/icons/lightning.svg";
 import calendarIcon from "../assets/icons/calendar-page.svg";
+import starReviewIcon from "../assets/icons/star-review.svg";
 import moneyIcon from "../assets/icons/money.svg";
 import starIcon from "../assets/icons/star-icon.svg";
 import discountIcon from "../assets/icons/discount.svg";
@@ -214,12 +214,10 @@ function SidebarV1() {
             </NavLink>
             {navRow(findItem("/coach/profile"))}
             {navRow(findItem("/coach/calendar"))}
+            {/* Goals — placeholder tab */}
+            {navRow({ to: "/coach/goals", label: "Goals", icon: starReviewIcon })}
             {/* Reviews only exists for experts (in the Expert tools card below) —
                 when Expert is off it's removed from My Leland entirely */}
-            {/* Refer a friend — promoted from the Account page into its own tab */}
-            {navRow({ to: "/coach/refer", label: "Refer a friend", icon: giftIcon })}
-            {/* Account — houses the links + toggles from the old Me menu */}
-            {navRow({ to: "/coach/account", label: "Account", icon: settingsIcon })}
           </nav>
         </div>
 
@@ -313,60 +311,16 @@ function AdminExpertToggle() {
   );
 }
 
-// Mobile section nav — the sidebar is hidden on phones, so this sticky,
-// horizontally-scrollable pill bar lets mobile users move between My Leland
-// tabs (and the Expert tools). Mirrors the sidebar's items; desktop only ever
-// sees the sidebar.
-function MobileSectionNav() {
-  const base = useCoachBase();
-  const { expert } = useExpertMode();
-
-  const items: { to: string; label: string; end?: boolean }[] = [
-    { to: base, label: "Dashboard", end: true },
-    { to: rebase("/coach/profile", base), label: "Profile" },
-    { to: rebase("/coach/calendar", base), label: "Calendar" },
-    ...(expert
-      ? [
-          { to: rebase("/coach/pricing", base), label: "Offerings" },
-          { to: rebase("/coach/opportunities", base), label: "Opportunities" },
-          { to: rebase("/coach/livestreams", base), label: "Livestreams" },
-          { to: rebase("/coach/earnings", base), label: "Earnings" },
-          { to: rebase("/coach/analytics", base), label: "Analytics" },
-          { to: rebase("/coach/reviews", base), label: "Reviews" },
-          { to: rebase("/coach/discount-codes", base), label: "Discount Codes" },
-        ]
-      : []),
-    { to: rebase("/coach/refer", base), label: "Refer a friend" },
-    { to: rebase("/coach/account", base), label: "Account" },
-  ];
-
-  return (
-    <nav className="sticky top-14 z-20 border-b border-gray-stroke bg-white md:hidden">
-      <div className="scrollbar-hide flex gap-2 overflow-x-auto px-4 py-2.5">
-        {items.map(({ to, label, end }) => (
-          <NavLink
-            key={label}
-            to={to}
-            end={end}
-            className={({ isActive }) =>
-              `shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[14px] font-medium transition-colors ${
-                isActive ? "bg-gray-dark text-white" : "bg-[#222222]/[0.06] text-gray-dark"
-              }`
-            }
-          >
-            {label}
-          </NavLink>
-        ))}
-      </div>
-    </nav>
-  );
-}
-
 export default function CoachLayout() {
   const { pathname } = useLocation();
+  const { editMode } = useProfileEditMode();
   // The My Leland dashboard (store root) and calendar get a subtle beige tint
-  // (brand beige at 50% opacity) across the whole content region.
-  const beigePage = pathname === "/my-leland" || pathname === "/my-leland/calendar";
+  // (brand beige at 50% opacity) across the whole content region — as does the
+  // Profile tab when it's in the card-based Edit mode (to match the Dashboard).
+  const beigePage =
+    pathname === "/my-leland" ||
+    pathname === "/my-leland/calendar" ||
+    (pathname === "/my-leland/profile" && editMode);
   const inMyLeland = pathname.startsWith("/my-leland");
 
   return (
@@ -396,7 +350,6 @@ export default function CoachLayout() {
       {/* Main content — fills remaining space, capped at 1280px. My Leland tabs
           share the Dashboard's fade-up entrance, re-triggered per tab. */}
       <div className="min-w-0 flex-1">
-        {inMyLeland && <MobileSectionNav />}
         <div className="mx-auto max-w-[1080px] px-4 py-8 sm:px-6 sm:py-10">
           {inMyLeland ? (
             <motion.div

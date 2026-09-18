@@ -107,7 +107,8 @@ import CoachProducts from "./pages/CoachProducts";
 import CoachInbox from "./pages/CoachInbox";
 import CoachManage from "./pages/CoachManage";
 import CoachProfileNew from "./pages/CoachProfileNew";
-import CoachProfilePlaceholder from "./pages/CoachProfilePlaceholder";
+import MyLelandProfile from "./pages/MyLelandProfile";
+import MyLelandGoals from "./pages/MyLelandGoals";
 import CoachOpportunities from "./pages/CoachOpportunities";
 import CoachLivestreams from "./pages/CoachLivestreams";
 import CoachContent from "./pages/CoachContent";
@@ -139,6 +140,7 @@ import LessonBlocksGallery from "./pages/LessonBlocksGallery";
 import Waitlist from "./pages/waitlist/Waitlist";
 import WaitlistOnboarding from "./pages/waitlist/WaitlistOnboarding";
 import { FeedAdminProvider } from "./contexts/FeedAdminContext";
+import { ProfileEditModeProvider } from "./contexts/ProfileEditModeContext";
 
 export default function App() {
   return (
@@ -154,6 +156,7 @@ export default function App() {
     <FullGoalsProvider>
     <FeedDemoProvider>
     <FeedAdminProvider>
+    <ProfileEditModeProvider>
     <ScrollToTop />
     <PageExitProvider>
     <Routes>
@@ -223,7 +226,10 @@ export default function App() {
           <Route path="/my-leland" element={<Dashboard shell />} />
           <Route path="/my-leland/inbox" element={<CoachInbox />} />
           <Route path="/my-leland/manage" element={<CoachManage />} />
-          <Route path="/my-leland/profile" element={<CoachProfilePlaceholder />} />
+          {/* Profile — the signed-in user's own profile rendered with the real
+              public template (ProfileV2, own-profile/editable) in embedded mode,
+              so it keeps the My Leland sidebar like every other tab. */}
+          <Route path="/my-leland/profile" element={<MyLelandProfile />} />
           <Route path="/my-leland/products" element={<CoachProducts />} />
           <Route path="/my-leland/manage/:category" element={<CoachCategoryEdit />} />
           <Route path="/my-leland/opportunities" element={<CoachOpportunities />} />
@@ -231,6 +237,7 @@ export default function App() {
           <Route path="/my-leland/content" element={<CoachContent />} />
           <Route path="/my-leland/pricing" element={<CoachPricing />} />
           <Route path="/my-leland/calendar" element={<Calendar shell />} />
+          <Route path="/my-leland/goals" element={<MyLelandGoals />} />
           <Route path="/my-leland/my-content" element={<CoachMyContent />} />
           <Route path="/my-leland/earnings" element={<CoachEarnings />} />
           <Route path="/my-leland/analytics" element={<CoachAnalytics />} />
@@ -290,6 +297,7 @@ export default function App() {
     </Routes>
     <PageExitOverlay />
     </PageExitProvider>
+    </ProfileEditModeProvider>
     </FeedAdminProvider>
     </FeedDemoProvider>
     </FullGoalsProvider>

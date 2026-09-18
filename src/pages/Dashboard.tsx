@@ -774,7 +774,7 @@ export default function Dashboard({ shell = false, expert: expertInit = false }:
           {embedded ? (
             <div>
               <h1 className="font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">
-                Good morning, Alex
+                Welcome back, Alex
               </h1>
               {todaySessionCount > 0 && (
                 <p className="mt-2 mb-4 text-[16px] text-gray-dark md:text-[17px]">
@@ -785,7 +785,7 @@ export default function Dashboard({ shell = false, expert: expertInit = false }:
           ) : (
             <>
               <h1 className="font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">
-                Good morning, Alex
+                Welcome back, Alex
               </h1>
               {todaySessionCount > 0 && (
                 <p className="mt-2 text-[16px] text-gray-dark md:text-[17px]">

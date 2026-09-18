@@ -225,9 +225,9 @@ const purchasedOfferings: PurchasedOffering[] = [
   },
 ];
 
-export type CoachOffering = { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string; href?: string };
+type CoachOffering = { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string; href?: string };
 
-export type CoachConfig = {
+type CoachConfig = {
   id: string;
   name: string;
   firstName: string;
@@ -236,7 +236,7 @@ export type CoachConfig = {
   offerings: CoachOffering[];
 };
 
-export const COACH_CONFIGS: Record<string, CoachConfig> = {
+const COACH_CONFIGS: Record<string, CoachConfig> = {
   samantha: {
     id: "samantha",
     name: "Samantha Parker",
@@ -599,7 +599,11 @@ function CustomerHourlySection({ marginClass = "mt-6", paddingClass = "p-6" }: {
   );
 }
 
-export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = true, altSchedule = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack, embedded = false, abTest = true, abVersion = "v3" }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; altSchedule?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void; embedded?: boolean; abTest?: boolean; abVersion?: "v1" | "v2" | "v3" }) {
+// The My Leland → Profile view. Forked from ProfileV2 so the signed-in user's
+// own-profile edit experience can diverge freely from the public-facing profile
+// template without affecting it. Shares only low-level primitives (Button,
+// PageShell, OfferingCard, icons) — the coach config here is a private copy.
+export default function MyLelandProfileView({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = true, altSchedule = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack, embedded = false, abTest = true, abVersion = "v3" }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; altSchedule?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void; embedded?: boolean; abTest?: boolean; abVersion?: "v1" | "v2" | "v3" }) {
   const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
   const { dark: darkMode } = useDarkMode();
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);

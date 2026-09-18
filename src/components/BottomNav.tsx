@@ -15,7 +15,9 @@ import browseActive from "../assets/icons/nav-icons/browse-active.svg";
 const navItems = [
   { to: "/", altTo: "/alt-nav", icon: homeAlt, label: "For you", end: true },
   { to: "/browse", altTo: "/alt-nav/browse", icon: searchActive, label: "Explore" },
-  { to: "/dashboard", altTo: "/my-leland", icon: browseActive, label: "My Leland" },
+  // `end` so "My Leland" is only active on the Dashboard tab itself (exact
+  // /my-leland or /dashboard), not on sub-pages like /my-leland/profile.
+  { to: "/dashboard", altTo: "/my-leland", icon: browseActive, label: "My Leland", end: true },
   { to: "/jobs", altTo: "/alt-nav/jobs", icon: jobsIcon, label: "Jobs" },
   { to: "/messages", altTo: "/alt-nav/messages", icon: chatActive, label: "Messages", badge: 1 },
 ];
