@@ -16,6 +16,7 @@ export enum ModalSize {
 }
 
 export enum ModalHeight {
+  XSMALL = "xs",
   SMALL = "sm",
   MEDIUM = "md",
   LARGE = "lg",
@@ -29,6 +30,7 @@ const ModalSizeToClass: Record<ModalSize, string> = {
 };
 
 const ModalHeightToClass: Record<ModalHeight, string> = {
+  [ModalHeight.XSMALL]: "sm:h-[560px]",
   [ModalHeight.SMALL]: "sm:h-[650px]",
   [ModalHeight.MEDIUM]: "sm:h-[800px]",
   [ModalHeight.LARGE]: "sm:h-[90%]",
