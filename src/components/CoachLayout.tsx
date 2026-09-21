@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useExpertMode } from "../contexts/ExpertModeContext";
-import { useProfileEditMode } from "../contexts/ProfileEditModeContext";
+import { useProfileBoxedMode } from "../contexts/ProfileBoxedModeContext";
 import chatIcon from "../assets/icons/nav-icons/chat-inactive.svg";
 import storeIcon from "../assets/icons/store.svg";
 import lightningIcon from "../assets/icons/lightning.svg";
@@ -313,14 +313,17 @@ function AdminExpertToggle() {
 
 export default function CoachLayout() {
   const { pathname } = useLocation();
-  const { editMode, boxedMode } = useProfileEditMode();
+  const { boxedMode } = useProfileBoxedMode();
   // The My Leland dashboard (store root) and calendar get a subtle beige tint
   // (brand beige at 50% opacity) across the whole content region — as does the
-  // Profile tab in Edit mode or in Inline's Boxed mode (to match the Dashboard).
+  // Profile Edit-mode page (always) and the Inline page when Boxed mode is on
+  // (to match the Dashboard).
   const beigePage =
     pathname === "/my-leland" ||
     pathname === "/my-leland/calendar" ||
-    (pathname === "/my-leland/profile" && (editMode || boxedMode));
+    pathname === "/my-leland/profile" ||
+    pathname === "/my-leland/profile/edit" ||
+    (pathname === "/my-leland/profile/inline" && boxedMode);
   const inMyLeland = pathname.startsWith("/my-leland");
 
   return (

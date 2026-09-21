@@ -108,6 +108,9 @@ import CoachInbox from "./pages/CoachInbox";
 import CoachManage from "./pages/CoachManage";
 import CoachProfileNew from "./pages/CoachProfileNew";
 import MyLelandProfile from "./pages/MyLelandProfile";
+import MyLelandProfileInline from "./pages/MyLelandProfileInline";
+import MyLelandProfileInline2 from "./pages/MyLelandProfileInline2";
+import MyLelandProfileEdit2 from "./pages/MyLelandProfileEdit2";
 import MyLelandGoals from "./pages/MyLelandGoals";
 import CoachOpportunities from "./pages/CoachOpportunities";
 import CoachLivestreams from "./pages/CoachLivestreams";
@@ -140,7 +143,7 @@ import LessonBlocksGallery from "./pages/LessonBlocksGallery";
 import Waitlist from "./pages/waitlist/Waitlist";
 import WaitlistOnboarding from "./pages/waitlist/WaitlistOnboarding";
 import { FeedAdminProvider } from "./contexts/FeedAdminContext";
-import { ProfileEditModeProvider } from "./contexts/ProfileEditModeContext";
+import { ProfileBoxedModeProvider } from "./contexts/ProfileBoxedModeContext";
 
 export default function App() {
   return (
@@ -156,7 +159,7 @@ export default function App() {
     <FullGoalsProvider>
     <FeedDemoProvider>
     <FeedAdminProvider>
-    <ProfileEditModeProvider>
+    <ProfileBoxedModeProvider>
     <ScrollToTop />
     <PageExitProvider>
     <Routes>
@@ -229,7 +232,18 @@ export default function App() {
           {/* Profile — the signed-in user's own profile rendered with the real
               public template (ProfileV2, own-profile/editable) in embedded mode,
               so it keeps the My Leland sidebar like every other tab. */}
-          <Route path="/my-leland/profile" element={<MyLelandProfile />} />
+          {/* Profile tab default — Edit mode 2 (two-column editor + right rail). */}
+          <Route path="/my-leland/profile" element={<MyLelandProfileEdit2 />} />
+          {/* Original Edit mode — no longer the default; reached from the admin
+              tool's "Mode" switcher. */}
+          <Route path="/my-leland/profile/edit" element={<MyLelandProfile />} />
+          {/* Inline — the faithful public-template variant. Not a sidebar tab;
+              reached from the profile admin tool's "Mode" switcher. Nested under
+              /profile so the "Profile" tab stays highlighted. */}
+          <Route path="/my-leland/profile/inline" element={<MyLelandProfileInline />} />
+          {/* Inline 2 — the faithful two-column template, editable inline.
+              Also nested under /profile so the "Profile" tab stays highlighted. */}
+          <Route path="/my-leland/profile/inline-2" element={<MyLelandProfileInline2 />} />
           <Route path="/my-leland/products" element={<CoachProducts />} />
           <Route path="/my-leland/manage/:category" element={<CoachCategoryEdit />} />
           <Route path="/my-leland/opportunities" element={<CoachOpportunities />} />
@@ -297,7 +311,7 @@ export default function App() {
     </Routes>
     <PageExitOverlay />
     </PageExitProvider>
-    </ProfileEditModeProvider>
+    </ProfileBoxedModeProvider>
     </FeedAdminProvider>
     </FeedDemoProvider>
     </FullGoalsProvider>

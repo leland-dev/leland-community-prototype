@@ -5290,16 +5290,16 @@ const MY_EXPERTS = [
 
 // A sidebar section rendered as a card: large bold header with a small "See all"
 // link in the top-right corner, then the section's content.
-function SidebarSectionCard({ title, to, bleed = true, children }: { title: string; to?: string; bleed?: boolean; children: React.ReactNode }) {
+export function SidebarSectionCard({ title, to, action, bleed = true, children }: { title: string; to?: string; action?: React.ReactNode; bleed?: boolean; children: React.ReactNode }) {
   return (
     <div className="rounded-[12px] border border-[#222222]/[0.12] bg-white p-4">
       <div className="mb-3 flex items-start justify-between">
         <h2 className="text-[17px] font-bold leading-tight text-gray-dark">{title}</h2>
-        {to && (
+        {action ?? (to && (
           <NavLink to={to} className="shrink-0 text-[13px] font-medium leading-none text-gray-extra-light transition-opacity hover:opacity-80">
             See all
           </NavLink>
-        )}
+        ))}
       </div>
       <div className={`flex flex-col ${bleed ? "-mx-2" : ""}`}>{children}</div>
     </div>

@@ -347,7 +347,7 @@ const categoryListings = [
   { slug: "product-management", category: "Product Management", headline: "Senior PM at LinkedIn | Ex-Meta | Breaking Into Tech", icon: pmIcon },
 ];
 
-export default function ProfileEditMode() {
+export default function ProfileEditMode({ publicProfileBanner = true, introVideoCard = true, afterHero }: { publicProfileBanner?: boolean; introVideoCard?: boolean; afterHero?: ReactNode } = {}) {
   const { expert } = useExpertMode();
   const navigate = useNavigate();
   const visibleOutcomes = [...initialOutcomes, ...initialSchools].filter((o) => !o.hidden);
@@ -411,15 +411,18 @@ export default function ProfileEditMode() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Banner — links to the public-facing profile (wired later) */}
-      <button
-        type="button"
-        className="group flex w-full items-center gap-2.5 rounded-xl bg-gray-hover px-4 py-3.5 text-left text-gray-dark transition-colors hover:bg-[rgba(34,34,34,0.1)]"
-      >
-        <MaskIcon src={eyeIcon} className="h-[18px] w-[18px]" />
-        <span className="flex-1 text-[15px] font-medium">View your public profile</span>
-        <MaskIcon src={chevronRightIcon} className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
-      </button>
+      {/* Banner — links to the public-facing profile (wired later). Hidden on
+          Edit mode 2, which surfaces the public profile in its right rail. */}
+      {publicProfileBanner && (
+        <button
+          type="button"
+          className="group flex w-full items-center gap-2.5 rounded-xl bg-gray-hover px-4 py-3.5 text-left text-gray-dark transition-colors hover:bg-[rgba(34,34,34,0.1)]"
+        >
+          <MaskIcon src={eyeIcon} className="h-[18px] w-[18px]" />
+          <span className="flex-1 text-[15px] font-medium">View your public profile</span>
+          <MaskIcon src={chevronRightIcon} className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
+        </button>
+      )}
 
       {/* Hero — cover is full-bleed to the card edges (own section, not the
           padded Card wrapper) and taller. */}
@@ -546,6 +549,10 @@ export default function ProfileEditMode() {
         </div>
       </section>
 
+      {/* Slot rendered directly under the hero — used by Edit mode 2 to place
+          its rail cards here on mobile (where the right rail is hidden). */}
+      {afterHero}
+
       {/* Categories — experts only, directly under the Hero */}
       {expert && (
         <Card>
@@ -571,8 +578,9 @@ export default function ProfileEditMode() {
       <EditableTextCard title="About" value={about} onChange={setAbout} />
 
       {/* Intro Video — experts only; compact horizontal banner (thumbnail +
-          name/link + duration + actions) rather than a full-width player. */}
-      {expert && (
+          name/link + duration + actions) rather than a full-width player.
+          Hidden on Edit mode 2, which relocates it to the right rail. */}
+      {expert && introVideoCard && (
         <Card>
           <CardHead title="Intro Video" />
           <div className="flex items-center gap-3.5 rounded-xl bg-gray-hover p-3">
