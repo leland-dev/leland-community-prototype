@@ -347,7 +347,6 @@ export default function TopNavLinkedIn() {
             {showNavLabels && "Browse"}
             {caret(isV2Like ? discoverOpen : browseMenuOpen)}
           </span>
-          {underline(discoverActive)}
         </button>
 
         {/* v1 — the LinkedIn-style Browse dropdown (modalities · buckets · categories) */}

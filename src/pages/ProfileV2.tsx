@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import PageShell from "../components/PageShell";
+import { FollowSuggestions } from "../components/FollowSuggestions";
 import SessionCard from "../components/SessionCard";
 import OfferingCard, { type OfferingType } from "../components/OfferingCard";
 import PackageCard from "../components/PackageCard";
@@ -604,6 +605,14 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   const { dark: darkMode } = useDarkMode();
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
   const [isFollowing, setIsFollowing] = useState(false);
+  // Template-only: tapping Follow reveals a "People to follow" section at the
+  // bottom of the hero; its X collapses it (unfollowing hides it too).
+  const [showFollowSuggestions, setShowFollowSuggestions] = useState(false);
+  const handleFollowToggle = () => {
+    const next = !isFollowing;
+    setIsFollowing(next);
+    setShowFollowSuggestions(next);
+  };
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [stickyNavVisible, setStickyNavVisible] = useState(false);
   const [activeSection, setActiveSection] = useState("offerings");
@@ -1664,7 +1673,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                       size="sm"
                       variant="secondary"
                       rounded="rounded-full"
-                      onClick={() => setIsFollowing(!isFollowing)}
+                      onClick={handleFollowToggle}
                       className="mb-1 text-[15px] font-semibold"
                     >
                       {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
@@ -1905,6 +1914,26 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             </div>
 
           </div>{/* end name → stats wrapper */}
+
+          {/* People to follow — revealed at the bottom of the hero after the
+              visitor taps Follow (template only). Height animates so the tab bar
+              and content below slide down as it appears. */}
+          {unified && (
+            <AnimatePresence initial={false}>
+              {showFollowSuggestions && (
+                <motion.div
+                  key="follow-suggestions"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                  className="overflow-hidden"
+                >
+                  <FollowSuggestions onClose={() => setShowFollowSuggestions(false)} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
 
 
           {/* Customer Favorite — mobile banner (hidden for now) */}
