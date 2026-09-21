@@ -7,6 +7,7 @@ import { useIsCoachMode } from "../hooks/useIsCoachMode";
 import { useNavTheme } from "./NavThemeContext";
 import { useTopNavStyle } from "../contexts/TopNavStyleContext";
 import { ExploreSearchModal } from "./ExploreSearchModal";
+import { BrowseMenu } from "./BrowseMenu";
 import { useExpertMode } from "../contexts/ExpertModeContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 // Primary nav icons — always the filled variant; inactive states just fade to
@@ -164,8 +165,12 @@ function IconNavLink({
 export default function TopNavLinkedIn() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [discoverOpen, setDiscoverOpen] = useState(false);
-  // v1 Explore opens a full universal-search modal instead of the dropdown.
+  // v1 Explore used to open a full universal-search modal (ExploreSearchModal).
+  // That takeover is kept as a component but no longer wired to Browse — the v1
+  // Browse trigger now opens the smaller BrowseMenu dropdown (below) on hover.
   const [searchModalOpen, setSearchModalOpen] = useState(false);
+  // v1 Browse: whether the LinkedIn-style hover dropdown (BrowseMenu) is open.
+  const [browseMenuOpen, setBrowseMenuOpen] = useState(false);
   // v2 Browse dropdown: whether the "Categories" hover flyout is showing.
   const [browseFlyoutOpen, setBrowseFlyoutOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
@@ -225,7 +230,7 @@ export default function TopNavLinkedIn() {
 
   // Discover (Browse) opens a browse-by-category list; it reads as active while
   // on the browse surface or whenever its dropdown is open.
-  const discoverActive = discoverOpen || searchModalOpen || pathname === "/browse" || pathname.startsWith("/browse/");
+  const discoverActive = discoverOpen || browseMenuOpen || searchModalOpen || pathname === "/browse" || pathname.startsWith("/browse/");
   // "My Leland" always opens the store shell (/my-leland); the Expert
   // toggle only controls whether the sidebar's "Expert tools" group shows.
   const myLelandTo = "/my-leland";
@@ -320,23 +325,37 @@ export default function TopNavLinkedIn() {
       {/* For you */}
       <IconNavLink to={homeTo} end label="For you" icon={homeIcon} />
 
-      {/* Discover — dropdown holding Browse experts + the rest */}
-      <div ref={discoverRef} className="relative flex items-stretch">
+      {/* Discover — v1 opens the BrowseMenu hover dropdown; v2+ keep the small
+          inline category dropdown. (The full-screen ExploreSearchModal is no
+          longer wired to Browse — see searchModalOpen above.) */}
+      <div
+        ref={discoverRef}
+        className="relative flex items-stretch"
+        onMouseEnter={() => { if (!isV2Like) setBrowseMenuOpen(true); }}
+        onMouseLeave={() => { if (!isV2Like) setBrowseMenuOpen(false); }}
+      >
         <button
           type="button"
-          onClick={() => (isV2Like ? setDiscoverOpen((v) => !v) : setSearchModalOpen(true))}
+          onClick={() => (isV2Like ? setDiscoverOpen((v) => !v) : setBrowseMenuOpen((v) => !v))}
           className={`${itemBase}${variant === 1 ? " min-w-[64px]" : ""}${showNavLabels ? "" : " !flex-row"}`}
-          aria-expanded={isV2Like ? discoverOpen : searchModalOpen}
+          aria-expanded={isV2Like ? discoverOpen : browseMenuOpen}
         >
           <span className={iconWrap}>
             <img src={exploreIcon} alt="" className={iconCls(discoverActive)} />
           </span>
           <span className={`flex items-center gap-0.5 ${labelCls(discoverActive)}`}>
             {showNavLabels && "Browse"}
-            {caret(discoverOpen)}
+            {caret(isV2Like ? discoverOpen : browseMenuOpen)}
           </span>
           {underline(discoverActive)}
         </button>
+
+        {/* v1 — the LinkedIn-style Browse dropdown (modalities · buckets · categories) */}
+        <BrowseMenu
+          open={!isV2Like && browseMenuOpen}
+          navTo={navTo}
+          onNavigate={() => setBrowseMenuOpen(false)}
+        />
 
         <AnimatePresence>
           {isV2Like && discoverOpen && (
