@@ -8,17 +8,10 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 // dropdown / Account admin panel.
 export type TopNavStyle = "classic" | "linkedin";
 
-// Design variants of the LinkedIn-style nav (v1/v2/v3) — a scratch space for
-// presenting minor styling alternatives to the team. Only meaningful when
-// style === "linkedin"; toggled from the Navigation dropdown.
-export type TopNavVariant = 1 | 2 | 3 | 4;
-
 interface TopNavStyleContextValue {
   style: TopNavStyle;
   setStyle: (v: TopNavStyle) => void;
   toggle: () => void;
-  variant: TopNavVariant;
-  setVariant: (v: TopNavVariant) => void;
   showNavLabels: boolean;
   setShowNavLabels: (v: boolean) => void;
   // v1-only "alt icons" experiment: My Leland shows the profile photo, the "Me"
@@ -44,8 +37,6 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
   style: "linkedin",
   setStyle: () => {},
   toggle: () => {},
-  variant: 1,
-  setVariant: () => {},
   showNavLabels: true,
   setShowNavLabels: () => {},
   altIcons: false,
@@ -62,7 +53,6 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
 // Bumped so stale "classic" values written by the old (no-op, path-based) toggle
 // don't force the classic nav on load.
 const STORAGE_KEY = "prototype-topnav-style-v2";
-const VARIANT_STORAGE_KEY = "prototype-topnav-variant";
 const LABELS_STORAGE_KEY = "prototype-topnav-labels";
 const ALT_ICONS_STORAGE_KEY = "prototype-topnav-alt-icons";
 const SEARCH_STORAGE_KEY = "prototype-topnav-search";
@@ -73,10 +63,6 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const [style, setStyleState] = useState<TopNavStyle>(() => {
     // Alt-nav (LinkedIn) is the default; only an explicit "classic" opts out.
     return localStorage.getItem(STORAGE_KEY) === "classic" ? "classic" : "linkedin";
-  });
-  const [variant, setVariantState] = useState<TopNavVariant>(() => {
-    const v = Number(localStorage.getItem(VARIANT_STORAGE_KEY));
-    return v === 2 || v === 3 || v === 4 ? (v as TopNavVariant) : 1;
   });
   const [showNavLabels, setShowNavLabelsState] = useState<boolean>(() => {
     // Labels shown by default; only an explicit "0" hides them.
@@ -102,11 +88,6 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const setStyle = (v: TopNavStyle) => {
     localStorage.setItem(STORAGE_KEY, v);
     setStyleState(v);
-  };
-
-  const setVariant = (v: TopNavVariant) => {
-    localStorage.setItem(VARIANT_STORAGE_KEY, String(v));
-    setVariantState(v);
   };
 
   const setShowNavLabels = (v: boolean) => {
@@ -137,7 +118,7 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const toggle = () => setStyle(style === "linkedin" ? "classic" : "linkedin");
 
   return (
-    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, variant, setVariant, showNavLabels, setShowNavLabels, altIcons, setAltIcons, showSearch, setShowSearch, feedEdgeToEdge, setFeedEdgeToEdge, navEdgeToEdge, setNavEdgeToEdge }}>
+    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, showNavLabels, setShowNavLabels, altIcons, setAltIcons, showSearch, setShowSearch, feedEdgeToEdge, setFeedEdgeToEdge, navEdgeToEdge, setNavEdgeToEdge }}>
       {children}
     </TopNavStyleContext.Provider>
   );

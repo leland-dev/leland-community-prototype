@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { useTopNavStyle, type TopNavVariant } from "../contexts/TopNavStyleContext";
+import { useTopNavStyle } from "../contexts/TopNavStyleContext";
 import { useExpertMode } from "../contexts/ExpertModeContext";
 import { settingsTabs, SettingsSectionContent } from "../components/SettingsSections";
 import switchIcon from "../assets/icons/switch.svg";
@@ -76,8 +76,6 @@ function Toggle<T extends string | number | boolean>({
 function AdminSection() {
   const {
     setStyle,
-    variant,
-    setVariant,
     altIcons,
     setAltIcons,
     navEdgeToEdge,
@@ -131,23 +129,14 @@ function AdminSection() {
             Switch to Classic nav
           </button>
           <Toggle
-            label="Variant"
-            value={variant}
-            options={([1, 2, 3, 4] as TopNavVariant[]).map((v) => ({ v, l: `V${v}` }))}
-            onChange={setVariant}
+            label="Alt icons"
+            value={altIcons}
+            options={[
+              { v: true, l: "On" },
+              { v: false, l: "Off" },
+            ]}
+            onChange={setAltIcons}
           />
-          {/* Alt icons — v1 only */}
-          {variant === 1 && (
-            <Toggle
-              label="Alt icons"
-              value={altIcons}
-              options={[
-                { v: true, l: "On" },
-                { v: false, l: "Off" },
-              ]}
-              onChange={setAltIcons}
-            />
-          )}
           <Toggle
             label="Nav width"
             value={navEdgeToEdge}
