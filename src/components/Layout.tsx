@@ -369,6 +369,13 @@ export function ContextLayout() {
   const linkedInCentered = isLinkedInLayout && !feedEdgeToEdge;
   const linkedInEdge = isLinkedInLayout && feedEdgeToEdge;
 
+  // The Messages page is its own full-bleed, full-height 3-column surface — it
+  // manages its own layout and scroll regions, so it skips PageShell entirely.
+  const isMessages = pathname === "/alt-nav/messages" || pathname === "/messages";
+  if (isMessages) {
+    return <Outlet />;
+  }
+
   return (
     <PageShell
       variant={variant}
