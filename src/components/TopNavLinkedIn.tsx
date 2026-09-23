@@ -20,6 +20,10 @@ import searchIcon from "../assets/icons/search.svg";
 import myLelandIcon from "../assets/icons/nav-icons/browse-active.svg";
 // Discover dropdown + profile menu icons.
 import jobsIcon from "../assets/icons/jobs.svg";
+// "Existing" modality set — Livestreams + Leland+ items. The nav renders these
+// as raw <img>, so use the #222222 (dark) icon variants to match the rest.
+import videoFilledIcon from "../assets/icons/video-filled-dark.svg";
+import contentBookFilledIcon from "../assets/icons/content-book-filled.svg";
 // Outlined variants — used in the "More" dropdown list (the top nav uses the filled ones)
 import livestreamsMenuIcon from "../assets/icons/lte-signal.svg";
 import myCoursesIcon from "../assets/icons/my-courses.svg";
@@ -52,11 +56,11 @@ const profileMenuGroups: { items: MenuItem[] }[] = [
 // A numbered bubble / unread dot anchored to the top-right of a nav icon.
 function NavBadge({ count, dot }: { count?: number; dot?: boolean }) {
   if (dot) {
-    return <span className="absolute right-0 top-0 h-[9px] w-[9px] rounded-full border border-white bg-[#FF003D]" />;
+    return <span className="absolute right-0 top-0 h-[9px] w-[9px] rounded-full border border-white bg-[#F3392C]" />;
   }
   if (!count) return null;
   return (
-    <span className="absolute -right-2 -top-1.5 flex min-h-[16px] min-w-[16px] items-center justify-center rounded-full border border-white bg-[#FF003D] px-1 py-0.5 text-[11px] font-semibold leading-none text-white">
+    <span className="absolute -right-2 -top-1.5 flex min-h-[16px] min-w-[16px] items-center justify-center rounded-full border border-white bg-[#F3392C] px-1 py-0.5 text-[11px] font-semibold leading-none text-white">
       {count}
     </span>
   );
@@ -115,19 +119,17 @@ function IconNavLink({
 
 export default function TopNavLinkedIn() {
   const [profileOpen, setProfileOpen] = useState(false);
-  // Explore used to open a full universal-search modal (ExploreSearchModal).
-  // That takeover is kept as a component but no longer wired to Browse — the
-  // Browse trigger now opens the smaller BrowseMenu dropdown (below) on hover.
+  // The full-screen universal-search takeover (ExploreSearchModal) — opened by
+  // clicking the nav search bar (when the Search bar admin toggle is ON).
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   // Browse: whether the LinkedIn-style hover dropdown (BrowseMenu) is open.
   const [browseMenuOpen, setBrowseMenuOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const isCoachMode = useIsCoachMode();
   const navTheme = useNavTheme();
   const { pathname } = useLocation();
-  const { setStyle, showNavLabels, altIcons, setAltIcons, showSearch, setShowSearch, navEdgeToEdge, setNavEdgeToEdge, feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
+  const { setStyle, showNavLabels, modalities, setModalities, showSearch, setShowSearch, feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
   const { expert, setExpert } = useExpertMode();
   // Inside the isolated /alt-nav experience, the nav destinations stay within
   // it (e.g. /alt-nav/messages); elsewhere they point at the normal routes.
@@ -136,10 +138,8 @@ export default function TopNavLinkedIn() {
   const navTo = (path: string) => (inLinkedInNav ? `/alt-nav${path}` : path);
   // The nav layout: search bar on the left (opt-in), the icon group + "Me"
   // dropdown on the right. Browse opens the LinkedIn-style hover dropdown; My
-  // Leland and Jobs are standalone items in the icon group.
-  //
-  // "Alt icons" experiment: My Leland shows the profile photo, the "Me" item
-  // becomes label-less, and the carets hide.
+  // Leland and Jobs are standalone items in the icon group. The "Me" trigger is
+  // a label-less profile photo + chevron.
 
   // scrollReveal pages (e.g. Dashboard) start with the nav matching the hero
   // color, then swap to white + a subtle shadow once the user scrolls.
@@ -155,11 +155,15 @@ export default function TopNavLinkedIn() {
 
   // Discover (Browse) opens a browse-by-category list; it reads as active while
   // on the browse surface or whenever its dropdown is open.
-  const discoverActive = browseMenuOpen || searchModalOpen || pathname === "/browse" || pathname.startsWith("/browse/");
+  const discoverActive = browseMenuOpen || pathname === "/browse" || pathname.startsWith("/browse/");
   // "My Leland" always opens the store shell (/my-leland); the Expert
-  // toggle only controls whether the sidebar's "Expert tools" group shows.
+  // toggle only controls whether the sidebar's "Expert tools" group shows. The
+  // My Leland Messages tab is owned by the Messages nav item, so it doesn't
+  // count toward the My Leland highlight.
   const myLelandTo = "/my-leland";
-  const myLelandActive = pathname.startsWith("/my-leland");
+  const myLelandActive = pathname.startsWith("/my-leland") && pathname !== "/my-leland/messages";
+  // Messages always opens the My Leland shell's Messages tab.
+  const messagesTo = "/my-leland/messages";
 
   const activeProfileMenuGroups = useMemo(() => {
     // Browse shortcuts injected under Profile — there are no standalone
@@ -205,16 +209,15 @@ export default function TopNavLinkedIn() {
     </svg>
   );
 
-  // The primary nav icon group — For you, Browse, My Leland, Jobs, Messages,
-  // Notifications — positioned on the right of the header.
+  // The primary nav icon group — For you, Browse, My Leland, the (optional)
+  // modality items, Messages, Notifications — positioned on the right of the
+  // header.
   const iconGroup = (
     <>
       {/* For you */}
       <IconNavLink to={homeTo} end label="For you" icon={homeIcon} />
 
-      {/* Browse — opens the LinkedIn-style BrowseMenu hover dropdown. (The
-          full-screen ExploreSearchModal is no longer wired to Browse — see
-          searchModalOpen above.) */}
+      {/* Browse — opens the LinkedIn-style BrowseMenu hover dropdown. */}
       <div
         className="relative flex items-stretch"
         onMouseEnter={() => setBrowseMenuOpen(true)}
@@ -240,46 +243,58 @@ export default function TopNavLinkedIn() {
           open={browseMenuOpen}
           navTo={navTo}
           onNavigate={() => setBrowseMenuOpen(false)}
+          // "Existing" surfaces the modality items in the top nav, so drop the
+          // dropdown's modality pane and lead with the category buckets.
+          showModalities={modalities !== "existing"}
         />
       </div>
 
-      {/* My Leland */}
+      {/* My Leland — active across the whole store shell except its Messages
+          tab (owned by the Messages item), so we drive the state off
+          myLelandActive rather than the NavLink's nested-match isActive. */}
       <NavLink to={myLelandTo} className={`${itemBase} min-w-[64px]`}>
-        {({ isActive }) => (
+        {() => (
           <>
             <span className={iconWrap}>
-              <img src={myLelandIcon} alt="" className={iconCls(isActive || myLelandActive)} />
+              <img src={myLelandIcon} alt="" className={iconCls(myLelandActive)} />
             </span>
-            {showNavLabels && <span className={labelCls(isActive || myLelandActive)}>My Leland</span>}
-            {underline(isActive || myLelandActive)}
+            {showNavLabels && <span className={labelCls(myLelandActive)}>My Leland</span>}
+            {underline(myLelandActive)}
           </>
         )}
       </NavLink>
 
-      {/* Jobs — standalone item, sitting between My Leland and Messages. */}
-      <IconNavLink to={navTo("/jobs")} label="Jobs" icon={jobsIcon} />
+      {/* Modality items between My Leland and Messages — controlled by the
+          "Modalities" admin toggle. Off = none; Jobs = a single Jobs item;
+          Existing = Livestreams + Leland+. */}
+      {modalities === "jobs" && (
+        <IconNavLink to={navTo("/jobs")} label="Jobs" icon={jobsIcon} />
+      )}
+      {modalities === "existing" && (
+        <>
+          <IconNavLink to={navTo("/livestreams")} label="Livestreams" icon={videoFilledIcon} />
+          <IconNavLink to={navTo("/content")} label="Leland+" icon={contentBookFilledIcon} />
+        </>
+      )}
 
       {/* Messages + Notifications */}
-      <IconNavLink to={navTo("/messages")} label="Messages" icon={chatIcon} badge={1} />
+      <IconNavLink to={messagesTo} label="Messages" icon={chatIcon} badge={1} />
       <IconNavLink to={navTo("/notifications")} label="Notifications" icon={notificationsIcon} badge={3} />
     </>
   );
 
-  // Full search input — sits in the left cluster (opt-in via the admin toggle).
+  // Search bar — a trigger styled like a search field that opens the full-screen
+  // ExploreSearchModal takeover. Sits in the left cluster (opt-in via the admin
+  // toggle).
   const searchBar = (
-    <form
-      onSubmit={(e) => e.preventDefault()}
-      className="hidden h-11 w-[300px] items-center gap-2.5 self-center rounded-full bg-[#222222]/[0.06] px-4 transition-colors focus-within:bg-[#222222]/[0.09] md:flex"
+    <button
+      type="button"
+      onClick={() => setSearchModalOpen(true)}
+      className="hidden h-11 w-[300px] items-center gap-2.5 self-center rounded-full bg-[#222222]/[0.06] px-4 text-left transition-colors hover:bg-[#222222]/[0.09] md:flex"
     >
       <img src={searchIcon} alt="" className="h-5 w-5 shrink-0" />
-      <input
-        type="text"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        placeholder="Search Leland"
-        className="w-full bg-transparent text-[15px] text-gray-dark placeholder:text-gray-light outline-none"
-      />
-    </form>
+      <span className="text-[15px] text-gray-light">Search Leland</span>
+    </button>
   );
 
   return (
@@ -291,7 +306,7 @@ export default function TopNavLinkedIn() {
       }`}
       style={reveal && !scrolled ? { backgroundColor: navTheme.bg } : undefined}
     >
-      <div className={`relative flex min-h-[60px] items-stretch justify-between gap-4 px-4 sm:px-6 ${navEdgeToEdge ? "w-full" : "mx-auto max-w-[1280px]"}`}>
+      <div className="relative flex min-h-[60px] w-full items-stretch justify-between gap-4 px-4 sm:px-6">
         {/* Left: logo + (opt-in search bar) */}
         <div className="flex items-center gap-5 py-2.5">
           <NavLink to={isCoachMode ? "/coach/inbox" : homeTo} className="flex shrink-0 items-center">
@@ -316,21 +331,19 @@ export default function TopNavLinkedIn() {
             <button
               type="button"
               onClick={() => setProfileOpen((v) => !v)}
-              className={`${itemBase} min-w-[64px]${!showNavLabels || altIcons ? " !flex-row" : ""}`}
-              aria-label={altIcons ? "Me" : undefined}
+              className={`${itemBase} min-w-[64px] !flex-row`}
+              aria-label="Me"
               aria-expanded={profileOpen}
             >
-              <span className={altIcons ? "relative flex items-center justify-center" : iconWrap}>
+              <span className="relative flex items-center justify-center">
                 <img
                   src={profilePhoto}
                   alt="Profile"
-                  className={`rounded-full object-cover ${altIcons ? "h-[32px] w-[32px]" : "h-[24px] w-[24px]"} ${profileOpen ? "ring-2 ring-gray-dark" : ""}`}
+                  className={`h-[32px] w-[32px] rounded-full object-cover ${profileOpen ? "ring-2 ring-gray-dark" : ""}`}
                 />
               </span>
-              {/* The default shows the "Me" label + chevron; alt-icons drops the
-                  label but keeps the chevron. */}
+              {/* Label-less "Me" trigger — profile photo + chevron. */}
               <span className={`flex items-center gap-0.5 ${labelCls(profileOpen)}`}>
-                {showNavLabels && (altIcons ? null : "Me")}
                 {caret(profileOpen)}
               </span>
               {underline(profileOpen)}
@@ -464,16 +477,16 @@ export default function TopNavLinkedIn() {
                               <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18" /></svg>
                               Switch to Classic nav
                             </NavLink>
-                            {/* Alt icons — profile-photo My Leland, label-less "Me", no carets */}
+                            {/* Modalities — which items sit between My Leland and Messages */}
                             <div className="flex items-center justify-between gap-3 py-2 pl-3 pr-1">
-                              <span className="text-[14px] font-medium text-gray-dark">Alt icons</span>
+                              <span className="text-[14px] font-medium text-gray-dark">Modalities</span>
                               <div className="flex shrink-0 overflow-hidden rounded-full bg-[#E5E5E5] p-[2px]">
-                                {([{ v: true, l: "On" }, { v: false, l: "Off" }] as const).map((o) => (
+                                {([{ v: "off", l: "Off" }, { v: "jobs", l: "Jobs" }, { v: "existing", l: "Existing" }] as const).map((o) => (
                                   <button
-                                    key={o.l}
-                                    onClick={() => setAltIcons(o.v)}
+                                    key={o.v}
+                                    onClick={() => setModalities(o.v)}
                                     className={`rounded-full px-2.5 py-[3px] text-[11px] font-medium transition-colors ${
-                                      altIcons === o.v ? "bg-[#222222] text-white" : "text-[#4c4c4c]"
+                                      modalities === o.v ? "bg-[#222222] text-white" : "text-[#4c4c4c]"
                                     }`}
                                   >
                                     {o.l}
@@ -491,23 +504,6 @@ export default function TopNavLinkedIn() {
                                     onClick={() => setShowSearch(o.v)}
                                     className={`rounded-full px-2.5 py-[3px] text-[11px] font-medium transition-colors ${
                                       showSearch === o.v ? "bg-[#222222] text-white" : "text-[#4c4c4c]"
-                                    }`}
-                                  >
-                                    {o.l}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                            {/* Constrain the nav content to 1280 vs. extend it to the window edges */}
-                            <div className="flex items-center justify-between gap-3 py-2 pl-3 pr-1">
-                              <span className="text-[14px] font-medium text-gray-dark">Nav width</span>
-                              <div className="flex shrink-0 overflow-hidden rounded-full bg-[#E5E5E5] p-[2px]">
-                                {([{ v: false, l: "Boxed" }, { v: true, l: "Full" }] as const).map((o) => (
-                                  <button
-                                    key={o.l}
-                                    onClick={() => setNavEdgeToEdge(o.v)}
-                                    className={`rounded-full px-2.5 py-[3px] text-[11px] font-medium transition-colors ${
-                                      navEdgeToEdge === o.v ? "bg-[#222222] text-white" : "text-[#4c4c4c]"
                                     }`}
                                   >
                                     {o.l}
@@ -571,7 +567,7 @@ export default function TopNavLinkedIn() {
         </div>
       </div>
 
-      {/* Universal search modal — opened from Explore (portal to body) */}
+      {/* Universal search modal — opened from the nav search bar (portal to body) */}
       <ExploreSearchModal open={searchModalOpen} onClose={() => setSearchModalOpen(false)} />
     </header>
   );

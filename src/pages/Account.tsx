@@ -76,10 +76,8 @@ function Toggle<T extends string | number | boolean>({
 function AdminSection() {
   const {
     setStyle,
-    altIcons,
-    setAltIcons,
-    navEdgeToEdge,
-    setNavEdgeToEdge,
+    modalities,
+    setModalities,
     feedEdgeToEdge,
     setFeedEdgeToEdge,
   } = useTopNavStyle();
@@ -129,22 +127,14 @@ function AdminSection() {
             Switch to Classic nav
           </button>
           <Toggle
-            label="Alt icons"
-            value={altIcons}
+            label="Modalities"
+            value={modalities}
             options={[
-              { v: true, l: "On" },
-              { v: false, l: "Off" },
+              { v: "off", l: "Off" },
+              { v: "jobs", l: "Jobs" },
+              { v: "existing", l: "Existing" },
             ]}
-            onChange={setAltIcons}
-          />
-          <Toggle
-            label="Nav width"
-            value={navEdgeToEdge}
-            options={[
-              { v: false, l: "Boxed" },
-              { v: true, l: "Full" },
-            ]}
-            onChange={setNavEdgeToEdge}
+            onChange={setModalities}
           />
           <Toggle
             label="Feed"

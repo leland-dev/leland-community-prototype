@@ -4,10 +4,15 @@ import { Button } from "../components/Button";
 
 /* ─────────────────────────── Icons ─────────────────────────── */
 
+// sort.svg from /assets/icons — inlined with currentColor so it inherits the
+// ghost button's gray-light → gray-dark hover color like the sibling icons.
 function IconSort({ className = "" }: { className?: string }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M7 4v16M7 20l-3-3M7 4l3 3M17 20V4M17 4l3 3M17 20l-3-3" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M10 8L7 5L4 8" />
+      <path d="M7 19V5" />
+      <path d="M14 16L17 19L20 16" />
+      <path d="M17 5V19" />
     </svg>
   );
 }
@@ -165,10 +170,10 @@ function ConversationListHeader({ tab, setTab }: { tab: "all" | "clients"; setTa
 function FilterRow() {
   return (
     <div className="flex shrink-0 items-center gap-2 px-5 py-3">
-      <Button size="sm" variant="dark" className="gap-1">
+      <Button size="sm" variant="dark" rounded="rounded-full" className="gap-1">
         All clients <IconChevronDown />
       </Button>
-      <Button size="sm" variant="outline" className="gap-1">
+      <Button size="sm" variant="outline" rounded="rounded-full" className="gap-1">
         More <IconChevronDown />
       </Button>
     </div>
@@ -278,7 +283,7 @@ function SessionCanceledCard() {
 function ConversationThread() {
   return (
     <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-8">
-      <div className="mx-auto flex max-w-[820px] flex-col gap-3">
+      <div className="flex flex-col gap-3">
         <DateSeparator>Jan 31, 2024</DateSeparator>
         <TheirBubble time="10:08 AM">test</TheirBubble>
         <MyBubble time="10:15 AM">Declined</MyBubble>
@@ -305,7 +310,7 @@ function ConversationThread() {
 function Composer() {
   return (
     <div className="shrink-0 px-5 pb-5 pt-2 sm:px-8">
-      <div className="mx-auto max-w-[820px] rounded-2xl border border-gray-stroke bg-white px-4 py-3 focus-within:border-gray-dark">
+      <div className="rounded-2xl border border-gray-stroke bg-white px-4 py-3 focus-within:border-gray-dark">
         <input
           type="text"
           placeholder="Write a message…"

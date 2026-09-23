@@ -12,6 +12,7 @@ import moneyIcon from "../assets/icons/money.svg";
 import starIcon from "../assets/icons/star-icon.svg";
 import discountIcon from "../assets/icons/discount.svg";
 import livestreamIcon from "../assets/icons/lte-signal.svg";
+import videoIcon from "../assets/icons/video-icon.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import userIcon from "../assets/icons/user.svg";
 import layoutGridIcon from "../assets/icons/layout-grid.svg";
@@ -125,11 +126,17 @@ function SidebarV1() {
 
   const inStore = base !== "/coach";
 
-  // A single top-level nav row from an item definition.
-  const navRow = ({ to, label, icon }: { to: string; label: string; icon: string }) => (
+  // A single top-level nav row from an item definition. An optional badge shows
+  // a red count bubble on the far right (matching the top-nav Messages badge).
+  const navRow = ({ to, label, icon, badge }: { to: string; label: string; icon: string; badge?: number }) => (
     <NavLink key={to} to={rebase(to, base)} className={navLinkClass}>
       <NavIcon src={icon} className="h-[22px] w-[22px]" />
-      {label}
+      <span className="flex-1">{label}</span>
+      {badge != null && (
+        <span className="flex min-h-[16px] min-w-[16px] items-center justify-center rounded-full bg-[#F3392C] px-2 py-0.5 text-[11px] font-semibold leading-none text-white">
+          {badge}
+        </span>
+      )}
     </NavLink>
   );
   const findItem = (to: string) => [...topItems, ...bottomItems].find((i) => i.to === to)!;
@@ -212,6 +219,7 @@ function SidebarV1() {
               <NavIcon src={layoutGridIcon} className="h-[22px] w-[22px]" />
               Dashboard
             </NavLink>
+            {navRow({ to: "/coach/messages", label: "Messages", icon: chatIcon, badge: 1 })}
             {navRow(findItem("/coach/profile"))}
             {navRow(findItem("/coach/calendar"))}
             {/* Goals — placeholder tab */}
@@ -230,7 +238,7 @@ function SidebarV1() {
             <nav className="flex flex-col gap-1 p-2">
               {offeringsAccordion}
               {navRow(findItem("/coach/opportunities"))}
-              {navRow(findItem("/coach/livestreams"))}
+              {navRow({ ...findItem("/coach/livestreams"), label: "My Livestreams", icon: videoIcon })}
               {navRow(findItem("/coach/earnings"))}
               {navRow({ to: "/coach/analytics", label: "Analytics", icon: chartIcon })}
               {navRow(findItem("/coach/reviews"))}
@@ -320,11 +328,15 @@ export default function CoachLayout() {
   // (to match the Dashboard).
   const beigePage =
     pathname === "/my-leland" ||
+    pathname === "/my-leland/goals" ||
     pathname === "/my-leland/calendar" ||
     pathname === "/my-leland/profile" ||
     pathname === "/my-leland/profile/edit" ||
     (pathname === "/my-leland/profile/inline" && boxedMode);
   const inMyLeland = pathname.startsWith("/my-leland");
+  // The Messages tab renders the full-height chat surface, so it fills the
+  // leftover space directly (no centered/padded content wrapper).
+  const isMessages = pathname === "/my-leland/messages";
 
   return (
     <div className={`flex min-h-[calc(100vh-61px)] ${beigePage ? "bg-[#F3F1E6]/50" : ""}`}>
@@ -351,22 +363,27 @@ export default function CoachLayout() {
       )}
 
       {/* Main content — fills remaining space, capped at 1280px. My Leland tabs
-          share the Dashboard's fade-up entrance, re-triggered per tab. */}
+          share the Dashboard's fade-up entrance, re-triggered per tab. The
+          Messages tab opts out of the cap/padding to render edge-to-edge. */}
       <div className="min-w-0 flex-1">
-        <div className="mx-auto max-w-[1080px] px-4 py-8 sm:px-6 sm:py-10">
-          {inMyLeland ? (
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            >
+        {isMessages ? (
+          <Outlet />
+        ) : (
+          <div className="mx-auto max-w-[1080px] px-4 py-8 sm:px-6 sm:py-10">
+            {inMyLeland ? (
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <Outlet />
+              </motion.div>
+            ) : (
               <Outlet />
-            </motion.div>
-          ) : (
-            <Outlet />
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

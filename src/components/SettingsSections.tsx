@@ -18,9 +18,6 @@ import mobilePhoneIcon from "../assets/icons/mobile-phone.svg";
 import lockIcon from "../assets/icons/lock.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import aiIcon from "../assets/icons/ai.svg";
-import profilePhoto from "../assets/profile photos/profile photo.png";
-import { AboutMeEditModal } from "./AboutMeEditModal";
-import { loadPersonalizationData, summarizePersonalization, type PersonalizationData } from "./PersonalizationModal";
 
 // The account/settings surface is shown in two places: the standalone /settings
 // page (sidebar layout) and the v3 "My Leland → Account" tab (horizontal nav).
@@ -37,7 +34,7 @@ export const settingsTabs: SettingsTab[] = [
   { key: "account", label: "Account", icon: settingsIcon },
   {
     key: "notifications",
-    label: "Notifications",
+    label: "Notification settings",
     title: "Notification Settings",
     subtitle:
       "Leland may still send you important notifications about your account and content outside of your preferred notification settings.",
@@ -125,38 +122,21 @@ const dashedBorderStyle = {
   backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")`,
 };
 
-// ── Account tab — the profile form (photo, name, email, pronouns, phone +
-// SMS toggles, LinkedIn, bio, session summaries). ──
+// ── Account tab — profile visibility, auto-respond, email, pronouns, phone +
+// SMS toggles, LinkedIn, session summaries. ──
 export function AccountProfileSection({ hidePhoneToggles = false }: { hidePhoneToggles?: boolean }) {
   const [smsReminders, setSmsReminders] = useState(true);
   const [smsOffers, setSmsOffers] = useState(false);
   const [sessionSummaries, setSessionSummaries] = useState(true);
-  const [aboutMe, setAboutMe] = useState<PersonalizationData | null>(() => loadPersonalizationData());
-  const [aboutMeModalOpen, setAboutMeModalOpen] = useState(false);
 
   return (
     <div className="mt-8">
-      {/* Profile photo */}
-      <div className="flex items-center gap-5 rounded-xl bg-[#F5F5F5] p-5">
-        <img src={profilePhoto} alt="" className="h-[72px] w-[72px] shrink-0 rounded-full object-cover" />
-        <div>
-          <p className="text-[14px] text-gray-light">Drag and drop an image or select from your files (under 1MB).</p>
-          <div className="mt-3 flex items-center gap-4">
-            <Button size="sm" variant="secondary">Upload new photo</Button>
-            <button className="text-[14px] font-medium text-gray-dark">Remove photo</button>
-          </div>
-        </div>
-      </div>
+      {/* Profile visibility */}
+      <ProfileVisibilityField />
 
-      {/* Name */}
+      {/* Auto-respond to new clients */}
       <div className="mt-6 border-t border-gray-stroke pt-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-[16px] font-semibold text-gray-dark">Name</h3>
-            <p className="mt-1 text-[14px] text-gray-light">June Allen</p>
-          </div>
-          <button className="text-[14px] font-medium text-gray-dark underline underline-offset-2">Edit</button>
-        </div>
+        <AutoRespondField />
       </div>
 
       {/* Email */}
@@ -177,24 +157,6 @@ export function AccountProfileSection({ hidePhoneToggles = false }: { hidePhoneT
             <p className="mt-1 text-[14px] text-gray-light">She/Her</p>
           </div>
           <button className="text-[14px] font-medium text-gray-dark underline underline-offset-2">Edit</button>
-        </div>
-      </div>
-
-      {/* About me */}
-      <div className="mt-6 border-t border-gray-stroke pt-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-[16px] font-semibold text-gray-dark">About me</h3>
-            <p className="mt-1 text-[14px] text-gray-light">
-              {aboutMe ? summarizePersonalization(aboutMe) : "Add your work situation, role, and industry"}
-            </p>
-          </div>
-          <button
-            onClick={() => setAboutMeModalOpen(true)}
-            className="text-[14px] font-medium text-gray-dark underline underline-offset-2"
-          >
-            Edit
-          </button>
         </div>
       </div>
 
@@ -238,17 +200,6 @@ export function AccountProfileSection({ hidePhoneToggles = false }: { hidePhoneT
         </div>
       </div>
 
-      {/* Personal bio */}
-      <div className="mt-6 border-t border-gray-stroke pt-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-[16px] font-semibold text-gray-dark">Personal bio</h3>
-            <p className="mt-1 text-[14px] text-gray-light">Product manager at Atlassian with 6+ years of experience building enterprise SaaS tools. I'm looking for coaching in career development to grow my expertise as a product leader.</p>
-          </div>
-          <button className="ml-4 shrink-0 text-[14px] font-medium text-gray-dark underline underline-offset-2">Edit</button>
-        </div>
-      </div>
-
       {/* Generate session summaries */}
       <div className="mt-6 border-t border-gray-stroke pt-6">
         <div className="flex items-start justify-between">
@@ -263,13 +214,149 @@ export function AccountProfileSection({ hidePhoneToggles = false }: { hidePhoneT
         </div>
         <p className="mt-1 text-[14px] text-gray-light">Leland can generate text summaries of your sessions, making it easy to revisit important concepts and stay aligned on your action items.</p>
       </div>
+    </div>
+  );
+}
 
-      <AboutMeEditModal
-        open={aboutMeModalOpen}
-        onOpenChange={setAboutMeModalOpen}
-        initialData={aboutMe}
-        onSave={setAboutMe}
-      />
+// ── Profile visibility — a custom dropdown of three visibility modes, each with
+// an icon + description; the selected mode's description shows below the field. ──
+const visibilityOptions = [
+  {
+    key: "public",
+    label: "Public profile",
+    description: "Open to new clients. Your profile will appear in Leland's search results.",
+    glyph: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h18" />
+        <path d="M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9s1.3-6.5 3.8-9z" />
+      </svg>
+    ),
+  },
+  {
+    key: "private",
+    label: "Private profile",
+    description: "Open to new clients. Your profile will not appear in Leland's search results.",
+    glyph: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.9 12.5A9 9 0 1 0 12.5 20.9" />
+        <path d="M3 12h9M12 3c2.2 2.2 3.5 5 3.7 7.9M12 21c-2.5-2.5-3.8-5.7-3.8-9s1.3-6.5 3.8-9" />
+        <rect x="15" y="15.5" width="7" height="5.5" rx="1.2" />
+        <path d="M16.6 15.5v-1.2a1.9 1.9 0 0 1 3.8 0v1.2" />
+      </svg>
+    ),
+  },
+  {
+    key: "closed",
+    label: "Not taking new clients",
+    description: "Your profile will not appear in Leland's search results and you won't receive new coaching order requests.",
+    glyph: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M8 12h8" />
+      </svg>
+    ),
+  },
+];
+
+function ProfileVisibilityField() {
+  const [value, setValue] = useState("public");
+  const [open, setOpen] = useState(false);
+  const selected = visibilityOptions.find((o) => o.key === value) ?? null;
+
+  return (
+    <div>
+      <h3 className="text-[16px] font-semibold text-gray-dark">Profile Visibility</h3>
+      <div className="relative mt-3">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="flex w-full items-center justify-between gap-3 rounded-lg border border-gray-stroke bg-white px-4 py-3 text-left transition-colors hover:border-gray-light"
+        >
+          <span className="flex items-center gap-3">
+            {selected ? (
+              <>
+                <span className="text-gray-dark">{selected.glyph}</span>
+                <span className="text-[15px] text-gray-dark">{selected.label}</span>
+              </>
+            ) : (
+              <span className="text-[15px] text-gray-xlight">Select an option…</span>
+            )}
+          </span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 text-gray-light transition-transform ${open ? "rotate-180" : ""}`}>
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
+
+        {open && (
+          <>
+            <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+            <div className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-lg border border-gray-stroke bg-white py-1 shadow-lg">
+              {visibilityOptions.map((o) => (
+                <button
+                  key={o.key}
+                  type="button"
+                  onClick={() => { setValue(o.key); setOpen(false); }}
+                  className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-hover"
+                >
+                  <span className="mt-0.5 shrink-0 text-gray-dark">{o.glyph}</span>
+                  <span>
+                    <span className="block text-[15px] font-medium text-gray-dark">{o.label}</span>
+                    <span className="mt-0.5 block text-[13px] text-gray-light">{o.description}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+      {selected && <p className="mt-2 text-[14px] text-gray-light">{selected.description}</p>}
+    </div>
+  );
+}
+
+// ── Auto-respond to new clients — a toggle that reveals an editable template
+// message with a {{clientFirstName}} token and a Save action. ──
+const defaultAutoRespond =
+  "Hi {{clientFirstName}}! Thanks for reaching out. Will you send your most recent resume to help me get a better understanding of your background? If you don't have one, a brief background summary works too.";
+
+function AutoRespondField() {
+  const [enabled, setEnabled] = useState(false);
+  const [message, setMessage] = useState(defaultAutoRespond);
+
+  return (
+    <div>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-[16px] font-semibold text-gray-dark">Auto-respond to new clients</h3>
+          <p className="mt-1 text-[14px] text-gray-light">Send an automated message to new clients after their first outreach.</p>
+        </div>
+        <button onClick={() => setEnabled(!enabled)} className="relative mt-0.5 h-[26px] w-[44px] shrink-0 cursor-pointer">
+          <div className={`h-full w-full rounded-full transition-colors ${enabled ? "bg-gray-dark" : "bg-[#E5E5E5]"}`} />
+          <div className={`absolute top-[2px] h-[22px] w-[22px] rounded-full bg-white shadow-sm transition-transform ${enabled ? "left-[20px]" : "left-[2px]"}`} />
+        </button>
+      </div>
+
+      {enabled && (
+        <>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={5}
+            className="mt-4 w-full resize-y rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[15px] leading-relaxed text-gray-dark outline-none focus:border-gray-dark"
+          />
+          <div className="mt-3 flex justify-end">
+            <Button size="sm" variant="primary">Save</Button>
+          </div>
+          <p className="mt-2 flex items-center gap-1.5 text-[13px] text-gray-light">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+              <path d="M9 18h6M10 22h4" />
+              <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z" />
+            </svg>
+            You can use the token {"{{clientFirstName}}"} to insert your client's name. Include the brackets!
+          </p>
+        </>
+      )}
     </div>
   );
 }

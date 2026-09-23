@@ -12,15 +12,13 @@ import deloitteLogo from "../assets/org-logos/deloitte.png";
 import lteSignalIcon from "../assets/icons/lte-signal.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
 import briefcaseIcon from "../assets/icons/briefcase.svg";
+import myCoursesIcon from "../assets/icons/my-courses.svg";
 
 // Prototype-only universal search modal (v1 Explore). Nothing is wired up — the
 // input doesn't filter and every row is decorative; it exists to present the
 // "big search" direction. Dark, Leland-flavored, modeled on Mobbin's palette.
 
-// Expert avatars + program cover art pulled straight from the asset folders.
-const avatars = Object.values(
-  import.meta.glob("../assets/profile photos/pic-*.png", { eager: true, import: "default" })
-) as string[];
+// Program cover art pulled straight from the asset folder.
 const covers = Object.values(
   import.meta.glob("../assets/img/cover-images/cover-image-*.{png,jpg,avif}", { eager: true, import: "default" })
 ) as string[];
@@ -32,7 +30,6 @@ const icon = (path: ReactNode) => (
   </svg>
 );
 const categoriesGlyph = icon(<><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></>);
-const expertsGlyph = icon(<><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" /></>);
 const searchGlyph = icon(<><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></>);
 
 // Masked icon — tints an imported (dark) SVG with the current text color so it
@@ -54,24 +51,26 @@ const maskGlyph = (src: string) => (
   />
 );
 
-type TabKey = "categories" | "experts" | "livestreams" | "content" | "jobs";
+type TabKey = "categories" | "livestreams" | "content" | "jobs" | "programs";
 const sidebar: { key: TabKey; label: string; glyph: ReactNode }[] = [
   { key: "categories", label: "Categories", glyph: categoriesGlyph },
-  { key: "experts", label: "Experts", glyph: expertsGlyph },
   { key: "livestreams", label: "Livestreams", glyph: maskGlyph(lteSignalIcon) },
-  { key: "content", label: "Content", glyph: maskGlyph(bookOpenIcon) },
+  { key: "content", label: "Leland+", glyph: maskGlyph(bookOpenIcon) },
   { key: "jobs", label: "Jobs", glyph: maskGlyph(briefcaseIcon) },
+  { key: "programs", label: "Programs", glyph: maskGlyph(myCoursesIcon) },
 ];
 
-// Recent / suggested searches — a mix of category shortcuts, saved searches and experts.
-const chips: { label: string; img?: string; search?: boolean }[] = [
+// Recent / suggested searches — a mix of category shortcuts, saved searches and
+// companies. `logo: true` marks entries that show a real company logo (kept as
+// the full-color logo, not tinted white like the line icons).
+const chips: { label: string; img?: string; search?: boolean; logo?: boolean }[] = [
   { label: "MBA Admissions", img: mbaIcon },
   { label: "Case interviews", search: true },
-  { label: "Goldman Sachs", img: goldmanLogo },
+  { label: "Goldman Sachs", img: goldmanLogo, logo: true },
   { label: "Product Management", img: pmIcon },
   { label: "Resume review", search: true },
   { label: "Management Consulting", img: consultingIcon },
-  { label: "Google PM", img: googleLogo },
+  { label: "Google PM", img: googleLogo, logo: true },
 ];
 
 // Top-level category buckets; the count is how many sub-categories each holds.
@@ -88,17 +87,6 @@ const categoryBuckets = [
   { name: "Health & Medicine", count: 11 },
   { name: "Law & Public Service", count: 10 },
   { name: "Arts, Media, and Entertainment", count: 12 },
-];
-
-const experts = [
-  { name: "Alex Rivera", role: "Ex-McKinsey · MBA Admissions", avatar: avatars[0] },
-  { name: "Priya Nair", role: "Senior PM at Google", avatar: avatars[1] },
-  { name: "Jordan Blake", role: "Goldman Sachs · IB", avatar: avatars[2] },
-  { name: "Mia Chen", role: "Product Lead · Stripe", avatar: avatars[3] },
-  { name: "Daniel Osei", role: "BCG · Case Coach", avatar: avatars[4] },
-  { name: "Sofia Marín", role: "Harvard MBA · Admissions", avatar: avatars[5] },
-  { name: "Ethan Park", role: "Staff Engineer · Meta", avatar: avatars[6] },
-  { name: "Hannah Wolfe", role: "Bain · Strategy", avatar: avatars[7] },
 ];
 
 const programs = [
@@ -138,6 +126,10 @@ const ThumbCard = ({ name, cover }: { name: string; cover: string }) => (
 
 export function ExploreSearchModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<TabKey>("categories");
+  // Recent searches — removable via the per-chip hover "X".
+  const [recentChips, setRecentChips] = useState(chips);
+  const removeChip = (label: string) =>
+    setRecentChips((prev) => prev.filter((c) => c.label !== label));
 
   // Esc to close + lock body scroll while the modal is up.
   useEffect(() => {
@@ -181,24 +173,56 @@ export function ExploreSearchModal({ open, onClose }: { open: boolean; onClose: 
               <span className="text-white/45">{searchGlyph}</span>
               <input
                 autoFocus
-                placeholder="Search experts, categories, programs, jobs or keywords…"
+                placeholder="Search categories, programs, jobs or keywords…"
                 className="flex-1 bg-transparent text-[15px] text-white placeholder:text-white/40 outline-none"
               />
             </div>
 
-            {/* Quick / recent search chips — horizontal scroll */}
+            {/* Quick / recent search chips — horizontal scroll. Each chip's icon
+                is white on no background; hovering the chip turns the icon into a
+                removable "X" on a low-opacity white background. */}
             <div className="scrollbar-hide flex gap-2 overflow-x-auto border-t border-white/10 px-4 py-3">
-              {chips.map((c) => (
-                <button key={c.label} className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-white/[0.07] py-1.5 pl-1.5 pr-3 text-[13px] font-medium text-white/90 transition-colors hover:bg-white/[0.12]">
-                  <span className="flex h-[22px] w-[22px] items-center justify-center overflow-hidden rounded-[6px] bg-white">
-                    {c.search ? (
-                      <span className="text-[#555]">{searchGlyph}</span>
-                    ) : (
-                      <img src={c.img} alt="" className="h-[15px] w-[15px] object-contain" />
-                    )}
-                  </span>
+              {recentChips.map((c) => (
+                <div key={c.label} className="group flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-white/[0.07] py-1.5 pl-1.5 pr-3 text-[13px] font-medium text-white/90 transition-colors hover:bg-white/[0.12]">
+                  <button
+                    type="button"
+                    onClick={() => removeChip(c.label)}
+                    aria-label={`Remove ${c.label}`}
+                    className={`relative flex h-[22px] w-[22px] items-center justify-center overflow-hidden rounded-full text-white transition-colors group-hover:bg-white/20 ${c.logo ? "bg-white" : ""}`}
+                  >
+                    {/* Default icon — hidden on hover. Logos stay full-color; line
+                        icons and the search glyph render white. */}
+                    <span className="flex items-center justify-center transition-opacity group-hover:opacity-0">
+                      {c.search ? (
+                        <span className="[&_svg]:h-[15px] [&_svg]:w-[15px]">{searchGlyph}</span>
+                      ) : c.logo ? (
+                        <img src={c.img} alt="" className="h-[15px] w-[15px] object-contain" />
+                      ) : (
+                        <span
+                          aria-hidden
+                          className="h-[15px] w-[15px] bg-white"
+                          style={{
+                            maskImage: `url("${c.img}")`,
+                            WebkitMaskImage: `url("${c.img}")`,
+                            maskSize: "contain",
+                            WebkitMaskSize: "contain",
+                            maskRepeat: "no-repeat",
+                            WebkitMaskRepeat: "no-repeat",
+                            maskPosition: "center",
+                            WebkitMaskPosition: "center",
+                          }}
+                        />
+                      )}
+                    </span>
+                    {/* X — shown on hover */}
+                    <span className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 6l12 12M18 6 6 18" />
+                      </svg>
+                    </span>
+                  </button>
                   {c.label}
-                </button>
+                </div>
               ))}
             </div>
 
@@ -234,23 +258,6 @@ export function ExploreSearchModal({ open, onClose }: { open: boolean; onClose: 
                   </>
                 )}
 
-                {activeTab === "experts" && (
-                  <>
-                    <SectionLabel>Top experts</SectionLabel>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      {experts.map((e) => (
-                        <div key={e.name} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3">
-                          <img src={e.avatar} alt="" className="h-11 w-11 shrink-0 rounded-full object-cover ring-1 ring-white/10" />
-                          <div className="min-w-0">
-                            <div className="truncate text-[14px] font-medium text-white">{e.name}</div>
-                            <div className="truncate text-[12px] text-white/50">{e.role}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-
                 {activeTab === "livestreams" && (
                   <>
                     <SectionLabel>Upcoming livestreams</SectionLabel>
@@ -264,7 +271,7 @@ export function ExploreSearchModal({ open, onClose }: { open: boolean; onClose: 
 
                 {activeTab === "content" && (
                   <>
-                    <SectionLabel>Browse content</SectionLabel>
+                    <SectionLabel>Browse Leland+</SectionLabel>
                     <div className="grid grid-cols-4 gap-3">
                       {contentItems.map((name, i) => (
                         <ThumbCard key={name} name={name} cover={covers[(i + 2) % covers.length]} />
@@ -288,6 +295,17 @@ export function ExploreSearchModal({ open, onClose }: { open: boolean; onClose: 
                           </div>
                           <span className="shrink-0 rounded-full border border-white/15 px-3 py-1 text-[12px] font-medium text-white/80">View</span>
                         </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {activeTab === "programs" && (
+                  <>
+                    <SectionLabel>Programs</SectionLabel>
+                    <div className="grid grid-cols-4 gap-3">
+                      {programs.map((name, i) => (
+                        <ThumbCard key={name} name={name} cover={covers[(i + 1) % covers.length]} />
                       ))}
                     </div>
                   </>

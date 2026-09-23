@@ -8,17 +8,23 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 // dropdown / Account admin panel.
 export type TopNavStyle = "classic" | "linkedin";
 
+// Which "modality" nav items sit between My Leland and Messages:
+//   "off"      — none
+//   "jobs"     — a single "Jobs" item
+//   "existing" — "Livestreams" + "Leland+" (the default modality set)
+export type NavModalities = "off" | "jobs" | "existing";
+
 interface TopNavStyleContextValue {
   style: TopNavStyle;
   setStyle: (v: TopNavStyle) => void;
   toggle: () => void;
   showNavLabels: boolean;
   setShowNavLabels: (v: boolean) => void;
-  // v1-only "alt icons" experiment: My Leland shows the profile photo, the "Me"
-  // item becomes "More" with a hamburger icon, and the Explore/More carets hide.
-  altIcons: boolean;
-  setAltIcons: (v: boolean) => void;
-  // v1-only "Search Leland" input in the navbar. Hidden by default; toggled from
+  // Which modality items appear in the icon group. Off by default; toggled from
+  // the Navigation admin dropdown.
+  modalities: NavModalities;
+  setModalities: (v: NavModalities) => void;
+  // "Search Leland" input in the navbar. Hidden by default; toggled from
   // the Navigation admin dropdown.
   showSearch: boolean;
   setShowSearch: (v: boolean) => void;
@@ -27,10 +33,6 @@ interface TopNavStyleContextValue {
   // from the Navigation admin dropdown.
   feedEdgeToEdge: boolean;
   setFeedEdgeToEdge: (v: boolean) => void;
-  // LinkedIn-style navbar content: false = constrained to 1280 (default),
-  // true = extends to the window edges. Toggled from the Navigation dropdown.
-  navEdgeToEdge: boolean;
-  setNavEdgeToEdge: (v: boolean) => void;
 }
 
 const TopNavStyleContext = createContext<TopNavStyleContextValue>({
@@ -39,14 +41,12 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
   toggle: () => {},
   showNavLabels: true,
   setShowNavLabels: () => {},
-  altIcons: false,
-  setAltIcons: () => {},
+  modalities: "existing",
+  setModalities: () => {},
   showSearch: false,
   setShowSearch: () => {},
   feedEdgeToEdge: false,
   setFeedEdgeToEdge: () => {},
-  navEdgeToEdge: false,
-  setNavEdgeToEdge: () => {},
 });
 
 // v2: the default flipped to "linkedin" (alt-nav is now the default experience).
@@ -54,10 +54,9 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
 // don't force the classic nav on load.
 const STORAGE_KEY = "prototype-topnav-style-v2";
 const LABELS_STORAGE_KEY = "prototype-topnav-labels";
-const ALT_ICONS_STORAGE_KEY = "prototype-topnav-alt-icons";
+const MODALITIES_STORAGE_KEY = "prototype-topnav-modalities";
 const SEARCH_STORAGE_KEY = "prototype-topnav-search";
 const FEED_EDGE_STORAGE_KEY = "prototype-feed-edge-to-edge";
-const NAV_EDGE_STORAGE_KEY = "prototype-nav-edge-to-edge";
 
 export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const [style, setStyleState] = useState<TopNavStyle>(() => {
@@ -68,9 +67,10 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
     // Labels shown by default; only an explicit "0" hides them.
     return localStorage.getItem(LABELS_STORAGE_KEY) !== "0";
   });
-  const [altIcons, setAltIconsState] = useState<boolean>(() => {
-    // Off by default; only an explicit "1" enables the alt-icons experiment.
-    return localStorage.getItem(ALT_ICONS_STORAGE_KEY) === "1";
+  const [modalities, setModalitiesState] = useState<NavModalities>(() => {
+    // Defaults to "existing"; only an explicit "off" / "jobs" opts out.
+    const v = localStorage.getItem(MODALITIES_STORAGE_KEY);
+    return v === "off" || v === "jobs" ? v : "existing";
   });
   const [showSearch, setShowSearchState] = useState<boolean>(() => {
     // Hidden by default; only an explicit "1" shows the search input.
@@ -80,11 +80,6 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
     // Centered (constrained) by default; only an explicit "1" pushes to edges.
     return localStorage.getItem(FEED_EDGE_STORAGE_KEY) === "1";
   });
-  const [navEdgeToEdge, setNavEdgeToEdgeState] = useState<boolean>(() => {
-    // Constrained by default; only an explicit "1" extends the nav to the edges.
-    return localStorage.getItem(NAV_EDGE_STORAGE_KEY) === "1";
-  });
-
   const setStyle = (v: TopNavStyle) => {
     localStorage.setItem(STORAGE_KEY, v);
     setStyleState(v);
@@ -95,9 +90,9 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
     setShowNavLabelsState(v);
   };
 
-  const setAltIcons = (v: boolean) => {
-    localStorage.setItem(ALT_ICONS_STORAGE_KEY, v ? "1" : "0");
-    setAltIconsState(v);
+  const setModalities = (v: NavModalities) => {
+    localStorage.setItem(MODALITIES_STORAGE_KEY, v);
+    setModalitiesState(v);
   };
 
   const setShowSearch = (v: boolean) => {
@@ -110,15 +105,10 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
     setFeedEdgeToEdgeState(v);
   };
 
-  const setNavEdgeToEdge = (v: boolean) => {
-    localStorage.setItem(NAV_EDGE_STORAGE_KEY, v ? "1" : "0");
-    setNavEdgeToEdgeState(v);
-  };
-
   const toggle = () => setStyle(style === "linkedin" ? "classic" : "linkedin");
 
   return (
-    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, showNavLabels, setShowNavLabels, altIcons, setAltIcons, showSearch, setShowSearch, feedEdgeToEdge, setFeedEdgeToEdge, navEdgeToEdge, setNavEdgeToEdge }}>
+    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, showNavLabels, setShowNavLabels, modalities, setModalities, showSearch, setShowSearch, feedEdgeToEdge, setFeedEdgeToEdge }}>
       {children}
     </TopNavStyleContext.Provider>
   );

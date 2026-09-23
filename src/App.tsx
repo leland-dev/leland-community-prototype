@@ -227,6 +227,7 @@ export default function App() {
             reachable from the expert-only "My Store" top-nav item. */}
         <Route element={<CoachLayout />}>
           <Route path="/my-leland" element={<Dashboard shell />} />
+          <Route path="/my-leland/messages" element={<Messaging />} />
           <Route path="/my-leland/inbox" element={<CoachInbox />} />
           <Route path="/my-leland/manage" element={<CoachManage />} />
           {/* Profile — the signed-in user's own profile rendered with the real
