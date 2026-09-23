@@ -140,7 +140,7 @@ export default function TopNavLinkedIn() {
   const isCoachMode = useIsCoachMode();
   const navTheme = useNavTheme();
   const { pathname } = useLocation();
-  const { setStyle, showNavLabels, modalities, setModalities, showSearch, setShowSearch, altLayout, setAltLayout, feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
+  const { setStyle, showNavLabels, showLivestreams, setShowLivestreams, showLelandPlus, setShowLelandPlus, showJobs, setShowJobs, showSearch, setShowSearch, altLayout, setAltLayout, feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
   const { expert, setExpert } = useExpertMode();
   // Inside the isolated /alt-nav experience, the nav destinations stay within
   // it (e.g. /alt-nav/messages); elsewhere they point at the normal routes.
@@ -254,9 +254,9 @@ export default function TopNavLinkedIn() {
           open={browseMenuOpen}
           navTo={navTo}
           onNavigate={() => setBrowseMenuOpen(false)}
-          // "Existing" surfaces the modality items in the top nav, so drop the
+          // When both content modalities already sit in the top nav, drop the
           // dropdown's modality pane and lead with the category buckets.
-          showModalities={modalities !== "existing"}
+          showModalities={!(showLivestreams && showLelandPlus)}
         />
       </div>
 
@@ -275,18 +275,11 @@ export default function TopNavLinkedIn() {
         )}
       </NavLink>
 
-      {/* Modality items between My Leland and Messages — controlled by the
-          "Modalities" admin toggle. Off = none; Jobs = a single Jobs item;
-          Existing = Livestreams + Leland+. */}
-      {modalities === "jobs" && (
-        <IconNavLink to={navTo("/jobs")} label="Jobs" icon={jobsIcon} />
-      )}
-      {modalities === "existing" && (
-        <>
-          <IconNavLink to={navTo("/livestreams")} label="Livestreams" icon={videoFilledIcon} />
-          <IconNavLink to={navTo("/content")} label="Leland+" icon={contentBookFilledIcon} />
-        </>
-      )}
+      {/* Modality items between My Leland and Messages — each toggled
+          independently from the Navigation admin dropdown. */}
+      {showLivestreams && <IconNavLink to={navTo("/livestreams")} label="Livestreams" icon={videoFilledIcon} />}
+      {showLelandPlus && <IconNavLink to={navTo("/content")} label="Leland+" icon={contentBookFilledIcon} />}
+      {showJobs && <IconNavLink to={navTo("/jobs")} label="Jobs" icon={jobsIcon} />}
 
       {/* Messages + Notifications — in the alt layout these move to the right of
           the divider (icon-only), so they're dropped from the icon group here. */}
@@ -334,10 +327,11 @@ export default function TopNavLinkedIn() {
             <>
               <div className="flex items-stretch gap-[2px]">{iconGroup}</div>
               {/* Divider before the trailing items (Me dropdown, plus the
-                  icon-only Messages/Notifications in the alt layout). */}
-              <span className="my-3 mx-1 w-px self-stretch bg-gray-stroke" />
+                  icon-only Messages/Notifications in the alt layout). The alt
+                  layout gives it a bit more horizontal breathing room. */}
+              <span className={`my-3 w-px self-stretch bg-gray-stroke ${altLayout ? "mx-3" : "mx-1"}`} />
               {altLayout && (
-                <div className="flex items-stretch">
+                <div className="flex items-stretch gap-2">
                   <IconNavLink to={messagesTo} label="Messages" icon={chatIcon} badge={1} hideLabel />
                   <IconNavLink to={navTo("/notifications")} label="Notifications" icon={notificationsIcon} badge={3} hideLabel />
                 </div>
@@ -496,23 +490,29 @@ export default function TopNavLinkedIn() {
                               <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18" /></svg>
                               Switch to Classic nav
                             </NavLink>
-                            {/* Modalities — which items sit between My Leland and Messages */}
-                            <div className="flex items-center justify-between gap-3 py-2 pl-3 pr-1">
-                              <span className="text-[14px] font-medium text-gray-dark">Modalities</span>
-                              <div className="flex shrink-0 overflow-hidden rounded-full bg-[#E5E5E5] p-[2px]">
-                                {([{ v: "off", l: "Off" }, { v: "jobs", l: "Jobs" }, { v: "existing", l: "Existing" }] as const).map((o) => (
-                                  <button
-                                    key={o.v}
-                                    onClick={() => setModalities(o.v)}
-                                    className={`rounded-full px-2.5 py-[3px] text-[11px] font-medium transition-colors ${
-                                      modalities === o.v ? "bg-[#222222] text-white" : "text-[#4c4c4c]"
-                                    }`}
-                                  >
-                                    {o.l}
-                                  </button>
-                                ))}
+                            {/* Modality items — each shown independently in the nav */}
+                            {[
+                              { label: "Livestreams", value: showLivestreams, set: setShowLivestreams },
+                              { label: "Leland+", value: showLelandPlus, set: setShowLelandPlus },
+                              { label: "Jobs", value: showJobs, set: setShowJobs },
+                            ].map((m) => (
+                              <div key={m.label} className="flex items-center justify-between gap-3 py-2 pl-3 pr-1">
+                                <span className="text-[14px] font-medium text-gray-dark">{m.label}</span>
+                                <div className="flex shrink-0 overflow-hidden rounded-full bg-[#E5E5E5] p-[2px]">
+                                  {([{ v: true, l: "On" }, { v: false, l: "Off" }] as const).map((o) => (
+                                    <button
+                                      key={o.l}
+                                      onClick={() => m.set(o.v)}
+                                      className={`rounded-full px-2.5 py-[3px] text-[11px] font-medium transition-colors ${
+                                        m.value === o.v ? "bg-[#222222] text-white" : "text-[#4c4c4c]"
+                                      }`}
+                                    >
+                                      {o.l}
+                                    </button>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
+                            ))}
                             {/* Search bar — show/hide the "Search Leland" input in the navbar */}
                             <div className="flex items-center justify-between gap-3 py-2 pl-3 pr-1">
                               <span className="text-[14px] font-medium text-gray-dark">Search bar</span>

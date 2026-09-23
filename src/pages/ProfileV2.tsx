@@ -771,9 +771,15 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   // when no longer viewing own profile), fall back to About.
   useEffect(() => {
     if (!showOfferingsTab && coachTab === "offerings") setCoachTab("about");
-    if (!viewingOwnProfile && (coachTab === "saved" || coachTab === "likes")) setCoachTab("about");
+    // Likes is hidden everywhere for now; Saved only when viewing your own.
+    if (coachTab === "likes") setCoachTab("about");
+    if (!viewingOwnProfile && coachTab === "saved") setCoachTab("about");
     if (mvp && coachTab === "activity") setCoachTab("about");
   }, [showOfferingsTab, viewingOwnProfile, coachTab, mvp]);
+  // Likes is hidden on your own profile; fall back to About if it's active.
+  useEffect(() => {
+    if (viewingOwnProfile && customerTab === "likes") setCustomerTab("about");
+  }, [viewingOwnProfile, customerTab]);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [eventsCategoryOpen, setEventsCategoryOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -2078,8 +2084,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                 // Activity is hidden in MVP mode.
                 ...(mvp ? [] : (["activity"] as const)),
                 ...(showOfferingsTab ? ["offerings" as const] : []),
-                // Saved + Likes appear only when viewing your own profile.
-                ...(viewingOwnProfile ? (["saved", "likes"] as const) : []),
+                // Saved appears only when viewing your own profile. (Likes is
+                // hidden on your own profile for now.)
+                ...(viewingOwnProfile ? (["saved"] as const) : []),
               ]).map((tab) => (
                 <button
                   key={tab}
@@ -2898,7 +2905,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             <>
                 {unified && <div ref={tabAnchorRef} aria-hidden className="mt-2 h-0" />}
                 <div ref={customerTabStripRef} className={`sticky top-14 z-10 -mx-4 md:mx-0 ${unified ? "" : "mt-2"} flex border-b border-gray-stroke bg-white md:top-0`}>
-                  {(viewingOwnProfile ? ["about", "more", "saved", "likes"] as const : unified ? ["about", "more"] as const : ["about", "more", "likes"] as const).map((tab) => (
+                  {(viewingOwnProfile ? ["about", "more", "saved"] as const : unified ? ["about", "more"] as const : ["about", "more", "likes"] as const).map((tab) => (
                     <button
                       key={tab}
                       data-tab={tab}

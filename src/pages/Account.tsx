@@ -76,8 +76,12 @@ function Toggle<T extends string | number | boolean>({
 function AdminSection() {
   const {
     setStyle,
-    modalities,
-    setModalities,
+    showLivestreams,
+    setShowLivestreams,
+    showLelandPlus,
+    setShowLelandPlus,
+    showJobs,
+    setShowJobs,
     altLayout,
     setAltLayout,
     feedEdgeToEdge,
@@ -129,14 +133,31 @@ function AdminSection() {
             Switch to Classic nav
           </button>
           <Toggle
-            label="Modalities"
-            value={modalities}
+            label="Livestreams"
+            value={showLivestreams}
             options={[
-              { v: "off", l: "Off" },
-              { v: "jobs", l: "Jobs" },
-              { v: "existing", l: "Existing" },
+              { v: true, l: "On" },
+              { v: false, l: "Off" },
             ]}
-            onChange={setModalities}
+            onChange={setShowLivestreams}
+          />
+          <Toggle
+            label="Leland+"
+            value={showLelandPlus}
+            options={[
+              { v: true, l: "On" },
+              { v: false, l: "Off" },
+            ]}
+            onChange={setShowLelandPlus}
+          />
+          <Toggle
+            label="Jobs"
+            value={showJobs}
+            options={[
+              { v: true, l: "On" },
+              { v: false, l: "Off" },
+            ]}
+            onChange={setShowJobs}
           />
           <Toggle
             label="Alt layout"

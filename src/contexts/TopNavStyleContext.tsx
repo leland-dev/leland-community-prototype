@@ -8,22 +8,21 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 // dropdown / Account admin panel.
 export type TopNavStyle = "classic" | "linkedin";
 
-// Which "modality" nav items sit between My Leland and Messages:
-//   "off"      — none
-//   "jobs"     — a single "Jobs" item
-//   "existing" — "Livestreams" + "Leland+" (the default modality set)
-export type NavModalities = "off" | "jobs" | "existing";
-
 interface TopNavStyleContextValue {
   style: TopNavStyle;
   setStyle: (v: TopNavStyle) => void;
   toggle: () => void;
   showNavLabels: boolean;
   setShowNavLabels: (v: boolean) => void;
-  // Which modality items appear in the icon group. Off by default; toggled from
-  // the Navigation admin dropdown.
-  modalities: NavModalities;
-  setModalities: (v: NavModalities) => void;
+  // Individual "modality" nav items shown between My Leland and Messages, each
+  // toggled from the Navigation admin dropdown. Livestreams + Leland+ default on,
+  // Jobs defaults off.
+  showLivestreams: boolean;
+  setShowLivestreams: (v: boolean) => void;
+  showLelandPlus: boolean;
+  setShowLelandPlus: (v: boolean) => void;
+  showJobs: boolean;
+  setShowJobs: (v: boolean) => void;
   // "Search Leland" input in the navbar. Hidden by default; toggled from
   // the Navigation admin dropdown.
   showSearch: boolean;
@@ -46,8 +45,12 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
   toggle: () => {},
   showNavLabels: true,
   setShowNavLabels: () => {},
-  modalities: "existing",
-  setModalities: () => {},
+  showLivestreams: true,
+  setShowLivestreams: () => {},
+  showLelandPlus: true,
+  setShowLelandPlus: () => {},
+  showJobs: false,
+  setShowJobs: () => {},
   showSearch: false,
   setShowSearch: () => {},
   altLayout: false,
@@ -61,7 +64,9 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
 // don't force the classic nav on load.
 const STORAGE_KEY = "prototype-topnav-style-v2";
 const LABELS_STORAGE_KEY = "prototype-topnav-labels";
-const MODALITIES_STORAGE_KEY = "prototype-topnav-modalities";
+const LIVESTREAMS_STORAGE_KEY = "prototype-topnav-livestreams";
+const LELANDPLUS_STORAGE_KEY = "prototype-topnav-lelandplus";
+const JOBS_STORAGE_KEY = "prototype-topnav-jobs";
 const SEARCH_STORAGE_KEY = "prototype-topnav-search";
 const ALT_LAYOUT_STORAGE_KEY = "prototype-topnav-alt-layout";
 const FEED_EDGE_STORAGE_KEY = "prototype-feed-edge-to-edge";
@@ -75,10 +80,17 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
     // Labels shown by default; only an explicit "0" hides them.
     return localStorage.getItem(LABELS_STORAGE_KEY) !== "0";
   });
-  const [modalities, setModalitiesState] = useState<NavModalities>(() => {
-    // Defaults to "existing"; only an explicit "off" / "jobs" opts out.
-    const v = localStorage.getItem(MODALITIES_STORAGE_KEY);
-    return v === "off" || v === "jobs" ? v : "existing";
+  const [showLivestreams, setShowLivestreamsState] = useState<boolean>(() => {
+    // On by default; only an explicit "0" hides it.
+    return localStorage.getItem(LIVESTREAMS_STORAGE_KEY) !== "0";
+  });
+  const [showLelandPlus, setShowLelandPlusState] = useState<boolean>(() => {
+    // On by default; only an explicit "0" hides it.
+    return localStorage.getItem(LELANDPLUS_STORAGE_KEY) !== "0";
+  });
+  const [showJobs, setShowJobsState] = useState<boolean>(() => {
+    // Off by default; only an explicit "1" shows it.
+    return localStorage.getItem(JOBS_STORAGE_KEY) === "1";
   });
   const [showSearch, setShowSearchState] = useState<boolean>(() => {
     // Hidden by default; only an explicit "1" shows the search input.
@@ -102,9 +114,19 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
     setShowNavLabelsState(v);
   };
 
-  const setModalities = (v: NavModalities) => {
-    localStorage.setItem(MODALITIES_STORAGE_KEY, v);
-    setModalitiesState(v);
+  const setShowLivestreams = (v: boolean) => {
+    localStorage.setItem(LIVESTREAMS_STORAGE_KEY, v ? "1" : "0");
+    setShowLivestreamsState(v);
+  };
+
+  const setShowLelandPlus = (v: boolean) => {
+    localStorage.setItem(LELANDPLUS_STORAGE_KEY, v ? "1" : "0");
+    setShowLelandPlusState(v);
+  };
+
+  const setShowJobs = (v: boolean) => {
+    localStorage.setItem(JOBS_STORAGE_KEY, v ? "1" : "0");
+    setShowJobsState(v);
   };
 
   const setShowSearch = (v: boolean) => {
@@ -125,7 +147,7 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const toggle = () => setStyle(style === "linkedin" ? "classic" : "linkedin");
 
   return (
-    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, showNavLabels, setShowNavLabels, modalities, setModalities, showSearch, setShowSearch, altLayout, setAltLayout, feedEdgeToEdge, setFeedEdgeToEdge }}>
+    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, showNavLabels, setShowNavLabels, showLivestreams, setShowLivestreams, showLelandPlus, setShowLelandPlus, showJobs, setShowJobs, showSearch, setShowSearch, altLayout, setAltLayout, feedEdgeToEdge, setFeedEdgeToEdge }}>
       {children}
     </TopNavStyleContext.Provider>
   );
