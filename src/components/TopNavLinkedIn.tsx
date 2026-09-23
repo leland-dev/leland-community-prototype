@@ -276,9 +276,18 @@ export default function TopNavLinkedIn() {
       </NavLink>
 
       {/* Modality items between My Leland and Messages — each toggled
-          independently from the Navigation admin dropdown. */}
-      {showLivestreams && <IconNavLink to={navTo("/livestreams")} label="Livestreams" icon={videoFilledIcon} />}
-      {showLelandPlus && <IconNavLink to={navTo("/content")} label="Leland+" icon={contentBookFilledIcon} />}
+          independently from the Navigation admin dropdown. Livestreams + Leland+
+          are dropped below xl so the nav doesn't crowd on narrower screens. */}
+      {showLivestreams && (
+        <div className="hidden items-stretch lg:flex">
+          <IconNavLink to={navTo("/livestreams")} label="Livestreams" icon={videoFilledIcon} />
+        </div>
+      )}
+      {showLelandPlus && (
+        <div className="hidden items-stretch lg:flex">
+          <IconNavLink to={navTo("/content")} label="Leland+" icon={contentBookFilledIcon} />
+        </div>
+      )}
       {showJobs && <IconNavLink to={navTo("/jobs")} label="Jobs" icon={jobsIcon} />}
 
       {/* Messages + Notifications — in the alt layout these move to the right of
