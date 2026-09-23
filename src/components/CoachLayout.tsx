@@ -11,12 +11,13 @@ import starReviewIcon from "../assets/icons/star-review.svg";
 import moneyIcon from "../assets/icons/money.svg";
 import starIcon from "../assets/icons/star-icon.svg";
 import discountIcon from "../assets/icons/discount.svg";
+import labelTagIcon from "../assets/icons/label-tag.svg";
 import livestreamIcon from "../assets/icons/lte-signal.svg";
 import videoIcon from "../assets/icons/video-icon.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import userIcon from "../assets/icons/user.svg";
 import layoutGridIcon from "../assets/icons/layout-grid.svg";
-import chartIcon from "../assets/icons/chart.svg";
+import analyticsChartIcon from "../assets/icons/Business, Chart.7.svg";
 import mbaIcon from "../assets/icons/category-icons/mba.svg";
 import consultingIcon from "../assets/icons/category-icons/consulting.svg";
 import pmIcon from "../assets/icons/category-icons/product-management.svg";
@@ -240,9 +241,9 @@ function SidebarV1() {
               {navRow(findItem("/coach/opportunities"))}
               {navRow({ ...findItem("/coach/livestreams"), label: "My Livestreams", icon: videoIcon })}
               {navRow(findItem("/coach/earnings"))}
-              {navRow({ to: "/coach/analytics", label: "Analytics", icon: chartIcon })}
+              {navRow({ to: "/coach/analytics", label: "Analytics", icon: analyticsChartIcon })}
               {navRow(findItem("/coach/reviews"))}
-              {navRow(findItem("/coach/discount-codes"))}
+              {navRow({ ...findItem("/coach/discount-codes"), icon: labelTagIcon })}
             </nav>
           </div>
         )}

@@ -142,12 +142,14 @@ export function BrowseMenu({
   // when those items already sit in the top nav (the "Existing" modality).
   showModalities?: boolean;
 }) {
-  // Which bucket's categories are showing in the flyout (null = none / at rest).
-  const [hoveredBucket, setHoveredBucket] = useState<string | null>(null);
+  // Which bucket's categories are showing in the flyout. Defaults to the first
+  // bucket so the second column (categories) is always visible.
+  const [hoveredBucket, setHoveredBucket] = useState<string | null>(categoryBuckets[0]);
   // Which category's subcategories are showing in the 4th pane (only some
   // categories have one; null = none).
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
-  // Horizontal nudge (px, ≤ 0) applied so the full cascade stays on screen.
+  // Horizontal offset (px) that centers the buckets column under Browse, then
+  // clamps so the full cascade stays on screen.
   const [shiftX, setShiftX] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -159,22 +161,30 @@ export function BrowseMenu({
   useLayoutEffect(() => {
     if (!open) {
       setShiftX(0);
-      setHoveredBucket(null);
+      setHoveredBucket(categoryBuckets[0]);
       setHoveredCategory(null);
       return;
     }
     const compute = () => {
       const anchor = menuRef.current?.offsetParent as HTMLElement | null;
-      const baseLeft = anchor
-        ? anchor.getBoundingClientRect().left
-        : menuRef.current?.getBoundingClientRect().left ?? 0;
+      const rect = anchor?.getBoundingClientRect();
+      // The menu is anchored at left-1/2 (the Browse item's center). Translate
+      // left so the categories flyout (the always-visible second column) ends up
+      // centered under Browse. The buckets column sits to its left (after the
+      // modality pane, when that's shown).
+      const browseCenter = rect ? rect.left + rect.width / 2 : 0;
+      const bucketsLeft = showModalities ? PANE1 : 0;
+      let x = -(bucketsLeft + PANE2 + FLYOUT / 2);
       // The base cascade always reserves room for the category flyout; the 4th
       // pane is added only while it's open, so the menu slides left on hover.
-      const total = (showModalities ? PANE1 : 0) + PANE2 + FLYOUT + (subPaneOpen ? SUBPANE : 0);
-      const overflow = baseLeft + total + EDGE_MARGIN - window.innerWidth;
-      // Shift left by the overflow, but never past the left edge margin.
-      const shift = Math.min(Math.max(0, overflow), Math.max(0, baseLeft - EDGE_MARGIN));
-      setShiftX(-shift);
+      const total = bucketsLeft + PANE2 + FLYOUT + (subPaneOpen ? SUBPANE : 0);
+      // Pull further left if the cascade would overflow the right edge…
+      const rightOverflow = browseCenter + x + total + EDGE_MARGIN - window.innerWidth;
+      if (rightOverflow > 0) x -= rightOverflow;
+      // …but never past the left edge margin.
+      const leftEdge = browseCenter + x;
+      if (leftEdge < EDGE_MARGIN) x += EDGE_MARGIN - leftEdge;
+      setShiftX(x);
     };
     compute();
     window.addEventListener("resize", compute);
@@ -187,10 +197,13 @@ export function BrowseMenu({
         <motion.div
           ref={menuRef}
           initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0, x: shiftX }}
+          animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 6 }}
           transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-          className="absolute left-0 top-full z-50 mt-1 flex max-h-[80vh] overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-lg"
+          // Horizontal offset is applied instantly (via style, not animate) so the
+          // menu fades/moves down on entrance rather than sliding in from the side.
+          style={{ x: shiftX }}
+          className="absolute left-1/2 top-full z-50 mt-1 flex max-h-[80vh] overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-lg"
         >
           {/* Pane 1 — modalities. Dropped when those items already live in the
               top nav (the "Existing" modality); the buckets pane then leads. */}

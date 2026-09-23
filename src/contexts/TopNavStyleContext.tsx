@@ -28,6 +28,11 @@ interface TopNavStyleContextValue {
   // the Navigation admin dropdown.
   showSearch: boolean;
   setShowSearch: (v: boolean) => void;
+  // Alt layout: Messages + Notifications move to the right of the divider and
+  // render icon-only (no labels). Off by default; toggled from the Navigation
+  // admin dropdown.
+  altLayout: boolean;
+  setAltLayout: (v: boolean) => void;
   // Classic-nav feed + post-detail frame: false = feed/sidebars centered within
   // 1280 (default), true = pushed to the window edges (edge-to-edge). Toggled
   // from the Navigation admin dropdown.
@@ -45,6 +50,8 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
   setModalities: () => {},
   showSearch: false,
   setShowSearch: () => {},
+  altLayout: false,
+  setAltLayout: () => {},
   feedEdgeToEdge: false,
   setFeedEdgeToEdge: () => {},
 });
@@ -56,6 +63,7 @@ const STORAGE_KEY = "prototype-topnav-style-v2";
 const LABELS_STORAGE_KEY = "prototype-topnav-labels";
 const MODALITIES_STORAGE_KEY = "prototype-topnav-modalities";
 const SEARCH_STORAGE_KEY = "prototype-topnav-search";
+const ALT_LAYOUT_STORAGE_KEY = "prototype-topnav-alt-layout";
 const FEED_EDGE_STORAGE_KEY = "prototype-feed-edge-to-edge";
 
 export function TopNavStyleProvider({ children }: { children: ReactNode }) {
@@ -75,6 +83,10 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const [showSearch, setShowSearchState] = useState<boolean>(() => {
     // Hidden by default; only an explicit "1" shows the search input.
     return localStorage.getItem(SEARCH_STORAGE_KEY) === "1";
+  });
+  const [altLayout, setAltLayoutState] = useState<boolean>(() => {
+    // Off by default; only an explicit "1" enables the alt layout.
+    return localStorage.getItem(ALT_LAYOUT_STORAGE_KEY) === "1";
   });
   const [feedEdgeToEdge, setFeedEdgeToEdgeState] = useState<boolean>(() => {
     // Centered (constrained) by default; only an explicit "1" pushes to edges.
@@ -100,6 +112,11 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
     setShowSearchState(v);
   };
 
+  const setAltLayout = (v: boolean) => {
+    localStorage.setItem(ALT_LAYOUT_STORAGE_KEY, v ? "1" : "0");
+    setAltLayoutState(v);
+  };
+
   const setFeedEdgeToEdge = (v: boolean) => {
     localStorage.setItem(FEED_EDGE_STORAGE_KEY, v ? "1" : "0");
     setFeedEdgeToEdgeState(v);
@@ -108,7 +125,7 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const toggle = () => setStyle(style === "linkedin" ? "classic" : "linkedin");
 
   return (
-    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, showNavLabels, setShowNavLabels, modalities, setModalities, showSearch, setShowSearch, feedEdgeToEdge, setFeedEdgeToEdge }}>
+    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, showNavLabels, setShowNavLabels, modalities, setModalities, showSearch, setShowSearch, altLayout, setAltLayout, feedEdgeToEdge, setFeedEdgeToEdge }}>
       {children}
     </TopNavStyleContext.Provider>
   );

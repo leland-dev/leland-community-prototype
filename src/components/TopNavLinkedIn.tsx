@@ -91,6 +91,7 @@ function IconNavLink({
   icon,
   badge,
   dot,
+  hideLabel,
 }: {
   to: string;
   end?: boolean;
@@ -98,18 +99,28 @@ function IconNavLink({
   icon: string;
   badge?: number;
   dot?: boolean;
+  // Force an icon-only item (no label, snug width) regardless of the global
+  // label toggle — used for Messages/Notifications in the alt layout.
+  hideLabel?: boolean;
 }) {
   const { showNavLabels } = useTopNavStyle();
-  // A fixed min-width keeps the primary items evenly spaced.
+  const showLabel = showNavLabels && !hideLabel;
+  // A fixed min-width keeps the primary items evenly spaced; icon-only items
+  // stay snug.
   return (
-    <NavLink to={to} end={end} className={`${itemBase} min-w-[64px]`}>
+    <NavLink
+      to={to}
+      end={end}
+      className={`${itemBase}${hideLabel ? "" : " min-w-[64px]"}`}
+      aria-label={hideLabel ? label : undefined}
+    >
       {({ isActive }) => (
         <>
           <span className={iconWrap}>
             <img src={icon} alt="" className={iconCls(isActive)} />
             <NavBadge count={badge} dot={dot} />
           </span>
-          {showNavLabels && <span className={labelCls(isActive)}>{label}</span>}
+          {showLabel && <span className={labelCls(isActive)}>{label}</span>}
           {underline(isActive)}
         </>
       )}
@@ -129,7 +140,7 @@ export default function TopNavLinkedIn() {
   const isCoachMode = useIsCoachMode();
   const navTheme = useNavTheme();
   const { pathname } = useLocation();
-  const { setStyle, showNavLabels, modalities, setModalities, showSearch, setShowSearch, feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
+  const { setStyle, showNavLabels, modalities, setModalities, showSearch, setShowSearch, altLayout, setAltLayout, feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
   const { expert, setExpert } = useExpertMode();
   // Inside the isolated /alt-nav experience, the nav destinations stay within
   // it (e.g. /alt-nav/messages); elsewhere they point at the normal routes.
@@ -277,9 +288,10 @@ export default function TopNavLinkedIn() {
         </>
       )}
 
-      {/* Messages + Notifications */}
-      <IconNavLink to={messagesTo} label="Messages" icon={chatIcon} badge={1} />
-      <IconNavLink to={navTo("/notifications")} label="Notifications" icon={notificationsIcon} badge={3} />
+      {/* Messages + Notifications — in the alt layout these move to the right of
+          the divider (icon-only), so they're dropped from the icon group here. */}
+      {!altLayout && <IconNavLink to={messagesTo} label="Messages" icon={chatIcon} badge={1} />}
+      {!altLayout && <IconNavLink to={navTo("/notifications")} label="Notifications" icon={notificationsIcon} badge={3} />}
     </>
   );
 
@@ -321,8 +333,15 @@ export default function TopNavLinkedIn() {
           {!isCoachMode && (
             <>
               <div className="flex items-stretch gap-[2px]">{iconGroup}</div>
-              {/* Divider before the trailing Me dropdown */}
+              {/* Divider before the trailing items (Me dropdown, plus the
+                  icon-only Messages/Notifications in the alt layout). */}
               <span className="my-3 mx-1 w-px self-stretch bg-gray-stroke" />
+              {altLayout && (
+                <div className="flex items-stretch">
+                  <IconNavLink to={messagesTo} label="Messages" icon={chatIcon} badge={1} hideLabel />
+                  <IconNavLink to={navTo("/notifications")} label="Notifications" icon={notificationsIcon} badge={3} hideLabel />
+                </div>
+              )}
             </>
           )}
 
@@ -504,6 +523,23 @@ export default function TopNavLinkedIn() {
                                     onClick={() => setShowSearch(o.v)}
                                     className={`rounded-full px-2.5 py-[3px] text-[11px] font-medium transition-colors ${
                                       showSearch === o.v ? "bg-[#222222] text-white" : "text-[#4c4c4c]"
+                                    }`}
+                                  >
+                                    {o.l}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            {/* Alt layout — Messages/Notifications move right of the divider, icon-only */}
+                            <div className="flex items-center justify-between gap-3 py-2 pl-3 pr-1">
+                              <span className="text-[14px] font-medium text-gray-dark">Alt layout</span>
+                              <div className="flex shrink-0 overflow-hidden rounded-full bg-[#E5E5E5] p-[2px]">
+                                {([{ v: true, l: "On" }, { v: false, l: "Off" }] as const).map((o) => (
+                                  <button
+                                    key={o.l}
+                                    onClick={() => setAltLayout(o.v)}
+                                    className={`rounded-full px-2.5 py-[3px] text-[11px] font-medium transition-colors ${
+                                      altLayout === o.v ? "bg-[#222222] text-white" : "text-[#4c4c4c]"
                                     }`}
                                   >
                                     {o.l}

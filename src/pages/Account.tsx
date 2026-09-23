@@ -78,6 +78,8 @@ function AdminSection() {
     setStyle,
     modalities,
     setModalities,
+    altLayout,
+    setAltLayout,
     feedEdgeToEdge,
     setFeedEdgeToEdge,
   } = useTopNavStyle();
@@ -135,6 +137,15 @@ function AdminSection() {
               { v: "existing", l: "Existing" },
             ]}
             onChange={setModalities}
+          />
+          <Toggle
+            label="Alt layout"
+            value={altLayout}
+            options={[
+              { v: true, l: "On" },
+              { v: false, l: "Off" },
+            ]}
+            onChange={setAltLayout}
           />
           <Toggle
             label="Feed"
