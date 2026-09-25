@@ -1508,16 +1508,19 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
         <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M10 13V18" /><path d="M18 9V18" /><path d="M14 6V18" /><path d="M6 9V18" /></svg>
         <span className="text-[13px] font-medium">{formatViews(postViewCount(post))}</span>
       </button>
-      {/* Bookmark / save */}
-      <FeedBookmarkButton post={post} />
-      {/* Share — swapped to the uploaded share.svg (upload glyph) */}
-      <div className="relative">
-        <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-light transition-colors hover:bg-[#222222]/8">
-          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M15 9h2c1.10457 0 2 .89543 2 2v8c0 1.10457-.89543 2-2 2h-10c-1.10457 0-2-.89543-2-2v-8c0-1.10457.89543-2 2-2h2" /><line x1="12" x2="12" y1="15" y2="3" /><polyline points="15,6 12,3 9,6" /></svg>
-        </button>
-        <AnimatePresence>
-          {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
-        </AnimatePresence>
+      {/* Bookmark + Share grouped together, no gap */}
+      <div className="flex items-center">
+        {/* Bookmark / save */}
+        <FeedBookmarkButton post={post} />
+        {/* Share — swapped to the uploaded share.svg (upload glyph) */}
+        <div className="relative">
+          <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-light transition-colors hover:bg-[#222222]/8">
+            <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M15 9h2c1.10457 0 2 .89543 2 2v8c0 1.10457-.89543 2-2 2h-10c-1.10457 0-2-.89543-2-2v-8c0-1.10457.89543-2 2-2h2" /><line x1="12" x2="12" y1="15" y2="3" /><polyline points="15,6 12,3 9,6" /></svg>
+          </button>
+          <AnimatePresence>
+            {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
+          </AnimatePresence>
+        </div>
       </div>
       <ImpressionsInfoModal open={impressionsOpen} onClose={() => setImpressionsOpen(false)} />
     </div>
