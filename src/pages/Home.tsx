@@ -5608,7 +5608,7 @@ function FeedAdminMenu() {
               onChange={(v) => setSidebarVersion(v as SidebarVersion)}
               options={[{ value: "v1", label: "V1" }, { value: "v2", label: "V2" }, { value: "v3", label: "V3" }]}
             />
-            <AdminToggle label="Featured questions" checked={featuredQuestions} onChange={() => setFeaturedQuestions(!featuredQuestions)} />
+            <AdminToggle label="Answer a question" checked={featuredQuestions} onChange={() => setFeaturedQuestions(!featuredQuestions)} />
             <AdminToggle label="Topics" checked={topics} onChange={() => setTopics(!topics)} />
           </motion.div>
         )}

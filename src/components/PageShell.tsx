@@ -79,9 +79,14 @@ export default function PageShell({
   // NOTE: keep full class strings literal so Tailwind's JIT scanner picks them
   // up. Building arbitrary variants like `min-[1200px]:block` via template
   // strings causes the rule to be silently dropped from the generated CSS.
+  // box-content + px-5/-mx-5: overflow-y-auto forces overflow-x to clip too, so
+  // a child card's horizontal drop shadow would be cut off. The symmetric
+  // padding widens the scroll/clip box by 20px each side to give the shadow
+  // room; the matching negative margin cancels it in the flow, so the column
+  // still occupies the same width and nothing shifts.
   const leftClass = leftSidebarMobile
-    ? "w-full shrink-0 md:w-[300px] md:sticky md:top-[81px] md:self-start md:max-h-[calc(100vh-81px)] md:overflow-y-auto"
-    : "hidden w-[300px] shrink-0 sticky top-[81px] self-start max-h-[calc(100vh-81px)] overflow-y-auto min-[960px]:block";
+    ? "w-full shrink-0 box-content px-5 -mx-5 md:w-[300px] md:sticky md:top-[81px] md:self-start md:max-h-[calc(100vh-81px)] md:overflow-y-auto"
+    : "hidden w-[300px] shrink-0 box-content px-5 -mx-5 sticky top-[81px] self-start max-h-[calc(100vh-81px)] overflow-y-auto min-[960px]:block";
 
   // stackRight: always visible, becomes sticky column at the breakpoint.
   // Default: hidden until the breakpoint.

@@ -32,7 +32,7 @@ const FeedAdminContext = createContext<FeedAdminContextValue>({
   setVerifiedBadgePosition: () => {},
   sidebarVersion: "v2",
   setSidebarVersion: () => {},
-  featuredQuestions: true,
+  featuredQuestions: false,
   setFeaturedQuestions: () => {},
   topics: false,
   setTopics: () => {},
@@ -60,8 +60,8 @@ export function FeedAdminProvider({ children }: { children: ReactNode }) {
     setVer(v);
   };
   const [featuredQuestions, setFQ] = useState<boolean>(() => {
-    // On by default; only an explicit "0" hides the carousel.
-    return localStorage.getItem(FEATURED_QUESTIONS_KEY) !== "0";
+    // Off by default; only an explicit "1" shows the carousel.
+    return localStorage.getItem(FEATURED_QUESTIONS_KEY) === "1";
   });
   const setFeaturedQuestions = (v: boolean) => {
     localStorage.setItem(FEATURED_QUESTIONS_KEY, v ? "1" : "0");
