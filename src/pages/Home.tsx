@@ -1568,7 +1568,7 @@ function ImpressionsInfoModal({ open, onClose }: { open: boolean; onClose: () =>
   );
 }
 
-function PostHeaderRow({ author, time, verified, headline, feed, topic, isGroupPost, groupId, groupPoster, companyLogo, onEdit, nameHover }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; topic?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; companyLogo?: string; onEdit?: () => void; nameHover?: HoverProps }) {
+function PostHeaderRow({ author, time, verified, headline, feed, topic, isGroupPost, groupId, groupPoster, companyLogo, onEdit, nameHover, showHeadline, featuredOrg, inlineOrgLogo, subOrgLogos }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; topic?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; companyLogo?: string; onEdit?: () => void; nameHover?: HoverProps; showHeadline?: boolean; featuredOrg?: { name: string; logo: string }; inlineOrgLogo?: string; subOrgLogos?: string[] }) {
   const postTopic = topicBySlug(topic);
   const [menuOpen, setMenuOpen] = useState(false);
   const [following, setFollowing] = useState(false);
@@ -1679,12 +1679,33 @@ function PostHeaderRow({ author, time, verified, headline, feed, topic, isGroupP
               </Link>
             </>
           )}
+          {/* Org logo inline between the name and the timestamp (logo only). */}
+          {inlineOrgLogo && (
+            <img src={inlineOrgLogo} alt="" className="h-[16px] w-[16px] shrink-0 rounded-[3px] object-cover" />
+          )}
           <span className="shrink-0 text-[15px] leading-tight text-gray-extra-light">{displayTime}</span>
         </div>
-        {/* Title / description line — surfaced in the "Title" (2) and "Dated"
-            (3) profile-bar modes; hidden in "Minimal" (1). */}
-        {profileBarMode !== 1 && displayHeadline ? (
-          <p className="mt-0.5 truncate text-[13px] leading-tight text-gray-light">{displayHeadline}</p>
+        {/* Sub-line under the name. A featured org (logo + company name) wins;
+            otherwise the headline — shown when the "Title"/"Dated" profile-bar
+            modes are active, or when explicitly requested via showHeadline. */}
+        {featuredOrg ? (
+          <div className="mt-0.5 flex items-center gap-1.5">
+            <img src={featuredOrg.logo} alt="" className="h-[16px] w-[16px] shrink-0 rounded-[3px] object-cover" />
+            <span className="truncate text-[13px] font-medium leading-tight text-gray-extra-light">{featuredOrg.name}</span>
+          </div>
+        ) : subOrgLogos && subOrgLogos.length > 0 ? (
+          <div className="mt-0.5 flex items-center gap-2">
+            <div className="flex -space-x-1.5">
+              {subOrgLogos.map((src, i) => (
+                <img key={i} src={src} alt="" className="h-[16px] w-[16px] shrink-0 rounded-[3px] border-[1.5px] border-white object-cover" />
+              ))}
+            </div>
+            {displayHeadline && (
+              <span className="truncate text-[14px] leading-tight text-gray-extra-light">{displayHeadline}</span>
+            )}
+          </div>
+        ) : (showHeadline || profileBarMode !== 1) && displayHeadline ? (
+          <p className="mt-0.5 truncate text-[14px] leading-tight text-gray-extra-light">{displayHeadline}</p>
         ) : null}
       </div>
       <div className="flex shrink-0 items-start gap-1">
@@ -3845,7 +3866,7 @@ function QuotedPostCard({ quoted }: { quoted: QuotedSnapshot }) {
 // Applied to the post's full-bleed row wrapper so it reaches the card edges.
 export const POST_HOVER_SHADOW = "transition-colors hover:bg-[rgba(34,34,34,0.03)]";
 
-export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOpen, hideTopic }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void; onOpen?: () => void; hideTopic?: boolean }) {
+export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOpen, hideTopic, showHeadline, featuredOrg, inlineOrgLogo, subOrgLogos }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void; onOpen?: () => void; hideTopic?: boolean; showHeadline?: boolean; featuredOrg?: { name: string; logo: string }; inlineOrgLogo?: string; subOrgLogos?: string[] }) {
   const navigate = useNavigate();
   const postBase = usePostBase();
   const [editOpen, setEditOpen] = useState(false);
@@ -3911,17 +3932,23 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
         </div>
         {/* Right column: content */}
         <div className="min-w-0 flex-1">
-          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} topic={hideTopic ? undefined : post.topic} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} companyLogo={post.companyLogo} onEdit={onUpdate ? () => setEditOpen(true) : undefined} nameHover={hover.enabled ? hover.hoverProps : undefined} />
+          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} topic={hideTopic ? undefined : post.topic} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} companyLogo={post.companyLogo} onEdit={onUpdate ? () => setEditOpen(true) : undefined} nameHover={hover.enabled ? hover.hoverProps : undefined} showHeadline={showHeadline} featuredOrg={featuredOrg} inlineOrgLogo={inlineOrgLogo} subOrgLogos={subOrgLogos} />
           {/* Minimal mode has no title line, so the body tucks up tight to the
-              identity row (negative margin trims the line-height leading); the
-              title modes give the body a touch more air. */}
+              identity row (negative margin trims the line-height leading); a
+              sub-line (title mode / headline / featured org) gives it more air. */}
           {/* Articles are represented by their card (title + clamped excerpt) —
               the raw body would dump the whole essay into the feed. */}
-          {post.type !== "article" ? (
-            <p className={`${profileBarMode === 1 ? "-mt-1.5" : "mt-1.5"} text-[15px] leading-[1.4] text-gray-dark`}>{post.body}</p>
-          ) : post.caption ? (
-            <p className={`${profileBarMode === 1 ? "-mt-1.5" : "mt-1.5"} text-[15px] leading-[1.4] text-gray-dark`}>{post.caption}</p>
-          ) : null}
+          {(() => {
+            const hasSubline = profileBarMode !== 1 || showHeadline || Boolean(featuredOrg) || Boolean(subOrgLogos?.length);
+            const bodyMargin = hasSubline ? "mt-1.5" : "-mt-1.5";
+            if (post.type !== "article") {
+              return <p className={`${bodyMargin} text-[15px] leading-[1.4] text-gray-dark`}>{post.body}</p>;
+            }
+            if (post.caption) {
+              return <p className={`${bodyMargin} text-[15px] leading-[1.4] text-gray-dark`}>{post.caption}</p>;
+            }
+            return null;
+          })()}
           <div className={post.type !== "text" ? "pb-1" : ""} onClick={e => e.stopPropagation()}>
             {post.type === "image" && (
               <ImageGallery

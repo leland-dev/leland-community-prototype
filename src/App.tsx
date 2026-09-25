@@ -67,6 +67,7 @@ import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
 import Messaging from "./pages/Messaging";
 import AnswerQuestions from "./pages/AnswerQuestions";
+import PostVariants from "./pages/PostVariants";
 import ConversationDetail from "./pages/ConversationDetail";
 import { CaptureDashboard, CaptureInbox, LelandThread } from "./components/promo/AppPromo";
 import ConversationRelationship from "./pages/ConversationRelationship";
@@ -278,6 +279,7 @@ export default function App() {
           <Route path="/groups/law" element={<GroupCommunity />} />
           <Route path="/" element={<Home />} />
           <Route path="/questions" element={<AnswerQuestions />} />
+          <Route path="/post-variants" element={<PostVariants />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />

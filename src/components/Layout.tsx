@@ -130,7 +130,7 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   // surfaces.
   const isHomeFeed = pathname === "/" || pathname === "/alt-nav";
   const isPostDetailPage = isPostDetail || pathname.startsWith("/alt-nav/post/");
-  const beigePageBg = (isHomeFeed || isPostDetailPage) && !isEmbed && !darkMode;
+  const beigePageBg = (isHomeFeed || isPostDetailPage || pathname === "/post-variants") && !isEmbed && !darkMode;
 
   // Keep height/overflow constrained while the close animation plays out,
   // so the content doesn't snap to full height mid-transition.
@@ -224,8 +224,8 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
           Important: no transform when closed so fixed children (nav bars)
           remain viewport-fixed. */}
       <div
-        className={`relative z-10 min-h-full transition-all duration-[300ms] ease-in-out ${
-          beigePageBg ? "bg-[#F3F1E6]/50" : "bg-white"
+        className={`relative z-10 transition-all duration-[300ms] ease-in-out ${
+          beigePageBg ? "min-h-screen bg-[#F3F1E6]/50" : "min-h-full bg-white"
         } ${sidebarOpen ? "rounded-[12px] shadow-2xl" : ""}`}
         style={{
           ...(sidebarOpen ? { transform: `translateX(${SIDEBAR_WIDTH}px) scale(0.92)`, transformOrigin: "right center" } : undefined),
