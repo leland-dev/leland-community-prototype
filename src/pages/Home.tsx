@@ -16,7 +16,7 @@ import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
-import DashboardProfileCard from "../components/DashboardProfileCard";
+import FeedProfileCard from "../components/FeedProfileCard";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
 import SessionCard from "../components/SessionCard";
@@ -41,6 +41,11 @@ import lelandCompass from "../assets/leland-compass.svg";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
+import categoryIB from "../assets/placeholder images/category images/investment-banking.png";
+import categoryConsulting from "../assets/placeholder images/category images/management-consulting.png";
+import categoryPM from "../assets/placeholder images/category images/product-management.png";
+import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
+import lelandMark from "../assets/leland-mark.svg";
 
 // Organisation logos
 import orgWharton   from "../assets/org-logos/wharton.png";
@@ -68,7 +73,10 @@ import commentsIcon from "../assets/icons/comments.svg";
 import sharesIcon from "../assets/icons/shares.svg";
 import verifiedIcon from "../assets/icons/verified.svg";
 import ComposerMediaButton from "../components/ComposerMediaButton";
-import { useFeedAdmin } from "../contexts/FeedAdminContext";
+import { useFeedAdmin, type VerifiedBadgePosition, type SidebarVersion } from "../contexts/FeedAdminContext";
+import AdminToggle from "../components/AdminToggle";
+import { AdminSelect } from "./ProfileAdminMenu";
+import FeaturedQuestions, { type FeaturedQuestion } from "../components/FeaturedQuestions";
 import composerImageIcon from "../assets/icons/image.svg";
 import composerCameraIcon from "../assets/icons/camera.svg";
 import composerVideoIcon from "../assets/icons/video-icon.svg";
@@ -1572,7 +1580,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, topic, isGroupP
   useLockBodyScroll(menuOpen && isMobile);
 
   const { mode: profileBarMode } = useProfileBarMode();
-  const { verifiedBadgePosition } = useFeedAdmin();
+  const { verifiedBadgePosition, topics: topicsEnabled } = useFeedAdmin();
   // The title/description line the older profile-bar versions surface.
   const displayHeadline = groupPoster?.headline ?? headline;
   // Mode 3 demonstrates an older post: show an absolute date instead of a
@@ -1657,8 +1665,9 @@ function PostHeaderRow({ author, time, verified, headline, feed, topic, isGroupP
             <VerifiedBadge className="h-5 w-5 shrink-0" />
           ) : null}
           {/* Topic — inline between the poster and the timestamp, chevron-separated
-              (mirrors the "poster › topic · time" reference treatment). */}
-          {postTopic && (
+              (mirrors the "poster › topic · time" reference treatment). Hidden
+              unless the Topics admin toggle is on. */}
+          {postTopic && topicsEnabled && (
             <>
               <svg className="shrink-0 text-gray-xlight" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
               <Link
@@ -4245,9 +4254,14 @@ export const FEEDS = [
   { id: "ai-bp-apr-26", label: "AI BP April 26" },
 ];
 
-export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string, images: ImageEntry[]) => void; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; editPost?: Post; quotePost?: Post; onGoLive?: () => void; isMVP?: boolean }) {
+export type AnswerQuestionContext = { asker: string; avatar: string; time: string; question: string };
+
+export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, answerQuestion, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string, images: ImageEntry[]) => void; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; editPost?: Post; quotePost?: Post; answerQuestion?: AnswerQuestionContext; onGoLive?: () => void; isMVP?: boolean }) {
   const isEditing = editPost != null;
   const isQuoting = quotePost != null;
+  const isAnswering = answerQuestion != null;
+  // Both quoting and answering render a referenced card under the compose area.
+  const hasReference = isQuoting || isAnswering;
   const isMobileModal = useIsMobile();
   useLockBodyScroll(true);
 
@@ -4719,7 +4733,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, o
             {/* Compose area. In quote mode the composer sizes to its content so
                 the quoted preview sits directly under the comment instead of
                 being pushed to the bottom of the sheet by a full-height field. */}
-            <div className={`${isMobileModal ? (isQuoting ? "flex gap-3 px-4 pt-4" : "flex-1 min-h-0 flex gap-3 px-4 pt-4") : "px-4 pt-4 pb-3 pr-14"}`}>
+            <div className={`${isMobileModal ? (hasReference ? "flex gap-3 px-4 pt-4" : "flex-1 min-h-0 flex gap-3 px-4 pt-4") : "px-4 pt-4 pb-3 pr-14"}`}>
               {isMobileModal && (
                 <img src={profilePhoto} alt="Your profile" className="h-10 w-10 shrink-0 rounded-full object-cover" />
               )}
@@ -4783,18 +4797,19 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, o
                 {text === "" && (
                   <span
                     className={`pointer-events-none absolute text-[15px] text-gray-light leading-relaxed transition-opacity duration-200 ${isMobileModal ? "left-0" : "left-[52px]"}`}
-                    style={{ opacity: placeholderVisible ? 1 : 0, top: 7 }}
+                    style={{ opacity: isAnswering ? 1 : placeholderVisible ? 1 : 0, top: 7 }}
                   >
-                    {composerPrompts[placeholderIdx]}
+                    {isAnswering ? "Write your answer…" : composerPrompts[placeholderIdx]}
                   </span>
                 )}
-                <textarea ref={textareaRef} autoFocus value={text} onChange={autoGrow} rows={isQuoting ? 3 : 4}
-                  className={`w-full resize-none bg-transparent text-[15px] text-gray-dark focus:outline-none leading-relaxed ${isMobileModal && !isQuoting ? "h-full" : ""}`}
+                <textarea ref={textareaRef} autoFocus value={text} onChange={autoGrow} rows={hasReference ? 3 : 4}
+                  className={`w-full resize-none bg-transparent text-[15px] text-gray-dark focus:outline-none leading-relaxed ${isMobileModal && !hasReference ? "h-full" : ""}`}
                   style={isMobileModal ? { padding: 0, paddingTop: 7, minHeight: 0 } : { minHeight: "180px", padding: 0, paddingTop: 7 }} />
               </div>
             </div>
 
-            {/* Quoted post preview — shown when reposting with thoughts. */}
+            {/* Referenced card — the quoted post (repost with thoughts) or the
+                question being answered. */}
             {isQuoting && (
               <div className="px-4 pb-3">
                 <QuotedPostCard
@@ -4806,6 +4821,19 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, o
                     verified: quotePost.verified,
                     body: quotePost.body,
                     image: quotePost.type === "image" ? quotePost.images[0] : undefined,
+                  }}
+                />
+              </div>
+            )}
+            {isAnswering && (
+              <div className="px-4 pb-3">
+                <QuotedPostCard
+                  quoted={{
+                    id: -1,
+                    author: answerQuestion.asker,
+                    avatar: answerQuestion.avatar,
+                    time: answerQuestion.time,
+                    body: answerQuestion.question,
                   }}
                 />
               </div>
@@ -5204,9 +5232,38 @@ function PopularExperts() {
   );
 }
 
+// Facepile + expert count subtitle for the "Find expert help" category cards.
+function CategoryExpertsSubtitle({ photos, experts }: { photos: string[]; experts: string }) {
+  return (
+    <span className="inline-flex items-center gap-[6px] align-middle">
+      <span className="inline-flex">
+        {photos.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt=""
+            className="inline-block h-[14px] w-[14px] shrink-0 rounded-full border border-white object-cover"
+            style={{ marginLeft: i === 0 ? 0 : "-3px" }}
+          />
+        ))}
+      </span>
+      {experts}
+    </span>
+  );
+}
+
+// Categories shown in the "Find expert help" sidebar card (topics toggle off).
+const FIND_EXPERT_CATEGORIES = [
+  { title: "Investment Banking", image: categoryIB, experts: "234 experts", photos: [pic1, pic4, pic5] },
+  { title: "Management Consulting", image: categoryConsulting, experts: "312 experts", photos: [pic6, pic7, pic8] },
+  { title: "Product Management", image: categoryPM, experts: "198 experts", photos: [pic3, pic1, pic6] },
+  { title: "AI Automation & Agents", image: categoryAI, experts: "300 experts", photos: [pic8, pic5, pic7] },
+];
+
 export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = {}) {
   // Opt-in via the showUpcoming prop; off by default.
   const upcoming = showUpcoming ?? false;
+  const { topics } = useFeedAdmin();
   return (
     <div className="flex flex-col gap-[14px]">
       {/* Upcoming sessions */}
@@ -5241,35 +5298,66 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
         />
       </SidebarSectionCard>
 
-      {/* Trending topics */}
-      <SidebarSectionCard title="Trending topics" to="/topic/mba-r1-admissions" bleed={false}>
-        {TOPICS.map(topic => (
-          <SidebarCard
-            key={topic.slug}
-            variant="topic"
-            align="top"
-            to={`/topic/${topic.slug}`}
-            icon={<img src={topicHash} alt="" className="h-[20px] w-[20px] shrink-0" />}
-            title={topic.name}
-            subtitle={`${topic.postsToday} posts today`}
-          />
-        ))}
-      </SidebarSectionCard>
+      {/* Topics on: Trending topics. Off (default): Find expert help. */}
+      {topics ? (
+        <SidebarSectionCard title="Trending topics" to="/topic/mba-r1-admissions" bleed={false}>
+          {TOPICS.map(topic => (
+            <SidebarCard
+              key={topic.slug}
+              variant="topic"
+              align="top"
+              to={`/topic/${topic.slug}`}
+              icon={<img src={topicHash} alt="" className="h-[20px] w-[20px] shrink-0" />}
+              title={topic.name}
+              subtitle={`${topic.postsToday} posts today`}
+            />
+          ))}
+        </SidebarSectionCard>
+      ) : (
+        <SidebarSectionCard title="Find expert help" bleed={false}>
+          {FIND_EXPERT_CATEGORIES.slice(0, 3).map(c => (
+            <SidebarCard
+              key={c.title}
+              variant="category"
+              to="/browse"
+              image={c.image}
+              title={c.title}
+              subtitle={<CategoryExpertsSubtitle photos={c.photos} experts={c.experts} />}
+            />
+          ))}
+        </SidebarSectionCard>
+      )}
 
       {/* Popular experts */}
       <PopularExperts />
 
-      {/* Footer links — inline directly below the last card */}
-      <div className="px-2 pt-1">
+      {/* Footer links — centered, directly below the last card */}
+      <div className="px-2 pt-1 text-center">
         <p className="text-[12px] leading-[1.7] text-gray-extra-light">
-          {["About", "Help", "Careers", "Blog", "Coaches", "Privacy", "Terms"].map((l, i) => (
+          {["Support", "Reviews", "Careers", "Become an Expert", "For Organizations", "Privacy"].map((l, i) => (
             <Fragment key={l}>
               {i > 0 && " · "}
               <a href="#" className="transition-opacity hover:opacity-70">{l}</a>
             </Fragment>
           ))}
         </p>
-        <p className="mt-3 text-[12px] text-gray-extra-light">© 2026 Leland</p>
+        <div className="mt-3 flex items-center justify-center gap-1.5">
+          <span
+            aria-hidden
+            className="h-[15px] w-[15px] bg-[#8F8C7E]"
+            style={{
+              maskImage: `url("${lelandMark}")`,
+              WebkitMaskImage: `url("${lelandMark}")`,
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              maskRepeat: "no-repeat",
+              WebkitMaskRepeat: "no-repeat",
+              maskPosition: "center",
+              WebkitMaskPosition: "center",
+            }}
+          />
+          <span className="text-[12px] text-gray-extra-light">© 2026 Leland</span>
+        </div>
       </div>
     </div>
   );
@@ -5325,8 +5413,8 @@ function HomeSidebarV1() {
   const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-[14px]">
-      {/* Profile card — the dashboard's profile summary, in its non-expert form */}
-      <DashboardProfileCard expert={false} hideEdit />
+      {/* Profile card — public-profile-style header with prioritized metrics */}
+      <FeedProfileCard />
 
       {/* Next session + calendar link */}
       <div className="rounded-[12px] border border-[#222222]/[0.12] bg-white">
@@ -5377,7 +5465,7 @@ function HomeSidebarV2() {
   return (
     <div className="flex flex-col gap-[14px]">
       {/* 1. Profile card */}
-      <DashboardProfileCard expert={false} compact hideEdit />
+      <FeedProfileCard />
 
       {/* 2. Upcoming sessions — preview up to 2 */}
       <SidebarSectionCard title="Upcoming sessions" to={sessionsTo} bleed>
@@ -5451,66 +5539,62 @@ const composerPrompts = [
 // ─── Page ─────────────────────────────────────────────
 
 // Prototype-only admin menu — a 3-dot button pinned to the bottom-right that
-// toggles preview states to show the team (starting with the verified-badge
-// position).
+// toggles preview states to show the team. Uses the same chrome + controls as
+// the My Leland profile admin menu (ProfileAdminMenu).
 function FeedAdminMenu() {
   const [open, setOpen] = useState(false);
-  const { verifiedBadgePosition, setVerifiedBadgePosition, sidebarVersion, setSidebarVersion } = useFeedAdmin();
-  const segBtn = (value: "avatar" | "name", label: string) => (
-    <button
-      onClick={() => setVerifiedBadgePosition(value)}
-      className={`flex-1 rounded-md px-2 py-1 text-[12px] font-medium transition-colors ${
-        verifiedBadgePosition === value ? "bg-white text-gray-dark shadow-sm" : "text-gray-light hover:text-gray-dark"
-      }`}
-    >
-      {label}
-    </button>
-  );
-  const sidebarBtn = (value: "v1" | "v2" | "v3", label: string) => (
-    <button
-      onClick={() => setSidebarVersion(value)}
-      className={`flex-1 rounded-md px-2 py-1 text-[12px] font-medium transition-colors ${
-        sidebarVersion === value ? "bg-white text-gray-dark shadow-sm" : "text-gray-light hover:text-gray-dark"
-      }`}
-    >
-      {label}
-    </button>
-  );
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { verifiedBadgePosition, setVerifiedBadgePosition, sidebarVersion, setSidebarVersion, featuredQuestions, setFeaturedQuestions, topics, setTopics } = useFeedAdmin();
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open]);
+
   return (
-    <div className="fixed bottom-4 right-4 z-40">
-      {open && (
-        <>
-          <div className="fixed inset-0" onClick={() => setOpen(false)} />
-          <div className="absolute bottom-full right-0 z-10 mb-2 w-60 rounded-xl border border-gray-stroke bg-white p-1 shadow-lg">
-            <p className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-light">Admin</p>
-            <div className="px-3 py-2">
-              <p className="text-[14px] font-medium text-gray-dark">Verified badge</p>
-              <div className="mt-1.5 flex rounded-lg bg-gray-100 p-0.5">
-                {segBtn("avatar", "On photo")}
-                {segBtn("name", "By name")}
-              </div>
-            </div>
-            <div className="px-3 py-2">
-              <p className="text-[14px] font-medium text-gray-dark">Left sidebar</p>
-              <div className="mt-1.5 flex rounded-lg bg-gray-100 p-0.5">
-                {sidebarBtn("v1", "V1")}
-                {sidebarBtn("v2", "V2")}
-                {sidebarBtn("v3", "V3")}
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+    <div
+      ref={menuRef}
+      className="fixed bottom-[calc(max(env(safe-area-inset-bottom),20px)+72px)] right-4 z-40 md:bottom-6 md:right-6"
+    >
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 4 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 4 }}
+            transition={{ duration: 0.15 }}
+            className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+          >
+            <AdminSelect
+              label="Verified badge"
+              value={verifiedBadgePosition}
+              onChange={(v) => setVerifiedBadgePosition(v as VerifiedBadgePosition)}
+              options={[{ value: "avatar", label: "On photo" }, { value: "name", label: "By name" }]}
+            />
+            <AdminSelect
+              label="Left sidebar"
+              value={sidebarVersion}
+              cols={3}
+              onChange={(v) => setSidebarVersion(v as SidebarVersion)}
+              options={[{ value: "v1", label: "V1" }, { value: "v2", label: "V2" }, { value: "v3", label: "V3" }]}
+            />
+            <AdminToggle label="Featured questions" checked={featuredQuestions} onChange={() => setFeaturedQuestions(!featuredQuestions)} />
+            <AdminToggle label="Topics" checked={topics} onChange={() => setTopics(!topics)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
       <button
-        type="button"
-        aria-label="Admin menu"
-        onClick={() => setOpen(o => !o)}
-        className={`flex h-10 w-10 items-center justify-center rounded-full border border-gray-stroke bg-white shadow-lg transition-colors ${open ? "text-gray-dark" : "text-gray-light hover:text-gray-dark"}`}
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Admin controls"
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-colors hover:bg-[#B1B1B1]/30"
       >
-        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-          <circle cx="5" cy="12" r="1.6" />
-          <circle cx="12" cy="12" r="1.6" />
-          <circle cx="19" cy="12" r="1.6" />
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="3" cy="8" r="1.5" fill="#222222" />
+          <circle cx="8" cy="8" r="1.5" fill="#222222" />
+          <circle cx="13" cy="8" r="1.5" fill="#222222" />
         </svg>
       </button>
     </div>
@@ -5538,10 +5622,13 @@ export default function Home() {
   // The post the user is quoting ("repost with your thoughts"); drives the
   // quote composer modal.
   const [quoteTarget, setQuoteTarget] = useState<Post | null>(null);
+  // The featured question being answered — drives the answer composer modal.
+  const [answerTarget, setAnswerTarget] = useState<FeaturedQuestion | null>(null);
   // When the full-width save toast is up, lift the FAB above it so the toast's
   // dismiss (X) stays tappable.
   const { active: savedToastActive } = useSavedToast();
   const { dark: darkMode } = useDarkMode();
+  const { featuredQuestions } = useFeedAdmin();
 
   useEffect(() => {
     const onScroll = () => {
@@ -5806,6 +5893,9 @@ export default function Home() {
 
       {/* Feed */}
       <div className="divide-y divide-gray-stroke">
+        {/* Featured questions — embedded feed section below the composer
+            (toggleable via the feed admin menu). */}
+        {featuredQuestions && <FeaturedQuestions onAnswer={setAnswerTarget} />}
         {feedPosts.map((post, i) => (
           <Fragment key={post.id}>
             <div className={`px-4 sm:px-6 ${POST_HOVER_SHADOW}`}>
@@ -5874,6 +5964,14 @@ export default function Home() {
         document.body
       )}
       {quoteTarget ? <ComposeModal quotePost={quoteTarget} onClose={() => setQuoteTarget(null)} onPost={handleQuotePost} isMVP={version === "A"} /> : null}
+      {answerTarget ? (
+        <ComposeModal
+          answerQuestion={{ asker: answerTarget.asker, avatar: answerTarget.avatar, time: answerTarget.time, question: answerTarget.question }}
+          onClose={() => setAnswerTarget(null)}
+          onPost={() => {}}
+          isMVP={version === "A"}
+        />
+      ) : null}
       {goLiveOpen ? <GoLiveModal onClose={() => setGoLiveOpen(false)} /> : null}
     </div>
   );

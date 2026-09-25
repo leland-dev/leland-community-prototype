@@ -66,6 +66,7 @@ import Browse from "./pages/Browse";
 import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
 import Messaging from "./pages/Messaging";
+import AnswerQuestions from "./pages/AnswerQuestions";
 import ConversationDetail from "./pages/ConversationDetail";
 import { CaptureDashboard, CaptureInbox, LelandThread } from "./components/promo/AppPromo";
 import ConversationRelationship from "./pages/ConversationRelationship";
@@ -276,6 +277,7 @@ export default function App() {
         <Route element={<ContextLayout />}>
           <Route path="/groups/law" element={<GroupCommunity />} />
           <Route path="/" element={<Home />} />
+          <Route path="/questions" element={<AnswerQuestions />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -293,6 +295,7 @@ export default function App() {
           {/* Isolated LinkedIn-nav experience — feed, post detail, and the
               destinations behind the top-nav items. */}
           <Route path="/alt-nav" element={<Home />} />
+          <Route path="/alt-nav/questions" element={<AnswerQuestions />} />
           <Route path="/alt-nav/post/:postId" element={<PostDetail />} />
           <Route path="/alt-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
           <Route path="/alt-nav/dashboard" element={<Dashboard />} />

@@ -125,8 +125,12 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   // Soft beige page bg (50% of the brand beige) so the white feed/cards read as
   // distinct surfaces rather than blending into a white page. Scoped to the
   // isolated /alt-nav experience. Embed / dark mode keep their own bg.
-  const onLinkedInPath = pathname === "/alt-nav" || pathname.startsWith("/alt-nav/") || pathname.startsWith("/my-leland");
-  const linkedinPageBg = onLinkedInPath && !isEmbed && !darkMode;
+  // The "For you" home feed and the post detail page get the same soft beige
+  // page bg as the My Leland dashboard, so the white cards read as distinct
+  // surfaces.
+  const isHomeFeed = pathname === "/" || pathname === "/alt-nav";
+  const isPostDetailPage = isPostDetail || pathname.startsWith("/alt-nav/post/");
+  const beigePageBg = (isHomeFeed || isPostDetailPage) && !isEmbed && !darkMode;
 
   // Keep height/overflow constrained while the close animation plays out,
   // so the content doesn't snap to full height mid-transition.
@@ -221,7 +225,7 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
           remain viewport-fixed. */}
       <div
         className={`relative z-10 min-h-full transition-all duration-[300ms] ease-in-out ${
-          linkedinPageBg ? "bg-white" : "bg-white"
+          beigePageBg ? "bg-[#F3F1E6]/50" : "bg-white"
         } ${sidebarOpen ? "rounded-[12px] shadow-2xl" : ""}`}
         style={{
           ...(sidebarOpen ? { transform: `translateX(${SIDEBAR_WIDTH}px) scale(0.92)`, transformOrigin: "right center" } : undefined),

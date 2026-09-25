@@ -885,7 +885,7 @@ export default function Dashboard({ shell = false, expert: expertInit = false }:
       {!new URLSearchParams(window.location.search).has("mini") && (
       <div
         ref={adminRef}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-40 md:bottom-6 md:right-6"
+        className="fixed bottom-[calc(max(env(safe-area-inset-bottom),20px)+72px)] right-4 z-40 md:bottom-6 md:right-6"
       >
         <AnimatePresence>
           {adminOpen && (
@@ -918,7 +918,7 @@ export default function Dashboard({ shell = false, expert: expertInit = false }:
         <button
           onClick={() => setAdminOpen((o) => !o)}
           aria-label="Admin controls"
-          className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-opacity ${adminOpen ? "opacity-100" : "opacity-20 hover:opacity-100"}`}
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-colors hover:bg-[#B1B1B1]/30"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <circle cx="3" cy="8" r="1.5" fill="#222222" />
