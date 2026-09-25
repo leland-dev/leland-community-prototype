@@ -12,6 +12,7 @@ import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { FADE_TRANSITION, FADE_IN, FADE_OUT } from "../lib/pushTransition";
 import { posts, type Post, FeedPost, FeedLikeButton, FeedRepostButton, FeedBookmarkButton, ShareDropdown, HomeRightSidebar, HomeSidebar, PollCard, usePostBase, POST_HOVER_SHADOW, VerifiedBadge, formatViews, postViewCount } from "./Home";
 import { Button } from "../components/Button";
+import { QuestionCard } from "../components/FeaturedQuestions";
 import ImageLightbox from "../components/ImageLightbox";
 import ComposerMediaButton from "../components/ComposerMediaButton";
 import composerImageIcon from "../assets/icons/image.svg";
@@ -289,6 +290,20 @@ function AuthorRow({ post, featured = false }: { post: Post; featured?: boolean 
 }
 
 function PostMedia({ post, onImageClick }: { post: Post; onImageClick?: (idx: number) => void }) {
+  const navigate = useNavigate();
+  const postBase = usePostBase();
+
+  if (post.type === "answer") {
+    return (
+      <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+        <QuestionCard
+          q={post.question}
+          onAnswer={() => navigate(`${postBase.replace(/\/post$/, "/question")}/${post.question.id}`)}
+        />
+      </div>
+    );
+  }
+
   if (post.type === "image") {
     const imgs = post.images;
     if (imgs.length === 1) {

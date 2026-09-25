@@ -20,7 +20,7 @@ import pic13 from "../assets/profile photos/pic-13.png";
 import pic14 from "../assets/profile photos/pic-14.png";
 
 // The full set of answerable questions shown in the "See all" grid.
-const ALL_QUESTIONS: FeaturedQuestion[] = [
+export const ALL_QUESTIONS: FeaturedQuestion[] = [
   { id: "aq1", asker: "Marcus W.", avatar: pic2, time: "2d", answered: 8, question: "How do I frame a career pivot from engineering to product in my MBA essays without sounding unfocused?" },
   { id: "aq2", asker: "Priya S.", avatar: pic4, time: "5h", answered: 12, question: "What's the best way to answer “why this bank” in a superday when I don't have a networking contact there?" },
   { id: "aq3", asker: "David C.", avatar: pic9, time: "1d", answered: 5, question: "For an APM interview, how much system design should I actually expect versus product sense?" },

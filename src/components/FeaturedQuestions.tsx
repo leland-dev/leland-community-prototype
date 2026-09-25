@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "motion/react";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic2 from "../assets/profile photos/pic-2.png";
 import pic3 from "../assets/profile photos/pic-3.png";
@@ -77,6 +78,10 @@ export const QUESTIONS: FeaturedQuestion[] = [
   },
 ];
 
+// Soft slate tint so the cards read as distinct cards rather than one white
+// block. (Dark-mode equivalent lives in index.css.)
+const QUESTION_TINT = "bg-[#EEF2F4]";
+
 export function QuestionCard({
   q,
   onAnswer,
@@ -93,7 +98,7 @@ export function QuestionCard({
     // The whole card opens the answer composer (no explicit button).
     <div
       onClick={onAnswer}
-      className="relative flex h-full w-full cursor-pointer flex-col rounded-2xl border border-gray-stroke bg-white p-4 transition-shadow hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+      className={`relative flex h-full w-full cursor-pointer flex-col rounded-2xl ${QUESTION_TINT} p-4 transition-shadow hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]`}
     >
       {/* Carousel: dismiss "X" at the top-right (matches People to follow). */}
       {!isGrid && onDismiss && (
@@ -110,7 +115,7 @@ export function QuestionCard({
       )}
 
       {/* The question — Season serif, prominent. */}
-      <p className={`line-clamp-4 flex-1 font-serif text-[22px] leading-snug text-gray-dark ${isGrid ? "" : "pr-6"}`}>
+      <p className={`line-clamp-4 flex-1 font-serif text-[20px] leading-snug text-gray-dark ${isGrid ? "" : "pr-6"}`}>
         {q.question}
       </p>
 
@@ -129,6 +134,7 @@ export function QuestionCard({
 
 export default function FeaturedQuestions({ onAnswer }: { onAnswer: (q: FeaturedQuestion) => void }) {
   const [questions, setQuestions] = useState(QUESTIONS);
+  const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   if (questions.length === 0) return null;
@@ -141,29 +147,68 @@ export default function FeaturedQuestions({ onAnswer }: { onAnswer: (q: Featured
     <div className="px-4 py-5 sm:px-6">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[19px] font-semibold leading-tight text-gray-dark">Answer a question</p>
-        <button
-          type="button"
-          onClick={() => navigate(seeAllTo)}
-          className="text-[14px] font-medium text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-opacity hover:opacity-70"
-        >
-          See all
-        </button>
+        <div className="flex items-center gap-2">
+          {/* "See all" is hidden (fades out) while the section is collapsed. */}
+          <AnimatePresence initial={false}>
+            {!collapsed && (
+              <motion.button
+                key="see-all"
+                type="button"
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                onClick={() => navigate(seeAllTo)}
+                className="overflow-hidden whitespace-nowrap text-[14px] font-medium text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px]"
+              >
+                See all
+              </motion.button>
+            )}
+          </AnimatePresence>
+          {/* Chevron toggle collapses/expands the card row. */}
+          <button
+            type="button"
+            onClick={() => setCollapsed((c) => !c)}
+            aria-expanded={!collapsed}
+            aria-label={collapsed ? "Expand section" : "Collapse section"}
+            className="flex h-7 w-7 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform ${collapsed ? "" : "rotate-180"}`}>
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Full-bleed scroll area: negative margins cancel the section padding so
           cards scroll to the section edges; the matching px keeps the first card
-          aligned under the header. */}
-      <div className="scrollbar-hide -mx-4 mt-4 flex gap-3 overflow-x-auto px-4 sm:-mx-6 sm:px-6">
-        {questions.map((q) => (
-          <div key={q.id} className="w-[300px] shrink-0">
-            <QuestionCard
-              q={q}
-              onAnswer={() => onAnswer(q)}
-              onDismiss={() => setQuestions((prev) => prev.filter((x) => x.id !== q.id))}
-            />
-          </div>
-        ))}
-      </div>
+          aligned under the header. The outer motion wrapper is full-bleed +
+          overflow-hidden so the height animation clips vertically while the
+          inner row still bleeds to the section edges and scrolls horizontally. */}
+      <AnimatePresence initial={false}>
+        {!collapsed && (
+          <motion.div
+            key="cards"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
+            className="-mx-4 overflow-hidden sm:-mx-6"
+          >
+            <div className="scrollbar-hide mt-4 flex gap-3 overflow-x-auto px-4 sm:px-6">
+              {questions.map((q) => (
+                <div key={q.id} className="w-[300px] shrink-0">
+                  <QuestionCard
+                    q={q}
+                    onAnswer={() => onAnswer(q)}
+                    onDismiss={() => setQuestions((prev) => prev.filter((x) => x.id !== q.id))}
+                  />
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

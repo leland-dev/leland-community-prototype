@@ -22,6 +22,7 @@ import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
 import SessionCard from "../components/SessionCard";
 import OfferingCard from "../components/OfferingCard";
 import SidebarCard from "../components/SidebarCard";
+import { IconLivestreamSignal } from "../components/leland";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import profileCover from "../assets/img/cover-image-2.png";
 import topicHash from "../assets/img/topic-hash.svg";
@@ -39,6 +40,7 @@ import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
 import eventImageSrc from "../assets/img/EventImage.avif";
 import lelandCompass from "../assets/leland-compass.svg";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
+import liveVideoThumb from "../assets/img/Video-Thumbnail.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
 import categoryIB from "../assets/placeholder images/category images/investment-banking.png";
@@ -76,7 +78,8 @@ import ComposerMediaButton from "../components/ComposerMediaButton";
 import { useFeedAdmin, type VerifiedBadgePosition, type SidebarVersion } from "../contexts/FeedAdminContext";
 import AdminToggle from "../components/AdminToggle";
 import { AdminSelect } from "./ProfileAdminMenu";
-import FeaturedQuestions, { type FeaturedQuestion } from "../components/FeaturedQuestions";
+import FeaturedQuestions, { QuestionCard, type FeaturedQuestion } from "../components/FeaturedQuestions";
+import AnswerCompose from "../components/AnswerCompose";
 import composerImageIcon from "../assets/icons/image.svg";
 import composerCameraIcon from "../assets/icons/camera.svg";
 import composerVideoIcon from "../assets/icons/video-icon.svg";
@@ -314,8 +317,17 @@ interface PollPost extends PostBase {
   };
 }
 
-export type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost | SessionPost | LivePost | QuotePost | ArticlePost | PollPost;
-export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, SessionPost, LivePost, QuotePost, ArticlePost, PollPost };
+// Answer to a featured question — a post by the current user carrying their
+// answer text plus the question they're responding to (rendered as a feed
+// question card beneath the body).
+interface AnswerPost extends PostBase {
+  type: "answer";
+  body: string;
+  question: FeaturedQuestion;
+}
+
+export type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost | SessionPost | LivePost | QuotePost | ArticlePost | PollPost | AnswerPost;
+export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, SessionPost, LivePost, QuotePost, ArticlePost, PollPost, AnswerPost };
 
 // ─── Topics ───────────────────────────────────────────
 // Hashtag-like threads that group posts across the feed. Each has a dedicated
@@ -3989,6 +4001,14 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
                 <QuotedPostCard quoted={post.quoted} />
               </div>
             )}
+            {post.type === "answer" && (
+              <div className="mt-1.5" onClick={(e) => e.stopPropagation()}>
+                <QuestionCard
+                  q={post.question}
+                  onAnswer={() => navigate(`${postBase.replace(/\/post$/, "/question")}/${post.question.id}`)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -5309,9 +5329,10 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
         <SidebarCard
           variant="event"
           live
-          image={eventImg1}
+          image={liveVideoThumb}
           title="MBA Strategy Live"
-          subtitle={<><span className="font-medium text-[#FB5A42]">Live now</span> · 125 registered</>}
+          subtitle={<><span className="inline-flex items-center gap-1 font-semibold text-red"><IconLivestreamSignal className="h-3.5 w-3.5 shrink-0" />Live now</span> · 125 registered</>}
+          rightInline
           right={<Button size="sm" variant="dark" rounded="rounded-full" className="w-fit">Join</Button>}
         />
         <SidebarCard
@@ -5837,6 +5858,31 @@ export default function Home() {
     setFeedPosts(prev => [quote, ...prev]);
   };
 
+  // Answer a featured question: create a new post owned by the current user
+  // carrying their answer text plus the question card they responded to.
+  const handleAnswerPost = (text: string) => {
+    if (!answerTarget) return;
+    const answer: AnswerPost = {
+      id: Date.now(),
+      type: "answer",
+      author: "Jamie Allen",
+      avatar: profilePhoto,
+      time: "just now",
+      verified: true,
+      headline: "Interactive Lead at Airbnb",
+      likes: 0,
+      comments: 0,
+      reposts: 0,
+      shares: 0,
+      body: text,
+      question: answerTarget,
+    };
+    // Register in the global posts array too so the answer's own detail page
+    // (/post/:id) resolves, just like a normal post.
+    posts.unshift(answer);
+    setFeedPosts(prev => [answer, ...prev]);
+  };
+
   if (peopleView) {
     return (
       <div className="-mt-3 md:mt-0">
@@ -5995,11 +6041,10 @@ export default function Home() {
       )}
       {quoteTarget ? <ComposeModal quotePost={quoteTarget} onClose={() => setQuoteTarget(null)} onPost={handleQuotePost} isMVP={version === "A"} /> : null}
       {answerTarget ? (
-        <ComposeModal
-          answerQuestion={{ asker: answerTarget.asker, avatar: answerTarget.avatar, time: answerTarget.time, question: answerTarget.question }}
+        <AnswerCompose
+          question={answerTarget}
           onClose={() => setAnswerTarget(null)}
-          onPost={() => {}}
-          isMVP={version === "A"}
+          onPost={handleAnswerPost}
         />
       ) : null}
       {goLiveOpen ? <GoLiveModal onClose={() => setGoLiveOpen(false)} /> : null}

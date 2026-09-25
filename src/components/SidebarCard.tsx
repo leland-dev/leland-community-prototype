@@ -49,6 +49,8 @@ interface SidebarCardProps {
   /** Optional review row rendered below the subtitle */
   reviews?: { rating: number; count: number };
   right?: ReactNode;
+  /** Place `right` immediately after the text instead of pushed to the far edge */
+  rightInline?: boolean;
   /** Event-only: adds the inset red border on the thumbnail */
   live?: boolean;
   /** Vertical alignment of content relative to the leading element */
@@ -100,18 +102,20 @@ export default function SidebarCard({
   subtitle,
   reviews,
   right,
+  rightInline,
   live,
   align = "center",
   to,
 }: SidebarCardProps) {
-  const className = `group flex cursor-pointer py-[10px] transition-[padding] duration-300 ease-out hover:pl-[4px] ${variant === "topic" ? "gap-2" : "gap-3"} ${align === "top" ? "items-start" : "items-center"}`;
+  const rowClass = `group flex cursor-pointer py-[10px] transition-[padding] duration-300 ease-out hover:pl-[4px] ${variant === "topic" ? "gap-2" : "gap-3"} ${align === "top" ? "items-start" : "items-center"}`;
 
   const content = (
     <>
       <Leading variant={variant} image={image} icon={icon} live={live} />
 
-      {/* Center: title + subtitle */}
-      <div className={`flex min-w-0 flex-1 flex-col gap-[2px]`}>
+      {/* Center: title + subtitle. Non-inline `right` gets pushed to the far
+          edge by flex-1; inline `right` hugs the text instead. */}
+      <div className={`flex min-w-0 flex-col gap-[2px] ${rightInline ? "" : "flex-1"}`}>
         <p className="line-clamp-2 text-[14px] font-semibold leading-[1.2] text-gray-dark group-hover:underline group-hover:decoration-[1px] group-hover:underline-offset-[2px]">{title}</p>
         <p className="truncate text-[12px] font-normal leading-[1.4] text-gray-light">{subtitle}</p>
         {reviews && (
@@ -127,7 +131,7 @@ export default function SidebarCard({
   );
 
   if (to) {
-    return <Link to={to} className={className}>{content}</Link>;
+    return <Link to={to} className={rowClass}>{content}</Link>;
   }
-  return <div className={className}>{content}</div>;
+  return <div className={rowClass}>{content}</div>;
 }

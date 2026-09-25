@@ -86,6 +86,7 @@ import Dashboard from "./pages/Dashboard";
 import { GoalsIndexSwitch, GoalDetailSwitch, GoalNewSwitch } from "./components/GoalsRouteSwitch";
 import FullTaskList from "./full/pages/TaskList";
 import PostDetail, { CommentDetail } from "./pages/PostDetail";
+import QuestionDetail from "./pages/QuestionDetail";
 import ReplyCompose from "./pages/ReplyCompose";
 import ReplayViewer from "./pages/ReplayViewer";
 import AccountSettings from "./pages/AccountSettings";
@@ -292,6 +293,7 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/post/:postId" element={<PostDetail />} />
           <Route path="/post/:postId/comment/:commentId" element={<CommentDetail />} />
+          <Route path="/question/:id" element={<QuestionDetail />} />
           {/* Topic pages — hashtag-like filtered feeds (Trending topics sidebar) */}
           <Route path="/topic/:slug" element={<Topic />} />
           {/* Isolated LinkedIn-nav experience — feed, post detail, and the
@@ -300,6 +302,7 @@ export default function App() {
           <Route path="/alt-nav/questions" element={<AnswerQuestions />} />
           <Route path="/alt-nav/post/:postId" element={<PostDetail />} />
           <Route path="/alt-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
+          <Route path="/alt-nav/question/:id" element={<QuestionDetail />} />
           <Route path="/alt-nav/dashboard" element={<Dashboard />} />
           <Route path="/alt-nav/browse" element={<Browse />} />
           <Route path="/alt-nav/jobs" element={<Jobs />} />

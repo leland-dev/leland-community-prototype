@@ -316,6 +316,9 @@ html.dark .bg-\[\#F5F5F5\],
 html.dark .bg-\[\#F0F0F0\],
 html.dark .bg-\[\#f5f5f5\],
 html.dark .bg-\[\#FAFAFA\] { background-color: #1a1a1a; }
+/* Answer-a-question card tint: a subtly tinted dark so the cards stay distinct
+   on the dark canvas (mirrors the light-mode tint in FeaturedQuestions.tsx). */
+html.dark .bg-\[\#EEF2F4\] { background-color: #16191a; }
 html.dark .text-gray-dark { color: #ededed; }
 /* Faint light-tint pills/outlines (e.g. coach profile Follow / More / Book a
    session) render as invisible near-black in dark mode — give them a clearly
