@@ -127,6 +127,8 @@
   --text-subtext-sm--line-height: 120%;
   --text-subtext-base: 0.875rem;
   --text-subtext-base--line-height: 120%;
+  --text-subtext-md: 0.9375rem;
+  --text-subtext-md--line-height: 120%;
   --text-subtext-lg: 1rem;
   --text-subtext-lg--line-height: 120%;
   --text-subtext-xl: 1.125rem;
@@ -140,6 +142,8 @@
   --text-paragraph-sm--line-height: 150%;
   --text-paragraph-base: 0.875rem;
   --text-paragraph-base--line-height: 150%;
+  --text-paragraph-md: 0.9375rem;
+  --text-paragraph-md--line-height: 150%;
   --text-paragraph-lg: 1rem;
   --text-paragraph-lg--line-height: 150%;
   --text-paragraph-xl: 1.125rem;
@@ -167,6 +171,7 @@
   --shadow-border: 0 0 0 1px;
   --shadow-bottomBorder: inset 0 -2px 0 0;
   --shadow-xs: 0 1px 2px 0 rgba(16, 24, 40, 0.05);
+  --shadow-avatarRing: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   --shadow-nav: 0 1px 4px rgba(0, 0, 0, 0.08);
   --shadow-popover: 0 12px 32px rgba(16, 24, 40, 0.12), 0 2px 8px rgba(16, 24, 40, 0.06);
 }
@@ -217,12 +222,14 @@
 @utility leland-heading-6xl { @apply text-heading-6xl font-medium; }
 @utility leland-subtext-sm { @apply text-subtext-sm font-normal; }
 @utility leland-subtext-base { @apply text-subtext-base font-normal; }
+@utility leland-subtext-md { @apply text-subtext-md font-normal; }
 @utility leland-subtext-lg { @apply text-subtext-lg font-normal; }
 @utility leland-subtext-xl { @apply text-subtext-xl font-normal; }
 @utility leland-subtext-2xl { @apply text-subtext-2xl font-normal; }
 @utility leland-subtext-3xl { @apply text-subtext-3xl font-normal; }
 @utility leland-paragraph-sm { @apply text-paragraph-sm font-normal; }
 @utility leland-paragraph-base { @apply text-paragraph-base font-normal; }
+@utility leland-paragraph-md { @apply text-paragraph-md font-normal; }
 @utility leland-paragraph-lg { @apply text-paragraph-lg font-normal; }
 @utility leland-paragraph-xl { @apply text-paragraph-xl font-normal; }
 @utility leland-eyebrow { @apply text-eyebrow font-medium uppercase; }
