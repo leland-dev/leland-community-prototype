@@ -21,6 +21,12 @@ export enum ModalHeight {
   MEDIUM = "md",
   LARGE = "lg",
   AUTO = "auto",
+  VIEWPORT = "viewport",
+}
+
+export enum ModalSurface {
+  DEFAULT = "default",
+  MEDIA = "media",
 }
 
 const ModalSizeToClass: Record<ModalSize, string> = {
@@ -35,6 +41,17 @@ const ModalHeightToClass: Record<ModalHeight, string> = {
   [ModalHeight.MEDIUM]: "sm:h-[800px]",
   [ModalHeight.LARGE]: "sm:h-[90%]",
   [ModalHeight.AUTO]: "",
+  [ModalHeight.VIEWPORT]: "sm:h-modal",
+};
+
+const ModalSurfaceToScrimClass: Record<ModalSurface, string> = {
+  [ModalSurface.DEFAULT]: "bg-leland-gray-overlay",
+  [ModalSurface.MEDIA]: "bg-black/75",
+};
+
+const ModalSurfaceToContentClass: Record<ModalSurface, string> = {
+  [ModalSurface.DEFAULT]: "bg-white",
+  [ModalSurface.MEDIA]: "bg-black",
 };
 
 export type ModalProps = RdxDialog.DialogProps &
@@ -73,9 +90,15 @@ export interface ModalContentProps {
    */
   popupOnMobile?: boolean;
   srTitle?: string;
+  surface?: ModalSurface;
   /** Extra classes appended to the modal content root — use `md:!min-w-0` and a tighter `sm:!max-w-*` to override default sizing. */
   className?: string;
 }
+
+const OVERLAY_LAYOUT =
+  "fixed left-0 top-0 flex size-full items-center justify-center";
+
+const OVERLAY_GUTTER = "px-8 py-[5%] z-modal";
 
 export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
   size = ModalSize.MEDIUM,
@@ -88,6 +111,7 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
   preventScroll,
   popupOnMobile,
   srTitle,
+  surface = ModalSurface.DEFAULT,
   className,
 }) => {
   // The overlay already centres and gutters its child, so a popup only needs to
@@ -98,7 +122,7 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
 
   const content = (
     <RdxDialog.Content
-      className={`${mobilePresentationClasses} bg-white sm:relative sm:max-h-modal sm:rounded-2xl md:min-w-[25rem] ${ModalSizeToClass[size]} flex flex-col overflow-hidden ${ModalHeightToClass[height]} z-modal ${className ?? ""}`}
+      className={`${mobilePresentationClasses} ${ModalSurfaceToContentClass[surface]} sm:relative sm:max-h-modal sm:rounded-2xl md:min-w-[25rem] ${ModalSizeToClass[size]} flex flex-col overflow-hidden ${ModalHeightToClass[height]} z-modal ${className ?? ""}`}
       onPointerDownOutside={
         preventCloseOnOverlayClick ? (e) => e.preventDefault() : undefined
       }
@@ -155,7 +179,9 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
   );
   return (
     <RdxDialog.Portal>
-      <RdxDialog.Overlay className="fixed left-0 top-0 flex size-full items-center justify-center bg-leland-gray-overlay px-8 py-[5%] z-modal">
+      <RdxDialog.Overlay
+        className={`${OVERLAY_LAYOUT} ${ModalSurfaceToScrimClass[surface]} ${OVERLAY_GUTTER}`}
+      >
         {content}
       </RdxDialog.Overlay>
     </RdxDialog.Portal>

@@ -20,6 +20,7 @@ import {
   type FC,
   forwardRef,
   Fragment,
+  type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
   type RefObject,
   type SVGProps,
@@ -32,11 +33,70 @@ import {
 } from "react";
 import { Link } from "react-router-dom";
 
-import { IconChevronLeft } from "./svg/icons";
+import { IconChevronLeft, IconSearch } from "./svg/icons";
 import { FontWeight, FontWeightToStyles } from "./util";
+
+function filterMenuItems(items: MenuItemProps[], query: string): MenuItemProps[] {
+  return items.flatMap((item) => {
+    if (item.label.toLowerCase().includes(query)) {
+      return [item];
+    }
+    if (!item.items) {
+      return [];
+    }
+    const matchingChildren = filterMenuSections(item.items, query);
+    return matchingChildren.length > 0
+      ? [{ ...item, items: matchingChildren }]
+      : [];
+  });
+}
+
+function filterMenuSections(
+  sections: MenuItemProps[][],
+  query: string,
+): MenuItemProps[][] {
+  return sections
+    .map((section) => filterMenuItems(section, query))
+    .filter((section) => section.length > 0);
+}
+
+function useMenuSearch(
+  sections: MenuItemProps[][],
+  enabled: boolean,
+): {
+  query: string;
+  onQueryChange: (value: string) => void;
+  resetQuery: () => void;
+  sections: MenuItemProps[][];
+  hasQuery: boolean;
+} {
+  const [query, setQuery] = useState('');
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const hasQuery = enabled && normalizedQuery !== '';
+
+  const filteredSections = useMemo(
+    () => (hasQuery ? filterMenuSections(sections, normalizedQuery) : sections),
+    [sections, hasQuery, normalizedQuery],
+  );
+
+  const resetQuery = useCallback(() => setQuery(''), []);
+
+  return {
+    query,
+    onQueryChange: setQuery,
+    resetQuery,
+    sections: filteredSections,
+    hasQuery,
+  };
+}
+
+export type MenuItemLeftIconSize = 'default' | 'large';
 
 export type MenuItemProps = {
   label: string;
+  description?: string;
+  leftIconSize?: MenuItemLeftIconSize;
   CustomLeftIcon?: FC<{ iconClassName?: string }>;
   LeftIcon?: FC<SVGProps<SVGSVGElement>>;
   CustomRightIcon?: FC<{ iconClassName?: string }>;
@@ -60,6 +120,7 @@ type MenuItemWithoutItems = {
     }
   | {
       url: string;
+      onSelect?: (e: Event | SyntheticEvent) => void;
     }
 );
 
@@ -82,6 +143,8 @@ const MenuItem = forwardRef<HTMLDivElement, InternalMenuItemProps>(
   (
     {
       label,
+      description,
+      leftIconSize = 'default',
       CustomLeftIcon,
       LeftIcon,
       CustomRightIcon,
@@ -103,6 +166,7 @@ const MenuItem = forwardRef<HTMLDivElement, InternalMenuItemProps>(
     ref,
   ) => {
     const iconStyles = "size-5";
+    const leftIconStyles = leftIconSize === 'large' ? 'size-10' : iconStyles;
     const [alignOffset, setAlignOffset] = useState(-8);
     const triggerRef = useRef<HTMLDivElement | null>(null);
     const subRef = useRef<HTMLDivElement | null>(null);
@@ -145,13 +209,22 @@ const MenuItem = forwardRef<HTMLDivElement, InternalMenuItemProps>(
       <>
         <div className="flex min-w-0 items-center gap-x-2.5">
           {CustomLeftIcon ? (
-            <CustomLeftIcon iconClassName={iconStyles} />
+            <CustomLeftIcon iconClassName={leftIconStyles} />
           ) : LeftIcon ? (
-            <LeftIcon className={iconStyles} />
+            <LeftIcon className={leftIconStyles} />
           ) : includeLeftIconPlaceholder ? (
-            <div className={iconStyles} />
+            <div className={leftIconStyles} />
           ) : null}
-          <span>{label}</span>
+          {description ? (
+            <span className="flex min-w-0 flex-col gap-y-0.5 text-left">
+              <span className="truncate">{label}</span>
+              <span className="truncate text-[0.75rem] font-normal text-leland-gray-light">
+                {description}
+              </span>
+            </span>
+          ) : (
+            <span>{label}</span>
+          )}
         </div>
         {CustomRightIcon ? (
           <CustomRightIcon iconClassName={iconStyles} />
@@ -164,7 +237,7 @@ const MenuItem = forwardRef<HTMLDivElement, InternalMenuItemProps>(
     if (!items?.length || pageView) {
       if (url) {
         return (
-          <DropdownMenuItem ref={ref} asChild>
+          <DropdownMenuItem ref={ref} asChild onSelect={onSelect}>
             <Link to={url} className={itemClassName}>
               {menuItem}
             </Link>
@@ -278,11 +351,37 @@ export interface MenuProps {
    * @default false
    */
   hasCustomTriggerRadius?: boolean;
+  searchable?: boolean;
+  searchPlaceholder?: string;
 }
 
-// Approximate rendered height of a MenuItem in pixels — used to compute a
-// scroll cap when maxItems is provided.
 const MENU_ITEM_HEIGHT_PX = 44;
+const TWO_LINE_MENU_ITEM_HEIGHT_PX = 60;
+const MENU_SEPARATOR_HEIGHT_PX = 9;
+
+function menuItemHeightPx(item: MenuItemProps): number {
+  return item.description || item.leftIconSize === 'large'
+    ? TWO_LINE_MENU_ITEM_HEIGHT_PX
+    : MENU_ITEM_HEIGHT_PX;
+}
+
+function visibleHeightPx(
+  sections: MenuItemSection[],
+  maxItems: number,
+): number {
+  let height = 0;
+  let counted = 0;
+  sections.forEach((section, sectionIndex) => {
+    if (counted >= maxItems) return;
+    if (sectionIndex > 0) height += MENU_SEPARATOR_HEIGHT_PX;
+    section.forEach((item) => {
+      if (counted >= maxItems) return;
+      height += menuItemHeightPx(item);
+      counted += 1;
+    });
+  });
+  return height;
+}
 
 export const Menu: FC<MenuProps> = ({
   itemSections: rawItemSections,
@@ -302,13 +401,25 @@ export const Menu: FC<MenuProps> = ({
   maxItems,
   includeLeftIconPlaceholder = null,
   hasCustomTriggerRadius = false,
+  searchable = false,
+  searchPlaceholder = 'Search',
 }) => {
   const itemSections = useMemo(
     () => rawItemSections.filter((section) => section.length > 0),
     [rawItemSections],
   );
 
+  const {
+    query,
+    onQueryChange,
+    resetQuery,
+    sections: searchedSections,
+    hasQuery,
+  } = useMenuSearch(itemSections, searchable);
+
   const parentMenuRef = useRef<HTMLDivElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const itemListRef = useRef<HTMLDivElement>(null);
 
   const { onMouseEnter, open, onOpenChange, containerRef, menuItemRefs } =
     useControlledHoverState({
@@ -316,6 +427,59 @@ export const Menu: FC<MenuProps> = ({
       parentMenuRef,
       onOpenChange: onOpenChangeProp,
     });
+
+  const [isOpenInternally, setIsOpenInternally] = useState(false);
+
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      setIsOpenInternally(nextOpen);
+      onOpenChange?.(nextOpen);
+    },
+    [onOpenChange],
+  );
+
+  const effectiveOpen = controlledOpen ?? open ?? isOpenInternally;
+
+  useEffect(() => {
+    if (!searchable || effectiveOpen) {
+      return;
+    }
+    resetQuery();
+  }, [searchable, effectiveOpen, resetQuery]);
+
+  useEffect(() => {
+    if (!searchable || loading || !effectiveOpen) {
+      return;
+    }
+    const frame = requestAnimationFrame(() => searchInputRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [searchable, loading, effectiveOpen]);
+
+  const focusEdgeItem = useCallback((edge: 'first' | 'last') => {
+    const items = itemListRef.current?.querySelectorAll<HTMLElement>(
+      '[role="menuitem"]:not([data-disabled])',
+    );
+    if (!items || items.length === 0) {
+      return;
+    }
+    const target = edge === 'first' ? items[0] : items[items.length - 1];
+    target?.focus();
+  }, []);
+
+  const handleSearchKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        focusEdgeItem(event.key === 'ArrowDown' ? 'first' : 'last');
+        return;
+      }
+      if (event.key === 'Escape' || event.key === 'Tab') {
+        return;
+      }
+      event.stopPropagation();
+    },
+    [focusEdgeItem],
+  );
 
   const refCallback = (el: HTMLDivElement) => {
     parentMenuRef.current = el;
@@ -335,8 +499,8 @@ export const Menu: FC<MenuProps> = ({
     sections: pageSections,
     onSelect: onSelectPage,
     hasLeftIcons: hasLeftIconsPage,
-  } = usePageSubmenus(itemSections);
-  const sections = subMenusInPageView ? pageSections : itemSections;
+  } = usePageSubmenus(searchedSections);
+  const sections = subMenusInPageView ? pageSections : searchedSections;
 
   const hasLeftIcons =
     includeLeftIconPlaceholder ??
@@ -349,7 +513,7 @@ export const Menu: FC<MenuProps> = ({
   return (
     <DropdownMenuRoot
       open={controlledOpen ?? open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       modal={!fillParentWidth && !openOnHover}
     >
       <DropdownMenuTrigger
@@ -396,12 +560,29 @@ export const Menu: FC<MenuProps> = ({
                   {header}
                 </div>
               ) : null}
+              {searchable ? (
+                <div className="-mx-2 mb-1 flex items-center gap-x-2.5 border-b border-leland-gray-stroke px-4.5 pb-2 pt-1">
+                  <IconSearch className="size-4 shrink-0 text-leland-gray-light" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={query}
+                    aria-label={searchPlaceholder}
+                    placeholder={searchPlaceholder}
+                    className="w-full min-w-0 bg-transparent text-[0.875rem] leading-tight text-leland-gray-dark outline-none placeholder:text-leland-gray-extra-light"
+                    onChange={(event) => onQueryChange(event.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                  />
+                </div>
+              ) : null}
               <div
+                ref={itemListRef}
                 className="overflow-y-auto"
                 style={{
-                  maxHeight: maxItems
-                    ? `${maxItems * MENU_ITEM_HEIGHT_PX}px`
-                    : "var(--radix-dropdown-menu-content-available-height)",
+                  maxHeight:
+                    maxItems && sections.length > 0
+                      ? `${visibleHeightPx(sections, maxItems)}px`
+                      : "var(--radix-dropdown-menu-content-available-height)",
                 }}
               >
                 {sections.map((section, sectionIndex) => (
@@ -426,6 +607,11 @@ export const Menu: FC<MenuProps> = ({
                     ))}
                   </Fragment>
                 ))}
+                {hasQuery && sections.length === 0 ? (
+                  <div className="p-2.5 text-[0.875rem] leading-tight text-leland-gray-light">
+                    No matches
+                  </div>
+                ) : null}
               </div>
             </>
           )}

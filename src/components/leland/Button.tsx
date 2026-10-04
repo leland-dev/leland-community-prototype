@@ -158,7 +158,7 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
         : 'text-leland-gray-dark bg-white disabled:bg-white border-leland-gray-stroke hover:bg-leland-gray-hover shadow-transparent',
     [ButtonColor.SECONDARY_NEUTRAL]: (selected) =>
       selected
-        ? 'text-leland-gray-dark bg-white border-leland-gray-dark shadow-leland-gray-dark'
+        ? 'text-leland-gray-dark bg-leland-gray-hover border-leland-gray-dark shadow-border shadow-leland-gray-dark'
         : 'text-leland-gray-dark bg-leland-gray-hover disabled:bg-leland-gray-hover border-transparent hover:bg-leland-gray-stroke hover:border-transparent',
     // TERTIARY reads as an inline text link (dotted underline) — no hover box.
     [ButtonColor.TERTIARY]: (selected) =>

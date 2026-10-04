@@ -114,6 +114,8 @@
   --text-heading-xl--line-height: 120%;
   --text-heading-2xl: 1.375rem;
   --text-heading-2xl--line-height: 120%;
+  --text-heading-2.5xl: 1.5rem;
+  --text-heading-2.5xl--line-height: 125%;
   --text-heading-3xl: 1.75rem;
   --text-heading-3xl--line-height: 120%;
   --text-heading-4xl: 2.125rem;
@@ -152,20 +154,25 @@
   --text-eyebrow: 0.75rem;
   --text-eyebrow--line-height: 120%;
   --text-eyebrow--letter-spacing: 0.1em;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 125%;
 
   /* ── Aspect ratios ───────────────────────────────────────────────────── */
   --aspect-profile-cover: 7 / 2;
   --aspect-profile-cover-narrow: 3 / 1;
+  --aspect-profile-card-cover: 4 / 1;
 
   /* ── Spacing additions ───────────────────────────────────────────────── */
   --spacing-26: 6.5rem;
   --spacing-50: 50rem;
+  --spacing-feed: 37.5rem;
 
   /* ── Animations ──────────────────────────────────────────────────────── */
   /* Starts one band-width before the leading edge and ends past the trailing
      one so the band never rests anywhere visible. Assumes a w-1/2 band. */
   --animate-shimmer: shimmer 1.6s ease-in-out infinite;
   --animate-waveform: waveform 0.9s ease-in-out infinite;
+  --animate-highlight-fade: highlight-fade 2.5s ease-out;
 
   /* ── Shadows / misc ──────────────────────────────────────────────────── */
   --shadow-border: 0 0 0 1px;
@@ -173,6 +180,7 @@
   --shadow-xs: 0 1px 2px 0 rgba(16, 24, 40, 0.05);
   --shadow-avatarRing: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   --shadow-nav: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --shadow-cardHover: 0 16px 21px 0 rgba(0, 0, 0, 0.07);
   --shadow-popover: 0 12px 32px rgba(16, 24, 40, 0.12), 0 2px 8px rgba(16, 24, 40, 0.06);
 }
 
@@ -194,6 +202,12 @@
   }
 }
 
+@keyframes highlight-fade {
+  0%, 50% {
+    background-color: var(--color-leland-gray-hover);
+  }
+}
+
 @utility outline-1\.5 { outline-width: 1.5px; }
 
 /* ── Production z-index scale (layered surfaces) ───────────────────────── */
@@ -201,7 +215,9 @@
 @utility z-modal { z-index: 1010; }
 /* The tallest a modal card may grow (leaves overlay padding visible). */
 @utility max-h-modal { max-height: 90vh; }
+@utility h-modal { height: 90vh; }
 @utility max-h-document { max-height: 34rem; }
+@utility z-dock { z-index: 990; }
 @utility z-takeoverModal { z-index: 1011; }
 @utility z-dropdown { z-index: 1012; }
 @utility z-toast { z-index: 1013; }
@@ -216,6 +232,7 @@
 @utility leland-heading-lg { @apply text-heading-lg font-medium; }
 @utility leland-heading-xl { @apply text-heading-xl font-medium; }
 @utility leland-heading-2xl { @apply text-heading-2xl font-medium; }
+@utility leland-heading-2\.5xl { @apply text-heading-2\.5xl font-medium; }
 @utility leland-heading-3xl { @apply text-heading-3xl font-medium; }
 @utility leland-heading-4xl { @apply text-heading-4xl font-medium; }
 @utility leland-heading-5xl { @apply text-heading-5xl font-medium; }
