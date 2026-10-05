@@ -131,7 +131,9 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   const isHomeFeed = pathname === "/" || pathname === "/alt-nav";
   const isPostDetailPage = isPostDetail || pathname.startsWith("/alt-nav/post/");
   const isTopicPage = pathname.startsWith("/topic/") || pathname.startsWith("/alt-nav/topic/");
-  const beigePageBg = (isHomeFeed || isPostDetailPage || isTopicPage || pathname === "/post-variants") && !isEmbed && !darkMode;
+  const isHashtagPage = pathname.startsWith("/hashtag/") || pathname.startsWith("/alt-nav/hashtag/");
+  const isQuestionPage = pathname.startsWith("/question/") || pathname.startsWith("/alt-nav/question/");
+  const beigePageBg = (isHomeFeed || isPostDetailPage || isTopicPage || isHashtagPage || isQuestionPage || pathname === "/post-variants") && !isEmbed && !darkMode;
 
   // Keep height/overflow constrained while the close animation plays out,
   // so the content doesn't snap to full height mid-transition.

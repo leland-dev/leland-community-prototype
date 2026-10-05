@@ -62,6 +62,7 @@ function ScrollToTop() {
 
 import Home from "./pages/Home";
 import Topic from "./pages/Topic";
+import Hashtag from "./pages/Hashtag";
 import Browse from "./pages/Browse";
 import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
@@ -296,6 +297,8 @@ export default function App() {
           <Route path="/question/:id" element={<QuestionDetail />} />
           {/* Topic pages — hashtag-like filtered feeds (Trending topics sidebar) */}
           <Route path="/topic/:slug" element={<Topic />} />
+          {/* Hashtag browse pages — all posts tagged with a given hashtag */}
+          <Route path="/hashtag/:slug" element={<Hashtag />} />
           {/* Isolated LinkedIn-nav experience — feed, post detail, and the
               destinations behind the top-nav items. */}
           <Route path="/alt-nav" element={<Home />} />

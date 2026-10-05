@@ -137,6 +137,9 @@ interface PostBase {
   // clickable topic pill at the top of the post and includes it in the topic's
   // filtered feed at /topic/:slug.
   topic?: string;
+  // Free-form hashtags shown below the post body as blue "#Tag" links. Each
+  // links to its hashtag browse page at /hashtag/<slugified-tag>.
+  hashtags?: string[];
   isGroupPost?: boolean;
   groupId?: string;
   groupColor?: string;
@@ -384,6 +387,15 @@ export function topicBySlug(slug: string | undefined): Topic | undefined {
   return TOPICS.find(t => t.slug === slug);
 }
 
+// Turn a display hashtag ("Product Management") into a topic-page slug
+// ("product-management") for its /topic/<slug> link.
+export function hashtagSlug(tag: string): string {
+  return tag
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function shuffle<T>(items: T[]): T[] {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {
@@ -440,6 +452,7 @@ export const posts: Post[] = [
     headline: "APM @ Google · Ex-founder",
     companyLogo: logoGoogle,
     body: "The thing nobody tells you about breaking into PM: your \"case study\" is worth more than your resume. I got three first-round interviews off a 4-page teardown of a product I loved — zero off my polished one-pager. Show them how you think, don't just tell them where you worked.",
+    hashtags: ["Product Management", "Career Growth", "Interview Prep"],
     likes: 156,
     comments: 27,
     reposts: 14,
@@ -461,6 +474,7 @@ export const posts: Post[] = [
       title: "How to Actually Prep for the Product Management Interview Loop",
       image: linkOg2,
     },
+    hashtags: ["Product Management", "Tech Careers"],
     likes: 203,
     comments: 19,
     reposts: 41,
@@ -476,6 +490,7 @@ export const posts: Post[] = [
     verified: false,
     headline: "Product Manager at Figma · Ex-Bain",
     body: "Transitioned from consulting to PM last year and the hardest habit to unlearn was needing to have the answer. In consulting you're paid to be the expert in the room. In product you're paid to find the truth — usually by admitting you don't know yet and running the smallest experiment that will tell you. Took me two quarters to get comfortable saying \"let's test it.\"",
+    hashtags: ["Product Management", "Career Pivot", "Consulting"],
     likes: 118,
     comments: 15,
     reposts: 9,
@@ -491,6 +506,7 @@ export const posts: Post[] = [
     verified: false,
     headline: "1L at Columbia Law",
     body: "Personal statement advice I wish I'd gotten sooner: admissions officers read thousands of \"I want to fight for justice\" essays. They remember the one about the summer you spent translating for your grandmother at the immigration office. Specific beats noble every single time.",
+    hashtags: ["Law School", "Personal Statement", "Admissions"],
     likes: 174,
     comments: 21,
     reposts: 12,
@@ -506,6 +522,7 @@ export const posts: Post[] = [
     verified: true,
     headline: "Pre-law Advisor · Former Admissions, Georgetown Law",
     body: "Reminder for anyone sitting on a scholarship offer: the number in the letter is a starting point, not a verdict. Politely share competing offers, reaffirm your interest, and ask if there's room. I've watched students add five figures to their aid package with one well-written email. The worst they can say is no.",
+    hashtags: ["Law School", "Scholarships", "Financial Aid"],
     likes: 261,
     comments: 33,
     reposts: 28,
@@ -4010,6 +4027,20 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
               </div>
             )}
           </div>
+          {post.hashtags && post.hashtags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1" onClick={e => e.stopPropagation()}>
+              {post.hashtags.map(tag => (
+                <Link
+                  key={tag}
+                  to={`/hashtag/${hashtagSlug(tag)}`}
+                  onClick={e => e.stopPropagation()}
+                  className="text-[14px] font-medium text-leland-blue-dark hover:underline"
+                >
+                  #{tag}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       {/* Full-bleed minimal live: escapes both the avatar column and the
