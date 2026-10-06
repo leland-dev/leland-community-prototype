@@ -495,3 +495,12 @@ input[name="phone"]:-webkit-autofill:focus {
   color: #a3a3a3;
   pointer-events: none;
 }
+
+/* AI Builder onboarding flow — every interactive control signals clickability.
+   Scoped so the rest of the prototype keeps its own conventions. */
+.aibp-flow :is(button, a, [role="button"], label:has(input[type="checkbox"]), input[type="checkbox"]):not(:disabled) {
+  cursor: pointer;
+}
+.aibp-flow button:disabled {
+  cursor: not-allowed;
+}
