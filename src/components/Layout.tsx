@@ -393,6 +393,9 @@ export function ContextLayout() {
       contentMaxWidth={linkedInCentered || centered ? undefined : isHomeFeed || isPostDetail || isTopicPage || linkedInEdge ? 640 : contentMaxWidth}
       // Edge-to-edge pushes the feed + sidebars to the window edges.
       edgeToEdge={classicEdge || linkedInEdge}
+      // Home feeds (/ and /alt-nav): right sidebar scrolls with the page and
+      // pins its own last card, rather than the whole column being sticky.
+      rightSidebarStickyLast={isLinkedInNavFeed || isHomeFeed}
       // Right column: 298px when centered, 356px edge-to-edge / post / topic.
       sidebarWidth={linkedInCentered || centered ? 298 : isHomeFeed || isPostDetail || isTopicPage || linkedInEdge ? 356 : undefined}
       // Left column matches the right at 298px when centered.

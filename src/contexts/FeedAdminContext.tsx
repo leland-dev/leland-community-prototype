@@ -25,6 +25,10 @@ interface FeedAdminContextValue {
   // swapped for a "Find expert help" categories card.
   topics: boolean;
   setTopics: (v: boolean) => void;
+  // "No goal" — simulates a user we have no goal/category data for. When on
+  // (off by default), a first-goal onboarding card shows atop the right sidebar.
+  noGoal: boolean;
+  setNoGoal: (v: boolean) => void;
 }
 
 const FeedAdminContext = createContext<FeedAdminContextValue>({
@@ -36,12 +40,15 @@ const FeedAdminContext = createContext<FeedAdminContextValue>({
   setFeaturedQuestions: () => {},
   topics: false,
   setTopics: () => {},
+  noGoal: false,
+  setNoGoal: () => {},
 });
 
 const STORAGE_KEY = "feed-verified-badge-position";
 const SIDEBAR_KEY = "feed-sidebar-version";
 const FEATURED_QUESTIONS_KEY = "feed-featured-questions";
 const TOPICS_KEY = "feed-topics";
+const NO_GOAL_KEY = "feed-no-goal";
 
 export function FeedAdminProvider({ children }: { children: ReactNode }) {
   const [verifiedBadgePosition, setPos] = useState<VerifiedBadgePosition>(() =>
@@ -75,8 +82,16 @@ export function FeedAdminProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(TOPICS_KEY, v ? "1" : "0");
     setTopicsState(v);
   };
+  const [noGoal, setNoGoalState] = useState<boolean>(() => {
+    // Off by default; only an explicit "1" shows the first-goal card.
+    return localStorage.getItem(NO_GOAL_KEY) === "1";
+  });
+  const setNoGoal = (v: boolean) => {
+    localStorage.setItem(NO_GOAL_KEY, v ? "1" : "0");
+    setNoGoalState(v);
+  };
   return (
-    <FeedAdminContext.Provider value={{ verifiedBadgePosition, setVerifiedBadgePosition, sidebarVersion, setSidebarVersion, featuredQuestions, setFeaturedQuestions, topics, setTopics }}>
+    <FeedAdminContext.Provider value={{ verifiedBadgePosition, setVerifiedBadgePosition, sidebarVersion, setSidebarVersion, featuredQuestions, setFeaturedQuestions, topics, setTopics, noGoal, setNoGoal }}>
       {children}
     </FeedAdminContext.Provider>
   );

@@ -26,6 +26,10 @@ type PageShellProps = {
   // When true, the right sidebar stacks below main content at narrow viewports
   // instead of being hidden.
   stackRight?: boolean;
+  // When true, the right sidebar is NOT sticky — it scrolls with the page and
+  // stretches to the full row height, so the sidebar content can pin its own
+  // last card via position:sticky. (The left sidebar keeps its sticky behavior.)
+  rightSidebarStickyLast?: boolean;
   // Override the outer vertical padding classes (defaults to "py-4 sm:py-10").
   paddingYClassName?: string;
   // Override the outer horizontal padding classes (defaults to "px-4 sm:px-6").
@@ -49,6 +53,7 @@ export default function PageShell({
   leftSidebarTop,
   leftSidebarFixed = false,
   stackRight = false,
+  rightSidebarStickyLast = false,
   paddingYClassName = "py-4 sm:py-10",
   paddingXClassName = "px-4 sm:px-6",
   columnGap = 40,
@@ -89,8 +94,14 @@ export default function PageShell({
     : "hidden w-[300px] shrink-0 box-content px-5 -mx-5 sticky top-[81px] self-start max-h-[calc(100vh-81px)] overflow-y-auto min-[960px]:block";
 
   // stackRight: always visible, becomes sticky column at the breakpoint.
-  // Default: hidden until the breakpoint.
-  const rightClass = stackRight
+  // rightSidebarStickyLast: non-sticky, full-height column that scrolls with the
+  // page (the sidebar content pins its own last card).
+  // Default: hidden until the breakpoint, sticky to the viewport.
+  const rightClass = rightSidebarStickyLast && !stackRight
+    ? hasBoth
+      ? "hidden shrink-0 self-stretch min-[1200px]:flex min-[1200px]:flex-col"
+      : "hidden shrink-0 self-stretch min-[960px]:flex min-[960px]:flex-col"
+    : stackRight
     ? hasBoth
       ? "w-full shrink-0 min-[1200px]:w-auto min-[1200px]:sticky min-[1200px]:top-[81px] min-[1200px]:self-start min-[1200px]:max-h-[calc(100vh-81px)] min-[1200px]:overflow-y-auto"
       : "w-full shrink-0 min-[960px]:w-auto min-[960px]:sticky min-[960px]:top-[81px] min-[960px]:self-start min-[960px]:max-h-[calc(100vh-81px)] min-[960px]:overflow-y-auto"

@@ -48,6 +48,7 @@ import categoryConsulting from "../assets/placeholder images/category images/man
 import categoryPM from "../assets/placeholder images/category images/product-management.png";
 import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
 import lelandMark from "../assets/leland-mark.svg";
+import goalIcon from "../assets/img/goal.svg";
 
 // Organisation logos
 import orgWharton   from "../assets/org-logos/wharton.png";
@@ -3974,10 +3975,10 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
             const hasSubline = profileBarMode !== 1 || showHeadline || Boolean(featuredOrg) || Boolean(subOrgLogos?.length);
             const bodyMargin = hasSubline ? "mt-1.5" : "-mt-1.5";
             if (post.type !== "article") {
-              return <p className={`${bodyMargin} text-[15px] leading-[1.4] text-gray-dark`}>{post.body}</p>;
+              return <p className={`${bodyMargin} text-[15px] font-medium leading-[1.4] text-gray-dark`}>{post.body}</p>;
             }
             if (post.caption) {
-              return <p className={`${bodyMargin} text-[15px] leading-[1.4] text-gray-dark`}>{post.caption}</p>;
+              return <p className={`${bodyMargin} text-[15px] font-medium leading-[1.4] text-gray-dark`}>{post.caption}</p>;
             }
             return null;
           })()}
@@ -5344,9 +5345,39 @@ const FIND_EXPERT_CATEGORIES = [
 export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = {}) {
   // Opt-in via the showUpcoming prop; off by default.
   const upcoming = showUpcoming ?? false;
-  const { topics } = useFeedAdmin();
+  const { topics, noGoal } = useFeedAdmin();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  // On the home feeds (/ and /alt-nav) the right column scrolls with the page
+  // and pins its last card to the top (see PageShell rightSidebarStickyLast).
+  const stickyLast = pathname === "/alt-nav" || pathname === "/";
   return (
-    <div className="flex flex-col gap-[14px]">
+    <div className={`flex flex-col gap-[14px] ${stickyLast ? "min-h-0 flex-1" : ""}`}>
+      {/* First-goal onboarding card — shown (via the "No goal" admin toggle) to
+          users we have no goal/category data for. Nudges them to create their
+          first goal so we can personalize the feed. */}
+      {noGoal && (
+        <div
+          className="rounded-[12px] bg-[#222222]/[0.04] p-5 text-center"
+          style={{
+            // Dashed outline matching the "Sell on Leland" callout: 3px dashes in
+            // gray-dark (#222222) at 30% opacity, drawn as an SVG background since
+            // border-dashed can't control dash length.
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3csvg%20width='100%25'%20height='100%25'%20xmlns='http://www.w3.org/2000/svg'%3e%3crect%20width='100%25'%20height='100%25'%20fill='none'%20rx='12'%20ry='12'%20stroke='%23222222'%20stroke-opacity='0.3'%20stroke-width='2'%20stroke-dasharray='3%204'/%3e%3c/svg%3e\")",
+          }}
+        >
+          <img src={goalIcon} alt="" className="mx-auto mb-3 h-14 w-auto" />
+          <h2 className="text-[17px] font-bold leading-tight text-gray-dark">What's your goal?</h2>
+          <p className="mt-1.5 text-[14px] leading-[1.5] text-gray-light">
+            Tell us what you're working toward and we'll tailor Leland for you.
+          </p>
+          <Button size="md" variant="dark" rounded="rounded-full" className="mt-3.5 w-full" onClick={() => navigate("/my-leland/goals")}>
+            Create a goal
+          </Button>
+        </div>
+      )}
+
       {/* Upcoming sessions */}
       {upcoming && (
         <SidebarSectionCard title="Upcoming sessions" to="/calendar" bleed>
@@ -5380,6 +5411,14 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
         />
       </SidebarSectionCard>
 
+      {/* Popular experts */}
+      <PopularExperts />
+
+      {/* Find expert help (or Trending topics) + footer. On the /alt-nav feed
+          this is the "last card" that pins to the top as the rest of the sidebar
+          scrolls; elsewhere the wrapper is display:contents so layout is
+          unchanged. */}
+      <div className={stickyLast ? "sticky top-[81px] flex flex-col gap-[14px]" : "contents"}>
       {/* Topics on: Trending topics. Off (default): Find expert help. */}
       {topics ? (
         <SidebarSectionCard title="Trending topics" to="/topic/mba-r1-admissions" bleed={false}>
@@ -5410,9 +5449,6 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
         </SidebarSectionCard>
       )}
 
-      {/* Popular experts */}
-      <PopularExperts />
-
       {/* Footer links — centered, directly below the last card */}
       <div className="px-2 pt-1 text-center">
         <p className="text-[12px] leading-[1.7] text-gray-extra-light">
@@ -5440,6 +5476,7 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
           />
           <span className="text-[12px] text-gray-extra-light">© 2026 Leland</span>
         </div>
+      </div>
       </div>
     </div>
   );
@@ -5626,7 +5663,7 @@ const composerPrompts = [
 function FeedAdminMenu() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { verifiedBadgePosition, setVerifiedBadgePosition, sidebarVersion, setSidebarVersion, featuredQuestions, setFeaturedQuestions, topics, setTopics } = useFeedAdmin();
+  const { verifiedBadgePosition, setVerifiedBadgePosition, sidebarVersion, setSidebarVersion, featuredQuestions, setFeaturedQuestions, topics, setTopics, noGoal, setNoGoal } = useFeedAdmin();
   useEffect(() => {
     if (!open) return;
     const onClick = (e: MouseEvent) => {
@@ -5665,6 +5702,7 @@ function FeedAdminMenu() {
             />
             <AdminToggle label="Answer a question" checked={featuredQuestions} onChange={() => setFeaturedQuestions(!featuredQuestions)} />
             <AdminToggle label="Topics" checked={topics} onChange={() => setTopics(!topics)} />
+            <AdminToggle label="No goal" checked={noGoal} onChange={() => setNoGoal(!noGoal)} />
           </motion.div>
         )}
       </AnimatePresence>
