@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Q3 Product Jeopardy</title>
+<style>
+:root{--bg:#070b1a;--tile:#10206b;--tile2:#1a34a8;--accent:#FFD60A;--fg:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--fg);overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+#board{position:fixed;inset:0;display:grid;grid-template-columns:repeat(4,1fr);
+  grid-template-rows:minmax(0,0.7fr) repeat(5,minmax(0,1fr));gap:.7vw;padding:.9vw}
+.head{display:flex;align-items:center;justify-content:center;text-align:center;background:var(--tile2);
+  border-radius:.6vw;font-weight:800;font-size:clamp(18px,2.6vw,60px);text-transform:uppercase;letter-spacing:.04em;padding:0 1vw;line-height:1.1}
+.tile{border:0;font:inherit;cursor:pointer;background:var(--tile);color:var(--accent);border-radius:.6vw;
+  font-weight:800;font-size:clamp(28px,5.5vw,130px);transition:transform .15s,background .15s}
+.tile:hover{background:var(--tile2);transform:scale(1.03)}
+.tile.played{cursor:default;background:#0b1024;color:#ffffff22;transform:none;pointer-events:none}
+#clue{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;
+  justify-content:center;padding:4vw 7vw;text-align:center;cursor:pointer}
+#clue.show{display:flex;animation:pop .35s ease-out}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+#meta{position:absolute;top:2vw;left:0;right:0;font-size:clamp(14px,1.6vw,36px);color:var(--accent);
+  font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+#cluetext{font-size:clamp(28px,4.6vw,110px);font-weight:700;line-height:1.2;max-width:90vw}
+#answer{display:none;margin-top:3vw;font-size:clamp(30px,5.2vw,125px);font-weight:800;color:var(--accent);line-height:1.15;max-width:90vw}
+#answer.show{display:block;animation:pop .3s ease-out}
+#img{display:none;margin-top:2vw;max-width:60vw;max-height:38vh;border-radius:1vw;object-fit:contain}
+#hint{position:absolute;bottom:1.5vw;left:0;right:0;font-size:clamp(12px,1.1vw,24px);color:#ffffff66}
+#overlay{position:fixed;inset:0;background:#070b1aee;display:flex;align-items:center;justify-content:center;z-index:10;
+  font-size:clamp(18px,2.2vw,50px);color:#ffffffcc;cursor:pointer;text-align:center;padding:2vw}
+#overlay.hide{display:none}
+#music{position:fixed;right:1vw;bottom:.8vw;font-size:clamp(11px,1vw,22px);color:#ffffff88;z-index:5;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="board"></div>
+<div id="clue"><div id="meta"></div><div id="cluetext"></div><div id="answer"></div><img id="img" alt=""><div id="hint">Space or click: reveal &nbsp;·&nbsp; Esc or click again: back to board</div></div>
+<div id="overlay">Click anywhere or press any key to start</div>
+<div id="music"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script>
+const CONTENT = {
+  columns: [
+    { pod: "Community / Mobile", clues: [
+      { value: 100, clue: "This new tab in the app lets members scroll posts, questions and wins from the whole community.", answer: "The Community feed", image: null },
+      { value: 200, clue: "Tap this on a post to jump into a topic and see everything tagged the same way.", answer: "Hashtags and the hashtag browse page", image: null },
+      { value: 300, clue: "When someone asks a question, members can now do this with a dedicated composer.", answer: "Answer-a-question flow", image: null },
+      { value: 400, clue: "This kind of alert brings you back when an expert replies to you.", answer: "Mobile push notifications for replies", image: null },
+      { value: 500, clue: "This redesigned screen means you land on your community, not a blank page, when you open the mobile app.", answer: "The new mobile home tab", image: null }
+    ]},
+    { pod: "Marketplace", clues: [
+      { value: 100, clue: "Students can now filter experts by this to find the right fit faster.", answer: "Improved expert search and filters", image: null },
+      { value: 200, clue: "This page gives each coach a richer way to show their background and results.", answer: "Redesigned expert profiles", image: null },
+      { value: 300, clue: "Before booking, students can try an expert with this low-commitment option.", answer: "Intro calls", image: null },
+      { value: 400, clue: "This makes it easier for experts to manage when they are available.", answer: "New availability and scheduling tools", image: null },
+      { value: 500, clue: "Experts now get paid faster thanks to this change.", answer: "Faster payouts", image: null }
+    ]},
+    { pod: "AI Education", clues: [
+      { value: 100, clue: "This hands-on program teaches members to build real products with AI.", answer: "AI Builder Program", image: null },
+      { value: 200, clue: "New members are greeted by this, which asks about goals and builds a personal plan.", answer: "AI-guided onboarding", image: null },
+      { value: 300, clue: "Each lesson now includes this so learners can practice, not just watch.", answer: "Interactive exercises", image: null },
+      { value: 400, clue: "This assistant answers questions about course material at any hour.", answer: "The AI course tutor", image: null },
+      { value: 500, clue: "Learners finishing a course now earn this to show off.", answer: "Certificates of completion", image: null }
+    ]},
+    { pod: "Livestreams", clues: [
+      { value: 100, clue: "Experts can now do this to their community in real time.", answer: "Go live", image: null },
+      { value: 200, clue: "Missed the stream? This lets you catch up whenever you want.", answer: "Replays", image: null },
+      { value: 300, clue: "Viewers can take part live in the stream using this feature.", answer: "Live chat and Q&A", image: null },
+      { value: 400, clue: "This reminder helps people show up for upcoming streams.", answer: "Event reminders and calendar invites", image: null },
+      { value: 500, clue: "This feature lets multiple experts share a single stage.", answer: "Multi-host livestreams", image: null }
+    ]}
+  ]
+};
+
+// ---------- State ----------
+const played = new Set();
+let current = null;      // {c, r} when a clue is open
+let revealed = false;
+let started = false;
+let musicOn = true;
+
+const $ = id => document.getElementById(id);
+const boardEl = $("board"), clueEl = $("clue"), overlay = $("overlay");
+
+// ---------- Board ----------
+function buildBoard() {
+  boardEl.innerHTML = "";
+  CONTENT.columns.forEach(col => {
+    const h = document.createElement("div"); h.className = "head"; h.textContent = col.pod; boardEl.appendChild(h);
+  });
+  const rows = Math.max(...CONTENT.columns.map(c => c.clues.length));
+  boardEl.style.gridTemplateRows = "minmax(0,0.7fr) repeat(" + rows + ",minmax(0,1fr))";
+  for (let r = 0; r < rows; r++) {
+    CONTENT.columns.forEach((col, c) => {
+      const clue = col.clues[r];
+      const b = document.createElement("button"); b.className = "tile"; b.id = "t" + c + "_" + r;
+      if (!clue) { b.style.visibility = "hidden"; boardEl.appendChild(b); return; }
+      b.textContent = "$" + clue.value;
+      if (played.has(c + "_" + r)) b.classList.add("played");
+      b.addEventListener("click", e => { e.stopPropagation(); openClue(c, r); });
+      boardEl.appendChild(b);
+    });
+  }
+}
+
+function openClue(c, r) {
+  if (!started || current || played.has(c + "_" + r)) return;
+  const col = CONTENT.columns[c], k = col.clues[r];
+  current = { c, r }; revealed = false;
+  $("meta").textContent = "$" + k.value + "  ·  " + col.pod;
+  $("cluetext").textContent = k.clue;
+  const a = $("answer"); a.textContent = k.answer; a.classList.remove("show"); a.style.display = "none";
+  const img = $("img"); img.style.display = "none";
+  clueEl.classList.remove("show"); void clueEl.offsetWidth; clueEl.classList.add("show");
+  startThinking();
+}
+
+function reveal() {
+  if (!current || revealed) return;
+  revealed = true;
+  const k = CONTENT.columns[current.c].clues[current.r];
+  const a = $("answer"); a.style.display = "block"; a.classList.remove("show"); void a.offsetWidth; a.classList.add("show");
+  if (k.image) { const img = $("img"); img.src = k.image; img.style.display = "block"; }
+  stopThinking(); ding();
+}
+
+function closeClue() {
+  if (!current) return;
+  played.add(current.c + "_" + current.r);
+  current = null; revealed = false;
+  stopThinking();
+  clueEl.classList.remove("show");
+  buildBoard();
+}
+
+// ---------- Audio (all guarded; board works silently without Tone) ----------
+const toneOK = () => typeof Tone !== "undefined" && started;
+let thinkLoop = null, thinkSynth = null, jingleSynths = [];
+
+function playJingle() {
+  try {
+    if (!toneOK() || !musicOn) return;
+    const lead = new Tone.Synth({ oscillator: { type: "triangle" }, envelope: { attack: .01, decay: .15, sustain: .3, release: .3 } }).toDestination();
+    const pad = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "sine" }, envelope: { attack: .05, decay: .2, sustain: .4, release: .6 } }).toDestination();
+    lead.volume.value = -6; pad.volume.value = -14;
+    jingleSynths.push(lead, pad);
+    const t0 = Tone.now() + 0.1, beat = 0.3;
+    const chords = [["C4","E4","G4"],["A3","C4","E4"],["F3","A3","C4"],["G3","B3","D4"],["C4","E4","G4","C5"]];
+    chords.forEach((ch, i) => pad.triggerAttackRelease(ch, beat * (i === 4 ? 3 : 3.6), t0 + i * beat * 4));
+    const mel = [["E5",0,1],["G5",1,1],["C6",2,2],["C6",4,1],["B5",5,1],["A5",6,2],
+                 ["A5",8,1],["G5",9,1],["F5",10,1],["A5",11,1],["G5",12,1],["D5",13,1],["B5",14,2],
+                 ["C6",16,1],["E6",17,1],["G6",18,1],["E6",19,1],["C6",20,4]];
+    mel.forEach(m => lead.triggerAttackRelease(m[0], m[2] * beat * 0.9, t0 + m[1] * beat));
+    setTimeout(() => { jingleSynths.forEach(s => { try { s.dispose(); } catch (e) {} }); jingleSynths = []; }, 12000);
+  } catch (e) { console.warn("jingle failed", e); }
+}
+
+function startThinking() {
+  try {
+    if (!toneOK() || !musicOn) return;
+    stopThinking();
+    thinkSynth = new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: .02, decay: .3, sustain: 0, release: .3 } }).toDestination();
+    thinkSynth.volume.value = -22;
+    const seq = ["C4","G4","E4","G4","A3","E4","C4","E4"]; let i = 0;
+    const syn = thinkSynth;
+    Tone.Transport.bpm.value = 90;
+    thinkLoop = new Tone.Loop(time => { syn.triggerAttackRelease(seq[i++ % seq.length], "8n", time); }, "8n").start(0);
+    Tone.Transport.start();
+  } catch (e) { console.warn("think failed", e); }
+}
+
+function stopThinking() {
+  try {
+    if (thinkLoop) { thinkLoop.stop(); thinkLoop.dispose(); thinkLoop = null; }
+    if (typeof Tone !== "undefined") { Tone.Transport.stop(); Tone.Transport.cancel(); }
+    if (thinkSynth) { const s = thinkSynth; thinkSynth = null; setTimeout(() => { try { s.dispose(); } catch (e) {} }, 400); }
+  } catch (e) {}
+}
+
+function ding() {
+  try {
+    if (!toneOK() || !musicOn) return;
+    const s = new Tone.Synth({ oscillator: { type: "triangle" }, envelope: { attack: .005, decay: .4, sustain: 0, release: .5 } }).toDestination();
+    s.volume.value = -8;
+    const t = Tone.now(); s.triggerAttackRelease("E6", .15, t); s.triggerAttackRelease("A6", .4, t + .12);
+    setTimeout(() => { try { s.dispose(); } catch (e) {} }, 2000);
+  } catch (e) {}
+}
+
+function updateIndicator() { $("music").textContent = (musicOn ? "♪ Music on" : "♪ Music off") + "  (M)"; }
+
+function toggleMusic() {
+  musicOn = !musicOn; updateIndicator();
+  try {
+    if (typeof Tone !== "undefined") {
+      Tone.Destination.mute = !musicOn;
+      if (!musicOn) { stopThinking(); jingleSynths.forEach(s => { try { s.dispose(); } catch (e) {} }); jingleSynths = []; }
+    }
+    if (musicOn && current && !revealed) startThinking();
+  } catch (e) {}
+}
+
+// ---------- Start / input ----------
+async function start() {
+  if (started) return;
+  started = true; overlay.classList.add("hide");
+  try { if (typeof Tone !== "undefined") { await Tone.start(); Tone.Destination.mute = !musicOn; } } catch (e) { console.warn(e); }
+  playJingle();
+}
+
+overlay.addEventListener("click", start);
+clueEl.addEventListener("click", () => { if (!revealed) reveal(); else closeClue(); });
+
+function resetBoard() {
+  if (current) return;
+  if (!played.size || confirm("Reset all played tiles?")) { played.clear(); buildBoard(); }
+}
+
+document.addEventListener("keydown", e => {
+  if (e.repeat) return;
+  if (!started) { if (e.key.toLowerCase() === "m") { musicOn = false; updateIndicator(); } start(); return; }
+  const k = e.key;
+  if (k === "m" || k === "M") { toggleMusic(); return; }
+  if (k === " " || k === "Spacebar") { e.preventDefault(); if (current) reveal(); return; }
+  if (k === "Escape") { closeClue(); return; }
+  if (k === "r" || k === "R") { resetBoard(); return; }
+});
+
+buildBoard(); updateIndicator();
+</script>
+</body>
+</html>
