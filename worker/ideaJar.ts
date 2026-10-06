@@ -125,7 +125,8 @@ export class IdeaJar extends DurableObject<IdeaJarEnv> {
     if (!idea) return err("Idea is required", 400);
     if (idea.length > 140) return err("Idea must be 140 characters or fewer", 400);
     if (why.length > 200) return err("Why must be 200 characters or fewer", 400);
-    if (!SOURCES.includes(b.source)) return err("Pick where this came from", 400);
+    // Source tag is optional (phone form no longer asks). Stored as "" when absent since the column is NOT NULL.
+    const source = SOURCES.includes(b.source) ? b.source : "";
     const pod = b.pod == null || b.pod === "" ? null : b.pod;
     if (pod !== null && !PODS.includes(pod)) return err("Invalid pod", 400);
     const showName = b.showName !== false;
@@ -145,9 +146,9 @@ export class IdeaJar extends DurableObject<IdeaJarEnv> {
     const id = crypto.randomUUID();
     this.sql.exec(
       `INSERT INTO ideas (id, idea, why, source, pod, author_name, device_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      id, idea, why, b.source, pod, authorName, deviceId, now,
+      id, idea, why, source, pod, authorName, deviceId, now,
     );
-    return json({ ok: true, idea: { id, idea, why, source: b.source, pod, authorName, createdAt: now, votes: 0 } }, 201);
+    return json({ ok: true, idea: { id, idea, why, source, pod, authorName, createdAt: now, votes: 0 } }, 201);
   }
 
   vote(b: any): Response {

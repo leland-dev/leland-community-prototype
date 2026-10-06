@@ -49,42 +49,50 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
   .hidden { display: none !important; }
 
   /* ---------- Phone ---------- */
-  #phone { max-width: 480px; margin: 0 auto; padding: 12px 14px 40px; }
-  #phone h1 { font-size: 20px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+  #phone { max-width: 480px; margin: 0 auto; padding: 20px 18px 48px; }
+  #phone h1 { font-size: 26px; letter-spacing: -.5px; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
   #phone h1 small { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
-  .field { margin-bottom: 8px; }
-  .field label.lbl { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-  .field label.lbl span { color: var(--muted); font-weight: 500; }
+  #phone h1 + .sub { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+  .field { margin-bottom: 12px; }
+  .field label.lbl { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 6px;
+    color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+  .field label.lbl span { font-weight: 500; text-transform: none; letter-spacing: 0; opacity: .7; }
   textarea, input[type=text] { width: 100%; background: var(--panel); color: var(--text); border: 1px solid var(--line);
-    border-radius: 10px; padding: 8px 10px; font: inherit; font-size: 16px; resize: none; }
-  textarea:focus, input[type=text]:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    border-radius: 14px; padding: 12px 14px; font: inherit; font-size: 16px; line-height: 1.4; resize: none;
+    transition: border-color .15s, box-shadow .15s; }
+  textarea::placeholder, input::placeholder { color: #6f8378; }
+  textarea:focus, input[type=text]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px #15b26b33; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip { border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 999px;
     padding: 6px 11px; font-size: 13px; line-height: 1.2; }
   .chip.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
-  .row { display: flex; gap: 8px; align-items: center; }
+  .row { display: flex; gap: 10px; align-items: center; }
   .row input[type=text] { flex: 1; }
-  .check { display: flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
-  .check input { width: 18px; height: 18px; accent-color: var(--accent); }
+  .check { display: flex; align-items: center; gap: 8px; font-size: 14px; white-space: nowrap; color: var(--muted); }
+  .check input { width: 20px; height: 20px; accent-color: var(--accent); }
   .btn { display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px;
     font-weight: 500; line-height: 1.2; }
-  .btn-primary { background: var(--accent); color: var(--accent-ink); }
-  .btn-primary:disabled { opacity: .5; }
-  #submitBtn { width: 100%; padding: 13px; font-size: 17px; margin-top: 10px; }
-  .msg { font-size: 14px; margin-top: 8px; min-height: 0; }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); box-shadow: 0 6px 20px #15b26b44; }
+  .btn-primary:active { transform: scale(.985); }
+  .btn-primary:disabled { opacity: .5; box-shadow: none; }
+  #submitBtn { width: 100%; padding: 16px; font-size: 17px; font-weight: 600; margin-top: 14px; }
+  .msg { font-size: 14px; margin-top: 10px; min-height: 0; }
   .msg.err { color: var(--danger); }
   .msg.ok { color: var(--accent); font-weight: 600; }
-  .list-head { display: flex; justify-content: space-between; align-items: baseline; margin: 22px 0 8px; }
-  .list-head h2 { font-size: 17px; margin: 0; }
-  .list-head span { font-size: 13px; color: var(--yellow); font-weight: 600; }
-  .pidea { display: flex; gap: 10px; align-items: flex-start; background: var(--panel); border: 1px solid var(--line);
-    border-radius: 12px; padding: 10px; margin-bottom: 8px; }
+  .list-head { display: flex; justify-content: space-between; align-items: baseline; margin: 32px 0 12px;
+    padding-top: 22px; border-top: 1px solid var(--line); }
+  .list-head h2 { font-size: 19px; margin: 0; letter-spacing: -.3px; }
+  .list-head span { font-size: 13px; color: var(--yellow); font-weight: 600; background: #ffd23f1a; padding: 4px 10px; border-radius: 999px; }
+  .pidea { display: flex; gap: 12px; align-items: center; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 14px; margin-bottom: 10px; }
   .pidea .body { flex: 1; min-width: 0; }
   .pidea .txt { font-size: 15px; font-weight: 600; line-height: 1.3; word-wrap: break-word; }
   .pidea .why { font-size: 13px; color: var(--muted); margin-top: 3px; word-wrap: break-word; }
   .pidea .meta { font-size: 12px; color: var(--muted); margin-top: 5px; }
-  .vote { min-width: 52px; border: 1px solid var(--line); background: transparent; color: var(--text); border-radius: 10px;
-    padding: 6px 4px; display: flex; flex-direction: column; align-items: center; font-size: 15px; font-weight: 700; line-height: 1.1; }
+  .vote { min-width: 56px; border: 1px solid var(--line); background: #ffffff08; color: var(--text); border-radius: 14px;
+    padding: 10px 6px; display: flex; flex-direction: column; align-items: center; font-size: 16px; font-weight: 700; line-height: 1.1;
+    transition: background .15s, transform .1s; }
+  .vote:active { transform: scale(.94); }
   .vote .arrow { font-size: 14px; }
   .vote.on { background: var(--yellow); color: #1a1400; border-color: var(--yellow); }
   .vote:disabled { opacity: .35; }
@@ -155,7 +163,8 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
 
 <!-- ================= PHONE VIEW ================= -->
 <div id="phone" class="hidden">
-  <h1>🫙 Drop an idea in the jar <small id="lockBadge"></small></h1>
+  <h1>Drop an idea in the jar <small id="lockBadge"></small></h1>
+  <p class="sub">What should we build next? Keep it short, then vote for your favorites below.</p>
   <form id="ideaForm" autocomplete="off">
     <div class="field">
       <label class="lbl" for="ideaInput">The idea <span id="ideaCount">0/140</span></label>
@@ -164,14 +173,6 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
     <div class="field">
       <label class="lbl" for="whyInput">Why it matters <span id="whyCount">0/200</span></label>
       <textarea id="whyInput" rows="2" maxlength="200" placeholder="What problem does it solve?"></textarea>
-    </div>
-    <div class="field">
-      <label class="lbl">Where'd it come from? <span>required</span></label>
-      <div class="chips" id="sourceChips"></div>
-    </div>
-    <div class="field">
-      <label class="lbl">Which pod? <span>optional</span></label>
-      <div class="chips" id="podChips"></div>
     </div>
     <div class="row">
       <input type="text" id="nameInput" maxlength="60" placeholder="Your name">
@@ -280,8 +281,7 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
         el.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.v === getSel()));
       });
     }
-    renderChips($("sourceChips"), SOURCES, () => source, v => { source = v; });
-    renderChips($("podChips"), PODS, () => pod, v => { pod = v; });
+    // Source and pod tags removed from the form; triaged later. Both submit as null.
 
     const ideaIn = $("ideaInput"), whyIn = $("whyInput"), nameIn = $("nameInput"), showIn = $("showName");
     const upd = () => { $("ideaCount").textContent = ideaIn.value.length + "/140"; $("whyCount").textContent = whyIn.value.length + "/200"; };
@@ -295,12 +295,10 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
       e.preventDefault();
       const idea = ideaIn.value.trim();
       if (!idea) return msg("Add your idea first.", "err");
-      if (!source) return msg("Pick where it came from.", "err");
       const btn = $("submitBtn"); btn.disabled = true;
       try {
         await store.addIdea({ idea, why: whyIn.value.trim(), source, pod, authorName: nameIn.value.trim(), showName: showIn.checked });
         ideaIn.value = ""; whyIn.value = ""; source = null; pod = null; upd();
-        document.querySelectorAll("#sourceChips .chip, #podChips .chip").forEach(c => c.classList.remove("on"));
         msg("In the jar! 🎉 Got another one?", "ok");
         setTimeout(() => { if ($("formMsg").classList.contains("ok")) msg(""); }, 4000);
         sub.refresh();
@@ -428,7 +426,7 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
           <div class="rank">${idx + 1}</div>
           <div class="body">
             <div class="txt">${esc(i.idea)}</div>
-            <div class="meta"><span class="pill">${esc(i.source)}</span>${i.pod ? `<span>${esc(i.pod)}</span>` : ""}${i.authorName ? `<span>— ${esc(i.authorName)}</span>` : ""}
+            <div class="meta">${i.source ? `<span class="pill">${esc(i.source)}</span>` : ""}${i.pod ? `<span>${esc(i.pod)}</span>` : ""}${i.authorName ? `<span>— ${esc(i.authorName)}</span>` : ""}
               ${ADMIN_KEY ? `<button type="button" class="hidebtn" data-hide="${esc(i.id)}">hide</button>` : ""}</div>
             ${i.id === sel && i.why ? `<div class="why">${esc(i.why)}</div>` : ""}
           </div>
