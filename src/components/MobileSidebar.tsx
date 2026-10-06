@@ -263,7 +263,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
 
       {/* Expert Tools */}
       <div className="pt-4">
-        <p className={sectionHeader}>Expert tools</p>
+        <p className={sectionHeader}>{expertMode ? "Expert tools" : "Sell on Leland"}</p>
         {expertMode ? (
           <>
             {expertItems.slice(0, MAX_EXPERT_ITEMS).map((item) => (

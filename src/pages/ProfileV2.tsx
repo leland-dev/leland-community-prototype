@@ -31,10 +31,9 @@ import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
 import reportFlagIcon from "../assets/icons/report-flag.svg";
 import lockIcon from "../assets/icons/lock.svg";
 import eyeClosedIcon from "../assets/icons/eye-closed.svg";
-import GroupCard from "../components/GroupCard";
-import groupImg1 from "../assets/placeholder images/group images/18603db620e37b489d2d52da4c9c1f86.jpg";
-import groupImg2 from "../assets/placeholder images/group images/419a6944d25e95be7012699559c7b0be.jpg";
-import groupImg3 from "../assets/placeholder images/group images/6c168007b1aef00bedc192e802c413e5.jpg";
+import gsbLogo from "../assets/logos/gsb.png";
+import metaLogo from "../assets/logos/meta.png";
+import linkedinLogo from "../assets/org-logos/linkedin-logo.png";
 import checkIcon from "../assets/icons/check.svg";
 import editIcon from "../assets/icons/edit.svg";
 import verifiedIcon from "../assets/icons/verified-new.svg";
@@ -596,6 +595,48 @@ function CustomerHourlySection({ marginClass = "mt-6", paddingClass = "p-6" }: {
       <Button size="md" variant="secondary" iconOnly className="shrink-0" aria-label="Buy coaching">
         <img src={arrowRightIcon} alt="" className="h-5 w-5" />
       </Button>
+    </div>
+  );
+}
+
+// Education / Experience — read-only credential rows for the customer profile
+// tab (mirrors the About/Education/Experience sections on My Leland → Profile).
+type ProfileCredential = { id: string; tileLabel: string; tileColor: string; title: string; subtitle: string; logo?: string };
+
+const PROFILE_EDUCATION: ProfileCredential[] = [
+  { id: "d1", tileLabel: "S", tileColor: "#8C1515", title: "Stanford Graduate School of Business", subtitle: "MBA · 2016 – 2018", logo: gsbLogo },
+  { id: "d2", tileLabel: "Y", tileColor: "#00356B", title: "Yale University", subtitle: "BA, Economics · 2008 – 2012", logo: yaleLogo },
+];
+
+const PROFILE_EXPERIENCE: ProfileCredential[] = [
+  { id: "e1", tileLabel: "in", tileColor: "#0A66C2", title: "Senior Product Manager", subtitle: "LinkedIn · 2019 – Present", logo: linkedinLogo },
+  { id: "e2", tileLabel: "M", tileColor: "#1877F2", title: "Product Manager", subtitle: "Meta · 2016 – 2019", logo: metaLogo },
+  { id: "e3", tileLabel: "G", tileColor: "#0F9D58", title: "Associate Product Manager", subtitle: "Google · 2012 – 2015", logo: googleLogo },
+];
+
+function CredentialTile({ label, color, logo }: { label: string; color: string; logo?: string }) {
+  if (logo) {
+    return (
+      <div className="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-[4px]">
+        <img src={logo} alt="" className="h-full w-full object-cover" />
+      </div>
+    );
+  }
+  return (
+    <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[4px] text-[16px] font-semibold text-white" style={{ backgroundColor: color }}>
+      {label}
+    </div>
+  );
+}
+
+function CredentialRow({ item, darkMode }: { item: ProfileCredential; darkMode?: boolean }) {
+  return (
+    <div className="flex items-center gap-4 py-2">
+      <CredentialTile label={item.tileLabel} color={item.tileColor} logo={item.logo} />
+      <div className="min-w-0 flex-1">
+        <p className={`text-[16px] font-medium ${darkMode ? "text-white" : "text-gray-dark"}`}>{item.title}</p>
+        <p className="mt-[2px] text-[14px] text-[#707070]">{item.subtitle}</p>
+      </div>
     </div>
   );
 }
@@ -1297,12 +1338,11 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                     Own profile → gray Edit; coach → Free intro call; else Follow. */}
                 {viewingOwnProfile ? (
                   <Link
-                    to="/settings?tab=account"
+                    to="/my-leland/profile"
                     onClick={(e) => e.stopPropagation()}
                     className="flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-[#222222]/5 px-[18px] py-2.5 text-[14px] font-medium text-gray-dark no-underline transition-colors hover:bg-[#222222]/[0.08]"
                   >
-                    <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
-                    Edit
+                    Edit profile
                   </Link>
                 ) : isCustomerProfile ? (
                   <button
@@ -1656,9 +1696,8 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             </div>
             <div className={`flex items-center gap-2 ${showCoverImage || heroCustomer ? "pb-1" : showGrayHeader ? "pb-[90px]" : "pb-1"} ${heroCustomer && !showCoverImage ? "md:pb-1" : ""}`}>
               {viewingOwnProfile ? (
-                <Link to="/settings?tab=account" className="flex cursor-pointer items-center gap-2 rounded-xl bg-[#F5F5F5] px-5 py-2.5 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#ebebeb]">
-                  <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
-                  Edit
+                <Link to="/my-leland/profile" className="flex cursor-pointer items-center gap-2 rounded-full bg-[#F5F5F5] px-5 py-2.5 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-[#ebebeb]">
+                  Edit profile
                 </Link>
               ) : (
                 <>
@@ -2037,7 +2076,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               template, which relies on the header Edit profile button instead. */}
           {!isCustomerProfile && viewingOwnProfile && !unified && (
             <div className="mt-3 md:hidden">
-              <Link to="/settings?tab=account" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+              <Link to="/my-leland/profile" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
                 <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
                 Edit profile
               </Link>
@@ -2977,7 +3016,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                       {/* Edit bio + visibility — only when viewing your own profile */}
                       {viewingOwnProfile && (
                         <div className="mt-4 flex items-center justify-between">
-                          <LinkButton size="md" variant="secondary" href="/settings?tab=account">
+                          <LinkButton size="md" variant="secondary" href="/my-leland/profile">
                             <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
                             Edit bio
                           </LinkButton>
@@ -2989,31 +3028,23 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                       )}
                     </section>
 
-                    {/* Groups */}
+                    {/* Education */}
                     <section>
-                      <h2 className="text-[22px] font-semibold text-gray-dark" style={{ fontWeight: 500 }}>Groups</h2>
+                      <h2 className={`text-[22px] font-semibold ${darkMode ? "text-white" : "text-gray-dark"}`} style={{ fontWeight: 500 }}>Education</h2>
                       <div className="mt-3 flex flex-col gap-1">
-                        <GroupCard
-                          name="AI BP April 26"
-                          image={groupImg1}
-                          members={18}
-                          newPosts={3}
-                          to="/groups/ai-bp-apr-26"
-                        />
-                        <GroupCard
-                          name="MBA Admissions 2027"
-                          image={groupImg2}
-                          members={142}
-                          newPosts={12}
-                          to="/groups/mba-admissions-2027"
-                        />
-                        <GroupCard
-                          name="Product Management Career Switchers"
-                          image={groupImg3}
-                          members={87}
-                          newPosts={0}
-                          to="/groups/pm-career-switchers"
-                        />
+                        {PROFILE_EDUCATION.map((item) => (
+                          <CredentialRow key={item.id} item={item} darkMode={darkMode} />
+                        ))}
+                      </div>
+                    </section>
+
+                    {/* Experience */}
+                    <section>
+                      <h2 className={`text-[22px] font-semibold ${darkMode ? "text-white" : "text-gray-dark"}`} style={{ fontWeight: 500 }}>Experience</h2>
+                      <div className="mt-3 flex flex-col gap-1">
+                        {PROFILE_EXPERIENCE.map((item) => (
+                          <CredentialRow key={item.id} item={item} darkMode={darkMode} />
+                        ))}
                       </div>
                     </section>
                   </div>
