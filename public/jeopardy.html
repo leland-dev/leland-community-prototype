@@ -32,6 +32,10 @@ html,body{height:100%;background:var(--bg);color:var(--fg);overflow:hidden;
   font-size:clamp(18px,2.2vw,50px);color:#ffffffcc;cursor:pointer;text-align:center;padding:2vw}
 #overlay.hide{display:none}
 #music{position:fixed;right:1vw;bottom:.8vw;font-size:clamp(11px,1vw,22px);color:#ffffff88;z-index:5;pointer-events:none}
+#keys{position:fixed;left:1vw;bottom:.8vw;font-size:clamp(11px,1vw,22px);color:#ffffff55;z-index:5;pointer-events:none}
+#flash{position:fixed;inset:0;pointer-events:none;z-index:8;opacity:0;transition:opacity .25s}
+#flash.correct{opacity:1;box-shadow:inset 0 0 0 1.2vw #2ecc71,inset 0 0 12vw #2ecc7166}
+#flash.wrong{opacity:1;box-shadow:inset 0 0 0 1.2vw #e74c3c,inset 0 0 12vw #e74c3c66}
 </style>
 </head>
 <body>
@@ -39,6 +43,8 @@ html,body{height:100%;background:var(--bg);color:var(--fg);overflow:hidden;
 <div id="clue"><div id="meta"></div><div id="cluetext"></div><div id="answer"></div><img id="img" alt=""><div id="hint">Space or click: reveal &nbsp;·&nbsp; Esc or click again: back to board</div></div>
 <div id="overlay">Click anywhere or press any key to start</div>
 <div id="music"></div>
+<div id="keys">C: correct &nbsp;·&nbsp; X: wrong &nbsp;·&nbsp; H: hype song &nbsp;·&nbsp; R: reset board</div>
+<div id="flash"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 <script>
 const CONTENT = {
@@ -72,6 +78,16 @@ const CONTENT = {
       { value: 500, clue: "This feature lets multiple experts share a single stage.", answer: "Multi-host livestreams", image: null }
     ]}
   ]
+};
+
+// ---------- Audio config ----------
+// Each sound is a file path (drop mp3/m4a files in public/audio/) or null for the built-in synthesized sound.
+// If a file is set but fails to load, the synthesized fallback plays instead.
+const AUDIO = {
+  hype: "/audio/jeopardy-hype.mp3",   // plays when the board starts; H replays/stops it
+  correct: null,                      // C key: "ding ding ding"
+  wrong: null,                        // X key: buzzer
+  volume: { hype: 0.85, sfx: 1.0 }
 };
 
 // ---------- State ----------
@@ -114,6 +130,7 @@ function openClue(c, r) {
   const a = $("answer"); a.textContent = k.answer; a.classList.remove("show"); a.style.display = "none";
   const img = $("img"); img.style.display = "none";
   clueEl.classList.remove("show"); void clueEl.offsetWidth; clueEl.classList.add("show");
+  stopHype(800);
   startThinking();
 }
 
@@ -189,6 +206,85 @@ function ding() {
   } catch (e) {}
 }
 
+// ---------- Sound effects: files from AUDIO, or synthesized fallbacks ----------
+const fileAudio = {};   // name -> HTMLAudioElement, created lazily
+function getFile(name) {
+  const src = AUDIO[name];
+  if (!src) return null;
+  if (!fileAudio[name]) {
+    const a = new Audio(src); a.preload = "auto";
+    a.volume = name === "hype" ? AUDIO.volume.hype : AUDIO.volume.sfx;
+    fileAudio[name] = a;
+  }
+  return fileAudio[name];
+}
+// Play a file if configured; on any failure (404, decode error, blocked) run the synth fallback.
+function playSound(name, synthFallback) {
+  if (!musicOn || !started) return;
+  const a = getFile(name);
+  if (!a) { synthFallback(); return; }
+  a.muted = false;
+  if (name !== "hype") { try { a.currentTime = 0; } catch (e) {} }
+  a.play().catch(() => synthFallback());
+}
+
+function synthCorrect() {
+  try {
+    if (!toneOK()) return;
+    const bell = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "sine" }, envelope: { attack: .003, decay: .5, sustain: 0, release: .6 } }).toDestination();
+    bell.volume.value = -4;
+    const t = Tone.now();
+    [0, .17, .34].forEach((dt, i) => bell.triggerAttackRelease(["E6", "G#6"], .3, t + dt));   // ding ding ding
+    bell.triggerAttackRelease(["C6", "E6", "G6", "C7"], .9, t + .6);                           // sparkle
+    setTimeout(() => { try { bell.dispose(); } catch (e) {} }, 3000);
+  } catch (e) {}
+}
+
+function synthWrong() {
+  try {
+    if (!toneOK()) return;
+    const buzz = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "sawtooth" }, envelope: { attack: .01, decay: .1, sustain: .8, release: .15 } }).toDestination();
+    buzz.volume.value = -10;
+    const t = Tone.now();
+    buzz.triggerAttackRelease(["A2", "Eb3"], .35, t);          // harsh tritone buzz
+    buzz.triggerAttackRelease(["G2", "Db3"], .55, t + .4);     // drops lower
+    setTimeout(() => { try { buzz.dispose(); } catch (e) {} }, 2500);
+  } catch (e) {}
+}
+
+function flash(kind) {
+  const f = $("flash"); f.className = kind;
+  setTimeout(() => { f.className = ""; }, kind === "correct" ? 900 : 1100);
+}
+function correct() { playSound("correct", synthCorrect); flash("correct"); }
+function wrong()   { playSound("wrong", synthWrong);     flash("wrong"); }
+
+// Hype song: plays on start, H toggles play/stop, fades out when a clue opens.
+let hypeFade = null;
+function playHype() {
+  if (!musicOn || !started) return;
+  const a = getFile("hype");
+  if (!a) { playJingle(); return; }
+  clearInterval(hypeFade); a.volume = AUDIO.volume.hype; a.muted = false;
+  try { a.currentTime = 0; } catch (e) {}
+  a.play().catch(() => playJingle());
+}
+function stopHype(fadeMs) {
+  const a = fileAudio.hype;
+  if (!a || a.paused) return;
+  clearInterval(hypeFade);
+  if (!fadeMs) { a.pause(); return; }
+  const step = a.volume / (fadeMs / 50);
+  hypeFade = setInterval(() => {
+    if (a.volume - step <= 0.02) { a.pause(); a.volume = AUDIO.volume.hype; clearInterval(hypeFade); }
+    else a.volume -= step;
+  }, 50);
+}
+function toggleHype() {
+  const a = getFile("hype");
+  if (a && !a.paused) stopHype(400); else playHype();
+}
+
 function updateIndicator() { $("music").textContent = (musicOn ? "♪ Music on" : "♪ Music off") + "  (M)"; }
 
 function toggleMusic() {
@@ -198,6 +294,7 @@ function toggleMusic() {
       Tone.Destination.mute = !musicOn;
       if (!musicOn) { stopThinking(); jingleSynths.forEach(s => { try { s.dispose(); } catch (e) {} }); jingleSynths = []; }
     }
+    Object.values(fileAudio).forEach(a => { a.muted = !musicOn; });
     if (musicOn && current && !revealed) startThinking();
   } catch (e) {}
 }
@@ -207,7 +304,7 @@ async function start() {
   if (started) return;
   started = true; overlay.classList.add("hide");
   try { if (typeof Tone !== "undefined") { await Tone.start(); Tone.Destination.mute = !musicOn; } } catch (e) { console.warn(e); }
-  playJingle();
+  playHype();
 }
 
 overlay.addEventListener("click", start);
@@ -226,6 +323,9 @@ document.addEventListener("keydown", e => {
   if (k === " " || k === "Spacebar") { e.preventDefault(); if (current) reveal(); return; }
   if (k === "Escape") { closeClue(); return; }
   if (k === "r" || k === "R") { resetBoard(); return; }
+  if (k === "c" || k === "C") { correct(); return; }
+  if (k === "x" || k === "X") { wrong(); return; }
+  if (k === "h" || k === "H") { toggleHype(); return; }
 });
 
 buildBoard(); updateIndicator();
