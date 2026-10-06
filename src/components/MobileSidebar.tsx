@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useExpertMode } from "../contexts/ExpertModeContext";
@@ -30,6 +30,8 @@ import giftIcon from "../assets/icons/gift.svg";
 import globeIcon from "../assets/icons/globe.svg";
 import messagesIcon from "../assets/icons/chat-inactive-bold.svg";
 import goalsIcon from "../assets/icons/star-review.svg";
+import organizationsIcon from "../assets/icons/organizations.svg";
+import lelandMark from "../assets/leland-mark.svg";
 
 interface MobileSidebarProps {
   open: boolean;
@@ -99,6 +101,14 @@ const myLelandItems = [
   { icon: bookOpenIcon, label: "Leland+", to: "/plus" },
 ];
 
+// Logged-out marketing links — shown in place of the signed-in app nav.
+// Targets are placeholders (no dedicated routes exist yet).
+const loggedOutLinks = [
+  { icon: starIcon, label: "Reviews", to: "#" },
+  { icon: storeIcon, label: "Become an expert", to: "#" },
+  { icon: organizationsIcon, label: "For organizations", to: "#" },
+];
+
 // Admin Tools segmented pill control — one row per demo toggle.
 function AdminSegControl<T extends string | number>({ label, icon, darkMode, value, onChange, options }: {
   label: string;
@@ -138,9 +148,13 @@ function AdminSegControl<T extends string | number>({ label, icon, darkMode, val
 }
 
 export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
+  const navigate = useNavigate();
   const { dark: darkMode, toggle: toggleDarkMode } = useDarkMode();
   const { expert: expertMode, toggle: toggleExpertMode } = useExpertMode();
   const { mode: profileBarMode, setMode: setProfileBarMode } = useProfileBarMode();
+  // Demo toggle (Admin Tools) — switches the sidebar between logged-in and
+  // logged-out states. Intentionally not reset when the sidebar closes.
+  const [loggedIn, setLoggedIn] = useState(true);
   const [accountOpen, setAccountOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
@@ -190,7 +204,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
     <div className="relative h-full w-[280px] overflow-hidden">
     <motion.div
       ref={scrollRef}
-      className={`flex h-full w-full flex-col overflow-y-auto pb-6 scrollbar-hide ${darkMode ? "bg-[#131313]" : "bg-white"}`}
+      className={`flex h-full w-full flex-col overflow-y-auto scrollbar-hide ${loggedIn ? "pb-6" : ""} ${darkMode ? "bg-[#131313]" : "bg-white"}`}
       animate={{ scale: open ? 1 : 0.95, opacity: open ? 1 : 0 }}
       transition={{ duration: 0.3, ease: [0.42, 0, 0.58, 1] }}
       style={{ transformOrigin: "left center" }}
@@ -198,35 +212,57 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
     >
       {/* Profile header */}
       <div className="px-5 pt-6 pb-4">
-        {/* Photo */}
-        <img
-          src={profilePhoto}
-          alt={PROFILE_NAME}
-          className="h-12 w-12 shrink-0 rounded-full object-cover"
-        />
+        {loggedIn ? (
+          <>
+            {/* Photo */}
+            <img
+              src={profilePhoto}
+              alt={PROFILE_NAME}
+              className="h-12 w-12 shrink-0 rounded-full object-cover"
+            />
 
-        {/* Name — stacked under the photo */}
-        <NavLink
-          to="/profile/june-allen?me=1"
-          onClick={onClose}
-          className="mt-3 block min-w-0"
-        >
-          <p className={`text-[18px] font-semibold ${darkMode ? "text-white" : "text-gray-dark"}`}>{PROFILE_NAME}</p>
-        </NavLink>
+            {/* Name — stacked under the photo */}
+            <NavLink
+              to="/profile/june-allen?me=1"
+              onClick={onClose}
+              className="mt-3 block min-w-0"
+            >
+              <p className={`text-[18px] font-semibold ${darkMode ? "text-white" : "text-gray-dark"}`}>{PROFILE_NAME}</p>
+            </NavLink>
 
-        {/* Stat row — compact, inline metrics (value + label on one line) */}
-        <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1">
-          {PROFILE_STATS.filter((s) => !s.star).map((s) => (
-            <span key={s.label} className="text-[14px] leading-none text-gray-light">
-              <span className={`font-medium ${darkMode ? "text-white" : "text-gray-dark"}`}>{s.value}</span>{" "}
-              {s.label}
-            </span>
-          ))}
-        </div>
+            {/* Stat row — compact, inline metrics (value + label on one line) */}
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1">
+              {PROFILE_STATS.filter((s) => !s.star).map((s) => (
+                <span key={s.label} className="text-[14px] leading-none text-gray-light">
+                  <span className={`font-medium ${darkMode ? "text-white" : "text-gray-dark"}`}>{s.value}</span>{" "}
+                  {s.label}
+                </span>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Leland mark — stands in for the profile photo when logged out */}
+            <span
+              aria-hidden
+              className={`block h-9 w-9 ${darkMode ? "bg-white" : "bg-gray-dark"}`}
+              style={{
+                maskImage: `url("${lelandMark}")`,
+                WebkitMaskImage: `url("${lelandMark}")`,
+                maskSize: "contain",
+                WebkitMaskSize: "contain",
+                maskRepeat: "no-repeat",
+                WebkitMaskRepeat: "no-repeat",
+                maskPosition: "left center",
+                WebkitMaskPosition: "left center",
+              }}
+            />
+          </>
+        )}
       </div>
 
-      {/* Divider between profile and the links below */}
-      <div className={`mx-5 border-t ${darkMode ? "border-white/20" : "border-[#E5E5E5]"}`} />
+      {/* Divider between profile and the links below — hidden when logged out */}
+      {loggedIn && <div className={`mx-5 border-t ${darkMode ? "border-white/20" : "border-[#E5E5E5]"}`} />}
 
       {/* Primary nav */}
       <div className="pt-2">
@@ -239,29 +275,46 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
           <span className="flex-1 text-left">Browse</span>
           <img src={chevronRight} alt="" className="h-5 w-5 shrink-0 opacity-50" aria-hidden />
         </button>
-        {/* Profile — the signed-in user's own profile (My profile on). */}
-        <NavLink
-          to="/profile/june-allen?me=1"
-          onClick={onClose}
-          className={menuItemClass}
-        >
-          <img src={userIcon} alt="" className={iconClass} aria-hidden />
-          <span>Profile</span>
-        </NavLink>
-        {myLelandTabs.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            onClick={onClose}
-            className={menuItemClass}
-          >
-            <img src={item.icon} alt="" className={iconClass} aria-hidden />
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+        {loggedIn ? (
+          <>
+            {/* Profile — the signed-in user's own profile (My profile on). */}
+            <NavLink
+              to="/profile/june-allen?me=1"
+              onClick={onClose}
+              className={menuItemClass}
+            >
+              <img src={userIcon} alt="" className={iconClass} aria-hidden />
+              <span>Profile</span>
+            </NavLink>
+            {myLelandTabs.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={onClose}
+                className={menuItemClass}
+              >
+                <img src={item.icon} alt="" className={iconClass} aria-hidden />
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
+          </>
+        ) : (
+          loggedOutLinks.map((item) => (
+            <NavLink
+              key={item.label}
+              to={item.to}
+              onClick={onClose}
+              className={menuItemClass}
+            >
+              <img src={item.icon} alt="" className={iconClass} aria-hidden />
+              <span>{item.label}</span>
+            </NavLink>
+          ))
+        )}
       </div>
 
-      {/* Expert Tools */}
+      {/* Expert Tools — hidden entirely when logged out */}
+      {loggedIn && (
       <div className="pt-4">
         <p className={sectionHeader}>{expertMode ? "Expert tools" : "Sell on Leland"}</p>
         {expertMode ? (
@@ -337,8 +390,9 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
           </p>
         )}
       </div>
+      )}
 
-      {/* My Leland */}
+      {/* More */}
       <div className="pt-4">
         <p className={sectionHeader}>More</p>
         {myLelandItems.map((item) => (
@@ -353,6 +407,9 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
           </NavLink>
         ))}
 
+        {/* Account-specific items — hidden when logged out */}
+        {loggedIn && (
+        <>
         {/* Refer a friend — sits directly above Account */}
         <NavLink
           to="/my-leland/refer"
@@ -414,6 +471,8 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
             </motion.div>
           )}
         </AnimatePresence>
+        </>
+        )}
       </div>
 
       {/* Admin Tools — mt-auto pins it to the bottom of the sidebar when the
@@ -452,6 +511,13 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
               className="overflow-hidden"
             >
               <div className={`relative ml-[31px] border-l-[1.5px] ${darkMode ? "border-white/20" : "border-[#E5E5E5]"} pl-[25px] pr-5`}>
+                <button
+                  onClick={() => setLoggedIn((v) => !v)}
+                  className={`flex w-full items-center justify-between gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
+                >
+                  <span className="flex items-center gap-3"><svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>Logged in</span>
+                  {toggleSwitch(loggedIn)}
+                </button>
                 <button
                   onClick={toggleExpertMode}
                   className={`flex w-full items-center justify-between gap-3 py-[10px] text-[16px] font-normal ${textColor} transition-colors ${hoverBg}`}
@@ -543,6 +609,18 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
         </AnimatePresence>
 
       </div>
+
+      {/* Auth footer — pinned to the bottom when logged out */}
+      {!loggedIn && (
+        <div className={`sticky bottom-0 flex flex-col gap-2 border-t px-5 pb-5 pt-4 ${darkMode ? "border-white/10 bg-[#131313]" : "border-[#E5E5E5] bg-white"}`}>
+          <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" onClick={() => { onClose(); navigate("/onboarding-minimal-v2"); }}>
+            Get started
+          </Button>
+          <Button size="lg" variant="secondary" rounded="rounded-full" className="w-full" onClick={() => { onClose(); navigate("/onboarding-minimal-v2"); }}>
+            Log in
+          </Button>
+        </div>
+      )}
 
     </motion.div>
 
