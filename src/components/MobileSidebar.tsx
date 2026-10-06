@@ -266,15 +266,18 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
 
       {/* Primary nav */}
       <div className="pt-2">
-        {/* Browse — opens the category sub-panel */}
-        <button
-          onClick={() => setBrowseOpen(true)}
-          className={`${menuItemClass} w-full`}
-        >
-          <img src={globeIcon} alt="" className={iconClass} aria-hidden />
-          <span className="flex-1 text-left">Browse</span>
-          <img src={chevronRight} alt="" className="h-5 w-5 shrink-0 opacity-50" aria-hidden />
-        </button>
+        {/* Browse — opens the category sub-panel (logged-out only; logged-in
+            shows it as "Categories" at the top of the More section) */}
+        {!loggedIn && (
+          <button
+            onClick={() => setBrowseOpen(true)}
+            className={`${menuItemClass} w-full`}
+          >
+            <img src={globeIcon} alt="" className={iconClass} aria-hidden />
+            <span className="flex-1 text-left">Browse</span>
+            <img src={chevronRight} alt="" className="h-5 w-5 shrink-0 opacity-50" aria-hidden />
+          </button>
+        )}
         {loggedIn ? (
           <>
             {/* Profile — the signed-in user's own profile (My profile on). */}
@@ -395,6 +398,17 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
       {/* More */}
       <div className="pt-4">
         <p className={sectionHeader}>More</p>
+        {/* Categories — opens the category sub-panel (logged-in only) */}
+        {loggedIn && (
+          <button
+            onClick={() => setBrowseOpen(true)}
+            className={`${menuItemClass} w-full`}
+          >
+            <img src={globeIcon} alt="" className={iconClass} aria-hidden />
+            <span className="flex-1 text-left">All categories</span>
+            <img src={chevronRight} alt="" className="h-5 w-5 shrink-0 opacity-50" aria-hidden />
+          </button>
+        )}
         {myLelandItems.map((item) => (
           <NavLink
             key={item.label}
