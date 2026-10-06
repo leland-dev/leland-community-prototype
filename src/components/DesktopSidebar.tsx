@@ -411,6 +411,7 @@ export default function DesktopSidebar() {
                           <NavLink to="/onboarding" onClick={() => setAccountOpen(false)} className={accountItemClass}><span>Onboarding v1</span></NavLink>
                           <NavLink to="/onboarding-minimal" onClick={() => setAccountOpen(false)} className={accountItemClass}><span>Onboarding v2</span></NavLink>
                           <NavLink to="/onboarding-minimal-v2" onClick={() => setAccountOpen(false)} className={accountItemClass}><span>Onboarding v3</span></NavLink>
+                          <NavLink to="/ai-onboarding" onClick={() => setAccountOpen(false)} className={accountItemClass}><span>AI Builder onboarding</span></NavLink>
                           <NavLink to="/waitlist" onClick={() => setAccountOpen(false)} className={accountItemClass}><span>Waitlist</span></NavLink>
                           <NavLink to="/waitlist-onboarding" onClick={() => setAccountOpen(false)} className={accountItemClass}><span>Waitlist Onboarding</span></NavLink>
                         </motion.div>

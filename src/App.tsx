@@ -104,6 +104,7 @@ import Onboarding from "./pages/onboarding/Onboarding";
 import MinimalOnboarding from "./pages/onboarding/MinimalOnboarding";
 import MinimalOnboardingV2 from "./pages/onboarding/MinimalOnboardingV2";
 import MinimalOnboardingV4 from "./pages/onboarding/MinimalOnboardingV4";
+import AiOnboarding from "./pages/ai-onboarding/AiOnboarding";
 import ContentViewer from "./pages/ContentViewer";
 import LelandKitTest from "./pages/LelandKitTest";
 import LessonBlocksGallery from "./pages/LessonBlocksGallery";
@@ -135,6 +136,7 @@ export default function App() {
       <Route path="/onboarding-minimal" element={<MinimalOnboarding />} />
       <Route path="/onboarding-minimal-v2" element={<MinimalOnboardingV2 />} />
       <Route path="/onboarding-v4" element={<MinimalOnboardingV4 />} />
+      <Route path="/ai-onboarding" element={<AiOnboarding />} />
       <Route path="/waitlist" element={<Waitlist />} />
       <Route path="/waitlist-onboarding" element={<WaitlistOnboarding />} />
       <Route path="/reply/:postId" element={<ReplyCompose />} />
