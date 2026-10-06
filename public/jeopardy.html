@@ -16,7 +16,8 @@ html,body{height:100%;background:var(--bg);color:var(--fg);overflow:hidden;
 .tile{border:0;font:inherit;cursor:pointer;background:var(--tile);color:var(--accent);border-radius:.6vw;
   font-weight:800;font-size:clamp(28px,5.5vw,130px);transition:transform .15s,background .15s}
 .tile:hover{background:var(--tile2);transform:scale(1.03)}
-.tile.played{cursor:default;background:#0b1024;color:#ffffff22;transform:none;pointer-events:none}
+.tile.played{background:#0b1024;color:#ffffff22;transform:none}
+.tile.played:hover{color:#ffffff55}
 #clue{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;
   justify-content:center;padding:4vw 7vw;text-align:center;cursor:pointer}
 #clue.show{display:flex;animation:pop .35s ease-out}
@@ -141,11 +142,12 @@ function buildBoard() {
 }
 
 function openClue(c, r) {
-  if (!started || current || played.has(c + "_" + r)) return;
+  if (!started || current) return;
   const col = CONTENT.columns[c], k = col.clues[r];
+  const replay = played.has(c + "_" + r);   // reopening a played tile: jump straight to the answer, no music or splash
   current = { c, r }; revealed = false;
-  $("meta").textContent = (k.dailyDouble ? "DAILY DOUBLE  ·  " : "") + "$" + k.value + "  ·  " + col.pod;
-  if (k.dailyDouble) {
+  $("meta").textContent = (k.dailyDouble ? "DAILY DOUBLE  ·  " : "") + "$" + k.value + "  ·  " + col.pod + (replay ? "  ·  already played" : "");
+  if (k.dailyDouble && !replay) {
     const dd = $("dd"); dd.classList.remove("show"); void dd.offsetWidth; dd.classList.add("show");
     setTimeout(() => dd.classList.remove("show"), 2300);
     synthDailyDouble();
@@ -155,7 +157,13 @@ function openClue(c, r) {
   const img = $("img"); img.style.display = "none";
   clueEl.classList.remove("show"); void clueEl.offsetWidth; clueEl.classList.add("show");
   stopHype(800);
-  startThinking();
+  if (replay) {
+    revealed = true;
+    a.style.display = "block"; a.classList.add("show");
+    if (k.image) { img.src = k.image; img.style.display = "block"; }
+  } else {
+    startThinking();
+  }
 }
 
 function reveal() {
