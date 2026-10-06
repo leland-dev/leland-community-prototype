@@ -185,7 +185,7 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
     <div id="formMsg" class="msg"></div>
   </form>
 
-  <div class="list-head"><h2>Vote for your favorites</h2><span id="votesLeft">3 of 3 votes left</span></div>
+  <div class="list-head"><h2>Vote for your favorites</h2><span id="votesLeft">Unlimited upvotes</span></div>
   <div id="voteMsg" class="msg err"></div>
   <div id="phoneList"><div class="empty">Loading ideas…</div></div>
 </div>
@@ -322,8 +322,8 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
     function render(data) {
       last = data;
       const mine = new Set(data.myVotes || []);
-      const left = Math.max(0, 3 - mine.size);
-      $("votesLeft").textContent = left + " of 3 votes left";
+      const left = Infinity; // unlimited upvotes, one per idea
+      $("votesLeft").textContent = "Unlimited upvotes";
       $("lockBadge").textContent = data.locked ? "🔒 Jar locked" : "";
       $("submitBtn").textContent = data.locked ? "Jar is locked" : "Drop it in the jar";
       if (!data.ideas.length) { $("phoneList").innerHTML = '<div class="empty">No ideas yet. Be the first!</div>'; return; }

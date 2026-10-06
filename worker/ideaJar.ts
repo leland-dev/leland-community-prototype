@@ -6,7 +6,7 @@ export interface IdeaJarEnv {
 
 const SOURCES = ["Customer feedback", "Metric hypothesis", "Team pain point", "Gut instinct"];
 const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other"];
-const MAX_VOTES = 3;
+const MAX_VOTES = Infinity; // unlimited per device (still one vote per idea)
 const MAX_IDEAS_PER_DEVICE = 10;
 const RATE_MS = 10_000;
 
