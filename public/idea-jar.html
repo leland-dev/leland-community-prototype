@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Idea Jar</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// ===== Content: edit the Q4 big rocks here =====
+const ROCKS = {
+  bigRocks: [
+    { pod: "Community / Mobile", label: "Mobile community launch", talkingPoint: "Placeholder: ship the community experience on mobile so members can engage anywhere." },
+    { pod: "Marketplace", label: "Faster coach matching", talkingPoint: "Placeholder: get every customer to the right coach in fewer steps." },
+    { pod: "Solutions", label: "Enterprise-ready programs", talkingPoint: "Placeholder: package programs that partners can roll out at scale." },
+    { pod: "Growth", label: "Activation that sticks", talkingPoint: "Placeholder: turn first-week signups into habitual users." }
+  ]
+};
+const SOURCES = ["Customer feedback", "Metric hypothesis", "Team pain point", "Gut instinct"];
+const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other"];
+</script>
+<style>
+  :root {
+    --bg: #0e1411; --panel: #18211c; --line: #2a3830; --text: #f4f7f5; --muted: #9db0a5;
+    --accent: #15b26b; --accent-ink: #04140c; --yellow: #ffd23f; --danger: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  button { font: inherit; cursor: pointer; }
+  .hidden { display: none !important; }
+
+  /* ---------- Phone ---------- */
+  #phone { max-width: 480px; margin: 0 auto; padding: 12px 14px 40px; }
+  #phone h1 { font-size: 20px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+  #phone h1 small { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  .field { margin-bottom: 8px; }
+  .field label.lbl { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .field label.lbl span { color: var(--muted); font-weight: 500; }
+  textarea, input[type=text] { width: 100%; background: var(--panel); color: var(--text); border: 1px solid var(--line);
+    border-radius: 10px; padding: 8px 10px; font: inherit; font-size: 16px; resize: none; }
+  textarea:focus, input[type=text]:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 999px;
+    padding: 6px 11px; font-size: 13px; line-height: 1.2; }
+  .chip.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row input[type=text] { flex: 1; }
+  .check { display: flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
+  .check input { width: 18px; height: 18px; accent-color: var(--accent); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px;
+    font-weight: 500; line-height: 1.2; }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:disabled { opacity: .5; }
+  #submitBtn { width: 100%; padding: 13px; font-size: 17px; margin-top: 10px; }
+  .msg { font-size: 14px; margin-top: 8px; min-height: 0; }
+  .msg.err { color: var(--danger); }
+  .msg.ok { color: var(--accent); font-weight: 600; }
+  .list-head { display: flex; justify-content: space-between; align-items: baseline; margin: 22px 0 8px; }
+  .list-head h2 { font-size: 17px; margin: 0; }
+  .list-head span { font-size: 13px; color: var(--yellow); font-weight: 600; }
+  .pidea { display: flex; gap: 10px; align-items: flex-start; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; padding: 10px; margin-bottom: 8px; }
+  .pidea .body { flex: 1; min-width: 0; }
+  .pidea .txt { font-size: 15px; font-weight: 600; line-height: 1.3; word-wrap: break-word; }
+  .pidea .why { font-size: 13px; color: var(--muted); margin-top: 3px; word-wrap: break-word; }
+  .pidea .meta { font-size: 12px; color: var(--muted); margin-top: 5px; }
+  .vote { min-width: 52px; border: 1px solid var(--line); background: transparent; color: var(--text); border-radius: 10px;
+    padding: 6px 4px; display: flex; flex-direction: column; align-items: center; font-size: 15px; font-weight: 700; line-height: 1.1; }
+  .vote .arrow { font-size: 14px; }
+  .vote.on { background: var(--yellow); color: #1a1400; border-color: var(--yellow); }
+  .vote:disabled { opacity: .35; }
+  .empty { color: var(--muted); font-size: 14px; text-align: center; padding: 16px; }
+
+  /* ---------- TV ---------- */
+  #tv { position: fixed; inset: 0; overflow: hidden; }
+  .beat { position: absolute; inset: 0; }
+  .jar { position: relative; border: 10px solid rgba(255,255,255,.75); border-top-width: 0;
+    border-radius: 0 0 70px 70px; background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.09)); }
+  .jar::before { /* rim */ content: ""; position: absolute; left: -26px; right: -26px; top: -26px; height: 26px;
+    border: 10px solid rgba(255,255,255,.75); border-radius: 16px; }
+  #beat1 { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #beat1 h1 { font-size: 64px; margin: 0 0 48px; letter-spacing: -1px; }
+  #beat1 h1 em { color: var(--yellow); font-style: normal; }
+  #rockJar { width: 760px; height: 560px; }
+  .rock { position: absolute; width: 330px; height: 200px; border-radius: 48% 52% 44% 56% / 55% 50% 50% 45%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 16px 24px;
+    color: #10140f; box-shadow: inset -14px -18px 0 rgba(0,0,0,.18); animation: drop .8s cubic-bezier(.3,1.4,.6,1) both; }
+  .rock b { font-size: 34px; line-height: 1.1; }
+  .rock small { font-size: 20px; font-weight: 600; opacity: .7; margin-top: 6px; }
+  .rock:nth-child(1) { left: 25px; bottom: 15px; background: #ffd23f; }
+  .rock:nth-child(2) { right: 25px; bottom: 25px; background: #7fd8a8; }
+  .rock:nth-child(3) { left: 50px; bottom: 235px; background: #8ec5ff; }
+  .rock:nth-child(4) { right: 40px; bottom: 245px; background: #ff9f80; }
+  @keyframes drop { from { transform: translateY(-900px) rotate(-12deg); } to { transform: none; } }
+  #caption { margin-top: 44px; font-size: 34px; color: var(--muted); max-width: 1400px; text-align: center; min-height: 90px; line-height: 1.35; }
+  .hint { position: absolute; bottom: 18px; right: 28px; font-size: 16px; color: #4f6358; }
+
+  #beat2 { display: flex; padding: 56px 64px; gap: 64px; }
+  #b2left { width: 40%; display: flex; flex-direction: column; align-items: center; }
+  #b2left h1 { font-size: 52px; margin: 0 0 24px; text-align: center; letter-spacing: -1px; }
+  #qr { background: #fff; padding: 18px; border-radius: 18px; }
+  #qr img, #qr canvas { display: block; }
+  #shortUrl { font-size: 30px; font-weight: 700; color: var(--yellow); margin-top: 16px; word-break: break-all; text-align: center; }
+  #pebbleJar { width: 440px; height: 330px; margin-top: 60px; overflow: visible; }
+  #pebbleJar .clip { position: absolute; inset: 0; overflow: hidden; border-radius: 0 0 60px 60px; }
+  .pebble { position: absolute; width: 38px; height: 38px; border-radius: 50%; box-shadow: inset -5px -6px 0 rgba(0,0,0,.2); }
+  .pebble.fall { animation: pfall 1s cubic-bezier(.4,1.3,.6,1) both; }
+  @keyframes pfall { from { transform: translateY(-700px); opacity: 0; } 20% { opacity: 1; } to { transform: none; } }
+  #jarCount { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 96px; font-weight: 800; text-shadow: 0 4px 24px rgba(0,0,0,.8); z-index: 2; pointer-events: none; }
+  #jarCount span { font-size: 26px; font-weight: 600; color: var(--muted); }
+  #b2right { width: 60%; display: flex; flex-direction: column; min-width: 0; }
+  #b2right h2 { font-size: 40px; margin: 0 0 20px; display: flex; justify-content: space-between; align-items: baseline; }
+  #b2right h2 span { font-size: 24px; color: var(--danger); }
+  #tvList { flex: 1; overflow: hidden; }
+  .tvrow { display: flex; gap: 22px; align-items: flex-start; padding: 16px 22px; border-radius: 16px; margin-bottom: 10px;
+    background: var(--panel); border: 2px solid transparent; cursor: pointer; }
+  .tvrow.sel { border-color: var(--yellow); }
+  .tvrow .rank { font-size: 30px; font-weight: 800; color: var(--muted); width: 48px; flex: none; }
+  .tvrow .body { flex: 1; min-width: 0; }
+  .tvrow .txt { font-size: 32px; font-weight: 700; line-height: 1.25; }
+  .tvrow .meta { margin-top: 8px; display: flex; gap: 12px; align-items: center; font-size: 22px; color: var(--muted); flex-wrap: wrap; }
+  .pill { background: rgba(21,178,107,.18); color: #7fe0b0; border-radius: 999px; padding: 4px 14px; font-size: 20px; font-weight: 600; }
+  .tvrow .why { font-size: 26px; color: var(--text); opacity: .85; margin-top: 12px; line-height: 1.35; }
+  .tvrow .votes { font-size: 44px; font-weight: 800; color: var(--yellow); flex: none; text-align: center; min-width: 80px; }
+  .tvrow .votes small { display: block; font-size: 16px; color: var(--muted); font-weight: 600; }
+  .hidebtn { font-size: 14px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--danger); color: var(--danger); background: transparent; }
+</style>
+</head>
+<body>
+
+<!-- ================= PHONE VIEW ================= -->
+<div id="phone" class="hidden">
+  <h1>🫙 Drop an idea in the jar <small id="lockBadge"></small></h1>
+  <form id="ideaForm" autocomplete="off">
+    <div class="field">
+      <label class="lbl" for="ideaInput">The idea <span id="ideaCount">0/140</span></label>
+      <textarea id="ideaInput" rows="2" maxlength="140" placeholder="What should we build or try?"></textarea>
+    </div>
+    <div class="field">
+      <label class="lbl" for="whyInput">Why it matters <span id="whyCount">0/200</span></label>
+      <textarea id="whyInput" rows="2" maxlength="200" placeholder="What problem does it solve?"></textarea>
+    </div>
+    <div class="field">
+      <label class="lbl">Where'd it come from? <span>required</span></label>
+      <div class="chips" id="sourceChips"></div>
+    </div>
+    <div class="field">
+      <label class="lbl">Which pod? <span>optional</span></label>
+      <div class="chips" id="podChips"></div>
+    </div>
+    <div class="row">
+      <input type="text" id="nameInput" maxlength="60" placeholder="Your name">
+      <label class="check"><input type="checkbox" id="showName" checked> Show my name</label>
+    </div>
+    <button type="submit" id="submitBtn" class="btn btn-primary">Drop it in the jar</button>
+    <div id="formMsg" class="msg"></div>
+  </form>
+
+  <div class="list-head"><h2>Vote for your favorites</h2><span id="votesLeft">3 of 3 votes left</span></div>
+  <div id="voteMsg" class="msg err"></div>
+  <div id="phoneList"><div class="empty">Loading ideas…</div></div>
+</div>
+
+<!-- ================= TV VIEW ================= -->
+<div id="tv" class="hidden">
+  <div id="beat1" class="beat">
+    <h1>Q4: our <em>big rocks</em></h1>
+    <div id="rockJar" class="jar"></div>
+    <div id="caption"></div>
+    <div class="hint">→ next · ← back</div>
+  </div>
+  <div id="beat2" class="beat hidden">
+    <div id="b2left">
+      <h1>Fill the jar with your ideas</h1>
+      <div id="qr"></div>
+      <div id="shortUrl"></div>
+      <div id="pebbleJar" class="jar">
+        <div class="clip" id="pebbles"></div>
+        <div id="jarCount">0<span>ideas</span></div>
+      </div>
+    </div>
+    <div id="b2right">
+      <h2>Top ideas <span id="tvLocked"></span></h2>
+      <div id="tvList"></div>
+    </div>
+    <div class="hint">↑ ↓ select · ← back</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const params = new URLSearchParams(location.search);
+  const IS_TV = params.get("view") === "tv";
+  const ADMIN_KEY = params.get("key") || null; // kept in memory only
+
+  function getDeviceId() {
+    let id = null;
+    try { id = localStorage.getItem("ideaJarDeviceId"); } catch (e) {}
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now());
+      try { localStorage.setItem("ideaJarDeviceId", id); } catch (e) {}
+    }
+    return id;
+  }
+  const DEVICE_ID = getDeviceId();
+
+  // ===== store: the only place that talks to the API =====
+  async function api(method, path, body) {
+    const res = await fetch(path, {
+      method,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+      cache: "no-store",
+    });
+    let data = {};
+    try { data = await res.json(); } catch (e) {}
+    if (!res.ok) throw new Error(data.error || ("Request failed (" + res.status + ")"));
+    return data;
+  }
+  const store = {
+    addIdea(fields) { return api("POST", "/api/ideas", Object.assign({ deviceId: DEVICE_ID }, fields)); },
+    vote(ideaId) { return api("POST", "/api/votes", { deviceId: DEVICE_ID, ideaId }); },
+    unvote(ideaId) { return api("POST", "/api/unvote", { deviceId: DEVICE_ID, ideaId }); },
+    hideIdea(id) { return api("POST", "/api/ideas/hide", { id, key: ADMIN_KEY }); },
+    subscribeIdeas(cb) {
+      let stopped = false, timer = null;
+      const tick = async () => {
+        try { cb(await api("GET", "/api/ideas?deviceId=" + encodeURIComponent(DEVICE_ID))); } catch (e) {}
+        if (!stopped) timer = setTimeout(tick, 2000);
+      };
+      tick();
+      return { refresh() { clearTimeout(timer); tick(); }, stop() { stopped = true; clearTimeout(timer); } };
+    },
+  };
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  const $ = id => document.getElementById(id);
+
+  if (IS_TV) initTV(); else initPhone();
+
+  // ================= PHONE =================
+  function initPhone() {
+    $("phone").classList.remove("hidden");
+    let source = null, pod = null, last = null;
+
+    function renderChips(el, items, getSel, setSel) {
+      el.innerHTML = items.map(t => `<button type="button" class="chip" data-v="${esc(t)}">${esc(t)}</button>`).join("");
+      el.addEventListener("click", e => {
+        const b = e.target.closest(".chip"); if (!b) return;
+        const v = b.dataset.v;
+        setSel(getSel() === v ? null : v);
+        el.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.v === getSel()));
+      });
+    }
+    renderChips($("sourceChips"), SOURCES, () => source, v => { source = v; });
+    renderChips($("podChips"), PODS, () => pod, v => { pod = v; });
+
+    const ideaIn = $("ideaInput"), whyIn = $("whyInput"), nameIn = $("nameInput"), showIn = $("showName");
+    const upd = () => { $("ideaCount").textContent = ideaIn.value.length + "/140"; $("whyCount").textContent = whyIn.value.length + "/200"; };
+    ideaIn.addEventListener("input", upd); whyIn.addEventListener("input", upd);
+    try { nameIn.value = localStorage.getItem("ideaJarName") || ""; } catch (e) {}
+    nameIn.addEventListener("input", () => { try { localStorage.setItem("ideaJarName", nameIn.value); } catch (e) {} });
+
+    const msg = (text, cls) => { const m = $("formMsg"); m.textContent = text || ""; m.className = "msg " + (cls || ""); };
+
+    $("ideaForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const idea = ideaIn.value.trim();
+      if (!idea) return msg("Add your idea first.", "err");
+      if (!source) return msg("Pick where it came from.", "err");
+      const btn = $("submitBtn"); btn.disabled = true;
+      try {
+        await store.addIdea({ idea, why: whyIn.value.trim(), source, pod, authorName: nameIn.value.trim(), showName: showIn.checked });
+        ideaIn.value = ""; whyIn.value = ""; source = null; pod = null; upd();
+        document.querySelectorAll("#sourceChips .chip, #podChips .chip").forEach(c => c.classList.remove("on"));
+        msg("In the jar! 🎉 Got another one?", "ok");
+        setTimeout(() => { if ($("formMsg").classList.contains("ok")) msg(""); }, 4000);
+        sub.refresh();
+      } catch (err) { msg(err.message, "err"); }
+      finally { btn.disabled = false; }
+    });
+
+    $("phoneList").addEventListener("click", async e => {
+      const b = e.target.closest(".vote"); if (!b || b.disabled) return;
+      const id = b.dataset.id, voted = b.classList.contains("on");
+      $("voteMsg").textContent = "";
+      b.disabled = true;
+      try { voted ? await store.unvote(id) : await store.vote(id); }
+      catch (err) { $("voteMsg").textContent = err.message; }
+      sub.refresh();
+    });
+
+    function render(data) {
+      last = data;
+      const mine = new Set(data.myVotes || []);
+      const left = Math.max(0, 3 - mine.size);
+      $("votesLeft").textContent = left + " of 3 votes left";
+      $("lockBadge").textContent = data.locked ? "🔒 Jar locked" : "";
+      $("submitBtn").textContent = data.locked ? "Jar is locked" : "Drop it in the jar";
+      if (!data.ideas.length) { $("phoneList").innerHTML = '<div class="empty">No ideas yet. Be the first!</div>'; return; }
+      $("phoneList").innerHTML = data.ideas.map(i => {
+        const on = mine.has(i.id);
+        const dis = data.locked || (!on && left === 0);
+        const meta = [i.source, i.pod, i.authorName].filter(Boolean).map(esc).join(" · ");
+        return `<div class="pidea">
+          <div class="body"><div class="txt">${esc(i.idea)}</div>${i.why ? `<div class="why">${esc(i.why)}</div>` : ""}<div class="meta">${meta}</div></div>
+          <button type="button" class="vote${on ? " on" : ""}" data-id="${esc(i.id)}"${dis ? " disabled" : ""} aria-label="${on ? "Remove vote" : "Upvote"}"><span class="arrow">▲</span>${i.votes}</button>
+        </div>`;
+      }).join("");
+    }
+    const sub = store.subscribeIdeas(render);
+  }
+
+  // ================= TV =================
+  function initTV() {
+    $("tv").classList.remove("hidden");
+    const N = ROCKS.bigRocks.length;
+    // 0..N = rocks shown in beat 1; N+1 = beat 2. ?step=live jumps straight to the live jar.
+    const stepParam = new URLSearchParams(location.search).get("step");
+    let step = stepParam === "live" ? N + 1 : Math.min(N + 1, Math.max(0, parseInt(stepParam || "0", 10) || 0));
+    let selected = -1, ideas = [], started = false;
+    const seen = new Set();
+    const pebbleColors = ["#ffd23f", "#7fd8a8", "#8ec5ff", "#ff9f80", "#d7b8ff", "#f4f7f5"];
+
+    function renderBeat1() {
+      const jar = $("rockJar");
+      const shown = Math.min(step, N);
+      // add/remove rocks to match step (only newly added ones animate)
+      while (jar.children.length > shown) jar.removeChild(jar.lastChild);
+      while (jar.children.length < shown) {
+        const r = ROCKS.bigRocks[jar.children.length];
+        const d = document.createElement("div");
+        d.className = "rock";
+        d.innerHTML = `<b>${esc(r.label)}</b><small>${esc(r.pod)}</small>`;
+        jar.appendChild(d);
+      }
+      $("caption").textContent = shown ? ROCKS.bigRocks[shown - 1].talkingPoint : "";
+    }
+    function show() {
+      const b2 = step > N;
+      $("beat1").classList.toggle("hidden", b2);
+      $("beat2").classList.toggle("hidden", !b2);
+      if (!b2) renderBeat1(); else startBeat2();
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowRight") { if (step <= N) { step++; show(); } }
+      else if (e.key === "ArrowLeft") { if (step > 0) { step--; show(); } }
+      else if (step > N && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+        e.preventDefault();
+        if (!ideas.length) return;
+        selected = e.key === "ArrowDown" ? Math.min(ideas.length - 1, selected + 1) : Math.max(0, selected - 1);
+        renderList();
+      }
+    });
+
+    function phoneUrl() {
+      const u = new URL(location.href);
+      u.searchParams.delete("view"); u.searchParams.delete("key"); u.searchParams.delete("step"); u.hash = "";
+      return u.toString();
+    }
+
+    function addPebble(animate, delay) {
+      const box = $("pebbles");
+      if (box.children.length >= 40) return;
+      const n = box.children.length;
+      const perRow = 10, size = 38;
+      const col = n % perRow, row = Math.floor(n / perRow);
+      const p = document.createElement("div");
+      p.className = "pebble" + (animate ? " fall" : "");
+      p.style.left = (12 + col * 41 + (row % 2 ? 10 : 0) + Math.random() * 4) + "px";
+      p.style.bottom = (6 + row * (size - 4)) + "px";
+      p.style.background = pebbleColors[Math.floor(Math.random() * pebbleColors.length)];
+      if (delay) p.style.animationDelay = delay + "ms";
+      box.appendChild(p);
+    }
+
+    function renderList() {
+      const sel = ideas[selected] ? ideas[selected].id : null;
+      $("tvList").innerHTML = ideas.slice(0, 12).map((i, idx) => `
+        <div class="tvrow${i.id === sel ? " sel" : ""}" data-idx="${idx}">
+          <div class="rank">${idx + 1}</div>
+          <div class="body">
+            <div class="txt">${esc(i.idea)}</div>
+            <div class="meta"><span class="pill">${esc(i.source)}</span>${i.pod ? `<span>${esc(i.pod)}</span>` : ""}${i.authorName ? `<span>— ${esc(i.authorName)}</span>` : ""}
+              ${ADMIN_KEY ? `<button type="button" class="hidebtn" data-hide="${esc(i.id)}">hide</button>` : ""}</div>
+            ${i.id === sel && i.why ? `<div class="why">${esc(i.why)}</div>` : ""}
+          </div>
+          <div class="votes">${i.votes}<small>votes</small></div>
+        </div>`).join("") || '<div class="empty" style="font-size:28px">Scan the code and drop the first idea in.</div>';
+    }
+
+    $("tvList").addEventListener("click", async e => {
+      const h = e.target.closest("[data-hide]");
+      if (h) {
+        e.stopPropagation();
+        h.disabled = true;
+        try { await store.hideIdea(h.dataset.hide); } catch (err) { alert(err.message); }
+        sub && sub.refresh();
+        return;
+      }
+      const row = e.target.closest(".tvrow"); if (!row) return;
+      const idx = Number(row.dataset.idx);
+      selected = selected === idx ? -1 : idx;
+      renderList();
+    });
+
+    let sub = null;
+    function startBeat2() {
+      if (started) return;
+      started = true;
+      const url = phoneUrl();
+      $("shortUrl").textContent = url.replace(/^https?:\/\//, "");
+      try { new QRCode($("qr"), { text: url, width: 340, height: 340, correctLevel: QRCode.CorrectLevel.M }); }
+      catch (e) { $("qr").textContent = "QR unavailable"; }
+      let first = true;
+      sub = store.subscribeIdeas(data => {
+        const selId = ideas[selected] ? ideas[selected].id : null;
+        ideas = data.ideas || [];
+        selected = selId ? ideas.findIndex(i => i.id === selId) : -1;
+        if (!ideas.length && seen.size) { seen.clear(); $("pebbles").innerHTML = ""; } // jar was reset
+        let k = 0;
+        ideas.slice().sort((a, b) => a.createdAt - b.createdAt).forEach(i => {
+          if (!seen.has(i.id)) { seen.add(i.id); addPebble(true, first ? k++ * 60 : k++ * 250); }
+        });
+        first = false;
+        $("jarCount").innerHTML = data.count + "<span>idea" + (data.count === 1 ? "" : "s") + "</span>";
+        $("tvLocked").textContent = data.locked ? "🔒 Jar locked" : "";
+        renderList();
+      });
+    }
+
+    show();
+  }
+})();
+</script>
+</body>
+</html>

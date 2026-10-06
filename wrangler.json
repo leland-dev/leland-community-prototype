@@ -16,5 +16,10 @@
 			"binding": "AGENTS_KV",
 			"id": "c9d42c2b90aa4982bd42e9c51aa37b04"
 		}
-	]
+	],
+	"durable_objects": {
+		"bindings": [{ "name": "IDEA_JAR", "class_name": "IdeaJar" }]
+	},
+	"migrations": [{ "tag": "v1", "new_sqlite_classes": ["IdeaJar"] }],
+	"vars": { "ADMIN_KEY": "set-before-deploy" }
 }
