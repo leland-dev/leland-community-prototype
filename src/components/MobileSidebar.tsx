@@ -21,11 +21,15 @@ import lteSignalIcon from "../assets/icons/lte-signal.svg";
 import myCoursesIcon from "../assets/icons/my-courses.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
 import toolsIcon from "../assets/icons/tools-wrench-ruler.svg";
-import userIcon from "../assets/icons/user.svg";
 import chartIcon from "../assets/icons/chart.svg";
+import userIcon from "../assets/icons/user.svg";
 import starIcon from "../assets/icons/star-icon.svg";
+import chevronRight from "../assets/icons/chevron-right.svg";
 import discountIcon from "../assets/icons/discount.svg";
 import giftIcon from "../assets/icons/gift.svg";
+import globeIcon from "../assets/icons/globe.svg";
+import messagesIcon from "../assets/icons/chat-inactive-bold.svg";
+import goalsIcon from "../assets/icons/star-review.svg";
 
 interface MobileSidebarProps {
   open: boolean;
@@ -38,12 +42,40 @@ const sectionHeaderBase =
 const menuItemBase =
   "flex items-center gap-3 px-5 py-[10px] text-[16px] font-normal transition-colors";
 
+// Profile preview — name, high-level headline, and the stat row that mirrors
+// the home-feed left-sidebar profile card.
+const PROFILE_NAME = "Alex Rivera";
+const PROFILE_STATS = [
+  { value: "4.9", label: "38 reviews", star: true },
+  { value: "84", label: "Followers" },
+  { value: "22.9k", label: "Likes" },
+];
+
 // My Leland tabs — mirrors the personal (non-expert) nav in the My Leland shell.
 // Dashboard is omitted: the bottom navbar's "My Leland" tab already lands there.
+// Profile is hidden on mobile; Messages takes its place. Browse is rendered
+// separately above these (it opens the category sub-panel rather than linking).
 const myLelandTabs = [
-  { icon: userIcon, label: "Profile", to: "/my-leland/profile" },
+  { icon: messagesIcon, label: "Messages", to: "/messages" },
   { icon: calendarPageIcon, label: "Calendar", to: "/my-leland/calendar" },
-  { icon: giftIcon, label: "Refer a friend", to: "/my-leland/refer" },
+  { icon: goalsIcon, label: "Goals", to: "/my-leland/goals" },
+];
+
+// Top-level category buckets shown in the Browse sub-panel (mirrors BrowseMenu).
+const browseCategories = [
+  "Popular",
+  "General",
+  "AI",
+  "School Admissions",
+  "Test Prep",
+  "Business",
+  "Finance & Accounting",
+  "Product",
+  "Technology",
+  "Health & Medicine",
+  "Law & Public Service",
+  "Arts, Media, and Entertainment",
+  "More",
 ];
 
 // Show at most this many expert tools inline; the rest collapse behind a "More"
@@ -113,6 +145,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const [adminOpen, setAdminOpen] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
   const [expertMoreOpen, setExpertMoreOpen] = useState(false);
+  const [browseOpen, setBrowseOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const textColor = darkMode ? "text-white" : "text-[#4c4c4c]";
@@ -149,13 +182,15 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
       setAccountOpen(false);
       setAdminOpen(false);
       setExpertMoreOpen(false);
+      setBrowseOpen(false);
     }
   }, [open]);
 
   return (
+    <div className="relative h-full w-[280px] overflow-hidden">
     <motion.div
       ref={scrollRef}
-      className={`flex h-full w-[280px] flex-col overflow-y-auto pb-6 scrollbar-hide ${darkMode ? "bg-[#131313]" : "bg-white"}`}
+      className={`flex h-full w-full flex-col overflow-y-auto pb-6 scrollbar-hide ${darkMode ? "bg-[#131313]" : "bg-white"}`}
       animate={{ scale: open ? 1 : 0.95, opacity: open ? 1 : 0 }}
       transition={{ duration: 0.3, ease: [0.42, 0, 0.58, 1] }}
       style={{ transformOrigin: "left center" }}
@@ -163,26 +198,56 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
     >
       {/* Profile header */}
       <div className="px-5 pt-6 pb-4">
+        {/* Photo */}
+        <img
+          src={profilePhoto}
+          alt={PROFILE_NAME}
+          className="h-12 w-12 shrink-0 rounded-full object-cover"
+        />
+
+        {/* Name — stacked under the photo */}
         <NavLink
-          to="/profile-v2"
+          to="/profile/june-allen?me=1"
           onClick={onClose}
-          className="flex items-center gap-3"
+          className="mt-3 block min-w-0"
         >
-          <img
-            src={profilePhoto}
-            alt="Jane Doe"
-            className="h-12 w-12 rounded-full object-cover"
-          />
-          <div>
-            <p className={`text-[18px] font-medium ${darkMode ? "text-white" : "text-gray-dark"}`}>Jane Doe</p>
-            <p className="text-[15px] text-gray-light">View profile</p>
-          </div>
+          <p className={`text-[18px] font-semibold ${darkMode ? "text-white" : "text-gray-dark"}`}>{PROFILE_NAME}</p>
         </NavLink>
+
+        {/* Stat row — compact, inline metrics (value + label on one line) */}
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1">
+          {PROFILE_STATS.filter((s) => !s.star).map((s) => (
+            <span key={s.label} className="text-[14px] leading-none text-gray-light">
+              <span className={`font-medium ${darkMode ? "text-white" : "text-gray-dark"}`}>{s.value}</span>{" "}
+              {s.label}
+            </span>
+          ))}
+        </div>
       </div>
 
-      {/* My Leland */}
+      {/* Divider between profile and the links below */}
+      <div className={`mx-5 border-t ${darkMode ? "border-white/20" : "border-[#E5E5E5]"}`} />
+
+      {/* Primary nav */}
       <div className="pt-2">
-        <p className={sectionHeader}>My Leland</p>
+        {/* Browse — opens the category sub-panel */}
+        <button
+          onClick={() => setBrowseOpen(true)}
+          className={`${menuItemClass} w-full`}
+        >
+          <img src={globeIcon} alt="" className={iconClass} aria-hidden />
+          <span className="flex-1 text-left">Browse</span>
+          <img src={chevronRight} alt="" className="h-5 w-5 shrink-0 opacity-50" aria-hidden />
+        </button>
+        {/* Profile — the signed-in user's own profile (My profile on). */}
+        <NavLink
+          to="/profile/june-allen?me=1"
+          onClick={onClose}
+          className={menuItemClass}
+        >
+          <img src={userIcon} alt="" className={iconClass} aria-hidden />
+          <span>Profile</span>
+        </NavLink>
         {myLelandTabs.map((item) => (
           <NavLink
             key={item.to}
@@ -264,7 +329,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
             )}
           </>
         ) : (
-          <p className="px-5 py-[10px] text-[16px] font-normal text-gray-extra-light">
+          <p className="px-5 pt-0 pb-[10px] text-[16px] font-normal text-gray-extra-light">
             You haven't set up your expert profile yet.{" "}
             <button onClick={onClose} className={`${textColor} underline decoration-dotted decoration-[1.5px] underline-offset-[3px]`}>
               Get started
@@ -287,6 +352,16 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
             <span>{item.label}</span>
           </NavLink>
         ))}
+
+        {/* Refer a friend — sits directly above Account */}
+        <NavLink
+          to="/my-leland/refer"
+          onClick={onClose}
+          className={menuItemClass}
+        >
+          <img src={giftIcon} alt="" className={iconClass} aria-hidden />
+          <span>Refer a friend</span>
+        </NavLink>
 
         {/* Account accordion */}
         <button
@@ -470,5 +545,47 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
       </div>
 
     </motion.div>
+
+      {/* Browse sub-panel — slides in from the right over the sidebar. */}
+      <AnimatePresence>
+        {browseOpen && (
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ duration: 0.3, ease: [0.42, 0, 0.58, 1] }}
+            className={`absolute inset-0 z-10 flex h-full flex-col overflow-y-auto pb-6 scrollbar-hide ${darkMode ? "bg-[#131313]" : "bg-white"}`}
+          >
+            {/* Back button + divider */}
+            <div className="px-5 pt-6 pb-2">
+              <button
+                onClick={() => setBrowseOpen(false)}
+                className={`flex items-center gap-2 text-[16px] font-normal ${textColor}`}
+              >
+                <img src={chevronRight} alt="" className="h-5 w-5 rotate-180 opacity-70" aria-hidden />
+                <span>Back</span>
+              </button>
+            </div>
+            <div className={`mx-5 border-t ${darkMode ? "border-white/20" : "border-[#E5E5E5]"}`} />
+
+            {/* Category list */}
+            <div className="pt-2">
+              {browseCategories.map((name) => (
+                <NavLink
+                  key={name}
+                  to="/browse"
+                  onClick={onClose}
+                  className={`${menuItemClass} justify-between`}
+                >
+                  <span>{name}</span>
+                  <img src={chevronRight} alt="" className="h-5 w-5 shrink-0 opacity-50" aria-hidden />
+                </NavLink>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </div>
   );
 }
