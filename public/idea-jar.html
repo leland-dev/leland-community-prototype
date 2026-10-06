@@ -34,6 +34,8 @@ const ROCKS = {
 };
 // Flattened for the slide: [{pod, color, label, talkingPoint}, ...]
 const ROCK_LIST = ROCKS.pods.flatMap(p => p.rocks.map(r => ({ pod: p.pod, color: p.color, ...r })));
+// Pretty link shown under the QR on the TV. The QR itself still encodes the real page URL. Set to null to show the real URL.
+const SHORT_URL = "https://bit.ly/4ASJRlx";
 const SOURCES = ["Customer feedback", "Metric hypothesis", "Team pain point", "Gut instinct"];
 const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other"];
 </script>
@@ -454,7 +456,7 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
       if (started) return;
       started = true;
       const url = phoneUrl();
-      $("shortUrl").textContent = url.replace(/^https?:\/\//, "");
+      $("shortUrl").textContent = (SHORT_URL || url).replace(/^https?:\/\//, "");
       try { new QRCode($("qr"), { text: url, width: 340, height: 340, correctLevel: QRCode.CorrectLevel.M }); }
       catch (e) { $("qr").textContent = "QR unavailable"; }
       let first = true;
