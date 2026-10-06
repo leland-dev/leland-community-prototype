@@ -254,10 +254,16 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
     hideIdea(id) { return api("POST", "/api/ideas/hide", { id, key: ADMIN_KEY }); },
     subscribeIdeas(cb) {
       let stopped = false, timer = null;
+      // TV polls every 3s, phones every 5s, and backgrounded tabs don't poll at all. Keeps request volume
+      // well under the free-tier daily caps with a room full of phones.
+      const interval = new URLSearchParams(location.search).get("view") === "tv" ? 3000 : 5000;
       const tick = async () => {
-        try { cb(await api("GET", "/api/ideas?deviceId=" + encodeURIComponent(DEVICE_ID))); } catch (e) {}
-        if (!stopped) timer = setTimeout(tick, 2000);
+        if (!document.hidden) {
+          try { cb(await api("GET", "/api/ideas?deviceId=" + encodeURIComponent(DEVICE_ID))); } catch (e) {}
+        }
+        if (!stopped) timer = setTimeout(tick, interval);
       };
+      document.addEventListener("visibilitychange", () => { if (!document.hidden && !stopped) { clearTimeout(timer); tick(); } });
       tick();
       return { refresh() { clearTimeout(timer); tick(); }, stop() { stopped = true; clearTimeout(timer); } };
     },

@@ -52,6 +52,7 @@ export class IdeaJar extends DurableObject<IdeaJarEnv> {
     const url = new URL(request.url);
     const path = url.pathname;
     const method = request.method;
+    if (method === "POST") this.cache = null;   // every write goes through POST; drop the snapshot
     let body: any = {};
     if (method === "POST") {
       try {
@@ -96,24 +97,35 @@ export class IdeaJar extends DurableObject<IdeaJarEnv> {
     }
   }
 
-  list(deviceId: string): Response {
+  // In-memory snapshot of the visible list. Dozens of phones + the TV poll this every few seconds, and the
+  // free tier caps SQLite rows read per day, so reads must not hit storage on every poll. Rebuilt lazily
+  // after any write (fetch() clears it on every POST) or after the DO is evicted from memory.
+  cache: { ideas: any[]; votesByDevice: Map<string, string[]>; locked: boolean } | null = null;
+
+  buildCache() {
     const ideas = this.sql
-      .exec(
-        `SELECT i.id, i.idea, i.why, i.source, i.pod, i.author_name AS authorName, i.created_at AS createdAt,
-           (SELECT COUNT(*) FROM votes v WHERE v.idea_id = i.id) AS votes
-         FROM ideas i WHERE i.hidden = 0 ORDER BY votes DESC, i.created_at ASC`,
-      )
+      .exec(`SELECT id, idea, why, source, pod, author_name AS authorName, created_at AS createdAt FROM ideas WHERE hidden = 0`)
       .toArray();
-    const myVotes = deviceId
-      ? this.sql
-          .exec(
-            `SELECT v.idea_id AS id FROM votes v JOIN ideas i ON i.id = v.idea_id WHERE v.device_id = ? AND i.hidden = 0`,
-            deviceId,
-          )
-          .toArray()
-          .map((r: any) => r.id)
-      : [];
-    return json({ ideas, myVotes, count: ideas.length, locked: this.isLocked() });
+    const votes = this.sql.exec(`SELECT idea_id, device_id FROM votes`).toArray();
+    const visible = new Set(ideas.map((i: any) => i.id));
+    const counts = new Map<string, number>();
+    const votesByDevice = new Map<string, string[]>();
+    for (const v of votes) {
+      if (!visible.has(v.idea_id)) continue;
+      counts.set(v.idea_id, (counts.get(v.idea_id) || 0) + 1);
+      if (!votesByDevice.has(v.device_id)) votesByDevice.set(v.device_id, []);
+      votesByDevice.get(v.device_id)!.push(v.idea_id);
+    }
+    for (const i of ideas) i.votes = counts.get(i.id) || 0;
+    ideas.sort((a: any, b: any) => b.votes - a.votes || a.createdAt - b.createdAt);
+    this.cache = { ideas, votesByDevice, locked: this.isLocked() };
+    return this.cache;
+  }
+
+  list(deviceId: string): Response {
+    const c = this.cache || this.buildCache();
+    const myVotes = deviceId ? c.votesByDevice.get(deviceId) || [] : [];
+    return json({ ideas: c.ideas, myVotes, count: c.ideas.length, locked: c.locked });
   }
 
   create(b: any): Response {
