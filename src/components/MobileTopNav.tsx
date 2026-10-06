@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import moreIcon from "../assets/icons/nav-icons/more-active.svg";
+import notificationsActive from "../assets/icons/nav-icons/notifications-active.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import logoIcon from "../assets/logos/leland-logo-split/Icon.svg";
 import logoWordmark from "../assets/logos/leland-logo-split/Wordmark.svg";
@@ -20,10 +20,12 @@ export default function MobileTopNav() {
   const { dark: darkMode } = useDarkMode();
   // On a post detail page the left slot becomes a Back button (returns the
   // user to wherever they came from) instead of the menu.
-  const isPostDetail = location.pathname.startsWith("/post/") || location.pathname.startsWith("/alt-nav/post/");
+  const isPostDetail = location.pathname.startsWith("/post/");
   // The profile template (/profile/:slug) also uses a Back button instead of
   // the sidebar menu.
   const isProfileTemplate = location.pathname.startsWith("/profile/");
+  // Inside the /alt-nav experience, keep Notifications on the alt route.
+  const inAltNav = location.pathname.startsWith("/alt-nav") || location.pathname.startsWith("/my-leland");
   // In dark mode, override nav to #111111 only when the page uses the default (white) nav theme.
   // Pages that set their own bg (profile, dashboard) keep their custom color.
   const darkNav = darkMode && navTheme.bg === "white";
@@ -101,9 +103,9 @@ export default function MobileTopNav() {
           className="flex h-8 w-8 items-center justify-center"
         >
           <img
-            src={moreIcon}
+            src={profilePhoto}
             alt="Menu"
-            className={`h-[23px] w-[23px] ${iconFilter}`}
+            className="h-8 w-8 rounded-full object-cover"
           />
         </button>
       )}
@@ -140,17 +142,27 @@ export default function MobileTopNav() {
         )}
       </button>
 
-      {/* Right: custom slot or default profile photo */}
+      {/* Right: page-provided custom slot, otherwise the Notifications icon
+          (pinned here in the top-right; Jobs took its old spot in the bottom
+          tab bar). */}
       {rightSlot ?? (
         <NavLink
-          to="/profile/june-allen?me=1"
-          className="flex h-8 w-8 items-center justify-center"
+          to={inAltNav ? "/alt-nav/notifications" : "/notifications"}
+          aria-label="Notifications"
+          className="relative flex h-8 w-8 items-center justify-center"
         >
-          <img
-            src={profilePhoto}
-            alt="Profile"
-            className="h-8 w-8 rounded-full object-cover"
-          />
+          {({ isActive }) => (
+            <>
+              <img
+                src={notificationsActive}
+                alt="Notifications"
+                className={`h-[26px] w-[26px] ${iconFilter} ${isActive ? "" : "opacity-40"}`}
+              />
+              <span className="absolute -right-1 -top-0.5 flex min-h-[16px] min-w-[16px] items-center justify-center rounded-full border border-white bg-[#FF003D] px-1 py-0.5 text-[11px] font-semibold leading-none text-white">
+                3
+              </span>
+            </>
+          )}
         </NavLink>
       )}
     </motion.header>

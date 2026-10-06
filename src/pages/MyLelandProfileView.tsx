@@ -1,0 +1,3512 @@
+import { useState, useRef, useEffect, useCallback, useMemo, type ReactNode } from "react";
+import { Button, LinkButton } from "../components/Button";
+import { Link, useSearchParams } from "react-router-dom";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "motion/react";
+import { useDarkMode } from "../contexts/DarkModeContext";
+import PageShell from "../components/PageShell";
+import SessionCard from "../components/SessionCard";
+import OfferingCard, { type OfferingType } from "../components/OfferingCard";
+import PackageCard from "../components/PackageCard";
+import AllOfferingsModal from "./AllOfferings";
+import SidebarCard, { SidebarGroup } from "../components/SidebarCard";
+import topicHash from "../assets/img/topic-hash.svg";
+import pic1 from "../assets/profile photos/pic-1.png";
+import pic2 from "../assets/profile photos/pic-2.png";
+import customerPhoto from "../assets/profile photos/profile photo.png";
+import pic3 from "../assets/profile photos/pic-3.png";
+import pic5 from "../assets/profile photos/pic-5.png";
+import pic6 from "../assets/profile photos/pic-6.png";
+import pic7 from "../assets/profile photos/pic-7.png";
+import pic8 from "../assets/profile photos/pic-8.png";
+import pic9 from "../assets/profile photos/pic-9.png";
+import pic10 from "../assets/profile photos/pic-10.png";
+import pic11 from "../assets/profile photos/pic-11.png";
+import shareArrowIcon from "../assets/icons/share-arrow.svg";
+import shareArrowFilledIcon from "../assets/icons/share-arrow-filled.svg";
+import logoIcon from "../assets/logos/leland-logo-split/Icon.svg";
+import logoWordmark from "../assets/logos/leland-logo-split/Wordmark.svg";
+import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
+import reportFlagIcon from "../assets/icons/report-flag.svg";
+import lockIcon from "../assets/icons/lock.svg";
+import checkIcon from "../assets/icons/check.svg";
+import editIcon from "../assets/icons/edit.svg";
+import verifiedIcon from "../assets/icons/verified-new.svg";
+import shieldIcon from "../assets/icons/shield-light.svg";
+import airplaneIcon from "../assets/icons/airplane.svg";
+import calendarIcon from "../assets/icons/calendar.svg";
+import calendarPageThinIcon from "../assets/icons/calendar-page-thin.svg";
+import chevronDownIcon from "../assets/icons/chevron-down.svg";
+import chevronRightIcon from "../assets/icons/chevron-right.svg";
+import addPlusIcon from "../assets/icons/add-plus.svg";
+import arrowRightIcon from "../assets/icons/arrow-right.svg";
+import timeClockHourglassIcon from "../assets/icons/time-clock-hourglass.svg";
+import bookBookmarkIcon from "../assets/icons/book-bookmark.svg";
+import piggyBankIcon from "../assets/icons/Piggy bank, Coin.1.svg";
+import stopwatchIcon from "../assets/icons/stopwatch.svg";
+import supportivenessIcon from "../assets/icons/supportiveness.svg";
+import wreathImg from "../assets/img/Wreath.svg";
+import wreathSmallImg from "../assets/img/wreath-small.svg";
+import videoThumbnail from "../assets/img/samantha-video.png";
+import starIcon from "../assets/icons/star.svg";
+import badgeQuickResponder from "../assets/icons/quick-responder.svg";
+import badgeCalendarExperience from "../assets/icons/calendar-experience.svg";
+import badgeRisingStar from "../assets/icons/rising-star.svg";
+import badgeBriefcase from "../assets/icons/briefcase.svg";
+import badgeGraduateHat from "../assets/icons/graduate-hat.svg";
+import badgeHandshake from "../assets/icons/handshake.svg";
+import badgeInterviewer from "../assets/icons/interviewer.svg";
+import badgeCustomerFavorite from "../assets/icons/customer-favorite.svg";
+import categoryMBA from "../assets/placeholder images/category images/gmat-tutoring.png";
+import categoryConsulting from "../assets/placeholder images/category images/management-consulting.png";
+import categoryPM from "../assets/placeholder images/category images/product-management.png";
+import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
+import categoryFinance from "../assets/placeholder images/category images/investment-banking.png";
+
+import coachCoverImage from "../assets/img/cover-2.avif";
+import customerCoverImage from "../assets/img/cover-image-2.png";
+import atlassianLogo from "../assets/logos/atlassian.png";
+import yaleLogo from "../assets/logos/yale.png";
+import clientLogo1 from "../assets/logos/Rectangle 3012.png";
+import clientLogo2 from "../assets/logos/Rectangle 3013.png";
+import clientLogo3 from "../assets/logos/Rectangle 3017.png";
+import clientLogo4 from "../assets/logos/Rectangle 3018.png";
+import facebookLogo from "../assets/logos/facebook.png";
+import googleLogo from "../assets/logos/google.png";
+import instagramLogo from "../assets/logos/instagram.png";
+import salesforceLogo from "../assets/logos/salesforce.png";
+import coinbaseLogo from "../assets/logos/coinbase.png";
+import mckinseyLogo from "../assets/logos/mckinsey.png";
+import bainLogo from "../assets/logos/bain.png";
+import lekLogo from "../assets/logos/lek.png";
+import nikeLogo from "../assets/logos/nike.png";
+import goldmanSachsLogo from "../assets/logos/goldman-sachs.png";
+import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
+import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
+import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
+import bootcampImg1 from "../assets/placeholder images/bootcamp-1.webp";
+import aiBuilderCourseImg from "../assets/placeholder images/ai-builder-course.avif";
+import { OFFERINGS, AB_COLLAPSED_COUNT, type Offering } from "../lib/offerings";
+import lelandPlusImg1 from "../assets/placeholder images/leland-plus-images/3cf6e985-7397-4e50-8e06-ef9a8f40491c.webp";
+import lelandPlusImg2 from "../assets/placeholder images/leland-plus-images/b9669ad2-4b6f-4c32-83e1-d1370dbf9484.webp";
+import lelandPlusImg3 from "../assets/placeholder images/leland-plus-images/db2eb673-d212-41d5-8df9-6fa6de57bc23.webp";
+import stanford1 from "../assets/placeholder post assets/stanford-post/00c1e12547190979b4db2978dbe211e2.jpg";
+import stanford2 from "../assets/placeholder post assets/stanford-post/39a9980b59e79fa3b58e8d7d5145b9a9.jpg";
+import stanford3 from "../assets/placeholder post assets/stanford-post/989ac1d56cf981c783808b83154d8a25.jpg";
+import stanford4 from "../assets/placeholder post assets/stanford-post/eb80edada3b3db7955379d433ca2861a.jpg";
+import { FeedPost, type Post } from "./Home";
+import { useBookmarks } from "../contexts/BookmarksContext";
+import { useExpertMode } from "../contexts/ExpertModeContext";
+import { useSetNavTheme, useSetNavRightSlot } from "../components/NavThemeContext";
+import { LogoStrip, initialOutcomes, initialSchools } from "./CoachReviews";
+// Profile-tab (Edit-mode-parity) sections
+import linkedinLogo from "../assets/org-logos/linkedin-logo.png";
+import metaLogo from "../assets/logos/meta.png";
+import gsbLogo from "../assets/logos/gsb.png";
+import starOutlineIcon from "../assets/icons/star-icon.svg";
+import trashIcon from "../assets/icons/trash.svg";
+
+const CATEGORY_ALIASES: Record<string, string> = {
+  MBA: "MBA Admissions",
+  College: "College Admissions",
+};
+
+const PROFILE_SECTIONS = [
+  { id: "offerings", label: "Offerings" },
+  { id: "activity", label: "Activity" },
+  { id: "about-samantha", label: "About" },
+  { id: "work-experience", label: "Experience" },
+  { id: "reviews", label: "Reviews" },
+];
+
+const dashedBorderStyle = {
+  backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C5C5C5' stroke-width='2' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e")`,
+};
+
+// Package offerings shown as cover cards in the Offerings tab grid.
+const PLACEHOLDER_PACKAGES: { title: string; meta: string; badge?: string }[] = [
+  { title: "MBA Applications | Comprehensive Package", meta: "Starting at $8,000 · 20h+ of coaching", badge: "Best Value" },
+  { title: "Essay Unlimited MBA Package", meta: "Starting at $4,300 · 15h+ of coaching", badge: "Best Value" },
+  { title: "Holistic MBA Profile Evaluation", meta: "$390 · 1h of coaching" },
+  { title: "Deferred MBA Applications | Comprehensive Package", meta: "Starting at $8,000 · 20h+ of coaching", badge: "Best Value" },
+  { title: "Find Your Fit: MBA School Selection Session", meta: "Starting at $390 · 1h+ of coaching" },
+  { title: "MBA Resume Revamp Package", meta: "Starting at $235 · 1h+ of coaching", badge: "Save up to $555" },
+  { title: "MIT / Yale / Kellogg Video Essay Mock Interview Prep", meta: "Starting at $450 · 1h+ of coaching" },
+  { title: "Stanford GSB Mock Interview Package", meta: "$500 · 1h of coaching" },
+];
+
+const BIO_PLACEHOLDER = `I help ambitious professionals break into top MBA programs and land PM roles at leading tech companies. With eight-plus years in product at LinkedIn and Meta, plus my own Stanford GSB journey, I bring firsthand experience to every coaching session — from the first brainstorm to the final decision.
+
+My approach is direct and deeply personal. I don't believe in templates or formulas. Instead, we start by figuring out what actually makes your story compelling, then build everything — essays, interviews, positioning — around that truth. I've reviewed thousands of applications and I know exactly where candidates lose the reader.
+
+Over the years I've worked with clients admitted to every M7 program, as well as folks who pivoted into product from consulting, banking, engineering, and the military. Whatever your background, my job is to help you translate it into a narrative that admissions committees and hiring managers can't ignore.
+
+Outside of coaching, I mentor first-generation applicants pro bono, write about admissions strategy, and spend far too much time perfecting my espresso setup. If any of this resonates, book a free intro call and let's talk about where you're headed.`;
+
+// Profile badges: an expert can display up to 3 at the top of their Profile
+// tab. Each has an icon, headline, and subheadline.
+type ProfileBadge = { icon?: string; emoji?: string; headline: string; subheadline: string };
+
+const BADGE_LIBRARY: Record<string, ProfileBadge> = {
+  customerFavorite: { icon: badgeCustomerFavorite, headline: "Customer favorite", subheadline: "In the top 10% of MBA experts on Leland" },
+  superCoach: { emoji: "🏆", headline: "Top Expert", subheadline: "Recognized for consistently outstanding coaching outcomes." },
+  quickResponder: { icon: badgeQuickResponder, headline: "Quick responder", subheadline: "Usually responds within an hour" },
+  risingStar: { icon: badgeRisingStar, headline: "Rising star", subheadline: "Fast-growing favorite on Leland" },
+  experience: { icon: badgeCalendarExperience, headline: "10 years of experience", subheadline: "Proven track record of success" },
+  admissionsStaff: { icon: badgeGraduateHat, headline: "Admissions committee staff", subheadline: "At Yale University" },
+  director: { icon: badgeBriefcase, headline: "Director-level", subheadline: "Experienced in team and org leadership" },
+  hiringManager: { icon: badgeHandshake, headline: "Hiring Manager", subheadline: "At Boston Consulting Group" },
+  interviewer: { icon: badgeInterviewer, headline: "Interviewer", subheadline: "At Boston Consulting Group" },
+};
+
+const upcomingEvents = [
+  { title: "1:1 Session with Jessica", dateTime: "Monday, Mar 30 at 2:00 PM", duration: "45m", image: pic6, type: "coach" as const, status: "live" as const },
+  { title: "MBA Strategy Live", dateTime: "Monday, Mar 30 at 4:00 PM", duration: "45m", image: eventImg1, type: "event" as const, status: "upcoming" as const, startsIn: "2h" },
+  { title: "Intro Call with Samantha", dateTime: "Wednesday, Apr 1 at 11:00 AM", duration: "30m", image: pic8, type: "coach" as const, status: "upcoming" as const, startsIn: "2d" },
+  { title: "GMAT Exam Prep Bootcamp", dateTime: "Thursday, Apr 2 at 6:00 PM", duration: "60m", image: eventImg2, type: "event" as const, status: "upcoming" as const, startsIn: "3d" },
+  { title: "Case Interview Masterclass", dateTime: "Monday, Apr 6 at 12:00 PM", duration: "90m", image: eventImg3, type: "event" as const, status: "upcoming" as const, startsIn: "7d" },
+  { title: "1:1 Session with Marcus", dateTime: "Wednesday, Apr 8 at 3:30 PM", duration: "45m", image: pic9, type: "coach" as const, status: "upcoming" as const, startsIn: "9d" },
+  { title: "Resume Review with Priya", dateTime: "Friday, Apr 10 at 10:00 AM", duration: "30m", image: pic2, type: "coach" as const, status: "upcoming" as const, startsIn: "11d" },
+];
+
+const pastEvents = [
+  { title: "1:1 Session with Marcus", dateTime: "Friday, Mar 28 at 10:00 AM", duration: "45m", image: pic7, type: "coach" as const, hasRecording: false },
+  { title: "Resume Review Workshop", dateTime: "Thursday, Mar 27 at 3:00 PM", duration: "60m", image: eventImg3, type: "event" as const, hasRecording: true },
+  { title: "1:1 Session with Jessica", dateTime: "Wednesday, Mar 26 at 2:00 PM", duration: "45m", image: pic6, type: "coach" as const, hasRecording: false },
+  { title: "MBA Admissions Strategy", dateTime: "Tuesday, Mar 25 at 1:00 PM", duration: "45m", image: eventImg1, type: "event" as const, hasRecording: true },
+  { title: "Intro Call with David", dateTime: "Monday, Mar 24 at 11:00 AM", duration: "30m", image: pic9, type: "coach" as const, hasRecording: false },
+  { title: "1:1 Session with Rachel", dateTime: "Sunday, Mar 23 at 3:00 PM", duration: "45m", image: pic10, type: "coach" as const, hasRecording: false },
+  { title: "Career Pivot Workshop", dateTime: "Saturday, Mar 22 at 10:00 AM", duration: "90m", image: eventImg2, type: "event" as const, hasRecording: true },
+  { title: "1:1 Session with Alex", dateTime: "Friday, Mar 21 at 1:00 PM", duration: "45m", image: pic11, type: "coach" as const, hasRecording: false },
+  { title: "Networking Strategies Live", dateTime: "Thursday, Mar 20 at 5:00 PM", duration: "60m", image: eventImg3, type: "event" as const, hasRecording: true },
+  { title: "1:1 Session with Jessica", dateTime: "Wednesday, Mar 19 at 2:00 PM", duration: "45m", image: pic6, type: "coach" as const, hasRecording: true },
+  { title: "Case Interview Practice", dateTime: "Tuesday, Mar 18 at 11:00 AM", duration: "45m", image: eventImg1, type: "event" as const, hasRecording: true },
+  { title: "1:1 Session with Priya", dateTime: "Monday, Mar 17 at 4:00 PM", duration: "30m", image: pic2, type: "coach" as const, hasRecording: false },
+  { title: "GSB Essay Workshop", dateTime: "Friday, Mar 14 at 1:00 PM", duration: "90m", image: eventImg2, type: "event" as const, hasRecording: true },
+  { title: "1:1 Session with Samantha", dateTime: "Thursday, Mar 13 at 10:00 AM", duration: "45m", image: pic8, type: "coach" as const, hasRecording: true },
+  { title: "Behavioral Interview Prep", dateTime: "Wednesday, Mar 12 at 3:00 PM", duration: "60m", image: eventImg3, type: "event" as const, hasRecording: true },
+];
+
+interface PurchasedOffering {
+  type: OfferingType;
+  title: string;
+  subtitle: ReactNode;
+  image: string;
+  exhausted?: boolean;
+}
+
+const purchasedOfferings: PurchasedOffering[] = [
+  {
+    type: "hourly",
+    title: "1h 20m with Marcus",
+    subtitle: "45m available to schedule",
+    image: pic9,
+  },
+  {
+    type: "hourly",
+    title: "Out of time with Jessica",
+    subtitle: "0m available to schedule",
+    image: pic6,
+    exhausted: true,
+  },
+  {
+    type: "package",
+    title: "MBA Application Package",
+    subtitle: <>Comprehensive package · <span className="text-gray-dark">Currently active</span></>,
+    image: pic7,
+  },
+  {
+    type: "course",
+    title: "AI Builder Program Level 1: Use AI to 10x Your Impact",
+    subtitle: <>Started May 12 <span className="text-[#9B9B9B]">· Next session tomorrow</span></>,
+    image: aiBuilderCourseImg,
+  },
+  {
+    type: "content",
+    title: "How I Got Into Stanford GSB",
+    subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>,
+    image: lelandPlusImg1,
+  },
+];
+
+type CoachOffering = { type: OfferingType; title: string; subtitle: ReactNode; image: string; ctaLabel?: string; href?: string };
+
+type CoachConfig = {
+  id: string;
+  name: string;
+  firstName: string;
+  photo: string;
+  qualificationsTitle: string;
+  offerings: CoachOffering[];
+};
+
+const COACH_CONFIGS: Record<string, CoachConfig> = {
+  samantha: {
+    id: "samantha",
+    name: "Samantha Parker",
+    firstName: "Samantha",
+    photo: pic6,
+    qualificationsTitle: "MBA Qualifications",
+    offerings: [
+      { type: "free-intro", title: "Free 15-minute intro call", subtitle: "Get to know Samantha and make a plan", image: "" },
+      { type: "package", title: "Essay Review Package", subtitle: "3 essays · Starting at $400", image: eventImg1 },
+      { type: "hourly-package", title: "10-Hour Coaching Package", subtitle: "10 hours · $1,200", image: eventImg1 },
+      { type: "package", title: "MBA Application Package", subtitle: "Comprehensive Package · Starting at $750", image: eventImg2 },
+      { type: "package", title: "Interview Prep Package", subtitle: "Comprehensive Package · Starting at $500", image: eventImg3 },
+      { type: "package", title: "Resume & Cover Letter Package", subtitle: "2 documents · Starting at $300", image: eventImg1 },
+      { type: "package", title: "School Selection Strategy", subtitle: "Comprehensive Package · Starting at $600", image: eventImg2 },
+      { type: "hourly-package", title: "5-Hour Quick Start Package", subtitle: "5 hours · $650", image: eventImg3 },
+      { type: "hourly", title: "Custom hourly coaching", subtitle: "$150 per hour", image: "" },
+      { type: "agent", title: "Samantha's MBA Admissions Agent", subtitle: "AI guidance, curated by Samantha · Subscription", image: categoryMBA, href: "/agent/samantha-mba-admissions" },
+      { type: "agent", title: "Samantha's GMAT Prep Agent", subtitle: "AI guidance, curated by Samantha · Subscription", image: categoryMBA, href: "/agent/samantha-gmat-prep" },
+      { type: "agent", title: "Samantha's Consulting Recruiting Agent", subtitle: "AI guidance, curated by Samantha · Subscription", image: categoryConsulting, href: "/agent/samantha-consulting" },
+      { type: "content", title: "How I Got Into Stanford GSB", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>, image: lelandPlusImg1 },
+      { type: "content", title: "GMAT Study Plan: 3 Months to 750+", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 184 views</span></span>, image: lelandPlusImg2 },
+      { type: "content", title: "My Consulting Recruiting Timeline", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 97 views</span></span>, image: lelandPlusImg3 },
+      { type: "content", title: "Top 10 MBA Programs for Consulting", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 312 views</span></span>, image: lelandPlusImg1 },
+      { type: "content", title: "Crafting Your MBA Resume", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 428 views</span></span>, image: lelandPlusImg2 },
+      { type: "content", title: "How to Write a Standout HBS Essay", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 189 views</span></span>, image: lelandPlusImg3 },
+      { type: "content", title: "Networking Tips for MBA Applicants", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 276 views</span></span>, image: lelandPlusImg1 },
+      { type: "content", title: "GMAT vs. GRE: Which Should You Take?", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 145 views</span></span>, image: lelandPlusImg2 },
+      { type: "content", title: "Understanding MBA Scholarships", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 203 views</span></span>, image: lelandPlusImg3 },
+      { type: "content", title: "What MBA Admissions Committees Look For", subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 367 views</span></span>, image: lelandPlusImg1 },
+      { type: "content", title: "Day in the Life at Wharton", subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 521 views</span></span>, image: lelandPlusImg2 },
+    ],
+  },
+  john: {
+    id: "john",
+    name: "John Koelliker",
+    firstName: "John",
+    photo: pic9,
+    qualificationsTitle: "Coach Qualifications",
+    offerings: [
+      { type: "free-intro", title: "Free 15-minute intro call", subtitle: "Get to know John and make a plan", image: "" },
+      { type: "package", title: "Deferred MBA Application Package", subtitle: "Comprehensive Package · Starting at $1,200", image: eventImg2 },
+      { type: "package", title: "Standard MBA Application Package", subtitle: "Comprehensive Package · Starting at $1,500", image: eventImg3 },
+      { type: "package", title: "Pitch Deck Review", subtitle: "Single 60-min session · $500", image: eventImg1 },
+      { type: "hourly", title: "Custom hourly coaching", subtitle: "$300 per hour", image: "" },
+      { type: "agent", title: "John's MBA Application Strategy Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-application-strategy" },
+      { type: "agent", title: "John's MBA Essays Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-essays" },
+      { type: "agent", title: "John's MBA Interviews Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-interviews" },
+      { type: "agent", title: "John's MBA Recommenders Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-mba-recommenders" },
+      { type: "agent", title: "John's Deferred MBA Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryMBA, href: "/agent/john-deferred-mba" },
+      { type: "agent", title: "John's Fundraising Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryFinance, href: "/agent/john-fundraising" },
+      { type: "agent", title: "John's Pitch Decks Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryFinance, href: "/agent/john-pitch-decks" },
+      { type: "agent", title: "John's Startup Strategy Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryAI, href: "/agent/john-startup" },
+      { type: "agent", title: "John's Career Coaching Agent", subtitle: "AI guidance, curated by John · Subscription", image: categoryPM, href: "/agent/john-career" },
+      { type: "content", title: "Components of an MBA Application Strategy", subtitle: <span className="flex items-center gap-1.5"><img src={pic9} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />John Koelliker <span className="text-[#9B9B9B]">· 560 views</span></span>, image: lelandPlusImg1 },
+      { type: "content", title: "Why Apply to Deferred MBA Programs?", subtitle: <span className="flex items-center gap-1.5"><img src={pic9} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />John Koelliker <span className="text-[#9B9B9B]">· 237 views</span></span>, image: lelandPlusImg2 },
+      { type: "content", title: "General Interview Tips", subtitle: <span className="flex items-center gap-1.5"><img src={pic9} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />John Koelliker <span className="text-[#9B9B9B]">· 354 views</span></span>, image: lelandPlusImg3 },
+    ],
+  },
+};
+
+const customerPosts: Post[] = [
+  {
+    id: 201,
+    type: "image",
+    author: "June Allen",
+    avatar: customerPhoto,
+    time: "3d",
+    body: "Stanford GSB admit weekend in the books. The campus, the people, the energy — surreal. Two years ago I almost convinced myself not to apply. Glad I didn't listen to that voice.",
+    images: [stanford1, stanford2, stanford3, stanford4],
+    likes: 612,
+    comments: 78,
+    reposts: 24,
+    shares: 11,
+  },
+  {
+    id: 202,
+    type: "text",
+    author: "June Allen",
+    avatar: customerPhoto,
+    time: "1w",
+    body: "I got in. STANFORD GSB. I literally screamed in my apartment when I saw the email. To everyone who supported me through this brutal process — this is for you. More to come, but for now I'm just letting it sink in.",
+    likes: 1487,
+    comments: 213,
+    reposts: 56,
+    shares: 34,
+  },
+  {
+    id: 203,
+    type: "text",
+    author: "June Allen",
+    avatar: customerPhoto,
+    time: "3w",
+    body: "Interview invite from Stanford. I'm pacing around my living room trying to act normal. Time to lock in for the next two weeks.",
+    likes: 423,
+    comments: 64,
+    reposts: 8,
+    shares: 4,
+  },
+  {
+    id: 204,
+    type: "text",
+    author: "June Allen",
+    avatar: customerPhoto,
+    time: "1mo",
+    body: "Hardest part of the application wasn't the essays — it was being honest with myself about why I actually wanted an MBA. My coach pushed me on this for weeks. Every time I gave a polished answer, she'd ask 'but why really?' Eventually I cracked. Turns out the real reason wasn't the version I'd been telling people.",
+    likes: 891,
+    comments: 124,
+    reposts: 47,
+    shares: 22,
+  },
+  {
+    id: 205,
+    type: "text",
+    author: "June Allen",
+    avatar: customerPhoto,
+    time: "2mo",
+    body: "Submitted Round 1 to Stanford, HBS, and Wharton tonight. 11 months of work compressed into a few clicks. I don't know what's going to happen but I know the application I sent in is the most honest version of myself I could put on paper. That has to count for something.",
+    likes: 567,
+    comments: 89,
+    reposts: 12,
+    shares: 6,
+  },
+  {
+    id: 206,
+    type: "text",
+    author: "June Allen",
+    avatar: customerPhoto,
+    time: "4mo",
+    body: "Took the GMAT today. Walked out feeling like I bombed it. Score came back 30 minutes later — 740. I genuinely don't know how. Lesson: your gut after the test means almost nothing.",
+    likes: 342,
+    comments: 51,
+    reposts: 7,
+    shares: 3,
+  },
+  {
+    id: 207,
+    type: "text",
+    author: "June Allen",
+    avatar: customerPhoto,
+    time: "6mo",
+    body: "Started working with an MBA admissions coach this week. Honestly didn't think I needed one — I'm a strong writer, I have a clear story, how hard could this be? First session: she tore my draft personal narrative apart in the kindest possible way and I realized I had no idea what I was doing. Money well spent already.",
+    likes: 278,
+    comments: 41,
+    reposts: 9,
+    shares: 5,
+  },
+  {
+    id: 208,
+    type: "text",
+    author: "June Allen",
+    avatar: customerPhoto,
+    time: "9mo",
+    body: "Decided I'm going to apply to business school this year. Have been thinking about it for three years and finally pulled the trigger. Target schools: Stanford, HBS, Wharton, Booth, Kellogg. If you've been through this and have advice, I'm all ears.",
+    likes: 195,
+    comments: 73,
+    reposts: 4,
+    shares: 2,
+  },
+];
+
+function CategorySubtitle({ photos, experts }: { photos: string[]; experts: string }) {
+  return (
+    <span className="inline-flex items-center gap-[6px] align-middle">
+      <span className="inline-flex">
+        {photos.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt=""
+            className="inline-block h-[14px] w-[14px] shrink-0 rounded-full border border-white object-cover"
+            style={{ marginLeft: i === 0 ? 0 : "-3px" }}
+          />
+        ))}
+      </span>
+      {experts}
+    </span>
+  );
+}
+
+// Alt schedule — a few days of upcoming open slots. Uneven column lengths are
+// intentional (mirrors the real calendar, where days book up differently).
+const ALT_SCHEDULE_DAYS: { label: string; date: string; times: string[] }[] = [
+  { label: "Today", date: "Jul 13", times: ["3:00 PM", "3:30 PM", "4:00 PM", "5:30 PM"] },
+  { label: "Tomorrow", date: "Jul 14", times: ["8:00 AM", "8:30 AM", "9:00 AM", "9:30 AM", "10:00 AM", "11:00 AM"] },
+  { label: "Wed", date: "Jul 15", times: ["8:00 AM", "8:30 AM", "9:00 AM", "10:00 AM"] },
+  { label: "Thu", date: "Jul 16", times: ["9:00 AM", "9:30 AM", "10:30 AM", "11:00 AM", "1:00 PM"] },
+  { label: "Fri", date: "Jul 17", times: ["8:30 AM", "9:00 AM", "9:30 AM", "10:00 AM"] },
+  { label: "Mon", date: "Jul 20", times: ["8:00 AM", "8:30 AM", "9:30 AM", "10:00 AM", "10:30 AM"] },
+];
+
+const ALT_SCHEDULE_DURATIONS = [15, 30, 45, 60];
+
+// Interactive availability preview shown in the desktop sidebar when the "Alt
+// schedule" ops tool is on. A thin-column rework of the booking modal: pick a
+// duration, then a slot across the expert's next open days.
+function AltScheduleWidget() {
+  const [duration, setDuration] = useState(30);
+  const [durationOpen, setDurationOpen] = useState(false);
+  const [startIdx, setStartIdx] = useState(0);
+  const [selected, setSelected] = useState<{ day: number; time: string } | null>(null);
+  const VISIBLE = 3;
+  const maxStart = Math.max(0, ALT_SCHEDULE_DAYS.length - VISIBLE);
+  const visibleDays = ALT_SCHEDULE_DAYS.slice(startIdx, startIdx + VISIBLE);
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-[#E5E5E5] bg-white" style={{ boxShadow: "0px 1px 2px 0px rgba(16,24,40,0.05)" }}>
+      {/* Header — duration is an inline dotted-underline dropdown; day paging
+          arrows sit across from the title */}
+      <div className="flex items-center justify-between gap-3 px-4 pb-3 pt-4">
+        <span className="flex items-center gap-2 text-[14px] font-semibold leading-tight text-gray-dark">
+          <span className="h-[10px] w-[10px] shrink-0 rounded-full bg-[#80ACED] animate-[pulse-ring-blue_2.4s_ease-out_infinite]" />
+          <span>
+            Book a{" "}
+            <span className="relative inline-block">
+              <button
+                onClick={() => setDurationOpen((o) => !o)}
+                className="cursor-pointer font-semibold text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px]"
+              >
+                {`${duration} minute`}
+              </button>
+              {durationOpen && (
+                <div className="absolute left-0 top-full z-20 mt-1.5 w-[128px] overflow-hidden rounded-lg border border-[#E5E5E5] bg-white shadow-lg">
+                  {ALT_SCHEDULE_DURATIONS.map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => { setDuration(d); setDurationOpen(false); }}
+                      className={`block w-full cursor-pointer px-3 py-2 text-left text-[14px] transition-colors hover:bg-[#f5f5f5] ${d === duration ? "font-semibold text-gray-dark" : "font-normal text-[#4C4C4C]"}`}
+                    >
+                      {d} minutes
+                    </button>
+                  ))}
+                </div>
+              )}
+            </span>
+            {" "}session
+          </span>
+        </span>
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            onClick={() => setStartIdx((i) => Math.max(0, i - 1))}
+            disabled={startIdx === 0}
+            aria-label="Previous days"
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-gray-dark transition-colors hover:bg-[#f5f5f5] disabled:cursor-default disabled:opacity-30"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <button
+            onClick={() => setStartIdx((i) => Math.min(maxStart, i + 1))}
+            disabled={startIdx >= maxStart}
+            aria-label="Next days"
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-gray-dark transition-colors hover:bg-[#f5f5f5] disabled:cursor-default disabled:opacity-30"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Calendar — day columns scroll past a set height */}
+      <div className="border-t border-[#E5E5E5] px-4 py-3">
+        <div className="max-h-[248px] overflow-y-auto">
+          <div className="flex gap-1.5">
+            {visibleDays.map((day, i) => {
+              const dayIdx = startIdx + i;
+              return (
+                <div key={day.date} className="flex flex-1 flex-col gap-1.5">
+                  <div className="sticky top-0 z-10 bg-white pb-1.5 text-center">
+                    <p className="text-[14px] font-semibold leading-tight text-gray-dark">{day.label}</p>
+                    <p className="text-[11px] leading-tight text-[#9B9B9B]">{day.date}</p>
+                  </div>
+                  {day.times.slice(0, 4).map((t) => {
+                    const isSel = selected?.day === dayIdx && selected?.time === t;
+                    return (
+                      <button
+                        key={t}
+                        onClick={() => setSelected({ day: dayIdx, time: t })}
+                        className={`flex items-center justify-center gap-0.5 rounded-md px-1 py-3.5 text-[14px] font-medium leading-none transition-colors ${isSel ? "border border-gray-dark bg-white text-gray-dark" : "bg-[#F7F7F7] text-gray-dark hover:bg-[#efefef]"}`}
+                      >
+                        {isSel && (
+                          <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                        )}
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Selected slot summary */}
+      {selected && (
+        <div className="flex items-center gap-2 border-t border-[#E5E5E5] px-4 py-3">
+          <svg className="h-4 w-4 shrink-0 text-[#707070]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+          </svg>
+          <span className="text-[13px] font-medium text-gray-dark">
+            {ALT_SCHEDULE_DAYS[selected.day].label}, {ALT_SCHEDULE_DAYS[selected.day].date} at {selected.time}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// A/B "Offerings" grid — customer-facing offering cards. Mirrors the coach
+// builder's live preview card (cover, name, headline, price row) and links to
+// the standalone offering page. Bundled packages beat buying the products
+// separately, so most cards show the discounted price against a struck-through
+// original plus the % saved. Catalog lives in ../lib/offerings.
+function CustomerOfferingCard({ offering }: { offering: Offering }) {
+  const priceRow = (
+    <div>
+      {offering.startingAt && (
+        <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-gray-extra-light">Starting at</p>
+      )}
+      <p className="flex items-baseline gap-x-1 text-[14px] font-semibold text-gray-dark">
+        <span>{offering.price}</span>
+        {offering.origPrice && <span className="font-normal text-gray-extra-light line-through">{offering.origPrice}</span>}
+        {offering.savePct != null && <span className="ml-auto text-[12px] font-medium text-[#1B8A54]">Save {offering.savePct}%</span>}
+      </p>
+    </div>
+  );
+
+  return (
+    <Link to={`/offering/${offering.slug}`} className="flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white no-underline shadow-[0_1px_3px_rgba(16,24,40,0.06)] transition-shadow duration-200 hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]">
+      <img src={offering.image} alt="" className="aspect-[1200/630] w-full object-cover" />
+      <div className="flex flex-1 flex-col p-4">
+        <p className="text-[15px] font-semibold leading-tight text-gray-dark">{offering.title}</p>
+        <p className="mt-1 text-[14px] leading-snug text-gray-light">{offering.headline}</p>
+        <div className="mt-auto pt-3">{priceRow}</div>
+      </div>
+    </Link>
+  );
+}
+
+// Full-width hourly-coaching section shown below the offerings grid — larger,
+// left-aligned, with an icon tile, price, and a "Buy coaching" CTA.
+function CustomerHourlySection({ marginClass = "mt-6", paddingClass = "p-6" }: { marginClass?: string; paddingClass?: string }) {
+  return (
+    <div className={`${marginClass} ${paddingClass} flex cursor-pointer flex-col gap-4 rounded-2xl bg-gray-hover transition-colors hover:bg-gray-stroke sm:flex-row sm:items-center sm:justify-between`}>
+      <div className="flex min-w-0 items-center gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#222222]/5">
+          <img src={timeClockHourglassIcon} alt="" className="h-6 w-6" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[15px] font-semibold text-gray-dark">
+            Custom hourly <span className="text-[#9B9B9B]">·</span> <span className="text-[#1B8A54]">$390/hr</span>
+          </p>
+          <p className="mt-1 text-[14px] text-gray-light">
+            Get help with Application Strategy, Cover Letters, and <span className="cursor-pointer underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">more</span>.
+          </p>
+        </div>
+      </div>
+      <Button size="md" variant="secondary" iconOnly className="shrink-0" aria-label="Buy coaching">
+        <img src={arrowRightIcon} alt="" className="h-5 w-5" />
+      </Button>
+    </div>
+  );
+}
+
+/* ── Profile-tab sections (Edit-mode parity) ──────────────────────────────
+   The My Leland Profile tab renders the same sections as the beige "Edit mode"
+   editor (Categories, About, Intro Video, Why I coach, Education, Experience,
+   Reviews), but as divided sections inside the bottom box rather than separate
+   cards — same 20px headers and section padding, no inner card borders. */
+
+const PROFILE_ABOUT_TEXT =
+  "I help ambitious professionals break into top MBA programs and land PM roles at leading tech companies. With 8+ years in product at LinkedIn and Meta, plus my own Stanford GSB journey, I bring firsthand experience to every conversation. Over the years I've reviewed thousands of applications, sat on both sides of the admissions and hiring table, and developed a repeatable framework for helping people tell the story only they can tell. My approach is direct but supportive: we start by getting crystal clear on your goals, then work backwards to a plan that fits your timeline, your background, and the specific programs or companies you're targeting. I care less about polishing a generic profile and more about surfacing the moments that actually make you memorable. Whether you're staring at a blank essay doc, prepping for a case interview, or trying to figure out whether an MBA is even the right move, I'll meet you where you are. Expect candid feedback, a lot of questions, and a partner who's genuinely invested in the outcome. The applicants I work with don't just get in — they leave the process knowing themselves better and telling a sharper story about where they're headed next.";
+const PROFILE_WHY_TEXT =
+  "I remember how overwhelming the application process felt, and how much a great mentor changed my trajectory. Coaching is my way of paying that forward — helping people tell their most honest, compelling story. When I was applying, I almost talked myself out of it entirely; I didn't think my background was impressive enough, and I had no idea how to translate what I'd done into something an admissions committee would care about. One conversation with the right person changed everything, and it wasn't about gaming the system — it was about helping me see my own experience clearly. That's the feeling I try to recreate for every person I work with. I coach because I love the moment when someone realizes their story is stronger than they thought, and because I've seen how much a single acceptance can change the shape of a career and a life. It's the most rewarding work I do, and I don't take the trust that comes with it lightly.";
+
+type ProfileCredential = { logo: string; title: string; subtitle: string; featured?: boolean };
+const PROFILE_EDUCATION: ProfileCredential[] = [
+  { logo: gsbLogo, title: "Stanford Graduate School of Business", subtitle: "MBA · 2016 – 2018", featured: true },
+  { logo: yaleLogo, title: "Yale University", subtitle: "BA, Economics · 2008 – 2012" },
+];
+const PROFILE_EXPERIENCE: ProfileCredential[] = [
+  { logo: linkedinLogo, title: "Senior Product Manager", subtitle: "LinkedIn · 2019 – Present", featured: true },
+  { logo: metaLogo, title: "Product Manager", subtitle: "Meta · 2016 – 2019" },
+  { logo: googleLogo, title: "Associate Product Manager", subtitle: "Google · 2012 – 2015" },
+];
+const PROFILE_REVIEW_OUTCOMES = [...initialOutcomes, ...initialSchools].filter((o) => !o.hidden);
+
+// Section heading row — 20px semibold title with an optional right-aligned
+// action (matches Edit mode's CardHead).
+function ProfileSectionHead({ title, action }: { title: string; action?: ReactNode }) {
+  return (
+    <div className="mb-4 flex items-center justify-between gap-3">
+      <h2 className="text-[20px] font-semibold text-gray-dark">{title}</h2>
+      {action}
+    </div>
+  );
+}
+
+// A pill "Edit"/"Add" action button (matches Edit mode's EditButton).
+function ProfileEditButton({ label, icon }: { label: string; icon: string }) {
+  return (
+    <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 text-[14px] font-semibold">
+      <img src={icon} alt="" className="h-[16px] w-[16px]" />
+      {label}
+    </Button>
+  );
+}
+
+// Long editable-text section (About, Why I coach): clamps to ~6 lines with a
+// gradient fade + Read more/less toggle. Mirrors Edit mode's EditableTextCard
+// view state, minus the card wrapper.
+const PROFILE_TEXT_COLLAPSED = 154; // ~6 lines at 16px / 1.6
+function ProfileTextSection({ title, text }: { title: string; text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const [overflow, setOverflow] = useState(false);
+  const pRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    const el = pRef.current;
+    if (el) setOverflow(el.scrollHeight > PROFILE_TEXT_COLLAPSED + 4);
+  }, [text]);
+  return (
+    <section className="py-6">
+      <ProfileSectionHead title={title} action={<ProfileEditButton label="Edit" icon={editIcon} />} />
+      <motion.div
+        initial={false}
+        animate={{ height: expanded ? "auto" : PROFILE_TEXT_COLLAPSED }}
+        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+        className="relative overflow-hidden"
+      >
+        <p ref={pRef} className="whitespace-pre-line text-[16px] leading-[1.6] text-[#4C4C4C]">{text}</p>
+        {overflow && (
+          <motion.div
+            initial={false}
+            animate={{ opacity: expanded ? 0 : 1 }}
+            transition={{ duration: 0.35, ease: [0.42, 0, 0.58, 1] }}
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[3.2em] bg-gradient-to-t from-white to-transparent"
+          />
+        )}
+      </motion.div>
+      {overflow && (
+        <Button size="md" variant="secondary" className="mt-3 font-semibold" onClick={() => setExpanded((v) => !v)}>
+          {expanded ? "Read less" : "Read more"}
+          <img src={chevronDownIcon} alt="" className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
+        </Button>
+      )}
+    </section>
+  );
+}
+
+// Education / Experience row: colored org tile + title/subtitle, with a
+// persistent featured star and hover-revealed feature/edit/delete actions.
+function ProfileCredentialRow({ logo, title, subtitle, featured }: ProfileCredential) {
+  return (
+    <div className="group flex items-center gap-4 rounded-xl px-2 py-2 transition-colors hover:bg-[#fafafa]">
+      <div className="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-[4px]">
+        <img src={logo} alt="" className="h-full w-full object-cover" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[16px] font-medium text-gray-dark">{title}</p>
+        <p className="mt-[2px] text-[14px] text-[#707070]">{subtitle}</p>
+      </div>
+      <div className="flex shrink-0 items-center justify-end">
+        {featured && (
+          <span className="flex items-center justify-center p-3"><img src={starIcon} alt="Featured" className="h-[18px] w-[18px]" /></span>
+        )}
+        <div className="flex items-center overflow-hidden opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          {!featured && (
+            <button type="button" aria-label="Feature" className="flex items-center justify-center rounded-full p-3 text-gray-dark transition-colors hover:bg-gray-hover"><img src={starOutlineIcon} alt="" className="h-[18px] w-[18px]" /></button>
+          )}
+          <button type="button" aria-label="Edit" className="flex items-center justify-center rounded-full p-3 text-gray-dark transition-colors hover:bg-gray-hover"><img src={editIcon} alt="" className="h-[18px] w-[18px]" /></button>
+          <button type="button" aria-label="Delete" className="flex items-center justify-center rounded-full p-3 text-gray-dark transition-colors hover:bg-gray-hover"><img src={trashIcon} alt="" className="h-[18px] w-[18px]" /></button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// The My Leland → Profile view. Forked from ProfileV2 so the signed-in user's
+// own-profile edit experience can diverge freely from the public-facing profile
+// template without affecting it. Shares only low-level primitives (Button,
+// PageShell, OfferingCard, icons) — the coach config here is a private copy.
+export default function MyLelandProfileView({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = true, altSchedule = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack, embedded = false, boxed = false, twoColumn = false, abTest = true, abVersion = "v3" }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; altSchedule?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string; headline?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void; embedded?: boolean; boxed?: boolean; twoColumn?: boolean; abTest?: boolean; abVersion?: "v1" | "v2" | "v3" }) {
+  const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
+  const { dark: darkMode } = useDarkMode();
+  // For the Inline 2 customer upsell ("Sell on Leland" sidebar card) — flips the
+  // global Expert toggle on, which re-renders this view as the expert profile.
+  const { setExpert } = useExpertMode();
+  // Boxed mode (Inline): confine the hero and the tab-bar + content into two
+  // white cards on the beige page (a `contents` wrapper is transparent when off).
+  const boxCard = "overflow-hidden rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10";
+  useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [stickyNavVisible, setStickyNavVisible] = useState(false);
+  // Boxed (Inline) mode: true once the content card's tab bar has pinned to the
+  // page top. Drives a page-colored cap above the tab bar that clips content
+  // scrolling up through the gap between the app nav and the pinned tabs (see
+  // the boxedTabCap below).
+  const [boxedTabsPinned, setBoxedTabsPinned] = useState(false);
+  const [activeSection, setActiveSection] = useState("offerings");
+  const [adminOpen, setAdminOpen] = useState(false);
+  const [showCustomerFavorite, setShowCustomerFavorite] = useState(true);
+  // `embedded` = rendered inside another shell (e.g. My Leland → Profile, which
+  // supplies its own left nav rail). Drops the profile's own right rail (inline
+  // coach video/note/availability copies take over), keeps the app top nav
+  // white (no immersive dark hero), and skips the portaled sticky secondary nav
+  // + self-rendered mobile nav that assume a full-page profile.
+  // `twoColumn` forces the profile's right sidebar on even when embedded (the
+  // Inline 2 variant: the faithful two-column public-template layout inside the
+  // My Leland shell). Without it, embedded defaults the sidebar off (Inline).
+  const [showSidebar, setShowSidebar] = useState(twoColumn || !embedded);
+  const [showCoachNote, setShowCoachNote] = useState(unified ? true : coach);
+  const [coachNoteExpanded, setCoachNoteExpanded] = useState(false);
+  const [showCoachVideo, setShowCoachVideo] = useState(true);
+  const [showSupercoach, setShowSupercoach] = useState(false);
+  // In the unified template, coaches use a tabbed layout (About first) instead
+  // of the long scroll; this tracks the active tab.
+  const [coachTab, setCoachTab] = useState<"about" | "offerings" | "activity" | "saved" | "likes">("about");
+  const [showCoverImage, setShowCoverImage] = useState(unified ? true : false);
+  const [showGrayHeader, setShowGrayHeader] = useState(false);
+  const [searchParams] = useSearchParams();
+  const isCustomerProfile = !coach;
+  // In the unified template these modular coach sections are driven by the
+  // wrapper's admin toggles (all default off); elsewhere they use the local
+  // admin-panel state.
+  const effCustomerFavorite = unified ? Boolean(customerFavorite) : showCustomerFavorite;
+  const effCoachNote = unified ? Boolean(coachNote) : showCoachNote;
+  const effCoachVideo = unified ? Boolean(coachVideo) : showCoachVideo;
+  const effShowSupercoach = unified ? Boolean(supercoach) : showSupercoach;
+  // In the unified template the hero + top nav (cover image, round photo,
+  // Follow/Message CTAs, nav theming) use the customer treatment for BOTH
+  // coach and customer, so they function identically. Content logic below
+  // still keys off isCustomerProfile.
+  const heroCustomer = isCustomerProfile || unified;
+  const { savedPosts } = useBookmarks();
+  const [navScrolled, setNavScrolled] = useState(false);
+  // Small-threshold scroll flag that drives the wordmark animating away, like
+  // the shared MobileTopNav (independent of the cover-based navScrolled).
+  const [navWordmarkHidden, setNavWordmarkHidden] = useState(false);
+  useEffect(() => {
+    if (!heroCustomer) return;
+    const onScroll = () => {
+      // Switch to white bg once scrolled past the cover image area
+      setNavScrolled(window.scrollY > window.innerHeight * 0.2 - 56);
+      setNavWordmarkHidden(window.scrollY > 1);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [heroCustomer]);
+  useSetNavTheme(
+    embedded
+      ? { bg: "white", light: false, hideWordmark: false }
+      : heroCustomer
+      ? navScrolled
+        ? { bg: "white", light: false, hideWordmark: false }
+        : { bg: "#111111", light: true, hideWordmark: false, bgGradient: true, slideIn: !unified }
+      : { bg: "white", light: false, hideWordmark: false }
+  );
+  useSetNavRightSlot(
+    heroCustomer
+      ? useMemo(() => (
+          <button
+            type="button"
+            aria-label="Share"
+            className="flex h-8 w-8 cursor-pointer items-center justify-center"
+          >
+            <img src={shareArrowFilledIcon} alt="Share" className={`h-[22px] w-[22px] ${navScrolled ? "brightness-0" : "brightness-0 invert"}`} />
+          </button>
+        ), [navScrolled])
+      : null
+  );
+  const [customerTab, setCustomerTab] = useState<"about" | "likes" | "saved" | "more">(
+    (["about", "saved", "likes", "more"] as const).includes(searchParams.get("tab") as any)
+      ? (searchParams.get("tab") as "about" | "likes" | "saved" | "more")
+      : unified && ownProfile
+      ? "more" // own profile (Inline / Inline 2): "Profile" tab is first + default
+      : "about"
+  );
+  const [purchasesFilter, setPurchasesFilter] = useState<"All" | "Coaching" | "Programs" | "Content">("All");
+  const [purchasesExpanded, setPurchasesExpanded] = useState(false);
+  const [pastOpen, setPastOpen] = useState(false);
+  const [sectionFilter, setSectionFilter] = useState("All");
+  const [offeringsType, setOfferingsType] = useState("All");
+  const [viewingOwnProfileState, setViewingOwnProfileState] = useState(unified ? false : isCustomerProfile);
+  // In the unified template "My profile" is driven by the wrapper's admin toggle.
+  const viewingOwnProfile = unified ? Boolean(ownProfile) : viewingOwnProfileState;
+  // "Offerings tab" (coach + unified only) promotes Offerings to its own tab.
+  const showOfferingsTab = unified && !isCustomerProfile && Boolean(offeringsTab);
+  // Where the coach's Offerings section renders vs the rest (Events → Reviews).
+  // In the unified My Leland view the Profile tab now shows the Edit-mode
+  // sections instead (see profileTabSections), so Offerings lives only in its
+  // own tab and the Events/Reviews "rest" block is dropped from Profile. The
+  // non-unified public layout is unchanged (both render inline).
+  const showOfferingsSection = !unified || (showOfferingsTab ? coachTab === "offerings" : false);
+  const showRestSections = !unified;
+  // The coach CTA sidebar (video, availability, CTAs, note, Questions) shows for
+  // every coach profile — including when viewing your own — so the desktop
+  // sidebar stays consistent. Customer profiles get the discovery sidebar.
+  const showCoachSidebar = !isCustomerProfile;
+  // On the unified template the coach sidebar only mounts at the sidebar
+  // breakpoint (≥960px), so the inline (mobile) copies of the video, note,
+  // availability, and CTA are hidden there to avoid duplication.
+  const hideForCoachSidebar = unified && showSidebar && showCoachSidebar ? "min-[960px]:hidden" : "";
+
+  // "Customer favorite" now lives solely in the badge system (gated by the
+  // Customer favorite admin toggle). The two legacy treatments — the stat-bar
+  // wreath and the inline mobile row — are hidden for now behind this flag.
+  const showLegacyCustomerFavorite = false;
+  // Cover treatment: "default" = image, "dark" = flat #111111, "beige" = flat
+  // #F3F1E6, "none" = flat #ffffff (each also drives the top nav + status bar).
+  const coverBg = coverMode === "beige" ? "#F3F1E6" : coverMode === "none" ? "#ffffff" : "#111111";
+  // Whether the self-rendered mobile nav icons should be light (white). Only the
+  // dark/image covers are dark enough for white icons; beige & none get dark ones.
+  const navIconsLight = navScrolled ? darkMode : coverMode === "default" || coverMode === "dark";
+  // Desktop cover action buttons ride on the cover — consistent across all
+  // cover modes: a low-opacity black frosted background with white icons.
+  const coverActionBg = "bg-black/40 hover:bg-black/45";
+  // Category-specific coach profile (a category is selected). The name shrinks
+  // and the headline becomes the large serif heading; Super Coach moves inline
+  // next to the name (so it's dropped from the badge list here).
+  const categoryMode = unified && !isCustomerProfile && !highLevel;
+  // Badges shown at the top of the Profile tab (max 3). Customer favorite is
+  // controlled by its admin toggle, and only shows on category-specific
+  // profiles (hidden on the high-level profile).
+  const showCustomerFavoriteBadge = effCustomerFavorite && !highLevel;
+  const displayedBadges: ProfileBadge[] = (
+    mvp
+      ? // MVP shows only the Customer favorite badge.
+        (showCustomerFavoriteBadge ? [BADGE_LIBRARY.customerFavorite] : [])
+      : [
+          ...(showCustomerFavoriteBadge ? [BADGE_LIBRARY.customerFavorite] : []),
+          ...(effShowSupercoach && !categoryMode ? [BADGE_LIBRARY.superCoach] : []),
+          BADGE_LIBRARY.admissionsStaff,
+          BADGE_LIBRARY.risingStar,
+        ]
+  ).slice(0, 3);
+
+  // High-level profile: large category selection buttons (each links to the
+  // coach's category-specific profile variant).
+  // capped: cards centered and capped at 500px (used in the "Work with …" band).
+  const renderCategoryButtons = (capped = false) => (
+    <div className={`flex flex-col ${capped ? "items-center gap-1.5 my-5" : "gap-3"}`}>
+      {categories.map((c) => (
+        <button
+          key={c.slug}
+          onClick={() => onSelectCategory?.(c.slug)}
+          className={`flex w-full items-center gap-3 rounded-2xl border border-gray-stroke bg-white px-5 py-4 text-left transition-colors hover:bg-gray-hover ${capped ? "max-w-[550px]" : ""}`}>
+          {c.icon && <img src={c.icon} alt="" className="h-7 w-7 shrink-0" />}
+          <span className="min-w-0 flex-1 text-[16px] font-semibold text-gray-dark">{c.label}</span>
+          <img src={chevronRightIcon} alt="" className="h-5 w-5 shrink-0" />
+        </button>
+      ))}
+    </div>
+  );
+  // If a coach tab disappears while it's active (Offerings toggled off, or Saved
+  // when no longer viewing own profile), fall back to About.
+  useEffect(() => {
+    if (!showOfferingsTab && coachTab === "offerings") setCoachTab("about");
+    if (!viewingOwnProfile && (coachTab === "saved" || coachTab === "likes")) setCoachTab("about");
+    if (mvp && coachTab === "activity") setCoachTab("about");
+  }, [showOfferingsTab, viewingOwnProfile, coachTab, mvp]);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [eventsCategoryOpen, setEventsCategoryOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [inlineCategory, setInlineCategory] = useState(false);
+  const [offeringsTypeOpen, setOfferingsTypeOpen] = useState(false);
+  const [allOfferingsOpen, setAllOfferingsOpen] = useState(false);
+  // A/B offerings grid: collapsed to two rows until expanded.
+  const [offeringsExpanded, setOfferingsExpanded] = useState(false);
+  const offeringsTypeRef = useRef<HTMLDivElement>(null);
+
+  // In the unified template the identity (name + photo) comes from the slug and
+  // stays constant across the coach/customer toggle. Elsewhere it keeps the
+  // original per-mode defaults.
+  const profilePhoto = unified ? (photo ?? coachConfig.photo) : (isCustomerProfile ? customerPhoto : coachConfig.photo);
+  const baseName = unified ? (name ?? coachConfig.name) : (isCustomerProfile ? "June Allen" : coachConfig.name);
+  // Inline hero editing (own profile): editable name + headline. Name derives
+  // from first/last so every profileName usage reflects an edit.
+  const [firstName, setFirstName] = useState(baseName.split(" ")[0] ?? "");
+  const [lastName, setLastName] = useState(baseName.split(" ").slice(1).join(" "));
+  const profileName = `${firstName} ${lastName}`.trim();
+  const [heroHeadline, setHeroHeadline] = useState(
+    isCustomerProfile
+      ? "Building products that matter. Passionate about AI, design, and helping others break into tech."
+      : "MBA Admissions Coach | Stanford GSB | 100+ M7 Admits",
+  );
+  const [editingHero, setEditingHero] = useState(false);
+  const [firstDraft, setFirstDraft] = useState(firstName);
+  const [lastDraft, setLastDraft] = useState(lastName);
+  const [headlineDraft, setHeadlineDraft] = useState(heroHeadline);
+  const startEditHero = () => {
+    setFirstDraft(firstName);
+    setLastDraft(lastName);
+    setHeadlineDraft(heroHeadline);
+    setEditingHero(true);
+  };
+  const saveHero = () => {
+    setFirstName(firstDraft.trim());
+    setLastName(lastDraft.trim());
+    setHeroHeadline(headlineDraft);
+    setEditingHero(false);
+  };
+
+  const categoryRef = useRef<HTMLDivElement>(null);
+  const eventsCategoryRef = useRef<HTMLDivElement>(null);
+  const adminRef = useRef<HTMLDivElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const heroSentinelRef = useRef<HTMLDivElement>(null);
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const groupRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const navScrollRef = useRef<HTMLDivElement>(null);
+  const customerTabStripRef = useRef<HTMLDivElement>(null);
+  const tabAnchorRef = useRef<HTMLDivElement>(null);
+  // On tab switch, scroll so the (sticky) tab strip pins just under the 56px top
+  // nav, showing the new tab's content from the top. Measures a NON-sticky
+  // anchor placed right above the strip — the strip's own rect is unreliable
+  // once it's pinned (its top is always 56, so the target would equal the
+  // current scroll = no-op). rAF lets the new tab content commit first.
+  const scrollTabsIntoView = () => {
+    // Only auto-scroll to the tab on mobile — on desktop the tabs stay put.
+    if (window.innerWidth >= 768) return;
+    requestAnimationFrame(() => {
+      const el = tabAnchorRef.current;
+      if (!el) return;
+      const y = el.getBoundingClientRect().top + window.scrollY - 56;
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    });
+  };
+
+  const setSectionRef = useCallback(
+    (id: string) => (el: HTMLElement | null) => {
+      sectionRefs.current[id] = el;
+    },
+    [],
+  );
+
+  const setGroupRef = useCallback(
+    (id: string) => (el: HTMLDivElement | null) => {
+      groupRefs.current[id] = el;
+    },
+    [],
+  );
+
+  // Observer A: Show/hide sticky nav based on hero sentinel visibility.
+  // We check boundingClientRect.top so the nav only appears when the
+  // sentinel has scrolled ABOVE the viewport — not when it's simply
+  // below the fold on small screens (e.g. mobile on initial load).
+  useEffect(() => {
+    const sentinel = heroSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setStickyNavVisible(false);
+        } else {
+          setStickyNavVisible(entry.boundingClientRect.top < 0);
+        }
+      },
+      { threshold: 0 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
+  // Observer B: Track active section group via scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const offset = 80;
+      let active: string | null = null;
+      for (const section of PROFILE_SECTIONS) {
+        const el = groupRefs.current[section.id];
+        if (el && el.getBoundingClientRect().top <= offset) {
+          active = section.id;
+        }
+      }
+      if (active) setActiveSection(active);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Boxed mode: flag when the tab bar has pinned (its non-sticky anchor has
+  // scrolled above the 81px pin line). Toggles the page-colored cap that hides
+  // content passing through the app-nav → tabs gap.
+  useEffect(() => {
+    if (!boxed) return;
+    const el = tabAnchorRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setBoxedTabsPinned(!entry.isIntersecting && entry.boundingClientRect.top < 81),
+      { threshold: 0, rootMargin: "-81px 0px 0px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [boxed, isCustomerProfile, coachTab, customerTab]);
+
+  // Auto-scroll active tab into view
+  useEffect(() => {
+    const container = navScrollRef.current;
+    if (!container) return;
+    const activeBtn = container.querySelector(`[data-section="${activeSection}"]`) as HTMLElement | null;
+    if (activeBtn) {
+      activeBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }, [activeSection]);
+
+  // Bring the selected customer tab into view (e.g. tapping "Saved" when it's
+  // clipped at the right edge). Scroll the strip horizontally only, so the
+  // sticky tab bar never nudges the page vertically.
+  useEffect(() => {
+    const strip = customerTabStripRef.current;
+    if (!strip) return;
+    const active = strip.querySelector<HTMLElement>(`[data-tab="${customerTab}"]`);
+    if (!active) return;
+    const target = active.offsetLeft - (strip.clientWidth - active.clientWidth) / 2;
+    strip.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, [customerTab]);
+
+  // Close admin dropdown on outside click
+  useEffect(() => {
+    if (!adminOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (adminRef.current && !adminRef.current.contains(e.target as Node)) {
+        setAdminOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [adminOpen]);
+
+  useEffect(() => {
+    if (!categoryDropdownOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
+        setCategoryDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [categoryDropdownOpen]);
+
+  // Category nav dropdown (Offerings tab on a category-specific profile) — picks
+  // another category and links to that category's page.
+  const [catNavOpen, setCatNavOpen] = useState(false);
+  const catNavRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!catNavOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (catNavRef.current && !catNavRef.current.contains(e.target as Node)) setCatNavOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [catNavOpen]);
+
+  // Category switcher pill + dropdown, reused both as a standalone control and
+  // embedded on the right side of the A/B search bar.
+  const categorySwitcher = (
+    <div ref={catNavRef} className="relative shrink-0">
+      <button
+        onClick={() => setCatNavOpen(!catNavOpen)}
+        className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-4 py-2 text-[14px] font-semibold text-[#222222] transition-colors hover:bg-[#ebebeb]"
+      >
+        {categoryLabel ?? "All categories"}
+        <img src={chevronDownIcon} alt="" className={`h-4 w-4 transition-transform ${catNavOpen ? "rotate-180" : ""}`} />
+      </button>
+      <AnimatePresence>
+        {catNavOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+          >
+            {categories.map((c) => (
+              <button
+                key={c.slug}
+                onClick={() => { onSelectCategory?.(c.slug); setCatNavOpen(false); }}
+                className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${c.label === categoryLabel ? "bg-gray-hover" : ""}`}
+              >
+                {c.label}
+                {c.label === categoryLabel && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
+  useEffect(() => {
+    if (!eventsCategoryOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (eventsCategoryRef.current && !eventsCategoryRef.current.contains(e.target as Node)) {
+        setEventsCategoryOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [eventsCategoryOpen]);
+
+  useEffect(() => {
+    if (!moreMenuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+        setMoreMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [moreMenuOpen]);
+
+  useEffect(() => {
+    if (!offeringsTypeOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (offeringsTypeRef.current && !offeringsTypeRef.current.contains(e.target as Node)) {
+        setOfferingsTypeOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [offeringsTypeOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "o") setViewingOwnProfileState(p => !p);
+      if (e.key === "i") setShowCoverImage(p => !p);
+      if (e.key === "g") setShowGrayHeader(p => !p);
+      if (!isCustomerProfile) {
+        if (e.key === "v") setShowCoachVideo(p => !p);
+        if (e.key === "n") setShowCoachNote(p => !p);
+        if (e.key === "f") setShowCustomerFavorite(p => !p);
+        if (e.key === "s") setShowSupercoach(p => !p);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isCustomerProfile]);
+
+  const scrollToSection = (id: string) => {
+    const el = sectionRefs.current[id];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  // Deep-link support: `?section=reviews` (e.g. "See all reviews" from an
+  // offering page) scrolls to that section on load, once its ref is registered
+  // and after ScrollToTop's reset has run.
+  useEffect(() => {
+    const section = searchParams.get("section");
+    if (!section) return;
+    const t = setTimeout(() => {
+      sectionRefs.current[section]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Modular coach sections reused in two places: the hero block (non-unified
+  // profiles) and the top of the About tab (unified template).
+  const customerFavoriteRow = (
+    <div className="flex gap-4 py-4">
+      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center">
+        <img src={wreathSmallImg} alt="" className="w-8" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[14px] font-semibold text-gray-dark">Customer Favorite</p>
+        <p className="text-[14px] leading-snug text-[#707070]">In the top 10% of MBA experts on Leland</p>
+      </div>
+    </div>
+  );
+  const coachNoteRow = (
+    <div
+      className="flex cursor-pointer items-start gap-3 py-4"
+      onClick={() => setCoachNoteExpanded(p => !p)}
+    >
+      <img
+        src={profilePhoto}
+        alt={profileName}
+        className="h-8 w-8 shrink-0 rounded-[4px] object-cover"
+      />
+      <div className="min-w-0">
+        <p className="text-[14px] font-semibold leading-tight text-gray-dark">Note from {profileName.split(" ")[0]}</p>
+        <div className="relative mt-0.5">
+          <p className={`text-[14px] leading-tight text-gray-light ${coachNoteExpanded ? "" : "line-clamp-3"}`}>
+            If you're looking for AI coaching, from fundamentals to building out more advanced agents and workflows, I'm taking on a few new folks for 1:1 productivity coaching for both your professional and personal life. Keeping up with the pace of development alone requires dedication. But we can bring your information together and rewire how you work. If you're looking for MBA application support, essay-writing, or other coaching, message me directly through Leland and I'll get right back to you.
+          </p>
+          {!coachNoteExpanded && (
+            <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[14px] leading-tight font-medium text-gray-dark">
+              Read more
+            </span>
+          )}
+          {coachNoteExpanded && (
+            <span className="mt-1 inline-block text-[14px] font-medium text-gray-dark">
+              Read less
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+  const coachVideoRow = (
+    <div className="group relative cursor-pointer overflow-hidden py-4">
+      <div className="relative overflow-hidden rounded-lg">
+        <img
+          src={videoThumbnail}
+          alt="Coach video"
+          className="block w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 transition-colors group-hover:bg-black/10" />
+        <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 px-2 pb-2">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/40 backdrop-blur-[6px]">
+            <svg width="11" height="13" viewBox="0 0 18 20" fill="none">
+              <path d="M17 10L1 19V1L17 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-[14px] font-medium leading-tight text-white">Get to know me</p>
+            <p className="text-[12px] leading-tight text-white/70">1:40</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Profile badges (Customer favorite, etc.). Shown at the top of the Profile tab
+  // normally; in v3 they move below the "About" header instead.
+  const badgesRow = displayedBadges.length > 0 ? (
+    <div className="flex flex-col gap-6">
+      {displayedBadges.map((badge) => (
+        <div key={badge.headline} className="flex items-center gap-3">
+          {badge.emoji ? (
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[26px] leading-none">{badge.emoji}</span>
+          ) : (
+            <img src={badge.icon} alt="" className="h-8 w-8 shrink-0" />
+          )}
+          <div className="min-w-0">
+            <p className="text-[14px] font-semibold leading-tight text-gray-dark">{badge.headline}</p>
+            <p className="mt-0.5 text-[14px] leading-tight text-[#4C4C4C]">{badge.subheadline}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : null;
+
+  // The "Work with {firstName}" preview rendered as a plain profile section (A/B
+  // versions). Bracketed by dividers to match every other section. v1 uses the
+  // compact offering-card rows (no shadow); v2 & v3 swap in a one-row grid of the
+  // new offering cards. Placement differs by version: v3 renders it above the bio
+  // (topDivider off there — the tab bar already separates it — so pad the top).
+  const renderWorkWithPreview = (topDivider = true) => (
+    <>
+      {topDivider ? <div className="my-[36px] border-t border-gray-200" /> : <div className="pt-9" />}
+      <div ref={setSectionRef("offerings")} className="scroll-mt-[60px]">
+        {highLevel ? (
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-[22px] font-semibold text-gray-dark">Categories</h2>
+            <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 text-[14px] font-semibold">
+              <img src={addPlusIcon} alt="" className="h-[16px] w-[16px]" />
+              Add category
+            </Button>
+          </div>
+        ) : (
+          <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">Work with {profileName.split(" ")[0]}</h2>
+        )}
+        {highLevel ? (
+          <div className="flex flex-col gap-1">
+            {categories.map((c) => (
+              <button
+                key={c.slug}
+                onClick={() => onSelectCategory?.(c.slug)}
+                className="group flex w-full items-center gap-3 rounded-xl px-2 py-3 text-left transition-colors hover:bg-gray-hover"
+              >
+                <div className="icon-tile flex h-11 w-11 shrink-0 items-center justify-center rounded-[6px] bg-[#f5f5f5]">
+                  {c.icon && <img src={c.icon} alt="" className="h-6 w-6" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[15px] font-semibold leading-tight text-gray-dark">{c.label}</p>
+                  {c.headline && <p className="mt-[2px] truncate text-[15px] leading-tight text-[#707070]">{c.headline}</p>}
+                </div>
+                <img src={chevronRightIcon} alt="" className="h-6 w-6 shrink-0 opacity-60" />
+              </button>
+            ))}
+          </div>
+        ) : abVersion === "v2" || abVersion === "v3" ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {OFFERINGS.slice(0, 3).map((o) => (
+              <CustomerOfferingCard key={o.slug} offering={o} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex w-full flex-col gap-2">
+            {coachConfig.offerings
+              .filter((o) => o.type === "package" || o.type === "hourly-package")
+              .slice(0, 4)
+              .map((o) => (
+                <OfferingCard
+                  key={o.title}
+                  type={o.type}
+                  title={o.title}
+                  subtitle={o.subtitle}
+                  image={o.image}
+                  ctaLabel={o.ctaLabel}
+                  href={o.href}
+                  showImage
+                  className="!px-3"
+                />
+              ))}
+          </div>
+        )}
+        {/* Custom hourly card — sits under the 3-offering grid (v2/v3), above the
+            "See more offerings" button. */}
+        {!highLevel && (abVersion === "v2" || abVersion === "v3") ? <CustomerHourlySection marginClass="mt-4" paddingClass="p-4" /> : null}
+        <div className="mt-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
+          {!highLevel && (
+            <button
+              onClick={() => { setCoachTab("offerings"); scrollTabsIntoView(); }}
+              className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+            >
+              See {OFFERINGS.length - (abVersion === "v2" || abVersion === "v3" ? 3 : 4)} more offerings
+            </button>
+          )}
+          <div className="flex items-center gap-2 text-[13px] text-[#9b9b9b]">
+            <img src={shieldIcon} alt="" className="w-[12px]" />
+            <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
+          </div>
+        </div>
+      </div>
+      <div className="my-[36px] border-t border-gray-200" />
+    </>
+  );
+
+  // Boxed mode: while the tab bar is pinned, a solid page-colored box-shadow
+  // caps the gap between the 61px app nav and the tabs (pinned at 81px). It
+  // clips content scrolling up through that gap instead of letting it peek above
+  // the tabs, and — because a solid shadow hugs the border-radius — it wraps the
+  // tab bar's rounded top corners so they read cleanly against the beige page.
+  // Gated on `boxedTabsPinned` so it never paints over the hero card above when
+  // unpinned. Color matches the page (#F3F1E6 at 50% over the body).
+  // Three 1px OUTSET shadows redraw the card's top + side border on top of that
+  // cap: the real top ring has scrolled away and the outset cap covers the side
+  // ring, so without these the outline vanishes where the tab bar sits. Offset
+  // (not spread) so they land exactly where box2's `ring-[#222222]/10` sits —
+  // continuing it flush past the bar with no jog — and hugging rounded-t-2xl.
+  // Listed before the cap so they paint over it. No layout shift (unlike a real
+  // border). Cap color matches the page (#F3F1E6 at 50% over the body).
+  const boxedTabCapStyle = boxed && boxedTabsPinned
+    ? {
+        boxShadow: [
+          "0 -1px 0 0 rgba(34,34,34,0.1)",
+          "1px 0 0 0 rgba(34,34,34,0.1)",
+          "-1px 0 0 0 rgba(34,34,34,0.1)",
+          `0 -16px 0 16px ${darkMode ? "#82817C" : "#F9F8F2"}`,
+        ].join(", "),
+      }
+    : undefined;
+
+  return (
+    <>
+      {/* Sticky secondary nav — portaled to body to escape framer-motion layoutId containing blocks */}
+      {!embedded && createPortal(
+        <AnimatePresence>
+          {stickyNavVisible && !isCustomerProfile && !unified && (
+            <motion.div
+              key="sticky-coach"
+              initial={{ y: "-100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-100%" }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+              className="fixed top-0 left-0 right-0 z-30 border-b border-gray-stroke bg-white"
+            >
+              <div className="mx-auto flex max-w-[1280px] items-stretch gap-4 px-6 transition-all duration-300">
+                {/* Left: photo + name + rate — click to scroll to top */}
+                <div
+                  className="flex shrink-0 cursor-pointer items-center gap-2.5 py-3"
+                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                >
+                  <img
+                    src={profilePhoto}
+                    alt={profileName}
+                    className="h-10 w-10 rounded-[4px] object-cover"
+                  />
+                  <div className="flex flex-col text-[14px] leading-tight md:text-[14px]">
+                    <span className="text-[16px] font-medium text-gray-dark md:text-[14px]">{profileName}</span>
+                    <span className="text-[#707070]">$150/hr</span>
+                  </div>
+                </div>
+
+                {/* Spacer */}
+                <div className="min-w-0 flex-1" />
+
+                {/* Right: pivot tabs + CTA */}
+                <div className="flex shrink-0 items-stretch">
+                  <div
+                    ref={navScrollRef}
+                    className="hidden items-stretch gap-1 overflow-x-auto md:flex md:scrollbar-hide"
+                  >
+                    {PROFILE_SECTIONS.map((section) => (
+                      <button
+                        key={section.id}
+                        data-section={section.id}
+                        onClick={() => scrollToSection(section.id)}
+                        className={`shrink-0 cursor-pointer border-b-2 px-3 py-3 text-[15px] font-medium transition-colors ${
+                          activeSection === section.id
+                            ? "border-gray-dark text-gray-dark"
+                            : "border-transparent text-gray-light hover:text-gray-dark"
+                        }`}
+                      >
+                        {section.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center pl-4 md:hidden">
+                    <button className="cursor-pointer rounded-lg bg-[#FFD96F] px-4 py-2.5 text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90">
+                      Free intro call
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Unified template — same sticky bar for coach & customer (no pivot
+              tabs). CTA is "Free intro call" for coaches, "Follow" for customers. */}
+          {stickyNavVisible && unified && (
+            <motion.div
+              key="sticky-unified"
+              initial={{ y: "-100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-100%" }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+              className="fixed top-0 left-0 right-0 z-30 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.08)]"
+            >
+              {/* Clicking anywhere in the bar (except the CTA) scrolls to top.
+                  On desktop it matches the app TopNav height (~65px) so the
+                  shared nav behind it doesn't peek out below. */}
+              <div
+                className="mx-auto flex h-14 max-w-[1280px] cursor-pointer items-center gap-4 px-4 md:h-[65px]"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              >
+                {/* Left: photo + name (+ rate for coaches) */}
+                <div className="flex min-w-0 shrink items-center gap-2.5">
+                  <img
+                    src={profilePhoto}
+                    alt={profileName}
+                    className="h-10 w-10 shrink-0 rounded-full object-cover"
+                  />
+                  <div className="flex min-w-0 flex-col text-[14px] leading-tight">
+                    <span className="truncate text-[16px] font-medium text-gray-dark md:text-[14px]">{profileName}</span>
+                    {!isCustomerProfile && <span className="truncate text-[#707070]">Available tomorrow</span>}
+                  </div>
+                </div>
+
+                {/* Spacer */}
+                <div className="min-w-0 flex-1" />
+
+                {/* Right: CTA — stops propagation so it doesn't scroll to top.
+                    Own profile → gray Edit; coach → Free intro call; else Follow. */}
+                {viewingOwnProfile ? (
+                  <Link
+                    to="/settings?tab=account"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-[#222222]/5 px-[18px] py-2.5 text-[14px] font-medium text-gray-dark no-underline transition-colors hover:bg-[#222222]/[0.08]"
+                  >
+                    <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
+                    Edit
+                  </Link>
+                ) : isCustomerProfile ? (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setIsFollowing(!isFollowing); }}
+                    className="shrink-0 cursor-pointer rounded-full bg-[#222222]/5 px-[18px] py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                  >
+                    {isFollowing ? "Following" : "Follow"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="shrink-0 cursor-pointer rounded-full bg-[#FFD96F] px-[18px] py-2.5 text-[14px] font-medium text-[#222222] transition-colors hover:bg-[#FFD96F]/90"
+                  >
+                    Free intro call
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
+
+      {/* Full-bleed header background */}
+      {!showCoverImage && showGrayHeader && (
+        <div className="w-full bg-[#f5f5f5]">
+          <div className="mx-auto max-w-[1280px] px-6">
+            <div className="h-[44px]" />
+          </div>
+          <div className="h-[78px]" />
+        </div>
+      )}
+
+      {/* Main content area */}
+      <motion.div
+        initial={isCustomerProfile && !unified ? { x: "100%" } : false}
+        animate={{ x: 0 }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
+      >
+      <PageShell paddingYClassName={embedded ? "py-0" : "py-4 sm:pb-10 sm:pt-6"} paddingXClassName={embedded ? "px-0" : "px-4 sm:px-6 lg:px-16"} rightSidebar={showSidebar ? (
+          !showCoachSidebar ? (
+            /* Inline 2 (customer): the discovery sidebar is replaced with an
+               expert-tools upsell mirroring CoachLayout's "Sell on Leland" card. */
+            twoColumn ? (
+              <div
+                className="rounded-[12px] bg-[#222222]/[0.04] p-5"
+                style={{
+                  backgroundImage:
+                    "url(\"data:image/svg+xml,%3csvg%20width='100%25'%20height='100%25'%20xmlns='http://www.w3.org/2000/svg'%3e%3crect%20width='100%25'%20height='100%25'%20fill='none'%20rx='12'%20ry='12'%20stroke='%23222222'%20stroke-opacity='0.3'%20stroke-width='2'%20stroke-dasharray='3%204'/%3e%3c/svg%3e\")",
+                }}
+              >
+                <h2 className="text-[15px] font-bold leading-tight text-gray-dark">Sell on Leland</h2>
+                <p className="mt-2 text-[15px] leading-snug text-gray-light">
+                  You haven't set up your expert tools yet.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setExpert(true)}
+                  className="mt-6 cursor-pointer text-[15px] font-semibold text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-opacity hover:opacity-70"
+                >
+                  Get started
+                </button>
+              </div>
+            ) : (
+            <div className="flex flex-col gap-6 px-1">
+              <SidebarGroup label="For you" hideChevron>
+                <SidebarCard
+                  variant="category"
+                  image={categoryMBA}
+                  title="MBA Admissions"
+                  subtitle={<CategorySubtitle photos={[pic1, pic5, pic8]} experts="312 experts" />}
+                />
+                <SidebarCard
+                  variant="category"
+                  image={categoryConsulting}
+                  title="Management Consulting"
+                  subtitle={<CategorySubtitle photos={[pic3, pic7, pic10]} experts="278 experts" />}
+                />
+                <SidebarCard
+                  variant="category"
+                  image={categoryPM}
+                  title="Product Management"
+                  subtitle={<CategorySubtitle photos={[pic6, pic9, pic11]} experts="195 experts" />}
+                />
+              </SidebarGroup>
+
+              <SidebarGroup label="Happening now">
+                <SidebarCard
+                  variant="event"
+                  live
+                  image={eventImg1}
+                  title="MBA Strategy Live"
+                  subtitle={<><span className="font-medium text-[#FB5A42]">Live now</span> · 125 registered</>}
+                  right={
+                    <Button size="sm" variant="primary">
+                      Join
+                    </Button>
+                  }
+                />
+                <SidebarCard
+                  variant="event"
+                  image={eventImg2}
+                  title="Tech Consulting Workshop"
+                  subtitle="Starts 4:30 PM · 89 registered"
+                />
+                <SidebarCard
+                  variant="event"
+                  image={eventImg3}
+                  title="Interview Prep Session"
+                  subtitle="Tomorrow, 2:00 PM · 54 registered"
+                />
+              </SidebarGroup>
+
+              <SidebarGroup label="Find an expert">
+                <SidebarCard
+                  variant="coach"
+                  image={pic1}
+                  title="Jasmine Singer"
+                  subtitle="Experienced Product Leader at LinkedIn | Ex-..."
+                  to="/coach-profile"
+                />
+                <SidebarCard
+                  variant="coach"
+                  image={pic3}
+                  title="Jackson Ringger"
+                  subtitle="Ex-McKinsey Engagement Manager | Wharton MBA..."
+                  to="/coach-profile"
+                />
+                <SidebarCard
+                  variant="coach"
+                  image={pic5}
+                  title="Erika Mah"
+                  subtitle="Senior PM at Google | Stanford GSB | Ex-Stripe..."
+                  to="/coach-profile"
+                />
+              </SidebarGroup>
+            </div>
+            )
+          ) : (
+            <div className="flex flex-col gap-6">
+              {/* Video + Availability + CTA buttons */}
+              <div className="flex flex-col" style={{ gap: 14 }}>
+                {/* Coach video — desktop sidebar */}
+                {effCoachVideo && (
+                  <div className="group relative cursor-pointer overflow-hidden rounded-lg">
+                    <img
+                      src={videoThumbnail}
+                      alt="Coach video"
+                      className="block w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute inset-0 transition-colors group-hover:bg-black/10" />
+                    <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 px-2 pb-2">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/40 backdrop-blur-[6px]">
+                        <svg width="11" height="13" viewBox="0 0 18 20" fill="none">
+                          <path d="M17 10L1 19V1L17 10Z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-[14px] font-medium leading-tight text-white">Get to know me</p>
+                        <p className="text-[12px] leading-tight text-white/70">1:40</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {altSchedule ? (
+                  <AltScheduleWidget />
+                ) : (
+                  <div className="flex items-center justify-between rounded-lg border border-[#E5E5E5] bg-white px-5 py-4" style={{ boxShadow: "0px 1px 2px 0px rgba(16,24,40,0.05)" }}>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[14px] font-semibold leading-tight text-gray-dark">Available tomorrow</span>
+                      <span className="text-[14px] leading-tight text-[#4C4C4C]">Starting at 5:30 PM MT</span>
+                    </div>
+                    <span className="h-[12px] w-[12px] shrink-0 rounded-full bg-[#80ACED] animate-[pulse-ring-blue_2.4s_ease-out_infinite]" />
+                  </div>
+                )}
+                {/* CTAs hidden on Inline 2 (the free intro call / book a session
+                    buttons) */}
+                {!twoColumn && (
+                  <div className="flex flex-col gap-2">
+                    <button className="w-full cursor-pointer rounded-full bg-leland-brand-primary px-4 py-[14px] text-[15px] font-medium text-gray-dark transition-colors hover:bg-leland-brand-primary/90">
+                      Schedule a free intro call
+                    </button>
+                    <button className="w-full cursor-pointer rounded-full bg-[#222222]/5 px-4 py-[14px] text-[15px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                      Book a session
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Coach note + Questions + Guarantee */}
+              <div className="flex flex-col">
+                {/* Coach note */}
+                {effCoachNote && (
+                  <div
+                    className="flex cursor-pointer gap-3 border-t border-b border-[#E5E5E5] py-6"
+                    onClick={() => setCoachNoteExpanded(p => !p)}
+                  >
+                    <img
+                      src={profilePhoto}
+                      alt={profileName}
+                      className="h-9 w-9 shrink-0 rounded-[4px] object-cover"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-semibold text-gray-dark">Note from {profileName.split(" ")[0]}</p>
+                      <div className="relative mt-0.5">
+                        <motion.div
+                          initial={false}
+                          animate={{ height: coachNoteExpanded ? "auto" : 58 }}
+                          transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <p className="text-[14px] leading-snug text-gray-light">
+                            If you're looking for AI coaching, from fundamentals to building out more advanced agents and workflows, I'm taking on a few new folks for 1:1 productivity coaching for both your professional and personal life. Keeping up with the pace of development alone requires dedication. But we can bring your information together and rewire how you work. If you're looking for MBA application support, essay-writing, or other coaching, message me directly through Leland and I'll get right back to you.
+                          </p>
+                        </motion.div>
+                        {!coachNoteExpanded && (
+                          <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-10 text-[14px] leading-snug font-medium text-gray-dark">
+                            Read more
+                          </span>
+                        )}
+                        {coachNoteExpanded && (
+                          <span className="mt-1 inline-block text-[14px] font-medium text-gray-dark">
+                            Read less
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Message / Questions section — hidden on Inline 2 */}
+                {!twoColumn && (
+                  <div className={`flex gap-3 border-b border-[#E5E5E5] py-6 ${!effCoachNote ? "border-t" : ""}`}>
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5] icon-tile">
+                      <img src={airplaneIcon} alt="" className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-semibold text-gray-dark">Questions?</p>
+                      <p className="mt-0.5 text-[14px] leading-snug text-gray-light">
+                        You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">Send a message</span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+
+            </div>
+          )
+        ) : undefined} rightSidebarWidth={340} rightSidebarTop={stickyNavVisible ? 76 : 20}>
+        <div className={boxed ? "flex flex-col gap-5" : ""}>
+          <div className={boxed ? boxCard : "contents"}>{/* Box 1 — hero */}
+          {/* Unified template — self-rendered mobile top nav that slides in/out
+              with the page (the shared fixed nav is hidden on /profile). It
+              overlays the cover: transparent + white icons over the cover, solid
+              + dark icons once scrolled. */}
+          {unified && !embedded && (
+            <div
+              className="absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)] transition-colors md:hidden"
+              style={{ backgroundColor: navScrolled ? (darkMode ? "#111111" : "#ffffff") : "transparent" }}
+            >
+              <button
+                onClick={onBack}
+                aria-label="Go back"
+                className={`flex h-8 w-8 items-center justify-center ${navIconsLight ? "text-white" : "text-gray-dark"}`}
+              >
+                <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <div className="flex items-center gap-[6px]">
+                <img src={logoIcon} alt="Leland" className={`h-[23px] w-auto ${navIconsLight ? "brightness-0 invert" : ""}`} />
+                <motion.img
+                  src={logoWordmark}
+                  alt=""
+                  className={`h-[20px] w-auto ${navIconsLight ? "brightness-0 invert" : ""}`}
+                  animate={{ opacity: navWordmarkHidden ? 0 : 1, width: navWordmarkHidden ? 0 : "auto", marginLeft: navWordmarkHidden ? 0 : undefined }}
+                  transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                />
+              </div>
+              <button aria-label="Share" className="flex h-8 w-8 items-center justify-center">
+                <img src={shareArrowFilledIcon} alt="Share" className={`h-[22px] w-[22px] ${navIconsLight ? "brightness-0 invert" : "brightness-0"}`} />
+              </button>
+            </div>
+          )}
+
+          {/* Cover image. In the template the cover pulls up past PageShell's
+              top padding so it (and the #111 backing behind the status bar)
+              reaches the very top — no white gap above the cover. */}
+          {heroCustomer ? (
+            <div
+              className={`group/cover relative -mx-4 md:mx-0 ${boxed ? "" : "md:rounded-[6px]"} ${unified ? "-mt-4 sm:-mt-10 md:mt-0" : "-mt-[72px] md:mt-0"} ${showCoverImage ? "" : "md:hidden"}`}
+              style={{ backgroundColor: coverBg }}
+            >
+              {coverMode === "default" ? (
+                <>
+                  <img
+                    src={unified && cover ? cover : customerCoverImage}
+                    alt="Cover"
+                    className={`block aspect-[4/1] w-full object-cover ${boxed ? "" : "md:rounded-[6px]"}`}
+                  />
+                </>
+              ) : (
+                <div className={`aspect-[4/1] w-full md:rounded-[6px] ${coverMode === "none" ? "md:hidden" : "md:aspect-[4/1]"}`} style={{ backgroundColor: coverBg }} />
+              )}
+
+              {/* Desktop floating cover actions — frosted-glass round buttons in
+                  the top corners (back on the left, share on the right), mirroring
+                  the mobile top nav. */}
+              {unified && (
+                coverMode === "none" ? (
+                  /* Cover hidden (none) — desktop action row sits inline above the
+                     profile photo, using the secondary gray button style. */
+                  <div className="hidden items-center justify-between px-4 pt-4 md:flex">
+                    {!highLevel ? (
+                      <Button size="sm" variant="secondary" iconOnly onClick={onBack} aria-label="Go back">
+                        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M15 18l-6-6 6-6" />
+                        </svg>
+                      </Button>
+                    ) : (
+                      <span className="h-9 w-9" />
+                    )}
+                    <Button size="sm" variant="secondary" iconOnly aria-label="Share">
+                      <img src={shareArrowFilledIcon} alt="" className="h-[17px] w-[17px] brightness-0" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Back — hidden on the high-level profile (nothing to go back
+                        to yet) and on the customer view. */}
+                    {!highLevel && !isCustomerProfile && (
+                    <button
+                      onClick={onBack}
+                      aria-label="Go back"
+                      className={`absolute left-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-colors md:flex ${coverActionBg}`}
+                    >
+                      <svg className="h-[18px] w-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M15 18l-6-6 6-6" />
+                      </svg>
+                    </button>
+                    )}
+                    {/* Edit cover — reveals on cover hover (matches Edit mode). */}
+                    <button
+                      type="button"
+                      className="absolute right-4 top-4 hidden items-center gap-1.5 rounded-full bg-[#222222]/25 px-3 py-1.5 text-[13px] font-semibold text-white opacity-0 backdrop-blur-[12px] transition-all hover:bg-[#222222]/35 group-hover/cover:opacity-100 md:flex"
+                    >
+                      <img src={editIcon} alt="" className="h-[14px] w-[14px] brightness-0 invert" />
+                      Edit cover
+                    </button>
+                  </>
+                )
+              )}
+            </div>
+          ) : (
+            showCoverImage && (
+              <img
+                src={coachCoverImage}
+                alt="Cover"
+                className="block aspect-[3/1] md:aspect-[7/2] w-full rounded-[6px] object-cover"
+              />
+            )
+          )}
+
+          {/* Sticky-nav sentinel — unified template shows the bar as soon as the
+              cover scrolls off (rather than waiting for the whole hero). */}
+          {unified && <div ref={heroSentinelRef} />}
+
+          <div className={boxed ? "px-5 pb-5" : twoColumn ? "px-3" : "contents"}>{/* hero padded inner — Inline 2 insets content 12px from the full-width cover */}
+          {/* Profile photo + CTA buttons */}
+          <div className={`${heroCustomer ? "-mt-[80px] items-end" : showCoverImage ? "-mt-[80px] pl-4 items-start" : showGrayHeader ? "-mt-[100px] items-start" : "mt-0 items-start"} mb-2 flex justify-between md:mb-4 ${heroCustomer || showCoverImage || showGrayHeader ? "md:items-end" : ""} ${heroCustomer && !showCoverImage ? "md:mt-0 md:pl-0" : ""} ${coverMode === "none" ? "md:mt-0" : ""}`}>
+            <div className={`group relative z-20 cursor-pointer border-[4px] ${darkMode ? "border-[#131313] bg-[#131313]" : "border-white bg-white"} ${heroCustomer ? "rounded-full" : "rounded-lg md:rounded-lg"}`} onClick={() => setLightboxOpen(true)}>
+              <div className={`relative overflow-hidden ${heroCustomer ? "rounded-full" : "rounded-[4px] md:rounded-[4px]"}`}>
+                <motion.img
+                  layoutId="profile-photo"
+                  src={profilePhoto}
+                  alt={profileName}
+                  className="block h-[132px] w-[132px] object-cover"
+                />
+                {viewingOwnProfile ? (
+                  /* Hover (own profile): darken the photo + reveal a centered
+                     Edit pill — mirrors the Edit-mode hero avatar. */
+                  <>
+                    <div className="pointer-events-none absolute inset-0 bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <span className="flex translate-y-1 items-center gap-1 rounded-full bg-[#222222]/25 px-3 py-1.5 text-[13px] font-semibold text-white opacity-0 backdrop-blur-[12px] transition-[transform,opacity] duration-200 ease-out group-hover:translate-y-0 group-hover:opacity-100">
+                        <img src={editIcon} alt="" className="h-[13px] w-[13px] brightness-0 invert" />
+                        Edit
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
+                )}
+              </div>
+            </div>
+            <div className={`flex items-center gap-2 ${showCoverImage || heroCustomer ? "pb-1" : showGrayHeader ? "pb-[90px]" : "pb-1"} ${heroCustomer && !showCoverImage ? "md:pb-1" : ""}`}>
+              {viewingOwnProfile ? (
+                editingHero ? null : (
+                <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 text-[14px] font-semibold" onClick={startEditHero}>
+                  <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
+                  Edit
+                </Button>
+                )
+              ) : (
+                <>
+                  {/* Message — icon-only circle next to Follow on all sizes. */}
+                  {heroCustomer && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      iconOnly
+                      aria-label={`Message ${profileName.split(" ")[0]}`}
+                      className="mb-1"
+                    >
+                      <img src={airplaneIcon} alt="" className="h-[18px] w-[18px]" />
+                    </Button>
+                  )}
+                  {heroCustomer ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      rounded="rounded-full"
+                      onClick={() => setIsFollowing(!isFollowing)}
+                      className="mb-1 text-[15px] font-semibold"
+                    >
+                      {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
+                      {isFollowing ? "Following" : "Follow"}
+                    </Button>
+                  ) : (
+                    <button
+                      onClick={() => setIsFollowing(!isFollowing)}
+                      className={`flex cursor-pointer items-center gap-1.5 transition-colors ${
+                        showCoverImage || !showGrayHeader
+                          ? "rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark hover:bg-[#222222]/[0.08]"
+                          : "rounded-lg border border-[#222222]/10 bg-white px-4 py-2.5 text-[14px] font-semibold text-gray-dark hover:border-[#222222]/20"
+                      }`}
+                    >
+                      {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
+                      {isFollowing ? "Following" : "Follow"}
+                    </button>
+                  )}
+                  <div ref={moreMenuRef} className={`relative ${heroCustomer ? "hidden" : ""}`}>
+                    <button
+                      onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                      className={`flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-lg transition-colors ${
+                        showCoverImage || !showGrayHeader
+                          ? "bg-[#222222]/5 hover:bg-[#222222]/[0.08]"
+                          : "border border-[#222222]/10 bg-white hover:border-[#222222]/20"
+                      }`}
+                    >
+                      <img src={dotsHorizontalIcon} alt="More" className="h-[20px] w-[20px]" />
+                    </button>
+                    <AnimatePresence>
+                      {moreMenuOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 6 }}
+                          transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+                          className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                        >
+                          {[
+                            { icon: shareArrowIcon, label: "Share" },
+                            { icon: airplaneIcon, label: "Message" },
+                            { icon: reportFlagIcon, label: "Report" },
+                          ].map((item) => (
+                            <button
+                              key={item.label}
+                              onClick={() => setMoreMenuOpen(false)}
+                              className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-gray-hover ${
+                                "text-gray-dark"
+                              }`}
+                            >
+                              <img src={item.icon} alt="" className="h-[20px] w-[20px] shrink-0 brightness-0" />
+                              {item.label}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Name → stats wrapper (padded when cover image is on). In the unified
+              template the text is flush-left on mobile (matching the photo, which
+              only pads on desktop) — drop the mobile pl-4 there. */}
+          <div className={showCoverImage && !unified ? "pl-4" : ""}>
+
+          {editingHero ? (
+          /* Inline edit — editable name + headline in place of the identity. */
+          <div className="flex max-w-[640px] flex-col gap-3 pb-2">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <label className="flex-1">
+                <span className="mb-1 block text-[13px] font-medium text-gray-light">First name</span>
+                <input value={firstDraft} onChange={(e) => setFirstDraft(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-[16px] text-gray-dark outline-none focus:border-gray-dark" />
+              </label>
+              <label className="flex-1">
+                <span className="mb-1 block text-[13px] font-medium text-gray-light">Last name</span>
+                <input value={lastDraft} onChange={(e) => setLastDraft(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-[16px] text-gray-dark outline-none focus:border-gray-dark" />
+              </label>
+            </div>
+            <label className="block">
+              <span className="mb-1 block text-[13px] font-medium text-gray-light">Headline</span>
+              <input value={headlineDraft} onChange={(e) => setHeadlineDraft(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-[16px] text-gray-dark outline-none focus:border-gray-dark" />
+            </label>
+            <div className="mt-1 flex items-center justify-between">
+              <Button size="lg" variant="secondary" className="font-semibold" onClick={() => setEditingHero(false)}>Cancel</Button>
+              <Button size="lg" variant="dark" className="font-semibold" onClick={saveHero}>Save</Button>
+            </div>
+          </div>
+          ) : (
+          <>
+
+          {/* Name + Verified badge + Supercoach badge. In the unified template the
+              name always keeps the large serif styling (it never shrinks when a
+              category is selected). */}
+          <div className={`flex items-center ${categoryMode ? "gap-1.5 mb-1" : unified || sectionFilter === "All" ? "gap-2 mb-2" : "gap-1 mb-1"}`}>
+            <h1 className={`font-medium text-gray-dark ${categoryMode ? "text-[16px]" : unified || sectionFilter === "All" ? "font-serif text-[26px]" : "text-[16px]"}`}>{profileName}</h1>
+            <AnimatePresence>
+              {!isCustomerProfile && !mvp && (
+                <motion.img
+                  key="verified"
+                  src={verifiedIcon}
+                  alt="Verified"
+                  className="mt-[2px] h-[19px] w-[19px]"
+                  initial={unified ? { opacity: 0, scale: 0.4 } : false}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.4 }}
+                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                />
+              )}
+            </AnimatePresence>
+            {/* Inline Super Coach — non-unified, and the category-specific
+                template (where it sits next to the smaller name). */}
+            {effShowSupercoach && !isCustomerProfile && (!unified || categoryMode) && (
+              <>
+                <span className="ml-1 text-[16px] text-[#999999]">·</span>
+                <span className="text-[16px] text-gray-light"><span className="text-[14px]">🏆</span> Top Expert</span>
+              </>
+            )}
+          </div>
+
+          {/* Headline — sits directly under the name. Large serif in the
+              category-specific coach view; body text (bio) for customers. The
+              high-level profile hides it (no category yet). */}
+          {(isCustomerProfile || unified) && (
+            <p className={categoryMode ? "mb-2 font-serif text-[26px] font-medium leading-[1.3] text-gray-dark" : "mb-2 text-[16px] leading-[1.45] text-gray-light"}>
+              {heroHeadline}
+            </p>
+          )}
+
+          {/* Headline — large serif variant. Hidden in the unified template,
+              where the headline instead renders in the bio slot below. */}
+          <p className={`mb-[6px] font-serif text-[26px] font-medium leading-[1.3] text-[#333333] ${unified || sectionFilter === "All" ? "hidden" : ""}`}>
+            {isCustomerProfile
+              ? <>Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB</>
+              : sectionFilter === "College"
+                ? <>College Admissions Expert | Yale Grad | 50+ Ivy League Admits</>
+                : sectionFilter === "MBA"
+                  ? <>MBA Coach | Stanford GSB | 100+ M7 Admits</>
+                  : <>Experienced Product Leader at LinkedIn | Ex-Meta | Stanford GSB</>
+            }
+          </p>
+
+          {/* Reviews — a 5-star row below the headline. */}
+          {!isCustomerProfile && altReviews && (
+            <div
+              className="mb-3 flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-70 md:mb-4"
+              onClick={() => scrollToSection("reviews")}
+            >
+              <div className="flex items-center gap-[1px]">
+                {[...Array(5)].map((_, i) => (
+                  <img key={i} src={starIcon} alt="" className="h-[16px] w-[16px]" />
+                ))}
+              </div>
+              <span className="text-[15px] font-semibold leading-none text-gray-dark">4.9</span>
+              <span className="text-[15px] leading-none text-[#707070]">52 Reviews</span>
+            </div>
+          )}
+
+          {/* Stats row */}
+            <div className="mb-1 flex flex-wrap items-center gap-x-6 gap-y-3 md:mb-2">
+              {/* Customer Favorite — desktop only (mobile gets its own banner below) */}
+              {showLegacyCustomerFavorite && effCustomerFavorite && (
+                <>
+                  <div className="hidden items-center gap-[2px] md:flex">
+                    <img src={wreathImg} alt="" className="h-[45px] w-[21px]" />
+                    <span className="text-center text-[16px] font-semibold leading-[110%] text-gray-dark">Customer<br/>Favorite</span>
+                    <img src={wreathImg} alt="" className="h-[45px] w-[21px] scale-x-[-1]" />
+                  </div>
+                </>
+              )}
+              {/* Reviews — coach only. popLayout pops it out of flow on exit so
+                  the trailing stats (which carry `layout`) glide to fill. */}
+              <AnimatePresence mode="popLayout">
+              {!isCustomerProfile && !altReviews && (
+              <motion.div
+                key="reviews"
+                layout
+                initial={unified ? { opacity: 0, scale: 0.85 } : false}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85 }}
+                transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+                className="flex items-center gap-x-6"
+              >
+                <div
+                  className="flex cursor-pointer flex-col gap-[2px] transition-opacity hover:opacity-70"
+                  onClick={() => scrollToSection("reviews")}
+                >
+                  <div className="flex items-center gap-1">
+                    <span className="text-[16px] font-semibold leading-none text-gray-dark">4.9</span>
+                    <img src={starIcon} alt="" className="h-[16px] w-[16px]" />
+                  </div>
+                  <span className="text-[14px] leading-tight text-[#707070]">52 Reviews</span>
+                </div>
+              </motion.div>
+              )}
+              </AnimatePresence>
+              {/* Minutes coached — hidden on the template's customer (Expert off) view */}
+              {(!unified || !isCustomerProfile) && (<>
+              <motion.div layout className="flex flex-col gap-[2px]">
+                <span className="text-[16px] font-semibold leading-none text-gray-dark">6.6k</span>
+                <span className="text-[14px] leading-tight text-[#707070]">{unified && !isCustomerProfile ? "Expert mins" : "Min coached"}</span>
+              </motion.div>
+              </>)}
+              {/* Followers */}
+              <motion.div layout className="flex flex-col gap-[2px]">
+                <span className="text-[16px] font-semibold leading-none text-gray-dark">84</span>
+                <span className="text-[14px] leading-tight text-[#707070]">Followers</span>
+              </motion.div>
+              {/* Likes + Impressions — hidden in MVP mode. */}
+              {!mvp && (<>
+              <motion.div layout className="flex flex-col gap-[2px]">
+                <span className="text-[16px] font-semibold leading-none text-gray-dark">1.6k</span>
+                <span className="text-[14px] leading-tight text-[#707070]">Likes</span>
+              </motion.div>
+              {/* Impressions — desktop only */}
+              <motion.div
+                layout
+                className="hidden cursor-pointer flex-col gap-[2px] transition-opacity hover:opacity-70 md:flex"
+                onClick={() => scrollToSection("activity")}
+              >
+                <span className="text-[16px] font-semibold leading-none text-gray-dark">8.5k</span>
+                <span className="text-[14px] leading-tight text-[#707070]">Impressions</span>
+              </motion.div>
+              </>)}
+            </div>
+
+          {/* Featured experience — moved below the stats row. */}
+          <div className="mt-3 flex flex-wrap items-center gap-x-[20px] gap-y-[2px] text-[14px] leading-tight text-gray-light md:mt-4">
+            {/* Atlassian */}
+            <div className="flex items-center gap-[6px]">
+              <img src={atlassianLogo} alt="Atlassian" className="h-[18px] w-[18px] rounded" />
+              <span>Atlassian</span>
+            </div>
+
+            {/* Yale University */}
+            <div className="flex items-center gap-[6px]">
+              <img src={yaleLogo} alt="Yale University" className="h-[18px] w-[18px] rounded" />
+              <span>Yale University</span>
+            </div>
+
+            {/* Successful clients at */}
+            {!isCustomerProfile && <div className="hidden items-center gap-[6px] sm:flex">
+              <span>Successful clients at</span>
+              <div className="flex items-center -space-x-[2px]">
+                <img src={clientLogo1} alt="" className="h-[18px] w-[18px] rounded border border-white" />
+                <img src={clientLogo2} alt="" className="h-[18px] w-[18px] rounded border border-white" />
+                <img src={clientLogo3} alt="" className="h-[18px] w-[18px] rounded border border-white" />
+                <img src={clientLogo4} alt="" className="h-[18px] w-[18px] rounded border border-white" />
+              </div>
+            </div>}
+          </div>
+
+          </>
+          )}
+
+          </div>{/* end name → stats wrapper */}
+
+
+          {/* Customer Favorite — mobile banner (hidden for now) */}
+
+          {/* Mobile inline CTA removed — the top-right header button is the
+              only Follow/Edit action on the customer profile. */}
+
+          {/* Mobile sidebar content — coach profile: Availability, CTAs, Customer Favorite, Coach note, Video, Questions.
+              In the unified template this block is promoted above the tab bar on
+              all widths (the coach CTA sidebar is dropped in favor of it). Height
+              animates on the template so everything below slides as it appears. */}
+          <AnimatePresence initial={false}>
+          {!isCustomerProfile && !viewingOwnProfile && (
+            <motion.div
+              key="coach-info"
+              initial={unified ? { opacity: 0, height: 0 } : false}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+              className="overflow-hidden"
+            >
+            <div className={`${unified ? "mt-3" : "mt-4"} flex flex-col ${unified ? hideForCoachSidebar : "md:hidden"}`}>
+              {/* CTA buttons */}
+              {unified ? (
+                /* One line: Free intro call fills up to the Message button, which
+                   Message lives next to Follow up top. Hidden on Inline 2 (no CTAs). */
+                twoColumn ? null : (
+                <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-leland-brand-primary px-5 py-[14px] text-[15px] font-medium text-[#111111] transition-colors hover:bg-leland-brand-primary/90">
+                  Free intro call
+                </button>
+                )
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-leland-brand-primary px-4 py-[14px] text-[15px] font-medium text-[#111111] transition-colors hover:bg-leland-brand-primary/90">
+                    Free intro call
+                  </button>
+                  <button className="w-full cursor-pointer rounded-full bg-[#222222]/5 px-4 py-[14px] text-[15px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                    Book a session
+                  </button>
+                </div>
+              )}
+
+              {/* Availability — unified template shows a compact line below the
+                  CTAs, left-aligned (no response-time, no icon tile). */}
+              {unified && (
+                <div className="mt-3 flex items-center justify-center gap-1.5">
+                  <img src={calendarPageThinIcon} alt="" className="h-[15px] w-[15px] shrink-0 brightness-0 opacity-[0.54]" />
+                  <p className="text-[13px] font-normal text-gray-extra-light">Available tomorrow at 5:30 PM</p>
+                </div>
+              )}
+
+              {/* Customer Favorite / Availability / Coach note / Questions /
+                  Video — non-unified hero only (the unified template promotes
+                  these elsewhere; availability + message moved above the CTA). */}
+              {!unified && (
+              <div className="mt-2 flex flex-col">
+                {/* Customer Favorite */}
+                {effCustomerFavorite && customerFavoriteRow}
+
+                {/* Availability */}
+                <div className="flex gap-4 py-4">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5] icon-tile">
+                    <img src={calendarIcon} alt="" className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[14px] font-medium text-gray-dark">Available today at 5:30 PM</p>
+                    <p className="text-[14px] leading-snug text-[#707070]">Usually responds within 12h</p>
+                  </div>
+                </div>
+
+                {/* Coach note */}
+                {effCoachNote && coachNoteRow}
+
+                {/* Questions */}
+                <div className="flex gap-4 py-4">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5] icon-tile">
+                    <img src={airplaneIcon} alt="" className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[14px] font-semibold text-gray-dark">Questions?</p>
+                    <p className="text-[14px] leading-snug text-[#707070]">
+                      You can start chatting with {profileName.split(" ")[0]} before you get started. <span className="cursor-pointer font-medium text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">Send a message</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Coach video */}
+                {effCoachVideo && coachVideoRow}
+              </div>
+              )}
+            </div>
+            </motion.div>
+          )}
+          </AnimatePresence>
+
+          {/* Mobile inline CTA — coach viewing own profile. Hidden in the unified
+              template, which relies on the header Edit profile button instead. */}
+          {!isCustomerProfile && viewingOwnProfile && !unified && (
+            <div className="mt-3 md:hidden">
+              <Link to="/settings?tab=account" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#222222]/5 px-4 py-3 text-[16px] font-medium text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
+                Edit profile
+              </Link>
+            </div>
+          )}
+
+          </div>{/* end hero padded inner */}
+          </div>{/* end Box 1 — hero */}
+
+          <div className={boxed ? "rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10 px-5 pb-5" : "contents"}>{/* Box 2 — tab bar + content (tab bar pins to the page top) */}
+          {/* Hero sentinel for sticky nav detection (non-unified position). */}
+          {!unified && <div ref={heroSentinelRef} />}
+
+          {/* Unified template — coach tab bar. Activity sits between About and
+              Offerings, with Offerings only when the "Offerings tab" toggle is on. */}
+          {!isCustomerProfile && unified && (
+            <>
+            <div ref={tabAnchorRef} aria-hidden className={boxed ? "h-0" : "mt-3 h-0"} />
+            <div style={boxedTabCapStyle} className={`sticky z-10 flex border-b border-gray-stroke bg-white ${boxed ? "top-[81px] -mx-5 rounded-t-2xl" : "top-14 md:top-0 -mx-4 md:mx-0"}`}>
+              {([
+                "about" as const,
+                // Activity is hidden in MVP mode.
+                ...(mvp ? [] : (["activity"] as const)),
+                ...(showOfferingsTab ? ["offerings" as const] : []),
+                // Saved + Likes appear only when viewing your own profile.
+                ...(viewingOwnProfile ? (["saved", "likes"] as const) : []),
+              ]).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => { setCoachTab(tab); scrollTabsIntoView(); }}
+                  className={`flex-1 cursor-pointer py-3 text-center transition-colors ${
+                    coachTab === tab
+                      ? `border-b-2 text-gray-dark ${darkMode ? "border-white" : "border-gray-dark"}`
+                      : "border-b-2 border-transparent text-gray-light hover:text-gray-dark"
+                  }`}
+                >
+                  <span className="inline-flex items-center gap-1.5 text-[16px] font-medium">
+                    {tab === "about" ? "Profile" : tab === "offerings" ? "Offerings" : tab === "activity" ? "Activity" : tab === "saved" ? "Saved" : "Likes"}
+                    {tab === "offerings" && (
+                      <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-[#222222]/[0.06] px-[8px] py-[2px] text-[12px] font-medium text-gray-light/80">
+                        {OFFERINGS.length}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              ))}
+            </div>
+            </>
+          )}
+
+          {/* Coach detail sections (Offerings → Reviews). In the unified template
+              these live inside the "About" tab (Offerings optionally in its own
+              tab); otherwise they scroll inline. */}
+          {!isCustomerProfile && (showOfferingsSection || showRestSections || (unified && coachTab === "about")) && (<>
+          {/* Profile tab (My Leland own profile) — the same sections as the beige
+              "Edit mode" editor, rendered as divided sections inside the bottom
+              box: 20px headers + Edit-mode section padding, hairline dividers,
+              no inner card borders. */}
+          {unified && coachTab === "about" && (
+            <div className="divide-y divide-gray-stroke/70">
+              {/* Categories */}
+              {categories.length > 0 && (
+                <section className="py-6">
+                  <ProfileSectionHead title="Categories" action={<ProfileEditButton label="Add category" icon={addPlusIcon} />} />
+                  <div className="flex flex-col gap-1">
+                    {categories.map((c) => (
+                      <button
+                        key={c.slug}
+                        onClick={() => onSelectCategory?.(c.slug)}
+                        className="group flex cursor-pointer items-center gap-3 rounded-xl px-2 py-3 text-left transition-colors hover:bg-gray-hover"
+                      >
+                        <div className="icon-tile flex h-11 w-11 shrink-0 items-center justify-center rounded-[6px] bg-[#f5f5f5]">
+                          {c.icon && <img src={c.icon} alt="" className="h-6 w-6" />}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[15px] font-semibold leading-tight text-gray-dark">{c.label}</p>
+                          {c.headline && <p className="mt-[2px] truncate text-[15px] leading-tight text-[#707070]">{c.headline}</p>}
+                        </div>
+                        <img src={chevronRightIcon} alt="" className="h-6 w-6 shrink-0 opacity-60" />
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* About */}
+              <ProfileTextSection title="About" text={PROFILE_ABOUT_TEXT} />
+
+              {/* Intro Video — compact banner (thumbnail + link + actions) */}
+              <section className="py-6">
+                <ProfileSectionHead title="Intro Video" />
+                <div className="flex items-center gap-3.5 rounded-xl bg-gray-hover p-3">
+                  <div className="relative h-16 w-[112px] shrink-0 overflow-hidden rounded-lg bg-black">
+                    <img src={videoThumbnail} alt="" className="h-full w-full object-cover" />
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#222222"><path d="M8 5v14l11-7z" /></svg>
+                      </div>
+                    </div>
+                    <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1.5 py-[1px] text-[11px] font-medium leading-none text-white">1:24</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[15px] font-semibold text-gray-dark">Intro video</p>
+                    <a href="https://youtu.be/dQw4w9WgXcQ" target="_blank" rel="noreferrer" className="mt-0.5 block truncate text-[13px] text-gray-light transition-colors hover:text-gray-dark hover:underline">https://youtu.be/dQw4w9WgXcQ</a>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <button type="button" aria-label="Edit" className="flex items-center justify-center rounded-full p-3 text-gray-dark transition-colors hover:bg-gray-hover"><img src={editIcon} alt="" className="h-[18px] w-[18px]" /></button>
+                    <button type="button" aria-label="More" className="flex items-center justify-center rounded-full p-3 text-gray-dark transition-colors hover:bg-gray-hover"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><circle cx="3" cy="8" r="1.5" /><circle cx="8" cy="8" r="1.5" /><circle cx="13" cy="8" r="1.5" /></svg></button>
+                  </div>
+                </div>
+              </section>
+
+              {/* Why I coach */}
+              <ProfileTextSection title="Why I coach" text={PROFILE_WHY_TEXT} />
+
+              {/* Education */}
+              <section className="py-6">
+                <ProfileSectionHead title="Education" action={<ProfileEditButton label="Add" icon={addPlusIcon} />} />
+                <div className="flex flex-col gap-1">
+                  {PROFILE_EDUCATION.map((item) => (
+                    <ProfileCredentialRow key={item.title} logo={item.logo} title={item.title} subtitle={item.subtitle} featured={item.featured} />
+                  ))}
+                </div>
+              </section>
+
+              {/* Experience */}
+              <section className="py-6">
+                <ProfileSectionHead title="Experience" action={<ProfileEditButton label="Add" icon={addPlusIcon} />} />
+                <div className="flex flex-col gap-1">
+                  {PROFILE_EXPERIENCE.map((item) => (
+                    <ProfileCredentialRow key={item.title} logo={item.logo} title={item.title} subtitle={item.subtitle} featured={item.featured} />
+                  ))}
+                </div>
+              </section>
+
+              {/* Reviews — summary + rating breakdown + outcomes */}
+              <section className="py-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-[20px] font-semibold text-gray-dark">37 reviews</h2>
+                    <div className="mt-2 flex items-center gap-2.5">
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <svg key={i} width="20" height="20" viewBox="0 0 24 24" fill="#222222">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <span className="text-[18px] font-normal text-gray-light">4.9 avg</span>
+                    </div>
+                  </div>
+                  <LinkButton size="md" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold" href="/my-leland/reviews">
+                    See all reviews
+                  </LinkButton>
+                </div>
+
+                <div className="my-5 border-t border-gray-200" />
+
+                {/* Rating breakdown — overall distribution + category scores */}
+                <div className="flex flex-col gap-4 md:grid md:grid-cols-5">
+                  <div className="md:col-span-1">
+                    <p className="mb-1 text-[14px] font-medium text-gray-light">Overall rating</p>
+                    <div className="flex flex-col gap-1">
+                      {[
+                        { star: 5, count: 3 },
+                        { star: 4, count: 0 },
+                        { star: 3, count: 0 },
+                        { star: 2, count: 0 },
+                        { star: 1, count: 0 },
+                      ].map((row) => (
+                        <div key={row.star} className="flex items-center gap-1.5">
+                          <span className="w-[10px] shrink-0 text-[10px] text-[#707070]">{row.star}</span>
+                          <div className="h-[4px] flex-1 overflow-hidden rounded-full bg-[#e5e5e5]">
+                            <div className="h-full rounded-full bg-gray-dark" style={{ width: `${(row.count / 3) * 100}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="-mx-4 scrollbar-hide col-span-4 flex gap-3 overflow-x-auto px-4 md:mx-0 md:contents md:px-0">
+                    {[
+                      { label: "Knowledge", score: 5.0, icon: bookBookmarkIcon },
+                      { label: "Value", score: 5.0, icon: piggyBankIcon },
+                      { label: "Responsiveness", score: 5.0, icon: stopwatchIcon },
+                      { label: "Supportiveness", score: 5.0, icon: supportivenessIcon },
+                    ].map((item) => (
+                      <div key={item.label} className="flex w-[60vw] shrink-0 flex-col justify-between rounded-lg border border-gray-200 p-4 md:w-auto md:shrink md:rounded-none md:border-0 md:border-l md:p-0 md:pl-4">
+                        <div>
+                          <p className="text-[14px] font-medium text-gray-light">{item.label}</p>
+                          <p className="text-[22px] font-semibold text-gray-dark">{item.score.toFixed(1)}</p>
+                        </div>
+                        <div className="mt-3 text-gray-dark"><img src={item.icon} alt="" className="h-[32px] w-[32px]" /></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-6 border-t border-gray-200" />
+
+                {/* Outcomes from your reviews */}
+                <div className="mt-6">
+                  <p className="mb-3 text-[14px] font-medium text-gray-light">Outcomes from your reviews</p>
+                  <LogoStrip outcomes={PROFILE_REVIEW_OUTCOMES} />
+                </div>
+              </section>
+            </div>
+          )}
+          {/* ── Offerings section (its own tab when "Offerings tab" is on) ── */}
+          {showOfferingsSection && (
+          <div ref={setGroupRef("offerings")} data-group="offerings">
+            {/* In its own tab the leading divider would sit awkwardly under the
+                tab bar — use plain top spacing there instead of a border. */}
+            {showOfferingsTab ? (
+              /* Template: the offerings preview (Profile tab) is a self-contained
+                 band and the Offerings tab sits right under the tab bar, so just
+                 use plain spacing rather than a border divider. The Offerings tab
+                 gets a bit more top padding. */
+              <div className={coachTab === "offerings" ? "pt-6" : abTest ? "" : "mt-4"} />
+            ) : (
+              <div className="my-[16px] border-t border-gray-200 md:my-[36px]" />
+            )}
+
+                {!showOfferingsTab && (<>
+                {inlineCategory ? (
+                  /* Inline category variant: "Offerings for {category}" */
+                  <>
+                  <div ref={setSectionRef("offerings")} className="scroll-mt-[60px] mb-4">
+                    <h2 className="mb-[18px] flex items-center gap-0 text-[22px] leading-[1.1] font-medium text-gray-dark">
+                      Offerings for{" "}
+                      <span ref={categoryRef} className="relative ml-[6px]">
+                        <button
+                          onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                          className="group inline-flex cursor-pointer items-center gap-1 text-[22px] font-medium text-[#707070] transition-colors hover:text-[#222222]"
+                        >
+                          <span className="inline-block pb-[3px] -mb-[3px] bg-[length:4px_4px] bg-[position:0_100%] bg-repeat-x [background-image:radial-gradient(circle,#9B9B9B_1px,transparent_1px)]">
+                            {sectionFilter === "All" ? "all categories" : (CATEGORY_ALIASES[sectionFilter] ?? sectionFilter)}
+                          </span>
+                          <img src={chevronDownIcon} alt="" className={`h-[16px] w-[16px] opacity-50 transition-transform ${categoryDropdownOpen ? "rotate-180" : ""}`} />
+                        </button>
+                        <AnimatePresence>
+                          {categoryDropdownOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 6 }}
+                              transition={{ duration: 0.15, ease: "easeOut" }}
+                              className="absolute left-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                            >
+                              {[{ value: "All", label: "All categories" }, { value: "College", label: "College" }, { value: "MBA", label: "MBA" }, { value: "Product Management", label: "Product Management" }].map(({ value, label }) => (
+                                <button
+                                  key={value}
+                                  onClick={() => { setSectionFilter(value); setCategoryDropdownOpen(false); }}
+                                  className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                                >
+                                  {label}
+                                  {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </span>
+                    </h2>
+                  </div>
+                  <div className="mb-4 flex flex-wrap gap-[6px]">
+                    {["All", "Packages", "Memberships", "Agents", "Content"].map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setOfferingsType(tab)}
+                        className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] ${
+                          offeringsType === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
+                        }`}
+                      >
+                        {tab}
+                      </button>
+                    ))}
+                  </div>
+                  </>
+                ) : (
+                  <>
+                    <h2
+                      ref={setSectionRef("offerings")}
+                      className="scroll-mt-[60px] mb-4 text-[22px] font-semibold text-gray-dark"
+                    >
+                      Offerings
+                    </h2>
+
+                    <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                      <div className="flex flex-wrap gap-[6px]">
+                        {["All", "Packages", "Memberships", "Agents", "Content"].map((tab) => (
+                          <button
+                            key={tab}
+                            onClick={() => setOfferingsType(tab)}
+                            className={`cursor-pointer rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] ${
+                              offeringsType === tab ? "border-[1.5px] border-[#222222]" : "border-[1.5px] border-transparent transition-colors hover:bg-[#ebebeb]"
+                            }`}
+                          >
+                            {tab}
+                          </button>
+                        ))}
+                      </div>
+                      <div ref={categoryRef} className="relative">
+                        <button
+                          onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                          className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] transition-colors hover:bg-[#ebebeb]"
+                        >
+                          {sectionFilter === "All" ? "All categories" : sectionFilter}
+                          <img src={chevronDownIcon} alt="" className={`h-[14px] w-[14px] transition-transform ${categoryDropdownOpen ? "rotate-180" : ""}`} />
+                        </button>
+                        <AnimatePresence>
+                          {categoryDropdownOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 6 }}
+                              transition={{ duration: 0.15, ease: "easeOut" }}
+                              className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                            >
+                              {[{ value: "All", label: "All categories" }, { value: "College", label: "College" }, { value: "MBA", label: "MBA" }, { value: "Product Management", label: "Product Management" }].map(({ value, label }) => (
+                                <button
+                                  key={value}
+                                  onClick={() => { setSectionFilter(value); setCategoryDropdownOpen(false); }}
+                                  className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                                >
+                                  {label}
+                                  {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Offering cards */}
+                {(() => {
+                  const filteredOfferings = coachConfig.offerings.filter((o) => {
+                    if (o.type === "free-intro") return false;
+                    if (offeringsType === "All") return true;
+                    if (offeringsType === "Packages") return o.type === "hourly-package" || o.type === "package";
+                    if (offeringsType === "Memberships") return o.type === "course";
+                    if (offeringsType === "Agents") return o.type === "agent";
+                    return o.type === "content";
+                  });
+                  const sliceCount = offeringsType === "All" ? 5 : offeringsType === "Agents" ? filteredOfferings.length : 5;
+                  const isOwnCoachProfile = !isCustomerProfile && viewingOwnProfile;
+                  return filteredOfferings.length > 0 ? (
+                    <div className="flex flex-col gap-1">
+                      {filteredOfferings.slice(0, sliceCount).map((o) => {
+                        const isAgent = o.type === "agent";
+                        const href = isAgent && isOwnCoachProfile && o.href ? `${o.href}/edit` : o.href;
+                        const ctaLabel = isAgent && isOwnCoachProfile ? "Edit context" : o.ctaLabel;
+                        return (
+                          <OfferingCard
+                            key={o.title}
+                            type={o.type}
+                            title={o.title}
+                            subtitle={o.subtitle}
+                            image={o.image}
+                            ctaLabel={ctaLabel}
+                            href={href}
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[#D0D0D0] py-10 text-center">
+                      <p className="text-[14px] text-[#9B9B9B]">No memberships available yet</p>
+                    </div>
+                  );
+                })()}
+
+                {/* View more + guarantee */}
+                <div className="mt-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
+                  <button
+                    onClick={() => setAllOfferingsOpen(true)}
+                    className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]"
+                  >
+                    See all offerings
+                  </button>
+                  <div className="flex items-center gap-2 text-[13px] text-[#9b9b9b]">
+                    <img src={shieldIcon} alt="" className="w-[12px]" />
+                    <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-[#707070]">Leland Experience Guarantee</span></span>
+                  </div>
+                </div>
+                </>)}
+
+                {/* Placeholder offerings — Profile tab shows a "Work with …"
+                    preview band (with a link to the Offerings tab); the Offerings
+                    tab shows the full list. */}
+                {showOfferingsTab && (
+                  coachTab === "about" ? (
+                    !abTest ? (
+                    /* Control — beige background, tripled vertical padding,
+                       centered header in the hero-name style. Full-bleed on
+                       mobile, contained + rounded on desktop. */
+                    <div className="-mx-4 bg-[#F3F1E6] px-4 pt-8 pb-4 md:mx-0 md:rounded-2xl md:px-8 md:pt-10 md:pb-4">
+                      <h2 ref={setSectionRef("offerings")} className={`scroll-mt-[60px] text-center font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[42px] ${highLevel ? "mb-2" : "mb-6"}`}>
+                        Work with {profileName.split(" ")[0]}
+                      </h2>
+                      {highLevel && (
+                        <p className="mb-6 text-center text-[15px] text-[#4C4C4C]">Select a category that you're looking for help in.</p>
+                      )}
+                      {highLevel ? (
+                        renderCategoryButtons(true)
+                      ) : (
+                        <div className="mx-auto flex w-full max-w-[550px] flex-col gap-2">
+                          {coachConfig.offerings
+                            .filter((o) => o.type === "package" || o.type === "hourly-package")
+                            .slice(0, 4)
+                            .map((o) => (
+                              <OfferingCard
+                                key={o.title}
+                                type={o.type}
+                                title={o.title}
+                                subtitle={o.subtitle}
+                                image={o.image}
+                                ctaLabel={o.ctaLabel}
+                                href={o.href}
+                                showImage
+                                className="!px-3 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)]"
+                              />
+                            ))}
+                        </div>
+                      )}
+                      <div className="mt-6 flex flex-col items-center">
+                        {!highLevel && (
+                          <Button
+                            size="lg"
+                            variant="white"
+                            rounded="rounded-full"
+                            className="mb-8 shadow-[0_0_0_1px_rgba(34,34,34,0.1),0_1px_3px_rgba(16,24,40,0.04)]"
+                            onClick={() => { setCoachTab("offerings"); scrollTabsIntoView(); }}
+                          >
+                            See all offerings
+                          </Button>
+                        )}
+                        <div className="flex items-center gap-2 text-[13px] text-gray-light">
+                          <svg width="12" height="13" viewBox="0 0 12 13" fill="none" className="shrink-0">
+                            <path d="M11.5 6.86766C11.5 9.53215 8.30667 11.5115 6.78383 12.3062C6.54161 12.4333 6.2735 12.4998 6.00146 12.5C5.72942 12.5002 5.4612 12.4343 5.21876 12.3076C3.69696 11.5136 0.5 9.52946 0.5 6.86766V3.01955C0.502443 2.84529 0.566835 2.67795 0.681057 2.54903C0.79528 2.4201 0.951455 2.33849 1.12019 2.31954C2.57901 2.20573 3.97762 1.67467 5.15754 0.786543C5.40103 0.600486 5.69646 0.5 5.99999 0.5C6.30351 0.5 6.59894 0.600486 6.84243 0.786543C8.02235 1.67467 9.42096 2.20573 10.8798 2.31954C11.0485 2.33848 11.2047 2.42009 11.3189 2.54902C11.4332 2.67794 11.4976 2.84528 11.5 3.01955V6.86766Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          <span>Protected by the <span className="cursor-pointer underline decoration-[0.5px] underline-offset-2 transition-colors hover:text-gray-dark">Leland Experience Guarantee</span></span>
+                        </div>
+                      </div>
+                    </div>
+                    ) : abVersion === "v3" ? null : (
+                      /* v1 & v2 — plain section in its normal position. */
+                      renderWorkWithPreview()
+                    )
+                  ) : (
+                    <>
+                      {abTest && !highLevel ? (
+                        /* Single search bar spanning the top, with the category
+                           switcher embedded on the far right. */
+                        <div ref={setSectionRef("offerings")} className="group mb-6 flex scroll-mt-[60px] items-center gap-2 rounded-full border border-gray-stroke bg-white py-1.5 pl-4 pr-1.5 transition-colors focus-within:border-gray-dark">
+                          <svg className="h-5 w-5 shrink-0 text-gray-extra-light transition-colors group-focus-within:text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="11" cy="11" r="7" />
+                            <path d="M21 21l-4.35-4.35" />
+                          </svg>
+                          <input
+                            type="text"
+                            placeholder="Search offerings"
+                            className="min-w-0 flex-1 bg-transparent text-[15px] text-gray-dark outline-none placeholder:text-gray-light"
+                          />
+                          {categorySwitcher}
+                        </div>
+                      ) : (
+                        <div className="mb-4 flex items-center justify-between gap-3">
+                          <h2 ref={setSectionRef("offerings")} className={`scroll-mt-[60px] ${highLevel ? "mt-4 text-[14px] font-medium text-gray-extra-light" : "text-[22px] font-semibold text-gray-dark"}`}>
+                            {highLevel ? "Select a category you're looking for help with:" : "Offerings"}
+                          </h2>
+                          {!highLevel && categorySwitcher}
+                        </div>
+                      )}
+                      {highLevel ? (
+                        renderCategoryButtons(false)
+                      ) : abTest ? (
+                        /* A/B improvement — customer-facing offering-card grid,
+                           truncated to two rows, with hourly coaching broken out
+                           into a full-width section below. */
+                        <>
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {OFFERINGS.slice(0, AB_COLLAPSED_COUNT).map((o) => (
+                              <CustomerOfferingCard key={o.title} offering={o} />
+                            ))}
+                          </div>
+                          <AnimatePresence initial={false}>
+                            {offeringsExpanded && (
+                              <motion.div
+                                key="more-offerings"
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                className="overflow-hidden"
+                              >
+                                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                  {OFFERINGS.slice(AB_COLLAPSED_COUNT).map((o) => (
+                                    <CustomerOfferingCard key={o.title} offering={o} />
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                          {OFFERINGS.length > AB_COLLAPSED_COUNT && (
+                            <div className="mt-6 flex items-center gap-4">
+                              <div className="h-px flex-1 bg-gray-stroke" />
+                              <Button
+                                size="md"
+                                variant="secondary"
+                                rounded="rounded-full"
+                                className="shrink-0 font-semibold"
+                                onClick={() => setOfferingsExpanded((v) => !v)}
+                              >
+                                {offeringsExpanded ? "Show less" : `See ${OFFERINGS.length - AB_COLLAPSED_COUNT} more offerings`}
+                              </Button>
+                              <div className="h-px flex-1 bg-gray-stroke" />
+                            </div>
+                          )}
+                          <CustomerHourlySection />
+                        </>
+                      ) : (
+                        <>
+                          {/* Custom hourly banner — top of the offerings list. */}
+                          <div className="mb-4 flex items-center justify-between gap-4 py-5">
+                            <div className="flex min-w-0 items-center gap-3">
+                              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[4px] bg-[#f5f5f5]">
+                                <img src={timeClockHourglassIcon} alt="" className="h-6 w-6" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-[16px] font-medium text-gray-dark">
+                                  <span className="font-semibold">Custom hourly</span> <span className="text-[#9B9B9B]">·</span> <span className="text-[#1B8A54]">$399/hr</span>
+                                </p>
+                                <p className="mt-1 text-[14px] text-gray-light">
+                                  Get help with Application Strategy, Cover Letters, and <span className="cursor-pointer underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">more</span>.
+                                </p>
+                              </div>
+                            </div>
+                            <Button size="md" variant="dark" className="shrink-0 font-semibold">
+                              Buy coaching
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {PLACEHOLDER_PACKAGES.map((pkg, i) => (
+                              <PackageCard
+                                key={pkg.title}
+                                title={pkg.title}
+                                meta={pkg.meta}
+                                badge={pkg.badge}
+                                coachName={coachConfig.name}
+                                coachPhoto={coachConfig.photo}
+                                themeIndex={i}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )
+                )}
+          </div>
+          )}
+
+          {/* ── Rest of the coach detail (Events → Reviews) — lives in the About tab ── */}
+          {showRestSections && (<>
+            {/* Events — on the unified template the offerings band above already
+                separates the sections, so skip the border divider. Except in v3,
+                where that band moved to the top, so restore the divider here. */}
+            <div className={`my-[36px] ${!unified || (abTest && abVersion === "v3") ? "border-t border-gray-200" : ""}`} />
+            {inlineCategory ? (
+              <div className="mb-4">
+                <h2 className="mb-[12px] flex items-center gap-0 text-[22px] leading-[1.1] font-medium text-gray-dark">
+                  Events for{" "}
+                  <span ref={eventsCategoryRef} className="relative ml-[6px]">
+                    <button
+                      onClick={() => setEventsCategoryOpen(!eventsCategoryOpen)}
+                      className="group inline-flex cursor-pointer items-center gap-1 text-[22px] font-medium text-[#707070] transition-colors hover:text-[#222222]"
+                    >
+                      <span className="inline-block pb-[3px] -mb-[3px] bg-[length:4px_4px] bg-[position:0_100%] bg-repeat-x [background-image:radial-gradient(circle,#9B9B9B_1px,transparent_1px)]">
+                        {sectionFilter === "All" ? "all categories" : (CATEGORY_ALIASES[sectionFilter] ?? sectionFilter)}
+                      </span>
+                      <img src={chevronDownIcon} alt="" className={`h-[16px] w-[16px] opacity-50 transition-transform ${eventsCategoryOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    <AnimatePresence>
+                      {eventsCategoryOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 6 }}
+                          transition={{ duration: 0.15, ease: "easeOut" }}
+                          className="absolute left-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                        >
+                          {[{ value: "All", label: "All categories" }, { value: "College", label: "College" }, { value: "MBA", label: "MBA" }, { value: "Product Management", label: "Product Management" }].map(({ value, label }) => (
+                            <button
+                              key={value}
+                              onClick={() => { setSectionFilter(value); setEventsCategoryOpen(false); }}
+                              className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                            >
+                              {label}
+                              {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </span>
+                </h2>
+              </div>
+            ) : (
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-[22px] font-semibold text-gray-dark">Events</h2>
+                <div ref={eventsCategoryRef} className="relative">
+                  <button
+                    onClick={() => setEventsCategoryOpen(!eventsCategoryOpen)}
+                    className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#f5f5f5] px-[14px] py-[6px] text-[12px] font-semibold text-[#222222] transition-colors hover:bg-[#ebebeb]"
+                  >
+                    {sectionFilter === "All" ? "All categories" : sectionFilter}
+                    <img src={chevronDownIcon} alt="" className={`h-[14px] w-[14px] transition-transform ${eventsCategoryOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  <AnimatePresence>
+                    {eventsCategoryOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 6 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-gray-stroke bg-white py-2 shadow-lg"
+                      >
+                        {[{ value: "All", label: "All categories" }, { value: "College", label: "College" }, { value: "MBA", label: "MBA" }, { value: "Product Management", label: "Product Management" }].map(({ value, label }) => (
+                          <button
+                            key={value}
+                            onClick={() => { setSectionFilter(value); setEventsCategoryOpen(false); }}
+                            className={`flex w-full cursor-pointer items-center justify-between px-4 py-2.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover ${sectionFilter === value ? "bg-gray-hover" : ""}`}
+                          >
+                            {label}
+                            {sectionFilter === value && <img src={checkIcon} alt="" className="h-[16px] w-[16px]" />}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            )}
+            <div className="flex flex-col gap-4">
+              <div className="h-[100px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+              <div className="h-[100px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+              <div className="h-[100px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+            </div>
+            <button className="mt-4 flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+              See 2 more
+              <img src={chevronDownIcon} alt="" className="h-[16px] w-[16px]" />
+            </button>
+
+          {/* ── {coach}'s {category} qualifications + Why I coach (template) ── */}
+          {unified && (<>
+            {/* Qualifications — hidden on the high-level profile (no category). */}
+            {!highLevel && (<>
+              <div className="my-[36px] border-t border-gray-200" />
+              <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">
+                {coachConfig.firstName}'s {categoryLabel ? `${categoryLabel} ` : ""}qualifications
+              </h2>
+              <div className="flex flex-col gap-4">
+                <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+              </div>
+            </>)}
+
+            <div className="my-[36px] border-t border-gray-200" />
+            <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">Why I coach</h2>
+            <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+          </>)}
+
+          {/* ── Activity group — omitted in the unified template's About tab ── */}
+          {!unified && (
+          <div ref={setGroupRef("activity")} data-group="activity">
+            <div className="my-[36px] border-t border-gray-200" />
+            <h2
+              ref={setSectionRef("activity")}
+              className="scroll-mt-[60px] mb-4 text-[22px] font-semibold text-gray-dark"
+            >
+              Activity
+            </h2>
+            <div className="-mx-4 scrollbar-hide flex gap-4 overflow-x-auto px-4 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
+              <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
+              <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
+              <div className="h-[220px] w-[80vw] shrink-0 rounded-xl bg-[#f5f5f5] md:w-auto" style={dashedBorderStyle} />
+            </div>
+            <button className="mt-4 cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+              See all
+            </button>
+          </div>
+          )}
+
+          {/* ── About group: MBA Qualifications + About Samantha + Why do I coach? ──
+              Hidden on the unified template for now (the bio at the top covers it). */}
+          {!unified && (
+          <div ref={setGroupRef("about-samantha")} data-group="about-samantha">
+            <div className="my-[36px] border-t border-gray-200" />
+            {sectionFilter !== "All" ? (
+              <>
+                <h2
+                  ref={setSectionRef("about-samantha")}
+                  className="scroll-mt-[60px] mb-4 text-[22px] font-semibold text-gray-dark"
+                >
+                  {sectionFilter} Qualifications
+                </h2>
+                <div className="flex flex-col gap-4">
+                  <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                  <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                </div>
+                <div className="my-[36px] border-t border-gray-200" />
+              </>
+            ) : (
+              <span ref={setSectionRef("about-samantha")} className="scroll-mt-[60px]" />
+            )}
+            <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">About {coachConfig.firstName}</h2>
+            <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+
+            <div className="my-[36px] border-t border-gray-200" />
+            <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">Why do I coach?</h2>
+            <div className="h-[160px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+          </div>
+          )}
+
+          {/* ── Experience group: Work Experience + Education ── */}
+          <div ref={setGroupRef("work-experience")} data-group="work-experience">
+            <div className="my-[36px] border-t border-gray-200" />
+            <h2
+              ref={setSectionRef("work-experience")}
+              className="scroll-mt-[60px] mb-4 text-[22px] font-semibold text-gray-dark"
+            >
+              Work Experience
+            </h2>
+            <div className="flex flex-col gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex gap-4">
+                  <div className="h-[100px] w-[100px] shrink-0 rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                  <div className="h-[100px] min-w-0 flex-1 rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                </div>
+              ))}
+            </div>
+
+            <div className="my-[36px] border-t border-gray-200" />
+            <h2 className="mb-4 text-[22px] font-semibold text-gray-dark">Education</h2>
+            <div className="flex flex-col gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex gap-4">
+                  <div className="h-[100px] w-[100px] shrink-0 rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                  <div className="h-[100px] min-w-0 flex-1 rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Reviews group ── */}
+          <div ref={setGroupRef("reviews")} data-group="reviews">
+            <div className="my-[36px] border-t border-gray-200" />
+            <div ref={setSectionRef("reviews")} className="scroll-mt-[60px]" />
+
+            {/* Stars + rating */}
+            <div className="mb-1 flex">
+              {[...Array(5)].map((_, i) => (
+                <svg key={i} width="24" height="24" viewBox="0 0 24 24" fill="#222222">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              ))}
+            </div>
+            <div className="flex flex-col items-start justify-between gap-1 md:flex-row md:items-end">
+              <p className="text-[26px] font-semibold text-gray-dark">5.0 average review</p>
+              <p className="text-[14px] font-normal text-[#9b9b9b]">52 reviews</p>
+            </div>
+
+            <div className="my-5 border-t border-gray-200" />
+
+            {/* Rating breakdown — Airbnb-style columns */}
+            <div className="flex flex-col gap-4 md:grid md:grid-cols-5">
+              {/* Overall rating distribution */}
+              <div className="md:col-span-1">
+                <p className="mb-1 text-[14px] font-medium text-gray-dark">Overall rating</p>
+                <div className="flex flex-col gap-1">
+                  {[
+                    { star: 5, count: 48 },
+                    { star: 4, count: 3 },
+                    { star: 3, count: 1 },
+                    { star: 2, count: 0 },
+                    { star: 1, count: 0 },
+                  ].map((row) => (
+                    <div key={row.star} className="flex items-center gap-1.5">
+                      <span className="w-[10px] shrink-0 text-[10px] text-[#707070]">{row.star}</span>
+                      <div className="h-[4px] flex-1 overflow-hidden rounded-full bg-[#e5e5e5]">
+                        <div
+                          className="h-full rounded-full bg-gray-dark"
+                          style={{ width: `${(row.count / 52) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category scores — horizontal scroll on mobile, grid columns on desktop */}
+              <div className="-mx-4 scrollbar-hide col-span-4 flex gap-3 overflow-x-auto px-4 md:mx-0 md:contents md:px-0">
+                {[
+                  {
+                    label: "Knowledge",
+                    score: 5.0,
+                    icon: <img src={bookBookmarkIcon} alt="" className="h-[32px] w-[32px]" />,
+                  },
+                  {
+                    label: "Value",
+                    score: 4.9,
+                    icon: <img src={piggyBankIcon} alt="" className="h-[32px] w-[32px]" />,
+                  },
+                  {
+                    label: "Responsiveness",
+                    score: 5.0,
+                    icon: <img src={stopwatchIcon} alt="" className="h-[32px] w-[32px]" />,
+                  },
+                  {
+                    label: "Supportiveness",
+                    score: 5.0,
+                    icon: <img src={supportivenessIcon} alt="" className="h-[32px] w-[32px]" />,
+                  },
+                ].map((item) => (
+                  <div key={item.label} className="flex w-[60vw] shrink-0 flex-col justify-between rounded-lg border border-gray-200 p-4 md:w-auto md:shrink md:rounded-none md:border-0 md:border-l md:p-0 md:pl-4">
+                  <div>
+                    <p className="text-[14px] font-medium text-gray-dark">{item.label}</p>
+                    <p className="text-[22px] font-semibold text-gray-dark">{item.score.toFixed(1)}</p>
+                  </div>
+                  <div className="mt-3 text-gray-dark">{item.icon}</div>
+                </div>
+              ))}
+              </div>
+            </div>
+
+            <div className="my-6 border-t border-gray-200" />
+
+            {/* Successful clients at */}
+            <div className="mb-6">
+              <p className="mb-1.5 text-[14px] font-medium text-gray-dark">Successful clients at</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-[4px]">
+                  {[clientLogo1, clientLogo2, clientLogo3, clientLogo4, facebookLogo, googleLogo, instagramLogo, salesforceLogo, coinbaseLogo, mckinseyLogo, bainLogo, lekLogo, nikeLogo, goldmanSachsLogo].map((logo, i) => (
+                    <div key={i} className="h-[32px] w-[32px] shrink-0 overflow-hidden rounded-[2px]">
+                      <img src={logo} alt="" className="h-full w-full object-cover" />
+                    </div>
+                  ))}
+                  <span className="flex h-[32px] items-center rounded-[2px] bg-[#f5f5f5] px-2 text-[12px] font-medium text-[#707070]">+12</span>
+                </div>
+                <div className="hidden flex-1 md:block" />
+                <button className="cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+                  See all
+                </button>
+              </div>
+            </div>
+
+            <div className="my-6 border-t border-gray-200" />
+
+            {/* Review card placeholders */}
+            <div className="flex flex-col gap-4">
+              <div className="h-[180px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+              <div className="h-[180px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+              <div className="h-[180px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+            </div>
+
+            {/* See all reviews */}
+            <button className="mt-6 cursor-pointer rounded-lg bg-[#222222]/5 px-4 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.08]">
+              See all 52 reviews
+            </button>
+          </div>
+          </>)}
+          </>)}
+
+          {/* Unified template — coach Activity tab (feed of the coach's posts) */}
+          {!isCustomerProfile && unified && coachTab === "activity" && (
+            <div className="mt-3 divide-y divide-gray-stroke/50">
+              {customerPosts.map((post) => (
+                <FeedPost
+                  key={post.id}
+                  post={{ ...post, author: profileName, avatar: profilePhoto }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Unified template — coach Saved tab (own profile only; bookmarked posts) */}
+          {!isCustomerProfile && unified && coachTab === "saved" && (
+            savedPosts.length > 0 ? (
+              <div className="mt-3 flex flex-col divide-y divide-gray-stroke/50">
+                {savedPosts.map((post) => (
+                  <FeedPost key={post.id} post={post} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2 py-16 text-center">
+                <svg className="h-8 w-8 text-gray-xlight" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+                <p className="text-[15px] font-medium text-gray-dark">Nothing saved yet</p>
+                <p className="text-[13px] text-gray-light">Tap the bookmark on a post to save it here.</p>
+              </div>
+            )
+          )}
+
+          {/* Unified template — coach Likes tab (placeholder) */}
+          {!isCustomerProfile && unified && coachTab === "likes" && (
+            <div className="mt-4 flex flex-col gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="flex gap-3">
+                  <div className="h-10 w-10 shrink-0 rounded-full border border-dashed border-[#C5C5C5] bg-[#f5f5f5]" />
+                  <div className="h-[120px] min-w-0 flex-1 rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Customer profile tabs */}
+          {isCustomerProfile && (
+            <>
+                {unified && <div ref={tabAnchorRef} aria-hidden className="mt-2 h-0" />}
+                <div ref={customerTabStripRef} style={boxedTabCapStyle} className={`sticky z-10 ${boxed ? "top-[81px] -mx-5 rounded-t-2xl" : "top-14 md:top-0 -mx-4 md:mx-0"} ${unified ? "" : "mt-2"} flex border-b border-gray-stroke bg-white`}>
+                  {(viewingOwnProfile ? ["more", "about", "saved", "likes"] as const : unified ? ["about", "more"] as const : ["about", "more", "likes"] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      data-tab={tab}
+                      onClick={() => { setCustomerTab(tab); if (unified) scrollTabsIntoView(); }}
+                      className={`flex-1 cursor-pointer py-3 text-center transition-colors ${
+                        customerTab === tab
+                          ? `border-b-2 text-gray-dark ${darkMode ? "border-white" : "border-gray-dark"}`
+                          : "border-b-2 border-transparent text-gray-light hover:text-gray-dark"
+                      }`}
+                    >
+                      <span className={`text-[16px] ${customerTab === tab ? (unified ? "font-medium" : "font-semibold") : "font-medium"}`}>{tab === "about" ? "Activity" : tab === "likes" ? "Likes" : tab === "saved" ? "Saved" : unified ? "Profile" : "About"}</span>
+                    </button>
+                  ))}
+                </div>
+
+              <div className="mt-3">
+                {customerTab === "about" && (
+                  <div className="divide-y divide-gray-stroke/50">
+                    {customerPosts.map((post) => (
+                      <FeedPost
+                        key={post.id}
+                        post={unified ? { ...post, author: profileName, avatar: profilePhoto } : post}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {viewingOwnProfile && customerTab === "likes" && (
+                  <div className="flex flex-col gap-4">
+                    {[...Array(8)].map((_, i) => (
+                      <div key={i} className="flex gap-3">
+                        <div className="h-10 w-10 shrink-0 rounded-full border border-dashed border-[#C5C5C5] bg-[#f5f5f5]" />
+                        <div className="h-[120px] min-w-0 flex-1 rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Saved — its own tab. Posts bookmarked from the feed; the
+                    yellow bookmark icon on each post is enough to differentiate. */}
+                {viewingOwnProfile && customerTab === "saved" && (
+                  savedPosts.length > 0 ? (
+                    <div className="flex flex-col divide-y divide-gray-stroke/50">
+                      {savedPosts.map((post) => (
+                        <FeedPost key={post.id} post={post} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 py-16 text-center">
+                      <svg className="h-8 w-8 text-gray-xlight" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+                      <p className="text-[15px] font-medium text-gray-dark">Nothing saved yet</p>
+                      <p className="text-[13px] text-gray-light">Tap the bookmark on a post to save it here.</p>
+                    </div>
+                  )
+                )}
+
+                {/* Profile tab (customer) — mirrors the Edit-mode sections:
+                    About, Education, Experience. Uses the same section pattern
+                    as the expert Profile tab (ProfileTextSection /
+                    ProfileCredentialRow) so both read consistently. */}
+                {customerTab === "more" && (
+                  <div className="divide-y divide-gray-stroke/70">
+                    {/* About */}
+                    <ProfileTextSection title="About" text={PROFILE_ABOUT_TEXT} />
+
+                    {/* Education */}
+                    <section className="py-6">
+                      <ProfileSectionHead title="Education" action={<ProfileEditButton label="Add" icon={addPlusIcon} />} />
+                      <div className="flex flex-col gap-1">
+                        {PROFILE_EDUCATION.map((item) => (
+                          <ProfileCredentialRow key={item.title} logo={item.logo} title={item.title} subtitle={item.subtitle} featured={item.featured} />
+                        ))}
+                      </div>
+                    </section>
+
+                    {/* Experience */}
+                    <section className="py-6">
+                      <ProfileSectionHead title="Experience" action={<ProfileEditButton label="Add" icon={addPlusIcon} />} />
+                      <div className="flex flex-col gap-1">
+                        {PROFILE_EXPERIENCE.map((item) => (
+                          <ProfileCredentialRow key={item.title} logo={item.logo} title={item.title} subtitle={item.subtitle} featured={item.featured} />
+                        ))}
+                      </div>
+                    </section>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+          <div className="h-[120px]" />
+          </div>{/* end Box 2 — tab bar + content */}
+        </div>
+      </PageShell>
+      </motion.div>
+
+      {/* Profile photo lightbox */}
+      <AnimatePresence>
+        {lightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, delay: 0.15 }}
+              onClick={() => setLightboxOpen(false)}
+              className="absolute right-6 top-6 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </motion.button>
+            <motion.img
+              layoutId="profile-photo"
+              src={profilePhoto}
+              alt={profileName}
+              className="max-h-[80vh] max-w-[80vw] rounded-xl object-contain shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Admin controls — hidden in the unified template, which supplies its
+          own coach/customer toggle from the wrapping page. */}
+      {!unified && (
+      <div ref={adminRef} className="fixed bottom-24 right-4 z-40 md:bottom-6 md:right-6">
+        <AnimatePresence>
+          {adminOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 4 }}
+              transition={{ duration: 0.15 }}
+              className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+            >
+              {!isCustomerProfile && (
+                <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                  <span className="text-[14px] font-medium text-gray-dark">Customer favorite</span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={showCustomerFavorite}
+                      onChange={() => setShowCustomerFavorite(!showCustomerFavorite)}
+                      className="peer sr-only"
+                    />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
+                    <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                  </div>
+                </label>
+              )}
+              {!isCustomerProfile && (
+                <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                  <span className="text-[14px] font-medium text-gray-dark">Coach video</span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={showCoachVideo}
+                      onChange={() => setShowCoachVideo(!showCoachVideo)}
+                      className="peer sr-only"
+                    />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
+                    <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                  </div>
+                </label>
+              )}
+              <label className={`flex items-center justify-between rounded-lg px-2 py-2 transition-colors ${showCoverImage ? "opacity-40" : "cursor-pointer hover:bg-[#f5f5f5]"}`}>
+                <span className="text-[14px] font-medium text-gray-dark">Gray header</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={showGrayHeader}
+                    onChange={() => !showCoverImage && setShowGrayHeader(!showGrayHeader)}
+                    className="peer sr-only"
+                  />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                <span className="text-[14px] font-medium text-gray-dark">Cover image</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={showCoverImage}
+                    onChange={() => setShowCoverImage(!showCoverImage)}
+                    className="peer sr-only"
+                  />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+              {!isCustomerProfile && (
+                <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                  <span className="text-[14px] font-medium text-gray-dark">Coach note</span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={showCoachNote}
+                      onChange={() => setShowCoachNote(!showCoachNote)}
+                      className="peer sr-only"
+                    />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
+                    <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                  </div>
+                </label>
+              )}
+              {!isCustomerProfile && (
+                <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                  <span className="text-[14px] font-medium text-gray-dark">Inline category selector</span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={inlineCategory}
+                      onChange={() => setInlineCategory(!inlineCategory)}
+                      className="peer sr-only"
+                    />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
+                    <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                  </div>
+                </label>
+              )}
+              {!isCustomerProfile && (
+                <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                  <span className="text-[14px] font-medium text-gray-dark">Top Expert</span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={showSupercoach}
+                      onChange={() => setShowSupercoach(!showSupercoach)}
+                      className="peer sr-only"
+                    />
+                    <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
+                    <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                  </div>
+                </label>
+              )}
+              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                <span className="text-[14px] font-medium text-gray-dark">Show sidebar</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={showSidebar}
+                    onChange={() => setShowSidebar(!showSidebar)}
+                    className="peer sr-only"
+                  />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                <span className="text-[14px] font-medium text-gray-dark">Viewing own profile</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={viewingOwnProfileState}
+                    onChange={() => setViewingOwnProfileState(!viewingOwnProfileState)}
+                    className="peer sr-only"
+                  />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-[#FFD96F]" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <button
+          onClick={() => setAdminOpen(!adminOpen)}
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 md:bg-[#222222]/5 md:shadow-none md:border-0 transition-colors hover:bg-gray-50 md:hover:bg-[#222222]/[0.08]"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="3" cy="8" r="1.5" fill="#707070" />
+            <circle cx="8" cy="8" r="1.5" fill="#707070" />
+            <circle cx="13" cy="8" r="1.5" fill="#707070" />
+          </svg>
+        </button>
+      </div>
+      )}
+
+      {!isCustomerProfile && (
+        <AllOfferingsModal coachId={coachId} open={allOfferingsOpen} onClose={() => setAllOfferingsOpen(false)} />
+      )}
+    </>
+  );
+}

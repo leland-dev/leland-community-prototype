@@ -1,5 +1,6 @@
-import { useRef, useState, useEffect, type CSSProperties, type RefObject } from "react";
+import { useRef, useState, useEffect, Fragment, type CSSProperties, type RefObject } from "react";
 import { Button } from "../components/Button";
+import ImageLightbox from "../components/ImageLightbox";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
@@ -15,24 +16,38 @@ import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
+import FeedProfileCard from "../components/FeedProfileCard";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
 import SessionCard from "../components/SessionCard";
 import OfferingCard from "../components/OfferingCard";
 import SidebarCard from "../components/SidebarCard";
+import { IconLivestreamSignal } from "../components/leland";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import profileCover from "../assets/img/cover-image-2.png";
+import topicHash from "../assets/img/topic-hash.svg";
+import aibpImg from "../assets/placeholder images/courses/AIBP.png";
+import samWielenImg from "../assets/placeholder images/courses/HERO-Sam-Vander-Wielen-case-study-scaled.avif";
+import automationsImg from "../assets/placeholder images/courses/HERO-10-automations-scaled.avif";
 import editIcon from "../assets/icons/edit.svg";
+import trashIcon from "../assets/icons/trash.svg";
+import eyeClosedIcon from "../assets/icons/eye-closed.svg";
+import reportFlagIcon from "../assets/icons/report-flag.svg";
+import addPlusIcon from "../assets/icons/add-plus.svg";
+import checkIcon from "../assets/icons/check.svg";
 import calendarPageIcon from "../assets/icons/calendar-page.svg";
 import dotsHorizontalIcon from "../assets/icons/dots-horizontal.svg";
 import eventImageSrc from "../assets/img/EventImage.avif";
 import lelandCompass from "../assets/leland-compass.svg";
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
+import liveVideoThumb from "../assets/img/Video-Thumbnail.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
-import categoryInvestmentBanking from "../assets/placeholder images/category images/investment-banking.png";
+import categoryIB from "../assets/placeholder images/category images/investment-banking.png";
+import categoryConsulting from "../assets/placeholder images/category images/management-consulting.png";
+import categoryPM from "../assets/placeholder images/category images/product-management.png";
 import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
-import categoryGMAT from "../assets/placeholder images/category images/gmat-tutoring.png";
+import lelandMark from "../assets/leland-mark.svg";
 
 // Organisation logos
 import orgWharton   from "../assets/org-logos/wharton.png";
@@ -57,9 +72,18 @@ import logoCoinbase   from "../assets/logos/coinbase.png";
 import logoMcKinsey   from "../assets/logos/mckinsey.png";
 
 import commentsIcon from "../assets/icons/comments.svg";
-import repostsIcon from "../assets/icons/reposts.svg";
 import sharesIcon from "../assets/icons/shares.svg";
 import verifiedIcon from "../assets/icons/verified.svg";
+import ComposerMediaButton from "../components/ComposerMediaButton";
+import { useFeedAdmin, type VerifiedBadgePosition, type SidebarVersion } from "../contexts/FeedAdminContext";
+import AdminToggle from "../components/AdminToggle";
+import { AdminSelect } from "./ProfileAdminMenu";
+import FeaturedQuestions, { QuestionCard, type FeaturedQuestion } from "../components/FeaturedQuestions";
+import AnswerCompose from "../components/AnswerCompose";
+import composerImageIcon from "../assets/icons/image.svg";
+import composerCameraIcon from "../assets/icons/camera.svg";
+import composerVideoIcon from "../assets/icons/video-icon.svg";
+import composerPollIcon from "../assets/icons/bar-chart.svg";
 
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic2 from "../assets/profile photos/pic-2.png";
@@ -75,6 +99,10 @@ import pic11 from "../assets/profile photos/pic-11.png";
 import pic12 from "../assets/profile photos/pic-12.png";
 import pic13 from "../assets/profile photos/pic-13.png";
 import pic14 from "../assets/profile photos/pic-14.png";
+// OG preview images for embedded link posts.
+import linkOg1 from "../assets/placeholder post assets/link-OGs/Property 1=AIBP.png";
+import linkOg2 from "../assets/placeholder post assets/link-OGs/Property 1=B2B.png";
+import linkOg3 from "../assets/placeholder post assets/link-OGs/Property 1=Variant11.png";
 
 // Post images — sourced from src/assets/placeholder post assets. Single-image
 // posts use the three top-level files; multi-image posts use the stanford-post
@@ -105,6 +133,13 @@ interface PostBase {
   verified?: boolean;
   headline?: string;
   feed?: string;
+  // Hashtag-like topic this post belongs to (slug into TOPICS). Surfaces a
+  // clickable topic pill at the top of the post and includes it in the topic's
+  // filtered feed at /topic/:slug.
+  topic?: string;
+  // Free-form hashtags shown below the post body as blue "#Tag" links. Each
+  // links to its hashtag browse page at /hashtag/<slugified-tag>.
+  hashtags?: string[];
   isGroupPost?: boolean;
   groupId?: string;
   groupColor?: string;
@@ -265,6 +300,8 @@ interface QuotePost extends PostBase {
 // preview card in the feed and full-length on its post page.
 interface ArticlePost extends PostBase {
   type: "article";
+  // Optional post text shown above the article card in the feed.
+  caption?: string;
   title: string;
   subtitle?: string;
   body: string;
@@ -283,8 +320,81 @@ interface PollPost extends PostBase {
   };
 }
 
-export type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost | SessionPost | LivePost | QuotePost | ArticlePost | PollPost;
-export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, SessionPost, LivePost, QuotePost, ArticlePost, PollPost };
+// Answer to a featured question — a post by the current user carrying their
+// answer text plus the question they're responding to (rendered as a feed
+// question card beneath the body).
+interface AnswerPost extends PostBase {
+  type: "answer";
+  body: string;
+  question: FeaturedQuestion;
+}
+
+export type Post = TextPost | ImagePost | LinkPost | EventPost | MilestonePost | SessionPost | LivePost | QuotePost | ArticlePost | PollPost | AnswerPost;
+export type { TextPost, ImagePost, LinkPost, EventPost, MilestonePost, SessionPost, LivePost, QuotePost, ArticlePost, PollPost, AnswerPost };
+
+// ─── Topics ───────────────────────────────────────────
+// Hashtag-like threads that group posts across the feed. Each has a dedicated
+// page (/topic/:slug) that filters the feed to just that topic, and surfaces a
+// clickable pill at the top of any post tagged with its slug.
+export interface Topic {
+  slug: string;
+  name: string;
+  tagline: string;      // one-liner shown under the title
+  description: string;  // longer "about" copy on the topic page
+  postsToday: number;
+  postCount: number;    // total posts, shown bucketed (e.g. "1.5k posts")
+  followers: number;
+  gradient: string;     // tailwind color stops for the topic-page hero band
+}
+
+export const TOPICS: Topic[] = [
+  {
+    slug: "mba-r1-admissions",
+    name: "MBA R1 Admissions",
+    tagline: "Round 1 essays, deadlines & decisions",
+    description:
+      "Everything Round 1 — essay drafts, school selection, recommender strategy, and interview debriefs from applicants and admissions coaches going through the cycle together.",
+    postsToday: 234,
+    postCount: 1500,
+    followers: 4820,
+    gradient: "from-[#1F5F4B] to-[#2E8B6B]",
+  },
+  {
+    slug: "breaking-into-pm",
+    name: "Breaking into Product",
+    tagline: "Landing your first PM role",
+    description:
+      "Resumes, portfolios, and interview prep for aspiring product managers — plus real talk from PMs who broke in from engineering, consulting, and non-traditional backgrounds.",
+    postsToday: 189,
+    postCount: 960,
+    followers: 3610,
+    gradient: "from-[#3B4CA0] to-[#5A6FD0]",
+  },
+  {
+    slug: "law-school-prep",
+    name: "Law School Prep",
+    tagline: "LSAT, personal statements & admits",
+    description:
+      "From LSAT logic games to personal statements and scholarship negotiations — advice and wins from pre-law applicants and admitted students.",
+    postsToday: 156,
+    postCount: 720,
+    followers: 2940,
+    gradient: "from-[#6B3F8C] to-[#9A5FC0]",
+  },
+];
+
+export function topicBySlug(slug: string | undefined): Topic | undefined {
+  return TOPICS.find(t => t.slug === slug);
+}
+
+// Turn a display hashtag ("Product Management") into a topic-page slug
+// ("product-management") for its /topic/<slug> link.
+export function hashtagSlug(tag: string): string {
+  return tag
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 function shuffle<T>(items: T[]): T[] {
   const result = [...items];
@@ -295,9 +405,129 @@ function shuffle<T>(items: T[]): T[] {
   return result;
 }
 
+// Space topic-tagged posts through the feed at roughly one every four posts
+// (rotating across topics so the same topic doesn't appear back to back),
+// rather than letting them cluster wherever they sit in the source array.
+function arrangeFeed(all: Post[]): Post[] {
+  const rest = all.filter(p => !p.topic);
+  // Round-robin the topical posts across their topics.
+  const byTopic = new Map<string, Post[]>();
+  for (const p of all) {
+    if (!p.topic) continue;
+    const arr = byTopic.get(p.topic) ?? [];
+    arr.push(p);
+    byTopic.set(p.topic, arr);
+  }
+  const queues = [...byTopic.values()];
+  const topical: Post[] = [];
+  for (let added = true; added; ) {
+    added = false;
+    for (const q of queues) {
+      const next = q.shift();
+      if (next) { topical.push(next); added = true; }
+    }
+  }
+  // Interleave: place a topic post in every fourth slot.
+  const out: Post[] = [];
+  let ti = 0, ri = 0;
+  for (let i = 0; ti < topical.length || ri < rest.length; i++) {
+    if (i % 4 === 3 && ti < topical.length) out.push(topical[ti++]);
+    else if (ri < rest.length) out.push(rest[ri++]);
+    else if (ti < topical.length) out.push(topical[ti++]);
+  }
+  return out;
+}
+
 // ─── Sample data ──────────────────────────────────────
 
 export const posts: Post[] = [
+  {
+    id: 101,
+    topic: "breaking-into-pm",
+    type: "text",
+    author: "Alex Rivera",
+    avatar: pic10,
+    time: "18m",
+    verified: false,
+    headline: "APM @ Google · Ex-founder",
+    companyLogo: logoGoogle,
+    body: "The thing nobody tells you about breaking into PM: your \"case study\" is worth more than your resume. I got three first-round interviews off a 4-page teardown of a product I loved — zero off my polished one-pager. Show them how you think, don't just tell them where you worked.",
+    hashtags: ["Product Management", "Career Growth", "Interview Prep"],
+    likes: 156,
+    comments: 27,
+    reposts: 14,
+    shares: 6,
+  },
+  {
+    id: 102,
+    topic: "breaking-into-pm",
+    type: "link",
+    author: "Dana Liu",
+    avatar: pic7,
+    time: "1h",
+    verified: true,
+    headline: "Senior PM at Stripe",
+    body: "Best breakdown of the PM interview loop I've read in a while. The section on \"product sense\" vs \"execution\" rounds is exactly how we actually calibrate at most tech companies.",
+    link: {
+      url: "https://example.com/pm-interview-loop",
+      domain: "lennysnewsletter.com",
+      title: "How to Actually Prep for the Product Management Interview Loop",
+      image: linkOg2,
+    },
+    hashtags: ["Product Management", "Tech Careers"],
+    likes: 203,
+    comments: 19,
+    reposts: 41,
+    shares: 22,
+  },
+  {
+    id: 103,
+    topic: "breaking-into-pm",
+    type: "text",
+    author: "Chris Bennett",
+    avatar: pic8,
+    time: "3h",
+    verified: false,
+    headline: "Product Manager at Figma · Ex-Bain",
+    body: "Transitioned from consulting to PM last year and the hardest habit to unlearn was needing to have the answer. In consulting you're paid to be the expert in the room. In product you're paid to find the truth — usually by admitting you don't know yet and running the smallest experiment that will tell you. Took me two quarters to get comfortable saying \"let's test it.\"",
+    hashtags: ["Product Management", "Career Pivot", "Consulting"],
+    likes: 118,
+    comments: 15,
+    reposts: 9,
+    shares: 3,
+  },
+  {
+    id: 104,
+    topic: "law-school-prep",
+    type: "text",
+    author: "Rachel Kim",
+    avatar: pic13,
+    time: "2h",
+    verified: false,
+    headline: "1L at Columbia Law",
+    body: "Personal statement advice I wish I'd gotten sooner: admissions officers read thousands of \"I want to fight for justice\" essays. They remember the one about the summer you spent translating for your grandmother at the immigration office. Specific beats noble every single time.",
+    hashtags: ["Law School", "Personal Statement", "Admissions"],
+    likes: 174,
+    comments: 21,
+    reposts: 12,
+    shares: 8,
+  },
+  {
+    id: 105,
+    topic: "law-school-prep",
+    type: "text",
+    author: "Jordan Ellis",
+    avatar: pic12,
+    time: "5h",
+    verified: true,
+    headline: "Pre-law Advisor · Former Admissions, Georgetown Law",
+    body: "Reminder for anyone sitting on a scholarship offer: the number in the letter is a starting point, not a verdict. Politely share competing offers, reaffirm your interest, and ask if there's room. I've watched students add five figures to their aid package with one well-written email. The worst they can say is no.",
+    hashtags: ["Law School", "Scholarships", "Financial Aid"],
+    likes: 261,
+    comments: 33,
+    reposts: 28,
+    shares: 19,
+  },
   {
     id: 36,
     type: "text",
@@ -409,6 +639,7 @@ export const posts: Post[] = [
   },
   {
     id: 3,
+    topic: "mba-r1-admissions",
     type: "link",
     author: "Priya Patel",
     avatar: pic3,
@@ -419,8 +650,7 @@ export const posts: Post[] = [
       url: "https://example.com/mba-networking",
       domain: "hbr.org",
       title: "The Art of Networking in Business School Admissions",
-      image:
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=340&fit=crop",
+      image: linkOg1,
     },
     likes: 89,
     comments: 7,
@@ -609,6 +839,7 @@ export const posts: Post[] = [
   },
   {
     id: 39,
+    topic: "mba-r1-admissions",
     type: "article",
     author: "Lauren Hayes",
     avatar: pic13,
@@ -627,6 +858,7 @@ export const posts: Post[] = [
   },
   {
     id: 40,
+    topic: "mba-r1-admissions",
     type: "poll",
     author: "David Kim",
     avatar: pic4,
@@ -677,6 +909,7 @@ export const posts: Post[] = [
   },
   {
     id: 18,
+    topic: "law-school-prep",
     type: "text",
     author: "Rachel Nguyen",
     avatar: pic9,
@@ -702,8 +935,7 @@ export const posts: Post[] = [
       url: "https://example.com/consulting-2026",
       domain: "strategyand.pwc.com",
       title: "State of the Consulting Industry: 2026 Market Landscape",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=340&fit=crop",
+      image: linkOg2,
     },
     likes: 156,
     comments: 21,
@@ -764,8 +996,7 @@ export const posts: Post[] = [
       url: "https://example.com/hbs-essay",
       domain: "poetsandquants.com",
       title: "Breaking Down the HBS Essay Prompt for 2027 Applicants",
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=340&fit=crop",
+      image: linkOg3,
     },
     likes: 203,
     comments: 35,
@@ -806,12 +1037,27 @@ export function formatCount(n: number): string {
   return n.toString();
 }
 
-// Post links stay inside whichever experience you're in: under /alt-nav they
-// point at /alt-nav/post/:id (keeping the sidebar shell), everywhere else at
-// /post/:id. Consumed by every card/action that opens a post.
+// Derived impression/view count for a post. Prototype has no real analytics, so
+// we weight the visible engagement numbers; kept in one place so the feed action
+// row and the post-detail stat row always show the same figure.
+export function postViewCount(post: Post): number {
+  return post.likes * 24 + post.comments * 18 + post.reposts * 40;
+}
+
+// Compact view-count formatting (e.g. 2632 → "2.6K", 14500 → "15K").
+export function formatViews(n: number): string {
+  if (n < 1000) return `${n}`;
+  const k = n / 1000;
+  return `${k >= 10 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, "")}K`;
+}
+
+// Post links stay inside whichever experience you're in: under /alt-nav
+// they point at /alt-nav/post/:id, everywhere else at /post/:id. Consumed
+// by every card/action that opens a post.
 export function usePostBase(): string {
   const { pathname } = useLocation();
-  return pathname.startsWith("/alt-nav") ? "/alt-nav/post" : "/post";
+  if (pathname.startsWith("/alt-nav")) return "/alt-nav/post";
+  return "/post";
 }
 
 // iOS Safari only opens the soft keyboard when focus() is called synchronously
@@ -898,7 +1144,7 @@ export function FeedLikeButton({ initialCount }: { initialCount: number }) {
       </div>
       <button
         onClick={handleClick}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-gray-hover ${liked ? "text-red-500" : "text-gray-extra-light hover:text-gray-light"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-[#222222]/8 ${liked ? "text-red-500" : "text-gray-light"}`}
       >
         {/* Heart geometry mirrors the uploaded heart.svg / heart-filled.svg —
             inlined so the fill can animate gray→red via currentColor. */}
@@ -915,13 +1161,15 @@ export function FeedLikeButton({ initialCount }: { initialCount: number }) {
         >
           <path d="M15.696 4C18.871 4 21 6.98 21 9.755C21 15.388 12.161 20 12 20C11.839 20 3 15.388 3 9.755C3 6.98 5.129 4 8.304 4C10.119 4 11.311 4.905 12 5.711C12.689 4.905 13.881 4 15.696 4V4Z"/>
         </motion.svg>
-        <motion.span
-          className="text-[13px] font-medium"
-          animate={liked ? { scale: [1, 1.4, 1] } : { scale: 1 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          {formatCount(initialCount + (liked ? 1 : 0))}
-        </motion.span>
+        {initialCount + (liked ? 1 : 0) > 0 && (
+          <motion.span
+            className="text-[13px] font-medium"
+            animate={liked ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            {formatCount(initialCount + (liked ? 1 : 0))}
+          </motion.span>
+        )}
       </button>
     </div>
   );
@@ -1091,32 +1339,34 @@ export function FeedRepostButton({ initialCount, initialReposted = false, onRepo
 
       <button
         onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-gray-hover ${reposted ? "text-[#4F86DB]" : "text-gray-extra-light hover:text-gray-light"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-[#222222]/8 ${reposted ? "text-[#4F86DB]" : "text-gray-light"}`}
       >
         <motion.svg
           className="h-[22px] w-[22px]"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.75"
+          strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           aria-hidden
           animate={reposted && burst ? { scale: [1, 0.6, 1.8, 0.9, 1.05, 1], rotate: [0, 360] } : { scale: 1, rotate: 0 }}
           transition={{ duration: 0.5, times: [0, 0.15, 0.35, 0.55, 0.75, 1], ease: "easeOut" }}
         >
-          <path d="M22.008 12L20.006 14L18.005 12" />
-          <path d="M6.341 6.344C7.79 4.896 9.791 4 12.002 4C16.423 4 20.007 7.582 20.007 12.002C20.007 12.61 19.933 13.2 19.805 13.769" />
-          <path d="M1.992 12L3.994 10L5.995 12" />
-          <path d="M17.658 17.6555C16.209 19.1035 14.208 19.9995 11.997 19.9995C7.576 19.9995 3.992 16.4175 3.992 11.9975C3.992 11.3895 4.066 10.7995 4.194 10.2305" />
+          <path d="M13 19h-6c-1.105 0-2-0.895-2-2v-12" />
+          <path d="M11 5h6c1.105 0 2 0.895 2 2v12" />
+          <path d="M7.5 7.5l-2.5-2.5-2.5 2.5" />
+          <path d="M16 16l3 3 3-3" />
         </motion.svg>
-        <motion.span
-          className="text-[13px] font-medium"
-          animate={reposted && burst ? { scale: [1, 1.4, 1] } : { scale: 1 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          {formatCount(initialCount + (reposted ? 1 : 0))}
-        </motion.span>
+        {initialCount + (reposted ? 1 : 0) > 0 && (
+          <motion.span
+            className="text-[13px] font-medium"
+            animate={reposted && burst ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            {formatCount(initialCount + (reposted ? 1 : 0))}
+          </motion.span>
+        )}
       </button>
 
       {(() => {
@@ -1153,7 +1403,7 @@ export function FeedRepostButton({ initialCount, initialReposted = false, onRepo
                   </button>
                 ) : (
                   <button onClick={triggerRepost} className={`flex w-full items-center gap-3 rounded-lg text-left font-medium text-gray-dark hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`}>
-                    <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+                    <svg className={`${isMobile ? "h-6 w-6" : "h-5 w-5"} shrink-0`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 19h-6c-1.105 0-2-0.895-2-2v-12"/><path d="M11 5h6c1.105 0 2 0.895 2 2v12"/><path d="M7.5 7.5l-2.5-2.5-2.5 2.5"/><path d="M16 16l3 3 3-3"/></svg>
                     Repost to feed
                   </button>
                 )}
@@ -1206,20 +1456,22 @@ export function FeedBookmarkButton({ post }: { post: Post }) {
       <button
         onClick={handleClick}
         aria-label={saved ? "Remove from saved" : "Save"}
-        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-gray-hover ${saved ? "text-[#FFD96F]" : "text-gray-extra-light hover:text-gray-light"}`}
+        className={`flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 transition-colors hover:bg-[#222222]/8 ${saved ? "text-[#FFD96F]" : "text-gray-light"}`}
       >
+        {/* Bookmark geometry mirrors the uploaded bookmark.svg / bookmark-filled.svg
+            — inlined so the fill toggles via currentColor on save. */}
         <motion.svg
           className="h-[22px] w-[22px]"
           viewBox="0 0 24 24"
           fill={saved ? "currentColor" : "none"}
           stroke="currentColor"
-          strokeWidth="1.75"
+          strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           animate={saved ? { scale: [1, 0.7, 1.25, 1] } : { scale: 1 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
         >
-          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+          <path d="M7.70001 3H16.3C17.405 3 18.3 3.895 18.3 5V21L12.008 17.727L5.70001 21V5C5.70001 3.895 6.59501 3 7.70001 3Z" />
         </motion.svg>
       </button>
       {createPortal(
@@ -1258,12 +1510,14 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
   const navigate = useNavigate();
   const postBase = usePostBase();
   const [shareOpen, setShareOpen] = useState(false);
+  const [impressionsOpen, setImpressionsOpen] = useState(false);
 
   return (
-    <div className="mt-1 flex items-center gap-px pl-[44px] pr-1">
+    // All five actions spread equally across the full row width.
+    <div className="mt-1 flex items-center justify-between pl-[44px] pr-1">
       <FeedLikeButton initialCount={likes} />
       {/* Comment — outline chat bubble (chat-inactive.svg), stays outlined */}
-      <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`${postBase}/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-extra-light transition-colors hover:bg-gray-hover hover:text-gray-light">
+      <button onClick={(e) => { primeKeyboard(); const rect = (e.currentTarget as HTMLElement).closest('[class*="pt-5"]')?.getBoundingClientRect(); navigate(`${postBase}/${postId}`, { state: { sourceY: rect?.top ?? 80, focusInput: true } }); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-light transition-colors hover:bg-[#222222]/8">
         <svg className="h-[22px] w-[22px] fill-none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4.541 17.003C3.577 15.571 3 13.857 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12C21 16.971 16.971 21 12 21C10.474 21 9.04 20.613 7.78 19.943C6.434 20.661 4.907 21.084 3.276 21.084C2.842 21.084 2.419 21.045 2 20.99C3.173 19.923 4.055 18.553 4.541 17.003Z" /></svg>
         {comments > 0 && <span className="text-[13px] font-medium">{formatCount(comments)}</span>}
       </button>
@@ -1275,22 +1529,79 @@ function ActionBar({ post, likes, comments, reposts, postId, onRepost, onUndoRep
         onUndoRepost={() => onUndoRepost?.(post)}
         onQuote={() => onQuote?.(post)}
       />
-      {/* Bookmark / save */}
-      <FeedBookmarkButton post={post} />
-      {/* Share — fifth action */}
-      <div className="relative">
-        <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-extra-light transition-colors hover:bg-gray-hover hover:text-gray-light">
-          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M11.082 8.95158V8.95158C6.196 9.503 2.50256 13.6346 2.5 18.5516V19.1636H2.5C4.62349 16.6055 7.75786 15.1019 11.082 15.0466V18.2736V18.2733C11.082 18.9482 11.6291 19.4953 12.304 19.4953C12.5786 19.4953 12.8452 19.4028 13.0608 19.2328L21.0508 12.9238V12.9238C21.5622 12.5207 21.65 11.7794 21.247 11.268C21.1895 11.1951 21.1237 11.1292 21.0508 11.0718L13.0608 4.76276V4.76276C12.531 4.34468 11.7626 4.43525 11.3445 4.96505C11.1744 5.18061 11.0818 5.44717 11.0818 5.72176L11.082 8.95158Z" /></svg>
-        </button>
-        <AnimatePresence>
-          {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
-        </AnimatePresence>
+      {/* Impressions / views — chart-small.svg glyph, inlined so it inherits the
+          row's gray via currentColor. Opens an explainer modal. Not shown on the
+          detail page's main post (that uses StatsRow, which surfaces Views in its
+          own bordered row), so it only appears on feed posts and replies. */}
+      <button onClick={(e) => { e.stopPropagation(); setImpressionsOpen(true); }} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-light transition-colors hover:bg-[#222222]/8">
+        <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M10 13V18" /><path d="M18 9V18" /><path d="M14 6V18" /><path d="M6 9V18" /></svg>
+        <span className="text-[13px] font-medium">{formatViews(postViewCount(post))}</span>
+      </button>
+      {/* Bookmark + Share grouped together, no gap */}
+      <div className="flex items-center">
+        {/* Bookmark / save */}
+        <FeedBookmarkButton post={post} />
+        {/* Share — swapped to the uploaded share.svg (upload glyph) */}
+        <div className="relative">
+          <button onClick={() => setShareOpen(o => !o)} className="flex cursor-pointer items-center gap-1 rounded-[100px] px-2.5 py-1.5 text-gray-light transition-colors hover:bg-[#222222]/8">
+            <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M15 9h2c1.10457 0 2 .89543 2 2v8c0 1.10457-.89543 2-2 2h-10c-1.10457 0-2-.89543-2-2v-8c0-1.10457.89543-2 2-2h2" /><line x1="12" x2="12" y1="15" y2="3" /><polyline points="15,6 12,3 9,6" /></svg>
+          </button>
+          <AnimatePresence>
+            {shareOpen ? <ShareDropdown post={post} onClose={() => setShareOpen(false)} /> : null}
+          </AnimatePresence>
+        </div>
       </div>
+      <ImpressionsInfoModal open={impressionsOpen} onClose={() => setImpressionsOpen(false)} />
     </div>
   );
 }
 
-function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, groupId, groupPoster, companyLogo, onEdit }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; companyLogo?: string; onEdit?: () => void}) {
+// Explainer modal for the impressions/views action. Prototype has no real
+// analytics drill-down, so tapping the count just defines what it means.
+function ImpressionsInfoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  useLockBodyScroll(open);
+  return createPortal(
+    <AnimatePresence>
+      {open ? (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-6" onClick={(e) => { e.stopPropagation(); onClose(); }}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 bg-black/30"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Impressions"
+            className="relative z-[81] w-full max-w-md rounded-3xl bg-white p-8 shadow-xl"
+          >
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="absolute right-5 top-5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#222222]/5 text-gray-dark transition-colors hover:bg-[#222222]/10"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+            </button>
+            <h2 className="pr-10 font-serif text-[32px] leading-tight text-gray-dark">Impressions</h2>
+            <p className="mt-2 text-[17px] text-gray-light">Number of times this post was seen.</p>
+            <Button size="lg" variant="outline" onClick={onClose} className="mt-6 w-full">Dismiss</Button>
+          </motion.div>
+        </div>
+      ) : null}
+    </AnimatePresence>,
+    document.body,
+  );
+}
+
+function PostHeaderRow({ author, time, verified, headline, feed, topic, isGroupPost, groupId, groupPoster, companyLogo, onEdit, nameHover, showHeadline, featuredOrg, inlineOrgLogo, subOrgLogos }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; topic?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; companyLogo?: string; onEdit?: () => void; nameHover?: HoverProps; showHeadline?: boolean; featuredOrg?: { name: string; logo: string }; inlineOrgLogo?: string; subOrgLogos?: string[] }) {
+  const postTopic = topicBySlug(topic);
   const [menuOpen, setMenuOpen] = useState(false);
   const [following, setFollowing] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -1301,6 +1612,7 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
   useLockBodyScroll(menuOpen && isMobile);
 
   const { mode: profileBarMode } = useProfileBarMode();
+  const { verifiedBadgePosition, topics: topicsEnabled } = useFeedAdmin();
   // The title/description line the older profile-bar versions surface.
   const displayHeadline = groupPoster?.headline ?? headline;
   // Mode 3 demonstrates an older post: show an absolute date instead of a
@@ -1321,17 +1633,18 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
     return () => document.removeEventListener("mousedown", handler);
   }, [menuOpen, isMobile]);
 
+  // Menu-row icon — 20px asset-folder svg (4px smaller than the profile dropdown).
+  const menuIcon = (src: string, alt = "") => <img src={src} alt={alt} className="h-5 w-5 shrink-0" />;
+  // Danger rows tint their icon to the row's red via a CSS mask (asset svgs are
+  // pre-colored, so a plain <img> can't inherit the text color).
+  const dangerIcon = (src: string) => (
+    <span
+      aria-hidden
+      className="h-5 w-5 shrink-0 bg-current"
+      style={{ maskImage: `url("${src}")`, WebkitMaskImage: `url("${src}")`, maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat", maskPosition: "center", WebkitMaskPosition: "center" }}
+    />
+  );
   const menuItems = [
-    ...(onEdit ? [{
-      label: "Edit post",
-      icon: (
-        <svg width={isMobile ? 22 : 16} height={isMobile ? 22 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-        </svg>
-      ),
-      danger: false,
-      onClick: onEdit,
-    }] : []),
     {
       label: "Follow",
       follow: true,
@@ -1340,35 +1653,27 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
       onClick: undefined as (() => void) | undefined,
     },
     {
-      label: "Delete post",
-      icon: (
-        <svg width={isMobile ? 22 : 16} height={isMobile ? 22 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
-        </svg>
-      ),
-      danger: true,
-      onClick: undefined as (() => void) | undefined,
-    },
-    {
       label: "Not interested",
-      icon: (
-        <svg width={isMobile ? 22 : 16} height={isMobile ? 22 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M17 14c.34-.57.54-1.26.54-2 0-2.21-1.91-4-4.27-4-1.89 0-3.5 1.16-4.12 2.8"/><path d="M9.17 9.17L3 3m18 18-5.18-5.18"/>
-          <path d="M6.5 6.5C5.57 7.4 5 8.63 5 10c0 2.76 2.24 5 5 5 1.37 0 2.6-.57 3.5-1.5"/>
-          <line x1="2" y1="2" x2="22" y2="22"/>
-        </svg>
-      ),
+      icon: menuIcon(eyeClosedIcon),
       danger: false,
       onClick: undefined as (() => void) | undefined,
     },
     {
       label: "Report post",
-      icon: (
-        <svg width={isMobile ? 22 : 16} height={isMobile ? 22 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
-        </svg>
-      ),
+      icon: menuIcon(reportFlagIcon),
       danger: false,
+      onClick: undefined as (() => void) | undefined,
+    },
+    ...(onEdit ? [{
+      label: "Edit post",
+      icon: menuIcon(editIcon),
+      danger: false,
+      onClick: onEdit,
+    }] : []),
+    {
+      label: "Delete post",
+      icon: dangerIcon(trashIcon),
+      danger: true,
       onClick: undefined as (() => void) | undefined,
     },
   ];
@@ -1379,19 +1684,60 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
         {/* Person leads: for a member's group post we surface the person, not
             the group; the group is shown as a small badge on the avatar. Pure
             group announcements (no groupPoster) still read as the group. */}
-        <div className="flex min-w-0 items-center gap-2">
+        <div className={`flex min-w-0 items-center ${verified && !isGroupPost && verifiedBadgePosition === "name" ? "gap-1" : "gap-2"}`}>
           <Link
             to={groupPoster ? `/profile/${nameToSlug(groupPoster.name)}` : isGroupPost ? `/groups/${groupId ?? "ai-bp-apr-26"}` : `/profile/${nameToSlug(author)}`}
             onClick={(e) => e.stopPropagation()}
-            className="cursor-pointer truncate text-[15px] leading-tight font-semibold text-gray-dark"
+            {...(nameHover ?? {})}
+            className="cursor-pointer truncate text-[15px] leading-tight font-semibold text-gray-dark hover:underline"
           >{groupPoster ? groupPoster.name : author}</Link>
-          {verified && <img src={verifiedIcon} alt="Verified" className="h-[15px] w-[15px] shrink-0" />}
+          {/* Verified badge sits inline (between name and time) when the admin
+              menu selects the "name" position; otherwise it's on the avatar. */}
+          {verified && !isGroupPost && verifiedBadgePosition === "name" ? (
+            <VerifiedBadge className="h-5 w-5 shrink-0" />
+          ) : null}
+          {/* Topic — inline between the poster and the timestamp, chevron-separated
+              (mirrors the "poster › topic · time" reference treatment). Hidden
+              unless the Topics admin toggle is on. */}
+          {postTopic && topicsEnabled && (
+            <>
+              <svg className="shrink-0 text-gray-xlight" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+              <Link
+                to={`/topic/${postTopic.slug}`}
+                onClick={(e) => e.stopPropagation()}
+                className="truncate text-[15px] font-semibold leading-tight text-[#3963D7] hover:underline"
+              >
+                {postTopic.name}
+              </Link>
+            </>
+          )}
+          {/* Org logo inline between the name and the timestamp (logo only). */}
+          {inlineOrgLogo && (
+            <img src={inlineOrgLogo} alt="" className="h-[16px] w-[16px] shrink-0 rounded-[3px] object-cover" />
+          )}
           <span className="shrink-0 text-[15px] leading-tight text-gray-extra-light">{displayTime}</span>
         </div>
-        {/* Title / description line — surfaced in the "Title" (2) and "Dated"
-            (3) profile-bar modes; hidden in "Minimal" (1). */}
-        {profileBarMode !== 1 && displayHeadline ? (
-          <p className="mt-0.5 truncate text-[13px] leading-tight text-gray-light">{displayHeadline}</p>
+        {/* Sub-line under the name. A featured org (logo + company name) wins;
+            otherwise the headline — shown when the "Title"/"Dated" profile-bar
+            modes are active, or when explicitly requested via showHeadline. */}
+        {featuredOrg ? (
+          <div className="mt-0.5 flex items-center gap-1.5">
+            <img src={featuredOrg.logo} alt="" className="h-[16px] w-[16px] shrink-0 rounded-[3px] object-cover" />
+            <span className="truncate text-[13px] font-medium leading-tight text-gray-extra-light">{featuredOrg.name}</span>
+          </div>
+        ) : subOrgLogos && subOrgLogos.length > 0 ? (
+          <div className="mt-0.5 flex items-center gap-2">
+            <div className="flex -space-x-1.5">
+              {subOrgLogos.map((src, i) => (
+                <img key={i} src={src} alt="" className="h-[16px] w-[16px] shrink-0 rounded-[3px] border-[1.5px] border-white object-cover" />
+              ))}
+            </div>
+            {displayHeadline && (
+              <span className="truncate text-[14px] leading-tight text-gray-extra-light">{displayHeadline}</span>
+            )}
+          </div>
+        ) : (showHeadline || profileBarMode !== 1) && displayHeadline ? (
+          <p className="mt-0.5 truncate text-[14px] leading-tight text-gray-extra-light">{displayHeadline}</p>
         ) : null}
       </div>
       <div className="flex shrink-0 items-start gap-1">
@@ -1424,15 +1770,14 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
                     className={
                       isMobile
                         ? "fixed inset-x-0 bottom-0 z-[70] rounded-t-2xl border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)] shadow-lg"
-                        : "absolute right-0 top-7 z-50 w-48 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+                        : "absolute right-0 top-7 z-50 w-56 rounded-2xl border border-gray-stroke bg-white shadow-lg"
                     }
                   >
                     {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1 w-10 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
                     <div className={isMobile ? "px-3 pt-1 pb-3" : "px-2 py-2"}>
                       {menuItems.map((item) => {
                         const { label, icon, danger, onClick } = item;
-                        const itemClass = `flex w-full items-center gap-3 rounded-lg text-left font-medium transition-colors hover:bg-gray-hover ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`;
-                        const sz = isMobile ? 22 : 16;
+                        const itemClass = `flex w-full items-center gap-[10px] rounded-lg text-left font-medium transition-colors hover:bg-[#222222]/5 ${isMobile ? "p-4 text-[15px]" : "p-3 text-[14px]"}`;
                         if ((item as { follow?: boolean }).follow) {
                           // Tapping Follow flips the icon to a check + the label
                           // to "Following". The sheet stays put and dismisses
@@ -1454,11 +1799,13 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
                               onClick={onFollowTap}
                               className={`${itemClass} text-gray-dark`}
                             >
-                              <span className="relative shrink-0" style={{ width: sz, height: sz }}>
+                              <span className="relative h-5 w-5 shrink-0">
                                 <AnimatePresence initial={false} mode="popLayout">
                                   {following ? (
-                                    <motion.svg
+                                    <motion.img
                                       key="check"
+                                      src={checkIcon}
+                                      alt=""
                                       initial={{ scale: 0, opacity: 0 }}
                                       animate={{ scale: 1, opacity: 1 }}
                                       exit={{ scale: 0, opacity: 0 }}
@@ -1469,21 +1816,19 @@ function PostHeaderRow({ author, time, verified, headline, feed, isGroupPost, gr
                                           window.setTimeout(() => setMenuOpen(false), 450);
                                         }
                                       }}
-                                      className="absolute inset-0 h-full w-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
-                                    >
-                                      <polyline points="20 6 9 17 4 12" />
-                                    </motion.svg>
+                                      className="absolute inset-0 h-full w-full"
+                                    />
                                   ) : (
-                                    <motion.svg
+                                    <motion.img
                                       key="plus"
+                                      src={addPlusIcon}
+                                      alt=""
                                       initial={{ scale: 0, opacity: 0 }}
                                       animate={{ scale: 1, opacity: 1 }}
                                       exit={{ scale: 0, opacity: 0 }}
                                       transition={iconSpring}
-                                      className="absolute inset-0 h-full w-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
-                                    >
-                                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>
-                                    </motion.svg>
+                                      className="absolute inset-0 h-full w-full"
+                                    />
                                   )}
                                 </AnimatePresence>
                               </span>
@@ -1544,16 +1889,33 @@ function PostImageGrid({
   className = "",
   maxHeight,
   onImageClick,
+  avatarInset = false,
 }: {
   images: { src: string; aspectRatio?: number }[];
   renderOverlay?: (idx: number) => React.ReactNode;
   className?: string;
   maxHeight?: number;
   onImageClick?: (idx: number) => void;
+  // Feed layout only: the post body is indented past a 40px avatar + 12px gap
+  // inside the px-4/sm:px-6 gutter, so the 4+ carousel bleeds left by that full
+  // offset (68px / 76px) and pads back so it starts aligned with the text.
+  avatarInset?: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const scroll = (dir: "left" | "right") =>
     scrollRef.current?.scrollBy({ left: dir === "right" ? 175 : -175, behavior: "smooth" });
+
+  // Track scroll position so each chevron only shows when there's room to scroll
+  // that way (hidden at the respective end). Only the 4+ carousel uses these.
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+  const updateArrows = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setAtStart(el.scrollLeft <= 1);
+    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 1);
+  };
+  useEffect(() => { updateArrows(); }, [images.length]);
 
   const count = images.length;
   if (count === 0) return null;
@@ -1607,10 +1969,13 @@ function PostImageGrid({
     );
   }
 
-  // 4 images: horizontal scroll strip with arrow buttons
+  // 4 images: horizontal scroll strip with arrow buttons. Negative margins
+  // cancel the post's gutters (and, in the feed, the avatar indent) so the strip
+  // scrolls edge-to-edge across the whole post; the matching scroll padding keeps
+  // the first image aligned with the text at rest.
   return (
-    <div className={`relative ${className}`}>
-      <div ref={scrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide rounded-xl">
+    <div className={`relative -mr-4 sm:-mr-6 ${avatarInset ? "-ml-[68px] sm:-ml-[76px]" : ""} ${className}`}>
+      <div ref={scrollRef} onScroll={updateArrows} className={`flex gap-2 overflow-x-auto scrollbar-hide pr-4 sm:pr-6 ${avatarInset ? "pl-[68px] sm:pl-[76px]" : ""}`}>
         {images.map((img, i) => (
           <div
             key={i}
@@ -1623,18 +1988,22 @@ function PostImageGrid({
           </div>
         ))}
       </div>
-      <button
-        onClick={() => scroll("left")}
-        className="absolute left-2 top-1/2 z-0 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/60 text-gray-dark shadow-sm backdrop-blur-sm transition-colors hover:bg-white/85"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button
-        onClick={() => scroll("right")}
-        className="absolute right-2 top-1/2 z-0 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/60 text-gray-dark shadow-sm backdrop-blur-sm transition-colors hover:bg-white/85"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
+      {!atStart ? (
+        <button
+          onClick={() => scroll("left")}
+          className="absolute left-2 top-1/2 z-0 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/60 text-gray-dark shadow-sm backdrop-blur-sm transition-colors hover:bg-white/85"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      ) : null}
+      {!atEnd ? (
+        <button
+          onClick={() => scroll("right")}
+          className="absolute right-2 top-1/2 z-0 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/60 text-gray-dark shadow-sm backdrop-blur-sm transition-colors hover:bg-white/85"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -1643,6 +2012,7 @@ function ImageGallery({ images, imageAspectRatios, onImageClick }: { images: str
   return (
     <PostImageGrid
       className="mt-3"
+      avatarInset
       images={images.map((src, i) => ({ src, aspectRatio: imageAspectRatios?.[i] }))}
       onImageClick={onImageClick}
     />
@@ -1664,9 +2034,18 @@ function LinkCard({ link }: { link: LinkPost["link"] }) {
           className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
-      <div className="px-4 py-3">
-        <p className="text-[11px] text-gray-light">{link.domain}</p>
-        <p className="mt-0.5 text-[13px] font-medium text-gray-dark leading-snug">{link.title}</p>
+      <div className="px-4 py-3.5">
+        {/* Domain with a favicon (derived from the domain); hides if it fails. */}
+        <div className="flex items-center gap-1.5">
+          <img
+            src={`https://www.google.com/s2/favicons?domain=${link.domain}&sz=64`}
+            alt=""
+            className="h-4 w-4 shrink-0 rounded-sm"
+            onError={e => { e.currentTarget.style.display = "none"; }}
+          />
+          <p className="text-[13px] text-gray-light">{link.domain}</p>
+        </div>
+        <p className="mt-1 text-[15px] font-medium text-gray-dark leading-snug">{link.title}</p>
       </div>
     </a>
   );
@@ -1826,7 +2205,7 @@ function SessionCompletedCard({ session }: { session: SessionPost["session"] }) 
 
 // Substack-style article preview: title + snippet in the feed, full read on
 // the post page.
-function ArticleCard({ post }: { post: ArticlePost }) {
+export function ArticleCard({ post }: { post: ArticlePost }) {
   const navigate = useNavigate();
   const postBase = usePostBase();
   const heroSrc = post.bodyHtml?.match(/<img[^>]+src="([^"]+)"/)?.[1];
@@ -3355,50 +3734,66 @@ function CoachHoverCard({ author, avatar, verified, headline, isEvent }: {
 
   return (
     <motion.div
-      className="absolute left-0 top-12 z-50 w-[305px] overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_8px_32px_rgba(0,0,0,0.13)]"
+      className="absolute left-0 top-12 z-50 w-[340px] overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_8px_32px_rgba(0,0,0,0.13)]"
       initial={{ opacity: 0, y: 6, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 4, scale: 0.97 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
       onMouseEnter={(e) => e.stopPropagation()}
     >
-      <CoachCardContent
+      <ProfileHoverContent
         avatar={avatar}
         name={author}
         verified={verified}
         headline={headline}
-        ctaLabel="Book a session"
         p={p}
       />
     </motion.div>
   );
 }
 
-function AvatarWithHoverCard({ post }: { post: Post }) {
+// Inline verified badge so the white separator can be a thin, crisp
+// non-scaling stroke that hugs the scalloped contour (a bg-white ring reads too
+// thick at this size). Blue scallop + explicit white check (the raw asset's
+// check is a cut-out hole, so it needs a solid fill behind it here).
+export function VerifiedBadge({ className = "" }: { className?: string }) {
+  // Uses the uploaded verified.svg (self-contained blue badge with a white
+  // outline), matching the verified icon shown next to names in posts.
+  return <img src={verifiedIcon} alt="" aria-hidden className={className} />;
+}
+
+type HoverProps = { onMouseEnter: () => void; onMouseLeave: () => void };
+
+// Shared hover-card controller: the avatar AND the author name drive the SAME
+// coach preview card, so hovering either opens it and moving between them (or
+// onto the card) keeps it open. Disabled for events / group posts, which don't
+// map to a coach profile.
+function useCoachHover(post: Post): { open: boolean; enabled: boolean; hoverProps: HoverProps } {
   const [open, setOpen] = useState(false);
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const navigate = useNavigate();
-  const isEvent = post.type === "event";
-  const isGroupPost = post.isGroupPost || !!post.groupPoster;
+  const enabled = post.type !== "event" && !post.isGroupPost && !post.groupPoster;
 
-  const handleMouseEnter = () => {
-    if (isEvent || isGroupPost) return;
+  const onMouseEnter = () => {
+    if (!enabled) return;
     if (closeTimer.current) clearTimeout(closeTimer.current);
     openTimer.current = setTimeout(() => setOpen(true), 350);
   };
-
-  const handleMouseLeave = () => {
+  const onMouseLeave = () => {
     if (openTimer.current) clearTimeout(openTimer.current);
     closeTimer.current = setTimeout(() => setOpen(false), 200);
   };
+  return { open, enabled, hoverProps: { onMouseEnter, onMouseLeave } };
+}
+
+function AvatarWithHoverCard({ post, open, hoverProps }: { post: Post; open: boolean; hoverProps: HoverProps }) {
+  const navigate = useNavigate();
+  const { verifiedBadgePosition } = useFeedAdmin();
+  const isEvent = post.type === "event";
+  const isGroupPost = post.isGroupPost || !!post.groupPoster;
 
   return (
-    <div
-      className="relative shrink-0"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className="relative shrink-0" {...hoverProps}>
       <div
         className="group relative h-10 w-10 cursor-pointer"
         onClick={(e) => {
@@ -3453,6 +3848,11 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
           />
         )}
         <div className={`absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10 ${isGroupPost && !post.groupPoster ? "rounded-[8px]" : "rounded-full"}`} />
+        {/* Verified badge — bottom-right of the avatar, ringed in white to lift
+            off the photo. Skipped for group/event avatars (which own that spot). */}
+        {post.verified && !isGroupPost && !isEvent && verifiedBadgePosition === "avatar" ? (
+          <VerifiedBadge className="absolute -bottom-1 -right-1 h-5 w-5" />
+        ) : null}
       </div>
 
       <AnimatePresence>
@@ -3477,29 +3877,38 @@ function AvatarWithHoverCard({ post }: { post: Post }) {
 function QuotedPostCard({ quoted }: { quoted: QuotedSnapshot }) {
   const body = quoted.body.length > 220 ? `${quoted.body.slice(0, 220).trimEnd()}…` : quoted.body;
   return (
-    <div className="mt-2 overflow-hidden rounded-2xl border border-gray-stroke">
-      <div className="flex flex-col gap-2 p-3">
+    <div className="mt-2 overflow-hidden rounded-2xl border border-gray-stroke transition-colors hover:bg-gray-hover">
+      <div className="flex flex-col gap-1 p-3">
         <div className="flex items-center gap-2">
           {quoted.avatar
             ? <img src={quoted.avatar} alt={quoted.author} className="h-6 w-6 shrink-0 rounded-full object-cover" />
             : <div className="h-6 w-6 shrink-0 rounded-full bg-gray-hover" />}
-          <span className="truncate text-[14px] font-medium text-gray-dark">{quoted.author}</span>
+          <span className="truncate text-[15px] font-semibold leading-tight text-gray-dark">{quoted.author}</span>
           {quoted.verified && <img src={verifiedIcon} alt="Verified" className="h-[13px] w-[13px] shrink-0" />}
-          <span className="shrink-0 text-[13px] text-gray-xlight">{quoted.time}</span>
+          <span className="shrink-0 text-[15px] leading-tight text-gray-extra-light">{quoted.time}</span>
         </div>
-        {body && <p className="whitespace-pre-wrap text-[14px] leading-[1.4] text-gray-dark">{body}</p>}
+        {body && <p className="whitespace-pre-wrap text-[15px] leading-[1.4] text-gray-dark">{body}</p>}
         {quoted.image && <img src={quoted.image} alt="" className="mt-1 max-h-64 w-full rounded-xl object-cover" />}
       </div>
     </div>
   );
 }
 
-export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOpen }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void; onOpen?: () => void }) {
+// Per-post hover treatment: the whole row tints to gray-dark (#222) at 3%.
+// Applied to the post's full-bleed row wrapper so it reaches the card edges.
+export const POST_HOVER_SHADOW = "transition-colors hover:bg-[rgba(34,34,34,0.03)]";
+
+export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOpen, hideTopic, showHeadline, featuredOrg, inlineOrgLogo, subOrgLogos }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void; onOpen?: () => void; hideTopic?: boolean; showHeadline?: boolean; featuredOrg?: { name: string; logo: string }; inlineOrgLogo?: string; subOrgLogos?: string[] }) {
   const navigate = useNavigate();
   const postBase = usePostBase();
   const [editOpen, setEditOpen] = useState(false);
   const { mode: profileBarMode } = useProfileBarMode();
   const { liveCardStyle, eventStage } = useFeedDemo();
+  // Avatar + name share one coach hover-card (see useCoachHover).
+  const hover = useCoachHover(post);
+  // Clicking a post image expands it in a lightbox in place (no navigation), so
+  // dismissing leaves the feed exactly where it was.
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Media-only live post: identity and actions live on the card itself.
   if (post.type === "live" && post.live.variant === "minimal" && post.live.bare) {
@@ -3521,8 +3930,23 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
   return (
     <div className="pt-5 pb-[14px]">
       {post.repostedBy && (
-        <div className="mb-2 flex items-center gap-1.5 pl-[44px] text-[13px] font-medium text-gray-light">
-          <img src={repostsIcon} alt="" className="h-4 w-4 [filter:invert(44%)]" />
+        <div className="mb-2 flex items-center gap-1.5 pl-[44px] text-[13px] font-semibold text-gray-extra-light">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4"
+            aria-hidden="true"
+          >
+            <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke">
+              <path d="M13 19h-6c-1.105 0-2-0.895-2-2v-12" />
+              <path d="M11 5h6c1.105 0 2 0.895 2 2v12" />
+              <path d="M7.5 7.5l-2.5-2.5-2.5 2.5" />
+              <path d="M16 16l3 3 3-3" />
+            </g>
+          </svg>
           <span>{post.repostedBy === "You" ? "You reposted" : `${post.repostedBy} reposted`}</span>
         </div>
       )}
@@ -3536,25 +3960,33 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
       >
         {/* Left column: avatar with hover card */}
         <div onClick={e => e.stopPropagation()}>
-          <AvatarWithHoverCard post={post} />
+          <AvatarWithHoverCard post={post} open={hover.open} hoverProps={hover.hoverProps} />
         </div>
         {/* Right column: content */}
         <div className="min-w-0 flex-1">
-          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} companyLogo={post.companyLogo} onEdit={onUpdate ? () => setEditOpen(true) : undefined} />
+          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} topic={hideTopic ? undefined : post.topic} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} companyLogo={post.companyLogo} onEdit={onUpdate ? () => setEditOpen(true) : undefined} nameHover={hover.enabled ? hover.hoverProps : undefined} showHeadline={showHeadline} featuredOrg={featuredOrg} inlineOrgLogo={inlineOrgLogo} subOrgLogos={subOrgLogos} />
           {/* Minimal mode has no title line, so the body tucks up tight to the
-              identity row (negative margin trims the line-height leading); the
-              title modes give the body a touch more air. */}
+              identity row (negative margin trims the line-height leading); a
+              sub-line (title mode / headline / featured org) gives it more air. */}
           {/* Articles are represented by their card (title + clamped excerpt) —
               the raw body would dump the whole essay into the feed. */}
-          {post.type !== "article" ? (
-            <p className={`${profileBarMode === 1 ? "-mt-1.5" : "mt-1.5"} text-[15px] leading-[1.4] text-gray-dark`}>{post.body}</p>
-          ) : null}
+          {(() => {
+            const hasSubline = profileBarMode !== 1 || showHeadline || Boolean(featuredOrg) || Boolean(subOrgLogos?.length);
+            const bodyMargin = hasSubline ? "mt-1.5" : "-mt-1.5";
+            if (post.type !== "article") {
+              return <p className={`${bodyMargin} text-[15px] leading-[1.4] text-gray-dark`}>{post.body}</p>;
+            }
+            if (post.caption) {
+              return <p className={`${bodyMargin} text-[15px] leading-[1.4] text-gray-dark`}>{post.caption}</p>;
+            }
+            return null;
+          })()}
           <div className={post.type !== "text" ? "pb-1" : ""} onClick={e => e.stopPropagation()}>
             {post.type === "image" && (
               <ImageGallery
                 images={post.images}
                 imageAspectRatios={post.imageAspectRatios}
-                onImageClick={(idx) => navigate(`${postBase}/${post.id}`, { state: { focusImage: idx } })}
+                onImageClick={(idx) => setLightboxIndex(idx)}
               />
             )}
             {post.type === "link" && <LinkCard link={post.link} />}
@@ -3586,7 +4018,29 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
                 <QuotedPostCard quoted={post.quoted} />
               </div>
             )}
+            {post.type === "answer" && (
+              <div className="mt-1.5" onClick={(e) => e.stopPropagation()}>
+                <QuestionCard
+                  q={post.question}
+                  onAnswer={() => navigate(`${postBase.replace(/\/post$/, "/question")}/${post.question.id}`)}
+                />
+              </div>
+            )}
           </div>
+          {post.hashtags && post.hashtags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1" onClick={e => e.stopPropagation()}>
+              {post.hashtags.map(tag => (
+                <Link
+                  key={tag}
+                  to={`/hashtag/${hashtagSlug(tag)}`}
+                  onClick={e => e.stopPropagation()}
+                  className="text-[14px] font-medium text-leland-blue-dark hover:underline"
+                >
+                  #{tag}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       {/* Full-bleed minimal live: escapes both the avatar column and the
@@ -3608,174 +4062,230 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
           isMVP={true}
         />
       )}
+      {/* Expand-in-place image viewer — no navigation, so closing returns to the
+          exact scroll position. */}
+      <AnimatePresence>
+        {lightboxIndex !== null && post.type === "image" && (
+          <ImageLightbox
+            images={post.images}
+            index={lightboxIndex}
+            onClose={() => setLightboxIndex(null)}
+            onChangeIndex={setLightboxIndex}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-// ─── Suggested experts ────────────────────────────────
+// ─── People to follow ─────────────────────────────────
 
-const suggestedExperts = [
-  { name: "James Allen",     avatar: pic1,  verified: true, headline: "Former Director of Admissions at Stanford GSB | 200+ M7 Admits" },
-  { name: "David Kim",      avatar: pic4,  verified: true, headline: "MBA Admissions Consultant | Ex-Bain, HBS '19 | Ranked Top 4 on P&Q" },
-  { name: "Nina Kowalski",  avatar: pic7,  verified: true, headline: "Partner at McKinsey & Company | Consulting Recruiting Lead" },
-  { name: "Alex Thompson",  avatar: pic8,  verified: false, headline: "Career Expert | Ex-Google PM | Tech & MBA Transitions" },
-  { name: "Michael Chen",   avatar: pic10, verified: true, headline: "Ex-BCG Consultant | Kellogg Adm. Insider | 130+ M7 Admits" },
-  { name: "Lauren Hayes",   avatar: pic13, verified: true, headline: "HBS Admissions Expert | Former Reader | 5.0 Rated Expert" },
-  { name: "Jason Park",     avatar: pic14, verified: false, headline: "Deloitte Strategy Lead | MBA Career Expert | Finance & Consulting" },
+// Any user, not just experts — verified experts get a badge on their avatar.
+type FollowPerson = { name: string; avatar: string; verified: boolean; subtitle: string };
+
+const peopleToFollow: FollowPerson[] = [
+  // First and third are verified experts (showcase).
+  { name: "Julie Zhuo",        avatar: pic7,  verified: true,  subtitle: "The Looking Glass" },
+  { name: "Dylan Allen",       avatar: pic1,  verified: false, subtitle: "techocarrott" },
+  { name: "Nina Kowalski",     avatar: pic5,  verified: true,  subtitle: "McKinsey & Company" },
+  { name: "Claire Vo",         avatar: pic13, verified: false, subtitle: "Claire's Substack" },
+  { name: "Molly Baz",         avatar: pic2,  verified: false, subtitle: "mollybaz" },
+  { name: "Jordan Allen",      avatar: pic8,  verified: false, subtitle: "jordanallen1" },
+  { name: "Garry Tan",         avatar: pic10, verified: false, subtitle: "Garry Tan" },
+  { name: "Dwarkesh Patel",    avatar: pic4,  verified: true,  subtitle: "Dwarkesh Podcast" },
+  { name: "Michael Brandley",  avatar: pic6,  verified: false, subtitle: "Followed by Austin Winfield" },
+  { name: "Paul Graham",       avatar: pic9,  verified: false, subtitle: "Paul Graham" },
+  { name: "Andrew Huberman",   avatar: pic11, verified: true,  subtitle: "Andrew Huberman" },
+  { name: "Patrick Collison",  avatar: pic12, verified: false, subtitle: "Patrick Collison" },
+  { name: "Michael Pollan",    avatar: pic14, verified: false, subtitle: "The Microdose" },
+  { name: "Andrej Karpathy",   avatar: pic3,  verified: false, subtitle: "Andrej's Substack" },
+  { name: "Lauren Hayes",      avatar: pic13, verified: true,  subtitle: "HBS Admissions" },
+  { name: "Emily Oster",       avatar: pic2,  verified: false, subtitle: "emilyoster" },
+  { name: "Samin Nosrat",      avatar: pic7,  verified: true,  subtitle: "a grain of salt" },
+  { name: "Alison Roman",      avatar: pic1,  verified: false, subtitle: "a newsletter" },
+  { name: "Jake Reni",         avatar: pic8,  verified: false, subtitle: "Jake Reni" },
+  { name: "Marc Andreessen",   avatar: pic10, verified: true,  subtitle: "Marc Andreessen Substack" },
 ];
 
-function CoachCardContent({ avatar, name, verified, headline, price, ctaLabel, showFollow = true, isOnline, p }: {
+// The hover popover shown over a post's avatar/name: identity (name + handle +
+// avatar), a short bio, follower count, and two equal-weight CTAs — Follow
+// (toggles to Following) and Message.
+function ProfileHoverContent({ avatar, name, verified, headline, p }: {
   avatar: string;
   name: string;
   verified?: boolean;
   headline?: string;
-  price?: string;
-  ctaLabel: string;
-  showFollow?: boolean;
-  isOnline?: boolean;
-  p: typeof coachProfiles[string] | undefined;
+  p: CoachProfile | undefined;
 }) {
+  const navigate = useNavigate();
+  const [following, setFollowing] = useState(false);
+  const handle = name.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const bio = headline ?? p?.affiliation;
+  const profileTo = `/profile/${nameToSlug(name)}`;
+
   return (
-    <>
-      {/* Square left-aligned image with price badge top-right */}
-      <div className="relative flex items-start p-3">
-        <img
-          src={avatar}
-          alt={name}
-          className="h-[175px] w-[175px] shrink-0 rounded-xl object-cover"
-          style={{ objectPosition: "50% 15%" }}
-        />
-        <div className="absolute right-3 top-3 rounded-lg bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-dark">
-          {price ?? "$150/hr"}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-4">
-        {/* Name + rating */}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-          <span className="text-[15px] font-medium text-gray-dark">{name}</span>
-          {verified ? <img src={verifiedIcon} alt="" className="h-[15px] w-[15px] shrink-0" /> : null}
-          {p ? (
-            <>
-              <span className="flex items-center gap-0.5">
-                <span className="text-yellow-400">★</span>
-                <span className="text-[13px] text-gray-dark">{p.rating.toFixed(1)}</span>
-              </span>
-              <span className="text-[13px] text-[#C0C0C0]">{p.reviews} reviews</span>
-            </>
-          ) : null}
-        </div>
-
-        {/* Headline */}
-        {headline ? (
-          <p className="mt-2 line-clamp-2 text-[13px] leading-snug text-gray-dark">{headline}</p>
-        ) : null}
-
-        {/* Successful clients */}
-        {p && p.successfulClients.length > 0 ? (
-          <div className="mt-3">
-            <p className="text-[12px] text-gray-light">Successful clients at:</p>
-            <div className="mt-1.5 flex items-center gap-1.5">
-              {p.successfulClients.slice(0, 5).map((c, i) => (
-                <OrgLogo key={i} logo={c.logo} name={c.name} size={26} />
-              ))}
-              {p.successfulClientsMore ? (
-                <span className="ml-0.5 text-[10px] text-gray-light">+{p.successfulClientsMore}</span>
-              ) : null}
-            </div>
+    <div className="p-4">
+      {/* Identity: name + handle on the left, circular avatar on the right */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <Link to={profileTo} className="truncate text-[17px] font-semibold leading-tight text-gray-dark hover:underline">{name}</Link>
+            {verified ? <img src={verifiedIcon} alt="" className="h-4 w-4 shrink-0" /> : null}
           </div>
-        ) : null}
-
-        {/* CTAs */}
-        <div className="mt-4 flex gap-2">
-          <button className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-dark py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-[#333]">
-            {isOnline ? (
-              <>
-                <style>{`@keyframes talk-now-blink { 0%,100%{background-color:#4b5563} 50%{background-color:#4ade80} }`}</style>
-                <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ animation: 'talk-now-blink 1s ease-in-out infinite' }} />
-                Talk now
-              </>
-            ) : ctaLabel}
-          </button>
-          <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Message">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-          </button>
-          {showFollow ? (
-            <button className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-gray-stroke bg-white transition-colors hover:bg-gray-50" aria-label="Follow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <line x1="19" y1="8" x2="19" y2="14" />
-                <line x1="22" y1="11" x2="16" y2="11" />
-              </svg>
-            </button>
-          ) : null}
+          <p className="mt-1 truncate text-[14px] leading-tight text-gray-light">@{handle}</p>
         </div>
+        <Link to={profileTo} className="shrink-0">
+          <img src={avatar} alt={name} className="h-14 w-14 rounded-full object-cover" style={{ objectPosition: "50% 15%" }} />
+        </Link>
       </div>
-    </>
-  );
-}
 
-function ExpertCard({ expert, isOnline }: { expert: typeof suggestedExperts[number]; isOnline?: boolean }) {
-  const p = coachProfiles[expert.name];
-  return (
-    <div
-      className="flex shrink-0 flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white"
-      style={{ width: "305px", minWidth: "305px" }}
-    >
-      <CoachCardContent
-        avatar={expert.avatar}
-        name={expert.name}
-        verified={expert.verified}
-        headline={expert.headline}
-        ctaLabel="Free intro call"
-        showFollow={false}
-        isOnline={isOnline}
-        p={p}
-      />
+      {bio ? <p className="mt-3 text-[14px] leading-snug text-gray-dark">{bio}</p> : null}
+
+      {p ? (
+        <p className="mt-2 text-[13px] leading-tight text-gray-light">
+          <span className="font-semibold text-gray-dark">{formatCount(p.followers)}</span> followers
+        </p>
+      ) : null}
+
+      {/* Two primary CTAs */}
+      <div className="mt-4 flex gap-2">
+        <Button
+          size="md"
+          rounded="rounded-xl"
+          variant={following ? "outline" : "dark"}
+          onClick={() => setFollowing(f => !f)}
+          className="flex-1"
+        >
+          {following ? "Following" : "Follow"}
+        </Button>
+        <Button
+          size="md"
+          rounded="rounded-xl"
+          variant="outline"
+          onClick={() => navigate("/messages")}
+          className="flex-1"
+        >
+          Message
+        </Button>
+      </div>
     </div>
   );
 }
 
-function SuggestedExperts() {
-  const scrollRef = useRef<HTMLDivElement>(null);
+// A person's avatar with the verified badge overlaid bottom-right (experts only).
+function FollowAvatar({ person, size, badge }: { person: FollowPerson; size: number; badge: string }) {
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <img src={person.avatar} alt={person.name} className="h-full w-full rounded-full object-cover" style={{ objectPosition: "50% 15%" }} />
+      {person.verified ? <VerifiedBadge className={`absolute -bottom-0.5 -right-0.5 ${badge}`} /> : null}
+    </div>
+  );
+}
 
-  const scrollBy = (dir: 1 | -1) => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: dir * scrollRef.current.clientWidth * 0.75, behavior: "smooth" });
-    }
-  };
-
-  const NavBtn = ({ dir, label }: { dir: 1 | -1; label: string }) => (
-    <button
-      onClick={() => scrollBy(dir)}
-      className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-stroke text-gray-dark transition-colors hover:bg-gray-hover"
-      aria-label={label}
+// Simple follow toggle — gray-dark by default, gray (secondary) once following.
+function FollowToggle({ className = "" }: { className?: string }) {
+  const [following, setFollowing] = useState(false);
+  return (
+    <Button
+      size="sm"
+      variant={following ? "secondary" : "dark"}
+      rounded="rounded-lg"
+      onClick={() => setFollowing(f => !f)}
+      className={`font-semibold ${className}`}
     >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        {dir === 1
-          ? <polyline points="9 18 15 12 9 6" />
-          : <polyline points="15 18 9 12 15 6" />}
+      {following ? "Following" : "Follow"}
+    </Button>
+  );
+}
+
+function DismissButton({ label, onClick, className = "" }: { label: string; onClick: () => void; className?: string }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label}
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark ${className}`}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M6 6l12 12M18 6L6 18" />
       </svg>
     </button>
   );
+}
 
+// Carousel card: dismissable, centered avatar (+badge), name, subtitle, Follow.
+function PersonToFollowCard({ person, onDismiss }: { person: FollowPerson; onDismiss: () => void }) {
   return (
-    <div className="py-5">
-      <div className="flex items-center justify-between">
-        <p className="text-[15px] font-medium text-gray-dark">Suggested experts</p>
-        <div className="flex items-center gap-1.5">
-          <NavBtn dir={-1} label="Scroll left" />
-          <NavBtn dir={1} label="Scroll right" />
-        </div>
+    <div className="relative flex shrink-0 flex-col items-center rounded-2xl border border-gray-stroke bg-white px-4 pb-4 pt-8" style={{ width: 200, minWidth: 200 }}>
+      <DismissButton label={`Dismiss ${person.name}`} onClick={onDismiss} className="absolute right-2 top-2" />
+      <FollowAvatar person={person} size={88} badge="h-6 w-6" />
+      <p className="mt-3 max-w-full truncate text-center text-[15px] font-semibold text-gray-dark">{person.name}</p>
+      <p className="mt-0.5 max-w-full truncate text-center text-[13px] text-gray-light">{person.subtitle}</p>
+      <FollowToggle className="mt-4 w-full" />
+    </div>
+  );
+}
+
+// Full-list row (the "See all" view): avatar (+badge), name, subtitle, Follow · X.
+function PersonRow({ person, onDismiss }: { person: FollowPerson; onDismiss: () => void }) {
+  return (
+    <div className="flex items-center gap-3 py-3">
+      <FollowAvatar person={person} size={48} badge="h-[18px] w-[18px]" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[15px] font-semibold text-gray-dark">{person.name}</p>
+        <p className="truncate text-[14px] text-gray-light">{person.subtitle}</p>
       </div>
-      <div ref={scrollRef} className="scrollbar-hide mt-4 flex gap-3 overflow-x-auto">
-        {suggestedExperts.map((expert, i) => (
-          <ExpertCard key={expert.name} expert={expert} isOnline={i === 0} />
+      <FollowToggle />
+      <DismissButton label={`Dismiss ${person.name}`} onClick={onDismiss} />
+    </div>
+  );
+}
+
+// Feed section — a horizontal carousel of people to follow, with a "See all"
+// link that swaps the center feed for the full list (PeopleToFollowFull).
+function PeopleToFollow({ onSeeAll }: { onSeeAll: () => void }) {
+  const [people, setPeople] = useState(() => peopleToFollow.slice(0, 9));
+  if (people.length === 0) return null;
+  return (
+    // Its own feed row — the parent divide-y provides the full-width top border,
+    // and there's no post hover state here.
+    <div className="px-4 py-5 sm:px-6">
+      <div className="flex items-center justify-between">
+        <p className="text-[19px] font-semibold text-gray-dark">People to follow</p>
+        <button onClick={onSeeAll} className="text-[14px] font-medium text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-opacity hover:opacity-70">See all</button>
+      </div>
+      {/* Full-bleed scroll area: negative margins cancel the section padding so
+          cards scroll to the section edges; the matching px keeps the first card
+          aligned under the header (scroll padding). */}
+      <div className="scrollbar-hide -mx-4 mt-4 flex gap-3 overflow-x-auto px-4 sm:-mx-6 sm:px-6">
+        {people.map(p => (
+          <PersonToFollowCard key={p.name} person={p} onDismiss={() => setPeople(prev => prev.filter(x => x.name !== p.name))} />
         ))}
+      </div>
+    </div>
+  );
+}
+
+// The "See all" view — replaces the center feed with a long list of accounts.
+// Mirrors the Post Details layout: a back + title header ABOVE the boxed card.
+function PeopleToFollowFull({ onBack }: { onBack: () => void }) {
+  const [people, setPeople] = useState(peopleToFollow);
+  // Always open at the top, regardless of the feed scroll position on entry.
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+  return (
+    <div>
+      {/* Header sits outside the card, like the post thread header. */}
+      <div className="mb-3 flex items-center gap-3 px-1">
+        <button onClick={onBack} aria-label="Back to feed" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover">
+          <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5" /><path d="M12 19l-7-7 7-7" /></svg>
+        </button>
+        <p className="min-w-0 text-[18px] font-semibold leading-tight text-gray-dark">People to follow</p>
+      </div>
+      <div className="rounded-2xl border border-gray-stroke bg-white">
+        <div className="divide-y divide-gray-stroke px-4 sm:px-6">
+          {people.map(p => (
+            <PersonRow key={p.name} person={p} onDismiss={() => setPeople(prev => prev.filter(x => x.name !== p.name))} />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -3825,9 +4335,14 @@ export const FEEDS = [
   { id: "ai-bp-apr-26", label: "AI BP April 26" },
 ];
 
-export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string, images: ImageEntry[]) => void; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; editPost?: Post; quotePost?: Post; onGoLive?: () => void; isMVP?: boolean }) {
+export type AnswerQuestionContext = { asker: string; avatar: string; time: string; question: string };
+
+export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, answerQuestion, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string, images: ImageEntry[]) => void; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; editPost?: Post; quotePost?: Post; answerQuestion?: AnswerQuestionContext; onGoLive?: () => void; isMVP?: boolean }) {
   const isEditing = editPost != null;
   const isQuoting = quotePost != null;
+  const isAnswering = answerQuestion != null;
+  // Both quoting and answering render a referenced card under the compose area.
+  const hasReference = isQuoting || isAnswering;
   const isMobileModal = useIsMobile();
   useLockBodyScroll(true);
 
@@ -4299,7 +4814,7 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, o
             {/* Compose area. In quote mode the composer sizes to its content so
                 the quoted preview sits directly under the comment instead of
                 being pushed to the bottom of the sheet by a full-height field. */}
-            <div className={`${isMobileModal ? (isQuoting ? "flex gap-3 px-4 pt-4" : "flex-1 min-h-0 flex gap-3 px-4 pt-4") : "px-4 pt-4 pb-3 pr-14"}`}>
+            <div className={`${isMobileModal ? (hasReference ? "flex gap-3 px-4 pt-4" : "flex-1 min-h-0 flex gap-3 px-4 pt-4") : "px-4 pt-4 pb-3 pr-14"}`}>
               {isMobileModal && (
                 <img src={profilePhoto} alt="Your profile" className="h-10 w-10 shrink-0 rounded-full object-cover" />
               )}
@@ -4363,18 +4878,19 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, o
                 {text === "" && (
                   <span
                     className={`pointer-events-none absolute text-[15px] text-gray-light leading-relaxed transition-opacity duration-200 ${isMobileModal ? "left-0" : "left-[52px]"}`}
-                    style={{ opacity: placeholderVisible ? 1 : 0, top: 7 }}
+                    style={{ opacity: isAnswering ? 1 : placeholderVisible ? 1 : 0, top: 7 }}
                   >
-                    {composerPrompts[placeholderIdx]}
+                    {isAnswering ? "Write your answer…" : composerPrompts[placeholderIdx]}
                   </span>
                 )}
-                <textarea ref={textareaRef} autoFocus value={text} onChange={autoGrow} rows={isQuoting ? 3 : 4}
-                  className={`w-full resize-none bg-transparent text-[15px] text-gray-dark focus:outline-none leading-relaxed ${isMobileModal && !isQuoting ? "h-full" : ""}`}
+                <textarea ref={textareaRef} autoFocus value={text} onChange={autoGrow} rows={hasReference ? 3 : 4}
+                  className={`w-full resize-none bg-transparent text-[15px] text-gray-dark focus:outline-none leading-relaxed ${isMobileModal && !hasReference ? "h-full" : ""}`}
                   style={isMobileModal ? { padding: 0, paddingTop: 7, minHeight: 0 } : { minHeight: "180px", padding: 0, paddingTop: 7 }} />
               </div>
             </div>
 
-            {/* Quoted post preview — shown when reposting with thoughts. */}
+            {/* Referenced card — the quoted post (repost with thoughts) or the
+                question being answered. */}
             {isQuoting && (
               <div className="px-4 pb-3">
                 <QuotedPostCard
@@ -4386,6 +4902,19 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, o
                     verified: quotePost.verified,
                     body: quotePost.body,
                     image: quotePost.type === "image" ? quotePost.images[0] : undefined,
+                  }}
+                />
+              </div>
+            )}
+            {isAnswering && (
+              <div className="px-4 pb-3">
+                <QuotedPostCard
+                  quoted={{
+                    id: -1,
+                    author: answerQuestion.asker,
+                    avatar: answerQuestion.avatar,
+                    time: answerQuestion.time,
+                    body: answerQuestion.question,
                   }}
                 />
               </div>
@@ -4750,14 +5279,14 @@ export function CategorySubtitle({ photos, experts }: { photos: string[]; expert
   );
 }
 
-// Popular experts — each row can be dismissed; the whole card hides once empty.
+// Popular experts shown in the right sidebar (follow-only, no dismiss).
 const POPULAR_EXPERTS = [
   { name: "Jasmine Singer", photo: pic1, headline: "Experienced Product Leader at LinkedIn | Ex-..." },
   { name: "Jackson Ringger", photo: pic3, headline: "Ex-McKinsey Consultant | Wharton MBA" },
   { name: "Erika Mah", photo: pic5, headline: "MBA Expert | Stanford GSB | 100+ M7 Admits" },
 ];
 
-function ExpertRow({ expert, onDismiss }: { expert: (typeof POPULAR_EXPERTS)[number]; onDismiss: () => void }) {
+function ExpertRow({ expert }: { expert: (typeof POPULAR_EXPERTS)[number] }) {
   const [following, setFollowing] = useState(false);
   return (
     <SidebarCard
@@ -4766,48 +5295,75 @@ function ExpertRow({ expert, onDismiss }: { expert: (typeof POPULAR_EXPERTS)[num
       title={expert.name}
       subtitle={expert.headline}
       right={
-        <div className="flex items-center gap-1.5">
-          <Button size="sm" variant="secondary" onClick={() => setFollowing((f) => !f)} className="min-w-[74px]">
-            {following ? "Following" : "Follow"}
-          </Button>
-          <button
-            onClick={onDismiss}
-            aria-label={`Dismiss ${expert.name}`}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </button>
-        </div>
+        <Button size="sm" variant="secondary" rounded="rounded-full" onClick={() => setFollowing((f) => !f)} className="min-w-[74px] font-semibold">
+          {following ? "Following" : "Follow"}
+        </Button>
       }
     />
   );
 }
 
 function PopularExperts() {
-  const [experts, setExperts] = useState(POPULAR_EXPERTS);
-  if (experts.length === 0) return null;
   return (
     <SidebarSectionCard title="Popular experts" to="/browse" bleed={false}>
-      {experts.map((e) => (
-        <ExpertRow key={e.name} expert={e} onDismiss={() => setExperts((prev) => prev.filter((x) => x.name !== e.name))} />
+      {POPULAR_EXPERTS.map((e) => (
+        <ExpertRow key={e.name} expert={e} />
       ))}
     </SidebarSectionCard>
   );
 }
 
-export function HomeRightSidebar() {
+// Facepile + expert count subtitle for the "Find expert help" category cards.
+function CategoryExpertsSubtitle({ photos, experts }: { photos: string[]; experts: string }) {
+  return (
+    <span className="inline-flex items-center gap-[6px] align-middle">
+      <span className="inline-flex">
+        {photos.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt=""
+            className="inline-block h-[14px] w-[14px] shrink-0 rounded-full border border-white object-cover"
+            style={{ marginLeft: i === 0 ? 0 : "-3px" }}
+          />
+        ))}
+      </span>
+      {experts}
+    </span>
+  );
+}
+
+// Categories shown in the "Find expert help" sidebar card (topics toggle off).
+const FIND_EXPERT_CATEGORIES = [
+  { title: "Investment Banking", image: categoryIB, experts: "234 experts", photos: [pic1, pic4, pic5] },
+  { title: "Management Consulting", image: categoryConsulting, experts: "312 experts", photos: [pic6, pic7, pic8] },
+  { title: "Product Management", image: categoryPM, experts: "198 experts", photos: [pic3, pic1, pic6] },
+  { title: "AI Automation & Agents", image: categoryAI, experts: "300 experts", photos: [pic8, pic5, pic7] },
+];
+
+export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = {}) {
+  // Opt-in via the showUpcoming prop; off by default.
+  const upcoming = showUpcoming ?? false;
+  const { topics } = useFeedAdmin();
   return (
     <div className="flex flex-col gap-[14px]">
+      {/* Upcoming sessions */}
+      {upcoming && (
+        <SidebarSectionCard title="Upcoming sessions" to="/calendar" bleed>
+          <SessionCard size="small" title="Alex <> Jessica" dateTime="Today, 5:45 PM" duration="30m" day={16} image={pic6} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
+          <SessionCard size="small" title="Resume Review" dateTime="Tomorrow, 11:00 AM" duration="45m" day={17} image={pic4} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
+        </SidebarSectionCard>
+      )}
+
       {/* Livestreams */}
       <SidebarSectionCard title="Livestreams" to="/events" bleed={false}>
         <SidebarCard
           variant="event"
           live
-          image={eventImg1}
+          image={liveVideoThumb}
           title="MBA Strategy Live"
-          subtitle={<><span className="font-medium text-[#FB5A42]">Live now</span> · 125 registered</>}
+          subtitle={<><span className="inline-flex items-center gap-1 font-semibold text-red"><IconLivestreamSignal className="h-3.5 w-3.5 shrink-0" />Live now</span> · 125 registered</>}
+          rightInline
           right={<Button size="sm" variant="dark" rounded="rounded-full" className="w-fit">Join</Button>}
         />
         <SidebarCard
@@ -4824,42 +5380,66 @@ export function HomeRightSidebar() {
         />
       </SidebarSectionCard>
 
-      {/* Popular categories */}
-      <SidebarSectionCard title="Popular categories" bleed={false}>
-        <SidebarCard
-          variant="category"
-          image={categoryInvestmentBanking}
-          title="Investment Banking"
-          subtitle={<CategorySubtitle photos={[pic1, pic4, pic5]} experts="234 experts" />}
-        />
-        <SidebarCard
-          variant="category"
-          image={categoryAI}
-          title="AI Automation & Agents"
-          subtitle={<CategorySubtitle photos={[pic6, pic7, pic8]} experts="300 experts" />}
-        />
-        <SidebarCard
-          variant="category"
-          image={categoryGMAT}
-          title="GMAT Tutoring"
-          subtitle={<CategorySubtitle photos={[pic2, pic3, pic10]} experts="156 experts" />}
-        />
-      </SidebarSectionCard>
+      {/* Topics on: Trending topics. Off (default): Find expert help. */}
+      {topics ? (
+        <SidebarSectionCard title="Trending topics" to="/topic/mba-r1-admissions" bleed={false}>
+          {TOPICS.map(topic => (
+            <SidebarCard
+              key={topic.slug}
+              variant="topic"
+              align="top"
+              to={`/topic/${topic.slug}`}
+              icon={<img src={topicHash} alt="" className="h-[20px] w-[20px] shrink-0" />}
+              title={topic.name}
+              subtitle={`${topic.postsToday} posts today`}
+            />
+          ))}
+        </SidebarSectionCard>
+      ) : (
+        <SidebarSectionCard title="Find expert help" bleed={false}>
+          {FIND_EXPERT_CATEGORIES.slice(0, 3).map(c => (
+            <SidebarCard
+              key={c.title}
+              variant="category"
+              to="/browse"
+              image={c.image}
+              title={c.title}
+              subtitle={<CategoryExpertsSubtitle photos={c.photos} experts={c.experts} />}
+            />
+          ))}
+        </SidebarSectionCard>
+      )}
 
       {/* Popular experts */}
       <PopularExperts />
 
-      {/* Footer links — inline directly below the last card */}
-      <div className="px-2 pt-1">
+      {/* Footer links — centered, directly below the last card */}
+      <div className="px-2 pt-1 text-center">
         <p className="text-[12px] leading-[1.7] text-gray-extra-light">
-          {["About", "Help", "Careers", "Blog", "Coaches", "Privacy", "Terms"].map((l, i) => (
-            <span key={l}>
-              {i > 0 && <span className="mx-1">·</span>}
+          {["Support", "Reviews", "Careers", "Become an Expert", "For Organizations", "Privacy"].map((l, i) => (
+            <Fragment key={l}>
+              {i > 0 && " · "}
               <a href="#" className="transition-opacity hover:opacity-70">{l}</a>
-            </span>
+            </Fragment>
           ))}
         </p>
-        <p className="mt-3 text-[12px] text-gray-extra-light">© 2026 Leland</p>
+        <div className="mt-3 flex items-center justify-center gap-1.5">
+          <span
+            aria-hidden
+            className="h-[15px] w-[15px] bg-[#8F8C7E]"
+            style={{
+              maskImage: `url("${lelandMark}")`,
+              WebkitMaskImage: `url("${lelandMark}")`,
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              maskRepeat: "no-repeat",
+              WebkitMaskRepeat: "no-repeat",
+              maskPosition: "center",
+              WebkitMaskPosition: "center",
+            }}
+          />
+          <span className="text-[12px] text-gray-extra-light">© 2026 Leland</span>
+        </div>
       </div>
     </div>
   );
@@ -4880,34 +5460,43 @@ const MY_EXPERTS = [
 
 // A sidebar section rendered as a card: large bold header with a small "See all"
 // link in the top-right corner, then the section's content.
-function SidebarSectionCard({ title, to, bleed = true, children }: { title: string; to?: string; bleed?: boolean; children: React.ReactNode }) {
+export function SidebarSectionCard({ title, to, action, bleed = true, children }: { title: string; to?: string; action?: React.ReactNode; bleed?: boolean; children: React.ReactNode }) {
   return (
     <div className="rounded-[12px] border border-[#222222]/[0.12] bg-white p-4">
       <div className="mb-3 flex items-start justify-between">
         <h2 className="text-[17px] font-bold leading-tight text-gray-dark">{title}</h2>
-        {to && (
+        {action ?? (to && (
           <NavLink to={to} className="shrink-0 text-[13px] font-medium leading-none text-gray-extra-light transition-opacity hover:opacity-80">
             See all
           </NavLink>
-        )}
+        ))}
       </div>
       <div className={`flex flex-col ${bleed ? "-mx-2" : ""}`}>{children}</div>
     </div>
   );
 }
 
-export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
+// Sessions the user has coming up — previewed (up to 2) in the v2 sidebar.
+const UPCOMING_SESSIONS = [
+  { title: "Alex <> Jessica", dateTime: "Today, 5:45 PM", duration: "30m", day: 16, image: pic6 },
+  { title: "Resume Review", dateTime: "Tomorrow, 11:00 AM", duration: "45m", day: 17, image: pic4 },
+];
+
+// Programs the user is mid-way through — previewed in the v2 sidebar with a
+// progress bar (the "continue learning" job-to-be-done).
+const MY_PROGRAMS = [
+  { title: "AI Builder Program: Level 1", author: "Leland", pct: 60, image: aibpImg, href: "/course/1" },
+  { title: "MBA Application Masterclass", author: "Sam Wielen", pct: 25, image: samWielenImg, href: "/courses" },
+  { title: "Consulting Case Interview Prep", author: "Jessica Lin", pct: 0, image: automationsImg, href: "/courses" },
+];
+
+// v1 — original: profile card, next session + calendar, my experts.
+function HomeSidebarV1() {
   const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-[14px]">
-      {/* Profile preview */}
-      <div className="flex items-center gap-3">
-        <img src={profilePhoto} alt="Alex" className="h-12 w-12 shrink-0 rounded-full object-cover" />
-        <div className="min-w-0">
-          <p className="truncate text-[16px] font-semibold leading-tight text-gray-dark">Alex Rivera</p>
-          <p className="mt-0.5 truncate text-[13px] leading-tight text-gray-light">MBA Applicant · Class of 2027</p>
-        </div>
-      </div>
+      {/* Profile card — public-profile-style header with prioritized metrics */}
+      <FeedProfileCard />
 
       {/* Next session + calendar link */}
       <div className="rounded-[12px] border border-[#222222]/[0.12] bg-white">
@@ -4945,6 +5534,77 @@ export function HomeSidebar({ onCreatePost }: { onCreatePost: () => void }) {
   );
 }
 
+// v2 — reorganized around the two jobs-to-be-done: upcoming sessions and
+// in-progress programs. Profile card on top.
+function HomeSidebarV2() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  // Inside the /alt-nav experience, "See all" links stay within My Leland
+  // rather than jumping back into the classic-nav routes.
+  const inAltNav = pathname === "/alt-nav" || pathname.startsWith("/alt-nav/");
+  const sessionsTo = inAltNav ? "/my-leland/calendar" : "/dashboard";
+  const learningTo = inAltNav ? "/my-leland" : "/my-programs";
+  return (
+    <div className="flex flex-col gap-[14px]">
+      {/* 1. Profile card */}
+      <FeedProfileCard />
+
+      {/* 2. Upcoming sessions — preview up to 2 */}
+      <SidebarSectionCard title="Upcoming sessions" to={sessionsTo} bleed>
+        {UPCOMING_SESSIONS.slice(0, 2).map((s) => (
+          <SessionCard key={s.title} size="small" title={s.title} dateTime={s.dateTime} duration={s.duration} day={s.day} image={s.image} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
+        ))}
+      </SidebarSectionCard>
+
+      {/* 3. Continue learning — in-progress programs show a progress bar; a
+          not-started program shows a Start CTA instead. */}
+      <SidebarSectionCard title="Continue learning" to={learningTo} bleed>
+        {/* Demo: show the AI Builder Program and the not-started Consulting one */}
+        {[MY_PROGRAMS[0], MY_PROGRAMS[2]].map((p) => {
+          const started = p.pct > 0;
+          return (
+            <div
+              key={p.title}
+              onClick={() => navigate(p.href)}
+              className="group flex cursor-pointer items-center gap-3 rounded-[8px] px-2 py-2 transition-colors hover:bg-gray-hover"
+            >
+              <img src={p.image} alt="" className="h-[42px] w-[68px] shrink-0 rounded-[6px] object-cover" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[14px] font-semibold leading-tight text-gray-dark group-hover:underline">{p.title}</p>
+                <p className="mt-0.5 truncate text-[12px] leading-tight text-gray-light">
+                  {p.author} · {started ? `${p.pct}% complete` : "Not started"}
+                </p>
+                {started && (
+                  <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-[#222222]/[0.08]">
+                    <div className="h-full rounded-full bg-gray-dark" style={{ width: `${p.pct}%` }} />
+                  </div>
+                )}
+              </div>
+              {!started && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  rounded="rounded-full"
+                  className="shrink-0 font-semibold"
+                  onClick={(e) => { e.stopPropagation(); navigate(p.href); }}
+                >
+                  Start
+                </Button>
+              )}
+            </div>
+          );
+        })}
+      </SidebarSectionCard>
+    </div>
+  );
+}
+
+export function HomeSidebar(_props: { onCreatePost: () => void }) {
+  const { sidebarVersion } = useFeedAdmin();
+  // v3 is reserved for the next iteration — mirror v2 until it's specced.
+  return sidebarVersion === "v1" ? <HomeSidebarV1 /> : <HomeSidebarV2 />;
+}
+
 // ─── Composer prompts ────────────────────────────────
 
 const composerPrompts = [
@@ -4960,14 +5620,76 @@ const composerPrompts = [
 
 // ─── Page ─────────────────────────────────────────────
 
+// Prototype-only admin menu — a 3-dot button pinned to the bottom-right that
+// toggles preview states to show the team. Uses the same chrome + controls as
+// the My Leland profile admin menu (ProfileAdminMenu).
+function FeedAdminMenu() {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { verifiedBadgePosition, setVerifiedBadgePosition, sidebarVersion, setSidebarVersion, featuredQuestions, setFeaturedQuestions, topics, setTopics } = useFeedAdmin();
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open]);
+
+  return (
+    <div
+      ref={menuRef}
+      className="fixed bottom-[calc(max(env(safe-area-inset-bottom),20px)+72px)] right-4 z-40 md:bottom-6 md:right-6"
+    >
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 4 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 4 }}
+            transition={{ duration: 0.15 }}
+            className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+          >
+            <AdminSelect
+              label="Verified badge"
+              value={verifiedBadgePosition}
+              onChange={(v) => setVerifiedBadgePosition(v as VerifiedBadgePosition)}
+              options={[{ value: "avatar", label: "On photo" }, { value: "name", label: "By name" }]}
+            />
+            <AdminSelect
+              label="Left sidebar"
+              value={sidebarVersion}
+              cols={3}
+              onChange={(v) => setSidebarVersion(v as SidebarVersion)}
+              options={[{ value: "v1", label: "V1" }, { value: "v2", label: "V2" }, { value: "v3", label: "V3" }]}
+            />
+            <AdminToggle label="Answer a question" checked={featuredQuestions} onChange={() => setFeaturedQuestions(!featuredQuestions)} />
+            <AdminToggle label="Topics" checked={topics} onChange={() => setTopics(!topics)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Admin controls"
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-colors hover:bg-[#B1B1B1]/30"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="3" cy="8" r="1.5" fill="#222222" />
+          <circle cx="8" cy="8" r="1.5" fill="#222222" />
+          <circle cx="13" cy="8" r="1.5" fill="#222222" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 export default function Home() {
   useEffect(() => { document.title = "Leland Prototype | Feed"; }, []);
   const { version } = useVersion();
-  // In alt-nav the feed card fades in on mount, matching the post detail.
-  const { pathname } = useLocation();
-  const isAltNav = pathname.startsWith("/alt-nav");
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
+  // "People to follow → See all" swaps the center feed for the full accounts list.
+  const [peopleView, setPeopleView] = useState(false);
   const [navHidden, setNavHidden] = useState(false);
   const lastScrollY = useRef(0);
   const isMobile = useIsMobile();
@@ -4978,14 +5700,17 @@ export default function Home() {
   useSetRightSidebar(<HomeRightSidebar />);
   // Copy, don't alias: handlePublish mutates `posts` (so /post/:id resolves),
   // which would double-insert if this state shared the same array reference.
-  const [feedPosts, setFeedPosts] = useState<Post[]>(() => [...posts]);
+  const [feedPosts, setFeedPosts] = useState<Post[]>(() => arrangeFeed(posts));
   // The post the user is quoting ("repost with your thoughts"); drives the
   // quote composer modal.
   const [quoteTarget, setQuoteTarget] = useState<Post | null>(null);
+  // The featured question being answered — drives the answer composer modal.
+  const [answerTarget, setAnswerTarget] = useState<FeaturedQuestion | null>(null);
   // When the full-width save toast is up, lift the FAB above it so the toast's
   // dismiss (X) stays tappable.
   const { active: savedToastActive } = useSavedToast();
   const { dark: darkMode } = useDarkMode();
+  const { featuredQuestions } = useFeedAdmin();
 
   useEffect(() => {
     const onScroll = () => {
@@ -5164,30 +5889,89 @@ export default function Home() {
     setFeedPosts(prev => [quote, ...prev]);
   };
 
+  // Answer a featured question: create a new post owned by the current user
+  // carrying their answer text plus the question card they responded to.
+  const handleAnswerPost = (text: string) => {
+    if (!answerTarget) return;
+    const answer: AnswerPost = {
+      id: Date.now(),
+      type: "answer",
+      author: "Jamie Allen",
+      avatar: profilePhoto,
+      time: "just now",
+      verified: true,
+      headline: "Interactive Lead at Airbnb",
+      likes: 0,
+      comments: 0,
+      reposts: 0,
+      shares: 0,
+      body: text,
+      question: answerTarget,
+    };
+    // Register in the global posts array too so the answer's own detail page
+    // (/post/:id) resolves, just like a normal post.
+    posts.unshift(answer);
+    setFeedPosts(prev => [answer, ...prev]);
+  };
+
+  if (peopleView) {
+    return (
+      <div className="-mt-3 md:mt-0">
+        <PeopleToFollowFull onBack={() => setPeopleView(false)} />
+      </div>
+    );
+  }
+
   return (
     <div className="-mt-3 md:mt-0">
       {/* Feed card — one bordered container wrapping the composer and the whole
           post list, so the border runs around all edges. Horizontal padding
           lives on the composer and each post row (dividers run full-bleed to
-          the border while post content stays inset). */}
+          the border while post content stays inset). On mobile it breaks out of
+          the page padding to run full-bleed: no rounding, no left/right borders
+          (the per-post dividers remain). */}
       <motion.div
-        {...(isAltNav ? { initial: FADE_IN.initial, animate: FADE_IN.animate, transition: FADE_TRANSITION } : {})}
-        className="rounded-2xl border border-[#D5D5D5]"
+        className="-mx-4 rounded-none border border-x-0 border-gray-stroke bg-white sm:-mx-6 md:mx-0 md:rounded-2xl md:border-x"
       >
-      {/* Post composer — hidden on mobile (composer lives in the floating
-          + button there). */}
-      <div className="hidden md:flex items-center gap-3 border-b border-[#D5D5D5] px-4 py-4 sm:px-6">
-        <img
-          src={profilePhoto}
-          alt="Your profile"
-          className="h-10 w-10 shrink-0 rounded-full object-cover"
-        />
-        <button
-          onClick={() => setComposeOpen(true)}
-          className="flex-1 rounded-full bg-gray-hover px-4 py-[10px] text-left text-[14px] text-gray-light transition-shadow hover:shadow-[0_0_0_1.5px_#111111]"
-        >
-          Create post
-        </button>
+      {/* Post composer — desktop only (hidden on mobile). Mirrors the post-detail
+          comment composer's active state: avatar + prompt on top, media icons +
+          Post button beneath. Clicking anywhere opens the compose modal. */}
+      <div
+        onClick={() => setComposeOpen(true)}
+        className="hidden cursor-pointer border-b border-gray-stroke px-4 py-3 sm:px-6 md:block"
+      >
+        <div className="flex items-center gap-3">
+          <img
+            src={profilePhoto}
+            alt="Your profile"
+            className="h-10 w-10 shrink-0 rounded-full object-cover"
+          />
+          <span className="flex-1 truncate text-left text-[17px] text-gray-extra-light">
+            What's on your mind?
+          </span>
+        </div>
+        {/* Media icons (left) + Post (right), indented under the prompt text. */}
+        <div className="mt-2 flex items-center justify-between pl-[52px]">
+          <div className="-ml-2.5 flex items-center gap-1">
+            {[
+              { label: "Add image", src: composerImageIcon },
+              { label: "Take photo", src: composerCameraIcon },
+              { label: "Add video", src: composerVideoIcon },
+              { label: "Add poll", src: composerPollIcon },
+            ].map(t => (
+              <ComposerMediaButton key={t.label} src={t.src} label={t.label} tone="extra-light" />
+            ))}
+          </div>
+          <Button
+            size="md"
+            variant="secondary"
+            rounded="rounded-full"
+            onClick={() => setComposeOpen(true)}
+            className="shrink-0 font-semibold opacity-50"
+          >
+            Post
+          </Button>
+        </div>
       </div>
 
       {/* Pull-to-refresh slot — sits between the composer and the feed (top
@@ -5215,12 +5999,20 @@ export default function Home() {
       )}
 
       {/* Feed */}
-      <div className="divide-y divide-[#D5D5D5]">
+      <div className="divide-y divide-gray-stroke">
+        {/* Featured questions — embedded feed section below the composer
+            (toggleable via the feed admin menu). */}
+        {featuredQuestions && <FeaturedQuestions onAnswer={setAnswerTarget} />}
         {feedPosts.map((post, i) => (
-          <div key={post.id} className="px-4 sm:px-6">
-            <FeedPost post={post} onUpdate={handleEdit} onRepost={handleRepost} onUndoRepost={handleUndoRepost} onQuote={setQuoteTarget} />
-            {i === 3 && <SuggestedExperts />}
-          </div>
+          <Fragment key={post.id}>
+            <div className={`px-4 sm:px-6 ${POST_HOVER_SHADOW}`}>
+              <FeedPost post={post} onUpdate={handleEdit} onRepost={handleRepost} onUndoRepost={handleUndoRepost} onQuote={setQuoteTarget} />
+            </div>
+            {/* Rendered as its own feed row (not inside the post's hover div) so
+                it doesn't share the post's hover state; divide-y gives its top
+                border. */}
+            {i === 3 && <PeopleToFollow onSeeAll={() => setPeopleView(true)} />}
+          </Fragment>
         ))}
       </div>
       </motion.div>{/* /Feed card */}
@@ -5240,11 +6032,13 @@ export default function Home() {
       </button>
 
       {composeOpen ? <Composer onClose={() => { setComposeOpen(false); setComposeInDrafts(false); }} onPublish={handlePublish} onDraftSaved={handleDraftSaved} onScheduled={handleScheduled} openDraftsOnMount={composeInDrafts} draftsTabOnMount={composeDraftsTab} /> : null}
+      {/* Prototype admin controls — bottom-right 3-dot menu. */}
+      <FeedAdminMenu />
       {/* Draft-saved toast — portaled so the tab bar's stacking context can't cover it */}
       {createPortal(
         <AnimatePresence>
           {draftToast ? (
-            <div key="draft" className="pointer-events-none fixed inset-x-0 bottom-[calc(max(env(safe-area-inset-bottom),20px)+76px)] z-[80] flex justify-center">
+            <div key="draft" className="pointer-events-none fixed inset-x-0 bottom-[calc(max(env(safe-area-inset-bottom),20px)+76px)] z-[80] flex justify-center md:bottom-10">
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -5259,7 +6053,7 @@ export default function Home() {
             </div>
           ) : null}
           {schedToast ? (
-            <div key="sched" className="pointer-events-none fixed inset-x-0 bottom-[calc(max(env(safe-area-inset-bottom),20px)+76px)] z-[80] flex justify-center">
+            <div key="sched" className="pointer-events-none fixed inset-x-0 bottom-[calc(max(env(safe-area-inset-bottom),20px)+76px)] z-[80] flex justify-center md:bottom-10">
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -5277,6 +6071,13 @@ export default function Home() {
         document.body
       )}
       {quoteTarget ? <ComposeModal quotePost={quoteTarget} onClose={() => setQuoteTarget(null)} onPost={handleQuotePost} isMVP={version === "A"} /> : null}
+      {answerTarget ? (
+        <AnswerCompose
+          question={answerTarget}
+          onClose={() => setAnswerTarget(null)}
+          onPost={handleAnswerPost}
+        />
+      ) : null}
       {goLiveOpen ? <GoLiveModal onClose={() => setGoLiveOpen(false)} /> : null}
     </div>
   );

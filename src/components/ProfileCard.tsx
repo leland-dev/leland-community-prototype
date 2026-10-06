@@ -1,4 +1,4 @@
-import verifiedIcon from "../assets/icons/verified.svg";
+import verifiedIcon from "../assets/icons/verified-new.svg";
 import starIcon from "../assets/icons/star.svg";
 
 // ─── Types ─────────────────────────────────────────────────────────────────

@@ -2,6 +2,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, Reorder, useDragControls } from "motion/react";
 import { Button } from "../components/Button";
+import { useExpertMode } from "../contexts/ExpertModeContext";
 import { IconStar, IconDotsVertical, IconAddPlus, IconArrowUp } from "../components/leland/svg/icons";
 import linkIcon from "../assets/icons/link.svg";
 import settingsIcon from "../assets/icons/settings.svg";
@@ -314,7 +315,7 @@ function ReviewBody({ text }: { text: string }) {
   );
 }
 
-type Outcome = {
+export type Outcome = {
   id: string;
   name: string;
   logo: string;
@@ -322,7 +323,7 @@ type Outcome = {
   hidden: boolean;
 };
 
-const initialOutcomes: Outcome[] = [
+export const initialOutcomes: Outcome[] = [
   { id: "stripe", name: "Stripe", logo: clientLogo1, clients: 12, hidden: false },
   { id: "airbnb", name: "Airbnb", logo: clientLogo2, clients: 9, hidden: false },
   { id: "apple", name: "Apple", logo: clientLogo3, clients: 8, hidden: false },
@@ -339,7 +340,7 @@ const initialOutcomes: Outcome[] = [
   { id: "goldman", name: "Goldman Sachs", logo: goldmanSachsLogo, clients: 1, hidden: false },
 ];
 
-const initialSchools: Outcome[] = [
+export const initialSchools: Outcome[] = [
   { id: "hbs", name: "Harvard Business School", logo: hbsLogo, clients: 11, hidden: false },
   { id: "wharton", name: "The Wharton School (UPenn)", logo: whartonLogo, clients: 9, hidden: false },
   { id: "kellogg", name: "Kellogg School of Management", logo: kelloggLogo, clients: 8, hidden: false },
@@ -647,7 +648,7 @@ function AddOutcomeButton() {
 
 // Single-line logo strip: fits as many 36px logos as the container allows,
 // then caps with a "+X" chip for the remainder (mirrors the profile template).
-function LogoStrip({ outcomes }: { outcomes: Outcome[] }) {
+export function LogoStrip({ outcomes }: { outcomes: Outcome[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const [slots, setSlots] = useState(outcomes.length);
 
@@ -687,8 +688,9 @@ function LogoStrip({ outcomes }: { outcomes: Outcome[] }) {
   );
 }
 
-export default function CoachReviews() {
-  const [tab, setTab] = useState<"reviews" | "pending">("reviews");
+// Expert view — the coach's own reviews, ratings breakdown, and outcomes.
+function ExpertReviews() {
+  const [tab, setTab] = useState<"reviews" | "pending" | "submitted">("reviews");
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [outcomesOpen, setOutcomesOpen] = useState(false);
@@ -726,7 +728,7 @@ export default function CoachReviews() {
   const visibleOutcomes = [...outcomes, ...schoolOutcomes].filter((o) => !o.hidden);
 
   return (
-    <div className="mx-auto max-w-[880px]">
+    <div className="mx-auto max-w-[1080px]">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="font-serif text-[30px] font-medium text-gray-dark md:text-[38px]">37 reviews</h1>
@@ -850,8 +852,8 @@ export default function CoachReviews() {
       <div className="mt-10 border-b border-gray-stroke">
         <div className="flex gap-8">
           {[
-            { key: "reviews" as const, label: "My reviews" },
-            { key: "pending" as const, label: "Haven’t reviewed yet" },
+            { key: "reviews" as const, label: "Reviews for you" },
+            { key: "submitted" as const, label: "Reviews you’ve submitted" },
           ].map(({ key, label }) => (
             <button
               key={key}
@@ -869,15 +871,23 @@ export default function CoachReviews() {
       </div>
 
       {/* Review list — dashed placeholders (mirrors the profile template) */}
-      {tab === "reviews" ? (
+      {tab === "reviews" && (
         <div className="mt-6 flex flex-col gap-4">
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="h-[180px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
           ))}
         </div>
-      ) : (
+      )}
+      {tab === "pending" && (
         <div className="py-16 text-center text-[16px] text-gray-light">
           Everyone you’ve coached has left a review. 🎉
+        </div>
+      )}
+      {tab === "submitted" && (
+        <div className="mt-6 flex flex-col gap-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-[180px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+          ))}
         </div>
       )}
 
@@ -891,4 +901,33 @@ export default function CoachReviews() {
       />
     </div>
   );
+}
+
+// Customer view — the reviews I've left for coaches I've worked with (shown
+// before Expert tools are turned on).
+function CustomerReviews() {
+  useEffect(() => {
+    document.title = "Leland Prototype | Reviews";
+  }, []);
+
+  return (
+    <div className="mx-auto max-w-[1080px]">
+      <h1 className="font-serif text-[30px] font-medium leading-[1.1] text-gray-dark md:text-[38px]">Reviews</h1>
+      <p className="mt-2 text-[16px] text-gray-light">
+        Reviews you’ve left for experts you’ve worked with.
+      </p>
+      <div className="mt-8 flex flex-col gap-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="h-[180px] rounded-xl bg-[#f5f5f5]" style={dashedBorderStyle} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// The Reviews page swaps treatments based on Expert mode: customers see the
+// reviews they've left; experts get their coach reviews dashboard.
+export default function CoachReviews() {
+  const { expert } = useExpertMode();
+  return expert ? <ExpertReviews /> : <CustomerReviews />;
 }

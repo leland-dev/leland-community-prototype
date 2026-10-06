@@ -8,7 +8,7 @@ import pic4 from "../../../../../assets/profile photos/pic-4.png";
 import pic5 from "../../../../../assets/profile photos/pic-5.png";
 import pic6 from "../../../../../assets/profile photos/pic-6.png";
 import pic8 from "../../../../../assets/profile photos/pic-8.png";
-import verifiedIcon from "../../../../../assets/icons/verified.svg";
+import verifiedIcon from "../../../../../assets/icons/verified-new.svg";
 import ChatPanel from "./ChatPanel";
 import Resources from "./Resources";
 

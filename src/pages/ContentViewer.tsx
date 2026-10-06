@@ -13,8 +13,8 @@ import {
 } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { CourseSentimentModal } from "../components/CourseSentimentModal";
 import { ReviewModal } from "../components/ReviewModal";
+import { WrittenReviewModal } from "../components/WrittenReviewModal";
 import { SectionFeedbackModal } from "../components/SectionFeedbackModal";
 import { SupportModal } from "../components/SupportModal";
 import TopNav from "../components/TopNav";
@@ -55,7 +55,9 @@ import {
   IconHelp,
   IconShare,
   IconMenuBurger,
+  IconRefresh,
   IconStar,
+  IconUser,
   IconStarOutline,
   IconWrite,
   IconX,
@@ -83,9 +85,10 @@ import type {
 } from "../data/lessonBlocks";
 import { LESSON_1_SECTIONS, LESSON_1_TOP_BLOCKS } from "../data/sampleLesson";
 import { LESSON_2_SECTIONS, LESSON_2_TOP_BLOCKS } from "../data/sampleLesson2";
+import { LESSON_3_SECTIONS, LESSON_3_TOP_BLOCKS } from "../data/sampleLesson3";
 import { TOOL_SETUP_CLAUDE, TOOL_SETUP_CODEX, TOOL_SETUP_GEMINI, TOOL_SETUP_COPILOT } from "../data/toolSetupSections";
 import { JOIN_SLACK_SECTION } from "../data/joinSlackSection";
-import { PERSONALIZATION_SECTION } from "../data/personalizationSection";
+import { PERSONALIZATION_SECTION, AI_CONFIDENCE_QUESTION } from "../data/personalizationSection";
 import {
   BlockList,
   LessonFooterActions,
@@ -98,6 +101,16 @@ import { GettingStartedFlow, type FlowKey } from "../components/getting-started"
 import { COHORT_MEMBERS } from "./Group";
 import { SelectCohortModal } from "../components/LiveCourseCard";
 import { TrackPickerModal, type CourseTrack, TRACK_STORAGE_KEY, getLogoSrc } from "../components/TrackPickerModal";
+import {
+  PersonalizationModal,
+  PERSONALIZATION_KEY,
+  loadPersonalizationData,
+  summarizePersonalizationParts,
+  type PersonalizationData,
+} from "../components/PersonalizationModal";
+import { AboutMeEditModal } from "../components/AboutMeEditModal";
+import { TextRemindersModal, TEXT_REMINDERS_KEY, hasVerifiedPhone } from "../components/TextRemindersModal";
+import { NoAccessModal } from "../components/NoAccessModal";
 
 // ─── Types & seed data ───────────────────────────────────────────────────────
 
@@ -125,9 +138,22 @@ type InteractiveSection = {
   flow: FlowKey;
 };
 
+// Course-completion page: the terminal "you did it" screen after the last
+// lesson's last section. No footer actions, share button, or section nav —
+// just the rating/review-collection modal chain (see the trigger effect)
+// plus whatever benchmarking blocks (e.g. the repeated confidence question)
+// are listed here.
+type CompletionSection = {
+  id: string;
+  title: string;
+  kind: "completion";
+  blocks?: Block[];
+};
+
 // A section is either a legacy media section, a native block section
-// (BlockSection), or an interactive flow. Chosen per-section by `kind`.
-type Section = MediaSection | BlockSection | InteractiveSection;
+// (BlockSection), an interactive flow, or the course-completion page.
+// Chosen per-section by `kind`.
+type Section = MediaSection | BlockSection | InteractiveSection | CompletionSection;
 
 type Lesson = {
   id: string;
@@ -150,11 +176,27 @@ const DASHBOARD = "/dashboard";
 // The community page opens externally (new tab) — it's the existing group page.
 const COMMUNITY_GROUP_ID = "ai-bp-apr-26";
 
+const COURSE_COMPLETION_SECTION: CompletionSection = {
+  id: "course-complete",
+  title: "Course complete",
+  kind: "completion",
+  // Same question, same wording, as the intake "Getting to know you" section
+  // — a clean pre/post pair for self-reported confidence improvement.
+  blocks: [AI_CONFIDENCE_QUESTION],
+};
+
 // Lessons 3–4 come from the generated manifest (legacy HTML iframe sections).
 // Lessons 1 and 2 are the block/CMS demo: hand-authored native block sections.
 const LESSONS: Lesson[] = (lessonData as Lesson[]).map((lesson) => {
   if (lesson.number === 1) return { ...lesson, topBlocks: LESSON_1_TOP_BLOCKS, sections: LESSON_1_SECTIONS };
   if (lesson.number === 2) return { ...lesson, topBlocks: LESSON_2_TOP_BLOCKS, sections: LESSON_2_SECTIONS };
+  if (lesson.number === 3) {
+    return {
+      ...lesson,
+      topBlocks: LESSON_3_TOP_BLOCKS,
+      sections: [...LESSON_3_SECTIONS, COURSE_COMPLETION_SECTION],
+    };
+  }
   return lesson;
 });
 
@@ -202,6 +244,28 @@ function useCompletion() {
     });
   };
   return { completed, markComplete };
+}
+
+// Tracks the learner's star rating (0 = not yet rated), across both the
+// mid-Lesson-1 ReviewModal trigger and the completion-page one — so the
+// completion page knows whether to ask for a rating again or jump straight
+// to the written review (pre-filled with whatever they gave, editable).
+const COURSE_RATING_KEY = "content-viewer-course-rating";
+
+function useCourseRating() {
+  const [rating, setRatingState] = useState(
+    () => Number(localStorage.getItem(COURSE_RATING_KEY) ?? 0),
+  );
+  const setRating = (next: number) => {
+    localStorage.setItem(COURSE_RATING_KEY, String(next));
+    setRatingState(next);
+  };
+  return {
+    rating,
+    hasRated: rating > 0,
+    setRating,
+    toggleHasRated: () => setRating(rating > 0 ? 0 : 5),
+  };
 }
 
 // ─── Section content ─────────────────────────────────────────────────────────
@@ -1388,6 +1452,8 @@ type PrototypeOptions = {
   noHeader: boolean;
   showSiteNav: boolean;
   showTrackPicker: boolean;
+  hasOfficeHours: boolean;
+  hasAccess: boolean;
   liveSessionVariant: LiveSessionVariant;
 };
 
@@ -1403,6 +1469,8 @@ const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
   noHeader: true,
   showSiteNav: false,
   showTrackPicker: true,
+  hasOfficeHours: true,
+  hasAccess: true,
   liveSessionVariant: "addToCalendar",
 };
 
@@ -1411,6 +1479,8 @@ const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
   { key: "noHeader", label: "No header" },
   { key: "showSiteNav", label: "Show site nav" },
   { key: "showTrackPicker", label: "Track picker" },
+  { key: "hasOfficeHours", label: "Has office hours" },
+  { key: "hasAccess", label: "Has course access" },
 ];
 
 
@@ -1454,18 +1524,22 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onToggle,
   onSetVariant,
   onOpenFeedback,
-  onOpenSentiment,
   onOpenReview,
   onOpenSupport,
+  hasRated,
+  onToggleHasRated,
+  onResetProgress,
   ...modalProps
 }: ModalProps & {
   options: PrototypeOptions;
   onToggle: (key: BooleanOptionKey) => void;
   onSetVariant: (variant: LiveSessionVariant) => void;
   onOpenFeedback: () => void;
-  onOpenSentiment: () => void;
   onOpenReview: () => void;
   onOpenSupport: () => void;
+  hasRated: boolean;
+  onToggleHasRated: () => void;
+  onResetProgress: () => void;
 }) {
   return (
     <Modal {...modalProps}>
@@ -1504,6 +1578,13 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
               />
             </div>
           ))}
+          <div className="rounded-lg p-3">
+            <SwitchInput
+              label="Has rated course"
+              isChecked={hasRated}
+              onToggle={onToggleHasRated}
+            />
+          </div>
           <div className="mt-1 border-t border-leland-gray-stroke pt-2">
             <button
               type="button"
@@ -1512,14 +1593,6 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
             >
               <IconStar className="size-4 shrink-0 text-leland-gray-light" />
               <span className="leland-paragraph-base text-leland-gray-dark">Trigger feedback modal</span>
-            </button>
-            <button
-              type="button"
-              onClick={onOpenSentiment}
-              className="flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-            >
-              <IconStar className="size-4 shrink-0 text-leland-gray-light" />
-              <span className="leland-paragraph-base text-leland-gray-dark">Trigger sentiment modal</span>
             </button>
             <button
               type="button"
@@ -1536,6 +1609,20 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
             >
               <IconStar className="size-4 shrink-0 text-leland-gray-light" />
               <span className="leland-paragraph-base text-leland-gray-dark">Trigger support modal</span>
+            </button>
+          </div>
+          <div className="mt-1 border-t border-leland-gray-stroke pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Reset all course progress and selections? This simulates a first-time visit.")) {
+                  onResetProgress();
+                }
+              }}
+              className="flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+            >
+              <IconRefresh className="size-4 shrink-0 text-leland-red" />
+              <span className="leland-paragraph-base text-leland-red">Reset all progress</span>
             </button>
           </div>
         </div>
@@ -2267,11 +2354,13 @@ export default function ContentViewer() {
   const [showRecording, setShowRecording] = useState(false);
   const [lessonShowRecording, setLessonShowRecording] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
-  const [sentimentModalOpen, setSentimentModalOpen] = useState(false);
-  const sentimentModalTriggered = useRef(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [completionReviewModalOpen, setCompletionReviewModalOpen] = useState(false);
+  const [writtenReviewModalOpen, setWrittenReviewModalOpen] = useState(false);
+  const completionModalTriggered = useRef(false);
   const [supportModalOpen, setSupportModalOpen] = useState(false);
   const reviewModalTriggered = useRef(false);
+  const { rating: courseRating, hasRated, setRating: setCourseRating, toggleHasRated } = useCourseRating();
   const [activeOnLesson10Min, setActiveOnLesson10Min] = useState(false);
   const navigatedViaButtons = useRef(false);
   const [addToCalendarModalOpen, setAddToCalendarModalOpen] = useState(false);
@@ -2281,6 +2370,12 @@ export default function ContentViewer() {
   const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
   const [trackPickerOpen, setTrackPickerOpen] = useState(false);
+  const [personalizationModalOpen, setPersonalizationModalOpen] = useState(false);
+  const [aboutMe, setAboutMe] = useState<PersonalizationData | null>(() => loadPersonalizationData());
+  const aboutMeParts = aboutMe ? summarizePersonalizationParts(aboutMe) : null;
+  const [aboutMeModalOpen, setAboutMeModalOpen] = useState(false);
+  const [textRemindersModalOpen, setTextRemindersModalOpen] = useState(false);
+  const [noAccessModalOpen, setNoAccessModalOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<CourseTrack | null>(
     () => localStorage.getItem(TRACK_STORAGE_KEY) as CourseTrack | null,
   );
@@ -2346,18 +2441,10 @@ export default function ContentViewer() {
     }
   }, [options.showTrackPicker]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Course-level sentiment check-in — separate from the per-section "Was
-  // this helpful?" flow. Fires once, 50% of the way through lesson 2 (by
-  // section navigation), for any course with at least two lessons.
+  // Paywall for anyone without course access.
   useEffect(() => {
-    if (sentimentModalTriggered.current || sentimentModalOpen) return;
-    if (LESSONS.length < 2 || lesson.number !== 2) return;
-    const progressPct = (sectionIdx + 1) / visibleSections.length;
-    if (progressPct >= 0.5) {
-      sentimentModalTriggered.current = true;
-      setSentimentModalOpen(true);
-    }
-  }, [lesson.number, sectionIdx, visibleSections.length, sentimentModalOpen]);
+    setNoAccessModalOpen(!options.hasAccess);
+  }, [options.hasAccess]);
 
   // Tracks 10 minutes of activity on the current lesson (resets whenever the
   // learner moves to a different lesson) — a gate for the review prompt below.
@@ -2379,6 +2466,31 @@ export default function ContentViewer() {
       setReviewModalOpen(true);
     }
   }, [lesson.number, sectionIdx, visibleSections.length, activeOnLesson10Min, reviewModalOpen]);
+
+  // Course-completion page: rating first if the learner hasn't rated yet,
+  // otherwise straight to the written review. Waits a couple seconds after
+  // landing so the modal doesn't slam over the page before it's even read.
+  // Re-arms whenever the learner leaves and comes back to this section.
+  useEffect(() => {
+    if (section.kind !== "completion") {
+      completionModalTriggered.current = false;
+      return;
+    }
+    if (completionModalTriggered.current) return;
+    // Marked inside the timeout (not before scheduling it) so StrictMode's
+    // dev-only mount/cleanup/remount cycle — which cancels and reschedules
+    // this timer once — can't leave the ref "triggered" with no timer left
+    // to actually open the modal.
+    const timer = setTimeout(() => {
+      completionModalTriggered.current = true;
+      if (hasRated) {
+        setWrittenReviewModalOpen(true);
+      } else {
+        setCompletionReviewModalOpen(true);
+      }
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [section.kind, section.id, hasRated]);
 
   // Opening the drawer/sidebar jumps to the lesson + section the user is on.
   // "nearest" only scrolls when the row is actually out of view, so opening
@@ -2505,7 +2617,7 @@ export default function ContentViewer() {
             )}
           </div>
           <div className="flex flex-1 items-center justify-end gap-2">
-            <button type="button" aria-label="Get help" className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
+            <button type="button" aria-label="Get help" onClick={() => setSupportModalOpen(true)} className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
               <IconQuestion className="size-5" />
             </button>
             <button type="button" aria-label="Share" className="flex size-10 items-center justify-center rounded-full bg-leland-gray-solid-hover text-leland-gray-dark hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary">
@@ -2603,6 +2715,7 @@ export default function ContentViewer() {
             <button
               type="button"
               aria-label="Get help"
+              onClick={() => setSupportModalOpen(true)}
               className="flex size-10 items-center justify-center rounded-full border border-leland-gray-stroke bg-white text-leland-gray-extra-light shadow-sm hover:bg-leland-gray-solid-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
               <IconQuestion className="size-5" />
@@ -2662,6 +2775,7 @@ export default function ContentViewer() {
                   <LessonPageProvider
                     actions={{
                       onShareFeedback: () => setFeedbackModalOpen(true),
+                      onOpenSupport: () => setSupportModalOpen(true),
                       onOpenCalendar: () => setAddToCalendarModalOpen(true),
                       liveSessionVariant: options.liveSessionVariant,
                       liveProgram: options.liveProgram,
@@ -2739,6 +2853,28 @@ export default function ContentViewer() {
                             </div>
                           ) : null}
                         </div>
+                        {section.id === "personalize" ? (
+                          <button
+                            type="button"
+                            onClick={() => setAboutMeModalOpen(true)}
+                            className="flex w-full items-center gap-4 rounded-xl border border-leland-gray-stroke bg-white px-5 py-4 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                          >
+                            <span className="flex size-11 shrink-0 items-center justify-center rounded-[4px] bg-leland-gray-hover">
+                              <IconUser className="size-5 text-leland-gray-dark" />
+                            </span>
+                            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                              <span className="truncate leland-heading-base font-semibold text-leland-gray-dark">
+                                {aboutMeParts?.primary ?? "Add your work situation, role, and industry"}
+                              </span>
+                              {aboutMeParts?.secondary ? (
+                                <span className="truncate leland-paragraph-base text-leland-gray-light">
+                                  {aboutMeParts.secondary}
+                                </span>
+                              ) : null}
+                            </span>
+                            <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
+                          </button>
+                        ) : null}
                         <BlockList blocks={section.blocks} />
                       </div>
                       <LessonFooterActions />
@@ -2785,6 +2921,16 @@ export default function ContentViewer() {
                     />
                   </div>
                 </div>
+              ) : section.kind === 'completion' ? (
+                <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
+                  {breadcrumbBar}
+                  <div className={`mx-auto flex w-full max-w-[720px] flex-col gap-10 px-4 md:px-8 pb-16 ${options.noHeader ? "pt-8 md:pt-4" : "pt-8 md:pt-10"}`}>
+                    <h1 className="text-heading-4xl md:text-heading-5xl font-season font-normal text-leland-gray-dark">
+                      {section.title}
+                    </h1>
+                    {section.blocks?.length ? <BlockList blocks={section.blocks} /> : null}
+                  </div>
+                </div>
               ) : (
                 <>
                   <div className="relative min-h-0 flex-1 overflow-hidden">
@@ -2812,10 +2958,6 @@ export default function ContentViewer() {
                 onOpenChange={setFeedbackModalOpen}
                 sectionTitle={section.title}
               />
-              <CourseSentimentModal
-                open={sentimentModalOpen}
-                onOpenChange={setSentimentModalOpen}
-              />
               <ReviewModal
                 open={reviewModalOpen}
                 onOpenChange={setReviewModalOpen}
@@ -2824,11 +2966,33 @@ export default function ContentViewer() {
                   setSupportModalOpen(true);
                 }}
               />
+              <ReviewModal
+                open={completionReviewModalOpen}
+                onOpenChange={setCompletionReviewModalOpen}
+                mode="ratingOnly"
+                tense="enjoyed"
+                onTalkToSupport={() => {
+                  setCompletionReviewModalOpen(false);
+                  setSupportModalOpen(true);
+                }}
+                onRated={(n) => {
+                  setCourseRating(n);
+                  setCompletionReviewModalOpen(false);
+                  setWrittenReviewModalOpen(true);
+                }}
+              />
+              <WrittenReviewModal
+                rating={courseRating}
+                onRatingChange={setCourseRating}
+                open={writtenReviewModalOpen}
+                onOpenChange={setWrittenReviewModalOpen}
+              />
               <SupportModal
                 open={supportModalOpen}
                 onOpenChange={setSupportModalOpen}
+                hasOfficeHours={options.hasOfficeHours}
               />
-              {(lesson.id !== "start-here" || section.kind === "blocks" || section.kind === "interactive") && (
+              {(lesson.id !== "start-here" || section.kind === "blocks" || section.kind === "interactive") && section.kind !== "completion" && (
                 <CourseViewerSectionNav
                   prevSectionLink={
                     prevNavTarget ? sectionUrl(prevNavTarget.lesson, prevNavTarget.section) : null
@@ -2864,9 +3028,18 @@ export default function ContentViewer() {
         onToggle={toggleOption}
         onSetVariant={(variant) => setOption("liveSessionVariant", variant)}
         onOpenFeedback={() => { setPrototypeOptionsOpen(false); setFeedbackModalOpen(true); }}
-        onOpenSentiment={() => { setPrototypeOptionsOpen(false); setSentimentModalOpen(true); }}
         onOpenReview={() => { setPrototypeOptionsOpen(false); setReviewModalOpen(true); }}
         onOpenSupport={() => { setPrototypeOptionsOpen(false); setSupportModalOpen(true); }}
+        hasRated={hasRated}
+        onToggleHasRated={toggleHasRated}
+        onResetProgress={() => {
+          localStorage.removeItem(COMPLETION_KEY);
+          localStorage.removeItem(COURSE_RATING_KEY);
+          localStorage.removeItem(TRACK_STORAGE_KEY);
+          localStorage.removeItem(PERSONALIZATION_KEY);
+          localStorage.removeItem(TEXT_REMINDERS_KEY);
+          window.location.reload();
+        }}
       />
       <SelectCohortModal
         open={cohortModalOpen}
@@ -2876,8 +3049,39 @@ export default function ContentViewer() {
       <TrackPickerModal
         open={trackPickerOpen}
         onOpenChange={setTrackPickerOpen}
-        onSelect={(track) => setSelectedTrack(track)}
+        onSelect={(track) => {
+          setSelectedTrack(track);
+          setPersonalizationModalOpen(true);
+        }}
         currentTrack={selectedTrack}
+      />
+      <PersonalizationModal
+        open={personalizationModalOpen}
+        onOpenChange={(next) => {
+          setPersonalizationModalOpen(next);
+          if (!next) {
+            setAboutMe(loadPersonalizationData());
+            // Mirrors openModalIfNecessary from usePhoneNumberModal — don't
+            // ask again if there's already a verified number on file.
+            if (!hasVerifiedPhone()) setTextRemindersModalOpen(true);
+          }
+        }}
+      />
+      <AboutMeEditModal
+        open={aboutMeModalOpen}
+        onOpenChange={setAboutMeModalOpen}
+        initialData={aboutMe}
+        onSave={setAboutMe}
+      />
+      <TextRemindersModal
+        open={textRemindersModalOpen}
+        onOpenChange={setTextRemindersModalOpen}
+      />
+      <NoAccessModal
+        open={noAccessModalOpen}
+        onDismiss={() => setNoAccessModalOpen(false)}
+        purchaseHref={COURSE_HOME}
+        courseDescription="Learn to build AI workflows, automations and agents that amplify your impact and give you more time for what matters"
       />
       <AddToCalendarModal
         open={addToCalendarModalOpen}

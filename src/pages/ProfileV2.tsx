@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import PageShell from "../components/PageShell";
+import { FollowSuggestions } from "../components/FollowSuggestions";
 import SessionCard from "../components/SessionCard";
 import OfferingCard, { type OfferingType } from "../components/OfferingCard";
 import PackageCard from "../components/PackageCard";
@@ -36,7 +37,7 @@ import groupImg2 from "../assets/placeholder images/group images/419a6944d25e95b
 import groupImg3 from "../assets/placeholder images/group images/6c168007b1aef00bedc192e802c413e5.jpg";
 import checkIcon from "../assets/icons/check.svg";
 import editIcon from "../assets/icons/edit.svg";
-import verifiedIcon from "../assets/icons/verified.svg";
+import verifiedIcon from "../assets/icons/verified-new.svg";
 import shieldIcon from "../assets/icons/shield-light.svg";
 import airplaneIcon from "../assets/icons/airplane.svg";
 import calendarIcon from "../assets/icons/calendar.svg";
@@ -576,9 +577,9 @@ function CustomerOfferingCard({ offering }: { offering: Offering }) {
 
 // Full-width hourly-coaching section shown below the offerings grid — larger,
 // left-aligned, with an icon tile, price, and a "Buy coaching" CTA.
-function CustomerHourlySection() {
+function CustomerHourlySection({ marginClass = "mt-6", paddingClass = "p-6" }: { marginClass?: string; paddingClass?: string }) {
   return (
-    <div className="mt-6 flex cursor-pointer flex-col gap-4 rounded-2xl bg-gray-hover p-6 transition-colors hover:bg-gray-stroke sm:flex-row sm:items-center sm:justify-between">
+    <div className={`${marginClass} ${paddingClass} flex cursor-pointer flex-col gap-4 rounded-2xl bg-gray-hover transition-colors hover:bg-gray-stroke sm:flex-row sm:items-center sm:justify-between`}>
       <div className="flex min-w-0 items-center gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#222222]/5">
           <img src={timeClockHourglassIcon} alt="" className="h-6 w-6" />
@@ -599,17 +600,30 @@ function CustomerHourlySection() {
   );
 }
 
-export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = false, altSchedule = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack, abTest = false, abVersion = "v1" }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; altSchedule?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void; abTest?: boolean; abVersion?: "v1" | "v2" | "v3" }) {
+export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = true, altSchedule = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack, embedded = false, abTest = true, abVersion = "v3" }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; altSchedule?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void; embedded?: boolean; abTest?: boolean; abVersion?: "v1" | "v2" | "v3" }) {
   const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
   const { dark: darkMode } = useDarkMode();
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
   const [isFollowing, setIsFollowing] = useState(false);
+  // Template-only: tapping Follow reveals a "People to follow" section at the
+  // bottom of the hero; its X collapses it (unfollowing hides it too).
+  const [showFollowSuggestions, setShowFollowSuggestions] = useState(false);
+  const handleFollowToggle = () => {
+    const next = !isFollowing;
+    setIsFollowing(next);
+    setShowFollowSuggestions(next);
+  };
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [stickyNavVisible, setStickyNavVisible] = useState(false);
   const [activeSection, setActiveSection] = useState("offerings");
   const [adminOpen, setAdminOpen] = useState(false);
   const [showCustomerFavorite, setShowCustomerFavorite] = useState(true);
-  const [showSidebar, setShowSidebar] = useState(true);
+  // `embedded` = rendered inside another shell (e.g. My Leland → Profile, which
+  // supplies its own left nav rail). Drops the profile's own right rail (inline
+  // coach video/note/availability copies take over), keeps the app top nav
+  // white (no immersive dark hero), and skips the portaled sticky secondary nav
+  // + self-rendered mobile nav that assume a full-page profile.
+  const [showSidebar, setShowSidebar] = useState(!embedded);
   const [showCoachNote, setShowCoachNote] = useState(unified ? true : coach);
   const [coachNoteExpanded, setCoachNoteExpanded] = useState(false);
   const [bioExpanded, setBioExpanded] = useState(false);
@@ -651,7 +665,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
     return () => window.removeEventListener("scroll", onScroll);
   }, [heroCustomer]);
   useSetNavTheme(
-    heroCustomer
+    embedded
+      ? { bg: "white", light: false, hideWordmark: false }
+      : heroCustomer
       ? navScrolled
         ? { bg: "white", light: false, hideWordmark: false }
         : { bg: "#111111", light: true, hideWordmark: false, bgGradient: true, slideIn: !unified }
@@ -755,9 +771,15 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   // when no longer viewing own profile), fall back to About.
   useEffect(() => {
     if (!showOfferingsTab && coachTab === "offerings") setCoachTab("about");
-    if (!viewingOwnProfile && (coachTab === "saved" || coachTab === "likes")) setCoachTab("about");
+    // Likes is hidden everywhere for now; Saved only when viewing your own.
+    if (coachTab === "likes") setCoachTab("about");
+    if (!viewingOwnProfile && coachTab === "saved") setCoachTab("about");
     if (mvp && coachTab === "activity") setCoachTab("about");
   }, [showOfferingsTab, viewingOwnProfile, coachTab, mvp]);
+  // Likes is hidden on your own profile; fall back to About if it's active.
+  useEffect(() => {
+    if (viewingOwnProfile && customerTab === "likes") setCustomerTab("about");
+  }, [viewingOwnProfile, customerTab]);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [eventsCategoryOpen, setEventsCategoryOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -1150,6 +1172,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               ))}
           </div>
         )}
+        {/* Custom hourly card — sits under the 3-offering grid (v2/v3), above the
+            "See more offerings" button. */}
+        {!highLevel && (abVersion === "v2" || abVersion === "v3") ? <CustomerHourlySection marginClass="mt-4" paddingClass="p-4" /> : null}
         <div className="mt-4 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
           {!highLevel && (
             <button
@@ -1172,7 +1197,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   return (
     <>
       {/* Sticky secondary nav — portaled to body to escape framer-motion layoutId containing blocks */}
-      {createPortal(
+      {!embedded && createPortal(
         <AnimatePresence>
           {stickyNavVisible && !isCustomerProfile && !unified && (
             <motion.div
@@ -1317,7 +1342,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
         animate={{ x: 0 }}
         transition={{ duration: 0.15, ease: "easeOut" }}
       >
-      <PageShell paddingYClassName="py-4 sm:pb-10 sm:pt-6" paddingXClassName="px-4 sm:px-6 lg:px-16" rightSidebar={showSidebar ? (
+      <PageShell paddingYClassName={embedded ? "py-0" : "py-4 sm:pb-10 sm:pt-6"} paddingXClassName={embedded ? "px-0" : "px-4 sm:px-6 lg:px-16"} rightSidebar={showSidebar ? (
           !showCoachSidebar ? (
             <div className="flex flex-col gap-6 px-1">
               <SidebarGroup label="For you" hideChevron>
@@ -1504,7 +1529,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
               with the page (the shared fixed nav is hidden on /profile). It
               overlays the cover: transparent + white icons over the cover, solid
               + dark icons once scrolled. */}
-          {unified && (
+          {unified && !embedded && (
             <div
               className="absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-between px-4 pt-[env(safe-area-inset-top,0px)] transition-colors md:hidden"
               style={{ backgroundColor: navScrolled ? (darkMode ? "#111111" : "#ffffff") : "transparent" }}
@@ -1654,7 +1679,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                       size="sm"
                       variant="secondary"
                       rounded="rounded-full"
-                      onClick={() => setIsFollowing(!isFollowing)}
+                      onClick={handleFollowToggle}
                       className="mb-1 text-[15px] font-semibold"
                     >
                       {isFollowing && <img src={checkIcon} alt="" className="h-[18px] w-[18px]" />}
@@ -1896,6 +1921,26 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
 
           </div>{/* end name → stats wrapper */}
 
+          {/* People to follow — revealed at the bottom of the hero after the
+              visitor taps Follow (template only). Height animates so the tab bar
+              and content below slide down as it appears. */}
+          {unified && (
+            <AnimatePresence initial={false}>
+              {showFollowSuggestions && (
+                <motion.div
+                  key="follow-suggestions"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                  className="overflow-hidden"
+                >
+                  <FollowSuggestions onClose={() => setShowFollowSuggestions(false)} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
+
 
           {/* Customer Favorite — mobile banner (hidden for now) */}
 
@@ -2039,8 +2084,9 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                 // Activity is hidden in MVP mode.
                 ...(mvp ? [] : (["activity"] as const)),
                 ...(showOfferingsTab ? ["offerings" as const] : []),
-                // Saved + Likes appear only when viewing your own profile.
-                ...(viewingOwnProfile ? (["saved", "likes"] as const) : []),
+                // Saved appears only when viewing your own profile. (Likes is
+                // hidden on your own profile for now.)
+                ...(viewingOwnProfile ? (["saved"] as const) : []),
               ]).map((tab) => (
                 <button
                   key={tab}
@@ -2859,7 +2905,7 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             <>
                 {unified && <div ref={tabAnchorRef} aria-hidden className="mt-2 h-0" />}
                 <div ref={customerTabStripRef} className={`sticky top-14 z-10 -mx-4 md:mx-0 ${unified ? "" : "mt-2"} flex border-b border-gray-stroke bg-white md:top-0`}>
-                  {(viewingOwnProfile ? ["about", "more", "saved", "likes"] as const : unified ? ["about", "more"] as const : ["about", "more", "likes"] as const).map((tab) => (
+                  {(viewingOwnProfile ? ["about", "more", "saved"] as const : unified ? ["about", "more"] as const : ["about", "more", "likes"] as const).map((tab) => (
                     <button
                       key={tab}
                       data-tab={tab}

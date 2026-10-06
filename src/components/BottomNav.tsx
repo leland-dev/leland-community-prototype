@@ -1,23 +1,31 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useDarkMode } from "../contexts/DarkModeContext";
 
-import homeActive from "../assets/icons/nav-icons/home-active.svg";
+import homeAlt from "../assets/icons/nav-icons/home-alt.svg";
 import searchActive from "../assets/icons/nav-icons/search-active.svg";
-import browseActive from "../assets/icons/nav-icons/browse-active.svg";
 import chatActive from "../assets/icons/nav-icons/chat-active.svg";
-import notificationsActive from "../assets/icons/nav-icons/notifications-active.svg";
+import jobsIcon from "../assets/icons/jobs.svg";
+import browseActive from "../assets/icons/nav-icons/browse-active.svg";
 
+// Mirrors the v1 alt-icons top nav: For you · Explore · My Leland · Jobs ·
+// Messages. Notifications lives in the mobile top nav's top-right corner
+// instead. When the user is already inside the /alt-nav experience, `altTo`
+// keeps them there instead of bouncing back to the classic-nav routes.
 const navItems = [
-  { to: "/", icon: homeActive, label: "Home" },
-  { to: "/search", icon: searchActive, label: "Search" },
-  { to: "/dashboard", icon: browseActive, label: "Dashboard" },
-  { to: "/notifications", icon: notificationsActive, label: "Notifications" },
-  { to: "/messages", icon: chatActive, label: "Messages" },
+  { to: "/", altTo: "/alt-nav", icon: homeAlt, label: "For you", end: true },
+  { to: "/browse", altTo: "/alt-nav/browse", icon: searchActive, label: "Explore" },
+  // `end` so "My Leland" is only active on the Dashboard tab itself (exact
+  // /my-leland or /dashboard), not on sub-pages like /my-leland/profile.
+  { to: "/dashboard", altTo: "/my-leland", icon: browseActive, label: "My Leland", end: true },
+  { to: "/jobs", altTo: "/alt-nav/jobs", icon: jobsIcon, label: "Jobs" },
+  { to: "/messages", altTo: "/alt-nav/messages", icon: chatActive, label: "Messages", badge: 1 },
 ];
 
 export default function BottomNav() {
   const { dark: darkMode } = useDarkMode();
+  const { pathname } = useLocation();
+  const inAltNav = pathname.startsWith("/alt-nav") || pathname.startsWith("/my-leland");
   const [hidden, setHidden] = useState(false);
   const lastY = useRef(0);
 
@@ -35,22 +43,29 @@ export default function BottomNav() {
   }, []);
 
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 z-30 ${darkMode ? "bg-[#131313]" : "bg-white"} shadow-[0_-4px_12px_rgba(0,0,0,0.06)] pb-[max(env(safe-area-inset-bottom),20px)] transition-transform duration-200 ease-out ${hidden ? "translate-y-full" : "translate-y-0"}`}>
+    <nav className={`fixed bottom-0 left-0 right-0 z-30 ${darkMode ? "bg-[#131313]" : "bg-white"} shadow-[0_-4px_12px_rgba(0,0,0,0.06)] pt-1 pb-[max(env(safe-area-inset-bottom),8px)] transition-transform duration-200 ease-out ${hidden ? "translate-y-full" : "translate-y-0"}`}>
       <ul className="flex items-center">
-        {navItems.map(({ to, icon, label }) => (
+        {navItems.map(({ to, altTo, icon, label, end, badge }) => (
           <li key={to} className="flex-1">
             <NavLink
-              to={to}
-              end={to === "/"}
+              to={inAltNav && altTo ? altTo : to}
+              end={end}
               className="flex flex-col items-center justify-center gap-1 py-2"
             >
               {({ isActive }) => (
                 <>
-                  <img
-                    src={icon}
-                    alt={label}
-                    className={`h-6 w-6 ${isActive ? "" : "opacity-40"}`}
-                  />
+                  <span className="relative">
+                    <img
+                      src={icon}
+                      alt={label}
+                      className={`h-7 w-7 ${isActive ? "" : "opacity-40"}`}
+                    />
+                    {badge ? (
+                      <span className="absolute -right-2 -top-1 flex min-h-[16px] min-w-[16px] items-center justify-center rounded-full border border-white bg-[#FF003D] px-1 py-0.5 text-[11px] font-semibold leading-none text-white">
+                        {badge}
+                      </span>
+                    ) : null}
+                  </span>
                   <span className={`text-[11px] ${isActive ? "font-semibold text-gray-dark" : "font-medium text-gray-light"}`}>
                     {label}
                   </span>

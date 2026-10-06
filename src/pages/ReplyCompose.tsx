@@ -5,7 +5,7 @@ import { posts } from "./Home";
 import { addPostComment, addPostReply, type CommentData } from "./PostDetail";
 
 import profilePhoto from "../assets/profile photos/profile photo.png";
-import verifiedIconSrc from "../assets/icons/verified.svg";
+import verifiedIconSrc from "../assets/icons/verified-new.svg";
 
 // What the reply is aimed at — the post itself, or a specific comment.
 type ReplyTarget = { kind: "post" } | { kind: "comment"; comment: CommentData };

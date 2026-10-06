@@ -121,6 +121,16 @@ export default function MinimalOnboardingV4() {
     };
   }, [stage, reduced]);
 
+  // deep-link for iteration: /onboarding-v4?stage=review|gate with mock answers
+  useEffect(() => {
+    const target = new URLSearchParams(window.location.search).get("stage");
+    if (target !== "review" && target !== "gate") return;
+    setBranch("get-into-school");
+    setCategories(["College"]);
+    setSchool({ school: "Harvard University", custom: false, pioneer: false, logoKey: "harvard", gradYear: 2027 });
+    setStage(target);
+  }, []);
+
   const exit = () => navigate("/");
 
   const logoVisible = stage === "loading" || stage === "opener";
@@ -144,7 +154,7 @@ export default function MinimalOnboardingV4() {
   // Only genuinely optional screens offer a corner Skip.
   const STEP_SKIP: Partial<Record<Stage, Stage>> = {
     situation: "student",
-    linkedin: "review",
+    linkedin: "access",
   };
   const STEP_INDEX: Partial<Record<Stage, number>> = {
     goal: 1,
@@ -325,13 +335,13 @@ export default function MinimalOnboardingV4() {
                   gradYear={school?.gradYear}
                   onConnected={(p) => {
                     setLinkedin(p);
-                    setStage("review");
+                    setStage("access");
                   }}
                 />,
               )
             ) : stage === "review" && reviewInput ? (
               <motion.div key="review" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="h-full">
-                <ApplicationReview input={reviewInput} onContinue={() => setStage("access")} />
+                <ApplicationReview input={reviewInput} onContinue={() => setStage("gate")} />
               </motion.div>
             ) : stage === "access" && school ? (
               screen("access",
@@ -343,13 +353,13 @@ export default function MinimalOnboardingV4() {
                 />,
               )
             ) : stage === "notify" ? (
-              screen("notify", <NotifyStep onDone={() => setStage("gate")} />)
-            ) : school ? (
+              screen("notify", <NotifyStep onDone={() => setStage("review")} />)
+            ) : school && reviewInput ? (
               screen("gate",
                 <WaitlistGate
+                  pass={reviewInput}
                   sent={invitesSent}
                   onSent={() => setInvitesSent((n) => Math.min(n + 1, 3))}
-                  category={primaryCategory}
                   you={{
                     name: linkedin?.name ?? "June Allen",
                     aff: `${school.school.replace(/^University of /, "").replace(/ University$/, "").replace(/ College$/, "")} · ${

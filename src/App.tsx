@@ -5,6 +5,7 @@ import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { BookmarksProvider } from "./contexts/BookmarksContext";
 import { SavedToastProvider } from "./contexts/SavedToastContext";
 import { ExpertModeProvider } from "./contexts/ExpertModeContext";
+import { TopNavStyleProvider } from "./contexts/TopNavStyleContext";
 import { ProfileBarModeProvider } from "./contexts/ProfileBarModeContext";
 import { FeedDemoProvider } from "./contexts/FeedDemoContext";
 import { PageExitProvider } from "./contexts/PageExitContext";
@@ -21,32 +22,55 @@ import { ContextLayout } from "./components/Layout";
 function ScrollToTop() {
   const { pathname } = useLocation();
   const navigationType = useNavigationType();
+  // The app-promo takeover embeds pages in a ?mini=1 iframe, which shares this
+  // tab's sessionStorage — skip restore/save there so the demo neither
+  // inherits nor pollutes the real tab's scroll positions.
+  const isMini = new URLSearchParams(window.location.search).has("mini");
 
   useEffect(() => {
+    if (isMini) {
+      // Chrome restores per-URL scroll on iframe reloads; opt out entirely.
+      try {
+        window.history.scrollRestoration = "manual";
+      } catch {
+        /* noop */
+      }
+      window.scrollTo(0, 0);
+      return;
+    }
     const saved = sessionStorage.getItem(`scrollY:${pathname}`);
     if (navigationType === "POP" && saved !== null) {
       window.scrollTo({ top: Number(saved), behavior: "smooth" });
     } else {
       window.scrollTo(0, 0);
     }
-  }, [pathname, navigationType]);
+  }, [pathname, navigationType, isMini]);
 
   useEffect(() => {
+    if (isMini) return;
     const onScroll = () => sessionStorage.setItem(`scrollY:${pathname}`, String(window.scrollY));
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [pathname]);
+  }, [pathname, isMini]);
+
+  // The mini stylesheet (scrollbar hiding, nav head-room, entrance cascade) is
+  // injected synchronously by the inline script in index.html so the page never
+  // paints un-animated content for a frame.
 
   return null;
 }
 
 import Home from "./pages/Home";
+import Topic from "./pages/Topic";
+import Hashtag from "./pages/Hashtag";
 import Browse from "./pages/Browse";
 import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
 import Messaging from "./pages/Messaging";
+import AnswerQuestions from "./pages/AnswerQuestions";
+import PostVariants from "./pages/PostVariants";
 import ConversationDetail from "./pages/ConversationDetail";
-import { LelandThread } from "./components/promo/AppPromo";
+import { CaptureDashboard, CaptureInbox, LelandThread } from "./components/promo/AppPromo";
 import ConversationRelationship from "./pages/ConversationRelationship";
 import Profile from "./pages/Profile";
 import ProfileV2 from "./pages/ProfileV2";
@@ -58,10 +82,12 @@ import GroupCommunity from "./pages/GroupCommunity";
 import Events from "./pages/Events";
 import Courses from "./pages/Courses";
 import LelandPlus from "./pages/LelandPlus";
+import Jobs from "./pages/Jobs";
 import Dashboard from "./pages/Dashboard";
 import { GoalsIndexSwitch, GoalDetailSwitch, GoalNewSwitch } from "./components/GoalsRouteSwitch";
 import FullTaskList from "./full/pages/TaskList";
 import PostDetail, { CommentDetail } from "./pages/PostDetail";
+import QuestionDetail from "./pages/QuestionDetail";
 import ReplyCompose from "./pages/ReplyCompose";
 import ReplayViewer from "./pages/ReplayViewer";
 import AccountSettings from "./pages/AccountSettings";
@@ -85,14 +111,25 @@ import CoachProducts from "./pages/CoachProducts";
 import CoachInbox from "./pages/CoachInbox";
 import CoachManage from "./pages/CoachManage";
 import CoachProfileNew from "./pages/CoachProfileNew";
+import MyLelandProfile from "./pages/MyLelandProfile";
+import MyLelandProfileInline from "./pages/MyLelandProfileInline";
+import MyLelandProfileInline2 from "./pages/MyLelandProfileInline2";
+import MyLelandProfileEdit2 from "./pages/MyLelandProfileEdit2";
+import MyLelandGoals from "./pages/MyLelandGoals";
 import CoachOpportunities from "./pages/CoachOpportunities";
 import CoachLivestreams from "./pages/CoachLivestreams";
 import CoachContent from "./pages/CoachContent";
 import CoachPricing from "./pages/CoachPricing";
 import CoachCalendar from "./pages/CoachCalendar";
 import CoachEarnings from "./pages/CoachEarnings";
+import CoachAnalytics from "./pages/CoachAnalytics";
+import CoachMyContent from "./pages/CoachMyContent";
 import CoachReviews from "./pages/CoachReviews";
 import CoachDiscountCodes from "./pages/CoachDiscountCodes";
+import Account from "./pages/Account";
+import ReferFriend from "./pages/ReferFriend";
+import AltNavLivestreams from "./pages/AltNavLivestreams";
+import AltNavContent from "./pages/AltNavContent";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
 import CoachProductNew from "./pages/CoachProductNew";
 import OfferingPage from "./pages/OfferingPage";
@@ -110,13 +147,15 @@ import LelandKitTest from "./pages/LelandKitTest";
 import LessonBlocksGallery from "./pages/LessonBlocksGallery";
 import Waitlist from "./pages/waitlist/Waitlist";
 import WaitlistOnboarding from "./pages/waitlist/WaitlistOnboarding";
-import AltNavExpertPage from "./pages/AltNavExpertPage";
+import { FeedAdminProvider } from "./contexts/FeedAdminContext";
+import { ProfileBoxedModeProvider } from "./contexts/ProfileBoxedModeContext";
 
 export default function App() {
   return (
     <VersionProvider>
     <DarkModeProvider>
     <ExpertModeProvider>
+    <TopNavStyleProvider>
     <BookmarksProvider>
     <SavedToastProvider>
     <ProfileBarModeProvider>
@@ -124,6 +163,8 @@ export default function App() {
     <GoalsProvider>
     <FullGoalsProvider>
     <FeedDemoProvider>
+    <FeedAdminProvider>
+    <ProfileBoxedModeProvider>
     <ScrollToTop />
     <PageExitProvider>
     <Routes>
@@ -141,6 +182,8 @@ export default function App() {
       <Route path="/waitlist-onboarding" element={<WaitlistOnboarding />} />
       <Route path="/reply/:postId" element={<ReplyCompose />} />
       <Route path="/replay/:postId" element={<ReplayViewer />} />
+      <Route path="/capture/inbox" element={<CaptureInbox />} />
+      <Route path="/capture/dashboard" element={<CaptureDashboard />} />
       <Route path="/messages/leland" element={<LelandThread />} />
       <Route path="/messages/:conversationId" element={<ConversationDetail />} />
       <Route path="/messages/:conversationId/relationship" element={<ConversationRelationship />} />
@@ -163,10 +206,6 @@ export default function App() {
         <Route path="/site" element={<Site />} />
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/calendar" element={<Calendar />} />
-        {/* alt-nav Calendar: self-shells (like /calendar) but with the desktop
-            sidebar instead of the top navbar. Kept OUT of ContextLayout to
-            avoid a double PageShell. */}
-        <Route path="/alt-nav/calendar" element={<Calendar altNav />} />
         <Route path="/my-programs" element={<MyCourses />} />
         <Route path="/course/:courseId" element={<CourseDetail />} />
         <Route path="/program/session/:urn" element={<LiveSession />} />
@@ -174,7 +213,7 @@ export default function App() {
           <Route path="/coach/home" element={<CoachHome />} />
           <Route path="/coach/inbox" element={<CoachInbox />} />
           <Route path="/coach/manage" element={<CoachManage />} />
-          <Route path="/coach/profile-new" element={<CoachProfileNew />} />
+          <Route path="/coach/profile" element={<CoachProfileNew />} />
           <Route path="/coach/products" element={<CoachProducts />} />
           <Route path="/coach/manage/:category" element={<CoachCategoryEdit />} />
           <Route path="/coach/opportunities" element={<CoachOpportunities />} />
@@ -182,9 +221,51 @@ export default function App() {
           <Route path="/coach/content" element={<CoachContent />} />
           <Route path="/coach/pricing" element={<CoachPricing />} />
           <Route path="/coach/calendar" element={<CoachCalendar />} />
+          <Route path="/coach/my-content" element={<CoachMyContent />} />
           <Route path="/coach/earnings" element={<CoachEarnings />} />
+          <Route path="/coach/analytics" element={<CoachAnalytics />} />
           <Route path="/coach/reviews" element={<CoachReviews />} />
           <Route path="/coach/discount-codes" element={<CoachDiscountCodes />} />
+        </Route>
+        {/* "My Store" — the coach dashboard recreated inside the LinkedIn-nav
+            shell (LinkedIn top nav via TopNav's path dispatch, coach sidebar via
+            CoachLayout's base-path awareness). Reuses the coach page components;
+            reachable from the expert-only "My Store" top-nav item. */}
+        <Route element={<CoachLayout />}>
+          <Route path="/my-leland" element={<Dashboard shell />} />
+          <Route path="/my-leland/messages" element={<Messaging />} />
+          <Route path="/my-leland/inbox" element={<CoachInbox />} />
+          <Route path="/my-leland/manage" element={<CoachManage />} />
+          {/* Profile — the signed-in user's own profile rendered with the real
+              public template (ProfileV2, own-profile/editable) in embedded mode,
+              so it keeps the My Leland sidebar like every other tab. */}
+          {/* Profile tab default — Edit mode 2 (two-column editor + right rail). */}
+          <Route path="/my-leland/profile" element={<MyLelandProfileEdit2 />} />
+          {/* Original Edit mode — no longer the default; reached from the admin
+              tool's "Mode" switcher. */}
+          <Route path="/my-leland/profile/edit" element={<MyLelandProfile />} />
+          {/* Inline — the faithful public-template variant. Not a sidebar tab;
+              reached from the profile admin tool's "Mode" switcher. Nested under
+              /profile so the "Profile" tab stays highlighted. */}
+          <Route path="/my-leland/profile/inline" element={<MyLelandProfileInline />} />
+          {/* Inline 2 — the faithful two-column template, editable inline.
+              Also nested under /profile so the "Profile" tab stays highlighted. */}
+          <Route path="/my-leland/profile/inline-2" element={<MyLelandProfileInline2 />} />
+          <Route path="/my-leland/products" element={<CoachProducts />} />
+          <Route path="/my-leland/manage/:category" element={<CoachCategoryEdit />} />
+          <Route path="/my-leland/opportunities" element={<CoachOpportunities />} />
+          <Route path="/my-leland/livestreams" element={<CoachLivestreams />} />
+          <Route path="/my-leland/content" element={<CoachContent />} />
+          <Route path="/my-leland/pricing" element={<CoachPricing />} />
+          <Route path="/my-leland/calendar" element={<Calendar shell />} />
+          <Route path="/my-leland/goals" element={<MyLelandGoals />} />
+          <Route path="/my-leland/my-content" element={<CoachMyContent />} />
+          <Route path="/my-leland/earnings" element={<CoachEarnings />} />
+          <Route path="/my-leland/analytics" element={<CoachAnalytics />} />
+          <Route path="/my-leland/reviews" element={<CoachReviews />} />
+          <Route path="/my-leland/discount-codes" element={<CoachDiscountCodes />} />
+          <Route path="/my-leland/refer" element={<ReferFriend />} />
+          <Route path="/my-leland/account" element={<Account />} />
         </Route>
         <Route path="/components" element={<Components />} />
         <Route path="/components/leland" element={<LelandKitTest />} />
@@ -201,32 +282,8 @@ export default function App() {
         <Route element={<ContextLayout />}>
           <Route path="/groups/law" element={<GroupCommunity />} />
           <Route path="/" element={<Home />} />
-          {/* Experimental: home feed with a desktop sidebar instead of the top navbar */}
-          <Route path="/alt-nav" element={<Home />} />
-          {/* alt-nav sub-pages — the sidebar's destinations recreated inside the
-              alt-nav shell (DesktopSidebar left, no top navbar). Reuse the same
-              page components; ContextLayout supplies the shell. */}
-          <Route path="/alt-nav/discover" element={<Browse />} />
-          <Route path="/alt-nav/search" element={<Search />} />
-          <Route path="/alt-nav/messages" element={<Messaging />} />
-          <Route path="/alt-nav/notifications" element={<Notifications />} />
-          <Route path="/alt-nav/events" element={<Events />} />
-          <Route path="/alt-nav/courses" element={<Courses />} />
-          <Route path="/alt-nav/plus" element={<LelandPlus />} />
-          <Route path="/alt-nav/jobs" element={<AltNavExpertPage title="Jobs" eyebrow="Discover" />} />
-          {/* Expert tools — POC placeholder pages recreated inside alt-nav
-              (the real coach pages live under /coach/*). */}
-          <Route path="/alt-nav/offerings" element={<AltNavExpertPage title="Offerings" />} />
-          <Route path="/alt-nav/opportunities" element={<AltNavExpertPage title="Opportunities" />} />
-          <Route path="/alt-nav/livestreams" element={<AltNavExpertPage title="Livestreams" />} />
-          <Route path="/alt-nav/availability" element={<AltNavExpertPage title="Calendar" />} />
-          <Route path="/alt-nav/earnings" element={<AltNavExpertPage title="Earnings" />} />
-          <Route path="/alt-nav/reviews" element={<AltNavExpertPage title="Reviews" />} />
-          <Route path="/alt-nav/discount-codes" element={<AltNavExpertPage title="Discount Codes" />} />
-          <Route path="/alt-nav/analytics" element={<AltNavExpertPage title="Analytics" />} />
-          {/* Post detail inside the alt-nav shell (sidebars persist, no top nav) */}
-          <Route path="/alt-nav/post/:postId" element={<PostDetail />} />
-          <Route path="/alt-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
+          <Route path="/questions" element={<AnswerQuestions />} />
+          <Route path="/post-variants" element={<PostVariants />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/search" element={<Search />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -239,14 +296,37 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/post/:postId" element={<PostDetail />} />
           <Route path="/post/:postId/comment/:commentId" element={<CommentDetail />} />
+          <Route path="/question/:id" element={<QuestionDetail />} />
+          {/* Topic pages — hashtag-like filtered feeds (Trending topics sidebar) */}
+          <Route path="/topic/:slug" element={<Topic />} />
+          {/* Hashtag browse pages — all posts tagged with a given hashtag */}
+          <Route path="/hashtag/:slug" element={<Hashtag />} />
+          {/* Isolated LinkedIn-nav experience — feed, post detail, and the
+              destinations behind the top-nav items. */}
+          <Route path="/alt-nav" element={<Home />} />
+          <Route path="/alt-nav/questions" element={<AnswerQuestions />} />
+          <Route path="/alt-nav/post/:postId" element={<PostDetail />} />
+          <Route path="/alt-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
+          <Route path="/alt-nav/question/:id" element={<QuestionDetail />} />
+          <Route path="/alt-nav/dashboard" element={<Dashboard />} />
+          <Route path="/alt-nav/browse" element={<Browse />} />
+          <Route path="/alt-nav/jobs" element={<Jobs />} />
+          <Route path="/alt-nav/livestreams" element={<AltNavLivestreams />} />
+          <Route path="/alt-nav/content" element={<AltNavContent />} />
+          <Route path="/alt-nav/plus" element={<LelandPlus />} />
+          <Route path="/alt-nav/messages" element={<Messaging />} />
+          <Route path="/alt-nav/notifications" element={<Notifications />} />
           <Route path="/events" element={<Events />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/plus" element={<LelandPlus />} />
+          <Route path="/jobs" element={<Jobs />} />
         </Route>
       </Route>
     </Routes>
     <PageExitOverlay />
     </PageExitProvider>
+    </ProfileBoxedModeProvider>
+    </FeedAdminProvider>
     </FeedDemoProvider>
     </FullGoalsProvider>
     </GoalsProvider>
@@ -254,6 +334,7 @@ export default function App() {
     </ProfileBarModeProvider>
     </SavedToastProvider>
     </BookmarksProvider>
+    </TopNavStyleProvider>
     </ExpertModeProvider>
     </DarkModeProvider>
     </VersionProvider>

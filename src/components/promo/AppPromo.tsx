@@ -404,7 +404,13 @@ function MiniInboxScreen({ active = true }: { active?: boolean }) {
 // entrance settles we scroll the page, then the carousel loops onward.
 let miniFrameSeq = Date.now();
 
-function MiniDashboardScreen({ active = true }: { active?: boolean }) {
+function MiniDashboardScreen({
+  active = true,
+  scale = 0.66,
+}: {
+  active?: boolean;
+  scale?: number;
+}) {
   const [run, setRun] = useState(0);
   // A never-repeating token: Chrome restores scroll per iframe URL, so a
   // reused query string would drop us back where the last run ended.
@@ -500,7 +506,7 @@ function MiniDashboardScreen({ active = true }: { active?: boolean }) {
         style={{
           width: 390,
           height: 845,
-          transform: "scale(0.66)",
+          transform: `scale(${scale})`,
           transformOrigin: "top left",
           border: 0,
           pointerEvents: "none",
@@ -1184,5 +1190,57 @@ export function LelandThread() {
         />
       </div>
     </div>
+  );
+}
+
+
+// ── Capture surfaces (for exporting MP4s to hand to engineering) ───────────
+// Each renders ONLY the screen content, scaled up by ?zoom= so a headless
+// recording is a crisp, drop-in video for the device frame.
+
+function CaptureStage({
+  designWidth,
+  designHeight,
+  children,
+}: {
+  designWidth: number;
+  designHeight: number;
+  children: ReactNode;
+}) {
+  const [params] = useSearchParams();
+  const zoom = Number(params.get("zoom") ?? 1) || 1;
+
+  return (
+    <div
+      className="overflow-hidden bg-white"
+      style={{ width: designWidth * zoom, height: designHeight * zoom }}
+    >
+      <div
+        style={{
+          width: designWidth,
+          height: designHeight,
+          transform: `scale(${zoom})`,
+          transformOrigin: "top left",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export function CaptureInbox() {
+  return (
+    <CaptureStage designWidth={257} designHeight={557}>
+      <MiniInboxScreen active />
+    </CaptureStage>
+  );
+}
+
+export function CaptureDashboard() {
+  return (
+    <CaptureStage designWidth={390} designHeight={845}>
+      <MiniDashboardScreen active scale={1} />
+    </CaptureStage>
   );
 }

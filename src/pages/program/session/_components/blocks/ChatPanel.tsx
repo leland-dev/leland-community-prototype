@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { X, ArrowUp, Pin, PinOff, Trash2, Smile } from "lucide-react";
-import verifiedIcon from "../../../../../assets/icons/verified.svg";
+import verifiedIcon from "../../../../../assets/icons/verified-new.svg";
 import pic1 from "../../../../../assets/profile photos/pic-1.png";
 import pic3 from "../../../../../assets/profile photos/pic-3.png";
 import pic4 from "../../../../../assets/profile photos/pic-4.png";

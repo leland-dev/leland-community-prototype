@@ -5,7 +5,6 @@ import TopNav from "./TopNav";
 import BottomNav from "./BottomNav";
 import MobileTopNav from "./MobileTopNav";
 import MobileSidebar from "./MobileSidebar";
-import DesktopSidebar from "./DesktopSidebar";
 import PageShell from "./PageShell";
 import {
   RightSidebarProvider,
@@ -30,6 +29,7 @@ import { SessionLayoutProvider } from "./SessionLayoutContext";
 import { NavThemeProvider, useNavTheme } from "./NavThemeContext";
 import { MobileSidebarProvider, useMobileSidebar } from "./MobileSidebarContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
+import { useTopNavStyle } from "../contexts/TopNavStyleContext";
 
 /**
  * Layout — nav chrome (TopNav, MobileTopNav, BottomNav) + context providers + <Outlet />
@@ -116,15 +116,24 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   // the mobile top padding (which normally clears the shared nav) is dropped.
   const location = useLocation();
   const pathname = location.pathname;
-  const isPostDetail = pathname.startsWith("/post/") || pathname.startsWith("/alt-nav/post/");
+  const isPostDetail = pathname.startsWith("/post/");
   const isOwnSurface = isPostDetail || pathname.startsWith("/profile/");
-  // Alt-navigation: the home feed AND its sub-pages (/alt-nav/*) render with a
-  // persistent desktop sidebar in place of the top navbar.
-  const isAltNav = pathname === "/alt-nav" || pathname.startsWith("/alt-nav/");
   // Embed mode (?embed=1): strip the global nav chrome so the page renders as
   // bare content — used when a page is loaded inside another surface (e.g. the
   // course viewer's Community tab iframes this route).
   const isEmbed = new URLSearchParams(location.search).get("embed") === "1";
+  // Soft beige page bg (50% of the brand beige) so the white feed/cards read as
+  // distinct surfaces rather than blending into a white page. Scoped to the
+  // isolated /alt-nav experience. Embed / dark mode keep their own bg.
+  // The "For you" home feed and the post detail page get the same soft beige
+  // page bg as the My Leland dashboard, so the white cards read as distinct
+  // surfaces.
+  const isHomeFeed = pathname === "/" || pathname === "/alt-nav";
+  const isPostDetailPage = isPostDetail || pathname.startsWith("/alt-nav/post/");
+  const isTopicPage = pathname.startsWith("/topic/") || pathname.startsWith("/alt-nav/topic/");
+  const isHashtagPage = pathname.startsWith("/hashtag/") || pathname.startsWith("/alt-nav/hashtag/");
+  const isQuestionPage = pathname.startsWith("/question/") || pathname.startsWith("/alt-nav/question/");
+  const beigePageBg = (isHomeFeed || isPostDetailPage || isTopicPage || isHashtagPage || isQuestionPage || pathname === "/post-variants") && !isEmbed && !darkMode;
 
   // Keep height/overflow constrained while the close animation plays out,
   // so the content doesn't snap to full height mid-transition.
@@ -218,9 +227,9 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
           Important: no transform when closed so fixed children (nav bars)
           remain viewport-fixed. */}
       <div
-        className={`relative z-10 min-h-full bg-white transition-all duration-[300ms] ease-in-out ${
-          sidebarOpen ? "rounded-[12px] shadow-2xl" : ""
-        }`}
+        className={`relative z-10 transition-all duration-[300ms] ease-in-out ${
+          beigePageBg ? "min-h-screen bg-[#F3F1E6]/50" : "min-h-full bg-white"
+        } ${sidebarOpen ? "rounded-[12px] shadow-2xl" : ""}`}
         style={{
           ...(sidebarOpen ? { transform: `translateX(${SIDEBAR_WIDTH}px) scale(0.92)`, transformOrigin: "right center" } : undefined),
           ...(constrainContent ? { height: "100dvh", overflow: "hidden", overscrollBehavior: "none", touchAction: "none" } : {}),
@@ -241,11 +250,9 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
           )}
         </AnimatePresence>
 
-        {/* Mobile top nav. On alt-nav it must stay until the desktop sidebar
-            appears (min-[960px]) — otherwise the 768–960px range shows neither
-            the sidebar nor a nav, leaving no way to reach the menu. */}
+        {/* Mobile top nav */}
         {!isEmbed && (
-          <div className={isAltNav ? "min-[960px]:hidden" : "md:hidden"}>
+          <div className="md:hidden">
             <MobileTopNav />
           </div>
         )}
@@ -256,16 +263,14 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
             element room to scroll within. When sticky lived on <header>, its
             immediate parent (this same wrapper) was already collapsed to the
             header's height, so there was no scroll room and it never stuck. */}
-        {!isEmbed && !isAltNav && (
+        {!isEmbed && (
           <div className="sticky top-0 z-30 hidden md:block">
             <TopNav />
           </div>
         )}
 
-        {/* Sub-nav — the full-width bar belongs to the top-nav chrome, so it's
-            suppressed on alt-nav (ContextLayout renders the sub-nav inside the
-            content column there instead). */}
-        {!isEmbed && !isAltNav && subNav && showSubNav && (
+        {/* Sub-nav — the full-width bar that belongs to the top-nav chrome. */}
+        {!isEmbed && subNav && showSubNav && (
           <div className="hidden bg-gray-hover md:block">
             <div className="relative mx-auto max-w-[1280px] px-6">
               {/* Left arrow */}
@@ -309,10 +314,9 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        {/* Main content area. The top padding clears the fixed MobileTopNav; on
-            alt-nav that nav persists to 960px, so the reset must too. */}
+        {/* Main content area. The top padding clears the fixed MobileTopNav. */}
         <main
-          className={`relative z-0 ${isAltNav ? "min-[960px]:pt-0" : "md:pt-0"} ${
+          className={`relative z-0 md:pt-0 ${
             isEmbed
               ? "pt-0 pb-0"
               : `pb-20 md:pb-0 ${isOwnSurface ? "pt-0" : "pt-14"}`
@@ -347,64 +351,58 @@ export function ContextLayout() {
   const leftSidebar = useLeftSidebarContent();
   const variant = useLayoutVariant();
   const contentMaxWidth = useContentMaxWidth();
-  const subNav = useSubNavContent();
   const { pathname } = useLocation();
 
-  // Home feed uses a full-bleed 3-col layout: sidebars pinned to the window
-  // edges (356px each), the feed capped at 640px in the middle.
-  //   isAltNavFeed  — the feed itself (/alt-nav): 3-col edge-to-edge.
-  //   isAltNavSubpage — a recreated destination (/alt-nav/*): DesktopSidebar
-  //     flush-left + centered content, no right column, no top navbar.
-  // Both swap the left column for the desktop sidebar (which replaces the nav).
-  const isAltNavFeed = pathname === "/alt-nav";
-  const isAltNavSubpage = pathname.startsWith("/alt-nav/");
-  // The post detail shares the feed's card, so it also shares the 640px width.
-  const isAltNavPost = pathname.startsWith("/alt-nav/post");
-  const isAltNav = isAltNavFeed || isAltNavSubpage;
-  // The regular (non-alt-nav) post detail now mirrors the feed's 3-col frame too
-  // — same boxed card, same persistent sidebars. Scoped to the top-level post so
-  // the older comment-thread page (which only sets a right sidebar) is untouched.
-  const isRegularPost = pathname.startsWith("/post/") && !pathname.includes("/comment/");
-  // Any post detail (alt-nav or regular) shares the feed's 640/356 treatment.
-  const isPostDetail = isAltNavPost || isRegularPost;
-  // Keep the 3-col feed treatment (and the "/" home) bound to the EXACT feed
-  // so sub-pages and the default home are unaffected.
-  const isHomeFeed = pathname === "/" || isAltNavFeed;
+  const isRegularPost = pathname.startsWith("/post/");
+  // Topic pages (/topic/:slug) share the classic feed's boxed 640/298 frame.
+  const isTopicPage = pathname.startsWith("/topic/");
+  const isPostDetail = isRegularPost;
+  // The LinkedIn-nav experience lives under /alt-nav: its feed and post
+  // detail use a centered 1280 / 298 / 30-gap frame; the feed toggle flips them
+  // to a 640 feed + 356px sidebars pinned to the window edges.
+  const isLinkedInNavFeed = pathname === "/alt-nav";
+  const isLinkedInNavPost = pathname.startsWith("/alt-nav/post");
+  const isLinkedInLayout = isLinkedInNavFeed || isLinkedInNavPost;
+  // The classic home ("/") and classic post detail ("/post/:id") share ONE frame,
+  // toggled from the Navigation admin dropdown between centered (feed + 298px
+  // sidebars within 1280) and edge-to-edge (640 feed + 356px sidebars at edges).
+  const isClassicHome = pathname === "/";
+  const isHomeFeed = isClassicHome;
+  const { feedEdgeToEdge } = useTopNavStyle();
+  const isClassicFeed = isClassicHome || isRegularPost || isTopicPage;
+  const centered = isClassicFeed && !feedEdgeToEdge;
+  const classicEdge = isClassicFeed && feedEdgeToEdge;
+  // The LinkedIn-nav feed/post honor the same feed toggle.
+  const linkedInCentered = isLinkedInLayout && !feedEdgeToEdge;
+  const linkedInEdge = isLinkedInLayout && feedEdgeToEdge;
+
+  // The Messages page is its own full-bleed, full-height 3-column surface — it
+  // manages its own layout and scroll regions, so it skips PageShell entirely.
+  const isMessages = pathname === "/alt-nav/messages" || pathname === "/messages";
+  if (isMessages) {
+    return <Outlet />;
+  }
 
   return (
     <PageShell
-      // Sub-pages that request the "thin" variant (e.g. Notifications) would
-      // drop the sidebar — force standard on alt-nav so the sidebar stays.
-      variant={isAltNav && variant === "thin" ? "standard" : variant}
-      leftSidebar={isAltNav ? <DesktopSidebar /> : leftSidebar}
+      variant={variant}
+      leftSidebar={leftSidebar}
       rightSidebar={rightSidebar}
-      contentMaxWidth={isHomeFeed || isPostDetail ? 640 : isAltNavSubpage ? 720 : contentMaxWidth}
-      // Sub-pages share the feed's edge-to-edge frame so the sidebar sits
-      // flush-left and content centers in the remaining space.
-      edgeToEdge={isHomeFeed || isAltNavSubpage || isRegularPost}
-      sidebarWidth={isHomeFeed || isPostDetail ? 356 : undefined}
-      // alt-nav has no top navbar (the sidebar replaces it), so its left column
-      // pins 20px from the top (not the 81px that clears a navbar) and is capped
-      // at 250px. Padding drops to 20px on these pages too.
-      leftSidebarWidth={isAltNav ? 250 : undefined}
-      leftSidebarTop={isAltNav ? 20 : undefined}
-      // Pin the sidebar to the viewport (full height, never scrolls with the page).
-      leftSidebarFixed={isAltNav}
-      // Right column gets the same top treatment as the left — pinned 20px from
-      // the top instead of the 81px that clears the (absent) navbar.
-      rightSidebarTop={isAltNav ? 20 : undefined}
-      paddingXClassName={isAltNav ? "px-4" : undefined}
+      // Centered frames fill the middle (no cap); the home feed, post detail,
+      // topic pages, and edge-to-edge feeds cap the center column at 640.
+      contentMaxWidth={linkedInCentered || centered ? undefined : isHomeFeed || isPostDetail || isTopicPage || linkedInEdge ? 640 : contentMaxWidth}
+      // Edge-to-edge pushes the feed + sidebars to the window edges.
+      edgeToEdge={classicEdge || linkedInEdge}
+      // Right column: 298px when centered, 356px edge-to-edge / post / topic.
+      sidebarWidth={linkedInCentered || centered ? 298 : isHomeFeed || isPostDetail || isTopicPage || linkedInEdge ? 356 : undefined}
+      // Left column matches the right at 298px when centered.
+      leftSidebarWidth={linkedInCentered || centered ? 298 : undefined}
+      // 30px gaps between the columns when centered; default 40px elsewhere.
+      columnGap={linkedInCentered || centered ? 30 : undefined}
       // Start the row at the sidebar's sticky pin point (nav 61px + 20px gap) so
-      // the columns don't slide up 20px before locking as you scroll.
-      paddingYClassName={isHomeFeed || isAltNavSubpage || isRegularPost ? "py-4 sm:pt-5 sm:pb-10" : undefined}
+      // the columns don't slide up before locking as you scroll.
+      paddingYClassName={isLinkedInLayout || isHomeFeed || isRegularPost || isTopicPage ? "py-4 sm:pt-5 sm:pb-10" : undefined}
     >
-      {/* On alt-nav sub-pages the department sub-nav renders here, at the top of
-          the content column, instead of the suppressed full-width chrome bar. */}
-      {isAltNavSubpage && subNav ? (
-        <div className="mb-5 flex gap-1 overflow-x-auto scrollbar-hide border-b border-[#E5E5E5] pb-2">
-          {subNav}
-        </div>
-      ) : null}
       <Outlet />
     </PageShell>
   );

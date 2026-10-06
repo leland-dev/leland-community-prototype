@@ -7,6 +7,7 @@ import type { LiveSessionVariant } from "../../data/lessonBlocks";
 
 type LessonPageActions = {
   onShareFeedback: () => void;
+  onOpenSupport: () => void;
   onOpenCalendar: () => void;
   onViewRecording: () => void;
   liveSessionVariant: LiveSessionVariant;

@@ -9,7 +9,7 @@ import { useIsMobile } from "../hooks/useIsMobile";
 
 
 import bootcampBanner from "../assets/placeholder images/bootcamp-1.webp";
-import verifiedIconSrc from "../assets/icons/verified.svg";
+import verifiedIconSrc from "../assets/icons/verified-new.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic2 from "../assets/profile photos/pic-2.png";
 import pic3 from "../assets/profile photos/pic-3.png";

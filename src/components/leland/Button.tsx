@@ -63,6 +63,32 @@ export enum ButtonRoundedSide {
   NONE = 'NONE',
 }
 
+const LABELLED_SMALL_PADDING_FROM_BREAKPOINT: Record<Breakpoints, string> = {
+  [Breakpoints.SM]: 'sm:px-3',
+  [Breakpoints.MD]: 'md:px-3',
+  [Breakpoints.LG]: 'lg:px-3',
+  [Breakpoints.XL]: 'xl:px-3',
+  [Breakpoints['2XL']]: '2xl:px-3',
+};
+
+const getLabelledSmallPaddingClass = ({
+  size,
+  label,
+  hideLabel,
+  hideLabelBelow,
+}: {
+  size: ButtonSize;
+  label: string;
+  hideLabel?: boolean;
+  hideLabelBelow?: Breakpoints;
+}): string => {
+  if (size !== ButtonSize.SMALL || hideLabel || !label) return '';
+  if (hideLabelBelow != null) {
+    return LABELLED_SMALL_PADDING_FROM_BREAKPOINT[hideLabelBelow];
+  }
+  return 'px-3';
+};
+
 export type ButtonFontWeight = PickEnum<
   FontWeight,
   FontWeight.NORMAL | FontWeight.MEDIUM
@@ -132,7 +158,7 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
         : 'text-leland-gray-dark bg-white disabled:bg-white border-leland-gray-stroke hover:bg-leland-gray-hover shadow-transparent',
     [ButtonColor.SECONDARY_NEUTRAL]: (selected) =>
       selected
-        ? 'text-leland-gray-dark bg-white border-leland-gray-dark shadow-leland-gray-dark'
+        ? 'text-leland-gray-dark bg-leland-gray-hover border-leland-gray-dark shadow-border shadow-leland-gray-dark'
         : 'text-leland-gray-dark bg-leland-gray-hover disabled:bg-leland-gray-hover border-transparent hover:bg-leland-gray-stroke hover:border-transparent',
     // TERTIARY reads as an inline text link (dotted underline) — no hover box.
     [ButtonColor.TERTIARY]: (selected) =>
@@ -281,6 +307,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       rounded,
       selected,
       roundedSide,
+    })} ${getLabelledSmallPaddingClass({
+      size,
+      label,
+      hideLabel,
+      hideLabelBelow,
     })} ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-gray-dark ${useSolidHover ? 'hover:bg-leland-gray-solid-hover' : ''}`;
 
     const innerContent = (

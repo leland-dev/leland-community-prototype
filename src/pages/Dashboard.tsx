@@ -1,9 +1,12 @@
 import { useMemo, useRef, useState, useEffect, type ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
-import { Link, useNavigate } from "react-router-dom";
+import { useExpertMode } from "../contexts/ExpertModeContext";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSetLayoutVariant } from "../components/LayoutVariantContext";
 import { useSetNavTheme } from "../components/NavThemeContext";
+import { useSetRightSidebar } from "../components/RightSidebarContext";
+import { HomeRightSidebar } from "./Home";
 import SessionCard from "../components/SessionCard";
 import OfferingCard, { type OfferingType } from "../components/OfferingCard";
 import { Button, LinkButton } from "../components/Button";
@@ -36,8 +39,8 @@ import automationsImg from "../assets/placeholder images/courses/HERO-10-automat
 import courseImg4 from "../assets/placeholder images/courses/c10-hero-1920x1280.webp";
 import airplaneIcon from "../assets/icons/airplane.svg";
 import chevronRightIcon from "../assets/icons/chevron-right.svg";
-import starIcon from "../assets/icons/star.svg";
 import editIcon from "../assets/icons/edit.svg";
+import DashboardProfileCard from "../components/DashboardProfileCard";
 import { GoalTile, NewGoalTile } from "../components/GoalTile";
 import { useGoals } from "../contexts/GoalsContext";
 import { GoalTile as FullGoalTile, NewGoalTile as FullNewGoalTile } from "../full/components/GoalTile";
@@ -261,10 +264,11 @@ function CardCarousel({ title, seeAllLabel, seeAllTo, headerLinkTo, gapClass = "
   );
 }
 
-function MyCourses() {
+function MyCourses({ shell }: { shell?: boolean }) {
   const navigate = useNavigate();
+  const myContentTo = shell ? "/my-leland/my-content" : "/coach/my-content";
   return (
-    <CardCarousel title="My programs" seeAllLabel="See all programs" seeAllTo="/my-programs">
+    <CardCarousel title="My programs" seeAllLabel="See all programs" seeAllTo={myContentTo}>
       {myCourses.slice(0, 3).map((c) => (
         <CourseCard key={c.title} course={c} />
       ))}
@@ -704,69 +708,38 @@ function AltAnalyticsPreview() {
 // Left-column profile card — mirrors the profile template hero, differentiated
 // by whether the user is an expert (credentials, reviews, expert mins) or a
 // customer (bio + followers).
-function ProfileCard({ expert }: { expert: boolean }) {
-  return (
-    <div className="rounded-2xl bg-white p-6 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10">
-      <img src={profilePhoto} alt="Alex Rivera" className="h-[72px] w-[72px] rounded-full object-cover" />
-      <h2 className="mt-4 font-serif text-[26px] font-medium leading-tight text-gray-dark">Alex Rivera</h2>
+// Neutral nav theme for the embedded (shell) dashboard — the coach store keeps
+// its normal white LinkedIn top nav rather than the scroll-reveal beige hero.
+const SHELL_NAV_THEME = { bg: "#ffffff", light: false, hideWordmark: false, scrollReveal: false };
 
-      {/* Reviews — experts only */}
-      {expert && (
-        <div className="mt-3 flex items-center gap-1.5">
-          <div className="flex items-center gap-[1px]">
-            {[...Array(5)].map((_, i) => (
-              <img key={i} src={starIcon} alt="" className="h-[15px] w-[15px]" />
-            ))}
-          </div>
-          <span className="text-[14px] font-semibold leading-none text-gray-dark">4.9</span>
-          <span className="text-[14px] leading-none text-[#707070]">52 Reviews</span>
-        </div>
-      )}
-
-      {/* Stats */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-7 gap-y-3">
-        {expert && (
-          <div className="flex flex-col gap-[2px]">
-            <span className="text-[16px] font-semibold leading-none text-gray-dark">6.6k</span>
-            <span className="text-[13px] leading-tight text-[#707070]">Expert mins</span>
-          </div>
-        )}
-        <div className="flex flex-col gap-[2px]">
-          <span className="text-[16px] font-semibold leading-none text-gray-dark">84</span>
-          <span className="text-[13px] leading-tight text-[#707070]">Followers</span>
-        </div>
-        <div className="flex flex-col gap-[2px]">
-          <span className="text-[16px] font-semibold leading-none text-gray-dark">112</span>
-          <span className="text-[13px] leading-tight text-[#707070]">Following</span>
-        </div>
-      </div>
-
-      <LinkButton
-        href="/coach-profile"
-        size="sm"
-        variant="secondary"
-        className="mt-5 w-full text-[15px] font-semibold"
-      >
-        <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
-        Edit profile
-      </LinkButton>
-    </div>
-  );
-}
-
-
-export default function Dashboard() {
+// `shell` renders the embedded, in-flow treatment (no full-bleed hero, single
+// column) used inside a shell with its own sidebar — the alt-nav pages and the
+// LinkedIn-nav "My Store". `expert` seeds the expert-dashboard variant.
+export default function Dashboard({ shell = false, expert: expertInit = false }: { shell?: boolean; expert?: boolean } = {}) {
   useSetLayoutVariant("standard");
   useEffect(() => { document.title = "Dashboard"; }, []);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  // Recreated inside the alt-nav shell: no top navbar, narrower content column.
+  // Drop the full-bleed beige hero (it doesn't fit this layout) for a plain
+  // white, in-flow header.
+  const embedded = shell;
   const { dark: darkMode } = useDarkMode();
   const heroBg = darkMode ? "#5E6E79" : HERO_BG;
   const navTheme = useMemo(() => ({ bg: heroBg, light: darkMode, hideWordmark: false, scrollReveal: true }), [heroBg, darkMode]);
-  useSetNavTheme(navTheme);
+  useSetNavTheme(shell ? SHELL_NAV_THEME : navTheme);
+  // In the alt-nav shell the dashboard adopts the feed's right sidebar (minus the
+  // Upcoming sessions card, which the main column already covers).
+  useSetRightSidebar(embedded ? <HomeRightSidebar showUpcoming={false} /> : null);
 
   // Admin menu (bottom-right) — matches the profile template's 3-dot control.
   const [adminOpen, setAdminOpen] = useState(false);
-  const [expert, setExpert] = useState(false);
+  // In the store shell the Expert admin toggle mirrors the top navbar's global
+  // Expert toggle (so they stay in sync); elsewhere it's a local admin preview.
+  const { expert: globalExpert, toggle: toggleGlobalExpert } = useExpertMode();
+  const [localExpert, setLocalExpert] = useState(expertInit);
+  const expert = shell ? globalExpert : localExpert;
+  const toggleExpert = () => (shell ? toggleGlobalExpert() : setLocalExpert((v) => !v));
   const [altAnalytics, setAltAnalytics] = useState(false);
   const [goalsFeature, setGoalsFeature] = useState(true);
   const { version: goalsVersion, setVersion: setGoalsVersion } = useGoalsVersion();
@@ -785,25 +758,41 @@ export default function Dashboard() {
       {/* In-flow app-promo banner; bottom margin absorbs the hero's negative
           top margin so it isn't overlapped. */}
       <AppPromoPushToast className="mb-[72px] md:mb-10" />
-      {/* Hero — full-window beige band with a headline + help link */}
+      {/* Hero — full-window beige band with a headline + help link. In alt-nav
+          it's a plain white, in-flow header (no full-bleed, no overlap). */}
       <div
-        className="-mt-[72px] pb-32 pt-[120px] md:-mt-10 md:pb-36 md:pt-16"
-        style={{ backgroundColor: heroBg, ...fullBleed }}
+        className={embedded ? "pb-2 pt-1" : "-mt-[72px] pb-32 pt-[120px] md:-mt-10 md:pb-36 md:pt-16"}
+        style={embedded ? undefined : { backgroundColor: heroBg, ...fullBleed }}
       >
         <motion.div
-          className={`${WRAP} text-center md:text-left`}
+          className={embedded ? "text-left" : `${WRAP} text-center md:text-left`}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
-          <h1 className="font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">
-            Good morning, Alex
-          </h1>
-          {todaySessionCount > 0 && (
-            <p className="mt-2 text-[16px] text-gray-dark md:text-[17px]">
-              You have {todaySessionCount} session{todaySessionCount === 1 ? "" : "s"} today.
-            </p>
+          {embedded ? (
+            <div>
+              <h1 className="font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">
+                Welcome back, Alex
+              </h1>
+              {todaySessionCount > 0 && (
+                <p className="mt-2 mb-4 text-[16px] text-gray-dark md:text-[17px]">
+                  You have {todaySessionCount} session{todaySessionCount === 1 ? "" : "s"} today.
+                </p>
+              )}
+            </div>
+          ) : (
+            <>
+              <h1 className="font-serif text-[32px] font-medium leading-[1.1] text-gray-dark md:text-[40px]">
+                Welcome back, Alex
+              </h1>
+              {todaySessionCount > 0 && (
+                <p className="mt-2 text-[16px] text-gray-dark md:text-[17px]">
+                  You have {todaySessionCount} session{todaySessionCount === 1 ? "" : "s"} today.
+                </p>
+              )}
+            </>
           )}
         </motion.div>
       </div>
@@ -812,18 +801,21 @@ export default function Dashboard() {
           already sits inside PageShell's padded container, so it aligns with the
           hero's inner wrapper without re-adding max-width/padding. */}
       <motion.div
-        className="relative z-10 -mt-20 md:-mt-28"
+        className={`relative z-10 ${embedded ? "" : "-mt-20 md:-mt-28"}`}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
+        <div className={embedded ? "flex flex-col gap-5" : "grid grid-cols-1 gap-5 lg:grid-cols-[320px_minmax(0,1fr)]"}>
           {/* Left — profile preview (hidden on mobile; mirrors the profile
-              template hero, differentiated by expert vs customer) */}
-          <aside className="hidden self-start lg:block lg:sticky lg:top-[92px]">
-            <ProfileCard expert={expert} />
-          </aside>
+              template hero, differentiated by expert vs customer). In alt-nav the
+              profile moves into the header, so this column is dropped. */}
+          {!embedded && (
+            <aside className="hidden self-start lg:block lg:sticky lg:top-[92px]">
+              <DashboardProfileCard expert={expert} />
+            </aside>
+          )}
 
           {/* Right — stacked section cards */}
           <div className="flex min-w-0 flex-col gap-5">
@@ -833,12 +825,12 @@ export default function Dashboard() {
             {/* 1. Upcoming sessions */}
             <DashCard title="Upcoming sessions">
               <div className="-mx-2 flex flex-col gap-1">
-                {upcomingEvents.map((event, i) => (
+                {upcomingEvents.slice(0, 2).map((event, i) => (
                   <SessionCard key={i} size="auto" {...event} />
                 ))}
               </div>
-              <Button onClick={() => navigate("/calendar")} size="md" variant="secondary" className="mt-4 font-semibold">
-                See full calendar
+              <Button onClick={() => navigate(shell ? "/my-leland/calendar" : "/calendar")} size="md" variant="secondary" className="mt-4 font-semibold">
+                See {upcomingEvents.length - 2} more
               </Button>
             </DashCard>
 
@@ -847,7 +839,7 @@ export default function Dashboard() {
             {expert && (altAnalytics ? <AnalyticsPreview /> : <AltAnalyticsPreview />)}
 
             {/* My programs — hidden for experts */}
-            {!expert && <MyCourses />}
+            {!expert && <MyCourses shell={shell} />}
 
             {/* Conversations */}
             <MyExperts title="Conversations" />
@@ -869,7 +861,7 @@ export default function Dashboard() {
                     />
                   ))}
                 </div>
-                <Button onClick={() => navigate("/courses")} size="md" variant="secondary" className="mt-4 font-semibold">
+                <Button onClick={() => navigate(shell ? "/my-leland/my-content" : "/coach/my-content")} size="md" variant="secondary" className="mt-4 font-semibold">
                   See all
                 </Button>
               </DashCard>
@@ -893,7 +885,7 @@ export default function Dashboard() {
       {!new URLSearchParams(window.location.search).has("mini") && (
       <div
         ref={adminRef}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-40 md:bottom-6 md:right-6"
+        className="fixed bottom-[calc(max(env(safe-area-inset-bottom),20px)+72px)] right-4 z-40 md:bottom-6 md:right-6"
       >
         <AnimatePresence>
           {adminOpen && (
@@ -904,7 +896,7 @@ export default function Dashboard() {
               transition={{ duration: 0.15 }}
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
-              <AdminToggle label="Expert" checked={expert} onChange={() => setExpert((v) => !v)} />
+              <AdminToggle label="Expert" checked={expert} onChange={toggleExpert} />
               {expert && <AdminToggle label="Alt Analytics" checked={altAnalytics} onChange={() => setAltAnalytics((v) => !v)} />}
               {!expert && (
                 <AdminToggle label="Goals & tasks" checked={goalsFeature} onChange={() => setGoalsFeature((v) => !v)} />
@@ -926,7 +918,7 @@ export default function Dashboard() {
         <button
           onClick={() => setAdminOpen((o) => !o)}
           aria-label="Admin controls"
-          className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-opacity ${adminOpen ? "opacity-100" : "opacity-20 hover:opacity-100"}`}
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[#B1B1B1]/20 backdrop-blur-[12px] transition-colors hover:bg-[#B1B1B1]/30"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <circle cx="3" cy="8" r="1.5" fill="#222222" />

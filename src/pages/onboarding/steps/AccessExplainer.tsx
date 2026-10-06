@@ -107,7 +107,7 @@ export default function AccessExplainer({
             onClick={onContinue}
             className="flex h-14 w-full items-center justify-center gap-1.5 rounded-full bg-yellow text-[16px] font-semibold text-gray-dark transition-colors hover:bg-[#F3C948]"
           >
-            See my spot
+            Continue
             <ArrowRight size={16} strokeWidth={2.4} />
           </motion.button>
         </motion.div>

@@ -515,7 +515,7 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
 // Get help / Share sit on the left; "Was this section helpful?" with Yes/No
 // buttons is right-aligned on desktop and stacks below on mobile.
 export function LessonFooterActions() {
-  const { onShareFeedback } = useLessonPage();
+  const { onShareFeedback, onOpenSupport } = useLessonPage();
   const [selectedThumb, setSelectedThumb] = useState<"yes" | "no" | null>(null);
   const [yesPopKey, setYesPopKey] = useState(0);
   const [noPopKey, setNoPopKey] = useState(0);
@@ -527,6 +527,7 @@ export function LessonFooterActions() {
           buttonColor={ButtonColor.GRAY}
           size={ButtonSize.MEDIUM}
           LeftIcon={IconQuestion}
+          onClick={onOpenSupport}
         />
         <Button
           label="Share"

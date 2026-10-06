@@ -1,4 +1,4 @@
-import verifiedIcon from "../assets/icons/verified.svg";
+import verifiedIcon from "../assets/icons/verified-new.svg";
 
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic4 from "../assets/profile photos/pic-4.png";
