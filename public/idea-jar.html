@@ -146,7 +146,8 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
   #b2right { width: 60%; display: flex; flex-direction: column; min-width: 0; }
   #b2right h2 { font-size: 40px; margin: 0 0 20px; display: flex; justify-content: space-between; align-items: baseline; }
   #b2right h2 span { font-size: 24px; color: var(--danger); }
-  #tvList { flex: 1; overflow: hidden; }
+  #tvList { flex: 1; overflow-y: auto; min-height: 0; padding-right: 8px; scrollbar-width: thin; scrollbar-color: #2a3830 transparent; }
+  #tvList::-webkit-scrollbar { width: 8px; } #tvList::-webkit-scrollbar-thumb { background: #2a3830; border-radius: 8px; }
   .tvrow { display: flex; gap: 22px; align-items: flex-start; padding: 16px 22px; border-radius: 16px; margin-bottom: 10px;
     background: var(--panel); border: 2px solid transparent; cursor: pointer; }
   .tvrow.sel { border-color: var(--yellow); }
@@ -396,7 +397,7 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
         e.preventDefault();
         if (!ideas.length) return;
         selected = e.key === "ArrowDown" ? Math.min(ideas.length - 1, selected + 1) : Math.max(0, selected - 1);
-        renderList();
+        renderList(true);
       }
     });
 
@@ -421,9 +422,10 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
       box.appendChild(p);
     }
 
-    function renderList() {
+    function renderList(scrollToSel) {
       const sel = ideas[selected] ? ideas[selected].id : null;
-      $("tvList").innerHTML = ideas.slice(0, 12).map((i, idx) => `
+      const list = $("tvList"), keepScroll = list.scrollTop;   // re-renders every poll; keep the presenter's scroll position
+      list.innerHTML = ideas.map((i, idx) => `
         <div class="tvrow${i.id === sel ? " sel" : ""}" data-idx="${idx}">
           <div class="rank">${idx + 1}</div>
           <div class="body">
@@ -434,6 +436,8 @@ const PODS = ["Community / Mobile", "Marketplace", "Solutions", "Growth", "Other
           </div>
           <div class="votes">${i.votes}<small>votes</small></div>
         </div>`).join("") || '<div class="empty" style="font-size:28px">Scan the code and drop the first idea in.</div>';
+      list.scrollTop = keepScroll;
+      if (scrollToSel) { const row = list.querySelector(".tvrow.sel"); if (row) row.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
     }
 
     $("tvList").addEventListener("click", async e => {
