@@ -448,6 +448,14 @@ export default function TopNavClassic() {
                       Onboarding v4
                     </NavLink>
                     <NavLink
+                      to="/ai-onboarding"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
+                    >
+                      <svg className="h-5 w-5 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" /><path d="M19 17l.8 2.2L22 20l-2.2.8L19 23l-.8-2.2L16 20l2.2-.8z" /></svg>
+                      AI Builder onboarding
+                    </NavLink>
+                    <NavLink
                       to="/waitlist"
                       onClick={() => setProfileOpen(false)}
                       className="flex w-full items-center gap-[10px] rounded-lg p-3 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/5"
