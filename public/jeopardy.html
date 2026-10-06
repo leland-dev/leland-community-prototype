@@ -85,6 +85,9 @@ const CONTENT = {
 // If a file is set but fails to load, the synthesized fallback plays instead.
 const AUDIO = {
   hype: "/audio/jeopardy-hype.mp3",   // plays when the board starts; H replays/stops it
+  hypeStartAt: 0,                     // seconds into the track to start from (e.g. 42 to jump to the chorus)
+  hypeStopAfter: 25,                  // seconds to play before fading out on its own (0 = play the whole track)
+  hypeFadeMs: 2000,                   // length of the automatic fade-out
   correct: null,                      // C key: "ding ding ding"
   wrong: null,                        // X key: buzzer
   volume: { hype: 0.85, sfx: 1.0 }
@@ -260,17 +263,22 @@ function correct() { playSound("correct", synthCorrect); flash("correct"); }
 function wrong()   { playSound("wrong", synthWrong);     flash("wrong"); }
 
 // Hype song: plays on start, H toggles play/stop, fades out when a clue opens.
-let hypeFade = null;
+let hypeFade = null, hypeTimer = null;
 function playHype() {
   if (!musicOn || !started) return;
   const a = getFile("hype");
   if (!a) { playJingle(); return; }
-  clearInterval(hypeFade); a.volume = AUDIO.volume.hype; a.muted = false;
-  try { a.currentTime = 0; } catch (e) {}
-  a.play().catch(() => playJingle());
+  clearInterval(hypeFade); clearTimeout(hypeTimer);
+  a.volume = AUDIO.volume.hype; a.muted = false;
+  const seek = () => { try { a.currentTime = AUDIO.hypeStartAt || 0; } catch (e) {} };
+  if (a.readyState >= 1) seek(); else a.addEventListener("loadedmetadata", seek, { once: true });
+  a.play().then(() => {
+    if (AUDIO.hypeStopAfter > 0) hypeTimer = setTimeout(() => stopHype(AUDIO.hypeFadeMs), AUDIO.hypeStopAfter * 1000);
+  }).catch(() => playJingle());
 }
 function stopHype(fadeMs) {
   const a = fileAudio.hype;
+  clearTimeout(hypeTimer);
   if (!a || a.paused) return;
   clearInterval(hypeFade);
   if (!fadeMs) { a.pause(); return; }
