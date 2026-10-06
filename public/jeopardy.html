@@ -36,6 +36,12 @@ html,body{height:100%;background:var(--bg);color:var(--fg);overflow:hidden;
 #flash{position:fixed;inset:0;pointer-events:none;z-index:8;opacity:0;transition:opacity .25s}
 #flash.correct{opacity:1;box-shadow:inset 0 0 0 1.2vw #2ecc71,inset 0 0 12vw #2ecc7166}
 #flash.wrong{opacity:1;box-shadow:inset 0 0 0 1.2vw #e74c3c,inset 0 0 12vw #e74c3c66}
+#dd{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--tile2);z-index:7;
+  font-size:clamp(48px,9vw,220px);font-weight:900;color:var(--accent);letter-spacing:.04em;text-transform:uppercase;
+  text-shadow:0 .4vw 0 #0008;pointer-events:none}
+#dd.show{display:flex;animation:ddsplash 2.2s ease-in-out forwards}
+@keyframes ddsplash{0%{opacity:0;transform:scale(.4) rotate(-6deg)}12%{opacity:1;transform:scale(1.08) rotate(1deg)}
+  20%{transform:scale(1)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.3)}}
 </style>
 </head>
 <body>
@@ -45,38 +51,48 @@ html,body{height:100%;background:var(--bg);color:var(--fg);overflow:hidden;
 <div id="music"></div>
 <div id="keys">C: correct &nbsp;·&nbsp; X: wrong &nbsp;·&nbsp; H: hype song &nbsp;·&nbsp; R: reset board</div>
 <div id="flash"></div>
+<div id="dd">Daily Double!</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 <script>
 const CONTENT = {
+  // Source: Notion "All-Hands Q3 Jeopardy Board". Column order = board order.
+  // A clue with dailyDouble: true shows a DAILY DOUBLE splash before the clue.
   columns: [
     { pod: "Community / Mobile", clues: [
-      { value: 100, clue: "This new tab in the app lets members scroll posts, questions and wins from the whole community.", answer: "The Community feed", image: null },
-      { value: 200, clue: "Tap this on a post to jump into a topic and see everything tagged the same way.", answer: "Hashtags and the hashtag browse page", image: null },
-      { value: 300, clue: "When someone asks a question, members can now do this with a dedicated composer.", answer: "Answer-a-question flow", image: null },
-      { value: 400, clue: "This kind of alert brings you back when an expert replies to you.", answer: "Mobile push notifications for replies", image: null },
-      { value: 500, clue: "This redesigned screen means you land on your community, not a blank page, when you open the mobile app.", answer: "The new mobile home tab", image: null }
+      { value: 100, clue: "Leland, in your pocket…", answer: "Mobile app (rebuilt for iOS & Android!)", image: null },
+      { value: 200, clue: "Mark as unread, finally…", answer: "Inbox 2.0", image: null },
+      { value: 300, clue: "Pings that bring you back…", answer: "New notification system", image: null },
+      { value: 400, clue: "Experts get VIP access…", answer: "Expert Creator Beta: Community!", image: null },
+      { value: 500, clue: "The great unification…", answer: "Combined coach and customer apps", image: null }
     ]},
     { pod: "Marketplace", clues: [
-      { value: 100, clue: "Students can now filter experts by this to find the right fit faster.", answer: "Improved expert search and filters", image: null },
-      { value: 200, clue: "This page gives each coach a richer way to show their background and results.", answer: "Redesigned expert profiles", image: null },
-      { value: 300, clue: "Before booking, students can try an expert with this low-commitment option.", answer: "Intro calls", image: null },
-      { value: 400, clue: "This makes it easier for experts to manage when they are available.", answer: "New availability and scheduling tools", image: null },
-      { value: 500, clue: "Experts now get paid faster thanks to this change.", answer: "Faster payouts", image: null }
+      { value: 100, clue: "Where's my money??", answer: "Payout details & transparency", image: null },
+      { value: 200, clue: "Tutor, counselor, advisor, expert…", answer: "Category-specific titles", image: null },
+      { value: 300, clue: "Show off your best wins…", answer: "Reorder outcomes & pin up to 10 reviews", image: null },
+      { value: 400, clue: "See how your business is doing…", answer: "Expert analytics", image: null },
+      { value: 500, clue: "Shopping, shopping, shopping…", answer: "Cart 🛒 add 'em all!", image: null }
     ]},
     { pod: "AI Education", clues: [
-      { value: 100, clue: "This hands-on program teaches members to build real products with AI.", answer: "AI Builder Program", image: null },
-      { value: 200, clue: "New members are greeted by this, which asks about goals and builds a personal plan.", answer: "AI-guided onboarding", image: null },
-      { value: 300, clue: "Each lesson now includes this so learners can practice, not just watch.", answer: "Interactive exercises", image: null },
-      { value: 400, clue: "This assistant answers questions about course material at any hour.", answer: "The AI course tutor", image: null },
-      { value: 500, clue: "Learners finishing a course now earn this to show off.", answer: "Certificates of completion", image: null }
+      { value: 100, clue: "Recurring dollars…", answer: "AIBP checkout <> Leland+", image: null },
+      { value: 200, clue: "Refer a friend to AIBP, earn a cut…", answer: "Expert affiliate program", image: null },
+      { value: 300, clue: "Go deep, learn anything…", answer: "Courses 📚", image: null },
+      { value: 400, clue: "Bootcamp wizardry…", answer: "Simplified cohort creation", image: null },
+      { value: 500, clue: "“Claude, write AIBP, make no mistakes…”", answer: "Course MCP", image: null }
     ]},
     { pod: "Livestreams", clues: [
-      { value: 100, clue: "Experts can now do this to their community in real time.", answer: "Go live", image: null },
-      { value: 200, clue: "Missed the stream? This lets you catch up whenever you want.", answer: "Replays", image: null },
-      { value: 300, clue: "Viewers can take part live in the stream using this feature.", answer: "Live chat and Q&A", image: null },
-      { value: 400, clue: "This reminder helps people show up for upcoming streams.", answer: "Event reminders and calendar invites", image: null },
-      { value: 500, clue: "This feature lets multiple experts share a single stage.", answer: "Multi-host livestreams", image: null }
+      { value: 100, clue: "Many experts, one stage…", answer: "Experts can co-host livestreams", image: null },
+      { value: 200, clue: "The big unlock…", answer: "Livestreams 2.0", image: null },
+      { value: 300, clue: "Recordings upload themselves…", answer: "Auto-upload recordings to Leland+", image: null },
+      { value: 400, clue: "99% reliability…", answer: "1:1 on IVS 😎", image: null },
+      { value: 500, dailyDouble: true, clue: "150+ squashed this summer… 🪲", answer: "Backlog zero 🔥", image: null }
     ]}
+  ],
+  // Spares from Notion (Status = Spare). Swap one into a column above if needed.
+  spares: [
+    { pod: "Community / Mobile", clue: "Customers can ask experts anything…", answer: "Customer-submitted community topics" },
+    { pod: "Marketplace", clue: "Time is $$$, let your content work for you…", answer: "Sell standalone content 🔥" },
+    { pod: "Marketplace", clue: "Compliance, compliance, compliance…", answer: "WCAG accessibility (Verizon!)" },
+    { pod: "Livestreams", clue: "The best spike of all time… clip clip ✂️", answer: "Clippings are a GO 🚦" }
   ]
 };
 
@@ -128,7 +144,12 @@ function openClue(c, r) {
   if (!started || current || played.has(c + "_" + r)) return;
   const col = CONTENT.columns[c], k = col.clues[r];
   current = { c, r }; revealed = false;
-  $("meta").textContent = "$" + k.value + "  ·  " + col.pod;
+  $("meta").textContent = (k.dailyDouble ? "DAILY DOUBLE  ·  " : "") + "$" + k.value + "  ·  " + col.pod;
+  if (k.dailyDouble) {
+    const dd = $("dd"); dd.classList.remove("show"); void dd.offsetWidth; dd.classList.add("show");
+    setTimeout(() => dd.classList.remove("show"), 2300);
+    synthDailyDouble();
+  }
   $("cluetext").textContent = k.clue;
   const a = $("answer"); a.textContent = k.answer; a.classList.remove("show"); a.style.display = "none";
   const img = $("img"); img.style.display = "none";
@@ -252,6 +273,20 @@ function synthWrong() {
     buzz.triggerAttackRelease(["A2", "Eb3"], .35, t);          // harsh tritone buzz
     buzz.triggerAttackRelease(["G2", "Db3"], .55, t + .4);     // drops lower
     setTimeout(() => { try { buzz.dispose(); } catch (e) {} }, 2500);
+  } catch (e) {}
+}
+
+function synthDailyDouble() {
+  try {
+    if (!toneOK() || !musicOn) return;
+    const brass = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "square" }, envelope: { attack: .02, decay: .2, sustain: .6, release: .4 } }).toDestination();
+    brass.volume.value = -9;
+    const t = Tone.now();
+    brass.triggerAttackRelease(["C4", "E4", "G4"], .18, t);
+    brass.triggerAttackRelease(["C4", "E4", "G4"], .18, t + .22);
+    brass.triggerAttackRelease(["F4", "A4", "C5"], .18, t + .44);
+    brass.triggerAttackRelease(["G4", "B4", "D5", "G5"], 1.0, t + .66);   // big held chord
+    setTimeout(() => { try { brass.dispose(); } catch (e) {} }, 3500);
   } catch (e) {}
 }
 
