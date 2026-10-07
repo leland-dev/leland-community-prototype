@@ -5342,42 +5342,45 @@ const FIND_EXPERT_CATEGORIES = [
   { title: "AI Automation & Agents", image: categoryAI, experts: "300 experts", photos: [pic8, pic5, pic7] },
 ];
 
+// First-goal onboarding card — shown (via the "No goal" admin toggle) to users
+// we have no goal/category data for. Nudges them to create their first goal so
+// we can personalize the feed. Lives in the left sidebar, replacing the
+// Upcoming sessions + Continue learning cards; callers gate rendering.
+function FirstGoalCard() {
+  const navigate = useNavigate();
+  return (
+    <div
+      className="rounded-[12px] bg-[#222222]/[0.04] p-5 text-center"
+      style={{
+        // Dashed outline matching the "Sell on Leland" callout: 3px dashes in
+        // gray-dark (#222222) at 30% opacity, drawn as an SVG background since
+        // border-dashed can't control dash length.
+        backgroundImage:
+          "url(\"data:image/svg+xml,%3csvg%20width='100%25'%20height='100%25'%20xmlns='http://www.w3.org/2000/svg'%3e%3crect%20width='100%25'%20height='100%25'%20fill='none'%20rx='12'%20ry='12'%20stroke='%23222222'%20stroke-opacity='0.3'%20stroke-width='2'%20stroke-dasharray='3%204'/%3e%3c/svg%3e\")",
+      }}
+    >
+      <img src={goalIcon} alt="" className="mx-auto mb-3 h-14 w-auto" />
+      <h2 className="text-[17px] font-bold leading-tight text-gray-dark">What's your goal?</h2>
+      <p className="mt-1.5 text-[14px] leading-[1.5] text-gray-light">
+        Tell us what you're working toward and we'll tailor Leland for you.
+      </p>
+      <Button size="md" variant="dark" rounded="rounded-full" className="mt-3.5 w-full" onClick={() => navigate("/my-leland/goals")}>
+        Create a goal
+      </Button>
+    </div>
+  );
+}
+
 export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = {}) {
   // Opt-in via the showUpcoming prop; off by default.
   const upcoming = showUpcoming ?? false;
-  const { topics, noGoal } = useFeedAdmin();
-  const navigate = useNavigate();
+  const { topics } = useFeedAdmin();
   const { pathname } = useLocation();
   // On the home feeds (/ and /alt-nav) the right column scrolls with the page
   // and pins its last card to the top (see PageShell rightSidebarStickyLast).
   const stickyLast = pathname === "/alt-nav" || pathname === "/";
   return (
     <div className={`flex flex-col gap-[14px] ${stickyLast ? "min-h-0 flex-1" : ""}`}>
-      {/* First-goal onboarding card — shown (via the "No goal" admin toggle) to
-          users we have no goal/category data for. Nudges them to create their
-          first goal so we can personalize the feed. */}
-      {noGoal && (
-        <div
-          className="rounded-[12px] bg-[#222222]/[0.04] p-5 text-center"
-          style={{
-            // Dashed outline matching the "Sell on Leland" callout: 3px dashes in
-            // gray-dark (#222222) at 30% opacity, drawn as an SVG background since
-            // border-dashed can't control dash length.
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3csvg%20width='100%25'%20height='100%25'%20xmlns='http://www.w3.org/2000/svg'%3e%3crect%20width='100%25'%20height='100%25'%20fill='none'%20rx='12'%20ry='12'%20stroke='%23222222'%20stroke-opacity='0.3'%20stroke-width='2'%20stroke-dasharray='3%204'/%3e%3c/svg%3e\")",
-          }}
-        >
-          <img src={goalIcon} alt="" className="mx-auto mb-3 h-14 w-auto" />
-          <h2 className="text-[17px] font-bold leading-tight text-gray-dark">What's your goal?</h2>
-          <p className="mt-1.5 text-[14px] leading-[1.5] text-gray-light">
-            Tell us what you're working toward and we'll tailor Leland for you.
-          </p>
-          <Button size="md" variant="dark" rounded="rounded-full" className="mt-3.5 w-full" onClick={() => navigate("/my-leland/goals")}>
-            Create a goal
-          </Button>
-        </div>
-      )}
-
       {/* Upcoming sessions */}
       {upcoming && (
         <SidebarSectionCard title="Upcoming sessions" to="/calendar" bleed>
@@ -5576,6 +5579,10 @@ function HomeSidebarV1() {
 function HomeSidebarV2() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { noGoal } = useFeedAdmin();
+  // The first-goal card (No goal toggle) replaces the Upcoming sessions +
+  // Continue learning cards.
+  const showLeftGoal = noGoal;
   // Inside the /alt-nav experience, "See all" links stay within My Leland
   // rather than jumping back into the classic-nav routes.
   const inAltNav = pathname === "/alt-nav" || pathname.startsWith("/alt-nav/");
@@ -5586,6 +5593,10 @@ function HomeSidebarV2() {
       {/* 1. Profile card */}
       <FeedProfileCard />
 
+      {showLeftGoal ? (
+        <FirstGoalCard />
+      ) : (
+      <>
       {/* 2. Upcoming sessions — preview up to 2 */}
       <SidebarSectionCard title="Upcoming sessions" to={sessionsTo} bleed>
         {UPCOMING_SESSIONS.slice(0, 2).map((s) => (
@@ -5632,6 +5643,8 @@ function HomeSidebarV2() {
           );
         })}
       </SidebarSectionCard>
+      </>
+      )}
     </div>
   );
 }
