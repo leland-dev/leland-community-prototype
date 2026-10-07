@@ -145,7 +145,7 @@ export default function TopNavLinkedIn() {
   // Inside the isolated /alt-nav experience, the nav destinations stay within
   // it (e.g. /alt-nav/messages); elsewhere they point at the normal routes.
   const inLinkedInNav = pathname.startsWith("/alt-nav") || pathname.startsWith("/my-leland");
-  const homeTo = inLinkedInNav ? "/alt-nav" : "/";
+  const homeTo = "/";
   const navTo = (path: string) => (inLinkedInNav ? `/alt-nav${path}` : path);
   // The nav layout: search bar on the left (opt-in), the icon group + "Me"
   // dropdown on the right. Browse opens the LinkedIn-style hover dropdown; My

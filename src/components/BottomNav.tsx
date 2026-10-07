@@ -13,7 +13,7 @@ import browseActive from "../assets/icons/nav-icons/browse-active.svg";
 // instead. When the user is already inside the /alt-nav experience, `altTo`
 // keeps them there instead of bouncing back to the classic-nav routes.
 const navItems = [
-  { to: "/", altTo: "/alt-nav", icon: homeAlt, label: "For you", end: true },
+  { to: "/", altTo: "/", icon: homeAlt, label: "For you", end: true },
   { to: "/browse", altTo: "/alt-nav/browse", icon: searchActive, label: "Explore" },
   // `end` so "My Leland" is only active on the Dashboard tab itself (exact
   // /my-leland or /dashboard), not on sub-pages like /my-leland/profile.

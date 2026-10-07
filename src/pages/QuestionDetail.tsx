@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 
 import { useSetRightSidebar } from "../components/RightSidebarContext";
@@ -101,11 +101,10 @@ function ThreadHeader({ onBack }: { onBack: () => void }) {
 export default function QuestionDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
   const question = findQuestion(id);
 
-  // Back always returns to the home feed (respecting the alt-nav context).
-  const goHome = () => navigate(pathname.startsWith("/alt-nav") ? "/alt-nav" : "/");
+  // Back always returns to the home feed.
+  const goHome = () => navigate("/");
 
   useSetRightSidebar(<HomeRightSidebar />);
   useSetLeftSidebar(<HomeSidebar onCreatePost={() => {}} />);

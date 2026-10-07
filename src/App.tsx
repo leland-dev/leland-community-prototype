@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, useNavigationType } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation, useNavigationType } from "react-router-dom";
 import { useEffect } from "react";
 import { VersionProvider } from "./contexts/VersionContext";
 import { DarkModeProvider } from "./contexts/DarkModeContext";
@@ -303,7 +303,8 @@ export default function App() {
           <Route path="/hashtag/:slug" element={<Hashtag />} />
           {/* Isolated LinkedIn-nav experience — feed, post detail, and the
               destinations behind the top-nav items. */}
-          <Route path="/alt-nav" element={<Home />} />
+          {/* /alt-nav feed is a duplicate of the home feed — redirect to /. */}
+          <Route path="/alt-nav" element={<Navigate to="/" replace />} />
           <Route path="/alt-nav/questions" element={<AnswerQuestions />} />
           <Route path="/alt-nav/post/:postId" element={<PostDetail />} />
           <Route path="/alt-nav/post/:postId/comment/:commentId" element={<CommentDetail />} />
