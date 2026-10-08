@@ -15,9 +15,9 @@ import build3 from "../../assets/placeholder images/courses/toolkit_visa_eligibi
 import build4 from "../../assets/placeholder images/courses/c10-hero-1920x1280.webp";
 import build5 from "../../assets/placeholder images/courses/HERO-Sam-Vander-Wielen-case-study-scaled.avif";
 import {
-  BarChart3, Code2, Compass, Crown, FileText, Handshake, Landmark,
+  BarChart3, Code2, Compass, Crown, FileText, GraduationCap, Handshake, Hourglass, Landmark,
   Mail, Megaphone, MoreHorizontal, PenTool, Rocket, Scale, Search, Settings2,
-  Sparkles, Users, Workflow, CalendarDays,
+  Sparkles, Telescope, Users, Workflow, CalendarDays,
 } from "lucide-react";
 
 export type Path = "individual" | "team";
@@ -118,7 +118,17 @@ export const ROLES: RoleOption[] = [
   { key: "founder", label: "Founder", icon: Rocket },
   { key: "other", label: "Something else", icon: MoreHorizontal },
 ];
-export const roleLabel = (key?: string) => ROLES.find((r) => r.key === key)?.label ?? "your role";
+/** Extra options shown only on the "for personal use" path, appended before
+ *  "Something else". Same taxonomy (role is one stored property), three more values. */
+export const PERSONAL_ROLES: RoleOption[] = [
+  { key: "student", label: "Student", icon: GraduationCap },
+  { key: "between", label: "Between roles", icon: Hourglass },
+  { key: "exploring", label: "Just exploring", icon: Telescope },
+];
+export const NON_WORK_ROLES = new Set(PERSONAL_ROLES.map((r) => r.key));
+export const isNonWorkRole = (key?: string) => !!key && NON_WORK_ROLES.has(key);
+export const roleLabel = (key?: string) =>
+  [...ROLES, ...PERSONAL_ROLES].find((r) => r.key === key)?.label ?? "your role";
 
 /** Levels mirror Higgsfield's Beginner → Expert ladder; descriptions are ours. */
 export const EXPERIENCE_OPTIONS: { value: ExperienceKey; label: string; desc: string; dots: 1 | 2 | 3 | 4 }[] = [
@@ -400,6 +410,45 @@ export const ROLE_PROFILES: Record<string, Partial<RoleProfile>> = {
     peers: [
       { name: "Dana R.", title: "Associate General Counsel", company: "Coinbase", quote: "I was the skeptic. Now first-pass NDA review takes minutes and I spend my time on the hard clauses." },
       { name: "Sam O.", title: "Legal Ops Lead", company: "Deloitte", quote: "The intake assistant cut our response time in half without adding headcount." },
+    ],
+  },
+  student: {
+    proofHeadline: "Students and recent grads already build with us",
+    headline: "Built for students who want to {graduate already fluent in AI}",
+    outcomes: [
+      "Research, writing and study workflows that give you hours back every week",
+      "A portfolio build you can show in interviews, not just a certificate",
+      "The judgment to know what AI is good for, and what it isn't",
+    ],
+    peers: [
+      { name: "Maya K.", title: "MBA candidate", company: "Kellogg", quote: "I walked into recruiting with a working agent in my portfolio. Nobody else in my cohort had that." },
+      { name: "Theo R.", title: "CS senior", company: "UT Austin", quote: "Less about prompts, more about building things that hold up. Exactly what classes skip." },
+    ],
+  },
+  between: {
+    proofHeadline: "People between roles already build with us",
+    headline: "Built for people who want to {land the next role as an AI-native hire}",
+    outcomes: [
+      "A job search that runs itself: research, tailored applications, follow-ups",
+      "A real build to talk about in interviews, in the function you're targeting",
+      "Fluency that shows up on day one of the next job",
+    ],
+    peers: [
+      { name: "Jordan L.", title: "Marketing lead, now at", company: "Atlassian", quote: "I did the program during my search. The build I made became the story I told in every interview." },
+      { name: "Sam P.", title: "Ops manager, now at", company: "Coinbase", quote: "It gave my search structure, and it gave me something concrete to show." },
+    ],
+  },
+  exploring: {
+    proofHeadline: "People learning for themselves already build with us",
+    headline: "Built for curious people who want to {actually build something with AI}",
+    outcomes: [
+      "Ten quality AI sessions on things you care about, not toy examples",
+      "A personal workflow you run every day by the end of Level 0",
+      "One build you're proud to show someone",
+    ],
+    peers: [
+      { name: "Priya N.", title: "Program Manager", company: "Atlassian", quote: "I went from dabbling to shipping a working agent in week two. The cohort format kept me honest." },
+      { name: "Omar H.", title: "Founder", company: "Seed-stage SaaS", quote: "I shipped two features and automated support in the three weeks of the cohort." },
     ],
   },
   founder: {

@@ -6,7 +6,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Plus, X } from "lucide-react";
 import {
-  CONTEXT_OPTIONS, EXPERIENCE_OPTIONS, GOALS, ROLES, TEAM_SIZES, TOOLS, USER,
+  CONTEXT_OPTIONS, EXPERIENCE_OPTIONS, GOALS, PERSONAL_ROLES, ROLES, TEAM_SIZES, TOOLS, USER,
   type Answers, type Path,
 } from "../data";
 import { Chip, Eyebrow, GhostCta, Heading, OptionCard, OptionGrid, StepContinue, Sub, TextInput, TileCard } from "../ui";
@@ -132,13 +132,23 @@ export function TeamStep(p: StepProps) {
 /* ── Role ──────────────────────────────────────────────────────────────── */
 export function RoleStep(p: StepProps) {
   const value = p.answers.role;
+  // "For personal use" still asks the role (it drives examples and social
+  // proof), but reframes the question and adds three non-work options.
+  const personal = p.path === "individual" && p.answers.context === "personal";
+  const options = personal
+    ? [...ROLES.filter((r) => r.key !== "other"), ...PERSONAL_ROLES, ...ROLES.filter((r) => r.key === "other")]
+    : ROLES;
   return (
     <>
       <Eyebrow>About you</Eyebrow>
-      <Heading>What's your role?</Heading>
-      <Sub>We'll tailor the examples, the builds and the people you learn with.</Sub>
+      <Heading>{personal ? "What do you do?" : "What's your role?"}</Heading>
+      <Sub>
+        {personal
+          ? "Even if you're learning for yourself, this helps us pick examples from your world."
+          : "We'll tailor the examples, the builds and the people you learn with."}
+      </Sub>
       <OptionGrid cols={2}>
-        {ROLES.map((r) => (
+        {options.map((r) => (
           <OptionCard key={r.key} compact selected={value === r.key} onClick={() => p.update({ role: value === r.key ? undefined : r.key })} icon={r.icon} label={r.label} />
         ))}
       </OptionGrid>
