@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Check, Star } from "lucide-react";
-import { EXPERIENCE_ARC, EXPERIENCE_OPTIONS, INSTRUCTORS, ORG, TOOLS, profileFor, roleLabel, toolLabel, COHORTS, type Answers, type Path } from "../data";
+import { EXPERIENCE_ARC, EXPERIENCE_OPTIONS, INSTRUCTORS, ORG, TOOLS, isNonWorkRole, profileFor, roleLabel, toolLabel, COHORTS, type Answers, type Path } from "../data";
 import { ORG_LOGOS } from "../../onboarding/data";
 import { Dots, Eyebrow, Heading, StepContinue, Sub } from "../ui";
 import { useScenario } from "../scenario";
@@ -43,7 +43,11 @@ export function RoleAffirmation({ answers, onNext }: MomentProps) {
         <Heading>
           The best place for {arc.noun} to get the most out of {toolName}
         </Heading>
-        <Sub>Level 0 starts where you are. By Level 1 you're building with {toolName} on real {role} work.</Sub>
+        <Sub>
+          {isNonWorkRole(answers.role)
+            ? `Level 0 starts where you are. By Level 1 you're building with ${toolName} on things you actually care about.`
+            : `Level 0 starts where you are. By Level 1 you're building with ${toolName} on real ${role} work.`}
+        </Sub>
       </div>
 
       {/* Today → after the program */}
