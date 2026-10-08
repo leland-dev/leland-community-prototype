@@ -3,6 +3,8 @@ import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useExpertMode } from "../contexts/ExpertModeContext";
 import { useProfileBoxedMode } from "../contexts/ProfileBoxedModeContext";
+import { useTeam } from "../contexts/TeamContext";
+import { TeamLogo } from "./TeamLogo";
 import chatIcon from "../assets/icons/nav-icons/chat-inactive.svg";
 import storeIcon from "../assets/icons/store.svg";
 import lightningIcon from "../assets/icons/lightning.svg";
@@ -15,6 +17,7 @@ import labelTagIcon from "../assets/icons/label-tag.svg";
 import livestreamIcon from "../assets/icons/lte-signal.svg";
 import videoIcon from "../assets/icons/video-icon.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
+import arrowDiagonalIcon from "../assets/icons/arrow-diagonal.svg";
 import userIcon from "../assets/icons/user.svg";
 import layoutGridIcon from "../assets/icons/layout-grid.svg";
 import analyticsChartIcon from "../assets/icons/Business, Chart.7.svg";
@@ -123,6 +126,7 @@ function SidebarV1() {
   const { pathname } = useLocation();
   const base = useCoachBase();
   const { expert, setExpert } = useExpertMode();
+  const { team } = useTeam();
   const onStorefront = pathname.startsWith(rebase("/coach/manage", base)) || storefrontRoutes.some((r) => rebase(r, base) === pathname);
 
   const inStore = base !== "/coach";
@@ -229,6 +233,18 @@ function SidebarV1() {
                 when Expert is off it's removed from My Leland entirely */}
           </nav>
         </div>
+
+        {/* Team — its own card because it leaves My Leland for the standalone team
+            dashboard; the trailing arrow signals that. Only once the user is on a team. */}
+        {team && (
+          <div className="shrink-0 rounded-[12px] border border-[#222222]/[0.12] bg-white p-2 shadow-[0px_4px_8px_-2px_rgba(16,24,40,0.10),0px_2px_4px_-2px_rgba(16,24,40,0.06)]">
+            <NavLink to="/team" className="group flex w-full items-center gap-3 rounded-lg px-3 py-[10px] text-[15px] font-medium text-gray-light transition-colors hover:text-gray-dark">
+              <TeamLogo name={team.name} logo={team.logo} size={22} circle />
+              <span className="flex-1 truncate">{team.name}</span>
+              <NavIcon src={arrowDiagonalIcon} className="h-4 w-4 opacity-60 transition-opacity group-hover:opacity-100" />
+            </NavLink>
+          </div>
+        )}
 
         {/* Expert tools — only for experts; a non-expert sees just the card above */}
         {expert && (

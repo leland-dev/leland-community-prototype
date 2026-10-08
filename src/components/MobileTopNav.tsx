@@ -8,6 +8,8 @@ import logoWordmark from "../assets/logos/leland-logo-split/Wordmark.svg";
 import { useNavTheme, useNavRightSlot, useNavBackHandler } from "./NavThemeContext";
 import { useMobileSidebar } from "./MobileSidebarContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
+import { useTeam } from "../contexts/TeamContext";
+import { TeamLogo } from "./TeamLogo";
 
 export default function MobileTopNav() {
   const [scrolled, setScrolled] = useState(false);
@@ -18,12 +20,16 @@ export default function MobileTopNav() {
   const rightSlot = useNavRightSlot();
   const backHandler = useNavBackHandler();
   const { dark: darkMode } = useDarkMode();
+  const { team } = useTeam();
   // On a post detail page the left slot becomes a Back button (returns the
   // user to wherever they came from) instead of the menu.
   const isPostDetail = location.pathname.startsWith("/post/");
   // The profile template (/profile/:slug) also uses a Back button instead of
   // the sidebar menu.
   const isProfileTemplate = location.pathname.startsWith("/profile/");
+  // Team dashboard: the team logo replaces the profile photo and opens the slide-over sidebar in
+  // team mode (team pages + a way back to the personal view); the org name replaces the Leland logo.
+  const isTeamPage = location.pathname === "/team" || location.pathname.startsWith("/team/");
   // Inside the /alt-nav experience, keep Notifications on the alt route.
   const inAltNav = location.pathname.startsWith("/alt-nav") || location.pathname.startsWith("/my-leland");
   // In dark mode, override nav to #111111 only when the page uses the default (white) nav theme.
@@ -96,6 +102,22 @@ export default function MobileTopNav() {
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
+      ) : isTeamPage && team ? (
+        <button
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Team menu"
+          className="flex h-8 w-8 items-center justify-center"
+        >
+          <span className="relative block h-8 w-8">
+            <TeamLogo name={team.name} logo={team.logo} size={32} circle />
+            {/* Tiny profile photo badge — signals this is the alternate (team) version of the profile menu */}
+            <img
+              src={profilePhoto}
+              alt=""
+              className="absolute -bottom-1 -right-1 h-[16px] w-[16px] rounded-full object-cover ring-2 ring-white"
+            />
+          </span>
+        </button>
       ) : (
         <button
           onClick={() => setSidebarOpen(true)}
@@ -112,6 +134,11 @@ export default function MobileTopNav() {
 
       {/* Center: Leland icon + wordmark. Wordmark animates away on scroll.
           If already on the homepage, tapping scrolls to top instead of navigating. */}
+      {isTeamPage ? (
+        <span className={`absolute left-1/2 top-1/2 max-w-[56%] -translate-x-1/2 -translate-y-1/2 truncate leland-heading-base ${isLight ? "text-white" : "text-gray-dark"}`}>
+          {team ? team.name : "Add your team"}
+        </span>
+      ) : (
       <button
         onClick={() => {
           if (location.pathname === "/") {
@@ -141,6 +168,7 @@ export default function MobileTopNav() {
           />
         )}
       </button>
+      )}
 
       {/* Right: page-provided custom slot, otherwise the Notifications icon
           (pinned here in the top-right; Jobs took its old spot in the bottom

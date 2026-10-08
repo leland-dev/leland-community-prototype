@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useExpertMode } from "../contexts/ExpertModeContext";
 import { useProfileBarMode, type ProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { Button } from "./Button";
+import { TeamLogo } from "./TeamLogo";
+import { useTeam } from "../contexts/TeamContext";
+import { getTeamNavItems } from "../lib/teamNav";
+import switchIcon from "../assets/icons/switch.svg";
+import usersGroupIcon from "../assets/icons/users-group.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 
 // Menu icons
@@ -152,6 +157,10 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const { dark: darkMode, toggle: toggleDarkMode } = useDarkMode();
   const { expert: expertMode, toggle: toggleExpertMode } = useExpertMode();
   const { mode: profileBarMode, setMode: setProfileBarMode } = useProfileBarMode();
+  const { team } = useTeam();
+  const { pathname } = useLocation();
+  // On /team the sidebar swaps to the team menu (same slide-over, different contents).
+  const inTeamMode = !!team && (pathname === "/team" || pathname.startsWith("/team/"));
   // Demo toggle (Admin Tools) — switches the sidebar between logged-in and
   // logged-out states. Intentionally not reset when the sidebar closes.
   const [loggedIn, setLoggedIn] = useState(true);
@@ -199,6 +208,58 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
       setBrowseOpen(false);
     }
   }, [open]);
+
+  if (inTeamMode && team) {
+    return (
+      <div className="relative h-full w-[280px] overflow-hidden">
+        <motion.div
+          ref={scrollRef}
+          className={`flex h-full w-full flex-col overflow-y-auto scrollbar-hide pb-6 ${darkMode ? "bg-[#131313]" : "bg-white"}`}
+          animate={{ scale: open ? 1 : 0.95, opacity: open ? 1 : 0 }}
+          transition={{ duration: 0.3, ease: [0.42, 0, 0.58, 1] }}
+          style={{ transformOrigin: "left center" }}
+          aria-hidden={!open}
+        >
+          {/* Team header — same layout as the profile header: logo, name stacked below, then a label row */}
+          <div className="px-5 pb-4 pt-6">
+            <TeamLogo name={team.name} logo={team.logo} size={48} circle />
+            <NavLink to="/team/overview" onClick={onClose} className="mt-3 block min-w-0">
+              <p className={`text-[18px] font-semibold ${darkMode ? "text-white" : "text-gray-dark"}`}>{team.name}</p>
+            </NavLink>
+            <p className="mt-2.5 text-[14px] leading-none text-gray-light">
+              <span className={`font-medium ${darkMode ? "text-white" : "text-gray-dark"}`}>
+                {team.plan === "enterprise" ? "Enterprise" : "Team"}
+              </span>{" "}
+              · {team.viewerRole}
+            </p>
+          </div>
+
+          <div className={`mx-5 border-t ${darkMode ? "border-white/20" : "border-[#E5E5E5]"}`} />
+
+          <div className="pt-2">
+            {getTeamNavItems(team).map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={onClose}
+                className={({ isActive }) => `${menuItemClass} ${isActive ? (darkMode ? "bg-white/10 font-semibold" : "bg-gray-hover font-semibold") : ""}`}
+              >
+                <img src={item.icon} alt="" className={iconClass} aria-hidden />
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
+          </div>
+
+          <div className={`mx-5 mt-2 border-t pt-2 ${darkMode ? "border-white/20" : "border-[#E5E5E5]"}`}>
+            <NavLink to="/my-leland" onClick={onClose} className={`${menuItemClass} -mx-5`}>
+              <img src={switchIcon} alt="" className={iconClass} aria-hidden />
+              <span>Switch to personal view</span>
+            </NavLink>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-full w-[280px] overflow-hidden">
@@ -315,6 +376,22 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
           ))
         )}
       </div>
+
+      {/* Team — its own group below the personal tabs (not part of that list): it leaves
+          for the team dashboard and its own menu. Sits above Sell on Leland / Expert tools. */}
+      {loggedIn && (
+        <div className="pt-4">
+          <p className={sectionHeader}>Team</p>
+          <NavLink to="/team" onClick={onClose} className={menuItemClass}>
+            {team ? (
+              <TeamLogo name={team.name} logo={team.logo} size={24} circle />
+            ) : (
+              <img src={usersGroupIcon} alt="" className={iconClass} aria-hidden />
+            )}
+            <span className="min-w-0 flex-1 truncate">{team ? team.name : "Add your team"}</span>
+          </NavLink>
+        </div>
+      )}
 
       {/* Expert Tools — hidden entirely when logged out */}
       {loggedIn && (
