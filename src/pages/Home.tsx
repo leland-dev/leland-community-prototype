@@ -25,6 +25,14 @@ import SidebarCard from "../components/SidebarCard";
 import { IconLivestreamSignal } from "../components/leland";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import profileCover from "../assets/img/cover-image-2.png";
+import shareBg1 from "../assets/img/square-backgrounds/bg-1.png";
+import shareBg2 from "../assets/img/square-backgrounds/bg-2.png";
+import shareBg3 from "../assets/img/square-backgrounds/bg-3.png";
+import shareBg4 from "../assets/img/square-backgrounds/bg-4.png";
+import shareBg5 from "../assets/img/square-backgrounds/bg-5.png";
+import linkIcon from "../assets/icons/link.svg";
+import shareArrowIcon from "../assets/icons/share-arrow.svg";
+import downloadIcon from "../assets/icons/download.svg";
 import topicHash from "../assets/img/topic-hash.svg";
 import aibpImg from "../assets/placeholder images/courses/AIBP.png";
 import samWielenImg from "../assets/placeholder images/courses/HERO-Sam-Vander-Wielen-case-study-scaled.avif";
@@ -1176,11 +1184,30 @@ export function FeedLikeButton({ initialCount }: { initialCount: number }) {
   );
 }
 
+// Background swatches for the shareable preview-card canvas — solid colors and
+// cover-image backgrounds.
+const SHARE_BACKGROUNDS: { color?: string; image?: string }[] = [
+  { image: shareBg1 },
+  { color: "#80ACED" },
+  { image: shareBg2 },
+  { color: "#869AA6" },
+  { image: shareBg3 },
+  { color: "#F3F1E6" },
+  { image: shareBg4 },
+  { color: "#EBD4B5" },
+  { image: shareBg5 },
+  { color: "#94370C" },
+];
+
 export function ShareDropdown({ post, onClose }: { post: Post; onClose: () => void }) {
   const postId = post.id;
   const [copied, setCopied] = useState(false);
-  const isMobile = useIsMobile();
-  useLockBodyScroll(isMobile);
+  const [bgIndex, setBgIndex] = useState(0);
+  const bg = SHARE_BACKGROUNDS[bgIndex];
+  const canvasStyle = bg.image
+    ? { backgroundImage: `url(${bg.image})`, backgroundSize: "cover", backgroundPosition: "center" }
+    : { backgroundColor: bg.color };
+  useLockBodyScroll(true);
   const postUrl = `${window.location.origin}${window.location.pathname}#/post/${postId}`;
 
   const copyLink = () => {
@@ -1190,101 +1217,122 @@ export function ShareDropdown({ post, onClose }: { post: Post; onClose: () => vo
     });
   };
 
-  const mobileVariants = {
-    initial: { opacity: 0, y: "100%" },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: "100%" },
-  };
-  const desktopVariants = {
-    initial: { opacity: 0, scale: 0.95, y: -4 },
-    animate: { opacity: 1, scale: 1, y: 0 },
-    exit: { opacity: 0, scale: 0.95, y: -4 },
-  };
-
   const content = (
-    <>
-      <div className={`fixed inset-0 z-[60] ${isMobile ? "bg-black/30" : ""}`} onClick={onClose} />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
       <motion.div
-        initial={(isMobile ? mobileVariants : desktopVariants).initial}
-        animate={(isMobile ? mobileVariants : desktopVariants).animate}
-        exit={(isMobile ? mobileVariants : desktopVariants).exit}
-        transition={{ duration: isMobile ? 0.22 : 0.12, ease: [0.25, 0.1, 0.25, 1] }}
-        drag={isMobile ? "y" : false}
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0, bottom: 0.6 }}
-        onDragEnd={(_, info) => { if (isMobile && (info.offset.y > 100 || info.velocity.y > 400)) onClose(); }}
-        className={
-          isMobile
-            ? "fixed inset-x-0 bottom-0 z-[70] rounded-t-2xl border-t border-gray-stroke bg-white pb-[env(safe-area-inset-bottom)] shadow-lg"
-            : "absolute top-full right-0 z-50 mt-1 w-[380px] max-w-[92vw] rounded-2xl border border-gray-stroke bg-white shadow-lg"
-        }
+        initial={{ opacity: 0, scale: 0.96, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 8 }}
+        transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+        onClick={(e) => e.stopPropagation()}
+        className="max-h-[90vh] w-full max-w-[460px] overflow-y-auto scrollbar-hide rounded-2xl border border-gray-stroke bg-white shadow-xl"
       >
-        {isMobile && <div className="mx-auto mt-2.5 mb-1 h-1 w-10 cursor-grab rounded-full bg-gray-300 active:cursor-grabbing" />}
-        <div className={isMobile ? "px-4 pb-5 pt-1" : "px-4 py-4"}>
-          {/* Post preview */}
-          <div className="mb-4 flex gap-3 rounded-2xl border border-gray-stroke p-3">
-            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-hover">
-              {post.avatar ? <img src={post.avatar} alt={post.author} className="h-full w-full object-cover" /> : null}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <span className="truncate text-[14px] font-semibold text-gray-dark">{post.author}</span>
-                {post.verified && <img src={verifiedIcon} alt="" className="h-[13px] w-[13px] shrink-0" />}
-                <span className="shrink-0 text-[13px] text-gray-xlight">· {post.time}</span>
+        <div className="p-5">
+          {/* Header */}
+          <div className="relative mb-4 flex items-center justify-center">
+            <h2 className="text-[16px] font-semibold text-gray-dark">Share post</h2>
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="absolute right-0 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-gray-dark transition-colors hover:bg-gray-hover"
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+
+          {/* Shareable preview — the post on a color-changeable square canvas
+              with the Leland mark top-right. */}
+          <div className="mb-3 flex aspect-square items-center justify-center overflow-hidden rounded-2xl p-6 transition-colors" style={canvasStyle}>
+            <div className="w-full rounded-xl bg-white p-4 shadow-[0_4px_14px_rgba(0,0,0,0.10)]">
+              <div className="flex items-start gap-2.5">
+                <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-gray-hover">
+                  {post.avatar ? <img src={post.avatar} alt={post.author} className="h-full w-full object-cover" /> : null}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="truncate text-[14px] font-semibold text-gray-dark">{post.author}</span>
+                    {post.verified && <img src={verifiedIcon} alt="" className="h-[13px] w-[13px] shrink-0" />}
+                    <span className="shrink-0 text-[12px] text-gray-xlight">· {post.time}</span>
+                  </div>
+                  {post.headline && <p className="truncate text-[12px] leading-tight text-gray-light">{post.headline}</p>}
+                </div>
+                <span
+                  aria-hidden
+                  className="h-[18px] w-[18px] shrink-0 bg-gray-dark"
+                  style={{ maskImage: `url("${lelandMark}")`, WebkitMaskImage: `url("${lelandMark}")`, maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat", maskPosition: "center", WebkitMaskPosition: "center" }}
+                />
               </div>
-              <p className="mt-0.5 line-clamp-4 text-[13px] leading-snug text-gray-light">{post.body}</p>
+              <p className="mt-2.5 line-clamp-5 text-[14px] leading-[1.45] text-gray-dark">{post.body}</p>
+              {post.type === "image" && post.images[0] && (
+                <img src={post.images[0]} alt="" className="mt-3 aspect-square w-full rounded-lg object-cover" />
+              )}
             </div>
           </div>
 
-          {/* Actions. Fixed-width items + truncated labels keep the row
-              evenly spaced regardless of label length. */}
-          <div className="flex gap-6">
-            <button onClick={copyLink} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
-              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full border border-gray-stroke text-gray-dark">
+          {/* Background palette — horizontally scrolling with faded edges */}
+          <div
+            className="mb-4 -mx-5 flex gap-2.5 overflow-x-auto scrollbar-hide px-5 py-1"
+            style={{
+              maskImage: "linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent)",
+              WebkitMaskImage: "linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent)",
+            }}
+          >
+            {SHARE_BACKGROUNDS.map((b, i) => (
+              <button
+                key={i}
+                onClick={() => setBgIndex(i)}
+                aria-label={`Background ${i + 1}`}
+                className={`h-10 w-10 shrink-0 rounded-lg border border-black/10 bg-cover bg-center transition ${bgIndex === i ? "ring-2 ring-gray-dark ring-offset-2" : ""}`}
+                style={b.image ? { backgroundImage: `url(${b.image})` } : { backgroundColor: b.color }}
+              />
+            ))}
+          </div>
+
+          {/* Actions — uniform gray circular buttons */}
+          <div className="-mx-1 flex justify-center gap-4 overflow-x-auto px-1 pb-1 scrollbar-hide">
+            <button onClick={copyLink} className="flex w-14 shrink-0 flex-col items-center gap-1.5">
+              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-gray-hover text-gray-dark">
                 {copied ? (
-                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 ) : (
-                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                  <img src={linkIcon} alt="" className="h-[22px] w-[22px] rounded-full" />
                 )}
               </span>
-              <span className="w-full truncate text-center text-[12px] text-gray-dark">{copied ? "Copied!" : "Copy Link"}</span>
+              <span className="w-full truncate text-center text-[11px] text-gray-dark">{copied ? "Copied!" : "Copy Link"}</span>
             </button>
-            <button onClick={onClose} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
-              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full border border-gray-stroke text-gray-dark">
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/></svg>
+            <button onClick={onClose} className="flex w-14 shrink-0 flex-col items-center gap-1.5">
+              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-gray-hover text-gray-dark">
+                <img src={shareArrowIcon} alt="" className="h-[22px] w-[22px] rounded-full" />
               </span>
-              <span className="w-full truncate text-center text-[12px] text-gray-dark">Share via…</span>
+              <span className="w-full truncate text-center text-[11px] text-gray-dark">Share via</span>
             </button>
-            <button onClick={onClose} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
-              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full border border-gray-stroke text-gray-dark">
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4v11"/><path d="m8 11 4 4 4-4"/><path d="M20 15v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3"/></svg>
+            <button onClick={onClose} className="flex w-14 shrink-0 flex-col items-center gap-1.5">
+              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-gray-hover text-gray-dark">
+                <img src={downloadIcon} alt="" className="h-[22px] w-[22px] rounded-full" />
               </span>
-              <span className="w-full truncate text-center text-[12px] text-gray-dark">Download</span>
+              <span className="w-full truncate text-center text-[11px] text-gray-dark">Download</span>
             </button>
-          </div>
-
-          <div className="my-3 border-t border-gray-stroke" />
-
-          {/* Row 3 — external apps */}
-          <div className="-mx-1 flex gap-6 overflow-x-auto px-1 pb-1 scrollbar-hide">
-            <a href={`sms:&body=${encodeURIComponent(postUrl)}`} onClick={onClose} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
-              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-[#34C759] text-white"><svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.34 1.26 4.45 3.28 5.9-.14 1.13-.72 2.4-1.53 3.35 1.6-.2 3.1-.83 4.22-1.6 1.24.35 2.6.55 4.03.55 5.5 0 10-3.6 10-8s-4.5-8-10-8z"/></svg></span>
-              <span className="w-full truncate text-center text-[12px] text-gray-dark">Messages</span>
+            <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-14 shrink-0 flex-col items-center gap-1.5">
+              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-gray-hover text-gray-dark"><svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></span>
+              <span className="w-full truncate text-center text-[11px] text-gray-dark">LinkedIn</span>
             </a>
-            <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
-              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-[#0A66C2] text-white"><svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></span>
-              <span className="w-full truncate text-center text-[12px] text-gray-dark">LinkedIn</span>
-            </a>
-            <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
-              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-black text-white"><svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>
-              <span className="w-full truncate text-center text-[12px] text-gray-dark">Twitter</span>
+            <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" onClick={onClose} className="flex w-14 shrink-0 flex-col items-center gap-1.5">
+              <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-gray-hover text-gray-dark"><svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>
+              <span className="w-full truncate text-center text-[11px] text-gray-dark">X</span>
             </a>
           </div>
         </div>
       </motion.div>
-    </>
+    </motion.div>
   );
-  return isMobile ? createPortal(content, document.body) : content;
+  return createPortal(content, document.body);
 }
 
 export function FeedRepostButton({ initialCount, initialReposted = false, onRepost, onUndoRepost, onQuote }: { initialCount: number; initialReposted?: boolean; onRepost?: () => void; onUndoRepost?: () => void; onQuote?: () => void }) {
