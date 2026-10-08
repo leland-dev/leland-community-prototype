@@ -1,5 +1,10 @@
 import { useState, type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
+import B2BOverviewV2 from "./b2b/B2BOverviewV2";
+import B2BSettings from "./b2b/B2BSettings";
+import { B2BModalDispatcher } from "./b2b/B2BModals";
+import type { ModalId } from "./b2b/B2BData";
+import "../styles/b2b.css";
 import { Button } from "../components/Button";
 import { TeamLogo } from "../components/TeamLogo";
 import { useTeam } from "../contexts/TeamContext";
@@ -158,130 +163,6 @@ function Billing() {
   );
 }
 
-// ── Overview: everyone added to the organization and what they can access ──
-function UsersTable({ isAdmin }: { isAdmin: boolean }) {
-  const { team, addMember, updateMember, removeMember } = useTeam();
-  const [adding, setAdding] = useState(false);
-  const [email, setEmail] = useState("");
-  const [access, setAccess] = useState(ACCESS_OPTIONS[0]);
-  const [editing, setEditing] = useState<string | null>(null);
-  if (!team) return null;
-
-  const invite = () => {
-    const value = email.trim();
-    if (!value) return;
-    addMember({ name: value.split("@")[0], email: value, role: "Member", access: [access] });
-    setEmail("");
-    setAdding(false);
-  };
-  const toggleAccess = (id: string, current: string[], item: string) =>
-    updateMember(id, { access: current.includes(item) ? current.filter((a) => a !== item) : [...current, item] });
-
-  return (
-    <Card
-      title={`Users (${team.members.length})`}
-      action={
-        isAdmin ? (
-          <Button size="sm" variant="primary" onClick={() => setAdding((v) => !v)}>
-            Add user
-          </Button>
-        ) : undefined
-      }
-    >
-      {adding && (
-        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end">
-          <div className="flex-1">
-            <Field label="Email">
-              <input
-                className={inputCls}
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && invite()}
-                placeholder="teammate@company.com"
-              />
-            </Field>
-          </div>
-          <div className="sm:w-[220px]">
-            <Field label="Grant access to">
-              <select className={inputCls} value={access} onChange={(e) => setAccess(e.target.value)}>
-                {ACCESS_OPTIONS.map((o) => (
-                  <option key={o}>{o}</option>
-                ))}
-              </select>
-            </Field>
-          </div>
-          <Button size="md" variant="primary" onClick={invite} disabled={!email.trim()}>
-            Invite
-          </Button>
-        </div>
-      )}
-
-      <div className="-mx-5 overflow-x-auto px-5">
-        <table className="w-full min-w-[520px] border-collapse text-left text-[14px]">
-          <thead>
-            <tr className="border-b border-gray-stroke text-[12px] font-medium text-gray-light">
-              <th className="pb-2 pr-4 font-medium">User</th>
-              <th className="pb-2 pr-4 font-medium">Access</th>
-              {isAdmin && <th className="pb-2 text-right font-medium">Actions</th>}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-stroke">
-            {team.members.map((m) => {
-              const isEditing = editing === m.id;
-              const locked = m.role === "Admin";
-              return (
-                <tr key={m.id} className="align-top">
-                  <td className="py-3 pr-4">
-                    <p className="font-medium text-gray-dark">{m.name}</p>
-                    <p className="text-[13px] text-gray-light">{m.email}</p>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <div className="flex flex-wrap gap-1.5">
-                      {ACCESS_OPTIONS.filter((o) => isEditing || m.access.includes(o)).map((o) => {
-                        const on = m.access.includes(o);
-                        return (
-                          <button
-                            key={o}
-                            type="button"
-                            disabled={!isEditing}
-                            onClick={() => toggleAccess(m.id, m.access, o)}
-                            className={`rounded-full px-3 py-1 text-[12px] font-medium transition-colors disabled:cursor-default ${
-                              on ? "bg-[#222222] text-white" : "bg-[#222222]/5 text-gray-light hover:bg-[#222222]/10"
-                            }`}
-                          >
-                            {o}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </td>
-                  {isAdmin && (
-                    <td className="py-3 text-right">
-                      {locked ? (
-                        <span className="text-[12px] text-gray-light">Admin</span>
-                      ) : (
-                        <div className="inline-flex gap-1.5">
-                          <Button size="tag" variant="secondary" onClick={() => setEditing(isEditing ? null : m.id)}>
-                            {isEditing ? "Done" : "Edit access"}
-                          </Button>
-                          <Button size="tag" variant="secondary" onClick={() => removeMember(m.id)}>
-                            Remove
-                          </Button>
-                        </div>
-                      )}
-                    </td>
-                  )}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </Card>
-  );
-}
-
 function SecurityCard() {
   const [sso, setSso] = useState(false);
   return (
@@ -304,107 +185,39 @@ function SecurityCard() {
   );
 }
 
-function Admins() {
-  const { team, addMember, updateMember } = useTeam();
-  const [email, setEmail] = useState("");
-  if (!team) return null;
-  const admins = team.members.filter((m) => m.role === "Admin");
-  const others = team.members.filter((m) => m.role !== "Admin");
-
-  const row = (m: (typeof team.members)[number], action: ReactNode) => (
-    <li key={m.id} className="flex items-center justify-between gap-3 py-3">
-      <div className="min-w-0">
-        <p className="truncate text-[14px] font-medium text-gray-dark">{m.name}</p>
-        <p className="truncate text-[13px] text-gray-light">{m.email}</p>
-      </div>
-      {action}
-    </li>
-  );
-
-  return (
-    <Card title={`Admins (${admins.length})`}>
-      <p className="mb-3 text-[13px] text-gray-light">Admins can add and remove people, grant access, and manage billing.</p>
-      <ul className="divide-y divide-gray-stroke border-t border-gray-stroke">
-        {admins.map((m) =>
-          row(
-            m,
-            m.id === "me" ? (
-              <span className="text-[12px] text-gray-light">You</span>
-            ) : (
-              <Button size="sm" variant="secondary" onClick={() => updateMember(m.id, { role: "Member" })}>
-                Remove admin
-              </Button>
-            )
-          )
-        )}
-      </ul>
-
-      {others.length > 0 && (
-        <>
-          <p className="mb-1 mt-5 text-[12px] font-medium text-gray-light">Make an existing member an admin</p>
-          <ul className="divide-y divide-gray-stroke border-t border-gray-stroke">
-            {others.map((m) =>
-              row(
-                m,
-                <Button size="sm" variant="secondary" onClick={() => updateMember(m.id, { role: "Admin" })}>
-                  Make admin
-                </Button>
-              )
-            )}
-          </ul>
-        </>
-      )}
-
-      <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-end">
-        <div className="flex-1">
-          <Field label="Invite a new admin">
-            <input className={inputCls} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@company.com" />
-          </Field>
-        </div>
-        <Button
-          size="md"
-          variant="primary"
-          disabled={!email.trim()}
-          onClick={() => {
-            addMember({ name: email.trim().split("@")[0], email: email.trim(), role: "Admin", access: ["All programs"] });
-            setEmail("");
-          }}
-        >
-          Invite admin
-        </Button>
-      </div>
-    </Card>
-  );
-}
-
 // ── Pages rendered inside TeamLayout ──
 function PageTitle({ children }: { children: ReactNode }) {
   return <h1 className="font-serif text-[30px] font-medium leading-[1.1] text-gray-dark md:text-[38px]">{children}</h1>;
 }
 
+// Overview is the partner dashboard's overview, embedded as-is (minus the org name
+// under the title and the Admin Settings button — the team menu links to Admins).
+// Its modals are wired up here.
 export function TeamOverview() {
   const { team } = useTeam();
+  const [openModal, setOpenModal] = useState<ModalId>(null);
+  const [partnerModel, setPartnerModel] = useState<"per-seat" | "a-la-carte">("per-seat");
   if (!team) return null;
-  const isAdmin = team.viewerRole === "Admin";
-  const stats = [
-    { label: "Users", value: String(team.members.length) },
-    { label: "Admins", value: String(team.members.filter((m) => m.role === "Admin").length) },
-    { label: "Plan", value: team.plan === "enterprise" ? "Enterprise" : "Team" },
-    ...(isAdmin ? [{ label: "Payment method", value: team.card ? `${team.card.brand} •••• ${team.card.last4}` : "Not added" }] : []),
-  ];
   return (
-    <div className="flex flex-col gap-5">
-      <PageTitle>Overview</PageTitle>
-      <section className={`${cardCls} grid grid-cols-2 gap-5 p-5 ${isAdmin ? "md:grid-cols-4" : "md:grid-cols-3"}`}>
-        {stats.map((st) => (
-          <div key={st.label}>
-            <p className="text-[12px] text-gray-light">{st.label}</p>
-            <p className="mt-1 text-[18px] font-semibold text-gray-dark">{st.value}</p>
-          </div>
-        ))}
-      </section>
-      <UsersTable isAdmin={isAdmin} />
-    </div>
+    <>
+      <B2BOverviewV2
+        hideOrgName
+        hideAdminSettings
+        onNavigate={() => {}}
+        onSetUtilFilter={() => {}}
+        onOpenModal={setOpenModal}
+        partnerModel={partnerModel}
+        onSetPartnerModel={setPartnerModel}
+      />
+      <B2BModalDispatcher
+        openModal={openModal}
+        onClose={() => setOpenModal(null)}
+        emailRecipients={[]}
+        emailFilterLabel="All users"
+        showVerizon={partnerModel === "per-seat"}
+        isAlaCarte={partnerModel === "a-la-carte"}
+      />
+    </>
   );
 }
 
@@ -423,16 +236,13 @@ export const TeamReportsPage = () => <ComingSoon title="Reports" blurb="Usage an
 export const TeamAdsPage = () => <ComingSoon title="Paid ads" blurb="Promote your team's programs and events with paid ads." />;
 export const TeamRecruitingPage = () => <ComingSoon title="Recruiting" blurb="Find and recruit candidates through Leland for your team." />;
 
+// Admins is the partner dashboard's Admin Settings page, embedded as-is (without its
+// "Overview" link — the team menu already links there).
 export function TeamAdmins() {
   const { team } = useTeam();
   if (!team) return null;
   if (team.viewerRole !== "Admin") return <Navigate to="/team" replace />;
-  return (
-    <div className="flex flex-col gap-5">
-      <PageTitle>Admins</PageTitle>
-      <Admins />
-    </div>
-  );
+  return <B2BSettings hideDashboardLink />;
 }
 
 // Billing — card on file, plus SSO/invoicing for Enterprise.

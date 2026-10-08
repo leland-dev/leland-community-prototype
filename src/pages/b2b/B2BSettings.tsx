@@ -13,7 +13,7 @@ const ADMIN_USERS = [
   { initials: "JS", name: "Jennifer Sullivan", email: "j-sullivan@kellogg.edu" },
 ];
 
-export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboard?: () => void }) {
+export default function B2BSettings({ onNavigateDashboard, hideDashboardLink }: { onNavigateDashboard?: () => void; hideDashboardLink?: boolean }) {
   const [admins, setAdmins] = useState(ADMIN_USERS);
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
@@ -37,20 +37,24 @@ export default function B2BSettings({ onNavigateDashboard }: { onNavigateDashboa
       <div className="mb-8">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-[38px] font-medium text-gray-dark">Admin Settings</h1>
+            <h1 className={`text-[38px] font-medium text-gray-dark${hideDashboardLink ? " font-serif" : ""}`}>Admin Settings</h1>
             <p className="mt-2 text-[16px] text-[#707070]">Manage permissions, licenses, and account configuration</p>
           </div>
-          <div className="hidden sm:block">
-            <Button size="lg" variant="secondary" onClick={onNavigateDashboard}>
-              <img src={layoutGridIcon} alt="" className="h-5 w-5" />
-              Overview
-            </Button>
-          </div>
+          {!hideDashboardLink && (
+            <div className="hidden sm:block">
+              <Button size="lg" variant="secondary" onClick={onNavigateDashboard}>
+                <img src={layoutGridIcon} alt="" className="h-5 w-5" />
+                Overview
+              </Button>
+            </div>
+          )}
         </div>
-        <Button size="lg" variant="secondary" onClick={onNavigateDashboard} className="mt-6 w-full sm:hidden">
-          <img src={layoutGridIcon} alt="" className="h-5 w-5" />
-          Overview
-        </Button>
+        {!hideDashboardLink && (
+          <Button size="lg" variant="secondary" onClick={onNavigateDashboard} className="mt-6 w-full sm:hidden">
+            <img src={layoutGridIcon} alt="" className="h-5 w-5" />
+            Overview
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 items-start gap-8 sm:grid-cols-[1fr_280px] sm:gap-x-col-gap">

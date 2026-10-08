@@ -22,6 +22,10 @@ interface Props {
   onNavigateSettings?: () => void;
   partnerModel: "per-seat" | "a-la-carte";
   onSetPartnerModel: (m: "per-seat" | "a-la-carte") => void;
+  /** Hide the organization name under the page title (used when embedded in the Team dashboard). */
+  hideOrgName?: boolean;
+  /** Hide the "Admin Settings" buttons (the Team dashboard links to Admins from its own menu). */
+  hideAdminSettings?: boolean;
 }
 
 const activity = [
@@ -469,7 +473,54 @@ function ReviewsModal({ open, onClose }: { open: boolean; onClose: () => void })
   );
 }
 
-export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSettings, partnerModel, onSetPartnerModel }: Props) {
+// Which admin added each user (sample data) — drives the "Added by" filter.
+const ADDED_BY_ADMINS = ["Katie Brown", "Michael Reyes", "Jennifer Sullivan"];
+const addedByFor = (email: string) => ADDED_BY_ADMINS[Math.max(0, users.findIndex((u) => u.email === email)) % ADDED_BY_ADMINS.length];
+
+// Pill-style dropdown filter: "Label: Selected value" opens a single-select menu.
+function FilterDropdown({ label, value, options, onChange }: { label: string; value: string; options: { value: string; label: string }[]; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const current = options.find((o) => o.value === value);
+  const isAll = value === "all";
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-gray-hover px-3.5 py-2.5 text-[12px] font-medium leading-[1.2] text-[#222222] transition-colors hover:bg-[#222222]/10 ${open ? "ring-[1.5px] ring-inset ring-[#222222]" : ""}`}
+      >
+        <span className="text-[#707070]">{label}</span>
+        {!isAll && <span>{current?.label}</span>}
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden>
+          <polyline points="4 6 8 10 12 6" />
+        </svg>
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 top-full z-50 mt-1 w-[220px] rounded-xl border border-gray-stroke bg-white p-1.5 shadow-lg">
+            {options.map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                onClick={() => { onChange(o.value); setOpen(false); }}
+                className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+              >
+                {o.label}
+                {o.value === value && (
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="3 8.5 6.5 12 13 4.5" /></svg>
+                )}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSettings, partnerModel, onSetPartnerModel, hideOrgName, hideAdminSettings }: Props) {
   const showVerizon = partnerModel === "per-seat";
   const [page, setPage] = useState(0);
   const [selectedUserV2, setSelectedUserV2] = useState<UserDetailV2 | null>(null);
@@ -557,7 +608,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
-  const [filter, setFilter] = useState<"all" | "active" | "invited">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "invited" | "expired">("all");
+  const [addedByFilter, setAddedByFilter] = useState<string>("all");
   const [sort] = useState<"last-active" | "date-added">("date-added");
 
   const isActive = (u: typeof users[number]) =>
@@ -569,8 +621,10 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
     (Object.keys(u.cohortStatuses).length > 0 && Object.values(u.cohortStatuses).every((n) => (n ?? 0) === 0));
 
   const filteredUsers = users.filter((u) => {
-    if (filter === "active") return isActive(u);
-    if (filter === "invited") return hasInvitePending(u);
+    if (statusFilter === "active" && !isActive(u)) return false;
+    if (statusFilter === "invited" && !hasInvitePending(u)) return false;
+    if (statusFilter === "expired" && u.plus !== "Expired") return false;
+    if (addedByFilter !== "all" && addedByFor(u.email) !== addedByFilter) return false;
     return true;
   });
 
@@ -604,7 +658,6 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
   const [menuPos, setMenuPos] = useState<RowMenuPos | null>(null);
   const [openTooltip, setOpenTooltip] = useState<"sessions" | "cohorts" | "seats" | "active" | null>(null);
 
-  const handleFilter = (f: "all" | "active" | "invited") => { setFilter(f); setPage(0); };
 
   return (
     <div className="leading-[1.2]">
@@ -612,15 +665,17 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
       {/* Page header + desktop sticky button */}
       <div className="mb-6 flex items-start justify-between sm:mb-8">
         <div ref={headerRef}>
-          <h1 className="text-[38px] font-medium text-gray-dark">Overview</h1>
-          <p className="mt-2 text-[16px] text-[#707070]">{showVerizon ? "Verizon" : "Kellogg School of Management"}</p>
+          <h1 className={`text-[38px] font-medium text-gray-dark${hideOrgName ? " font-serif" : ""}`}>Overview</h1>
+          {!hideOrgName && <p className="mt-2 text-[16px] text-[#707070]">{showVerizon ? "Verizon" : "Kellogg School of Management"}</p>}
         </div>
         <div className="sticky hidden gap-2 self-start sm:flex sm:items-center" style={{ top: "28px" }}>
-          <Button size="lg" variant="secondary" onClick={onNavigateSettings}>
-            <img src={settingsIcon} alt="" className="h-4 w-4" />
-            Admin Settings
-          </Button>
-          <Button size="lg" variant="primary" onClick={() => onOpenModal("invite")} className="shadow-md">
+          {!hideAdminSettings && (
+            <Button size="lg" variant="secondary" onClick={onNavigateSettings}>
+              <img src={settingsIcon} alt="" className="h-4 w-4" />
+              Admin Settings
+            </Button>
+          )}
+          <Button size="lg" variant="primary" rounded="rounded-full" onClick={() => onOpenModal("invite")}>
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
             </svg>
@@ -631,11 +686,13 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
 
       {/* Mobile buttons — below header, stacked full-width */}
       <div className="mb-6 flex flex-col gap-2 sm:hidden">
-        <Button size="lg" variant="secondary" onClick={onNavigateSettings} className="w-full">
-          <img src={settingsIcon} alt="" className="h-4 w-4" />
-          Admin Settings
-        </Button>
-        <Button size="lg" variant="primary" onClick={() => onOpenModal("invite")} className="w-full shadow-md">
+        {!hideAdminSettings && (
+          <Button size="lg" variant="secondary" onClick={onNavigateSettings} className="w-full">
+            <img src={settingsIcon} alt="" className="h-4 w-4" />
+            Admin Settings
+          </Button>
+        )}
+        <Button size="lg" variant="primary" rounded="rounded-full" onClick={() => onOpenModal("invite")} className="w-full">
           <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
           </svg>
@@ -652,7 +709,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             exit={{ opacity: 0, scale: 0.85 }}
             transition={{ duration: 0.18 }}
             onClick={() => onOpenModal("invite")}
-            className="fixed right-4 top-[72px] z-30 flex items-center gap-2 rounded-lg bg-[#FFD96F] px-4 py-3 text-[14px] font-medium text-[#222222] shadow-md sm:hidden"
+            className="fixed right-4 top-[72px] z-30 flex items-center gap-2 rounded-full bg-[#FFD96F] px-4 py-3 text-[14px] font-medium text-[#222222] shadow-md sm:hidden"
           >
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
@@ -674,7 +731,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
         return (
           <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {cards.map(({ label, tooltip, rating, used, left }) => (
-              <div key={label} onClick={rating ? () => setShowReviews(true) : undefined} className={`rounded-lg border border-gray-stroke bg-white p-5 ${rating ? "cursor-pointer hover:bg-gray-hover" : ""}`}>
+              <div key={label} onClick={rating ? () => setShowReviews(true) : undefined} className={`rounded-[12px] border border-gray-stroke bg-white p-5 ${rating ? "cursor-pointer hover:bg-gray-hover" : ""}`}>
                 <div className="mb-2 flex items-center gap-1">
                   {tooltip ? (
                     <div className="group/tip relative">
@@ -707,7 +764,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
 
       {/* Stats row — Per Seat */}
       {partnerModel === "per-seat" && <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-x-5">
-        <div className="rounded-lg border border-gray-stroke bg-white p-5">
+        <div className="rounded-[12px] border border-gray-stroke bg-white p-5">
           <div className="mb-2 flex items-center gap-1.5 text-[16px] font-normal text-gray-light">
             Seats redeemed
             <div className="group relative flex items-center">
@@ -724,13 +781,13 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             <div className="text-[22px] font-medium leading-none text-gray-dark">289</div>
           </div>
         </div>
-        <div className="rounded-lg border border-gray-stroke bg-white p-5">
+        <div className="rounded-[12px] border border-gray-stroke bg-white p-5">
           <div className="mb-2 text-[16px] font-normal text-gray-light">Seats left</div>
           <div className="flex items-baseline gap-[6px] sm:block">
             <div className="text-[22px] font-medium leading-none text-gray-dark">75</div>
           </div>
         </div>
-        <div onClick={() => setShowReviews(true)} className="cursor-pointer rounded-lg border border-gray-stroke bg-white p-5 hover:bg-gray-hover">
+        <div onClick={() => setShowReviews(true)} className="cursor-pointer rounded-[12px] border border-gray-stroke bg-white p-5 hover:bg-gray-hover">
           <div className="mb-2 text-[16px] font-normal text-gray-light">Average rating</div>
           <div className="flex items-end gap-2">
             <div className="flex items-center gap-1.5">
@@ -756,27 +813,31 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               placeholder="Search by name or email"
             />
           </div>
-          {/* Filter pills + Resend invite — scrollable row */}
-          <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto sm:flex-none">
-            {(["all", "active", "invited"] as const).map((f) => (
-              <button
-                key={f}
-                onClick={() => handleFilter(f)}
-                className={`shrink-0 cursor-pointer rounded-full bg-[#f5f5f5] px-3.5 py-2.5 text-[12px] font-medium leading-[1.2] text-[#222222] transition-colors ${
-                  filter === f
-                    ? "ring-[1.5px] ring-inset ring-[#222222]"
-                    : "hover:bg-[#ebebeb]"
-                }`}
-              >
-                {f === "invited" ? "Invite pending" : f.charAt(0).toUpperCase() + f.slice(1)}
-              </button>
-            ))}
+          {/* Filters — Added by (which admin invited them) and Status (redemption state) */}
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <FilterDropdown
+              label="Added by"
+              value={addedByFilter}
+              options={[{ value: "all", label: "All admins" }, ...ADDED_BY_ADMINS.map((n) => ({ value: n, label: n }))]}
+              onChange={(v) => { setAddedByFilter(v); setPage(0); }}
+            />
+            <FilterDropdown
+              label="Status"
+              value={statusFilter}
+              options={[
+                { value: "all", label: "All" },
+                { value: "active", label: "Active" },
+                { value: "invited", label: "Invite pending" },
+                { value: "expired", label: "Expired" },
+              ]}
+              onChange={(v) => { setStatusFilter(v as typeof statusFilter); setPage(0); }}
+            />
           </div>
         </div>
-        <div className="relative overflow-hidden rounded-lg border border-gray-stroke bg-white shadow-card">
+        <div className="relative overflow-hidden rounded-[12px] border border-gray-stroke bg-white">
           {/* Bulk action bar */}
           {bulkActions && selectedEmails.size > 0 && (
-            <div className="flex items-center gap-3 rounded-t-lg bg-white px-4 py-3">
+            <div className="flex items-center gap-3 rounded-t-[12px] bg-white px-4 py-3">
               <button onClick={() => setSelectedEmails(new Set())} className="flex h-11 items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 text-[14px] font-medium text-gray-dark hover:bg-gray-hover">
                 {selectedEmails.size} selected
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -786,7 +847,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               <div className="flex gap-3">
                 <button
                   onClick={() => { onOpenModal("invite"); }}
-                  className="flex h-11 items-center gap-2 rounded-lg bg-[#f5f5f5] px-4 text-[14px] font-medium text-gray-dark hover:bg-[#ebebeb]"
+                  className="flex h-11 items-center gap-2 rounded-lg bg-gray-hover px-4 text-[14px] font-medium text-gray-dark hover:bg-[#222222]/10"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -804,7 +865,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                 return (
                   <div
                     key={i}
-                    className="cursor-pointer px-4 py-4 hover:bg-[#fafafa]"
+                    className="cursor-pointer px-4 py-4 hover:bg-gray-hover"
                     onClick={() => {
                       const baseDetail = showVerizon ? (verizonUserDetailsV2[user.email] ?? tableRowToUserDetailV2(user)) : (userDetailsV2[user.email] ?? tableRowToUserDetailV2(user));
                       const rowCohorts = tableRowToUserDetailV2(user).cohorts;
@@ -861,7 +922,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-gray-stroke">
-                  {bulkActions && <th className="bg-[#fafafa] pl-4 pr-0 py-3 text-left">
+                  {bulkActions && <th className="bg-gray-hover pl-4 pr-0 py-3 text-left">
                     <label className="relative flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border border-[#CCCCCC]"
                       style={visibleUsers.length > 0 && visibleUsers.every((u) => selectedEmails.has(u.email)) ? { backgroundColor: "#038561", borderColor: "#038561" } : undefined}>
                       <input
@@ -883,23 +944,23 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       )}
                     </label>
                   </th>}
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[14px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">User</div></th>
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[14px] font-medium leading-[1.2] text-gray-dark">
+                  <th className="bg-gray-hover px-4 py-3 text-left text-[14px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">User</div></th>
+                  <th className="bg-gray-hover px-4 py-3 text-left text-[14px] font-medium leading-[1.2] text-gray-dark">
                     <span className="max-w-[120px] truncate">1:1 Sessions</span>
                   </th>
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[14px] font-medium leading-[1.2] text-gray-dark">
+                  <th className="bg-gray-hover px-4 py-3 text-left text-[14px] font-medium leading-[1.2] text-gray-dark">
                     <div className="max-w-[200px] truncate">Programs</div>
                   </th>
-                  <th className="bg-[#fafafa] px-4 py-3 text-left text-[14px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+</div></th>
+                  <th className="bg-gray-hover px-4 py-3 text-left text-[14px] font-medium leading-[1.2] text-gray-dark"><div className="max-w-[140px] truncate">Leland+</div></th>
                   <th className="hidden"></th>
-                  <th className="sticky right-0 bg-[#fafafa] px-4 py-3"><div className="pointer-events-none absolute inset-y-0 -left-8 w-8 bg-gradient-to-r from-transparent to-[#fafafa]" /></th>
+                  <th className="sticky right-0 bg-[#f4f4f4] px-4 py-3"><div className="pointer-events-none absolute inset-y-0 -left-8 w-8 bg-gradient-to-r from-transparent to-[#f4f4f4]" /></th>
                 </tr>
               </thead>
               <tbody>
                 {visibleUsers.map((user, i) => (
                   <tr
                     key={i}
-                    className={`group cursor-pointer hover:bg-[#fafafa] ${i < visibleUsers.length - 1 ? "border-b border-gray-stroke" : ""}`}
+                    className={`group cursor-pointer hover:bg-gray-hover ${i < visibleUsers.length - 1 ? "border-b border-gray-stroke" : ""}`}
                     onClick={() => {
                       const baseDetail = showVerizon ? (verizonUserDetailsV2[user.email] ?? tableRowToUserDetailV2(user)) : (userDetailsV2[user.email] ?? tableRowToUserDetailV2(user));
                       const rowCohorts = tableRowToUserDetailV2(user).cohorts;
@@ -1007,7 +1068,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                         if (!status) return <span className="text-[14px] text-gray-light">—</span>;
                         if (status === "Active") return <span className="inline-flex rounded-full bg-[#e6f4ef] px-2.5 py-1.5 text-[12px] font-medium leading-none text-gray-dark">Active</span>;
                         if (status === "Invited") return <span className="inline-flex rounded-full bg-[#eff6ff] px-2.5 py-1.5 text-[12px] font-medium leading-none text-[#3b82f6]">Invited</span>;
-                        return <span className="inline-flex rounded-full bg-[#f5f5f5] px-2.5 py-1.5 text-[12px] font-medium leading-none text-[#888]">Expired</span>;
+                        return <span className="inline-flex rounded-full bg-gray-hover px-2.5 py-1.5 text-[12px] font-medium leading-none text-[#888]">Expired</span>;
                       })() : (
                         <>
                           {user.plus === "Granted" && user.plusExpiry && (
@@ -1019,7 +1080,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                       )}
                     </td>
                     <td className="hidden"></td>
-                    <td className="sticky right-0 bg-white px-4 py-[14px] group-hover:bg-[#fafafa]">
+                    <td className="sticky right-0 bg-white px-4 py-[14px] group-hover:bg-[#f4f4f4]">
                       <div className="pointer-events-none absolute inset-y-0 -left-8 w-8 bg-gradient-to-r from-transparent to-white group-hover:to-[#fafafa]" />
                       <div className="flex items-center justify-end gap-2">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight">

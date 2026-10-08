@@ -63,7 +63,8 @@ export default function TeamLayout() {
       </aside>
 
       <div className="min-w-0 flex-1">
-        <div className="mx-auto max-w-[860px] px-4 py-8 sm:px-6 sm:py-10">
+        {/* Same 1080px content width as My Leland, so page layout stays standard */}
+        <div className="mx-auto max-w-[1080px] px-4 py-8 sm:px-6 sm:py-10">
           <Outlet />
         </div>
       </div>
