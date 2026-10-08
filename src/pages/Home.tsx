@@ -5441,24 +5441,27 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
       <SidebarSectionCard title="Livestreams" to="/events" bleed={false}>
         <SidebarCard
           variant="event"
+          ogThumb
           live
           image={liveVideoThumb}
           title="MBA Strategy Live"
-          subtitle={<><span className="inline-flex items-center gap-1 font-semibold text-red"><IconLivestreamSignal className="h-3.5 w-3.5 shrink-0" />Live now</span> · 125 registered</>}
+          subtitle={<><span className="inline-flex items-center gap-1 font-semibold text-red"><IconLivestreamSignal className="h-3.5 w-3.5 shrink-0" />Live now</span> · 125 going</>}
           rightInline
           right={<Button size="sm" variant="dark" rounded="rounded-full" className="w-fit">Join</Button>}
         />
         <SidebarCard
           variant="event"
+          ogThumb
           image={eventImg2}
           title="Tech Consulting Workshop"
-          subtitle="Starts 4:30 PM · 89 registered"
+          subtitle="Today, 4:30 PM · 89 going"
         />
         <SidebarCard
           variant="event"
+          ogThumb
           image={eventImg3}
           title="Interview Prep Session"
-          subtitle="Tomorrow, 2:00 PM · 54 registered"
+          subtitle="Tomorrow, 2:00 PM · 54 going"
         />
       </SidebarSectionCard>
 
@@ -5664,7 +5667,7 @@ function HomeSidebarV2() {
               onClick={() => navigate(p.href)}
               className="group flex cursor-pointer items-center gap-3 rounded-[8px] px-2 py-2 transition-colors hover:bg-gray-hover"
             >
-              <img src={p.image} alt="" className="h-[42px] w-[68px] shrink-0 rounded-[6px] object-cover" />
+              <img src={p.image} alt="" className="aspect-[1.91/1] h-[42px] shrink-0 rounded-[6px] object-cover" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[14px] font-semibold leading-tight text-gray-dark group-hover:underline">{p.title}</p>
                 <p className="mt-0.5 truncate text-[12px] leading-tight text-gray-light">
