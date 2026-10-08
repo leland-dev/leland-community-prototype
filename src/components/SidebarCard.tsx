@@ -53,6 +53,8 @@ interface SidebarCardProps {
   rightInline?: boolean;
   /** Event-only: adds the inset red border on the thumbnail */
   live?: boolean;
+  /** Event-only: 44px-tall thumbnail at the 1.91:1 OG aspect ratio */
+  ogThumb?: boolean;
   /** Vertical alignment of content relative to the leading element */
   align?: "center" | "top";
   /** Optional route to navigate to when clicked */
@@ -70,17 +72,18 @@ function ReviewRow({ rating, count }: { rating: number; count: number }) {
   );
 }
 
-function Leading({ variant, image, icon, live }: Pick<SidebarCardProps, "variant" | "image" | "icon" | "live">) {
+function Leading({ variant, image, icon, live, ogThumb }: Pick<SidebarCardProps, "variant" | "image" | "icon" | "live" | "ogThumb">) {
+  const thumbSize = ogThumb ? "aspect-[1.91/1] h-[42px]" : "h-[44px] w-[80px]";
   if ((variant === "event" || variant === "course" || variant === "resource") && image) {
     if (variant === "event" && live) {
       return (
-        <div className="relative h-[44px] w-[80px] shrink-0">
+        <div className={`relative ${thumbSize} shrink-0`}>
           <img src={image} alt="" className="h-full w-full rounded-[4px] object-cover" />
           <div className="pointer-events-none absolute inset-0 rounded-[4px] border-[2px] border-[#FB5A42]" />
         </div>
       );
     }
-    return <img src={image} alt="" className="h-[44px] w-[80px] shrink-0 rounded-[4px] object-cover" />;
+    return <img src={image} alt="" className={`${thumbSize} shrink-0 rounded-[4px] object-cover`} />;
   }
   if (variant === "coach" && image) {
     return <img src={image} alt="" className="h-[36px] w-[36px] shrink-0 rounded-full object-cover" />;
@@ -104,6 +107,7 @@ export default function SidebarCard({
   right,
   rightInline,
   live,
+  ogThumb,
   align = "center",
   to,
 }: SidebarCardProps) {
@@ -111,12 +115,12 @@ export default function SidebarCard({
 
   const content = (
     <>
-      <Leading variant={variant} image={image} icon={icon} live={live} />
+      <Leading variant={variant} image={image} icon={icon} live={live} ogThumb={ogThumb} />
 
       {/* Center: title + subtitle. Non-inline `right` gets pushed to the far
           edge by flex-1; inline `right` hugs the text instead. */}
       <div className={`flex min-w-0 flex-col gap-[2px] ${rightInline ? "" : "flex-1"}`}>
-        <p className="line-clamp-2 text-[14px] font-semibold leading-[1.2] text-gray-dark group-hover:underline group-hover:decoration-[1px] group-hover:underline-offset-[2px]">{title}</p>
+        <p className={`line-clamp-2 text-[14px] font-semibold leading-[1.2] text-gray-dark group-hover:underline group-hover:decoration-[1px] group-hover:underline-offset-[2px]`}>{title}</p>
         <p className="truncate text-[12px] font-normal leading-[1.4] text-gray-light">{subtitle}</p>
         {reviews && (
           <p className="truncate text-[12px] font-normal leading-[1.4] text-gray-light">
