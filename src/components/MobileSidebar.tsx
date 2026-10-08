@@ -227,10 +227,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
               <p className={`text-[18px] font-semibold ${darkMode ? "text-white" : "text-gray-dark"}`}>{team.name}</p>
             </NavLink>
             <p className="mt-2.5 text-[14px] leading-none text-gray-light">
-              <span className={`font-medium ${darkMode ? "text-white" : "text-gray-dark"}`}>
-                {team.plan === "enterprise" ? "Enterprise" : "Team"}
-              </span>{" "}
-              · {team.viewerRole}
+              {team.plan === "enterprise" ? "Enterprise" : "Team"} {team.viewerRole.toLowerCase()}
             </p>
           </div>
 
@@ -242,7 +239,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                 key={item.to}
                 to={item.to}
                 onClick={onClose}
-                className={({ isActive }) => `${menuItemClass} ${isActive ? (darkMode ? "bg-white/10 font-semibold" : "bg-gray-hover font-semibold") : ""}`}
+                className={menuItemClass}
               >
                 <img src={item.icon} alt="" className={iconClass} aria-hidden />
                 <span>{item.label}</span>
@@ -250,11 +247,11 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
             ))}
           </div>
 
-          <div className={`mx-5 mt-2 border-t pt-2 ${darkMode ? "border-white/20" : "border-[#E5E5E5]"}`}>
-            <NavLink to="/my-leland" onClick={onClose} className={`${menuItemClass} -mx-5`}>
-              <img src={switchIcon} alt="" className={iconClass} aria-hidden />
-              <span>Switch to personal view</span>
-            </NavLink>
+          <div className="px-5 pt-4">
+            <Button size="md" variant="secondary" rounded="rounded-full" onClick={() => { onClose(); navigate("/my-leland"); }}>
+              <img src={switchIcon} alt="" className="h-5 w-5" aria-hidden />
+              Switch to personal view
+            </Button>
           </div>
         </motion.div>
       </div>

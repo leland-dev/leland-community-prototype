@@ -27,15 +27,19 @@ export default function TeamLayout() {
   return (
     <div className="flex min-h-[calc(100vh-61px)] bg-[#F3F1E6]/50">
       <aside className="hidden w-[264px] shrink-0 self-start sticky top-[61px] h-[calc(100vh-61px)] flex-col gap-4 overflow-y-auto px-4 pb-4 pt-5 md:flex">
+        {/* Team profile card */}
+        <div className={`${cardCls} p-5`}>
+          {/* Same stacked header as the mobile menu: logo, name, then plan · role */}
+          <TeamLogo name={team.name} logo={team.logo} size={48} circle />
+          <p className="mt-3 truncate text-[18px] font-semibold text-gray-dark">{team.name}</p>
+          <p className="mt-2.5 text-[14px] leading-none text-gray-light">
+              {team.plan === "enterprise" ? "Enterprise" : "Team"} {team.viewerRole.toLowerCase()}
+            </p>
+        </div>
+
+        {/* Menu items card */}
         <div className={`${cardCls} p-2`}>
-          <div className="flex items-center gap-3 px-3 py-3">
-            <TeamLogo name={team.name} logo={team.logo} size={36} circle />
-            <div className="min-w-0">
-              <p className="truncate text-[15px] font-semibold text-gray-dark">{team.name}</p>
-              <p className="text-[12px] text-gray-light">{team.plan === "enterprise" ? "Enterprise" : "Team"}</p>
-            </div>
-          </div>
-          <nav className="flex flex-col gap-1 border-t border-gray-stroke pt-2">
+          <nav className="flex flex-col gap-1">
             {items.map((i) => (
               <NavLink key={i.to} to={i.to} className={linkCls}>
                 {i.label}
