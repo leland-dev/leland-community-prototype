@@ -11,6 +11,14 @@ export interface TeamMember {
   access: string[];
 }
 
+export interface Purchase {
+  id: string;
+  date: string; // display date
+  description: string; // what was purchased
+  detail?: string; // e.g. seats, dates
+  amount: number; // USD
+}
+
 export interface Team {
   name: string;
   logo?: string; // image URL / data URL
@@ -19,6 +27,7 @@ export interface Team {
   viewerRole: TeamMember["role"];
   card?: { brand: string; last4: string };
   members: TeamMember[];
+  purchases?: Purchase[];
 }
 
 interface TeamContextValue {
@@ -55,6 +64,12 @@ const SAMPLE_TEAM: Team = {
   plan: "team",
   viewerRole: "Admin",
   card: { brand: "Visa", last4: "4242" },
+  purchases: [
+    { id: "p-4", date: "Sep 30, 2026", description: "1:1 coaching sessions", detail: "6 sessions \u00b7 Jordan Lee, Sam Patel", amount: 1500 },
+    { id: "p-3", date: "Sep 12, 2026", description: "Leland+ annual access", detail: "3 seats", amount: 897 },
+    { id: "p-2", date: "Aug 18, 2026", description: "AI Builder Program", detail: "2 seats \u00b7 Cohort starts Sep 8", amount: 3990 },
+    { id: "p-1", date: "Aug 4, 2026", description: "AI Builder Program", detail: "1 seat \u00b7 Cohort starts Sep 8", amount: 1995 },
+  ],
   members: [
     { id: "me", name: "Alex Rivera", email: "alex.rivera@flybreeze.com", role: "Admin", access: ["All programs"] },
     { id: "m-1", name: "Jordan Lee", email: "jordan.lee@flybreeze.com", role: "Member", access: ["AI Builder Program"] },

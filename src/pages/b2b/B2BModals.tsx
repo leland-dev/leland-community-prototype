@@ -98,7 +98,7 @@ function cohortDateLabel(startDate: string): string {
 }
 
 const MODAL_COHORTS_META = [
-  { key: "ib", label: "Spring '26 IB Recruiting Bootcamp", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", sessionCount: 8, scheduleDays: ["Wednesdays, 6–7:30 PM ET", "Fridays, 6–7:30 PM ET"], duration: "90-minute sessions" },
+  { key: "aibp", label: "AI Builder Program", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", sessionCount: 8, scheduleDays: ["Wednesdays, 6–7:30 PM ET", "Fridays, 6–7:30 PM ET"], duration: "90-minute sessions" },
   { key: "pe", label: "Private Equity Recruiting Bootcamp", startDate: "Jun 2, 2026", endDate: "Jun 30, 2026", sessionCount: 5, scheduleDays: ["Tuesdays, 7–8:30 PM ET"], duration: "90-minute sessions" },
   { key: "ai", label: "AI for Finance Professionals", startDate: "Mar 1, 2026", endDate: "Mar 29, 2026", sessionCount: 4, scheduleDays: ["Thursdays, 6–7 PM ET"], duration: "60-minute sessions", full: true },
   { key: "consulting", label: "Consulting Accelerator", startDate: "Jul 7, 2026", endDate: "Aug 4, 2026", sessionCount: 6, scheduleDays: ["Mondays, 7–8:30 PM ET", "Wednesdays, 7–8:30 PM ET"], duration: "90-minute sessions" },
@@ -209,7 +209,7 @@ const chevronDown = (
 
 const selectCls2 = "h-[48px] w-full appearance-none rounded-[8px] border border-gray-stroke bg-white px-4 pr-10 text-[14px] outline-none focus:border-primary";
 
-const COHORTS = ["Spring '26 IB Recruiting", "PE Recruiting Bootcamp", "AI for Finance"];
+const COHORTS = ["AI Builder Program", "PE Recruiting Bootcamp", "AI for Finance"];
 
 function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, cohortInvited, setCohortInvited, selectedDates, onOpenCohortPicker }: {
   sessions: number; setSessions: (n: number) => void;
@@ -293,16 +293,15 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, c
 }
 
 const CONTRACT_COHORTS_MODAL = [
-  "Spring '26 IB Recruiting Bootcamp",
+  "AI Builder Program",
   "Private Equity Recruiting Bootcamp",
   "AI for Finance Professionals",
 ];
 
 const COHORT_DATES: Record<string, string[]> = {
-  "Spring '26 IB Recruiting": ["Mar 3 – May 9, 2026", "Jun 2 – Aug 7, 2026"],
   "PE Recruiting Bootcamp": ["Apr 7 – Jun 12, 2026", "Sep 8 – Nov 13, 2026"],
   "AI for Finance": ["Feb 3 – Apr 10, 2026", "May 5 – Jul 10, 2026"],
-  "Spring '26 IB Recruiting Bootcamp": ["Mar 3 – May 9, 2026", "Jun 2 – Aug 7, 2026"],
+  "AI Builder Program": ["Mar 3 – May 9, 2026", "Jun 2 – Aug 7, 2026"],
   "Private Equity Recruiting Bootcamp": ["Apr 7 – Jun 12, 2026", "Sep 8 – Nov 13, 2026"],
   "AI for Finance Professionals": ["Feb 3 – Apr 10, 2026", "May 5 – Jul 10, 2026"],
 };

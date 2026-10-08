@@ -245,6 +245,46 @@ export function TeamAdmins() {
   return <B2BSettings hideDashboardLink />;
 }
 
+// Billing — card on file, purchase history, plus SSO/invoicing for Enterprise.
+const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 });
+
+function BillingHistory() {
+  const { team } = useTeam();
+  if (!team) return null;
+  const purchases = team.purchases ?? [];
+  return (
+    <Card title="Billing history">
+      {purchases.length === 0 ? (
+        <p className="text-[14px] text-gray-light">No purchases yet. Anything you buy for your team will show up here.</p>
+      ) : (
+        <div className="-mx-5 overflow-x-auto px-5">
+          <table className="w-full min-w-[480px] border-collapse text-left text-[14px]">
+            <thead>
+              <tr className="border-b border-gray-stroke text-[12px] font-medium text-gray-light">
+                <th className="pb-2 pr-4 font-medium">Date</th>
+                <th className="pb-2 pr-4 font-medium">Purchase</th>
+                <th className="pb-2 text-right font-medium">Amount</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-stroke">
+              {purchases.map((p) => (
+                <tr key={p.id} className="align-top">
+                  <td className="whitespace-nowrap py-3 pr-4 text-gray-light">{p.date}</td>
+                  <td className="py-3 pr-4">
+                    <p className="font-medium text-gray-dark">{p.description}</p>
+                    {p.detail && <p className="text-[13px] text-gray-light">{p.detail}</p>}
+                  </td>
+                  <td className="whitespace-nowrap py-3 text-right font-medium text-gray-dark">{usd(p.amount)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 // Billing — card on file, plus SSO/invoicing for Enterprise.
 export function TeamBilling() {
   const { team } = useTeam();
@@ -254,6 +294,7 @@ export function TeamBilling() {
     <div className="flex flex-col gap-5">
       <PageTitle>Billing</PageTitle>
       <Billing />
+      <BillingHistory />
       {team.plan === "enterprise" && <SecurityCard />}
     </div>
   );

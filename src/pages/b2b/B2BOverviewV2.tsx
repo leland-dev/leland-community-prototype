@@ -14,6 +14,8 @@ import userImg5 from "../../assets/profile photos/pic-8.png";
 import usersIcon from "../../assets/icons/user-community.svg";
 import settingsIcon from "../../assets/icons/settings.svg";
 import { RowMenu, type RowMenuPos } from "./B2BShared";
+import peBootcampImg from "../../assets/placeholder images/courses/pe-recruiting-bootcamp.png";
+import aiBuilderImg from "../../assets/placeholder images/courses/ai-builder-program.webp";
 
 interface Props {
   onNavigate: (view: B2BView) => void;
@@ -31,20 +33,23 @@ interface Props {
 const activity = [
   { type: "session", coachImg: coachImg1, name: "Sarah Kim", action: "booked a coaching session with", target: "Jordan Lee", time: "2h ago", category: "Investment Banking" },
   { type: "review", coachImg: coachImg2, name: "Raj Patel", action: "left a 5-star review for", target: "Priya N.", time: "Yesterday", category: "Career Strategy" },
-  { type: "enrollment", name: "Mia Chen", action: "enrolled in", target: "Spring '26 IB Cohort", time: "2d ago", category: "Live courses" },
+  { type: "enrollment", name: "Mia Chen", action: "enrolled in", target: "AI Builder Program", time: "2d ago", category: "Live courses" },
   { type: "session", coachImg: coachImg3, name: "Evan Torres", action: "booked a session with", target: "Alex Morgan", time: "3d ago", category: "Private Equity" },
 ];
 
 const CONTRACT_COHORTS = [
-  { key: "ib", label: "Spring '26 IB Recruiting Bootcamp" },
+  { key: "aibp", label: "AI Builder Program" },
   { key: "pe", label: "Private Equity Recruiting Bootcamp" },
   { key: "ai", label: "AI for Finance Professionals" },
   { key: "consulting", label: "Consulting Accelerator" },
 ] as const;
 
+// Programs listed in the user table (the Private Equity bootcamp is hidden here; it still appears in the user drawer).
+const TABLE_COHORTS = CONTRACT_COHORTS.filter((c) => c.key !== "pe");
+
 const COHORT_META: Record<CohortKey, { label: string; image: string; startDate: string; endDate: string; sessionsTotal: number }> = {
-  ib: { label: "Spring '26 IB Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", sessionsTotal: 8 },
-  pe: { label: "Private Equity Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841c0c4dde9ed55e539fe5f.png", startDate: "Jun 2, 2026", endDate: "Jun 30, 2026", sessionsTotal: 5 },
+  aibp: { label: "AI Builder Program", image: aiBuilderImg, startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", sessionsTotal: 8 },
+  pe: { label: "Private Equity Recruiting Bootcamp", image: peBootcampImg, startDate: "Jun 2, 2026", endDate: "Jun 30, 2026", sessionsTotal: 5 },
   ai: { label: "AI for Finance Professionals", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Mar 1, 2026", endDate: "Mar 29, 2026", sessionsTotal: 4 },
   consulting: { label: "Consulting Accelerator", image: "https://leland.imgix.net/bootcamps/6841c0c4dde9ed55e539fe5f.png", startDate: "Jul 7, 2026", endDate: "Aug 4, 2026", sessionsTotal: 6 },
 };
@@ -102,15 +107,15 @@ type UserRow = {
 };
 
 const users: UserRow[] = [
-  { initials: "ZP", name: "Zoe Park", email: "zoe.park@kellogg.edu", sessions: 1, sessionsTotal: 3, cohortStatuses: { ib: 8, pe: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Feb 15, 2026", plusExpiry: "Aug 15, 2026", lastActive: "1d ago", lastActiveDays: 1, dateAdded: "Jan 5, 2026", daysAdded: 99 },
-  { initials: "SK", name: "Sarah Kim", email: "sarah.kim@kellogg.edu", sessions: 2, sessionsTotal: 4, cohortStatuses: { ib: 8, pe: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 10, 2026", plusExpiry: "Jul 10, 2026", lastActive: "2h ago", lastActiveDays: 0.08, dateAdded: "Jan 10, 2026", daysAdded: 94 },
-  { initials: "RP", name: "Raj Patel", email: "raj.patel@kellogg.edu", sessions: 1, sessionsTotal: 3, cohortStatuses: { ib: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 10, 2026", plusExpiry: "Jul 10, 2026", lastActive: "Yesterday", lastActiveDays: 1, dateAdded: "Jan 10, 2026", daysAdded: 94 },
-  { initials: "MC", name: "Mia Chen", email: "mia.chen@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: { ib: 4, ai: 4 } as Partial<Record<CohortKey, CohortStatus>>, plus: "—",  plusExpiry: null, lastActive: "2d ago", lastActiveDays: 2, dateAdded: "Jan 15, 2026", daysAdded: 89 },
+  { initials: "ZP", name: "Zoe Park", email: "zoe.park@kellogg.edu", sessions: 1, sessionsTotal: 3, cohortStatuses: { aibp: 8, pe: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Feb 15, 2026", plusExpiry: "Aug 15, 2026", lastActive: "1d ago", lastActiveDays: 1, dateAdded: "Jan 5, 2026", daysAdded: 99 },
+  { initials: "SK", name: "Sarah Kim", email: "sarah.kim@kellogg.edu", sessions: 2, sessionsTotal: 4, cohortStatuses: { aibp: 8, pe: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 10, 2026", plusExpiry: "Jul 10, 2026", lastActive: "2h ago", lastActiveDays: 0.08, dateAdded: "Jan 10, 2026", daysAdded: 94 },
+  { initials: "RP", name: "Raj Patel", email: "raj.patel@kellogg.edu", sessions: 1, sessionsTotal: 3, cohortStatuses: { aibp: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 10, 2026", plusExpiry: "Jul 10, 2026", lastActive: "Yesterday", lastActiveDays: 1, dateAdded: "Jan 10, 2026", daysAdded: 94 },
+  { initials: "MC", name: "Mia Chen", email: "mia.chen@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: { aibp: 4, ai: 4 } as Partial<Record<CohortKey, CohortStatus>>, plus: "—",  plusExpiry: null, lastActive: "2d ago", lastActiveDays: 2, dateAdded: "Jan 15, 2026", daysAdded: 89 },
   { initials: "ET", name: "Evan Torres", email: "evan.torres@kellogg.edu", sessions: 2, sessionsTotal: 4, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 15, 2026", plusExpiry: "Jul 15, 2026", lastActive: "3d ago", lastActiveDays: 3, dateAdded: "Jan 15, 2026", daysAdded: 89 },
   { initials: "AL", name: "Aisha Lee", email: "aisha.lee@kellogg.edu", sessions: 0, sessionsTotal: 3, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Feb 1, 2026", plusExpiry: "Aug 1, 2026", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 1, 2026", daysAdded: 72 },
   { initials: "JL", name: "Jordan Lee", email: "jordan.lee@kellogg.edu", sessions: 2, sessionsTotal: 3, cohortStatuses: { pe: 0, consulting: null } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 20, 2026", plusExpiry: "Jul 20, 2026", lastActive: "4d ago", lastActiveDays: 4, dateAdded: "Jan 20, 2026", daysAdded: 84 },
   { initials: "PM", name: "Priya Mehta", email: "priya.mehta@kellogg.edu", sessions: 1, sessionsTotal: 2, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 20, 2026", plusExpiry: "Jul 20, 2026", lastActive: "5d ago", lastActiveDays: 5, dateAdded: "Jan 20, 2026", daysAdded: 84 },
-  { initials: "DW", name: "Daniel Wu", email: "daniel.wu@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: { ib: 3 } as Partial<Record<CohortKey, CohortStatus>>, plus: "—",  plusExpiry: null, lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Feb 3, 2026", daysAdded: 70 },
+  { initials: "DW", name: "Daniel Wu", email: "daniel.wu@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: { aibp: 3 } as Partial<Record<CohortKey, CohortStatus>>, plus: "—",  plusExpiry: null, lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Feb 3, 2026", daysAdded: 70 },
   { initials: "NB", name: "Nina Brooks", email: "nina.brooks@kellogg.edu", sessions: 3, sessionsTotal: 4, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Jan 25, 2026", plusExpiry: "Jul 25, 2026", lastActive: "1w ago", lastActiveDays: 7, dateAdded: "Jan 25, 2026", daysAdded: 79 },
   { initials: "CR", name: "Carlos Rivera", email: "carlos.rivera@kellogg.edu", sessions: null, sessionsTotal: null, cohortStatuses: {} as Partial<Record<CohortKey, CohortStatus>>, plus: "Expired", plusGranted: "Oct 10, 2025", plusExpiry: "Apr 10, 2026", lastActive: "—", lastActiveDays: 999, dateAdded: "Feb 10, 2026", daysAdded: 63 },
   { initials: "HS", name: "Hannah Seo", email: "hannah.seo@kellogg.edu", sessions: 1, sessionsTotal: 2, cohortStatuses: { pe: null, ai: null } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted", plusGranted: "Feb 15, 2026", plusExpiry: "Aug 15, 2026", lastActive: "2w ago", lastActiveDays: 14, dateAdded: "Feb 15, 2026", daysAdded: 58 },
@@ -131,7 +136,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
       ],
     },
     cohorts: [
-      cohortEntry("ib", 8, { review: { rating: 5, text: "Incredibly well-structured and the coaches had real recruiting experience. I felt prepared going into every interview." } }),
+      cohortEntry("aibp", 8, { review: { rating: 5, text: "Incredibly well-structured and the coaches had real recruiting experience. I felt prepared going into every interview." } }),
       cohortEntry("pe", 0),
     ],
     plus: { status: "active", grantedDate: "Feb 15, 2026", expiry: "Aug 15, 2026", resourcesViewed: 24, topCategories: ["Investment Banking", "Resume & Cover Letters", "Networking"] },
@@ -148,7 +153,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
       ],
     },
     cohorts: [
-      cohortEntry("ib", 8, { review: { rating: 5, text: "Exactly what I needed — structured, fast-paced, and the instructors had real deal experience." } }),
+      cohortEntry("aibp", 8, { review: { rating: 5, text: "Exactly what I needed — structured, fast-paced, and the instructors had real deal experience." } }),
       cohortEntry("pe", 0),
     ],
     plus: { status: "active", expiry: "Jul 10, 2026", resourcesViewed: 31, topCategories: ["Investment Banking", "Private Equity", "Interview Prep"] },
@@ -164,14 +169,14 @@ const userDetailsV2: Record<string, UserDetailV2> = {
       ],
     },
     cohorts: [
-      cohortEntry("ib", 0),
+      cohortEntry("aibp", 0),
     ],
     plus: { status: "active", expiry: "Jul 10, 2026", resourcesViewed: 12, topCategories: ["Consulting", "Case Interview Prep"] },
   },
   "mia.chen@kellogg.edu": {
     name: "Mia Chen", email: "mia.chen@kellogg.edu", initials: "MC", image: userImg4, dateAdded: "Jan 15, 2026",
     cohorts: [
-      cohortEntry("ib", 4),
+      cohortEntry("aibp", 4),
       cohortEntry("ai", 4, { review: { rating: 4, text: "Great content, though I wished there was more time for hands-on exercises." } }),
     ],
   },
@@ -229,7 +234,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
   "daniel.wu@kellogg.edu": {
     name: "Daniel Wu", email: "daniel.wu@kellogg.edu", initials: "DW", dateAdded: "Feb 3, 2026",
     cohorts: [
-      cohortEntry("ib", 3),
+      cohortEntry("aibp", 3),
     ],
   },
   "nina.brooks@kellogg.edu": {
@@ -281,7 +286,7 @@ const userDetailsV2: Record<string, UserDetailV2> = {
 
 // Shared Verizon cohort invites for all users
 const verizonCohorts: CohortEntry[] = [
-  cohortEntry("ib", 0),
+  cohortEntry("aibp", 0),
   cohortEntry("pe", 0),
 ];
 
@@ -488,11 +493,11 @@ function FilterDropdown({ label, value, options, onChange }: { label: string; va
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-gray-hover px-3.5 py-2.5 text-[12px] font-medium leading-[1.2] text-[#222222] transition-colors hover:bg-[#222222]/10 ${open ? "ring-[1.5px] ring-inset ring-[#222222]" : ""}`}
+        className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-lg border bg-white px-4 py-3 text-[14px] font-medium leading-[1.2] text-[#222222] transition-colors hover:bg-gray-hover ${open ? "border-[#222222]" : "border-gray-stroke"}`}
       >
         <span className="text-[#707070]">{label}</span>
         {!isAll && <span>{current?.label}</span>}
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden>
           <polyline points="4 6 8 10 12 6" />
         </svg>
       </button>
@@ -610,6 +615,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
   }, []);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "invited" | "expired">("all");
   const [addedByFilter, setAddedByFilter] = useState<string>("all");
+  const [removedEmails, setRemovedEmails] = useState<Set<string>>(new Set());
   const [sort] = useState<"last-active" | "date-added">("date-added");
 
   const isActive = (u: typeof users[number]) =>
@@ -621,6 +627,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
     (Object.keys(u.cohortStatuses).length > 0 && Object.values(u.cohortStatuses).every((n) => (n ?? 0) === 0));
 
   const filteredUsers = users.filter((u) => {
+    if (removedEmails.has(u.email)) return false;
     if (statusFilter === "active" && !isActive(u)) return false;
     if (statusFilter === "invited" && !hasInvitePending(u)) return false;
     if (statusFilter === "expired" && u.plus !== "Expired") return false;
@@ -641,7 +648,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
       if (!showVerizon) return u;
       const vz = verizonUserDetailsV2[u.email];
       const completedCount = vz?.sessions?.entries.filter((e) => e.status === "completed").length ?? 0;
-      return { ...u, sessions: completedCount, sessionsTotal: 2, cohortStatuses: { ib: 0, pe: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted" as const, plusExpiry: "Dec 31, 2026" };
+      return { ...u, sessions: completedCount, sessionsTotal: 2, cohortStatuses: { aibp: 0, pe: 0 } as Partial<Record<CohortKey, CohortStatus>>, plus: "Granted" as const, plusExpiry: "Dec 31, 2026" };
     })();
     if (!override) return base;
     const cohortStatuses: Partial<Record<CohortKey, CohortStatus>> = {};
@@ -801,7 +808,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
 
       {/* Users table */}
       <div className="mt-8">
-        <h2 className="mb-3 text-[22px] font-medium text-gray-dark">Users</h2>
+        <h2 className={`mb-3 text-[22px] text-gray-dark ${hideOrgName ? "font-semibold" : "font-medium"}`}>Users</h2>
         {/* Search + filters toolbar */}
         <div className="mb-3 flex flex-wrap items-center gap-3">
           <div className="flex w-full items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3 sm:w-auto sm:max-w-[280px] sm:flex-1">
@@ -861,7 +868,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
           {tableWraps && (
             <div className="divide-y divide-gray-stroke sm:hidden">
               {visibleUsers.map((user, i) => {
-                const enrolled = CONTRACT_COHORTS.filter((c) => user.cohortStatuses[c.key] !== undefined);
+                const enrolled = TABLE_COHORTS.filter((c) => user.cohortStatuses[c.key] !== undefined);
                 return (
                   <div
                     key={i}
@@ -991,13 +998,6 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     </td>}
                     <td className="px-4 py-[14px]">
                       <div className="flex items-center gap-[10px]">
-                        {userDetailsV2[user.email]?.image ? (
-                          <img src={userDetailsV2[user.email].image} alt={user.name} className="hidden h-9 w-9 shrink-0 rounded-full object-cover lg:block" />
-                        ) : (
-                          <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-xlight text-[12px] font-semibold text-dark-green lg:flex">
-                            {user.initials}
-                          </div>
-                        )}
                         <div>
                           <div className="text-[14px] font-medium text-gray-dark">{user.name}</div>
                           <div className="text-[12px] text-gray-light">{user.email}</div>
@@ -1011,7 +1011,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                     </td>
                     <td className="px-4 py-[14px]">
                       {(() => {
-                        const enrolled = CONTRACT_COHORTS.filter((c) => user.cohortStatuses[c.key] !== undefined);
+                        const enrolled = TABLE_COHORTS.filter((c) => user.cohortStatuses[c.key] !== undefined);
                         const isExpanded = expandedPrograms.has(user.email);
                         const visible = isExpanded ? enrolled : enrolled.slice(0, 3);
                         const hidden = enrolled.length - 3;
@@ -1247,7 +1247,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
 
       <div className="h-[120px] shrink-0" />
 
-      <B2BUserDrawerV2 user={selectedUserV2} onClose={() => setSelectedUserV2(null)} isAlaCarte={partnerModel === "a-la-carte"} showLpEngagement={showLpEngagement} onUpdateAccess={handleUpdateAccess} onSwitchCohort={handleSwitchCohort} />
+      <B2BUserDrawerV2 user={selectedUserV2} onClose={() => setSelectedUserV2(null)} isAlaCarte={partnerModel === "a-la-carte"} showLpEngagement={showLpEngagement} onUpdateAccess={handleUpdateAccess} onSwitchCohort={handleSwitchCohort} onRemoveUser={(email) => setRemovedEmails((prev) => new Set(prev).add(email))} />
       <ReviewsModal open={showReviews} onClose={() => setShowReviews(false)} />
 
       {/* Prototype toggle */}

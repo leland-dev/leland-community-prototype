@@ -1,10 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type SVGProps } from "react";
 import { Button } from "../../components/Button";
 import { motion, AnimatePresence } from "motion/react";
 import usersIcon from "../../assets/icons/users-icon.svg";
 import starIcon from "../../assets/icons/star-icon.svg";
 import videoIcon from "../../assets/icons/video-icon.svg";
 import plusIcon from "../../assets/icons/plus-icon.svg";
+import peBootcampImg from "../../assets/placeholder images/courses/pe-recruiting-bootcamp.png";
+import aiBuilderImg from "../../assets/placeholder images/courses/ai-builder-program.webp";
+import { Button as LelandButton, ButtonColor, ButtonSize } from "../../components/leland/Button";
 
 export interface SessionEntry {
   coach?: string;
@@ -54,6 +57,8 @@ interface Props {
   showLpEngagement?: boolean;
   onUpdateAccess?: (email: string, cohortKeys: string[], sessions: number) => void;
   onSwitchCohort?: (email: string, oldCohortName: string, newCohortKey: string) => void;
+  onGrantAdmin?: (email: string) => void;
+  onRemoveUser?: (email: string) => void;
 }
 
 
@@ -62,27 +67,27 @@ function cohortDateLabel(startDate: string): string {
 }
 
 const ALL_COHORTS_META: { key: string; label: string; image: string; startDate: string; endDate: string; sessionCount: number; scheduleDays: string[]; duration: string; full?: boolean }[] = [
-  { key: "ib", label: "Spring '26 IB Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", sessionCount: 8, scheduleDays: ["Wednesdays, 6–7:30 PM ET", "Fridays, 6–7:30 PM ET"], duration: "90-minute sessions" },
-  { key: "pe", label: "Private Equity Recruiting Bootcamp", image: "https://leland.imgix.net/bootcamps/6841c0c4dde9ed55e539fe5f.png", startDate: "Jun 2, 2026", endDate: "Jun 30, 2026", sessionCount: 5, scheduleDays: ["Tuesdays, 7–8:30 PM ET"], duration: "90-minute sessions" },
+  { key: "aibp", label: "AI Builder Program", image: aiBuilderImg, startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", sessionCount: 8, scheduleDays: ["Wednesdays, 6–7:30 PM ET", "Fridays, 6–7:30 PM ET"], duration: "90-minute sessions" },
+  { key: "pe", label: "Private Equity Recruiting Bootcamp", image: peBootcampImg, startDate: "Jun 2, 2026", endDate: "Jun 30, 2026", sessionCount: 5, scheduleDays: ["Tuesdays, 7–8:30 PM ET"], duration: "90-minute sessions" },
   { key: "ai", label: "AI for Finance Professionals", image: "https://leland.imgix.net/bootcamps/6841f40a18fcbc7406208084.png", startDate: "Mar 1, 2026", endDate: "Mar 29, 2026", sessionCount: 4, scheduleDays: ["Thursdays, 6–7 PM ET"], duration: "60-minute sessions", full: true },
   { key: "consulting", label: "Consulting Accelerator", image: "https://leland.imgix.net/bootcamps/6841c0c4dde9ed55e539fe5f.png", startDate: "Jul 7, 2026", endDate: "Aug 4, 2026", sessionCount: 6, scheduleDays: ["Mondays, 7–8:30 PM ET", "Wednesdays, 7–8:30 PM ET"], duration: "90-minute sessions" },
 ];
 
 const AVAILABLE_PROGRAMS = [
-  { key: "ib", label: "Spring '26 IB Recruiting Bootcamp" },
+  { key: "aibp", label: "AI Builder Program" },
   { key: "pe", label: "Private Equity Recruiting Bootcamp" },
   { key: "ai", label: "AI for Finance Professionals" },
   { key: "consulting", label: "Consulting Accelerator" },
 ];
 
 const PER_SEAT_PROGRAMS = [
-  "Spring '26 IB Recruiting Bootcamp",
+  "AI Builder Program",
   "Private Equity Recruiting Bootcamp",
   "AI for Finance Professionals",
 ];
 
 const PER_SEAT_PROGRAM_DATES: Record<string, { label: string }[]> = {
-  "Spring '26 IB Recruiting Bootcamp": [
+  "AI Builder Program": [
     { label: "Jan 15 – Mar 20, 2026" },
     { label: "Apr 7 – Jun 12, 2026" },
   ],
@@ -484,19 +489,29 @@ function AccordionSection({
   );
 }
 
-export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngagement, onUpdateAccess, onSwitchCohort }: Props) {
+function DotsVerticalIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden {...props}>
+      <circle cx="8" cy="3" r="1.3" /><circle cx="8" cy="8" r="1.3" /><circle cx="8" cy="13" r="1.3" />
+    </svg>
+  );
+}
+
+export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngagement, onUpdateAccess, onSwitchCohort, onGrantAdmin, onRemoveUser }: Props) {
   const [switchCohortName, setSwitchCohortName] = useState<string | null>(null);
   const [showUpdateAccess, setShowUpdateAccess] = useState(false);
   const [showEditAccess, setShowEditAccess] = useState(false);
-  const [reminderSent, setReminderSent] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [adminGranted, setAdminGranted] = useState(false);
   const activeView = switchCohortName ? "switch-cohort" : showUpdateAccess ? "update-access" : showEditAccess ? "edit-access" : "user";
 
   useEffect(() => {
     if (!user) return;
-    setReminderSent(false);
     setSwitchCohortName(null);
     setShowUpdateAccess(false);
     setShowEditAccess(false);
+    setMenuOpen(false);
+    setAdminGranted(false);
     function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -609,9 +624,45 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                 {/* User summary */}
                 {activeView === "user" && (<>
                 <div className="px-4 pb-2 pt-5 sm:px-6">
-                  <div className="text-[28px] font-medium text-gray-dark">User details</div>
-                  <div className="mt-1 text-[14px] text-gray-light">
-                    {user.email}{user.dateAdded ? ` · Added ${user.dateAdded}` : ""}
+                  <div className="relative flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="font-serif text-[28px] font-medium text-gray-dark">User details</div>
+                      <div className="mt-1 text-[14px] text-gray-light">
+                        {user.email}{user.dateAdded ? ` · Added ${user.dateAdded}` : ""}
+                      </div>
+                    </div>
+                    {/* More actions */}
+                    <LelandButton
+                      buttonColor={ButtonColor.REVEAL}
+                      size={ButtonSize.MEDIUM}
+                      rounded
+                      hideLabel
+                      label="More actions"
+                      ariaLabel="More actions"
+                      aria-expanded={menuOpen}
+                      LeftIcon={DotsVerticalIcon}
+                      onClick={() => setMenuOpen((v) => !v)}
+                    />
+                    {menuOpen && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                        <div className="absolute right-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-2xl border border-gray-stroke bg-white p-2 shadow-lg">
+                          <button
+                            disabled={adminGranted}
+                            onClick={() => { onGrantAdmin?.(user.email); setAdminGranted(true); setMenuOpen(false); }}
+                            className="flex w-full items-center rounded-lg px-3 py-2.5 text-left text-[14px] font-medium text-gray-dark hover:bg-gray-hover disabled:opacity-50"
+                          >
+                            {adminGranted ? "Admin access granted" : "Grant admin access"}
+                          </button>
+                          <button
+                            onClick={() => { setMenuOpen(false); onRemoveUser?.(user.email); onClose(); }}
+                            className="flex w-full items-center rounded-lg px-3 py-2.5 text-left text-[14px] font-medium text-[#D92D20] hover:bg-gray-hover"
+                          >
+                            Remove user
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="mt-5 flex gap-3">
                     {isAlaCarte && (
@@ -624,28 +675,6 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
                         Edit access
                       </Button>
                     )}
-                    <div className="group/remind relative flex-1">
-                      <Button size="md" variant="secondary" disabled={reminderSent} onClick={() => setReminderSent(true)} className="w-full justify-center border border-gray-stroke bg-white hover:bg-gray-hover">
-                        {reminderSent ? (
-                          <>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                            Reminder sent
-                          </>
-                        ) : (
-                          <>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
-                            </svg>
-                            Send reminder
-                          </>
-                        )}
-                      </Button>
-                      <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 w-56 -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[11px] leading-[1.4] text-white opacity-0 shadow-md transition-opacity group-hover/remind:opacity-100">
-                        Email the user links to benefits they haven't used yet.
-                      </div>
-                    </div>
                   </div>
                 </div>
 
