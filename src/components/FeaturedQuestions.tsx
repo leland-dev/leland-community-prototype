@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
+import MaskIcon from "./MaskIcon";
+import bellIcon from "../assets/icons/nav-icons/notifications-active.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic2 from "../assets/profile photos/pic-2.png";
 import pic3 from "../assets/profile photos/pic-3.png";
@@ -122,18 +124,8 @@ export function QuestionCard({
       onClick={onAnswer}
       className={`relative flex h-full w-full cursor-pointer flex-col rounded-2xl ${QUESTION_TINT} p-4 transition-shadow hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]`}
     >
-      {/* v2 attribution — "anonymous" + a submitted timestamp, with a
-          silhouette avatar whose ring matches the card tint. */}
-      {showAttribution && (
-        <div className="mb-2 flex items-center gap-2">
-          <AnonAvatar className="h-[22px] w-[22px] ring-2 ring-[#EEF2F4]" />
-          <span className="text-[14px] font-semibold text-gray-dark">Anonymous</span>
-          <span className="ml-auto text-[14px] text-gray-light">{q.time}</span>
-        </div>
-      )}
-
       {/* Carousel: dismiss "X" at the top-right (matches People to follow).
-          Hidden in v2, where the asker attribution occupies that row. */}
+          Hidden in v2, where the asker attribution occupies the bottom row. */}
       {!isGrid && onDismiss && !showAttribution && (
         <button
           type="button"
@@ -152,13 +144,24 @@ export function QuestionCard({
         {q.question}
       </p>
 
+      {/* v2 attribution — "anonymous" + a submitted timestamp, with a
+          silhouette avatar whose ring matches the card tint. Sits at the bottom
+          of the card, in place of the facepile. */}
+      {showAttribution && (
+        <div className="mt-4 flex items-center gap-2">
+          <AnonAvatar className="h-[22px] w-[22px] ring-2 ring-[#EEF2F4]" />
+          <span className="text-[14px] font-semibold text-gray-dark">Anonymous</span>
+          <span className="ml-auto text-[14px] text-gray-extra-light">{q.time}</span>
+        </div>
+      )}
+
       {/* Social proof — facepile of experts who've already answered. Hidden in
           v2, where the asker attribution replaces it as the card's meta row. */}
       {!showAttribution && (
         <div className="mt-4 flex items-center gap-2">
           <div className="flex -space-x-2">
             {FACEPILE.map((src, i) => (
-              <img key={i} src={src} alt="" className="h-5 w-5 rounded-full object-cover ring-2 ring-white" />
+              <img key={i} src={src} alt="" className="h-5 w-5 rounded-full object-cover ring-2 ring-[#EEF2F4]" />
             ))}
           </div>
           <span className="text-[12px] text-gray-light">{q.answered} other experts have answered</span>
@@ -177,6 +180,8 @@ export default function FeaturedQuestions({
 }) {
   const [questions, setQuestions] = useState(QUESTIONS);
   const [collapsed, setCollapsed] = useState(false);
+  // v3 only: fan the card deck out a little on banner hover.
+  const [deckHovered, setDeckHovered] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   if (questions.length === 0) return null;
@@ -192,16 +197,25 @@ export default function FeaturedQuestions({
         <button
           type="button"
           onClick={() => navigate(seeAllTo)}
-          className={`group flex w-full items-center gap-4 rounded-2xl ${QUESTION_TINT} p-4 text-left transition-shadow hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] sm:gap-5 sm:p-5`}
+          onMouseEnter={() => setDeckHovered(true)}
+          onMouseLeave={() => setDeckHovered(false)}
+          className={`group relative flex w-full items-center gap-6 rounded-2xl ${QUESTION_TINT} p-4 text-left transition-shadow hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] sm:gap-7 sm:p-5`}
         >
-          {/* Abstract stack of questions — three fanned mini-cards. */}
+          {/* Notification bubble — overhangs the top-left corner with a bell to
+              draw the eye. */}
+          <span className="absolute -left-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#E5484D] text-white ring-2 ring-white">
+            <MaskIcon src={bellIcon} className="h-[14px] w-[14px] -rotate-12" />
+          </span>
+
+          {/* Abstract stack of questions — three fanned mini-cards, centered
+              in the container so the deck reads vertically balanced. */}
           <div className="relative h-[72px] w-[84px] shrink-0">
             {QUESTIONS.slice(0, 3).map((q, i) => (
               <div
                 key={q.id}
-                className="absolute inset-0 rounded-xl bg-white p-2 shadow-[0_2px_8px_rgba(0,0,0,0.08)] ring-1 ring-black/5"
+                className="absolute inset-0 rounded-xl bg-white p-2 shadow-[0_2px_8px_rgba(0,0,0,0.08)] ring-1 ring-black/5 transition-transform duration-300 ease-out"
                 style={{
-                  transform: `translate(${i * 8}px, ${i * -6}px) rotate(${(i - 1) * 6}deg)`,
+                  transform: `translate(${(i - 1) * (deckHovered ? 20 : 8)}px, ${(i - 1) * (deckHovered ? -11 : -6)}px) rotate(${(i - 1) * (deckHovered ? 13 : 6)}deg)`,
                   zIndex: i,
                 }}
               >
@@ -214,12 +228,12 @@ export default function FeaturedQuestions({
           <div className="min-w-0 flex-1">
             <p className="text-[17px] font-semibold leading-tight text-gray-dark">Answer a question</p>
             <p className="mt-1 text-[14px] leading-snug text-gray-light">
-              Customers are asking questions you're a great fit to answer. Share your expertise and grow your reputation.
+              Real Leland customers have questions for you. Share your expertise &amp; grow your reputation.
             </p>
           </div>
 
           {/* Chevron → see all */}
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors group-hover:bg-white group-hover:text-gray-dark">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors group-hover:bg-gray-hover group-hover:text-gray-dark">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6" />
             </svg>
