@@ -52,7 +52,7 @@ const SEQUENCE: StepDef[] = [
   { id: "checkout", when: (_, sc) => sc.path === "individual" },
   { id: "invite", when: (_, sc) => sc.path === "team" },
   { id: "interstitial", when: (_, sc) => sc.path === "team" },
-  { id: "welcome" },
+  { id: "welcome", when: (_, sc) => sc.welcome },   // optional: ?welcome=off skips it
   { id: "context", when: (_, sc) => sc.path === "individual", counts: true, shell: { theme: "light" } },
   { id: "team", when: (a, sc) => sc.path === "individual" && a.context === "work", counts: true, skippable: true, shell: { theme: "light" } },
   { id: "role", counts: true, shell: { theme: "light" } },
