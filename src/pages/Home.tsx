@@ -86,7 +86,7 @@ import commentsIcon from "../assets/icons/comments.svg";
 import sharesIcon from "../assets/icons/shares.svg";
 import verifiedIcon from "../assets/icons/verified.svg";
 import ComposerMediaButton from "../components/ComposerMediaButton";
-import { useFeedAdmin, type VerifiedBadgePosition, type SidebarVersion } from "../contexts/FeedAdminContext";
+import { useFeedAdmin, type VerifiedBadgePosition, type FeaturedQuestionsVersion, type GoalSidebarState } from "../contexts/FeedAdminContext";
 import AdminToggle from "../components/AdminToggle";
 import { AdminSelect } from "./ProfileAdminMenu";
 import FeaturedQuestions, { QuestionCard, type FeaturedQuestion } from "../components/FeaturedQuestions";
@@ -3955,6 +3955,10 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
   const [editOpen, setEditOpen] = useState(false);
   const { mode: profileBarMode } = useProfileBarMode();
   const { liveCardStyle, eventStage } = useFeedDemo();
+  // Answer posts embed a question card — mirror the "Answer a question" section
+  // version so the embedded card matches the top-of-feed treatment (v2 = asker
+  // attribution instead of the "experts have answered" facepile).
+  const { featuredQuestionsVersion } = useFeedAdmin();
   // Avatar + name share one coach hover-card (see useCoachHover).
   const hover = useCoachHover(post);
   // Clicking a post image expands it in a lightbox in place (no navigation), so
@@ -4074,6 +4078,7 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
                 <QuestionCard
                   q={post.question}
                   onAnswer={() => navigate(`${postBase.replace(/\/post$/, "/question")}/${post.question.id}`)}
+                  showAttribution={featuredQuestionsVersion === "v2"}
                 />
               </div>
             )}
@@ -5330,7 +5335,7 @@ export function CategorySubtitle({ photos, experts }: { photos: string[]; expert
   );
 }
 
-// Popular experts shown in the right sidebar (follow-only, no dismiss).
+// "People to follow" — experts shown in the right sidebar (follow-only, no dismiss).
 const POPULAR_EXPERTS = [
   { name: "Jasmine Singer", photo: pic1, headline: "Experienced Product Leader at LinkedIn | Ex-..." },
   { name: "Jackson Ringger", photo: pic3, headline: "Ex-McKinsey Consultant | Wharton MBA" },
@@ -5356,7 +5361,7 @@ function ExpertRow({ expert }: { expert: (typeof POPULAR_EXPERTS)[number] }) {
 
 function PopularExperts() {
   return (
-    <SidebarSectionCard title="Popular experts" to="/browse" bleed={false}>
+    <SidebarSectionCard title="People to follow" to="/browse" bleed={false}>
       {POPULAR_EXPERTS.map((e) => (
         <ExpertRow key={e.name} expert={e} />
       ))}
@@ -5467,16 +5472,9 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
         />
       </SidebarSectionCard>
 
-      {/* Popular experts */}
-      <PopularExperts />
-
-      {/* Find expert help (or Trending topics) + footer. On the /alt-nav feed
-          this is the "last card" that pins to the top as the rest of the sidebar
-          scrolls; elsewhere the wrapper is display:contents so layout is
-          unchanged. */}
-      <div className={stickyLast ? "sticky top-[81px] flex flex-col gap-[14px]" : "contents"}>
-      {/* Topics on: Trending topics. Off (default): Find expert help. */}
-      {topics ? (
+      {/* Trending topics (only when the topics toggle is on) — scrolls normally
+          above the pinned "Find expert help" card. */}
+      {topics && (
         <SidebarSectionCard title="Trending topics" to="/topic/mba-r1-admissions" bleed={false}>
           {TOPICS.map(topic => (
             <SidebarCard
@@ -5490,20 +5488,27 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
             />
           ))}
         </SidebarSectionCard>
-      ) : (
-        <SidebarSectionCard title="Find expert help" bleed={false}>
-          {FIND_EXPERT_CATEGORIES.slice(0, 3).map(c => (
-            <SidebarCard
-              key={c.title}
-              variant="category"
-              to="/browse"
-              image={c.image}
-              title={c.title}
-              subtitle={<CategoryExpertsSubtitle photos={c.photos} experts={c.experts} />}
-            />
-          ))}
-        </SidebarSectionCard>
       )}
+
+      {/* People to follow */}
+      <PopularExperts />
+
+      {/* Find expert help + footer. On the /alt-nav feed this is the "last card"
+          that pins to the top as the rest of the sidebar scrolls; elsewhere the
+          wrapper is display:contents so layout is unchanged. */}
+      <div className={stickyLast ? "sticky top-[81px] flex flex-col gap-[14px]" : "contents"}>
+      <SidebarSectionCard title="Find expert help" bleed={false}>
+        {FIND_EXPERT_CATEGORIES.slice(0, 3).map(c => (
+          <SidebarCard
+            key={c.title}
+            variant="category"
+            to="/browse"
+            image={c.image}
+            title={c.title}
+            subtitle={<CategoryExpertsSubtitle photos={c.photos} experts={c.experts} />}
+          />
+        ))}
+      </SidebarSectionCard>
 
       {/* Footer links — centered, directly below the last card */}
       <div className="px-2 pt-1 text-center">
@@ -5539,17 +5544,6 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
 }
 
 // ─── Left Sidebar ──────────────────────────────────────
-
-// Experts the user has purchased time with — shown as a photo grid with the
-// remaining time under each.
-const MY_EXPERTS = [
-  { name: "Jessica", photo: pic6, timeLeft: "45m left" },
-  { name: "Marcus", photo: pic1, timeLeft: "Out of time", outOfTime: true },
-  { name: "Priya", photo: pic3, timeLeft: "1h 20m left" },
-  { name: "David", photo: pic5, timeLeft: "30m left" },
-  { name: "Elena", photo: pic7, timeLeft: "3h left" },
-  { name: "Sofia", photo: pic8, timeLeft: "1h left" },
-];
 
 // A sidebar section rendered as a card: large bold header with a small "See all"
 // link in the top-right corner, then the section's content.
@@ -5616,59 +5610,16 @@ function YourGoalsCard() {
   );
 }
 
-// v1 — original: profile card, next session + calendar, my experts.
-function HomeSidebarV1() {
-  const navigate = useNavigate();
-  return (
-    <div className="flex flex-col gap-[14px]">
-      {/* Profile card — public-profile-style header with prioritized metrics */}
-      <FeedProfileCard />
-
-      {/* Next session + calendar link */}
-      <div className="rounded-[12px] border border-[#222222]/[0.12] bg-white">
-        <div className="p-2">
-          <SessionCard size="small" title="Alex <> Jessica" dateTime="Today, 5:45 PM" duration="30m" day={16} image={pic6} type="coach" status="upcoming" subtitleColorClass="text-gray-dark" />
-        </div>
-        <NavLink
-          to="/dashboard"
-          className="flex items-center justify-center gap-1.5 rounded-b-[12px] border-t border-[#222222]/[0.12] py-[14px] text-[15px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover"
-        >
-          View full calendar
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0">
-            <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </NavLink>
-      </div>
-
-      {/* My Experts */}
-      <SidebarSectionCard title="My experts" to="/dashboard" bleed={false}>
-        <div className="grid grid-cols-3 gap-x-3">
-          {MY_EXPERTS.slice(0, 3).map((e) => (
-            <NavLink key={e.name} to="/coach-profile" className="group flex flex-col items-center text-center transition-opacity hover:opacity-90">
-              <img src={e.photo} alt={e.name} className="h-12 w-12 rounded-full object-cover" />
-              <p className="mt-2 w-full truncate text-[14px] font-semibold leading-tight text-gray-dark">{e.name}</p>
-              <p className={`mt-0.5 text-[12px] font-medium leading-tight ${e.outOfTime ? "text-gray-extra-light" : "text-gray-light"}`}>{e.timeLeft}</p>
-            </NavLink>
-          ))}
-        </div>
-      </SidebarSectionCard>
-
-      <Button onClick={() => navigate("/dashboard")} size="md" variant="secondary" rounded="rounded-full" className="self-start font-semibold">
-        View dashboard
-      </Button>
-    </div>
-  );
-}
-
-// v2 — reorganized around the two jobs-to-be-done: upcoming sessions and
+// Reorganized around the two jobs-to-be-done: upcoming sessions and
 // in-progress programs. Profile card on top.
 function HomeSidebarV2() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { noGoal } = useFeedAdmin();
-  // The first-goal card (No goal toggle) replaces the Upcoming sessions +
-  // Continue learning cards.
-  const showLeftGoal = noGoal;
+  const { goalSidebar } = useFeedAdmin();
+  // "no-goal" replaces the Upcoming sessions + Continue learning cards with a
+  // first-goal onboarding card; "goals" also shows the "Your goals" preview
+  // below them; "default" shows neither goal treatment.
+  const showLeftGoal = goalSidebar === "no-goal";
   // Inside the /alt-nav experience, "See all" links stay within My Leland
   // rather than jumping back into the classic-nav routes.
   const inAltNav = pathname === "/alt-nav" || pathname.startsWith("/alt-nav/");
@@ -5730,8 +5681,8 @@ function HomeSidebarV2() {
         })}
       </SidebarSectionCard>
 
-      {/* 4. Your goals — preview of the user's active goals */}
-      <YourGoalsCard />
+      {/* 4. Your goals — preview of the user's active goals (only in "goals") */}
+      {goalSidebar === "goals" && <YourGoalsCard />}
       </>
       )}
     </div>
@@ -5739,9 +5690,7 @@ function HomeSidebarV2() {
 }
 
 export function HomeSidebar(_props: { onCreatePost: () => void }) {
-  const { sidebarVersion } = useFeedAdmin();
-  // v3 is reserved for the next iteration — mirror v2 until it's specced.
-  return sidebarVersion === "v1" ? <HomeSidebarV1 /> : <HomeSidebarV2 />;
+  return <HomeSidebarV2 />;
 }
 
 // ─── Composer prompts ────────────────────────────────
@@ -5765,7 +5714,7 @@ const composerPrompts = [
 function FeedAdminMenu() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { verifiedBadgePosition, setVerifiedBadgePosition, sidebarVersion, setSidebarVersion, featuredQuestions, setFeaturedQuestions, topics, setTopics, noGoal, setNoGoal } = useFeedAdmin();
+  const { verifiedBadgePosition, setVerifiedBadgePosition, featuredQuestions, setFeaturedQuestions, featuredQuestionsVersion, setFeaturedQuestionsVersion, topics, setTopics, goalSidebar, setGoalSidebar } = useFeedAdmin();
   useEffect(() => {
     if (!open) return;
     const onClick = (e: MouseEvent) => {
@@ -5795,16 +5744,24 @@ function FeedAdminMenu() {
               onChange={(v) => setVerifiedBadgePosition(v as VerifiedBadgePosition)}
               options={[{ value: "avatar", label: "On photo" }, { value: "name", label: "By name" }]}
             />
-            <AdminSelect
-              label="Left sidebar"
-              value={sidebarVersion}
-              cols={3}
-              onChange={(v) => setSidebarVersion(v as SidebarVersion)}
-              options={[{ value: "v1", label: "V1" }, { value: "v2", label: "V2" }, { value: "v3", label: "V3" }]}
-            />
             <AdminToggle label="Answer a question" checked={featuredQuestions} onChange={() => setFeaturedQuestions(!featuredQuestions)} />
+            {featuredQuestions && (
+              <AdminSelect
+                label="Answer a question version"
+                value={featuredQuestionsVersion}
+                cols={3}
+                onChange={(v) => setFeaturedQuestionsVersion(v as FeaturedQuestionsVersion)}
+                options={[{ value: "v1", label: "V1" }, { value: "v2", label: "V2" }, { value: "v3", label: "V3" }]}
+              />
+            )}
             <AdminToggle label="Topics" checked={topics} onChange={() => setTopics(!topics)} />
-            <AdminToggle label="No goal" checked={noGoal} onChange={() => setNoGoal(!noGoal)} />
+            <AdminSelect
+              label="Goals"
+              value={goalSidebar}
+              cols={3}
+              onChange={(v) => setGoalSidebar(v as GoalSidebarState)}
+              options={[{ value: "default", label: "Default" }, { value: "goals", label: "Goals" }, { value: "no-goal", label: "None" }]}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -5850,7 +5807,7 @@ export default function Home() {
   // dismiss (X) stays tappable.
   const { active: savedToastActive } = useSavedToast();
   const { dark: darkMode } = useDarkMode();
-  const { featuredQuestions } = useFeedAdmin();
+  const { featuredQuestions, featuredQuestionsVersion } = useFeedAdmin();
 
   useEffect(() => {
     const onScroll = () => {
@@ -6142,7 +6099,7 @@ export default function Home() {
       <div className="divide-y divide-gray-stroke">
         {/* Featured questions — embedded feed section below the composer
             (toggleable via the feed admin menu). */}
-        {featuredQuestions && <FeaturedQuestions onAnswer={setAnswerTarget} />}
+        {featuredQuestions && <FeaturedQuestions version={featuredQuestionsVersion} onAnswer={setAnswerTarget} />}
         {feedPosts.map((post, i) => (
           <Fragment key={post.id}>
             <div className={`px-4 sm:px-6 ${POST_HOVER_SHADOW}`}>

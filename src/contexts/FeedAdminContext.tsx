@@ -5,50 +5,57 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 //     "avatar" (default) — bottom-right of the profile photo
 //     "name"             — inline, between the name and the timestamp
 export type VerifiedBadgePosition = "avatar" | "name";
-//   sidebarVersion — which left-sidebar layout the main feed shows:
-//     "v1"           — original: profile card, next session, my experts
-//     "v2" (default) — profile card, upcoming sessions, continue-learning programs
-//     "v3"           — reserved for the next iteration (currently mirrors v2)
-export type SidebarVersion = "v1" | "v2" | "v3";
+//   featuredQuestionsVersion — which treatment of the "Answer a question"
+//   section the feed shows (the carousel is first enabled via the toggle):
+//     "v1" (default) — original: scrollable cards, facepile social proof
+//     "v2"           — v1 + "Asked by anonymous" attribution on each card
+//     "v3"           — a promotional banner (abstract stack + chevron) that
+//                      links straight to the "see all" questions page
+export type FeaturedQuestionsVersion = "v1" | "v2" | "v3";
+//   goalSidebar — what the right sidebar shows for the user's goals:
+//     "default" (default) — no goals card (just sessions + continue learning)
+//     "goals"             — the "Your goals" preview card is shown
+//     "no-goal"           — simulates a user with no goal data: a first-goal
+//                           onboarding card replaces the sessions/learning cards
+export type GoalSidebarState = "default" | "goals" | "no-goal";
 
 interface FeedAdminContextValue {
   verifiedBadgePosition: VerifiedBadgePosition;
   setVerifiedBadgePosition: (v: VerifiedBadgePosition) => void;
-  sidebarVersion: SidebarVersion;
-  setSidebarVersion: (v: SidebarVersion) => void;
   // "Featured questions" carousel at the top of the feed — customer questions
   // the expert is well-suited to answer, shown as answerable prompts.
   featuredQuestions: boolean;
   setFeaturedQuestions: (v: boolean) => void;
+  featuredQuestionsVersion: FeaturedQuestionsVersion;
+  setFeaturedQuestionsVersion: (v: FeaturedQuestionsVersion) => void;
   // Topics — the (in-progress) hashtag-like topics feature. When off (default),
   // post topic pills are hidden and the "Trending topics" sidebar card is
   // swapped for a "Find expert help" categories card.
   topics: boolean;
   setTopics: (v: boolean) => void;
-  // "No goal" — simulates a user we have no goal/category data for. When on
-  // (off by default), a first-goal onboarding card shows atop the right sidebar.
-  noGoal: boolean;
-  setNoGoal: (v: boolean) => void;
+  // Goals treatment in the right sidebar — see GoalSidebarState above.
+  goalSidebar: GoalSidebarState;
+  setGoalSidebar: (v: GoalSidebarState) => void;
 }
 
 const FeedAdminContext = createContext<FeedAdminContextValue>({
   verifiedBadgePosition: "avatar",
   setVerifiedBadgePosition: () => {},
-  sidebarVersion: "v2",
-  setSidebarVersion: () => {},
   featuredQuestions: false,
   setFeaturedQuestions: () => {},
+  featuredQuestionsVersion: "v1",
+  setFeaturedQuestionsVersion: () => {},
   topics: false,
   setTopics: () => {},
-  noGoal: false,
-  setNoGoal: () => {},
+  goalSidebar: "default",
+  setGoalSidebar: () => {},
 });
 
 const STORAGE_KEY = "feed-verified-badge-position";
-const SIDEBAR_KEY = "feed-sidebar-version";
 const FEATURED_QUESTIONS_KEY = "feed-featured-questions";
+const FEATURED_QUESTIONS_VERSION_KEY = "feed-featured-questions-version";
 const TOPICS_KEY = "feed-topics";
-const NO_GOAL_KEY = "feed-no-goal";
+const GOAL_SIDEBAR_KEY = "feed-goal-sidebar";
 
 export function FeedAdminProvider({ children }: { children: ReactNode }) {
   const [verifiedBadgePosition, setPos] = useState<VerifiedBadgePosition>(() =>
@@ -58,14 +65,6 @@ export function FeedAdminProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, v);
     setPos(v);
   };
-  const [sidebarVersion, setVer] = useState<SidebarVersion>(() => {
-    const saved = localStorage.getItem(SIDEBAR_KEY);
-    return saved === "v1" || saved === "v3" ? saved : "v2";
-  });
-  const setSidebarVersion = (v: SidebarVersion) => {
-    localStorage.setItem(SIDEBAR_KEY, v);
-    setVer(v);
-  };
   const [featuredQuestions, setFQ] = useState<boolean>(() => {
     // Off by default; only an explicit "1" shows the carousel.
     return localStorage.getItem(FEATURED_QUESTIONS_KEY) === "1";
@@ -73,6 +72,14 @@ export function FeedAdminProvider({ children }: { children: ReactNode }) {
   const setFeaturedQuestions = (v: boolean) => {
     localStorage.setItem(FEATURED_QUESTIONS_KEY, v ? "1" : "0");
     setFQ(v);
+  };
+  const [featuredQuestionsVersion, setFQV] = useState<FeaturedQuestionsVersion>(() => {
+    const saved = localStorage.getItem(FEATURED_QUESTIONS_VERSION_KEY);
+    return saved === "v2" || saved === "v3" ? saved : "v1";
+  });
+  const setFeaturedQuestionsVersion = (v: FeaturedQuestionsVersion) => {
+    localStorage.setItem(FEATURED_QUESTIONS_VERSION_KEY, v);
+    setFQV(v);
   };
   const [topics, setTopicsState] = useState<boolean>(() => {
     // Off by default; only an explicit "1" enables topics.
@@ -82,16 +89,16 @@ export function FeedAdminProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(TOPICS_KEY, v ? "1" : "0");
     setTopicsState(v);
   };
-  const [noGoal, setNoGoalState] = useState<boolean>(() => {
-    // Off by default; only an explicit "1" shows the first-goal card.
-    return localStorage.getItem(NO_GOAL_KEY) === "1";
+  const [goalSidebar, setGoalSidebarState] = useState<GoalSidebarState>(() => {
+    const saved = localStorage.getItem(GOAL_SIDEBAR_KEY);
+    return saved === "goals" || saved === "no-goal" ? saved : "default";
   });
-  const setNoGoal = (v: boolean) => {
-    localStorage.setItem(NO_GOAL_KEY, v ? "1" : "0");
-    setNoGoalState(v);
+  const setGoalSidebar = (v: GoalSidebarState) => {
+    localStorage.setItem(GOAL_SIDEBAR_KEY, v);
+    setGoalSidebarState(v);
   };
   return (
-    <FeedAdminContext.Provider value={{ verifiedBadgePosition, setVerifiedBadgePosition, sidebarVersion, setSidebarVersion, featuredQuestions, setFeaturedQuestions, topics, setTopics, noGoal, setNoGoal }}>
+    <FeedAdminContext.Provider value={{ verifiedBadgePosition, setVerifiedBadgePosition, featuredQuestions, setFeaturedQuestions, featuredQuestionsVersion, setFeaturedQuestionsVersion, topics, setTopics, goalSidebar, setGoalSidebar }}>
       {children}
     </FeedAdminContext.Provider>
   );

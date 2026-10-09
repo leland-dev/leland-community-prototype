@@ -27,6 +27,25 @@ export type FeaturedQuestion = {
 // Shared small facepile for the "other experts have answered" row.
 const FACEPILE = [pic1, pic3, pic5];
 
+// Prototype version of the section (driven by the bottom-right admin tool):
+//   v1 — original card carousel
+//   v2 — v1 + "Asked by anonymous" attribution on each card
+//   v3 — a promotional banner that links straight to the "see all" page
+export type FeaturedQuestionsVersion = "v1" | "v2" | "v3";
+
+// Anonymous asker avatar — a neutral gray silhouette so questions in v2 read as
+// "asked by someone" without attributing a real person.
+function AnonAvatar({ className = "" }: { className?: string }) {
+  return (
+    <span className={`flex items-center justify-center rounded-full bg-[#D9DEE2] text-[#8A939B] ${className}`}>
+      <svg viewBox="0 0 24 24" fill="currentColor" className="h-[62%] w-[62%]">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7v1H4v-1z" />
+      </svg>
+    </span>
+  );
+}
+
 export const QUESTIONS: FeaturedQuestion[] = [
   {
     id: "q1",
@@ -87,11 +106,14 @@ export function QuestionCard({
   onAnswer,
   onDismiss,
   variant = "carousel",
+  showAttribution = false,
 }: {
   q: FeaturedQuestion;
   onAnswer: () => void;
   onDismiss?: () => void;
   variant?: "carousel" | "grid";
+  // v2: show an "Asked by anonymous" header with a neutral silhouette avatar.
+  showAttribution?: boolean;
 }) {
   const isGrid = variant === "grid";
   return (
@@ -100,8 +122,19 @@ export function QuestionCard({
       onClick={onAnswer}
       className={`relative flex h-full w-full cursor-pointer flex-col rounded-2xl ${QUESTION_TINT} p-4 transition-shadow hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]`}
     >
-      {/* Carousel: dismiss "X" at the top-right (matches People to follow). */}
-      {!isGrid && onDismiss && (
+      {/* v2 attribution — "anonymous" + a submitted timestamp, with a
+          silhouette avatar whose ring matches the card tint. */}
+      {showAttribution && (
+        <div className="mb-2 flex items-center gap-2">
+          <AnonAvatar className="h-[22px] w-[22px] ring-2 ring-[#EEF2F4]" />
+          <span className="text-[14px] font-semibold text-gray-dark">Anonymous</span>
+          <span className="ml-auto text-[14px] text-gray-light">{q.time}</span>
+        </div>
+      )}
+
+      {/* Carousel: dismiss "X" at the top-right (matches People to follow).
+          Hidden in v2, where the asker attribution occupies that row. */}
+      {!isGrid && onDismiss && !showAttribution && (
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onDismiss(); }}
@@ -115,24 +148,33 @@ export function QuestionCard({
       )}
 
       {/* The question — Season serif, prominent. */}
-      <p className={`line-clamp-4 flex-1 font-serif text-[20px] leading-snug text-gray-dark ${isGrid ? "" : "pr-6"}`}>
+      <p className={`line-clamp-4 flex-1 font-serif text-[20px] leading-snug text-gray-dark ${isGrid || showAttribution ? "" : "pr-6"}`}>
         {q.question}
       </p>
 
-      {/* Social proof — facepile of experts who've already answered */}
-      <div className="mt-4 flex items-center gap-2">
-        <div className="flex -space-x-2">
-          {FACEPILE.map((src, i) => (
-            <img key={i} src={src} alt="" className="h-5 w-5 rounded-full object-cover ring-2 ring-white" />
-          ))}
+      {/* Social proof — facepile of experts who've already answered. Hidden in
+          v2, where the asker attribution replaces it as the card's meta row. */}
+      {!showAttribution && (
+        <div className="mt-4 flex items-center gap-2">
+          <div className="flex -space-x-2">
+            {FACEPILE.map((src, i) => (
+              <img key={i} src={src} alt="" className="h-5 w-5 rounded-full object-cover ring-2 ring-white" />
+            ))}
+          </div>
+          <span className="text-[12px] text-gray-light">{q.answered} other experts have answered</span>
         </div>
-        <span className="text-[12px] text-gray-light">{q.answered} other experts have answered</span>
-      </div>
+      )}
     </div>
   );
 }
 
-export default function FeaturedQuestions({ onAnswer }: { onAnswer: (q: FeaturedQuestion) => void }) {
+export default function FeaturedQuestions({
+  onAnswer,
+  version = "v1",
+}: {
+  onAnswer: (q: FeaturedQuestion) => void;
+  version?: FeaturedQuestionsVersion;
+}) {
   const [questions, setQuestions] = useState(QUESTIONS);
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
@@ -140,6 +182,52 @@ export default function FeaturedQuestions({ onAnswer }: { onAnswer: (q: Featured
   if (questions.length === 0) return null;
 
   const seeAllTo = pathname.startsWith("/alt-nav") ? "/alt-nav/questions" : "/questions";
+
+  // v3 — a promotional banner instead of a scrollable list. The whole banner
+  // links to the "see all" questions page; the card deck on the left is an
+  // abstract, decorative stack (not interactive).
+  if (version === "v3") {
+    return (
+      <div className="px-4 py-5 sm:px-6">
+        <button
+          type="button"
+          onClick={() => navigate(seeAllTo)}
+          className={`group flex w-full items-center gap-4 rounded-2xl ${QUESTION_TINT} p-4 text-left transition-shadow hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] sm:gap-5 sm:p-5`}
+        >
+          {/* Abstract stack of questions — three fanned mini-cards. */}
+          <div className="relative h-[72px] w-[84px] shrink-0">
+            {QUESTIONS.slice(0, 3).map((q, i) => (
+              <div
+                key={q.id}
+                className="absolute inset-0 rounded-xl bg-white p-2 shadow-[0_2px_8px_rgba(0,0,0,0.08)] ring-1 ring-black/5"
+                style={{
+                  transform: `translate(${i * 8}px, ${i * -6}px) rotate(${(i - 1) * 6}deg)`,
+                  zIndex: i,
+                }}
+              >
+                <p className="line-clamp-3 font-serif text-[9px] leading-tight text-gray-dark">{q.question}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Promo copy */}
+          <div className="min-w-0 flex-1">
+            <p className="text-[17px] font-semibold leading-tight text-gray-dark">Answer a question</p>
+            <p className="mt-1 text-[14px] leading-snug text-gray-light">
+              Customers are asking questions you're a great fit to answer. Share your expertise and grow your reputation.
+            </p>
+          </div>
+
+          {/* Chevron → see all */}
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors group-hover:bg-white group-hover:text-gray-dark">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     // Its own feed row — the parent divide-y provides the full-width top border,
@@ -202,6 +290,7 @@ export default function FeaturedQuestions({ onAnswer }: { onAnswer: (q: Featured
                     q={q}
                     onAnswer={() => onAnswer(q)}
                     onDismiss={() => setQuestions((prev) => prev.filter((x) => x.id !== q.id))}
+                    showAttribution={version === "v2"}
                   />
                 </div>
               ))}
