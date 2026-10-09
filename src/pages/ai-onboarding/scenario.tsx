@@ -3,6 +3,7 @@
  *   ?path=individual|team   self-purchase vs. invited by a B2B admin
  *   ?cohort=oct|nov|dec     cohort already chosen at checkout (omit = choose in onboarding)
  *   ?orgTool=claude|...|none  team path: did the admin set the AI tool for everyone?
+ *   ?welcome=off            skip the branded welcome screen (checkout/auth → first question)
  * A floating dev panel flips these and restarts the flow. */
 import { createContext, useContext, useState } from "react";
 import { ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
@@ -15,6 +16,8 @@ export type Scenario = {
   cohort: string | null;
   /** Team path only: tool set at the org level, or null if each learner picks. */
   orgTool: ToolKey | null;
+  /** Show the branded "Welcome to the AI Builder Program" screen before the questions. */
+  welcome: boolean;
 };
 
 export const DEFAULT_ORG_TOOL: ToolKey = "claude";
@@ -29,17 +32,19 @@ export function scenarioFromParams(params: URLSearchParams): Scenario {
     : t === "none" ? null
     : t && TOOLS.some((x) => x.value === t) ? (t as ToolKey)
     : DEFAULT_ORG_TOOL;
-  return { path, cohort, orgTool };
+  const welcome = params.get("welcome") !== "off";
+  return { path, cohort, orgTool, welcome };
 }
 
 export function paramsFromScenario(s: Scenario): Record<string, string> {
   const p: Record<string, string> = { path: s.path };
   if (s.cohort) p.cohort = s.cohort;
   if (s.path === "team") p.orgTool = s.orgTool ?? "none";
+  if (!s.welcome) p.welcome = "off";
   return p;
 }
 
-const ScenarioContext = createContext<Scenario>({ path: "individual", cohort: null, orgTool: null });
+const ScenarioContext = createContext<Scenario>({ path: "individual", cohort: null, orgTool: null, welcome: true });
 export const ScenarioProvider = ScenarioContext.Provider;
 export const useScenario = () => useContext(ScenarioContext);
 
@@ -132,6 +137,15 @@ export function DevPanel({
               onChange={(v) => onChange({ ...scenario, orgTool: v === "none" ? null : (v as ToolKey) })}
             />
           ) : null}
+          <Seg
+            label="Welcome screen"
+            value={scenario.welcome ? "show" : "skip"}
+            options={[
+              { value: "show", label: "Show" },
+              { value: "skip", label: "Skip" },
+            ]}
+            onChange={(v) => onChange({ ...scenario, welcome: v === "show" })}
+          />
           <Button size="sm" variant="glass" rounded="rounded-md" className="w-full bg-white/10! hover:bg-white/20!" onClick={onRestart}>
             <RotateCcw size={12} /> Restart flow
           </Button>
