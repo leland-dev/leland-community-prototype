@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import PageShell from "../components/PageShell";
 import { useDarkMode } from "../contexts/DarkModeContext";
@@ -449,12 +449,18 @@ export default function GoalDetail() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       >
-        <Link to="/goals" className="inline-flex items-center gap-1.5 self-start text-[14px] font-medium text-gray-extra-light transition-opacity hover:opacity-70">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <Button
+          size="lg"
+          variant="secondary"
+          iconOnly
+          onClick={() => navigate("/my-leland/goals")}
+          aria-label="My goals"
+          className="self-start"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M19 12H5M11 18l-6-6 6-6" />
           </svg>
-          My goals
-        </Link>
+        </Button>
 
         {/* Header — cream block with name, target, progress. No on-track/
             needs-action health judgment. */}

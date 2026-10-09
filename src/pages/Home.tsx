@@ -14,6 +14,8 @@ import { Composer } from "./Composer";
 import { useFeedDemo } from "../contexts/FeedDemoContext";
 import { useProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
+import { useGoals } from "../contexts/GoalsContext";
+import { goalProgress } from "../data/goals";
 import { useSetLeftSidebar } from "../components/LeftSidebarContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
 import FeedProfileCard from "../components/FeedProfileCard";
@@ -5581,6 +5583,39 @@ const MY_PROGRAMS = [
   { title: "Consulting Case Interview Prep", author: "Jessica Lin", pct: 0, image: automationsImg, href: "/courses" },
 ];
 
+// Your goals — previews the user's active goals (name, target line, progress)
+// in the left sidebar, mirroring the "My goals" dashboard tab. Clicking a goal
+// opens its detail; "See all" goes to the goals index.
+function YourGoalsCard() {
+  const navigate = useNavigate();
+  const { goals } = useGoals();
+  // Active goals first; show up to 3 so the card stays compact.
+  const preview = goals.filter((g) => !g.completedAt).slice(0, 3);
+  if (preview.length === 0) return null;
+  return (
+    <SidebarSectionCard title="Your goals" to="/goals" bleed>
+      {preview.map((goal) => {
+        const { pct } = goalProgress(goal);
+        return (
+          <div
+            key={goal.id}
+            onClick={() => navigate(`/goals/${goal.id}`)}
+            className="group flex cursor-pointer flex-col gap-1.5 rounded-[8px] px-2 py-2 transition-colors hover:bg-gray-hover"
+          >
+            <div className="flex flex-col gap-0.5">
+              <p className="truncate text-[14px] font-semibold leading-tight text-gray-dark group-hover:underline">{goal.name}</p>
+              <p className="truncate text-[12px] leading-tight text-gray-light">{goal.targetLabel}</p>
+            </div>
+            <div className="h-1 w-full overflow-hidden rounded-full bg-[#222222]/[0.08]">
+              <div className="h-full rounded-full bg-gray-dark" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        );
+      })}
+    </SidebarSectionCard>
+  );
+}
+
 // v1 — original: profile card, next session + calendar, my experts.
 function HomeSidebarV1() {
   const navigate = useNavigate();
@@ -5694,6 +5729,9 @@ function HomeSidebarV2() {
           );
         })}
       </SidebarSectionCard>
+
+      {/* 4. Your goals — preview of the user's active goals */}
+      <YourGoalsCard />
       </>
       )}
     </div>

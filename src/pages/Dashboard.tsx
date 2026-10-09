@@ -434,10 +434,11 @@ function GoalsPlaceholderCard() {
   );
 }
 
-function GoalsCard() {
+function GoalsCard({ shell }: { shell?: boolean }) {
   const { goals } = useGoals();
+  const goalsTo = shell ? "/my-leland/goals" : "/goals";
   return (
-    <DashCard title="My goals" to={goals.length > 0 ? "/goals" : undefined}>
+    <DashCard title="My goals" to={goals.length > 0 ? goalsTo : undefined}>
       <p className="-mt-2 mb-4 text-[15px] text-[#707070]">Track your progress toward what matters most.</p>
       {goals.length > 0 ? (
         <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-1">
@@ -455,10 +456,11 @@ function GoalsCard() {
 
 // Same card, wired to the complete original feature set (routines, board,
 // master list) instead of the MVP data — see GoalsVersionContext.
-function FullGoalsCard() {
+function FullGoalsCard({ shell }: { shell?: boolean }) {
   const { goals } = useFullGoals();
+  const goalsTo = shell ? "/my-leland/goals" : "/goals";
   return (
-    <DashCard title="My goals" to={goals.length > 0 ? "/goals" : undefined}>
+    <DashCard title="My goals" to={goals.length > 0 ? goalsTo : undefined}>
       <p className="-mt-2 mb-4 text-[15px] text-[#707070]">Track your progress toward what matters most.</p>
       {goals.length > 0 ? (
         <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-1">
@@ -474,10 +476,10 @@ function FullGoalsCard() {
   );
 }
 
-function GoalsCardSwitch({ enabled }: { enabled: boolean }) {
+function GoalsCardSwitch({ enabled, shell }: { enabled: boolean; shell?: boolean }) {
   const { version } = useGoalsVersion();
   if (!enabled) return <GoalsPlaceholderCard />;
-  return version === "full" ? <FullGoalsCard /> : <GoalsCard />;
+  return version === "full" ? <FullGoalsCard shell={shell} /> : <GoalsCard shell={shell} />;
 }
 
 // ─── Expert-only sections ──────────────────────────────────────────────────
@@ -868,7 +870,7 @@ export default function Dashboard({ shell = false, expert: expertInit = false }:
             )}
 
             {/* My goals — hidden for experts */}
-            {!expert && <GoalsCardSwitch enabled={goalsFeature} />}
+            {!expert && <GoalsCardSwitch enabled={goalsFeature} shell={shell} />}
 
             {/* 6. Get help */}
             <GetHelp />
