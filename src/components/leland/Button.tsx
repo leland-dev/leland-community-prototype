@@ -89,6 +89,39 @@ const getLabelledSmallPaddingClass = ({
   return 'px-3';
 };
 
+const LABELLED_PADDING_FROM_BREAKPOINT: Record<
+  ButtonSize.MEDIUM | ButtonSize.LARGE,
+  Record<Breakpoints, string>
+> = {
+  [ButtonSize.MEDIUM]: {
+    [Breakpoints.SM]: 'sm:px-4',
+    [Breakpoints.MD]: 'md:px-4',
+    [Breakpoints.LG]: 'lg:px-4',
+    [Breakpoints.XL]: 'xl:px-4',
+    [Breakpoints['2XL']]: '2xl:px-4',
+  },
+  [ButtonSize.LARGE]: {
+    [Breakpoints.SM]: 'sm:px-6',
+    [Breakpoints.MD]: 'md:px-6',
+    [Breakpoints.LG]: 'lg:px-6',
+    [Breakpoints.XL]: 'xl:px-6',
+    [Breakpoints['2XL']]: '2xl:px-6',
+  },
+};
+
+const getLabelledPaddingFromBreakpointClass = ({
+  size,
+  hideLabelBelow,
+  hasIcon,
+}: {
+  size: ButtonSize;
+  hideLabelBelow?: Breakpoints;
+  hasIcon: boolean;
+}): string => {
+  if (size === ButtonSize.SMALL || hideLabelBelow == null || !hasIcon) return '';
+  return LABELLED_PADDING_FROM_BREAKPOINT[size][hideLabelBelow];
+};
+
 export type ButtonFontWeight = PickEnum<
   FontWeight,
   FontWeight.NORMAL | FontWeight.MEDIUM
@@ -179,17 +212,77 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
       'text-leland-red bg-white disabled:text-leland-gray-light disabled:bg-white border-transparent hover:bg-leland-gray-solid-hover shadow-xs',
   };
 
+const ButtonSizeToContentHeight: Record<
+  ButtonSize,
+  { icon: string; lineHeight: string }
+> = {
+  [ButtonSize.SMALL]: { icon: 'size-4.5', lineHeight: 'leading-normal' },
+  [ButtonSize.MEDIUM]: { icon: 'size-5', lineHeight: 'leading-5' },
+  [ButtonSize.LARGE]: { icon: 'size-5', lineHeight: 'leading-5' },
+};
+
 // Production sizes: monorepo text-sm = 0.75rem, text-base = 0.875rem.
 const ButtonSizeToStyles: Record<ButtonSize, string> = {
-  [ButtonSize.SMALL]: 'p-2 text-[0.75rem] leading-none space-x-1',
-  [ButtonSize.MEDIUM]: 'p-3 text-[0.875rem] space-x-2',
-  [ButtonSize.LARGE]: 'p-4 text-[0.875rem] space-x-2',
+  [ButtonSize.SMALL]: `text-[0.75rem] ${ButtonSizeToContentHeight[ButtonSize.SMALL].lineHeight} space-x-1`,
+  [ButtonSize.MEDIUM]: `text-[0.875rem] ${ButtonSizeToContentHeight[ButtonSize.MEDIUM].lineHeight} space-x-2`,
+  [ButtonSize.LARGE]: `text-[0.875rem] ${ButtonSizeToContentHeight[ButtonSize.LARGE].lineHeight} space-x-2`,
 };
 
 export const ButtonSizeToIconStyles: Record<ButtonSize, string> = {
-  [ButtonSize.SMALL]: 'size-3.5',
-  [ButtonSize.MEDIUM]: 'size-5',
-  [ButtonSize.LARGE]: 'size-5',
+  [ButtonSize.SMALL]: ButtonSizeToContentHeight[ButtonSize.SMALL].icon,
+  [ButtonSize.MEDIUM]: ButtonSizeToContentHeight[ButtonSize.MEDIUM].icon,
+  [ButtonSize.LARGE]: ButtonSizeToContentHeight[ButtonSize.LARGE].icon,
+};
+
+const ButtonSizeToVerticalPadding: Record<ButtonSize, string> = {
+  [ButtonSize.SMALL]: 'py-2',
+  [ButtonSize.MEDIUM]: 'py-2.5',
+  [ButtonSize.LARGE]: 'py-4',
+};
+
+const ButtonSizeToLeftPadding: Record<
+  ButtonSize,
+  { plain: string; withIcon: string }
+> = {
+  [ButtonSize.SMALL]: { plain: 'pl-3', withIcon: 'pl-2.5' },
+  [ButtonSize.MEDIUM]: { plain: 'pl-4', withIcon: 'pl-3.5' },
+  [ButtonSize.LARGE]: { plain: 'pl-6', withIcon: 'pl-5' },
+};
+
+const ButtonSizeToRightPadding: Record<
+  ButtonSize,
+  { plain: string; withIcon: string }
+> = {
+  [ButtonSize.SMALL]: { plain: 'pr-3', withIcon: 'pr-2.5' },
+  [ButtonSize.MEDIUM]: { plain: 'pr-4', withIcon: 'pr-3.5' },
+  [ButtonSize.LARGE]: { plain: 'pr-6', withIcon: 'pr-5' },
+};
+
+const ButtonSizeToIconOnlyPadding: Record<ButtonSize, string> = {
+  [ButtonSize.SMALL]: 'p-2',
+  [ButtonSize.MEDIUM]: 'p-2.5',
+  [ButtonSize.LARGE]: 'p-4',
+};
+
+type ButtonPaddingProps = {
+  size: ButtonSize;
+  hasLeftIcon: boolean;
+  hasRightIcon: boolean;
+  isIconOnly: boolean;
+};
+
+export const getButtonPadding = ({
+  size,
+  hasLeftIcon,
+  hasRightIcon,
+  isIconOnly,
+}: ButtonPaddingProps): string => {
+  if (isIconOnly) {
+    return ButtonSizeToIconOnlyPadding[size];
+  }
+  const left = ButtonSizeToLeftPadding[size];
+  const right = ButtonSizeToRightPadding[size];
+  return `${ButtonSizeToVerticalPadding[size]} ${hasLeftIcon ? left.withIcon : left.plain} ${hasRightIcon ? right.withIcon : right.plain}`;
 };
 
 const ButtonWidthToStyles: Record<ButtonWidth, string> = {
@@ -225,6 +318,9 @@ interface ButtonStyleProps {
   roundedSide?: ButtonRoundedSide;
   rounded?: boolean;
   selected?: boolean;
+  hasLeftIcon?: boolean;
+  hasRightIcon?: boolean;
+  isIconOnly?: boolean;
 }
 
 export const getButtonStyles = ({
@@ -235,10 +331,13 @@ export const getButtonStyles = ({
   rounded = false,
   selected,
   roundedSide = ButtonRoundedSide.BOTH,
+  hasLeftIcon = false,
+  hasRightIcon = false,
+  isIconOnly = false,
 }: ButtonStyleProps): string =>
-  `sm:whitespace-nowrap leading-tight items-center justify-center border ${BORDERLESS_COLORS.has(buttonColor) ? '' : 'shadow-border'} ${ButtonColorToStyles[
+  `sm:whitespace-nowrap items-center justify-center border ${BORDERLESS_COLORS.has(buttonColor) ? '' : 'shadow-border'} ${ButtonColorToStyles[
     buttonColor
-  ](selected)} ${ButtonSizeToStyles[size]} ${ButtonWidthToStyles[width]} ${
+  ](selected)} ${ButtonSizeToStyles[size]} ${getButtonPadding({ size, hasLeftIcon, hasRightIcon, isIconOnly })} ${ButtonWidthToStyles[width]} ${
     FontWeightToStyles[fontWeight]
   } ${ButtonRoundedSideToStyles[roundedSide](rounded, selected)}`;
 
@@ -299,6 +398,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ? `hidden ${breakpointToTailwind(hideLabelBelow)}:inline`
         : '';
 
+    const hasLeftIcon = Boolean(CustomLeftIcon || LeftIcon);
+    const hasRightIcon = Boolean(CustomRightIcon || RightIcon);
+    const isIconOnly = Boolean(hideLabel) && (hasLeftIcon || hasRightIcon);
+    const isLabelHiddenBelowBreakpoint =
+      hideLabelBelow != null && (hasLeftIcon || hasRightIcon);
+
     const buttonClassName = `${getButtonStyles({
       buttonColor,
       size,
@@ -307,11 +412,18 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       rounded,
       selected,
       roundedSide,
+      hasLeftIcon,
+      hasRightIcon,
+      isIconOnly: isIconOnly || isLabelHiddenBelowBreakpoint,
     })} ${getLabelledSmallPaddingClass({
       size,
       label,
       hideLabel,
       hideLabelBelow,
+    })} ${getLabelledPaddingFromBreakpointClass({
+      size,
+      hideLabelBelow,
+      hasIcon: hasLeftIcon || hasRightIcon,
     })} ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-gray-dark ${useSolidHover ? 'hover:bg-leland-gray-solid-hover' : ''}`;
 
     const innerContent = (

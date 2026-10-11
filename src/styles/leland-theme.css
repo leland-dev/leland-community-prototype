@@ -163,9 +163,14 @@
   --aspect-profile-cover-narrow: 3 / 1;
   --aspect-profile-card-cover: 4 / 1;
 
+  /* ── Border radius ───────────────────────────────────────────────────── */
+  --radius-card: 20px;
+
   /* ── Spacing additions ───────────────────────────────────────────────── */
   --spacing-26: 6.5rem;
+  --spacing-40: 40rem;
   --spacing-50: 50rem;
+  --spacing-5_5: 1.375rem;
   --spacing-feed: 37.5rem;
 
   /* ── Animations ──────────────────────────────────────────────────────── */
@@ -174,6 +179,7 @@
   --animate-shimmer: shimmer 1.6s ease-in-out infinite;
   --animate-waveform: waveform 0.9s ease-in-out infinite;
   --animate-highlight-fade: highlight-fade 2.5s ease-out;
+  --animate-bell-ring: bell-ring 3s ease-in-out infinite;
 
   /* ── Shadows / misc ──────────────────────────────────────────────────── */
   --shadow-border: 0 0 0 1px;
@@ -207,6 +213,15 @@
   0%, 50% {
     background-color: var(--color-leland-gray-hover);
   }
+}
+
+@keyframes bell-ring {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  5% { transform: rotate(14deg); }
+  15% { transform: rotate(-12deg); }
+  25% { transform: rotate(9deg); }
+  35% { transform: rotate(-6deg); }
+  45% { transform: rotate(3deg); }
 }
 
 @utility outline-1\.5 { outline-width: 1.5px; }
