@@ -88,7 +88,7 @@ export function TopicPicker({
         className={`inline-flex items-center gap-1.5 rounded-full py-1.5 text-[14px] ${
           selected
             ? "border border-gray-stroke bg-white pl-3 pr-2.5 font-semibold text-gray-dark shadow-[0_1px_2px_0_rgba(16,24,40,0.05)]"
-            : "cursor-pointer bg-gray-hover px-3 font-medium text-gray-extra-light transition-colors hover:text-gray-dark"
+            : "cursor-pointer bg-gray-hover px-3 font-medium text-gray-extra-light transition-colors hover:text-gray-light"
         }`}
       >
         <span aria-hidden className="h-4 w-4 shrink-0" style={topicIconStyle} />
