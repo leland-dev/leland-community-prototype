@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { ArticleCard, CaptionClip, LiveReplayCard } from "./Home";
 import type { Post, ImageEntry } from "./Home";
+import { TopicPicker } from "../components/TopicPicker";
+import hashtagSquare from "../assets/icons/hashtag-square.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
 import articlePhoto from "../assets/photography/talking.jpeg";
 import { useFeedDemo } from "../contexts/FeedDemoContext";
@@ -128,6 +130,17 @@ const SELF = {
   reposts: 0,
   shares: 0,
 };
+
+// Inline so its strokes scale with the display size and inherit currentColor,
+// matching the sibling stroke icons (a CSS mask would bake in the source stroke
+// width and render thinner). Paths from assets/icons/question-chat.svg.
+const QuestionChatIcon = ({ className, strokeWidth = 1.6 }: { className?: string; strokeWidth?: number }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3,11.291c0,2.683 1.42,5.045 3.599,6.534c-0.001,0.855 0.001,2.007 0.001,3.216l3.531,-1.747c0.604,0.116 1.228,0.179 1.869,0.179c4.952,0 9,-3.643 9,-8.182c0,-4.539 -4.048,-8.182 -9,-8.182c-4.952,0 -9,3.643 -9,8.182Z" />
+    <path d="M11.899,12.328v-0.207c0,-0.678 0.419,-1.045 0.839,-1.327c0.41,-0.276 0.821,-0.636 0.821,-1.3c0,-0.917 -0.743,-1.659 -1.659,-1.659c-0.916,0 -1.66,0.741 -1.66,1.658" />
+    <path d="M11.898,14.667c-0.083,0 -0.15,0.067 -0.149,0.15c0,0.083 0.067,0.15 0.15,0.15c0.083,0 0.15,-0.067 0.15,-0.15c-0.0000000000000018,-0.083 -0.066,-0.15 -0.151,-0.15" />
+  </svg>
+);
 
 const stripHtml = (html: string) => {
   const div = document.createElement("div");
@@ -339,6 +352,41 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
   const [articleStep, setArticleStep] = useState<"write" | "share">("write");
   const [articleCaption, setArticleCaption] = useState("");
   const [images, setImages] = useState<ImageEntry[]>([]);
+
+  // Topics attached to the post — rendered as the icon+text chips under the
+  // published post. Selection UI (fixed taxonomy, personalized) lives in
+  // <TopicPicker>; here we just hold the chosen topics and thread them into the
+  // built post in buildPost().
+  const MAX_TOPICS = 5;
+  const [hashtags, setHashtags] = useState<string[]>([]);
+  // The topic row auto-reveals once the post has some substance (~40 chars), or
+  // manually via the hashtag toolbar button. It stays visible while any topic is
+  // attached so selected topics can't be hidden from the post. Clearing the field
+  // resets it — the row hides and any chosen topics are de-selected.
+  const TOPIC_REVEAL_CHARS = 40;
+  const [topicsOpen, setTopicsOpen] = useState(false);
+  // The topic row clips its content (so it's contained as it animates in/out)
+  // except while the picker dropdown is open, which needs to escape upward.
+  const [topicPickerOpen, setTopicPickerOpen] = useState(false);
+  const autoOpenedTopics = useRef(false);
+  useEffect(() => {
+    const len = text.trim().length;
+    if (len === 0) {
+      autoOpenedTopics.current = false;
+      setTopicsOpen(false);
+      setHashtags(prev => (prev.length ? [] : prev));
+      return;
+    }
+    if (!autoOpenedTopics.current && len >= TOPIC_REVEAL_CHARS) {
+      autoOpenedTopics.current = true;
+      setTopicsOpen(true);
+    }
+  }, [text]);
+  const showTopics = topicsOpen || hashtags.length > 0;
+  // Once the user starts composing, the large entry cards collapse away and their
+  // actions reappear as compact icons at the end of the bottom toolbar.
+  const hasTyped = text.trim().length > 0;
+
   const [pollOptions, setPollOptions] = useState<string[] | null>(null);
   const [pollDuration, setPollDuration] = useState<string>(POLL_DURATIONS[0]);
   const [scheduledFor, setScheduledFor] = useState<string | null>(null);
@@ -756,11 +804,13 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
         },
       };
     }
+    const postTags = hashtags.length ? hashtags : undefined;
     if (pollOptions !== null) {
       return {
         ...base,
         type: "poll",
         body: text.trim(),
+        hashtags: postTags,
         poll: {
           options: pollOptions.filter(o => o.trim()).map(label => ({ label: label.trim(), votes: 0 })),
           durationLabel: `${pollDuration} left`,
@@ -772,11 +822,12 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
         ...base,
         type: "image",
         body: text.trim(),
+        hashtags: postTags,
         images: images.map(i => i.cropped),
         imageAspectRatios: images.map(i => i.aspectRatio),
       };
     }
-    return { ...base, type: "text", body: text.trim() };
+    return { ...base, type: "text", body: text.trim(), hashtags: postTags };
   };
 
   const submit = () => {
@@ -874,12 +925,12 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
     </div>
   ) : null;
 
-  const toolbarButton = (label: string, onAction: () => void, icon: React.ReactNode, active = false) => (
+  const toolbarButton = (label: string, onAction: () => void, icon: React.ReactNode, active = false, strongActive = false) => (
     <button
       onMouseDown={e => e.preventDefault()}
       onClick={onAction}
       aria-label={label}
-      className={`shrink-0 cursor-pointer rounded-full p-2 transition-colors hover:bg-gray-hover hover:text-gray-dark ${active ? "text-gray-dark" : "text-gray-light"}`}
+      className={`shrink-0 cursor-pointer rounded-full p-2 transition-colors hover:bg-gray-hover hover:text-gray-dark ${active ? "text-gray-dark" : "text-gray-light"} ${strongActive && active ? "bg-gray-hover" : ""}`}
     >
       {icon}
     </button>
@@ -1002,8 +1053,15 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
       <motion.div
         layout
         transition={{ layout: { duration: 0.22, ease: [0.4, 0, 0.2, 1] } }}
-        className={`relative mx-auto flex h-full w-full flex-col md:h-auto md:max-h-[92dvh] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white ${
-          discardOpen ? "max-w-[600px] md:max-w-[440px]" : "max-w-[600px] md:min-h-[560px]"
+        className={`relative mx-auto flex h-full w-full flex-col md:max-h-[92dvh] md:overflow-hidden md:rounded-2xl md:border md:border-gray-stroke md:bg-white ${
+          discardOpen
+            ? "max-w-[600px] md:h-auto md:max-w-[440px]"
+            : mode === "post"
+              // Fixed height for the quick composer so the frame doesn't jump as
+              // cards, topics, and action icons show/hide. Other modes keep their
+              // content-driven sizing.
+              ? "max-w-[600px] md:h-[560px]"
+              : "max-w-[600px] md:h-auto md:min-h-[560px]"
         }`}
       >
         {/* Everything the composer shows — hidden on desktop while the card
@@ -1122,63 +1180,21 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
 
         {mode === "post" ? (
           <>
-            <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6 md:min-h-[340px] md:px-6">
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-3 pb-3 md:px-6">
               {/* Identity row above the input, Substack-style */}
-              <div className="flex items-center gap-3">
+              <div className="flex shrink-0 items-center gap-3">
                 <img src={profilePhoto} alt="You" className="h-10 w-10 rounded-full object-cover" />
                 <span className="text-[16px] font-semibold text-gray-dark">{SELF.author}</span>
               </div>
-              {/* Single line that grows — keeps the toolbar hugging the text
-                  instead of floating several empty lines below it. */}
+              {/* Fills the remaining modal height so the compose area is one big
+                  field; the media/entry bar is pinned to the modal's bottom. */}
               <textarea
                 autoFocus
                 value={text}
-                onChange={e => { setText(e.target.value); autoGrow(e); }}
+                onChange={e => setText(e.target.value)}
                 placeholder={pollOptions !== null ? "Ask a question…" : "What's on your mind?"}
-                rows={1}
-                className="zoom-ok mt-3 w-full resize-none text-[19px] leading-[1.45] text-gray-dark outline-none placeholder:text-gray-light"
+                className="zoom-ok mt-3 w-full flex-1 min-h-[120px] resize-none text-[19px] leading-[1.45] text-gray-dark outline-none placeholder:text-gray-light"
               />
-
-              {/* Media toolbar sits right under the input */}
-              <div className="-ml-2 mt-1.5 flex items-center gap-3">
-                {toolbarButton("Add image", () => fileInputRef.current?.click(), (
-                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.5-3.5a2 2 0 0 0-2.83 0L6 20" /></svg>
-                ), images.length > 0)}
-                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelect} />
-                {toolbarButton("Take photo", () => cameraInputRef.current?.click(), (
-                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3.5" /></svg>
-                ))}
-                <input ref={cameraInputRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleImageSelect} />
-                {toolbarButton("Add video", () => videoInputRef.current?.click(), (
-                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m22 8-6 4 6 4V8Z" /><rect x="2" y="6" width="14" height="12" rx="2" /></svg>
-                ))}
-                <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleVideoSelect} />
-                {toolbarButton("Add poll", () => setPollOptions(opts => (opts === null ? ["", ""] : opts)), (
-                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M6 20V10" /><path d="M12 20V4" /><path d="M18 20v-6" /></svg>
-                ), pollOptions !== null)}
-                <div className="relative">
-                  {toolbarButton("Add emoji", () => setEmojiOpen(o => !o), (
-                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><path d="M9 9h.01" /><path d="M15 9h.01" /></svg>
-                  ), emojiOpen)}
-                  {emojiOpen ? (
-                    <>
-                      <div className="fixed inset-0 z-[65]" onMouseDown={() => setEmojiOpen(false)} />
-                      <div className="absolute left-1/2 top-11 z-[66] grid w-[296px] max-w-[calc(100vw-24px)] -translate-x-1/2 grid-cols-8 gap-0.5 rounded-xl border border-gray-stroke bg-white p-2">
-                        {EMOJIS.map(em => (
-                          <button
-                            key={em}
-                            onMouseDown={e => e.preventDefault()}
-                            onClick={() => setText(t => t + em)}
-                            className="cursor-pointer rounded-lg p-1 text-[20px] leading-none transition-colors hover:bg-gray-hover"
-                          >
-                            {em}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  ) : null}
-                </div>
-              </div>
 
               {scheduledChip}
 
@@ -1251,35 +1267,124 @@ export function Composer({ onClose, onPublish, onDraftSaved, onScheduled, openDr
               ) : null}
             </div>
 
-            {/* Long-form entry points, Substack-style cards — hidden while a
-                poll is being built so the focused card isn't crowded out */}
-            {pollOptions === null ? (
-            <div className="shrink-0 pb-[max(env(safe-area-inset-bottom),16px)] md:pb-6">
-              <div className="flex gap-3 overflow-x-auto px-4 md:px-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <button
-                  onClick={() => { setArticleStep("write"); setMode("article"); }}
-                  className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200 md:w-auto md:flex-1"
-                >
-                  <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /><path d="M8 13h8" /><path d="M8 17h5" /></svg>
-                  <span className="text-[15px] font-semibold text-gray-dark">Write an article</span>
-                </button>
-                <button
-                  onClick={() => { setMode("live"); setLiveStep("list"); setSelectedRecording(null); setSelectedClip(null); setCropGrid(false); setCropAspect("Original"); setCropX(50); setCropY(50); }}
-                  className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200 md:w-auto md:flex-1"
-                >
-                  <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="m22 8-6 4 6 4V8Z" /><rect x="2" y="6" width="14" height="12" rx="2" /></svg>
-                  <span className="text-[15px] font-semibold text-gray-dark">Post Livestream</span>
-                </button>
-                <button
-                  onClick={() => setMode("golive")}
-                  className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200 md:w-auto md:flex-1"
-                >
-                  <span className="rounded bg-[#D6204C] px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white">LIVE</span>
-                  <span className="text-[15px] font-semibold text-gray-dark">Go Live</span>
-                </button>
+            {/* Bottom action zone — long-form entry cards, then (when active) the
+                suggested-topics row, then the media toolbar pinned to the very
+                bottom of the modal. */}
+            <div className="shrink-0">
+              {/* Large entry cards — present only before the user starts
+                  composing. Once they type, these collapse away (their actions
+                  reappear as icons at the end of the toolbar below). */}
+              <AnimatePresence initial={false}>
+                {!hasTyped && pollOptions === null ? (
+                  <motion.div
+                    key="entry-cards"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="flex gap-3 overflow-x-auto px-4 md:px-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      <button
+                        onClick={() => { setArticleStep("write"); setMode("article"); }}
+                        className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200 md:w-auto md:flex-1"
+                      >
+                        <svg className="h-6 w-6 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /><path d="M8 13h8" /><path d="M8 17h5" /></svg>
+                        <span className="text-[15px] font-semibold text-gray-dark">Write an article</span>
+                      </button>
+                      <button
+                        onClick={() => {}}
+                        className="flex w-[164px] shrink-0 cursor-pointer flex-col items-start gap-2.5 rounded-2xl bg-gray-100 p-4 text-left transition-colors hover:bg-gray-200 md:w-auto md:flex-1"
+                      >
+                        <QuestionChatIcon className="h-6 w-6 text-gray-dark" />
+                        <span className="text-[15px] font-semibold text-gray-dark">Ask an expert</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+
+              {/* Suggested-topics row — animates in/out above the toolbar when the
+                  topic editor is active (typed something, or toggled the # button). */}
+              <AnimatePresence initial={false}>
+                {showTopics ? (
+                  <motion.div
+                    key="topic-row"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+                    className={topicPickerOpen ? "overflow-visible" : "overflow-hidden"}
+                  >
+                    <div className="px-4 pt-4 md:px-6">
+                      <TopicPicker value={hashtags} onChange={setHashtags} max={MAX_TOPICS} dropUp onOpenChange={setTopicPickerOpen} />
+                    </div>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+
+              {/* Media toolbar — pinned to the bottom of the modal, with icons
+                  sitting equidistant from the divider above and the modal edge. */}
+              <div className="mt-3 flex items-center gap-3 border-t border-gray-stroke px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] md:px-4">
+                {toolbarButton("Add image", () => fileInputRef.current?.click(), (
+                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.5-3.5a2 2 0 0 0-2.83 0L6 20" /></svg>
+                ), images.length > 0)}
+                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelect} />
+                {toolbarButton("Take photo", () => cameraInputRef.current?.click(), (
+                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                ))}
+                <input ref={cameraInputRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleImageSelect} />
+                <div className="relative">
+                  {toolbarButton("Add emoji", () => setEmojiOpen(o => !o), (
+                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><path d="M9 9h.01" /><path d="M15 9h.01" /></svg>
+                  ), emojiOpen)}
+                  {emojiOpen ? (
+                    <>
+                      <div className="fixed inset-0 z-[65]" onMouseDown={() => setEmojiOpen(false)} />
+                      <div className="absolute left-1/2 bottom-11 z-[66] grid w-[296px] max-w-[calc(100vw-24px)] -translate-x-1/2 grid-cols-8 gap-0.5 rounded-xl border border-gray-stroke bg-white p-2 shadow-lg">
+                        {EMOJIS.map(em => (
+                          <button
+                            key={em}
+                            onMouseDown={e => e.preventDefault()}
+                            onClick={() => setText(t => t + em)}
+                            className="cursor-pointer rounded-lg p-1 text-[20px] leading-none transition-colors hover:bg-gray-hover"
+                          >
+                            {em}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+                {toolbarButton("Add topics", () => setTopicsOpen(o => !o), (
+                  <span aria-hidden className="block h-6 w-6 bg-current" style={{ maskImage: `url("${hashtagSquare}")`, WebkitMaskImage: `url("${hashtagSquare}")`, maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat", maskPosition: "center", WebkitMaskPosition: "center" }} />
+                ), showTopics, true)}
+                {/* Video capture stays wired, but its trigger is hidden for now */}
+                <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleVideoSelect} />
+
+                {/* Entry actions — collapse out of the large cards and pop in here
+                    once the user starts composing. */}
+                <AnimatePresence initial={false}>
+                  {hasTyped ? (
+                    <motion.div
+                      key="inline-entry-actions"
+                      className="flex items-center gap-3"
+                      initial={{ opacity: 0, scale: 0.6 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.6 }}
+                      transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+                    >
+                      {toolbarButton("Write an article", () => { setArticleStep("write"); setMode("article"); }, (
+                        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /><path d="M8 13h8" /><path d="M8 17h5" /></svg>
+                      ))}
+                      {toolbarButton("Ask an expert", () => {}, (
+                        <QuestionChatIcon className="h-6 w-6" strokeWidth={1.75} />
+                      ))}
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
               </div>
             </div>
-            ) : null}
           </>
         ) : null}
 

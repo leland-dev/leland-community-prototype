@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, Fragment, type CSSProperties, type RefObject } from "react";
 import { Button } from "../components/Button";
+import { TopicPicker } from "../components/TopicPicker";
 import ImageLightbox from "../components/ImageLightbox";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
@@ -3949,7 +3950,7 @@ function QuotedPostCard({ quoted }: { quoted: QuotedSnapshot }) {
 // Applied to the post's full-bleed row wrapper so it reaches the card edges.
 export const POST_HOVER_SHADOW = "transition-colors hover:bg-[rgba(34,34,34,0.03)]";
 
-export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOpen, hideTopic, showHeadline, featuredOrg, inlineOrgLogo, subOrgLogos }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void; onOpen?: () => void; hideTopic?: boolean; showHeadline?: boolean; featuredOrg?: { name: string; logo: string }; inlineOrgLogo?: string; subOrgLogos?: string[] }) {
+export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOpen, hideTopic, showHeadline, featuredOrg, inlineOrgLogo, subOrgLogos }: { post: Post; onUpdate?: (id: number, text: string, images: ImageEntry[], hashtags?: string[]) => void; onRepost?: (post: Post) => void; onUndoRepost?: (post: Post) => void; onQuote?: (post: Post) => void; onOpen?: () => void; hideTopic?: boolean; showHeadline?: boolean; featuredOrg?: { name: string; logo: string }; inlineOrgLogo?: string; subOrgLogos?: string[] }) {
   const navigate = useNavigate();
   const postBase = usePostBase();
   const [editOpen, setEditOpen] = useState(false);
@@ -4090,9 +4091,14 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
                   key={tag}
                   to={`/hashtag/${hashtagSlug(tag)}`}
                   onClick={e => e.stopPropagation()}
-                  className="text-[14px] font-medium text-leland-blue-dark hover:underline"
+                  className="group inline-flex items-center gap-[4px] text-[14px] font-medium text-[#5E6E79]"
                 >
-                  #{tag}
+                  <span
+                    aria-hidden
+                    className="h-[16px] w-[16px] shrink-0"
+                    style={{ backgroundColor: "#869AA6", maskImage: `url("${topicHash}")`, WebkitMaskImage: `url("${topicHash}")`, maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat", maskPosition: "center", WebkitMaskPosition: "center" }}
+                  />
+                  <span className="group-hover:underline">{tag}</span>
                 </Link>
               ))}
             </div>
@@ -4114,7 +4120,7 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
           editPost={post}
           onClose={() => setEditOpen(false)}
           onPost={() => {}}
-          onUpdate={(id, text, images) => { onUpdate?.(id, text, images); }}
+          onUpdate={(id, text, images, hashtags) => { onUpdate?.(id, text, images, hashtags); }}
           isMVP={true}
         />
       )}
@@ -4393,7 +4399,7 @@ export const FEEDS = [
 
 export type AnswerQuestionContext = { asker: string; avatar: string; time: string; question: string };
 
-export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, answerQuestion, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string, images: ImageEntry[]) => void; onUpdate?: (id: number, text: string, images: ImageEntry[]) => void; editPost?: Post; quotePost?: Post; answerQuestion?: AnswerQuestionContext; onGoLive?: () => void; isMVP?: boolean }) {
+export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, answerQuestion, onGoLive, isMVP }: { onClose: () => void; onPost: (text: string, images: ImageEntry[], hashtags?: string[]) => void; onUpdate?: (id: number, text: string, images: ImageEntry[], hashtags?: string[]) => void; editPost?: Post; quotePost?: Post; answerQuestion?: AnswerQuestionContext; onGoLive?: () => void; isMVP?: boolean }) {
   const isEditing = editPost != null;
   const isQuoting = quotePost != null;
   const isAnswering = answerQuestion != null;
@@ -4436,14 +4442,20 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, a
     if ((!text.trim() && images.length === 0) || overLimit) return;
     setPosting(true);
     setTimeout(() => {
-      if (isEditing && onUpdate) onUpdate(editPost!.id, text.trim(), images);
-      else onPost(text.trim(), images);
+      if (isEditing && onUpdate) onUpdate(editPost!.id, text.trim(), images, hashtags);
+      else onPost(text.trim(), images, hashtags);
       onClose();
     }, 450);
   };
   const [text, setText] = useState(editPost?.body ?? "");
   const [selectedFeed, setSelectedFeed] = useState(FEEDS[0]);
   const [feedDropdownOpen, setFeedDropdownOpen] = useState(false);
+
+  // Topics attached to the post — rendered as the icon+text chips under the
+  // published post. Selection UI (fixed Leland taxonomy, personalized) lives in
+  // <TopicPicker>; prefilled from the post being edited.
+  const MAX_TOPICS = 5;
+  const [hashtags, setHashtags] = useState<string[]>(editPost?.hashtags ?? []);
 
   function selectFeed(feed: typeof FEEDS[number]) {
     setSelectedFeed(feed);
@@ -4944,6 +4956,16 @@ export function ComposeModal({ onClose, onPost, onUpdate, editPost, quotePost, a
                   style={isMobileModal ? { padding: 0, paddingTop: 7, minHeight: 0 } : { minHeight: "180px", padding: 0, paddingTop: 7 }} />
               </div>
             </div>
+
+            {/* Topic editor — tag the post with topics from Leland's fixed
+                category taxonomy (no free-form tags). Hidden when answering. */}
+            {!isAnswering && (
+              <div className="px-4 pb-3">
+                <div className="sm:pl-[52px]">
+                  <TopicPicker value={hashtags} onChange={setHashtags} max={MAX_TOPICS} />
+                </div>
+              </div>
+            )}
 
             {/* Referenced card — the quoted post (repost with thoughts) or the
                 question being answered. */}
@@ -5877,13 +5899,14 @@ export default function Home() {
     };
   }, [isMobile, refreshing]);
 
-  const handleEdit = (id: number, text: string, postImages: ImageEntry[]) => {
+  const handleEdit = (id: number, text: string, postImages: ImageEntry[], hashtags?: string[]) => {
+    const tags = hashtags?.length ? hashtags : undefined;
     setFeedPosts(prev => prev.map(p => {
       if (p.id !== id) return p;
       if (postImages.length > 0) {
-        return { ...p, type: "image" as const, body: text, images: postImages.map(img => img.cropped), imageAspectRatios: postImages.map(img => img.aspectRatio) };
+        return { ...p, type: "image" as const, body: text, images: postImages.map(img => img.cropped), imageAspectRatios: postImages.map(img => img.aspectRatio), hashtags: tags };
       }
-      return { ...p, type: "text" as const, body: text } as Post;
+      return { ...p, type: "text" as const, body: text, hashtags: tags } as Post;
     }));
   };
 
@@ -5907,7 +5930,7 @@ export default function Home() {
     setFeedPosts(prev => [newPost, ...prev]);
   };
 
-  const handlePost = (text: string, postImages: ImageEntry[]) => {
+  const handlePost = (text: string, postImages: ImageEntry[], hashtags?: string[]) => {
     const base = {
       id: Date.now(),
       author: "Jamie Allen",
@@ -5919,6 +5942,7 @@ export default function Home() {
       comments: 0,
       reposts: 0,
       shares: 0,
+      hashtags: hashtags?.length ? hashtags : undefined,
     };
     const newPost: Post = postImages.length > 0
       ? {
