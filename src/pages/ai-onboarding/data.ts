@@ -24,6 +24,7 @@ export type Path = "individual" | "team";
 export type Context = "work" | "personal";
 export type ToolKey = "claude" | "chatgpt" | "copilot" | "gemini" | "unsure";
 export type ExperienceKey = "new" | "casual" | "daily" | "builder";
+export type LevelKey = "ic" | "manager" | "director";
 
 export type Answers = {
   context?: Context;
@@ -31,6 +32,9 @@ export type Answers = {
   teamSize?: string;
   invites: string[];
   role?: string;
+  /** Seniority within the role: IC / manager / director+. Not asked for
+   *  non-work roles, or for Executive and Founder where it's implied. */
+  level?: LevelKey;
   experience?: ExperienceKey;
   tool?: ToolKey;
   goals: string[];
@@ -127,6 +131,14 @@ export const PERSONAL_ROLES: RoleOption[] = [
 ];
 export const NON_WORK_ROLES = new Set(PERSONAL_ROLES.map((r) => r.key));
 export const isNonWorkRole = (key?: string) => !!key && NON_WORK_ROLES.has(key);
+export const LEVEL_OPTIONS: { value: LevelKey; label: string }[] = [
+  { value: "ic", label: "Individual contributor" },
+  { value: "manager", label: "Manager" },
+  { value: "director", label: "Director or above" },
+];
+/** Roles where seniority is implied or doesn't apply, so we don't ask. */
+const NO_LEVEL_ROLES = new Set(["exec", "founder", "student", "between", "exploring"]);
+export const roleAsksLevel = (key?: string) => !!key && !NO_LEVEL_ROLES.has(key);
 export const roleLabel = (key?: string) =>
   [...ROLES, ...PERSONAL_ROLES].find((r) => r.key === key)?.label ?? "your role";
 
