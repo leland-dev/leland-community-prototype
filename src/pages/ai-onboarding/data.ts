@@ -15,15 +15,18 @@ import build3 from "../../assets/placeholder images/courses/toolkit_visa_eligibi
 import build4 from "../../assets/placeholder images/courses/c10-hero-1920x1280.webp";
 import build5 from "../../assets/placeholder images/courses/HERO-Sam-Vander-Wielen-case-study-scaled.avif";
 import {
-  BarChart3, Code2, Compass, Crown, FileText, GraduationCap, Handshake, Hourglass, Landmark,
-  Mail, Megaphone, MoreHorizontal, PenTool, Rocket, Scale, Search, Settings2,
-  Sparkles, Telescope, Users, Workflow, CalendarDays,
+  BarChart3, BookOpen, Briefcase, Bug, Calculator, CalendarDays, ClipboardList, Code2, Compass, Crown,
+  Database, FileSignature, FileText, GitBranch, GraduationCap, Handshake, Home, Hourglass, Inbox, Landmark,
+  Layout, Lightbulb, ListChecks, Mail, Megaphone, MessagesSquare, MoreHorizontal, Palette, PenTool, Phone,
+  Presentation, RefreshCw, Rocket, Scale, Search, Send, Settings2, Sparkles, Target, Telescope, TrendingUp,
+  Users, Workflow, Wrench,
 } from "lucide-react";
 
 export type Path = "individual" | "team";
 export type Context = "work" | "personal";
 export type ToolKey = "claude" | "chatgpt" | "copilot" | "gemini" | "unsure";
 export type ExperienceKey = "new" | "casual" | "daily" | "builder";
+export type LevelKey = "ic" | "manager" | "director";
 
 export type Answers = {
   context?: Context;
@@ -31,6 +34,9 @@ export type Answers = {
   teamSize?: string;
   invites: string[];
   role?: string;
+  /** Seniority within the role: IC / manager / director+. Not asked for
+   *  non-work roles, or for Executive and Founder where it's implied. */
+  level?: LevelKey;
   experience?: ExperienceKey;
   tool?: ToolKey;
   goals: string[];
@@ -127,6 +133,14 @@ export const PERSONAL_ROLES: RoleOption[] = [
 ];
 export const NON_WORK_ROLES = new Set(PERSONAL_ROLES.map((r) => r.key));
 export const isNonWorkRole = (key?: string) => !!key && NON_WORK_ROLES.has(key);
+export const LEVEL_OPTIONS: { value: LevelKey; label: string }[] = [
+  { value: "ic", label: "Individual contributor" },
+  { value: "manager", label: "Manager" },
+  { value: "director", label: "Director or above" },
+];
+/** Roles where seniority is implied or doesn't apply, so we don't ask. */
+const NO_LEVEL_ROLES = new Set(["exec", "founder", "student", "between", "exploring"]);
+export const roleAsksLevel = (key?: string) => !!key && !NO_LEVEL_ROLES.has(key);
 export const roleLabel = (key?: string) =>
   [...ROLES, ...PERSONAL_ROLES].find((r) => r.key === key)?.label ?? "your role";
 
@@ -156,16 +170,134 @@ export const TOOLS: { value: ToolKey; label: string; desc: string; logo?: string
 ];
 export const toolLabel = (key?: ToolKey) => TOOLS.find((t) => t.value === key)?.label ?? "your AI tool";
 
-export const GOALS: { key: string; label: string; icon: LucideIcon }[] = [
+export type GoalOption = { key: string; label: string; icon: LucideIcon };
+
+/** Generic outcomes, shown to everyone ("Across your work"). */
+export const GENERIC_GOALS: GoalOption[] = [
   { key: "email", label: "Email & messages", icon: Mail },
-  { key: "research", label: "Research & analysis", icon: Search },
   { key: "writing", label: "Writing & documents", icon: FileText },
-  { key: "data", label: "Data & reporting", icon: BarChart3 },
-  { key: "meetings", label: "Meetings & notes", icon: CalendarDays },
+  { key: "research", label: "Research & synthesis", icon: Search },
+  { key: "data", label: "Data analysis & reporting", icon: BarChart3 },
+  { key: "presentations", label: "Presentations & decks", icon: Presentation },
+  { key: "meetings", label: "Meetings & follow-ups", icon: CalendarDays },
   { key: "automation", label: "Automating repetitive work", icon: Workflow },
   { key: "building", label: "Building tools & agents", icon: Code2 },
-  { key: "leading", label: "Leading my team's AI adoption", icon: Users },
 ];
+
+/** Role-specific outcomes ("For {role}"), keyed `{role}:{slug}` so the two
+ *  groups stay distinguishable in the captured data. */
+export const ROLE_GOALS: Record<string, GoalOption[]> = {
+  product: [
+    { key: "product:feedback", label: "Customer feedback synthesis", icon: MessagesSquare },
+    { key: "product:specs", label: "PRDs & specs", icon: FileText },
+    { key: "product:prototyping", label: "Prototyping ideas", icon: Lightbulb },
+    { key: "product:competitive", label: "Competitive analysis", icon: Target },
+  ],
+  engineering: [
+    { key: "engineering:code", label: "Code generation & review", icon: Code2 },
+    { key: "engineering:debugging", label: "Debugging & tests", icon: Bug },
+    { key: "engineering:docs", label: "Documentation", icon: BookOpen },
+    { key: "engineering:tools", label: "Internal tools", icon: Wrench },
+  ],
+  design: [
+    { key: "design:prototyping", label: "Rapid prototyping", icon: Lightbulb },
+    { key: "design:research", label: "User research synthesis", icon: MessagesSquare },
+    { key: "design:handoff", label: "Specs & handoff", icon: Layout },
+    { key: "design:copy", label: "Copy & content variations", icon: PenTool },
+  ],
+  data: [
+    { key: "data:sql", label: "SQL & queries", icon: Database },
+    { key: "data:pipelines", label: "Data cleaning & pipelines", icon: GitBranch },
+    { key: "data:dashboards", label: "Dashboards & narratives", icon: BarChart3 },
+    { key: "data:selfserve", label: "Self-serve answers for stakeholders", icon: MessagesSquare },
+  ],
+  marketing: [
+    { key: "marketing:copy", label: "Campaign & ad copy", icon: Megaphone },
+    { key: "marketing:content", label: "Content calendar & SEO", icon: CalendarDays },
+    { key: "marketing:reporting", label: "Performance reporting", icon: TrendingUp },
+    { key: "marketing:research", label: "Audience & competitor research", icon: Target },
+  ],
+  sales: [
+    { key: "sales:prep", label: "Prospect research & call prep", icon: Phone },
+    { key: "sales:outreach", label: "Outreach sequences", icon: Send },
+    { key: "sales:crm", label: "CRM updates & follow-ups", icon: RefreshCw },
+    { key: "sales:proposals", label: "Proposals & pricing docs", icon: FileSignature },
+  ],
+  ops: [
+    { key: "ops:sops", label: "SOPs & playbooks", icon: ListChecks },
+    { key: "ops:vendors", label: "Vendor & process research", icon: Search },
+    { key: "ops:triage", label: "Request triage", icon: Inbox },
+    { key: "ops:reporting", label: "Reporting automation", icon: Workflow },
+  ],
+  finance: [
+    { key: "finance:variance", label: "Variance commentary", icon: TrendingUp },
+    { key: "finance:models", label: "Model docs & scenarios", icon: Calculator },
+    { key: "finance:recon", label: "Reconciliation checks", icon: ListChecks },
+    { key: "finance:board", label: "Board & stakeholder decks", icon: Presentation },
+  ],
+  people: [
+    { key: "people:hiring", label: "Job descriptions & interview guides", icon: ClipboardList },
+    { key: "people:onboarding", label: "Onboarding & enablement content", icon: BookOpen },
+    { key: "people:policy", label: "Policy Q&A", icon: MessagesSquare },
+    { key: "people:reviews", label: "Performance review drafts", icon: FileText },
+  ],
+  legal: [
+    { key: "legal:contracts", label: "Contract review & redlines", icon: FileSignature },
+    { key: "legal:memos", label: "Research memos", icon: Search },
+    { key: "legal:intake", label: "Intake triage", icon: Inbox },
+    { key: "legal:policy", label: "Policy summaries", icon: Scale },
+  ],
+  exec: [
+    { key: "exec:briefs", label: "Team updates & exec briefs", icon: FileText },
+    { key: "exec:board", label: "Board prep", icon: Presentation },
+    { key: "exec:strategy", label: "Strategy & planning docs", icon: Compass },
+    { key: "exec:adoption", label: "Leading my org's AI adoption", icon: Users },
+  ],
+  founder: [
+    { key: "founder:investors", label: "Investor updates", icon: TrendingUp },
+    { key: "founder:support", label: "Customer support", icon: MessagesSquare },
+    { key: "founder:prototyping", label: "Product prototyping", icon: Lightbulb },
+    { key: "founder:gtm", label: "GTM & sales collateral", icon: Megaphone },
+  ],
+  student: [
+    { key: "student:studying", label: "Studying & notes", icon: BookOpen },
+    { key: "student:papers", label: "Papers & essays", icon: FileText },
+    { key: "student:jobsearch", label: "Job search & applications", icon: Briefcase },
+    { key: "student:portfolio", label: "Portfolio projects", icon: Rocket },
+  ],
+  between: [
+    { key: "between:jobsearch", label: "Job search & applications", icon: Briefcase },
+    { key: "between:interviews", label: "Interview prep", icon: MessagesSquare },
+    { key: "between:portfolio", label: "Portfolio projects", icon: Rocket },
+    { key: "between:skilling", label: "Skilling up for a target role", icon: GraduationCap },
+  ],
+  exploring: [
+    { key: "exploring:projects", label: "Personal projects", icon: Rocket },
+    { key: "exploring:learning", label: "Learning how AI works", icon: Lightbulb },
+    { key: "exploring:admin", label: "Life admin & organizing", icon: Home },
+    { key: "exploring:creative", label: "Creative projects", icon: Palette },
+  ],
+};
+
+/** Shown in the role group for managers and director+, whatever the function. */
+export const LEAD_GOAL: GoalOption = { key: "lead:adoption", label: "Leading my team's AI adoption", icon: Users };
+
+/** Group heading for the role-specific chips ("For executive" reads wrong). */
+const GOAL_GROUP_LABEL: Record<string, string> = {
+  product: "For product", engineering: "For engineering", design: "For design", data: "For data & analytics",
+  marketing: "For marketing", sales: "For sales", ops: "For operations", finance: "For finance",
+  people: "For people / HR", legal: "For legal", exec: "For executives", founder: "For founders",
+  student: "For students", between: "For your search", exploring: "For you",
+};
+export const goalGroupLabel = (role?: string) => (role && GOAL_GROUP_LABEL[role]) || "For your role";
+
+/** The two chip groups for the goals step. "Something else" gets generic only. */
+export function goalsFor(role?: string, level?: LevelKey): { role: GoalOption[]; generic: GoalOption[] } {
+  const base = (role && ROLE_GOALS[role]) || [];
+  const leads = (level === "manager" || level === "director") && role !== "exec";
+  return { role: leads ? [...base, LEAD_GOAL] : base, generic: GENERIC_GOALS };
+}
+export const ALL_GOALS: GoalOption[] = [...GENERIC_GOALS, ...Object.values(ROLE_GOALS).flat(), LEAD_GOAL];
 
 export type CohortSession = { month: string; day: number; when: string; title: string; minutes: number };
 export type Cohort = {

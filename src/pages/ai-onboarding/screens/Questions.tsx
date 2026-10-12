@@ -2,11 +2,12 @@
  * first and advances with the same full-width Continue at the bottom.
  * Single-select cards toggle: clicking the selected card clears it, which
  * puts the step back in its empty state (Continue disabled). */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Plus, X } from "lucide-react";
 import {
-  CONTEXT_OPTIONS, EXPERIENCE_OPTIONS, GOALS, PERSONAL_ROLES, ROLES, TEAM_SIZES, TOOLS, USER,
+  CONTEXT_OPTIONS, EXPERIENCE_OPTIONS, LEVEL_OPTIONS, PERSONAL_ROLES, ROLES, TEAM_SIZES, TOOLS, USER, goalGroupLabel, goalsFor, roleAsksLevel,
+  type GoalOption,
   type Answers, type Path,
 } from "../data";
 import { Chip, Eyebrow, GhostCta, Heading, OptionCard, OptionGrid, StepContinue, Sub, TextInput, TileCard } from "../ui";
@@ -138,6 +139,15 @@ export function RoleStep(p: StepProps) {
   const options = personal
     ? [...ROLES.filter((r) => r.key !== "other"), ...PERSONAL_ROLES, ...ROLES.filter((r) => r.key === "other")]
     : ROLES;
+  // Seniority follows the function as a second row on the same question, so it
+  // reads as one question rather than an extra step.
+  const asksLevel = roleAsksLevel(value);
+  const canContinue = !!value && (!asksLevel || !!p.answers.level);
+  const levelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (asksLevel) requestAnimationFrame(() => levelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }));
+  }, [asksLevel]);
+  const pickRole = (key: string) => p.update(value === key ? { role: undefined, level: undefined } : { role: key, level: roleAsksLevel(key) ? p.answers.level : undefined });
   return (
     <>
       <Eyebrow>About you</Eyebrow>
@@ -149,10 +159,36 @@ export function RoleStep(p: StepProps) {
       </Sub>
       <OptionGrid cols={2}>
         {options.map((r) => (
-          <OptionCard key={r.key} compact selected={value === r.key} onClick={() => p.update({ role: value === r.key ? undefined : r.key })} icon={r.icon} label={r.label} />
+          <OptionCard key={r.key} compact selected={value === r.key} onClick={() => pickRole(r.key)} icon={r.icon} label={r.label} />
         ))}
       </OptionGrid>
-      <StepContinue onClick={p.onNext} disabled={!value} />
+
+      <AnimatePresence initial={false}>
+        {asksLevel ? (
+          <motion.div
+            key="level"
+            ref={levelRef}
+            initial={{ opacity: 0, y: 8, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -4, height: 0 }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pt-8">
+              <div className="text-[16px] font-medium text-ink-primary">And your level?</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {LEVEL_OPTIONS.map((l) => (
+                  <Chip key={l.value} selected={p.answers.level === l.value} onClick={() => p.update({ level: p.answers.level === l.value ? undefined : l.value })}>
+                    {l.label}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <StepContinue onClick={p.onNext} disabled={!canContinue} />
     </>
   );
 }
@@ -198,22 +234,35 @@ export function ToolStep(p: StepProps) {
   );
 }
 
-/* ── Goals (multi-select chips) ────────────────────────────────────────── */
+/* ── Goals (multi-select chips): role-specific group, then generic ──────── */
 export function GoalsStep(p: StepProps) {
   const toggle = (k: string) =>
     p.update({ goals: p.answers.goals.includes(k) ? p.answers.goals.filter((g) => g !== k) : [...p.answers.goals, k] });
+  const groups = goalsFor(p.answers.role, p.answers.level);
+  const chips = (list: GoalOption[]) => (
+    <div className="flex flex-wrap justify-center gap-2.5">
+      {list.map((g) => (
+        <Chip key={g.key} selected={p.answers.goals.includes(g.key)} onClick={() => toggle(g.key)} icon={g.icon}>
+          {g.label}
+        </Chip>
+      ))}
+    </div>
+  );
   return (
     <>
       <div className="text-center">
         <Heading>What do you want to accomplish with AI?</Heading>
         <Sub>Choose as many options as you want</Sub>
       </div>
-      <div className="mt-8 flex flex-wrap justify-center gap-2.5">
-        {GOALS.map((g) => (
-          <Chip key={g.key} selected={p.answers.goals.includes(g.key)} onClick={() => toggle(g.key)} icon={g.icon}>
-            {g.label}
-          </Chip>
-        ))}
+      {groups.role.length ? (
+        <div className="mt-8">
+          <div className="mb-3 text-center text-[12px] font-medium uppercase tracking-[0.14em] text-ink-secondary">{goalGroupLabel(p.answers.role)}</div>
+          {chips(groups.role)}
+        </div>
+      ) : null}
+      <div className={groups.role.length ? "mt-7" : "mt-8"}>
+        {groups.role.length ? <div className="mb-3 text-center text-[12px] font-medium uppercase tracking-[0.14em] text-ink-secondary">Across your work</div> : null}
+        {chips(groups.generic)}
       </div>
       <StepContinue onClick={p.onNext} disabled={p.answers.goals.length === 0} />
     </>
