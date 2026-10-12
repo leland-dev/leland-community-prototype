@@ -6,7 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Plus, X } from "lucide-react";
 import {
-  CONTEXT_OPTIONS, EXPERIENCE_OPTIONS, GOALS, LEVEL_OPTIONS, PERSONAL_ROLES, ROLES, TEAM_SIZES, TOOLS, USER, roleAsksLevel,
+  CONTEXT_OPTIONS, EXPERIENCE_OPTIONS, LEVEL_OPTIONS, PERSONAL_ROLES, ROLES, TEAM_SIZES, TOOLS, USER, goalGroupLabel, goalsFor, roleAsksLevel,
+  type GoalOption,
   type Answers, type Path,
 } from "../data";
 import { Chip, Eyebrow, GhostCta, Heading, OptionCard, OptionGrid, StepContinue, Sub, TextInput, TileCard } from "../ui";
@@ -233,22 +234,35 @@ export function ToolStep(p: StepProps) {
   );
 }
 
-/* ── Goals (multi-select chips) ────────────────────────────────────────── */
+/* ── Goals (multi-select chips): role-specific group, then generic ──────── */
 export function GoalsStep(p: StepProps) {
   const toggle = (k: string) =>
     p.update({ goals: p.answers.goals.includes(k) ? p.answers.goals.filter((g) => g !== k) : [...p.answers.goals, k] });
+  const groups = goalsFor(p.answers.role, p.answers.level);
+  const chips = (list: GoalOption[]) => (
+    <div className="flex flex-wrap justify-center gap-2.5">
+      {list.map((g) => (
+        <Chip key={g.key} selected={p.answers.goals.includes(g.key)} onClick={() => toggle(g.key)} icon={g.icon}>
+          {g.label}
+        </Chip>
+      ))}
+    </div>
+  );
   return (
     <>
       <div className="text-center">
         <Heading>What do you want to accomplish with AI?</Heading>
         <Sub>Choose as many options as you want</Sub>
       </div>
-      <div className="mt-8 flex flex-wrap justify-center gap-2.5">
-        {GOALS.map((g) => (
-          <Chip key={g.key} selected={p.answers.goals.includes(g.key)} onClick={() => toggle(g.key)} icon={g.icon}>
-            {g.label}
-          </Chip>
-        ))}
+      {groups.role.length ? (
+        <div className="mt-8">
+          <div className="mb-3 text-center text-[12px] font-medium uppercase tracking-[0.14em] text-ink-secondary">{goalGroupLabel(p.answers.role)}</div>
+          {chips(groups.role)}
+        </div>
+      ) : null}
+      <div className={groups.role.length ? "mt-7" : "mt-8"}>
+        {groups.role.length ? <div className="mb-3 text-center text-[12px] font-medium uppercase tracking-[0.14em] text-ink-secondary">Across your work</div> : null}
+        {chips(groups.generic)}
       </div>
       <StepContinue onClick={p.onNext} disabled={p.answers.goals.length === 0} />
     </>
