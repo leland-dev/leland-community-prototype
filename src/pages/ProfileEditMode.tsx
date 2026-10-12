@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type ReactNode } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, Reorder, useDragControls } from "motion/react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { useExpertMode } from "../contexts/ExpertModeContext";
@@ -26,6 +26,7 @@ import linkedinLogo from "../assets/org-logos/linkedin-logo.png";
 import mbaIcon from "../assets/icons/category-icons/mba.svg";
 import consultingIcon from "../assets/icons/category-icons/consulting.svg";
 import pmIcon from "../assets/icons/category-icons/product-management.svg";
+import dragDotsIcon from "../assets/icons/drag-dots.svg";
 import bookBookmarkIcon from "../assets/icons/book-bookmark.svg";
 import piggyBankIcon from "../assets/icons/Piggy bank, Coin.1.svg";
 import stopwatchIcon from "../assets/icons/stopwatch.svg";
@@ -347,6 +348,56 @@ const categoryListings = [
   { slug: "product-management", category: "Product Management", headline: "Senior PM at LinkedIn | Ex-Meta | Breaking Into Tech", icon: pmIcon },
 ];
 
+type CategoryListing = (typeof categoryListings)[number];
+
+// Categories card — the list reorders via drag & drop (Framer Motion's Reorder,
+// same package the Offering builder's Page tab uses). A drag handle animates in
+// to the left of each category icon on hover and is the only drag initiator.
+function CategoriesCard() {
+  const [items, setItems] = useState<CategoryListing[]>(categoryListings);
+  return (
+    <Card>
+      <CardHead title="Categories" action={<EditButton label="Add category" icon={addPlusIcon} />} />
+      <Reorder.Group axis="y" values={items} onReorder={setItems} as="div" className="flex flex-col gap-1">
+        {items.map(item => (
+          <CategoryRow key={item.slug} item={item} />
+        ))}
+      </Reorder.Group>
+    </Card>
+  );
+}
+
+function CategoryRow({ item }: { item: CategoryListing }) {
+  const { slug, category, headline, icon } = item;
+  const dragControls = useDragControls();
+  return (
+    <Reorder.Item as="div" value={item} dragListener={false} dragControls={dragControls} className="group relative">
+      <Link to={`/my-leland/manage/${slug}`} className="flex items-center gap-3 rounded-xl px-2 py-3 no-underline transition-colors hover:bg-gray-hover">
+        {/* Drag handle + icon tile. The handle collapses to zero width when not
+            hovering and animates in to the left of the icon, nudging it right. */}
+        <div className="flex shrink-0 items-center">
+          <span
+            onPointerDown={(e) => { e.preventDefault(); dragControls.start(e); }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            aria-label="Drag to reorder"
+            className="flex h-11 w-0 touch-none cursor-grab items-center justify-center overflow-hidden text-gray-extra-light opacity-0 transition-all duration-200 hover:text-gray-light group-hover:mr-1 group-hover:w-6 group-hover:opacity-100 active:cursor-grabbing"
+          >
+            <MaskIcon src={dragDotsIcon} className="h-[18px] w-[18px]" />
+          </span>
+          <div className="icon-tile flex h-11 w-11 items-center justify-center rounded-[6px] bg-[#f5f5f5]">
+            <img src={icon} alt="" className="h-6 w-6" />
+          </div>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[15px] font-semibold leading-tight text-gray-dark">{category}</p>
+          <p className="mt-[2px] truncate text-[15px] leading-tight text-[#707070]">{headline}</p>
+        </div>
+        <img src={chevronRightIcon} alt="" className="h-6 w-6 shrink-0 opacity-60" />
+      </Link>
+    </Reorder.Item>
+  );
+}
+
 export default function ProfileEditMode({ publicProfileBanner = true, introVideoCard = true, afterHero }: { publicProfileBanner?: boolean; introVideoCard?: boolean; afterHero?: ReactNode } = {}) {
   const { expert } = useExpertMode();
   const navigate = useNavigate();
@@ -554,25 +605,7 @@ export default function ProfileEditMode({ publicProfileBanner = true, introVideo
       {afterHero}
 
       {/* Categories — experts only, directly under the Hero */}
-      {expert && (
-        <Card>
-          <CardHead title="Categories" action={<EditButton label="Add category" icon={addPlusIcon} />} />
-          <div className="flex flex-col gap-1">
-            {categoryListings.map(({ slug, category, headline: h, icon }) => (
-              <Link key={category} to={`/my-leland/manage/${slug}`} className="group flex items-center gap-3 rounded-xl px-2 py-3 no-underline transition-colors hover:bg-gray-hover">
-                <div className="icon-tile flex h-11 w-11 shrink-0 items-center justify-center rounded-[6px] bg-[#f5f5f5]">
-                  <img src={icon} alt="" className="h-6 w-6" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[15px] font-semibold leading-tight text-gray-dark">{category}</p>
-                  <p className="mt-[2px] truncate text-[15px] leading-tight text-[#707070]">{h}</p>
-                </div>
-                <img src={chevronRightIcon} alt="" className="h-6 w-6 shrink-0 opacity-60" />
-              </Link>
-            ))}
-          </div>
-        </Card>
-      )}
+      {expert && <CategoriesCard />}
 
       {/* About */}
       <EditableTextCard title="About" value={about} onChange={setAbout} />
