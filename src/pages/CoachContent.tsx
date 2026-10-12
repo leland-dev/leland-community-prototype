@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "../components/Button";
+import { useCourses, courseStats, deleteCourse, type BuilderCourse } from "../lib/courses";
 import { ConfigModal, ListConfigModal, CollectionCover, collectionThumbs, collectionCountLabel, CONTENT_LIBRARY, formatViews, defaultConfigFor, type OfferingItem } from "./CoachProductNew";
 import { useCollections, upsertCollection, deleteCollection, newCollectionId, type Collection } from "../lib/collections";
 import { RESOURCES, type Resource } from "../lib/resources";
@@ -259,6 +261,95 @@ function CollectionCarouselView({ collections, onNew, onOpen }: CollectionViewPr
   );
 }
 
+// ── Courses — full multi-module courses built in the standalone course builder.
+// Its own section on the Content page (like Collections); cards open the builder,
+// and "New course" starts a fresh one. ──
+function CourseCardCover({ course }: { course: BuilderCourse }) {
+  if (course.coverImage) {
+    return <img src={course.coverImage} alt="" className="aspect-[1.91/1] w-full object-cover" />;
+  }
+  return (
+    <div className="flex aspect-[1.91/1] w-full items-center justify-center bg-gray-hover">
+      <MaskIcon src={myCoursesIcon} className="h-8 w-8 text-gray-extra-light" />
+    </div>
+  );
+}
+
+function CoursesSection() {
+  const navigate = useNavigate();
+  const courses = useCourses();
+  const [confirmDelete, setConfirmDelete] = useState<BuilderCourse | null>(null);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h2 className="text-[22px] font-semibold text-gray-dark">Courses</h2>
+          <p className="mt-0.5 text-[15px] text-gray-light">Build structured, multi-module courses with their own lessons and pages.</p>
+        </div>
+        <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => navigate("/coach/content/course/new")}>
+          {PLUS_ICON}
+          New course
+        </Button>
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {courses.map((c) => {
+          const stats = courseStats(c);
+          return (
+            <div
+              key={c.id}
+              onClick={() => navigate(`/coach/content/course/${c.id}`)}
+              className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white text-left shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]"
+            >
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setConfirmDelete(c); }}
+                aria-label={`Delete ${c.title}`}
+                className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-gray-light opacity-0 shadow-[0_1px_3px_rgba(16,24,40,0.15)] transition-all hover:text-[#E5484D] focus-visible:opacity-100 group-hover:opacity-100"
+              >
+                <MaskIcon src={trashIcon} className="h-[16px] w-[16px]" />
+              </button>
+              <CourseCardCover course={c} />
+              <div className="flex flex-1 flex-col p-4">
+                <div className="mb-2 flex items-center gap-2">
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${c.status === "published" ? "bg-[#E6F4EA] text-[#1E7B34]" : "bg-[#222222]/5 text-gray-light"}`}>
+                    {c.status === "published" ? "Published" : "Draft"}
+                  </span>
+                </div>
+                <p className="text-[15px] font-semibold leading-tight text-gray-dark">{c.title || "Untitled course"}</p>
+                <p className="mt-1.5 line-clamp-2 flex-1 text-[14px] leading-snug text-gray-light">{c.description || "No description yet."}</p>
+                <span className="mt-3 text-[12px] font-medium text-gray-light">
+                  {stats.modules} {stats.modules === 1 ? "module" : "modules"} · {stats.sections} {stats.sections === 1 ? "section" : "sections"}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Create tile — dashed, always the last cell */}
+        <button
+          type="button"
+          onClick={() => navigate("/coach/content/course/new")}
+          className="flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-stroke text-gray-light transition-colors hover:border-gray-dark hover:text-gray-dark"
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#222222]/5">{PLUS_ICON}</span>
+          <span className="text-[14px] font-semibold">New course</span>
+        </button>
+      </div>
+
+      <ConfirmModal
+        open={!!confirmDelete}
+        title={`Delete “${confirmDelete?.title || "Untitled course"}”?`}
+        body="This permanently removes the course and all its modules and sections. This can't be undone."
+        confirmLabel="Delete course"
+        onConfirm={() => { if (confirmDelete) deleteCourse(confirmDelete.id); setConfirmDelete(null); }}
+        onClose={() => setConfirmDelete(null)}
+      />
+    </div>
+  );
+}
+
 // Content-page analytics — same figures as before, now shown in the shared
 // Analytics card (label + value + sparkline).
 const CONTENT_METRICS: AnalyticsMetric[] = [
@@ -465,6 +556,11 @@ export default function CoachContent() {
           )}
         </div>
       )}
+
+      {/* ── Courses ── */}
+      <div className="mt-12">
+        <CoursesSection />
+      </div>
 
       {/* ── Your resources (simplified — styled like the offering builder's
           product list) ── */}
