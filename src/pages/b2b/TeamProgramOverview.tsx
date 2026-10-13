@@ -234,9 +234,10 @@ const TEAM_COHORTS: CohortOption[] = [
 type Cohort = { startDate: string; endDate?: string } | null;
 
 type Recipient = { name: string; email: string };
-// What the add-team-members dialog does: add an admin (no charge), or grant an AI Builder Program seat or 1:1 coaching. They choose first.
+// What the add-team-members dialog can do for the people being added, in any combination: make them admins (no charge),
+// and grant an AI Builder Program seat and/or 1:1 coaching. Each checked item gets its own section on the details step.
 type GrantOffering = "program" | "coaching" | "admin";
-type GrantResult = { recipients: Recipient[]; offering: GrantOffering; format: ProgramFormat; access: ProgramAccess; cohort: Cohort; sessions: number; category: string };
+type GrantResult = { recipients: Recipient[]; offerings: GrantOffering[]; format: ProgramFormat; access: ProgramAccess; cohort: Cohort; sessions: number; category: string };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SEPARATORS = /[\s,;]+/;
@@ -316,13 +317,15 @@ function EmailChipsInput({ emails, draft, statuses, onEmails, onDraft }: {
 }
 
 // One choice in step one of the add-team-members dialog. All options share this layout so they read as a set.
-// An option can put a looping video behind its icon tile (with a white logo mark on top) to stand out.
-function AccessOption({ icon, title, description, onSelect, videoSrc, markSrc }: { icon: string; title: string; description: string; onSelect: () => void; videoSrc?: string; markSrc?: string }) {
+// A selectable card (several can be checked). An option can put a looping video behind its icon tile, with a white logo mark on top.
+function AccessOption({ icon, title, description = "", price, checked, onToggle, videoSrc, markSrc }: { icon: string; title: string; description?: string; /** leads the subtext, so it's clear which choices cost money */ price?: string; checked: boolean; onToggle: () => void; videoSrc?: string; markSrc?: string }) {
   return (
     <button
       type="button"
-      onClick={onSelect}
-      className="flex w-full cursor-pointer items-center gap-4 rounded-[12px] border border-gray-stroke bg-white p-4 text-left transition-colors hover:bg-gray-hover"
+      role="checkbox"
+      aria-checked={checked}
+      onClick={onToggle}
+      className={`flex w-full cursor-pointer items-center gap-3 rounded-[12px] border bg-white p-4 text-left transition-colors hover:bg-gray-hover ${checked ? "border-gray-dark" : "border-gray-stroke"}`}
     >
       <span className={`relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[10px] ${videoSrc ? "bg-[#1e2130]" : "bg-gray-hover"}`}>
         {videoSrc && (
@@ -340,9 +343,19 @@ function AccessOption({ icon, title, description, onSelect, videoSrc, markSrc }:
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-[14px] font-semibold text-gray-dark">{title}</span>
-        <span className="block text-[14px] text-gray-light">{description}</span>
+        <span className="block text-[14px] text-gray-light">
+          {price && <span className="text-gray-dark">{price}</span>}
+          {price && description && " · "}
+          {description}
+        </span>
       </span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight"><polyline points="9 18 15 12 9 6" /></svg>
+      <span
+        aria-hidden
+        className="ml-1 flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[5px] border"
+        style={checked ? { backgroundColor: "#222222", borderColor: "#222222" } : { borderColor: "#CCCCCC" }}
+      >
+        {checked && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6L5 8.5L9.5 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+      </span>
     </button>
   );
 }
@@ -358,9 +371,9 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
   const [draft, setDraft] = useState("");
   const [cohort, setCohort] = useState<Cohort>(null);
   const [picking, setPicking] = useState(false);
-  // Two steps: first the kind of access, then its options, the emails and a confirmation. Editing someone skips step one.
-  const [step, setStep] = useState<"type" | "details">("type");
-  const [offering, setOffering] = useState<GrantOffering>("program");
+  // Three steps: who (emails), what they get, then that offering's options with a confirmation. Editing someone skips to the last.
+  const [step, setStep] = useState<"emails" | "type" | "details">("emails");
+  const [selected, setSelected] = useState<GrantOffering[]>([]);
   const [sessions, setSessions] = useState(3);
   const [category, setCategory] = useState("");
   const [format, setFormat] = useState<ProgramFormat>("live");
@@ -380,8 +393,8 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
     setPicking(false);
     setCardStep(false);
     setPaid(null);
-    setStep(person ? "details" : "type");
-    setOffering(person && !person.program ? "coaching" : "program");
+    setStep(person ? "details" : "emails");
+    setSelected(person ? [!person.program && person.coaching ? "coaching" : "program"] : []);
     setSessions(person?.coaching?.granted ?? 3);
     setCategory(person?.coaching?.category ?? "");
     setFormat(person?.plan?.format ?? "live");
@@ -409,54 +422,53 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
 
   // Everyone invited gets the same access; the charge is per person.
   const count = Math.max(1, recipients.length);
-  const needsSeat = offering === "program" && !person?.program;
-  const newSessions = offering === "coaching" ? Math.max(0, sessions - (person?.coaching?.granted ?? 0)) : 0;
+  const wantsProgram = selected.includes("program");
+  const wantsCoaching = selected.includes("coaching");
+  const wantsAdmin = selected.includes("admin");
+  const toggle = (o: GrantOffering) => setSelected((prev) => (prev.includes(o) ? prev.filter((x) => x !== o) : [...prev, o]));
+  const needsSeat = wantsProgram && !person?.program;
+  const newSessions = wantsCoaching ? Math.max(0, sessions - (person?.coaching?.granted ?? 0)) : 0;
   const seatPrice = SEAT_PRICES[format][access];
-  const perPerson = (needsSeat ? seatPrice : 0) + newSessions * SESSION_PRICE;
+  const programPer = needsSeat ? seatPrice : 0;
+  const coachingPer = newSessions * SESSION_PRICE;
+  const perPerson = programPer + coachingPer;
   const charge = perPerson * count;
-  const valid = recipients.length > 0 && problems.length === 0 && !incompleteDraft;
+  const valid = selected.length > 0 && recipients.length > 0 && problems.length === 0 && !incompleteDraft;
   // No card on file yet: collect one first, then charge and send in one step.
   const needsCard = charge > 0 && !card;
 
   const submit = () => {
     const c = card;
-    const r: GrantResult = { recipients, offering, format, access, cohort, sessions, category };
-    if (offering === "admin") {
-      // Admins need no seat or payment: they're added to the team with the Admin role.
+    const r: GrantResult = { recipients, offerings: selected, format, access, cohort, sessions, category };
+    const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const stamp = Date.now();
+    // One purchase per paid item, for Billing history.
+    const purchases = [
+      ...(programPer > 0
+        ? [{ id: `p-${stamp}-a`, date: today, description: "AI Builder Program", detail: `${count} ${count === 1 ? "seat" : "seats"} · ${format === "live" ? "Live" : "Async"} · ${access === "limited" ? "2 months" : "extended access"}`, amount: programPer * count }]
+        : []),
+      ...(coachingPer > 0
+        ? [{ id: `p-${stamp}-b`, date: today, description: "1:1 coaching", detail: `${count * newSessions} sessions${category ? ` · ${category}` : ""}`, amount: coachingPer * count }]
+        : []),
+    ];
+    // Admins need no seat or payment: they're added to the team with the Admin role.
+    const newAdmins = wantsAdmin ? recipients.map((rec, i) => ({ id: `m-${stamp}-${i}`, name: rec.name, email: rec.email, role: "Admin" as const, access: ["All programs"] })) : [];
+    if (wantsProgram || wantsCoaching) onGrant(r);
+    // One team update for everything, so nothing overwrites anything else.
+    if (newAdmins.length > 0 || purchases.length > 0) {
       updateTeam({
-        members: [
-          ...(team?.members ?? []),
-          ...recipients.map((rec, i) => ({ id: `m-${Date.now()}-${i}`, name: rec.name, email: rec.email, role: "Admin" as const, access: ["All programs"] })),
-        ],
-      });
-      setPaid(null);
-      setDone(r);
-      return;
-    }
-    onGrant(r);
-    if (charge > 0) {
-      // One update for everything: a card just entered, plus the purchase for Billing history.
-      updateTeam({
-        purchases: [
-          {
-            id: `p-${Date.now()}`,
-            date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-            description: offering === "program" ? "AI Builder Program" : "1:1 coaching",
-            detail:
-              offering === "program"
-                ? `${count} ${count === 1 ? "seat" : "seats"} · ${format === "live" ? "Live" : "Async"} · ${access === "limited" ? "2 months" : "extended access"}`
-                : `${count * newSessions} sessions${category ? ` · ${category}` : ""}`,
-            amount: charge,
-          },
-          ...(team?.purchases ?? []),
-        ],
+        ...(newAdmins.length > 0 ? { members: [...(team?.members ?? []), ...newAdmins] } : {}),
+        ...(purchases.length > 0 ? { purchases: [...purchases, ...(team?.purchases ?? [])] } : {}),
       });
     }
     setPaid(charge > 0 && c ? { card: `${c.brand} ending in ${c.last4}`, amount: charge } : null);
     setDone(r);
   };
+  const first = recipients[0];
+  const recipientsLine = first ? (recipients.length === 1 ? first.email : `${first.email} and ${recipients.length - 1} other${recipients.length === 2 ? "" : "s"}`) : "";
   const sendLabel = person ? "Save access" : recipients.length > 1 ? `Send ${recipients.length} invites` : "Send invite";
-  const offeringTitle = offering === "program" ? "AI Builder Program" : offering === "coaching" ? "1:1 coaching" : "Add an admin";
+  const offeringName = (o: GrantOffering) => (o === "program" ? "AI Builder Program" : o === "coaching" ? "1:1 coaching" : "Admin settings");
+  const offeringTitle = selected.length === 1 ? offeringName(selected[0]) : "Review details";
 
   const inputCls = "h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[14px] text-gray-dark outline-none focus:border-primary disabled:bg-gray-hover disabled:text-gray-light";
 
@@ -469,7 +481,7 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
           onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
         >
           <div className="relative flex max-h-[100dvh] w-full flex-col overflow-hidden rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] sm:max-h-[90dvh] sm:w-[520px] sm:max-w-[95vw] sm:rounded-2xl">
-            <button onClick={onClose} className="absolute right-0 top-0 p-2" aria-label="Close">
+            <button onClick={onClose} className="absolute right-0 top-0 z-20 p-2" aria-label="Close">
               <div className="flex items-center justify-center rounded-full border border-gray-stroke bg-white p-[10px] text-gray-dark hover:bg-gray-hover">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><line x1="1" y1="1" x2="13" y2="13" /><line x1="13" y1="1" x2="1" y2="13" /></svg>
               </div>
@@ -529,7 +541,7 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                   <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" onClick={onClose}>Sounds good</Button>
                 </div>
               </>
-            ) : step === "type" && !person ? (
+            ) : step === "emails" && !person ? (
               <>
                 <div className="px-6 pb-5 pt-6">
                   {/* A small face pile as an example of the people being added */}
@@ -543,34 +555,66 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                   </div>
                   <h3 className="font-serif text-[28px] font-medium text-gray-dark">Add team members</h3>
                 </div>
-                <div className="px-6 pb-6">
+                <div className="flex-1 overflow-y-auto px-6 pb-6">
+                  <label className="mb-[6px] block text-[14px] text-gray-dark">Email addresses</label>
+                  <EmailChipsInput emails={emails} draft={draft} statuses={statuses} onEmails={setEmails} onDraft={setDraft} />
+                  {problems.length > 0 && (
+                    <p className="mt-[6px] text-[12px] text-[#B42318]">
+                      {problems.length === 1 ? "1 address can't be added" : `${problems.length} addresses can't be added`}: invalid, repeated, or already on your team. Remove them to continue.
+                    </p>
+                  )}
+                </div>
+                <div className="border-t border-gray-stroke px-6 py-[14px]">
+                  <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" disabled={recipients.length === 0 || problems.length > 0 || incompleteDraft} onClick={() => setStep("type")}>
+                    Continue
+                  </Button>
+                </div>
+              </>
+            ) : step === "type" && !person ? (
+              <>
+                <div className="relative flex min-h-[56px] shrink-0 items-center justify-center border-b border-gray-stroke px-12">
+                  <button type="button" aria-label="Back" onClick={() => setStep("emails")} className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full hover:bg-gray-hover">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                  </button>
+                  <span className="max-w-full truncate text-[16px] font-medium text-gray-dark">{recipientsLine}</span>
+                </div>
+                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-6">
+                  <h3 className="mb-5 text-[18px] font-semibold leading-[1.3] text-gray-dark">Grant access</h3>
                   <AccessOption
                     icon={settingsIcon}
-                    title="Add an admin"
-                    description="Manage your team, access and billing"
-                    onSelect={() => { setOffering("admin"); setStep("details"); }}
+                    title="Admin settings"
+                    description="Manage team access and billing"
+                    checked={wantsAdmin}
+                    onToggle={() => toggle("admin")}
                   />
                   <div className="my-5 flex items-center gap-3 text-[14px] text-gray-light">
                     <span className="h-px flex-1 bg-gray-stroke" />
-                    Or give access to
+                    and/or
                     <span className="h-px flex-1 bg-gray-stroke" />
                   </div>
                   <div className="flex flex-col gap-3">
                     <AccessOption
                       icon={bookOpenIcon}
                       title="AI Builder Program"
-                      description="Live or async, 2 months or annual"
+                      price={`From ${usd(Math.min(...Object.values(SEAT_PRICES).flatMap((a) => Object.values(a))))} / seat`}
                       videoSrc="/videos/animated-gradient-06.mp4"
                       markSrc={lelandMark}
-                      onSelect={() => { setOffering("program"); setStep("details"); }}
+                      checked={wantsProgram}
+                      onToggle={() => toggle("program")}
                     />
                     <AccessOption
                       icon={userIcon}
                       title="1:1 coaching"
-                      description="Sessions with an expert"
-                      onSelect={() => { setOffering("coaching"); setStep("details"); }}
+                      price={`${usd(SESSION_PRICE)} / session`}
+                      checked={wantsCoaching}
+                      onToggle={() => toggle("coaching")}
                     />
                   </div>
+                </div>
+                <div className="border-t border-gray-stroke px-6 py-[14px]">
+                  <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" disabled={selected.length === 0} onClick={() => setStep("details")}>
+                    Continue
+                  </Button>
                 </div>
               </>
             ) : (
@@ -590,32 +634,24 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                 )}
                 <div className={`flex-1 overflow-y-auto px-6 pb-6 ${person ? "" : "pt-5"}`}>
                   {!person && (
-                    <div className="mb-6">
-                      <label className="mb-[6px] block text-[14px] text-gray-dark">Email addresses</label>
-                      <EmailChipsInput emails={emails} draft={draft} statuses={statuses} onEmails={setEmails} onDraft={setDraft} />
-                      {problems.length > 0 && (
-                        <p className="mt-[6px] text-[12px] text-[#B42318]">
-                          {problems.length === 1 ? "1 address can't be added" : `${problems.length} addresses can't be added`}: invalid, repeated, or already on your team. Remove them to continue.
-                        </p>
-                      )}
-                    </div>
+                    <p className="mb-5 text-[14px] text-gray-light">
+                      For <span className="text-gray-dark">{recipientsLine}</span>{" "}
+                      <button type="button" onClick={() => setStep("emails")} className="underline decoration-dotted decoration-[1.5px] underline-offset-[3px] hover:text-gray-dark">Edit</button>
+                    </p>
                   )}
                   {person && (
                     <div className="mb-3">
                       <FilterDropdown
                         field
                         label="Offering"
-                        value={offering}
+                        value={selected[0] ?? "program"}
                         options={[{ value: "program", label: "AI Builder Program" }, { value: "coaching", label: "1:1 coaching" }]}
-                        onChange={(v) => setOffering(v as GrantOffering)}
+                        onChange={(v) => setSelected([v as GrantOffering])}
                       />
                     </div>
                   )}
-                  {offering === "admin" && (
-                    <p className="text-[14px] leading-[1.5] text-gray-light">Admins can manage team members, grant or revoke their access, make others admins, and manage billing details.</p>
-                  )}
-
-                  {offering === "program" && (
+                  <div className="flex flex-col gap-3">
+                  {wantsProgram && (
                   <div className="rounded-[10px] border border-gray-stroke p-4">
                       <div className="flex items-baseline justify-between gap-3">
                         <span className="text-[14px] font-medium text-gray-dark">AI Builder Program seat</span>
@@ -667,7 +703,7 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                   </div>
                   )}
 
-                  {offering === "coaching" && (
+                  {wantsCoaching && (
                     <div className="rounded-[10px] border border-gray-stroke p-4">
                       <div className="flex items-baseline justify-between gap-3">
                         <span className="text-[14px] font-medium text-gray-dark">1:1 coaching</span>
@@ -688,12 +724,28 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                     </div>
                   )}
 
+                  {wantsAdmin && (
+                    <p className="text-[14px] leading-[1.5] text-gray-light">
+                      {wantsProgram || wantsCoaching
+                        ? "They’ll also be added as admins, so they can manage team members, access and billing."
+                        : "Admins can manage team members, grant or revoke their access, make others admins, and manage billing details."}
+                    </p>
+                  )}
+                  </div>
+
                   {charge > 0 && (
                     <>
                     <p className="mb-3 mt-6 text-[16px] font-semibold text-gray-dark">Review</p>
                     <div className={`flex flex-col gap-1.5 rounded-[10px] bg-gray-hover px-4 text-[14px] ${card ? "py-3" : "pb-4 pt-3"}`}>
-                      {count > 1 && (
-                        <div className="flex items-center justify-between text-gray-light"><span>{offering === "program" ? `${count} seats` : `${count} people`}</span><span>{count} × {usd(perPerson)}</span></div>
+                      {(count > 1 || (programPer > 0 && coachingPer > 0)) && (
+                        <>
+                          {programPer > 0 && (
+                            <div className="flex items-center justify-between text-gray-light"><span>AI Builder Program · {count} {count === 1 ? "seat" : "seats"}</span><span>{usd(programPer * count)}</span></div>
+                          )}
+                          {coachingPer > 0 && (
+                            <div className="flex items-center justify-between text-gray-light"><span>1:1 coaching · {count * newSessions} {count * newSessions === 1 ? "session" : "sessions"}</span><span>{usd(coachingPer * count)}</span></div>
+                          )}
+                        </>
                       )}
                       {card && (
                         <div className="flex items-center justify-between text-gray-light">
@@ -1339,7 +1391,7 @@ export function TeamPeopleProvider({ children }: { children: ReactNode }) {
       // Program: keep a started one as-is; otherwise a live seat goes in the chosen cohort (or waits for them to pick),
       // and an async seat is self-paced, so it starts right away.
       const program: Program | null =
-        r.offering !== "program"
+        !r.offerings.includes("program")
           ? cur ?? null
           : cur && (cur.status === "in-progress" || cur.status === "completed")
             ? cur
@@ -1351,10 +1403,10 @@ export function TeamPeopleProvider({ children }: { children: ReactNode }) {
                   ? { status: "in-progress", startDate: r.cohort.startDate, level: 1 }
                   : { status: "not-started", startDate: r.cohort.startDate };
       const coaching: Person["coaching"] =
-        r.offering !== "coaching"
+        !r.offerings.includes("coaching")
           ? existing?.coaching ?? null
           : { ...existing?.coaching, granted: r.sessions, used: Math.min(existing?.coaching?.used ?? 0, r.sessions), category: r.category || undefined };
-      const plan = r.offering === "program" && !(cur && existing && hasStarted(existing)) ? { format: r.format, access: r.access } : existing?.plan;
+      const plan = r.offerings.includes("program") && !(cur && existing && hasStarted(existing)) ? { format: r.format, access: r.access } : existing?.plan;
       if (existing) {
         updatedByEmail.set(rec.email, { ...existing, program, coaching, plan });
       } else {
