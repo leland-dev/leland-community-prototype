@@ -104,6 +104,26 @@ function PrototypeMenu() {
 
           <div className={sectionCls}>Data</div>
           <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+            <span className="text-[14px] font-medium text-gray-dark">Card on file</span>
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={!!team.card}
+                onChange={() =>
+                  team.card
+                    ? updateTeam({ card: undefined, billing: undefined })
+                    : updateTeam({
+                        card: { brand: "Visa", last4: "4242", exp: "12/28", name: "Alex Rivera" },
+                        billing: { company: team.name, line1: "1 Airport Way", city: "Salt Lake City", state: "UT", zip: "84116", country: "United States" },
+                      })
+                }
+                className="peer sr-only"
+              />
+              <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-gray-dark" />
+              <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+            </div>
+          </label>
+          <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
             <span className="text-[14px] font-medium text-gray-dark">Empty team</span>
             <div className="relative">
               <input type="checkbox" checked={emptyTeam} onChange={() => setEmptyTeam(!emptyTeam)} className="peer sr-only" />

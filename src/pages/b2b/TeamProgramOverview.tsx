@@ -6,9 +6,15 @@ import { Button } from "../../components/Button";
 import { FilterDropdown } from "./B2BOverviewV2";
 import { Tag, TagColor, TagSize } from "../../components/leland";
 import { useTeam } from "../../contexts/TeamContext";
+import { PaymentMethodForm, TermsLinks } from "../../components/PaymentMethodForm";
 import { useTeamPrototype } from "../../contexts/TeamPrototypeContext";
 import { CohortPickerView, type CohortOption } from "./B2BModals";
+import { CoachingCategoryPicker } from "../../components/CoachingCategoryPicker";
 import usersGroupIcon from "../../assets/icons/users-group.svg";
+import bookOpenIcon from "../../assets/icons/book-open.svg";
+import lelandMark from "../../assets/leland-mark.svg";
+import userIcon from "../../assets/icons/user.svg";
+import settingsIcon from "../../assets/icons/settings.svg";
 import pic1 from "../../assets/profile photos/pic-1.png";
 import pic3 from "../../assets/profile photos/pic-3.png";
 import pic5 from "../../assets/profile photos/pic-5.png";
@@ -23,6 +29,7 @@ import pic13 from "../../assets/profile photos/pic-13.png";
 // AI Builder Program seat pricing (sample): live vs async, and limited-time vs extended (annual) access.
 type ProgramFormat = "live" | "async";
 type ProgramAccess = "limited" | "extended";
+const SESSION_PRICE = 250; // 1:1 coaching, per session (sample)
 const SEAT_PRICES: Record<ProgramFormat, Record<ProgramAccess, number>> = {
   live: { limited: 1995, extended: 2995 },
   async: { limited: 995, extended: 1495 },
@@ -50,6 +57,7 @@ type Person = {
   coaching: { granted: number; used: number; lastSession?: string; nextSession?: string; category?: string } | null;
   lelandPlus?: { expires: string } | null; // Leland+ subscription (sample data)
   plan?: { format: ProgramFormat; access: ProgramAccess }; // how the program seat was purchased
+  isAdmin?: boolean; // a team admin (may not have been granted any access yet)
   lastActive: string; // display text
   lastActiveDays: number | null; // null = hasn't logged in yet
   assessments: Assessment[];
@@ -226,8 +234,9 @@ const TEAM_COHORTS: CohortOption[] = [
 type Cohort = { startDate: string; endDate?: string } | null;
 
 type Recipient = { name: string; email: string };
-// The add-team-members dialog only grants the AI Builder Program for now; coaching isn't offered there yet.
-type GrantResult = { recipients: Recipient[]; format: ProgramFormat; access: ProgramAccess; cohort: Cohort };
+// What the add-team-members dialog does: add an admin (no charge), or grant an AI Builder Program seat or 1:1 coaching. They choose first.
+type GrantOffering = "program" | "coaching" | "admin";
+type GrantResult = { recipients: Recipient[]; offering: GrantOffering; format: ProgramFormat; access: ProgramAccess; cohort: Cohort; sessions: number; category: string };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SEPARATORS = /[\s,;]+/;
@@ -306,6 +315,38 @@ function EmailChipsInput({ emails, draft, statuses, onEmails, onDraft }: {
   );
 }
 
+// One choice in step one of the add-team-members dialog. All options share this layout so they read as a set.
+// An option can put a looping video behind its icon tile (with a white logo mark on top) to stand out.
+function AccessOption({ icon, title, description, onSelect, videoSrc, markSrc }: { icon: string; title: string; description: string; onSelect: () => void; videoSrc?: string; markSrc?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className="flex w-full cursor-pointer items-center gap-4 rounded-[12px] border border-gray-stroke bg-white p-4 text-left transition-colors hover:bg-gray-hover"
+    >
+      <span className={`relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[10px] ${videoSrc ? "bg-[#1e2130]" : "bg-gray-hover"}`}>
+        {videoSrc && (
+          <video src={videoSrc} aria-hidden autoPlay muted loop playsInline preload="auto" className="pointer-events-none absolute inset-0 h-full w-full object-cover motion-reduce:hidden" />
+        )}
+        {markSrc ? (
+          <span
+            aria-hidden
+            className="relative h-6 w-6 bg-white"
+            style={{ maskImage: `url("${markSrc}")`, WebkitMaskImage: `url("${markSrc}")`, maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat", maskPosition: "center", WebkitMaskPosition: "center" }}
+          />
+        ) : (
+          <img src={icon} alt="" className="relative h-6 w-6" />
+        )}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[14px] font-semibold text-gray-dark">{title}</span>
+        <span className="block text-[14px] text-gray-light">{description}</span>
+      </span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight"><polyline points="9 18 15 12 9 6" /></svg>
+    </button>
+  );
+}
+
 function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
   open: boolean;
   person: Person | null; // set when editing an existing team member
@@ -317,11 +358,19 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
   const [draft, setDraft] = useState("");
   const [cohort, setCohort] = useState<Cohort>(null);
   const [picking, setPicking] = useState(false);
+  // Two steps: first the kind of access, then its options, the emails and a confirmation. Editing someone skips step one.
+  const [step, setStep] = useState<"type" | "details">("type");
+  const [offering, setOffering] = useState<GrantOffering>("program");
+  const [sessions, setSessions] = useState(3);
+  const [category, setCategory] = useState("");
   const [format, setFormat] = useState<ProgramFormat>("live");
   const [access, setAccess] = useState<ProgramAccess>("limited");
   const [done, setDone] = useState<GrantResult | null>(null);
-  const { team } = useTeam();
+  const { team, updateTeam } = useTeam();
   const card = team?.card;
+  // The card form opens from "Add a card" / "Change". Sending is disabled until a card is on file, so a card is always saved first.
+  const [cardStep, setCardStep] = useState(false);
+  const [paid, setPaid] = useState<{ card: string; amount: number } | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -329,16 +378,22 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
     setEmails([]); setDraft("");
     setCohort(person?.program?.status === "not-started" ? { startDate: person.program.startDate } : null);
     setPicking(false);
+    setCardStep(false);
+    setPaid(null);
+    setStep(person ? "details" : "type");
+    setOffering(person && !person.program ? "coaching" : "program");
+    setSessions(person?.coaching?.granted ?? 3);
+    setCategory(person?.coaching?.category ?? "");
     setFormat(person?.plan?.format ?? "live");
     setAccess(person?.plan?.access ?? "limited");
   }, [open, person]);
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { if (picking) setPicking(false); else onClose(); } };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { if (cardStep) setCardStep(false); else if (picking) setPicking(false); else onClose(); } };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose, picking]);
+  }, [open, onClose, picking, cardStep]);
 
   // Each typed address is checked; only "ok" ones are invited. A complete address still in the box counts.
   const draftToken = draft.trim().toLowerCase();
@@ -354,17 +409,54 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
 
   // Everyone invited gets the same access; the charge is per person.
   const count = Math.max(1, recipients.length);
-  const needsSeat = !person?.program;
+  const needsSeat = offering === "program" && !person?.program;
+  const newSessions = offering === "coaching" ? Math.max(0, sessions - (person?.coaching?.granted ?? 0)) : 0;
   const seatPrice = SEAT_PRICES[format][access];
-  const perPerson = needsSeat ? seatPrice : 0;
+  const perPerson = (needsSeat ? seatPrice : 0) + newSessions * SESSION_PRICE;
   const charge = perPerson * count;
-  const valid = recipients.length > 0 && problems.length === 0 && !incompleteDraft && (charge === 0 || !!card);
+  const valid = recipients.length > 0 && problems.length === 0 && !incompleteDraft;
+  // No card on file yet: collect one first, then charge and send in one step.
+  const needsCard = charge > 0 && !card;
 
   const submit = () => {
-    const r: GrantResult = { recipients, format, access, cohort };
+    const c = card;
+    const r: GrantResult = { recipients, offering, format, access, cohort, sessions, category };
+    if (offering === "admin") {
+      // Admins need no seat or payment: they're added to the team with the Admin role.
+      updateTeam({
+        members: [
+          ...(team?.members ?? []),
+          ...recipients.map((rec, i) => ({ id: `m-${Date.now()}-${i}`, name: rec.name, email: rec.email, role: "Admin" as const, access: ["All programs"] })),
+        ],
+      });
+      setPaid(null);
+      setDone(r);
+      return;
+    }
     onGrant(r);
+    if (charge > 0) {
+      // One update for everything: a card just entered, plus the purchase for Billing history.
+      updateTeam({
+        purchases: [
+          {
+            id: `p-${Date.now()}`,
+            date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+            description: offering === "program" ? "AI Builder Program" : "1:1 coaching",
+            detail:
+              offering === "program"
+                ? `${count} ${count === 1 ? "seat" : "seats"} · ${format === "live" ? "Live" : "Async"} · ${access === "limited" ? "2 months" : "extended access"}`
+                : `${count * newSessions} sessions${category ? ` · ${category}` : ""}`,
+            amount: charge,
+          },
+          ...(team?.purchases ?? []),
+        ],
+      });
+    }
+    setPaid(charge > 0 && c ? { card: `${c.brand} ending in ${c.last4}`, amount: charge } : null);
     setDone(r);
   };
+  const sendLabel = person ? "Save access" : recipients.length > 1 ? `Send ${recipients.length} invites` : "Send invite";
+  const offeringTitle = offering === "program" ? "AI Builder Program" : offering === "coaching" ? "1:1 coaching" : "Add an admin";
 
   const inputCls = "h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[14px] text-gray-dark outline-none focus:border-primary disabled:bg-gray-hover disabled:text-gray-light";
 
@@ -382,7 +474,34 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><line x1="1" y1="1" x2="13" y2="13" /><line x1="13" y1="1" x2="1" y2="13" /></svg>
               </div>
             </button>
-            {picking ? (
+            {cardStep ? (
+              <>
+                <div className="relative flex min-h-[56px] shrink-0 items-center justify-center border-b border-gray-stroke px-12">
+                  <button type="button" aria-label="Back" onClick={() => setCardStep(false)} className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full hover:bg-gray-hover">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                  </button>
+                  <span className="text-[16px] font-medium text-gray-dark">{card ? "Update card" : "Add a card"}</span>
+                </div>
+                <div className="flex-1 overflow-y-auto px-6 py-5">
+                  <PaymentMethodForm
+                    initialBilling={team?.billing}
+                    initialName={team?.card?.name ?? ""}
+                    submitLabel="Save card"
+                    terms={
+                      <>
+                        By saving this card, you authorize Leland to charge it each time you add seats or other purchases to your team.
+                        {" "}Extended access renews every year at the price shown at purchase until you cancel, and we’ll email you before each renewal.
+                        {" "}Taxes, if any, are calculated from your billing address. Purchases are subject to our <TermsLinks />.
+                      </>
+                    }
+                    onSubmit={(c, b) => {
+                      updateTeam({ card: c, billing: b });
+                      setCardStep(false);
+                    }}
+                  />
+                </div>
+              </>
+            ) : picking ? (
               <CohortPickerView
                 cohorts={TEAM_COHORTS}
                 isSelected={(c) => cohort?.startDate === c.startDate}
@@ -404,18 +523,72 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                         ? `Emails have been sent to ${done.recipients.length} people.`
                         : `An email has been sent to ${done.recipients[0].email}.`}
                   </p>
+                  {paid && <p className="mt-2 text-[14px] text-gray-light">We charged {usd(paid.amount)} to your {paid.card}.</p>}
                 </div>
                 <div className="border-t border-gray-stroke px-6 py-[14px]">
                   <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" onClick={onClose}>Sounds good</Button>
                 </div>
               </>
+            ) : step === "type" && !person ? (
+              <>
+                <div className="px-6 pb-5 pt-6">
+                  {/* A small face pile as an example of the people being added */}
+                  <div className="mb-4 flex items-center" aria-hidden>
+                    {[pic5, pic9, pic3, pic13].map((src, i) => (
+                      <img key={i} src={src} alt="" className={`h-10 w-10 rounded-full object-cover ring-2 ring-white ${i > 0 ? "-ml-3" : ""}`} />
+                    ))}
+                    <span className="-ml-3 flex h-10 w-10 items-center justify-center rounded-full bg-[#f4f4f4] ring-2 ring-white">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                    </span>
+                  </div>
+                  <h3 className="font-serif text-[28px] font-medium text-gray-dark">Add team members</h3>
+                </div>
+                <div className="px-6 pb-6">
+                  <AccessOption
+                    icon={settingsIcon}
+                    title="Add an admin"
+                    description="Manage your team, access and billing"
+                    onSelect={() => { setOffering("admin"); setStep("details"); }}
+                  />
+                  <div className="my-5 flex items-center gap-3 text-[14px] text-gray-light">
+                    <span className="h-px flex-1 bg-gray-stroke" />
+                    Or give access to
+                    <span className="h-px flex-1 bg-gray-stroke" />
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <AccessOption
+                      icon={bookOpenIcon}
+                      title="AI Builder Program"
+                      description="Live or async, 2 months or annual"
+                      videoSrc="/videos/animated-gradient-06.mp4"
+                      markSrc={lelandMark}
+                      onSelect={() => { setOffering("program"); setStep("details"); }}
+                    />
+                    <AccessOption
+                      icon={userIcon}
+                      title="1:1 coaching"
+                      description="Sessions with an expert"
+                      onSelect={() => { setOffering("coaching"); setStep("details"); }}
+                    />
+                  </div>
+                </div>
+              </>
             ) : (
               <>
-                <div className="px-6 pb-4 pt-6">
-                  <h3 className="font-serif text-[28px] font-medium text-gray-dark">{person ? "Edit access" : "Add team members"}</h3>
-                  {person && <p className="mt-2 text-[16px] leading-[1.5] text-gray-light">Choose what {person.name.split(" ")[0]} can use.</p>}
-                </div>
-                <div className="flex-1 overflow-y-auto px-6 pb-6">
+                {person ? (
+                  <div className="px-6 pb-4 pt-6">
+                    <h3 className="font-serif text-[28px] font-medium text-gray-dark">Edit access</h3>
+                    <p className="mt-2 text-[16px] leading-[1.5] text-gray-light">Choose what {person.name.split(" ")[0]} can use.</p>
+                  </div>
+                ) : (
+                  <div className="relative flex min-h-[56px] shrink-0 items-center justify-center border-b border-gray-stroke px-12">
+                    <button type="button" aria-label="Back" onClick={() => setStep("type")} className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full hover:bg-gray-hover">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                    </button>
+                    <span className="text-[16px] font-medium text-gray-dark">{offeringTitle}</span>
+                  </div>
+                )}
+                <div className={`flex-1 overflow-y-auto px-6 pb-6 ${person ? "" : "pt-5"}`}>
                   {!person && (
                     <div className="mb-6">
                       <label className="mb-[6px] block text-[14px] text-gray-dark">Email addresses</label>
@@ -427,7 +600,22 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                       )}
                     </div>
                   )}
-                  <p className="mb-3 text-[16px] font-semibold text-gray-dark">Access</p>
+                  {person && (
+                    <div className="mb-3">
+                      <FilterDropdown
+                        field
+                        label="Offering"
+                        value={offering}
+                        options={[{ value: "program", label: "AI Builder Program" }, { value: "coaching", label: "1:1 coaching" }]}
+                        onChange={(v) => setOffering(v as GrantOffering)}
+                      />
+                    </div>
+                  )}
+                  {offering === "admin" && (
+                    <p className="text-[14px] leading-[1.5] text-gray-light">Admins can manage team members, grant or revoke their access, make others admins, and manage billing details.</p>
+                  )}
+
+                  {offering === "program" && (
                   <div className="rounded-[10px] border border-gray-stroke p-4">
                       <div className="flex items-baseline justify-between gap-3">
                         <span className="text-[14px] font-medium text-gray-dark">AI Builder Program seat</span>
@@ -477,23 +665,59 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                         </>
                       )}
                   </div>
+                  )}
+
+                  {offering === "coaching" && (
+                    <div className="rounded-[10px] border border-gray-stroke p-4">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="text-[14px] font-medium text-gray-dark">1:1 coaching</span>
+                        <span className="shrink-0 text-[14px] text-gray-light">{usd(SESSION_PRICE)} / session</span>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-stroke pt-3">
+                        <span className="text-[14px] text-gray-dark">Category</span>
+                        <CoachingCategoryPicker value={category} onChange={setCategory} />
+                      </div>
+                      <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-stroke pt-3">
+                        <span className="text-[14px] text-gray-dark">Sessions</span>
+                        <span className="flex items-center overflow-hidden rounded-lg border border-gray-stroke">
+                          <button type="button" aria-label="Fewer sessions" onClick={() => setSessions((n) => Math.max(person?.coaching?.used || 1, n - 1))} className="h-9 w-9 text-[16px] text-gray-dark hover:bg-gray-hover">−</button>
+                          <span className="w-9 text-center text-[14px] font-medium text-gray-dark">{sessions}</span>
+                          <button type="button" aria-label="More sessions" onClick={() => setSessions((n) => Math.min(12, n + 1))} className="h-9 w-9 text-[16px] text-gray-dark hover:bg-gray-hover">+</button>
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                   {charge > 0 && (
-                    <div className="mt-4 flex flex-col gap-1.5 rounded-[10px] bg-gray-hover px-4 py-3 text-[14px]">
+                    <>
+                    <p className="mb-3 mt-6 text-[16px] font-semibold text-gray-dark">Review</p>
+                    <div className={`flex flex-col gap-1.5 rounded-[10px] bg-gray-hover px-4 text-[14px] ${card ? "py-3" : "pb-4 pt-3"}`}>
                       {count > 1 && (
-                        <div className="flex items-center justify-between text-gray-light"><span>{count} seats</span><span>{count} × {usd(perPerson)}</span></div>
+                        <div className="flex items-center justify-between text-gray-light"><span>{offering === "program" ? `${count} seats` : `${count} people`}</span><span>{count} × {usd(perPerson)}</span></div>
                       )}
-                      <div className="flex items-center justify-between text-gray-light">
-                        <span>Card</span>
-                        {card ? <span>{card.brand} ending in {card.last4}</span> : <span className="text-[#B42318]">Add a card in Billing</span>}
-                      </div>
+                      {card && (
+                        <div className="flex items-center justify-between text-gray-light">
+                          <span>Card</span>
+                          <span className="flex items-center gap-2">
+                            {card.brand} ending in {card.last4}
+                            <button type="button" onClick={() => setCardStep(true)} className="underline decoration-dotted decoration-[1.5px] underline-offset-[3px] hover:text-gray-dark">Change</button>
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between font-medium text-gray-dark"><span>Charged today</span><span>{usd(charge)}</span></div>
+                      {/* No card yet: hide the card row and offer a full-width button below the numbers, with room above it */}
+                      {!card && (
+                        <Button type="button" size="md" variant="dark" rounded="rounded-full" className="mt-4 w-full" onClick={() => setCardStep(true)}>
+                          Add a card
+                        </Button>
+                      )}
                     </div>
+                    </>
                   )}
                 </div>
                 <div className="border-t border-gray-stroke px-6 py-[14px]">
-                  <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" disabled={!valid} onClick={submit}>
-                    {person ? "Save access" : recipients.length > 1 ? `Send ${recipients.length} invites` : "Send invite"}
+                  <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" disabled={!valid || needsCard} onClick={() => submit()}>
+                    {sendLabel}
                   </Button>
                 </div>
               </>
@@ -587,6 +811,7 @@ function PersonDrawer({ person, onClose, onEdit }: { person: Person | null; onCl
                     <div className="min-w-0">
                       <div className="font-serif text-[24px] font-medium leading-tight text-gray-dark">{person.name}</div>
                       <div className="truncate text-[14px] text-gray-light">{person.email}</div>
+                      {person.isAdmin && <div className="mt-1"><Tag text="Admin" tagColor={TagColor.WHITE} size={TagSize.XS} /></div>}
                     </div>
                   </div>
                   <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0" onClick={() => onEdit(person)}>Edit access</Button>
@@ -1094,6 +1319,7 @@ function usePeople() {
 
 export function TeamPeopleProvider({ children }: { children: ReactNode }) {
   const { emptyTeam } = useTeamPrototype();
+  const { team } = useTeam();
   const [people, setPeople] = useState<Person[]>(emptyTeam ? [] : INITIAL_PEOPLE);
   // The prototype's "Empty team" switch resets the roster either way.
   useEffect(() => { setPeople(emptyTeam ? [] : INITIAL_PEOPLE); }, [emptyTeam]);
@@ -1109,26 +1335,33 @@ export function TeamPeopleProvider({ children }: { children: ReactNode }) {
     for (const rec of r.recipients) {
       const existing = people.find((p) => p.email === rec.email);
       const cur = existing?.program;
-      // Keep a started program as-is; otherwise a live seat goes in the chosen cohort (or waits for them to pick),
-      // and an async seat is self-paced, so it starts right away. Anything else they already have is left alone.
+      // Only the chosen offering changes; anything else they already have is left alone.
+      // Program: keep a started one as-is; otherwise a live seat goes in the chosen cohort (or waits for them to pick),
+      // and an async seat is self-paced, so it starts right away.
       const program: Program | null =
-        cur && (cur.status === "in-progress" || cur.status === "completed")
-          ? cur
-          : r.format === "async"
-            ? { status: "in-progress", startDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }), level: 1 }
-            : !r.cohort
-              ? { status: "no-cohort" }
-              : new Date(r.cohort.startDate).getTime() <= Date.now()
-                ? { status: "in-progress", startDate: r.cohort.startDate, level: 1 }
-                : { status: "not-started", startDate: r.cohort.startDate };
-      const coaching = existing?.coaching ?? null;
+        r.offering !== "program"
+          ? cur ?? null
+          : cur && (cur.status === "in-progress" || cur.status === "completed")
+            ? cur
+            : r.format === "async"
+              ? { status: "in-progress", startDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }), level: 1 }
+              : !r.cohort
+                ? { status: "no-cohort" }
+                : new Date(r.cohort.startDate).getTime() <= Date.now()
+                  ? { status: "in-progress", startDate: r.cohort.startDate, level: 1 }
+                  : { status: "not-started", startDate: r.cohort.startDate };
+      const coaching: Person["coaching"] =
+        r.offering !== "coaching"
+          ? existing?.coaching ?? null
+          : { ...existing?.coaching, granted: r.sessions, used: Math.min(existing?.coaching?.used ?? 0, r.sessions), category: r.category || undefined };
+      const plan = r.offering === "program" && !(cur && existing && hasStarted(existing)) ? { format: r.format, access: r.access } : existing?.plan;
       if (existing) {
-        updatedByEmail.set(rec.email, { ...existing, program, coaching, plan: cur && hasStarted(existing) ? existing.plan : { format: r.format, access: r.access } });
+        updatedByEmail.set(rec.email, { ...existing, program, coaching, plan });
       } else {
         created.push({
           name: rec.name, email: rec.email, initials: initialsOf(rec.name),
           program, coaching,
-          plan: { format: r.format, access: r.access },
+          plan,
           lastActive: "—", lastActiveDays: null, assessments: [], submissions: [],
         });
       }
@@ -1141,7 +1374,7 @@ export function TeamPeopleProvider({ children }: { children: ReactNode }) {
     <PeopleContext.Provider value={{ people, openGrant, openPerson: setSelected }}>
       {children}
       <PersonDrawer person={selected} onClose={() => setSelected(null)} onEdit={(p) => openGrant(p)} />
-      <GrantAccessModal open={grantOpen} person={editing} existingEmails={people.map((p) => p.email.toLowerCase())} onClose={() => setGrantOpen(false)} onGrant={handleGrant} />
+      <GrantAccessModal open={grantOpen} person={editing} existingEmails={[...people.map((p) => p.email), ...(team?.members.map((m) => m.email) ?? [])].map((e) => e.toLowerCase())} onClose={() => setGrantOpen(false)} onGrant={handleGrant} />
     </PeopleContext.Provider>
   );
 }
@@ -1169,7 +1402,7 @@ export default function TeamProgramOverview() {
 
   return (
     <div className="leading-[1.2]">
-      <h1 className="mb-6 font-serif text-[38px] font-medium text-gray-dark sm:mb-8">Overview</h1>
+      <h1 className="mb-6 font-serif text-[30px] font-medium text-gray-dark sm:text-[38px] sm:mb-8">Overview</h1>
 
       <ImpactHero people={people} />
 
@@ -1232,7 +1465,7 @@ const OFFERING_LABEL: Record<Offering, string> = { everyone: "All", program: "AI
 
 // Everything a person has access to, as tags. Outlined (white) tags so they don't read as a status.
 function AccessTags({ p }: { p: Person }) {
-  const tags = [p.program && "AI Builder Program", p.coaching && "Coaching", p.lelandPlus && "Leland+"].filter(Boolean) as string[];
+  const tags = [p.isAdmin && "Admin", p.program && "AI Builder Program", p.coaching && "Coaching", p.lelandPlus && "Leland+"].filter(Boolean) as string[];
   if (tags.length === 0) return <span className="text-[14px] text-gray-light">—</span>;
   return <div className="flex flex-wrap gap-1">{tags.map((t) => <Tag key={t} text={t} tagColor={TagColor.WHITE} size={TagSize.XS} />)}</div>;
 }
@@ -1305,18 +1538,27 @@ const ACCESS_COL: Col = { key: "access", header: "Access", cell: (p) => <AccessT
 
 // Team members: manage people. The prototype menu switches how offerings are split up.
 export function TeamMembersPage() {
-  const { people, openGrant, openPerson } = usePeople();
+  const { people: granted, openGrant, openPerson } = usePeople();
+  const { team } = useTeam();
   const { membersLayout, showAccessColumn } = useTeamPrototype();
   const [offeringChoice, setOfferingChoice] = useState<Offering>("program");
   const [filter, setFilter] = useState<string>("all");
   const [query, setQuery] = useState("");
 
+  // Admins show up in the full roster even before they've been granted anything, but only in "All":
+  // they appear in the program and coaching views once they actually have that access. (You, the signed-in admin, aren't listed.)
+  const admins = (team?.members ?? []).filter((m) => m.role === "Admin" && m.id !== "me");
+  const adminEmails = new Set(admins.map((m) => m.email.toLowerCase()));
+  const adminOnly: Person[] = admins
+    .filter((a) => !granted.some((p) => p.email.toLowerCase() === a.email.toLowerCase()))
+    .map((a) => ({ name: a.name, email: a.email, initials: initialsOf(a.name), program: null, coaching: null, lastActive: "—", lastActiveDays: null, assessments: [], submissions: [], isAdmin: true }));
+  const people: Person[] = [...granted.map((p) => (adminEmails.has(p.email.toLowerCase()) ? { ...p, isAdmin: true } : p)), ...adminOnly];
   const programPeople = people.filter((p) => p.program);
   const coachingPeople = people.filter((p) => p.coaching);
   const plusPeople = people.filter((p) => p.lelandPlus);
   const counts: Record<Offering, number> = { everyone: people.length, program: programPeople.length, coaching: coachingPeople.length, plus: plusPeople.length };
-  // Leland+ only appears as a choice once someone on the team has it.
-  const offerings = (["everyone", "program", "coaching", "plus"] as Offering[]).filter((o) => o !== "plus" || counts.plus > 0);
+  // Leland+ isn't a tab or filter choice for now (the Access tags and the one-table layout still show it).
+  const offerings: Offering[] = ["everyone", "program", "coaching"];
 
   const combined = membersLayout === "combined";
   const offering: Offering = combined ? "everyone" : offerings.includes(offeringChoice) ? offeringChoice : "program";
@@ -1351,6 +1593,7 @@ export function TeamMembersPage() {
       if (filter === "program-only") return !!p.program && !p.coaching;
       if (filter === "coaching-only") return !p.program && !!p.coaching;
       if (filter === "both") return !!p.program && !!p.coaching;
+      if (filter === "admins") return !!p.isAdmin;
     }
     return true;
   });
@@ -1378,6 +1621,7 @@ export function TeamMembersPage() {
               { value: "program-only", label: "Program only" },
               { value: "coaching-only", label: "Coaching only" },
               { value: "both", label: "Program + coaching" },
+              { value: "admins", label: "Admins" },
             ]
           : null;
 
@@ -1385,7 +1629,7 @@ export function TeamMembersPage() {
   if (people.length === 0) {
     return (
       <div className="leading-[1.2]">
-        <h1 className="mb-6 font-serif text-[38px] font-medium text-gray-dark sm:mb-8">Team members</h1>
+        <h1 className="mb-6 font-serif text-[30px] font-medium text-gray-dark sm:text-[38px] sm:mb-8">Team members</h1>
         <div className="flex flex-col items-center rounded-[12px] border border-gray-stroke bg-white px-6 py-16 text-center">
           <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-gray-hover">
             <img src={usersGroupIcon} alt="" className="h-6 w-6 opacity-70" />
@@ -1406,28 +1650,35 @@ export function TeamMembersPage() {
   return (
     <div className="leading-[1.2]">
       <div className="mb-6 flex items-start justify-between gap-4 sm:mb-8">
-        <h1 className="font-serif text-[38px] font-medium text-gray-dark">Team members</h1>
-        <Button size="lg" variant="primary" rounded="rounded-full" className="hidden shrink-0 sm:inline-flex" onClick={() => openGrant(null)}>
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
-          Add a team member
-        </Button>
+        <h1 className="font-serif text-[30px] font-medium text-gray-dark sm:text-[38px]">Team members</h1>
+        {/* Desktop button; the full-width one below is for mobile. The wrapper hides it, since the Button's own display would override a hidden class. */}
+        <div className="hidden shrink-0 sm:block">
+          <Button size="lg" variant="primary" rounded="rounded-full" onClick={() => openGrant(null)}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
+            Add a team member
+          </Button>
+        </div>
       </div>
       <Button size="lg" variant="primary" rounded="rounded-full" className="mb-6 w-full sm:hidden" onClick={() => openGrant(null)}>Add a team member</Button>
 
       {membersLayout === "tabs" && (
-        <div className="mb-4 flex flex-wrap gap-x-6 border-b border-gray-stroke" role="tablist" aria-label="Offering">
-          {offerings.map((o) => (
-            <button
-              key={o}
-              role="tab"
-              aria-selected={offering === o}
-              onClick={() => changeOffering(o)}
-              className={`-mb-px flex items-center gap-2 border-b-2 pb-3 text-[14px] font-medium transition-colors ${offering === o ? "border-gray-dark text-gray-dark" : "border-transparent text-gray-light hover:text-gray-dark"}`}
-            >
-              {OFFERING_LABEL[o]}
-              <span className="text-[12px] font-normal text-gray-light">{counts[o]}</span>
-            </button>
-          ))}
+        // The tabs scroll sideways on narrow screens instead of wrapping. The rule under them is a pseudo-element so the
+        // scroll container doesn't clip the active tab's underline.
+        <div className="relative mb-4 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-gray-stroke">
+          <div className="relative z-10 flex flex-nowrap gap-x-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Offering">
+            {offerings.map((o) => (
+              <button
+                key={o}
+                role="tab"
+                aria-selected={offering === o}
+                onClick={() => changeOffering(o)}
+                className={`flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 pb-3 text-[14px] font-medium transition-colors ${offering === o ? "border-gray-dark text-gray-dark" : "border-transparent text-gray-light hover:text-gray-dark"}`}
+              >
+                {OFFERING_LABEL[o]}
+                <span className="text-[12px] font-normal text-gray-light">{counts[o]}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

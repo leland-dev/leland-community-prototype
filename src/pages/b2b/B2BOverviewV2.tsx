@@ -505,6 +505,7 @@ export function FilterDropdown({ label, value, options, onChange, plain, underli
   const current = options.find((o) => o.value === value);
   const isAll = value === "all";
   const hasHints = options.some((o) => o.hint);
+  const longLabels = options.some((o) => o.label.length > 26);
   return (
     <div className={`relative ${field ? "w-full" : ""}`}>
       {(() => {
@@ -543,7 +544,7 @@ export function FilterDropdown({ label, value, options, onChange, plain, underli
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className={`absolute ${alignRight ? "right-0" : "left-0"} top-full z-50 mt-1 ${field ? "w-full" : hasHints ? "w-max min-w-[220px]" : "w-[220px]"} rounded-xl border border-gray-stroke bg-white p-1.5 shadow-lg`}>
+          <div className={`absolute ${alignRight ? "right-0" : "left-0"} top-full z-50 mt-1 ${field ? "w-full" : hasHints || longLabels ? "w-max min-w-[220px] max-w-[320px]" : "w-[220px]"} ${options.length > 7 ? "max-h-[280px] overflow-y-auto" : ""} rounded-xl border border-gray-stroke bg-white p-1.5 shadow-lg`}>
             {options.map((o) => (
               <button
                 key={o.value}

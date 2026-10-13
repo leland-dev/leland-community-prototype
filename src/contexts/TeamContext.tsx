@@ -19,13 +19,32 @@ export interface Purchase {
   amount: number; // USD
 }
 
+export interface PaymentCard {
+  brand: string;
+  last4: string;
+  exp?: string; // MM/YY
+  name?: string; // name on card
+}
+
+export interface BillingAddress {
+  company: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+}
+
 export interface Team {
   name: string;
   logo?: string; // image URL / data URL
   plan: TeamPlan;
   /** The signed-in user's role on this team (prototype-switchable). */
   viewerRole: TeamMember["role"];
-  card?: { brand: string; last4: string };
+  card?: PaymentCard;
+  /** Company billing address, collected with the card (also used for tax). */
+  billing?: BillingAddress;
   members: TeamMember[];
   purchases?: Purchase[];
 }
@@ -63,7 +82,8 @@ const SAMPLE_TEAM: Team = {
   logo: breezeLogo,
   plan: "team",
   viewerRole: "Admin",
-  card: { brand: "Visa", last4: "4242" },
+  card: { brand: "Visa", last4: "4242", exp: "12/28", name: "Alex Rivera" },
+  billing: { company: "Breeze Airways", line1: "1 Airport Way", city: "Salt Lake City", state: "UT", zip: "84116", country: "United States" },
   purchases: [
     { id: "p-4", date: "Sep 30, 2026", description: "1:1 coaching sessions", detail: "6 sessions \u00b7 Jordan Lee, Sam Patel", amount: 1500 },
     { id: "p-3", date: "Sep 12, 2026", description: "Leland+ annual access", detail: "3 seats", amount: 897 },

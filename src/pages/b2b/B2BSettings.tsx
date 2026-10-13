@@ -13,8 +13,8 @@ const ADMIN_USERS = [
   { initials: "JS", name: "Jennifer Sullivan", email: "j-sullivan@kellogg.edu" },
 ];
 
-export default function B2BSettings({ onNavigateDashboard, hideDashboardLink }: { onNavigateDashboard?: () => void; hideDashboardLink?: boolean }) {
-  const [admins, setAdmins] = useState(ADMIN_USERS);
+export default function B2BSettings({ onNavigateDashboard, hideDashboardLink, initialAdmins }: { onNavigateDashboard?: () => void; hideDashboardLink?: boolean; initialAdmins?: typeof ADMIN_USERS }) {
+  const [admins, setAdmins] = useState(initialAdmins ?? ADMIN_USERS);
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<{ name: string; email: string } | null>(null);

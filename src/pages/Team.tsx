@@ -9,6 +9,7 @@ import { Button } from "../components/Button";
 import { TeamLogo } from "../components/TeamLogo";
 import { useTeam } from "../contexts/TeamContext";
 import TeamProgramOverview, { TeamMembersPage } from "./b2b/TeamProgramOverview";
+import { PaymentMethodForm, TermsLinks } from "../components/PaymentMethodForm";
 
 // Team + Enterprise share this dashboard. Team is the lightweight version
 // (a card on file + seat access); Enterprise layers on SSO, usage reporting and
@@ -99,8 +100,8 @@ export function CreateTeam() {
 function Billing() {
   const { team, updateTeam } = useTeam();
   const [adding, setAdding] = useState(false);
-  const [number, setNumber] = useState("");
   if (!team) return null;
+  const b = team.billing;
 
   return (
     <Card
@@ -113,53 +114,48 @@ function Billing() {
         ) : undefined
       }
     >
-      {team.card && !adding ? (
-        <p className="text-[14px] font-medium text-gray-dark">
-          {team.card.brand} •••• {team.card.last4}
-        </p>
-      ) : adding || !team.card ? (
-        <div className="flex flex-col gap-3">
-          {!adding && (
-            <p className="text-[14px] text-gray-light">Add a card to cover seats and sessions for your team.</p>
-          )}
-          {adding ? (
-            <>
-              <Field label="Card number">
-                <input
-                  className={inputCls}
-                  inputMode="numeric"
-                  value={number}
-                  onChange={(e) => setNumber(e.target.value.replace(/[^\d ]/g, ""))}
-                  placeholder="4242 4242 4242 4242"
-                />
-              </Field>
-              <div className="flex gap-2">
-                <Button
-                  size="md"
-                  variant="primary"
-                  disabled={number.replace(/\s/g, "").length < 12}
-                  onClick={() => {
-                    updateTeam({ card: { brand: "Visa", last4: number.replace(/\s/g, "").slice(-4) } });
-                    setAdding(false);
-                    setNumber("");
-                  }}
-                >
-                  Save card
-                </Button>
-                <Button size="md" variant="secondary" onClick={() => setAdding(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </>
-          ) : (
+      {adding ? (
+        <PaymentMethodForm
+          initialBilling={team.billing}
+          initialName={team.card?.name ?? ""}
+          submitLabel="Save card"
+          terms={<>By saving this card, you authorize Leland to charge it for seats and other purchases you add to your team. See our <TermsLinks />.</>}
+          onSubmit={(card, billing) => {
+            updateTeam({ card, billing });
+            setAdding(false);
+          }}
+          onCancel={() => setAdding(false)}
+        />
+      ) : team.card ? (
+        <div className="flex flex-col gap-4">
+          <div>
+            <p className="text-[14px] font-medium text-gray-dark">{team.card.brand} •••• {team.card.last4}</p>
+            {(team.card.exp || team.card.name) && (
+              <p className="mt-0.5 text-[12px] text-gray-light">{[team.card.name, team.card.exp && `Expires ${team.card.exp}`].filter(Boolean).join(" · ")}</p>
+            )}
+          </div>
+          {b && (
             <div>
-              <Button size="md" variant="primary" onClick={() => setAdding(true)}>
-                Add credit card
-              </Button>
+              <p className="mb-0.5 text-[12px] text-gray-light">Billing address</p>
+              <p className="text-[14px] leading-[1.5] text-gray-dark">
+                {b.company}<br />
+                {b.line1}{b.line2 ? `, ${b.line2}` : ""}<br />
+                {b.city}, {b.state} {b.zip}<br />
+                {b.country}
+              </p>
             </div>
           )}
         </div>
-      ) : null}
+      ) : (
+        <div className="flex flex-col gap-3">
+          <p className="text-[14px] text-gray-light">Add a card to cover seats and sessions for your team.</p>
+          <div>
+            <Button size="md" variant="primary" onClick={() => setAdding(true)}>
+              Add credit card
+            </Button>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
@@ -272,7 +268,11 @@ export function TeamAdmins() {
   const { team } = useTeam();
   if (!team) return null;
   if (team.viewerRole !== "Admin") return <Navigate to="/team" replace />;
-  return <B2BSettings hideDashboardLink />;
+  // Seeded from the team's own admins (including ones just added from "Add team members").
+  const initialAdmins = team.members
+    .filter((m) => m.role === "Admin")
+    .map((m) => ({ initials: m.name.split(/\s+/).map((w) => w[0]?.toUpperCase()).filter(Boolean).slice(0, 2).join(""), name: m.name, email: m.email }));
+  return <B2BSettings hideDashboardLink initialAdmins={initialAdmins} />;
 }
 
 // Billing — card on file, purchase history, plus SSO/invoicing for Enterprise.
