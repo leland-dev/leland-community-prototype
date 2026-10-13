@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "../../components/Button";
 import { motion, AnimatePresence } from "motion/react";
 import type { B2BView, ModalId } from "./B2BData";
@@ -28,6 +29,10 @@ interface Props {
   hideOrgName?: boolean;
   /** Hide the "Admin Settings" buttons (the Team dashboard links to Admins from its own menu). */
   hideAdminSettings?: boolean;
+  /** Enterprise contracts to switch between (shown as a dropdown under the page title). */
+  contracts?: { value: string; label: string }[];
+  /** Hide the prototype Partner model switch (the Team dashboard fixes the model by plan). */
+  lockPartnerModel?: boolean;
 }
 
 const activity = [
@@ -422,7 +427,7 @@ const allReviews = Object.values(userDetailsV2).flatMap((u) => [
 
 function ReviewsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null;
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[1010] flex items-end justify-center bg-black/40 sm:items-center"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
@@ -474,7 +479,8 @@ function ReviewsModal({ open, onClose }: { open: boolean; onClose: () => void })
           ))}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -483,28 +489,61 @@ const ADDED_BY_ADMINS = ["Katie Brown", "Michael Reyes", "Jennifer Sullivan"];
 const addedByFor = (email: string) => ADDED_BY_ADMINS[Math.max(0, users.findIndex((u) => u.email === email)) % ADDED_BY_ADMINS.length];
 
 // Pill-style dropdown filter: "Label: Selected value" opens a single-select menu.
-function FilterDropdown({ label, value, options, onChange }: { label: string; value: string; options: { value: string; label: string }[]; onChange: (v: string) => void }) {
+export function FilterDropdown({ label, value, options, onChange, plain, underline, small, alignRight, field }: {
+  label: string; value: string; options: { value: string; label: string; /** right-aligned secondary text, e.g. a price */ hint?: string }[]; onChange: (v: string) => void;
+  plain?: boolean;
+  /** plain only: dotted underline on the label (the text-link style) */
+  underline?: boolean;
+  /** plain only: 14px text instead of 16px */
+  small?: boolean;
+  /** open the menu aligned to the button's right edge (for controls at the right of a container) */
+  alignRight?: boolean;
+  /** form-field style: a full-width gray (secondary) button showing just the selected value */
+  field?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const current = options.find((o) => o.value === value);
   const isAll = value === "all";
+  const hasHints = options.some((o) => o.hint);
   return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-lg border bg-white px-4 py-3 text-[14px] font-medium leading-[1.2] text-[#222222] transition-colors hover:bg-gray-hover ${open ? "border-[#222222]" : "border-gray-stroke"}`}
-      >
-        <span className="text-[#707070]">{label}</span>
-        {!isAll && <span>{current?.label}</span>}
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden>
-          <polyline points="4 6 8 10 12 6" />
-        </svg>
-      </button>
+    <div className={`relative ${field ? "w-full" : ""}`}>
+      {(() => {
+        const chevron = (
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden>
+            <polyline points="4 6 8 10 12 6" />
+          </svg>
+        );
+        // "plain" is an inline text selector (not a button look); the filters use the shared outline Button.
+        return plain ? (
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            className={`flex shrink-0 cursor-pointer items-center gap-1.5 ${small ? "text-[14px]" : "text-[16px]"} leading-[1.2] transition-colors hover:text-gray-dark ${open ? "text-gray-dark" : "text-gray-light"}`}
+          >
+            <span className={underline ? "underline decoration-dotted decoration-[1.5px] underline-offset-[3px]" : undefined}>{current?.label}</span>
+            {chevron}
+          </button>
+        ) : (
+          <Button
+            size="md"
+            variant={field ? "secondary" : "outline"}
+            rounded={field ? "rounded-full" : undefined}
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-label={field ? label : undefined}
+            className={field ? "w-full !justify-between gap-2 !px-5" : `gap-2 !px-4 ${open ? "!border-[#222222]" : ""}`}
+          >
+            {!field && <span className="text-[#707070]">{label}</span>}
+            {(field || !isAll) && <span>{current?.label}</span>}
+            {chevron}
+          </Button>
+        );
+      })()}
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-full z-50 mt-1 w-[220px] rounded-xl border border-gray-stroke bg-white p-1.5 shadow-lg">
+          <div className={`absolute ${alignRight ? "right-0" : "left-0"} top-full z-50 mt-1 ${field ? "w-full" : hasHints ? "w-max min-w-[220px]" : "w-[220px]"} rounded-xl border border-gray-stroke bg-white p-1.5 shadow-lg`}>
             {options.map((o) => (
               <button
                 key={o.value}
@@ -513,9 +552,12 @@ function FilterDropdown({ label, value, options, onChange }: { label: string; va
                 className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
               >
                 {o.label}
-                {o.value === value && (
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="3 8.5 6.5 12 13 4.5" /></svg>
-                )}
+                <span className="flex items-center gap-3">
+                  {o.hint && <span className="font-normal text-gray-light">{o.hint}</span>}
+                  {o.value === value && (
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="3 8.5 6.5 12 13 4.5" /></svg>
+                  )}
+                </span>
               </button>
             ))}
           </div>
@@ -525,8 +567,10 @@ function FilterDropdown({ label, value, options, onChange }: { label: string; va
   );
 }
 
-export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSettings, partnerModel, onSetPartnerModel, hideOrgName, hideAdminSettings }: Props) {
+export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSettings, partnerModel, onSetPartnerModel, hideOrgName, hideAdminSettings, contracts, lockPartnerModel }: Props) {
   const showVerizon = partnerModel === "per-seat";
+  // Teams invite people (granting access happens per person); partners keep their own labels.
+  const addLabel = lockPartnerModel ? "Invite" : partnerModel === "a-la-carte" ? "Grant access" : "Add users";
   const [page, setPage] = useState(0);
   const [selectedUserV2, setSelectedUserV2] = useState<UserDetailV2 | null>(null);
   const [accessOverrides, setAccessOverrides] = useState<Map<string, { cohortKeys: string[]; sessions: number }>>(new Map());
@@ -615,6 +659,9 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
   }, []);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "invited" | "expired">("all");
   const [addedByFilter, setAddedByFilter] = useState<string>("all");
+  // Defaults to the most recent contract (list is ordered newest first); also covers the plan switching to Enterprise after mount.
+  const [selectedContract, setContract] = useState<string | null>(null);
+  const contract = contracts?.some((c) => c.value === selectedContract) ? selectedContract! : (contracts?.[0]?.value ?? "");
   const [removedEmails, setRemovedEmails] = useState<Set<string>>(new Set());
   const [sort] = useState<"last-active" | "date-added">("date-added");
 
@@ -674,6 +721,11 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
         <div ref={headerRef}>
           <h1 className={`text-[38px] font-medium text-gray-dark${hideOrgName ? " font-serif" : ""}`}>Overview</h1>
           {!hideOrgName && <p className="mt-2 text-[16px] text-[#707070]">{showVerizon ? "Verizon" : "Kellogg School of Management"}</p>}
+          {contracts && contracts.length > 0 && (
+            <div className="mt-3">
+              <FilterDropdown plain label="Contract" value={contract} options={contracts} onChange={setContract} />
+            </div>
+          )}
         </div>
         <div className="sticky hidden gap-2 self-start sm:flex sm:items-center" style={{ top: "28px" }}>
           {!hideAdminSettings && (
@@ -686,7 +738,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
             </svg>
-            {partnerModel === "a-la-carte" ? "Grant access" : "Add users"}
+            {addLabel}
           </Button>
         </div>
       </div>
@@ -703,26 +755,27 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
           <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
           </svg>
-          {partnerModel === "a-la-carte" ? "Grant access" : "Add users"}
+          {addLabel}
         </Button>
       </div>
 
       {/* Mobile corner button — appears when header scrolls out of view */}
       <AnimatePresence>
         {!headerVisible && (
-          <motion.button
+          <motion.div
             initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.85 }}
             transition={{ duration: 0.18 }}
-            onClick={() => onOpenModal("invite")}
-            className="fixed right-4 top-[72px] z-30 flex items-center gap-2 rounded-full bg-[#FFD96F] px-4 py-3 text-[14px] font-medium text-[#222222] shadow-md sm:hidden"
+            className="fixed right-4 top-[72px] z-30 sm:hidden"
           >
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-            </svg>
-            {partnerModel === "a-la-carte" ? "Grant access" : "Add users"}
-          </motion.button>
+            <Button size="md" variant="primary" rounded="rounded-full" onClick={() => onOpenModal("invite")} className="shadow-md">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+              </svg>
+              {addLabel}
+            </Button>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -732,23 +785,24 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
         const cards = [
           { label: "Average rating", tooltip: null, value: null, rating: { score: 4.0, count: 1 }, used: null, left: null },
           { label: "1:1 sessions", tooltip: "Personalized coaching with an expert matched to each user's recruiting track.", value: null, rating: null, used: 15, left: 85 },
-          { label: "Live courses", tooltip: "Instructor-led group programs covering recruiting strategy, technical skills, and more.", value: null, rating: null, used: 32, left: 48 },
+          { label: lockPartnerModel ? "Programs" : "Live courses", unit: lockPartnerModel ? "enrolled" : "used", tooltip: lockPartnerModel ? "People on your team enrolled in Leland programs." : "Instructor-led group programs covering recruiting strategy, technical skills, and more.", value: null, rating: null, used: 32, left: 48 },
           { label: "Leland+ licenses", tooltip: "Unlimited access to Leland's full library of guides, templates, and video content.", value: null, rating: null, used: 20, left: 180 },
         ];
+        // Cards keep a minimum width and wrap onto new rows instead of squishing their text
         return (
-          <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {cards.map(({ label, tooltip, rating, used, left }) => (
+          <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+            {cards.map(({ label, tooltip, rating, used, left, unit }) => (
               <div key={label} onClick={rating ? () => setShowReviews(true) : undefined} className={`rounded-[12px] border border-gray-stroke bg-white p-5 ${rating ? "cursor-pointer hover:bg-gray-hover" : ""}`}>
                 <div className="mb-2 flex items-center gap-1">
                   {tooltip ? (
                     <div className="group/tip relative">
-                      <span className="cursor-default border-b border-dashed border-gray-stroke text-[16px] font-normal text-gray-light">{label}</span>
+                      <span className={lockPartnerModel ? "cursor-default text-[14px] font-normal text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px]" : "cursor-default border-b border-dashed border-gray-stroke text-[16px] font-normal text-gray-light"}>{label}</span>
                       <div className="pointer-events-none absolute bottom-full left-0 z-50 mb-2 w-52 rounded-lg bg-gray-dark px-3 py-2 text-[11px] leading-[1.4] text-white opacity-0 shadow-md transition-opacity group-hover/tip:opacity-100">
                         {tooltip}
                       </div>
                     </div>
                   ) : (
-                    <span className="text-[16px] font-normal text-gray-light">{label}</span>
+                    <span className={lockPartnerModel ? "text-[14px] font-normal text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px]" : "text-[16px] font-normal text-gray-light"}>{label}</span>
                   )}
                 </div>
                 {rating ? (
@@ -759,8 +813,9 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                   </div>
                 ) : (
                   <div className="flex items-baseline justify-between gap-2">
-                    <div className="text-[22px] font-medium leading-none text-gray-dark">{used} <span className="text-[14px] font-normal text-gray-light">used</span></div>
-                    <span className="rounded-md bg-gray-hover px-2 py-0.5 text-[12px] font-medium text-gray-light">{left} left</span>
+                    <div className="text-[22px] font-medium leading-none text-gray-dark">{used} <span className="text-[14px] font-normal text-gray-light">{unit ?? "used"}</span></div>
+                    {/* Teams pay as they go — only show what's been used, not what's left */}
+                    {!lockPartnerModel && <span className="rounded-md bg-gray-hover px-2 py-0.5 text-[12px] font-medium text-gray-light">{left} left</span>}
                   </div>
                 )}
               </div>
@@ -770,7 +825,7 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
       })()}
 
       {/* Stats row — Per Seat */}
-      {partnerModel === "per-seat" && <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-x-5">
+      {partnerModel === "per-seat" && <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4 sm:gap-x-5">
         <div className="rounded-[12px] border border-gray-stroke bg-white p-5">
           <div className="mb-2 flex items-center gap-1.5 text-[16px] font-normal text-gray-light">
             Seats redeemed
@@ -1262,6 +1317,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
               className="absolute bottom-full right-0 mb-2 w-[260px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg"
             >
               <div className="p-2">
+              {!lockPartnerModel && (
+              <>
               <div className="px-2 pb-2 pt-1 text-[12px] font-medium uppercase tracking-wider text-[#9b9b9b]">Partner model</div>
               <div className="mx-2 mb-1 flex rounded-lg bg-[#f5f5f5] p-[3px]">
                 {(["per-seat", "a-la-carte"] as const).map((opt) => (
@@ -1274,6 +1331,8 @@ export default function B2BOverviewV2({ onNavigate, onOpenModal, onNavigateSetti
                   </button>
                 ))}
               </div>
+              </>
+              )}
               <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
                 <span className="text-[14px] font-medium text-gray-dark">User table wraps on mobile</span>
                 <div className="relative">

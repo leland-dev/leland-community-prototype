@@ -6,6 +6,7 @@ import { BookmarksProvider } from "./contexts/BookmarksContext";
 import { SavedToastProvider } from "./contexts/SavedToastContext";
 import { ExpertModeProvider } from "./contexts/ExpertModeContext";
 import { TeamProvider } from "./contexts/TeamContext";
+import { TeamPrototypeProvider } from "./contexts/TeamPrototypeContext";
 import { TopNavStyleProvider } from "./contexts/TopNavStyleContext";
 import { ProfileBarModeProvider } from "./contexts/ProfileBarModeContext";
 import { FeedDemoProvider } from "./contexts/FeedDemoContext";
@@ -130,7 +131,7 @@ import CoachDiscountCodes from "./pages/CoachDiscountCodes";
 import Account from "./pages/Account";
 import ReferFriend from "./pages/ReferFriend";
 import TeamLayout from "./components/TeamLayout";
-import { TeamOverview, TeamAdmins, TeamBilling, TeamReportsPage, TeamAdsPage, TeamRecruitingPage } from "./pages/Team";
+import { TeamOverview, TeamMembers, TeamAdmins, TeamBilling, TeamReportsPage, TeamAdsPage, TeamRecruitingPage } from "./pages/Team";
 import AltNavLivestreams from "./pages/AltNavLivestreams";
 import AltNavContent from "./pages/AltNavContent";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
@@ -159,6 +160,7 @@ export default function App() {
     <DarkModeProvider>
     <ExpertModeProvider>
     <TeamProvider>
+    <TeamPrototypeProvider>
     <TopNavStyleProvider>
     <BookmarksProvider>
     <SavedToastProvider>
@@ -213,6 +215,7 @@ export default function App() {
         <Route path="/team" element={<TeamLayout />}>
           <Route index element={<Navigate to="/team/overview" replace />} />
           <Route path="overview" element={<TeamOverview />} />
+          <Route path="members" element={<TeamMembers />} />
           <Route path="admins" element={<TeamAdmins />} />
           <Route path="billing" element={<TeamBilling />} />
           <Route path="reports" element={<TeamReportsPage />} />
@@ -351,6 +354,7 @@ export default function App() {
     </SavedToastProvider>
     </BookmarksProvider>
     </TopNavStyleProvider>
+    </TeamPrototypeProvider>
     </TeamProvider>
     </ExpertModeProvider>
     </DarkModeProvider>

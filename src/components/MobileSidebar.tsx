@@ -8,6 +8,7 @@ import { Button } from "./Button";
 import { TeamLogo } from "./TeamLogo";
 import { useTeam } from "../contexts/TeamContext";
 import { getTeamNavItems } from "../lib/teamNav";
+import { useTeamPrototype } from "../contexts/TeamPrototypeContext";
 import switchIcon from "../assets/icons/switch.svg";
 import usersGroupIcon from "../assets/icons/users-group.svg";
 import profilePhoto from "../assets/profile photos/profile photo.png";
@@ -158,6 +159,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const { expert: expertMode, toggle: toggleExpertMode } = useExpertMode();
   const { mode: profileBarMode, setMode: setProfileBarMode } = useProfileBarMode();
   const { team } = useTeam();
+  const { showPaidAds, showRecruiting } = useTeamPrototype();
   const { pathname } = useLocation();
   // On /team the sidebar swaps to the team menu (same slide-over, different contents).
   const inTeamMode = !!team && (pathname === "/team" || pathname.startsWith("/team/"));
@@ -234,7 +236,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
           <div className={`mx-5 border-t ${darkMode ? "border-white/20" : "border-[#E5E5E5]"}`} />
 
           <div className="pt-2">
-            {getTeamNavItems(team).map((item) => (
+            {getTeamNavItems(team, { paidAds: showPaidAds, recruiting: showRecruiting }).map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}

@@ -8,6 +8,7 @@ import "../styles/b2b.css";
 import { Button } from "../components/Button";
 import { TeamLogo } from "../components/TeamLogo";
 import { useTeam } from "../contexts/TeamContext";
+import TeamProgramOverview, { TeamMembersPage } from "./b2b/TeamProgramOverview";
 
 // Team + Enterprise share this dashboard. Team is the lightweight version
 // (a card on file + seat access); Enterprise layers on SSO, usage reporting and
@@ -190,24 +191,52 @@ function PageTitle({ children }: { children: ReactNode }) {
   return <h1 className="font-serif text-[30px] font-medium leading-[1.1] text-gray-dark md:text-[38px]">{children}</h1>;
 }
 
+// Enterprise teams can have several contracts (by year); Overview shows a switcher.
+// Ordered newest first — the first one is the default selection.
+const CONTRACTS = [
+  { value: "2026-27", label: "2026\u201327 contract" },
+  { value: "2025-26", label: "2025\u201326 contract" },
+  { value: "2024-25", label: "2024\u201325 contract" },
+];
+
 // Overview is the partner dashboard's overview, embedded as-is (minus the org name
 // under the title and the Admin Settings button — the team menu links to Admins).
 // Its modals are wired up here.
 export function TeamOverview() {
   const { team } = useTeam();
-  const [openModal, setOpenModal] = useState<ModalId>(null);
-  const [partnerModel, setPartnerModel] = useState<"per-seat" | "a-la-carte">("per-seat");
   if (!team) return null;
+  // Enterprise partnerships keep the partner dashboard; teams get the AI Builder Program overview.
+  return team.plan === "enterprise" ? <EnterpriseOverview /> : <TeamProgramOverview />;
+}
+
+// Team members: the AI Builder Program / coaching roster. Enterprise keeps its own table inside the overview.
+export function TeamMembers() {
+  const { team } = useTeam();
+  if (!team) return null;
+  if (team.plan === "enterprise" || team.viewerRole !== "Admin") return <Navigate to="/team/overview" replace />;
+  return <TeamMembersPage />;
+}
+
+function EnterpriseOverview() {
+  const { team } = useTeam();
+  const [openModal, setOpenModal] = useState<ModalId>(null);
+  const [enterpriseModel, setPartnerModel] = useState<"per-seat" | "a-la-carte">("per-seat");
+  if (!team) return null;
+  // Teams aren't seat-based: they get the à la carte view (no seats redeemed / seats left).
+  // Enterprise keeps the per-seat view (the prototype switch still lets you flip it).
+  const partnerModel = team.plan === "enterprise" ? enterpriseModel : "a-la-carte";
   return (
     <>
       <B2BOverviewV2
         hideOrgName
         hideAdminSettings
+        contracts={team.plan === "enterprise" ? CONTRACTS : undefined}
         onNavigate={() => {}}
         onSetUtilFilter={() => {}}
         onOpenModal={setOpenModal}
         partnerModel={partnerModel}
         onSetPartnerModel={setPartnerModel}
+        lockPartnerModel={team.plan !== "enterprise"}
       />
       <B2BModalDispatcher
         openModal={openModal}
@@ -216,6 +245,7 @@ export function TeamOverview() {
         emailFilterLabel="All users"
         showVerizon={partnerModel === "per-seat"}
         isAlaCarte={partnerModel === "a-la-carte"}
+        isTeam={team.plan !== "enterprise"}
       />
     </>
   );

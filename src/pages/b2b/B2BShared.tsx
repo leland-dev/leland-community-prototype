@@ -78,8 +78,8 @@ export function ProgressBar({
 
 export function Avatar({
   initials,
-  bg = "bg-primary-xlight",
-  color = "text-dark-green",
+  bg = "bg-gray-hover",
+  color = "text-gray-dark",
   size = 30,
 }: {
   initials: string;

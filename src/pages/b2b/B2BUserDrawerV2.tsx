@@ -1,4 +1,5 @@
 import { useState, useEffect, type SVGProps } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "../../components/Button";
 import { motion, AnimatePresence } from "motion/react";
 import usersIcon from "../../assets/icons/users-icon.svg";
@@ -543,7 +544,9 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
   const sessionsCompleted = user?.sessions?.entries.filter((s) => s.status === "completed").length ?? 0;
 
 
-  return (
+  // Portaled to <body>: an animated/transformed ancestor would otherwise trap `fixed` and
+  // let the sticky nav draw over the modal.
+  return createPortal(
     <>
     <AnimatePresence>
       {user && (
@@ -880,6 +883,7 @@ export default function B2BUserDrawerV2({ user, onClose, isAlaCarte, showLpEngag
         </>
       )}
     </AnimatePresence>
-    </>
+    </>,
+    document.body
   );
 }

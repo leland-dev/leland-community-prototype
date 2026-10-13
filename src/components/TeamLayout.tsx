@@ -1,9 +1,12 @@
+import { useEffect, useRef, useState } from "react";
 import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 import { Button } from "./Button";
 import { TeamLogo } from "./TeamLogo";
 import { CreateTeam } from "../pages/Team";
 import { getTeamNavItems } from "../lib/teamNav";
 import { useTeam, type TeamPlan } from "../contexts/TeamContext";
+import { TeamPeopleProvider } from "../pages/b2b/TeamProgramOverview";
+import { useTeamPrototype, type MembersLayout } from "../contexts/TeamPrototypeContext";
 
 // The standalone team dashboard — a separate surface from the My Leland shell.
 // Team and Enterprise share it. Desktop: sidebar + page. Mobile: the top nav's team-logo
@@ -16,13 +19,131 @@ const linkCls = ({ isActive }: { isActive: boolean }) =>
 const cardCls =
   "rounded-[12px] border border-[#222222]/[0.12] bg-white shadow-[0px_4px_8px_-2px_rgba(16,24,40,0.10),0px_2px_4px_-2px_rgba(16,24,40,0.06)]";
 
-export default function TeamLayout() {
+// Prototype-only controls: a 3-dot button at the bottom of the sidebar opens a panel of
+// toggles. Not part of the product UI.
+function PrototypeMenu() {
   const { team, updateTeam, reset } = useTeam();
+  const { membersLayout, setMembersLayout, showAccessColumn, setShowAccessColumn, showPaidAds, setShowPaidAds, showRecruiting, setShowRecruiting, emptyTeam, setEmptyTeam } = useTeamPrototype();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+
+  if (!team) return null;
+  const sectionCls = "px-2 pb-2 pt-1 text-[12px] font-medium uppercase tracking-wider text-[#9b9b9b]";
+  const layouts: { value: MembersLayout; label: string }[] = [
+    { value: "tabs", label: "Tabs" },
+    { value: "filter", label: "Filter" },
+    { value: "combined", label: "One table" },
+  ];
+
+  return (
+    <div ref={ref} className="relative mt-auto">
+      {open && (
+        <div className="absolute bottom-full left-0 right-0 z-40 mb-2 rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
+          <div className={sectionCls}>Plan</div>
+          <div className="mx-2 mb-2 flex rounded-lg bg-[#f5f5f5] p-[3px]">
+            {(["team", "enterprise"] as TeamPlan[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => updateTeam({ plan: p })}
+                className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors ${team.plan === p ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
+              >
+                {p === "team" ? "Team" : "Enterprise"}
+              </button>
+            ))}
+          </div>
+
+          {team.plan !== "enterprise" && (
+            <>
+              <div className={sectionCls}>Team members table</div>
+              <div className="mx-2 mb-1 flex rounded-lg bg-[#f5f5f5] p-[3px]">
+                {layouts.map((l) => (
+                  <button
+                    key={l.value}
+                    onClick={() => setMembersLayout(l.value)}
+                    className={`flex-1 cursor-pointer whitespace-nowrap rounded-md px-2 py-1.5 text-[12px] font-medium transition-colors ${membersLayout === l.value ? "bg-white text-gray-dark shadow-sm" : "text-[#707070]"}`}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+              <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+                <span className="text-[14px] font-medium text-gray-dark">Access column</span>
+                <div className="relative">
+                  <input type="checkbox" checked={showAccessColumn} onChange={() => setShowAccessColumn(!showAccessColumn)} className="peer sr-only" />
+                  <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-gray-dark" />
+                  <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+                </div>
+              </label>
+            </>
+          )}
+
+          <div className={sectionCls}>Menu items</div>
+          <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+            <span className="text-[14px] font-medium text-gray-dark">Paid ads</span>
+            <div className="relative">
+              <input type="checkbox" checked={showPaidAds} onChange={() => setShowPaidAds(!showPaidAds)} className="peer sr-only" />
+              <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-gray-dark" />
+              <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+            </div>
+          </label>
+          <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+            <span className="text-[14px] font-medium text-gray-dark">Recruiting</span>
+            <div className="relative">
+              <input type="checkbox" checked={showRecruiting} onChange={() => setShowRecruiting(!showRecruiting)} className="peer sr-only" />
+              <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-gray-dark" />
+              <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+            </div>
+          </label>
+
+          <div className={sectionCls}>Data</div>
+          <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+            <span className="text-[14px] font-medium text-gray-dark">Empty team</span>
+            <div className="relative">
+              <input type="checkbox" checked={emptyTeam} onChange={() => setEmptyTeam(!emptyTeam)} className="peer sr-only" />
+              <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-gray-dark" />
+              <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+            </div>
+          </label>
+
+          <div className="mt-1 border-t border-gray-200 px-2 pt-2">
+            <Button size="tag" variant="secondary" onClick={reset}>Remove team</Button>
+          </div>
+        </div>
+      )}
+      <div className={`${cardCls} flex items-center justify-between p-3`}>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-gray-light">Prototype</span>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-label="Prototype options"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+            <circle cx="3" cy="8" r="1.5" fill="#707070" />
+            <circle cx="8" cy="8" r="1.5" fill="#707070" />
+            <circle cx="13" cy="8" r="1.5" fill="#707070" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function TeamLayout() {
+  const { team } = useTeam();
+  const { showPaidAds, showRecruiting } = useTeamPrototype();
   const { pathname } = useLocation();
 
   if (!team) return pathname === "/team" ? <div className="px-4 py-10 sm:px-6"><CreateTeam /></div> : <Navigate to="/team" replace />;
 
-  const items = getTeamNavItems(team);
+  const items = getTeamNavItems(team, { paidAds: showPaidAds, recruiting: showRecruiting });
 
   return (
     <div className="flex min-h-[calc(100vh-61px)] bg-[#F3F1E6]/50">
@@ -48,24 +169,15 @@ export default function TeamLayout() {
           </nav>
         </div>
 
-        {/* Prototype controls — not part of the product UI */}
-        <div className={`${cardCls} mt-auto flex flex-wrap items-center gap-2 p-3`}>
-          <span className="w-full text-[11px] font-semibold uppercase tracking-[0.05em] text-gray-light">Prototype</span>
-          {(["team", "enterprise"] as TeamPlan[]).map((p) => (
-            <Button key={p} size="tag" variant={team.plan === p ? "dark" : "secondary"} onClick={() => updateTeam({ plan: p })}>
-              {p === "team" ? "Team" : "Enterprise"}
-            </Button>
-          ))}
-          <Button size="tag" variant="secondary" onClick={reset}>
-            Remove team
-          </Button>
-        </div>
+        <PrototypeMenu />
       </aside>
 
       <div className="min-w-0 flex-1">
         {/* Same 1080px content width as My Leland, so page layout stays standard */}
         <div className="mx-auto max-w-[1080px] px-4 py-8 sm:px-6 sm:py-10">
-          <Outlet />
+          <TeamPeopleProvider>
+            <Outlet />
+          </TeamPeopleProvider>
         </div>
       </div>
     </div>
