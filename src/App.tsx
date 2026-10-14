@@ -105,6 +105,7 @@ import ProfileCardTest from "./pages/ProfileCardTest";
 import GroupCardTest from "./pages/GroupCardTest";
 import Components from "./pages/Components";
 import CourseDetail from "./pages/CourseDetail";
+import CourseBuilder from "./pages/CourseBuilder";
 import CoachLayout from "./components/CoachLayout";
 import CoachHome from "./pages/CoachHome";
 import CoachProducts from "./pages/CoachProducts";
@@ -191,6 +192,9 @@ export default function App() {
       {/* Product-creation flow — standalone full-screen surface (no app chrome) */}
       <Route path="/coach/manage/:category/new-product" element={<CoachProductNew />} />
       <Route path="/coach/manage/:category/new-product/:type" element={<CoachProductNew />} />
+      {/* Course builder — standalone full-screen editor (no app chrome) */}
+      <Route path="/coach/content/course/new" element={<CourseBuilder />} />
+      <Route path="/coach/content/course/:courseId" element={<CourseBuilder />} />
       <Route element={<Layout />}>
         {/* Standalone pages using PageShell directly */}
         <Route path="/profile-v2" element={<ProfileV2 />} />
