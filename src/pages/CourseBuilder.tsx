@@ -12,11 +12,9 @@ import {
   Check,
   ChevronDown,
   ChevronLeft,
-  Eye,
   GripVertical,
   Image as ImageIcon,
   Layers,
-  Pencil,
   Plus,
   Settings2,
   Trash2,
@@ -24,7 +22,6 @@ import {
 
 import { Button } from "../components/Button";
 import ConfirmModal from "../components/ConfirmModal";
-import { BlockList } from "../components/lesson-blocks";
 import { BlockListEditor } from "../components/course-builder/BlockEditors";
 import { useReorder } from "../components/course-builder/dnd";
 import {
@@ -99,13 +96,13 @@ export default function CourseBuilder() {
   const reorderModules = (modules: CourseModule[]) => setCourse((c) => ({ ...c, modules }));
 
   const addModule = () =>
-    setCourse((c) => ({ ...c, modules: [...c.modules, emptyModule(`Module ${c.modules.length + 1}`)] }));
+    setCourse((c) => ({ ...c, modules: [...c.modules, emptyModule(`Lesson ${c.modules.length + 1}`)] }));
 
   const deleteModule = (moduleId: string) =>
     setCourse((c) => ({ ...c, modules: c.modules.filter((m) => m.id !== moduleId) }));
 
   const addSection = (moduleId: string) => {
-    const section = emptySection("New section");
+    const section = emptySection("New page");
     setCourse((c) => ({
       ...c,
       modules: c.modules.map((m) => (m.id === moduleId ? { ...m, sections: [...m.sections, section] } : m)),
@@ -141,7 +138,7 @@ export default function CourseBuilder() {
   const activeSection = activeModule?.sections.find((s) => selection.type === "section" && s.id === selection.sectionId);
 
   return (
-    <div className="flex h-screen flex-col bg-[#faf9f6] text-gray-dark">
+    <div className="flex h-screen flex-col bg-[#F3F1E6]/50 text-gray-dark">
       {/* ── Top bar ── */}
       <header className="flex shrink-0 items-center gap-4 border-b border-gray-stroke bg-white px-5 py-3">
         <Link to={CONTENT_HOME} className="inline-flex items-center gap-1.5 text-[14px] text-gray-light transition-colors hover:text-gray-dark">
@@ -174,9 +171,9 @@ export default function CourseBuilder() {
             {/* Course details entry */}
             <button
               onClick={() => setSelection({ type: "details" })}
-              className={`mb-2 flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[14px] font-medium transition-colors ${selection.type === "details" ? "bg-gray-dark text-white" : "text-gray-dark hover:bg-gray-hover"}`}
+              className={`mb-1 flex w-full items-center gap-3 rounded-lg px-3 py-[10px] text-left text-[15px] transition-colors ${selection.type === "details" ? "bg-[#222222]/5 font-semibold text-gray-dark" : "font-medium text-gray-light hover:text-gray-dark"}`}
             >
-              <Settings2 className="h-[18px] w-[18px] shrink-0" />
+              <Settings2 className="h-5 w-5 shrink-0" />
               Course details
             </button>
 
@@ -197,9 +194,9 @@ export default function CourseBuilder() {
 
             <button
               onClick={addModule}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-gray-stroke py-2.5 text-[13px] font-semibold text-gray-light transition-colors hover:border-gray-dark hover:text-gray-dark"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-gray-hover py-2.5 text-[13px] font-semibold text-gray-light transition-colors hover:bg-[#222222]/10 hover:text-gray-dark"
             >
-              <Plus className="h-4 w-4" /> Add module
+              <Plus className="h-4 w-4" /> Add lesson
             </button>
           </div>
         </aside>
@@ -216,7 +213,7 @@ export default function CourseBuilder() {
               onChange={(patch) => updateSection(activeModule.id, activeSection.id, patch)}
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-[14px] text-gray-light">Select a section to edit.</div>
+            <div className="flex h-full items-center justify-center text-[14px] text-gray-light">Select a page to edit.</div>
           )}
         </main>
       </div>
@@ -318,27 +315,27 @@ function ModuleRow({
       className={`rounded-lg transition-all ${dragging ? "opacity-40" : ""} ${over ? "ring-2 ring-[#FFD96F]/50" : ""}`}
     >
       <div className="group/mod flex items-center gap-1 rounded-lg px-1 py-1 hover:bg-gray-hover/60">
-        <button {...handleProps} className="cursor-grab rounded p-1 text-gray-extra-light hover:text-gray-dark active:cursor-grabbing" aria-label="Drag module">
+        <button {...handleProps} className="cursor-grab rounded p-1 text-gray-extra-light hover:text-gray-dark active:cursor-grabbing" aria-label="Drag lesson">
           <GripVertical className="h-4 w-4" />
-        </button>
-        <button onClick={() => setOpen((o) => !o)} className="rounded p-0.5 text-gray-light hover:text-gray-dark" aria-label={open ? "Collapse" : "Expand"}>
-          <ChevronDown className={`h-4 w-4 transition-transform ${open ? "" : "-rotate-90"}`} />
         </button>
         <input
           value={module.title}
           onChange={(e) => onRename(e.target.value)}
-          placeholder="Module title"
-          className={`${railInput} text-[14px] font-semibold`}
+          placeholder="Lesson title"
+          className={`${railInput} text-[15px] font-semibold`}
         />
         {canDelete && (
-          <button onClick={onDelete} className="shrink-0 rounded p-1 text-gray-extra-light opacity-0 transition-opacity hover:text-red-500 group-hover/mod:opacity-100" aria-label="Delete module">
+          <button onClick={onDelete} className="shrink-0 rounded p-1 text-gray-extra-light opacity-0 transition-opacity hover:text-red-500 group-hover/mod:opacity-100" aria-label="Delete lesson">
             <Trash2 className="h-4 w-4" />
           </button>
         )}
+        <button onClick={() => setOpen((o) => !o)} className="shrink-0 rounded p-0.5 text-gray-light hover:text-gray-dark" aria-label={open ? "Collapse" : "Expand"}>
+          <ChevronDown className={`h-4 w-4 transition-transform ${open ? "" : "-rotate-90"}`} />
+        </button>
       </div>
 
       {open && (
-        <div className="ml-6 flex flex-col gap-0.5 border-l border-gray-stroke pb-1 pl-2">
+        <div className="ml-3 flex flex-col gap-0.5 border-l border-gray-stroke pb-1 pl-2">
           <input
             value={module.subtitle ?? ""}
             onChange={(e) => onRenameSubtitle(e.target.value)}
@@ -352,19 +349,17 @@ function ModuleRow({
               <div
                 key={section.id}
                 {...sectionReorder.itemProps(i)}
+                {...sectionReorder.handleProps}
                 className={`group/sec flex items-center gap-1 rounded-md transition-all ${st.dragging ? "opacity-40" : ""} ${st.over ? "ring-2 ring-[#FFD96F]/50" : ""}`}
               >
-                <button {...sectionReorder.handleProps} className="cursor-grab rounded p-1 text-gray-extra-light opacity-0 hover:text-gray-dark active:cursor-grabbing group-hover/sec:opacity-100" aria-label="Drag section">
-                  <GripVertical className="h-3.5 w-3.5" />
-                </button>
                 <button
                   onClick={() => onSelectSection(module.id, section.id)}
-                  className={`flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] transition-colors ${active ? "bg-gray-dark font-medium text-white" : "text-gray-dark hover:bg-gray-hover"}`}
+                  className={`flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[15px] transition-colors ${active ? "bg-[#222222]/5 font-semibold text-gray-dark" : "font-medium text-gray-light hover:text-gray-dark"}`}
                 >
-                  <span className={`flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${active ? "bg-white/20 text-white" : "border border-gray-stroke text-gray-light"}`}>{i + 1}</span>
-                  <span className="truncate">{section.title || "Untitled section"}</span>
+                  <span className={`flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${active ? "border border-gray-dark text-gray-dark" : "border border-gray-stroke text-gray-light"}`}>{i + 1}</span>
+                  <span className="truncate">{section.title || "Untitled page"}</span>
                 </button>
-                <button onClick={() => onDeleteSection(section.id)} className="shrink-0 rounded p-1 text-gray-extra-light opacity-0 transition-opacity hover:text-red-500 group-hover/sec:opacity-100" aria-label="Delete section">
+                <button onClick={() => onDeleteSection(section.id)} className="shrink-0 rounded p-1 text-gray-extra-light opacity-0 transition-opacity hover:text-red-500 group-hover/sec:opacity-100" aria-label="Delete page">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -372,9 +367,9 @@ function ModuleRow({
           })}
           <button
             onClick={onAddSection}
-            className="mt-0.5 flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+            className="mt-0.5 flex items-center gap-2 rounded-lg px-2 py-1.5 text-[15px] font-medium text-gray-light transition-colors hover:text-gray-dark"
           >
-            <Plus className="h-3.5 w-3.5" /> Add section
+            <Plus className="h-4 w-4" /> Add page
           </button>
         </div>
       )}
@@ -382,7 +377,7 @@ function ModuleRow({
   );
 }
 
-// ─── Section page editor (main area) ─────────────────────────────────────────
+// ─── Page editor (main area) ─────────────────────────────────────────
 
 function SectionEditor({
   module,
@@ -393,71 +388,33 @@ function SectionEditor({
   section: CourseSection;
   onChange: (patch: Partial<CourseSection>) => void;
 }) {
-  const [mode, setMode] = useState<"edit" | "preview">("edit");
-
   return (
     <div className="mx-auto max-w-[760px] px-6 py-8 md:px-10">
-      {/* Breadcrumb + mode toggle */}
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <p className="min-w-0 truncate text-[13px] text-gray-light">
-          {module.title} <span className="mx-1 text-gray-extra-light">/</span>
-          <span className="text-gray-dark">{section.title || "Untitled section"}</span>
-        </p>
-        <div className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gray-hover p-1">
-          {([["edit", "Edit", Pencil], ["preview", "Preview", Eye]] as const).map(([key, label, Icon]) => (
-            <button
-              key={key}
-              onClick={() => setMode(key)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${mode === key ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]" : "text-gray-light hover:text-gray-dark"}`}
-            >
-              <Icon className="h-3.5 w-3.5" /> {label}
-            </button>
-          ))}
-        </div>
+      {/* Breadcrumb */}
+      <p className="mb-6 min-w-0 truncate text-[13px] text-gray-light">
+        {module.title} <span className="mx-1 text-gray-extra-light">/</span>
+        <span className="text-gray-dark">{section.title || "Untitled page"}</span>
+      </p>
+
+      {/* Section title + description — edited in place */}
+      <input
+        value={section.title}
+        onChange={(e) => onChange({ title: e.target.value })}
+        placeholder="Page title"
+        className="w-full bg-transparent font-serif text-[32px] leading-tight text-gray-dark placeholder:text-gray-extra-light focus:outline-none"
+      />
+      <textarea
+        value={section.description ?? ""}
+        onChange={(e) => onChange({ description: e.target.value })}
+        placeholder="Add a short description (optional)"
+        rows={2}
+        className="mt-2 w-full resize-none bg-transparent text-[16px] leading-relaxed text-gray-light placeholder:text-gray-extra-light focus:outline-none"
+      />
+
+      {/* Inline content canvas — each block is its live preview, edited in place */}
+      <div className="mt-6 border-t border-gray-stroke pt-6">
+        <BlockListEditor blocks={section.blocks} onChange={(blocks) => onChange({ blocks })} />
       </div>
-
-      {mode === "edit" ? (
-        <>
-          {/* Section title + description */}
-          <input
-            value={section.title}
-            onChange={(e) => onChange({ title: e.target.value })}
-            placeholder="Section title"
-            className="w-full bg-transparent text-[30px] font-semibold leading-tight text-gray-dark placeholder:text-gray-extra-light focus:outline-none"
-          />
-          <textarea
-            value={section.description ?? ""}
-            onChange={(e) => onChange({ description: e.target.value })}
-            placeholder="Add a short description (optional)"
-            rows={2}
-            className="mt-2 w-full resize-none bg-transparent text-[16px] leading-relaxed text-gray-light placeholder:text-gray-extra-light focus:outline-none"
-          />
-
-          <div className="mt-6 border-t border-gray-stroke pt-6">
-            <BlockListEditor blocks={section.blocks} onChange={(blocks) => onChange({ blocks })} />
-          </div>
-        </>
-      ) : (
-        <SectionPreview section={section} />
-      )}
-    </div>
-  );
-}
-
-function SectionPreview({ section }: { section: CourseSection }) {
-  return (
-    <div>
-      <h1 className="font-serif text-[40px] leading-[1.05] text-gray-dark">{section.title || "Untitled section"}</h1>
-      {section.description ? (
-        <p className="mt-3 text-[18px] leading-relaxed text-gray-light">{section.description}</p>
-      ) : null}
-      {section.blocks.length > 0 ? (
-        <div className="mt-8">
-          <BlockList blocks={section.blocks} />
-        </div>
-      ) : (
-        <p className="mt-8 text-[14px] italic text-gray-extra-light">No content yet — switch to Edit to add sections.</p>
-      )}
     </div>
   );
 }
@@ -548,11 +505,11 @@ function DetailsPanel({
       <div className="mt-8 flex gap-3">
         <div className="flex-1 rounded-xl border border-gray-stroke bg-white px-4 py-3">
           <p className="text-[22px] font-semibold text-gray-dark">{moduleCount}</p>
-          <p className="text-[13px] text-gray-light">{moduleCount === 1 ? "Module" : "Modules"}</p>
+          <p className="text-[13px] text-gray-light">{moduleCount === 1 ? "Lesson" : "Lessons"}</p>
         </div>
         <div className="flex-1 rounded-xl border border-gray-stroke bg-white px-4 py-3">
           <p className="text-[22px] font-semibold text-gray-dark">{sectionCount}</p>
-          <p className="text-[13px] text-gray-light">{sectionCount === 1 ? "Section" : "Sections"}</p>
+          <p className="text-[13px] text-gray-light">{sectionCount === 1 ? "Page" : "Pages"}</p>
         </div>
         <div className="flex-1 rounded-xl border border-gray-stroke bg-white px-4 py-3">
           <p className="flex items-center gap-1.5 text-[22px] font-semibold text-gray-dark">

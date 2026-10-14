@@ -56,12 +56,12 @@ export const newSectionId = () => uid("sec");
 
 // ─── Factories ─────────────────────────────────────────────────────────────
 
-export function emptySection(title = "Untitled section"): CourseSection {
+export function emptySection(title = "Untitled page"): CourseSection {
   return { id: newSectionId(), title, description: "", blocks: [] };
 }
 
-export function emptyModule(title = "Untitled module"): CourseModule {
-  return { id: newModuleId(), title, subtitle: "", sections: [emptySection("New section")] };
+export function emptyModule(title = "Untitled lesson"): CourseModule {
+  return { id: newModuleId(), title, subtitle: "", sections: [emptySection("New page")] };
 }
 
 export function emptyCourse(): BuilderCourse {
@@ -70,7 +70,7 @@ export function emptyCourse(): BuilderCourse {
     title: "",
     description: "",
     coverImage: undefined,
-    modules: [emptyModule("Module 1")],
+    modules: [emptyModule("Lesson 1")],
     status: "draft",
     updatedAt: Date.now(),
   };
@@ -203,10 +203,28 @@ const SEED: BuilderCourse[] = [
 
 const STORAGE_KEY = "builder-courses-v1";
 
+// The builder's terminology changed from Module/Section to Lesson/Page. Rename
+// the auto-generated default titles on load so courses saved before the change
+// pick up the new wording. Only the generated strings are touched — titles an
+// author typed are left alone. Idempotent: already-migrated titles don't match.
+const migrateLessonTitle = (t: string) =>
+  t === "Untitled module" ? "Untitled lesson" : t.replace(/^Module (\d+)$/, "Lesson $1");
+const migratePageTitle = (t: string) =>
+  t === "Untitled section" ? "Untitled page" : t === "New section" ? "New page" : t;
+const migrate = (list: BuilderCourse[]): BuilderCourse[] =>
+  list.map((c) => ({
+    ...c,
+    modules: c.modules.map((m) => ({
+      ...m,
+      title: migrateLessonTitle(m.title),
+      sections: m.sections.map((s) => ({ ...s, title: migratePageTitle(s.title) })),
+    })),
+  }));
+
 function load(): BuilderCourse[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as BuilderCourse[];
+    if (raw) return migrate(JSON.parse(raw) as BuilderCourse[]);
   } catch {
     // fall through to seed
   }

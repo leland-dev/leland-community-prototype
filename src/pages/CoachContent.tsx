@@ -320,7 +320,7 @@ function CoursesSection() {
                 <p className="text-[15px] font-semibold leading-tight text-gray-dark">{c.title || "Untitled course"}</p>
                 <p className="mt-1.5 line-clamp-2 flex-1 text-[14px] leading-snug text-gray-light">{c.description || "No description yet."}</p>
                 <span className="mt-3 text-[12px] font-medium text-gray-light">
-                  {stats.modules} {stats.modules === 1 ? "module" : "modules"} · {stats.sections} {stats.sections === 1 ? "section" : "sections"}
+                  {stats.modules} {stats.modules === 1 ? "lesson" : "lessons"} · {stats.sections} {stats.sections === 1 ? "page" : "pages"}
                 </span>
               </div>
             </div>
@@ -341,7 +341,7 @@ function CoursesSection() {
       <ConfirmModal
         open={!!confirmDelete}
         title={`Delete “${confirmDelete?.title || "Untitled course"}”?`}
-        body="This permanently removes the course and all its modules and sections. This can't be undone."
+        body="This permanently removes the course and all its lessons and pages. This can't be undone."
         confirmLabel="Delete course"
         onConfirm={() => { if (confirmDelete) deleteCourse(confirmDelete.id); setConfirmDelete(null); }}
         onClose={() => setConfirmDelete(null)}
