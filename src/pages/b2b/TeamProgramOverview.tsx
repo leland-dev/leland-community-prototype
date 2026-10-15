@@ -91,6 +91,7 @@ type Person = {
   plan?: { format: ProgramFormat; access: ProgramAccess; billing?: ExtendedBilling; renewsOn?: string; renewalCanceled?: boolean }; // how the program seat was purchased; extended access renews yearly until canceled
   isAdmin?: boolean; // a team admin (may not have been granted any access yet)
   isYou?: boolean; // the signed-in admin
+  programHours?: number; // hours spent in the AI Builder Program (lessons, live sessions, builds); sample data
   lastActive: string; // display text
   lastActiveDays: number | null; // null = hasn't logged in yet
   assessments: Assessment[];
@@ -118,9 +119,40 @@ function assess(level: Level, score: number, date: string, withAfter = true): As
   };
 }
 
-const INITIAL_PEOPLE: Person[] = [
+// More sample builds on top of each person's originals, so the team has 24 in all.
+const EXTRA_BUILDS: Record<string, Submission[]> = {
+  "dana.whitfield@flybreeze.com": [
+    { title: "Customer health score dashboard", description: "Rolls usage, tickets and NPS into one health score per account.", date: "Aug 20, 2026", recordingLength: "3:22", image: build_metrics_digest },
+    { title: "Vendor contract summarizer", description: "Pulls renewal dates, fees and exit terms out of vendor contracts.", date: "Sep 2, 2026", recordingLength: "2:45", image: build_meeting_notes },
+    { title: "Quarterly business review builder", description: "Drafts the QBR deck from the dashboard numbers.", date: "Sep 22, 2026", recordingLength: "4:05", image: build_metrics_digest },
+    { title: "Slack standup digest", description: "Turns the daily standup thread into a short summary.", date: "Oct 6, 2026", recordingLength: "2:10", image: build_meeting_notes },
+  ],
+  "marcus.ellery@flybreeze.com": [
+    { title: "Expense policy checker", description: "Flags expenses that break policy before they reach finance.", date: "Sep 12, 2026", recordingLength: "3:30", image: build_invoice_reconciliation },
+    { title: "Purchase order tracker", description: "Tracks every PO from request to delivery.", date: "Sep 20, 2026", recordingLength: "2:58", image: build_invoice_reconciliation },
+    { title: "Vendor risk scorecard", description: "Scores vendors on delivery, cost and concentration risk.", date: "Oct 8, 2026", recordingLength: "3:40", image: build_crm_cleanup },
+  ],
+  "priya.raman@flybreeze.com": [
+    { title: "Interview question generator", description: "Writes structured interview questions for each role.", date: "Sep 24, 2026", recordingLength: "2:34", image: build_prompt_library },
+    { title: "New hire FAQ assistant", description: "Answers first-week questions from the onboarding docs.", date: "Oct 7, 2026", recordingLength: "3:05", image: build_onboarding_bot },
+  ],
+  "lena.okafor@flybreeze.com": [
+    { title: "Lead dedupe checker", description: "Catches duplicate leads before they hit the CRM.", date: "Aug 28, 2026", recordingLength: "2:50", image: build_crm_cleanup },
+    { title: "Territory assignment helper", description: "Assigns new accounts to reps by territory and load.", date: "Sep 5, 2026", recordingLength: "3:12", image: build_lead_brief },
+  ],
+  "jonah.bishop@flybreeze.com": [
+    { title: "Objection handling trainer", description: "Role-plays common objections and scores the replies.", date: "Sep 29, 2026", recordingLength: "4:15", image: build_sales_call_coach },
+    { title: "Pipeline forecast summarizer", description: "Writes the weekly forecast note from CRM data.", date: "Oct 9, 2026", recordingLength: "2:40", image: build_metrics_digest },
+  ],
+};
+const EXTRA_BUILDS_ME: Submission[] = [
+  { title: "Team AI usage tracker", description: "Shows how the team is using AI tools week to week.", date: "Oct 2, 2026", recordingLength: "3:18", image: build_metrics_digest },
+  { title: "Weekly leadership update writer", description: "Drafts the Friday update from weekly notes.", date: "Oct 10, 2026", recordingLength: "2:26", image: build_meeting_notes },
+];
+
+const BASE_PEOPLE: Person[] = [
   {
-    name: "Dana Whitfield", email: "dana.whitfield@flybreeze.com", initials: "DW", image: pic9,
+    name: "Dana Whitfield", programHours: 18, email: "dana.whitfield@flybreeze.com", initials: "DW", image: pic9,
     plan: { format: "live", access: "extended", billing: "yearly", renewsOn: "Jun 2, 2027" }, program: { status: "completed", startDate: "Jun 2, 2026" }, lelandPlus: { expires: "Dec 31, 2026" }, coaching: { granted: 4, used: 3, lastSession: "Sep 22, 2026", nextSession: "Oct 20, 2026", sessions: [
         { ...COACHES.jordan, date: "Jul 8, 2026", status: "completed", summary: "Mapped where AI could take over the weekly reporting grind. Agreed on three candidate workflows and a simple way to measure the time saved. Next step: prototype the metrics digest." },
         { ...COACHES.jordan, date: "Aug 12, 2026", status: "completed", summary: "Reviewed the first prototype and tightened the prompt structure. Talked through how to hand it to the ops team without it becoming a one-person side project." },
@@ -136,7 +168,7 @@ const INITIAL_PEOPLE: Person[] = [
     ],
   },
   {
-    name: "Marcus Ellery", email: "marcus.ellery@flybreeze.com", initials: "ME",
+    name: "Marcus Ellery", programHours: 12, email: "marcus.ellery@flybreeze.com", initials: "ME",
     plan: { format: "live", access: "limited" }, program: { status: "in-progress", startDate: "Aug 11, 2026", level: 3 }, coaching: null,
     lastActive: "Yesterday", lastActiveDays: 1,
     assessments: [assess(1, 76, "Sep 1, 2026"), assess(2, 72, "Sep 29, 2026")],
@@ -146,7 +178,7 @@ const INITIAL_PEOPLE: Person[] = [
     ],
   },
   {
-    name: "Priya Raman", email: "priya.raman@flybreeze.com", initials: "PR", image: pic3,
+    name: "Priya Raman", programHours: 9, email: "priya.raman@flybreeze.com", initials: "PR", image: pic3,
     plan: { format: "live", access: "extended", billing: "yearly", renewsOn: "Sep 8, 2027" }, program: { status: "in-progress", startDate: "Sep 8, 2026", level: 2 }, coaching: { granted: 3, used: 1, lastSession: "Sep 30, 2026", nextSession: "Oct 14, 2026", sessions: [
         { ...COACHES.nina, date: "Sep 30, 2026", status: "completed", summary: "Broke the onboarding process into steps an assistant can follow, and decided which checks should stay with a person. Left with a first draft of the checklist bot." },
         { ...COACHES.nina, date: "Oct 14, 2026", status: "scheduled" },
@@ -158,12 +190,12 @@ const INITIAL_PEOPLE: Person[] = [
     ],
   },
   {
-    name: "Tomás Herrera", email: "tomas.herrera@flybreeze.com", initials: "TH",
+    name: "Tomás Herrera", programHours: 3, email: "tomas.herrera@flybreeze.com", initials: "TH",
     program: { status: "in-progress", startDate: "Sep 22, 2026", level: 1 }, coaching: null,
     lastActive: "5d ago", lastActiveDays: 5, assessments: [], submissions: [],
   },
   {
-    name: "Lena Okafor", email: "lena.okafor@flybreeze.com", initials: "LO",
+    name: "Lena Okafor", programHours: 8, email: "lena.okafor@flybreeze.com", initials: "LO",
     program: { status: "in-progress", startDate: "Jul 14, 2026", level: 3 }, coaching: null,
     lastActive: "3w ago", lastActiveDays: 21,
     assessments: [assess(1, 69, "Aug 4, 2026"), assess(2, 64, "Sep 1, 2026")],
@@ -172,7 +204,7 @@ const INITIAL_PEOPLE: Person[] = [
     ],
   },
   {
-    name: "Jonah Bishop", email: "jonah.bishop@flybreeze.com", initials: "JB", image: pic13,
+    name: "Jonah Bishop", programHours: 12, email: "jonah.bishop@flybreeze.com", initials: "JB", image: pic13,
     plan: { format: "async", access: "extended", billing: "yearly", renewsOn: "Aug 25, 2027" }, program: { status: "in-progress", startDate: "Aug 25, 2026", level: 2 }, coaching: { granted: 2, used: 2, lastSession: "Oct 3, 2026", sessions: [
         { ...COACHES.sam, date: "Sep 12, 2026", status: "completed", summary: "Talked through using the sales call coach in weekly 1:1s and how to give reps feedback without it feeling like surveillance." },
         { ...COACHES.sam, date: "Oct 3, 2026", status: "completed", summary: "Refined the scoring rubric against the team playbook and picked two calls per rep to review each week." },
@@ -221,6 +253,7 @@ const INITIAL_PEOPLE: Person[] = [
     lastActive: "—", lastActiveDays: null, assessments: [], submissions: [],
   },
 ];
+const INITIAL_PEOPLE: Person[] = BASE_PEOPLE.map((p) => ({ ...p, submissions: [...p.submissions, ...(EXTRA_BUILDS[p.email] ?? [])] }));
 
 const initialsOf = (name: string) => name.split(/\s+/).map((p) => p[0]?.toUpperCase()).filter(Boolean).slice(0, 2).join("");
 
@@ -234,7 +267,6 @@ function levelReached(p: Person): Level | 0 {
 // ── Small pieces ──
 
 const cardCls = "rounded-[12px] border border-gray-stroke bg-white p-5";
-const bigNumCls = "text-[16px] font-semibold leading-none text-gray-dark";
 
 function Avatar({ initials, image, size = 36 }: { initials: string; image?: string; size?: number }) {
   if (image) return <img src={image} alt="" className="shrink-0 rounded-full object-cover" style={{ width: size, height: size }} />;
@@ -1358,7 +1390,7 @@ function TeamSkills({ people }: { people: Person[] }) {
   // Biggest improvements first; skills without a post-score yet go last.
   const skills = computeSkills(people).sort((a, b) => (b.gain ?? -Infinity) - (a.gain ?? -Infinity));
   return (
-    <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
       <div className={cardCls}>
         <h2 className="mb-4 text-[16px] font-semibold text-gray-dark">Assessments completed</h2>
         <div className="flex flex-col gap-4">
@@ -1390,7 +1422,7 @@ function TeamSkills({ people }: { people: Person[] }) {
   );
 }
 
-// ── Activity over time ──
+// ── Engagement over time ──
 
 // Running totals of levels completed and builds shared (they only go up), plotted by
 // week over an adjustable time window.
@@ -1416,14 +1448,27 @@ function ActivityChart({ people }: { people: Person[] }) {
   const [range, setRange] = useState<RangeValue>("6m");
   const [hover, setHover] = useState<number | null>(null);
 
-  const { weeks, levels, builds } = useMemo(() => {
-    const empty = { weeks: [] as number[], levels: [] as number[], builds: [] as number[] };
-    const levelTimes = people.flatMap((p) => p.assessments.map((a) => new Date(a.date).getTime()));
+  const { weeks, hours, builds } = useMemo(() => {
+    const empty = { weeks: [] as number[], hours: [] as number[], builds: [] as number[] };
+    // Hands-on building hours are spread evenly from the week someone started the program to the week they were last active.
+    const spans = people
+      .filter((p) => (p.programHours ?? 0) > 0 && p.program && "startDate" in p.program && p.lastActiveDays !== null)
+      .map((p) => ({ hours: p.programHours as number, from: new Date((p.program as { startDate: string }).startDate).getTime(), to: Date.now() - (p.lastActiveDays as number) * DAY }));
+    const levelTimes = spans.map((sp) => sp.from);
     const buildTimes = people.flatMap((p) => p.submissions.map((sub) => new Date(sub.date).getTime()));
     const all = [...levelTimes, ...buildTimes];
     if (all.length === 0) return empty;
     const first = startOfWeek(Math.min(...all));
     const total = Math.round((startOfWeek(Date.now()) - first) / (7 * DAY)) + 1;
+    const hourBuckets = () => {
+      const out = new Array(total).fill(0);
+      spans.forEach((sp) => {
+        const i0 = Math.max(0, Math.round((startOfWeek(sp.from) - first) / (7 * DAY)));
+        const i1 = Math.min(total - 1, Math.max(i0, Math.round((startOfWeek(sp.to) - first) / (7 * DAY))));
+        for (let i = i0; i <= i1; i++) out[i] += sp.hours / (i1 - i0 + 1);
+      });
+      return out;
+    };
     const bucket = (times: number[]) => {
       const out = new Array(total).fill(0);
       times.forEach((t) => { const i = Math.round((startOfWeek(t) - first) / (7 * DAY)); if (i >= 0 && i < total) out[i] += 1; });
@@ -1436,21 +1481,25 @@ function ActivityChart({ people }: { people: Person[] }) {
     // shorter window still starts from what the team had already achieved.
     return {
       weeks: Array.from({ length: total }, (_, i) => first + i * 7 * DAY).slice(from),
-      levels: cum(bucket(levelTimes)).slice(from),
+      hours: cum(hourBuckets()).slice(from),
       builds: cum(bucket(buildTimes)).slice(from),
     };
   }, [people, range]);
 
   if (weeks.length < 2) return null;
 
-  const W = 800, H = 220, padL = 28, padR = 12, padT = 12, padB = 26;
+  const W = 800, H = 220, padL = 30, padR = 30, padT = 12, padB = 26;
   const n = weeks.length;
   const step = (W - padL - padR) / (n - 1);
   const x = (i: number) => padL + i * step;
-  const max = Math.max(4, Math.ceil(Math.max(...levels, ...builds) / 2) * 2);
-  const y = (v: number) => padT + (1 - v / max) * (H - padT - padB);
-  const line = (xs: number[]) => xs.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
-  const area = (xs: number[]) => `${line(xs)} L${x(n - 1).toFixed(1)},${y(0)} L${x(0).toFixed(1)},${y(0)} Z`;
+  // Hours and builds have different units, so each gets its own axis: hours on the left, builds on the right.
+  const niceMax = (v: number) => Math.max(4, Math.ceil(v / 4) * 4);
+  const maxH = niceMax(Math.max(...hours));
+  const maxB = niceMax(Math.max(...builds));
+  const yH = (v: number) => padT + (1 - v / maxH) * (H - padT - padB);
+  const yB = (v: number) => padT + (1 - v / maxB) * (H - padT - padB);
+  const lineOf = (xs: number[], yf: (v: number) => number) => xs.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${yf(v).toFixed(1)}`).join(" ");
+  const areaOf = (xs: number[], yf: (v: number) => number) => `${lineOf(xs, yf)} L${x(n - 1).toFixed(1)},${yf(0)} L${x(0).toFixed(1)},${yf(0)} Z`;
   const fmt = (t: number) => new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   // Month ticks; January (and the first tick) carry the year once the window crosses a year boundary.
   const crossesYear = new Date(weeks[0]).getFullYear() !== new Date(weeks[n - 1]).getFullYear();
@@ -1468,12 +1517,12 @@ function ActivityChart({ people }: { people: Person[] }) {
   const h = hover;
 
   return (
-    <div className={`${cardCls} mb-8`}>
+    <div className={`${cardCls} mb-5`}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
-          <h2 className="text-[16px] font-semibold text-gray-dark">Activity over time</h2>
+          <h2 className="text-[16px] font-semibold text-gray-dark">Engagement over time</h2>
           <div className="flex items-center gap-4 text-[12px] text-gray-light">
-            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: LEVEL_COLOR }} />Levels completed · {levels[n - 1]}</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: LEVEL_COLOR }} />Hours building · {Math.round(hours[n - 1])}</span>
             <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: BUILD_COLOR }} />Builds shared · {builds[n - 1]}</span>
           </div>
         </div>
@@ -1491,7 +1540,7 @@ function ActivityChart({ people }: { people: Person[] }) {
           viewBox={`0 0 ${W} ${H}`}
           className="block w-full"
           role="img"
-          aria-label="Cumulative levels completed and builds shared by week"
+          aria-label="Cumulative hours building and builds shared by week"
           onMouseMove={(e) => {
             const r = e.currentTarget.getBoundingClientRect();
             const px = ((e.clientX - r.left) / r.width) * W;
@@ -1499,23 +1548,24 @@ function ActivityChart({ people }: { people: Person[] }) {
           }}
           onMouseLeave={() => setHover(null)}
         >
-          {[0, max / 2, max].map((t) => (
-            <g key={t}>
-              <line x1={padL} x2={W - padR} y1={y(t)} y2={y(t)} stroke="#e5e5e5" strokeWidth="1" />
-              <text x={padL - 8} y={y(t) + 4} textAnchor="end" fontSize="11" fill="#767676">{t}</text>
+          {[0, 0.5, 1].map((f) => (
+            <g key={f}>
+              <line x1={padL} x2={W - padR} y1={yH(maxH * f)} y2={yH(maxH * f)} stroke="#e5e5e5" strokeWidth="1" />
+              <text x={padL - 8} y={yH(maxH * f) + 4} textAnchor="end" fontSize="11" fill="#767676">{Math.round(maxH * f)}</text>
+              <text x={W - padR + 8} y={yH(maxH * f) + 4} textAnchor="start" fontSize="11" fill="#767676">{Math.round(maxB * f)}</text>
             </g>
           ))}
           {monthTicks.map((t) => (
             <text key={t.i} x={x(t.i)} y={H - 6} textAnchor={t.i === 0 ? "start" : "middle"} fontSize="11" fill="#767676">{t.label}</text>
           ))}
-          <path d={area(levels)} fill={LEVEL_COLOR} opacity="0.08" />
-          <path d={line(builds)} fill="none" stroke={BUILD_COLOR} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-          <path d={line(levels)} fill="none" stroke={LEVEL_COLOR} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+          <path d={areaOf(hours, yH)} fill={LEVEL_COLOR} opacity="0.08" />
+          <path d={lineOf(builds, yB)} fill="none" stroke={BUILD_COLOR} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+          <path d={lineOf(hours, yH)} fill="none" stroke={LEVEL_COLOR} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
           {h !== null && (
             <>
               <line x1={x(h)} x2={x(h)} y1={padT} y2={H - padB} stroke="#a3a3a3" strokeWidth="1" strokeDasharray="3 3" />
-              <circle cx={x(h)} cy={y(builds[h])} r="4" fill="white" stroke={BUILD_COLOR} strokeWidth="2" />
-              <circle cx={x(h)} cy={y(levels[h])} r="4" fill="white" stroke={LEVEL_COLOR} strokeWidth="2" />
+              <circle cx={x(h)} cy={yB(builds[h])} r="4" fill="white" stroke={BUILD_COLOR} strokeWidth="2" />
+              <circle cx={x(h)} cy={yH(hours[h])} r="4" fill="white" stroke={LEVEL_COLOR} strokeWidth="2" />
             </>
           )}
         </svg>
@@ -1526,7 +1576,7 @@ function ActivityChart({ people }: { people: Person[] }) {
             style={{ left: `${(x(h) / W) * 100}%`, transform: `translateX(${x(h) / W > 0.7 ? "calc(-100% - 12px)" : "12px"})` }}
           >
             <div className="mb-1 font-medium text-gray-dark">{fmt(weeks[h])}</div>
-            <div className="flex justify-between text-gray-light"><span>Levels completed</span><span className="text-gray-dark">{levels[h]}</span></div>
+            <div className="flex justify-between text-gray-light"><span>Hours building</span><span className="text-gray-dark">{Math.round(hours[h])}</span></div>
             <div className="flex justify-between text-gray-light"><span>Builds shared</span><span className="text-gray-dark">{builds[h]}</span></div>
           </div>
         )}
@@ -1653,7 +1703,7 @@ function TeamBuilds({ people, onSeeAll }: { people: Person[]; onSeeAll: () => vo
   const navBtn = "flex h-9 w-9 items-center justify-center rounded-full border border-[#222222]/[0.12] text-gray-dark transition-colors hover:bg-[#222222]/5 disabled:opacity-30 disabled:hover:bg-transparent";
 
   return (
-    <div className="mb-8 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
+    <div className="mb-5 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-[18px] font-semibold text-gray-dark">What the team is building</h2>
         <div className="flex shrink-0 items-center gap-2">
@@ -1695,11 +1745,11 @@ function TeamReflections({ people, onSeeAll, onOpen }: { people: Person[]; onSee
   const all = allReflections(people);
   if (all.length === 0) return null;
   return (
-    <div className="mb-8 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
+    <div className="mb-5 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
       <div className="mb-2 flex items-baseline justify-between gap-3">
         <h2 className="text-[18px] font-semibold text-gray-dark">What the team is learning</h2>
       </div>
-      <p className="mb-4 text-[14px] text-gray-light">After each build, participants share what they learned and how they'll apply it at work.</p>
+      <p className="mb-5 text-[14px] text-gray-light">After each build, participants share what they learned and how they'll apply it at work.</p>
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {all.slice(0, 3).map(({ sub, p }) => <ReflectionCard key={`${p.email}-${sub.title}`} p={p} sub={sub} onOpen={() => onOpen(p, sub)} />)}
       </div>
@@ -1740,19 +1790,29 @@ function LevelsDetail({ people }: { people: Person[] }) {
   );
 }
 
-function RatingsDetail() {
+// Reviews of the coaches your team worked with (not of the program).
+const SAMPLE_COACHING_REVIEWS = [
+  { name: "Dana W.", coach: "Alex M.", date: "Sep 23, 2026", rating: 5, text: "Alex helped me plan the rollout of the support agent. Practical, specific and exactly what I needed." },
+  { name: "Priya R.", coach: "Nina O.", date: "Oct 1, 2026", rating: 5, text: "Nina broke my messy onboarding process into steps I could actually build. I left with a first draft." },
+  { name: "Jonah B.", coach: "Sam R.", date: "Oct 4, 2026", rating: 5, text: "Sam gave great advice on getting reps to use the call coach without it feeling like surveillance." },
+  { name: "Rachel M.", coach: "Jordan L.", date: "Oct 7, 2026", rating: 4, text: "Helpful and well prepared. I'd like a little more time per session." },
+];
+
+function RatingsDetail({ kind = "program" }: { kind?: "program" | "coaching" }) {
+  const coaching = kind === "coaching";
+  const reviews: { name: string; date: string; rating: number; text: string; coach?: string }[] = coaching ? SAMPLE_COACHING_REVIEWS : SAMPLE_REVIEWS;
   return (
     <div>
       <div className="mb-4 flex items-center gap-2">
         <Stars n={5} />
-        <span className="text-[16px] font-semibold text-gray-dark">4.9</span>
-        <span className="text-[14px] text-gray-light">(18) · Average participant rating</span>
+        <span className="text-[16px] font-semibold text-gray-dark">{coaching ? "4.8" : "4.9"}</span>
+        <span className="text-[14px] text-gray-light">({coaching ? 6 : 9} team members) · {coaching ? "Average rating of your team's coaches" : "Average team rating of the program"}</span>
       </div>
       <div className="flex flex-col divide-y divide-gray-stroke">
-        {SAMPLE_REVIEWS.map((r) => (
+        {reviews.map((r) => (
           <div key={r.name + r.date} className="py-3 first:pt-0 last:pb-0">
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2"><span className="text-[14px] font-medium text-gray-dark">{r.name}</span><Stars n={r.rating} /></div>
+              <div className="flex items-center gap-2"><span className="text-[14px] font-medium text-gray-dark">{r.name}</span><Stars n={r.rating} />{r.coach && <span className="text-[12px] text-gray-light">on {r.coach}</span>}</div>
               <span className="text-[12px] text-gray-light">{r.date}</span>
             </div>
             <p className="mt-1 text-[14px] leading-[1.4] text-gray-light">{r.text}</p>
@@ -1760,18 +1820,6 @@ function RatingsDetail() {
         ))}
       </div>
     </div>
-  );
-}
-
-// A headline card that opens a detail dialog.
-function MetricCard({ onClick, label, children }: { onClick: () => void; label: string; children: ReactNode }) {
-  return (
-    <button type="button" onClick={onClick} aria-label={label} className={`${cardCls} group relative w-full cursor-pointer text-left transition-colors hover:bg-gray-hover`}>
-      {children}
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute right-4 top-5 text-gray-xlight transition-colors group-hover:text-gray-dark" aria-hidden>
-        <polyline points="9 18 15 12 9 6" />
-      </svg>
-    </button>
   );
 }
 
@@ -1805,7 +1853,7 @@ function sampleMe(name: string, email: string): Person {
         { ...COACHES.jordan, date: "Oct 21, 2026", status: "scheduled" },
       ],
     },
-    lastActive: "Today", lastActiveDays: 0, assessments: [], submissions: [],
+    programHours: 8, lastActive: "Today", lastActiveDays: 0, assessments: [], submissions: EXTRA_BUILDS_ME,
   };
 }
 
@@ -1893,72 +1941,269 @@ export function TeamPeopleProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Engagement, framed as momentum: how many people practiced recently, how much hands-on time that adds up to per person,
+// and what it produced. Program hours are sample data (time in lessons, live sessions and builds).
+// The average rating for an offering, shown top right of its section; opens the reviews behind it.
+function RatingLink({ rating, count, label, onClick }: { rating: string; count: number; label: string; onClick: () => void }) {
+  // No hover box: the number gets our dotted underline when you point at the rating.
+  const underline = "group-hover:underline group-hover:decoration-dotted group-hover:decoration-[1.5px] group-hover:underline-offset-[3px]";
+  return (
+    <button type="button" onClick={onClick} aria-label={label} className="group flex shrink-0 cursor-pointer items-center gap-1.5">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+      <span className={`text-[14px] font-semibold text-gray-dark ${underline}`}>{rating}</span>
+      <span className="text-[14px] text-gray-light">
+        {/* Just the number on tablet and mobile; the full wording from desktop up */}
+        <span className="lg:hidden">({count})</span>
+        <span className="hidden lg:inline">({count} team {count === 1 ? "member" : "members"})</span>
+      </span>
+    </button>
+  );
+}
+
+// The part of a figure's caption that opens the detail behind it: our inline text link style.
+function FigureLink({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+  // A span, not a <button>: buttons are atomic inline boxes, so a link that wraps onto a second line would move as one
+  // centered block. A span wraps with the surrounding text and keeps the underline on each line.
+  return (
+    <span
+      role="button"
+      tabIndex={0}
+      aria-label={label}
+      onClick={onClick}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}
+      className="cursor-pointer text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-colors hover:text-gray-light focus:outline-none focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-gray-dark/30"
+    >
+      {children}
+    </span>
+  );
+}
+
+const figureCls = "font-serif text-[28px] font-medium leading-[1.1] text-gray-dark";
+const figureLabelCls = "mt-2 text-[14px] leading-[1.4] text-gray-light";
+
+// Engagement, framed as momentum: who is active, how much hands-on time that adds up to per person, and what it produced.
+// Program hours are sample data (time in lessons, live sessions and builds).
+function TeamPractice({ people, onOpen }: { people: Person[]; onOpen: (k: "active" | "hours" | "builds" | "ratings") => void }) {
+  const team = people.filter((p) => p.program || p.coaching);
+  const recent = team.filter((p) => p.lastActiveDays !== null && p.lastActiveDays <= 30);
+  const practicing = people.filter((p) => (p.programHours ?? 0) > 0);
+  const avgHours = practicing.length ? Math.round(practicing.reduce((t, p) => t + (p.programHours ?? 0), 0) / practicing.length) : 0;
+  const builds = people.reduce((t, p) => t + p.submissions.length, 0);
+  if (team.length === 0 || recent.length === 0) return null;
+
+  return (
+    <div className="mb-5 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <h2 className="text-[18px] font-semibold text-gray-dark">AI Transformation</h2>
+        <RatingLink rating="4.9" count={9} label="See your team's program reviews" onClick={() => onOpen("ratings")} />
+      </div>
+      <div className="grid gap-6 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-gray-stroke">
+        <div className="sm:pr-6">
+          <p className={figureCls}>{recent.length} <span className="text-[18px] text-gray-light">of {team.length}</span></p>
+          <p className={figureLabelCls}><FigureLink label="See who was active in the last 30 days" onClick={() => onOpen("active")}>active</FigureLink> in the last 30 days</p>
+        </div>
+        {avgHours > 0 && (
+          <div className="sm:px-6">
+            <p className={figureCls}>{avgHours} <span className="text-[18px] text-gray-light">{avgHours === 1 ? "hour" : "hours"}</span></p>
+            <p className={figureLabelCls}><FigureLink label="See hands-on building hours by person" onClick={() => onOpen("hours")}>hands-on building</FigureLink> per person</p>
+          </div>
+        )}
+        <div className="sm:pl-6">
+          <p className={figureCls}>{builds}</p>
+          <p className={figureLabelCls}><FigureLink label="See all builds shared" onClick={() => onOpen("builds")}>{builds === 1 ? "build" : "builds"} shared</FigureLink> with the team</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 1:1 coaching on its own: sessions completed and booked across the team, and how many people are being coached.
+function TeamCoaching({ people, onOpen }: { people: Person[]; onOpen: (k: "coaching" | "coachingRatings") => void }) {
+  const coached = people.filter((p) => p.coaching);
+  const done = coached.reduce((t, p) => t + p.coaching!.used, 0);
+  const booked = coached.reduce((t, p) => t + (p.coaching!.sessions ? p.coaching!.sessions.filter((x) => x.status === "scheduled").length : p.coaching!.nextSession ? 1 : 0), 0);
+  if (coached.length === 0 || (done === 0 && booked === 0)) return null;
+  return (
+    <div className="mb-5 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <h2 className="text-[18px] font-semibold text-gray-dark">1:1 coaching</h2>
+        <RatingLink rating="4.8" count={6} label="See your team's reviews of their coaches" onClick={() => onOpen("coachingRatings")} />
+      </div>
+      <div className="grid gap-6 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-gray-stroke">
+        <div className="sm:pr-6">
+          <p className={figureCls}>{done}</p>
+          <p className={figureLabelCls}><FigureLink label="See coaching sessions by person" onClick={() => onOpen("coaching")}>{done === 1 ? "session" : "sessions"} completed</FigureLink></p>
+        </div>
+        <div className="sm:px-6">
+          <p className={figureCls}>{booked}</p>
+          <p className={figureLabelCls}><FigureLink label="See coaching sessions by person" onClick={() => onOpen("coaching")}>{booked === 1 ? "session" : "sessions"} booked</FigureLink></p>
+        </div>
+        <div className="sm:pl-6">
+          <p className={figureCls}>{coached.length}</p>
+          <p className={figureLabelCls}><FigureLink label="See who is being coached" onClick={() => onOpen("coaching")}>{coached.length === 1 ? "person" : "people"} being coached</FigureLink></p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Details behind the figures ──
+
+function PersonLine({ p, right, sub }: { p: Person; right: ReactNode; sub?: string }) {
+  return (
+    <div className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+      <Avatar initials={p.initials} image={p.image} />
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[14px] font-medium text-gray-dark">{p.name}</div>
+        {sub && <div className="truncate text-[12px] text-gray-light">{sub}</div>}
+      </div>
+      <div className="shrink-0 text-right text-[14px] text-gray-dark">{right}</div>
+    </div>
+  );
+}
+
+function ActiveDetail({ people }: { people: Person[] }) {
+  const rows = people
+    .filter((p) => p.program || p.coaching)
+    .sort((a, b) => (a.lastActiveDays ?? 999) - (b.lastActiveDays ?? 999));
+  return (
+    <div className="flex flex-col divide-y divide-gray-stroke">
+      {rows.map((p) => (
+        <PersonLine key={p.email} p={p} sub={p.lastActiveDays === null ? "Hasn't accepted their invite yet" : activeNote(p)}
+          right={p.lastActiveDays === null ? <span className="text-gray-light">Not active yet</span> : <span className={p.lastActiveDays <= 30 ? "" : "text-gray-light"}>Active {p.lastActive}</span>} />
+      ))}
+    </div>
+  );
+}
+
+function HoursDetail({ people }: { people: Person[] }) {
+  const rows = people.filter((p) => (p.programHours ?? 0) > 0).sort((a, b) => (b.programHours ?? 0) - (a.programHours ?? 0));
+  const max = Math.max(1, ...rows.map((p) => p.programHours ?? 0));
+  return (
+    <div className="flex flex-col divide-y divide-gray-stroke">
+      {rows.map((p) => (
+        <PersonLine key={p.email} p={p}
+          right={
+            <span className="flex items-center gap-3">
+              <span className="h-1.5 w-24 overflow-hidden rounded-full bg-[#222222]/[0.08]"><span className="block h-full rounded-full bg-gray-dark" style={{ width: `${((p.programHours ?? 0) / max) * 100}%` }} /></span>
+              <span className="w-[64px] whitespace-nowrap">{p.programHours} {p.programHours === 1 ? "hour" : "hours"}</span>
+            </span>
+          } />
+      ))}
+    </div>
+  );
+}
+
+function CoachingDetail({ people }: { people: Person[] }) {
+  const rows = people.filter((p) => p.coaching).sort((a, b) => b.coaching!.used - a.coaching!.used);
+  return (
+    <div className="flex flex-col divide-y divide-gray-stroke">
+      {rows.map((p) => {
+        const c = p.coaching!;
+        const next = c.sessions?.find((x) => x.status === "scheduled")?.date ?? c.nextSession;
+        return (
+          <PersonLine key={p.email} p={p} sub={next ? `Next session ${next}` : c.used >= c.granted ? "All sessions used" : "Nothing booked"}
+            right={<span>{c.used} <span className="text-gray-light">of {c.granted} sessions</span></span>} />
+        );
+      })}
+    </div>
+  );
+}
+
+// Who on the team has accepted their invite and who still needs a nudge. "Invited" = hasn't logged in yet; "Accepted" = has.
+// What each person sees next comes from what they've been granted (program and/or coaching).
+function invitedNote(p: Person): string {
+  if (p.program?.status === "no-cohort") return "Needs to pick a cohort";
+  if (p.program?.status === "not-started") return `Program starts ${p.program.startDate}`;
+  if (p.coaching && !p.program) return "Hasn't booked a coaching session";
+  return "Hasn't joined yet";
+}
+
+function activeNote(p: Person): string {
+  const parts: string[] = [];
+  if (p.program) parts.push(p.program.status === "completed" ? "Program completed" : programDetail(p) ? `Program · ${programDetail(p)}` : "Program");
+  if (p.coaching) parts.push(`Coaching · ${p.coaching.used} of ${p.coaching.granted} sessions`);
+  return parts.join("  ·  ");
+}
+
+function TeamStatus({ people }: { people: Person[] }) {
+  const navigate = useNavigate();
+  const [reminded, setReminded] = useState<Set<string>>(new Set());
+  const team = people.filter((p) => !p.isYou && (p.program || p.coaching));
+  const invited = team.filter((p) => p.lastActiveDays === null);
+  const active = team.filter((p) => p.lastActiveDays !== null);
+  if (team.length === 0) return null;
+
+  const remind = (emails: string[]) => setReminded((prev) => new Set([...prev, ...emails]));
+  const groupTitle = "text-[14px] font-semibold leading-[1.35] text-gray-dark";
+
+  const Row = ({ p, invitedRow }: { p: Person; invitedRow?: boolean }) => (
+    <div className="flex items-center gap-3 border-b border-gray-stroke py-3 first:pt-0 last:border-0 last:pb-0">
+      <Avatar initials={p.initials} image={p.image} />
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[14px] font-medium text-gray-dark">{p.name}</div>
+        <div className="truncate text-[12px] text-gray-light">{invitedRow ? invitedNote(p) : activeNote(p)}</div>
+      </div>
+      {invitedRow ? (
+        <Button
+          size="sm"
+          variant="secondary"
+          rounded="rounded-full"
+          className="shrink-0 font-semibold"
+          disabled={reminded.has(p.email)}
+          onClick={() => remind([p.email])}
+        >
+          {reminded.has(p.email) ? "Invite sent" : "Resend invite"}
+        </Button>
+      ) : (
+        <span className="hidden shrink-0 text-[12px] text-gray-light sm:inline">Active {p.lastActive}</span>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="mb-5 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
+      <h2 className="mb-5 text-[18px] font-semibold text-gray-dark">Your team</h2>
+
+      {/* Invited and accepted sit side by side on desktop, stacked on mobile */}
+      <div className={`grid gap-8 ${invited.length > 0 && active.length > 0 ? "lg:grid-cols-2 lg:gap-10" : ""}`}>
+      {invited.length > 0 && (
+        <div>
+          <p className={`${groupTitle} border-b border-gray-stroke pb-3`}>Pending invites <span className="font-normal text-gray-light">{invited.length}</span></p>
+          <div className="flex flex-col pt-3">{invited.slice(0, 3).map((p) => <Row key={p.email} p={p} invitedRow />)}</div>
+        </div>
+      )}
+
+      {active.length > 0 && (
+        <div>
+          <p className={`${groupTitle} border-b border-gray-stroke pb-3`}>Accepted <span className="font-normal text-gray-light">{active.length}</span></p>
+          <div className="flex flex-col pt-3">{active.slice(0, 3).map((p) => <Row key={p.email} p={p} />)}</div>
+        </div>
+      )}
+      </div>
+
+      <Button size="md" variant="secondary" className="mt-5 font-semibold" onClick={() => navigate("/team/members")}>
+        See all {team.length} {team.length === 1 ? "member" : "members"}
+      </Button>
+    </div>
+  );
+}
+
 // Overview: is the program working? Results, activity and skills; the people live on Team members.
 export default function TeamProgramOverview() {
   const { people } = usePeople();
   const navigate = useNavigate();
   const { showSkills } = useTeamPrototype();
-  const avgGain = useMemo(() => averageSkillGain(people), [people]);
   const [openReflection, setOpenReflection] = useState<{ p: Person; sub: Submission } | null>(null);
-  const [detail, setDetail] = useState<"builds" | "levels" | "ratings" | "reflections" | null>(null);
-
-  // Headline numbers are all-time; "recent" is a smaller secondary line (30 days).
-  const stats = useMemo(() => {
-    // Most people won't finish every level, so progress counts levels completed (one assessment each).
-    const levelsCompleted = people.reduce((t, p) => t + p.assessments.length, 0);
-    const withLevel = people.filter((p) => p.assessments.length > 0).length;
-    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    const subs = people.flatMap((p) => p.submissions);
-    return {
-      levelsCompleted, withLevel,
-      subCount: subs.length,
-      subRecent: subs.filter((sub) => new Date(sub.date).getTime() >= cutoff).length,
-      builders: people.filter((p) => p.submissions.length > 0).length,
-      coachingDone: people.reduce((t, p) => t + (p.coaching?.used ?? 0), 0),
-      coachingScheduled: people.filter((p) => p.coaching?.nextSession).length,
-    };
-  }, [people]);
+  const [detail, setDetail] = useState<"builds" | "levels" | "ratings" | "reflections" | "active" | "hours" | "coaching" | "coachingRatings" | null>(null);
 
   return (
     <div className="leading-[1.2]">
-      <h1 className="mb-6 font-serif text-[30px] font-medium leading-[1.15] text-gray-dark sm:mb-8 sm:text-[38px]">
-        {showSkills
-          ? (avgGain !== null ? `Team skills are up ${avgGain} points on average` : "Overview")
-          : stats.subCount > 0
-            ? `Your team has shared ${stats.subCount} ${stats.subCount === 1 ? "build" : "builds"}`
-            : stats.coachingDone > 0
-              ? `Your team has completed ${stats.coachingDone} coaching ${stats.coachingDone === 1 ? "session" : "sessions"}`
-              : stats.coachingScheduled > 0
-                ? `${stats.coachingScheduled} coaching ${stats.coachingScheduled === 1 ? "session is" : "sessions are"} scheduled`
-                : "Overview"}
-      </h1>
+      <h1 className="mb-6 font-serif text-[30px] font-medium leading-[1.15] text-gray-dark sm:mb-8 sm:text-[38px]">Overview</h1>
 
-      {/* Headline cards: all-time results lead, recent activity is the smaller line */}
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <MetricCard label="View all builds shared" onClick={() => setDetail("builds")}>
-          <div className={bigNumCls}>{stats.subCount} <span className="text-[14px] font-normal text-gray-light">{stats.subCount === 1 ? "build" : "builds"} shared</span></div>
-          <div className="mt-3 text-[12px] text-gray-light">
-            {stats.subRecent > 0
-              ? `${stats.subRecent} in the last 30 days`
-              : `From ${stats.builders} ${stats.builders === 1 ? "person" : "people"}`}
-          </div>
-        </MetricCard>
+      <TeamPractice people={people} onOpen={setDetail} />
 
-        <MetricCard label="View levels completed by person" onClick={() => setDetail("levels")}>
-          <div className={bigNumCls}>{stats.levelsCompleted} <span className="text-[14px] font-normal text-gray-light">{stats.levelsCompleted === 1 ? "level" : "levels"} completed</span></div>
-          <div className="mt-3 text-[12px] text-gray-light">
-            Across {stats.withLevel} {stats.withLevel === 1 ? "person" : "people"}
-          </div>
-        </MetricCard>
-
-        <MetricCard label="View participant reviews" onClick={() => setDetail("ratings")}>
-          <div className="flex items-center gap-1.5">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-            <span className={bigNumCls}>4.9 <span className="text-[14px] font-normal text-gray-light">(18)</span></span>
-          </div>
-          <div className="mt-3 text-[12px] text-gray-light">Average participant rating</div>
-        </MetricCard>
-      </div>
+      <TeamCoaching people={people} onOpen={setDetail} />
 
       <ActivityChart people={people} />
 
@@ -1966,16 +2211,9 @@ export default function TeamProgramOverview() {
 
       {showSkills ? <TeamSkills people={people} /> : <TeamReflections people={people} onSeeAll={() => setDetail("reflections")} onOpen={(p, sub) => setOpenReflection({ p, sub })} />}
 
-      {/* Mobile: a quiet line with a text link. From sm up: a boxed row with a button. */}
-      <p className="mb-8 mt-10 text-center text-[14px] text-gray-light sm:hidden">
-        <span className="font-semibold text-gray-dark">{people.length} {people.length === 1 ? "person" : "people"}</span> on your team ·{" "}
-        <button onClick={() => navigate("/team/members")} className="text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">View team members</button>
-      </p>
-      <div className="mb-8 hidden flex-wrap items-center justify-between gap-3 rounded-[12px] border border-gray-stroke bg-white p-5 sm:flex">
-        <span className="text-[14px] text-gray-light"><span className="font-semibold text-gray-dark">{people.length} {people.length === 1 ? "person" : "people"}</span> on your team</span>
-        <Button size="md" variant="secondary" rounded="rounded-full" onClick={() => navigate("/team/members")}>View team members</Button>
-      </div>
-      <div className="mb-8 text-center sm:text-left">
+      <TeamStatus people={people} />
+
+      <div className="mb-5 text-center sm:text-left">
         <h2 className="leland-heading-base mb-2 font-semibold text-gray-dark">Support</h2>
         <p className="mx-auto max-w-[560px] text-[14px] leading-[1.5] text-gray-light sm:mx-0">
           Need help with your account? Reach out to your Leland success team at{" "}
@@ -1990,10 +2228,10 @@ export default function TeamProgramOverview() {
         {detail && (
           <DetailDialog
             key={detail}
-            title={detail === "builds" ? "Builds shared" : detail === "levels" ? "Levels completed" : detail === "reflections" ? "What the team is learning" : "Participant reviews"}
+            title={detail === "builds" ? "Builds shared" : detail === "levels" ? "Levels completed" : detail === "reflections" ? "What the team is learning" : detail === "active" ? "Active in the last 30 days" : detail === "hours" ? "Hands-on building by person" : detail === "coaching" ? "1:1 coaching by person" : detail === "coachingRatings" ? "Reviews of your team's coaches" : "Program reviews from your team"}
             onClose={() => setDetail(null)}
           >
-            {detail === "builds" ? <BuildsDetail people={people} /> : detail === "reflections" ? <ReflectionsDetail people={people} /> : detail === "levels" ? <LevelsDetail people={people} /> : <RatingsDetail />}
+            {detail === "builds" ? <BuildsDetail people={people} /> : detail === "active" ? <ActiveDetail people={people} /> : detail === "hours" ? <HoursDetail people={people} /> : detail === "coaching" ? <CoachingDetail people={people} /> : detail === "reflections" ? <ReflectionsDetail people={people} /> : detail === "levels" ? <LevelsDetail people={people} /> : <RatingsDetail kind={detail === "coachingRatings" ? "coaching" : "program"} />}
           </DetailDialog>
         )}
         {openReflection && (
