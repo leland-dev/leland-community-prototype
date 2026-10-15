@@ -45,9 +45,13 @@ type ProgramFormat = "live" | "async";
 type ProgramAccess = "limited" | "extended";
 const SESSION_PRICE = 200; // 1:1 coaching, per 1-hour session (sample)
 const SEAT_PRICES: Record<ProgramFormat, Record<ProgramAccess, number>> = {
-  live: { limited: 1995, extended: 2995 },
-  async: { limited: 995, extended: 1495 },
+  live: { limited: 899, extended: 899 },
+  async: { limited: 199, extended: 199 },
 };
+// Extended access starts after the 3 months included with a seat, and renews until canceled.
+type ExtendedBilling = "yearly" | "monthly";
+const EXTENDED_PRICES: Record<ExtendedBilling, number> = { yearly: 119, monthly: 29 };
+const extendedLabel = (b: ExtendedBilling) => `${usd(EXTENDED_PRICES[b])} / ${b === "yearly" ? "year" : "month"}`;
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 });
 const SESSION_PRICE_LABEL = `${usd(SESSION_PRICE)} / 1-hr session`;
 const LEVELS = [1, 2, 3, 4] as const;
@@ -84,8 +88,9 @@ type Person = {
   program: Program | null; // null = no program seat (e.g. coaching only)
   coaching: { granted: number; used: number; lastSession?: string; nextSession?: string; category?: string; sessions?: CoachSession[] } | null;
   lelandPlus?: { expires: string } | null; // Leland+ subscription (sample data)
-  plan?: { format: ProgramFormat; access: ProgramAccess; renewsOn?: string; renewalCanceled?: boolean }; // how the program seat was purchased; extended access renews yearly until canceled
+  plan?: { format: ProgramFormat; access: ProgramAccess; billing?: ExtendedBilling; renewsOn?: string; renewalCanceled?: boolean }; // how the program seat was purchased; extended access renews yearly until canceled
   isAdmin?: boolean; // a team admin (may not have been granted any access yet)
+  isYou?: boolean; // the signed-in admin
   lastActive: string; // display text
   lastActiveDays: number | null; // null = hasn't logged in yet
   assessments: Assessment[];
@@ -116,7 +121,7 @@ function assess(level: Level, score: number, date: string, withAfter = true): As
 const INITIAL_PEOPLE: Person[] = [
   {
     name: "Dana Whitfield", email: "dana.whitfield@flybreeze.com", initials: "DW", image: pic9,
-    plan: { format: "live", access: "extended", renewsOn: "Jun 2, 2027" }, program: { status: "completed", startDate: "Jun 2, 2026" }, lelandPlus: { expires: "Dec 31, 2026" }, coaching: { granted: 4, used: 3, lastSession: "Sep 22, 2026", nextSession: "Oct 20, 2026", sessions: [
+    plan: { format: "live", access: "extended", billing: "yearly", renewsOn: "Jun 2, 2027" }, program: { status: "completed", startDate: "Jun 2, 2026" }, lelandPlus: { expires: "Dec 31, 2026" }, coaching: { granted: 4, used: 3, lastSession: "Sep 22, 2026", nextSession: "Oct 20, 2026", sessions: [
         { ...COACHES.jordan, date: "Jul 8, 2026", status: "completed", summary: "Mapped where AI could take over the weekly reporting grind. Agreed on three candidate workflows and a simple way to measure the time saved. Next step: prototype the metrics digest." },
         { ...COACHES.jordan, date: "Aug 12, 2026", status: "completed", summary: "Reviewed the first prototype and tightened the prompt structure. Talked through how to hand it to the ops team without it becoming a one-person side project." },
         { ...COACHES.alex, date: "Sep 22, 2026", status: "completed", summary: "Planned the rollout of the support triage agent: who reviews what, how to handle edge cases, and what to report back to leadership after the first month." },
@@ -142,7 +147,7 @@ const INITIAL_PEOPLE: Person[] = [
   },
   {
     name: "Priya Raman", email: "priya.raman@flybreeze.com", initials: "PR", image: pic3,
-    plan: { format: "live", access: "extended", renewsOn: "Sep 8, 2027" }, program: { status: "in-progress", startDate: "Sep 8, 2026", level: 2 }, coaching: { granted: 3, used: 1, lastSession: "Sep 30, 2026", nextSession: "Oct 14, 2026", sessions: [
+    plan: { format: "live", access: "extended", billing: "yearly", renewsOn: "Sep 8, 2027" }, program: { status: "in-progress", startDate: "Sep 8, 2026", level: 2 }, coaching: { granted: 3, used: 1, lastSession: "Sep 30, 2026", nextSession: "Oct 14, 2026", sessions: [
         { ...COACHES.nina, date: "Sep 30, 2026", status: "completed", summary: "Broke the onboarding process into steps an assistant can follow, and decided which checks should stay with a person. Left with a first draft of the checklist bot." },
         { ...COACHES.nina, date: "Oct 14, 2026", status: "scheduled" },
       ] },
@@ -168,7 +173,7 @@ const INITIAL_PEOPLE: Person[] = [
   },
   {
     name: "Jonah Bishop", email: "jonah.bishop@flybreeze.com", initials: "JB", image: pic13,
-    plan: { format: "async", access: "extended", renewsOn: "Aug 25, 2027" }, program: { status: "in-progress", startDate: "Aug 25, 2026", level: 2 }, coaching: { granted: 2, used: 2, lastSession: "Oct 3, 2026", sessions: [
+    plan: { format: "async", access: "extended", billing: "yearly", renewsOn: "Aug 25, 2027" }, program: { status: "in-progress", startDate: "Aug 25, 2026", level: 2 }, coaching: { granted: 2, used: 2, lastSession: "Oct 3, 2026", sessions: [
         { ...COACHES.sam, date: "Sep 12, 2026", status: "completed", summary: "Talked through using the sales call coach in weekly 1:1s and how to give reps feedback without it feeling like surveillance." },
         { ...COACHES.sam, date: "Oct 3, 2026", status: "completed", summary: "Refined the scoring rubric against the team playbook and picked two calls per rep to review each week." },
       ] },
@@ -287,7 +292,7 @@ type Recipient = { name: string; email: string };
 // What the add-team-members dialog can do for the people being added, in any combination: make them admins (no charge),
 // and grant an AI Builder Program seat and/or 1:1 coaching. Each checked item gets its own section on the details step.
 type GrantOffering = "program" | "coaching" | "admin";
-type GrantResult = { recipients: Recipient[]; offerings: GrantOffering[]; format: ProgramFormat; access: ProgramAccess; cohort: Cohort; sessions: number; category: string };
+type GrantResult = { recipients: Recipient[]; offerings: GrantOffering[]; format: ProgramFormat; access: ProgramAccess; billing: ExtendedBilling; cohort: Cohort; sessions: number; category: string };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SEPARATORS = /[\s,;]+/;
@@ -426,10 +431,11 @@ function GrantAccessModal({ open, person, preset, existingEmails, onClose, onGra
   // Three steps: who (emails), what they get, then those options with a confirmation. Granting more to an existing member skips the first.
   const [step, setStep] = useState<"emails" | "type" | "details">("emails");
   const [selected, setSelected] = useState<GrantOffering[]>([]);
-  const [sessions, setSessions] = useState(3);
+  const [sessions, setSessions] = useState(1);
   const [category, setCategory] = useState("");
   const [format, setFormat] = useState<ProgramFormat>("live");
   const [access, setAccess] = useState<ProgramAccess>("limited");
+  const [billing, setBilling] = useState<ExtendedBilling>("yearly");
   const [done, setDone] = useState<GrantResult | null>(null);
   const { team, updateTeam } = useTeam();
   const card = team?.card;
@@ -447,10 +453,11 @@ function GrantAccessModal({ open, person, preset, existingEmails, onClose, onGra
     setPaid(null);
     setStep(person ? "type" : "emails");
     setSelected(preset ?? []);
-    setSessions(person?.coaching?.granted ?? 3);
+    setSessions(person?.coaching?.granted ?? 1);
     setCategory(person?.coaching?.category ?? "");
     setFormat(person?.plan?.format ?? "live");
     setAccess(person?.plan?.access ?? "limited");
+    setBilling(person?.plan?.billing ?? "yearly");
   }, [open, person, preset]);
 
   useEffect(() => {
@@ -491,13 +498,13 @@ function GrantAccessModal({ open, person, preset, existingEmails, onClose, onGra
 
   const submit = () => {
     const c = card;
-    const r: GrantResult = { recipients, offerings: selected, format, access, cohort, sessions, category };
+    const r: GrantResult = { recipients, offerings: selected, format, access, billing, cohort, sessions, category };
     const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
     const stamp = Date.now();
     // One purchase per paid item, for Billing history.
     const purchases = [
       ...(programPer > 0
-        ? [{ id: `p-${stamp}-a`, date: today, description: "AI Builder Program", detail: `${count} ${count === 1 ? "seat" : "seats"} · ${format === "live" ? "Live" : "Async"} · ${access === "limited" ? "2 months" : "extended access"}`, amount: programPer * count }]
+        ? [{ id: `p-${stamp}-a`, date: today, description: "AI Builder Program", detail: `${count} ${count === 1 ? "seat" : "seats"} · ${format === "live" ? "Live" : "Async"} · ${access === "limited" ? "3 months" : `extended access, then ${extendedLabel(billing)}`}`, amount: programPer * count }]
         : []),
       ...(coachingPer > 0
         ? [{ id: `p-${stamp}-b`, date: today, description: "1:1 coaching", detail: `${count * newSessions} sessions${category ? ` · ${category}` : ""}`, amount: coachingPer * count }]
@@ -554,7 +561,7 @@ function GrantAccessModal({ open, person, preset, existingEmails, onClose, onGra
                     terms={
                       <>
                         By saving this card, you authorize Leland to charge it each time you add seats or other purchases to your team.
-                        {" "}Extended access renews every year at the price shown at purchase until you cancel, and we’ll email you before each renewal.
+                        {" "}Extended access renews at the price shown at purchase until you cancel, and we’ll email you before each renewal.
                         {" "}Taxes, if any, are calculated from your billing address. Purchases are subject to our <TermsLinks />.
                       </>
                     }
@@ -696,7 +703,7 @@ function GrantAccessModal({ open, person, preset, existingEmails, onClose, onGra
                       <div className="flex items-baseline justify-between gap-3">
                         <span className="text-[14px] font-medium text-gray-dark">AI Builder Program seat</span>
                         <span className="shrink-0 text-[14px] text-gray-light">
-                          {person?.program ? "Already has a seat" : `${usd(seatPrice)} / ${access === "limited" ? "seat" : "year"}`}
+                          {person?.program ? "Already has a seat" : `${usd(seatPrice)} / seat`}
                         </span>
                       </div>
                       {!(person && hasStarted(person)) && (
@@ -723,12 +730,27 @@ function GrantAccessModal({ open, person, preset, existingEmails, onClose, onGra
                               label="Access"
                               value={access}
                               options={[
-                                { value: "limited", label: "Limited time (2 months)", hint: usd(SEAT_PRICES[format].limited) },
-                                { value: "extended", label: "Extended (renews annually)", hint: `${usd(SEAT_PRICES[format].extended)} / year` },
+                                { value: "limited", label: "Limited time (3 months)", hint: "Included" },
+                                { value: "extended", label: "Extended access (renews)", hint: `Then ${extendedLabel(billing)}` },
                               ]}
                               onChange={(v) => setAccess(v as ProgramAccess)}
                             />
                           </div>
+                          {access === "extended" && (
+                            <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-stroke pt-3">
+                              <span className="text-[14px] text-gray-dark">Billing after 3 months</span>
+                              <FilterDropdown
+                                plain underline small alignRight
+                                label="Billing"
+                                value={billing}
+                                options={[
+                                  { value: "yearly", label: "Yearly", hint: extendedLabel("yearly") },
+                                  { value: "monthly", label: "Monthly", hint: extendedLabel("monthly") },
+                                ]}
+                                onChange={(v) => setBilling(v as ExtendedBilling)}
+                              />
+                            </div>
+                          )}
                           </>)}
                           {/* Live programs run in cohorts; async is self-paced, so there's no cohort to pick */}
                           {format === "live" && (
@@ -800,6 +822,9 @@ function GrantAccessModal({ open, person, preset, existingEmails, onClose, onGra
                         </div>
                       )}
                       <div className="flex items-center justify-between font-medium text-gray-dark"><span>Charged today</span><span>{usd(charge)}</span></div>
+                      {programPer > 0 && access === "extended" && (
+                        <div className="flex items-center justify-between text-[12px] text-gray-light"><span>Extended access after 3 months, until canceled</span><span>{extendedLabel(billing)}</span></div>
+                      )}
                       {/* No card yet: hide the card row and offer a full-width button below the numbers, with room above it */}
                       {!card && (
                         <Button type="button" size="md" variant="dark" rounded="rounded-full" className="mt-4 w-full" onClick={() => setCardStep(true)}>
@@ -1087,7 +1112,7 @@ function PersonDrawer({ person, onClose, onEdit, onCohort, onRenewal }: { person
               </div>
               <div className="flex-1 overflow-y-auto">
                 <div className="px-4 pb-2 pt-5 sm:px-6">
-                  <div className="font-serif text-[28px] font-medium text-gray-dark">User details</div>
+                  <div className="font-serif text-[28px] font-medium text-gray-dark">Member details</div>
                   <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-gray-light">
                     <span>{person.email}</span>
                     {person.isAdmin && <Tag text="Admin" tagColor={TagColor.BLUE} size={TagSize.XS} />}
@@ -1101,7 +1126,7 @@ function PersonDrawer({ person, onClose, onEdit, onCohort, onRenewal }: { person
                   {person.isAdmin && (
                     <DrawerSection title="Team admin">
                       <p className="text-[14px] leading-[1.4] text-gray-light">Can manage team members, grant or revoke their access, make others admins, and manage billing details.</p>
-                      <Button size="sm" variant="secondary" rounded="rounded-full" className="mt-3" onClick={() => revokeAdmin(person)}>Revoke admin access</Button>
+                      {!person.isYou && <Button size="sm" variant="secondary" rounded="rounded-full" className="mt-3" onClick={() => revokeAdmin(person)}>Revoke admin access</Button>}
                     </DrawerSection>
                   )}
 
@@ -1110,11 +1135,11 @@ function PersonDrawer({ person, onClose, onEdit, onCohort, onRenewal }: { person
                       <div className="flex flex-col">
                         <DrawerRow label="Status"><StatusPill program={person.program} /></DrawerRow>
                         {programDetail(person) && <DrawerRow label="Progress">{programDetail(person)}</DrawerRow>}
-                        {person.plan && <DrawerRow label="Plan">{person.plan.format === "live" ? "Live" : "Async"} · {person.plan.access === "limited" ? "2 months" : "Extended"}</DrawerRow>}
-                        {/* 2-month access doesn't renew: just show when it ends once they've started */}
+                        {person.plan && <DrawerRow label="Plan">{person.plan.format === "live" ? "Live" : "Async"} · {person.plan.access === "limited" ? "3 months" : `Extended${person.plan.billing ? ` · ${extendedLabel(person.plan.billing)}` : ""}`}</DrawerRow>}
+                        {/* 3-month access doesn't renew: just show when it ends once they've started */}
                         {person.plan?.access === "limited" && hasStarted(person) && (() => {
                           const end = new Date((person.program as { startDate: string }).startDate);
-                          end.setMonth(end.getMonth() + 2);
+                          end.setMonth(end.getMonth() + 3);
                           return <DrawerRow label="Access ends">{end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</DrawerRow>;
                         })()}
                         {person.plan?.access === "extended" && person.plan.renewsOn && (
@@ -1767,12 +1792,31 @@ function usePeople() {
   return ctx;
 }
 
+// The signed-in admin's own access in the sample data.
+function sampleMe(name: string, email: string): Person {
+  return {
+    name, email, initials: initialsOf(name), isAdmin: true, isYou: true,
+    plan: { format: "live", access: "limited" },
+    program: { status: "in-progress", startDate: "Sep 8, 2026", level: 2 },
+    coaching: {
+      granted: 3, used: 1, lastSession: "Sep 30, 2026", nextSession: "Oct 21, 2026", category: "Product Management",
+      sessions: [
+        { ...COACHES.jordan, date: "Sep 30, 2026", status: "completed", summary: "Set goals for rolling AI into the team's workflows. Agreed on a first pilot, who owns it, and how to report results after a month." },
+        { ...COACHES.jordan, date: "Oct 21, 2026", status: "scheduled" },
+      ],
+    },
+    lastActive: "Today", lastActiveDays: 0, assessments: [], submissions: [],
+  };
+}
+
 export function TeamPeopleProvider({ children }: { children: ReactNode }) {
   const { emptyTeam } = useTeamPrototype();
   const { team } = useTeam();
-  const [people, setPeople] = useState<Person[]>(emptyTeam ? [] : INITIAL_PEOPLE);
-  // The prototype's "Empty team" switch resets the roster either way.
-  useEffect(() => { setPeople(emptyTeam ? [] : INITIAL_PEOPLE); }, [emptyTeam]);
+  // The signed-in admin has the AI Builder Program and coaching themselves. The prototype's "Empty team" switch leaves only them.
+  const me = team?.members.find((m) => m.id === "me");
+  const startingPeople = (): Person[] => [...(me ? [sampleMe(me.name, me.email)] : []), ...(emptyTeam ? [] : INITIAL_PEOPLE)];
+  const [people, setPeople] = useState<Person[]>(startingPeople);
+  useEffect(() => { setPeople(startingPeople()); }, [emptyTeam, me?.email]); // eslint-disable-line react-hooks/exhaustive-deps
   const [grantOpen, setGrantOpen] = useState(false);
   const [editing, setEditing] = useState<Person | null>(null);
   const [preset, setPreset] = useState<GrantOffering[] | undefined>(undefined);
@@ -1821,9 +1865,9 @@ export function TeamPeopleProvider({ children }: { children: ReactNode }) {
         !r.offerings.includes("coaching")
           ? existing?.coaching ?? null
           : { ...existing?.coaching, granted: r.sessions, used: Math.min(existing?.coaching?.used ?? 0, r.sessions), category: r.category || undefined };
-      const inAYear = new Date(); inAYear.setFullYear(inAYear.getFullYear() + 1);
+      const afterIncluded = new Date(); afterIncluded.setMonth(afterIncluded.getMonth() + 3);
       const plan = r.offerings.includes("program") && !cur
-        ? { format: r.format, access: r.access, ...(r.access === "extended" ? { renewsOn: inAYear.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) } : {}) }
+        ? { format: r.format, access: r.access, ...(r.access === "extended" ? { billing: r.billing, renewsOn: afterIncluded.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) } : {}) }
         : existing?.plan;
       if (existing) {
         updatedByEmail.set(rec.email, { ...existing, program, coaching, plan });
@@ -2058,19 +2102,26 @@ export function TeamMembersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
   const { team } = useTeam();
-  const { membersLayout, showAccessColumn } = useTeamPrototype();
-  const [offeringChoice, setOfferingChoice] = useState<Offering>("program");
+  const { membersLayout, showAccessColumn, emptyTeam } = useTeamPrototype();
+  const [offeringChoice, setOfferingChoice] = useState<Offering | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [query, setQuery] = useState("");
 
   // Admins show up in the full roster even before they've been granted anything, but only in "All":
-  // they appear in the program and coaching views once they actually have that access. (You, the signed-in admin, aren't listed.)
-  const admins = (team?.members ?? []).filter((m) => m.role === "Admin" && m.id !== "me");
+  // they appear in the program and coaching views once they actually have that access. You, the signed-in admin, are always listed first.
+  // The prototype's "Empty team" switch lists nobody but you.
+  const admins = (team?.members ?? []).filter((m) => m.role === "Admin" && (!emptyTeam || m.id === "me"));
   const adminEmails = new Set(admins.map((m) => m.email.toLowerCase()));
+  const myEmail = team?.members.find((m) => m.id === "me")?.email.toLowerCase();
   const adminOnly: Person[] = admins
     .filter((a) => !granted.some((p) => p.email.toLowerCase() === a.email.toLowerCase()))
-    .map((a) => ({ name: a.name, email: a.email, initials: initialsOf(a.name), program: null, coaching: null, lastActive: "—", lastActiveDays: null, assessments: [], submissions: [], isAdmin: true }));
-  const people: Person[] = [...granted.map((p) => (adminEmails.has(p.email.toLowerCase()) ? { ...p, isAdmin: true } : p)), ...adminOnly];
+    .map((a) => ({ name: a.name, email: a.email, initials: initialsOf(a.name), program: null, coaching: null, lastActive: "—", lastActiveDays: null, assessments: [], submissions: [], isAdmin: true, isYou: a.email.toLowerCase() === myEmail }));
+  const roster: Person[] = [...granted.map((p) => ({ ...p, ...(adminEmails.has(p.email.toLowerCase()) ? { isAdmin: true } : {}), isYou: p.email.toLowerCase() === myEmail })), ...adminOnly];
+  const people: Person[] = [...roster.filter((p) => p.isYou), ...roster.filter((p) => !p.isYou)];
+  // Nobody else has been given the program or coaching yet (you and other admins don't count): nudge the admin to add people.
+  const nobodyGranted = people.filter((p) => !p.isYou).every((p) => !p.program && !p.coaching && !p.lelandPlus);
+  // You're the only one on the team: a bigger empty state inside the table replaces the header button.
+  const onlyYou = people.length === 1 && !!people[0].isYou;
   const programPeople = people.filter((p) => p.program);
   const coachingPeople = people.filter((p) => p.coaching);
   const plusPeople = people.filter((p) => p.lelandPlus);
@@ -2080,8 +2131,12 @@ export function TeamMembersPage() {
   const offerings: Offering[] = ["everyone", "program", "coaching", "admins"];
 
   const combined = membersLayout === "combined";
-  const offering: Offering = combined ? "everyone" : offerings.includes(offeringChoice) ? offeringChoice : "program";
+  // Until a tab is picked: the program view, or the full roster when nobody has been granted anything yet.
+  const defaultOffering: Offering = nobodyGranted ? "everyone" : "program";
+  // With only you on the team there is nothing to pivot between: always the full roster, no tabs.
+  const offering: Offering = combined || onlyYou ? "everyone" : offeringChoice && offerings.includes(offeringChoice) ? offeringChoice : defaultOffering;
   const colKey: Offering | "combined" = combined ? "combined" : offering;
+  const showEmptyState = onlyYou;
   // An offering-specific view already implies what access people have, so the Access column only
   // shows on "All". The one-table layout has a column per offering, which makes it redundant there too.
   const hideAccess = combined || (offering !== "everyone" && offering !== "admins");
@@ -2097,7 +2152,7 @@ export function TeamMembersPage() {
 
   const base = offering === "program" ? programPeople : offering === "coaching" ? coachingPeople : offering === "plus" ? plusPeople : offering === "admins" ? adminPeople : people;
   const rows = base.filter((p) => {
-    if (query && !`${p.name} ${p.email}`.toLowerCase().includes(query.toLowerCase())) return false;
+    if (query && !onlyYou && !`${p.name} ${p.email}`.toLowerCase().includes(query.toLowerCase())) return false;
     if (offering === "program") {
       if (filter === "in-progress") return p.program!.status === "in-progress";
       if (filter === "no-cohort") return p.program!.status === "no-cohort";
@@ -2145,42 +2200,21 @@ export function TeamMembersPage() {
           : null;
 
   // Nobody on the team yet: one clear next step instead of an empty table.
-  if (people.length === 0) {
-    return (
-      <div className="leading-[1.2]">
-        <h1 className="mb-6 font-serif text-[30px] font-medium text-gray-dark sm:text-[38px] sm:mb-8">Team members</h1>
-        <div className="flex flex-col items-center rounded-[12px] border border-gray-stroke bg-white px-6 py-16 text-center">
-          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-gray-hover">
-            <img src={usersGroupIcon} alt="" className="h-6 w-6 opacity-70" />
-          </div>
-          <h2 className="font-serif text-[28px] font-medium leading-[1.2] text-gray-dark">No team members yet</h2>
-          <p className="mt-2 max-w-[420px] text-[16px] leading-[1.5] text-gray-light">
-            Add your first teammate to give them access to the AI Builder Program or 1:1 coaching. We'll send them an invite email.
-          </p>
-          <Button size="lg" variant="primary" rounded="rounded-full" className="mt-6" onClick={() => openGrant(null)}>
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
-            Add a team member
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="leading-[1.2]">
       <div className="mb-6 flex items-start justify-between gap-4 sm:mb-8">
         <h1 className="font-serif text-[30px] font-medium text-gray-dark sm:text-[38px]">Team members</h1>
         {/* Desktop button; the full-width one below is for mobile. The wrapper hides it, since the Button's own display would override a hidden class. */}
-        <div className="hidden shrink-0 sm:block">
+        <div className={`hidden shrink-0 ${showEmptyState ? "" : "sm:block"}`}>
           <Button size="lg" variant="primary" rounded="rounded-full" onClick={() => openGrant(null)}>
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
             Add a team member
           </Button>
         </div>
       </div>
-      <Button size="lg" variant="primary" rounded="rounded-full" className="mb-6 w-full sm:hidden" onClick={() => openGrant(null)}>Add a team member</Button>
+      {!showEmptyState && <Button size="lg" variant="primary" rounded="rounded-full" className="mb-6 w-full sm:hidden" onClick={() => openGrant(null)}>Add a team member</Button>}
 
-      {membersLayout === "tabs" && (
+      {membersLayout === "tabs" && !onlyYou && (
         // The tabs scroll sideways on narrow screens instead of wrapping. The rule under them is a pseudo-element so the
         // scroll container doesn't clip the active tab's underline.
         <div className="relative mb-4 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-gray-stroke">
@@ -2214,7 +2248,8 @@ export function TeamMembersPage() {
         </div>
       )}
 
-      <div className="mb-3 flex flex-wrap items-center gap-3">
+      {/* While the empty state shows there is nothing to search, filter or pivot. */}
+      {!showEmptyState && <div className="mb-3 flex flex-wrap items-center gap-3">
         {membersLayout === "filter" && (
           <FilterDropdown
             label="Offering"
@@ -2223,19 +2258,19 @@ export function TeamMembersPage() {
             onChange={(v) => changeOffering(v as Offering)}
           />
         )}
-        <div className="flex w-full items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3 sm:w-auto sm:max-w-[280px] sm:flex-1">
+        {!showEmptyState && <div className="flex w-full items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3 sm:w-auto sm:max-w-[280px] sm:flex-1">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-dark"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
           <input value={query} onChange={(e) => setQuery(e.target.value)} className="flex-1 border-none bg-transparent text-[14px] leading-[1.2] text-gray-dark outline-none placeholder:text-gray-xlight" placeholder="Search by name or email" />
-        </div>
-        {statusOptions && <FilterDropdown label="Show" value={filter} options={statusOptions} onChange={setFilter} />}
-      </div>
+        </div>}
+        {statusOptions && !showEmptyState && <FilterDropdown label="Show" value={filter} options={statusOptions} onChange={setFilter} />}
+      </div>}
 
       <div className="overflow-hidden rounded-[12px] border border-gray-stroke bg-white">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse" style={{ minWidth: 220 + cols.length * 140 }}>
             <thead>
               <tr className="border-b border-gray-stroke bg-gray-hover text-left text-[14px] font-medium text-gray-dark">
-                <th className="px-4 py-3">Person</th>
+                <th className="px-4 py-3">Member</th>
                 {cols.map((c) => <th key={c.key} className="px-4 py-3">{c.header}</th>)}
                 <th className="w-10 px-4 py-3" />
               </tr>
@@ -2247,7 +2282,7 @@ export function TeamMembersPage() {
                     <div className="flex items-center gap-[10px]">
                       <Avatar initials={p.initials} image={p.image} />
                       <div className="min-w-0">
-                        <div className="text-[14px] font-medium text-gray-dark">{p.name}</div>
+                        <div className="text-[14px] font-medium text-gray-dark">{p.name}{p.isYou && <span className="ml-1.5 text-[12px] font-normal text-gray-light">(You)</span>}</div>
                         <div className="text-[12px] text-gray-light">{p.email}</div>
                       </div>
                     </div>
@@ -2259,15 +2294,51 @@ export function TeamMembersPage() {
                 </tr>
               ))}
               {rows.length === 0 && (
-                <tr><td colSpan={cols.length + 2} className="px-4 py-10 text-center text-[14px] text-gray-light">No one matches this filter.</td></tr>
+                <tr>
+                  <td colSpan={cols.length + 2} className="px-4 py-10 text-center text-[14px] text-gray-light">
+                    {base.length === 0 && (offering === "program" || offering === "coaching") ? (
+                      <div className="flex flex-col items-center gap-3">
+                        <span>No one has {offering === "program" ? "the AI Builder Program" : "1:1 coaching"} yet.</span>
+                        <Button size="sm" variant="secondary" rounded="rounded-full" onClick={() => openGrant(null, [offering])}>Add a team member</Button>
+                      </div>
+                    ) : "No one matches this filter."}
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
         </div>
+        {showEmptyState && (
+          <div className="flex flex-col items-center border-t border-gray-stroke px-6 py-14 text-center">
+            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-gray-hover">
+              <img src={usersGroupIcon} alt="" className="h-6 w-6 opacity-70" />
+            </div>
+            <h2 className="font-serif text-[28px] font-medium leading-[1.2] text-gray-dark">Add your team</h2>
+            <p className="mt-2 max-w-[440px] text-[16px] leading-[1.5] text-gray-light">
+              Give teammates access to the AI Builder Program or 1:1 coaching, and see their progress here.
+            </p>
+            <Button size="lg" variant="primary" rounded="rounded-full" className="mt-6" onClick={() => openGrant(null)}>
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
+              Add a team member
+            </Button>
+          </div>
+        )}
         <div className="border-t border-gray-stroke px-4 py-3 text-[12px] text-gray-light">
           {rows.length} {rows.length === 1 ? "person" : "people"}
         </div>
       </div>
+      {nobodyGranted && !onlyYou && (offering === "everyone" || offering === "admins") && !query && (
+        <div className="mt-4 flex flex-col gap-4 rounded-[12px] border border-gray-stroke bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+          <div className="min-w-0">
+            <h2 className="text-[16px] font-semibold text-gray-dark">Add your team</h2>
+            <p className="mt-1 text-[14px] leading-[1.4] text-gray-light">Give teammates access to the AI Builder Program or 1:1 coaching, and see their progress here.</p>
+          </div>
+          <Button size="md" variant="primary" rounded="rounded-full" className="shrink-0 self-start sm:self-auto" onClick={() => openGrant(null)}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
+            Add a team member
+          </Button>
+        </div>
+      )}
       <div className="h-[120px] shrink-0" />
     </div>
   );

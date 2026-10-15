@@ -87,8 +87,8 @@ const SAMPLE_TEAM: Team = {
   purchases: [
     { id: "p-4", date: "Sep 30, 2026", description: "1:1 coaching sessions", detail: "6 sessions \u00b7 Jordan Lee, Sam Patel", amount: 1500 },
     { id: "p-3", date: "Sep 12, 2026", description: "Leland+ annual access", detail: "3 seats", amount: 897 },
-    { id: "p-2", date: "Aug 18, 2026", description: "AI Builder Program", detail: "2 seats \u00b7 Cohort starts Sep 8", amount: 3990 },
-    { id: "p-1", date: "Aug 4, 2026", description: "AI Builder Program", detail: "1 seat \u00b7 Cohort starts Sep 8", amount: 1995 },
+    { id: "p-2", date: "Aug 18, 2026", description: "AI Builder Program", detail: "2 seats \u00b7 Cohort starts Sep 8", amount: 1798 },
+    { id: "p-1", date: "Aug 4, 2026", description: "AI Builder Program", detail: "1 seat \u00b7 Cohort starts Sep 8", amount: 899 },
   ],
   members: [
     { id: "me", name: "Alex Rivera", email: "alex.rivera@flybreeze.com", role: "Admin", access: ["All programs"] },
@@ -110,7 +110,8 @@ function load(): Team | null {
     if (!parsed) return null;
     // Bundled asset URLs change between builds, so a stored one can go stale:
     // re-attach the sample team's logo, and drop any other non-uploaded logo.
-    const logo = parsed.name === SAMPLE_TEAM.name ? SAMPLE_TEAM.logo : parsed.logo?.startsWith("data:") ? parsed.logo : undefined;
+    // "" means the logo was removed on purpose. An uploaded (data:) logo is kept; the sample team otherwise gets its bundled one.
+    const logo = parsed.logo === "" ? undefined : parsed.logo?.startsWith("data:") ? parsed.logo : parsed.name === SAMPLE_TEAM.name ? SAMPLE_TEAM.logo : undefined;
     let members = parsed.members;
     // A team saved before the sample admins existed gets them once (not again, so removing one sticks).
     if (parsed.name === SAMPLE_TEAM.name && !localStorage.getItem(SAMPLE_ADMINS_KEY)) {
