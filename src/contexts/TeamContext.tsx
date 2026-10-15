@@ -94,8 +94,14 @@ const SAMPLE_TEAM: Team = {
     { id: "me", name: "Alex Rivera", email: "alex.rivera@flybreeze.com", role: "Admin", access: ["All programs"] },
     { id: "m-1", name: "Jordan Lee", email: "jordan.lee@flybreeze.com", role: "Member", access: ["AI Builder Program"] },
     { id: "m-2", name: "Sam Patel", email: "sam.patel@flybreeze.com", role: "Member", access: ["Leland+", "1:1 coaching — hourly"] },
+    // Admins on the Team members page: Dana is also in the program and coaching; the other two are admin-only.
+    { id: "m-3", name: "Dana Whitfield", email: "dana.whitfield@flybreeze.com", role: "Admin", access: ["All programs"] },
+    { id: "m-4", name: "Renee Castillo", email: "renee.castillo@flybreeze.com", role: "Admin", access: ["All programs"] },
+    { id: "m-5", name: "Theo Nakamura", email: "theo.nakamura@flybreeze.com", role: "Admin", access: ["All programs"] },
   ],
 };
+
+const SAMPLE_ADMINS_KEY = "leland-team-sample-admins-v2";
 
 function load(): Team | null {
   try {
@@ -105,7 +111,15 @@ function load(): Team | null {
     // Bundled asset URLs change between builds, so a stored one can go stale:
     // re-attach the sample team's logo, and drop any other non-uploaded logo.
     const logo = parsed.name === SAMPLE_TEAM.name ? SAMPLE_TEAM.logo : parsed.logo?.startsWith("data:") ? parsed.logo : undefined;
-    return { ...parsed, logo, viewerRole: parsed.viewerRole ?? "Admin" };
+    let members = parsed.members;
+    // A team saved before the sample admins existed gets them once (not again, so removing one sticks).
+    if (parsed.name === SAMPLE_TEAM.name && !localStorage.getItem(SAMPLE_ADMINS_KEY)) {
+      const have = new Set(members.map((m) => m.email.toLowerCase()));
+      members = [...members, ...SAMPLE_TEAM.members.filter((m) => m.role === "Admin" && !have.has(m.email.toLowerCase()))];
+      localStorage.setItem(SAMPLE_ADMINS_KEY, "1");
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...parsed, members }));
+    }
+    return { ...parsed, members, logo, viewerRole: parsed.viewerRole ?? "Admin" };
   } catch {
     return null;
   }

@@ -23,7 +23,7 @@ const cardCls =
 // toggles. Not part of the product UI.
 function PrototypeMenu() {
   const { team, updateTeam, reset } = useTeam();
-  const { membersLayout, setMembersLayout, showAccessColumn, setShowAccessColumn, showPaidAds, setShowPaidAds, showRecruiting, setShowRecruiting, emptyTeam, setEmptyTeam, showSkills, setShowSkills } = useTeamPrototype();
+  const { membersLayout, setMembersLayout, showAccessColumn, setShowAccessColumn, showPaidAds, setShowPaidAds, showRecruiting, setShowRecruiting, emptyTeam, setEmptyTeam, showSkills, setShowSkills, showAdminsPage, setShowAdminsPage } = useTeamPrototype();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -85,6 +85,14 @@ function PrototypeMenu() {
           )}
 
           <div className={sectionCls}>Menu items</div>
+          <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+            <span className="text-[14px] font-medium text-gray-dark">Admins page</span>
+            <div className="relative">
+              <input type="checkbox" checked={showAdminsPage} onChange={() => setShowAdminsPage(!showAdminsPage)} className="peer sr-only" />
+              <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-gray-dark" />
+              <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+            </div>
+          </label>
           <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
             <span className="text-[14px] font-medium text-gray-dark">Paid ads</span>
             <div className="relative">
@@ -167,12 +175,12 @@ function PrototypeMenu() {
 
 export default function TeamLayout() {
   const { team } = useTeam();
-  const { showPaidAds, showRecruiting } = useTeamPrototype();
+  const { showPaidAds, showRecruiting, showAdminsPage } = useTeamPrototype();
   const { pathname } = useLocation();
 
   if (!team) return pathname === "/team" ? <div className="px-4 py-10 sm:px-6"><CreateTeam /></div> : <Navigate to="/team" replace />;
 
-  const items = getTeamNavItems(team, { paidAds: showPaidAds, recruiting: showRecruiting });
+  const items = getTeamNavItems(team, { paidAds: showPaidAds, recruiting: showRecruiting, adminsPage: showAdminsPage });
 
   return (
     <div className="flex min-h-[calc(100vh-61px)] bg-[#F3F1E6]/50">

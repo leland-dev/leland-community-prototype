@@ -23,7 +23,10 @@ interface TeamPrototypeValue {
   /** Start from a team with no members, to see the empty states. */
   emptyTeam: boolean;
   setEmptyTeam: (v: boolean) => void;
-  /** Show the skills metrics (skill gains, assessments). Off: the Overview leads with builds and reflections instead. */
+  /** Show the separate "Admins" page in the menu. Off: admins are managed from the Admins tab on Team members. */
+  showAdminsPage: boolean;
+  setShowAdminsPage: (v: boolean) => void;
+  /** Show the skills metrics (skill gains, assessments). Off (the default): the Overview leads with builds and reflections instead. */
   showSkills: boolean;
   setShowSkills: (v: boolean) => void;
 }
@@ -39,8 +42,10 @@ const Ctx = createContext<TeamPrototypeValue>({
   setShowRecruiting: () => {},
   emptyTeam: false,
   setEmptyTeam: () => {},
-  showSkills: true,
+  showSkills: false,
   setShowSkills: () => {},
+  showAdminsPage: false,
+  setShowAdminsPage: () => {},
 });
 
 export function TeamPrototypeProvider({ children }: { children: ReactNode }) {
@@ -49,9 +54,10 @@ export function TeamPrototypeProvider({ children }: { children: ReactNode }) {
   const [showPaidAds, setShowPaidAds] = useState(true);
   const [showRecruiting, setShowRecruiting] = useState(true);
   const [emptyTeam, setEmptyTeam] = useState(false);
-  const [showSkills, setShowSkills] = useState(true);
+  const [showSkills, setShowSkills] = useState(false);
+  const [showAdminsPage, setShowAdminsPage] = useState(false);
   return (
-    <Ctx.Provider value={{ membersLayout, setMembersLayout, showAccessColumn, setShowAccessColumn, showPaidAds, setShowPaidAds, showRecruiting, setShowRecruiting, emptyTeam, setEmptyTeam, showSkills, setShowSkills }}>
+    <Ctx.Provider value={{ membersLayout, setMembersLayout, showAccessColumn, setShowAccessColumn, showPaidAds, setShowPaidAds, showRecruiting, setShowRecruiting, emptyTeam, setEmptyTeam, showSkills, setShowSkills, showAdminsPage, setShowAdminsPage }}>
       {children}
     </Ctx.Provider>
   );

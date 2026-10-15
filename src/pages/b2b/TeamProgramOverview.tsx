@@ -21,6 +21,20 @@ import pic5 from "../../assets/profile photos/pic-5.png";
 import pic9 from "../../assets/profile photos/pic-9.png";
 import pic11 from "../../assets/profile photos/pic-11.png";
 import pic13 from "../../assets/profile photos/pic-13.png";
+// Sample build screenshots
+import build_triage_agent from "../../assets/img/builds/triage-agent.svg";
+import build_metrics_digest from "../../assets/img/builds/metrics-digest.svg";
+import build_prompt_library from "../../assets/img/builds/prompt-library.svg";
+import build_invoice_reconciliation from "../../assets/img/builds/invoice-reconciliation.svg";
+import build_meeting_notes from "../../assets/img/builds/meeting-notes.svg";
+import build_onboarding_bot from "../../assets/img/builds/onboarding-bot.svg";
+import build_crm_cleanup from "../../assets/img/builds/crm-cleanup.svg";
+import build_sales_call_coach from "../../assets/img/builds/sales-call-coach.svg";
+import build_lead_brief from "../../assets/img/builds/lead-brief.svg";
+import coachPic2 from "../../assets/profile photos/pic-2.png";
+import coachPic4 from "../../assets/profile photos/pic-4.png";
+import coachPic6 from "../../assets/profile photos/pic-6.png";
+import coachPic7 from "../../assets/profile photos/pic-7.png";
 
 // Team overview for the AI Builder Program: seats, engagement, assessments and
 // output, plus a team table where each person is at their own point in the program.
@@ -44,7 +58,7 @@ type Assessment = { level: Level; score: number; date: string; skills: Skill[] }
 // After each build, participants answer two free-response questions.
 const REFLECTION_QUESTIONS = { learned: "What did you learn?", apply: "How will you apply this in your work?" };
 type Reflection = { learned: string; apply: string };
-type Submission = { title: string; description: string; date: string; recordingLength: string; link?: string; reflection?: Reflection };
+type Submission = { title: string; description: string; date: string; recordingLength: string; link?: string; image?: string; reflection?: Reflection };
 
 type Program =
   | { status: "no-cohort" } // seat assigned, but they haven't picked a cohort yet
@@ -52,15 +66,25 @@ type Program =
   | { status: "in-progress"; startDate: string; level: Level }
   | { status: "completed"; startDate: string };
 
+// A booked 1:1 session: who it is with, when, and (once it is done) a short summary of what was covered.
+type CoachSession = { coach: string; coachImg: string; coachHeadline: string; date: string; status: "completed" | "scheduled"; summary?: string };
+
+const COACHES = {
+  jordan: { coach: "Jordan Lee", coachImg: coachPic2, coachHeadline: "Ex-Google PM · AI product lead" },
+  alex: { coach: "Alex Morgan", coachImg: coachPic4, coachHeadline: "Operator · Chief of Staff, AI strategy" },
+  nina: { coach: "Nina Okoye", coachImg: coachPic6, coachHeadline: "Ex-Stripe · Head of Ops automation" },
+  sam: { coach: "Sam Reyes", coachImg: coachPic7, coachHeadline: "Career coach · Ex-McKinsey" },
+};
+
 type Person = {
   name: string;
   email: string;
   initials: string;
   image?: string; // profile photo; about half the sample people have one
   program: Program | null; // null = no program seat (e.g. coaching only)
-  coaching: { granted: number; used: number; lastSession?: string; nextSession?: string; category?: string } | null;
+  coaching: { granted: number; used: number; lastSession?: string; nextSession?: string; category?: string; sessions?: CoachSession[] } | null;
   lelandPlus?: { expires: string } | null; // Leland+ subscription (sample data)
-  plan?: { format: ProgramFormat; access: ProgramAccess }; // how the program seat was purchased
+  plan?: { format: ProgramFormat; access: ProgramAccess; renewsOn?: string; renewalCanceled?: boolean }; // how the program seat was purchased; extended access renews yearly until canceled
   isAdmin?: boolean; // a team admin (may not have been granted any access yet)
   lastActive: string; // display text
   lastActiveDays: number | null; // null = hasn't logged in yet
@@ -92,32 +116,40 @@ function assess(level: Level, score: number, date: string, withAfter = true): As
 const INITIAL_PEOPLE: Person[] = [
   {
     name: "Dana Whitfield", email: "dana.whitfield@flybreeze.com", initials: "DW", image: pic9,
-    program: { status: "completed", startDate: "Jun 2, 2026" }, lelandPlus: { expires: "Dec 31, 2026" }, coaching: { granted: 4, used: 3, lastSession: "Sep 22, 2026", nextSession: "Oct 20, 2026" },
+    plan: { format: "live", access: "extended", renewsOn: "Jun 2, 2027" }, program: { status: "completed", startDate: "Jun 2, 2026" }, lelandPlus: { expires: "Dec 31, 2026" }, coaching: { granted: 4, used: 3, lastSession: "Sep 22, 2026", nextSession: "Oct 20, 2026", sessions: [
+        { ...COACHES.jordan, date: "Jul 8, 2026", status: "completed", summary: "Mapped where AI could take over the weekly reporting grind. Agreed on three candidate workflows and a simple way to measure the time saved. Next step: prototype the metrics digest." },
+        { ...COACHES.jordan, date: "Aug 12, 2026", status: "completed", summary: "Reviewed the first prototype and tightened the prompt structure. Talked through how to hand it to the ops team without it becoming a one-person side project." },
+        { ...COACHES.alex, date: "Sep 22, 2026", status: "completed", summary: "Planned the rollout of the support triage agent: who reviews what, how to handle edge cases, and what to report back to leadership after the first month." },
+        { ...COACHES.alex, date: "Oct 20, 2026", status: "scheduled" },
+      ] },
     lastActive: "2h ago", lastActiveDays: 0,
     assessments: [assess(1, 84, "Jun 23, 2026"), assess(2, 79, "Jul 21, 2026"), assess(3, 88, "Aug 18, 2026"), assess(4, 91, "Sep 15, 2026")],
     submissions: [
-      { title: "Support ticket triage agent", description: "Routes inbound tickets by urgency and drafts first replies for the team to review.", date: "Sep 14, 2026", recordingLength: "4:12", link: "https://example.com/triage", reflection: { learned: "How much of triage is really pattern recognition. Once I wrote down what \"urgent\" means for us, the agent got it right most of the time.", apply: "Rolling it out to the support team next month, with a human review step for anything the agent marks as urgent." } },
-      { title: "Weekly metrics digest", description: "Pulls the dashboard numbers each Monday and writes the exec summary.", date: "Aug 6, 2026", recordingLength: "3:40", reflection: { learned: "That a good summary starts with deciding which three numbers actually matter. The model was the easy part.", apply: "The digest now goes to leadership every Monday, so I no longer pull those numbers by hand." } },
-      { title: "Prompt library", description: "A shared set of tested prompts for the ops team.", date: "Jul 2, 2026", recordingLength: "2:58", reflection: { learned: "Small, tested prompts beat long clever ones, and writing down what worked saves everyone time.", apply: "Sharing the library with the ops team and asking each person to add one prompt a week." } },
+      { title: "Support ticket triage agent", image: build_triage_agent, description: "Routes inbound tickets by urgency and drafts first replies for the team to review.", date: "Sep 14, 2026", recordingLength: "4:12", link: "https://example.com/triage", reflection: { learned: "How much of triage is really pattern recognition. Once I wrote down what \"urgent\" means for us, the agent got it right most of the time.", apply: "Rolling it out to the support team next month, with a human review step for anything the agent marks as urgent." } },
+      { title: "Weekly metrics digest", image: build_metrics_digest, description: "Pulls the dashboard numbers each Monday and writes the exec summary.", date: "Aug 6, 2026", recordingLength: "3:40", reflection: { learned: "That a good summary starts with deciding which three numbers actually matter. The model was the easy part.", apply: "The digest now goes to leadership every Monday, so I no longer pull those numbers by hand." } },
+      { title: "Prompt library", image: build_prompt_library, description: "A shared set of tested prompts for the ops team.", date: "Jul 2, 2026", recordingLength: "2:58", reflection: { learned: "Small, tested prompts beat long clever ones, and writing down what worked saves everyone time.", apply: "Sharing the library with the ops team and asking each person to add one prompt a week." } },
     ],
   },
   {
     name: "Marcus Ellery", email: "marcus.ellery@flybreeze.com", initials: "ME",
-    program: { status: "in-progress", startDate: "Aug 11, 2026", level: 3 }, coaching: null,
+    plan: { format: "live", access: "limited" }, program: { status: "in-progress", startDate: "Aug 11, 2026", level: 3 }, coaching: null,
     lastActive: "Yesterday", lastActiveDays: 1,
     assessments: [assess(1, 76, "Sep 1, 2026"), assess(2, 72, "Sep 29, 2026")],
     submissions: [
-      { title: "Invoice reconciliation helper", description: "Matches invoices to POs and flags mismatches.", date: "Sep 29, 2026", recordingLength: "5:03", link: "https://example.com/invoices", reflection: { learned: "Matching is the easy part. Handling the weird exceptions is where the time goes, so I built the flagging first.", apply: "Finance will use it on next month's close, starting with our three largest vendors." } },
-      { title: "Meeting notes summarizer", description: "Turns call transcripts into action items.", date: "Sep 1, 2026", recordingLength: "2:31", reflection: { learned: "Asking for action items with owners gives much better notes than asking for a summary.", apply: "Using it on all of our weekly client calls so follow-ups stop slipping." } },
+      { title: "Invoice reconciliation helper", image: build_invoice_reconciliation, description: "Matches invoices to POs and flags mismatches.", date: "Sep 29, 2026", recordingLength: "5:03", link: "https://example.com/invoices", reflection: { learned: "Matching is the easy part. Handling the weird exceptions is where the time goes, so I built the flagging first.", apply: "Finance will use it on next month's close, starting with our three largest vendors." } },
+      { title: "Meeting notes summarizer", image: build_meeting_notes, description: "Turns call transcripts into action items.", date: "Sep 1, 2026", recordingLength: "2:31", reflection: { learned: "Asking for action items with owners gives much better notes than asking for a summary.", apply: "Using it on all of our weekly client calls so follow-ups stop slipping." } },
     ],
   },
   {
     name: "Priya Raman", email: "priya.raman@flybreeze.com", initials: "PR", image: pic3,
-    program: { status: "in-progress", startDate: "Sep 8, 2026", level: 2 }, coaching: { granted: 3, used: 1, lastSession: "Sep 30, 2026", nextSession: "Oct 14, 2026" },
+    plan: { format: "live", access: "extended", renewsOn: "Sep 8, 2027" }, program: { status: "in-progress", startDate: "Sep 8, 2026", level: 2 }, coaching: { granted: 3, used: 1, lastSession: "Sep 30, 2026", nextSession: "Oct 14, 2026", sessions: [
+        { ...COACHES.nina, date: "Sep 30, 2026", status: "completed", summary: "Broke the onboarding process into steps an assistant can follow, and decided which checks should stay with a person. Left with a first draft of the checklist bot." },
+        { ...COACHES.nina, date: "Oct 14, 2026", status: "scheduled" },
+      ] },
     lastActive: "3d ago", lastActiveDays: 3,
     assessments: [assess(1, 81, "Sep 29, 2026")],
     submissions: [
-      { title: "Onboarding checklist bot", description: "Walks new hires through their first-week tasks.", date: "Oct 1, 2026", recordingLength: "3:18", reflection: { learned: "How to break a messy process into steps an assistant can follow one at a time.", apply: "Piloting it with the two people who start in November, then adjusting from their feedback." } },
+      { title: "Onboarding checklist bot", image: build_onboarding_bot, description: "Walks new hires through their first-week tasks.", date: "Oct 1, 2026", recordingLength: "3:18", reflection: { learned: "How to break a messy process into steps an assistant can follow one at a time.", apply: "Piloting it with the two people who start in November, then adjusting from their feedback." } },
     ],
   },
   {
@@ -131,17 +163,20 @@ const INITIAL_PEOPLE: Person[] = [
     lastActive: "3w ago", lastActiveDays: 21,
     assessments: [assess(1, 69, "Aug 4, 2026"), assess(2, 64, "Sep 1, 2026")],
     submissions: [
-      { title: "CRM cleanup script", description: "Finds and merges duplicate accounts.", date: "Aug 20, 2026", recordingLength: "3:55", reflection: { learned: "Duplicate detection needs a clear rule for which record wins. I had skipped that at first.", apply: "Running it quarterly on our CRM and sharing the merge rules with sales ops." } },
+      { title: "CRM cleanup script", image: build_crm_cleanup, description: "Finds and merges duplicate accounts.", date: "Aug 20, 2026", recordingLength: "3:55", reflection: { learned: "Duplicate detection needs a clear rule for which record wins. I had skipped that at first.", apply: "Running it quarterly on our CRM and sharing the merge rules with sales ops." } },
     ],
   },
   {
     name: "Jonah Bishop", email: "jonah.bishop@flybreeze.com", initials: "JB", image: pic13,
-    program: { status: "in-progress", startDate: "Aug 25, 2026", level: 2 }, coaching: { granted: 2, used: 2, lastSession: "Oct 3, 2026" },
+    plan: { format: "async", access: "extended", renewsOn: "Aug 25, 2027" }, program: { status: "in-progress", startDate: "Aug 25, 2026", level: 2 }, coaching: { granted: 2, used: 2, lastSession: "Oct 3, 2026", sessions: [
+        { ...COACHES.sam, date: "Sep 12, 2026", status: "completed", summary: "Talked through using the sales call coach in weekly 1:1s and how to give reps feedback without it feeling like surveillance." },
+        { ...COACHES.sam, date: "Oct 3, 2026", status: "completed", summary: "Refined the scoring rubric against the team playbook and picked two calls per rep to review each week." },
+      ] },
     lastActive: "1d ago", lastActiveDays: 1,
     assessments: [assess(1, 88, "Sep 15, 2026")],
     submissions: [
-      { title: "Sales call coach", description: "Scores call recordings against our playbook.", date: "Sep 25, 2026", recordingLength: "4:40", link: "https://example.com/call-coach", reflection: { learned: "Scoring against our own playbook works far better than a generic rubric.", apply: "Using it in weekly 1:1s with reps to pick one call to review together." } },
-      { title: "Lead research brief", description: "Builds a one-page brief for each new lead.", date: "Sep 10, 2026", recordingLength: "2:47", reflection: { learned: "Giving the model a template for the brief matters more than giving it more sources.", apply: "Every new lead gets a brief before the first call, which saves about 20 minutes each." } },
+      { title: "Sales call coach", image: build_sales_call_coach, description: "Scores call recordings against our playbook.", date: "Sep 25, 2026", recordingLength: "4:40", link: "https://example.com/call-coach", reflection: { learned: "Scoring against our own playbook works far better than a generic rubric.", apply: "Using it in weekly 1:1s with reps to pick one call to review together." } },
+      { title: "Lead research brief", image: build_lead_brief, description: "Builds a one-page brief for each new lead.", date: "Sep 10, 2026", recordingLength: "2:47", reflection: { learned: "Giving the model a template for the brief matters more than giving it more sources.", apply: "Every new lead gets a brief before the first call, which saves about 20 minutes each." } },
     ],
   },
   {
@@ -160,8 +195,19 @@ const INITIAL_PEOPLE: Person[] = [
     lastActive: "—", lastActiveDays: null, assessments: [], submissions: [],
   },
   {
+    name: "Renee Castillo", email: "renee.castillo@flybreeze.com", initials: "RC", isAdmin: true,
+    program: { status: "in-progress", startDate: "Sep 22, 2026", level: 1 }, coaching: null,
+    lastActive: "2d ago", lastActiveDays: 2, assessments: [], submissions: [],
+  },
+  {
     name: "Rachel Moore", email: "rachel.moore@flybreeze.com", initials: "RM", image: pic1,
-    program: null, lelandPlus: { expires: "Dec 31, 2026" }, coaching: { granted: 6, used: 4, lastSession: "Oct 6, 2026", nextSession: "Oct 15, 2026" },
+    program: null, lelandPlus: { expires: "Dec 31, 2026" }, coaching: { granted: 6, used: 4, lastSession: "Oct 6, 2026", nextSession: "Oct 15, 2026", sessions: [
+        { ...COACHES.jordan, date: "Aug 4, 2026", status: "completed", summary: "Set goals for the quarter and sorted which parts of the current role are worth automating first." },
+        { ...COACHES.alex, date: "Aug 25, 2026", status: "completed", summary: "Walked through a stakeholder update that had grown too long, and cut it to what each reader actually needs." },
+        { ...COACHES.alex, date: "Sep 15, 2026", status: "completed", summary: "Practiced presenting the automation plan to leadership and prepared answers for the likely objections about cost and risk." },
+        { ...COACHES.alex, date: "Oct 6, 2026", status: "completed", summary: "Reviewed feedback from the presentation and agreed the next three pilots. Discussed how to staff them without adding headcount." },
+        { ...COACHES.alex, date: "Oct 15, 2026", status: "scheduled" },
+      ] },
     lastActive: "4d ago", lastActiveDays: 4, assessments: [], submissions: [],
   },
   {
@@ -322,14 +368,15 @@ function EmailChipsInput({ emails, draft, statuses, onEmails, onDraft }: {
 
 // One choice in step one of the add-team-members dialog. All options share this layout so they read as a set.
 // A selectable card (several can be checked). An option can put a looping video behind its icon tile, with a white logo mark on top.
-function AccessOption({ icon, title, description = "", price, checked, onToggle, videoSrc, markSrc }: { icon: string; title: string; description?: string; /** leads the subtext, so it's clear which choices cost money */ price?: string; checked: boolean; onToggle: () => void; videoSrc?: string; markSrc?: string }) {
+function AccessOption({ icon, title, description = "", price, checked, onToggle, videoSrc, markSrc, disabled }: { icon: string; title: string; description?: string; disabled?: boolean; /** leads the subtext, so it's clear which choices cost money */ price?: string; checked: boolean; onToggle: () => void; videoSrc?: string; markSrc?: string }) {
   return (
     <button
       type="button"
       role="checkbox"
       aria-checked={checked}
-      onClick={onToggle}
-      className={`flex w-full cursor-pointer items-center gap-3 rounded-[12px] border bg-white p-4 text-left transition-colors hover:bg-gray-hover ${checked ? "border-gray-dark" : "border-gray-stroke"}`}
+      aria-disabled={disabled}
+      onClick={disabled ? undefined : onToggle}
+      className={`flex w-full items-center gap-3 rounded-[12px] border bg-white p-4 text-left transition-colors ${disabled ? "cursor-default opacity-60" : "cursor-pointer hover:bg-gray-hover"} ${checked ? "border-gray-dark" : "border-gray-stroke"}`}
     >
       <span className={`relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[10px] ${videoSrc ? "bg-[#1e2130]" : "bg-gray-hover"}`}>
         {videoSrc && (
@@ -364,7 +411,8 @@ function AccessOption({ icon, title, description = "", price, checked, onToggle,
   );
 }
 
-function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
+function GrantAccessModal({ open, person, preset, existingEmails, onClose, onGrant }: {
+  preset?: GrantOffering[]; // offerings ticked when the dialog opens (e.g. "New admin")
   open: boolean;
   person: Person | null; // set when editing an existing team member
   existingEmails: string[];
@@ -375,7 +423,7 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
   const [draft, setDraft] = useState("");
   const [cohort, setCohort] = useState<Cohort>(null);
   const [picking, setPicking] = useState(false);
-  // Three steps: who (emails), what they get, then that offering's options with a confirmation. Editing someone skips to the last.
+  // Three steps: who (emails), what they get, then those options with a confirmation. Granting more to an existing member skips the first.
   const [step, setStep] = useState<"emails" | "type" | "details">("emails");
   const [selected, setSelected] = useState<GrantOffering[]>([]);
   const [sessions, setSessions] = useState(3);
@@ -397,13 +445,13 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
     setPicking(false);
     setCardStep(false);
     setPaid(null);
-    setStep(person ? "details" : "emails");
-    setSelected(person ? [!person.program && person.coaching ? "coaching" : "program"] : []);
+    setStep(person ? "type" : "emails");
+    setSelected(preset ?? []);
     setSessions(person?.coaching?.granted ?? 3);
     setCategory(person?.coaching?.category ?? "");
     setFormat(person?.plan?.format ?? "live");
     setAccess(person?.plan?.access ?? "limited");
-  }, [open, person]);
+  }, [open, person, preset]);
 
   useEffect(() => {
     if (!open) return;
@@ -456,7 +504,7 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
         : []),
     ];
     // Admins need no seat or payment: they're added to the team with the Admin role.
-    const newAdmins = wantsAdmin ? recipients.map((rec, i) => ({ id: `m-${stamp}-${i}`, name: rec.name, email: rec.email, role: "Admin" as const, access: ["All programs"] })) : [];
+    const newAdmins = wantsAdmin && !person?.isAdmin ? recipients.map((rec, i) => ({ id: `m-${stamp}-${i}`, name: rec.name, email: rec.email, role: "Admin" as const, access: ["All programs"] })) : [];
     if (wantsProgram || wantsCoaching) onGrant(r);
     // One team update for everything, so nothing overwrites anything else.
     if (newAdmins.length > 0 || purchases.length > 0) {
@@ -574,12 +622,14 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                   </Button>
                 </div>
               </>
-            ) : step === "type" && !person ? (
+            ) : step === "type" ? (
               <>
                 <div className="relative flex min-h-[56px] shrink-0 items-center justify-center border-b border-gray-stroke px-12">
-                  <button type="button" aria-label="Back" onClick={() => setStep("emails")} className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full hover:bg-gray-hover">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-                  </button>
+                  {!person && (
+                    <button type="button" aria-label="Back" onClick={() => setStep("emails")} className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full hover:bg-gray-hover">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                    </button>
+                  )}
                   <span className="max-w-full truncate text-[16px] font-medium text-gray-dark">{recipientsLine}</span>
                 </div>
                 <div className="flex-1 overflow-y-auto px-6 pb-6 pt-6">
@@ -587,8 +637,9 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                   <AccessOption
                     icon={settingsIcon}
                     title="Team admin"
-                    description="Manage team access and billing"
-                    checked={wantsAdmin}
+                    description={person?.isAdmin ? "Already a team admin" : "Manage team access and billing"}
+                    checked={wantsAdmin || !!person?.isAdmin}
+                    disabled={!!person?.isAdmin}
                     onToggle={() => toggle("admin")}
                   />
                   <div className="my-5 flex items-center gap-3 text-[14px] text-gray-light">
@@ -600,16 +651,19 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                     <AccessOption
                       icon={bookOpenIcon}
                       title="AI Builder Program"
-                      price={`From ${usd(Math.min(...Object.values(SEAT_PRICES).flatMap((a) => Object.values(a))))} / seat`}
+                      price={person?.program ? undefined : `From ${usd(Math.min(...Object.values(SEAT_PRICES).flatMap((a) => Object.values(a))))} / seat`}
+                      description={person?.program ? "Already has a seat" : ""}
                       videoSrc="/videos/animated-gradient-06.mp4"
                       markSrc={lelandMark}
-                      checked={wantsProgram}
+                      checked={wantsProgram || !!person?.program}
+                      disabled={!!person?.program}
                       onToggle={() => toggle("program")}
                     />
                     <AccessOption
                       icon={userIcon}
                       title="1:1 coaching"
                       price={SESSION_PRICE_LABEL}
+                      description={person?.coaching ? `${person.coaching.granted} ${person.coaching.granted === 1 ? "session" : "sessions"} granted` : ""}
                       checked={wantsCoaching}
                       onToggle={() => toggle("coaching")}
                     />
@@ -623,37 +677,19 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
               </>
             ) : (
               <>
-                {person ? (
-                  <div className="px-6 pb-4 pt-6">
-                    <h3 className="font-serif text-[28px] font-medium text-gray-dark">Edit access</h3>
-                    <p className="mt-2 text-[16px] leading-[1.5] text-gray-light">Choose what {person.name.split(" ")[0]} can use.</p>
-                  </div>
-                ) : (
-                  <div className="relative flex min-h-[56px] shrink-0 items-center justify-center border-b border-gray-stroke px-12">
-                    <button type="button" aria-label="Back" onClick={() => setStep("type")} className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full hover:bg-gray-hover">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-                    </button>
-                    <span className="text-[16px] font-medium text-gray-dark">{offeringTitle}</span>
-                  </div>
-                )}
-                <div className={`flex-1 overflow-y-auto px-6 pb-6 ${person ? "" : "pt-5"}`}>
-                  {!person && (
-                    <p className="mb-5 text-[14px] text-gray-light">
-                      For <span className="text-gray-dark">{recipientsLine}</span>{" "}
-                      <button type="button" onClick={() => setStep("emails")} className="underline decoration-dotted decoration-[1.5px] underline-offset-[3px] hover:text-gray-dark">Edit</button>
-                    </p>
-                  )}
-                  {person && (
-                    <div className="mb-3">
-                      <FilterDropdown
-                        field
-                        label="Offering"
-                        value={selected[0] ?? "program"}
-                        options={[{ value: "program", label: "AI Builder Program" }, { value: "coaching", label: "1:1 coaching" }]}
-                        onChange={(v) => setSelected([v as GrantOffering])}
-                      />
-                    </div>
-                  )}
+                <div className="relative flex min-h-[56px] shrink-0 items-center justify-center border-b border-gray-stroke px-12">
+                  <button type="button" aria-label="Back" onClick={() => setStep("type")} className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full hover:bg-gray-hover">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                  </button>
+                  <span className="text-[16px] font-medium text-gray-dark">{offeringTitle}</span>
+                </div>
+                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-5">
+                  <p className="mb-5 text-[14px] text-gray-light">
+                    For <span className="text-gray-dark">{recipientsLine}</span>
+                    {!person && (
+                      <>{" "}<button type="button" onClick={() => setStep("emails")} className="underline decoration-dotted decoration-[1.5px] underline-offset-[3px] hover:text-gray-dark">Edit</button></>
+                    )}
+                  </p>
                   <div className="flex flex-col gap-3">
                   {wantsProgram && (
                   <div className="rounded-[10px] border border-gray-stroke p-4">
@@ -665,6 +701,8 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                       </div>
                       {!(person && hasStarted(person)) && (
                         <>
+                          {/* Format and access were paid for with the seat, so only a new seat can choose them */}
+                          {!person?.program && (<>
                           <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-stroke pt-3">
                             <span className="text-[14px] text-gray-dark">Format</span>
                             <FilterDropdown
@@ -691,6 +729,7 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                               onChange={(v) => setAccess(v as ProgramAccess)}
                             />
                           </div>
+                          </>)}
                           {/* Live programs run in cohorts; async is self-paced, so there's no cohort to pick */}
                           {format === "live" && (
                             <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-stroke pt-3">
@@ -720,7 +759,7 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                       <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-stroke pt-3">
                         <span className="text-[14px] text-gray-dark">Sessions</span>
                         <span className="flex items-center overflow-hidden rounded-lg border border-gray-stroke">
-                          <button type="button" aria-label="Fewer sessions" onClick={() => setSessions((n) => Math.max(person?.coaching?.used || 1, n - 1))} className="h-9 w-9 text-[16px] text-gray-dark hover:bg-gray-hover">−</button>
+                          <button type="button" aria-label="Fewer sessions" onClick={() => setSessions((n) => Math.max(person?.coaching?.granted || 1, n - 1))} className="h-9 w-9 text-[16px] text-gray-dark hover:bg-gray-hover">−</button>
                           <span className="w-9 text-center text-[14px] font-medium text-gray-dark">{sessions}</span>
                           <button type="button" aria-label="More sessions" onClick={() => setSessions((n) => Math.min(12, n + 1))} className="h-9 w-9 text-[16px] text-gray-dark hover:bg-gray-hover">+</button>
                         </span>
@@ -803,12 +842,25 @@ function ScoreBar({ label, before, after }: { label: string; before: number; aft
   );
 }
 
-function DrawerSection({ title, children }: { title: string; children: ReactNode }) {
+// Same card as the partner dashboard's user details: a gray title strip, then the content.
+function DrawerSection({ title, pill, children }: { title: string; pill?: ReactNode; children: ReactNode }) {
   return (
-    <section className="border-t border-gray-stroke px-4 py-5 sm:px-6">
-      <h4 className="mb-3 text-[16px] font-semibold text-gray-dark">{title}</h4>
-      {children}
-    </section>
+    <div className="rounded-[12px] border border-gray-stroke">
+      <div className="flex items-center justify-between gap-4 overflow-hidden rounded-t-[11px] border-b border-gray-stroke bg-gray-hover px-4 py-2.5">
+        <div className="shrink-0 text-[12px] font-medium text-gray-light">{title}</div>
+        {pill && <div className="shrink-0">{pill}</div>}
+      </div>
+      <div className="px-4 py-4">{children}</div>
+    </div>
+  );
+}
+
+function DrawerRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-gray-stroke py-3 first:pt-0 last:border-0 last:pb-0">
+      <span className="text-[14px] text-gray-light">{label}</span>
+      <span className="text-right text-[14px] text-gray-dark">{children}</span>
+    </div>
   );
 }
 
@@ -826,9 +878,9 @@ function ReflectionAnswers({ r, className = "", clamp }: { r: Reflection; classN
   );
 }
 
-function SubmissionItem({ sub, by }: { sub: Submission; by?: string }) {
+function SubmissionItem({ sub, by, flat }: { sub: Submission; by?: string; flat?: boolean }) {
   return (
-    <div className="rounded-[10px] border border-gray-stroke p-4">
+    <div className={flat ? "border-b border-gray-stroke py-4 first:pt-0 last:border-0 last:pb-0" : "rounded-[10px] border border-gray-stroke p-4"}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-[14px] font-medium text-gray-dark">{sub.title}</div>
@@ -851,8 +903,85 @@ function SubmissionItem({ sub, by }: { sub: Submission; by?: string }) {
   );
 }
 
-function PersonDrawer({ person, onClose, onEdit }: { person: Person | null; onClose: () => void; onEdit: (p: Person) => void }) {
+function SessionRow({ s, onOpen }: { s: CoachSession; onOpen: () => void }) {
+  const name = `${s.coach.split(" ")[0]} ${s.coach.split(" ")[1]?.[0] ?? ""}.`;
+  return (
+    <div className="border-b border-gray-stroke py-3 first:pt-0 last:border-0 last:pb-0">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="relative shrink-0">
+            <img src={s.coachImg} alt={s.coach} className="h-9 w-9 rounded-full object-cover" />
+            {s.status === "completed" && (
+              <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary shadow-sm">
+                <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="2 6 5 9 10 3" /></svg>
+              </div>
+            )}
+          </div>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <div className="truncate text-[14px] font-medium leading-[1.2] text-gray-dark">With {name}</div>
+            <div className="truncate text-[12px] leading-[1.2] text-gray-light">{s.coachHeadline}</div>
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-col gap-0.5 text-right">
+          <div className="text-[14px] leading-[1.2] text-gray-dark">{s.status === "completed" ? "Completed" : "Scheduled"}</div>
+          <div className="text-[12px] leading-[1.2] text-gray-light">{s.date}</div>
+        </div>
+      </div>
+      {s.summary && (
+        <button type="button" onClick={onOpen} className="group mt-3 flex w-full cursor-pointer items-start gap-3 rounded-lg bg-gray-hover px-3 py-2.5 text-left transition-colors hover:bg-[#222222]/[0.07]">
+          <span className="min-w-0 flex-1">
+            <span className="block text-[12px] font-medium text-gray-light">Session summary</span>
+            <span className="mt-1 line-clamp-2 text-[14px] leading-[1.4] text-gray-dark">{s.summary}</span>
+          </span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-3 shrink-0 text-gray-xlight group-hover:text-gray-dark"><polyline points="9 18 15 12 9 6" /></svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
+// A build in the list: a thumbnail (its image, or a play tile for the screen recording), title, short description and date.
+function BuildRow({ sub, onOpen }: { sub: Submission; onOpen: () => void }) {
+  return (
+    <button type="button" onClick={onOpen} className="group flex w-full cursor-pointer items-center gap-3 border-b border-gray-stroke py-3 text-left first:pt-0 last:border-0 last:pb-0">
+      <BuildThumb sub={sub} className="w-[96px]" />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[14px] font-medium text-gray-dark">{sub.title}</span>
+        <span className="mt-0.5 line-clamp-2 text-[14px] leading-[1.4] text-gray-light">{sub.description}</span>
+      </span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight group-hover:text-gray-dark"><polyline points="9 18 15 12 9 6" /></svg>
+    </button>
+  );
+}
+
+// Featured image for a build (a screenshot or thumbnail, always 1.91:1). Without one, a quiet placeholder.
+function BuildThumb({ sub, className = "" }: { sub: Submission; className?: string }) {
+  return (
+    <span className={`relative flex aspect-[1200/630] shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-gray-hover ${className}`}>
+      {sub.image ? (
+        <img src={sub.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      ) : (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-gray-xlight" aria-hidden><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="1.5" /><path d="M21 16l-5-5-8 8" /></svg>
+      )}
+    </span>
+  );
+}
+
+function PersonDrawer({ person, onClose, onEdit, onCohort, onRenewal }: { person: Person | null; onClose: () => void; onEdit: (p: Person) => void; onCohort: (email: string, cohort: Cohort) => void; onRenewal: (email: string, canceled: boolean) => void }) {
+  const [pickingCohort, setPickingCohort] = useState(false);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
+  // A child screen inside the modal: the full details of one build or one coaching session.
+  const [child, setChild] = useState<{ kind: "build"; sub: Submission } | { kind: "session"; s: CoachSession } | null>(null);
+  useEffect(() => { setPickingCohort(false); setConfirmingCancel(false); setChild(null); }, [person?.email]);
+  // A live seat that hasn't started can still get (or change) its cohort; it's set here, not in the access flow.
+  const canPickCohort = !!person?.program && (person.program.status === "no-cohort" || person.program.status === "not-started") && person.plan?.format !== "async";
   const { showSkills } = useTeamPrototype();
+  const { team, updateMember } = useTeam();
+  const revokeAdmin = (p: Person) => {
+    const m = team?.members.find((x) => x.role === "Admin" && x.email.toLowerCase() === p.email.toLowerCase());
+    if (m) updateMember(m.id, { role: "Member" });
+    onClose();
+  };
   useEffect(() => {
     if (!person) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -871,98 +1000,228 @@ function PersonDrawer({ person, onClose, onEdit }: { person: Person | null; onCl
             className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
           >
-            <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] sm:h-[80dvh] sm:w-[560px] sm:max-w-[95vw] sm:rounded-2xl">
+            <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] sm:h-[75dvh] sm:w-[560px] sm:max-w-[95vw] sm:rounded-2xl">
+              {child && person ? (
+                <>
+                  <div className="relative flex min-h-12 shrink-0 items-center justify-center border-b border-gray-stroke px-12 py-2">
+                    <button type="button" aria-label="Back" onClick={() => setChild(null)} className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full hover:bg-gray-hover">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                    </button>
+                    <span className="text-[16px] font-medium text-gray-dark">{child.kind === "build" ? "Build details" : "Session summary"}</span>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2"><CloseButton onClick={onClose} /></div>
+                  </div>
+                  <div className="flex-1 overflow-y-auto px-4 pb-8 pt-5 sm:px-6">
+                    {child.kind === "build" ? (
+                      <>
+                        <BuildThumb sub={child.sub} className="mb-5 w-full !rounded-[12px]" />
+                        <h3 className="font-serif text-[28px] font-medium leading-[1.2] text-gray-dark">{child.sub.title}</h3>
+                        <div className="mt-1 text-[14px] text-gray-light">by {person.name} · {child.sub.date}</div>
+                        <p className="mt-4 text-[16px] leading-[1.5] text-gray-dark">{child.sub.description}</p>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <Button size="md" variant="secondary" rounded="rounded-full" className="border border-gray-stroke bg-white hover:bg-gray-hover">Watch screen recording · {child.sub.recordingLength}</Button>
+                          {child.sub.link && (
+                            <Button size="md" variant="secondary" rounded="rounded-full" className="border border-gray-stroke bg-white hover:bg-gray-hover" onClick={() => window.open(child.sub.link, "_blank")}>Open build</Button>
+                          )}
+                        </div>
+                        {child.sub.reflection && (
+                          <div className="mt-6 rounded-[12px] border border-gray-stroke">
+                            <div className="overflow-hidden rounded-t-[11px] border-b border-gray-stroke bg-gray-hover px-4 py-2.5 text-[12px] font-medium text-gray-light">Reflection</div>
+                            <ReflectionAnswers r={child.sub.reflection} className="px-4 py-4" />
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-3">
+                          <img src={child.s.coachImg} alt={child.s.coach} className="h-12 w-12 rounded-full object-cover" />
+                          <div className="min-w-0">
+                            <div className="font-serif text-[24px] font-medium leading-[1.2] text-gray-dark">With {child.s.coach}</div>
+                            <div className="truncate text-[14px] text-gray-light">{child.s.coachHeadline}</div>
+                          </div>
+                        </div>
+                        <div className="mt-5 flex flex-col rounded-[12px] border border-gray-stroke px-4 py-4">
+                          <DrawerRow label="Client">{person.name}</DrawerRow>
+                          <DrawerRow label="Date">{child.s.date}</DrawerRow>
+                          <DrawerRow label="Status">{child.s.status === "completed" ? "Completed" : "Scheduled"}</DrawerRow>
+                        </div>
+                        <div className="mt-6 rounded-[12px] border border-gray-stroke">
+                          <div className="overflow-hidden rounded-t-[11px] border-b border-gray-stroke bg-gray-hover px-4 py-2.5 text-[12px] font-medium text-gray-light">Summary</div>
+                          <p className="px-4 py-4 text-[16px] leading-[1.5] text-gray-dark">{child.s.summary}</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </>
+              ) : confirmingCancel && person ? (
+                <>
+                  <div className="relative flex min-h-12 shrink-0 items-center justify-center border-b border-gray-stroke px-12 py-2">
+                    <button type="button" aria-label="Back" onClick={() => setConfirmingCancel(false)} className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full hover:bg-gray-hover">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                    </button>
+                    <span className="text-[16px] font-medium text-gray-dark">Cancel subscription</span>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2"><CloseButton onClick={onClose} /></div>
+                  </div>
+                  <div className="flex-1 overflow-y-auto px-4 pb-6 pt-6 sm:px-6">
+                    <h3 className="mb-3 font-serif text-[28px] font-medium leading-[1.2] text-gray-dark">Cancel {person.name.split(" ")[0]}'s subscription?</h3>
+                    <p className="text-[16px] leading-[1.5] text-gray-light">
+                      Their extended access won't renew. They keep access until {person.plan?.renewsOn}, and you won't be charged again. You can resume it before then.
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2 border-t border-gray-stroke px-4 py-[14px] sm:px-6">
+                    <Button size="lg" variant="dark" rounded="rounded-full" className="w-full" onClick={() => { onRenewal(person.email, true); setConfirmingCancel(false); }}>Cancel subscription</Button>
+                    <Button size="lg" variant="secondary" rounded="rounded-full" className="w-full" onClick={() => setConfirmingCancel(false)}>Keep subscription</Button>
+                  </div>
+                </>
+              ) : pickingCohort ? (
+                <CohortPickerView
+                  cohorts={TEAM_COHORTS}
+                  isSelected={(c) => person.program?.status === "not-started" && person.program.startDate === c.startDate}
+                  onPick={(c) => { onCohort(person.email, c ? { startDate: c.startDate, endDate: c.endDate } : null); setPickingCohort(false); }}
+                  onBack={() => setPickingCohort(false)}
+                  onClose={onClose}
+                />
+              ) : (<>
               <div className="relative flex min-h-12 shrink-0 items-center justify-center border-b border-gray-stroke px-12 py-2">
                 <span className="text-[16px] font-medium text-gray-dark">{person.name}</span>
                 <div className="absolute right-3 top-1/2 -translate-y-1/2"><CloseButton onClick={onClose} /></div>
               </div>
               <div className="flex-1 overflow-y-auto">
-                <div className="flex items-start justify-between gap-4 px-4 pb-5 pt-5 sm:px-6">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <Avatar initials={person.initials} image={person.image} size={48} />
-                    <div className="min-w-0">
-                      <div className="font-serif text-[24px] font-medium leading-tight text-gray-dark">{person.name}</div>
-                      <div className="truncate text-[14px] text-gray-light">{person.email}</div>
-                      {person.isAdmin && <div className="mt-1"><Tag text="Admin" tagColor={TagColor.WHITE} size={TagSize.XS} /></div>}
-                    </div>
+                <div className="px-4 pb-2 pt-5 sm:px-6">
+                  <div className="font-serif text-[28px] font-medium text-gray-dark">User details</div>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-gray-light">
+                    <span>{person.email}</span>
+                    {person.isAdmin && <Tag text="Admin" tagColor={TagColor.BLUE} size={TagSize.XS} />}
                   </div>
-                  <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0" onClick={() => onEdit(person)}>Edit access</Button>
+                  <div className="mt-5 flex gap-3">
+                    <Button size="md" variant="secondary" onClick={() => onEdit(person)} className="flex-1 justify-center border border-gray-stroke bg-white hover:bg-gray-hover">Grant additional access</Button>
+                  </div>
                 </div>
 
-                <DrawerSection title="AI Builder Program">
-                  {person.program ? (
-                    <div className="flex flex-col gap-1.5 text-[14px]">
-                      <div className="flex items-center gap-2"><StatusPill program={person.program} /><span className="text-gray-dark">{programDetail(person)}</span></div>
-                      {person.plan && <div className="text-gray-light">{person.plan.format === "live" ? "Live" : "Async"} · {person.plan.access === "limited" ? "2 months of access" : "Extended, renews annually"}</div>}
-                      <div className="text-gray-light">
-                        {person.program.status === "no-cohort"
-                          ? "Seat assigned · waiting for them to pick a cohort"
-                          : person.program.status === "not-started"
-                            ? `Seat assigned · starts ${person.program.startDate}`
-                            : `Started ${person.program.startDate}`}
-                        {person.lastActiveDays !== null && ` · Active ${person.lastActive}`}
-                      </div>
-                    </div>
-                  ) : <p className="text-[14px] text-gray-light">No program seat.</p>}
-                </DrawerSection>
+                <div className="flex flex-col gap-5 px-4 pb-10 pt-4 sm:px-6">
+                  {person.isAdmin && (
+                    <DrawerSection title="Team admin">
+                      <p className="text-[14px] leading-[1.4] text-gray-light">Can manage team members, grant or revoke their access, make others admins, and manage billing details.</p>
+                      <Button size="sm" variant="secondary" rounded="rounded-full" className="mt-3" onClick={() => revokeAdmin(person)}>Revoke admin access</Button>
+                    </DrawerSection>
+                  )}
 
-                {person.program && showSkills && (
-                  <DrawerSection title="Assessments & skills">
-                    {person.assessments.length === 0 ? (
-                      <p className="text-[14px] text-gray-light">No assessments completed yet. One is taken after each level.</p>
-                    ) : (
-                      <div className="flex flex-col gap-5">
-                        {person.assessments.map((a) => (
-                          <div key={a.level}>
-                            <div className="mb-2 flex items-baseline justify-between">
-                              <span className="text-[14px] font-medium text-gray-dark">Level {a.level} assessment · Completed</span>
-                              <span className="text-[12px] text-gray-light">{a.score}% avg</span>
+                  {person.program && (
+                    <DrawerSection title="AI Builder Program">
+                      <div className="flex flex-col">
+                        <DrawerRow label="Status"><StatusPill program={person.program} /></DrawerRow>
+                        {programDetail(person) && <DrawerRow label="Progress">{programDetail(person)}</DrawerRow>}
+                        {person.plan && <DrawerRow label="Plan">{person.plan.format === "live" ? "Live" : "Async"} · {person.plan.access === "limited" ? "2 months" : "Extended"}</DrawerRow>}
+                        {/* 2-month access doesn't renew: just show when it ends once they've started */}
+                        {person.plan?.access === "limited" && hasStarted(person) && (() => {
+                          const end = new Date((person.program as { startDate: string }).startDate);
+                          end.setMonth(end.getMonth() + 2);
+                          return <DrawerRow label="Access ends">{end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</DrawerRow>;
+                        })()}
+                        {person.plan?.access === "extended" && person.plan.renewsOn && (
+                          <DrawerRow label="Subscription">
+                            {person.plan.renewalCanceled ? `Ends ${person.plan.renewsOn}` : `Renews automatically ${person.plan.renewsOn}`}
+                            {" · "}
+                            <button
+                              onClick={() => (person.plan!.renewalCanceled ? onRenewal(person.email, false) : setConfirmingCancel(true))}
+                              className="underline decoration-dotted decoration-[1.5px] underline-offset-[3px] hover:text-gray-light"
+                            >
+                              {person.plan.renewalCanceled ? "Resume" : "Cancel"}
+                            </button>
+                          </DrawerRow>
+                        )}
+                        {person.plan?.format === "async" ? (
+                          <DrawerRow label="Started">{person.program.status === "no-cohort" ? "Not started" : person.program.startDate}</DrawerRow>
+                        ) : (
+                          // Live seats run in cohorts: a button to pick or change it while that's still possible, greyed out once it's under way
+                          <DrawerRow label="Cohort">
+                            <Button
+                              size="sm" variant="secondary" rounded="rounded-full"
+                              disabled={!canPickCohort}
+                              onClick={() => setPickingCohort(true)}
+                            >
+                              {person.program.status === "no-cohort" ? "Select cohort" : person.program.startDate}
+                            </Button>
+                          </DrawerRow>
+                        )}
+                        {person.lastActiveDays !== null && <DrawerRow label="Last active">{person.lastActive}</DrawerRow>}
+                      </div>
+                    </DrawerSection>
+                  )}
+
+                  {person.program && showSkills && (
+                    <DrawerSection title="Assessments & skills">
+                      {person.assessments.length === 0 ? (
+                        <p className="text-[14px] text-gray-light">No assessments completed yet. One is taken after each level.</p>
+                      ) : (
+                        <div className="flex flex-col gap-5">
+                          {person.assessments.map((a) => (
+                            <div key={a.level}>
+                              <div className="mb-2 flex items-baseline justify-between">
+                                <span className="text-[14px] font-medium text-gray-dark">Level {a.level} assessment · Completed</span>
+                                <span className="text-[12px] text-gray-light">{a.score}% avg</span>
+                              </div>
+                              <div className="flex flex-col gap-3">
+                                {a.skills.map((s) => <ScoreBar key={s.name} label={s.name} before={s.before} after={s.after} />)}
+                              </div>
                             </div>
-                            <div className="flex flex-col gap-3">
-                              {a.skills.map((s) => <ScoreBar key={s.name} label={s.name} before={s.before} after={s.after} />)}
-                            </div>
+                          ))}
+                          <p className="text-[12px] text-gray-light">Skill results from each assessment. Where a before and after score exist, the bar shows both.</p>
+                        </div>
+                      )}
+                    </DrawerSection>
+                  )}
+
+                  {person.program && (
+                    <DrawerSection title={`Builds${person.submissions.length ? ` · ${person.submissions.length}` : ""}`}>
+                      {person.submissions.length === 0 ? (
+                        <p className="text-[14px] text-gray-light">No builds shared yet.</p>
+                      ) : (
+                        <div className="flex flex-col">
+                          {person.submissions.map((sub) => <BuildRow key={sub.title} sub={sub} onOpen={() => setChild({ kind: "build", sub })} />)}
+                        </div>
+                      )}
+                    </DrawerSection>
+                  )}
+
+                  {person.coaching && (() => {
+                    const c = person.coaching;
+                    const done = c.sessions ? c.sessions.filter((x) => x.status === "completed").length : c.used;
+                    return (
+                      <DrawerSection title="1:1 coaching">
+                        <div className="mb-3 flex items-center gap-3">
+                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-stroke">
+                            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(done / c.granted) * 100}%` }} />
                           </div>
-                        ))}
-                        <p className="text-[12px] text-gray-light">Skill results from each assessment. Where a before and after score exist, the bar shows both.</p>
-                      </div>
-                    )}
-                  </DrawerSection>
-                )}
+                          <span className="shrink-0 text-[12px] leading-none text-gray-light">{done} of {c.granted} completed</span>
+                        </div>
+                        {c.sessions && c.sessions.length > 0 ? (
+                          <div className="flex flex-col">{c.sessions.map((x, i) => <SessionRow key={i} s={x} onOpen={() => setChild({ kind: "session", s: x })} />)}</div>
+                        ) : (
+                          <p className="text-[14px] text-gray-light">No sessions booked yet.</p>
+                        )}
+                        <div className="mt-4 flex items-center justify-between gap-4 border-t border-gray-stroke pt-3">
+                          <span className="text-[14px] text-gray-light">Category</span>
+                          <span className="text-[14px] text-gray-dark">{c.category ?? "Not set"}</span>
+                        </div>
+                      </DrawerSection>
+                    );
+                  })()}
 
-                {person.program && (
-                  <DrawerSection title={`Output${person.submissions.length ? ` · ${person.submissions.length}` : ""}`}>
-                    {person.submissions.length === 0 ? (
-                      <p className="text-[14px] text-gray-light">No submissions yet.</p>
-                    ) : (
-                      <div className="flex flex-col gap-3">
-                        {person.submissions.map((sub) => <SubmissionItem key={sub.title} sub={sub} />)}
+                  {person.lelandPlus && (
+                    <DrawerSection title="Leland+">
+                      <div className="flex flex-col">
+                        <DrawerRow label="Status">Active</DrawerRow>
+                        <DrawerRow label="Expires">{person.lelandPlus.expires}</DrawerRow>
                       </div>
-                    )}
-                  </DrawerSection>
-                )}
+                    </DrawerSection>
+                  )}
 
-                <DrawerSection title="1:1 coaching">
-                  {person.coaching ? (
-                    <div className="text-[14px]">
-                      <div className="text-gray-dark">{person.coaching.used} of {person.coaching.granted} sessions used</div>
-                      {person.coaching.category && <div className="mt-0.5 text-[12px] text-gray-light">{person.coaching.category}</div>}
-                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#222222]/[0.08]">
-                        <div className="h-full rounded-full bg-gray-dark" style={{ width: `${(person.coaching.used / person.coaching.granted) * 100}%` }} />
-                      </div>
-                    </div>
-                  ) : <p className="text-[14px] text-gray-light">Coaching hasn't been granted.</p>}
-                </DrawerSection>
-
-                {person.lelandPlus && (
-                  <DrawerSection title="Leland+">
-                    <div className="flex items-center gap-2 text-[14px]">
-                      <Tag text="Active" tagColor={TagColor.GREEN} size={TagSize.SMALL} />
-                      <span className="text-gray-light">Expires {person.lelandPlus.expires}</span>
-                    </div>
-                  </DrawerSection>
-                )}
-                <div className="h-6" />
+                  {!person.program && !person.coaching && !person.lelandPlus && !person.isAdmin && (
+                    <p className="text-[14px] text-gray-light">No offerings granted yet. Use Edit access to give {person.name.split(" ")[0]} the AI Builder Program or 1:1 coaching.</p>
+                  )}
+                </div>
               </div>
+              </>)}
             </div>
           </motion.div>
         </>
@@ -1427,7 +1686,7 @@ function MetricCard({ onClick, label, children }: { onClick: () => void; label: 
 // and Team members pages; the provider lives in the team layout so state survives navigation.
 type PeopleCtx = {
   people: Person[];
-  openGrant: (p: Person | null) => void;
+  openGrant: (p: Person | null, preset?: GrantOffering[]) => void;
   openPerson: (p: Person) => void;
 };
 const PeopleContext = createContext<PeopleCtx | null>(null);
@@ -1446,9 +1705,26 @@ export function TeamPeopleProvider({ children }: { children: ReactNode }) {
   useEffect(() => { setPeople(emptyTeam ? [] : INITIAL_PEOPLE); }, [emptyTeam]);
   const [grantOpen, setGrantOpen] = useState(false);
   const [editing, setEditing] = useState<Person | null>(null);
+  const [preset, setPreset] = useState<GrantOffering[] | undefined>(undefined);
   const [selected, setSelected] = useState<Person | null>(null);
 
-  const openGrant = (p: Person | null) => { setEditing(p); setGrantOpen(true); };
+  const openGrant = (p: Person | null, pre?: GrantOffering[]) => { setEditing(p); setPreset(pre); setGrantOpen(true); };
+
+  const setCohortFor = (email: string, c: Cohort) => {
+    const upd = (p: Person): Person => {
+      if (p.email !== email || !p.program) return p;
+      const program: Program = !c ? { status: "no-cohort" } : new Date(c.startDate).getTime() <= Date.now() ? { status: "in-progress", startDate: c.startDate, level: 1 } : { status: "not-started", startDate: c.startDate };
+      return { ...p, program };
+    };
+    setPeople((prev) => prev.map(upd));
+    setSelected((sel) => (sel ? upd(sel) : sel));
+  };
+
+  const setRenewalCanceled = (email: string, canceled: boolean) => {
+    const upd = (p: Person) => (p.email === email && p.plan ? { ...p, plan: { ...p.plan, renewalCanceled: canceled } } : p);
+    setPeople((prev) => prev.map(upd));
+    setSelected((sel) => (sel ? upd(sel) : sel));
+  };
 
   const handleGrant = (r: GrantResult) => {
     const updatedByEmail = new Map<string, Person>();
@@ -1475,7 +1751,10 @@ export function TeamPeopleProvider({ children }: { children: ReactNode }) {
         !r.offerings.includes("coaching")
           ? existing?.coaching ?? null
           : { ...existing?.coaching, granted: r.sessions, used: Math.min(existing?.coaching?.used ?? 0, r.sessions), category: r.category || undefined };
-      const plan = r.offerings.includes("program") && !(cur && existing && hasStarted(existing)) ? { format: r.format, access: r.access } : existing?.plan;
+      const inAYear = new Date(); inAYear.setFullYear(inAYear.getFullYear() + 1);
+      const plan = r.offerings.includes("program") && !cur
+        ? { format: r.format, access: r.access, ...(r.access === "extended" ? { renewsOn: inAYear.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) } : {}) }
+        : existing?.plan;
       if (existing) {
         updatedByEmail.set(rec.email, { ...existing, program, coaching, plan });
       } else {
@@ -1494,8 +1773,8 @@ export function TeamPeopleProvider({ children }: { children: ReactNode }) {
   return (
     <PeopleContext.Provider value={{ people, openGrant, openPerson: setSelected }}>
       {children}
-      <PersonDrawer person={selected} onClose={() => setSelected(null)} onEdit={(p) => openGrant(p)} />
-      <GrantAccessModal open={grantOpen} person={editing} existingEmails={[...people.map((p) => p.email), ...(team?.members.map((m) => m.email) ?? [])].map((e) => e.toLowerCase())} onClose={() => setGrantOpen(false)} onGrant={handleGrant} />
+      <PersonDrawer person={selected} onClose={() => setSelected(null)} onEdit={(p) => { setSelected(null); openGrant(p); }} onCohort={setCohortFor} onRenewal={setRenewalCanceled} />
+      <GrantAccessModal open={grantOpen} person={editing} preset={preset} existingEmails={[...people.map((p) => p.email), ...(team?.members.map((m) => m.email) ?? [])].map((e) => e.toLowerCase())} onClose={() => setGrantOpen(false)} onGrant={handleGrant} />
     </PeopleContext.Provider>
   );
 }
@@ -1573,12 +1852,21 @@ export default function TeamProgramOverview() {
 
       {/* Mobile: a quiet line with a text link. From sm up: a boxed row with a button. */}
       <p className="mb-8 mt-10 text-center text-[14px] text-gray-light sm:hidden">
-        {people.length} {people.length === 1 ? "person" : "people"} on your team ·{" "}
+        <span className="font-semibold text-gray-dark">{people.length} {people.length === 1 ? "person" : "people"}</span> on your team ·{" "}
         <button onClick={() => navigate("/team/members")} className="text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">View team members</button>
       </p>
       <div className="mb-8 hidden flex-wrap items-center justify-between gap-3 rounded-[12px] border border-gray-stroke bg-white p-5 sm:flex">
-        <span className="text-[14px] text-gray-light">{people.length} {people.length === 1 ? "person" : "people"} on your team</span>
+        <span className="text-[14px] text-gray-light"><span className="font-semibold text-gray-dark">{people.length} {people.length === 1 ? "person" : "people"}</span> on your team</span>
         <Button size="md" variant="secondary" rounded="rounded-full" onClick={() => navigate("/team/members")}>View team members</Button>
+      </div>
+      <div className="mb-8 text-center sm:text-left">
+        <h2 className="leland-heading-base mb-2 font-semibold text-gray-dark">Support</h2>
+        <p className="mx-auto max-w-[560px] text-[14px] leading-[1.5] text-gray-light sm:mx-0">
+          Need help with your account? Reach out to your Leland success team at{" "}
+          <a href="mailto:partnerships@joinleland.com" className="whitespace-nowrap text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-colors hover:text-gray-dark">partnerships@joinleland.com</a>
+          {" "}or{" "}
+          <a href="https://intercom.help/leland-help-center/en/articles/11181753-how-to-submit-a-support-ticket" target="_blank" rel="noopener noreferrer" className="whitespace-nowrap text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-colors hover:text-gray-dark">submit a support ticket</a>.
+        </p>
       </div>
       <div className="h-[80px] shrink-0" />
 
@@ -1609,14 +1897,14 @@ export default function TeamProgramOverview() {
 
 // ── Team members ──
 
-type Offering = "everyone" | "program" | "coaching" | "plus";
-const OFFERING_LABEL: Record<Offering, string> = { everyone: "All", program: "AI Builder Program", coaching: "1:1 coaching", plus: "Leland+" };
+type Offering = "everyone" | "program" | "coaching" | "plus" | "admins";
+const OFFERING_LABEL: Record<Offering, string> = { everyone: "All", program: "AI Builder Program", coaching: "1:1 coaching", plus: "Leland+", admins: "Admins" };
 
 // Everything a person has access to, as tags. Outlined (white) tags so they don't read as a status.
 function AccessTags({ p }: { p: Person }) {
   const tags = [p.isAdmin && "Admin", p.program && "AI Builder Program", p.coaching && "Coaching", p.lelandPlus && "Leland+"].filter(Boolean) as string[];
   if (tags.length === 0) return <span className="text-[14px] text-gray-light">—</span>;
-  return <div className="flex flex-wrap gap-1">{tags.map((t) => <Tag key={t} text={t} tagColor={TagColor.WHITE} size={TagSize.XS} />)}</div>;
+  return <div className="flex flex-wrap gap-1">{tags.map((t) => <Tag key={t} text={t} tagColor={t === "Admin" ? TagColor.BLUE : TagColor.WHITE} size={TagSize.XS} />)}</div>;
 }
 
 const Dash = () => <span className="text-[14px] text-gray-light">—</span>;
@@ -1679,6 +1967,7 @@ const COLUMNS: Record<Offering | "combined", Col[]> = {
     { key: "expires", header: "Expires", cell: (p) => (p.lelandPlus ? <Plain>{p.lelandPlus.expires}</Plain> : <Dash />) },
   ],
   everyone: [PROGRAM_COLS.lastActive],
+  admins: [PROGRAM_COLS.lastActive],
   combined: [], // built per team below: one column per offering anyone has
 
 };
@@ -1705,16 +1994,17 @@ export function TeamMembersPage() {
   const programPeople = people.filter((p) => p.program);
   const coachingPeople = people.filter((p) => p.coaching);
   const plusPeople = people.filter((p) => p.lelandPlus);
-  const counts: Record<Offering, number> = { everyone: people.length, program: programPeople.length, coaching: coachingPeople.length, plus: plusPeople.length };
+  const adminPeople = people.filter((p) => p.isAdmin);
+  const counts: Record<Offering, number> = { everyone: people.length, program: programPeople.length, coaching: coachingPeople.length, plus: plusPeople.length, admins: adminPeople.length };
   // Leland+ isn't a tab or filter choice for now (the Access tags and the one-table layout still show it).
-  const offerings: Offering[] = ["everyone", "program", "coaching"];
+  const offerings: Offering[] = ["everyone", "program", "coaching", "admins"];
 
   const combined = membersLayout === "combined";
   const offering: Offering = combined ? "everyone" : offerings.includes(offeringChoice) ? offeringChoice : "program";
   const colKey: Offering | "combined" = combined ? "combined" : offering;
   // An offering-specific view already implies what access people have, so the Access column only
   // shows on "All". The one-table layout has a column per offering, which makes it redundant there too.
-  const hideAccess = combined || offering !== "everyone";
+  const hideAccess = combined || (offering !== "everyone" && offering !== "admins");
   // One table: a single column per offering that someone on the team has. The rest of each
   // person's detail (assessments, submissions, session dates...) is in their drawer.
   const combinedCols: Col[] = [
@@ -1725,7 +2015,7 @@ export function TeamMembersPage() {
   const cols = [...(showAccessColumn && !hideAccess ? [ACCESS_COL] : []), ...(combined ? combinedCols : COLUMNS[colKey])];
   const changeOffering = (o: Offering) => { setOfferingChoice(o); setFilter("all"); setQuery(""); };
 
-  const base = offering === "program" ? programPeople : offering === "coaching" ? coachingPeople : offering === "plus" ? plusPeople : people;
+  const base = offering === "program" ? programPeople : offering === "coaching" ? coachingPeople : offering === "plus" ? plusPeople : offering === "admins" ? adminPeople : people;
   const rows = base.filter((p) => {
     if (query && !`${p.name} ${p.email}`.toLowerCase().includes(query.toLowerCase())) return false;
     if (offering === "program") {
@@ -1770,7 +2060,7 @@ export function TeamMembersPage() {
               { value: "program-only", label: "Program only" },
               { value: "coaching-only", label: "Coaching only" },
               { value: "both", label: "Program + coaching" },
-              { value: "admins", label: "Admins" },
+              ...(combined ? [{ value: "admins", label: "Admins" }] : []),
             ]
           : null;
 
@@ -1828,6 +2118,19 @@ export function TeamMembersPage() {
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {offering === "admins" && (
+        <div className="mb-6 mt-2 flex flex-col gap-4 rounded-[12px] border border-gray-stroke bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+          <div className="min-w-0">
+            <h2 className="text-[16px] font-semibold text-gray-dark">Team admins</h2>
+            <p className="mt-1 text-[14px] leading-[1.4] text-gray-light">Admins can manage team members, grant or revoke their access, make others admins, and manage billing details.</p>
+          </div>
+          <Button size="md" variant="secondary" rounded="rounded-full" className="shrink-0 self-start sm:self-auto" onClick={() => openGrant(null, ["admin"])}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
+            New admin
+          </Button>
         </div>
       )}
 

@@ -159,7 +159,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const { expert: expertMode, toggle: toggleExpertMode } = useExpertMode();
   const { mode: profileBarMode, setMode: setProfileBarMode } = useProfileBarMode();
   const { team } = useTeam();
-  const { showPaidAds, showRecruiting } = useTeamPrototype();
+  const { showPaidAds, showRecruiting, showAdminsPage } = useTeamPrototype();
   const { pathname } = useLocation();
   // On /team the sidebar swaps to the team menu (same slide-over, different contents).
   const inTeamMode = !!team && (pathname === "/team" || pathname.startsWith("/team/"));
@@ -236,7 +236,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
           <div className={`mx-5 border-t ${darkMode ? "border-white/20" : "border-[#E5E5E5]"}`} />
 
           <div className="pt-2">
-            {getTeamNavItems(team, { paidAds: showPaidAds, recruiting: showRecruiting }).map((item) => (
+            {getTeamNavItems(team, { paidAds: showPaidAds, recruiting: showRecruiting, adminsPage: showAdminsPage }).map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
