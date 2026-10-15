@@ -408,7 +408,13 @@ export function ContextLayout() {
       columnGap={linkedInCentered || centered ? 30 : undefined}
       // Start the row at the sidebar's sticky pin point (nav 61px + 20px gap) so
       // the columns don't slide up before locking as you scroll.
-      paddingYClassName={isLinkedInLayout || isHomeFeed || isRegularPost || isTopicPage ? "py-4 sm:pt-5 sm:pb-10" : undefined}
+      paddingYClassName={
+        isNotifications
+          ? "pt-0 pb-10 md:pt-5"
+          : isLinkedInLayout || isHomeFeed || isRegularPost || isTopicPage
+            ? "py-4 sm:pt-5 sm:pb-10"
+            : undefined
+      }
     >
       <Outlet />
     </PageShell>

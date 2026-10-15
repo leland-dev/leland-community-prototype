@@ -109,8 +109,8 @@ export function NotificationItem({
       onClick={onClick}
       className={`relative flex gap-3 px-4 py-4 transition-colors ${
         children ? "items-start" : "items-center"
-      } ${onClick ? "cursor-pointer hover:bg-gray-hover" : ""} ${
-        read ? "" : "bg-leland-primary-extra-light/60"
+      } ${read ? "" : "bg-[#F0F6FE]"} ${
+        onClick ? `cursor-pointer ${read ? "hover:bg-[rgba(34,34,34,0.03)]" : "hover:bg-[#E4EDFB]"}` : ""
       }`}
     >
       <div className="shrink-0">

@@ -560,9 +560,9 @@ export default function Notifications() {
   const items = tab === "all" ? NOTIFICATIONS : NOTIFICATIONS.filter((n) => n.tabs.includes(tab));
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Tabs */}
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-[#222222]/[0.12] bg-white p-3">
+    <div className="flex flex-col gap-0 md:gap-3">
+      {/* Tabs — full-bleed on mobile, boxed card at md+ (matches the home feed) */}
+      <div className="-mx-4 flex items-center justify-between gap-3 rounded-none border border-x-0 border-b-0 border-[#222222]/[0.12] bg-white p-3 sm:-mx-6 md:mx-0 md:rounded-xl md:border-x md:border-b">
         <div className="flex flex-wrap gap-2">
           {TABS.map((t) => (
             <Button
@@ -580,8 +580,8 @@ export default function Notifications() {
         <OverflowMenu />
       </div>
 
-      {/* Notifications list */}
-      <div className="overflow-hidden rounded-xl border border-[#222222]/[0.12] bg-white">
+      {/* Notifications list — full-bleed on mobile, boxed card at md+ */}
+      <div className="-mx-4 overflow-hidden rounded-none border border-x-0 border-[#222222]/[0.12] bg-white sm:-mx-6 md:mx-0 md:rounded-xl md:border-x">
         {items.length > 0 ? (
           <div className="divide-y divide-gray-stroke/70">
             {items.map((n) => (
