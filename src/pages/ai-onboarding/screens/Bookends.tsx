@@ -5,7 +5,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { ArrowRight, Check, Inbox, Send, Archive, Star } from "lucide-react";
 import { Button } from "../../../components/Button";
-import { AI_GRADIENT_VIDEO, COHORTS, ORG, USER, inviteCopy } from "../data";
+import { AI_GRADIENT_VIDEO, COHORTS, OFFERINGS, ORG, USER, inviteCopy } from "../data";
 import { BrandLockup, Cta, Eyebrow, FLOW_COLUMN, Heading, Initials, LelandLogo, Sub, TextInput } from "../ui";
 import { BrandPanel, SplitLayout } from "./BrandPanel";
 import { useScenario } from "../scenario";
@@ -81,8 +81,7 @@ export function CheckoutConfirmation({ onNext }: { onNext: () => void }) {
 
 /* ── 2. Invite email (team entry) ──────────────────────────────────────── */
 export function InviteEmail({ onNext }: { onNext: () => void }) {
-  const { offerings } = useScenario();
-  const copy = inviteCopy(offerings);
+  const copy = inviteCopy(["program"]);
   const folders = [
     { icon: Inbox, label: "Inbox", count: 12, active: true },
     { icon: Star, label: "Starred" },
@@ -122,14 +121,19 @@ export function InviteEmail({ onNext }: { onNext: () => void }) {
           <div className="flex flex-1 items-start justify-center bg-[#fafafa] p-6 md:p-10">
             <div className="w-full max-w-[520px] overflow-hidden rounded-2xl border border-[#e3e3e3] bg-white">
               <div className="bg-black px-7 py-6 text-white">
-                {/* The program's own logo when the invite includes a seat; coaching-only invites keep the Leland logo. */}
-                {copy.keys.includes("program") ? <BrandLockup /> : <LelandLogo theme="dark" />}
+                {/* Both logos on desktop. On mobile they don't fit together, so only the program's logo stays. */}
+                <div className="flex items-center justify-between">
+                  <div className="hidden sm:block">
+                    <LelandLogo theme="dark" />
+                  </div>
+                  <BrandLockup />
+                </div>
               </div>
               <div className="px-7 py-7">
                 <div className="flex items-center gap-3">
                   <Initials text={ORG.inviter.initials} size={32} circle />
                   <div className="text-[14px] text-ink-secondary">
-                    <span className="font-medium text-ink-primary">{ORG.inviter.name}</span> · {ORG.inviter.title}, {ORG.name}
+                    <span className="font-medium text-ink-primary">{ORG.inviter.name}</span>, {ORG.name}
                   </div>
                 </div>
                 <h2 className="mt-5 text-[26px] font-semibold leading-[1.1] tracking-[-0.02em] text-ink-primary">
@@ -138,6 +142,23 @@ export function InviteEmail({ onNext }: { onNext: () => void }) {
                 <p className="mt-3 text-[15px] leading-[1.5] text-ink-secondary">
                   {copy.body}
                 </p>
+                {/* One row per offering the invite grants, each with a square image */}
+                <div className="mt-5 flex flex-col gap-3">
+                  {copy.keys.map((k) => {
+                    const row = OFFERINGS[k].row;
+                    return (
+                      <div key={k} className="flex items-center gap-4 rounded-xl border border-gray-stroke p-3">
+                        <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-gray-hover">
+                          <img src={row.image} alt="" className={`h-full w-full ${row.fit === "contain" ? "object-contain p-2" : "object-cover"}`} />
+                        </span>
+                        <div>
+                          <div className="text-[15px] font-medium text-ink-primary">{row.title}</div>
+                          <div className="text-[13px] text-ink-secondary">{row.blurb}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
                 <Button size="lg" variant="dark" rounded="rounded-full" className="mt-6 w-full" onClick={onNext}>
                   Accept invite <ArrowRight size={16} />
                 </Button>

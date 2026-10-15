@@ -4,12 +4,11 @@
  *   ?cohort=oct|nov|dec     cohort already chosen at checkout (omit = choose in onboarding)
  *   ?orgTool=claude|...|none  team path: did the admin set the AI tool for everyone?
  *   ?welcome=off            skip the branded welcome screen (checkout/auth → first question)
- *   ?offerings=program,coaching  team path: what the invite grants (program seat, 1:1 coaching, or both; default program)
  * A floating dev panel flips these and restarts the flow. */
 import { createContext, useContext, useState } from "react";
 import { ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
 import { Button } from "../../components/Button";
-import { COHORTS, OFFERINGS, OFFERING_KEYS, TOOLS, type OfferingKey, type Path, type ToolKey } from "./data";
+import { COHORTS, TOOLS, type Path, type ToolKey } from "./data";
 
 export type Scenario = {
   path: Path;
@@ -19,8 +18,6 @@ export type Scenario = {
   orgTool: ToolKey | null;
   /** Show the branded "Welcome to the AI Builder Program" screen before the questions. */
   welcome: boolean;
-  /** Team path: what the admin granted this person. Drives the invite email. */
-  offerings: OfferingKey[];
 };
 
 export const DEFAULT_ORG_TOOL: ToolKey = "claude";
@@ -36,23 +33,18 @@ export function scenarioFromParams(params: URLSearchParams): Scenario {
     : t && TOOLS.some((x) => x.value === t) ? (t as ToolKey)
     : DEFAULT_ORG_TOOL;
   const welcome = params.get("welcome") !== "off";
-  const granted = (params.get("offerings") ?? "").split(",").filter((k): k is OfferingKey => (OFFERING_KEYS as string[]).includes(k));
-  const offerings: OfferingKey[] = granted.length ? OFFERING_KEYS.filter((k) => granted.includes(k)) : ["program"];
-  return { path, cohort, orgTool, welcome, offerings };
+  return { path, cohort, orgTool, welcome };
 }
 
 export function paramsFromScenario(s: Scenario): Record<string, string> {
   const p: Record<string, string> = { path: s.path };
   if (s.cohort) p.cohort = s.cohort;
-  if (s.path === "team") {
-    p.orgTool = s.orgTool ?? "none";
-    p.offerings = s.offerings.join(",");
-  }
+  if (s.path === "team") p.orgTool = s.orgTool ?? "none";
   if (!s.welcome) p.welcome = "off";
   return p;
 }
 
-const ScenarioContext = createContext<Scenario>({ path: "individual", cohort: null, orgTool: null, welcome: true, offerings: ["program"] });
+const ScenarioContext = createContext<Scenario>({ path: "individual", cohort: null, orgTool: null, welcome: true });
 export const ScenarioProvider = ScenarioContext.Provider;
 export const useScenario = () => useContext(ScenarioContext);
 
@@ -154,31 +146,6 @@ export function DevPanel({
             ]}
             onChange={(v) => onChange({ ...scenario, welcome: v === "show" })}
           />
-          {scenario.path === "team" ? (
-            <div>
-              <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.12em] text-white/40">Invite grants</div>
-              <div className="flex gap-1">
-                {OFFERING_KEYS.map((k) => {
-                  const on = scenario.offerings.includes(k);
-                  return (
-                    <Button
-                      key={k}
-                      size="tag"
-                      variant="glass"
-                      rounded="rounded-md"
-                      onClick={() => {
-                        const next = on ? scenario.offerings.filter((x) => x !== k) : OFFERING_KEYS.filter((x) => x === k || scenario.offerings.includes(x));
-                        if (next.length) onChange({ ...scenario, offerings: next });
-                      }}
-                      className={on ? "bg-yellow! text-ink-primary!" : "bg-white/10! text-white/80 hover:bg-white/20!"}
-                    >
-                      {OFFERINGS[k].label}
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
           <Button size="sm" variant="glass" rounded="rounded-md" className="w-full bg-white/10! hover:bg-white/20!" onClick={onRestart}>
             <RotateCcw size={12} /> Restart flow
           </Button>
