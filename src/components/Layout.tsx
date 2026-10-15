@@ -133,7 +133,8 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   const isTopicPage = pathname.startsWith("/topic/") || pathname.startsWith("/alt-nav/topic/");
   const isHashtagPage = pathname.startsWith("/hashtag/") || pathname.startsWith("/alt-nav/hashtag/");
   const isQuestionPage = pathname.startsWith("/question/") || pathname.startsWith("/alt-nav/question/");
-  const beigePageBg = (isHomeFeed || isPostDetailPage || isTopicPage || isHashtagPage || isQuestionPage || pathname === "/post-variants") && !isEmbed && !darkMode;
+  const isNotificationsPage = pathname === "/notifications" || pathname === "/alt-nav/notifications";
+  const beigePageBg = (isHomeFeed || isPostDetailPage || isTopicPage || isHashtagPage || isQuestionPage || isNotificationsPage || pathname === "/post-variants") && !isEmbed && !darkMode;
 
   // Keep height/overflow constrained while the close animation plays out,
   // so the content doesn't snap to full height mid-transition.
@@ -366,10 +367,13 @@ export function ContextLayout() {
   // The classic home ("/") and classic post detail ("/post/:id") share ONE frame,
   // toggled from the Navigation admin dropdown between centered (feed + 298px
   // sidebars within 1280) and edge-to-edge (640 feed + 356px sidebars at edges).
+  // Notifications shares the home-feed frame (3 columns, feed-width center,
+  // honoring the same edge-to-edge toggle) on both the classic and alt-nav routes.
+  const isNotifications = pathname === "/notifications" || pathname === "/alt-nav/notifications";
   const isClassicHome = pathname === "/";
-  const isHomeFeed = isClassicHome;
+  const isHomeFeed = isClassicHome || isNotifications;
   const { feedEdgeToEdge } = useTopNavStyle();
-  const isClassicFeed = isClassicHome || isRegularPost || isTopicPage;
+  const isClassicFeed = isClassicHome || isRegularPost || isTopicPage || isNotifications;
   const centered = isClassicFeed && !feedEdgeToEdge;
   const classicEdge = isClassicFeed && feedEdgeToEdge;
   // The LinkedIn-nav feed/post honor the same feed toggle.

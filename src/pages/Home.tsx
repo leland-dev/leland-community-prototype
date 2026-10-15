@@ -5533,33 +5533,41 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
       </SidebarSectionCard>
 
       {/* Footer links — centered, directly below the last card */}
-      <div className="px-2 pt-1 text-center">
-        <p className="text-[12px] leading-[1.7] text-gray-extra-light">
-          {["Support", "Reviews", "Careers", "Become an Expert", "For Organizations", "Privacy"].map((l, i) => (
-            <Fragment key={l}>
-              {i > 0 && " · "}
-              <a href="#" className="transition-opacity hover:opacity-70">{l}</a>
-            </Fragment>
-          ))}
-        </p>
-        <div className="mt-3 flex items-center justify-center gap-1.5">
-          <span
-            aria-hidden
-            className="h-[15px] w-[15px] bg-[#8F8C7E]"
-            style={{
-              maskImage: `url("${lelandMark}")`,
-              WebkitMaskImage: `url("${lelandMark}")`,
-              maskSize: "contain",
-              WebkitMaskSize: "contain",
-              maskRepeat: "no-repeat",
-              WebkitMaskRepeat: "no-repeat",
-              maskPosition: "center",
-              WebkitMaskPosition: "center",
-            }}
-          />
-          <span className="text-[12px] text-gray-extra-light">© 2026 Leland</span>
-        </div>
+      <HomeFeedFooter />
       </div>
+    </div>
+  );
+}
+
+// The feed's footer: inline link list + Leland mark and copyright. Reused by
+// the home feed right rail and the Notifications right rail.
+export function HomeFeedFooter() {
+  return (
+    <div className="px-2 pt-1 text-center">
+      <p className="text-[12px] leading-[1.7] text-gray-extra-light">
+        {["Support", "Reviews", "Careers", "Become an Expert", "For Organizations", "Privacy"].map((l, i) => (
+          <Fragment key={l}>
+            {i > 0 && " · "}
+            <a href="#" className="transition-opacity hover:opacity-70">{l}</a>
+          </Fragment>
+        ))}
+      </p>
+      <div className="mt-3 flex items-center justify-center gap-1.5">
+        <span
+          aria-hidden
+          className="h-[15px] w-[15px] bg-[#8F8C7E]"
+          style={{
+            maskImage: `url("${lelandMark}")`,
+            WebkitMaskImage: `url("${lelandMark}")`,
+            maskSize: "contain",
+            WebkitMaskSize: "contain",
+            maskRepeat: "no-repeat",
+            WebkitMaskRepeat: "no-repeat",
+            maskPosition: "center",
+            WebkitMaskPosition: "center",
+          }}
+        />
+        <span className="text-[12px] text-gray-extra-light">© 2026 Leland</span>
       </div>
     </div>
   );
@@ -5634,14 +5642,15 @@ function YourGoalsCard() {
 
 // Reorganized around the two jobs-to-be-done: upcoming sessions and
 // in-progress programs. Profile card on top.
-function HomeSidebarV2() {
+function HomeSidebarV2({ hideGoals = false }: { hideGoals?: boolean }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { goalSidebar } = useFeedAdmin();
   // "no-goal" replaces the Upcoming sessions + Continue learning cards with a
   // first-goal onboarding card; "goals" also shows the "Your goals" preview
   // below them; "default" shows neither goal treatment.
-  const showLeftGoal = goalSidebar === "no-goal";
+  // hideGoals (Notifications rail) suppresses every goal treatment outright.
+  const showLeftGoal = goalSidebar === "no-goal" && !hideGoals;
   // Inside the /alt-nav experience, "See all" links stay within My Leland
   // rather than jumping back into the classic-nav routes.
   const inAltNav = pathname === "/alt-nav" || pathname.startsWith("/alt-nav/");
@@ -5704,15 +5713,15 @@ function HomeSidebarV2() {
       </SidebarSectionCard>
 
       {/* 4. Your goals — preview of the user's active goals (only in "goals") */}
-      {goalSidebar === "goals" && <YourGoalsCard />}
+      {goalSidebar === "goals" && !hideGoals && <YourGoalsCard />}
       </>
       )}
     </div>
   );
 }
 
-export function HomeSidebar(_props: { onCreatePost: () => void }) {
-  return <HomeSidebarV2 />;
+export function HomeSidebar(_props: { onCreatePost: () => void; hideGoals?: boolean }) {
+  return <HomeSidebarV2 hideGoals={_props.hideGoals} />;
 }
 
 // ─── Composer prompts ────────────────────────────────
