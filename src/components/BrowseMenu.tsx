@@ -76,7 +76,7 @@ const modalityLinks: { label: string; icon?: string; node?: ReactNode; to: strin
 ];
 
 // Top-level category buckets, each expanding into the categories below.
-const categoryBuckets = [
+export const categoryBuckets = [
   "Popular",
   "General",
   "AI",
@@ -92,7 +92,7 @@ const categoryBuckets = [
 ];
 
 // The third-level lists — representative categories inside each bucket.
-const bucketCategories: Record<string, string[]> = {
+export const bucketCategories: Record<string, string[]> = {
   Popular: ["MBA Admissions", "Management Consulting", "Product Management", "Investment Banking", "Software Engineering", "Data Science", "Medical School", "Law School", "Resume Review", "Interview Prep"],
   General: ["Career Growth", "Networking", "Personal Branding", "Leadership", "Communication", "Salary Negotiation", "Job Search", "Mentorship", "Public Speaking"],
   AI: ["Machine Learning", "Prompt Engineering", "AI Product Management", "LLMs", "Generative AI", "AI Research", "MLOps", "Computer Vision", "NLP", "AI Ethics"],
@@ -109,7 +109,7 @@ const bucketCategories: Record<string, string[]> = {
 
 // A fourth level — subcategories inside a category. Only categories listed here
 // get the extra panel (revealed on hover); everything else is a plain link.
-const categorySubcategories: Record<string, string[]> = {
+export const categorySubcategories: Record<string, string[]> = {
   "MBA Admissions": [
     "Traditional Full-Time MBA",
     "Deferred MBA",

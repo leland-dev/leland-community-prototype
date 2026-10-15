@@ -10,6 +10,10 @@ import { ExploreSearchModal } from "./ExploreSearchModal";
 import { BrowseMenu } from "./BrowseMenu";
 import { useExpertMode } from "../contexts/ExpertModeContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
+import usersGroupIcon from "../assets/icons/users-group.svg";
+import { useTeam } from "../contexts/TeamContext";
+import { TeamLogo } from "./TeamLogo";
+import { TeamAdminMenu } from "./TeamAdminMenu";
 // Primary nav icons — always the filled variant; inactive states just fade to
 // 40% opacity (see IconNavLink).
 import homeIcon from "../assets/icons/nav-icons/home-alt.svg";
@@ -36,7 +40,7 @@ import logOutIcon from "../assets/icons/log out.svg";
 import lelandWordmark from "../assets/leland-wordmark.svg";
 
 /* ── "Me" dropdown menu groups ── */
-type MenuItem = { to: string | null; icon: string; label: string; danger: boolean; isProfile?: boolean; badge?: number };
+type MenuItem = { to: string | null; icon: string; label: string; danger: boolean; isProfile?: boolean; badge?: number; team?: boolean };
 const profileMenuGroups: { items: MenuItem[] }[] = [
   {
     items: [
@@ -176,6 +180,8 @@ export default function TopNavLinkedIn() {
   // Messages always opens the My Leland shell's Messages tab.
   const messagesTo = "/my-leland/messages";
 
+  const { team } = useTeam();
+
   const activeProfileMenuGroups = useMemo(() => {
     // Browse shortcuts injected under Profile — there are no standalone
     // Livestreams/Content nav items, so they live in the "More" menu (Jobs is a
@@ -187,12 +193,18 @@ export default function TopNavLinkedIn() {
     ];
     const [topGroup, bottomGroup] = profileMenuGroups;
     return [
-      // Profile then Refer a friend + Settings
-      { items: [...topGroup.items] },
+      // Profile, Team (org name + logo, or an invite to add one), then Refer a friend + Settings
+      {
+        items: [
+          topGroup.items[0],
+          { to: "/team", icon: usersGroupIcon, label: team ? team.name : "Add your team", danger: false, team: true },
+          ...topGroup.items.slice(1),
+        ],
+      },
       // Browse shortcuts join Help + Log out as one lower section
       { items: [...browseItems, ...bottomGroup.items] },
     ];
-  }, [navTo]);
+  }, [navTo, team]);
 
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -382,7 +394,7 @@ export default function TopNavLinkedIn() {
                 >
                   {activeProfileMenuGroups.map((group, gi) => (
                     <div key={gi} className={`px-2 py-2${gi > 0 ? " border-t border-gray-stroke" : ""}`}>
-                      {group.items.map(({ to, icon, label, danger, isProfile, badge }) =>
+                      {group.items.map(({ to, icon, label, danger, isProfile, badge, team: isTeam }) =>
                         to ? (
                           <NavLink
                             key={label}
@@ -392,15 +404,19 @@ export default function TopNavLinkedIn() {
                               danger ? "text-[#D92D20] hover:bg-[#222222]/5" : "text-gray-light hover:bg-[#222222]/5"
                             }`}
                           >
-                            {icon && (
-                              <span className="relative shrink-0">
-                                <img
-                                  src={icon}
-                                  alt={label}
-                                  className={`h-5 w-5${isProfile ? " rounded-full object-cover" : ""}`}
-                                />
-                                <NavBadge count={badge} />
-                              </span>
+                            {isTeam && team ? (
+                              <TeamLogo name={team.name} logo={team.logo} circle size={20} />
+                            ) : (
+                              icon && (
+                                <span className="relative shrink-0">
+                                  <img
+                                    src={icon}
+                                    alt={label}
+                                    className={`h-5 w-5${isProfile ? " rounded-full object-cover" : ""}`}
+                                  />
+                                  <NavBadge count={badge} />
+                                </span>
+                              )
                             )}
                             {label}
                           </NavLink>
@@ -476,6 +492,7 @@ export default function TopNavLinkedIn() {
                       <img src={codeIcon} alt="" className="h-5 w-5 shrink-0" />
                       Components
                     </NavLink>
+                    <TeamAdminMenu />
                     {/* Navigation — pick the top-level nav experience */}
                     <button
                       onClick={() => setNavMenuOpen((v) => !v)}

@@ -8,6 +8,10 @@ import codeIcon from "../assets/icons/code.svg";
 import { useIsCoachMode } from "../hooks/useIsCoachMode";
 import { useNavTheme } from "./NavThemeContext";
 import profilePhoto from "../assets/profile photos/profile photo.png";
+import usersGroupIcon from "../assets/icons/users-group.svg";
+import { useTeam } from "../contexts/TeamContext";
+import { TeamLogo } from "./TeamLogo";
+import { TeamAdminMenu } from "./TeamAdminMenu";
 import notificationsInactive from "../assets/icons/nav-icons/notifications-inactive.svg";
 import notificationsActive from "../assets/icons/nav-icons/notifications-active.svg";
 import searchInactive from "../assets/icons/nav-icons/search-inactive.svg";
@@ -48,7 +52,8 @@ const browseCategories = [
 ];
 
 /* ── Profile dropdown menu items ── */
-const profileMenuGroups = [
+type MenuItem = { to: string | null; icon: string; label: string; danger: boolean; isProfile?: boolean; team?: boolean };
+const profileMenuGroups: { items: MenuItem[] }[] = [
   {
     items: [
       { to: "/profile/june-allen?me=1", icon: profilePhoto, label: "Profile", danger: false, isProfile: true },
@@ -91,9 +96,16 @@ export default function TopNavClassic() {
   }, [navTheme.scrollReveal]);
   const reveal = navTheme.scrollReveal;
 
+  const { team } = useTeam();
   const activeProfileMenuGroups = useMemo(() => {
-    if (!isCoachMode) return profileMenuGroups;
-    return profileMenuGroups.map((group) => ({
+    // Team sits directly under Profile: org name + logo, or an invite to add one.
+    const teamItem: MenuItem = { to: "/team", icon: usersGroupIcon, label: team ? team.name : "Add your team", danger: false, team: true };
+    const groups = profileMenuGroups.map((group) => ({
+      ...group,
+      items: group.items.flatMap((item) => (item.isProfile ? [item, teamItem] : [item])),
+    }));
+    if (!isCoachMode) return groups;
+    return groups.map((group) => ({
       ...group,
       items: group.items
         .filter((item) => item.label !== "My courses")
@@ -103,7 +115,7 @@ export default function TopNavClassic() {
             : item
         ),
     }));
-  }, [isCoachMode]);
+  }, [isCoachMode, team]);
 
   const profileRef = useRef<HTMLDivElement>(null);
   const browseRef = useRef<HTMLDivElement>(null);
@@ -320,7 +332,7 @@ export default function TopNavClassic() {
                       key={gi}
                       className={`px-2 py-2${gi > 0 ? " border-t border-gray-stroke" : ""}`}
                     >
-                      {group.items.map(({ to, icon, label, danger, isProfile }) =>
+                      {group.items.map(({ to, icon, label, danger, isProfile, team: isTeam }) =>
                         to ? (
                           <NavLink
                             key={label}
@@ -332,12 +344,16 @@ export default function TopNavClassic() {
                                 : "text-gray-dark hover:bg-[#222222]/5"
                             }`}
                           >
-                            {icon && (
-                              <img
-                                src={icon}
-                                alt={label}
-                                className={`h-6 w-6 shrink-0${isProfile ? " rounded-full object-cover" : ""}`}
-                              />
+                            {isTeam && team ? (
+                              <TeamLogo name={team.name} logo={team.logo} circle size={24} />
+                            ) : (
+                              icon && (
+                                <img
+                                  src={icon}
+                                  alt={label}
+                                  className={`h-6 w-6 shrink-0${isProfile ? " rounded-full object-cover" : ""}`}
+                                />
+                              )
                             )}
                             {label}
                           </NavLink>
@@ -391,6 +407,7 @@ export default function TopNavClassic() {
                       <img src={codeIcon} alt="" className="h-5 w-5 shrink-0" />
                       Components
                     </NavLink>
+                    <TeamAdminMenu />
                     {/* Navigation — pick the top-level nav experience */}
                     <button
                       onClick={() => setNavMenuOpen((v) => !v)}

@@ -1,4 +1,5 @@
 import { useState, useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import type { ModalId } from "./B2BData";
 import { users } from "./B2BData";
 import { Button } from "../../components/Button";
@@ -98,7 +99,7 @@ function cohortDateLabel(startDate: string): string {
 }
 
 const MODAL_COHORTS_META = [
-  { key: "ib", label: "Spring '26 IB Recruiting Bootcamp", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", sessionCount: 8, scheduleDays: ["Wednesdays, 6–7:30 PM ET", "Fridays, 6–7:30 PM ET"], duration: "90-minute sessions" },
+  { key: "aibp", label: "AI Builder Program", startDate: "Jan 15, 2026", endDate: "Mar 20, 2026", sessionCount: 8, scheduleDays: ["Wednesdays, 6–7:30 PM ET", "Fridays, 6–7:30 PM ET"], duration: "90-minute sessions" },
   { key: "pe", label: "Private Equity Recruiting Bootcamp", startDate: "Jun 2, 2026", endDate: "Jun 30, 2026", sessionCount: 5, scheduleDays: ["Tuesdays, 7–8:30 PM ET"], duration: "90-minute sessions" },
   { key: "ai", label: "AI for Finance Professionals", startDate: "Mar 1, 2026", endDate: "Mar 29, 2026", sessionCount: 4, scheduleDays: ["Thursdays, 6–7 PM ET"], duration: "60-minute sessions", full: true },
   { key: "consulting", label: "Consulting Accelerator", startDate: "Jul 7, 2026", endDate: "Aug 4, 2026", sessionCount: 6, scheduleDays: ["Mondays, 7–8:30 PM ET", "Wednesdays, 7–8:30 PM ET"], duration: "90-minute sessions" },
@@ -151,6 +152,65 @@ function ModalCohortSelectRow({ cohort, isEnrolled, onEnroll }: {
         </Button>
       </div>
     </div>
+  );
+}
+
+export type CohortOption = typeof MODAL_COHORTS_META[number];
+
+// The "Select cohort" screen: an option to let the user choose their own dates, then the cohorts.
+// Shared by the invite flow and the team dashboard's add-a-team-member dialog.
+export function CohortPickerView({ cohorts = MODAL_COHORTS_META, isSelected, onPick, onBack, onClose }: {
+  cohorts?: CohortOption[];
+  isSelected?: (cohort: CohortOption) => boolean;
+  /** A cohort, or null to let the user choose their own dates */
+  onPick: (cohort: CohortOption | null) => void;
+  onBack: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <>
+      {/* Cohort picker header */}
+      <div className="relative flex min-h-[56px] items-center justify-center border-b border-gray-stroke px-12">
+        <button
+          onClick={onBack}
+          className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-hover"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+        <span className="text-[16px] font-medium text-gray-dark">Select cohort</span>
+        <button onClick={onClose} className="absolute right-0 top-0 p-2">
+          <div className="flex items-center justify-center rounded-full border border-gray-stroke bg-white p-[10px] text-gray-dark hover:bg-gray-hover">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <line x1="1" y1="1" x2="13" y2="13" /><line x1="13" y1="1" x2="1" y2="13" />
+            </svg>
+          </div>
+        </button>
+      </div>
+      {/* Cohort picker body */}
+      <div className="flex-1 overflow-y-auto px-6 py-5">
+        <button
+          onClick={() => onPick(null)}
+          className="mb-5 flex w-full items-center justify-between rounded-lg bg-gray-hover px-4 py-3.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]"
+        >
+          Invite the user to select their own dates
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+        <div className="divide-y divide-gray-stroke">
+          {cohorts.map((cohort) => (
+            <ModalCohortSelectRow
+              key={`${cohort.key}-${cohort.startDate}`}
+              cohort={cohort}
+              isEnrolled={isSelected?.(cohort) ?? false}
+              onEnroll={() => onPick(cohort)}
+            />
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -209,7 +269,7 @@ const chevronDown = (
 
 const selectCls2 = "h-[48px] w-full appearance-none rounded-[8px] border border-gray-stroke bg-white px-4 pr-10 text-[14px] outline-none focus:border-primary";
 
-const COHORTS = ["Spring '26 IB Recruiting", "PE Recruiting Bootcamp", "AI for Finance"];
+const COHORTS = ["AI Builder Program", "PE Recruiting Bootcamp", "AI for Finance"];
 
 function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, cohortInvited, setCohortInvited, selectedDates, onOpenCohortPicker }: {
   sessions: number; setSessions: (n: number) => void;
@@ -292,17 +352,184 @@ function AlaCArteOfferings({ sessions, setSessions, lelandPlus, setLelandPlus, c
   );
 }
 
+// Teams aren't contract-based, so they can grant anything Leland offers. Instead of a
+// table of specific contracted offerings, show the high-level categories; Programs and
+// Courses use a searchable single-select (the catalogs will be large). Sample data.
+const TEAM_PROGRAMS = [
+  "AI Builder Program", "Private Equity Recruiting Bootcamp", "Investment Banking Recruiting Bootcamp", "Consulting Accelerator",
+  "MBA Admissions Bootcamp", "Product Management Bootcamp", "Venture Capital Recruiting Bootcamp", "Law School Admissions Program",
+  "Data Science Career Accelerator", "Executive Presence Program", "Startup Operator Program", "Medical School Admissions Program",
+];
+const TEAM_COURSES = [
+  "Case Interview Fundamentals", "Financial Modeling Essentials", "Resume & Storytelling", "Excel for Finance Professionals",
+  "Behavioral Interview Mastery", "Networking That Works", "LBO Modeling Deep Dive", "Product Sense & Strategy",
+  "SQL for Analysts", "Negotiating Your Offer", "GMAT Quant Foundations", "Writing Standout Essays",
+];
+
+// Coaching categories for 1:1 matching (sample data).
+export const COACHING_CATEGORIES = [
+  "MBA admissions", "Management consulting", "Investment banking", "Private equity & venture capital",
+  "Product management", "Software engineering", "Law school admissions", "Medical school admissions",
+  "Resume & career strategy", "Executive coaching",
+];
+
+// Searchable single-select: type to filter, click a result to choose it.
+function SearchSelect({ items, onSelect, onClose, placeholder }: { items: string[]; onSelect: (item: string) => void; onClose: () => void; placeholder: string }) {
+  const [query, setQuery] = useState("");
+  const results = items.filter((i) => i.toLowerCase().includes(query.trim().toLowerCase()));
+  return (
+    <div className="mt-4">
+      {/* Standard search bar; results listed below */}
+      <div className="flex items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-light">
+          <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          autoFocus
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") { e.stopPropagation(); onClose(); }
+            if (e.key === "Enter" && results[0]) onSelect(results[0]);
+          }}
+          placeholder={placeholder}
+          className="flex-1 border-none bg-transparent text-[14px] leading-[1.2] text-gray-dark outline-none placeholder:text-gray-xlight"
+        />
+      </div>
+      <div className="max-h-[200px] overflow-y-auto pt-2">
+        {results.length === 0 ? (
+          <p className="py-2 text-[13px] text-gray-light">No matches</p>
+        ) : (
+          results.map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => onSelect(item)}
+              className="block w-full rounded-lg px-2 py-2 text-left text-[14px] text-gray-dark hover:bg-gray-hover"
+            >
+              {item}
+            </button>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TeamOfferings() {
+  const [sessions, setSessions] = useState(0);
+  const [category, setCategory] = useState("");
+  const [lelandPlus, setLelandPlus] = useState(false);
+  const [picked, setPicked] = useState<Record<"programs" | "courses", string | null>>({ programs: null, courses: null });
+  const [searching, setSearching] = useState<"programs" | "courses" | null>(null);
+
+  const catalogRow = (group: "programs" | "courses", title: string, blurb: string, items: string[]) => (
+    <div className="border-t border-gray-stroke py-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <span className="text-[14px] font-medium text-gray-dark">{title}</span>
+          <p className="truncate text-[12px] text-gray-light">{picked[group] ?? blurb}</p>
+        </div>
+        {picked[group] ? (
+          <Button size="tag" variant="secondary" rounded="rounded-full" onClick={() => setPicked((p) => ({ ...p, [group]: null }))}>
+            Remove
+          </Button>
+        ) : (
+          <Button size="tag" variant="secondary" rounded="rounded-full" onClick={() => setSearching(searching === group ? null : group)}>
+            {searching === group ? "Cancel" : "Add"}
+          </Button>
+        )}
+      </div>
+      {searching === group && !picked[group] && (
+        <SearchSelect
+          items={items}
+          placeholder={`Search ${title.toLowerCase()}`}
+          onClose={() => setSearching(null)}
+          onSelect={(item) => { setPicked((p) => ({ ...p, [group]: item })); setSearching(null); }}
+        />
+      )}
+    </div>
+  );
+
+  return (
+    // Extra top margin keeps this section visually distinct from the user details above
+    <div className="mt-8">
+    <p className="mb-3 text-[16px] font-semibold text-gray-dark">Grant access</p>
+    <div className="mb-5">
+      {/* 1:1 sessions */}
+      <div className="pb-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <span className="text-[14px] font-medium text-gray-dark">1:1 sessions</span>
+          <p className="text-[12px] text-gray-light">Coaching with an expert</p>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button size="sm" variant="secondary" iconOnly aria-label="Fewer sessions" onClick={() => setSessions(Math.max(0, sessions - 1))} disabled={sessions === 0}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </Button>
+          <span className="w-6 text-center text-[14px] font-medium text-gray-dark">{sessions}</span>
+          <Button size="sm" variant="secondary" iconOnly aria-label="More sessions" onClick={() => setSessions(sessions + 1)}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </Button>
+        </div>
+      </div>
+      {/* We match each person with a coach, so ask what kind of coaching they need */}
+      {sessions > 0 && (
+        <div className="mt-4 flex flex-col gap-3">
+          <div>
+            <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">Coaching category</label>
+            <div className="relative">
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className={`h-[48px] w-full appearance-none rounded-[8px] border border-gray-stroke bg-white px-4 pr-10 text-[14px] outline-none focus:border-primary ${category ? "text-gray-dark" : "text-gray-xlight"}`}
+              >
+                <option value="" disabled>Select a category</option>
+                {COACHING_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-light" aria-hidden>
+                <polyline points="4 6 8 10 12 6" />
+              </svg>
+            </div>
+          </div>
+          <div>
+            <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">Notes for our team <span className="text-gray-light">(optional)</span></label>
+            <textarea
+              rows={3}
+              placeholder="Anything that helps us match them with the right coach..."
+              className="block w-full resize-none rounded-[8px] border border-gray-stroke bg-white px-4 py-3 text-[14px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-primary"
+            />
+          </div>
+        </div>
+      )}
+      </div>
+      {catalogRow("programs", "Programs", "In-depth programs, live or self-paced", TEAM_PROGRAMS)}
+      {catalogRow("courses", "Courses", "Shorter, focused self-paced courses", TEAM_COURSES)}
+      {/* Leland+ */}
+      <div className="flex items-center justify-between gap-4 border-t border-gray-stroke pt-4">
+        <div className="min-w-0">
+          <span className="text-[14px] font-medium text-gray-dark">Leland+ license</span>
+          <p className="text-[12px] text-gray-light">{lelandPlus ? "License will be granted" : "Full content library access"}</p>
+        </div>
+        <Button size="tag" variant="secondary" rounded="rounded-full" onClick={() => setLelandPlus(!lelandPlus)}>
+          {lelandPlus ? "Remove" : "Add"}
+        </Button>
+      </div>
+    </div>
+    </div>
+  );
+}
+
 const CONTRACT_COHORTS_MODAL = [
-  "Spring '26 IB Recruiting Bootcamp",
+  "AI Builder Program",
   "Private Equity Recruiting Bootcamp",
   "AI for Finance Professionals",
 ];
 
 const COHORT_DATES: Record<string, string[]> = {
-  "Spring '26 IB Recruiting": ["Mar 3 – May 9, 2026", "Jun 2 – Aug 7, 2026"],
   "PE Recruiting Bootcamp": ["Apr 7 – Jun 12, 2026", "Sep 8 – Nov 13, 2026"],
   "AI for Finance": ["Feb 3 – Apr 10, 2026", "May 5 – Jul 10, 2026"],
-  "Spring '26 IB Recruiting Bootcamp": ["Mar 3 – May 9, 2026", "Jun 2 – Aug 7, 2026"],
+  "AI Builder Program": ["Mar 3 – May 9, 2026", "Jun 2 – Aug 7, 2026"],
   "Private Equity Recruiting Bootcamp": ["Apr 7 – Jun 12, 2026", "Sep 8 – Nov 13, 2026"],
   "AI for Finance Professionals": ["Feb 3 – Apr 10, 2026", "May 5 – Jul 10, 2026"],
 };
@@ -380,7 +607,7 @@ function PerSeatIncludes({ selectedDates, onOpenCohortPicker }: {
   );
 }
 
-export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open: boolean; onClose: () => void; hideOffering?: boolean; isAlaCarte?: boolean }) {
+export function InviteModal({ open, onClose, hideOffering, isAlaCarte, isTeam }: { open: boolean; onClose: () => void; hideOffering?: boolean; isAlaCarte?: boolean; isTeam?: boolean }) {
   const [mode, setMode] = useState<"individual" | "bulk">("individual");
   const [email, setEmail] = useState("");
   const [offering, setOffering] = useState("");
@@ -437,49 +664,12 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
   );
 
   if (selectingCohort && !sent) return modalWrapper(
-    <>
-      {/* Cohort picker header */}
-      <div className="relative flex min-h-[56px] items-center justify-center border-b border-gray-stroke px-12">
-        <button
-          onClick={() => setSelectingCohort(null)}
-          className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-hover"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <span className="text-[16px] font-medium text-gray-dark">Select cohort</span>
-        <button onClick={onClose} className="absolute right-0 top-0 p-2">
-          <div className="flex items-center justify-center rounded-full border border-gray-stroke bg-white p-[10px] text-gray-dark hover:bg-gray-hover">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-              <line x1="1" y1="1" x2="13" y2="13" /><line x1="13" y1="1" x2="1" y2="13" />
-            </svg>
-          </div>
-        </button>
-      </div>
-      {/* Cohort picker body */}
-      <div className="flex-1 overflow-y-auto px-6 py-5">
-        <button
-          onClick={() => handleCohortPicked(null)}
-          className="mb-5 flex w-full items-center justify-between rounded-lg bg-gray-hover px-4 py-3.5 text-[14px] font-medium text-gray-dark transition-colors hover:bg-[#ebebeb]"
-        >
-          Invite the user to select their own dates
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
-        <div className="divide-y divide-gray-stroke">
-          {MODAL_COHORTS_META.map((cohort) => (
-            <ModalCohortSelectRow
-              key={cohort.key}
-              cohort={cohort}
-              isEnrolled={selectedDates[selectingCohort!] === cohort.label}
-              onEnroll={() => handleCohortPicked(cohort.startDate)}
-            />
-          ))}
-        </div>
-      </div>
-    </>, true
+    <CohortPickerView
+      isSelected={(cohort) => selectedDates[selectingCohort!] === cohort.label}
+      onPick={(cohort) => handleCohortPicked(cohort ? cohort.startDate : null)}
+      onBack={() => setSelectingCohort(null)}
+      onClose={onClose}
+    />, true
   );
 
   if (sent) return modalWrapper(
@@ -491,7 +681,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
           </svg>
         </div>
         <h3 className="mb-3 text-[28px] font-medium text-gray-dark">
-          {isAlaCarte ? "Access granted!" : mode === "bulk" ? "Invites sent!" : "Invite sent!"}
+          {isTeam ? (mode === "bulk" ? "Invites sent!" : "Invite sent!") : isAlaCarte ? "Access granted!" : mode === "bulk" ? "Invites sent!" : "Invite sent!"}
         </h3>
         <p className="text-[16px] leading-[1.5] text-gray-light">{successMessage}</p>
       </div>
@@ -504,11 +694,12 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
   return modalWrapper(
     <>
       <div className="px-6 pb-4 pt-6">
-        <h3 className="text-[28px] font-medium text-gray-dark">{isAlaCarte ? "Grant access" : "Add users"}</h3>
+        <h3 className={`text-[28px] font-medium text-gray-dark${isTeam ? " font-serif" : ""}`}>{isTeam ? "Invite" : isAlaCarte ? "Grant access" : "Add users"}</h3>
+        {isTeam && <p className="leland-paragraph-lg mt-2 text-gray-light">Add a teammate and grant them access to services or content on Leland. We'll send them an invite email.</p>}
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-6 pb-2">
+      <div className="flex-1 overflow-y-auto px-6 pb-6">
         {/* Toggle */}
         <div className="mb-6 flex gap-2">
           {(["individual", "bulk"] as const).map((m) => (
@@ -528,6 +719,7 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
 
         {mode === "individual" ? (
           <>
+            {isTeam && <p className="mb-3 text-[16px] font-semibold text-gray-dark">User details</p>}
             <div className="mb-5">
               <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">Email address</label>
               <input value={email} onChange={(e) => setEmail(e.target.value)} className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[14px] text-gray-dark outline-none focus:border-primary" type="email" />
@@ -543,8 +735,8 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
                 <input className="h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[14px] text-gray-dark outline-none focus:border-primary" />
               </div>
             </div>
-            {isAlaCarte && <p className="mt-8 mb-5 text-[14px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>}
-            {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} cohortInvited={cohortInvited} setCohortInvited={setCohortInvited} selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} /> : <PerSeatIncludes selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} />}
+            {isAlaCarte && !isTeam && <p className="mt-8 mb-5 text-[14px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>}
+            {isTeam ? <TeamOfferings /> : isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} cohortInvited={cohortInvited} setCohortInvited={setCohortInvited} selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} /> : <PerSeatIncludes selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} />}
           </>
         ) : (
           <>
@@ -566,27 +758,47 @@ export function InviteModal({ open, onClose, hideOffering, isAlaCarte }: { open:
               </svg>
               Download template CSV to get started.
             </button>
-            {isAlaCarte && <p className="mt-8 mb-5 text-[14px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>}
-            {isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} cohortInvited={cohortInvited} setCohortInvited={setCohortInvited} selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} /> : <PerSeatIncludes selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} />}
+            {isAlaCarte && !isTeam && <p className="mt-8 mb-5 text-[14px] font-medium text-gray-dark">When you grant access, this user will receive an email.</p>}
+            {isTeam ? <TeamOfferings /> : isAlaCarte ? <AlaCArteOfferings sessions={sessions} setSessions={setSessions} lelandPlus={lelandPlus} setLelandPlus={setLelandPlus} cohortInvited={cohortInvited} setCohortInvited={setCohortInvited} selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} /> : <PerSeatIncludes selectedDates={selectedDates} onOpenCohortPicker={handleOpenCohortPicker} />}
           </>
         )}
 
+        {isTeam && (
+          <div className="mt-8">
+            <label className="mb-3 block text-[16px] font-semibold text-gray-dark">
+              Personal message <span className="font-normal text-gray-light">(optional)</span>
+            </label>
+            <textarea
+              rows={3}
+              placeholder="e.g. I enrolled in this program last month and thought it would be really helpful for you."
+              className="block w-full resize-none rounded-[8px] border border-gray-stroke bg-white px-4 py-3 text-[14px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-primary"
+            />
+            <p className="mt-1.5 text-[12px] text-gray-light">We'll include this in the invite email.</p>
+          </div>
+        )}
+        {!isTeam && (
         <div className="mt-6">
-          <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">
-            Notes <span className="text-gray-light">(optional)</span>
-          </label>
-          <textarea
-            rows={3}
-            placeholder="Add a note for this user..."
-            className="w-full resize-none rounded-[8px] border border-gray-stroke bg-white px-4 py-3 text-[14px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-primary"
-          />
-        </div>
+            <label className="mb-[6px] block text-[14px] font-normal text-gray-dark">
+              Notes <span className="text-gray-light">(optional)</span>
+            </label>
+            <textarea
+              rows={3}
+              placeholder="Add a note for this user..."
+              className="w-full resize-none rounded-[8px] border border-gray-stroke bg-white px-4 py-3 text-[14px] text-gray-dark outline-none placeholder:text-gray-xlight focus:border-primary"
+            />
+          </div>
+        )}
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-t border-gray-stroke px-6 py-[14px]">
-        <Btn variant="secondary" onClick={onClose}>Cancel</Btn>
-        <Btn variant="primary" onClick={() => setSent(true)}>{isAlaCarte ? "Grant access" : "Send invite"}</Btn>
+      <div className={`flex items-center border-t border-gray-stroke px-6 py-[14px] ${isTeam ? "justify-end" : "justify-between"}`}>
+        {/* Teams drop Cancel — the modal's close button covers it */}
+        {!isTeam && <Btn variant="secondary" onClick={onClose}>Cancel</Btn>}
+        {isTeam ? (
+          <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" onClick={() => setSent(true)}>Send invite</Button>
+        ) : (
+          <Btn variant="primary" onClick={() => setSent(true)}>{isAlaCarte ? "Grant access" : "Send invite"}</Btn>
+        )}
       </div>
     </>
   );
@@ -948,6 +1160,7 @@ export function B2BModalDispatcher({
   emailFilterLabel,
   showVerizon,
   isAlaCarte,
+  isTeam,
 }: {
   openModal: ModalId;
   onClose: () => void;
@@ -955,10 +1168,13 @@ export function B2BModalDispatcher({
   emailFilterLabel: string;
   showVerizon?: boolean;
   isAlaCarte?: boolean;
+  isTeam?: boolean;
 }) {
-  return (
+  // Portaled to <body> so an animated/transformed page ancestor can't trap the fixed overlays
+  // (which let the sticky nav draw over the modal).
+  return createPortal(
     <>
-      <InviteModal open={openModal === "invite"} onClose={onClose} hideOffering={showVerizon} isAlaCarte={isAlaCarte} />
+      <InviteModal open={openModal === "invite"} onClose={onClose} hideOffering={showVerizon} isAlaCarte={isAlaCarte} isTeam={isTeam} />
       <GrantModal open={openModal === "grant"} onClose={onClose} />
       <BulkImportModal open={openModal === "bulk"} onClose={onClose} />
       <AdminModal open={openModal === "admin"} onClose={onClose} />
@@ -970,6 +1186,7 @@ export function B2BModalDispatcher({
         recipients={emailRecipients}
         filterLabel={emailFilterLabel}
       />
-    </>
+    </>,
+    document.body
   );
 }

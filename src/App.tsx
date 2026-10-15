@@ -5,6 +5,8 @@ import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { BookmarksProvider } from "./contexts/BookmarksContext";
 import { SavedToastProvider } from "./contexts/SavedToastContext";
 import { ExpertModeProvider } from "./contexts/ExpertModeContext";
+import { TeamProvider } from "./contexts/TeamContext";
+import { TeamPrototypeProvider } from "./contexts/TeamPrototypeContext";
 import { TopNavStyleProvider } from "./contexts/TopNavStyleContext";
 import { ProfileBarModeProvider } from "./contexts/ProfileBarModeContext";
 import { FeedDemoProvider } from "./contexts/FeedDemoContext";
@@ -129,6 +131,8 @@ import CoachReviews from "./pages/CoachReviews";
 import CoachDiscountCodes from "./pages/CoachDiscountCodes";
 import Account from "./pages/Account";
 import ReferFriend from "./pages/ReferFriend";
+import TeamLayout from "./components/TeamLayout";
+import { TeamOverview, TeamMembers, TeamAdmins, TeamBilling, TeamReportsPage, TeamAdsPage, TeamRecruitingPage } from "./pages/Team";
 import AltNavLivestreams from "./pages/AltNavLivestreams";
 import AltNavContent from "./pages/AltNavContent";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
@@ -156,6 +160,8 @@ export default function App() {
     <VersionProvider>
     <DarkModeProvider>
     <ExpertModeProvider>
+    <TeamProvider>
+    <TeamPrototypeProvider>
     <TopNavStyleProvider>
     <BookmarksProvider>
     <SavedToastProvider>
@@ -209,6 +215,18 @@ export default function App() {
         <Route path="/groups/:groupId" element={<Group />} />
         <Route path="/site" element={<Site />} />
         <Route path="/settings" element={<AccountSettings />} />
+        {/* Standalone team dashboard — separate from the My Leland shell */}
+        <Route path="/team" element={<TeamLayout />}>
+          <Route index element={<Navigate to="/team/overview" replace />} />
+          <Route path="overview" element={<TeamOverview />} />
+          <Route path="members" element={<TeamMembers />} />
+          <Route path="admins" element={<TeamAdmins />} />
+          <Route path="billing" element={<TeamBilling />} />
+          <Route path="reports" element={<TeamReportsPage />} />
+          <Route path="ads" element={<TeamAdsPage />} />
+          <Route path="recruiting" element={<TeamRecruitingPage />} />
+          <Route path="*" element={<Navigate to="/team" replace />} />
+        </Route>
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/my-programs" element={<MyCourses />} />
         <Route path="/course/:courseId" element={<CourseDetail />} />
@@ -340,6 +358,8 @@ export default function App() {
     </SavedToastProvider>
     </BookmarksProvider>
     </TopNavStyleProvider>
+    </TeamPrototypeProvider>
+    </TeamProvider>
     </ExpertModeProvider>
     </DarkModeProvider>
     </VersionProvider>
