@@ -1576,12 +1576,12 @@ function ReflectionCard({ p, sub, onOpen }: { p: Person; sub: Submission; onOpen
         role: "button", tabIndex: 0, onClick: onOpen,
         onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } },
       } : {})}
-      className={`flex flex-col justify-between overflow-hidden rounded-[12px] border border-gray-stroke bg-white transition-colors ${onOpen ? "cursor-pointer hover:border-gray-xlight" : ""}`}
+      className={`flex flex-col justify-between overflow-hidden rounded-[12px] border border-gray-stroke transition-colors ${onOpen ? "cursor-pointer bg-gray-hover hover:border-gray-xlight" : "bg-white"}`}
     >
       <div className="p-5">
         <ReflectionAnswers r={sub.reflection!} clamp={!!onOpen} />
       </div>
-      <div className="flex min-w-0 items-center gap-2 border-t border-gray-stroke bg-cream/50 px-5 py-3">
+      <div className={`flex min-w-0 items-center gap-2 border-t border-gray-stroke px-5 py-3 ${onOpen ? "bg-white" : "bg-cream/50"}`}>
         <span className="min-w-0 flex-1 truncate text-[12px] text-gray-light"><span className="font-semibold text-gray-dark">{p.name}</span> · {sub.title}</span>
         {!onOpen && <span className="shrink-0 text-[12px] text-gray-light">{sub.date}</span>}
       </div>
@@ -1595,11 +1595,82 @@ function ReflectionsDetail({ people }: { people: Person[] }) {
   return <div className="flex flex-col gap-3">{all.map(({ sub, p }) => <ReflectionCard key={`${p.email}-${sub.title}`} p={p} sub={sub} />)}</div>;
 }
 
+// The team's latest builds, laid out like the "My programs" carousel on My Leland: a title with prev/next buttons,
+// a track of 1.91:1 cards that pages with the buttons (it only free-scrolls by touch), and a "See all" button below.
+function TeamBuilds({ people, onSeeAll }: { people: Person[]; onSeeAll: () => void }) {
+  const all = people
+    .flatMap((p) => p.submissions.map((sub) => ({ p, sub })))
+    .sort((a, b) => new Date(b.sub.date).getTime() - new Date(a.sub.date).getTime());
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(0);
+  const [pages, setPages] = useState(1);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth || 1;
+      setPage(Math.round(el.scrollLeft / w));
+      setPages(Math.max(1, Math.ceil((el.scrollWidth - 8) / w)));
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => { el.removeEventListener("scroll", update); ro.disconnect(); };
+  }, [all.length]);
+
+  if (all.length === 0) return null;
+  const scrollByPage = (dir: 1 | -1) => {
+    const el = scrollRef.current;
+    if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" });
+  };
+  const navBtn = "flex h-9 w-9 items-center justify-center rounded-full border border-[#222222]/[0.12] text-gray-dark transition-colors hover:bg-[#222222]/5 disabled:opacity-30 disabled:hover:bg-transparent";
+
+  return (
+    <div className="mb-8 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-[22px] font-semibold text-gray-dark">What the team is building</h2>
+        <div className="flex shrink-0 items-center gap-2">
+          <button onClick={() => scrollByPage(-1)} disabled={page <= 0} aria-label="Previous" className={navBtn}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <button onClick={() => scrollByPage(1)} disabled={page >= pages - 1} aria-label="Next" className={navBtn}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          </button>
+        </div>
+      </div>
+      {/* The track runs out to the card edges; its padding keeps the first card aligned with the heading, and the fades soften the cut-off cards. */}
+      <div className="relative -mx-5 sm:-mx-6">
+        <div ref={scrollRef} className="snap-x snap-mandatory scroll-pl-5 overflow-x-auto py-1 [scrollbar-width:none] sm:scroll-pl-6 sm:overflow-x-hidden [&::-webkit-scrollbar]:hidden">
+          <div className="flex w-max items-start gap-4 px-5 sm:px-6">
+            {all.slice(0, 8).map(({ p, sub }) => (
+              <div key={`${p.email}-${sub.title}`} onClick={onSeeAll} className="group w-[232px] shrink-0 cursor-pointer snap-start">
+                <BuildThumb sub={sub} className="w-full !rounded-[12px] border border-gray-stroke" />
+                <h3 className="mt-3 text-[16px] font-semibold leading-snug text-gray-dark">{sub.title}</h3>
+                <div className="mt-1 flex items-center gap-2 text-[14px] leading-tight text-gray-light">
+                  <Avatar initials={p.initials} image={p.image} size={20} />
+                  <span className="truncate">{p.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-white to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white to-transparent" />
+      </div>
+      <Button size="md" variant="secondary" className="mt-4 font-semibold" onClick={onSeeAll}>
+        See all {all.length} {all.length === 1 ? "build" : "builds"}
+      </Button>
+    </div>
+  );
+}
+
 function TeamReflections({ people, onSeeAll, onOpen }: { people: Person[]; onSeeAll: () => void; onOpen: (p: Person, sub: Submission) => void }) {
   const all = allReflections(people);
   if (all.length === 0) return null;
   return (
-    <div className="mb-8">
+    <div className="mb-8 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
       <div className="mb-3 flex items-baseline justify-between gap-3">
         <h2 className="text-[22px] font-semibold text-gray-dark">What the team is learning</h2>
         <button onClick={onSeeAll} className="hidden text-[14px] text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px] sm:inline">See all {all.length} {all.length === 1 ? "response" : "responses"}</button>
@@ -1847,6 +1918,8 @@ export default function TeamProgramOverview() {
       </div>
 
       <ActivityChart people={people} />
+
+      <TeamBuilds people={people} onSeeAll={() => setDetail("builds")} />
 
       {showSkills ? <TeamSkills people={people} /> : <TeamReflections people={people} onSeeAll={() => setDetail("reflections")} onOpen={(p, sub) => setOpenReflection({ p, sub })} />}
 
