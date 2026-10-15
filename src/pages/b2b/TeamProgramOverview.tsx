@@ -1630,7 +1630,7 @@ function TeamBuilds({ people, onSeeAll }: { people: Person[]; onSeeAll: () => vo
   return (
     <div className="mb-8 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-[22px] font-semibold text-gray-dark">What the team is building</h2>
+        <h2 className="text-[18px] font-semibold text-gray-dark">What the team is building</h2>
         <div className="flex shrink-0 items-center gap-2">
           <button onClick={() => scrollByPage(-1)} disabled={page <= 0} aria-label="Previous" className={navBtn}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
@@ -1671,17 +1671,16 @@ function TeamReflections({ people, onSeeAll, onOpen }: { people: Person[]; onSee
   if (all.length === 0) return null;
   return (
     <div className="mb-8 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
-      <div className="mb-3 flex items-baseline justify-between gap-3">
-        <h2 className="text-[22px] font-semibold text-gray-dark">What the team is learning</h2>
-        <button onClick={onSeeAll} className="hidden text-[14px] text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px] sm:inline">See all {all.length} {all.length === 1 ? "response" : "responses"}</button>
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <h2 className="text-[18px] font-semibold text-gray-dark">What the team is learning</h2>
       </div>
-      <p className="mb-4 text-[16px] text-gray-light">After each build, participants share what they learned and how they'll apply it at work.</p>
+      <p className="mb-4 text-[14px] text-gray-light">After each build, participants share what they learned and how they'll apply it at work.</p>
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {all.slice(0, 3).map(({ sub, p }) => <ReflectionCard key={`${p.email}-${sub.title}`} p={p} sub={sub} onOpen={() => onOpen(p, sub)} />)}
       </div>
-      <div className="mt-4 sm:hidden">
-        <Button size="md" variant="secondary" rounded="rounded-full" className="w-full" onClick={onSeeAll}>See all {all.length} {all.length === 1 ? "response" : "responses"}</Button>
-      </div>
+      <Button size="md" variant="secondary" className="mt-4 font-semibold" onClick={onSeeAll}>
+        See all {all.length} {all.length === 1 ? "response" : "responses"}
+      </Button>
     </div>
   );
 }
