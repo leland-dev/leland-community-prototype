@@ -175,6 +175,15 @@ export type SlackJoinBlock = {
   channel?: string;
 };
 
+// "Invite your team" call to action: sends the learner to the team dashboard's add-members flow
+// (or to creating a team first, if they don't have one yet).
+export type InviteTeamBlock = {
+  kind: "inviteTeam";
+  title?: string;
+  description?: string;
+  href?: string;
+};
+
 export type RadioCardOption = {
   value: string;
   label: string;
@@ -222,6 +231,7 @@ export type Block =
   | TagsBlock
   | StepsBlock
   | SlackJoinBlock
+  | InviteTeamBlock
   | LiveSessionBannerBlock
   | RadioCardGroupBlock
   | ToggleChipGroupBlock;

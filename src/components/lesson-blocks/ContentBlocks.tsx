@@ -28,6 +28,7 @@ import type {
   DownloadBlock as DownloadBlockType,
   EmbedBlock as EmbedBlockType,
   HtmlBlock as HtmlBlockType,
+  InviteTeamBlock as InviteTeamBlockType,
   ImageBlock as ImageBlockType,
   RadioCardGroupBlock as RadioCardGroupBlockType,
   SlackJoinBlock as SlackJoinBlockType,
@@ -373,6 +374,30 @@ export function SlackJoinBlock({ block }: { block: SlackJoinBlockType }) {
         Join →
       </span>
     </a>
+  );
+}
+
+export function InviteTeamBlock({ block }: { block: InviteTeamBlockType }) {
+  return (
+    <div className="flex w-full flex-col gap-4 rounded-lg border border-leland-gray-stroke bg-white p-5 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-leland-gray-hover text-leland-gray-dark">
+        <LelandIcons.IconUserGroup className="size-6" />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <p className="leland-heading-base font-semibold text-leland-gray-dark">
+          {block.title ?? "Bring your team along"}
+        </p>
+        <p className="leland-paragraph-base text-leland-gray-extra-light">
+          {block.description ?? "Invite teammates to the AI Builder Program or 1:1 coaching, and see what they learn."}
+        </p>
+      </div>
+      <Link
+        to={block.href ?? "/team/members?invite=1"}
+        className="shrink-0 self-start rounded-lg bg-leland-gray-dark px-4 py-3 text-center leland-heading-base font-semibold text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary sm:self-auto"
+      >
+        Invite your team
+      </Link>
+    </div>
   );
 }
 

@@ -182,7 +182,7 @@ const COURSE_COMPLETION_SECTION: CompletionSection = {
   kind: "completion",
   // Same question, same wording, as the intake "Getting to know you" section
   // — a clean pre/post pair for self-reported confidence improvement.
-  blocks: [AI_CONFIDENCE_QUESTION],
+  blocks: [AI_CONFIDENCE_QUESTION, { kind: "inviteTeam" }],
 };
 
 // Lessons 3–4 come from the generated manifest (legacy HTML iframe sections).

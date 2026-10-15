@@ -8,7 +8,6 @@ import { useSetNavTheme } from "../components/NavThemeContext";
 import { useSetRightSidebar } from "../components/RightSidebarContext";
 import { HomeRightSidebar } from "./Home";
 import SessionCard from "../components/SessionCard";
-import OfferingCard, { type OfferingType } from "../components/OfferingCard";
 import { Button, LinkButton } from "../components/Button";
 import {
   AppPromoCallout,
@@ -68,33 +67,11 @@ const upcomingEvents = [
 const TODAY_DAY = 30;
 const todaySessionCount = upcomingEvents.filter((e) => e.day === TODAY_DAY).length;
 
-interface ContentItem {
-  title: string;
-  subtitle: ReactNode;
-  image: string;
-  type: OfferingType;
-  href?: string;
-}
-
-const myContent: ContentItem[] = [
-  {
-    type: "content",
-    title: "How I Got Into Stanford GSB",
-    subtitle: <span className="flex items-center gap-1.5"><img src={pic1} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Marcus Thomas <span className="text-[#9B9B9B]">· 251 views</span></span>,
-    image: lelandPlusImg1,
-  },
-  {
-    type: "content",
-    title: "MBA Essay Framework",
-    subtitle: <span className="flex items-center gap-1.5"><img src={pic6} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Jessica Lin <span className="text-[#9B9B9B]">· 1.2k views</span></span>,
-    image: eventImg2,
-  },
-  {
-    type: "content",
-    title: "Consulting Case Prep Guide",
-    subtitle: <span className="flex items-center gap-1.5"><img src={pic8} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />Samantha Parker <span className="text-[#9B9B9B]">· 890 views</span></span>,
-    image: eventImg3,
-  },
+// Anything else the learner has bought or has access to (guides, recordings, frameworks), shown next to their programs.
+const myContentItems: Course[] = [
+  { title: "How I Got Into Stanford GSB", meta: "Marcus Thomas", progress: "251 views", image: lelandPlusImg1, ctaLabel: "View" },
+  { title: "MBA Essay Framework", meta: "Jessica Lin", progress: "1.2k views", image: eventImg2, ctaLabel: "View" },
+  { title: "Consulting Case Prep Guide", meta: "Samantha Parker", progress: "890 views", image: eventImg3, ctaLabel: "View" },
 ];
 
 const myExperts = [
@@ -141,10 +118,12 @@ interface Course {
   progress: string;
   image: string;
   href?: string;
+  /** Hover button label; defaults to Resume/Start for programs. */
+  ctaLabel?: string;
 }
 
 const myCourses: Course[] = [
-  { title: "AI Builder Program: Level 1", meta: "Leland · 12 lessons", progress: "60% complete", image: aibpImg, href: "/course/1" },
+  { title: "AI Builder Program: Level 1", meta: "Leland · 12 lessons", progress: "60% complete", image: aibpImg, href: "/program/ai-builder" },
   { title: "MBA Application Masterclass", meta: "Sam Wielen · 8 lessons", progress: "25% complete", image: samWielenImg },
   { title: "Consulting Case Interview Prep", meta: "Jessica Lin · 15 lessons", progress: "Not started", image: automationsImg },
   { title: "Product Management Foundations", meta: "David Kim · 10 lessons", progress: "90% complete", image: courseImg4 },
@@ -175,7 +154,7 @@ function CourseCard({ course }: { course: Course }) {
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="translate-y-2 opacity-0 transition-[transform,opacity] duration-200 ease-out will-change-transform group-hover:translate-y-0 group-hover:opacity-100">
                 <Button size="md" variant="glass" rounded="rounded-full" className="transform-gpu [will-change:backdrop-filter]">
-                  {pct > 0 ? "Resume" : "Start"}
+                  {course.ctaLabel ?? (pct > 0 ? "Resume" : "Start")}
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M5 12h14M13 6l6 6-6 6" />
                   </svg>
@@ -268,8 +247,8 @@ function MyCourses({ shell }: { shell?: boolean }) {
   const navigate = useNavigate();
   const myContentTo = shell ? "/my-leland/my-content" : "/coach/my-content";
   return (
-    <CardCarousel title="My programs" seeAllLabel="See all programs" seeAllTo={myContentTo}>
-      {myCourses.slice(0, 3).map((c) => (
+    <CardCarousel title="My content" seeAllLabel="See all" seeAllTo={myContentTo}>
+      {[...myCourses.slice(0, 3), ...myContentItems].map((c) => (
         <CourseCard key={c.title} course={c} />
       ))}
       {/* Always-present CTA — dashed tile matching the "My goals" add card */}
@@ -280,7 +259,7 @@ function MyCourses({ shell }: { shell?: boolean }) {
           </svg>
         </div>
         <h3 className="mt-3 truncate text-[16px] font-semibold leading-snug text-gray-dark">Take the next step</h3>
-        <p className="mt-1 truncate text-[14px] leading-tight text-gray-light">Browse all programs</p>
+        <p className="mt-1 truncate text-[14px] leading-tight text-gray-light">Browse all programs and content</p>
       </button>
     </CardCarousel>
   );
@@ -845,29 +824,6 @@ export default function Dashboard({ shell = false, expert: expertInit = false }:
 
             {/* Conversations */}
             <MyExperts title="Conversations" />
-
-            {/* My content — hidden for experts */}
-            {!expert && (
-              <DashCard title="My content">
-                <div className="-mx-2 flex flex-col gap-1">
-                  {myContent.map((item) => (
-                    <OfferingCard
-                      key={item.title}
-                      type={item.type}
-                      title={item.title}
-                      subtitle={item.subtitle}
-                      image={item.image}
-                      href={item.href}
-                      purchased
-                      size="small"
-                    />
-                  ))}
-                </div>
-                <Button onClick={() => navigate(shell ? "/my-leland/my-content" : "/coach/my-content")} size="md" variant="secondary" className="mt-4 font-semibold">
-                  See all
-                </Button>
-              </DashCard>
-            )}
 
             {/* My goals — hidden for experts */}
             {!expert && <GoalsCardSwitch enabled={goalsFeature} shell={shell} />}

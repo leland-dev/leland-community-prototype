@@ -9,6 +9,7 @@ import {
   EmbedBlock,
   HtmlBlock,
   ImageBlock,
+  InviteTeamBlock,
   RadioCardGroup,
   SlackJoinBlock,
   StepsBlock,
@@ -53,6 +54,8 @@ export function BlockRenderer({ block, allowH1 = true }: { block: Block; allowH1
       return <StepsBlock block={block} />;
     case "slackJoin":
       return <SlackJoinBlock block={block} />;
+    case "inviteTeam":
+      return <InviteTeamBlock block={block} />;
     case "radioCardGroup":
       return <RadioCardGroup block={block} />;
     case "toggleChipGroup":
