@@ -106,6 +106,7 @@ import PostTest from "./pages/PostTest";
 import ProfileCardTest from "./pages/ProfileCardTest";
 import GroupCardTest from "./pages/GroupCardTest";
 import Components from "./pages/Components";
+import ProgramHub from "./pages/ProgramHub";
 import CourseDetail from "./pages/CourseDetail";
 import CoachLayout from "./components/CoachLayout";
 import CoachHome from "./pages/CoachHome";
@@ -225,6 +226,7 @@ export default function App() {
         </Route>
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/my-programs" element={<MyCourses />} />
+        <Route path="/program/ai-builder" element={<ProgramHub />} />
         <Route path="/course/:courseId" element={<CourseDetail />} />
         <Route path="/program/session/:urn" element={<LiveSession />} />
         <Route element={<CoachLayout />}>

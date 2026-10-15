@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "../../components/Button";
 import { FilterDropdown } from "./B2BOverviewV2";
@@ -2049,6 +2049,14 @@ const ACCESS_COL: Col = { key: "access", header: "Access", cell: (p) => <AccessT
 // Team members: manage people. The prototype menu switches how offerings are split up.
 export function TeamMembersPage() {
   const { people: granted, openGrant, openPerson } = usePeople();
+  // "Invite your team" calls to action elsewhere in the product link here with ?invite=1 to open the add-members flow.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("invite") !== "1") return;
+    openGrant(null);
+    setSearchParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
   const { team } = useTeam();
   const { membersLayout, showAccessColumn } = useTeamPrototype();
   const [offeringChoice, setOfferingChoice] = useState<Offering>("program");
