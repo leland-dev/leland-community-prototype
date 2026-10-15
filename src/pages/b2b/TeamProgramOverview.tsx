@@ -29,18 +29,22 @@ import pic13 from "../../assets/profile photos/pic-13.png";
 // AI Builder Program seat pricing (sample): live vs async, and limited-time vs extended (annual) access.
 type ProgramFormat = "live" | "async";
 type ProgramAccess = "limited" | "extended";
-const SESSION_PRICE = 250; // 1:1 coaching, per session (sample)
+const SESSION_PRICE = 200; // 1:1 coaching, per 1-hour session (sample)
 const SEAT_PRICES: Record<ProgramFormat, Record<ProgramAccess, number>> = {
   live: { limited: 1995, extended: 2995 },
   async: { limited: 995, extended: 1495 },
 };
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 });
+const SESSION_PRICE_LABEL = `${usd(SESSION_PRICE)} / 1-hr session`;
 const LEVELS = [1, 2, 3, 4] as const;
 type Level = (typeof LEVELS)[number];
 
 type Skill = { name: string; before: number; after?: number };
 type Assessment = { level: Level; score: number; date: string; skills: Skill[] };
-type Submission = { title: string; description: string; date: string; recordingLength: string; link?: string };
+// After each build, participants answer two free-response questions.
+const REFLECTION_QUESTIONS = { learned: "What did you learn?", apply: "How will you apply this in your work?" };
+type Reflection = { learned: string; apply: string };
+type Submission = { title: string; description: string; date: string; recordingLength: string; link?: string; reflection?: Reflection };
 
 type Program =
   | { status: "no-cohort" } // seat assigned, but they haven't picked a cohort yet
@@ -92,9 +96,9 @@ const INITIAL_PEOPLE: Person[] = [
     lastActive: "2h ago", lastActiveDays: 0,
     assessments: [assess(1, 84, "Jun 23, 2026"), assess(2, 79, "Jul 21, 2026"), assess(3, 88, "Aug 18, 2026"), assess(4, 91, "Sep 15, 2026")],
     submissions: [
-      { title: "Support ticket triage agent", description: "Routes inbound tickets by urgency and drafts first replies for the team to review.", date: "Sep 14, 2026", recordingLength: "4:12", link: "https://example.com/triage" },
-      { title: "Weekly metrics digest", description: "Pulls the dashboard numbers each Monday and writes the exec summary.", date: "Aug 6, 2026", recordingLength: "3:40" },
-      { title: "Prompt library", description: "A shared set of tested prompts for the ops team.", date: "Jul 2, 2026", recordingLength: "2:58" },
+      { title: "Support ticket triage agent", description: "Routes inbound tickets by urgency and drafts first replies for the team to review.", date: "Sep 14, 2026", recordingLength: "4:12", link: "https://example.com/triage", reflection: { learned: "How much of triage is really pattern recognition. Once I wrote down what \"urgent\" means for us, the agent got it right most of the time.", apply: "Rolling it out to the support team next month, with a human review step for anything the agent marks as urgent." } },
+      { title: "Weekly metrics digest", description: "Pulls the dashboard numbers each Monday and writes the exec summary.", date: "Aug 6, 2026", recordingLength: "3:40", reflection: { learned: "That a good summary starts with deciding which three numbers actually matter. The model was the easy part.", apply: "The digest now goes to leadership every Monday, so I no longer pull those numbers by hand." } },
+      { title: "Prompt library", description: "A shared set of tested prompts for the ops team.", date: "Jul 2, 2026", recordingLength: "2:58", reflection: { learned: "Small, tested prompts beat long clever ones, and writing down what worked saves everyone time.", apply: "Sharing the library with the ops team and asking each person to add one prompt a week." } },
     ],
   },
   {
@@ -103,8 +107,8 @@ const INITIAL_PEOPLE: Person[] = [
     lastActive: "Yesterday", lastActiveDays: 1,
     assessments: [assess(1, 76, "Sep 1, 2026"), assess(2, 72, "Sep 29, 2026")],
     submissions: [
-      { title: "Invoice reconciliation helper", description: "Matches invoices to POs and flags mismatches.", date: "Sep 29, 2026", recordingLength: "5:03", link: "https://example.com/invoices" },
-      { title: "Meeting notes summarizer", description: "Turns call transcripts into action items.", date: "Sep 1, 2026", recordingLength: "2:31" },
+      { title: "Invoice reconciliation helper", description: "Matches invoices to POs and flags mismatches.", date: "Sep 29, 2026", recordingLength: "5:03", link: "https://example.com/invoices", reflection: { learned: "Matching is the easy part. Handling the weird exceptions is where the time goes, so I built the flagging first.", apply: "Finance will use it on next month's close, starting with our three largest vendors." } },
+      { title: "Meeting notes summarizer", description: "Turns call transcripts into action items.", date: "Sep 1, 2026", recordingLength: "2:31", reflection: { learned: "Asking for action items with owners gives much better notes than asking for a summary.", apply: "Using it on all of our weekly client calls so follow-ups stop slipping." } },
     ],
   },
   {
@@ -113,7 +117,7 @@ const INITIAL_PEOPLE: Person[] = [
     lastActive: "3d ago", lastActiveDays: 3,
     assessments: [assess(1, 81, "Sep 29, 2026")],
     submissions: [
-      { title: "Onboarding checklist bot", description: "Walks new hires through their first-week tasks.", date: "Oct 1, 2026", recordingLength: "3:18" },
+      { title: "Onboarding checklist bot", description: "Walks new hires through their first-week tasks.", date: "Oct 1, 2026", recordingLength: "3:18", reflection: { learned: "How to break a messy process into steps an assistant can follow one at a time.", apply: "Piloting it with the two people who start in November, then adjusting from their feedback." } },
     ],
   },
   {
@@ -127,7 +131,7 @@ const INITIAL_PEOPLE: Person[] = [
     lastActive: "3w ago", lastActiveDays: 21,
     assessments: [assess(1, 69, "Aug 4, 2026"), assess(2, 64, "Sep 1, 2026")],
     submissions: [
-      { title: "CRM cleanup script", description: "Finds and merges duplicate accounts.", date: "Aug 20, 2026", recordingLength: "3:55" },
+      { title: "CRM cleanup script", description: "Finds and merges duplicate accounts.", date: "Aug 20, 2026", recordingLength: "3:55", reflection: { learned: "Duplicate detection needs a clear rule for which record wins. I had skipped that at first.", apply: "Running it quarterly on our CRM and sharing the merge rules with sales ops." } },
     ],
   },
   {
@@ -136,8 +140,8 @@ const INITIAL_PEOPLE: Person[] = [
     lastActive: "1d ago", lastActiveDays: 1,
     assessments: [assess(1, 88, "Sep 15, 2026")],
     submissions: [
-      { title: "Sales call coach", description: "Scores call recordings against our playbook.", date: "Sep 25, 2026", recordingLength: "4:40", link: "https://example.com/call-coach" },
-      { title: "Lead research brief", description: "Builds a one-page brief for each new lead.", date: "Sep 10, 2026", recordingLength: "2:47" },
+      { title: "Sales call coach", description: "Scores call recordings against our playbook.", date: "Sep 25, 2026", recordingLength: "4:40", link: "https://example.com/call-coach", reflection: { learned: "Scoring against our own playbook works far better than a generic rubric.", apply: "Using it in weekly 1:1s with reps to pick one call to review together." } },
+      { title: "Lead research brief", description: "Builds a one-page brief for each new lead.", date: "Sep 10, 2026", recordingLength: "2:47", reflection: { learned: "Giving the model a template for the brief matters more than giving it more sources.", apply: "Every new lead gets a brief before the first call, which saves about 20 minutes each." } },
     ],
   },
   {
@@ -467,7 +471,7 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
   const first = recipients[0];
   const recipientsLine = first ? (recipients.length === 1 ? first.email : `${first.email} and ${recipients.length - 1} other${recipients.length === 2 ? "" : "s"}`) : "";
   const sendLabel = person ? "Save access" : recipients.length > 1 ? `Send ${recipients.length} invites` : "Send invite";
-  const offeringName = (o: GrantOffering) => (o === "program" ? "AI Builder Program" : o === "coaching" ? "1:1 coaching" : "Admin settings");
+  const offeringName = (o: GrantOffering) => (o === "program" ? "AI Builder Program" : o === "coaching" ? "1:1 coaching" : "Team admin");
   const offeringTitle = selected.length === 1 ? offeringName(selected[0]) : "Review details";
 
   const inputCls = "h-[48px] w-full rounded-[8px] border border-gray-stroke bg-white px-4 text-[14px] text-gray-dark outline-none focus:border-primary disabled:bg-gray-hover disabled:text-gray-light";
@@ -579,10 +583,10 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                   <span className="max-w-full truncate text-[16px] font-medium text-gray-dark">{recipientsLine}</span>
                 </div>
                 <div className="flex-1 overflow-y-auto px-6 pb-6 pt-6">
-                  <h3 className="mb-5 text-[18px] font-semibold leading-[1.3] text-gray-dark">Grant access</h3>
+                  <h3 className="mb-5 font-serif text-[28px] font-medium leading-[1.2] text-gray-dark">Grant access</h3>
                   <AccessOption
                     icon={settingsIcon}
-                    title="Admin settings"
+                    title="Team admin"
                     description="Manage team access and billing"
                     checked={wantsAdmin}
                     onToggle={() => toggle("admin")}
@@ -605,7 +609,7 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                     <AccessOption
                       icon={userIcon}
                       title="1:1 coaching"
-                      price={`${usd(SESSION_PRICE)} / session`}
+                      price={SESSION_PRICE_LABEL}
                       checked={wantsCoaching}
                       onToggle={() => toggle("coaching")}
                     />
@@ -707,7 +711,7 @@ function GrantAccessModal({ open, person, existingEmails, onClose, onGrant }: {
                     <div className="rounded-[10px] border border-gray-stroke p-4">
                       <div className="flex items-baseline justify-between gap-3">
                         <span className="text-[14px] font-medium text-gray-dark">1:1 coaching</span>
-                        <span className="shrink-0 text-[14px] text-gray-light">{usd(SESSION_PRICE)} / session</span>
+                        <span className="shrink-0 text-[14px] text-gray-light">{SESSION_PRICE_LABEL}</span>
                       </div>
                       <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-stroke pt-3">
                         <span className="text-[14px] text-gray-dark">Category</span>
@@ -808,6 +812,20 @@ function DrawerSection({ title, children }: { title: string; children: ReactNode
   );
 }
 
+function ReflectionAnswers({ r, className = "", clamp }: { r: Reflection; className?: string; clamp?: boolean }) {
+  return (
+    <div className={`flex flex-col gap-3 ${className}`}>
+      {(["learned", "apply"] as const).map((k) => (
+        <div key={k}>
+          {/* Preview cards sit under "What the team is learning", which introduces the first answer */}
+          {clamp ? (k === "apply" && <div className="text-[12px] font-medium text-gray-light">How they'll apply it</div>) : <div className="text-[12px] font-medium text-gray-light">{REFLECTION_QUESTIONS[k]}</div>}
+          <p className={`${clamp && k === "learned" ? "" : "mt-1"} text-[14px] font-medium leading-[1.4] text-gray-dark ${clamp ? "line-clamp-2" : ""}`}>{r[k]}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function SubmissionItem({ sub, by }: { sub: Submission; by?: string }) {
   return (
     <div className="rounded-[10px] border border-gray-stroke p-4">
@@ -819,13 +837,14 @@ function SubmissionItem({ sub, by }: { sub: Submission; by?: string }) {
         <div className="shrink-0 text-[12px] text-gray-light">{sub.date}</div>
       </div>
       <p className="mt-1 text-[14px] leading-[1.4] text-gray-light">{sub.description}</p>
+      {sub.reflection && <ReflectionAnswers r={sub.reflection} className="mt-3 border-t border-gray-stroke pt-3" />}
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button className="inline-flex items-center gap-1.5 rounded-full bg-gray-hover px-3 py-1.5 text-[12px] font-medium text-gray-dark hover:bg-[#222222]/10">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4" /></svg>
           Screen recording · {sub.recordingLength}
         </button>
         {sub.link && (
-          <a href={sub.link} onClick={(e) => e.preventDefault()} className="inline-flex items-center gap-1 text-[12px] font-medium text-gray-dark underline">Project link</a>
+          <a href={sub.link} onClick={(e) => e.preventDefault()} className="inline-flex items-center gap-1 text-[12px] font-medium text-gray-dark underline">Build link</a>
         )}
       </div>
     </div>
@@ -833,6 +852,7 @@ function SubmissionItem({ sub, by }: { sub: Submission; by?: string }) {
 }
 
 function PersonDrawer({ person, onClose, onEdit }: { person: Person | null; onClose: () => void; onEdit: (p: Person) => void }) {
+  const { showSkills } = useTeamPrototype();
   useEffect(() => {
     if (!person) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -886,7 +906,7 @@ function PersonDrawer({ person, onClose, onEdit }: { person: Person | null; onCl
                   ) : <p className="text-[14px] text-gray-light">No program seat.</p>}
                 </DrawerSection>
 
-                {person.program && (
+                {person.program && showSkills && (
                   <DrawerSection title="Assessments & skills">
                     {person.assessments.length === 0 ? (
                       <p className="text-[14px] text-gray-light">No assessments completed yet. One is taken after each level.</p>
@@ -989,17 +1009,13 @@ function computeSkills(people: Person[]): SkillSummary[] {
   });
 }
 
-// Headline result: the average improvement across skills that have a post-assessment.
-// Hidden until there is at least one, so it never overstates what the data shows.
-function ImpactHero({ people }: { people: Person[] }) {
+// Headline result: the average improvement across skills that have a post-assessment. It becomes the
+// page title, so it's null (and the title falls back to "Overview") until at least one skill has a
+// post-score, which keeps it from overstating what the data shows.
+function averageSkillGain(people: Person[]): number | null {
   const measured = computeSkills(people).filter((s) => s.gain !== null);
   if (measured.length === 0) return null;
-  const avgGain = Math.round(measured.reduce((t, s) => t + s.gain!, 0) / measured.length);
-  return (
-    <div className="mb-4 rounded-[12px] border border-gray-stroke bg-white p-6">
-      <div className="font-serif text-[28px] font-medium leading-[1.2] text-gray-dark">Team skills are up {avgGain} points on average</div>
-    </div>
-  );
+  return Math.round(measured.reduce((t, s) => t + s.gain!, 0) / measured.length);
 }
 
 function SkillRow({ skill, open, onToggle }: { skill: SkillSummary; open: boolean; onToggle: () => void }) {
@@ -1092,7 +1108,7 @@ function TeamSkills({ people }: { people: Person[] }) {
 
 // ── Activity over time ──
 
-// Running totals of levels completed and projects shared (they only go up), plotted by
+// Running totals of levels completed and builds shared (they only go up), plotted by
 // week over an adjustable time window.
 const DAY = 86400000;
 const startOfWeek = (t: number) => {
@@ -1116,11 +1132,11 @@ function ActivityChart({ people }: { people: Person[] }) {
   const [range, setRange] = useState<RangeValue>("6m");
   const [hover, setHover] = useState<number | null>(null);
 
-  const { weeks, levels, projects } = useMemo(() => {
-    const empty = { weeks: [] as number[], levels: [] as number[], projects: [] as number[] };
+  const { weeks, levels, builds } = useMemo(() => {
+    const empty = { weeks: [] as number[], levels: [] as number[], builds: [] as number[] };
     const levelTimes = people.flatMap((p) => p.assessments.map((a) => new Date(a.date).getTime()));
-    const projectTimes = people.flatMap((p) => p.submissions.map((sub) => new Date(sub.date).getTime()));
-    const all = [...levelTimes, ...projectTimes];
+    const buildTimes = people.flatMap((p) => p.submissions.map((sub) => new Date(sub.date).getTime()));
+    const all = [...levelTimes, ...buildTimes];
     if (all.length === 0) return empty;
     const first = startOfWeek(Math.min(...all));
     const total = Math.round((startOfWeek(Date.now()) - first) / (7 * DAY)) + 1;
@@ -1137,7 +1153,7 @@ function ActivityChart({ people }: { people: Person[] }) {
     return {
       weeks: Array.from({ length: total }, (_, i) => first + i * 7 * DAY).slice(from),
       levels: cum(bucket(levelTimes)).slice(from),
-      projects: cum(bucket(projectTimes)).slice(from),
+      builds: cum(bucket(buildTimes)).slice(from),
     };
   }, [people, range]);
 
@@ -1147,7 +1163,7 @@ function ActivityChart({ people }: { people: Person[] }) {
   const n = weeks.length;
   const step = (W - padL - padR) / (n - 1);
   const x = (i: number) => padL + i * step;
-  const max = Math.max(4, Math.ceil(Math.max(...levels, ...projects) / 2) * 2);
+  const max = Math.max(4, Math.ceil(Math.max(...levels, ...builds) / 2) * 2);
   const y = (v: number) => padT + (1 - v / max) * (H - padT - padB);
   const line = (xs: number[]) => xs.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
   const area = (xs: number[]) => `${line(xs)} L${x(n - 1).toFixed(1)},${y(0)} L${x(0).toFixed(1)},${y(0)} Z`;
@@ -1164,7 +1180,7 @@ function ActivityChart({ people }: { people: Person[] }) {
     .filter((t, k, arr) => k === 0 || t.m !== arr[k - 1].m)
     .filter((t, k, arr) => k === 0 || (t.i - arr[k - 1].i) * step >= 36);
   const LEVEL_COLOR = "var(--color-rust)";
-  const PROJECT_COLOR = "var(--color-gray-dark)";
+  const BUILD_COLOR = "var(--color-gray-dark)";
   const h = hover;
 
   return (
@@ -1174,7 +1190,7 @@ function ActivityChart({ people }: { people: Person[] }) {
           <h2 className="text-[16px] font-semibold text-gray-dark">Activity over time</h2>
           <div className="flex items-center gap-4 text-[12px] text-gray-light">
             <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: LEVEL_COLOR }} />Levels completed · {levels[n - 1]}</span>
-            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: PROJECT_COLOR }} />Projects shared · {projects[n - 1]}</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: BUILD_COLOR }} />Builds shared · {builds[n - 1]}</span>
           </div>
         </div>
         <FilterDropdown
@@ -1191,7 +1207,7 @@ function ActivityChart({ people }: { people: Person[] }) {
           viewBox={`0 0 ${W} ${H}`}
           className="block w-full"
           role="img"
-          aria-label="Cumulative levels completed and projects shared by week"
+          aria-label="Cumulative levels completed and builds shared by week"
           onMouseMove={(e) => {
             const r = e.currentTarget.getBoundingClientRect();
             const px = ((e.clientX - r.left) / r.width) * W;
@@ -1209,12 +1225,12 @@ function ActivityChart({ people }: { people: Person[] }) {
             <text key={t.i} x={x(t.i)} y={H - 6} textAnchor={t.i === 0 ? "start" : "middle"} fontSize="11" fill="#767676">{t.label}</text>
           ))}
           <path d={area(levels)} fill={LEVEL_COLOR} opacity="0.08" />
-          <path d={line(projects)} fill="none" stroke={PROJECT_COLOR} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+          <path d={line(builds)} fill="none" stroke={BUILD_COLOR} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
           <path d={line(levels)} fill="none" stroke={LEVEL_COLOR} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
           {h !== null && (
             <>
               <line x1={x(h)} x2={x(h)} y1={padT} y2={H - padB} stroke="#a3a3a3" strokeWidth="1" strokeDasharray="3 3" />
-              <circle cx={x(h)} cy={y(projects[h])} r="4" fill="white" stroke={PROJECT_COLOR} strokeWidth="2" />
+              <circle cx={x(h)} cy={y(builds[h])} r="4" fill="white" stroke={BUILD_COLOR} strokeWidth="2" />
               <circle cx={x(h)} cy={y(levels[h])} r="4" fill="white" stroke={LEVEL_COLOR} strokeWidth="2" />
             </>
           )}
@@ -1227,7 +1243,7 @@ function ActivityChart({ people }: { people: Person[] }) {
           >
             <div className="mb-1 font-medium text-gray-dark">{fmt(weeks[h])}</div>
             <div className="flex justify-between text-gray-light"><span>Levels completed</span><span className="text-gray-dark">{levels[h]}</span></div>
-            <div className="flex justify-between text-gray-light"><span>Projects shared</span><span className="text-gray-dark">{projects[h]}</span></div>
+            <div className="flex justify-between text-gray-light"><span>Builds shared</span><span className="text-gray-dark">{builds[h]}</span></div>
           </div>
         )}
       </div>
@@ -1263,7 +1279,7 @@ function DetailDialog({ title, onClose, children }: { title: string; onClose: ()
 
 // Sample reviews for the ratings dialog (placeholder content for the prototype).
 const SAMPLE_REVIEWS = [
-  { name: "Dana W.", date: "Sep 16, 2026", rating: 5, text: "I went from using AI occasionally to building tools my whole team relies on. The projects made it real." },
+  { name: "Dana W.", date: "Sep 16, 2026", rating: 5, text: "I went from using AI occasionally to building tools my whole team relies on. The builds made it real." },
   { name: "Jonah B.", date: "Sep 16, 2026", rating: 5, text: "Practical from day one. The call coach I built is already part of our weekly routine." },
   { name: "Marcus E.", date: "Sep 2, 2026", rating: 5, text: "Clear structure, great feedback on my submissions. I wish it ran longer." },
   { name: "Lena O.", date: "Aug 5, 2026", rating: 4, text: "Strong content. I fell behind for a few weeks but picking back up was easy." },
@@ -1279,12 +1295,65 @@ function Stars({ n }: { n: number }) {
   );
 }
 
-function ProjectsDetail({ people }: { people: Person[] }) {
+function BuildsDetail({ people }: { people: Person[] }) {
   const all = people
     .flatMap((p) => p.submissions.map((sub) => ({ sub, by: p.name })))
     .sort((a, b) => new Date(b.sub.date).getTime() - new Date(a.sub.date).getTime());
-  if (all.length === 0) return <p className="text-[14px] text-gray-light">Projects will appear here as people submit them.</p>;
+  if (all.length === 0) return <p className="text-[14px] text-gray-light">Builds will appear here as people submit them.</p>;
   return <div className="flex flex-col gap-3">{all.map(({ sub, by }) => <SubmissionItem key={`${by}-${sub.title}`} sub={sub} by={by} />)}</div>;
+}
+
+function allReflections(people: Person[]) {
+  return people
+    .flatMap((p) => p.submissions.filter((sub) => sub.reflection).map((sub) => ({ sub, p })))
+    .sort((a, b) => new Date(b.sub.date).getTime() - new Date(a.sub.date).getTime());
+}
+
+function ReflectionCard({ p, sub, onOpen }: { p: Person; sub: Submission; onOpen?: () => void }) {
+  // With onOpen: a preview that opens the full answers. Without: shown in full, with the date.
+  return (
+    <div
+      {...(onOpen ? {
+        role: "button", tabIndex: 0, onClick: onOpen,
+        onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } },
+      } : {})}
+      className={`flex flex-col justify-between overflow-hidden rounded-[12px] border border-gray-stroke bg-white transition-colors ${onOpen ? "cursor-pointer hover:border-gray-xlight" : ""}`}
+    >
+      <div className="p-5">
+        <ReflectionAnswers r={sub.reflection!} clamp={!!onOpen} />
+      </div>
+      <div className="flex min-w-0 items-center gap-2 border-t border-gray-stroke bg-cream/50 px-5 py-3">
+        <span className="min-w-0 flex-1 truncate text-[12px] text-gray-light"><span className="font-semibold text-gray-dark">{p.name}</span> · {sub.title}</span>
+        {!onOpen && <span className="shrink-0 text-[12px] text-gray-light">{sub.date}</span>}
+      </div>
+    </div>
+  );
+}
+
+function ReflectionsDetail({ people }: { people: Person[] }) {
+  const all = allReflections(people);
+  if (all.length === 0) return <p className="text-[14px] text-gray-light">Reflections will appear here as people share builds.</p>;
+  return <div className="flex flex-col gap-3">{all.map(({ sub, p }) => <ReflectionCard key={`${p.email}-${sub.title}`} p={p} sub={sub} />)}</div>;
+}
+
+function TeamReflections({ people, onSeeAll, onOpen }: { people: Person[]; onSeeAll: () => void; onOpen: (p: Person, sub: Submission) => void }) {
+  const all = allReflections(people);
+  if (all.length === 0) return null;
+  return (
+    <div className="mb-8">
+      <div className="mb-3 flex items-baseline justify-between gap-3">
+        <h2 className="text-[22px] font-semibold text-gray-dark">What the team is learning</h2>
+        <button onClick={onSeeAll} className="hidden text-[14px] text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px] sm:inline">See all {all.length} {all.length === 1 ? "response" : "responses"}</button>
+      </div>
+      <p className="mb-4 text-[16px] text-gray-light">After each build, participants share what they learned and how they'll apply it at work.</p>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        {all.slice(0, 3).map(({ sub, p }) => <ReflectionCard key={`${p.email}-${sub.title}`} p={p} sub={sub} onOpen={() => onOpen(p, sub)} />)}
+      </div>
+      <div className="mt-4 sm:hidden">
+        <Button size="md" variant="secondary" rounded="rounded-full" className="w-full" onClick={onSeeAll}>See all {all.length} {all.length === 1 ? "response" : "responses"}</Button>
+      </div>
+    </div>
+  );
 }
 
 function LevelsDetail({ people }: { people: Person[] }) {
@@ -1435,7 +1504,10 @@ export function TeamPeopleProvider({ children }: { children: ReactNode }) {
 export default function TeamProgramOverview() {
   const { people } = usePeople();
   const navigate = useNavigate();
-  const [detail, setDetail] = useState<"projects" | "levels" | "ratings" | null>(null);
+  const { showSkills } = useTeamPrototype();
+  const avgGain = useMemo(() => averageSkillGain(people), [people]);
+  const [openReflection, setOpenReflection] = useState<{ p: Person; sub: Submission } | null>(null);
+  const [detail, setDetail] = useState<"builds" | "levels" | "ratings" | "reflections" | null>(null);
 
   // Headline numbers are all-time; "recent" is a smaller secondary line (30 days).
   const stats = useMemo(() => {
@@ -1449,19 +1521,29 @@ export default function TeamProgramOverview() {
       subCount: subs.length,
       subRecent: subs.filter((sub) => new Date(sub.date).getTime() >= cutoff).length,
       builders: people.filter((p) => p.submissions.length > 0).length,
+      coachingDone: people.reduce((t, p) => t + (p.coaching?.used ?? 0), 0),
+      coachingScheduled: people.filter((p) => p.coaching?.nextSession).length,
     };
   }, [people]);
 
   return (
     <div className="leading-[1.2]">
-      <h1 className="mb-6 font-serif text-[30px] font-medium text-gray-dark sm:text-[38px] sm:mb-8">Overview</h1>
-
-      <ImpactHero people={people} />
+      <h1 className="mb-6 font-serif text-[30px] font-medium leading-[1.15] text-gray-dark sm:mb-8 sm:text-[38px]">
+        {showSkills
+          ? (avgGain !== null ? `Team skills are up ${avgGain} points on average` : "Overview")
+          : stats.subCount > 0
+            ? `Your team has shared ${stats.subCount} ${stats.subCount === 1 ? "build" : "builds"}`
+            : stats.coachingDone > 0
+              ? `Your team has completed ${stats.coachingDone} coaching ${stats.coachingDone === 1 ? "session" : "sessions"}`
+              : stats.coachingScheduled > 0
+                ? `${stats.coachingScheduled} coaching ${stats.coachingScheduled === 1 ? "session is" : "sessions are"} scheduled`
+                : "Overview"}
+      </h1>
 
       {/* Headline cards: all-time results lead, recent activity is the smaller line */}
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <MetricCard label="View all projects shared" onClick={() => setDetail("projects")}>
-          <div className={bigNumCls}>{stats.subCount} <span className="text-[14px] font-normal text-gray-light">{stats.subCount === 1 ? "project" : "projects"} shared</span></div>
+        <MetricCard label="View all builds shared" onClick={() => setDetail("builds")}>
+          <div className={bigNumCls}>{stats.subCount} <span className="text-[14px] font-normal text-gray-light">{stats.subCount === 1 ? "build" : "builds"} shared</span></div>
           <div className="mt-3 text-[12px] text-gray-light">
             {stats.subRecent > 0
               ? `${stats.subRecent} in the last 30 days`
@@ -1487,9 +1569,14 @@ export default function TeamProgramOverview() {
 
       <ActivityChart people={people} />
 
-      <TeamSkills people={people} />
+      {showSkills ? <TeamSkills people={people} /> : <TeamReflections people={people} onSeeAll={() => setDetail("reflections")} onOpen={(p, sub) => setOpenReflection({ p, sub })} />}
 
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-gray-stroke bg-white p-5">
+      {/* Mobile: a quiet line with a text link. From sm up: a boxed row with a button. */}
+      <p className="mb-8 mt-10 text-center text-[14px] text-gray-light sm:hidden">
+        {people.length} {people.length === 1 ? "person" : "people"} on your team ·{" "}
+        <button onClick={() => navigate("/team/members")} className="text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">View team members</button>
+      </p>
+      <div className="mb-8 hidden flex-wrap items-center justify-between gap-3 rounded-[12px] border border-gray-stroke bg-white p-5 sm:flex">
         <span className="text-[14px] text-gray-light">{people.length} {people.length === 1 ? "person" : "people"} on your team</span>
         <Button size="md" variant="secondary" rounded="rounded-full" onClick={() => navigate("/team/members")}>View team members</Button>
       </div>
@@ -1499,10 +1586,20 @@ export default function TeamProgramOverview() {
         {detail && (
           <DetailDialog
             key={detail}
-            title={detail === "projects" ? "Projects shared" : detail === "levels" ? "Levels completed" : "Participant reviews"}
+            title={detail === "builds" ? "Builds shared" : detail === "levels" ? "Levels completed" : detail === "reflections" ? "What the team is learning" : "Participant reviews"}
             onClose={() => setDetail(null)}
           >
-            {detail === "projects" ? <ProjectsDetail people={people} /> : detail === "levels" ? <LevelsDetail people={people} /> : <RatingsDetail />}
+            {detail === "builds" ? <BuildsDetail people={people} /> : detail === "reflections" ? <ReflectionsDetail people={people} /> : detail === "levels" ? <LevelsDetail people={people} /> : <RatingsDetail />}
+          </DetailDialog>
+        )}
+        {openReflection && (
+          <DetailDialog key="reflection" title={openReflection.sub.title} onClose={() => setOpenReflection(null)}>
+            <div className="mb-4 flex items-center gap-2.5">
+              <Avatar initials={openReflection.p.initials} image={openReflection.p.image} size={28} />
+              <div className="min-w-0 flex-1 text-[14px] font-medium text-gray-dark">{openReflection.p.name}</div>
+              <div className="shrink-0 text-[12px] text-gray-light">{openReflection.sub.date}</div>
+            </div>
+            <ReflectionAnswers r={openReflection.sub.reflection!} />
           </DetailDialog>
         )}
       </AnimatePresence>
@@ -1543,14 +1640,14 @@ const PROGRAM_COLS: Record<string, Col> = {
     key: "assessments", header: "Assessments",
     cell: (p) => (hasStarted(p) ? <Plain>{p.assessments.length} <span className="text-gray-light">of {LEVELS.length}</span></Plain> : <Dash />),
   },
-  // Anyone with a project has been active, but not everyone active has a project, so activity leads
-  // and the project count is lighter subtext after it.
+  // Anyone with a build has been active, but not everyone active has a build, so activity leads
+  // and the build count is lighter subtext after it.
   activity: {
     key: "activity", header: "Last active",
     cell: (p) => p.lastActiveDays === null ? <Dash /> : (
       <span className="whitespace-nowrap text-[14px] text-gray-dark">
         {p.lastActive}
-        {p.submissions.length > 0 && <span className="text-[12px] text-gray-light"> · {p.submissions.length} {p.submissions.length === 1 ? "project" : "projects"}</span>}
+        {p.submissions.length > 0 && <span className="text-[12px] text-gray-light"> · {p.submissions.length} {p.submissions.length === 1 ? "build" : "builds"}</span>}
       </span>
     ),
   },

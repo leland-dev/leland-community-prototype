@@ -23,6 +23,9 @@ interface TeamPrototypeValue {
   /** Start from a team with no members, to see the empty states. */
   emptyTeam: boolean;
   setEmptyTeam: (v: boolean) => void;
+  /** Show the skills metrics (skill gains, assessments). Off: the Overview leads with builds and reflections instead. */
+  showSkills: boolean;
+  setShowSkills: (v: boolean) => void;
 }
 
 const Ctx = createContext<TeamPrototypeValue>({
@@ -36,6 +39,8 @@ const Ctx = createContext<TeamPrototypeValue>({
   setShowRecruiting: () => {},
   emptyTeam: false,
   setEmptyTeam: () => {},
+  showSkills: true,
+  setShowSkills: () => {},
 });
 
 export function TeamPrototypeProvider({ children }: { children: ReactNode }) {
@@ -44,8 +49,9 @@ export function TeamPrototypeProvider({ children }: { children: ReactNode }) {
   const [showPaidAds, setShowPaidAds] = useState(true);
   const [showRecruiting, setShowRecruiting] = useState(true);
   const [emptyTeam, setEmptyTeam] = useState(false);
+  const [showSkills, setShowSkills] = useState(true);
   return (
-    <Ctx.Provider value={{ membersLayout, setMembersLayout, showAccessColumn, setShowAccessColumn, showPaidAds, setShowPaidAds, showRecruiting, setShowRecruiting, emptyTeam, setEmptyTeam }}>
+    <Ctx.Provider value={{ membersLayout, setMembersLayout, showAccessColumn, setShowAccessColumn, showPaidAds, setShowPaidAds, showRecruiting, setShowRecruiting, emptyTeam, setEmptyTeam, showSkills, setShowSkills }}>
       {children}
     </Ctx.Provider>
   );

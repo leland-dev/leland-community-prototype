@@ -21,7 +21,7 @@ const Check = () => (
   <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0" aria-hidden><polyline points="3 8.5 6.5 12 13 4.5" /></svg>
 );
 
-export function CoachingCategoryPicker({ value, onChange, emptyLabel = "Let them choose" }: { value: string; onChange: (v: string) => void; emptyLabel?: string }) {
+export function CoachingCategoryPicker({ value, onChange, emptyLabel = "Not set" }: { value: string; onChange: (v: string) => void; emptyLabel?: string }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>({ level: 1 });
   const [query, setQuery] = useState("");
