@@ -5,7 +5,7 @@ import { useDarkMode } from "../contexts/DarkModeContext";
 import { useExpertMode } from "../contexts/ExpertModeContext";
 import { useProfileBarMode, type ProfileBarMode } from "../contexts/ProfileBarModeContext";
 import { Button } from "./Button";
-import { TeamLogo } from "./TeamLogo";
+import { TeamLogo, EditableTeamLogo } from "./TeamLogo";
 import { useTeam } from "../contexts/TeamContext";
 import { getTeamNavItems } from "../lib/teamNav";
 import { useTeamPrototype } from "../contexts/TeamPrototypeContext";
@@ -224,7 +224,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
         >
           {/* Team header — same layout as the profile header: logo, name stacked below, then a label row */}
           <div className="px-5 pb-4 pt-6">
-            <TeamLogo name={team.name} logo={team.logo} size={48} circle />
+            <EditableTeamLogo size={48} />
             <NavLink to="/team/overview" onClick={onClose} className="mt-3 block min-w-0">
               <p className={`text-[18px] font-semibold ${darkMode ? "text-white" : "text-gray-dark"}`}>{team.name}</p>
             </NavLink>

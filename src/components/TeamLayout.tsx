@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 import { Button } from "./Button";
-import { TeamLogo } from "./TeamLogo";
+import { EditableTeamLogo } from "./TeamLogo";
+import breezeLogo from "../assets/org-logos/breeze-airways.png";
 import { CreateTeam } from "../pages/Team";
 import { getTeamNavItems } from "../lib/teamNav";
 import { useTeam, type TeamPlan } from "../contexts/TeamContext";
@@ -121,6 +122,14 @@ function PrototypeMenu() {
           </label>
 
           <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
+            <span className="text-[14px] font-medium text-gray-dark">Company logo</span>
+            <div className="relative">
+              <input type="checkbox" checked={!!team.logo} onChange={() => updateTeam({ logo: team.logo ? "" : breezeLogo })} className="peer sr-only" />
+              <div className="h-5 w-9 rounded-full bg-[#d4d4d4] transition-colors peer-checked:bg-gray-dark" />
+              <div className="absolute left-[2px] top-[2px] h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+            </div>
+          </label>
+          <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[#f5f5f5]">
             <span className="text-[14px] font-medium text-gray-dark">Card on file</span>
             <div className="relative">
               <input
@@ -188,7 +197,7 @@ export default function TeamLayout() {
         {/* Team profile card */}
         <div className={`${cardCls} p-5`}>
           {/* Same stacked header as the mobile menu: logo, name, then plan · role */}
-          <TeamLogo name={team.name} logo={team.logo} size={48} circle />
+          <EditableTeamLogo size={48} />
           <p className="mt-3 truncate text-[18px] font-semibold text-gray-dark">{team.name}</p>
           <p className="mt-2.5 text-[14px] leading-none text-gray-light">
               {team.plan === "enterprise" ? "Enterprise" : "Team"} {team.viewerRole.toLowerCase()}
