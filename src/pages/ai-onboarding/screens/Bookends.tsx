@@ -5,13 +5,12 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { ArrowRight, Check, Inbox, Send, Archive, Star } from "lucide-react";
 import { Button } from "../../../components/Button";
-import { AI_GRADIENT_VIDEO, COHORTS, ORG, PROGRAM_COVER, USER } from "../data";
+import { AI_GRADIENT_VIDEO, COHORTS, ORG, USER, inviteCopy } from "../data";
 import { BrandLockup, Cta, Eyebrow, FLOW_COLUMN, Heading, Initials, LelandLogo, Sub, TextInput } from "../ui";
 import { BrandPanel, SplitLayout } from "./BrandPanel";
 import { useScenario } from "../scenario";
 import { LelandMark } from "../LelandWordmark";
 
-const cover = PROGRAM_COVER;
 
 /* ── 1. Checkout confirmation (individual entry) ───────────────────────── */
 export function CheckoutConfirmation({ onNext }: { onNext: () => void }) {
@@ -82,6 +81,8 @@ export function CheckoutConfirmation({ onNext }: { onNext: () => void }) {
 
 /* ── 2. Invite email (team entry) ──────────────────────────────────────── */
 export function InviteEmail({ onNext }: { onNext: () => void }) {
+  const { offerings } = useScenario();
+  const copy = inviteCopy(offerings);
   const folders = [
     { icon: Inbox, label: "Inbox", count: 12, active: true },
     { icon: Star, label: "Starred" },
@@ -108,7 +109,7 @@ export function InviteEmail({ onNext }: { onNext: () => void }) {
         <div className="flex min-h-full flex-col rounded-2xl bg-white shadow-sm">
           <div className="border-b border-[#e3e3e3] px-6 py-5">
             <h1 className="text-[22px] font-normal">
-              {ORG.inviter.name} invited you to the AI Builder Program
+              {copy.subject}
             </h1>
             <div className="mt-3 flex items-center gap-3 text-[13px] text-[#5e5e5e]">
               <span className="flex size-9 items-center justify-center rounded-full bg-yellow text-[12px] font-semibold text-ink-primary">L</span>
@@ -121,31 +122,22 @@ export function InviteEmail({ onNext }: { onNext: () => void }) {
           <div className="flex flex-1 items-start justify-center bg-[#fafafa] p-6 md:p-10">
             <div className="w-full max-w-[520px] overflow-hidden rounded-2xl border border-[#e3e3e3] bg-white">
               <div className="bg-black px-7 py-6 text-white">
-                <div className="flex items-center justify-between">
-                  <LelandLogo theme="dark" />
-                  <BrandLockup />
-                </div>
+                {/* The program's own logo when the invite includes a seat; coaching-only invites keep the Leland logo. */}
+                {copy.keys.includes("program") ? <BrandLockup /> : <LelandLogo theme="dark" />}
               </div>
               <div className="px-7 py-7">
                 <div className="flex items-center gap-3">
-                  <Initials text={ORG.inviter.initials} />
+                  <Initials text={ORG.inviter.initials} size={32} circle />
                   <div className="text-[14px] text-ink-secondary">
                     <span className="font-medium text-ink-primary">{ORG.inviter.name}</span> · {ORG.inviter.title}, {ORG.name}
                   </div>
                 </div>
-                <h2 className="mt-5 text-[26px] font-medium leading-[1.1] tracking-[-0.02em] text-ink-primary">
+                <h2 className="mt-5 text-[26px] font-semibold leading-[1.1] tracking-[-0.02em] text-ink-primary">
                   {ORG.inviter.name.split(" ")[0]} invited you to start learning on Leland
                 </h2>
                 <p className="mt-3 text-[15px] leading-[1.5] text-ink-secondary">
-                  {ORG.name} is enrolling your team in the AI Builder Program, Leland's hands-on program for going from using AI to building with it. Your seat is reserved.
+                  {copy.body}
                 </p>
-                <div className="mt-5 flex items-center gap-4 rounded-xl border border-gray-stroke p-3">
-                  <img src={cover} alt="" className="size-14 rounded-lg object-cover" />
-                  <div>
-                    <div className="text-[15px] font-medium text-ink-primary">AI Builder Program</div>
-                    <div className="text-[13px] text-ink-secondary">Level 0 Foundations + Level 1 live cohort</div>
-                  </div>
-                </div>
                 <Button size="lg" variant="dark" rounded="rounded-full" className="mt-6 w-full" onClick={onNext}>
                   Accept invite <ArrowRight size={16} />
                 </Button>

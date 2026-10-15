@@ -271,12 +271,11 @@ export function DarkTag({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function Initials({ text }: { text: string; dark?: boolean }) {
+export function Initials({ text, size = 40, circle = false }: { text: string; dark?: boolean; size?: number; circle?: boolean }) {
   return (
     <span
-      className={`flex size-10 shrink-0 items-center justify-center rounded-md text-[13px] font-semibold ${
-        "bg-yellow text-ink-primary"
-      }`}
+      style={{ width: size, height: size, fontSize: size <= 32 ? 12 : 13 }}
+      className={`flex shrink-0 items-center justify-center font-semibold bg-yellow text-ink-primary ${circle ? "rounded-full" : "rounded-md"}`}
     >
       {text}
     </span>
