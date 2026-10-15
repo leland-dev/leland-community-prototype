@@ -6,6 +6,7 @@
  * ──────────────────────────────────────────────────────────────────────── */
 import type { LucideIcon } from "lucide-react";
 import programCover from "../../assets/img/ai-builder-l1.avif";
+import aibpTile from "../../assets/ai-onboarding/aibp-tile.png";
 import pic3 from "../../assets/profile photos/pic-3.png";
 import pic5 from "../../assets/profile photos/pic-5.png";
 import pic7 from "../../assets/profile photos/pic-7.png";
@@ -66,11 +67,11 @@ export const ORG = {
   seats: 25,
 };
 
-/* ── What a B2B invite can grant ─────────────────────────────────────────
- * The invite email is built from this list, so one email works for a program seat, 1:1 coaching, or both. To support a
- * new offering later (a course, say): add a key, an entry in OFFERINGS, and a tile for it in the email (Bookends.tsx). */
-export type OfferingKey = "program" | "coaching";
-export const OFFERING_KEYS: OfferingKey[] = ["program", "coaching"];
+/* ── What a B2B invite grants ────────────────────────────────────────────
+ * Today an invite is for the AI Builder Program only. The email is still built from this list, so a new offering (a course,
+ * coaching again) is: add a key, an entry in OFFERINGS, and it shows up as a row with its own subject and copy. */
+export type OfferingKey = "program";
+export const OFFERING_KEYS: OfferingKey[] = ["program"];
 
 export const OFFERINGS: Record<
   OfferingKey,
@@ -82,6 +83,8 @@ export const OFFERINGS: Record<
     granted: string;
     /** What they'll do: "You'll ___". */
     promise: string;
+    /** The row for this offering in the email: a square image, a title and a one-line description. */
+    row: { title: string; blurb: string; image: string; fit: "cover" | "contain" };
   }
 > = {
   program: {
@@ -89,12 +92,7 @@ export const OFFERINGS: Record<
     subject: "the AI Builder Program",
     granted: "reserved your seat in the AI Builder Program",
     promise: "learn by building real AI tools for your own work, with live support along the way",
-  },
-  coaching: {
-    label: "1:1 coaching",
-    subject: "1:1 coaching",
-    granted: "set you up with 1:1 coaching",
-    promise: "work one-on-one with an expert coach on what matters most to you",
+    row: { title: "AI Builder Program", blurb: "Guided learning with live support", image: aibpTile, fit: "cover" },
   },
 };
 
@@ -103,13 +101,10 @@ const joinAnd = (xs: string[]) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0,
 /** Subject line and body paragraph for an invite granting these offerings (in a stable order). */
 export function inviteCopy(offerings: OfferingKey[]) {
   const keys = OFFERING_KEYS.filter((k) => offerings.includes(k));
-  // Offerings that don't name the brand themselves get "on Leland" at the end ("1:1 coaching on Leland"); the program already says it.
-  const subject = `${ORG.inviter.name} invited you to ${joinAnd(keys.map((k) => OFFERINGS[k].subject))}${keys.includes("program") ? "" : " on Leland"}`;
-  // The common combinations are hand-written so they read naturally; anything else (e.g. a new offering) falls back to the generic composition.
+  const subject = `${ORG.inviter.name} invited you to ${joinAnd(keys.map((k) => OFFERINGS[k].subject))}`;
+  // Common combinations can be hand-written so they read naturally; anything else falls back to the generic composition.
   const handWritten: Record<string, string> = {
     program: `${ORG.name} has reserved your seat in the AI Builder Program. You'll learn by building: real AI tools for your own work, with live support along the way.`,
-    coaching: `${ORG.name} has set you up with 1:1 coaching on Leland. You'll work one-on-one with an expert coach on the goals that matter most to you.`,
-    "program,coaching": `${ORG.name} has reserved your seat in the AI Builder Program and set you up with 1:1 coaching. You'll learn by building real AI tools for your own work, with live support.`,
   };
   const body =
     handWritten[keys.join(",")] ??
