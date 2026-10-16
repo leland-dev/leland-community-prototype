@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import aiBuilderTile from "../../assets/ai-onboarding/aibp-tile.png";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "../Button";
 
 import {
   BrandSlack,
@@ -378,25 +380,26 @@ export function SlackJoinBlock({ block }: { block: SlackJoinBlockType }) {
 }
 
 export function InviteTeamBlock({ block }: { block: InviteTeamBlockType }) {
+  const navigate = useNavigate();
   return (
-    <div className="flex w-full flex-col gap-4 rounded-lg border border-leland-gray-stroke bg-white p-5 sm:flex-row sm:items-center sm:gap-4">
-      <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-leland-gray-hover text-leland-gray-dark">
-        <LelandIcons.IconUserGroup className="size-6" />
-      </div>
+    <div className="flex w-full flex-col gap-4 rounded-[12px] border border-leland-gray-stroke bg-white p-5 sm:flex-row sm:items-center sm:gap-4">
+      <img src={aiBuilderTile} alt="" className="size-12 shrink-0 rounded-[4px] object-cover" />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="leland-heading-base font-semibold text-leland-gray-dark">
           {block.title ?? "Bring your team along"}
         </p>
         <p className="leland-paragraph-base text-leland-gray-extra-light">
-          {block.description ?? "Invite teammates to the AI Builder Program or 1:1 coaching, and see what they learn."}
+          {block.description ?? "Invite teammates to the AI Builder Program."}
         </p>
       </div>
-      <Link
-        to={block.href ?? "/team/members?invite=1"}
-        className="shrink-0 self-start rounded-lg bg-leland-gray-dark px-4 py-3 text-center leland-heading-base font-semibold text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary sm:self-auto"
+      <Button
+        size="md"
+        variant="secondary"
+        className="shrink-0 self-start sm:self-auto"
+        onClick={() => navigate(block.href ?? "/team/members?invite=1")}
       >
         Invite your team
-      </Link>
+      </Button>
     </div>
   );
 }

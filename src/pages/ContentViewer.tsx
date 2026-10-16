@@ -87,8 +87,8 @@ import { LESSON_1_SECTIONS, LESSON_1_TOP_BLOCKS } from "../data/sampleLesson";
 import { LESSON_2_SECTIONS, LESSON_2_TOP_BLOCKS } from "../data/sampleLesson2";
 import { LESSON_3_SECTIONS, LESSON_3_TOP_BLOCKS } from "../data/sampleLesson3";
 import { TOOL_SETUP_CLAUDE, TOOL_SETUP_CODEX, TOOL_SETUP_GEMINI, TOOL_SETUP_COPILOT } from "../data/toolSetupSections";
+import CourseComplete from "../components/course-complete/CourseComplete";
 import { JOIN_SLACK_SECTION } from "../data/joinSlackSection";
-import { PERSONALIZATION_SECTION, AI_CONFIDENCE_QUESTION } from "../data/personalizationSection";
 import {
   BlockList,
   LessonFooterActions,
@@ -180,9 +180,7 @@ const COURSE_COMPLETION_SECTION: CompletionSection = {
   id: "course-complete",
   title: "Course complete",
   kind: "completion",
-  // Same question, same wording, as the intake "Getting to know you" section
-  // — a clean pre/post pair for self-reported confidence improvement.
-  blocks: [AI_CONFIDENCE_QUESTION, { kind: "inviteTeam" }],
+  blocks: [{ kind: "inviteTeam" }],
 };
 
 // Lessons 3–4 come from the generated manifest (legacy HTML iframe sections).
@@ -207,13 +205,11 @@ const START_HERE: Lesson = {
   subtitle: "Complete these steps before your first session so you're ready to hit the ground running.",
   durationMin: 20,
   sections: [
-    { id: "add-to-calendar", title: "Add sessions to your calendar", kind: "interactive", flow: "add-to-calendar" },
     TOOL_SETUP_CLAUDE,
     TOOL_SETUP_CODEX,
     TOOL_SETUP_GEMINI,
     TOOL_SETUP_COPILOT,
     JOIN_SLACK_SECTION,
-    PERSONALIZATION_SECTION,
   ],
 };
 
@@ -1453,7 +1449,7 @@ type PrototypeOptions = {
   showSiteNav: boolean;
   showTrackPicker: boolean;
   hasOfficeHours: boolean;
-  hasAccess: boolean;
+  showNoAccess: boolean;
   liveSessionVariant: LiveSessionVariant;
 };
 
@@ -1470,7 +1466,7 @@ const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
   showSiteNav: false,
   showTrackPicker: true,
   hasOfficeHours: true,
-  hasAccess: true,
+  showNoAccess: false,
   liveSessionVariant: "addToCalendar",
 };
 
@@ -1480,7 +1476,7 @@ const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
   { key: "showSiteNav", label: "Show site nav" },
   { key: "showTrackPicker", label: "Track picker" },
   { key: "hasOfficeHours", label: "Has office hours" },
-  { key: "hasAccess", label: "Has course access" },
+  { key: "showNoAccess", label: "Show no-access overlay" },
 ];
 
 
@@ -2441,10 +2437,10 @@ export default function ContentViewer() {
     }
   }, [options.showTrackPicker]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Paywall for anyone without course access.
+  // No-access paywall: only shown when explicitly switched on in the prototype options.
   useEffect(() => {
-    setNoAccessModalOpen(!options.hasAccess);
-  }, [options.hasAccess]);
+    setNoAccessModalOpen(options.showNoAccess);
+  }, [options.showNoAccess]);
 
   // Tracks 10 minutes of activity on the current lesson (resets whenever the
   // learner moves to a different lesson) — a gate for the review prompt below.
@@ -2506,8 +2502,21 @@ export default function ContentViewer() {
     return () => clearTimeout(timer);
   }, [sidebarOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const isCompletion = section.kind === "completion";
   const breadcrumbLabel =
-    lesson.id === "start-here" ? "Before you begin" : `Lesson ${lesson.number}`;
+    isCompletion ? "Course complete" : lesson.id === "start-here" ? "Before you begin" : `Lesson ${lesson.number}`;
+  // On the completion page the breadcrumb's last crumb is a small dark check badge plus "Finished".
+  const breadcrumbCrumb = isCompletion ? (
+    <span className="inline-flex items-center gap-2">
+      <span className="flex size-5 items-center justify-center rounded-full bg-leland-gray-dark text-white" aria-hidden>
+        <IconCheck className="size-3" />
+      </span>
+      Finished
+    </span>
+  ) : (
+    breadcrumbLabel
+  );
+
 
   // Sticky course → lesson breadcrumb. Beige bg matches the content area so it's
   // invisible at rest and cleanly masks content as it scrolls beneath, keeping
@@ -2516,7 +2525,7 @@ export default function ContentViewer() {
   // are consistent.
   const breadcrumbBar = options.noHeader ? (
     <div className={`hidden md:block z-10 bg-[#F9F8F3] ${!sidebarOpen ? "sticky top-0" : ""}`}>
-      <div className={`flex w-full items-center gap-2 px-4 md:px-8 leland-paragraph-base ${sidebarOpen ? "mx-auto max-w-[720px] py-8" : "py-4"}`}>
+      <div className={`flex w-full items-center gap-2 px-4 md:px-8 leland-paragraph-base ${sidebarOpen ? `mx-auto py-8 ${isCompletion ? "max-w-[800px]" : "max-w-[720px]"}` : "py-4"}`}>
         {!sidebarOpen ? (
           <>
             {/* Full trail only on desktop; on mobile the page header already
@@ -2541,15 +2550,23 @@ export default function ContentViewer() {
               <span className="max-w-[240px] truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
               <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
             </div>
-            <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbLabel}</span>
-            <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-            <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {visibleSections.length}</span>
+            <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbCrumb}</span>
+            {!isCompletion && (
+              <>
+                <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
+                <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {visibleSections.length}</span>
+              </>
+            )}
           </>
         ) : (
           <>
-            <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbLabel}</span>
-            <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-            <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {visibleSections.length}</span>
+            <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbCrumb}</span>
+            {!isCompletion && (
+              <>
+                <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
+                <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {visibleSections.length}</span>
+              </>
+            )}
           </>
         )}
       </div>
@@ -2583,7 +2600,7 @@ export default function ContentViewer() {
             {COURSE_TITLE_FULL}
           </span>
           <span className="leland-paragraph-sm text-leland-gray-light">
-            {breadcrumbLabel} / {sectionIdx + 1} of {visibleSections.length}
+            {breadcrumbLabel}{!isCompletion && ` / ${sectionIdx + 1} of ${visibleSections.length}`}
           </span>
         </button>
         <button
@@ -2610,9 +2627,13 @@ export default function ContentViewer() {
                 <span className="h-4 w-px shrink-0 bg-leland-gray-stroke" aria-hidden />
                 <span className="min-w-0 truncate text-leland-gray-light">{COURSE_TITLE_FULL}</span>
                 <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-                <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbLabel}</span>
-                <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
-                <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {visibleSections.length}</span>
+                <span className="shrink-0 font-medium text-leland-gray-dark">{breadcrumbCrumb}</span>
+                {!isCompletion && (
+                  <>
+                    <span className="shrink-0 text-leland-gray-light" aria-hidden>/</span>
+                    <span className="shrink-0 text-leland-gray-light">{sectionIdx + 1} of {visibleSections.length}</span>
+                  </>
+                )}
               </>
             )}
           </div>
@@ -2924,12 +2945,9 @@ export default function ContentViewer() {
               ) : section.kind === 'completion' ? (
                 <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
                   {breadcrumbBar}
-                  <div className={`mx-auto flex w-full max-w-[720px] flex-col gap-10 px-4 md:px-8 pb-16 ${options.noHeader ? "pt-8 md:pt-4" : "pt-8 md:pt-10"}`}>
-                    <h1 className="text-heading-4xl md:text-heading-5xl font-season font-normal text-leland-gray-dark">
-                      {section.title}
-                    </h1>
+                  <CourseComplete levelTitle="Level 1: Use AI to 10x Your Impact">
                     {section.blocks?.length ? <BlockList blocks={section.blocks} /> : null}
-                  </div>
+                  </CourseComplete>
                 </div>
               ) : (
                 <>
