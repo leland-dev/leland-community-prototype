@@ -189,10 +189,10 @@ export default function CourseComplete({ levelTitle, children }: { levelTitle: s
         </div>
       </div>
 
+      {rule}
+
       {/* Extra blocks (e.g. the "Invite your team" call to action) */}
       {children}
-
-      {rule}
     </div>
   );
 }

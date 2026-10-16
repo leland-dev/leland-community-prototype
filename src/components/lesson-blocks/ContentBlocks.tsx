@@ -1,6 +1,6 @@
 import { useState } from "react";
 import aiBuilderTile from "../../assets/ai-onboarding/aibp-tile.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "../Button";
 
 import {
@@ -380,15 +380,14 @@ export function SlackJoinBlock({ block }: { block: SlackJoinBlockType }) {
 }
 
 export function InviteTeamBlock({ block }: { block: InviteTeamBlockType }) {
-  const navigate = useNavigate();
   return (
-    <div className="flex w-full flex-col gap-4 rounded-[12px] border border-leland-gray-stroke bg-white p-5 sm:flex-row sm:items-center sm:gap-4">
+    <div className="flex w-full flex-col gap-4 rounded-[12px] border border-leland-gray-stroke bg-white/60 p-5 sm:flex-row sm:items-center sm:gap-4">
       <img src={aiBuilderTile} alt="" className="size-12 shrink-0 rounded-[4px] object-cover" />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <p className="leland-heading-base font-semibold text-leland-gray-dark">
+        <p className="leland-heading-lg font-semibold text-leland-gray-dark">
           {block.title ?? "Bring your team along"}
         </p>
-        <p className="leland-paragraph-base text-leland-gray-extra-light">
+        <p className="leland-paragraph-base text-leland-gray-light">
           {block.description ?? "Invite teammates to the AI Builder Program."}
         </p>
       </div>
@@ -396,7 +395,11 @@ export function InviteTeamBlock({ block }: { block: InviteTeamBlockType }) {
         size="md"
         variant="secondary"
         className="shrink-0 self-start sm:self-auto"
-        onClick={() => navigate(block.href ?? "/team/members?invite=1")}
+        onClick={() => {
+          // Open the team dashboard in a new tab, with the invite-members modal triggered by ?invite=1.
+          const path = block.href ?? "/team/members?invite=1";
+          window.open(`${import.meta.env.BASE_URL.replace(/\/$/, "")}${path}`, "_blank", "noopener");
+        }}
       >
         Invite your team
       </Button>
