@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
@@ -935,31 +935,6 @@ function ReflectionAnswers({ r, className = "", clamp }: { r: Reflection; classN
   );
 }
 
-function SubmissionItem({ sub, by, flat }: { sub: Submission; by?: string; flat?: boolean }) {
-  return (
-    <div className={flat ? "border-b border-gray-stroke py-4 first:pt-0 last:border-0 last:pb-0" : "rounded-[10px] border border-gray-stroke p-4"}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-[14px] font-medium text-gray-dark">{sub.title}</div>
-          {by && <div className="mt-0.5 text-[12px] text-gray-light">by {by}</div>}
-        </div>
-        <div className="shrink-0 text-[12px] text-gray-light">{sub.date}</div>
-      </div>
-      <p className="mt-1 text-[14px] leading-[1.4] text-gray-light">{sub.description}</p>
-      {sub.reflection && <ReflectionAnswers r={sub.reflection} className="mt-3 border-t border-gray-stroke pt-3" />}
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <button className="inline-flex items-center gap-1.5 rounded-full bg-gray-hover px-3 py-1.5 text-[12px] font-medium text-gray-dark hover:bg-[#222222]/10">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4" /></svg>
-          Screen recording · {sub.recordingLength}
-        </button>
-        {sub.link && (
-          <a href={sub.link} onClick={(e) => e.preventDefault()} className="inline-flex items-center gap-1 text-[12px] font-medium text-gray-dark underline">Build link</a>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function SessionRow({ s, onOpen }: { s: CoachSession; onOpen: () => void }) {
   const name = `${s.coach.split(" ")[0]} ${s.coach.split(" ")[1]?.[0] ?? ""}.`;
   return (
@@ -979,35 +954,54 @@ function SessionRow({ s, onOpen }: { s: CoachSession; onOpen: () => void }) {
             <div className="truncate text-[12px] leading-[1.2] text-gray-light">{s.coachHeadline}</div>
           </div>
         </div>
-        <div className="flex shrink-0 flex-col gap-0.5 text-right">
-          <div className="text-[14px] leading-[1.2] text-gray-dark">{s.status === "completed" ? "Completed" : "Scheduled"}</div>
+        <div className={`flex shrink-0 flex-col text-right ${s.status === "completed" && s.summary ? "gap-1.5" : "gap-0.5"}`}>
+          <div className="text-[14px] leading-[1.2] text-gray-dark">
+            {s.status !== "completed" ? "Scheduled" : s.summary ? <FigureLink label="Open the session summary" onClick={onOpen}>Session summary</FigureLink> : "Completed"}
+          </div>
           <div className="text-[12px] leading-[1.2] text-gray-light">{s.date}</div>
         </div>
       </div>
-      {s.summary && (
-        <button type="button" onClick={onOpen} className="group mt-3 flex w-full cursor-pointer items-start gap-3 rounded-lg bg-gray-hover px-3 py-2.5 text-left transition-colors hover:bg-[#222222]/[0.07]">
-          <span className="min-w-0 flex-1">
-            <span className="block text-[12px] font-medium text-gray-light">Session summary</span>
-            <span className="mt-1 line-clamp-2 text-[14px] leading-[1.4] text-gray-dark">{s.summary}</span>
-          </span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-3 shrink-0 text-gray-xlight group-hover:text-gray-dark"><polyline points="9 18 15 12 9 6" /></svg>
-        </button>
-      )}
     </div>
   );
 }
 
 // A build in the list: a thumbnail (its image, or a play tile for the screen recording), title, short description and date.
-function BuildRow({ sub, onOpen }: { sub: Submission; onOpen: () => void }) {
+function BuildRow({ sub, by, onOpen }: { sub: Submission; by?: string; onOpen: () => void }) {
   return (
-    <button type="button" onClick={onOpen} className="group flex w-full cursor-pointer items-center gap-3 border-b border-gray-stroke py-3 text-left first:pt-0 last:border-0 last:pb-0">
+    <button type="button" onClick={onOpen} className="group flex w-full cursor-pointer items-start gap-3 border-b border-gray-stroke py-3 text-left first:pt-0 last:border-0 last:pb-0">
       <BuildThumb sub={sub} className="w-[96px]" />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[14px] font-medium text-gray-dark">{sub.title}</span>
+        {by && <span className="block truncate text-[12px] text-gray-light">by {by}</span>}
         <span className="mt-0.5 line-clamp-2 text-[14px] leading-[1.4] text-gray-light">{sub.description}</span>
       </span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-xlight group-hover:text-gray-dark"><polyline points="9 18 15 12 9 6" /></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 self-center text-gray-xlight group-hover:text-gray-dark"><polyline points="9 18 15 12 9 6" /></svg>
     </button>
+  );
+}
+
+// The full details of one build: image, title, who and when, description, recording / link buttons and the reflection.
+// Shared by the person drawer and the "Builds shared" modal.
+function BuildDetailBody({ sub, by }: { sub: Submission; by: string }) {
+  return (
+    <>
+      <BuildThumb sub={sub} className="mb-5 w-full !rounded-[12px]" />
+      <h3 className="font-serif text-[28px] font-medium leading-[1.2] text-gray-dark">{sub.title}</h3>
+      <div className="mt-1 text-[14px] text-gray-light">by {by} · {sub.date}</div>
+      <p className="mt-4 text-[16px] leading-[1.5] text-gray-dark">{sub.description}</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button size="md" variant="secondary" rounded="rounded-full" className="border border-gray-stroke bg-white hover:bg-gray-hover">Watch screen recording · {sub.recordingLength}</Button>
+        {sub.link && (
+          <Button size="md" variant="secondary" rounded="rounded-full" className="border border-gray-stroke bg-white hover:bg-gray-hover" onClick={() => window.open(sub.link, "_blank")}>Open build</Button>
+        )}
+      </div>
+      {sub.reflection && (
+        <div className="mt-6 rounded-[12px] border border-gray-stroke">
+          <div className="overflow-hidden rounded-t-[11px] border-b border-gray-stroke bg-gray-hover px-4 py-2.5 text-[12px] font-medium text-gray-light">Reflection</div>
+          <ReflectionAnswers r={sub.reflection} className="px-4 py-4" />
+        </div>
+      )}
+    </>
   );
 }
 
@@ -1069,24 +1063,7 @@ function PersonDrawer({ person, onClose, onEdit, onCohort, onRenewal }: { person
                   </div>
                   <div className="flex-1 overflow-y-auto px-4 pb-8 pt-5 sm:px-6">
                     {child.kind === "build" ? (
-                      <>
-                        <BuildThumb sub={child.sub} className="mb-5 w-full !rounded-[12px]" />
-                        <h3 className="font-serif text-[28px] font-medium leading-[1.2] text-gray-dark">{child.sub.title}</h3>
-                        <div className="mt-1 text-[14px] text-gray-light">by {person.name} · {child.sub.date}</div>
-                        <p className="mt-4 text-[16px] leading-[1.5] text-gray-dark">{child.sub.description}</p>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <Button size="md" variant="secondary" rounded="rounded-full" className="border border-gray-stroke bg-white hover:bg-gray-hover">Watch screen recording · {child.sub.recordingLength}</Button>
-                          {child.sub.link && (
-                            <Button size="md" variant="secondary" rounded="rounded-full" className="border border-gray-stroke bg-white hover:bg-gray-hover" onClick={() => window.open(child.sub.link, "_blank")}>Open build</Button>
-                          )}
-                        </div>
-                        {child.sub.reflection && (
-                          <div className="mt-6 rounded-[12px] border border-gray-stroke">
-                            <div className="overflow-hidden rounded-t-[11px] border-b border-gray-stroke bg-gray-hover px-4 py-2.5 text-[12px] font-medium text-gray-light">Reflection</div>
-                            <ReflectionAnswers r={child.sub.reflection} className="px-4 py-4" />
-                          </div>
-                        )}
-                      </>
+                      <BuildDetailBody sub={child.sub} by={person.name} />
                     ) : (
                       <>
                         <div className="flex items-center gap-3">
@@ -1245,9 +1222,9 @@ function PersonDrawer({ person, onClose, onEdit, onCohort, onRenewal }: { person
                     const done = c.sessions ? c.sessions.filter((x) => x.status === "completed").length : c.used;
                     return (
                       <DrawerSection title="1:1 coaching">
-                        <div className="mb-3 flex items-center gap-3">
+                        <div className="mb-5 flex items-center gap-3">
                           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-stroke">
-                            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(done / c.granted) * 100}%` }} />
+                            <div className="h-full rounded-full bg-gray-dark transition-all" style={{ width: `${(done / c.granted) * 100}%` }} />
                           </div>
                           <span className="shrink-0 text-[12px] leading-none text-gray-light">{done} of {c.granted} completed</span>
                         </div>
@@ -1619,22 +1596,22 @@ const SAMPLE_REVIEWS = [
   { name: "Lena O.", date: "Aug 5, 2026", rating: 4, text: "Strong content. I fell behind for a few weeks but picking back up was easy." },
 ];
 
-function Stars({ n }: { n: number }) {
+function Stars({ n, size = 12 }: { n: number; size?: number }) {
   return (
     <span className="inline-flex gap-0.5" aria-label={`${n} out of 5`}>
       {[1, 2, 3, 4, 5].map((i) => (
-        <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill={i <= n ? "#ffcb47" : "#e5e5e5"}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+        <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill={i <= n ? "#ffcb47" : "#e5e5e5"}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
       ))}
     </span>
   );
 }
 
-function BuildsDetail({ people }: { people: Person[] }) {
+function BuildsDetail({ people, onOpen }: { people: Person[]; onOpen: (by: Person, sub: Submission) => void }) {
   const all = people
-    .flatMap((p) => p.submissions.map((sub) => ({ sub, by: p.name })))
+    .flatMap((p) => p.submissions.map((sub) => ({ sub, by: p })))
     .sort((a, b) => new Date(b.sub.date).getTime() - new Date(a.sub.date).getTime());
   if (all.length === 0) return <p className="text-[14px] text-gray-light">Builds will appear here as people submit them.</p>;
-  return <div className="flex flex-col gap-3">{all.map(({ sub, by }) => <SubmissionItem key={`${by}-${sub.title}`} sub={sub} by={by} />)}</div>;
+  return <div className="flex flex-col">{all.map(({ sub, by }) => <BuildRow key={`${by.email}-${sub.title}`} sub={sub} by={by.name} onOpen={() => onOpen(by, sub)} />)}</div>;
 }
 
 function allReflections(people: Person[]) {
@@ -1798,28 +1775,75 @@ const SAMPLE_COACHING_REVIEWS = [
   { name: "Rachel M.", coach: "Jordan L.", date: "Oct 7, 2026", rating: 4, text: "Helpful and well prepared. I'd like a little more time per session." },
 ];
 
-function RatingsDetail({ kind = "program" }: { kind?: "program" | "coaching" }) {
+// Avatar colors for reviewers, picked from the name so a person keeps the same color.
+const REVIEWER_COLORS = ["#5b3d8f", "#5f7283", "#b5593a", "#2f6f5e", "#3b6ea5", "#8a4a6b"];
+function reviewerColor(name: string) {
+  let h = 0;
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return REVIEWER_COLORS[h % REVIEWER_COLORS.length];
+}
+
+// The reviews modal, laid out like the one in the main product: a large "Reviews" title with the count under it and a
+// bordered close button, then a scrolling list of reviewers (avatar, name, what they reviewed, stars and date, the text).
+function ReviewsDialog({ kind, onClose }: { kind: "program" | "coaching"; onClose: () => void }) {
   const coaching = kind === "coaching";
   const reviews: { name: string; date: string; rating: number; text: string; coach?: string }[] = coaching ? SAMPLE_COACHING_REVIEWS : SAMPLE_REVIEWS;
-  return (
-    <div>
-      <div className="mb-4 flex items-center gap-2">
-        <Stars n={5} />
-        <span className="text-[16px] font-semibold text-gray-dark">{coaching ? "4.8" : "4.9"}</span>
-        <span className="text-[14px] text-gray-light">({coaching ? 6 : 9} team members) · {coaching ? "Average rating of your team's coaches" : "Average team rating of the program"}</span>
+  const count = coaching ? 6 : 9;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  return createPortal(
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }}
+      className="fixed inset-0 z-[1010] flex items-end justify-center bg-black/40 sm:items-center"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div role="dialog" aria-label="Reviews" className="relative flex h-[100dvh] w-full flex-col overflow-hidden rounded-none bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] sm:h-[85dvh] sm:w-[560px] sm:max-w-[95vw] sm:rounded-2xl">
+        <div className="relative shrink-0 border-b border-gray-stroke px-6 pb-5 pt-6">
+          <h2 className="pr-14 font-serif text-[28px] font-medium leading-[1.1] text-gray-dark">Reviews</h2>
+          <p className="mt-1 pr-14 text-[16px] leading-[1.4] text-gray-light">
+            {count} reviews from your team{coaching ? " about their coaches" : ""}
+          </p>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-gray-stroke bg-white text-gray-dark hover:bg-gray-hover"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
+        </div>
+        <ul className="flex-1 divide-y divide-gray-stroke overflow-y-auto bg-[#fafafa] px-6">
+          {reviews.map((r) => (
+            <li key={r.name + r.date} className="flex gap-4 py-6">
+              <span
+                className="flex size-10 shrink-0 items-center justify-center rounded-full text-[14px] font-medium text-white"
+                style={{ backgroundColor: reviewerColor(r.name) }}
+                aria-hidden
+              >
+                {r.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="truncate text-[16px] font-medium leading-[1.3] text-gray-dark">{r.name}</p>
+                    <p className="truncate text-[14px] leading-[1.4] text-gray-light">{r.coach ? `1:1 session with ${r.coach}` : "AI Builder Program"}</p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <Stars n={r.rating} size={14} />
+                    <p className="mt-1 text-[14px] leading-[1.2] text-gray-light">{r.date}</p>
+                  </div>
+                </div>
+                <p className="mt-3 text-[16px] leading-[1.6] text-gray-dark">{r.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
-      <div className="flex flex-col divide-y divide-gray-stroke">
-        {reviews.map((r) => (
-          <div key={r.name + r.date} className="py-3 first:pt-0 last:pb-0">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2"><span className="text-[14px] font-medium text-gray-dark">{r.name}</span><Stars n={r.rating} />{r.coach && <span className="text-[12px] text-gray-light">on {r.coach}</span>}</div>
-              <span className="text-[12px] text-gray-light">{r.date}</span>
-            </div>
-            <p className="mt-1 text-[14px] leading-[1.4] text-gray-light">{r.text}</p>
-          </div>
-        ))}
-      </div>
-    </div>
+    </motion.div>,
+    document.body,
   );
 }
 
@@ -1941,26 +1965,10 @@ export function TeamPeopleProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Engagement, framed as momentum: how many people practiced recently, how much hands-on time that adds up to per person,
-// and what it produced. Program hours are sample data (time in lessons, live sessions and builds).
-// The average rating for an offering, shown top right of its section; opens the reviews behind it.
-function RatingLink({ rating, count, label, onClick }: { rating: string; count: number; label: string; onClick: () => void }) {
-  // No hover box: the number gets our dotted underline when you point at the rating.
-  const underline = "group-hover:underline group-hover:decoration-dotted group-hover:decoration-[1.5px] group-hover:underline-offset-[3px]";
-  return (
-    <button type="button" onClick={onClick} aria-label={label} className="group flex shrink-0 cursor-pointer items-center gap-1.5">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-      <span className={`text-[14px] font-semibold text-gray-dark ${underline}`}>{rating}</span>
-      <span className="text-[14px] text-gray-light">
-        {/* Just the number on tablet and mobile; the full wording from desktop up */}
-        <span className="lg:hidden">({count})</span>
-        <span className="hidden lg:inline">({count} team {count === 1 ? "member" : "members"})</span>
-      </span>
-    </button>
-  );
-}
+const figureCls = "font-serif text-[28px] font-medium leading-[1.1] text-gray-dark";
+const figureLabelCls = "mt-2 text-[14px] leading-[1.4] text-gray-light";
 
-// The part of a figure's caption that opens the detail behind it: our inline text link style.
+// The label under a figure: our inline text link style (dotted underline), which opens the detail behind the number.
 function FigureLink({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
   // A span, not a <button>: buttons are atomic inline boxes, so a link that wraps onto a second line would move as one
   // centered block. A span wraps with the surrounding text and keeps the underline on each line.
@@ -1978,8 +1986,35 @@ function FigureLink({ label, onClick, children }: { label: string; onClick: () =
   );
 }
 
-const figureCls = "font-serif text-[28px] font-medium leading-[1.1] text-gray-dark";
-const figureLabelCls = "mt-2 text-[14px] leading-[1.4] text-gray-light";
+// One metric: a big number with a short label under it. The label is the dotted-underline link that opens the detail.
+function MetricTile({ value, label, ariaLabel, onClick, star }: { value: ReactNode; label: string; ariaLabel: string; onClick: () => void; star?: boolean }) {
+  return (
+    <div>
+      <p className={`${figureCls} flex items-center gap-1.5`}>
+        {value}
+        {star && (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffcb47" stroke="#ffcb47" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+        )}
+      </p>
+      <p className={figureLabelCls}><FigureLink label={ariaLabel} onClick={onClick}>{label}</FigureLink></p>
+    </div>
+  );
+}
+
+// Tiles sit in one row from tablet up (two per row on mobile).
+function MetricGrid({ count, children }: { count: number; children: ReactNode }) {
+  return (
+    <div
+      className="grid grid-cols-2 gap-x-4 gap-y-6 sm:[grid-template-columns:repeat(var(--n),minmax(0,1fr))]"
+      style={{ "--n": count } as CSSProperties}
+    >
+      {children}
+    </div>
+  );
+}
+
+// Engagement, framed as momentum: who is active, how much hands-on time that adds up to per person, and what it produced.
+// Program hours are sample data (time in lessons, live sessions and builds).
 
 // Engagement, framed as momentum: who is active, how much hands-on time that adds up to per person, and what it produced.
 // Program hours are sample data (time in lessons, live sessions and builds).
@@ -1993,26 +2028,15 @@ function TeamPractice({ people, onOpen }: { people: Person[]; onOpen: (k: "activ
 
   return (
     <div className="mb-5 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <h2 className="text-[18px] font-semibold text-gray-dark">AI Transformation</h2>
-        <RatingLink rating="4.9" count={9} label="See your team's program reviews" onClick={() => onOpen("ratings")} />
-      </div>
-      <div className="grid gap-6 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-gray-stroke">
-        <div className="sm:pr-6">
-          <p className={figureCls}>{recent.length} <span className="text-[18px] text-gray-light">of {team.length}</span></p>
-          <p className={figureLabelCls}><FigureLink label="See who was active in the last 30 days" onClick={() => onOpen("active")}>active</FigureLink> in the last 30 days</p>
-        </div>
+      <h2 className="mb-5 text-[18px] font-semibold text-gray-dark">AI Builder Program</h2>
+      <MetricGrid count={avgHours > 0 ? 4 : 3}>
+        <MetricTile value={recent.length} label="Active users this month" ariaLabel="See who was active in the last 30 days" onClick={() => onOpen("active")} />
         {avgHours > 0 && (
-          <div className="sm:px-6">
-            <p className={figureCls}>{avgHours} <span className="text-[18px] text-gray-light">{avgHours === 1 ? "hour" : "hours"}</span></p>
-            <p className={figureLabelCls}><FigureLink label="See hands-on building hours by person" onClick={() => onOpen("hours")}>hands-on building</FigureLink> per person</p>
-          </div>
+          <MetricTile value={avgHours} label="Avg. hours building" ariaLabel="See hands-on building hours by person" onClick={() => onOpen("hours")} />
         )}
-        <div className="sm:pl-6">
-          <p className={figureCls}>{builds}</p>
-          <p className={figureLabelCls}><FigureLink label="See all builds shared" onClick={() => onOpen("builds")}>{builds === 1 ? "build" : "builds"} shared</FigureLink> with the team</p>
-        </div>
-      </div>
+        <MetricTile value={builds} label={builds === 1 ? "Build shared" : "Builds shared"} ariaLabel="See all builds shared" onClick={() => onOpen("builds")} />
+        <MetricTile value="4.9" star label="Avg. rating" ariaLabel="See your team's program reviews (9 reviews)" onClick={() => onOpen("ratings")} />
+      </MetricGrid>
     </div>
   );
 }
@@ -2025,24 +2049,13 @@ function TeamCoaching({ people, onOpen }: { people: Person[]; onOpen: (k: "coach
   if (coached.length === 0 || (done === 0 && booked === 0)) return null;
   return (
     <div className="mb-5 rounded-[12px] border border-gray-stroke bg-white p-5 sm:p-6">
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <h2 className="text-[18px] font-semibold text-gray-dark">1:1 coaching</h2>
-        <RatingLink rating="4.8" count={6} label="See your team's reviews of their coaches" onClick={() => onOpen("coachingRatings")} />
-      </div>
-      <div className="grid gap-6 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-gray-stroke">
-        <div className="sm:pr-6">
-          <p className={figureCls}>{done}</p>
-          <p className={figureLabelCls}><FigureLink label="See coaching sessions by person" onClick={() => onOpen("coaching")}>{done === 1 ? "session" : "sessions"} completed</FigureLink></p>
-        </div>
-        <div className="sm:px-6">
-          <p className={figureCls}>{booked}</p>
-          <p className={figureLabelCls}><FigureLink label="See coaching sessions by person" onClick={() => onOpen("coaching")}>{booked === 1 ? "session" : "sessions"} booked</FigureLink></p>
-        </div>
-        <div className="sm:pl-6">
-          <p className={figureCls}>{coached.length}</p>
-          <p className={figureLabelCls}><FigureLink label="See who is being coached" onClick={() => onOpen("coaching")}>{coached.length === 1 ? "person" : "people"} being coached</FigureLink></p>
-        </div>
-      </div>
+      <h2 className="mb-5 text-[18px] font-semibold text-gray-dark">1:1 coaching</h2>
+      <MetricGrid count={4}>
+        <MetricTile value={done} label={done === 1 ? "Session completed" : "Sessions completed"} ariaLabel="See coaching sessions by person" onClick={() => onOpen("coaching")} />
+        <MetricTile value={booked} label={booked === 1 ? "Session booked" : "Sessions booked"} ariaLabel="See coaching sessions by person" onClick={() => onOpen("coaching")} />
+        <MetricTile value={coached.length} label={coached.length === 1 ? "Person coached" : "People coached"} ariaLabel="See who is being coached" onClick={() => onOpen("coaching")} />
+        <MetricTile value="4.8" star label="Avg. rating" ariaLabel="See your team's reviews of their coaches (6 reviews)" onClick={() => onOpen("coachingRatings")} />
+      </MetricGrid>
     </div>
   );
 }
@@ -2195,6 +2208,7 @@ export default function TeamProgramOverview() {
   const navigate = useNavigate();
   const { showSkills } = useTeamPrototype();
   const [openReflection, setOpenReflection] = useState<{ p: Person; sub: Submission } | null>(null);
+  const [openBuild, setOpenBuild] = useState<{ by: Person; sub: Submission } | null>(null);
   const [detail, setDetail] = useState<"builds" | "levels" | "ratings" | "reflections" | "active" | "hours" | "coaching" | "coachingRatings" | null>(null);
 
   return (
@@ -2225,13 +2239,21 @@ export default function TeamProgramOverview() {
       <div className="h-[80px] shrink-0" />
 
       <AnimatePresence>
-        {detail && (
+        {(detail === "ratings" || detail === "coachingRatings") && (
+          <ReviewsDialog key={detail} kind={detail === "coachingRatings" ? "coaching" : "program"} onClose={() => setDetail(null)} />
+        )}
+        {detail && detail !== "ratings" && detail !== "coachingRatings" && (
           <DetailDialog
             key={detail}
             title={detail === "builds" ? "Builds shared" : detail === "levels" ? "Levels completed" : detail === "reflections" ? "What the team is learning" : detail === "active" ? "Active in the last 30 days" : detail === "hours" ? "Hands-on building by person" : detail === "coaching" ? "1:1 coaching by person" : detail === "coachingRatings" ? "Reviews of your team's coaches" : "Program reviews from your team"}
             onClose={() => setDetail(null)}
           >
-            {detail === "builds" ? <BuildsDetail people={people} /> : detail === "active" ? <ActiveDetail people={people} /> : detail === "hours" ? <HoursDetail people={people} /> : detail === "coaching" ? <CoachingDetail people={people} /> : detail === "reflections" ? <ReflectionsDetail people={people} /> : detail === "levels" ? <LevelsDetail people={people} /> : <RatingsDetail kind={detail === "coachingRatings" ? "coaching" : "program"} />}
+            {detail === "builds" ? <BuildsDetail people={people} onOpen={(by, sub) => setOpenBuild({ by, sub })} /> : detail === "active" ? <ActiveDetail people={people} /> : detail === "hours" ? <HoursDetail people={people} /> : detail === "coaching" ? <CoachingDetail people={people} /> : detail === "reflections" ? <ReflectionsDetail people={people} /> : detail === "levels" ? <LevelsDetail people={people} /> : null}
+          </DetailDialog>
+        )}
+        {openBuild && (
+          <DetailDialog key="build" title="Build details" onClose={() => setOpenBuild(null)}>
+            <BuildDetailBody sub={openBuild.sub} by={openBuild.by.name} />
           </DetailDialog>
         )}
         {openReflection && (
@@ -2354,7 +2376,7 @@ export function TeamMembersPage() {
   const adminOnly: Person[] = admins
     .filter((a) => !granted.some((p) => p.email.toLowerCase() === a.email.toLowerCase()))
     .map((a) => ({ name: a.name, email: a.email, initials: initialsOf(a.name), program: null, coaching: null, lastActive: "—", lastActiveDays: null, assessments: [], submissions: [], isAdmin: true, isYou: a.email.toLowerCase() === myEmail }));
-  const roster: Person[] = [...granted.map((p) => ({ ...p, ...(adminEmails.has(p.email.toLowerCase()) ? { isAdmin: true } : {}), isYou: p.email.toLowerCase() === myEmail })), ...adminOnly];
+  const roster: Person[] = [...granted.map((p) => ({ ...p, isAdmin: adminEmails.has(p.email.toLowerCase()), isYou: p.email.toLowerCase() === myEmail })), ...adminOnly];
   const people: Person[] = [...roster.filter((p) => p.isYou), ...roster.filter((p) => !p.isYou)];
   // Nobody else has been given the program or coaching yet (you and other admins don't count): nudge the admin to add people.
   const nobodyGranted = people.filter((p) => !p.isYou).every((p) => !p.program && !p.coaching && !p.lelandPlus);

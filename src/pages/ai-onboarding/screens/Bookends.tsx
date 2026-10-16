@@ -118,7 +118,7 @@ export function InviteEmail({ onNext }: { onNext: () => void }) {
               </div>
             </div>
           </div>
-          <div className="flex flex-1 items-start justify-center bg-[#fafafa] px-4 py-6 md:p-10">
+          <div className="flex flex-1 items-start justify-center bg-[#F9F8F3] px-4 py-6 md:p-10">
             <div className="w-full max-w-[520px] overflow-hidden rounded-2xl border border-[#e3e3e3] bg-white">
               <div className="bg-black p-5 text-white sm:px-7 sm:py-6">
                 {/* Both logos on desktop. On mobile they don't fit together, so only the program's logo stays. */}
