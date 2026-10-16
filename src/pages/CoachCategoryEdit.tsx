@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion, Reorder } from "motion/react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button, LinkButton } from "../components/Button";
+import AdminToggle from "../components/AdminToggle";
 import { OFFERINGS, type Offering } from "../lib/offerings";
 import { LELAND_PACKAGES, fmtPrice, type LelandPackage } from "../lib/lelandPackages";
 import editIcon from "../assets/icons/edit.svg";
@@ -992,6 +993,8 @@ export default function CoachCategoryEdit() {
   const [version, setVersion] = useState<CategoryVersion>(() => (localStorage.getItem(VERSION_KEY) as CategoryVersion) || "v3");
   useEffect(() => { localStorage.setItem(VERSION_KEY, version); }, [version]);
   const [adminOpen, setAdminOpen] = useState(false);
+  // Admin toggle: show/hide the pricing card (hourly rate + first step).
+  const [showPricingCard, setShowPricingCard] = useState(false);
   const adminRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!adminOpen) return;
@@ -1040,17 +1043,17 @@ export default function CoachCategoryEdit() {
           both the container's px padding and its mx-auto centering gutter: the
           container is centered in flex-1, so the gutter is symmetric, and equal
           negative margins reach both edges. The gutter only exists once flex-1
-          exceeds the max-w-[1280px] cap, hence the -24px floor. The constant
-          726 = (1280 max-width + 220 sidebar) / 2 - 24 padding. The overlapping
+          exceeds the max-w-[1080px] cap, hence the -24px floor. The constant
+          626 = (1080 max-width + 220 sidebar) / 2 - 24 padding. The overlapping
           cards below pull up into it, matching the customer Dashboard hero. */}
       <div
-        className="-ml-4 -mr-4 -mt-8 pb-28 pt-8 sm:-mt-10 sm:pb-32 sm:pt-10 sm:[margin-left:min(-24px,calc(726px_-_50vw))] sm:[margin-right:min(-24px,calc(726px_-_50vw))]"
+        className="-ml-4 -mr-4 -mt-8 pb-28 pt-8 sm:-mt-10 sm:pb-32 sm:pt-10 sm:[margin-left:min(-24px,calc(626px_-_50vw))] sm:[margin-right:min(-24px,calc(626px_-_50vw))]"
         style={{ backgroundColor: HERO_BG }}
       >
         {/* Recreate CoachLayout's padded max-w container so the hero content
             box matches the main content box exactly (which lives inside that
             same container), then constrain to the per-version content width. */}
-        <div className="mx-auto max-w-[1280px] px-4 sm:px-6">
+        <div className="mx-auto max-w-[1080px] px-4 sm:px-6">
           <div className={`mx-auto ${contentMax}`}>
           {/* Back + Preview listing */}
           <div className="mb-6 flex items-center justify-between gap-3">
@@ -1131,7 +1134,7 @@ export default function CoachCategoryEdit() {
           <div className="grid grid-cols-1 gap-6 lg:gap-x-10 lg:grid-cols-[320px_minmax(0,1fr)]">
             <div className="flex flex-col gap-6 lg:sticky lg:top-[77px] lg:self-start">
               <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} category={category} />
-              <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />
+              {showPricingCard && <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />}
             </div>
             <div className="flex min-w-0 flex-col gap-8">
               <CategoryAnalyticsCard analytics={data.analytics} />
@@ -1146,7 +1149,7 @@ export default function CoachCategoryEdit() {
               {version === "v2"
                 ? <CategoryAnalyticsCard analytics={data.analytics} className="lg:col-span-2" />
                 : <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} category={category} className="lg:col-span-2" />}
-              <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />
+              {showPricingCard && <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />}
             </div>
 
             <div className="mt-12">
@@ -1183,6 +1186,10 @@ export default function CoachCategoryEdit() {
                     {v}
                   </button>
                 ))}
+              </div>
+              <div className="mt-2 border-t border-gray-stroke pt-2">
+                <p className="px-2 pb-1 pt-1 text-[12px] font-medium text-gray-light">Widgets</p>
+                <AdminToggle label="Hourly rate & first step" checked={showPricingCard} onChange={() => setShowPricingCard((v) => !v)} />
               </div>
             </motion.div>
           )}

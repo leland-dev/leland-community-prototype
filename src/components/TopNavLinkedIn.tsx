@@ -390,7 +390,7 @@ export default function TopNavLinkedIn() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 6 }}
                   transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="absolute right-0 top-full z-50 mt-1 w-64 rounded-2xl border border-gray-stroke bg-white shadow-lg"
+                  className="absolute right-0 top-full z-50 mt-1 max-h-[calc(100vh-80px)] w-64 overflow-y-auto overscroll-contain rounded-2xl border border-gray-stroke bg-white shadow-lg"
                 >
                   {activeProfileMenuGroups.map((group, gi) => (
                     <div key={gi} className={`px-2 py-2${gi > 0 ? " border-t border-gray-stroke" : ""}`}>

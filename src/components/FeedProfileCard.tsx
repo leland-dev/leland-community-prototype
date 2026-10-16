@@ -20,12 +20,15 @@ const FEATURED = [
   { org: "Stanford GSB", tileLabel: "S", tileColor: "#8C1515", logo: gsbLogo },
 ];
 
-// Stats row — the profile metrics. The rating leads with a star and shows the
-// number of reviews as its label.
+// Rating — shown on its own line above the stats, with the 5-star treatment.
+const RATING = "4.9";
+const REVIEW_COUNT = "38 Reviews";
+
+// Stats row — the profile metrics.
 const STATS = [
-  { value: "4.9", label: "38 reviews", star: true },
   { value: "84", label: "Followers" },
   { value: "22.9k", label: "Likes" },
+  { value: "214k", label: "Impressions" },
 ];
 
 function OrgSquare({ tileLabel, tileColor, logo }: { tileLabel: string; tileColor: string; logo?: string }) {
@@ -77,17 +80,21 @@ export default function FeedProfileCard() {
             <img src={verifiedIcon} alt="Verified" className="h-[18px] w-[18px] shrink-0" />
           </div>
 
-          {/* Headline */}
-          <p className="mt-1.5 text-[14px] leading-[1.45] text-gray-light">{HEADLINE}</p>
+          {/* Reviews — a single-star rating row directly under the name. */}
+          <div className="mt-2 flex items-center gap-1.5">
+            <img src={starIcon} alt="" className="h-[15px] w-[15px]" />
+            <span className="text-[14px] font-semibold leading-none text-gray-dark">{RATING}</span>
+            <span className="text-[14px] leading-none text-[#707070]">{REVIEW_COUNT}</span>
+          </div>
 
-          {/* Stats — the profile metrics. The rating leads with a star. */}
+          {/* Headline */}
+          <p className="mt-2 text-[14px] leading-[1.45] text-gray-light">{HEADLINE}</p>
+
+          {/* Stats — the profile metrics. */}
           <div className="mt-3 flex items-center gap-x-6">
             {STATS.map((s) => (
               <div key={s.label} className="flex flex-col gap-[2px]">
-                <span className="flex items-center gap-1 text-[15px] font-semibold leading-none text-gray-dark">
-                  {s.value}
-                  {s.star && <img src={starIcon} alt="" className="h-[15px] w-[15px]" />}
-                </span>
+                <span className="text-[15px] font-semibold leading-none text-gray-dark">{s.value}</span>
                 <span className="text-[13px] leading-tight text-gray-extra-light">{s.label}</span>
               </div>
             ))}

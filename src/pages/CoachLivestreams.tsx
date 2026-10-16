@@ -30,12 +30,15 @@ type Host = { kind: "people"; people: HostPerson[] } | { kind: "leland" };
 
 type Status = { kind: "draft" } | { kind: "enrolled"; count: number };
 
+type Pricing = { kind: "free" } | { kind: "paid"; price: string };
+
 type EventItem = {
   id: string;
   title: string;
   date: string;
   startTime: string;
   duration: string;
+  pricing: Pricing;
   thumb?: string;
   host: Host;
   status: Status;
@@ -52,6 +55,7 @@ const upcoming: EventItem[] = [
     date: "Oct 20, 2025",
     startTime: "11:30 AM PST",
     duration: "1 hr",
+    pricing: { kind: "free" },
     host: { kind: "people", people: [YOU] },
     status: { kind: "draft" },
     startsIn: "5d",
@@ -62,6 +66,7 @@ const upcoming: EventItem[] = [
     date: "Oct 20, 2025",
     startTime: "11:30 AM PST",
     duration: "1 hr",
+    pricing: { kind: "free" },
     thumb: eventThumb02,
     host: { kind: "leland" },
     status: { kind: "enrolled", count: 64 },
@@ -73,6 +78,7 @@ const upcoming: EventItem[] = [
     date: "Oct 20, 2025",
     startTime: "11:30 AM PST",
     duration: "1 hr",
+    pricing: { kind: "paid", price: "$49" },
     thumb: courseSystems,
     host: { kind: "people", people: [YOU, { name: "Marcus Lee", avatar: coachPhoto }] },
     status: { kind: "enrolled", count: 64 },
@@ -81,6 +87,14 @@ const upcoming: EventItem[] = [
 ];
 
 const pastThumbs = [bootcamp1, eventThumb01, coursePe, eventThumb03, bootcamp2, courseC10];
+const pastPricing: Pricing[] = [
+  { kind: "free" },
+  { kind: "paid", price: "$29" },
+  { kind: "free" },
+  { kind: "paid", price: "$99" },
+  { kind: "free" },
+  { kind: "paid", price: "$49" },
+];
 const pastTitles = [
   "Navigating Dual/Concurrent Degrees: MBA + Policy, Education, and STEM",
   "From Analyst to Associate: Breaking Into Private Equity",
@@ -96,6 +110,7 @@ const past: EventItem[] = pastTitles.map((title, i) => ({
   date: "Oct 20, 2025",
   startTime: "11:30 AM PST",
   duration: "1 hr",
+  pricing: pastPricing[i],
   thumb: pastThumbs[i],
   host: { kind: "people", people: [YOU] },
   status: { kind: "enrolled", count: 64 },
@@ -126,6 +141,21 @@ function Thumbnail({ item }: { item: EventItem }) {
   }
   return (
     <img src={item.thumb} alt="" className="h-[60px] w-[100px] shrink-0 rounded-md object-cover" />
+  );
+}
+
+function PriceTag({ pricing }: { pricing: Pricing }) {
+  if (pricing.kind === "free") {
+    return (
+      <span className="shrink-0 rounded-full bg-[#E8F0EC] px-2.5 py-0.5 text-[12px] font-semibold text-[#1F5340]">
+        Free
+      </span>
+    );
+  }
+  return (
+    <span className="shrink-0 rounded-full bg-[#FBEFC9] px-2.5 py-0.5 text-[12px] font-semibold text-[#7A5E00]">
+      {pricing.price}
+    </span>
   );
 }
 
@@ -243,7 +273,10 @@ function EventRow({ item, past = false }: { item: EventItem; past?: boolean }) {
       <div className="flex min-w-0 flex-1 items-center gap-4">
         <Thumbnail item={item} />
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-[15px] font-semibold text-gray-dark">{item.title}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="truncate text-[15px] font-semibold text-gray-dark">{item.title}</h3>
+            <PriceTag pricing={item.pricing} />
+          </div>
           <p className="mt-0.5 truncate text-[14px] text-gray-light">
             {item.date} · {item.startTime} · {item.duration}
           </p>
