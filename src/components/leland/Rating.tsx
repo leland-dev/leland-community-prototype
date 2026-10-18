@@ -21,6 +21,7 @@ export enum RatingTextColor {
 
 export interface RatingProps {
   totalStars?: number;
+  scale?: number;
   rate: number;
   /** NOTE: if `overallRate` is not supplied, it falls back to `rate` */
   overallRate?: number;
@@ -56,6 +57,7 @@ export const Rating: FC<RatingProps> = ({
   overallRate = rate,
   hoverable,
   totalStars = 5,
+  scale = 5,
   onSaveRating,
   showRate,
   size = hoverable ? RatingSize.LARGE : RatingSize.MEDIUM,
@@ -75,7 +77,7 @@ export const Rating: FC<RatingProps> = ({
         className="flex gap-px"
         role={hoverable ? undefined : "img"}
         aria-label={
-          hoverable ? undefined : `${formattedRate} out of ${totalStars} stars`
+          hoverable ? undefined : `${formattedRate} out of ${scale} stars`
         }
       >
         {Array.from({ length: totalStars }, (_, i) => i + 1).map((index) => {
