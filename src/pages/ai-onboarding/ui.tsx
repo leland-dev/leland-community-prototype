@@ -15,7 +15,7 @@ export type Theme = "light" | "dark";
 export const ACCENT = "#FFD96F"; // Leland yellow — the AI Builder Program uses the core brand accent
 
 /** The one content width every step in the flow obeys (incl. Back/Skip and the Continue button). */
-export const FLOW_COLUMN = "max-w-[680px]";
+export const FLOW_COLUMN = "max-w-[544px]";
 
 /* ── Logo ──────────────────────────────────────────────────────────────── */
 export function LelandLogo({ theme = "light", className = "" }: { theme?: Theme; className?: string }) {

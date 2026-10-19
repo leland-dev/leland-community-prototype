@@ -6,7 +6,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Plus, X } from "lucide-react";
 import {
-  CONTEXT_OPTIONS, EXPERIENCE_OPTIONS, GOALS, PERSONAL_ROLES, ROLES, TEAM_SIZES, TOOLS, USER,
+  CONTEXT_OPTIONS, EXPERIENCE_OPTIONS, LEVEL_OPTIONS, PERSONAL_ROLES, ROLES, TEAM_SIZES, TOOLS, USER, goalsFor, objectiveExample, roleAsksLevel,
   type Answers, type Path,
 } from "../data";
 import { Chip, Eyebrow, GhostCta, Heading, OptionCard, OptionGrid, StepContinue, Sub, TextInput, TileCard } from "../ui";
@@ -138,6 +138,11 @@ export function RoleStep(p: StepProps) {
   const options = personal
     ? [...ROLES.filter((r) => r.key !== "other"), ...PERSONAL_ROLES, ...ROLES.filter((r) => r.key === "other")]
     : ROLES;
+  // Changing to a role that doesn't ask seniority drops any level picked earlier.
+  const pickRole = (key: string) =>
+    p.update(value === key ? { role: undefined, level: undefined } : { role: key, level: roleAsksLevel(key) ? p.answers.level : undefined });
+  // "Something else" opens a free-text field so we learn which options are missing.
+  const typing = value === "other";
   return (
     <>
       <Eyebrow>About you</Eyebrow>
@@ -149,7 +154,53 @@ export function RoleStep(p: StepProps) {
       </Sub>
       <OptionGrid cols={2}>
         {options.map((r) => (
-          <OptionCard key={r.key} compact selected={value === r.key} onClick={() => p.update({ role: value === r.key ? undefined : r.key })} icon={r.icon} label={r.label} />
+          <OptionCard key={r.key} compact selected={value === r.key} onClick={() => pickRole(r.key)} icon={r.icon} label={r.label} />
+        ))}
+      </OptionGrid>
+
+      <AnimatePresence initial={false}>
+        {typing ? (
+          <motion.div
+            key="other"
+            initial={{ opacity: 0, y: 8, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -4, height: 0 }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pt-4">
+              <TextInput
+                autoFocus
+                value={p.answers.roleOther}
+                onChange={(e) => p.update({ roleOther: e.target.value })}
+                placeholder="What's your role? (optional)"
+                aria-label="Your role"
+              />
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <StepContinue onClick={p.onNext} disabled={!value} />
+    </>
+  );
+}
+
+/* ── Role level (drill-down from the role question) ────────────────────── */
+export function LevelStep(p: StepProps) {
+  const role = [...ROLES, ...PERSONAL_ROLES].find((r) => r.key === p.answers.role);
+  const value = p.answers.level;
+  return (
+    <>
+      <Eyebrow>About you</Eyebrow>
+      {role ? (
+        <div className="mb-4 inline-flex items-center rounded-full bg-[#222222]/5 px-3.5 py-1.5 text-[14px] font-medium text-ink-primary">{role.label}</div>
+      ) : null}
+      <Heading>And what's your level?</Heading>
+      <Sub>So the examples match the scope of your work.</Sub>
+      <OptionGrid>
+        {LEVEL_OPTIONS.map((l) => (
+          <OptionCard key={l.value} compact selected={value === l.value} onClick={() => p.update({ level: value === l.value ? undefined : l.value })} label={l.label} desc={l.desc} />
         ))}
       </OptionGrid>
       <StepContinue onClick={p.onNext} disabled={!value} />
@@ -198,18 +249,19 @@ export function ToolStep(p: StepProps) {
   );
 }
 
-/* ── Goals (multi-select chips) ────────────────────────────────────────── */
+/* ── Goals (multi-select chips): role-specific group, then generic ──────── */
 export function GoalsStep(p: StepProps) {
   const toggle = (k: string) =>
     p.update({ goals: p.answers.goals.includes(k) ? p.answers.goals.filter((g) => g !== k) : [...p.answers.goals, k] });
+  const { role, generic } = goalsFor(p.answers.role, p.answers.level);
+  // One cloud, no section labels: the role-specific outcomes lead, the generic ones follow.
+  const options = [...role, ...generic];
   return (
     <>
-      <div className="text-center">
-        <Heading>What do you want to accomplish with AI?</Heading>
-        <Sub>Choose as many options as you want</Sub>
-      </div>
-      <div className="mt-8 flex flex-wrap justify-center gap-2.5">
-        {GOALS.map((g) => (
+      <Heading>What do you want to accomplish with AI?</Heading>
+      <Sub>Choose as many options as you want</Sub>
+      <div className="mt-8 flex flex-wrap gap-2.5">
+        {options.map((g) => (
           <Chip key={g.key} selected={p.answers.goals.includes(g.key)} onClick={() => toggle(g.key)} icon={g.icon}>
             {g.label}
           </Chip>
@@ -236,18 +288,22 @@ export function GoalTextStep(p: StepProps) {
   const { ratio, color } = strengthOf(text);
   return (
     <>
-      <Eyebrow>One last question</Eyebrow>
-      <Heading>What do you want to get out of the program?</Heading>
-      <Sub>Where could AI give you back time, or let you do something you can't today? Your instructors read every answer and shape your first builds around it.</Sub>
+      <Eyebrow>Your learning objective</Eyebrow>
+      <Heading>What do you want AI to do for you?</Heading>
+      <Sub>Finish the sentence in your own words. We'll save it as your learning objective and build toward it with you through the program.</Sub>
 
-      <textarea
-        value={text}
-        onChange={(e) => p.update({ goalsNote: e.target.value })}
-        rows={5}
-        autoFocus
-        placeholder="e.g. I run a six-person marketing team. I want our weekly reporting and competitive research to run themselves, so Fridays go to strategy instead of spreadsheets."
-        className="mt-8 w-full resize-none rounded-xl border border-gray-stroke bg-white px-4 py-3.5 text-[16px] leading-[1.5] text-ink-primary outline-none transition-colors placeholder:text-gray-xlight focus:border-ink-primary"
-      />
+      {/* One sentence with a fixed lead-in: the structure does the articulating. */}
+      <label className="mt-8 block cursor-text rounded-xl border border-gray-stroke bg-white px-4 pb-3 pt-3.5 transition-colors focus-within:border-ink-primary">
+        <span className="block text-[16px] font-medium leading-[1.5] text-ink-primary">By the end of the program, I want to use AI to…</span>
+        <textarea
+          value={text}
+          onChange={(e) => p.update({ goalsNote: e.target.value })}
+          rows={3}
+          autoFocus
+          placeholder={objectiveExample(p.answers.role)}
+          className="mt-1 w-full resize-none bg-transparent text-[16px] leading-[1.5] text-ink-primary outline-none placeholder:text-gray-xlight"
+        />
+      </label>
       <div className="mt-2.5 flex items-center gap-2.5 text-[12px] text-gray-extra-light">
         <div className="h-1.5 w-28 overflow-hidden rounded-full bg-[#222222]/10" aria-hidden>
           <motion.div
