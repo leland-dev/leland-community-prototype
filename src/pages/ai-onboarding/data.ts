@@ -34,6 +34,8 @@ export type Answers = {
   teamSize?: string;
   invites: string[];
   role?: string;
+  /** Free text when role is "other": tells us which options the taxonomy is missing. */
+  roleOther: string;
   /** Seniority within the role: IC / manager / director+. Not asked for
    *  non-work roles, or for Executive and Founder where it's implied. */
   level?: LevelKey;
@@ -49,6 +51,7 @@ export type Answers = {
 
 export const EMPTY_ANSWERS: Answers = {
   companyName: "",
+  roleOther: "",
   invites: [],
   goals: [],
   goalsNote: "",
@@ -133,16 +136,16 @@ export const PERSONAL_ROLES: RoleOption[] = [
 ];
 export const NON_WORK_ROLES = new Set(PERSONAL_ROLES.map((r) => r.key));
 export const isNonWorkRole = (key?: string) => !!key && NON_WORK_ROLES.has(key);
-export const LEVEL_OPTIONS: { value: LevelKey; label: string }[] = [
-  { value: "ic", label: "Individual contributor" },
-  { value: "manager", label: "Manager" },
-  { value: "director", label: "Director or above" },
+export const LEVEL_OPTIONS: { value: LevelKey; label: string; desc: string }[] = [
+  { value: "ic", label: "Individual contributor", desc: "You own your own work" },
+  { value: "manager", label: "Manager", desc: "You lead a team" },
+  { value: "director", label: "Director or above", desc: "You lead teams or a function" },
 ];
 /** Roles where seniority is implied or doesn't apply, so we don't ask. */
 const NO_LEVEL_ROLES = new Set(["exec", "founder", "student", "between", "exploring"]);
 export const roleAsksLevel = (key?: string) => !!key && !NO_LEVEL_ROLES.has(key);
-export const roleLabel = (key?: string) =>
-  [...ROLES, ...PERSONAL_ROLES].find((r) => r.key === key)?.label ?? "your role";
+export const roleLabel = (key?: string, other?: string) =>
+  key === "other" && other?.trim() ? other.trim() : [...ROLES, ...PERSONAL_ROLES].find((r) => r.key === key)?.label ?? "your role";
 
 /** Levels mirror Higgsfield's Beginner → Expert ladder; descriptions are ours. */
 export const EXPERIENCE_OPTIONS: { value: ExperienceKey; label: string; desc: string; dots: 1 | 2 | 3 | 4 }[] = [
@@ -602,6 +605,28 @@ export const ROLE_PROFILES: Record<string, Partial<RoleProfile>> = {
     ],
   },
 };
+
+/** Example endings for the learning-objective sentence ("By the end of the
+ *  program, I want to use AI to…"), one per role, shown as the placeholder. */
+const OBJECTIVE_EXAMPLES: Record<string, string> = {
+  product: "turn a week of customer interviews into a prioritized brief, so I spend my time on the roadmap instead of note-taking.",
+  marketing: "run our weekly reporting and competitive research on their own, so Fridays go to strategy instead of spreadsheets.",
+  sales: "research every account and draft the first outreach before my day starts, so I spend my hours in conversations.",
+  ops: "automate the status updates and handoffs I chase every week, so the team runs without me in the loop.",
+  finance: "pull the monthly close commentary straight from our data, so I spend the week on forecasting instead of formatting.",
+  people: "draft job descriptions and interview plans from a short brief, so hiring managers get them the same day.",
+  engineering: "build and test the glue code and internal tools nobody has time for, so I ship the real work faster.",
+  exec: "turn board prep and weekly reporting into a half-day job, so I spend my time with customers and the team.",
+  design: "go from a rough idea to a clickable prototype in an afternoon, so the team is reacting to something real.",
+  data: "answer the ad-hoc questions that fill my inbox, so I get back to the analysis only I can do.",
+  legal: "do the first-pass review of standard contracts, so I only read the clauses that need me.",
+  student: "research, outline and polish my work twice as fast, so I can take on projects I'd otherwise skip.",
+  between: "build a portfolio project that shows I can ship with AI, so I stand out in my next interview.",
+  exploring: "take one thing I do every week and hand most of it off, so I find out what else is possible.",
+  founder: "do the marketing, support and reporting work of a small team, so I stay focused on the product.",
+};
+export const objectiveExample = (role?: string) =>
+  (role && OBJECTIVE_EXAMPLES[role]) || "take over the repetitive part of my week, so I spend my time on the work only I can do.";
 
 export function profileFor(role?: string): RoleProfile {
   return { ...DEFAULT_PROFILE, ...(role ? ROLE_PROFILES[role] ?? {} : {}) };

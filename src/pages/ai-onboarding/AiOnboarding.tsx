@@ -22,13 +22,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
-import { EMPTY_ANSWERS, type Answers } from "./data";
+import { EMPTY_ANSWERS, roleAsksLevel, type Answers } from "./data";
 import { DevPanel, ScenarioProvider, paramsFromScenario, scenarioFromParams, type Scenario } from "./scenario";
 import { Shell, type Theme } from "./ui";
 import { CheckoutConfirmation, InviteEmail, InviteInterstitial } from "./screens/Bookends";
 import { ProgramHub } from "./screens/ProgramHub";
 import { Welcome } from "./screens/Welcome";
-import { ContextStep, ExperienceStep, GoalTextStep, GoalsStep, RoleStep, TeamStep, ToolStep } from "./screens/Questions";
+import { ContextStep, ExperienceStep, GoalTextStep, GoalsStep, LevelStep, RoleStep, TeamStep, ToolStep } from "./screens/Questions";
 import { Preparing, RoleAffirmation, SocialProof } from "./screens/Moments";
 import { FinishStep } from "./screens/FinishAccount";
 
@@ -36,7 +36,7 @@ export const AI_ONBOARDING_PATH = "/ai-onboarding";
 
 type StepId =
   | "checkout" | "invite" | "interstitial" | "welcome"
-  | "context" | "team" | "role" | "experience" | "affirm" | "tool" | "goals" | "goal" | "proof" | "finish"
+  | "context" | "team" | "role" | "level" | "experience" | "affirm" | "tool" | "goals" | "goal" | "proof" | "finish"
   | "preparing" | "hub";
 
 type StepDef = {
@@ -56,6 +56,7 @@ const SEQUENCE: StepDef[] = [
   { id: "context", when: (_, sc) => sc.path === "individual", counts: true, shell: { theme: "light" } },
   { id: "team", when: (a, sc) => sc.path === "individual" && a.context === "work", counts: true, skippable: true, shell: { theme: "light" } },
   { id: "role", counts: true, shell: { theme: "light" } },
+  { id: "level", when: (a) => roleAsksLevel(a.role), counts: true, shell: { theme: "light" } },  // seniority, as a drill-down from the role
   { id: "proof", shell: { theme: "light" } },      // "people like you", right after they tell us their role
   { id: "experience", counts: true, shell: { theme: "light" } },
   { id: "tool", when: (_, sc) => !sc.orgTool, counts: true, shell: { theme: "light" } },
@@ -185,6 +186,7 @@ export default function AiOnboarding() {
       case "context": return <ContextStep {...stepProps} />;
       case "team": return <TeamStep {...stepProps} />;
       case "role": return <RoleStep {...stepProps} />;
+      case "level": return <LevelStep {...stepProps} />;
       case "experience": return <ExperienceStep {...stepProps} />;
       case "affirm": return <RoleAffirmation answers={answers} path={path} onNext={next} />;
       case "tool": return <ToolStep {...stepProps} />;

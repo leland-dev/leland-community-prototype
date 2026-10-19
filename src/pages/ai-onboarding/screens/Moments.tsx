@@ -21,7 +21,7 @@ export function RoleAffirmation({ answers, onNext }: MomentProps) {
   const level = answers.experience ?? "casual";
   const arc = EXPERIENCE_ARC[level];
   const dots = EXPERIENCE_OPTIONS.find((o) => o.value === level)?.dots ?? 2;
-  const role = roleLabel(answers.role).toLowerCase();
+  const role = roleLabel(answers.role, answers.roleOther).toLowerCase();
 
   return (
     <>
@@ -130,15 +130,16 @@ export function SocialProof({ answers, path, onNext }: MomentProps) {
         </div>
       ) : null}
 
-      <div className="mt-7 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+      {/* The logos are white SVGs (built for the dark brand panel); invert them for the light step. */}
+      <div className="mt-5 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
         <div className="flex w-max items-center gap-10" style={{ animation: "leland-marquee 40s linear infinite" }}>
           {[...ORG_LOGOS, ...ORG_LOGOS].map((l, i) => (
-            <img key={`${l.name}-${i}`} src={l.src} alt={l.name} style={{ height: Math.round(l.height * 0.8) }} className="w-auto shrink-0 opacity-50 grayscale" />
+            <img key={`${l.name}-${i}`} src={l.src} alt={l.name} style={{ height: Math.round(l.height * 0.85) }} className="w-auto shrink-0 opacity-50 invert" />
           ))}
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {peers.map((peer) => (
           // Same card grammar as the quotes on the welcome brand panel, in light.
           <div key={peer.name} className="rounded-2xl border border-gray-stroke bg-white p-4">
@@ -152,14 +153,12 @@ export function SocialProof({ answers, path, onNext }: MomentProps) {
         ))}
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-gray-stroke pt-5 text-[14px] text-ink-secondary">
-        <div><span className="text-[22px] font-medium text-ink-primary">{profile.stat.value}</span> · {profile.stat.label}</div>
-        <div className="flex items-center gap-3">
-          <div className="flex -space-x-2">
-            {INSTRUCTORS.map((ins) => <img key={ins.name} src={ins.photo} alt={ins.name} className="size-8 rounded-full border-2 border-white object-cover" />)}
-          </div>
-          <span>Your instructors and TAs</span>
+      {/* One social-proof line: instructor avatars, then the rating. */}
+      <div className="mt-5 flex items-center gap-3 text-[14px] text-ink-secondary">
+        <div className="flex -space-x-2">
+          {INSTRUCTORS.map((ins) => <img key={ins.name} src={ins.photo} alt={ins.name} className="size-8 rounded-full border-2 border-white object-cover" />)}
         </div>
+        <div><span className="text-[18px] font-medium text-ink-primary">{profile.stat.value}</span> · {profile.stat.label}</div>
       </div>
 
       <StepContinue onClick={onNext} />
@@ -174,7 +173,8 @@ export function Preparing({ answers, onDone }: { answers: Answers; path: Path; o
   const cohort = COHORTS.find((c) => c.id === answers.cohortId);
   const lines = [
     `Setting your track: ${toolLabel(tool)}`,
-    `Tailoring examples for ${roleLabel(answers.role).toLowerCase()}`,
+    `Tailoring examples for ${roleLabel(answers.role, answers.roleOther).toLowerCase()}`,
+    ...(answers.goalsNote.trim() ? ["Saving your learning objective"] : []),
     cohort
       ? `${scenario.cohort === cohort.id ? "Confirming" : "Reserving"} your seat in the ${cohort.label}`
       : "Unlocking Level 0 Foundations",
