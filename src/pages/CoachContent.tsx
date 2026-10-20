@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "../components/Button";
-import { useCourses, type BuilderCourse } from "../lib/courses";
+import { useCourses, upsertCourse, type BuilderCourse } from "../lib/courses";
 import { ConfigModal, ListConfigModal, CollectionCover, collectionThumbs, CONTENT_LIBRARY, formatViews, defaultConfigFor, type OfferingItem } from "./CoachProductNew";
 import { useCollections, getCollection, upsertCollection, deleteCollection, newCollectionId, type Collection } from "../lib/collections";
 import { RESOURCES, type Resource } from "../lib/resources";
@@ -10,6 +10,7 @@ import AnalyticsCard, { type AnalyticsMetric } from "../components/AnalyticsCard
 import CoachContentResourceSheet from "./CoachContentResourceSheet";
 import CoachContentCollectionSheet from "./CoachContentCollectionSheet";
 import CoachContentCourseSheet from "./CoachContentCourseSheet";
+import AddToOfferingModal from "../components/AddToOfferingModal";
 import ConfirmModal from "../components/ConfirmModal";
 import chevronDownIcon from "../assets/icons/chevron-down.svg";
 import stackIcon from "../assets/icons/stack.svg";
@@ -294,6 +295,14 @@ type ContentRow =
   | { kind: "course"; key: string; data: BuilderCourse }
   | { kind: "resource"; key: string; data: Resource };
 
+// Current offering slugs / display title for a row, across kinds.
+function rowOfferingSlugs(row: ContentRow): string[] {
+  return row.kind === "resource" ? row.data.offerings : row.data.offerings ?? [];
+}
+function rowTitle(row: ContentRow): string {
+  return row.kind === "course" ? row.data.title || "Untitled course" : row.data.title;
+}
+
 // Admin-selectable versions of the "Your content" table rows (switched via the
 // 3-dot admin menu). v1 is the current layout; v2 and v3 are variants to iterate
 // on and currently render the same as v1.
@@ -314,6 +323,7 @@ type RowDisplay = {
   views: string | null;
   offerings: number;
   onClick: () => void;
+  onOfferings: () => void;
   ariaLabel: string;
 };
 
@@ -364,7 +374,7 @@ function ContentRowV3({ d, isLast }: { d: RowDisplay; isLast: boolean }) {
         </span>
       </button>
       <div className="flex shrink-0 flex-col items-end text-right">
-        <OfferingStatus offerings={d.offerings} onClick={d.onClick} />
+        <OfferingStatus offerings={d.offerings} onClick={d.onOfferings} />
       </div>
       <button onClick={d.onClick} aria-label={d.ariaLabel} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
         {ROW_CHEVRON}
@@ -393,11 +403,11 @@ function ContentRowV2({ d, isLast }: { d: RowDisplay; isLast: boolean }) {
           </span>
         )}
         {d.offerings > 0 ? (
-          <span className="inline-flex items-center rounded-full bg-[#222222]/5 px-2.5 py-1 text-[13px] font-medium text-gray-light">
+          <button onClick={d.onOfferings} className="inline-flex items-center rounded-full bg-[#222222]/5 px-2.5 py-1 text-[13px] font-medium text-gray-light transition-colors hover:bg-[#222222]/10">
             {d.offerings} offering{d.offerings === 1 ? "" : "s"}
-          </span>
+          </button>
         ) : (
-          <Button size="sm" variant="outline" onClick={d.onClick}>
+          <Button size="sm" variant="outline" onClick={d.onOfferings}>
             Add to an offering
           </Button>
         )}
@@ -433,13 +443,13 @@ function TableRow({ d, isLast, ctaAsButton, offeringsAlign }: { d: RowDisplay; i
           the Leland+ column from shifting); aligned per version */}
       <div className={`flex w-48 shrink-0 ${offeringsAlign === "left" ? "justify-start" : "justify-end"}`}>
         {d.offerings > 0 ? (
-          <button type="button" onClick={d.onClick} className={OFFERING_LINK_CLASS}>
+          <button type="button" onClick={d.onOfferings} className={OFFERING_LINK_CLASS}>
             {d.offerings} offering{d.offerings === 1 ? "" : "s"}
           </button>
         ) : ctaAsButton ? (
-          <Button size="md" variant="outline" onClick={d.onClick}>Add to offering</Button>
+          <Button size="md" variant="outline" onClick={d.onOfferings}>Add to offering</Button>
         ) : (
-          <button type="button" onClick={d.onClick} className={OFFERING_LINK_CLASS}>Add to offering</button>
+          <button type="button" onClick={d.onOfferings} className={OFFERING_LINK_CLASS}>Add to offering</button>
         )}
       </div>
       <button onClick={d.onClick} aria-label={d.ariaLabel} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
@@ -471,11 +481,13 @@ function ContentRowV1({ d, isLast }: { d: RowDisplay; isLast: boolean }) {
       {/* Offerings value / status (label lives in the header) */}
       <div className="flex w-48 shrink-0 justify-start">
         {d.offerings > 0 ? (
-          <button type="button" onClick={d.onClick} className="text-[14px] font-medium leading-tight text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-colors hover:text-gray-dark">
+          <button type="button" onClick={d.onOfferings} className="text-[14px] font-medium leading-tight text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-colors hover:text-gray-dark">
             {d.offerings} offering{d.offerings === 1 ? "" : "s"}
           </button>
         ) : (
-          <span className="whitespace-nowrap text-[14px] font-medium leading-tight text-gray-extra-light">Not sold on your profile</span>
+          <button type="button" onClick={d.onOfferings} className="text-[14px] font-medium leading-tight text-gray-extra-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">
+            Not for sale
+          </button>
         )}
       </div>
       <button onClick={d.onClick} aria-label={d.ariaLabel} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
@@ -668,6 +680,17 @@ export default function CoachContent() {
   const [openResource, setOpenResource] = useState<Resource | null>(null);
   const [openCollection, setOpenCollection] = useState<Collection | null>(null);
   const [openCourse, setOpenCourse] = useState<BuilderCourse | null>(null);
+  // The row whose "add to an offering" modal is open (null = closed).
+  const [offeringRow, setOfferingRow] = useState<ContentRow | null>(null);
+  // RESOURCES is a static array (not a store), so mutating a resource's offerings
+  // needs a manual re-render; collections/courses re-render via their stores.
+  const [, forceRender] = useReducer((n: number) => n + 1, 0);
+  const saveOfferings = (row: ContentRow, slugs: string[]) => {
+    if (row.kind === "collection") upsertCollection({ ...row.data, offerings: slugs });
+    else if (row.kind === "course") upsertCourse({ ...row.data, offerings: slugs });
+    else { row.data.offerings = slugs; forceRender(); }
+    setOfferingRow(null);
+  };
   // "Submit a resource" opens the content upload/configure modal (the same one
   // used in the offering builder), started in its upload-new flow.
   const [uploadItem, setUploadItem] = useState<OfferingItem | null>(null);
@@ -708,6 +731,7 @@ export default function CoachContent() {
           views: `${formatViews(collectionTotalViews(c.items))} views`,
           offerings: (c.offerings ?? []).length,
           onClick: () => setOpenCollection(c),
+          onOfferings: () => setOfferingRow(row),
           ariaLabel: `View details for ${c.title}`,
         };
       }
@@ -721,6 +745,7 @@ export default function CoachContent() {
           views: c.views != null ? `${formatViews(c.views)} views` : null,
           offerings: (c.offerings ?? []).length,
           onClick: () => setOpenCourse(c),
+          onOfferings: () => setOfferingRow(row),
           ariaLabel: `View details for ${c.title || "course"}`,
         };
       }
@@ -734,6 +759,7 @@ export default function CoachContent() {
           views: `${formatViews(r.views)} views`,
           offerings: r.offerings.length,
           onClick: () => setOpenResource(r),
+          onOfferings: () => setOfferingRow(row),
           ariaLabel: `View details for ${r.title}`,
         };
       }
@@ -843,6 +869,14 @@ export default function CoachContent() {
         course={openCourse}
         onClose={() => setOpenCourse(null)}
         onEdit={() => { if (openCourse) navigate(`/coach/content/course/${openCourse.id}`); setOpenCourse(null); }}
+      />
+
+      <AddToOfferingModal
+        open={!!offeringRow}
+        title={offeringRow ? rowTitle(offeringRow) : ""}
+        offerings={offeringRow ? rowOfferingSlugs(offeringRow) : []}
+        onClose={() => setOfferingRow(null)}
+        onSave={(slugs) => { if (offeringRow) saveOfferings(offeringRow, slugs); }}
       />
 
       {/* Collection builder + delete confirm — rendered once, opened from a
