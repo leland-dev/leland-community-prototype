@@ -2,16 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "../components/Button";
-import { useCourses, courseStats, deleteCourse, type BuilderCourse } from "../lib/courses";
-import { ConfigModal, ListConfigModal, CollectionCover, collectionThumbs, collectionCountLabel, CONTENT_LIBRARY, formatViews, defaultConfigFor, type OfferingItem } from "./CoachProductNew";
-import { useCollections, upsertCollection, deleteCollection, newCollectionId, type Collection } from "../lib/collections";
+import { useCourses, type BuilderCourse } from "../lib/courses";
+import { ConfigModal, ListConfigModal, CollectionCover, collectionThumbs, CONTENT_LIBRARY, formatViews, defaultConfigFor, type OfferingItem } from "./CoachProductNew";
+import { useCollections, getCollection, upsertCollection, deleteCollection, newCollectionId, type Collection } from "../lib/collections";
 import { RESOURCES, type Resource } from "../lib/resources";
 import AnalyticsCard, { type AnalyticsMetric } from "../components/AnalyticsCard";
 import CoachContentResourceSheet from "./CoachContentResourceSheet";
+import CoachContentCollectionSheet from "./CoachContentCollectionSheet";
+import CoachContentCourseSheet from "./CoachContentCourseSheet";
 import ConfirmModal from "../components/ConfirmModal";
 import chevronDownIcon from "../assets/icons/chevron-down.svg";
 import stackIcon from "../assets/icons/stack.svg";
-import trashIcon from "../assets/icons/trash.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
 import documentIcon from "../assets/icons/document.svg";
 import playVideoIcon from "../assets/icons/play-video.svg";
@@ -41,11 +42,10 @@ function MaskIcon({ src, className = "" }: { src: string; className?: string }) 
   );
 }
 
-// ── Collections — named buckets of uploaded content, shown alongside the raw
-// resources. Created / edited here via the same builder the offering flow uses
-// (ListConfigModal); the shared store keeps both surfaces in sync. Three admin-
-// selectable display modes: cards (default), interwoven into the content list,
-// and a minimal horizontal carousel. ──
+// ── Collections — named buckets of uploaded content, shown as rows in the
+// unified "Your content" list alongside courses and single resources. Created /
+// edited here via the same builder the offering flow uses (ListConfigModal);
+// the shared store keeps both surfaces in sync. ──
 function collectionToItem(c: Collection): OfferingItem {
   return {
     id: Date.now(),
@@ -61,14 +61,9 @@ function collectionTotalViews(items: Collection["items"]): number {
   return items.reduce((sum, it) => sum + (CONTENT_LIBRARY.find((l) => l.id === it.config.libraryId)?.views ?? 0), 0);
 }
 
-// One-line metadata for a collection, e.g. "4 resources · 8.5k views".
-function collectionMeta(c: Collection): string {
-  return `${collectionCountLabel(c.items.length)} · ${formatViews(collectionTotalViews(c.items))} views`;
-}
 
-// Editor state + modals for creating / editing / deleting collections. Shared
-// across every display mode so a collection can be opened from anywhere on the
-// page (cards, carousel, or a row in the interwoven content list).
+// Editor state + modals for creating / editing / deleting collections, opened
+// from a collection row in the "Your content" list.
 function useCollectionEditor() {
   // The collection currently open in the builder (null = closed). Carries a
   // `collectionId` in config so save knows which bucket to write back.
@@ -87,11 +82,16 @@ function useCollectionEditor() {
   const save = () => {
     setEditItem((it) => {
       if (it) {
+        // Preserve monetization status (Leland+ / offerings) across edits — the
+        // builder modal doesn't manage those fields, so carry them forward.
+        const existing = getCollection(it.config.collectionId);
         upsertCollection({
           id: it.config.collectionId,
           title: it.config.title || "Untitled collection",
           description: it.config.description || "",
           items: (it.items ?? []).map((r) => ({ id: r.id, config: { ...r.config } })),
+          lelandPlus: existing?.lelandPlus,
+          offerings: existing?.offerings,
         });
       }
       return null;
@@ -124,228 +124,15 @@ function useCollectionEditor() {
 
 const PLUS_ICON = <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>;
 
-type CollectionViewProps = {
-  collections: Collection[];
-  onNew: () => void;
-  onOpen: (c: Collection) => void;
-  onDelete: (c: Collection) => void;
-};
-
-// Shared section title block.
-function CollectionsTitle() {
-  return (
-    <div>
-      <h2 className="text-[22px] font-semibold text-gray-dark">Collections</h2>
-      <p className="mt-0.5 text-[15px] text-gray-light">Bundle your content into buckets you can add to an offering.</p>
-    </div>
-  );
-}
-
-// V1 — grid of cards with cover, title, description, and item count.
-function CollectionCardsView({ collections, onNew, onOpen, onDelete }: CollectionViewProps) {
-  return (
-    <div>
-      <div className="flex items-center justify-between gap-4">
-        <CollectionsTitle />
-        <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={onNew}>
-          {PLUS_ICON}
-          New collection
-        </Button>
-      </div>
-
-      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {collections.map((c) => (
-          <div
-            key={c.id}
-            onClick={() => onOpen(c)}
-            className="group relative flex cursor-pointer flex-col rounded-2xl border border-gray-stroke bg-white p-4 text-left shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]"
-          >
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onDelete(c); }}
-              aria-label={`Delete ${c.title}`}
-              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-gray-light opacity-0 shadow-[0_1px_3px_rgba(16,24,40,0.15)] transition-all hover:text-[#E5484D] focus-visible:opacity-100 group-hover:opacity-100"
-            >
-              <MaskIcon src={trashIcon} className="h-[16px] w-[16px]" />
-            </button>
-            <CollectionCover thumbs={collectionThumbs(c.items)} className="h-16 w-24" />
-            <p className="mt-3.5 text-[15px] font-semibold leading-tight text-gray-dark">{c.title}</p>
-            <p className="mt-1.5 line-clamp-2 flex-1 text-[14px] leading-snug text-gray-light">{c.description}</p>
-            <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-[#222222]/5 px-2.5 py-1 text-[12px] font-medium text-gray-light">
-              <MaskIcon src={stackIcon} className="h-3.5 w-3.5" />
-              {collectionCountLabel(c.items.length)}
-            </span>
-          </div>
-        ))}
-
-        {/* Create tile — dashed, always the last cell */}
-        <button
-          type="button"
-          onClick={onNew}
-          className="flex min-h-[172px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-stroke text-gray-light transition-colors hover:border-gray-dark hover:text-gray-dark"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#222222]/5">{PLUS_ICON}</span>
-          <span className="text-[14px] font-semibold">New collection</span>
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// V3 — minimal horizontal carousel: a larger thumbnail stack, title, and a bit
-// of metadata. Prev/next chevrons that fade out at the scroll extents.
-function CollectionCarouselView({ collections, onNew, onOpen }: CollectionViewProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [atStart, setAtStart] = useState(true);
-  const [atEnd, setAtEnd] = useState(false);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const update = () => {
-      setAtStart(el.scrollLeft <= 1);
-      setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 1);
-    };
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => { el.removeEventListener("scroll", update); ro.disconnect(); };
-  }, [collections.length]);
-
-  const scrollByCards = (dir: 1 | -1) => scrollRef.current?.scrollBy({ left: dir * 280, behavior: "smooth" });
-  const chevron = "flex h-9 w-9 items-center justify-center rounded-full border border-[#222222]/[0.12] text-gray-dark transition-colors hover:bg-[#222222]/5 disabled:opacity-30 disabled:hover:bg-transparent";
-
-  return (
-    <div>
-      <div className="flex items-end justify-between gap-4">
-        <CollectionsTitle />
-        <div className="flex shrink-0 items-center gap-2">
-          <button onClick={() => scrollByCards(-1)} disabled={atStart} aria-label="Previous collections" className={chevron}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-          </button>
-          <button onClick={() => scrollByCards(1)} disabled={atEnd} aria-label="More collections" className={chevron}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-          </button>
-          <Button size="sm" variant="dark" rounded="rounded-full" className="ml-1 shrink-0 font-semibold" onClick={onNew}>
-            {PLUS_ICON}
-            New
-          </Button>
-        </div>
-      </div>
-
-      <div ref={scrollRef} className="scrollbar-hide mt-5 flex items-stretch gap-4 overflow-x-auto pb-2">
-        {collections.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => onOpen(c)}
-            className="group flex w-[240px] shrink-0 flex-col rounded-2xl border border-gray-stroke bg-white p-3 text-left shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]"
-          >
-            <CollectionCover thumbs={collectionThumbs(c.items)} className="h-36 w-full" />
-            <p className="mt-3.5 truncate text-[15px] font-semibold text-gray-dark">{c.title}</p>
-            <p className="mt-1 truncate text-[13px] text-gray-light">{collectionMeta(c)}</p>
-          </button>
-        ))}
-
-        {/* Create card — dashed, at the end of the row */}
-        <button
-          type="button"
-          onClick={onNew}
-          className="flex w-[240px] shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-stroke text-gray-light transition-colors hover:border-gray-dark hover:text-gray-dark"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#222222]/5">{PLUS_ICON}</span>
-          <span className="text-[14px] font-semibold">New collection</span>
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Courses — full multi-module courses built in the standalone course builder.
-// Its own section on the Content page (like Collections); cards open the builder,
-// and "New course" starts a fresh one. ──
-function CourseCardCover({ course }: { course: BuilderCourse }) {
+// Small cover thumbnail for a course row in the unified content list — mirrors
+// the collection cover / resource thumbnail dimensions (h-10 × 60px).
+function CourseRowCover({ course }: { course: BuilderCourse }) {
   if (course.coverImage) {
-    return <img src={course.coverImage} alt="" className="aspect-[1.91/1] w-full object-cover" />;
+    return <img src={course.coverImage} alt="" className="h-10 w-[60px] shrink-0 rounded-lg object-cover" />;
   }
   return (
-    <div className="flex aspect-[1.91/1] w-full items-center justify-center bg-gray-hover">
-      <MaskIcon src={myCoursesIcon} className="h-8 w-8 text-gray-extra-light" />
-    </div>
-  );
-}
-
-function CoursesSection() {
-  const navigate = useNavigate();
-  const courses = useCourses();
-  const [confirmDelete, setConfirmDelete] = useState<BuilderCourse | null>(null);
-
-  return (
-    <div>
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h2 className="text-[22px] font-semibold text-gray-dark">Courses</h2>
-          <p className="mt-0.5 text-[15px] text-gray-light">Build structured, multi-module courses with their own lessons and pages.</p>
-        </div>
-        <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => navigate("/coach/content/course/new")}>
-          {PLUS_ICON}
-          New course
-        </Button>
-      </div>
-
-      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {courses.map((c) => {
-          const stats = courseStats(c);
-          return (
-            <div
-              key={c.id}
-              onClick={() => navigate(`/coach/content/course/${c.id}`)}
-              className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white text-left shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] transition-shadow hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]"
-            >
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); setConfirmDelete(c); }}
-                aria-label={`Delete ${c.title}`}
-                className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-gray-light opacity-0 shadow-[0_1px_3px_rgba(16,24,40,0.15)] transition-all hover:text-[#E5484D] focus-visible:opacity-100 group-hover:opacity-100"
-              >
-                <MaskIcon src={trashIcon} className="h-[16px] w-[16px]" />
-              </button>
-              <CourseCardCover course={c} />
-              <div className="flex flex-1 flex-col p-4">
-                <div className="mb-2 flex items-center gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${c.status === "published" ? "bg-[#E6F4EA] text-[#1E7B34]" : "bg-[#222222]/5 text-gray-light"}`}>
-                    {c.status === "published" ? "Published" : "Draft"}
-                  </span>
-                </div>
-                <p className="text-[15px] font-semibold leading-tight text-gray-dark">{c.title || "Untitled course"}</p>
-                <p className="mt-1.5 line-clamp-2 flex-1 text-[14px] leading-snug text-gray-light">{c.description || "No description yet."}</p>
-                <span className="mt-3 text-[12px] font-medium text-gray-light">
-                  {stats.modules} {stats.modules === 1 ? "lesson" : "lessons"} · {stats.sections} {stats.sections === 1 ? "page" : "pages"}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Create tile — dashed, always the last cell */}
-        <button
-          type="button"
-          onClick={() => navigate("/coach/content/course/new")}
-          className="flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-stroke text-gray-light transition-colors hover:border-gray-dark hover:text-gray-dark"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#222222]/5">{PLUS_ICON}</span>
-          <span className="text-[14px] font-semibold">New course</span>
-        </button>
-      </div>
-
-      <ConfirmModal
-        open={!!confirmDelete}
-        title={`Delete “${confirmDelete?.title || "Untitled course"}”?`}
-        body="This permanently removes the course and all its lessons and pages. This can't be undone."
-        confirmLabel="Delete course"
-        onConfirm={() => { if (confirmDelete) deleteCourse(confirmDelete.id); setConfirmDelete(null); }}
-        onClose={() => setConfirmDelete(null)}
-      />
+    <div className="flex h-10 w-[60px] shrink-0 items-center justify-center rounded-lg bg-gray-hover">
+      <MaskIcon src={myCoursesIcon} className="h-4 w-4 text-gray-extra-light" />
     </div>
   );
 }
@@ -476,24 +263,392 @@ const EXTERNAL_ARROW = (
   </svg>
 );
 
-const RESOURCE_TABS = [
-  { key: "all", label: "All" },
+// Type filter for the unified "Your content" list.
+const CONTENT_FILTERS = [
+  { key: "all", label: "All types" },
+  { key: "resources", label: "Resources" },
+  { key: "collections", label: "Collections" },
+  { key: "courses", label: "Courses" },
+] as const;
+type ContentFilter = (typeof CONTENT_FILTERS)[number]["key"];
+
+// Status filter — a single monetization/state dimension.
+const STATUS_FILTERS = [
+  { key: "any", label: "Any status" },
   { key: "leland", label: "Added to Leland+" },
+  { key: "offering", label: "Added to an offering" },
+  { key: "draft", label: "Draft" },
+  { key: "none", label: "No status" },
 ] as const;
 
-// Admin-selectable ways to display collections on this page.
-const COLLECTION_VIEWS = [
-  { key: "cards", label: "Cards" },
-  { key: "interwoven", label: "In content list" },
-  { key: "carousel", label: "Carousel" },
+// Category filter — "All" plus the distinct resource categories.
+const CATEGORY_FILTERS = [
+  { key: "all", label: "All categories" },
+  ...Array.from(new Set(RESOURCES.map((r) => r.category).filter(Boolean))).map((c) => ({ key: c, label: c })),
 ] as const;
-type CollectionView = (typeof COLLECTION_VIEWS)[number]["key"];
+
+// A single row in the unified content list — a collection, a course, or a
+// standalone resource. The `kind` discriminates cover, meta, tag, and click.
+type ContentRow =
+  | { kind: "collection"; key: string; data: Collection }
+  | { kind: "course"; key: string; data: BuilderCourse }
+  | { kind: "resource"; key: string; data: Resource };
+
+// Admin-selectable versions of the "Your content" table rows (switched via the
+// 3-dot admin menu). v1 is the current layout; v2 and v3 are variants to iterate
+// on and currently render the same as v1.
+const ROW_VERSIONS = [
+  { key: "v1", label: "v1" },
+  { key: "v2", label: "v2" },
+  { key: "v3", label: "v3" },
+  { key: "v4", label: "v4" },
+] as const;
+type RowVersion = (typeof ROW_VERSIONS)[number]["key"];
+
+// Display props for a single content row, derived from a ContentRow by kind.
+type RowDisplay = {
+  cover: React.ReactNode;
+  title: string;
+  meta: string;
+  lelandPlus: boolean;
+  views: string | null;
+  offerings: number;
+  onClick: () => void;
+  ariaLabel: string;
+};
+
+// Left subtitle: type, then Leland+ status and views when on Leland+ (views
+// track Leland+ engagement), joined inline — e.g. "Course · Added to Leland+ · 2.2k views".
+function rowSubtitle(d: RowDisplay): string {
+  return [d.meta, d.lelandPlus ? "Added to Leland+" : null, d.lelandPlus ? d.views : null].filter(Boolean).join(" · ");
+}
+
+// Right-hand offering status, shared across row versions: the "Added to N
+// offerings / View offerings" stack, or the "Not sold on your profile / Add to
+// an offering" stack.
+function OfferingStatus({ offerings, onClick }: { offerings: number; onClick: () => void }) {
+  if (offerings > 0) {
+    return (
+      <>
+        <span className="text-[14px] font-semibold leading-tight text-gray-dark">Added to {offerings} offering{offerings === 1 ? "" : "s"}</span>
+        <button type="button" onClick={onClick} className="text-[14px] font-medium leading-tight text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-colors hover:text-gray-dark">
+          View offerings
+        </button>
+      </>
+    );
+  }
+  return (
+    <>
+      <span className="text-[14px] font-semibold leading-tight text-gray-extra-light">Not sold on your profile</span>
+      <button type="button" onClick={onClick} className="text-[14px] font-medium leading-tight text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-colors hover:text-gray-dark">
+        Add to an offering
+      </button>
+    </>
+  );
+}
+
+const ROW_CHEVRON = (
+  <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+);
+
+// ── v3 — cover + title/metadata on the left, a right-aligned offering-status
+// stack, and a chevron. ──
+function ContentRowV3({ d, isLast }: { d: RowDisplay; isLast: boolean }) {
+  return (
+    <div className={`flex items-center gap-3 ${isLast ? "" : "border-b border-gray-stroke"}`}>
+      <button onClick={d.onClick} className="flex min-w-0 flex-1 items-center gap-4 py-4 text-left">
+        {d.cover}
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate text-[14px] font-semibold leading-tight text-gray-dark hover:underline">{d.title}</span>
+          <span className="truncate text-[14px] leading-tight text-gray-light">{rowSubtitle(d)}</span>
+        </span>
+      </button>
+      <div className="flex shrink-0 flex-col items-end text-right">
+        <OfferingStatus offerings={d.offerings} onClick={d.onClick} />
+      </div>
+      <button onClick={d.onClick} aria-label={d.ariaLabel} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
+        {ROW_CHEVRON}
+      </button>
+    </div>
+  );
+}
+
+// ── v2 — status chips: the subtitle is just the type, and the two statuses read
+// as compact pills on the right. Leland+ membership carries its view count; the
+// offering state is a neutral count pill, or an outline CTA when not yet sold. ──
+function ContentRowV2({ d, isLast }: { d: RowDisplay; isLast: boolean }) {
+  return (
+    <div className={`flex items-center gap-3 ${isLast ? "" : "border-b border-gray-stroke"}`}>
+      <button onClick={d.onClick} className="flex min-w-0 flex-1 items-center gap-4 py-4 text-left">
+        {d.cover}
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate text-[14px] font-semibold leading-tight text-gray-dark hover:underline">{d.title}</span>
+          <span className="truncate text-[14px] leading-tight text-gray-light">{d.meta}</span>
+        </span>
+      </button>
+      <div className="flex shrink-0 items-center gap-2">
+        {d.lelandPlus && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#F1ECFB] px-2.5 py-1 text-[13px] font-medium text-[#6B4BB8]">
+            Leland+{d.views ? ` · ${d.views}` : ""}
+          </span>
+        )}
+        {d.offerings > 0 ? (
+          <span className="inline-flex items-center rounded-full bg-[#222222]/5 px-2.5 py-1 text-[13px] font-medium text-gray-light">
+            {d.offerings} offering{d.offerings === 1 ? "" : "s"}
+          </span>
+        ) : (
+          <Button size="sm" variant="outline" onClick={d.onClick}>
+            Add to an offering
+          </Button>
+        )}
+      </div>
+      <button onClick={d.onClick} aria-label={d.ariaLabel} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
+        {ROW_CHEVRON}
+      </button>
+    </div>
+  );
+}
+
+// Shared table-header-column row for v3/v4. The only difference: v4 renders the
+// not-sold CTA as a white button; v3 keeps it as a dotted text link matching the
+// offerings-count link. Labels live in ContentTableHeader; fully monochromatic.
+const OFFERING_LINK_CLASS = "text-[14px] font-medium leading-tight text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-colors hover:text-gray-light";
+function TableRow({ d, isLast, ctaAsButton, offeringsAlign }: { d: RowDisplay; isLast: boolean; ctaAsButton: boolean; offeringsAlign: "left" | "right" }) {
+  return (
+    <div className={`flex items-center gap-6 ${isLast ? "" : "border-b border-gray-stroke"}`}>
+      <button onClick={d.onClick} className="flex min-w-0 flex-1 items-center gap-4 py-4 text-left">
+        {d.cover}
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate text-[14px] font-semibold leading-tight text-gray-dark hover:underline">{d.title}</span>
+          <span className="truncate text-[14px] leading-tight text-gray-light">{d.meta}</span>
+        </span>
+      </button>
+      {/* Leland+ value (label lives in the header) */}
+      <div className="hidden w-28 shrink-0 sm:block">
+        <span className={`text-[14px] leading-tight ${d.lelandPlus ? "text-gray-dark" : "text-gray-extra-light"}`}>
+          {d.lelandPlus ? (d.views ?? "Enrolled") : "—"}
+        </span>
+      </div>
+      {/* Offerings value / CTA (label lives in the header) — fixed width (keeps
+          the Leland+ column from shifting); aligned per version */}
+      <div className={`flex w-48 shrink-0 ${offeringsAlign === "left" ? "justify-start" : "justify-end"}`}>
+        {d.offerings > 0 ? (
+          <button type="button" onClick={d.onClick} className={OFFERING_LINK_CLASS}>
+            {d.offerings} offering{d.offerings === 1 ? "" : "s"}
+          </button>
+        ) : ctaAsButton ? (
+          <Button size="md" variant="outline" onClick={d.onClick}>Add to offering</Button>
+        ) : (
+          <button type="button" onClick={d.onClick} className={OFFERING_LINK_CLASS}>Add to offering</button>
+        )}
+      </div>
+      <button onClick={d.onClick} aria-label={d.ariaLabel} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
+        {ROW_CHEVRON}
+      </button>
+    </div>
+  );
+}
+
+// ── v1 (default) — table-header columns, left-aligned. Muted treatment:
+// Leland+ and Offerings values are gray-light medium text; a not-sold item reads
+// as a plain "Not sold on your profile" status in gray-extra-light. ──
+function ContentRowV1({ d, isLast }: { d: RowDisplay; isLast: boolean }) {
+  return (
+    <div className={`flex items-center gap-6 ${isLast ? "" : "border-b border-gray-stroke"}`}>
+      <button onClick={d.onClick} className="flex min-w-0 flex-1 items-center gap-4 py-4 text-left">
+        {d.cover}
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate text-[14px] font-semibold leading-tight text-gray-dark hover:underline">{d.title}</span>
+          <span className="truncate text-[14px] leading-tight text-gray-light">{d.meta}</span>
+        </span>
+      </button>
+      {/* Leland+ value (label lives in the header) */}
+      <div className="hidden w-28 shrink-0 sm:block">
+        <span className="text-[14px] font-medium leading-tight text-gray-light">
+          {d.lelandPlus ? (d.views ?? "Enrolled") : "—"}
+        </span>
+      </div>
+      {/* Offerings value / status (label lives in the header) */}
+      <div className="flex w-48 shrink-0 justify-start">
+        {d.offerings > 0 ? (
+          <button type="button" onClick={d.onClick} className="text-[14px] font-medium leading-tight text-gray-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-colors hover:text-gray-dark">
+            {d.offerings} offering{d.offerings === 1 ? "" : "s"}
+          </button>
+        ) : (
+          <span className="whitespace-nowrap text-[14px] font-medium leading-tight text-gray-extra-light">Not sold on your profile</span>
+        )}
+      </div>
+      <button onClick={d.onClick} aria-label={d.ariaLabel} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
+        {ROW_CHEVRON}
+      </button>
+    </div>
+  );
+}
+
+// ── v4 — table-header columns, right-aligned offerings, not-sold CTA as a white
+// button. ──
+function ContentRowV4({ d, isLast }: { d: RowDisplay; isLast: boolean }) {
+  return <TableRow d={d} isLast={isLast} ctaAsButton={true} offeringsAlign="right" />;
+}
+
+// Table header for v3/v4 — gray-hover band with small gray-light labels. Columns
+// mirror the row layout (flex-1 title, w-28 Leland+, auto Offerings, w-8 chevron
+// spacer) so the labels sit above their values. Bleeds to the card edges with
+// -mx-6, then re-pads so the content aligns with the rows.
+function ContentTableHeader({ offeringsAlign }: { offeringsAlign: "left" | "right" }) {
+  return (
+    <div className="-mx-6 flex items-center gap-6 bg-gray-hover px-6 py-1.5">
+      <span className="min-w-0 flex-1 text-[14px] font-medium text-gray-light">Content</span>
+      <span className="hidden w-28 shrink-0 text-[14px] font-medium text-gray-light sm:block">Leland+</span>
+      <span className={`w-48 shrink-0 text-[14px] font-medium text-gray-light ${offeringsAlign === "left" ? "text-left" : "text-right"}`}>Offerings</span>
+      <span className="h-8 w-8 shrink-0" aria-hidden />
+    </div>
+  );
+}
+
+// Picks the row component for the active admin version.
+function VersionedRow({ version, d, isLast }: { version: RowVersion; d: RowDisplay; isLast: boolean }) {
+  if (version === "v2") return <ContentRowV2 d={d} isLast={isLast} />;
+  if (version === "v3") return <ContentRowV3 d={d} isLast={isLast} />;
+  if (version === "v4") return <ContentRowV4 d={d} isLast={isLast} />;
+  return <ContentRowV1 d={d} isLast={isLast} />;
+}
+
+// Header "New" action — a pill button that opens a dropdown for creating any of
+// the three content kinds that live on this page. Closes on outside click.
+function NewMenu({ onNewResource, onNewCollection, onNewCourse }: { onNewResource: () => void; onNewCollection: () => void; onNewCourse: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open]);
+
+  const items = [
+    { icon: documentIcon, label: "Resource", desc: "Upload a video, PDF, or doc", onClick: onNewResource },
+    { icon: stackIcon, label: "Collection", desc: "Bundle content into a set", onClick: onNewCollection },
+    { icon: myCoursesIcon, label: "Course", desc: "Build a multi-module course", onClick: onNewCourse },
+  ];
+
+  return (
+    <div ref={ref} className="relative">
+      <Button size="md" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => setOpen((o) => !o)}>
+        {PLUS_ICON}
+        New
+      </Button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+            className="absolute right-0 z-50 mt-2 w-72 rounded-2xl border border-gray-stroke bg-white p-2 shadow-lg"
+          >
+            {items.map((item) => (
+              <button
+                key={item.label}
+                onClick={() => { item.onClick(); setOpen(false); }}
+                className="flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-gray-hover"
+              >
+                <MaskIcon src={item.icon} className="h-6 w-6 shrink-0 text-gray-dark" />
+                <span className="min-w-0">
+                  <span className="block text-[14px] font-semibold text-gray-dark">{item.label}</span>
+                  <span className="block text-[13px] text-gray-light">{item.desc}</span>
+                </span>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// A medium, round dropdown button for a single-select filter. Shows the current
+// selection as its label; closes on outside click. Mirrors the "Sort by" pill.
+function FilterDropdown({ options, value, onChange, menuWidth = "w-56" }: { options: readonly { key: string; label: string }[]; value: string; onChange: (v: string) => void; menuWidth?: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open]);
+  const current = options.find((o) => o.key === value) ?? options[0];
+  return (
+    <div ref={ref} className="relative">
+      <Button size="sm" variant="outline" rounded="rounded-full" className="font-semibold" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+        {current.label}
+        <MaskIcon src={chevronDownIcon} className={`h-4 w-4 text-gray-light transition-transform ${open ? "rotate-180" : ""}`} />
+      </Button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+            className={`absolute left-0 z-50 mt-2 ${menuWidth} rounded-2xl border border-gray-stroke bg-white p-2 shadow-lg`}
+          >
+            {options.map((o) => {
+              const active = o.key === value;
+              return (
+                <button key={o.key} onClick={() => { onChange(o.key); setOpen(false); }} className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-gray-hover">
+                  <span className={`text-[14px] font-medium ${active ? "text-gray-dark" : "text-gray-light"}`}>{o.label}</span>
+                  {active && <svg className="h-4 w-4 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// Flattened attributes used by the Status / Category filters, across kinds.
+function rowAttrs(row: ContentRow): { lelandPlus: boolean; offerings: number; draft: boolean; category: string | null } {
+  switch (row.kind) {
+    case "resource":
+      return { lelandPlus: row.data.lelandPlus, offerings: row.data.offerings.length, draft: false, category: row.data.category };
+    case "collection":
+      return { lelandPlus: row.data.lelandPlus ?? false, offerings: (row.data.offerings ?? []).length, draft: false, category: null };
+    case "course":
+      return { lelandPlus: row.data.lelandPlus ?? false, offerings: (row.data.offerings ?? []).length, draft: row.data.status === "draft", category: null };
+  }
+}
+
+// Does a row pass the active Status filter?
+function matchesStatus(row: ContentRow, status: string): boolean {
+  if (status === "any") return true;
+  const a = rowAttrs(row);
+  switch (status) {
+    case "leland": return a.lelandPlus;
+    case "offering": return a.offerings > 0;
+    case "draft": return a.draft;
+    case "none": return !a.lelandPlus && a.offerings === 0;
+    default: return true;
+  }
+}
 
 export default function CoachContent() {
-  const [resourceTab, setResourceTab] = useState<(typeof RESOURCE_TABS)[number]["key"]>("all");
-  // Which collections display mode is active (toggled via the admin 3-dot menu).
-  const [collectionsView, setCollectionsView] = useState<CollectionView>("cards");
+  const navigate = useNavigate();
+  // Type / Status / Category filters for the unified content list.
+  const [contentFilter, setContentFilter] = useState<ContentFilter>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("any");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  // Which "Your content" row layout is active (toggled via the admin 3-dot menu).
+  const [rowVersion, setRowVersion] = useState<RowVersion>("v1");
   const collections = useCollections();
+  const courses = useCourses();
   const editor = useCollectionEditor();
 
   // Admin 3-dot menu (bottom-right) — closes on outside click.
@@ -508,8 +663,11 @@ export default function CoachContent() {
     return () => document.removeEventListener("mousedown", onClick);
   }, [adminOpen]);
 
-  // The resource whose details sheet is open (null = closed).
+  // The item whose details sheet is open (null = closed). Each content type has
+  // its own sheet; the footer CTA in each hands off to that type's editor.
   const [openResource, setOpenResource] = useState<Resource | null>(null);
+  const [openCollection, setOpenCollection] = useState<Collection | null>(null);
+  const [openCourse, setOpenCourse] = useState<BuilderCourse | null>(null);
   // "Submit a resource" opens the content upload/configure modal (the same one
   // used in the offering builder), started in its upload-new flow.
   const [uploadItem, setUploadItem] = useState<OfferingItem | null>(null);
@@ -522,6 +680,66 @@ export default function CoachContent() {
     document.title = "Leland Prototype | Content";
   }, []);
 
+  // Build the unified list from the three sources (collections lead, then
+  // courses, then single resources), filtered by Type, then narrowed by the
+  // Status and Category filters. Category only applies to resources (the only
+  // kind with a category), so a specific category hides collections/courses.
+  const showType = (t: ContentFilter) => contentFilter === "all" || contentFilter === t;
+  let rows: ContentRow[] = [];
+  if (showType("collections"))
+    rows.push(...collections.map((c): ContentRow => ({ kind: "collection", key: `col-${c.id}`, data: c })));
+  if (showType("courses"))
+    rows.push(...courses.map((c): ContentRow => ({ kind: "course", key: `course-${c.id}`, data: c })));
+  if (showType("resources"))
+    rows.push(...RESOURCES.map((r): ContentRow => ({ kind: "resource", key: `res-${r.id}`, data: r })));
+  rows = rows.filter((row) => matchesStatus(row, statusFilter) && (categoryFilter === "all" || rowAttrs(row).category === categoryFilter));
+
+  // Per-row display props, branched on the row kind. The active row version
+  // (v1/v2/v3) decides how these are laid out.
+  const rowDisplay = (row: ContentRow): RowDisplay => {
+    switch (row.kind) {
+      case "collection": {
+        const c = row.data;
+        return {
+          cover: <CollectionCover thumbs={collectionThumbs(c.items)} className="h-10 w-[60px]" />,
+          title: c.title,
+          meta: "Collection",
+          lelandPlus: c.lelandPlus ?? false,
+          views: `${formatViews(collectionTotalViews(c.items))} views`,
+          offerings: (c.offerings ?? []).length,
+          onClick: () => setOpenCollection(c),
+          ariaLabel: `View details for ${c.title}`,
+        };
+      }
+      case "course": {
+        const c = row.data;
+        return {
+          cover: <CourseRowCover course={c} />,
+          title: c.title || "Untitled course",
+          meta: "Course",
+          lelandPlus: c.lelandPlus ?? false,
+          views: c.views != null ? `${formatViews(c.views)} views` : null,
+          offerings: (c.offerings ?? []).length,
+          onClick: () => setOpenCourse(c),
+          ariaLabel: `View details for ${c.title || "course"}`,
+        };
+      }
+      case "resource": {
+        const r = row.data;
+        return {
+          cover: <img src={r.cover} alt="" className="h-10 w-[60px] shrink-0 rounded-lg object-cover" />,
+          title: r.title,
+          meta: r.fileType,
+          lelandPlus: r.lelandPlus,
+          views: `${formatViews(r.views)} views`,
+          offerings: r.offerings.length,
+          onClick: () => setOpenResource(r),
+          ariaLabel: `View details for ${r.title}`,
+        };
+      }
+    }
+  };
+
   return (
     <div className="pb-8">
       {/* ── Header ── */}
@@ -533,10 +751,11 @@ export default function CoachContent() {
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <Button size="md" variant="dark" rounded="rounded-full" className="font-semibold" onClick={openSubmit}>
-            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-            Upload content
-          </Button>
+          <NewMenu
+            onNewResource={openSubmit}
+            onNewCollection={editor.openNew}
+            onNewCourse={() => navigate("/coach/content/course/new")}
+          />
         </div>
       </div>
 
@@ -545,101 +764,39 @@ export default function CoachContent() {
         <AnalyticsCard title="Your Leland+ stats" metrics={CONTENT_METRICS} collapsible />
       </div>
 
-      {/* ── Collections (cards / carousel views; the interwoven view folds them
-          into the resources list below instead) ── */}
-      {collectionsView !== "interwoven" && (
-        <div className="mt-12">
-          {collectionsView === "carousel" ? (
-            <CollectionCarouselView collections={collections} onNew={editor.openNew} onOpen={editor.openEdit} onDelete={editor.requestDelete} />
-          ) : (
-            <CollectionCardsView collections={collections} onNew={editor.openNew} onOpen={editor.openEdit} onDelete={editor.requestDelete} />
-          )}
-        </div>
-      )}
-
-      {/* ── Courses ── */}
+      {/* ── Your content — unified list of collections, courses, and single
+          resources, styled like the offering builder's product list ── */}
       <div className="mt-12">
-        <CoursesSection />
-      </div>
-
-      {/* ── Your resources (simplified — styled like the offering builder's
-          product list) ── */}
-      <div className="mt-12">
-        <h2 className="text-[22px] font-semibold text-gray-dark">{collectionsView === "interwoven" ? "Your content" : "Your resources"}</h2>
-        <div className="mt-4 flex items-center justify-between gap-4">
-          <div className="inline-flex items-center gap-1 rounded-full bg-gray-hover p-1">
-            {RESOURCE_TABS.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setResourceTab(t.key)}
-                className={`rounded-full px-3.5 py-1.5 text-[14px] font-medium transition-colors ${resourceTab === t.key ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(0,0,0,0.12)]" : "text-gray-light hover:text-gray-dark"}`}
-              >
-                {t.label}
-              </button>
-            ))}
+        <h2 className="text-[22px] font-semibold text-gray-dark">Your content</h2>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <FilterDropdown options={CONTENT_FILTERS} value={contentFilter} onChange={(v) => setContentFilter(v as ContentFilter)} />
+            <FilterDropdown options={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} menuWidth="w-60" />
+            <FilterDropdown options={CATEGORY_FILTERS} value={categoryFilter} onChange={setCategoryFilter} />
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {collectionsView === "interwoven" && (
-              <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={editor.openNew}>
-                {PLUS_ICON}
-                New collection
-              </Button>
-            )}
-            <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold">
-              Sort by
-              <MaskIcon src={chevronDownIcon} className="h-4 w-4 text-gray-light" />
-            </Button>
-          </div>
+          <Button size="sm" variant="outline" rounded="rounded-full" className="shrink-0 font-semibold">
+            Sort by
+            <MaskIcon src={chevronDownIcon} className="h-4 w-4 text-gray-light" />
+          </Button>
         </div>
         <div className="mt-5 overflow-hidden rounded-xl border border-gray-stroke bg-white px-6">
-          {/* Interwoven view: collection rows lead the list, then standalone
-              content. Each collection opens the builder; the stacked cover and
-              "Collection" tag set them apart from single resources. */}
-          {collectionsView === "interwoven" && collections.map((c) => (
-            <div key={c.id} className="flex items-center gap-3 border-b border-gray-stroke">
-              <button onClick={() => editor.openEdit(c)} className="flex min-w-0 flex-1 items-center gap-3 py-4 text-left">
-                <CollectionCover thumbs={collectionThumbs(c.items)} className="h-10 w-[60px]" />
-                <span className="min-w-0 flex-1">
-                  <span className="inline-block max-w-full truncate align-top text-[15px] font-semibold text-gray-dark hover:underline">{c.title}</span>
-                  <span className="mt-0.5 block truncate text-[15px] text-gray-light">{collectionMeta(c)}</span>
-                </span>
-              </button>
-              <div className="flex shrink-0 items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#222222]/5 px-2 py-0.5 text-[12px] font-medium text-gray-light">
-                  <MaskIcon src={stackIcon} className="h-3.5 w-3.5" />
-                  Collection
-                </span>
-              </div>
-              <button onClick={() => editor.openEdit(c)} aria-label={`Edit ${c.title}`} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
-                <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-              </button>
-            </div>
-          ))}
-          {(resourceTab === "leland" ? RESOURCES.filter((r) => r.lelandPlus) : RESOURCES).map((r, i, list) => {
-            const views = r.views < 1000 ? String(r.views) : `${(r.views / 1000).toFixed(1).replace(/\.0$/, "")}k`;
-            const offeringsText = `${r.offerings.length} offering${r.offerings.length === 1 ? "" : "s"}`;
-            return (
-              <div key={r.id} className={`flex items-center gap-3 ${i < list.length - 1 ? "border-b border-gray-stroke" : ""}`}>
-                <button onClick={() => setOpenResource(r)} className="flex min-w-0 flex-1 items-center gap-3 py-4 text-left">
-                  <img src={r.cover} alt="" className="h-10 w-[60px] shrink-0 rounded-lg object-cover" />
-                  <span className="min-w-0 flex-1">
-                    <span className="inline-block max-w-full truncate align-top text-[15px] font-semibold text-gray-dark hover:underline">{r.title}</span>
-                    <span className="mt-0.5 block truncate text-[15px] text-gray-light">{r.fileType} · {views} views</span>
-                  </span>
-                </button>
-                <div className="flex shrink-0 items-center gap-2">
-                  {r.offerings.length > 0 && <span className="rounded-full bg-[#222222]/5 px-2 py-0.5 text-[12px] font-medium text-gray-light">{offeringsText}</span>}
-                  {r.lelandPlus && <span className="rounded-full bg-[#F1ECFB] px-2 py-0.5 text-[12px] font-medium text-[#6B4BB8]">Leland+</span>}
-                </div>
-                <button onClick={() => setOpenResource(r)} aria-label={`View details for ${r.title}`} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark">
-                  <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                </button>
-              </div>
-            );
-          })}
+          {/* Unified list — collections, then courses, then single resources.
+              Each row's cover, meta, tag, and click target are branched on kind
+              (see rowDisplay). Collections open the builder, courses open the
+              course editor, resources open the details sheet. */}
+          {rows.length === 0 ? (
+            <p className="py-10 text-center text-[14px] text-gray-light">No content here yet.</p>
+          ) : (
+            <>
+              {(rowVersion === "v1" || rowVersion === "v4") && <ContentTableHeader offeringsAlign={rowVersion === "v1" ? "left" : "right"} />}
+              {rows.map((row, i) => (
+                <VersionedRow key={row.key} version={rowVersion} d={rowDisplay(row)} isLast={i === rows.length - 1} />
+              ))}
+            </>
+          )}
           {/* Footer — upload content, part of the card like the offering
               builder's "Add product" button */}
-          <button onClick={openSubmit} className="-mx-6 flex w-[calc(100%+3rem)] items-center justify-center gap-2 border-t border-gray-stroke px-6 py-4 text-[15px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover">
+          <button onClick={openSubmit} className="-mx-6 flex w-[calc(100%+3rem)] items-center justify-center gap-2 border-t border-gray-stroke px-6 py-4 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover">
             <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
             Upload content
           </button>
@@ -676,11 +833,23 @@ export default function CoachContent() {
 
       <CoachContentResourceSheet resource={openResource} onClose={() => setOpenResource(null)} />
 
-      {/* Collection builder + delete confirm — rendered once, shared by every
-          display mode so a collection opens from cards, carousel, or the list */}
+      <CoachContentCollectionSheet
+        collection={openCollection}
+        onClose={() => setOpenCollection(null)}
+        onEdit={() => { if (openCollection) editor.openEdit(openCollection); setOpenCollection(null); }}
+      />
+
+      <CoachContentCourseSheet
+        course={openCourse}
+        onClose={() => setOpenCourse(null)}
+        onEdit={() => { if (openCourse) navigate(`/coach/content/course/${openCourse.id}`); setOpenCourse(null); }}
+      />
+
+      {/* Collection builder + delete confirm — rendered once, opened from a
+          collection row in the list */}
       {editor.modals}
 
-      {/* Admin tool — 3-dot menu (bottom-right) to switch how collections show */}
+      {/* Admin tool — 3-dot menu (bottom-right) to switch the content-row layout */}
       <div ref={adminRef} className="fixed bottom-6 right-6 z-40">
         <AnimatePresence>
           {adminOpen && (
@@ -691,13 +860,13 @@ export default function CoachContent() {
               transition={{ duration: 0.15 }}
               className="absolute bottom-full right-0 mb-2 w-[220px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
             >
-              <p className="px-2 pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wide text-gray-light">Collections display</p>
-              {COLLECTION_VIEWS.map((v) => {
-                const active = collectionsView === v.key;
+              <p className="px-2 pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wide text-gray-light">Resources table rows</p>
+              {ROW_VERSIONS.map((v) => {
+                const active = rowVersion === v.key;
                 return (
                   <button
                     key={v.key}
-                    onClick={() => setCollectionsView(v.key)}
+                    onClick={() => setRowVersion(v.key)}
                     className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left transition-colors hover:bg-[#f5f5f5]"
                   >
                     <span className={`text-[14px] font-medium ${active ? "text-gray-dark" : "text-gray-light"}`}>{v.label}</span>

@@ -38,6 +38,12 @@ export type BuilderCourse = {
   modules: CourseModule[];
   status: "draft" | "published";
   updatedAt: number;
+  // Monetization status, mirroring Resource: whether the course is on Leland+,
+  // which offerings it's attached to (empty = not for sale), and lifetime views
+  // (shown beside the Leland+ badge, since Leland+ pays out on engagement).
+  lelandPlus?: boolean;
+  offerings?: string[];
+  views?: number;
 };
 
 // ─── ids ───────────────────────────────────────────────────────────────────
@@ -89,6 +95,9 @@ const SEED: BuilderCourse[] = [
     coverImage: new URL("../assets/img/cover-images/cover-image-3.png", import.meta.url).href,
     status: "published",
     updatedAt: Date.now(),
+    lelandPlus: true,
+    offerings: ["ai-builder-package"],
+    views: 1240,
     modules: [
       {
         id: "mod-before",

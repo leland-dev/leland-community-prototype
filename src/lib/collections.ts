@@ -22,6 +22,10 @@ export type Collection = {
   title: string;
   description: string;
   items: CollectionItemData[];
+  // Monetization status, mirroring Resource: whether the collection is on
+  // Leland+, and which offerings it's attached to (empty = not for sale).
+  lelandPlus?: boolean;
+  offerings?: string[];
 };
 
 // Build a reused-library item from a library id (the minimum a seed needs).
@@ -36,18 +40,24 @@ let collections: Collection[] = [
     title: "MBA Application Essentials",
     description: "Everything an applicant needs to go from research to submitted — essays, roadmap, and recommendation prep.",
     items: [lib(1, "c1"), lib(2, "c9"), lib(3, "c7"), lib(4, "c13")],
+    lelandPlus: true,
+    offerings: ["mba-application-package", "essay-review-package"],
   },
   {
     id: "col-interview-kit",
     title: "Consulting Interview Kit",
     description: "The frameworks, practice cases, and mock walkthroughs I use to prep candidates for Bain and McKinsey.",
     items: [lib(1, "c8"), lib(2, "c15"), lib(3, "c3"), lib(4, "c4"), lib(5, "c12")],
+    lelandPlus: false,
+    offerings: ["interview-prep-package"],
   },
   {
     id: "col-resume-pack",
     title: "Resume & Networking Pack",
     description: "Templates and trackers for a standout resume and a networking process that actually converts.",
     items: [lib(1, "c2"), lib(2, "c10"), lib(3, "c6"), lib(4, "c14")],
+    lelandPlus: true,
+    offerings: [],
   },
 ];
 
