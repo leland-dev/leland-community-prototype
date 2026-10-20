@@ -23,9 +23,11 @@ export type Collection = {
   description: string;
   items: CollectionItemData[];
   // Monetization status, mirroring Resource: whether the collection is on
-  // Leland+, and which offerings it's attached to (empty = not for sale).
+  // Leland+, which offerings it's attached to (empty = not for sale), and a
+  // suggested price used when bundling it into an offering.
   lelandPlus?: boolean;
   offerings?: string[];
+  price?: string;
 };
 
 // Build a reused-library item from a library id (the minimum a seed needs).
@@ -42,6 +44,7 @@ let collections: Collection[] = [
     items: [lib(1, "c1"), lib(2, "c9"), lib(3, "c7"), lib(4, "c13")],
     lelandPlus: true,
     offerings: ["mba-application-package", "essay-review-package"],
+    price: "$49",
   },
   {
     id: "col-interview-kit",
@@ -50,6 +53,7 @@ let collections: Collection[] = [
     items: [lib(1, "c8"), lib(2, "c15"), lib(3, "c3"), lib(4, "c4"), lib(5, "c12")],
     lelandPlus: false,
     offerings: ["interview-prep-package"],
+    price: "$39",
   },
   {
     id: "col-resume-pack",
@@ -58,6 +62,7 @@ let collections: Collection[] = [
     items: [lib(1, "c2"), lib(2, "c10"), lib(3, "c6"), lib(4, "c14")],
     lelandPlus: true,
     offerings: [],
+    price: "$29",
   },
 ];
 

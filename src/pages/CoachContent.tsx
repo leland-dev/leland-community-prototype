@@ -302,6 +302,13 @@ function rowOfferingSlugs(row: ContentRow): string[] {
 function rowTitle(row: ContentRow): string {
   return row.kind === "course" ? row.data.title || "Untitled course" : row.data.title;
 }
+// Content's suggested price ("$0"/none → null) used to offer a price bump when
+// adding it to an offering. Resources always have one; collections and courses
+// carry an optional suggested price.
+function rowSuggestedPrice(row: ContentRow): string | null {
+  const price = row.data.price;
+  return price && price !== "$0" ? price : null;
+}
 
 // Admin-selectable versions of the "Your content" table rows (switched via the
 // 3-dot admin menu). v1 is the current layout; v2 and v3 are variants to iterate
@@ -486,7 +493,7 @@ function ContentRowV1({ d, isLast }: { d: RowDisplay; isLast: boolean }) {
           </button>
         ) : (
           <button type="button" onClick={d.onOfferings} className="text-[14px] font-medium leading-tight text-gray-extra-light underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">
-            Not for sale
+            Not for sale yet
           </button>
         )}
       </div>
@@ -874,6 +881,7 @@ export default function CoachContent() {
       <AddToOfferingModal
         open={!!offeringRow}
         title={offeringRow ? rowTitle(offeringRow) : ""}
+        suggestedPrice={offeringRow ? rowSuggestedPrice(offeringRow) : null}
         offerings={offeringRow ? rowOfferingSlugs(offeringRow) : []}
         onClose={() => setOfferingRow(null)}
         onSave={(slugs) => { if (offeringRow) saveOfferings(offeringRow, slugs); }}
