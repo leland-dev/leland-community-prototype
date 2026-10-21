@@ -46,6 +46,10 @@ export type BuilderCourse = {
   offerings?: string[];
   views?: number;
   price?: string;
+  // Discoverability / Leland+ metadata captured on the details page, stored as a
+  // flat config bag so it can be driven by the shared ContentMetadataFields form
+  // (category, subcategory, topics, resourceType, organizations, anonymous, …).
+  meta?: Record<string, string>;
 };
 
 // ─── ids ───────────────────────────────────────────────────────────────────

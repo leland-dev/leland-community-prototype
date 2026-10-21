@@ -15,13 +15,16 @@ import {
   GripVertical,
   Image as ImageIcon,
   Layers,
+  PanelLeftClose,
+  PanelLeftOpen,
   Plus,
-  Settings2,
   Trash2,
 } from "lucide-react";
 
 import { Button } from "../components/Button";
 import ConfirmModal from "../components/ConfirmModal";
+import { IconPencil } from "../components/leland/svg/icons";
+import { ContentMetadataFields, CONTENT_CARD } from "./CoachProductNew";
 import { BlockListEditor } from "../components/course-builder/BlockEditors";
 import { useReorder } from "../components/course-builder/dnd";
 import {
@@ -46,7 +49,10 @@ const COVER_PRESETS = [
   new URL("../assets/img/cover-images/cover-image-6.png", import.meta.url).href,
 ];
 
+// Route base the builder lives under — used to build the course's own URL.
 const CONTENT_HOME = "/coach/content";
+// Where "exit" (back link, Done, delete) returns the coach to.
+const CONTENT_LIST = "/my-leland/content";
 
 // What the main area is editing.
 type Selection = { type: "details" } | { type: "section"; moduleId: string; sectionId: string };
@@ -71,6 +77,7 @@ export default function CourseBuilder() {
     });
 
   const [selection, setSelection] = useState<Selection>({ type: "details" });
+  const [collapsed, setCollapsed] = useState(false);
 
   // New course: persist the fresh object and swap the URL to its real id.
   useEffect(() => {
@@ -141,7 +148,7 @@ export default function CourseBuilder() {
     <div className="flex h-screen flex-col bg-[#F3F1E6]/50 text-gray-dark">
       {/* ── Top bar ── */}
       <header className="flex shrink-0 items-center gap-4 border-b border-gray-stroke bg-white px-5 py-3">
-        <Link to={CONTENT_HOME} className="inline-flex items-center gap-1.5 text-[14px] text-gray-light transition-colors hover:text-gray-dark">
+        <Link to={CONTENT_LIST} className="inline-flex items-center gap-1.5 text-[14px] text-gray-light transition-colors hover:text-gray-dark">
           <ChevronLeft className="h-4 w-4" /> My content
         </Link>
         <div className="mx-1 h-5 w-px bg-gray-stroke" />
@@ -157,27 +164,62 @@ export default function CourseBuilder() {
           <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={() => setCourse((c) => ({ ...c, status: c.status === "published" ? "draft" : "published" }))}>
             {course.status === "published" ? "Unpublish" : "Publish"}
           </Button>
-          <Button size="sm" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => navigate(CONTENT_HOME)}>
+          <Button size="sm" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => navigate(CONTENT_LIST)}>
             Done
           </Button>
         </div>
       </header>
 
       {/* ── Body ── */}
-      <div className="flex min-h-0 flex-1">
-        {/* Left rail — course outline */}
-        <aside className="flex w-[320px] shrink-0 flex-col border-r border-gray-stroke bg-white">
-          <div className="flex-1 overflow-y-auto px-3 py-4">
-            {/* Course details entry */}
-            <button
-              onClick={() => setSelection({ type: "details" })}
-              className={`mb-1 flex w-full items-center gap-3 rounded-lg px-3 py-[10px] text-left text-[15px] transition-colors ${selection.type === "details" ? "bg-[#222222]/5 font-semibold text-gray-dark" : "font-medium text-gray-light hover:text-gray-dark"}`}
-            >
-              <Settings2 className="h-5 w-5 shrink-0" />
-              Course details
-            </button>
+      <div className="relative flex min-h-0 flex-1">
+        {/* Collapsed — floating expand control */}
+        {collapsed && (
+          <Button
+            iconOnly
+            size="sm"
+            variant="white"
+            onClick={() => setCollapsed(false)}
+            aria-label="Expand sidebar"
+            className="absolute left-3 top-3 z-20 border border-gray-stroke text-gray-extra-light shadow-sm hover:text-gray-light"
+          >
+            <PanelLeftOpen className="h-5 w-5" />
+          </Button>
+        )}
 
-            <p className="px-3 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wide text-gray-extra-light">Curriculum</p>
+        {/* Left rail — course outline */}
+        {!collapsed && (
+        <aside className="flex w-[320px] shrink-0 flex-col border-r border-gray-stroke bg-white">
+          {/* Course preview — thumbnail, title, edit control */}
+          <div className="relative z-10 px-4 pb-4 pt-4 shadow-[0_4px_8px_-2px_rgba(16,24,40,0.10),0_2px_4px_-2px_rgba(16,24,40,0.06)]">
+            <div className="flex items-start justify-between gap-3">
+              <div className="aspect-[1.91/1] w-24 shrink-0 overflow-hidden rounded-lg border border-gray-stroke bg-gray-hover">
+                {course.coverImage ? (
+                  <img src={course.coverImage} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-gray-extra-light">
+                    <ImageIcon className="h-5 w-5" />
+                  </div>
+                )}
+              </div>
+              <Button variant="ghost" rounded="rounded-md" onClick={() => setCollapsed(true)} className="p-2 text-gray-extra-light hover:bg-transparent hover:text-gray-light" aria-label="Collapse sidebar">
+                <PanelLeftClose className="h-5 w-5" />
+              </Button>
+            </div>
+            <h2 className="mt-3 font-serif text-[28px] leading-[1.1] text-gray-dark">
+              {course.title || "Untitled course"}
+            </h2>
+            <Button
+              variant="secondary"
+              rounded="rounded-full"
+              onClick={() => setSelection({ type: "details" })}
+              className="mt-4 w-full font-semibold"
+            >
+              <IconPencil className="h-4 w-4" /> Edit course details
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-3 py-4">
+            <p className="px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-gray-extra-light">Curriculum</p>
 
             <ModuleList
               modules={course.modules}
@@ -200,11 +242,12 @@ export default function CourseBuilder() {
             </button>
           </div>
         </aside>
+        )}
 
         {/* Main area */}
         <main className="min-w-0 flex-1 overflow-y-auto">
           {selection.type === "details" ? (
-            <DetailsPanel course={course} setCourse={setCourse} onDeleted={() => navigate(CONTENT_HOME)} />
+            <DetailsPanel course={course} setCourse={setCourse} onDeleted={() => navigate(CONTENT_LIST)} />
           ) : activeSection && activeModule ? (
             <SectionEditor
               key={activeSection.id}
@@ -443,87 +486,116 @@ function DetailsPanel({
     reader.readAsDataURL(file);
   };
 
-  const labelClass = "text-[13px] font-semibold text-gray-dark";
-  const inputClass =
-    "w-full rounded-lg border border-gray-stroke bg-white px-3.5 py-2.5 text-[15px] text-gray-dark placeholder:text-gray-extra-light focus:border-gray-dark focus:outline-none";
+  // Matches the section headings inside ContentMetadataFields so the cover card
+  // reads as a peer of the General / Discoverability / Leland+ cards.
+  const headingClass = "pb-5 text-[22px] font-semibold text-gray-dark";
+
+  // Adapt the course to the flat config shape the shared metadata form expects.
+  // First-class columns (title/description/price/lelandPlus) map to themselves;
+  // everything else lives in `course.meta`.
+  const config: Record<string, string> = {
+    title: course.title,
+    description: course.description,
+    price: course.price ?? "",
+    lelandPlus: course.lelandPlus ? "true" : "false",
+    ...(course.meta ?? {}),
+  };
+  const onConfigChange = (patch: Record<string, string>) =>
+    setCourse((c) => {
+      const next: BuilderCourse = { ...c };
+      const meta: Record<string, string> = { ...(c.meta ?? {}) };
+      for (const [k, v] of Object.entries(patch)) {
+        if (k === "title") next.title = v;
+        else if (k === "description") next.description = v;
+        else if (k === "price") next.price = v;
+        else if (k === "lelandPlus") next.lelandPlus = v === "true";
+        else meta[k] = v;
+      }
+      next.meta = meta;
+      return next;
+    });
 
   return (
     <div className="mx-auto max-w-[720px] px-6 py-8 md:px-10">
       <h1 className="font-serif text-[36px] leading-tight text-gray-dark">Course details</h1>
       <p className="mt-1.5 text-[16px] text-gray-light">The name, summary, and cover learners see before enrolling.</p>
 
-      {/* Cover image */}
-      <div className="mt-8">
-        <p className={labelClass}>Cover image</p>
-        <div className="mt-2.5 flex flex-col gap-3 sm:flex-row sm:items-start">
-          <div className="relative aspect-[1.91/1] w-full max-w-[280px] shrink-0 overflow-hidden rounded-xl border border-gray-stroke bg-gray-hover">
-            {course.coverImage ? (
-              <img src={course.coverImage} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-gray-extra-light"><ImageIcon className="h-8 w-8" /></div>
-            )}
-          </div>
-          <div className="flex flex-1 flex-col gap-3">
-            <div className="flex flex-wrap gap-2">
-              {COVER_PRESETS.map((src) => (
-                <button
-                  key={src}
-                  onClick={() => setCourse((c) => ({ ...c, coverImage: src }))}
-                  className={`h-11 w-16 overflow-hidden rounded-md border transition-all ${course.coverImage === src ? "border-gray-dark ring-2 ring-[#FFD96F]" : "border-gray-stroke hover:border-gray-dark"}`}
-                >
-                  <img src={src} alt="" className="h-full w-full object-cover" />
-                </button>
-              ))}
+      {/* Sections are standalone white cards, matching the My Leland dashboard. */}
+      <div className="mt-8 flex flex-col gap-5">
+        {/* Shared resource metadata — General, Discoverability, Leland+ (no custom
+            thumbnail; the cover card below General serves that role) and no
+            Advanced settings (the download options don't apply to a course).
+            Each section is its own card. The cover image is injected right after
+            the General section. */}
+        <ContentMetadataFields
+          config={config}
+          onChange={onConfigChange}
+          priced
+          prefix=""
+          showThumbnail={false}
+          showAdvanced={false}
+          card
+          afterGeneral={
+            <div className={CONTENT_CARD}>
+              <p className={headingClass}>Cover image</p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                <div className="relative aspect-[1.91/1] w-full max-w-[280px] shrink-0 overflow-hidden rounded-xl border border-gray-stroke bg-gray-hover">
+                  {course.coverImage ? (
+                    <img src={course.coverImage} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-gray-extra-light"><ImageIcon className="h-8 w-8" /></div>
+                  )}
+                </div>
+                <div className="flex flex-1 flex-col gap-3">
+                  <div className="flex flex-wrap gap-2">
+                    {COVER_PRESETS.map((src) => (
+                      <button
+                        key={src}
+                        onClick={() => setCourse((c) => ({ ...c, coverImage: src }))}
+                        className={`h-11 w-16 overflow-hidden rounded-md border transition-all ${course.coverImage === src ? "border-gray-dark ring-2 ring-[#FFD96F]" : "border-gray-stroke hover:border-gray-dark"}`}
+                      >
+                        <img src={src} alt="" className="h-full w-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                  <div>
+                    <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={() => fileInputRef.current?.click()}>
+                      Upload image
+                    </Button>
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onUpload} />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={() => fileInputRef.current?.click()}>
-                Upload image
-              </Button>
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onUpload} />
+          }
+        />
+
+        {/* Stats */}
+        <div className={CONTENT_CARD}>
+          <div className="flex gap-3">
+            <div className="flex-1 rounded-xl bg-gray-hover px-4 py-3">
+              <p className="text-[22px] font-semibold text-gray-dark">{moduleCount}</p>
+              <p className="text-[13px] text-gray-light">{moduleCount === 1 ? "Lesson" : "Lessons"}</p>
+            </div>
+            <div className="flex-1 rounded-xl bg-gray-hover px-4 py-3">
+              <p className="text-[22px] font-semibold text-gray-dark">{sectionCount}</p>
+              <p className="text-[13px] text-gray-light">{sectionCount === 1 ? "Page" : "Pages"}</p>
+            </div>
+            <div className="flex-1 rounded-xl bg-gray-hover px-4 py-3">
+              <p className="flex items-center gap-1.5 text-[22px] font-semibold text-gray-dark">
+                {course.status === "published" ? <><Check className="h-5 w-5 text-[#1E7B34]" /> Live</> : "Draft"}
+              </p>
+              <p className="text-[13px] text-gray-light">Status</p>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Title */}
-      <div className="mt-8">
-        <label className="flex flex-col gap-2">
-          <span className={labelClass}>Course title</span>
-          <input value={course.title} onChange={(e) => setCourse((c) => ({ ...c, title: e.target.value }))} placeholder="e.g. AI Builder Program Level 1" className={inputClass} />
-        </label>
-      </div>
-
-      {/* Description */}
-      <div className="mt-6">
-        <label className="flex flex-col gap-2">
-          <span className={labelClass}>Description</span>
-          <textarea value={course.description} onChange={(e) => setCourse((c) => ({ ...c, description: e.target.value }))} placeholder="What will learners be able to do after this course?" rows={4} className={`${inputClass} resize-y leading-relaxed`} />
-        </label>
-      </div>
-
-      {/* Stats */}
-      <div className="mt-8 flex gap-3">
-        <div className="flex-1 rounded-xl border border-gray-stroke bg-white px-4 py-3">
-          <p className="text-[22px] font-semibold text-gray-dark">{moduleCount}</p>
-          <p className="text-[13px] text-gray-light">{moduleCount === 1 ? "Lesson" : "Lessons"}</p>
+        {/* Danger zone */}
+        <div className={CONTENT_CARD}>
+          <button onClick={() => setConfirmDelete(true)} className="inline-flex items-center gap-2 text-[14px] font-medium text-[#DC2B23] hover:underline">
+            <Trash2 className="h-4 w-4" /> Delete course
+          </button>
         </div>
-        <div className="flex-1 rounded-xl border border-gray-stroke bg-white px-4 py-3">
-          <p className="text-[22px] font-semibold text-gray-dark">{sectionCount}</p>
-          <p className="text-[13px] text-gray-light">{sectionCount === 1 ? "Page" : "Pages"}</p>
-        </div>
-        <div className="flex-1 rounded-xl border border-gray-stroke bg-white px-4 py-3">
-          <p className="flex items-center gap-1.5 text-[22px] font-semibold text-gray-dark">
-            {course.status === "published" ? <><Check className="h-5 w-5 text-[#1E7B34]" /> Live</> : "Draft"}
-          </p>
-          <p className="text-[13px] text-gray-light">Status</p>
-        </div>
-      </div>
-
-      {/* Danger zone */}
-      <div className="mt-12 border-t border-gray-stroke pt-6">
-        <button onClick={() => setConfirmDelete(true)} className="inline-flex items-center gap-2 text-[14px] font-medium text-[#DC2B23] hover:underline">
-          <Trash2 className="h-4 w-4" /> Delete course
-        </button>
       </div>
 
       <ConfirmModal

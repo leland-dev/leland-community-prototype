@@ -33,6 +33,11 @@ interface FeedAdminContextValue {
   // swapped for a "Find expert help" categories card.
   topics: boolean;
   setTopics: (v: boolean) => void;
+  // Combined "Explore" card — merges the "Trending topics" and "Find expert
+  // help" sidebar cards into a single card with a Community/Experts toggle.
+  // When on (default off), both separate cards are replaced by the one card.
+  exploreCard: boolean;
+  setExploreCard: (v: boolean) => void;
   // Goals treatment in the right sidebar — see GoalSidebarState above.
   goalSidebar: GoalSidebarState;
   setGoalSidebar: (v: GoalSidebarState) => void;
@@ -47,6 +52,8 @@ const FeedAdminContext = createContext<FeedAdminContextValue>({
   setFeaturedQuestionsVersion: () => {},
   topics: false,
   setTopics: () => {},
+  exploreCard: false,
+  setExploreCard: () => {},
   goalSidebar: "default",
   setGoalSidebar: () => {},
 });
@@ -55,6 +62,7 @@ const STORAGE_KEY = "feed-verified-badge-position";
 const FEATURED_QUESTIONS_KEY = "feed-featured-questions";
 const FEATURED_QUESTIONS_VERSION_KEY = "feed-featured-questions-version";
 const TOPICS_KEY = "feed-topics";
+const EXPLORE_CARD_KEY = "feed-explore-card";
 const GOAL_SIDEBAR_KEY = "feed-goal-sidebar";
 
 export function FeedAdminProvider({ children }: { children: ReactNode }) {
@@ -89,6 +97,14 @@ export function FeedAdminProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(TOPICS_KEY, v ? "1" : "0");
     setTopicsState(v);
   };
+  const [exploreCard, setExploreCardState] = useState<boolean>(() => {
+    // Off by default; only an explicit "1" enables the combined card.
+    return localStorage.getItem(EXPLORE_CARD_KEY) === "1";
+  });
+  const setExploreCard = (v: boolean) => {
+    localStorage.setItem(EXPLORE_CARD_KEY, v ? "1" : "0");
+    setExploreCardState(v);
+  };
   const [goalSidebar, setGoalSidebarState] = useState<GoalSidebarState>(() => {
     const saved = localStorage.getItem(GOAL_SIDEBAR_KEY);
     return saved === "goals" || saved === "no-goal" ? saved : "default";
@@ -98,7 +114,7 @@ export function FeedAdminProvider({ children }: { children: ReactNode }) {
     setGoalSidebarState(v);
   };
   return (
-    <FeedAdminContext.Provider value={{ verifiedBadgePosition, setVerifiedBadgePosition, featuredQuestions, setFeaturedQuestions, featuredQuestionsVersion, setFeaturedQuestionsVersion, topics, setTopics, goalSidebar, setGoalSidebar }}>
+    <FeedAdminContext.Provider value={{ verifiedBadgePosition, setVerifiedBadgePosition, featuredQuestions, setFeaturedQuestions, featuredQuestionsVersion, setFeaturedQuestionsVersion, topics, setTopics, exploreCard, setExploreCard, goalSidebar, setGoalSidebar }}>
       {children}
     </FeedAdminContext.Provider>
   );

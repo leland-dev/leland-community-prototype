@@ -58,6 +58,10 @@ import categoryIB from "../assets/placeholder images/category images/investment-
 import categoryConsulting from "../assets/placeholder images/category images/management-consulting.png";
 import categoryPM from "../assets/placeholder images/category images/product-management.png";
 import categoryAI from "../assets/placeholder images/category images/AI-automation-and-agents.png";
+import categoryGmat from "../assets/placeholder images/category images/gmat-tutoring.png";
+import categoryLaw from "../assets/placeholder images/category images/law-school.png";
+import hashtagSquare from "../assets/icons/hashtag-square.svg";
+import arrowRight from "../assets/icons/arrow-right.svg";
 import lelandMark from "../assets/leland-mark.svg";
 import goalIcon from "../assets/img/goal.svg";
 
@@ -5419,6 +5423,66 @@ const FIND_EXPERT_CATEGORIES = [
   { title: "AI Automation & Agents", image: categoryAI, experts: "300 experts", photos: [pic8, pic5, pic7] },
 ];
 
+// Categories shown in the combined "Explore" card (exploreCard admin toggle on).
+// Each category maps to a real topic page (community mode → /topic/<slug>) and
+// carries expert social proof (experts mode → /browse). Kept to the three topics
+// that have real community feeds so the "Community" rows always land on content.
+const EXPLORE_CATEGORIES = [
+  { slug: "mba-r1-admissions", title: "MBA R1 Admissions", image: categoryGmat, postsToday: 234, experts: "234 experts", photos: [pic1, pic4, pic5] },
+  { slug: "breaking-into-pm", title: "Breaking into Product", image: categoryPM, postsToday: 189, experts: "198 experts", photos: [pic3, pic1, pic6] },
+  { slug: "law-school-prep", title: "Law School Prep", image: categoryLaw, postsToday: 156, experts: "150 experts", photos: [pic6, pic7, pic8] },
+];
+
+// Combined card that merges "Trending topics" and "Find expert help" into one.
+// Each category is a single unit with two actions: read the community feed
+// (/topic/<slug>) or find an expert to hire (/browse).
+function ExploreCard() {
+  const navigate = useNavigate();
+  return (
+    <div className="rounded-[12px] border border-[#222222]/[0.12] bg-white p-4">
+      <h2 className="mb-1 text-[17px] font-bold leading-tight text-gray-dark">Explore categories</h2>
+
+      <div className="flex flex-col divide-y divide-[#222222]/[0.08]">
+        {EXPLORE_CATEGORIES.map((c) => (
+          <div key={c.slug} className="flex flex-col gap-2.5 py-3.5 first:pt-2">
+            <div className="flex items-center gap-3">
+              <img src={c.image} alt="" className="h-[40px] w-[40px] shrink-0 rounded-[6px] object-cover" />
+              <div className="flex min-w-0 flex-col gap-[2px]">
+                <p className="truncate text-[14px] font-semibold leading-[1.2] text-gray-dark">{c.title}</p>
+                <p className="truncate text-[12px] leading-[1.4] text-gray-light">
+                  <CategoryExpertsSubtitle photos={c.photos} experts={c.experts} />
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                rounded="rounded-full"
+                className="flex-1 px-2 !font-semibold"
+                onClick={() => navigate(`/topic/${c.slug}`)}
+              >
+                <img src={hashtagSquare} alt="" className="h-4 w-4 shrink-0" />
+                View topic
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                rounded="rounded-full"
+                className="flex-1 px-2 !font-semibold"
+                onClick={() => navigate("/browse")}
+              >
+                Browse experts
+                <img src={arrowRight} alt="" className="h-4 w-4 shrink-0" />
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // First-goal onboarding card — shown (via the "No goal" admin toggle) to users
 // we have no goal/category data for. Nudges them to create their first goal so
 // we can personalize the feed. Lives in the left sidebar, replacing the
@@ -5451,7 +5515,7 @@ function FirstGoalCard() {
 export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = {}) {
   // Opt-in via the showUpcoming prop; off by default.
   const upcoming = showUpcoming ?? false;
-  const { topics } = useFeedAdmin();
+  const { topics, exploreCard } = useFeedAdmin();
   const { pathname } = useLocation();
   // On the home feeds (/ and /alt-nav) the right column scrolls with the page
   // and pins its last card to the top (see PageShell rightSidebarStickyLast).
@@ -5495,8 +5559,9 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
       </SidebarSectionCard>
 
       {/* Trending topics (only when the topics toggle is on) — scrolls normally
-          above the pinned "Find expert help" card. */}
-      {topics && (
+          above the pinned "Find expert help" card. Hidden when the combined
+          "Explore" card is on, since that card absorbs it. */}
+      {topics && !exploreCard && (
         <SidebarSectionCard title="Trending topics" to="/topic/mba-r1-admissions" bleed={false}>
           {TOPICS.map(topic => (
             <SidebarCard
@@ -5519,18 +5584,22 @@ export function HomeRightSidebar({ showUpcoming }: { showUpcoming?: boolean } = 
           that pins to the top as the rest of the sidebar scrolls; elsewhere the
           wrapper is display:contents so layout is unchanged. */}
       <div className={stickyLast ? "sticky top-[81px] flex flex-col gap-[14px]" : "contents"}>
-      <SidebarSectionCard title="Find expert help" bleed={false}>
-        {FIND_EXPERT_CATEGORIES.slice(0, 3).map(c => (
-          <SidebarCard
-            key={c.title}
-            variant="category"
-            to="/browse"
-            image={c.image}
-            title={c.title}
-            subtitle={<CategoryExpertsSubtitle photos={c.photos} experts={c.experts} />}
-          />
-        ))}
-      </SidebarSectionCard>
+      {exploreCard ? (
+        <ExploreCard />
+      ) : (
+        <SidebarSectionCard title="Find expert help" bleed={false}>
+          {FIND_EXPERT_CATEGORIES.slice(0, 3).map(c => (
+            <SidebarCard
+              key={c.title}
+              variant="category"
+              to="/browse"
+              image={c.image}
+              title={c.title}
+              subtitle={<CategoryExpertsSubtitle photos={c.photos} experts={c.experts} />}
+            />
+          ))}
+        </SidebarSectionCard>
+      )}
 
       {/* Footer links — centered, directly below the last card */}
       <HomeFeedFooter />
@@ -5737,6 +5806,17 @@ const composerPrompts = [
   "Ask the community anything...",
 ];
 
+// Short rotating prompts for the home feed composer. Each line models a
+// different behavior — ask / share progress / celebrate / narrate — so the
+// idle composer teaches the range of what belongs here. Fades between lines
+// while idle, freezes on hover, holds the first line under reduced motion.
+const homeComposerPrompts = [
+  "Ask a question...",
+  "Share what you're working on...",
+  "Share a win from this week...",
+  "Tell your story...",
+];
+
 // ─── Page ─────────────────────────────────────────────
 
 // Prototype-only admin menu — a 3-dot button pinned to the bottom-right that
@@ -5745,7 +5825,7 @@ const composerPrompts = [
 function FeedAdminMenu() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { verifiedBadgePosition, setVerifiedBadgePosition, featuredQuestions, setFeaturedQuestions, featuredQuestionsVersion, setFeaturedQuestionsVersion, topics, setTopics, goalSidebar, setGoalSidebar } = useFeedAdmin();
+  const { verifiedBadgePosition, setVerifiedBadgePosition, featuredQuestions, setFeaturedQuestions, featuredQuestionsVersion, setFeaturedQuestionsVersion, topics, setTopics, exploreCard, setExploreCard, goalSidebar, setGoalSidebar } = useFeedAdmin();
   useEffect(() => {
     if (!open) return;
     const onClick = (e: MouseEvent) => {
@@ -5786,6 +5866,7 @@ function FeedAdminMenu() {
               />
             )}
             <AdminToggle label="Topics" checked={topics} onChange={() => setTopics(!topics)} />
+            <AdminToggle label="Explore card" checked={exploreCard} onChange={() => setExploreCard(!exploreCard)} />
             <AdminSelect
               label="Goals"
               value={goalSidebar}
@@ -5816,6 +5897,23 @@ export default function Home() {
   const { version } = useVersion();
   const [composeOpen, setComposeOpen] = useState(false);
   const [goLiveOpen, setGoLiveOpen] = useState(false);
+  // Rotating composer placeholder: fades between homeComposerPrompts while idle,
+  // freezes on hover (intent to click), and holds the first line under reduced motion.
+  const [composerPromptIdx, setComposerPromptIdx] = useState(0);
+  const [composerPromptVisible, setComposerPromptVisible] = useState(true);
+  const [composerHovered, setComposerHovered] = useState(false);
+  useEffect(() => {
+    if (composerHovered) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = setInterval(() => {
+      setComposerPromptVisible(false);
+      setTimeout(() => {
+        setComposerPromptIdx(i => (i + 1) % homeComposerPrompts.length);
+        setComposerPromptVisible(true);
+      }, 250);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, [composerHovered]);
   // "People to follow → See all" swaps the center feed for the full accounts list.
   const [peopleView, setPeopleView] = useState(false);
   const [navHidden, setNavHidden] = useState(false);
@@ -6068,6 +6166,8 @@ export default function Home() {
           Post button beneath. Clicking anywhere opens the compose modal. */}
       <div
         onClick={() => setComposeOpen(true)}
+        onMouseEnter={() => { setComposerHovered(true); setComposerPromptVisible(true); }}
+        onMouseLeave={() => setComposerHovered(false)}
         className="hidden cursor-pointer border-b border-gray-stroke px-4 py-3 sm:px-6 md:block"
       >
         <div className="flex items-center gap-3">
@@ -6076,8 +6176,11 @@ export default function Home() {
             alt="Your profile"
             className="h-10 w-10 shrink-0 rounded-full object-cover"
           />
-          <span className="flex-1 truncate text-left text-[17px] text-gray-extra-light">
-            What's on your mind?
+          <span
+            className="flex-1 truncate text-left text-[17px] text-gray-extra-light transition-opacity duration-200"
+            style={{ opacity: composerPromptVisible ? 1 : 0 }}
+          >
+            {homeComposerPrompts[composerPromptIdx]}
           </span>
         </div>
         {/* Media icons (left) + Post (right), indented under the prompt text. */}

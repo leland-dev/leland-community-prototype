@@ -10,6 +10,7 @@ import bookOpenIcon from "../assets/icons/book-open.svg";
 import stackIcon from "../assets/icons/stack.svg";
 import myCoursesIcon from "../assets/icons/my-courses.svg";
 import lteSignalIcon from "../assets/icons/lte-signal.svg";
+import usersGroupIcon from "../assets/icons/users-group.svg";
 import aiIcon from "../assets/icons/ai.svg";
 import moneyIcon from "../assets/icons/money.svg";
 import browseIcon from "../assets/icons/nav-icons/browse-inactive.svg";
@@ -64,7 +65,7 @@ const useV2 = () => useContext(V2Context);
 
 // Product types that carry a price in v2 (everything with a real config modal;
 // placeholder types like Agent / Private group are excluded).
-const PRICEABLE = ["coaching-time", "content", "collection", "course", "paid-livestream"];
+const PRICEABLE = ["coaching-time", "content", "collection", "course", "paid-livestream", "workshop"];
 const isPriceable = (slug: string) => PRICEABLE.includes(slug);
 
 // A single pricing option under "Paid access". Each option bundles its own set
@@ -143,7 +144,7 @@ const offeringTypes = [
   { slug: "content", label: "Content", blurb: "Guides, templates, videos", icon: bookOpenIcon },
   { slug: "collection", label: "Collection", blurb: "Group products into a bundle", icon: stackIcon },
   { slug: "course", label: "Course", blurb: "Structured multi-lesson course", icon: myCoursesIcon },
-  { slug: "paid-livestream", label: "Livestream", blurb: "Host a paid live session", icon: lteSignalIcon },
+  { slug: "workshop", label: "Workshop", blurb: "Host a paid live class", icon: usersGroupIcon },
   { slug: "agent", label: "Agent", blurb: "An AI assistant trained on you", icon: aiIcon },
   { slug: "membership", label: "Private group", blurb: "A private community for members", icon: crownIcon },
 ];
@@ -156,6 +157,7 @@ const offeringAddDescription: Record<string, string> = {
   collection: "Bundle multiple resources together.",
   course: "Create a structured, multi-lesson course.",
   "paid-livestream": "Host a live, group session.",
+  workshop: "Host a paid, live class — set a price and a seat limit.",
   agent: "An AI assistant trained on your expertise.",
   membership: "Give members access to a private community.",
 };
@@ -260,6 +262,9 @@ const configDefaults: Record<string, Record<string, string>> = {
   collection: { title: "", description: "" },
   course: { title: "", description: "" },
   "paid-livestream": { name: "", description: "", subcategories: "", lelandPlus: "false", duration: "30", date: "", time: "", coverName: "" },
+  // A workshop is a paid livestream: same scheduling fields, but it always
+  // carries its own price and an optional seat limit.
+  workshop: { name: "", description: "", price: "", capacity: "", subcategories: "", lelandPlus: "false", duration: "60", date: "", time: "", coverName: "" },
   // Placeholder offerings — configuration TBD, so their config is empty and
   // they're always "complete" (see isConfigComplete's default).
   agent: {},
@@ -282,6 +287,7 @@ const configPrompts: Record<string, string> = {
   "coaching-time": "How much time do you want to include?",
   content: "Upload your file and add the details.",
   "paid-livestream": "Schedule and set up your livestream.",
+  workshop: "Schedule your workshop and set a price.",
 };
 
 // Unfinished-state CTA (label + optional icon) shown on the added row. The
@@ -292,6 +298,7 @@ const configCTA: Record<string, { label: string; icon?: string }> = {
   collection: { label: "Configure" },
   course: { label: "Configure" },
   "paid-livestream": { label: "Configure" },
+  workshop: { label: "Configure" },
   agent: { label: "Configure" },
   membership: { label: "Configure" },
 };
@@ -386,6 +393,10 @@ function isConfigComplete(item: OfferingItem): boolean {
   if (item.slug === "paid-livestream") {
     return Boolean(c.name && c.date && c.time);
   }
+  if (item.slug === "workshop") {
+    // Workshops are always paid, so a price is required alongside scheduling.
+    return Boolean(c.name && c.date && c.time && c.price);
+  }
   if (isListOffering(item.slug)) {
     return Boolean(c.title) && (item.items?.length ?? 0) > 0;
   }
@@ -406,7 +417,7 @@ function configSummary(item: OfferingItem): string {
     if (c.source === "reuse") return c.r_title || CONTENT_LIBRARY.find((l) => l.id === c.libraryId)?.title || "";
     return c.assetName;
   }
-  if (item.slug === "paid-livestream") {
+  if (item.slug === "paid-livestream" || item.slug === "workshop") {
     return c.name;
   }
   if (isListOffering(item.slug)) {
@@ -689,12 +700,75 @@ function AdminToggle({ label, checked, onChange }: { label: string; checked: boo
   );
 }
 
+// ── Offering status — surfaced in the builder top bar and chosen at publish ──
+type OfferingStatus = "draft" | "public" | "private";
+
+const OFFERING_STATUS_META: Record<OfferingStatus, { label: string; pill: string }> = {
+  draft: { label: "Draft", pill: "bg-gray-hover text-gray-light" },
+  public: { label: "Public", pill: "bg-[#E5F3EC] text-[#1B7A4B]" },
+  private: { label: "Private", pill: "bg-[#EEF4FB] text-[#35506E]" },
+};
+
+// At-a-glance status pill for the top bar (display-only).
+function OfferingStatusPill({ status }: { status: OfferingStatus }) {
+  const m = OFFERING_STATUS_META[status];
+  return <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[13px] font-medium ${m.pill}`}>{m.label}</span>;
+}
+
+// Publish button with a dropdown — publish Public / Private, or save as a draft.
+// Each choice sets the offering status and completes the flow. Closes on
+// outside click.
+function PublishMenu({ disabled, onChoose }: { disabled: boolean; onChoose: (status: OfferingStatus) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+  const options: { status: OfferingStatus; label: string; desc: string }[] = [
+    { status: "public", label: "Publish — Public", desc: "Visible to everyone" },
+    { status: "private", label: "Publish — Private", desc: "Only reachable with a direct link" },
+    { status: "draft", label: "Save as draft", desc: "Keep working — not visible to anyone" },
+  ];
+  return (
+    <div ref={ref} className="relative">
+      <Button size="sm" variant="dark" rounded="rounded-full" className="text-[14px] font-semibold" onClick={() => setOpen((o) => !o)} disabled={disabled}>
+        Publish
+        <svg className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+      </Button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+            className="absolute right-0 top-full z-50 mt-2 w-[300px] rounded-2xl border border-gray-stroke bg-white p-2 shadow-lg"
+          >
+            {options.map((o) => (
+              <button key={o.status} onClick={() => { setOpen(false); onChoose(o.status); }} className="flex w-full flex-col items-start rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-gray-hover">
+                <span className="text-[14px] font-semibold text-gray-dark">{o.label}</span>
+                <span className="text-[13px] text-gray-light">{o.desc}</span>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function CoachProductNew() {
   const { category } = useParams<{ category: string; type?: string }>();
   const navigate = useNavigate();
 
   const [pendingNav, setPendingNav] = useState<string | null>(null);
   const [step, setStep] = useState<StepKey>("offerings");
+  // Offering status — shown in the top bar and chosen when publishing. New
+  // offerings start as a draft until the coach publishes.
+  const [status, setStatus] = useState<OfferingStatus>("draft");
 
   // Shared product-in-progress state, reflected live in the preview.
   const [name, setName] = useState("");
@@ -739,11 +813,13 @@ export default function CoachProductNew() {
   const stepIndex = STEPS.findIndex((s) => s.key === step);
   const isLast = stepIndex === STEPS.length - 1;
 
-  const close = () => setPendingNav(`/coach/manage/${category}`);
+  const close = () => setPendingNav(`/my-leland/manage/${category}`);
   const next = () => {
     if (isLast) close();
     else setStep(STEPS[stepIndex + 1].key);
   };
+  // Publish with a chosen status (or save as draft), then route back.
+  const publish = (s: OfferingStatus) => { setStatus(s); close(); };
 
   // Whether the preview column is in the DOM — true while a product exists and
   // stays true through the column's exit animation (cleared on exit-complete).
@@ -881,12 +957,17 @@ export default function CoachProductNew() {
           })}
         </nav>
 
-        <Button size="sm" variant="dark" rounded="rounded-full" className="text-[14px] font-semibold" onClick={next} disabled={added.length === 0}>
-          {isLast ? "Publish" : "Next"}
-          {!isLast && (
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+        <div className="flex items-center gap-3">
+          <OfferingStatusPill status={status} />
+          {isLast ? (
+            <PublishMenu disabled={added.length === 0} onChoose={publish} />
+          ) : (
+            <Button size="sm" variant="dark" rounded="rounded-full" className="text-[14px] font-semibold" onClick={next} disabled={added.length === 0}>
+              Next
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+            </Button>
           )}
-        </Button>
+        </div>
       </header>
 
       <div className="mx-auto flex w-full max-w-[1080px] flex-col gap-10 px-4 py-10 sm:px-6 lg:flex-row lg:gap-14">
@@ -1043,14 +1124,6 @@ function ProductStep({
             <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Thumbnail</label>
             <ImageUploadField value={thumbnail} onChange={setThumbnail} label="Add a thumbnail image" hint="Recommended 1200 × 630" />
           </div>
-        </div>
-      </section>
-
-      <section>
-        <h2 className="text-[22px] font-semibold text-gray-dark">Visibility</h2>
-        <p className="mt-0.5 text-[15px] text-gray-light">Control who can discover this offering and how it appears on your profile.</p>
-        <div className="mt-5">
-          <ProductSettings />
         </div>
       </section>
 
@@ -1772,36 +1845,6 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
           <PricingRollup products={products} option={option} onChange={onChange} />
         </div>
       )}
-    </div>
-  );
-}
-
-/* ---------- Visibility (public / private) ---------- */
-
-function ProductSettings() {
-  const [visibility, setVisibility] = useState<"public" | "private">("public");
-
-  const visibilityOptions = [
-    { key: "public" as const, label: "Public", desc: "Visible to everyone", icon: eyeIcon },
-    { key: "private" as const, label: "Private", desc: "Only reachable with a direct link", icon: eyeClosedIcon },
-  ];
-
-  return (
-    <div className="grid grid-cols-2 gap-3">
-      {visibilityOptions.map((opt) => {
-        const active = visibility === opt.key;
-        return (
-          <button
-            key={opt.key}
-            onClick={() => setVisibility(opt.key)}
-            className={`flex flex-col items-center rounded-xl px-4 py-6 text-center transition-colors ${active ? "border-[1.5px] border-gray-dark" : "border border-gray-stroke hover:border-[#c9c9c9]"}`}
-          >
-            <MaskIcon src={opt.icon} className={`h-7 w-7 ${active ? "text-gray-dark" : "text-gray-extra-light"}`} />
-            <span className="mt-3 text-[16px] font-semibold text-gray-dark">{opt.label}</span>
-            <span className="mt-1 text-[14px] leading-snug text-gray-light">{opt.desc}</span>
-          </button>
-        );
-      })}
     </div>
   );
 }
@@ -2871,6 +2914,7 @@ function OfferingConfigFields({ slug, config, onChange, lockedCoachingMode = nul
   if (slug === "coaching-time") return <CoachingTimeFields config={config} onChange={onChange} lockedMode={lockedCoachingMode} />;
   if (slug === "content") return <ContentFields config={config} onChange={onChange} priced={v2} backSignal={backSignal} scrolled={scrolled} uploadOnly={uploadOnly} onCancel={onCancel} />;
   if (slug === "paid-livestream") return <PaidLivestreamFields config={config} onChange={onChange} />;
+  if (slug === "workshop") return <WorkshopFields config={config} onChange={onChange} />;
   return <PlaceholderFields label={offeringBySlug[slug]?.label ?? "This product"} />;
 }
 
@@ -2907,6 +2951,93 @@ function PaidLivestreamFields({ config, onChange }: { config: Record<string, str
       <div>
         <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Duration</label>
         <Select value={config.duration ?? "30"} onChange={(v) => onChange({ duration: v })} options={LIVESTREAM_DURATIONS} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Date</label>
+          <input type="date" value={config.date ?? ""} onChange={(e) => onChange({ date: e.target.value })} className={configInputClass} />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Time</label>
+          <input type="time" value={config.time ?? ""} onChange={(e) => onChange({ time: e.target.value })} className={configInputClass} />
+        </div>
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Cover photo</label>
+        <UploadField value={config.coverName ?? ""} onChange={(name) => onChange({ coverName: name })} hint="Recommended 1200 × 630" />
+      </div>
+
+      <div>
+        <label className="mb-2 block text-[14px] font-medium text-gray-light">Subcategories</label>
+        <div className="flex flex-wrap gap-2">
+          {MBA_SUBCATEGORIES.map((s) => {
+            const active = selectedSubs.includes(s);
+            return (
+              <button
+                key={s}
+                type="button"
+                onClick={() => toggleSub(s)}
+                className={`rounded-full border px-3.5 py-1.5 text-[14px] font-medium transition-colors ${active ? "border-gray-dark bg-gray-dark text-white" : "border-gray-stroke text-gray-dark hover:border-[#c9c9c9]"}`}
+              >
+                {s}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <ToggleRow
+        label="Upload recording to Leland+"
+        desc="Reach new leads and earn passive income by sharing your recording with Leland+ subscribers. You keep full rights to your content."
+        checked={config.lelandPlus === "true"}
+        onChange={() => onChange({ lelandPlus: config.lelandPlus === "true" ? "false" : "true" })}
+      />
+    </div>
+  );
+}
+
+/* ---------- Workshop config ---------- */
+
+// A workshop is a paid livestream with its own first-class type. It mirrors the
+// livestream scheduling fields, but price is always required (not v2-gated) and
+// it adds an optional seat limit. The coach's price here becomes the product's
+// config.price, which feeds the offering roll-up and can be waived per-offering.
+function WorkshopFields({ config, onChange }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void }) {
+  const selectedSubs = (config.subcategories ?? "").split(",").filter(Boolean);
+  const toggleSub = (s: string) => {
+    const set = new Set(selectedSubs);
+    if (set.has(s)) set.delete(s); else set.add(s);
+    onChange({ subcategories: [...set].join(",") });
+  };
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div>
+        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Name</label>
+        <input value={config.name ?? ""} onChange={(e) => onChange({ name: e.target.value })} placeholder="Name your workshop" autoComplete="off" className={configInputClass} />
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Description</label>
+        <textarea value={config.description ?? ""} onChange={(e) => onChange({ description: e.target.value })} rows={3} placeholder="What will attendees learn?" autoComplete="off" className={`${configInputClass} resize-none`} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Price</label>
+          <PriceField value={config.price ?? ""} onChange={(v) => onChange({ price: v })} />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Seats <span className="font-normal text-gray-extra-light">(optional)</span></label>
+          <input type="number" min="1" inputMode="numeric" value={config.capacity ?? ""} onChange={(e) => onChange({ capacity: e.target.value })} placeholder="Unlimited" autoComplete="off" className={configInputClass} />
+        </div>
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Duration</label>
+        <Select value={config.duration ?? "60"} onChange={(v) => onChange({ duration: v })} options={LIVESTREAM_DURATIONS} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -3487,6 +3618,9 @@ function CourseModal({ item, onGeneralChange, onItemsChange, onSave, onClose }: 
 
 const configInputClass = "w-full rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1] focus:border-gray-dark";
 
+// White section card — matches the My Leland dashboard cards exactly.
+export const CONTENT_CARD = "rounded-2xl bg-white p-5 shadow-[0_1px_2px_0_rgba(16,24,40,0.06)] ring-1 ring-[#222222]/10 sm:p-6";
+
 // A dollar-prefixed price input used inside v2 product config modals. Stores the
 // raw numeric string; formats to two decimals on blur.
 function PriceField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -3638,6 +3772,187 @@ function UploadedAssetField({ name, onReplace, preview = samanthaVideo }: { name
   );
 }
 
+/* ---------- Shared content metadata form ---------- */
+
+// The General / Discoverability / Leland+ / Advanced field set shared by the
+// resource upload editor and the course details page. Bound to a config-key
+// namespace via `prefix` ("" for a freshly uploaded asset, "r_" for a reused
+// library asset). `showThumbnail` / `showAdvanced` let a host hide sections it
+// supplies itself (the course page keeps its own cover-image picker and drops
+// the download-related Advanced settings).
+export function ContentMetadataFields({
+  config,
+  onChange,
+  priced = false,
+  prefix = "",
+  showThumbnail = true,
+  showAdvanced = true,
+  card = false,
+  afterGeneral,
+}: {
+  config: Record<string, string>;
+  onChange: (patch: Record<string, string>) => void;
+  priced?: boolean;
+  prefix?: string;
+  showThumbnail?: boolean;
+  showAdvanced?: boolean;
+  card?: boolean;
+  // Optional content inserted right after the General section (e.g. a course's
+  // cover-image card), so a host can interleave its own section in the stack.
+  afterGeneral?: ReactNode;
+}) {
+  const p = prefix;
+  const g = (f: string) => config[`${p}${f}`] ?? "";
+  const set = (f: string, v: string) => onChange({ [`${p}${f}`]: v });
+  const isOn = (f: string) => config[`${p}${f}`] === "true";
+  const flip = (f: string) => onChange({ [`${p}${f}`]: isOn(f) ? "false" : "true" });
+  const getMulti = (f: string) => g(f).split(",").filter(Boolean);
+  const setMulti = (f: string, arr: string[]) => set(f, arr.join(","));
+  // When `card`, each section becomes a standalone white card (matching the
+  // My Leland dashboard) and its heading drops the top padding the flat layout
+  // uses for inter-section rhythm (the card padding supplies it instead).
+  const sectionCls = card ? CONTENT_CARD : "";
+  const headCls = `${card ? "pb-5" : "py-5"} text-[22px] font-semibold text-gray-dark`;
+  return (
+    <>
+      <div className={sectionCls}>
+        <p className="pb-5 text-[22px] font-semibold text-gray-dark">General</p>
+        <FieldRow icon={labelTagIcon} title="Title" desc="The name people will see for this content.">
+          <input value={g("title")} onChange={(e) => set("title", e.target.value)} placeholder="Give your content a title" autoComplete="off" className={configInputClass} />
+        </FieldRow>
+        <FieldRow icon={textIcon} title="Description" desc="A short summary of what this content is." divider={priced}>
+          <textarea value={g("description")} onChange={(e) => set("description", e.target.value)} rows={3} placeholder="Describe what this is…" autoComplete="off" className={`${configInputClass} resize-none`} />
+        </FieldRow>
+        {priced && (
+          <FieldRow icon={moneyIcon} title="Suggested price" desc="What you'd charge by default. This won't be for sale until you add it to an offering." divider={false}>
+            <PriceField value={config.price ?? ""} onChange={(v) => onChange({ price: v })} />
+          </FieldRow>
+        )}
+      </div>
+
+      {afterGeneral}
+
+      {/* Discoverability — how this resource is categorized & surfaced */}
+      <div className={sectionCls}>
+        <p className={headCls}>Discoverability</p>
+        <FieldRow icon={browseIcon} title="Category" desc="Where this shows up in the catalog.">
+          <MultiSelect values={getMulti("category")} onChange={(v) => setMulti("category", v)} options={CATEGORY_OPTIONS} placeholder="Select categories" />
+        </FieldRow>
+        <FieldRow icon={labelTagIcon} title="Subcategory" desc="Narrow it down further.">
+          <MultiSelect values={getMulti("subcategory")} onChange={(v) => setMulti("subcategory", v)} options={SUBCATEGORY_OPTIONS} placeholder="Select subcategories" />
+        </FieldRow>
+        <FieldRow icon={lightBulbIcon} title="Topics" desc="The focuses this resource covers.">
+          <MultiSelect values={getMulti("topics")} onChange={(v) => setMulti("topics", v)} options={TOPIC_OPTIONS} placeholder="Search coaching focuses…" />
+        </FieldRow>
+        <FieldRow icon={stackIcon} title="Resource type" desc="Choose the categories that best fit it.">
+          <MultiSelect values={getMulti("resourceType")} onChange={(v) => setMulti("resourceType", v)} options={RESOURCE_TYPES.map((t) => t.label)} placeholder="Select resource types" />
+        </FieldRow>
+        <FieldRow icon={storeIcon} title="Organizations" desc="Tag relevant schools or companies." divider={showThumbnail}>
+          <MultiSelect values={getMulti("organizations")} onChange={(v) => setMulti("organizations", v)} options={ORGANIZATION_OPTIONS} placeholder="Search schools & companies…" />
+        </FieldRow>
+        {showThumbnail && (
+          <SettingRow
+            icon={<MaskIcon src={photoIcon} className="h-6 w-6 text-gray-dark" />}
+            title="Add a custom thumbnail"
+            desc="Upload a custom thumbnail to help this resource stand out. A screenshot or eye-catching mockup works well."
+            checked={isOn("thumbnailEnabled")}
+            onChange={() => flip("thumbnailEnabled")}
+            divider={false}
+          >
+            <div className="mt-3">
+              <UploadField value={g("thumbnail")} onChange={(name) => set("thumbnail", name)} hint="PNG, JPG, JPEG, GIF, WEBP, SVG, HEIC" label="Click to upload or drag and drop" />
+            </div>
+          </SettingRow>
+        )}
+      </div>
+
+      {/* Leland+ library */}
+      <div className={sectionCls}>
+        <p className={headCls}>Leland+ library</p>
+        <SettingRow
+          icon={<MaskIcon src={bookOpenIcon} className="h-6 w-6 text-gray-dark" />}
+          title="Add to the Leland+ library"
+          desc="Anyone with a Leland+ subscription can access it. You’ll get paid based on usage."
+          checked={isOn("lelandPlus")}
+          onChange={() => flip("lelandPlus")}
+          divider={isOn("lelandPlus")}
+        />
+
+        <AnimatePresence initial={false}>
+        {isOn("lelandPlus") && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={offeringTransition} className="overflow-hidden">
+            <SettingRow
+              icon={<MaskIcon src={eyeClosedIcon} className="h-6 w-6 text-gray-dark" />}
+              title="Submit anonymously"
+              desc="Your name won’t appear on this resource."
+              checked={isOn("anonymous")}
+              onChange={() => flip("anonymous")}
+            />
+
+            {/* Content visibility — same row layout (icon + content), no checkbox */}
+            <div className="flex gap-4">
+              <span className="flex shrink-0 pt-5 text-gray-dark"><MaskIcon src={globeIcon} className="h-6 w-6 text-gray-dark" /></span>
+              <div className="min-w-0 flex-1 pt-5 pb-5">
+                <p className="text-[15px] font-semibold text-gray-dark">Content visibility</p>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  {[
+                    { key: "public", label: "Public", desc: "Appears in search results" },
+                    { key: "unlisted", label: "Unlisted", desc: "Won't appear in search results" },
+                  ].map((opt) => {
+                    const active = (g("visibility") || "public") === opt.key;
+                    return (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => set("visibility", opt.key)}
+                        className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3.5 text-left transition-colors ${active ? "border-[1.5px] border-gray-dark" : "border border-gray-stroke hover:border-[#c9c9c9]"}`}
+                      >
+                        <span className="min-w-0">
+                          <span className="block text-[15px] font-semibold text-gray-dark">{opt.label}</span>
+                          <span className="block text-[13px] text-gray-light">{opt.desc}</span>
+                        </span>
+                        <RadioDot active={active} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+        </AnimatePresence>
+      </div>
+
+      {/* Advanced settings */}
+      {showAdvanced && (
+        <div className={sectionCls}>
+          <p className={headCls}>Advanced settings</p>
+          <SettingRow
+            icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11" /><path d="m7 10 5 5 5-5" /><path d="M5 19h14" /></svg>}
+            title="Allow users to download this file"
+            desc="Not supported for videos"
+            checked={isOn("downloadable")}
+            onChange={() => flip("downloadable")}
+          />
+
+          <SettingRow
+            icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>}
+            title="Attach a separate, downloadable file"
+            desc="Add an extra asset, like a spreadsheet or worksheet, for users to download. The file above should explain it."
+            checked={isOn("attachFile")}
+            onChange={() => flip("attachFile")}
+            divider={false}
+          >
+            <div className="mt-3">
+              <UploadField value={g("attachmentName")} onChange={(name) => set("attachmentName", name)} hint="The file members can download" label="Click to upload or drag and drop" />
+            </div>
+          </SettingRow>
+        </div>
+      )}
+    </>
+  );
+}
+
 /* ---------- Content config (upload new / reuse existing) ---------- */
 
 function ContentFields({ config, onChange, priced = false, backSignal = 0, scrolled = false, uploadOnly = false, onCancel }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; priced?: boolean; backSignal?: number; scrolled?: boolean; uploadOnly?: boolean; onCancel?: () => void }) {
@@ -3716,148 +4031,12 @@ function ContentFields({ config, onChange, priced = false, backSignal = 0, scrol
   const cancelEdit = () => { onChange({ ...(snapshotRef.current ?? {}), editing: "" }); };
   const saveEdit = () => onChange({ editing: "" });
 
-  // Editable metadata fields bound to a config-key namespace ("" for a freshly
-  // uploaded asset, "r_" for a reused library asset).
-  const renderMetadata = (p: string) => {
-    const g = (f: string) => config[`${p}${f}`] ?? "";
-    const set = (f: string, v: string) => onChange({ [`${p}${f}`]: v });
-    const isOn = (f: string) => config[`${p}${f}`] === "true";
-    const flip = (f: string) => onChange({ [`${p}${f}`]: isOn(f) ? "false" : "true" });
-    const getMulti = (f: string) => g(f).split(",").filter(Boolean);
-    const setMulti = (f: string, arr: string[]) => set(f, arr.join(","));
-    return (
-      <>
-        <div>
-          <p className="pb-5 text-[22px] font-semibold text-gray-dark">General</p>
-          <FieldRow icon={labelTagIcon} title="Title" desc="The name people will see for this content.">
-            <input value={g("title")} onChange={(e) => set("title", e.target.value)} placeholder="Give your content a title" autoComplete="off" className={configInputClass} />
-          </FieldRow>
-          <FieldRow icon={textIcon} title="Description" desc="A short summary of what this content is." divider={priced}>
-            <textarea value={g("description")} onChange={(e) => set("description", e.target.value)} rows={3} placeholder="Describe what this is…" autoComplete="off" className={`${configInputClass} resize-none`} />
-          </FieldRow>
-          {priced && (
-            <FieldRow icon={moneyIcon} title="Suggested price" desc="What you'd charge by default. This won't be for sale until you add it to an offering." divider={false}>
-              <PriceField value={config.price ?? ""} onChange={(v) => onChange({ price: v })} />
-            </FieldRow>
-          )}
-        </div>
-
-        {/* Discoverability — how this resource is categorized & surfaced */}
-        <div>
-          <p className="py-5 text-[22px] font-semibold text-gray-dark">Discoverability</p>
-          <FieldRow icon={browseIcon} title="Category" desc="Where this shows up in the catalog.">
-            <MultiSelect values={getMulti("category")} onChange={(v) => setMulti("category", v)} options={CATEGORY_OPTIONS} placeholder="Select categories" />
-          </FieldRow>
-          <FieldRow icon={labelTagIcon} title="Subcategory" desc="Narrow it down further.">
-            <MultiSelect values={getMulti("subcategory")} onChange={(v) => setMulti("subcategory", v)} options={SUBCATEGORY_OPTIONS} placeholder="Select subcategories" />
-          </FieldRow>
-          <FieldRow icon={lightBulbIcon} title="Topics" desc="The focuses this resource covers.">
-            <MultiSelect values={getMulti("topics")} onChange={(v) => setMulti("topics", v)} options={TOPIC_OPTIONS} placeholder="Search coaching focuses…" />
-          </FieldRow>
-          <FieldRow icon={stackIcon} title="Resource type" desc="Choose the categories that best fit it.">
-            <MultiSelect values={getMulti("resourceType")} onChange={(v) => setMulti("resourceType", v)} options={RESOURCE_TYPES.map((t) => t.label)} placeholder="Select resource types" />
-          </FieldRow>
-          <FieldRow icon={storeIcon} title="Organizations" desc="Tag relevant schools or companies.">
-            <MultiSelect values={getMulti("organizations")} onChange={(v) => setMulti("organizations", v)} options={ORGANIZATION_OPTIONS} placeholder="Search schools & companies…" />
-          </FieldRow>
-          <SettingRow
-            icon={<MaskIcon src={photoIcon} className="h-6 w-6 text-gray-dark" />}
-            title="Add a custom thumbnail"
-            desc="Upload a custom thumbnail to help this resource stand out. A screenshot or eye-catching mockup works well."
-            checked={isOn("thumbnailEnabled")}
-            onChange={() => flip("thumbnailEnabled")}
-            divider={false}
-          >
-            <div className="mt-3">
-              <UploadField value={g("thumbnail")} onChange={(name) => set("thumbnail", name)} hint="PNG, JPG, JPEG, GIF, WEBP, SVG, HEIC" label="Click to upload or drag and drop" />
-            </div>
-          </SettingRow>
-        </div>
-
-        {/* Leland+ library */}
-        <div>
-          <p className="py-5 text-[22px] font-semibold text-gray-dark">Leland+ library</p>
-          <SettingRow
-            icon={<MaskIcon src={bookOpenIcon} className="h-6 w-6 text-gray-dark" />}
-            title="Add to the Leland+ library"
-            desc="Anyone with a Leland+ subscription can access it. You’ll get paid based on usage."
-            checked={isOn("lelandPlus")}
-            onChange={() => flip("lelandPlus")}
-            divider={isOn("lelandPlus")}
-          />
-
-          <AnimatePresence initial={false}>
-          {isOn("lelandPlus") && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={offeringTransition} className="overflow-hidden">
-              <SettingRow
-                icon={<MaskIcon src={eyeClosedIcon} className="h-6 w-6 text-gray-dark" />}
-                title="Submit anonymously"
-                desc="Your name won’t appear on this resource."
-                checked={isOn("anonymous")}
-                onChange={() => flip("anonymous")}
-              />
-
-              {/* Content visibility — same row layout (icon + content), no checkbox */}
-              <div className="flex gap-4">
-                <span className="flex shrink-0 pt-5 text-gray-dark"><MaskIcon src={globeIcon} className="h-6 w-6 text-gray-dark" /></span>
-                <div className="min-w-0 flex-1 pt-5 pb-5">
-                  <p className="text-[15px] font-semibold text-gray-dark">Content visibility</p>
-                  <div className="mt-3 grid grid-cols-2 gap-3">
-                    {[
-                      { key: "public", label: "Public", desc: "Appears in search results" },
-                      { key: "unlisted", label: "Unlisted", desc: "Won't appear in search results" },
-                    ].map((opt) => {
-                      const active = (g("visibility") || "public") === opt.key;
-                      return (
-                        <button
-                          key={opt.key}
-                          type="button"
-                          onClick={() => set("visibility", opt.key)}
-                          className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3.5 text-left transition-colors ${active ? "border-[1.5px] border-gray-dark" : "border border-gray-stroke hover:border-[#c9c9c9]"}`}
-                        >
-                          <span className="min-w-0">
-                            <span className="block text-[15px] font-semibold text-gray-dark">{opt.label}</span>
-                            <span className="block text-[13px] text-gray-light">{opt.desc}</span>
-                          </span>
-                          <RadioDot active={active} />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-          </AnimatePresence>
-        </div>
-
-        {/* Advanced settings */}
-        <div>
-          <p className="py-5 text-[22px] font-semibold text-gray-dark">Advanced settings</p>
-          <SettingRow
-            icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11" /><path d="m7 10 5 5 5-5" /><path d="M5 19h14" /></svg>}
-            title="Allow users to download this file"
-            desc="Not supported for videos"
-            checked={isOn("downloadable")}
-            onChange={() => flip("downloadable")}
-          />
-
-          <SettingRow
-            icon={<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>}
-            title="Attach a separate, downloadable file"
-            desc="Add an extra asset, like a spreadsheet or worksheet, for users to download. The file above should explain it."
-            checked={isOn("attachFile")}
-            onChange={() => flip("attachFile")}
-            divider={false}
-          >
-            <div className="mt-3">
-              <UploadField value={g("attachmentName")} onChange={(name) => set("attachmentName", name)} hint="The file members can download" label="Click to upload or drag and drop" />
-            </div>
-          </SettingRow>
-        </div>
-      </>
-    );
-  };
+  // The General / Discoverability / Leland+ / Advanced field set, bound to a
+  // config-key namespace ("" for a freshly uploaded asset, "r_" for a reused
+  // library asset). Shared with the course details page via ContentMetadataFields.
+  const renderMetadata = (p: string) => (
+    <ContentMetadataFields config={config} onChange={onChange} priced={priced} prefix={p} />
+  );
 
   return (
     <div className="flex flex-col gap-5">

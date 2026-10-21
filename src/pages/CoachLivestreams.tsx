@@ -144,21 +144,6 @@ function Thumbnail({ item }: { item: EventItem }) {
   );
 }
 
-function PriceTag({ pricing }: { pricing: Pricing }) {
-  if (pricing.kind === "free") {
-    return (
-      <span className="shrink-0 rounded-full bg-[#E8F0EC] px-2.5 py-0.5 text-[12px] font-semibold text-[#1F5340]">
-        Free
-      </span>
-    );
-  }
-  return (
-    <span className="shrink-0 rounded-full bg-[#FBEFC9] px-2.5 py-0.5 text-[12px] font-semibold text-[#7A5E00]">
-      {pricing.price}
-    </span>
-  );
-}
-
 function HostAvatar({ src, name }: { src: string; name: string }) {
   return (
     <span className="group/avatar relative inline-flex">
@@ -273,10 +258,7 @@ function EventRow({ item, past = false }: { item: EventItem; past?: boolean }) {
       <div className="flex min-w-0 flex-1 items-center gap-4">
         <Thumbnail item={item} />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="truncate text-[15px] font-semibold text-gray-dark">{item.title}</h3>
-            <PriceTag pricing={item.pricing} />
-          </div>
+          <h3 className="truncate text-[15px] font-semibold text-gray-dark">{item.title}</h3>
           <p className="mt-0.5 truncate text-[14px] text-gray-light">
             {item.date} · {item.startTime} · {item.duration}
           </p>
@@ -315,7 +297,7 @@ export default function CoachLivestreams() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="font-serif text-[30px] font-medium leading-[1.1] text-gray-dark md:text-[38px]">
-            My Livestreams
+            My Free Livestreams
           </h1>
           <p className="mt-2 text-[15px] text-gray-light">
             Coaches who host regular livestreams earn 7x more than coaches who don't.
