@@ -13,6 +13,11 @@ import lteSignalIcon from "../assets/icons/lte-signal.svg";
 import usersGroupIcon from "../assets/icons/users-group.svg";
 import aiIcon from "../assets/icons/ai.svg";
 import moneyIcon from "../assets/icons/money.svg";
+import repostIcon from "../assets/icons/repost-2.svg";
+import writeIcon from "../assets/icons/write.svg";
+import orderHistoryIcon from "../assets/icons/order-history.svg";
+import chatInactiveBoldIcon from "../assets/icons/chat-inactive-bold.svg";
+import liveCoursesIcon from "../assets/icons/live-courses.svg";
 import browseIcon from "../assets/icons/nav-icons/browse-inactive.svg";
 import storeIcon from "../assets/icons/store.svg";
 import freeIcon from "../assets/icons/free.svg";
@@ -284,7 +289,6 @@ const isConfigurable = (slug: string) => slug in configDefaults;
 
 // Subheadline shown under the modal title for each configurable type.
 const configPrompts: Record<string, string> = {
-  "coaching-time": "How much time do you want to include?",
   content: "Upload your file and add the details.",
   "paid-livestream": "Schedule and set up your livestream.",
   workshop: "Schedule your workshop and set a price.",
@@ -374,18 +378,23 @@ const LIVESTREAM_DURATIONS = [
 ];
 
 // How coaching time is delivered. Async carries an explanatory tooltip.
-const deliveryFormats: { value: string; label: string; info?: string }[] = [
-  { value: "live", label: "Live Sessions" },
-  { value: "async", label: "Asynchronous Coaching", info: "Asynchronous coaching is done offline, rather than in live sessions. It can be great for editing, document feedback, or any work that doesn't require live collaboration." },
-  { value: "mix", label: "Mix of Live and Asynchronous" },
+const deliveryFormats: { value: string; label: string; cardTitle: string; sub: string; icon: string; info?: string }[] = [
+  { value: "live", label: "Live Sessions", cardTitle: "Live", sub: "Real-time sessions", icon: lteSignalIcon },
+  { value: "async", label: "Asynchronous Coaching", cardTitle: "Asynchronous", sub: "Offline feedback", icon: chatInactiveBoldIcon, info: "Asynchronous coaching is done offline, rather than in live sessions. It can be great for editing, document feedback, or any work that doesn't require live collaboration." },
+  { value: "mix", label: "Mix of Live and Asynchronous", cardTitle: "Mix of both", sub: "Live + async", icon: liveCoursesIcon },
 ];
 const deliveryLabel = (v: string) => deliveryFormats.find((d) => d.value === v)?.label;
 
 // Whether a configurable offering has enough filled in to be saved as finished.
-function isConfigComplete(item: OfferingItem): boolean {
+function isConfigComplete(item: OfferingItem, v2 = false): boolean {
   const c = item.config;
   if (item.slug === "coaching-time") {
-    return c.mode === "range" ? Boolean(c.minHours && c.maxHours && c.price) : Boolean(c.hours || c.minutes);
+    if (c.mode === "range") return Boolean(c.minHours && c.maxHours && c.price);
+    const timeOk = Boolean(c.hours || c.minutes);
+    // v2 set mode also requires a pricing choice — synced, or custom with a price.
+    if (!v2) return timeOk;
+    const pricingOk = c.priceMode === "sync" || (c.priceMode === "custom" && Number(c.customPrice || 0) > 0);
+    return timeOk && pricingOk;
   }
   if (item.slug === "content") {
     return c.source === "reuse" ? Boolean(c.libraryId) : Boolean(c.assetName && c.title);
@@ -542,7 +551,7 @@ function CheckBox({ checked, onChange, label }: { checked: boolean; onChange: ()
 
 // Custom select — a trigger with a chevron and a menu that opens below. Options
 // may carry an `info` string, shown as a hoverable "i" tooltip in the menu.
-function Select({ value, onChange, options, placeholder, className = "", triggerClassName = "py-2.5 pl-3.5 pr-3 text-[14px]" }: { value: string; onChange: (v: string) => void; options: { value: string; label: string; info?: string }[]; placeholder?: string; className?: string; triggerClassName?: string }) {
+function Select({ value, onChange, options, placeholder, className = "", triggerClassName = "py-2.5 pl-3.5 pr-3 text-[14px]" }: { value: string; onChange: (v: string) => void; options: { value: string; label: string; info?: string; sub?: string }[]; placeholder?: string; className?: string; triggerClassName?: string }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   // Menu is portaled to the body so it isn't clipped by any overflow-hidden
@@ -584,10 +593,13 @@ function Select({ value, onChange, options, placeholder, className = "", trigger
                   key={o.value}
                   type="button"
                   onClick={() => { onChange(o.value); setOpen(false); }}
-                  className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-[14px] transition-colors hover:bg-gray-hover ${active ? "font-semibold text-gray-dark" : "font-medium text-gray-dark"}`}
+                  className={`flex w-full items-start justify-between gap-3 rounded-lg px-3 py-2 text-left text-[14px] transition-colors hover:bg-gray-hover ${active ? "font-semibold text-gray-dark" : "font-medium text-gray-dark"}`}
                 >
-                  <span className="truncate">{o.label}</span>
-                  <span className="flex shrink-0 items-center gap-2">
+                  <span className="min-w-0">
+                    <span className="block truncate">{o.label}</span>
+                    {o.sub && <span className="mt-0.5 block truncate text-[13px] font-normal text-gray-light">{o.sub}</span>}
+                  </span>
+                  <span className="flex shrink-0 items-center gap-2 pt-0.5">
                     {o.info && (
                       <span className="group/info relative flex" onClick={(e) => e.stopPropagation()}>
                         <svg className="h-4 w-4 text-gray-light transition-colors hover:text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
@@ -1276,6 +1288,10 @@ function AddPricingOptionButton({ onClick }: { onClick: () => void }) {
 // basis for price suggestions on any hourly coaching time in the offering.
 const EXPERT_HOURLY_RATE = 150;
 
+// The expert's global bulk discount (set on their profile, mocked here), applied
+// to hourly coaching time when the expert opts in.
+const BULK_DISCOUNT = 0.1;
+
 // Hours represented by a configured coaching-time product. Range mode uses the
 // midpoint; set mode adds hours + minutes.
 function coachingHours(item: OfferingItem): number {
@@ -1290,9 +1306,11 @@ function coachingHours(item: OfferingItem): number {
 // product carries a manual price in its config. Non-priceable placeholder
 // products contribute nothing.
 function productListPrice(item: OfferingItem): number {
-  // Range-mode coaching is priced manually; set mode is auto-priced from hours.
+  // Range-mode coaching is priced manually; set mode is auto-priced from hours,
+  // unless the coach opted into a custom price for it.
   if (item.slug === "coaching-time") {
     if (item.config.mode === "range") return Number(item.config.price || 0);
+    if (item.config.priceMode === "custom") return Number(item.config.customPrice || 0);
     return Math.round(coachingHours(item) * EXPERT_HOURLY_RATE);
   }
   if (!isPriceable(item.slug)) return 0;
@@ -2685,13 +2703,14 @@ function AddedOfferingRow({ item, onRemove, onConfigure, onToggleFree, isLast = 
   );
   if (finished && item.slug === "coaching-time") {
     const isRange = item.config.mode === "range";
+    const isCustom = !isRange && item.config.priceMode === "custom";
     headline = isRange
       ? `${Number(item.config.minHours || 0)}h–${Number(item.config.maxHours || 0)}h of coaching`
       : `${compactHours(coachingHours(item))} of coaching`;
     const delivery = deliveryLabel(item.config.delivery ?? "");
     detail = (
       <span className="truncate">
-        {isRange ? `$${formatMoney(Number(item.config.price || 0))}` : `$${EXPERT_HOURLY_RATE.toLocaleString()}/hr`}
+        {isRange ? `$${formatMoney(Number(item.config.price || 0))}` : isCustom ? "Custom price" : `$${EXPERT_HOURLY_RATE.toLocaleString()}/hr`}
         {delivery && <span className="text-gray-extra-light"> · {delivery}</span>}
       </span>
     );
@@ -2817,8 +2836,9 @@ function ConfirmModal({ open, title, body, confirmLabel, onConfirm, onClose }: {
 }
 
 export function ConfigModal({ item, lockedCoachingMode = null, uploadOnly = false, saveLabel = "Save product", onChange, onSave, onClose }: { item: OfferingItem | null; lockedCoachingMode?: "set" | "range" | null; uploadOnly?: boolean; saveLabel?: string; onChange: (patch: Record<string, string>) => void; onSave: () => void; onClose: () => void }) {
+  const v2 = useV2();
   const o = item ? offeringBySlug[item.slug] : null;
-  const complete = item ? isConfigComplete(item) : false;
+  const complete = item ? isConfigComplete(item, v2) : false;
   const prompt = item ? configPrompts[item.slug] : undefined;
   // Content's two-column editor uses a wider layout — so the modal grows to
   // accommodate it. It's reached only once an asset is uploaded; the upload
@@ -2856,7 +2876,7 @@ export function ConfigModal({ item, lockedCoachingMode = null, uploadOnly = fals
             transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1], layout: { duration: 0.42, ease: [0, 0, 0.2, 1] } }}
             onClick={(e) => e.stopPropagation()}
             style={{ borderRadius: 24 }}
-            className={`relative flex w-full flex-col overflow-hidden bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)] ${wide ? "max-w-[1180px]" : "max-w-[600px]"} ${item?.slug === "content" && !wide ? "h-[85vh]" : "max-h-[85vh]"}`}
+            className={`relative flex w-full flex-col overflow-hidden bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)] ${wide ? "max-w-[1180px]" : "max-w-[600px]"} ${item?.slug === "content" && !wide ? "h-[85vh]" : item?.slug === "coaching-time" ? "h-[850px] max-h-[calc(100vh-2rem)]" : "max-h-[85vh]"}`}
           >
             {/* Close — circular gray, top-right. Fades out once the library is
                 scrolled so it doesn't collide with the sticky search bar. */}
@@ -2867,7 +2887,7 @@ export function ConfigModal({ item, lockedCoachingMode = null, uploadOnly = fals
             {/* Scrollable content. pt lives on the inner wrappers (not here) so the
                 library's sticky search can pin flush to the top. The upload prompt
                 has no footer, so it gets a matching bottom padding. */}
-            <div onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)} className={`flex-1 overflow-y-auto px-7 ${uploadPrompt ? "pb-7" : "pb-1"}`}>
+            <div onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)} className={`flex-1 overflow-y-auto px-7 ${uploadPrompt ? "pb-7" : item.slug === "coaching-time" ? "pb-28" : "pb-1"}`}>
               {/* Header — for content, each view (library / upload) renders its
                   own header inside ContentFields so it animates with that view's
                   content rather than morphing across the modal resize. */}
@@ -2884,9 +2904,24 @@ export function ConfigModal({ item, lockedCoachingMode = null, uploadOnly = fals
               </div>
             </div>
 
+            {/* Soft white fade so content dissolves under the floating Save
+                button rather than ending in a hard edge. */}
+            {!uploadPrompt && item.slug === "coaching-time" && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-28 bg-gradient-to-t from-white via-white/85 to-transparent" />
+            )}
+
             {/* Actions — hidden on the upload prompt, which has nothing to save.
-                The editor shows Back (far left) and Save (far right), equal size. */}
+                Coaching time floats its Save button over the scrolling content so
+                nothing is cut off by an opaque footer. The editor shows Back (far
+                left) and Save (far right), equal size. */}
             {!uploadPrompt && (
+              item.slug === "coaching-time" ? (
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-7 pb-7">
+                  <Button size="lg" variant="primary" rounded="rounded-full" className="pointer-events-auto w-full !py-[18px] font-semibold shadow-[0_6px_16px_rgba(16,24,40,0.10)]" disabled={!complete} onClick={onSave}>
+                    {saveLabel}
+                  </Button>
+                </div>
+              ) : (
               <div className="flex items-center justify-between gap-3 px-7 pb-7 pt-1">
                 {wide && (
                   <Button size="lg" variant="secondary" rounded="rounded-full" onClick={() => setBackSignal((n) => n + 1)}>
@@ -2898,6 +2933,7 @@ export function ConfigModal({ item, lockedCoachingMode = null, uploadOnly = fals
                   {saveLabel}
                 </Button>
               </div>
+              )
             )}
           </motion.div>
         </motion.div>
@@ -3640,14 +3676,16 @@ function PriceField({ value, onChange }: { value: string; onChange: (v: string) 
 }
 
 // A leading checkbox with a label + description — the standard settings row.
-function ToggleRow({ label, desc, checked, onChange, className = "" }: { label: string; desc?: string; checked: boolean; onChange: () => void; className?: string }) {
+// `muted` renders the label in the same light gray/weight as a description, for
+// rows that read as a quiet inline note rather than a heading.
+function ToggleRow({ label, desc, muted = false, checked, onChange, className = "" }: { label: string; desc?: string; muted?: boolean; checked: boolean; onChange: () => void; className?: string }) {
   return (
     <button type="button" onClick={onChange} className={`flex w-full items-start gap-3 text-left ${className}`}>
       <span className={`mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] border transition-colors ${checked ? "border-gray-dark bg-gray-dark" : "border-gray-stroke bg-white"}`}>
         {checked && <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
       </span>
       <span className="min-w-0">
-        <span className="block text-[14px] font-semibold text-gray-dark">{label}</span>
+        <span className={`block text-[14px] ${muted ? "font-normal text-gray-light" : "font-semibold text-gray-dark"}`}>{label}</span>
         {desc && <span className="mt-0.5 block text-[14px] leading-snug text-gray-light">{desc}</span>}
       </span>
     </button>
@@ -4264,15 +4302,17 @@ function TimeField({ value, onChange, label }: { value: string; onChange: (v: st
 
 function CoachingTimeFields({ config, onChange, lockedMode = null }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedMode?: "set" | "range" | null }) {
   const v2 = useV2();
+  // The form reveals one section at a time: each unlocks once the one before it
+  // has been answered. Both toggles start with nothing selected.
   // When another coaching-time in the offering already fixed the mode, this one
   // is locked to match it — keep the stored mode in sync and disable the toggle.
-  const mode = lockedMode ?? (config.mode === "range" ? "range" : "set");
+  const mode: "set" | "range" | null = lockedMode ?? (config.mode === "range" ? "range" : config.mode === "set" ? "set" : null);
   useEffect(() => {
     if (lockedMode && config.mode !== lockedMode) onChange({ mode: lockedMode });
   }, [lockedMode, config.mode, onChange]);
   const modes = [
-    { value: "set", label: "Set amount of hours" },
-    { value: "range", label: "Range of hours" },
+    { value: "set", label: "Set amount of hours", sub: "Log time to reduce the balance", icon: hourglassIcon },
+    { value: "range", label: "Range of hours", sub: "No time logging required", icon: orderHistoryIcon },
   ];
   // v2: coaching time is auto-priced from hours × the expert's hourly rate.
   const hrs = mode === "range"
@@ -4280,73 +4320,110 @@ function CoachingTimeFields({ config, onChange, lockedMode = null }: { config: R
     : Number(config.hours || 0) + Number(config.minutes || 0) / 60;
   const autoPrice = Math.round(hrs * EXPERT_HOURLY_RATE);
 
+  // Pricing is synced to the expert's hourly rate or a manually entered custom
+  // price — nothing selected until the coach picks one. The bulk-discount
+  // opt-in only exists while syncing.
+  const priceMode: "sync" | "custom" | null = config.priceMode === "custom" ? "custom" : config.priceMode === "sync" ? "sync" : null;
+  const applyDiscount = config.applyDiscount === "true";
+  const discountAmount = Math.round(autoPrice * BULK_DISCOUNT);
+  // The synced price reflects the bulk discount once the coach opts in.
+  const syncedPrice = applyDiscount ? autoPrice - discountAmount : autoPrice;
+
+  // Step gates — each later section unlocks once the prior answer exists.
+  const timeEntered = mode === "set" && hrs > 0;
+  const rangeEntered = mode === "range" && Number(config.minHours || 0) > 0 && Number(config.maxHours || 0) > 0;
+  const rangePriceEntered = rangeEntered && Number(config.price || 0) > 0;
+  // Delivery format is the final section, shown once pricing has been resolved.
+  const showDelivery = mode === "set"
+    ? (v2 ? timeEntered && priceMode !== null : timeEntered)
+    : rangePriceEntered;
+
+  // Every section opens with the same header treatment so the form reads as one
+  // consistent sequence of choices.
+  const sectionHeader = "mb-2.5 block text-[15px] font-semibold text-gray-dark";
+
+  // Each section slides up + fades as it's revealed. `initial={false}` on the
+  // surrounding AnimatePresence keeps already-answered sections from animating
+  // when the modal first opens (e.g. editing a saved product) — only sections
+  // that appear in response to a selection play the entrance.
+  const sectionAnim = {
+    initial: { opacity: 0, y: -10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: 6 },
+    transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] as const },
+  };
+
   return (
     <div>
-      <div className="grid grid-cols-2 gap-3">
-        {modes.map((opt) => {
-          const active = mode === opt.value;
-          const disabled = Boolean(lockedMode) && opt.value !== lockedMode;
-          return (
-            <div key={opt.value} className="group relative">
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={() => { if (!disabled) onChange({ mode: opt.value }); }}
-                className={`flex w-full items-center justify-between gap-2 rounded-xl border-[1.5px] bg-white px-4 py-3.5 text-left transition-colors ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"} ${disabled ? "pointer-events-none cursor-not-allowed opacity-40" : ""}`}
-              >
-                <span className="text-[15px] font-semibold text-gray-dark">{opt.label}</span>
-                <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-[1.5px] ${active ? "border-gray-dark" : "border-[#CFCFCF]"}`}>
-                  {active && <span className="h-2.5 w-2.5 rounded-full bg-gray-dark" />}
-                </span>
-              </button>
-              {disabled && (
-                <span role="tooltip" className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-max max-w-[220px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
-                  All coaching time in an offering must use the same format.
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <p className="mb-3 mt-5 text-[13px] font-semibold uppercase tracking-[0.1em] text-gray-extra-light">
-        {mode === "set" ? "Enter an amount of time" : "Enter a range of time"}
-      </p>
-      {mode === "set" ? (
-        <div className="grid grid-cols-2 gap-4">
-          <TimeField value={config.hours ?? ""} onChange={(v) => onChange({ hours: v })} label="hours" />
-          <TimeField value={config.minutes ?? ""} onChange={(v) => onChange({ minutes: v })} label="minutes" />
+      <motion.div className="mt-3" initial={sectionAnim.initial} animate={sectionAnim.animate} transition={sectionAnim.transition}>
+        <h3 className={sectionHeader}>Choose a time format</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {modes.map((opt) => {
+            const active = mode === opt.value;
+            const disabled = Boolean(lockedMode) && opt.value !== lockedMode;
+            return (
+              <div key={opt.value} className="group relative">
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => { if (!disabled) onChange({ mode: opt.value }); }}
+                  className={`flex w-full flex-col items-center gap-2 rounded-xl border-[1.5px] bg-white px-4 py-5 text-center transition-colors ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"} ${disabled ? "pointer-events-none cursor-not-allowed opacity-40" : ""}`}
+                >
+                  <MaskIcon src={opt.icon} className="h-[26px] w-[26px] text-gray-dark" />
+                  <span className="flex flex-col gap-0.5">
+                    <span className="text-[15px] font-semibold text-gray-dark">{opt.label}</span>
+                    <span className="text-[14px] leading-snug text-gray-light">{opt.sub}</span>
+                  </span>
+                </button>
+                {disabled && (
+                  <span role="tooltip" className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-max max-w-[220px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
+                    All coaching time in an offering must use the same format.
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
-      ) : (
-        <div className="flex items-center gap-3">
-          <TimeField value={config.minHours ?? ""} onChange={(v) => onChange({ minHours: v })} label="min hours" />
-          <span className="shrink-0 text-[24px] font-medium text-gray-light" aria-hidden="true">–</span>
-          <TimeField value={config.maxHours ?? ""} onChange={(v) => onChange({ maxHours: v })} label="max hours" />
-        </div>
-      )}
+      </motion.div>
 
-      {/* Delivery format — how the coaching time is delivered. */}
-      <div className="mt-5">
-        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Delivery Format</label>
-        <Select
-          value={config.delivery ?? ""}
-          onChange={(v) => onChange({ delivery: v })}
-          options={deliveryFormats}
-          placeholder="Select an option"
-          triggerClassName="py-3 pl-4 pr-3 text-[15px]"
-        />
-      </div>
+      {/* Amount of time — revealed once a time format is chosen; re-animates when
+          switching between set and range. */}
+      <AnimatePresence initial={false} mode="wait">
+        {mode && (
+          <motion.div key={mode} {...sectionAnim}>
+            <h3 className={`${sectionHeader} mt-6`}>
+              {mode === "set" ? "Amount of time" : "Range of time"}
+            </h3>
+            {mode === "set" ? (
+              <div className="grid grid-cols-2 gap-4">
+                <TimeField value={config.hours ?? ""} onChange={(v) => onChange({ hours: v })} label="hours" />
+                <TimeField value={config.minutes ?? ""} onChange={(v) => onChange({ minutes: v })} label="minutes" />
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <TimeField value={config.minHours ?? ""} onChange={(v) => onChange({ minHours: v })} label="min hours" />
+                <span className="shrink-0 text-[24px] font-medium text-gray-light" aria-hidden="true">–</span>
+                <TimeField value={config.maxHours ?? ""} onChange={(v) => onChange({ maxHours: v })} label="max hours" />
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Range mode isn't auto-priced — collect a manual price and a scope of
-          work describing what the coaching covers. */}
-      {mode === "range" && (
-        <>
-          <div className="mt-5">
-            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Price</label>
+      {/* Range mode isn't auto-priced — once a range is entered, collect a manual
+          price, then the scope of work it covers. */}
+      <AnimatePresence initial={false}>
+        {rangeEntered && (
+          <motion.div key="range-price" {...sectionAnim} className="mt-6">
+            <label className={sectionHeader}>Price</label>
             <PriceField value={config.price ?? ""} onChange={(v) => onChange({ price: v })} />
-          </div>
-          <div className="mt-5">
-            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">What you'll work on</label>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence initial={false}>
+        {rangePriceEntered && (
+          <motion.div key="work-on" {...sectionAnim} className="mt-6">
+            <label className={sectionHeader}>What you'll work on</label>
             <textarea
               value={config.workOn ?? ""}
               onChange={(e) => onChange({ workOn: e.target.value })}
@@ -4355,22 +4432,84 @@ function CoachingTimeFields({ config, onChange, lockedMode = null }: { config: R
               autoComplete="off"
               className={`${configInputClass} resize-none`}
             />
-          </div>
-        </>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Set mode is auto-priced from the expert's hourly rate. */}
-      {v2 && mode === "set" && (
-        <div className="mt-5 flex items-center justify-between gap-3 rounded-xl bg-gray-hover px-4 py-3.5">
-          <span className="flex min-w-0 items-center gap-2.5">
-            <MaskIcon src={moneyIcon} className="h-[18px] w-[18px] shrink-0 text-gray-light" />
-            <span className="text-[14px] leading-snug text-gray-light">
-              {hrs > 0 ? `${formatHours(hrs)} × your $${EXPERT_HOURLY_RATE.toLocaleString()}/hr rate` : "Set the time to price this automatically"}
-            </span>
-          </span>
-          <span className="shrink-0 text-[16px] font-semibold text-gray-dark">${formatMoney(autoPrice)}</span>
-        </div>
-      )}
+      {/* Pricing — revealed once an amount of time is entered. Price by syncing
+          to the expert's hourly rate or by entering a custom price. */}
+      <AnimatePresence initial={false}>
+        {v2 && timeEntered && (
+          <motion.div key="pricing" {...sectionAnim} className="mt-6">
+            <h3 className={sectionHeader}>Pricing</h3>
+            {/* Pricing-mode toggle — same card treatment as the time format toggle:
+                icon on top, label + subtext, selection shown by the border alone. */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { value: "sync", label: "Sync to my hourly rate", sub: `$${formatMoney(syncedPrice)} · $${EXPERT_HOURLY_RATE.toLocaleString()}/hr`, icon: repostIcon },
+                { value: "custom", label: "Set a custom price", sub: "Will not sync to your rate", icon: writeIcon },
+              ].map((opt) => {
+                const active = priceMode === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => onChange({ priceMode: opt.value })}
+                    className={`flex w-full flex-col items-center gap-2 rounded-xl border-[1.5px] bg-white px-4 py-5 text-center transition-colors ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
+                  >
+                    <MaskIcon src={opt.icon} className="h-[26px] w-[26px] text-gray-dark" />
+                    <span className="flex flex-col gap-0.5">
+                      <span className="text-[15px] font-semibold text-gray-dark">{opt.label}</span>
+                      <span className="text-[14px] leading-snug text-gray-light">{opt.sub}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* The sync/custom detail swaps in place as the pricing mode changes. */}
+            <AnimatePresence initial={false} mode="wait">
+              {/* Synced: the price basis is already shown on the toggle, so just the
+                  bulk-discount opt-in appears here. */}
+              {priceMode === "sync" && (
+                <motion.div key="sync" {...sectionAnim}>
+                  <ToggleRow
+                    className="mt-3.5"
+                    muted
+                    label={`Apply bulk discounts · $${formatMoney(autoPrice)} → $${formatMoney(autoPrice - discountAmount)} (−$${formatMoney(discountAmount)})`}
+                    checked={applyDiscount}
+                    onChange={() => onChange({ applyDiscount: applyDiscount ? "false" : "true" })}
+                  />
+                </motion.div>
+              )}
+
+              {/* Custom: enter the price directly. */}
+              {priceMode === "custom" && (
+                <motion.div key="custom" {...sectionAnim} className="mt-5">
+                  <label className={sectionHeader}>Set a custom price</label>
+                  <PriceField value={config.customPrice ?? ""} onChange={(v) => onChange({ customPrice: v })} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delivery format — the final section, shown once pricing is resolved. */}
+      <AnimatePresence initial={false}>
+        {showDelivery && (
+          <motion.div key="delivery" {...sectionAnim} className="mt-6">
+            <h3 className={sectionHeader}>How will this time be delivered?</h3>
+            <Select
+              value={config.delivery ?? ""}
+              onChange={(v) => onChange({ delivery: v })}
+              options={deliveryFormats}
+              placeholder="Select an option"
+              triggerClassName="py-3 pl-4 pr-3 text-[15px]"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
