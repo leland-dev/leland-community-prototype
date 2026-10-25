@@ -28,24 +28,22 @@ export enum ButtonWidth {
 
 export enum ButtonColor {
   PRIMARY = 'PRIMARY',
-  WHITE = 'WHITE',
-  GRAY = 'GRAY',
-  RED = 'RED',
-  PURPLE = 'PURPLE',
-  LIGHT_BLUE = 'LIGHT_BLUE',
-  BLUE = 'BLUE',
-  ORANGE = 'ORANGE',
   BLACK = 'BLACK',
   TRANSPARENT = 'TRANSPARENT',
   REVEAL = 'REVEAL',
-  REVEAL_PRIMARY = 'REVEAL_PRIMARY',
   REVEAL_WHITE = 'REVEAL_WHITE',
-  LIGHT_RED = 'LIGHT_RED',
+  // WONK-18 consolidated variants. Additive — old variants stay functional until
+  // their consumers migrate. PRIMARY is restyled green -> yellow in the final
+  // visual-switch step; these inherit the palette flip via var-backed tokens.
   SECONDARY = 'SECONDARY',
   SECONDARY_NEUTRAL = 'SECONDARY_NEUTRAL',
+  SECONDARY_NEUTRAL_SOLID = 'SECONDARY_NEUTRAL_SOLID',
   TERTIARY = 'TERTIARY',
   DESTRUCTIVE = 'DESTRUCTIVE',
+  DESTRUCTIVE_REVEAL = 'DESTRUCTIVE_REVEAL',
+  DESTRUCTIVE_ON_HOVER = 'DESTRUCTIVE_ON_HOVER',
   OVERLAY = 'OVERLAY',
+  /** Action sitting on media — a solid white pill that lifts off the image. */
   OVERLAY_WHITE = 'OVERLAY_WHITE',
   OVERLAY_DESTRUCTIVE = 'OVERLAY_DESTRUCTIVE',
 }
@@ -131,36 +129,8 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
   {
     [ButtonColor.PRIMARY]: (selected) =>
       selected
-        ? 'text-leland-primary bg-white border-leland-primary shadow-leland-primary'
+        ? 'text-leland-on-primary-text bg-leland-primary border-leland-gray-dark shadow-leland-gray-dark'
         : 'text-leland-on-primary-text bg-leland-primary border-leland-primary disabled:bg-leland-primary hover:bg-leland-primary-hover hover:border-leland-primary-hover shadow-transparent',
-    [ButtonColor.WHITE]: (selected) =>
-      selected
-        ? 'text-leland-gray-dark bg-white border-leland-gray-dark shadow-leland-gray-dark'
-        : 'text-leland-gray-dark bg-white disabled:bg-white border-leland-gray-stroke hover:bg-leland-gray-hover shadow-transparent',
-    [ButtonColor.GRAY]: (selected) =>
-      selected
-        ? 'text-leland-gray-dark bg-white border-leland-gray-dark shadow-leland-gray-dark'
-        : 'text-leland-gray-dark bg-leland-gray-hover disabled:bg-leland-gray-hover border-transparent hover:bg-leland-gray-stroke hover:border-transparent',
-    [ButtonColor.RED]: (selected) =>
-      selected
-        ? 'text-leland-red bg-white border-leland-red shadow-leland-red'
-        : 'text-white bg-leland-red disabled:bg-leland-red border-leland-red hover:bg-leland-red-hover hover:border-leland-red-hover shadow-transparent',
-    [ButtonColor.PURPLE]: (selected) =>
-      selected
-        ? 'text-leland-purple bg-white border-leland-purple shadow-leland-purple'
-        : 'text-white bg-leland-purple disabled:bg-leland-purple border-leland-purple hover:bg-leland-purple-hover hover:border-leland-purple-hover shadow-transparent',
-    [ButtonColor.LIGHT_BLUE]: (selected) =>
-      selected
-        ? 'text-leland-blue-dark bg-white border-leland-blue-dark shadow-leland-blue-dark'
-        : 'text-leland-blue-dark bg-leland-blue-light disabled:bg-leland-blue-light border-leland-blue-light hover:bg-leland-blue-light-hover hover:border-leland-blue-light-hover shadow-transparent',
-    [ButtonColor.BLUE]: (selected) =>
-      selected
-        ? 'text-leland-blue-dark bg-white border-leland-blue-dark shadow-leland-blue-dark'
-        : 'text-leland-white bg-leland-blue-dark disabled:bg-leland-blue-dark border-leland-blue-dark hover:bg-leland-blue-hover hover:border-leland-blue-hover shadow-transparent',
-    [ButtonColor.ORANGE]: (selected) =>
-      selected
-        ? 'text-leland-orange bg-white border-leland-orange shadow-leland-orange'
-        : 'text-leland-white bg-leland-orange disabled:bg-leland-orange border-leland-orange hover:bg-leland-orange-dark hover:border-leland-orange-dark shadow-transparent',
     [ButtonColor.BLACK]: (selected) =>
       selected
         ? 'text-leland-black bg-white border-leland-black shadow-leland-black'
@@ -173,18 +143,10 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
       selected
         ? 'text-leland-gray-dark bg-transparent border-transparent shadow-transparent'
         : 'text-leland-gray-dark bg-transparent disabled:text-leland-gray-light disabled:bg-transparent hover:bg-leland-gray-hover border-transparent shadow-transparent',
-    [ButtonColor.REVEAL_PRIMARY]: (selected) =>
-      selected
-        ? 'text-leland-primary bg-transparent border-transparent shadow-transparent'
-        : 'text-leland-primary bg-transparent disabled:text-leland-gray-light disabled:bg-transparent border-transparent shadow-transparent',
     [ButtonColor.REVEAL_WHITE]: (selected) =>
       selected
         ? 'text-leland-white bg-leland-white/10 border-transparent shadow-transparent'
         : 'text-leland-white bg-transparent disabled:text-leland-white/50 disabled:bg-transparent hover:bg-leland-white/10 border-transparent shadow-transparent',
-    [ButtonColor.LIGHT_RED]: (selected) =>
-      selected
-        ? 'text-leland-red bg-leland-red-light border-transparent shadow-transparent'
-        : 'text-leland-red bg-leland-red-light disabled:text-leland-gray-light disabled:bg-transparent hover:bg-leland-red-light-hover border-transparent shadow-transparent',
     [ButtonColor.SECONDARY]: (selected) =>
       selected
         ? 'text-leland-gray-dark bg-white border-leland-gray-dark shadow-leland-gray-dark'
@@ -192,8 +154,14 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
     [ButtonColor.SECONDARY_NEUTRAL]: (selected) =>
       selected
         ? 'text-leland-gray-dark bg-leland-gray-hover border-leland-gray-dark shadow-border shadow-leland-gray-dark'
-        : 'text-leland-gray-dark bg-leland-gray-hover disabled:bg-leland-gray-hover border-transparent hover:bg-leland-gray-stroke hover:border-transparent',
-    // TERTIARY reads as an inline text link (dotted underline) — no hover box.
+        : 'text-leland-gray-dark bg-leland-gray-hover disabled:bg-leland-gray-hover border-transparent hover:bg-leland-gray-dark/10 hover:border-transparent',
+    [ButtonColor.SECONDARY_NEUTRAL_SOLID]: (selected) =>
+      selected
+        ? 'text-leland-gray-dark bg-leland-gray-solid-hover border-leland-gray-dark shadow-border shadow-leland-gray-dark'
+        : 'text-leland-gray-dark bg-leland-gray-solid-hover disabled:bg-leland-gray-solid-hover border-transparent hover:bg-leland-gray-stroke hover:border-transparent',
+    // Unlike REVEAL, TERTIARY reads as an inline text link (dotted underline),
+    // so it intentionally has no hover background — a highlight box would make
+    // it look like a full button.
     [ButtonColor.TERTIARY]: (selected) =>
       selected
         ? 'text-leland-gray-dark bg-transparent border-transparent shadow-transparent underline decoration-dotted decoration-[1.5px] underline-offset-4'
@@ -202,6 +170,14 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
       selected
         ? 'text-leland-red bg-white border-leland-red shadow-leland-red'
         : 'text-white bg-leland-red disabled:bg-leland-red border-leland-red hover:bg-leland-red-hover hover:border-leland-red-hover shadow-transparent',
+    [ButtonColor.DESTRUCTIVE_REVEAL]: (selected) =>
+      selected
+        ? 'text-leland-red bg-transparent border-transparent shadow-transparent'
+        : 'text-leland-red bg-transparent disabled:text-leland-gray-light disabled:bg-transparent hover:bg-leland-gray-hover border-transparent shadow-transparent',
+    [ButtonColor.DESTRUCTIVE_ON_HOVER]: (selected) =>
+      selected
+        ? 'text-leland-red bg-leland-gray-hover border-transparent shadow-transparent'
+        : 'text-leland-gray-dark bg-transparent disabled:text-leland-gray-light disabled:bg-transparent hover:text-leland-red hover:bg-leland-gray-hover border-transparent shadow-transparent',
     [ButtonColor.OVERLAY]: (selected) =>
       selected
         ? 'text-leland-white bg-leland-black/80 border-transparent shadow-transparent backdrop-blur-md'
@@ -304,8 +280,10 @@ const ButtonRoundedSideToStyles: Record<
 };
 
 const BORDERLESS_COLORS = new Set([
-  ButtonColor.GRAY,
   ButtonColor.SECONDARY_NEUTRAL,
+  ButtonColor.SECONDARY_NEUTRAL_SOLID,
+  // These carry their own drop shadow, which the shadow-border ring would
+  // overwrite (both set --tw-shadow).
   ButtonColor.OVERLAY_WHITE,
   ButtonColor.OVERLAY_DESTRUCTIVE,
 ]);
@@ -337,7 +315,9 @@ export const getButtonStyles = ({
 }: ButtonStyleProps): string =>
   `sm:whitespace-nowrap items-center justify-center border ${BORDERLESS_COLORS.has(buttonColor) ? '' : 'shadow-border'} ${ButtonColorToStyles[
     buttonColor
-  ](selected)} ${ButtonSizeToStyles[size]} ${getButtonPadding({ size, hasLeftIcon, hasRightIcon, isIconOnly })} ${ButtonWidthToStyles[width]} ${
+  ](
+    selected,
+  )} ${ButtonSizeToStyles[size]} ${getButtonPadding({ size, hasLeftIcon, hasRightIcon, isIconOnly })} ${ButtonWidthToStyles[width]} ${
     FontWeightToStyles[fontWeight]
   } ${ButtonRoundedSideToStyles[roundedSide](rounded, selected)}`;
 
@@ -370,7 +350,7 @@ export interface ButtonProps
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
-      buttonColor = ButtonColor.WHITE,
+      buttonColor = ButtonColor.SECONDARY,
       disabled,
       fontWeight = FontWeight.SEMIBOLD,
       label,

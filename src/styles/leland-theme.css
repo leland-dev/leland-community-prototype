@@ -99,9 +99,10 @@
   --color-leland-avatar-6: #2166cb; /* blue */
   --color-leland-avatar-7: #b93561; /* raspberry */
 
-  /* ── Brand fonts (production sans = Macan; condensed = Season) ───────── */
+  /* ── Brand fonts (production sans = Macan; display = Season) ────────── */
   --font-macan: "Macan", ui-sans-serif, system-ui, sans-serif;
   --font-season: "Season", ui-serif, serif;
+  --font-display: "Season", ui-serif, serif;
 
   /* ── Type scale (named sizes; used by the leland-* classes below) ────── */
   --text-heading-sm: 0.75rem;
@@ -112,6 +113,8 @@
   --text-heading-lg--line-height: 120%;
   --text-heading-xl: 1.125rem;
   --text-heading-xl--line-height: 120%;
+  /* Note: "1.5xl" (with a dot) can't be a Tailwind theme key — handled as a
+     direct utility (leland-heading-1.5xl) below, like 2.5xl. */
   --text-heading-2xl: 1.375rem;
   --text-heading-2xl--line-height: 120%;
   /* Note: "2.5xl" (with a dot) can't be a Tailwind theme key — the dot breaks
@@ -172,6 +175,8 @@
   --spacing-50: 50rem;
   --spacing-5_5: 1.375rem;
   --spacing-feed: 37.5rem;
+  --spacing-page: 80rem;
+  --spacing-page-medium: 67.5rem;
 
   /* ── Animations ──────────────────────────────────────────────────────── */
   /* Starts one band-width before the leading edge and ends past the trailing
@@ -225,6 +230,9 @@
 }
 
 @utility outline-1\.5 { outline-width: 1.5px; }
+@utility border-1\.5 { border-width: 1.5px; }
+@utility line-clamp-8 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 8; }
+@utility line-clamp-10 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 10; }
 
 /* ── Production z-index scale (layered surfaces) ───────────────────────── */
 @utility z-navbar { z-index: 1000; }
@@ -247,6 +255,7 @@
 @utility leland-heading-base { @apply text-heading-base font-medium; }
 @utility leland-heading-lg { @apply text-heading-lg font-medium; }
 @utility leland-heading-xl { @apply text-heading-xl font-medium; }
+@utility leland-heading-1\.5xl { font-size: 1.25rem; line-height: 1.2; @apply font-medium; }
 @utility leland-heading-2xl { @apply text-heading-2xl font-medium; }
 @utility leland-heading-2\.5xl { font-size: 1.5rem; line-height: 1.25; @apply font-medium; }
 @utility leland-heading-3xl { @apply text-heading-3xl font-medium; }

@@ -19,7 +19,7 @@ export function JoinCohortFlow({ onComplete, onContinue }: FlowProps) {
         <div className="flex items-center gap-3 pt-2">
           <Button
             label="Skip for now"
-            buttonColor={ButtonColor.GRAY}
+            buttonColor={ButtonColor.SECONDARY_NEUTRAL}
             size={ButtonSize.LARGE}
             onClick={advance}
           />

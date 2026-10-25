@@ -135,7 +135,7 @@ const TextRemindersModalImpl = ({ open, onOpenChange }: ModalProps) => {
                 />
                 <Button
                   label="Skip for now"
-                  buttonColor={ButtonColor.WHITE}
+                  buttonColor={ButtonColor.SECONDARY}
                   size={ButtonSize.LARGE}
                   rounded
                   width={ButtonWidth.FULL}
@@ -200,7 +200,7 @@ const TextRemindersModalImpl = ({ open, onOpenChange }: ModalProps) => {
                 />
                 <Button
                   label="Skip for now"
-                  buttonColor={ButtonColor.WHITE}
+                  buttonColor={ButtonColor.SECONDARY}
                   size={ButtonSize.LARGE}
                   rounded
                   width={ButtonWidth.FULL}

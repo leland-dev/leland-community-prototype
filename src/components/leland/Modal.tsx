@@ -4,7 +4,9 @@
 // Changes from the source: text-lg → 1rem and min-w-100 → 25rem (monorepo
 // scale overrides); z-modal utility comes from styles/leland-theme.css.
 import * as RdxDialog from "@radix-ui/react-dialog";
-import { type FC, type PropsWithChildren, type ReactNode } from "react";
+import { type FC, type PropsWithChildren, type ReactNode, useRef } from "react";
+
+import { firstFormField } from "./first-form-field";
 
 import { Button, ButtonSize } from "./Button";
 import { IconX } from "./svg/icons";
@@ -89,6 +91,7 @@ export interface ModalContentProps {
    * screen reads as having navigated somewhere instead of as a dialog.
    */
   popupOnMobile?: boolean;
+  autoFocusFirstField?: boolean;
   srTitle?: string;
   surface?: ModalSurface;
   /** Extra classes appended to the modal content root — use `md:!min-w-0` and a tighter `sm:!max-w-*` to override default sizing. */
@@ -110,10 +113,22 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
   preventCloseOnOverlayClick,
   preventScroll,
   popupOnMobile,
+  autoFocusFirstField,
   srTitle,
   surface = ModalSurface.DEFAULT,
   className,
 }) => {
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  const handleOpenAutoFocus = (event: Event) => {
+    const field = firstFormField(bodyRef.current);
+    if (field === null) {
+      return;
+    }
+    event.preventDefault();
+    field.focus();
+  };
+
   // The overlay already centres and gutters its child, so a popup only needs to
   // stop filling the viewport; the sm: rules below then take over unchanged.
   const mobilePresentationClasses = popupOnMobile
@@ -129,6 +144,7 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
       onEscapeKeyDown={
         preventCloseOnOverlayClick ? (e) => e.preventDefault() : undefined
       }
+      onOpenAutoFocus={autoFocusFirstField ? handleOpenAutoFocus : undefined}
       // The content isn't required to describe itself; opt out of Radix's
       // missing-`aria-describedby` warning rather than inventing a description.
       aria-describedby={undefined}
@@ -161,6 +177,7 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
         </div>
       )}
       <div
+        ref={bodyRef}
         className={`flex grow flex-col ${
           preventScroll ? "overflow-hidden" : "overflow-auto"
         }`}

@@ -1728,7 +1728,7 @@ const AddToCalendarModal = withModal(function AddToCalendarModal({
             href={urls.ics}
             download={`${session.title}.ics`}
             onClick={handleAdd}
-            className={getButtonStyles({ buttonColor: ButtonColor.GRAY, size: ButtonSize.LARGE, width: ButtonWidth.FULL, fontWeight: FontWeight.SEMIBOLD, rounded: true })}
+            className={getButtonStyles({ buttonColor: ButtonColor.SECONDARY_NEUTRAL, size: ButtonSize.LARGE, width: ButtonWidth.FULL, fontWeight: FontWeight.SEMIBOLD, rounded: true })}
           >
             <IconDownload className="size-5" />
             <span>Download .ics file</span>

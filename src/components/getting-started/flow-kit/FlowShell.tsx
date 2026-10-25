@@ -110,7 +110,7 @@ export function FlowShell({
           {onBack ? (
             <Button
               label={backLabel}
-              buttonColor={ButtonColor.WHITE}
+              buttonColor={ButtonColor.SECONDARY}
               size={ButtonSize.LARGE}
               onClick={onBack}
             />

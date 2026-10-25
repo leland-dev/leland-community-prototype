@@ -66,7 +66,7 @@ const ConfirmSetupModalImpl = ({
             )}
             <Button
               label="I can't do this right now"
-              buttonColor={ButtonColor.WHITE}
+              buttonColor={ButtonColor.SECONDARY}
               size={ButtonSize.LARGE}
               width={ButtonWidth.FULL}
               onClick={onCantDoIt}

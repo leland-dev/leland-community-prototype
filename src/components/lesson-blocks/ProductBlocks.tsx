@@ -524,7 +524,7 @@ export function LessonFooterActions() {
       <div className="flex flex-wrap items-center gap-2">
         <Button
           label="Get help"
-          buttonColor={ButtonColor.GRAY}
+          buttonColor={ButtonColor.SECONDARY_NEUTRAL}
           size={ButtonSize.MEDIUM}
           LeftIcon={IconQuestion}
           onClick={onOpenSupport}
@@ -532,7 +532,7 @@ export function LessonFooterActions() {
         <Button
           label="Share"
           hideLabel
-          buttonColor={ButtonColor.GRAY}
+          buttonColor={ButtonColor.SECONDARY_NEUTRAL}
           size={ButtonSize.MEDIUM}
           LeftIcon={IconShare}
         />

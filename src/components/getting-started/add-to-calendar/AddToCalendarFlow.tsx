@@ -142,7 +142,7 @@ export function AddToCalendarFlow({ onComplete }: FlowProps) {
         </div>
         <Button
           label="Download ICS file"
-          buttonColor={ButtonColor.GRAY}
+          buttonColor={ButtonColor.SECONDARY_NEUTRAL}
           size={ButtonSize.LARGE}
           width={ButtonWidth.FULL}
           RightIcon={DownloadIcon}
