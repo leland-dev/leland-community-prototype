@@ -9,7 +9,7 @@ import {
   type TestAttempt,
   type GoalType,
 } from "../data/goals";
-import type { Plan } from "../data/goalPlans";
+import type { Answers, Plan } from "../data/goalPlans";
 
 // Goals are mutated from three places — the dashboard card, goal detail, and
 // the new-goal flow — so they live in one shared store. Prototype-only:
@@ -21,6 +21,9 @@ interface GoalsContextValue {
   moveTask: (taskId: string, status: TaskStatus) => void;
   createTask: (input: { title: string; goalId: string; milestoneId?: string | null; dueDate?: string }) => void;
   createGoal: (input: CreateGoalInput) => Goal;
+  // Appends a drafted plan's milestones to an existing goal — used when
+  // resuming the draft-plan step for a goal that was created blank.
+  addPlan: (goalId: string, plan: Plan) => void;
   // Edits
   updateGoal: (goalId: string, patch: Partial<Pick<Goal, "name" | "targetDate" | "description" | "targetScore" | "baselineScore" | "outcome" | "finalScore">>) => void;
   deleteGoal: (goalId: string) => void;
@@ -52,6 +55,9 @@ export type CreateGoalInput = {
   targetScore?: number;
   baselineScore?: number;
   plan: Plan;
+  // The details-step answers, kept only when the plan itself was skipped —
+  // lets a later resumed draft regenerate the same tailored plan.
+  planAnswers?: Answers;
 };
 
 const GoalsContext = createContext<GoalsContextValue | null>(null);
@@ -136,10 +142,21 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
       baselineScore: input.baselineScore,
       milestones,
       otherTasks: [],
+      planAnswers: input.planAnswers,
     };
 
     setGoals((prev) => [...prev, goal]);
     return goal;
+  }, []);
+
+  const addPlan = useCallback((goalId: string, plan: Plan) => {
+    const milestones: Milestone[] = plan.projects.map((p) => ({
+      id: nextId("milestone"),
+      name: p.label,
+      note: p.why,
+      tasks: p.tasks.map((title) => ({ id: nextId("task"), title, status: "todo" as TaskStatus })),
+    }));
+    setGoals((prev) => mapGoal(prev, goalId, (goal) => ({ ...goal, milestones: [...goal.milestones, ...milestones] })));
   }, []);
 
   // ─── Edits ────────────────────────────────────────────────────────────────
@@ -266,13 +283,13 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      goals, getGoal, toggleTask, moveTask, createTask, createGoal,
+      goals, getGoal, toggleTask, moveTask, createTask, createGoal, addPlan,
       updateGoal, deleteGoal, completeGoal, reopenGoal, updateTask, deleteTask, reassignTask,
       addMilestone, updateMilestone, deleteMilestone, setMilestoneView, setOtherTasksView,
       addAttempt, updateAttempt, deleteAttempt, setSectionTarget,
     }),
     [
-      goals, getGoal, toggleTask, moveTask, createTask, createGoal,
+      goals, getGoal, toggleTask, moveTask, createTask, createGoal, addPlan,
       updateGoal, deleteGoal, completeGoal, reopenGoal, updateTask, deleteTask, reassignTask,
       addMilestone, updateMilestone, deleteMilestone, setMilestoneView, setOtherTasksView,
       addAttempt, updateAttempt, deleteAttempt, setSectionTarget,

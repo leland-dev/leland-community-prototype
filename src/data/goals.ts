@@ -5,6 +5,7 @@
 // the MVP scope doc for what this cut from the full-featured version.
 
 import pic7 from "../assets/profile photos/pic-7.png";
+import type { Answers } from "./goalPlans";
 
 export type TaskStatus = "todo" | "in-progress" | "done";
 
@@ -78,6 +79,10 @@ export type Goal = {
   // Per-section targets, keyed by section name, plus every sitting logged.
   sectionTargets?: Record<string, number>;
   attempts?: TestAttempt[];
+  // Set when the goal was created by skipping the drafted plan — lets
+  // "Get started" on the empty-milestones intro regenerate the same
+  // tailored draft the details step would have produced.
+  planAnswers?: Answers;
 };
 
 // Reference "today" the mock fixtures below are written against, mirroring
