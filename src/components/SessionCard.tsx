@@ -33,7 +33,21 @@ interface SessionCardProps {
 }
 
 // Apple-style calendar chip: blue header bar over a white face with the day.
-function CalendarIcon({ day, dim }: { day: string; dim?: boolean }) {
+// "md" is the larger 48px-wide variant (from the onboarding add-to-calendar
+// step) that also prints the month in the header bar.
+export function CalendarIcon({ day, dim, size = "sm", month }: { day: string; dim?: boolean; size?: "sm" | "md"; month?: string }) {
+  if (size === "md") {
+    return (
+      <div className={`flex w-12 shrink-0 flex-col overflow-hidden rounded-lg border border-gray-stroke bg-white${dim ? " opacity-50" : ""}`}>
+        <div className="flex items-center justify-center px-2.5 py-0.5" style={{ backgroundColor: "#80ACED" }}>
+          <span className="text-[10px] font-semibold uppercase tracking-[1px] text-gray-dark">{month}</span>
+        </div>
+        <div className="flex flex-1 items-center justify-center px-2.5 py-1">
+          <span className="text-[19px] font-semibold leading-none text-gray-dark">{day}</span>
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       className={`flex h-[36px] w-[36px] shrink-0 flex-col overflow-hidden rounded-[8px] bg-white${dim ? " opacity-50" : ""}`}

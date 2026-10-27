@@ -140,6 +140,7 @@ import AltNavContent from "./pages/AltNavContent";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
 import CoachProductNew from "./pages/CoachProductNew";
 import OfferingPage from "./pages/OfferingPage";
+import GroupSessionPage from "./pages/GroupSessionPage";
 import LiveSession from "./pages/program/session/LiveSession";
 import IncredibleHomePage from "./pages/IncredibleHomePage";
 import IncredibleHomePageBU from "./pages/IncredibleHomePageBU";
@@ -210,6 +211,7 @@ export default function App() {
         <Route path="/offering/:slug" element={<OfferingPage />} />
         <Route path="/profile/:slug" element={<ProfileTemplate />} />
         <Route path="/profile/:slug/:category" element={<ProfileTemplate />} />
+        <Route path="/offering/:slug/session/:sessionId" element={<GroupSessionPage />} />
         <Route path="/coach-profile" element={<ProfileV2 coach coachId="samantha" />} />
         <Route path="/coach-profile-john" element={<ProfileV2 coach coachId="john" />} />
         <Route path="/agent/:agentSlug" element={<CoachAgent />} />

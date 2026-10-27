@@ -10,7 +10,7 @@ import bookOpenIcon from "../assets/icons/book-open.svg";
 import stackIcon from "../assets/icons/stack.svg";
 import myCoursesIcon from "../assets/icons/my-courses.svg";
 import lteSignalIcon from "../assets/icons/lte-signal.svg";
-import usersGroupIcon from "../assets/icons/users-group.svg";
+import videoIcon from "../assets/icons/video-icon.svg";
 import aiIcon from "../assets/icons/ai.svg";
 import moneyIcon from "../assets/icons/money.svg";
 import repostIcon from "../assets/icons/repost-2.svg";
@@ -149,7 +149,7 @@ const offeringTypes = [
   { slug: "content", label: "Content", blurb: "Guides, templates, videos", icon: bookOpenIcon },
   { slug: "collection", label: "Collection", blurb: "Group products into a bundle", icon: stackIcon },
   { slug: "course", label: "Course", blurb: "Structured multi-lesson course", icon: myCoursesIcon },
-  { slug: "workshop", label: "Workshop", blurb: "Host a paid live class", icon: usersGroupIcon },
+  { slug: "workshop", label: "Group Session", blurb: "Host a paid live class", icon: videoIcon },
   { slug: "agent", label: "Agent", blurb: "An AI assistant trained on you", icon: aiIcon },
   { slug: "membership", label: "Private group", blurb: "A private community for members", icon: crownIcon },
 ];
@@ -162,7 +162,7 @@ const offeringAddDescription: Record<string, string> = {
   collection: "Bundle multiple resources together.",
   course: "Create a structured, multi-lesson course.",
   "paid-livestream": "Host a live, group session.",
-  workshop: "Host a paid, live class — set a price and a seat limit.",
+  workshop: "Host a paid, live class — set a price and schedule it.",
   agent: "An AI assistant trained on your expertise.",
   membership: "Give members access to a private community.",
 };
@@ -268,8 +268,8 @@ const configDefaults: Record<string, Record<string, string>> = {
   course: { title: "", description: "" },
   "paid-livestream": { name: "", description: "", subcategories: "", lelandPlus: "false", duration: "30", date: "", time: "", coverName: "" },
   // A workshop is a paid livestream: same scheduling fields, but it always
-  // carries its own price and an optional seat limit.
-  workshop: { name: "", description: "", price: "", capacity: "", subcategories: "", lelandPlus: "false", duration: "60", date: "", time: "", coverName: "" },
+  // carries its own price. Seats are unlimited.
+  workshop: { name: "", description: "", price: "", subcategories: "", lelandPlus: "false", duration: "30", date: "", time: "", coverName: "" },
   // Placeholder offerings — configuration TBD, so their config is empty and
   // they're always "complete" (see isConfigComplete's default).
   agent: {},
@@ -291,7 +291,7 @@ const isConfigurable = (slug: string) => slug in configDefaults;
 const configPrompts: Record<string, string> = {
   content: "Upload your file and add the details.",
   "paid-livestream": "Schedule and set up your livestream.",
-  workshop: "Schedule your workshop and set a price.",
+  workshop: "Schedule your group session and set a price.",
 };
 
 // Unfinished-state CTA (label + optional icon) shown on the added row. The
@@ -368,7 +368,7 @@ export function contentMeta(c: Record<string, string>): { typeLabel: string | nu
 const MBA_SUBCATEGORIES = ["Deferred MBA", "Executive MBA", "JD/MBA", "Online MBA", "Part-Time MBA", "Traditional Full-Time MBA"];
 
 const LIVESTREAM_DURATIONS = [
-  { value: "30", label: "30 minutes — Most popular" },
+  { value: "30", label: "30 minutes", tag: "Most popular" },
   { value: "45", label: "45 minutes" },
   { value: "60", label: "1 hour" },
   { value: "75", label: "1 hour 15 minutes" },
@@ -551,7 +551,13 @@ function CheckBox({ checked, onChange, label }: { checked: boolean; onChange: ()
 
 // Custom select — a trigger with a chevron and a menu that opens below. Options
 // may carry an `info` string, shown as a hoverable "i" tooltip in the menu.
-function Select({ value, onChange, options, placeholder, className = "", triggerClassName = "py-2.5 pl-3.5 pr-3 text-[14px]" }: { value: string; onChange: (v: string) => void; options: { value: string; label: string; info?: string; sub?: string }[]; placeholder?: string; className?: string; triggerClassName?: string }) {
+// Small gray pill for a Select option's tag (e.g. "Most popular"), shown on the
+// right of both the trigger and the menu row.
+function SelectTag({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <span className={`shrink-0 rounded-full bg-gray-hover px-2 py-0.5 text-[12px] font-medium text-gray-light ${className}`}>{children}</span>;
+}
+
+function Select({ value, onChange, options, placeholder, className = "", triggerClassName = "py-2.5 pl-3.5 pr-3 text-[14px]" }: { value: string; onChange: (v: string) => void; options: { value: string; label: string; info?: string; sub?: string; tag?: string }[]; placeholder?: string; className?: string; triggerClassName?: string }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   // Menu is portaled to the body so it isn't clipped by any overflow-hidden
@@ -577,6 +583,7 @@ function Select({ value, onChange, options, placeholder, className = "", trigger
         className={`flex w-full items-center justify-between gap-2 rounded-lg border border-gray-stroke bg-white text-left transition-colors hover:border-[#c9c9c9] ${selected ? "text-gray-dark" : "text-[#B1B1B1]"} ${triggerClassName}`}
       >
         <span className="truncate">{selected?.label ?? placeholder ?? value}</span>
+        {selected?.tag && <SelectTag className="ml-auto">{selected.tag}</SelectTag>}
         <svg className={`h-4 w-4 shrink-0 text-gray-light transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
       </button>
       {open && createPortal(
@@ -600,6 +607,7 @@ function Select({ value, onChange, options, placeholder, className = "", trigger
                     {o.sub && <span className="mt-0.5 block truncate text-[13px] font-normal text-gray-light">{o.sub}</span>}
                   </span>
                   <span className="flex shrink-0 items-center gap-2 pt-0.5">
+                    {o.tag && <SelectTag>{o.tag}</SelectTag>}
                     {o.info && (
                       <span className="group/info relative flex" onClick={(e) => e.stopPropagation()}>
                         <svg className="h-4 w-4 text-gray-light transition-colors hover:text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
@@ -2724,6 +2732,11 @@ function AddedOfferingRow({ item, onRemove, onConfigure, onToggleFree, isLast = 
     // becomes the secondary detail.
     headline = item.config.title || o.label;
     detail = <span className="truncate">{configSummary(item)}</span>;
+  } else if (finished && (item.slug === "workshop" || item.slug === "paid-livestream")) {
+    // Group sessions / livestreams lead with their name; the description sits
+    // beneath, falling back to the type label when it's left blank.
+    headline = item.config.name || o.label;
+    detail = <span className="truncate">{item.config.description || o.label}</span>;
   } else if (v2Priced) {
     detail = <span className="truncate">{configSummary(item)}</span>;
   }
@@ -3037,10 +3050,11 @@ function PaidLivestreamFields({ config, onChange }: { config: Record<string, str
 /* ---------- Workshop config ---------- */
 
 // A workshop is a paid livestream with its own first-class type. It mirrors the
-// livestream scheduling fields, but price is always required (not v2-gated) and
-// it adds an optional seat limit. The coach's price here becomes the product's
+// livestream scheduling fields, but price is always required (not v2-gated).
+// Seats are unlimited. The coach's price here becomes the product's
 // config.price, which feeds the offering roll-up and can be waived per-offering.
 function WorkshopFields({ config, onChange }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void }) {
+  const [advancedOpen, setAdvancedOpen] = useState(() => Boolean(config.preEventMessage));
   const selectedSubs = (config.subcategories ?? "").split(",").filter(Boolean);
   const toggleSub = (s: string) => {
     const set = new Set(selectedSubs);
@@ -3052,7 +3066,7 @@ function WorkshopFields({ config, onChange }: { config: Record<string, string>; 
     <div className="flex flex-col gap-5">
       <div>
         <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Name</label>
-        <input value={config.name ?? ""} onChange={(e) => onChange({ name: e.target.value })} placeholder="Name your workshop" autoComplete="off" className={configInputClass} />
+        <input value={config.name ?? ""} onChange={(e) => onChange({ name: e.target.value })} placeholder="Name your group session" autoComplete="off" className={configInputClass} />
       </div>
 
       <div>
@@ -3066,14 +3080,9 @@ function WorkshopFields({ config, onChange }: { config: Record<string, string>; 
           <PriceField value={config.price ?? ""} onChange={(v) => onChange({ price: v })} />
         </div>
         <div>
-          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Seats <span className="font-normal text-gray-extra-light">(optional)</span></label>
-          <input type="number" min="1" inputMode="numeric" value={config.capacity ?? ""} onChange={(e) => onChange({ capacity: e.target.value })} placeholder="Unlimited" autoComplete="off" className={configInputClass} />
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Duration</label>
+          <Select value={config.duration ?? "30"} onChange={(v) => onChange({ duration: v })} options={LIVESTREAM_DURATIONS} />
         </div>
-      </div>
-
-      <div>
-        <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Duration</label>
-        <Select value={config.duration ?? "60"} onChange={(v) => onChange({ duration: v })} options={LIVESTREAM_DURATIONS} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -3117,6 +3126,29 @@ function WorkshopFields({ config, onChange }: { config: Record<string, string>; 
         checked={config.lelandPlus === "true"}
         onChange={() => onChange({ lelandPlus: config.lelandPlus === "true" ? "false" : "true" })}
       />
+
+      {/* Advanced — less-common settings, collapsed by default (opens on its
+          own when one of them already has a value). */}
+      <div className="border-t border-gray-stroke pt-4">
+        <button
+          type="button"
+          onClick={() => setAdvancedOpen((o) => !o)}
+          aria-expanded={advancedOpen}
+          className="flex w-full cursor-pointer items-center justify-between gap-4 text-left"
+        >
+          <span className="text-[15px] font-semibold text-gray-dark">Advanced</span>
+          <svg className={`h-5 w-5 shrink-0 text-gray-light transition-transform duration-200 ${advancedOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+        </button>
+        <div className={`grid transition-all duration-300 ease-out ${advancedOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+          <div className="overflow-hidden">
+            <div className="pt-4">
+              <label className="block text-[14px] font-medium text-gray-dark">Pre-event message <span className="font-normal">(optional)</span></label>
+              <p className="mb-2 mt-0.5 text-[14px] text-gray-light">Shared with attendees in reminder emails before the group session starts.</p>
+              <textarea value={config.preEventMessage ?? ""} onChange={(e) => onChange({ preEventMessage: e.target.value })} rows={3} placeholder="Anything attendees should know or prepare before the group session…" autoComplete="off" className={`${configInputClass} resize-none`} />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

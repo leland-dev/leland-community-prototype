@@ -41,7 +41,6 @@ type WorkshopItem = {
   startTime: string;
   duration: string;
   price: string;
-  seats?: number; // optional seat limit
   thumb?: string;
   host: Host;
   status: Status;
@@ -60,7 +59,6 @@ const upcoming: WorkshopItem[] = [
     startTime: "11:30 AM PST",
     duration: "1 hr 30 min",
     price: "$79",
-    seats: 25,
     thumb: courseSystems,
     host: { kind: "people", people: [YOU] },
     status: { kind: "enrolled", count: 18 },
@@ -74,7 +72,6 @@ const upcoming: WorkshopItem[] = [
     startTime: "4:00 PM PST",
     duration: "1 hr",
     price: "$49",
-    seats: 40,
     thumb: eventThumb02,
     host: { kind: "people", people: [YOU, { name: "Marcus Lee", avatar: coachPhoto }] },
     status: { kind: "enrolled", count: 31 },
@@ -298,7 +295,6 @@ function WorkshopRow({ item, past = false, onAddToOffering }: { item: WorkshopIt
           </div>
           <p className="mt-0.5 truncate text-[14px] text-gray-light">
             {item.date} · {item.startTime} · {item.duration}
-            {item.seats ? ` · ${item.seats} seats` : ""}
           </p>
         </div>
       </div>

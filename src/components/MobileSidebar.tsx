@@ -95,7 +95,6 @@ const expertItems = [
   { icon: storeIcon, label: "Offerings", to: "/my-leland/pricing" },
   { icon: lightningIcon, label: "Opportunities", to: "/my-leland/opportunities" },
   { icon: lteSignalIcon, label: "Free Livestreams", to: "/my-leland/livestreams" },
-  { icon: usersGroupIcon, label: "Paid Workshops", to: "/my-leland/workshops" },
   { icon: moneyIcon, label: "Earnings", to: "/my-leland/earnings" },
   { icon: chartIcon, label: "Analytics", to: "/my-leland/analytics" },
   { icon: starIcon, label: "Reviews", to: "/my-leland/reviews" },

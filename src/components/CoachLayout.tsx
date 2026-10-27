@@ -16,7 +16,6 @@ import discountIcon from "../assets/icons/discount.svg";
 import labelTagIcon from "../assets/icons/label-tag.svg";
 import livestreamIcon from "../assets/icons/lte-signal.svg";
 import videoIcon from "../assets/icons/video-icon.svg";
-import usersGroupIcon from "../assets/icons/users-group.svg";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import arrowDiagonalIcon from "../assets/icons/arrow-diagonal.svg";
 import userIcon from "../assets/icons/user.svg";
@@ -257,7 +256,6 @@ function SidebarV1() {
               {offeringsAccordion}
               {navRow(findItem("/coach/opportunities"))}
               {navRow({ ...findItem("/coach/livestreams"), label: "Free Livestreams", icon: videoIcon })}
-              {navRow({ to: "/coach/workshops", label: "Paid Workshops", icon: usersGroupIcon })}
               {navRow(findItem("/coach/earnings"))}
               {navRow({ to: "/coach/analytics", label: "Analytics", icon: analyticsChartIcon })}
               {navRow(findItem("/coach/reviews"))}

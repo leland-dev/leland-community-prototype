@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, Navigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { getOfferingBySlug, OFFERINGS, type Offering } from "../lib/offerings";
+import { getGroupSessionsForOffering, isStandaloneSessionMode, BUNDLED_PRODUCTS, type BundledProduct } from "../lib/groupSessions";
+import myCoursesIcon from "../assets/icons/my-courses.svg";
+import { CalendarIcon } from "../components/SessionCard";
 import checkmarkFilledIcon from "../assets/icons/checkmark-filled.svg";
 import airplaneIcon from "../assets/icons/airplane.svg";
 import starIcon from "../assets/icons/star.svg";
@@ -25,7 +28,7 @@ import boothLogo from "../assets/logos/booth.png";
 // synthesize a plausible set of sections keyed off the offering itself.
 // The coach behind this offering. Offerings don't carry coach data yet, so this
 // is synthesized to match Samantha's profile.
-const COACH = {
+export const COACH = {
   name: "Samantha Parker",
   slug: "samantha-parker",
   headline: "MBA Admissions Coach | Stanford GSB | 100+ M7 Admits",
@@ -49,6 +52,13 @@ const ADDITIONAL_DETAILS = [
   "We'll kick off with a short intake so I can understand your background, target schools, and timeline before our first working session. From there, every hour is tailored — no generic templates, no filler. If your priorities change midway through, we change direction with them.",
   "You'll leave each session with a clear, written set of next steps so you always know exactly what to do before we meet again. And because the hours are bundled, you're locking in a rate that's meaningfully better than booking sessions individually — while keeping the flexibility to use them whenever you need them most.",
 ];
+
+// Builder product type → list icon, for offerings with bundle data.
+const bundledIcon: Record<BundledProduct["kind"], string> = {
+  "coaching-time": hourglassIcon,
+  content: bookOpenIcon,
+  course: myCoursesIcon,
+};
 
 // "$1,200" → 1200
 const parseMoney = (s?: string) => Number((s ?? "").replace(/[^0-9.]/g, "")) || 0;
@@ -187,7 +197,7 @@ function ReviewCard({ review }: { review: Review }) {
   );
 }
 
-function PriceRow({ offering, className = "" }: { offering: Offering; className?: string }) {
+export function PriceRow({ offering, className = "" }: { offering: Offering; className?: string }) {
   return (
     <div className={className}>
       {offering.startingAt && (
@@ -345,6 +355,7 @@ export default function OfferingPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const offering = getOfferingBySlug(slug);
+  const groupSessions = getGroupSessionsForOffering(slug);
 
   useEffect(() => {
     document.title = offering ? `Leland | ${offering.title}` : "Leland | Offering";
@@ -380,6 +391,12 @@ export default function OfferingPage() {
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, []);
+
+  // Admin "Session is the only product" preview: an offering that's just a
+  // group session has no details page of its own — go straight to the session.
+  if (offering && groupSessions.length > 0 && isStandaloneSessionMode()) {
+    return <Navigate to={`/offering/${offering.slug}/session/${groupSessions[0].id}`} replace />;
+  }
 
   if (!offering) {
     return (
@@ -466,12 +483,34 @@ export default function OfferingPage() {
               // otherwise it's the single offering price.
               const tier = tiersEnabled ? TIERS[activeTier] : null;
               const total = tier ? tier.total : parseMoney(offering.price);
-              const subtotal = tier ? tier.subtotal : parseMoney(offering.origPrice) || total;
+              // Offerings with real bundle data (shared with the group session
+              // page) list those products at their own prices; an active tier
+              // swaps in its coaching amount. Subtotal is the sum of the rows.
+              const bundled = BUNDLED_PRODUCTS[offering.slug];
+              const bundledRows = bundled?.map((p) => {
+                  const tiered = tier && p.kind === "coaching-time";
+                  const [lead, ...rest] = p.detail.split(" · ");
+                  return {
+                    icon: bundledIcon[p.kind],
+                    title: tiered ? tier.coaching : p.title,
+                    detail: (
+                      <>
+                        {lead}
+                        {rest.length > 0 && <span className="text-gray-extra-light"> · {rest.join(" · ")}</span>}
+                      </>
+                    ),
+                    price: tiered ? tier.subtotal : p.price,
+                    free: false,
+                  };
+                });
+              const subtotal = bundledRows
+                ? bundledRows.reduce((sum, r) => sum + r.price, 0)
+                : tier ? tier.subtotal : parseMoney(offering.origPrice) || total;
               const savings = Math.max(0, subtotal - total);
-              // Products in this offering, matching the builder's types. The
-              // priced coaching time carries the subtotal; the content item is
-              // bundled in for free.
-              const products = [
+              // Fallback for offerings without bundle data, matching the
+              // builder's types. The priced coaching time carries the subtotal;
+              // the content item is bundled in for free.
+              const products = bundledRows ?? [
                 {
                   icon: hourglassIcon,
                   title: tier ? tier.coaching : "10h of coaching",
@@ -511,6 +550,23 @@ export default function OfferingPage() {
 
                   {/* Product list */}
                   <div className="overflow-hidden rounded-2xl border border-gray-stroke px-4">
+                    {/* Group sessions link to their own shareable sub-page. */}
+                    {groupSessions.map((s) => (
+                      <Link
+                        key={s.id}
+                        to={`/offering/${offering.slug}/session/${s.id}`}
+                        className="-mx-4 flex items-center gap-3 border-b border-gray-stroke px-4 py-4 no-underline hover:bg-[#fafafa]"
+                      >
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+                          <CalendarIcon day={s.day} />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[15px] font-semibold text-gray-dark">{s.name}</span>
+                          <span className="block text-[15px] text-gray-light">Group session · {s.dateLabel}</span>
+                        </span>
+                        <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+                      </Link>
+                    ))}
                     {products.map((p, i) => (
                       <div key={p.title} className={`flex items-center gap-3 py-4 ${i < products.length - 1 ? "border-b border-gray-stroke" : ""}`}>
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center">
