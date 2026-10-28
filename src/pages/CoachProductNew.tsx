@@ -1393,6 +1393,38 @@ function tiersWithSessions(options: PricingOption[], added: OfferingItem[]) {
     .filter((t) => t.liveItems.length > 0);
 }
 
+// Read-only tier tabs for the Scheduling step — mirrors the Products step's
+// OptionTabs styling, minus the add/remove controls (tiers are managed there).
+function TierTabs({ options, activeId, onSelect }: { options: PricingOption[]; activeId: number; onSelect: (id: number) => void }) {
+  return (
+    <div className="flex items-center gap-1 overflow-x-auto border-b border-gray-stroke">
+      {options.map((opt, i) => {
+        const active = opt.id === activeId;
+        const label = opt.name || `Option ${i + 1}`;
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => onSelect(opt.id)}
+            className={`flex shrink-0 items-center border-b-2 px-3 py-2.5 text-[15px] transition-colors ${active ? "border-gray-dark font-semibold text-gray-dark" : "border-transparent font-medium text-gray-light hover:text-gray-dark"}`}
+          >
+            <span className="max-w-[160px] truncate">{label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// Shown on a tier tab that has no group sessions to schedule.
+function NoTierSessions() {
+  return (
+    <div className="rounded-xl bg-gray-hover px-4 py-8 text-center text-[15px] text-gray-light">
+      No group sessions in this tier.
+    </div>
+  );
+}
+
 function SchedulingStep({
   options, added, multiEnabled, cohortsByOption, onAdd, onRemove, onUpdate,
 }: {
@@ -1404,11 +1436,26 @@ function SchedulingStep({
   onRemove: (optionId: number, id: number) => void;
   onUpdate: (optionId: number, id: number, patch: Partial<BuilderCohort>) => void;
 }) {
-  // Only tiers that include a group session are schedulable; each runs on its own.
-  const tiers = tiersWithSessions(options, added);
+  // With tiers, switch between them via tabs (like the Products step); the active
+  // tier's cohorts show below. Default to the first tier that has sessions.
+  const sessionTiers = tiersWithSessions(options, added);
+  const [activeId, setActiveId] = useState<number>(() => sessionTiers[0]?.opt.id ?? options[0]?.id ?? 0);
+  const active = options.find((o) => o.id === activeId) ?? options[0];
+  const activeLive = active ? sessionsForOption(active, added) : [];
+
+  const renderTier = (opt: PricingOption, liveItems: OfferingItem[], isTier: boolean) => (
+    <TierCohortSchedule
+      isTier={isTier}
+      liveItems={liveItems}
+      cohorts={cohortsByOption[opt.id] ?? []}
+      onAdd={() => onAdd(opt.id)}
+      onRemove={(id) => onRemove(opt.id, id)}
+      onUpdate={(id, patch) => onUpdate(opt.id, id, patch)}
+    />
+  );
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <section>
         <h2 className="text-[22px] font-semibold text-gray-dark">Scheduling</h2>
         <p className="mt-0.5 text-[15px] text-gray-light">
@@ -1426,17 +1473,16 @@ function SchedulingStep({
         </p>
       </div>
 
-      {tiers.map(({ opt, i, liveItems }) => (
-        <TierCohortSchedule
-          key={opt.id}
-          title={multiEnabled ? (opt.name || `Option ${i + 1}`) : null}
-          liveItems={liveItems}
-          cohorts={cohortsByOption[opt.id] ?? []}
-          onAdd={() => onAdd(opt.id)}
-          onRemove={(id) => onRemove(opt.id, id)}
-          onUpdate={(id, patch) => onUpdate(opt.id, id, patch)}
-        />
-      ))}
+      {multiEnabled ? (
+        <div>
+          <TierTabs options={options} activeId={active.id} onSelect={setActiveId} />
+          <div className="mt-6">
+            {activeLive.length > 0 ? renderTier(active, activeLive, true) : <NoTierSessions />}
+          </div>
+        </div>
+      ) : (
+        renderTier(options[0], sessionsForOption(options[0], added), false)
+      )}
     </div>
   );
 }
@@ -1480,11 +1526,12 @@ function CohortSessionRow({ item, slot, onChange }: { item: OfferingItem; slot: 
   );
 }
 
-// One tier's cohorts.
+// One tier's cohorts. `isTier` only tweaks the waitlist copy (the tab shows the
+// tier name, so no header is rendered here).
 function TierCohortSchedule({
-  title, liveItems, cohorts, onAdd, onRemove, onUpdate,
+  isTier, liveItems, cohorts, onAdd, onRemove, onUpdate,
 }: {
-  title: string | null;
+  isTier: boolean;
   liveItems: OfferingItem[];
   cohorts: BuilderCohort[];
   onAdd: () => void;
@@ -1500,14 +1547,12 @@ function TierCohortSchedule({
 
   return (
     <section className="flex flex-col gap-4">
-      {title && <h3 className="text-[17px] font-semibold text-gray-dark">{title}</h3>}
-
       {/* Per-tier warning once nothing in this tier is left to sell. */}
       {anyDated && !anyOpen && (
         <div className="flex items-start gap-3 rounded-xl border border-[#F5D48A] bg-[#FFF8E6] px-4 py-3.5">
           <MaskIcon src={calendarPageIcon} className="mt-0.5 h-5 w-5 text-[#8A5A00]" />
           <p className="text-[14px] leading-snug text-[#5C3D00]">
-            <span className="font-semibold">No upcoming cohorts.</span> {title ? "This tier" : "This offering"} is on a waitlist. Add a cohort with new dates to start selling it again.
+            <span className="font-semibold">No upcoming cohorts.</span> {isTier ? "This tier" : "This offering"} is on a waitlist. Add a cohort with new dates to start selling it again.
           </p>
         </div>
       )}
@@ -1618,11 +1663,63 @@ function SubscriptionSchedulingStep({
   onRemove: (itemId: number, occId: number) => void;
   onUpdate: (itemId: number, occId: number, patch: Partial<SessionOccurrence>) => void;
 }) {
-  // Only tiers that include a group session appear; each keeps its own calendar.
-  const tiers = tiersWithSessions(options, added);
+  // With tiers, switch between them via tabs; the active tier's rolling calendar
+  // shows below. Default to the first tier that has sessions.
+  const sessionTiers = tiersWithSessions(options, added);
+  const [activeId, setActiveId] = useState<number>(() => sessionTiers[0]?.opt.id ?? options[0]?.id ?? 0);
+  const active = options.find((o) => o.id === activeId) ?? options[0];
+  const activeLive = active ? sessionsForOption(active, added) : [];
+
+  const renderSessions = (liveItems: OfferingItem[]) => (
+    <div className="flex flex-col gap-4">
+      {/* One card per group session in this tier, each with its own dates. */}
+      {liveItems.map((item) => {
+        const occurrences = calendar[item.id] ?? [];
+        const duration = LIVESTREAM_DURATIONS.find((d) => d.value === (item.config.duration ?? "30"))?.label;
+        return (
+          <div key={item.id} className="overflow-hidden rounded-2xl border border-gray-stroke">
+            <div className="flex items-center gap-3 border-b border-gray-stroke px-4 py-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+                <img src={videoIcon} alt="" className="h-[26px] w-[26px]" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[16px] font-semibold text-gray-dark">{item.config.name || "Group Session"}</p>
+                {duration && <p className="text-[14px] text-gray-light">{duration}</p>}
+              </div>
+              <span className="shrink-0 rounded-full bg-gray-hover px-2.5 py-1 text-[12px] font-medium text-gray-light">
+                {occurrences.length} {occurrences.length === 1 ? "date" : "dates"}
+              </span>
+            </div>
+
+            {occurrences.length === 0 ? (
+              <p className="px-4 py-4 text-[15px] text-gray-extra-light">No upcoming dates yet.</p>
+            ) : (
+              <div className="flex flex-col divide-y divide-gray-stroke">
+                {occurrences.map((occ) => (
+                  <SessionDateRow
+                    key={occ.id}
+                    occ={occ}
+                    onChange={(patch) => onUpdate(item.id, occ.id, patch)}
+                    onRemove={() => onRemove(item.id, occ.id)}
+                  />
+                ))}
+              </div>
+            )}
+
+            <div className="border-t border-gray-stroke p-3">
+              <Button size="sm" variant="secondary" className="font-semibold" onClick={() => onAdd(item.id)}>
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                Add date
+              </Button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <section>
         <h2 className="text-[22px] font-semibold text-gray-dark">Scheduling</h2>
         <p className="mt-0.5 text-[15px] text-gray-light">
@@ -1639,55 +1736,16 @@ function SubscriptionSchedulingStep({
         </p>
       </div>
 
-      {tiers.map(({ opt, i, liveItems }) => (
-        <section key={opt.id} className="flex flex-col gap-4">
-          {multiEnabled && <h3 className="text-[17px] font-semibold text-gray-dark">{opt.name || `Option ${i + 1}`}</h3>}
-
-          {/* One card per group session in this tier, each with its own dates. */}
-          {liveItems.map((item) => {
-            const occurrences = calendar[item.id] ?? [];
-            const duration = LIVESTREAM_DURATIONS.find((d) => d.value === (item.config.duration ?? "30"))?.label;
-            return (
-              <div key={item.id} className="overflow-hidden rounded-2xl border border-gray-stroke">
-                <div className="flex items-center gap-3 border-b border-gray-stroke px-4 py-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center">
-                    <img src={videoIcon} alt="" className="h-[26px] w-[26px]" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[16px] font-semibold text-gray-dark">{item.config.name || "Group Session"}</p>
-                    {duration && <p className="text-[14px] text-gray-light">{duration}</p>}
-                  </div>
-                  <span className="shrink-0 rounded-full bg-gray-hover px-2.5 py-1 text-[12px] font-medium text-gray-light">
-                    {occurrences.length} {occurrences.length === 1 ? "date" : "dates"}
-                  </span>
-                </div>
-
-                {occurrences.length === 0 ? (
-                  <p className="px-4 py-4 text-[15px] text-gray-extra-light">No upcoming dates yet.</p>
-                ) : (
-                  <div className="flex flex-col divide-y divide-gray-stroke">
-                    {occurrences.map((occ) => (
-                      <SessionDateRow
-                        key={occ.id}
-                        occ={occ}
-                        onChange={(patch) => onUpdate(item.id, occ.id, patch)}
-                        onRemove={() => onRemove(item.id, occ.id)}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                <div className="border-t border-gray-stroke p-3">
-                  <Button size="sm" variant="secondary" className="font-semibold" onClick={() => onAdd(item.id)}>
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-                    Add date
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
-        </section>
-      ))}
+      {multiEnabled ? (
+        <div>
+          <TierTabs options={options} activeId={active.id} onSelect={setActiveId} />
+          <div className="mt-6">
+            {activeLive.length > 0 ? renderSessions(activeLive) : <NoTierSessions />}
+          </div>
+        </div>
+      ) : (
+        renderSessions(sessionsForOption(options[0], added))
+      )}
     </div>
   );
 }
