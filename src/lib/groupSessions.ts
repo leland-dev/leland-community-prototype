@@ -1,6 +1,11 @@
 // Group sessions — paid, live classes that only exist inside an offering. Each
 // one has its own shareable page (/offering/:slug/session/:id), but access comes
 // from buying the parent offering, so the session always points back to it.
+//
+// Sessions don't carry dates themselves. An offering with any group session is
+// scheduled in cohorts: each cohort gives every session a date, and buyers pick
+// a cohort at checkout. A cohort is sellable until its first session starts;
+// once none are left the offering moves to a waitlist until new dates are set.
 import eventImg1 from "../assets/placeholder images/placeholder-event-01.png";
 import eventImg2 from "../assets/placeholder images/placeholder-event-02.png";
 import pic1 from "../assets/profile photos/pic-1.png";
@@ -15,13 +20,7 @@ export type GroupSession = {
   name: string;
   description: string[];
   image: string;
-  // Display-ready schedule (prototype data, not real dates).
-  month: string;
-  day: string;
-  dateLabel: string;
-  timeLabel: string;
   durationMin: number;
-  enrolled: number;
   // Price when the session is sold on its own (standalone offering).
   price: number;
   agenda: string[];
@@ -47,12 +46,7 @@ export const GROUP_SESSIONS: GroupSession[] = [
       "Bring a rough idea of your post-MBA goal. Cameras optional, questions encouraged.",
     ],
     image: eventImg1,
-    month: "Nov",
-    day: "12",
-    dateLabel: "Wednesday, Nov 12",
-    timeLabel: "6:00 PM – 7:30 PM PT",
     durationMin: 90,
-    enrolled: 22,
     price: 149,
     agenda: [
       "The three-part “Why MBA” framework",
@@ -69,12 +63,7 @@ export const GROUP_SESSIONS: GroupSession[] = [
       "A hands-on session on the behavioral questions that show up in nearly every MBA interview. Samantha models strong answers, then runs live mock rounds with volunteers so everyone can see feedback in action.",
     ],
     image: eventImg2,
-    month: "Dec",
-    day: "3",
-    dateLabel: "Wednesday, Dec 3",
-    timeLabel: "6:00 PM – 7:00 PM PT",
     durationMin: 60,
-    enrolled: 14,
     price: 99,
     agenda: ["Structuring STAR answers", "Live mock rounds", "Common pitfalls", "Q&A"],
   },
@@ -88,6 +77,54 @@ export const BUNDLED_PRODUCTS: Record<string, BundledProduct[]> = {
   ],
 };
 
+// When one group session meets within a cohort (display-ready prototype data).
+export type SessionSlot = { month: string; day: string; dateLabel: string; timeLabel: string };
+
+export type Cohort = {
+  id: string;
+  label: string;
+  enrolled: number;
+  // Keyed by group session id — every session in the offering gets a slot.
+  sessions: Record<string, SessionSlot>;
+};
+
+export const COHORTS: Record<string, Cohort[]> = {
+  "mba-application-package": [
+    {
+      id: "nov",
+      label: "November cohort",
+      enrolled: 22,
+      sessions: {
+        "why-mba-workshop": { month: "Nov", day: "12", dateLabel: "Wednesday, Nov 12", timeLabel: "6:00 PM – 7:30 PM PT" },
+        "interview-lab": { month: "Dec", day: "3", dateLabel: "Wednesday, Dec 3", timeLabel: "6:00 PM – 7:00 PM PT" },
+      },
+    },
+    {
+      id: "jan",
+      label: "January cohort",
+      enrolled: 6,
+      sessions: {
+        "why-mba-workshop": { month: "Jan", day: "14", dateLabel: "Wednesday, Jan 14", timeLabel: "6:00 PM – 7:30 PM PT" },
+        "interview-lab": { month: "Feb", day: "4", dateLabel: "Wednesday, Feb 4", timeLabel: "6:00 PM – 7:00 PM PT" },
+      },
+    },
+  ],
+};
+
+export function getCohorts(offeringSlug: string | undefined): Cohort[] {
+  return COHORTS[offeringSlug ?? ""] ?? [];
+}
+
+// "Nov 12 – Dec 3" — first to last session date in a cohort, in session order.
+export function cohortRange(cohort: Cohort, sessions: GroupSession[]): string {
+  const slots = sessions.map((s) => cohort.sessions[s.id]).filter(Boolean);
+  if (slots.length === 0) return "";
+  const short = (sl: SessionSlot) => `${sl.month} ${sl.day}`;
+  const first = short(slots[0]);
+  const last = short(slots[slots.length - 1]);
+  return first === last ? first : `${first} – ${last}`;
+}
+
 // Attendee avatars for the "people going" stack.
 export const ATTENDEES = [
   { name: "Maya", photo: pic1 },
@@ -98,12 +135,19 @@ export const ATTENDEES = [
 ];
 
 // Prototype admin flag: preview offerings whose only product is a group
-// session. The session page drops the bundle, and the offering page redirects
-// straight to the session.
+// session. The session page drops the bundle (the offering page is unchanged).
 export const STANDALONE_SESSION_KEY = "group-session-standalone";
 
 export function isStandaloneSessionMode(): boolean {
   try { return localStorage.getItem(STANDALONE_SESSION_KEY) === "1"; } catch { return false; }
+}
+
+// Prototype admin flag: preview an offering whose cohorts have all passed — it
+// can't be bought, only waitlisted, until the expert schedules new dates.
+export const WAITLIST_KEY = "offering-waitlist";
+
+export function isWaitlistMode(): boolean {
+  try { return localStorage.getItem(WAITLIST_KEY) === "1"; } catch { return false; }
 }
 
 export function getGroupSession(offeringSlug: string | undefined, id: string | undefined) {

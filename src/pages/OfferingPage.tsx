@@ -1,10 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { useParams, useNavigate, Link, Navigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "../components/Button";
 import { getOfferingBySlug, OFFERINGS, type Offering } from "../lib/offerings";
-import { getGroupSessionsForOffering, isStandaloneSessionMode, BUNDLED_PRODUCTS, type BundledProduct } from "../lib/groupSessions";
+import {
+  getGroupSessionsForOffering,
+  getCohorts,
+  cohortRange,
+  isWaitlistMode,
+  WAITLIST_KEY,
+  BUNDLED_PRODUCTS,
+  type BundledProduct,
+  type Cohort,
+  type GroupSession,
+  type SessionSlot,
+} from "../lib/groupSessions";
 import myCoursesIcon from "../assets/icons/my-courses.svg";
 import { CalendarIcon } from "../components/SessionCard";
 import checkmarkFilledIcon from "../assets/icons/checkmark-filled.svg";
@@ -66,10 +77,12 @@ const formatMoney = (n: number) => `$${n.toLocaleString("en-US")}`;
 
 // Multiple pricing options (admin "Enable tiers" preview). Each tier is a
 // different amount of coaching time at the same $150/hr, bundled at a discount.
+// `hasSessions` marks tiers that include the offering's live group sessions —
+// only those require picking a cohort after the buyer chooses their size.
 const TIERS = [
-  { name: "5 hours", coaching: "5h of coaching", subtotal: 750, total: 650 },
-  { name: "10 hours", coaching: "10h of coaching", subtotal: 1500, total: 1200 },
-  { name: "20 hours", coaching: "20h of coaching", subtotal: 3000, total: 2400 },
+  { name: "5 hours", coaching: "5h of coaching", subtotal: 750, total: 650, hasSessions: false },
+  { name: "10 hours", coaching: "10h of coaching", subtotal: 1500, total: 1200, hasSessions: true },
+  { name: "20 hours", coaching: "20h of coaching", subtotal: 3000, total: 2400, hasSessions: true },
 ];
 
 const CHECKLIST_ITEMS = [
@@ -214,7 +227,7 @@ export function PriceRow({ offering, className = "" }: { offering: Offering; cla
 
 // The sticky purchase card on the right — the customer-facing counterpart of the
 // coach builder's live preview card.
-function PurchaseCard({ offering, ctaLabel }: { offering: Offering; ctaLabel: string }) {
+function PurchaseCard({ offering, ctaLabel, ctaDisabled = false, onCta, children }: { offering: Offering; ctaLabel: string; ctaDisabled?: boolean; onCta?: () => void; children?: React.ReactNode }) {
   return (
     <div className="overflow-hidden lg:rounded-2xl lg:border lg:border-gray-stroke lg:bg-white lg:shadow-[0_1px_3px_rgba(16,24,40,0.06)]">
       <img src={offering.image} alt="" className="aspect-[1200/630] w-full rounded-2xl object-cover lg:rounded-none" />
@@ -224,12 +237,70 @@ function PurchaseCard({ offering, ctaLabel }: { offering: Offering; ctaLabel: st
         <p className="text-[16px] font-semibold leading-tight text-gray-dark">{offering.title}</p>
         <p className="mt-1 text-[14px] leading-snug text-gray-light">{offering.headline}</p>
         <PriceRow offering={offering} className="mt-3" />
-        <Button size="lg" variant="primary" rounded="rounded-full" className="mt-4 w-full text-[15px]">
+        {children}
+        <Button size="lg" variant="primary" rounded="rounded-full" className="mt-4 w-full text-[15px]" disabled={ctaDisabled} onClick={onCta}>
           {ctaLabel}
         </Button>
         <Button size="lg" variant="secondary" rounded="rounded-full" className="mt-2 w-full text-[15px]">
           Free intro call
         </Button>
+      </div>
+    </div>
+  );
+}
+
+// Cohort choice for offerings with group sessions — buyers must pick when the
+// live sessions happen before they can purchase. With no upcoming cohorts the
+// offering is waitlisted instead.
+function CohortPicker({
+  cohorts, sessions, selectedId, onSelect, waitlist,
+}: {
+  cohorts: Cohort[];
+  sessions: GroupSession[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  waitlist: boolean;
+}) {
+  if (waitlist) {
+    return (
+      <div className="mt-4 rounded-xl bg-gray-hover px-3.5 py-3">
+        <p className="text-[14px] font-semibold text-gray-dark">No upcoming dates</p>
+        <p className="mt-0.5 text-[14px] leading-snug text-gray-light">
+          Join the waitlist and we'll email you when {COACH.name.split(" ")[0]} schedules the next cohort.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div className="mt-4">
+      <p className="mb-2 text-[14px] font-semibold text-gray-dark">Choose your dates</p>
+      <div role="radiogroup" className="flex flex-col gap-2">
+        {cohorts.map((c) => {
+          const active = c.id === selectedId;
+          const first = sessions.map((s) => c.sessions[s.id]).find(Boolean);
+          return (
+            <button
+              key={c.id}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => onSelect(c.id)}
+              className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition-colors ${active ? "border-gray-dark ring-1 ring-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
+            >
+              <CalendarIcon day={first?.day ?? "–"} />
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-semibold text-gray-dark">{cohortRange(c, sessions)}</span>
+                <span className="block text-[13px] text-gray-light">
+                  {c.label}
+                  {first && ` · Enroll by ${first.month} ${first.day}`}
+                </span>
+              </span>
+              <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 ${active ? "border-gray-dark" : "border-[#CFCFCF]"}`}>
+                {active && <span className="h-2 w-2 rounded-full bg-gray-dark" />}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -317,21 +388,191 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
   );
 }
 
-// Prototype-only admin menu — a 3-dot button pinned to the bottom-right that
-// toggles the "Enable tiers" preview (multiple pricing options).
-function AdminMenu({ tiersEnabled, onToggleTiers }: { tiersEnabled: boolean; onToggleTiers: () => void }) {
+// Shared modal chrome for this page — same as ConfirmModal: scrim, rounded
+// card, close button; closes on scrim click or Escape.
+function ModalShell({ open, onClose, label, className = "max-w-[560px]", children }: { open: boolean; onClose: () => void; label: string; className?: string; children: React.ReactNode }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key={label}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[95] flex items-center justify-center bg-black/40 p-4"
+        >
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label={label}
+            initial={{ opacity: 0, scale: 0.96, y: 32 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 32 }}
+            transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className={`relative max-h-[90vh] w-full overflow-y-auto rounded-3xl bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)] ${className}`}
+          >
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-dark shadow-sm transition-colors hover:bg-white"
+            >
+              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+            {children}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body,
+  );
+}
+
+// A group session's description, opened from its "Details" link in What's
+// included.
+function SessionDetailsModal({ session, slot, onClose }: { session: GroupSession | null; slot?: SessionSlot; onClose: () => void }) {
+  return (
+    <ModalShell open={session !== null} onClose={onClose} label={session?.name ?? "Session details"}>
+      {session && (
+        <>
+          <img src={session.image} alt="" className="aspect-[1200/630] w-full object-cover" />
+          <div className="p-7">
+            <p className="text-[13px] font-medium text-gray-light">Group session · {session.durationMin} min</p>
+            <h2 className="mt-1 font-serif text-[26px] leading-tight text-gray-dark">{session.name}</h2>
+            <div className="mt-4 flex items-center gap-3">
+              {slot ? <CalendarIcon size="md" month={slot.month} day={slot.day} /> : <CalendarIcon size="md" month="TBA" day="–" />}
+              <div>
+                <p className="text-[15px] font-semibold text-gray-dark">{slot ? slot.dateLabel : "Dates to be announced"}</p>
+                <p className="text-[14px] text-gray-light">{slot ? slot.timeLabel : "Join the waitlist to hear when it's scheduled"}</p>
+              </div>
+            </div>
+            <div className="mt-5 flex flex-col gap-3 text-[15px] leading-[1.6] text-gray-dark">
+              {session.description.map((p, i) => <p key={i}>{p}</p>)}
+            </div>
+          </div>
+        </>
+      )}
+    </ModalShell>
+  );
+}
+
+type Tier = (typeof TIERS)[number];
+
+// Tier picker — opened by "Select a size". A two-step flow: first choose the
+// size, then (only if that size includes live group sessions) choose a cohort.
+// Sizes without sessions skip straight to purchase.
+function TierPickerModal({
+  open, onClose, offering, tiers, activeIndex, onSelectTier, isLive, cohorts, sessions, cohortId, onSelectCohort,
+}: {
+  open: boolean;
+  onClose: () => void;
+  offering: Offering;
+  tiers: Tier[];
+  activeIndex: number;
+  onSelectTier: (i: number) => void;
+  isLive: boolean;
+  cohorts: Cohort[];
+  sessions: GroupSession[];
+  cohortId: string | null;
+  onSelectCohort: (id: string) => void;
+}) {
+  const [step, setStep] = useState<"size" | "cohort">("size");
+  // Always re-open on the size step.
+  useEffect(() => { if (open) setStep("size"); }, [open]);
+  const active = tiers[activeIndex];
+  const needsCohort = isLive && active.hasSessions;
+
+  return (
+    <ModalShell open={open} onClose={onClose} label="Choose an option" className="max-w-[480px]">
+      <div className="p-7">
+        {step === "size" ? (
+          <>
+            <h2 className="pr-10 font-serif text-[26px] leading-tight text-gray-dark">Choose a size</h2>
+            <p className="mt-1 text-[15px] text-gray-light">{offering.title}</p>
+            <div role="radiogroup" className="mt-5 flex flex-col gap-2.5">
+              {tiers.map((t, i) => {
+                const selected = i === activeIndex;
+                const savePct = t.subtotal > t.total ? Math.round((1 - t.total / t.subtotal) * 100) : 0;
+                return (
+                  <button
+                    key={t.name}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => onSelectTier(i)}
+                    className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-colors ${selected ? "border-gray-dark ring-1 ring-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
+                  >
+                    <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 ${selected ? "border-gray-dark" : "border-[#CFCFCF]"}`}>
+                      {selected && <span className="h-2 w-2 rounded-full bg-gray-dark" />}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[15px] font-semibold text-gray-dark">{t.name}</span>
+                      <span className="block text-[14px] text-gray-light">{t.coaching} + MBA Essay Playbook{isLive && t.hasSessions ? " + live sessions" : ""}</span>
+                    </span>
+                    <span className="shrink-0 text-right">
+                      <span className="block text-[15px] font-semibold text-gray-dark">{formatMoney(t.total)}</span>
+                      {savePct > 0 && (
+                        <span className="block text-[13px]">
+                          <span className="text-gray-extra-light line-through">{formatMoney(t.subtotal)}</span>
+                          <span className="ml-1.5 font-medium text-[#1B8A54]">Save {savePct}%</span>
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <Button size="lg" variant="primary" rounded="rounded-full" className="mt-6 w-full text-[15px]" onClick={() => { if (needsCohort) setStep("cohort"); }}>
+              {needsCohort ? "Continue" : `Purchase · ${formatMoney(active.total)}`}
+            </Button>
+          </>
+        ) : (
+          <>
+            <button type="button" onClick={() => setStep("size")} className="mb-3 flex items-center gap-1 text-[14px] font-medium text-gray-light transition-colors hover:text-gray-dark">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+              Back
+            </button>
+            <h2 className="pr-10 font-serif text-[26px] leading-tight text-gray-dark">Choose your dates</h2>
+            <p className="mt-1 text-[15px] text-gray-light">{active.name} · {offering.title}</p>
+            <CohortPicker cohorts={cohorts} sessions={sessions} selectedId={cohortId} onSelect={onSelectCohort} waitlist={false} />
+            <Button size="lg" variant="primary" rounded="rounded-full" className="mt-6 w-full text-[15px]" disabled={!cohortId}>
+              Purchase · {formatMoney(active.total)}
+            </Button>
+          </>
+        )}
+      </div>
+    </ModalShell>
+  );
+}
+
+// Prototype-only admin menu — a 3-dot button pinned to the bottom-right with
+// preview toggles ("Enable tiers", and the waitlist state for live offerings).
+function AdminMenu({ toggles }: { toggles: { label: string; checked: boolean; onChange: () => void }[] }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="fixed bottom-4 right-4 z-40">
       {open && (
         <>
           <div className="fixed inset-0" onClick={() => setOpen(false)} />
-          <div className="absolute bottom-full right-0 z-10 mb-2 w-56 rounded-xl border border-gray-stroke bg-white p-1 shadow-lg">
+          <div className="absolute bottom-full right-0 z-10 mb-2 w-64 rounded-xl border border-gray-stroke bg-white p-1 shadow-lg">
             <p className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-light">Admin</p>
-            <div className="flex items-center justify-between gap-3 rounded-lg px-3 py-2">
-              <span className="text-[14px] font-medium text-gray-dark">Enable tiers</span>
-              <Toggle checked={tiersEnabled} onChange={onToggleTiers} />
-            </div>
+            {toggles.map((t) => (
+              <div key={t.label} className="flex items-center justify-between gap-3 rounded-lg px-3 py-2">
+                <span className="text-[14px] font-medium text-gray-dark">{t.label}</span>
+                <Toggle checked={t.checked} onChange={t.onChange} />
+              </div>
+            ))}
           </div>
         </>
       )}
@@ -371,7 +612,40 @@ export default function OfferingPage() {
       localStorage.setItem("offering-tiers-enabled", next ? "1" : "0");
       return next;
     });
-  const primaryCta = tiersEnabled ? "Select an option" : "Purchase";
+
+  // Offerings with group sessions are sold by cohort: the buyer must pick dates
+  // before purchasing, or join the waitlist once no cohorts are left.
+  const cohorts = getCohorts(slug);
+  const isLive = groupSessions.length > 0 && cohorts.length > 0;
+  const [waitlist, setWaitlist] = useState<boolean>(isWaitlistMode);
+  const toggleWaitlist = () =>
+    setWaitlist((v) => {
+      const next = !v;
+      try { localStorage.setItem(WAITLIST_KEY, next ? "1" : "0"); } catch { /* ignore */ }
+      return next;
+    });
+  const [cohortId, setCohortId] = useState<string | null>(null);
+  // The cohort whose dates the page shows: the chosen one, else the soonest.
+  const shownCohort = isLive && !waitlist ? cohorts.find((c) => c.id === cohortId) ?? cohorts[0] : undefined;
+
+  // With tiers, the size (and any cohort) is chosen in the purchase modal, so the
+  // CTA just opens it. Single-tier live offerings still pick a cohort inline.
+  const primaryCta = isLive && waitlist ? "Join waitlist"
+    : tiersEnabled ? "Select a size"
+    : isLive ? (cohortId ? "Purchase" : "Select your dates")
+    : "Purchase";
+  const ctaDisabled = isLive && !waitlist && !tiersEnabled && !cohortId;
+  const [tierPickerOpen, setTierPickerOpen] = useState(false);
+  const onPurchase = () => {
+    if (tiersEnabled && !(isLive && waitlist)) setTierPickerOpen(true);
+  };
+  // Group session whose description is open in the details modal.
+  const [detailsSession, setDetailsSession] = useState<GroupSession | null>(null);
+  // Cohort selection is inline only for single-tier live offerings; with tiers it
+  // moves into the size → dates modal flow (a tier may not include sessions).
+  const cohortPicker = isLive && !tiersEnabled && (
+    <CohortPicker cohorts={cohorts} sessions={groupSessions} selectedId={cohortId} onSelect={setCohortId} waitlist={waitlist} />
+  );
 
   // Mobile sticky nav — appears once the hero sentinel scrolls above the
   // viewport, matching the profile page's scroll-in bar. (Same observer logic:
@@ -391,12 +665,6 @@ export default function OfferingPage() {
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, []);
-
-  // Admin "Session is the only product" preview: an offering that's just a
-  // group session has no details page of its own — go straight to the session.
-  if (offering && groupSessions.length > 0 && isStandaloneSessionMode()) {
-    return <Navigate to={`/offering/${offering.slug}/session/${groupSessions[0].id}`} replace />;
-  }
 
   if (!offering) {
     return (
@@ -447,7 +715,8 @@ export default function OfferingPage() {
                 description instead of in the (image-only) card at the top. */}
             <div className="mt-6 lg:hidden">
               <PriceRow offering={offering} />
-              <Button size="lg" variant="primary" rounded="rounded-full" className="mt-4 w-full text-[15px]">
+              {cohortPicker}
+              <Button size="lg" variant="primary" rounded="rounded-full" className="mt-4 w-full text-[15px]" disabled={ctaDisabled} onClick={onPurchase}>
                 {primaryCta}
               </Button>
               <Button size="lg" variant="secondary" rounded="rounded-full" className="mt-2 w-full text-[15px]">
@@ -503,8 +772,10 @@ export default function OfferingPage() {
                     free: false,
                   };
                 });
+              // Group sessions are priced line items too, so they count toward it.
+              const sessionsSubtotal = groupSessions.reduce((sum, gs) => sum + gs.price, 0);
               const subtotal = bundledRows
-                ? bundledRows.reduce((sum, r) => sum + r.price, 0)
+                ? bundledRows.reduce((sum, r) => sum + r.price, 0) + sessionsSubtotal
                 : tier ? tier.subtotal : parseMoney(offering.origPrice) || total;
               const savings = Math.max(0, subtotal - total);
               // Fallback for offerings without bundle data, matching the
@@ -551,22 +822,33 @@ export default function OfferingPage() {
                   {/* Product list */}
                   <div className="overflow-hidden rounded-2xl border border-gray-stroke px-4">
                     {/* Group sessions link to their own shareable sub-page. */}
-                    {groupSessions.map((s) => (
-                      <Link
-                        key={s.id}
-                        to={`/offering/${offering.slug}/session/${s.id}`}
-                        className="-mx-4 flex items-center gap-3 border-b border-gray-stroke px-4 py-4 no-underline hover:bg-[#fafafa]"
-                      >
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center">
-                          <CalendarIcon day={s.day} />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[15px] font-semibold text-gray-dark">{s.name}</span>
-                          <span className="block text-[15px] text-gray-light">Group session · {s.dateLabel}</span>
-                        </span>
-                        <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
-                      </Link>
-                    ))}
+                    {/* Group sessions — priced like the other products, dated by
+                        the shown cohort (undated while waitlisted), with a
+                        "Details" link that opens the session's description. */}
+                    {groupSessions.map((s) => {
+                      const slot = shownCohort?.sessions[s.id];
+                      return (
+                        <div key={s.id} className="flex items-center gap-3 border-b border-gray-stroke py-4">
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+                            <CalendarIcon day={slot?.day ?? "–"} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[15px] font-semibold text-gray-dark">{s.name}</span>
+                            <span className="block text-[15px] text-gray-light">
+                              Group session · {slot ? slot.dateLabel : "Dates to be announced"} ·{" "}
+                              <button
+                                type="button"
+                                onClick={() => setDetailsSession(s)}
+                                className="cursor-pointer font-medium text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px]"
+                              >
+                                Details
+                              </button>
+                            </span>
+                          </span>
+                          <span className="shrink-0 text-[15px] text-gray-dark">{formatMoney(s.price)}</span>
+                        </div>
+                      );
+                    })}
                     {products.map((p, i) => (
                       <div key={p.title} className={`flex items-center gap-3 py-4 ${i < products.length - 1 ? "border-b border-gray-stroke" : ""}`}>
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center">
@@ -708,7 +990,9 @@ export default function OfferingPage() {
 
           {/* Right: sticky purchase card */}
           <aside className="w-full lg:sticky lg:top-[81px] lg:h-fit lg:w-[340px] lg:shrink-0">
-            <PurchaseCard offering={offering} ctaLabel={primaryCta} />
+            <PurchaseCard offering={offering} ctaLabel={primaryCta} ctaDisabled={ctaDisabled} onCta={onPurchase}>
+              {cohortPicker}
+            </PurchaseCard>
 
             {/* Questions? — mirrors the coach profile sidebar's message prompt. Desktop only. */}
             <div className="hidden gap-3 pt-6 lg:flex">
@@ -783,7 +1067,12 @@ export default function OfferingPage() {
                   variant="primary"
                   rounded="rounded-full"
                   className="shrink-0"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // No dates picked yet: send them back up to the date picker.
+                    if (ctaDisabled) window.scrollTo({ top: 0, behavior: "smooth" });
+                    else onPurchase();
+                  }}
                 >
                   {primaryCta}
                 </Button>
@@ -794,7 +1083,32 @@ export default function OfferingPage() {
         document.body,
       )}
 
-      <AdminMenu tiersEnabled={tiersEnabled} onToggleTiers={toggleTiers} />
+      <TierPickerModal
+        open={tierPickerOpen}
+        onClose={() => setTierPickerOpen(false)}
+        offering={offering}
+        tiers={TIERS}
+        activeIndex={activeTier}
+        onSelectTier={setActiveTier}
+        isLive={isLive}
+        cohorts={cohorts}
+        sessions={groupSessions}
+        cohortId={cohortId}
+        onSelectCohort={setCohortId}
+      />
+
+      <SessionDetailsModal
+        session={detailsSession}
+        slot={detailsSession ? shownCohort?.sessions[detailsSession.id] : undefined}
+        onClose={() => setDetailsSession(null)}
+      />
+
+      <AdminMenu
+        toggles={[
+          { label: "Enable tiers", checked: tiersEnabled, onChange: toggleTiers },
+          ...(isLive ? [{ label: "No upcoming cohorts", checked: waitlist, onChange: toggleWaitlist }] : []),
+        ]}
+      />
     </div>
   );
 }

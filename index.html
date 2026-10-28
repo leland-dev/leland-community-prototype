@@ -27,29 +27,57 @@
       // would paint fully once before the entrance styles applied, flashing all
       // its content for a frame.
       (function () {
-        if (!new URLSearchParams(location.search).has("mini")) return;
+        var params = new URLSearchParams(location.search);
+        var isMini = params.has("mini");
+        // ?clip=1 is the Video Mode (/video) entrance cascade: the same iframe
+        // renders the *real* page, but nav items, sidebar cards, and dashboard
+        // content cards fade up in a stagger. Injected here (not from React) so
+        // the elements start hidden before first paint — no un-animated flash.
+        var clip = params.get("clip");
+        if (!isMini && !clip) return;
         var css = [
           "html,body{scrollbar-width:none;-ms-overflow-style:none}",
-          "::-webkit-scrollbar{display:none}",
-          // Status-bar head-room: the nav grows taller, so the strip carries
-          // the nav's own background (beige over the hero, white on scroll).
-          "header.fixed{padding-top:24px;height:80px}",
-          "@keyframes miniIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}",
-          "h1,h1+p,section,section:nth-of-type(1)>div:nth-of-type(2)>*,section:nth-of-type(1)>button{opacity:0;animation:miniIn .5s cubic-bezier(.25,.1,.25,1) forwards}",
-          "h1{animation-delay:.55s}h1+p{animation-delay:.75s}",
-          "section:nth-of-type(1){animation-delay:1.05s}",
-          "section:nth-of-type(1)>div:nth-of-type(2)>*:nth-child(1){animation-delay:1.4s}",
-          "section:nth-of-type(1)>div:nth-of-type(2)>*:nth-child(2){animation-delay:1.6s}",
-          "section:nth-of-type(1)>div:nth-of-type(2)>*:nth-child(3){animation-delay:1.8s}",
-          "section:nth-of-type(1)>button{animation-delay:2.05s}",
-          "section:nth-of-type(2){animation-delay:2.35s}",
-          "section:nth-of-type(3){animation-delay:2.6s}",
-          "section:nth-of-type(4){animation-delay:2.85s}",
-          "section:nth-of-type(5){animation-delay:3.1s}"
-        ].join("");
+          "::-webkit-scrollbar{display:none}"
+        ];
+        // The promo/takeover mini cascade — only when mini *without* a clip
+        // override (the clip cascade below replaces it for Video Mode).
+        if (isMini && !clip) {
+          css.push(
+            // Status-bar head-room: the nav grows taller, so the strip carries
+            // the nav's own background (beige over the hero, white on scroll).
+            "header.fixed{padding-top:24px;height:80px}",
+            "@keyframes miniIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}",
+            "h1,h1+p,section,section:nth-of-type(1)>div:nth-of-type(2)>*,section:nth-of-type(1)>button{opacity:0;animation:miniIn .5s cubic-bezier(.25,.1,.25,1) forwards}",
+            "h1{animation-delay:.55s}h1+p{animation-delay:.75s}",
+            "section:nth-of-type(1){animation-delay:1.05s}",
+            "section:nth-of-type(1)>div:nth-of-type(2)>*:nth-child(1){animation-delay:1.4s}",
+            "section:nth-of-type(1)>div:nth-of-type(2)>*:nth-child(2){animation-delay:1.6s}",
+            "section:nth-of-type(1)>div:nth-of-type(2)>*:nth-child(3){animation-delay:1.8s}",
+            "section:nth-of-type(1)>button{animation-delay:2.05s}",
+            "section:nth-of-type(2){animation-delay:2.35s}",
+            "section:nth-of-type(3){animation-delay:2.6s}",
+            "section:nth-of-type(4){animation-delay:2.85s}",
+            "section:nth-of-type(5){animation-delay:3.1s}"
+          );
+        }
+        if (clip) {
+          var nav = "header [class~='gap-[2px]'] > *";
+          var me = "header button[aria-label='Me']";
+          var side = "aside[class~='w-[264px]'] > div";
+          var cards = "[class~='min-w-0'][class~='gap-5'][class~='flex-col'] > *";
+          css.push("@keyframes clipIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}");
+          css.push(nav + "," + me + "," + side + "," + cards + "{opacity:0;animation:clipIn .5s cubic-bezier(.22,1,.36,1) both}");
+          // Nav items (top-right cluster), then the Me avatar.
+          for (var i = 1; i <= 8; i++) css.push(nav + ":nth-child(" + i + "){animation-delay:" + (0.15 + 0.07 * (i - 1)).toFixed(2) + "s}");
+          css.push(me + "{animation-delay:.64s}");
+          // Sidebar cards.
+          for (var j = 1; j <= 5; j++) css.push(side + ":nth-child(" + j + "){animation-delay:" + (0.55 + 0.09 * (j - 1)).toFixed(2) + "s}");
+          // Main-content dashboard cards.
+          for (var k = 1; k <= 8; k++) css.push(cards + ":nth-child(" + k + "){animation-delay:" + (0.8 + 0.1 * (k - 1)).toFixed(2) + "s}");
+        }
         var el = document.createElement("style");
         el.id = "mini-style";
-        el.textContent = css;
+        el.textContent = css.join("");
         document.head.appendChild(el);
       })();
     </script>

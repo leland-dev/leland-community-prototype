@@ -578,7 +578,7 @@ function OfferingsSection({ category, gridClass }: { category: string | undefine
                 key={id}
                 offering={o}
                 onPreview={() => navigate(`/offering/${o.slug}`)}
-                onEdit={() => navigate(`/coach/manage/${category}/new-product`)}
+                onEdit={() => navigate(`/coach/manage/${category}/new-product?edit=${o.slug}`)}
               />
             );
           }

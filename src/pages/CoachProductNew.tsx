@@ -1,9 +1,12 @@
 import { createContext, Fragment, useContext, useEffect, useLayoutEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion, Reorder, useDragControls } from "motion/react";
 import { Button } from "../components/Button";
+import { CalendarIcon } from "../components/SessionCard";
 import { useCollections, upsertCollection, newCollectionId, type Collection } from "../lib/collections";
+import { getOfferingBySlug } from "../lib/offerings";
+import { getGroupSessionsForOffering, getCohorts, BUNDLED_PRODUCTS } from "../lib/groupSessions";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import crownIcon from "../assets/icons/crown-membership.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
@@ -58,8 +61,9 @@ import checkmarkFilledIcon from "../assets/icons/checkmark-filled.svg";
 import giftIcon from "../assets/icons/gift.svg";
 import lightBulbIcon from "../assets/icons/light-bulb.svg";
 import packageBoxOpenIcon from "../assets/icons/package-box-open.svg";
+import calendarPageIcon from "../assets/icons/calendar-page.svg";
 
-type StepKey = "product" | "offerings" | "page";
+type StepKey = "product" | "offerings" | "scheduling" | "page";
 
 // Setup-flow version, toggled from the admin menu. v1: add products, then set a
 // price. v2: each product carries its own price and the option shows a roll-up
@@ -119,6 +123,8 @@ const newPricingOption = (id: number): PricingOption => ({
 const STEPS: { key: StepKey; label: string; icon: string }[] = [
   { key: "offerings", label: "Products", icon: moneyIcon },
   { key: "product", label: "Details", icon: textIcon },
+  // Only shown once the offering has a group session (see `steps` below).
+  { key: "scheduling", label: "Scheduling", icon: calendarPageIcon },
   { key: "page", label: "Page", icon: storeIcon },
 ];
 
@@ -262,14 +268,16 @@ const newCourseSection = (existing: CourseSection[]): CourseSection => ({
 // gets a CTA that opens the config modal (see OfferingConfigFields). Add an
 // entry to give another offering type its own configuration.
 const configDefaults: Record<string, Record<string, string>> = {
-  "coaching-time": { mode: "set", hours: "", minutes: "", minHours: "", maxHours: "", delivery: "" },
+  // `expiration` default must match DEFAULT_EXPIRATION below (kept as a literal
+  // here since this object is initialized before that const).
+  "coaching-time": { mode: "set", hours: "", minutes: "", minHours: "", maxHours: "", delivery: "", expiration: "3 months" },
   content: { assetName: "", title: "", description: "", downloadable: "false", attachFile: "false", attachmentName: "", resourceType: "", lelandPlus: "true", anonymous: "false" },
   collection: { title: "", description: "" },
   course: { title: "", description: "" },
   "paid-livestream": { name: "", description: "", subcategories: "", lelandPlus: "false", duration: "30", date: "", time: "", coverName: "" },
-  // A workshop is a paid livestream: same scheduling fields, but it always
-  // carries its own price. Seats are unlimited.
-  workshop: { name: "", description: "", price: "", subcategories: "", lelandPlus: "false", duration: "30", date: "", time: "", coverName: "" },
+  // A workshop (group session) is a paid livestream without its own date — the
+  // offering's Scheduling step dates it per cohort. Seats are unlimited.
+  workshop: { name: "", description: "", price: "", subcategories: "", lelandPlus: "false", duration: "30", coverName: "" },
   // Placeholder offerings — configuration TBD, so their config is empty and
   // they're always "complete" (see isConfigComplete's default).
   agent: {},
@@ -385,6 +393,18 @@ const deliveryFormats: { value: string; label: string; cardTitle: string; sub: s
 ];
 const deliveryLabel = (v: string) => deliveryFormats.find((d) => d.value === v)?.label;
 
+// How long a coaching-time purchase stays redeemable before it expires. Applies
+// to both one-time and subscription offerings; defaults to 3 months.
+const EXPIRATION_OPTIONS = [
+  { value: "1 month", label: "1 month" },
+  { value: "3 months", label: "3 months" },
+  { value: "6 months", label: "6 months" },
+  { value: "9 months", label: "9 months" },
+  { value: "1 year", label: "1 year" },
+  { value: "2 years", label: "2 years" },
+];
+const DEFAULT_EXPIRATION = "3 months";
+
 // Whether a configurable offering has enough filled in to be saved as finished.
 function isConfigComplete(item: OfferingItem, v2 = false): boolean {
   const c = item.config;
@@ -403,8 +423,8 @@ function isConfigComplete(item: OfferingItem, v2 = false): boolean {
     return Boolean(c.name && c.date && c.time);
   }
   if (item.slug === "workshop") {
-    // Workshops are always paid, so a price is required alongside scheduling.
-    return Boolean(c.name && c.date && c.time && c.price);
+    // Always paid, so a price is required. Dates come from the Scheduling step.
+    return Boolean(c.name && c.price);
   }
   if (isListOffering(item.slug)) {
     return Boolean(c.title) && (item.items?.length ?? 0) > 0;
@@ -451,6 +471,18 @@ const stepMotion = {
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: 8 },
   transition: { duration: 0.28, ease: [0.25, 0.1, 0.25, 1] as const },
+};
+
+// Staggered entrance for the upfront "How do people pay?" gate. The container
+// cascades its children; each item fades up. Shared variant labels let the
+// stagger nest into the card selector (its cards reveal in turn too).
+const gateContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+const gateItem = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const } },
 };
 
 // Height/opacity transition for the "Added" list. Rows animate their own
@@ -786,30 +818,56 @@ export default function CoachProductNew() {
 
   const [pendingNav, setPendingNav] = useState<string | null>(null);
   const [step, setStep] = useState<StepKey>("offerings");
+
+  // Edit mode (?edit=<offering slug>): the flow opens pre-filled with that
+  // offering's details, products, pricing and cohorts instead of empty.
+  const [searchParams] = useSearchParams();
+  const [seed] = useState(() => seedFromOffering(searchParams.get("edit")));
+  const editing = seed !== null;
+
   // Offering status — shown in the top bar and chosen when publishing. New
-  // offerings start as a draft until the coach publishes.
-  const [status, setStatus] = useState<OfferingStatus>("draft");
+  // offerings start as a draft until the coach publishes; edited ones are live.
+  const [status, setStatus] = useState<OfferingStatus>(editing ? "public" : "draft");
 
   // Shared product-in-progress state, reflected live in the preview.
-  const [name, setName] = useState("");
-  const [headline, setHeadline] = useState("");
+  const [name, setName] = useState(seed?.name ?? "");
+  const [headline, setHeadline] = useState(seed?.headline ?? "");
   // Always keep at least one pricing option. Each option is a self-contained
   // unit: name + its own products + its own access (free/paid) + price.
-  const [pricingOptions, setPricingOptions] = useState<PricingOption[]>(() => [newPricingOption(0)]);
+  const [pricingOptions, setPricingOptions] = useState<PricingOption[]>(() => [seed?.pricingOption ?? newPricingOption(0)]);
   const nextPricingId = useRef(1);
   // v2: whether the offering has multiple pricing options (tabs). Off collapses
   // back to a single option.
   const [multiEnabled, setMultiEnabled] = useState(false);
-  const [added, setAdded] = useState<OfferingItem[]>([]);
-  const [description, setDescription] = useState("");
+  // Offering-level billing model (one-time vs subscription). Chosen on an upfront
+  // gate before the builder opens; billing is offering-wide, so every pricing
+  // option tracks it (they differ only by price / products / interval).
+  const [billingModel, setBillingModel] = useState<BillingModel>(seed?.pricingOption?.billing === "recurring" ? "recurring" : "one-time");
+  // Whether the model has been picked. New offerings start on the gate; edits
+  // already have a model, so they skip straight into the builder.
+  const [modelConfirmed, setModelConfirmed] = useState(editing);
+  // Confirm when switching to subscription would conflict with a product (a
+  // coaching-time range), which gets converted to a set amount.
+  const [confirmRecurring, setConfirmRecurring] = useState(false);
+  const [added, setAdded] = useState<OfferingItem[]>(seed?.added ?? []);
+  // Cohorts — scoped per pricing tier (each tier schedules its own sessions),
+  // keyed by pricing-option id. The primary option is id 0.
+  const [cohortsByOption, setCohortsByOption] = useState<Record<number, BuilderCohort[]>>(() => ({ 0: seed?.cohorts.length ? seed.cohorts : [newCohort(0)] }));
+  const nextCohortId = useRef(seed?.cohorts.length || 1);
+  // Subscription offerings schedule live sessions as a rolling calendar instead
+  // of cohorts: per group session (keyed by product id), a list of upcoming
+  // occurrences members can join while active.
+  const [sessionCalendar, setSessionCalendar] = useState<Record<number, SessionOccurrence[]>>({});
+  const nextOccurrenceId = useRef(1);
+  const [description, setDescription] = useState(seed?.description ?? "");
   const [buttonText, setButtonText] = useState("Purchase");
   // Thumbnail image (demo-only object URL) — set on the Details step, previewed
   // in the sidebar card and on the Page step.
-  const [thumbnail, setThumbnail] = useState<string | null>(null);
+  const [thumbnail, setThumbnail] = useState<string | null>(seed?.thumbnail ?? null);
   const [sections, setSections] = useState<PageSection[]>(() => [
     { id: INCLUDED_SECTION_ID, kind: "included", heading: "What's included" },
   ]);
-  const nextOfferingId = useRef(0);
+  const nextOfferingId = useRef(seed?.added.length ?? 0);
   const nextSectionId = useRef(0);
 
   // Admin tool — MVP on shows the full feature set; off hides not-yet-built bits.
@@ -827,17 +885,57 @@ export default function CoachProductNew() {
   }, [adminOpen]);
 
   useEffect(() => {
-    document.title = "Leland Prototype | Add offering";
-  }, []);
+    document.title = `Leland Prototype | ${editing ? "Edit offering" : "Add offering"}`;
+  }, [editing]);
 
-  const stepIndex = STEPS.findIndex((s) => s.key === step);
-  const isLast = stepIndex === STEPS.length - 1;
+  // Keep every pricing option's billing in lockstep with the offering-level
+  // model. Covers switching the model and any option added while subscription.
+  useEffect(() => {
+    setPricingOptions((o) => (o.every((p) => p.billing === billingModel) ? o : o.map((p) => ({ ...p, billing: billingModel }))));
+  }, [billingModel]);
+
+  // Group sessions are what make an offering "live": they add the Scheduling
+  // step after Details. Removing the last one drops the step again.
+  const liveItems = added.filter((a) => a.slug === "workshop");
+  const hasLive = liveItems.length > 0;
+  const steps = STEPS.filter((s) => s.key !== "scheduling" || hasLive);
+  if (step === "scheduling" && !hasLive) setStep("product");
+  const stepIndex = steps.findIndex((s) => s.key === step);
+  const isLast = stepIndex === steps.length - 1;
 
   const close = () => setPendingNav(`/my-leland/manage/${category}`);
   const next = () => {
     if (isLast) close();
-    else setStep(STEPS[stepIndex + 1].key);
+    else setStep(steps[stepIndex + 1].key);
   };
+
+  const addCohort = (optionId: number) =>
+    setCohortsByOption((m) => ({ ...m, [optionId]: [...(m[optionId] ?? []), newCohort(nextCohortId.current++)] }));
+  const removeCohort = (optionId: number, id: number) =>
+    setCohortsByOption((m) => ({ ...m, [optionId]: (m[optionId] ?? []).filter((x) => x.id !== id) }));
+  const updateCohort = (optionId: number, id: number, patch: Partial<BuilderCohort>) =>
+    setCohortsByOption((m) => ({ ...m, [optionId]: (m[optionId] ?? []).map((x) => (x.id === id ? { ...x, ...patch } : x)) }));
+  // Ensure every tier that includes a group session starts with one cohort to
+  // fill in (mirrors the single-tier default of starting with one).
+  useEffect(() => {
+    setCohortsByOption((m) => {
+      let changed = false;
+      const next = { ...m };
+      for (const opt of pricingOptions) {
+        const hasSessions = opt.productIds.some((id) => added.find((a) => a.id === id)?.slug === "workshop");
+        if (hasSessions && !next[opt.id]?.length) { next[opt.id] = [newCohort(nextCohortId.current++)]; changed = true; }
+      }
+      return changed ? next : m;
+    });
+  }, [pricingOptions, added]);
+  // Rolling-calendar handlers (subscription scheduling) — occurrences live under
+  // their group session's product id.
+  const addOccurrence = (itemId: number) =>
+    setSessionCalendar((c) => ({ ...c, [itemId]: [...(c[itemId] ?? []), { id: nextOccurrenceId.current++, date: "", time: "" }] }));
+  const removeOccurrence = (itemId: number, occId: number) =>
+    setSessionCalendar((c) => ({ ...c, [itemId]: (c[itemId] ?? []).filter((o) => o.id !== occId) }));
+  const updateOccurrence = (itemId: number, occId: number, patch: Partial<SessionOccurrence>) =>
+    setSessionCalendar((c) => ({ ...c, [itemId]: (c[itemId] ?? []).map((o) => (o.id === occId ? { ...o, ...patch } : o)) }));
   // Publish with a chosen status (or save as draft), then route back.
   const publish = (s: OfferingStatus) => { setStatus(s); close(); };
 
@@ -848,8 +946,9 @@ export default function CoachProductNew() {
   const [previewMounted, setPreviewMounted] = useState(added.length > 0);
   if (added.length > 0 && !previewMounted) setPreviewMounted(true);
 
-  // Pricing options (step 2). Each is a self-contained option.
-  const makePricingOption = () => newPricingOption(nextPricingId.current++);
+  // Pricing options (step 2). Each is a self-contained option, created already
+  // matching the offering-level billing model (billing is offering-wide).
+  const makePricingOption = () => ({ ...newPricingOption(nextPricingId.current++), billing: billingModel });
   const addPricingOption = (): number => {
     // Mirror the primary option's product line-up into the new option, but as
     // fresh, unconfigured instances — same types, empty setup, "Configure" CTA.
@@ -895,7 +994,8 @@ export default function CoachProductNew() {
   const previewItems = (primaryPricing?.productIds ?? [])
     .map((id) => added.find((a) => a.id === id))
     .filter((it): it is OfferingItem => Boolean(it));
-  const previewPaidType: "recurring" | "one-time" = primaryPricing?.billing === "recurring" ? "recurring" : "one-time";
+  const previewPaidType: "recurring" | "one-time" = billingModel === "recurring" ? "recurring" : "one-time";
+  const previewInterval = primaryPricing?.interval ?? "1 month";
   // v2 derives the price from the option's roll-up total; v1 uses its set price.
   // Free is derived from a $0 price either way.
   const v2Total = optionRollup(previewItems, primaryPricing ?? { discountType: "percent", discountValue: "" }).total;
@@ -927,6 +1027,25 @@ export default function CoachProductNew() {
   const markOfferingConfigured = (id: number) =>
     setAdded((a) => a.map((item) => (item.id === id ? { ...item, configured: true } : item)));
 
+  // Change the offering-level billing model (from the gate or the pricing line).
+  // Switching to subscription with a coaching-time range in the cart defers to a
+  // confirm first, since a range can't be sold on a subscription.
+  const chooseBillingModel = (model: BillingModel) => {
+    if (model === billingModel) return;
+    const hasRange = added.some((it) => it.slug === "coaching-time" && it.config.mode === "range");
+    if (model === "recurring" && hasRange) { setConfirmRecurring(true); return; }
+    setBillingModel(model);
+  };
+  // Confirmed switch to subscription: convert range coaching-time products to a
+  // set amount (clearing the range) and re-open them for setup, then switch.
+  const confirmSwitchToRecurring = () => {
+    setAdded((a) => a.map((it) => (it.slug === "coaching-time" && it.config.mode === "range"
+      ? { ...it, config: { ...it.config, mode: "set", minHours: "", maxHours: "" }, configured: false }
+      : it)));
+    setBillingModel("recurring");
+    setConfirmRecurring(false);
+  };
+
   // Page sections (step 3). New sections append to the end; reorder swaps with a
   // neighbor so "move up/down" stays a single-step nudge.
   const addSection = (kind: PageSectionKind) => setSections((s) => [...s, newPageSection(kind, nextSectionId.current++)]);
@@ -939,6 +1058,31 @@ export default function CoachProductNew() {
   // Drag-and-drop reorder — the Reorder list hands back the new order live.
   const reorderSections = (next: PageSection[]) => setSections(next);
 
+  // Upfront gate — the billing model is chosen here, before the builder chrome
+  // and its step tabs appear. New offerings land here first; edits skip it.
+  if (!modelConfirmed) {
+    return (
+      <div className="min-h-screen bg-white">
+        <header className="sticky top-0 z-20 flex items-center gap-4 border-b border-gray-stroke bg-white px-4 py-3 sm:px-6">
+          <Button size="sm" variant="secondary" iconOnly onClick={() => navigate(`/my-leland/manage/${category}`)} aria-label="Close">
+            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </Button>
+          <span className="hidden text-[15px] font-semibold text-gray-dark sm:inline">Add offering</span>
+        </header>
+        <motion.main variants={gateContainer} initial="hidden" animate="show" className="mx-auto w-full max-w-[560px] px-4 py-16 sm:px-6">
+          <motion.h1 variants={gateItem} className="text-[26px] font-semibold text-gray-dark">How do people pay?</motion.h1>
+          <motion.p variants={gateItem} className="mt-1.5 text-[16px] leading-snug text-gray-light">Choose how buyers pay for this offering. This shapes which products you can add.</motion.p>
+          <BillingModelSelector className="mt-8" model={billingModel} onChange={setBillingModel} />
+          <motion.div variants={gateItem} className="mt-8">
+            <Button size="lg" variant="primary" rounded="rounded-full" className="w-full text-[15px] font-semibold" onClick={() => setModelConfirmed(true)}>
+              Continue
+            </Button>
+          </motion.div>
+        </motion.main>
+      </div>
+    );
+  }
+
   return (
     <V2Context.Provider value={v2}>
     <div className="min-h-screen bg-white">
@@ -950,31 +1094,42 @@ export default function CoachProductNew() {
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           </Button>
-          <span className="hidden text-[15px] font-semibold text-gray-dark sm:inline">Add offering</span>
+          <span className="hidden text-[15px] font-semibold text-gray-dark sm:inline">{editing ? "Edit offering" : "Add offering"}</span>
         </div>
 
-        {/* Breadcrumb — click a step to jump to it */}
-        <nav className="flex items-center gap-1.5">
-          {STEPS.map((s, i) => {
-            const active = s.key === step;
-            // The Details and Page steps are locked until a product exists.
-            const locked = added.length === 0 && s.key !== "offerings";
-            return (
-              <div key={s.key} className="flex items-center gap-1.5">
-                {i > 0 && (
-                  <svg className="h-4 w-4 text-[#CFCFCF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                )}
-                <button
-                  onClick={() => { if (!locked) setStep(s.key); }}
-                  disabled={locked}
-                  className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[14px] transition-colors ${active ? "font-semibold text-gray-dark" : locked ? "cursor-not-allowed font-medium text-gray-extra-light" : "font-medium text-gray-light hover:text-gray-dark"}`}
+        {/* Breadcrumb — click a step to jump to it. Steps that come and go (the
+            Scheduling step) expand/collapse in place; the spacing lives inside
+            each item so it collapses with it. */}
+        <nav className="flex items-center">
+          <AnimatePresence initial={false}>
+            {steps.map((s, i) => {
+              const active = s.key === step;
+              // The Details and Page steps are locked until a product exists.
+              const locked = added.length === 0 && s.key !== "offerings";
+              return (
+                <motion.div
+                  key={s.key}
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: "auto", opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                  className={`flex shrink-0 items-center gap-1.5 overflow-hidden whitespace-nowrap ${i > 0 ? "pl-1.5" : ""}`}
                 >
-                  <MaskIcon src={s.icon} />
-                  <span className="hidden sm:inline">{s.label}</span>
-                </button>
-              </div>
-            );
-          })}
+                  {i > 0 && (
+                    <svg className="h-4 w-4 text-[#CFCFCF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                  )}
+                  <button
+                    onClick={() => { if (!locked) setStep(s.key); }}
+                    disabled={locked}
+                    className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[14px] transition-colors ${active ? "font-semibold text-gray-dark" : locked ? "cursor-not-allowed font-medium text-gray-extra-light" : "font-medium text-gray-light hover:text-gray-dark"}`}
+                  >
+                    <MaskIcon src={s.icon} />
+                    <span className="hidden sm:inline">{s.label}</span>
+                  </button>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -1014,6 +1169,8 @@ export default function CoachProductNew() {
                 {step === "offerings" && (
                   <OfferingsStep
                     added={added} onConfigChange={updateOfferingConfig} onItemsChange={setOfferingItems} onConfigured={markOfferingConfigured}
+                    billingModel={billingModel}
+                    onChangeBillingModel={chooseBillingModel}
                     pricingOptions={pricingOptions}
                     onAddPricingOption={addPricingOption}
                     onRemovePricingOption={removePricingOption}
@@ -1025,12 +1182,36 @@ export default function CoachProductNew() {
                     mvp={mvp}
                   />
                 )}
+                {step === "scheduling" && (
+                  billingModel === "recurring" ? (
+                    <SubscriptionSchedulingStep
+                      options={pricingOptions}
+                      added={added}
+                      multiEnabled={multiEnabled}
+                      calendar={sessionCalendar}
+                      onAdd={addOccurrence}
+                      onRemove={removeOccurrence}
+                      onUpdate={updateOccurrence}
+                    />
+                  ) : (
+                    <SchedulingStep
+                      options={pricingOptions}
+                      added={added}
+                      multiEnabled={multiEnabled}
+                      cohortsByOption={cohortsByOption}
+                      onAdd={addCohort}
+                      onRemove={removeCohort}
+                      onUpdate={updateCohort}
+                    />
+                  )
+                )}
                 {step === "page" && (
                   <PageStep
                     name={name}
                     headline={headline}
                     pricingMode={previewMode}
                     paidType={previewPaidType}
+                    interval={previewInterval}
                     price={previewPrice}
                     description={description}
                     setDescription={setDescription}
@@ -1063,6 +1244,7 @@ export default function CoachProductNew() {
                 headline={headline}
                 pricingMode={previewMode}
                 paidType={previewPaidType}
+                interval={previewInterval}
                 price={previewPrice}
                 cover={thumbnail}
                 multiOption={pricingOptions.length > 1}
@@ -1072,6 +1254,17 @@ export default function CoachProductNew() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Switching to a subscription with a coaching-time range in the cart —
+          confirm the conversion to a set amount before switching. */}
+      <ConfirmModal
+        open={confirmRecurring}
+        title="Switch to a subscription?"
+        body="A range of coaching hours can't be sold on a subscription. That product will be reset to a set amount of hours for you to finish setting up."
+        confirmLabel="Switch to subscription"
+        onConfirm={confirmSwitchToRecurring}
+        onClose={() => setConfirmRecurring(false)}
+      />
 
       {/* Admin tool — bottom-right, mirrors the profile template */}
       <div ref={adminRef} className="fixed bottom-6 right-6 z-40">
@@ -1154,7 +1347,468 @@ function ProductStep({
   );
 }
 
+/* ---------- Scheduling (cohorts for offerings with group sessions) ---------- */
+
+// A cohort gives every group session in the offering a date + time. Slots are
+// keyed by the group session's product id.
+type CohortSlot = { date: string; time: string };
+type BuilderCohort = { id: number; label: string; slots: Record<number, CohortSlot> };
+const newCohort = (id: number): BuilderCohort => ({ id, label: "", slots: {} });
+
+// Subscription offerings don't run in cohorts — they keep a rolling calendar.
+// Each group session carries its own list of upcoming occurrences (a date +
+// time) that members can join while their subscription is active.
+type SessionOccurrence = { id: number; date: string; time: string };
+
+// "2026-11-12" → "Nov 12"
+const shortDate = (iso: string) =>
+  new Date(`${iso}T00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+// A cohort's lifecycle, from its earliest session date: it's sellable until
+// that first session starts, then it's underway.
+function cohortState(cohort: BuilderCohort, liveItems: OfferingItem[]): { status: "incomplete" | "open" | "started"; firstDate?: string } {
+  const slots = liveItems.map((it) => cohort.slots[it.id]);
+  if (slots.some((sl) => !sl?.date || !sl?.time)) return { status: "incomplete" };
+  const firstDate = slots.map((sl) => sl!.date).sort()[0];
+  const today = new Date().toISOString().slice(0, 10);
+  return { status: firstDate <= today ? "started" : "open", firstDate };
+}
+
+const cohortStatusPill: Record<"incomplete" | "open" | "started", { label: string; className: string }> = {
+  incomplete: { label: "Needs dates", className: "bg-gray-hover text-gray-light" },
+  open: { label: "Open for enrollment", className: "bg-[#E5F3EC] text-[#1B7A4B]" },
+  started: { label: "Underway", className: "bg-gray-hover text-gray-light" },
+};
+
+// The group sessions inside a given pricing tier (option).
+function sessionsForOption(opt: PricingOption, added: OfferingItem[]): OfferingItem[] {
+  return opt.productIds
+    .map((id) => added.find((a) => a.id === id))
+    .filter((it): it is OfferingItem => it !== undefined && it.slug === "workshop");
+}
+// Tiers that include at least one group session, paired with their display index.
+function tiersWithSessions(options: PricingOption[], added: OfferingItem[]) {
+  return options
+    .map((opt, i) => ({ opt, i, liveItems: sessionsForOption(opt, added) }))
+    .filter((t) => t.liveItems.length > 0);
+}
+
+function SchedulingStep({
+  options, added, multiEnabled, cohortsByOption, onAdd, onRemove, onUpdate,
+}: {
+  options: PricingOption[];
+  added: OfferingItem[];
+  multiEnabled: boolean;
+  cohortsByOption: Record<number, BuilderCohort[]>;
+  onAdd: (optionId: number) => void;
+  onRemove: (optionId: number, id: number) => void;
+  onUpdate: (optionId: number, id: number, patch: Partial<BuilderCohort>) => void;
+}) {
+  // Only tiers that include a group session are schedulable; each runs on its own.
+  const tiers = tiersWithSessions(options, added);
+
+  return (
+    <div className="flex flex-col gap-8">
+      <section>
+        <h2 className="text-[22px] font-semibold text-gray-dark">Scheduling</h2>
+        <p className="mt-0.5 text-[15px] text-gray-light">
+          {multiEnabled
+            ? "Each tier that includes live group sessions runs in its own cohorts. Buyers pick a cohort for their tier when they purchase."
+            : "Your offering includes live group sessions, so it runs in cohorts. Buyers pick a cohort when they purchase."}
+        </p>
+      </section>
+
+      {/* How the lifecycle works. */}
+      <div className="flex items-start gap-3 rounded-xl bg-gray-hover px-4 py-3.5">
+        <MaskIcon src={calendarPageIcon} className="mt-0.5 h-5 w-5 text-gray-light" />
+        <p className="text-[14px] leading-snug text-gray-light">
+          Each cohort can be purchased until its first session starts. Once every cohort is underway, it moves to a waitlist until you add new dates.
+        </p>
+      </div>
+
+      {tiers.map(({ opt, i, liveItems }) => (
+        <TierCohortSchedule
+          key={opt.id}
+          title={multiEnabled ? (opt.name || `Option ${i + 1}`) : null}
+          liveItems={liveItems}
+          cohorts={cohortsByOption[opt.id] ?? []}
+          onAdd={() => onAdd(opt.id)}
+          onRemove={(id) => onRemove(opt.id, id)}
+          onUpdate={(id, patch) => onUpdate(opt.id, id, patch)}
+        />
+      ))}
+    </div>
+  );
+}
+
+// One group session's date/time within a cohort. New (undated) rows open in an
+// editing state (date + time inputs + Save); once saved they collapse to the
+// calendar tile + date/time text with an Edit button.
+function CohortSessionRow({ item, slot, onChange }: { item: OfferingItem; slot: CohortSlot | undefined; onChange: (patch: Partial<CohortSlot>) => void }) {
+  const date = slot?.date ?? "";
+  const time = slot?.time ?? "";
+  const [editing, setEditing] = useState(!date || !time);
+  const canSave = Boolean(date && time);
+  const duration = LIVESTREAM_DURATIONS.find((d) => d.value === (item.config.duration ?? "30"))?.label;
+  const dayLabel = date ? String(Number(date.slice(8, 10))) : "–";
+  const dateText = date ? new Date(`${date}T00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+  const timeText = time ? new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "";
+
+  return (
+    <div className="flex items-center gap-3 px-4 py-4">
+      <CalendarIcon day={dayLabel} dim={!date} />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[15px] font-semibold text-gray-dark">{item.config.name || "Group Session"}</p>
+        {editing
+          ? (duration && <p className="text-[14px] text-gray-light">{duration}</p>)
+          : <p className="text-[14px] text-gray-light">{dateText} · {timeText}</p>}
+      </div>
+      {editing ? (
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:w-[300px]">
+            <input type="date" aria-label="Date" value={date} onChange={(e) => onChange({ date: e.target.value })} className={configInputClass} />
+            <input type="time" aria-label="Time" value={time} onChange={(e) => onChange({ time: e.target.value })} className={configInputClass} />
+          </div>
+          <Button size="md" variant="dark" disabled={!canSave} onClick={() => setEditing(false)}>Save</Button>
+        </div>
+      ) : (
+        <Button size="sm" variant="ghost" iconOnly aria-label="Edit" className="shrink-0" onClick={() => setEditing(true)}>
+          <MaskIcon src={editIcon} className="h-[18px] w-[18px]" />
+        </Button>
+      )}
+    </div>
+  );
+}
+
+// One tier's cohorts.
+function TierCohortSchedule({
+  title, liveItems, cohorts, onAdd, onRemove, onUpdate,
+}: {
+  title: string | null;
+  liveItems: OfferingItem[];
+  cohorts: BuilderCohort[];
+  onAdd: () => void;
+  onRemove: (id: number) => void;
+  onUpdate: (id: number, patch: Partial<BuilderCohort>) => void;
+}) {
+  const states = cohorts.map((c) => cohortState(c, liveItems));
+  const anyOpen = states.some((st) => st.status === "open");
+  const anyDated = states.some((st) => st.status !== "incomplete");
+
+  const setSlot = (cohort: BuilderCohort, itemId: number, patch: Partial<CohortSlot>) =>
+    onUpdate(cohort.id, { slots: { ...cohort.slots, [itemId]: { ...(cohort.slots[itemId] ?? { date: "", time: "" }), ...patch } } });
+
+  return (
+    <section className="flex flex-col gap-4">
+      {title && <h3 className="text-[17px] font-semibold text-gray-dark">{title}</h3>}
+
+      {/* Per-tier warning once nothing in this tier is left to sell. */}
+      {anyDated && !anyOpen && (
+        <div className="flex items-start gap-3 rounded-xl border border-[#F5D48A] bg-[#FFF8E6] px-4 py-3.5">
+          <MaskIcon src={calendarPageIcon} className="mt-0.5 h-5 w-5 text-[#8A5A00]" />
+          <p className="text-[14px] leading-snug text-[#5C3D00]">
+            <span className="font-semibold">No upcoming cohorts.</span> {title ? "This tier" : "This offering"} is on a waitlist. Add a cohort with new dates to start selling it again.
+          </p>
+        </div>
+      )}
+
+      {cohorts.map((cohort, i) => {
+        const st = states[i];
+        const pill = cohortStatusPill[st.status];
+        return (
+          <div key={cohort.id} className="overflow-hidden rounded-2xl border border-gray-stroke">
+            <div className="flex items-center gap-3 border-b border-gray-stroke px-4 py-3">
+              <input
+                value={cohort.label}
+                onChange={(e) => onUpdate(cohort.id, { label: e.target.value })}
+                placeholder={`Cohort ${i + 1}`}
+                aria-label="Cohort name"
+                autoComplete="off"
+                className="min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-gray-dark outline-none placeholder:text-gray-dark"
+              />
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-[12px] font-medium ${pill.className}`}>{pill.label}</span>
+              {cohorts.length > 1 && (
+                <Button size="sm" variant="ghost" iconOnly aria-label="Remove cohort" onClick={() => onRemove(cohort.id)}>
+                  <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
+                </Button>
+              )}
+            </div>
+
+            {/* One date/time row per group session in this cohort */}
+            <div className="flex flex-col divide-y divide-gray-stroke">
+              {liveItems.map((item) => (
+                <CohortSessionRow
+                  key={item.id}
+                  item={item}
+                  slot={cohort.slots[item.id]}
+                  onChange={(patch) => setSlot(cohort, item.id, patch)}
+                />
+              ))}
+            </div>
+
+            {st.firstDate && (
+              <p className="border-t border-gray-stroke bg-[#FAFAFA] px-4 py-2.5 text-[13px] text-gray-light">
+                {st.status === "open" ? `Enrollment closes ${shortDate(st.firstDate)}, when the first session starts.` : `Started ${shortDate(st.firstDate)} · no longer for sale.`}
+              </p>
+            )}
+          </div>
+        );
+      })}
+
+      <Button size="md" variant="secondary" className="self-start font-semibold" onClick={onAdd}>
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+        Add cohort
+      </Button>
+    </section>
+  );
+}
+
+// A single scheduled date for a session. New rows open in an editing state
+// (date + time inputs + Save); once saved they collapse to plain text with an
+// Edit button. Delete is always available.
+function SessionDateRow({ occ, onChange, onRemove }: { occ: SessionOccurrence; onChange: (patch: Partial<SessionOccurrence>) => void; onRemove: () => void }) {
+  const [editing, setEditing] = useState(!occ.date || !occ.time);
+  const canSave = Boolean(occ.date && occ.time);
+  const dayLabel = occ.date ? String(Number(occ.date.slice(8, 10))) : "–";
+  const dateText = occ.date ? new Date(`${occ.date}T00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+  const timeText = occ.time ? new Date(`2000-01-01T${occ.time}`).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "";
+
+  return (
+    <div className="flex items-center gap-3 px-4 py-3">
+      <CalendarIcon day={dayLabel} dim={!occ.date} />
+      {editing ? (
+        <>
+          <div className="grid flex-1 grid-cols-2 gap-2">
+            <input type="date" aria-label="Date" value={occ.date} onChange={(e) => onChange({ date: e.target.value })} className={configInputClass} />
+            <input type="time" aria-label="Time" value={occ.time} onChange={(e) => onChange({ time: e.target.value })} className={configInputClass} />
+          </div>
+          <Button size="md" variant="dark" disabled={!canSave} onClick={() => setEditing(false)}>Save</Button>
+        </>
+      ) : (
+        <>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[15px] font-semibold text-gray-dark">{dateText}</p>
+            <p className="text-[14px] text-gray-light">{timeText}</p>
+          </div>
+          <Button size="sm" variant="ghost" iconOnly aria-label="Edit" onClick={() => setEditing(true)}>
+            <MaskIcon src={editIcon} className="h-[18px] w-[18px]" />
+          </Button>
+        </>
+      )}
+      <Button size="sm" variant="ghost" iconOnly aria-label="Remove date" onClick={onRemove}>
+        <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
+      </Button>
+    </div>
+  );
+}
+
+// Scheduling for subscription offerings — a rolling calendar instead of cohorts.
+// Each group session keeps its own list of upcoming dates/times; members can
+// join any session while their subscription is active (no enrollment windows, no
+// waitlist, nothing to pick at checkout). Occurrences are a manual list for now;
+// a repeat/cadence rule can layer on top later.
+function SubscriptionSchedulingStep({
+  options, added, multiEnabled, calendar, onAdd, onRemove, onUpdate,
+}: {
+  options: PricingOption[];
+  added: OfferingItem[];
+  multiEnabled: boolean;
+  calendar: Record<number, SessionOccurrence[]>;
+  onAdd: (itemId: number) => void;
+  onRemove: (itemId: number, occId: number) => void;
+  onUpdate: (itemId: number, occId: number, patch: Partial<SessionOccurrence>) => void;
+}) {
+  // Only tiers that include a group session appear; each keeps its own calendar.
+  const tiers = tiersWithSessions(options, added);
+
+  return (
+    <div className="flex flex-col gap-8">
+      <section>
+        <h2 className="text-[22px] font-semibold text-gray-dark">Scheduling</h2>
+        <p className="mt-0.5 text-[15px] text-gray-light">
+          {multiEnabled
+            ? "Your offering is a subscription, so live sessions run on a rolling calendar. Each tier keeps its own — members can join any session in their tier while subscribed."
+            : "Your offering is a subscription, so live sessions run on a rolling calendar. Members can join any session while their subscription is active."}
+        </p>
+      </section>
+
+      <div className="flex items-start gap-3 rounded-xl bg-gray-hover px-4 py-3.5">
+        <MaskIcon src={calendarPageIcon} className="mt-0.5 h-5 w-5 text-gray-light" />
+        <p className="text-[14px] leading-snug text-gray-light">
+          Add upcoming dates for each session and keep the calendar stocked. Past dates drop off automatically — there's no enrollment deadline.
+        </p>
+      </div>
+
+      {tiers.map(({ opt, i, liveItems }) => (
+        <section key={opt.id} className="flex flex-col gap-4">
+          {multiEnabled && <h3 className="text-[17px] font-semibold text-gray-dark">{opt.name || `Option ${i + 1}`}</h3>}
+
+          {/* One card per group session in this tier, each with its own dates. */}
+          {liveItems.map((item) => {
+            const occurrences = calendar[item.id] ?? [];
+            const duration = LIVESTREAM_DURATIONS.find((d) => d.value === (item.config.duration ?? "30"))?.label;
+            return (
+              <div key={item.id} className="overflow-hidden rounded-2xl border border-gray-stroke">
+                <div className="flex items-center gap-3 border-b border-gray-stroke px-4 py-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+                    <img src={videoIcon} alt="" className="h-[26px] w-[26px]" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[16px] font-semibold text-gray-dark">{item.config.name || "Group Session"}</p>
+                    {duration && <p className="text-[14px] text-gray-light">{duration}</p>}
+                  </div>
+                  <span className="shrink-0 rounded-full bg-gray-hover px-2.5 py-1 text-[12px] font-medium text-gray-light">
+                    {occurrences.length} {occurrences.length === 1 ? "date" : "dates"}
+                  </span>
+                </div>
+
+                {occurrences.length === 0 ? (
+                  <p className="px-4 py-4 text-[15px] text-gray-extra-light">No upcoming dates yet.</p>
+                ) : (
+                  <div className="flex flex-col divide-y divide-gray-stroke">
+                    {occurrences.map((occ) => (
+                      <SessionDateRow
+                        key={occ.id}
+                        occ={occ}
+                        onChange={(patch) => onUpdate(item.id, occ.id, patch)}
+                        onRemove={() => onRemove(item.id, occ.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                <div className="border-t border-gray-stroke p-3">
+                  <Button size="sm" variant="secondary" className="font-semibold" onClick={() => onAdd(item.id)}>
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                    Add date
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+/* ---------- Edit mode: seed the builder from an existing offering ---------- */
+
+// "Nov 12" → "2026-11-12". Sample cohort dates carry no year, so months before
+// the current one roll into next year.
+function isoFromMonthDay(month: string, day: string): string {
+  const m = new Date(`${month} 1, 2000`).getMonth();
+  const now = new Date();
+  const year = m < now.getMonth() ? now.getFullYear() + 1 : now.getFullYear();
+  return `${year}-${String(m + 1).padStart(2, "0")}-${String(Number(day)).padStart(2, "0")}`;
+}
+// "6:00 PM – 7:30 PM PT" → "18:00" (the start time).
+function timeFromLabel(label: string): string {
+  const m = label.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!m) return "";
+  const h = (Number(m[1]) % 12) + (m[3].toUpperCase() === "PM" ? 12 : 0);
+  return `${String(h).padStart(2, "0")}:${m[2]}`;
+}
+
+type OfferingSeed = {
+  name: string;
+  headline: string;
+  description: string;
+  thumbnail: string | null;
+  added: OfferingItem[];
+  pricingOption: PricingOption;
+  cohorts: BuilderCohort[];
+};
+
+// Rebuild the builder state for a published offering (prototype data): its
+// details, its products as finished rows, a single paid pricing option whose
+// discount lands on the offering's price, and its cohorts. Offerings with
+// bundle data use it; the rest fall back to the same coaching + guide pair the
+// customer page shows.
+function seedFromOffering(slug: string | null): OfferingSeed | null {
+  const offering = getOfferingBySlug(slug ?? undefined);
+  if (!offering) return null;
+  const sessions = getGroupSessionsForOffering(offering.slug);
+  const bundled = BUNDLED_PRODUCTS[offering.slug];
+  const added: OfferingItem[] = [];
+  const push = (slug: string, config: Record<string, string>, items?: CollectionItem[]) =>
+    added.push({ id: added.length, slug, config: { ...defaultConfigFor(slug), ...config }, configured: true, ...(items ? { items } : {}) });
+
+  sessions.forEach((gs) =>
+    push("workshop", { name: gs.name, description: gs.description.join("\n\n"), price: String(gs.price), duration: String(gs.durationMin), coverName: "cover.png" }),
+  );
+  const parseMoney = (v?: string) => Number((v ?? "").replace(/[^0-9.]/g, "")) || 0;
+  if (bundled) {
+    bundled.forEach((p) => {
+      if (p.kind === "coaching-time") {
+        push("coaching-time", { mode: "set", hours: String(Math.round(p.price / EXPERT_HOURLY_RATE)), minutes: "0", delivery: "live", priceMode: "sync" });
+      } else if (p.kind === "content") {
+        push("content", { assetName: `${p.title}.pdf`, title: p.title, resourceType: "guide", price: String(p.price) });
+      } else {
+        const lessons = Number(p.detail.match(/\d+/)?.[0] ?? 1);
+        push("course", { title: p.title, price: String(p.price) },
+          Array.from({ length: lessons }, (_, i) => ({ id: i + 1, config: { title: `Lesson ${i + 1}`, description: "" }, sections: [] })));
+      }
+    });
+  } else {
+    const subtotal = parseMoney(offering.origPrice) || parseMoney(offering.price);
+    push("coaching-time", { mode: "set", hours: String(Math.max(1, Math.round(subtotal / EXPERT_HOURLY_RATE))), minutes: "0", delivery: "live", priceMode: "sync" });
+    push("content", { assetName: "MBA Essay Playbook.pdf", title: "MBA Essay Playbook", resourceType: "guide", price: "99", free: "true" });
+  }
+
+  // Discount the roll-up down to the published price.
+  const option: PricingOption = { ...newPricingOption(0), access: "paid", productIds: added.map((a) => a.id) };
+  const { total } = optionRollup(added, option);
+  const target = parseMoney(offering.price);
+  if (target > 0 && total > target) {
+    option.discountType = "flat";
+    option.discountValue = String(total - target);
+  }
+
+  const cohorts: BuilderCohort[] = getCohorts(offering.slug).map((c, i) => ({
+    id: i,
+    label: c.label,
+    slots: Object.fromEntries(
+      sessions.flatMap((gs, idx) => {
+        const sl = c.sessions[gs.id];
+        return sl ? [[idx, { date: isoFromMonthDay(sl.month, sl.day), time: timeFromLabel(sl.timeLabel) }]] : [];
+      }),
+    ),
+  }));
+
+  return {
+    name: offering.title,
+    headline: offering.headline,
+    description: offering.description ?? "",
+    thumbnail: offering.image ?? null,
+    added,
+    pricingOption: option,
+    cohorts,
+  };
+}
+
 /* ---------- Paid pricing (recurring / one-time) ---------- */
+
+// The offering-level billing model. Chosen at the top of the Products step and
+// carried through pricing, product gating, and the preview. "recurring" is the
+// subscription model; the per-period cadence lives in each option's `interval`.
+type BillingModel = "one-time" | "recurring";
+
+// Billing intervals a subscription can bill on. The stored value is the option's
+// `interval` string; `unit` drives the per-period suffix shown throughout.
+const INTERVAL_OPTIONS = [
+  { value: "1 month", label: "Monthly", unit: "month" },
+  { value: "1 year", label: "Annually", unit: "year" },
+];
+const intervalUnit = (interval: string) => (interval === "1 year" ? "year" : "month");
+// "/ month", "/ year" — the suffix after a recurring price.
+const intervalSuffix = (interval: string) => `/ ${intervalUnit(interval)}`;
+
+// Product rule for subscriptions: a coaching-time *range* is the lone exclusion
+// (a range is a one-off scope of work, not a recurring deliverable); a set amount
+// of hours bills fine each cycle. Everything else — set-hour coaching, content,
+// collections, courses, group sessions, agents, private groups — is allowed. The
+// rule is enforced by locking the coaching-time format to "set" on subscriptions.
 
 // Secondary text beneath the price — a dropdown link toggling one-time / monthly.
 // The menu is portaled to the body so an overflow-hidden ancestor (e.g. the
@@ -1200,6 +1854,55 @@ function CadenceLink({ recurring, onChange }: { recurring: boolean; onChange: (r
     </div>
   );
 }
+
+// Inline dropdown rendered as an underlined text link + chevron — used on the
+// roll-up's Payment line (switch model) and Billing cycle line (monthly/annually).
+// Portaled to the body so the roll-up's overflow can't clip the menu. `transform`
+// optionally reshapes the trigger label (e.g. lowercasing the cycle).
+function InlineSelectLink({ value, options, onChange, transform }: { value: string; options: { value: string; label: string }[]; onChange: (v: string) => void; transform?: (label: string) => string }) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [pos, setPos] = useState({ left: 0, top: 0 });
+  const currentLabel = options.find((o) => o.value === value)?.label ?? options[0]?.label ?? "";
+
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current) return;
+    const r = triggerRef.current.getBoundingClientRect();
+    setPos({ left: r.left, top: r.bottom + 6 });
+  }, [open]);
+
+  return (
+    <span className="relative inline-flex">
+      <button ref={triggerRef} type="button" onClick={() => setOpen((o) => !o)} className="flex items-center gap-0.5 text-gray-dark underline decoration-dotted underline-offset-2 transition-colors hover:text-gray-light">
+        {transform ? transform(currentLabel) : currentLabel}
+        <svg className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+      </button>
+      {open && createPortal(
+        <>
+          <button aria-hidden tabIndex={-1} className="fixed inset-0 z-[100] cursor-default" onClick={() => setOpen(false)} />
+          <div style={{ position: "fixed", left: pos.left, top: pos.top }} className="z-[101] min-w-[180px] overflow-hidden rounded-xl border border-gray-stroke bg-white p-1 shadow-[0_4px_16px_rgba(16,24,40,0.12)]">
+            {options.map((opt) => {
+              const active = opt.value === value;
+              return (
+                <button key={opt.value} type="button" onClick={() => { onChange(opt.value); setOpen(false); }} className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-[14px] text-gray-dark transition-colors hover:bg-gray-hover ${active ? "font-semibold" : "font-medium"}`}>
+                  {opt.label}
+                  {active && <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+                </button>
+              );
+            })}
+          </div>
+        </>,
+        document.body
+      )}
+    </span>
+  );
+}
+
+// Billing model options for the Payment line's inline switcher.
+const BILLING_MODEL_OPTIONS = [
+  { value: "one-time", label: "One-time purchase" },
+  { value: "recurring", label: "Subscription" },
+];
 
 function PaidPricingCard({ paidType, setPaidType, price, setPrice }: { paidType: "recurring" | "one-time"; setPaidType: (v: "recurring" | "one-time") => void; price: string; setPrice: (v: string) => void }) {
   const recurring = paidType === "recurring";
@@ -1440,8 +2143,26 @@ function withCommas(v: string): string {
 
 // Price box: large editable price + cadence. When the price is 0, shows a green
 // "Free" tag (setting $0 is how a coach makes an offering free — no toggle).
-function PriceFields({ option, products, onChange, mvp }: { option: PricingOption; products: OfferingItem[]; onChange: (patch: Partial<PricingOption>) => void; mvp: boolean }) {
-  const recurring = option.billing === "recurring";
+// Subscription-only settings for the v1 price field: just the billing cycle,
+// shown once a recurring price is set (not for free options).
+function RecurringSettings({ option, onChange }: { option: PricingOption; onChange: (patch: Partial<PricingOption>) => void }) {
+  return (
+    <div className="mt-3 flex items-center justify-between gap-4 rounded-xl bg-gray-hover p-4">
+      <span className="flex items-center gap-2.5 text-[15px] font-medium text-gray-dark">
+        <MaskIcon src={repostIcon} className="h-[18px] w-[18px] text-gray-dark" />
+        Billing cycle
+      </span>
+      <Select
+        value={option.interval}
+        onChange={(v) => onChange({ interval: v })}
+        options={INTERVAL_OPTIONS.map((i) => ({ value: i.value, label: i.label }))}
+        className="w-[160px]"
+      />
+    </div>
+  );
+}
+
+function PriceFields({ option, products, onChange, mvp, recurring }: { option: PricingOption; products: OfferingItem[]; onChange: (patch: Partial<PricingOption>) => void; mvp: boolean; recurring: boolean }) {
 
   // Sync-to-hourly-rate is only offered when the offering is exactly one hourly
   // coaching-time product — the only thing that maps cleanly to the coach's
@@ -1498,10 +2219,10 @@ function PriceFields({ option, products, onChange, mvp }: { option: PricingOptio
                 <MaskIcon src={giftIcon} className="h-[18px] w-[18px] text-gray-extra-light" />
                 Free
               </span>
-            ) : mvp ? (
-              <span className="text-[16px] text-gray-extra-light">One-time purchase</span>
+            ) : recurring ? (
+              <span className="text-[16px] text-gray-extra-light">per {intervalUnit(option.interval)}</span>
             ) : (
-              <CadenceLink recurring={recurring} onChange={(r) => onChange({ billing: r ? "recurring" : "one-time" })} />
+              <span className="text-[16px] text-gray-extra-light">One-time purchase</span>
             )}
           </div>
         </div>
@@ -1528,30 +2249,7 @@ function PriceFields({ option, products, onChange, mvp }: { option: PricingOptio
 
       {!syncOn && products.length > 1 && <SuggestedPrice products={products} />}
 
-      {recurring && !isFree && (
-        <div className="mt-3 flex flex-col gap-4 rounded-xl bg-gray-hover p-4">
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2.5 text-[15px] font-medium text-gray-dark">
-              <MaskIcon src={giftIcon} className="h-[18px] w-[18px] text-gray-dark" />
-              Include a free trial
-              <span className="rounded bg-[#EEF1FF] px-1.5 py-0.5 text-[12px] font-semibold text-[#4666E5]">Recommended</span>
-            </span>
-            <Toggle checked={option.freeTrial} onChange={() => onChange({ freeTrial: !option.freeTrial })} />
-          </div>
-          {option.freeTrial && (
-            <Select
-              value={option.trialLength}
-              onChange={(v) => onChange({ trialLength: v })}
-              options={[
-                { value: "3", label: "3 days" },
-                { value: "7", label: "7 days" },
-                { value: "14", label: "14 days" },
-                { value: "30", label: "30 days" },
-              ]}
-            />
-          )}
-        </div>
-      )}
+      {recurring && !isFree && <RecurringSettings option={option} onChange={onChange} />}
     </>
   );
 }
@@ -1560,7 +2258,7 @@ function PriceFields({ option, products, onChange, mvp }: { option: PricingOptio
 // Total. The products themselves are already listed above, so this only carries
 // the totals; the rows share the product list's rhythm (py-4 + dividers) so they
 // read as an extension of it.
-function PricingRollup({ products, option, onChange }: { products: OfferingItem[]; option: PricingOption; onChange: (patch: Partial<PricingOption>) => void }) {
+function PricingRollup({ products, option, onChange, recurring, onChangeBillingModel }: { products: OfferingItem[]; option: PricingOption; onChange: (patch: Partial<PricingOption>) => void; recurring: boolean; onChangeBillingModel: (m: BillingModel) => void }) {
   const { items, subtotal, freeAmount, discount, total } = optionRollup(products, option);
   // Discount has three states: idle (an "Add discount" link), editing (the
   // %/$ controls + an "Apply" action), and done (the applied amount, editable,
@@ -1579,7 +2277,44 @@ function PricingRollup({ products, option, onChange }: { products: OfferingItem[
 
   return (
     <div className="flex flex-col">
+      {/* Billing model + cycle as separate line items. The model is an editable
+          inline switcher (one-time ↔ subscription); the cycle shows only for a
+          subscription, also as an inline link. */}
       <div className="flex items-center justify-between py-4 text-[15px]">
+        <span className="text-gray-light">Payment</span>
+        <InlineSelectLink
+          value={recurring ? "recurring" : "one-time"}
+          options={BILLING_MODEL_OPTIONS}
+          onChange={(v) => onChangeBillingModel(v as BillingModel)}
+        />
+      </div>
+
+      <AnimatePresence initial={false}>
+        {recurring && (
+          <motion.div
+            key="billing-cycle"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={offeringTransition}
+            className="overflow-hidden"
+          >
+            <div className="flex items-center justify-between border-t border-gray-stroke py-4 text-[15px]">
+              <span className="text-gray-light">Billing cycle</span>
+              <span className="flex items-center gap-1.5">
+                <MaskIcon src={repostIcon} className="h-[18px] w-[18px] text-gray-light" />
+                <InlineSelectLink
+                  value={option.interval}
+                  options={INTERVAL_OPTIONS.map((i) => ({ value: i.value, label: i.label }))}
+                  onChange={(v) => onChange({ interval: v })}
+                />
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex items-center justify-between border-t border-gray-stroke py-4 text-[15px]">
         <span className="text-gray-light">Subtotal</span>
         <span className="text-gray-dark">${formatMoney(subtotal)}</span>
       </div>
@@ -1680,7 +2415,9 @@ function PricingRollup({ products, option, onChange }: { products: OfferingItem[
 
       <div className="flex items-center justify-between border-t border-gray-stroke py-4">
         <span className="text-[16px] font-semibold text-gray-dark">Total</span>
-        <span className="text-[18px] font-semibold text-gray-dark">{total === 0 ? "Free" : `$${formatMoney(total)}`}</span>
+        <span className="text-[18px] font-semibold text-gray-dark">
+          {total === 0 ? "Free" : <>${formatMoney(total)}{recurring && <span className="text-[15px] font-normal text-gray-light"> {intervalSuffix(option.interval)}</span>}</>}
+        </span>
       </div>
     </div>
   );
@@ -1690,7 +2427,7 @@ function PricingRollup({ products, option, onChange }: { products: OfferingItem[
 // When `bare` (the single-option default), renders as two flat labeled sections
 // ("Add products" and "Pricing"). Otherwise wraps in card chrome with an
 // editable option name — used when there are multiple options.
-function PricingOptionCard({ option, index, products, available, comingSoon = [], bare, canDelete, mvp, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct, onToggleFreeProduct }: {
+function PricingOptionCard({ option, index, products, available, comingSoon = [], bare, canDelete, mvp, recurring, onChangeBillingModel, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct, onToggleFreeProduct }: {
   option: PricingOption;
   index: number;
   products: OfferingItem[];
@@ -1699,6 +2436,8 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
   bare: boolean;
   canDelete: boolean;
   mvp: boolean;
+  recurring: boolean;
+  onChangeBillingModel: (m: BillingModel) => void;
   onRemove: () => void;
   onChange: (patch: Partial<PricingOption>) => void;
   onAddProduct: (slug: string) => void;
@@ -1756,7 +2495,7 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
             <section className="mt-14">
               <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
               <div className="mt-5 border-t border-gray-stroke">
-                <PricingRollup products={products} option={option} onChange={onChange} />
+                <PricingRollup products={products} option={option} onChange={onChange} recurring={recurring} onChangeBillingModel={onChangeBillingModel} />
               </div>
             </section>
           )
@@ -1766,7 +2505,7 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
               <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
               <p className="mt-0.5 text-[15px] text-gray-light">Set a price, or enter $0 to offer it for free.</p>
               <div className="mt-5">
-                <PriceFields option={option} products={products} onChange={onChange} mvp={mvp} />
+                <PriceFields option={option} products={products} onChange={onChange} mvp={mvp} recurring={recurring} />
               </div>
             </section>
           )
@@ -1868,7 +2607,7 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
           once at least one product has been configured. */}
       {v2 && anyConfigured && (
         <div className="mt-5 border-t border-gray-stroke">
-          <PricingRollup products={products} option={option} onChange={onChange} />
+          <PricingRollup products={products} option={option} onChange={onChange} recurring={recurring} onChangeBillingModel={onChangeBillingModel} />
         </div>
       )}
     </div>
@@ -2075,7 +2814,42 @@ function OptionMetaFields({ option, onChange }: { option: PricingOption; onChang
   );
 }
 
-function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, multiEnabled, onToggleMulti, mvp }: { added: OfferingItem[]; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; pricingOptions: PricingOption[]; onAddPricingOption: () => number; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => number; onRemoveProductFromOption: (optionId: number, itemId: number) => void; multiEnabled: boolean; onToggleMulti: () => void; mvp: boolean }) {
+// Offering-level billing model picker — shown on the upfront gate before the
+// builder opens. Governs which products are addable and how pricing reads
+// downstream. Stacked full-width cards since it owns the whole gate screen.
+function BillingModelSelector({ model, onChange, className = "" }: { model: BillingModel; onChange: (m: BillingModel) => void; className?: string }) {
+  const options: { value: BillingModel; label: string; sub: string; icon: string }[] = [
+    { value: "one-time", label: "One-time purchase", sub: "Buyers pay once for lifetime access.", icon: labelTagIcon },
+    { value: "recurring", label: "Subscription", sub: "Buyers are billed on a repeating cycle until they cancel.", icon: repostIcon },
+  ];
+  return (
+    // A nested stagger container: when the gate reveals this slot, the two cards
+    // fade up in turn. Standalone (no animating parent) it just renders at rest.
+    <motion.div variants={gateContainer} className={`flex flex-col gap-3 ${className}`}>
+      {options.map((opt) => {
+        const active = model === opt.value;
+        return (
+          <motion.button
+            key={opt.value}
+            variants={gateItem}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={`flex items-center gap-4 rounded-xl border-[1.5px] bg-white px-5 py-4 text-left transition-colors ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
+          >
+            <MaskIcon src={opt.icon} className="h-6 w-6 shrink-0 text-gray-dark" />
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="text-[16px] font-semibold text-gray-dark">{opt.label}</span>
+              <span className="text-[14px] leading-snug text-gray-light">{opt.sub}</span>
+            </span>
+            <RadioDot active={active} />
+          </motion.button>
+        );
+      })}
+    </motion.div>
+  );
+}
+
+function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, billingModel, onChangeBillingModel, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, multiEnabled, onToggleMulti, mvp }: { added: OfferingItem[]; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; billingModel: BillingModel; onChangeBillingModel: (m: BillingModel) => void; pricingOptions: PricingOption[]; onAddPricingOption: () => number; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => number; onRemoveProductFromOption: (optionId: number, itemId: number) => void; multiEnabled: boolean; onToggleMulti: () => void; mvp: boolean }) {
   // When MVP is on: Agent / Private group are hidden entirely, while Course and
   // Livestream are shown as non-clickable "coming soon" options. Collection is
   // fully available — it reuses buckets built on the Content page.
@@ -2094,10 +2868,14 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
   // a coaching-time, lock its mode to any other coaching-time already added.
   const lockedCoachingMode: "set" | "range" | null = (() => {
     if (!configuring || configuring.slug !== "coaching-time") return null;
+    // A subscription can't sell a range of hours — lock the format to a set amount.
+    if (billingModel === "recurring") return "set";
     const other = added.find((a) => a.slug === "coaching-time" && a.id !== configuring.id);
     if (!other) return null;
     return other.config.mode === "range" ? "range" : "set";
   })();
+  // Why the coaching-time format is locked, so the picker can explain it.
+  const lockedCoachingReason: "format" | "subscription" = billingModel === "recurring" ? "subscription" : "format";
 
   // Products + still-addable types for a given option.
   const optionData = (opt: PricingOption) => {
@@ -2205,6 +2983,8 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
         bare
         canDelete={false}
         mvp={mvp}
+        recurring={billingModel === "recurring"}
+        onChangeBillingModel={onChangeBillingModel}
         onRemove={() => onRemovePricingOption(opt.id)}
         onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
         onAddProduct={(slug) => addProduct(opt.id, slug)}
@@ -2246,6 +3026,8 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
                       bare={!multi}
                       canDelete={multi}
                       mvp={mvp}
+                      recurring={billingModel === "recurring"}
+                      onChangeBillingModel={onChangeBillingModel}
                       onRemove={() => onRemovePricingOption(opt.id)}
                       onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
                       onAddProduct={(slug) => addProduct(opt.id, slug)}
@@ -2335,6 +3117,7 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, pri
       <ConfigModal
         item={configuring && !isListOffering(configuring.slug) ? configuring : null}
         lockedCoachingMode={lockedCoachingMode}
+        lockedCoachingReason={lockedCoachingReason}
         onChange={(patch) => configuring && onConfigChange(configuring.id, patch)}
         onSave={() => { if (configuring) { onConfigured(configuring.id); setConfiguringId(null); } }}
         onClose={() => setConfiguringId(null)}
@@ -2848,7 +3631,7 @@ function ConfirmModal({ open, title, body, confirmLabel, onConfirm, onClose }: {
   );
 }
 
-export function ConfigModal({ item, lockedCoachingMode = null, uploadOnly = false, saveLabel = "Save product", onChange, onSave, onClose }: { item: OfferingItem | null; lockedCoachingMode?: "set" | "range" | null; uploadOnly?: boolean; saveLabel?: string; onChange: (patch: Record<string, string>) => void; onSave: () => void; onClose: () => void }) {
+export function ConfigModal({ item, lockedCoachingMode = null, lockedCoachingReason = "format", uploadOnly = false, saveLabel = "Save product", onChange, onSave, onClose }: { item: OfferingItem | null; lockedCoachingMode?: "set" | "range" | null; lockedCoachingReason?: "format" | "subscription"; uploadOnly?: boolean; saveLabel?: string; onChange: (patch: Record<string, string>) => void; onSave: () => void; onClose: () => void }) {
   const v2 = useV2();
   const o = item ? offeringBySlug[item.slug] : null;
   const complete = item ? isConfigComplete(item, v2) : false;
@@ -2913,7 +3696,7 @@ export function ConfigModal({ item, lockedCoachingMode = null, uploadOnly = fals
 
               {/* Fields */}
               <div className={item.slug === "content" ? "pt-8" : "mt-3"}>
-                <OfferingConfigFields slug={item.slug} config={item.config} onChange={onChange} lockedCoachingMode={lockedCoachingMode} backSignal={backSignal} scrolled={scrolled} uploadOnly={uploadOnly} onCancel={onClose} />
+                <OfferingConfigFields slug={item.slug} config={item.config} onChange={onChange} lockedCoachingMode={lockedCoachingMode} lockedCoachingReason={lockedCoachingReason} backSignal={backSignal} scrolled={scrolled} uploadOnly={uploadOnly} onCancel={onClose} />
               </div>
             </div>
 
@@ -2958,9 +3741,9 @@ export function ConfigModal({ item, lockedCoachingMode = null, uploadOnly = fals
 
 // Dispatches to the fields component for the offering type. Add a case here
 // alongside a configDefaults entry to configure another type.
-function OfferingConfigFields({ slug, config, onChange, lockedCoachingMode = null, backSignal = 0, scrolled = false, uploadOnly = false, onCancel }: { slug: string; config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedCoachingMode?: "set" | "range" | null; backSignal?: number; scrolled?: boolean; uploadOnly?: boolean; onCancel?: () => void }) {
+function OfferingConfigFields({ slug, config, onChange, lockedCoachingMode = null, lockedCoachingReason = "format", backSignal = 0, scrolled = false, uploadOnly = false, onCancel }: { slug: string; config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedCoachingMode?: "set" | "range" | null; lockedCoachingReason?: "format" | "subscription"; backSignal?: number; scrolled?: boolean; uploadOnly?: boolean; onCancel?: () => void }) {
   const v2 = useV2();
-  if (slug === "coaching-time") return <CoachingTimeFields config={config} onChange={onChange} lockedMode={lockedCoachingMode} />;
+  if (slug === "coaching-time") return <CoachingTimeFields config={config} onChange={onChange} lockedMode={lockedCoachingMode} lockReason={lockedCoachingReason} />;
   if (slug === "content") return <ContentFields config={config} onChange={onChange} priced={v2} backSignal={backSignal} scrolled={scrolled} uploadOnly={uploadOnly} onCancel={onCancel} />;
   if (slug === "paid-livestream") return <PaidLivestreamFields config={config} onChange={onChange} />;
   if (slug === "workshop") return <WorkshopFields config={config} onChange={onChange} />;
@@ -3050,8 +3833,9 @@ function PaidLivestreamFields({ config, onChange }: { config: Record<string, str
 /* ---------- Workshop config ---------- */
 
 // A workshop is a paid livestream with its own first-class type. It mirrors the
-// livestream scheduling fields, but price is always required (not v2-gated).
-// Seats are unlimited. The coach's price here becomes the product's
+// livestream fields minus date/time (those are set per cohort on the offering's
+// Scheduling step), and price is always required (not v2-gated). Seats are
+// unlimited. The coach's price here becomes the product's
 // config.price, which feeds the offering roll-up and can be waived per-offering.
 function WorkshopFields({ config, onChange }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void }) {
   const [advancedOpen, setAdvancedOpen] = useState(() => Boolean(config.preEventMessage));
@@ -3085,16 +3869,11 @@ function WorkshopFields({ config, onChange }: { config: Record<string, string>; 
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Date</label>
-          <input type="date" value={config.date ?? ""} onChange={(e) => onChange({ date: e.target.value })} className={configInputClass} />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Time</label>
-          <input type="time" value={config.time ?? ""} onChange={(e) => onChange({ time: e.target.value })} className={configInputClass} />
-        </div>
-      </div>
+      {/* Dates live on the offering's Scheduling step, per cohort. */}
+      <p className="flex items-start gap-2 rounded-lg bg-gray-hover px-3.5 py-3 text-[14px] leading-snug text-gray-light">
+        <MaskIcon src={calendarPageIcon} className="mt-0.5 h-4 w-4 text-gray-light" />
+        You'll set dates and times for this session in the Scheduling step, where you can add one or more cohorts.
+      </p>
 
       <div>
         <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Cover photo</label>
@@ -4332,10 +5111,16 @@ function TimeField({ value, onChange, label }: { value: string; onChange: (v: st
   );
 }
 
-function CoachingTimeFields({ config, onChange, lockedMode = null }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedMode?: "set" | "range" | null }) {
+function CoachingTimeFields({ config, onChange, lockedMode = null, lockReason = "format" }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedMode?: "set" | "range" | null; lockReason?: "format" | "subscription" }) {
+  // Explanation shown on the disabled format option when it's locked.
+  const lockTooltip = lockReason === "subscription"
+    ? "A range of hours isn't available on subscription offerings."
+    : "All coaching time in an offering must use the same format.";
+  // The offering is a subscription — surfaced via lockReason, which is only
+  // "subscription" for recurring offerings.
+  const isSubscription = lockReason === "subscription";
   const v2 = useV2();
-  // The form reveals one section at a time: each unlocks once the one before it
-  // has been answered. Both toggles start with nothing selected.
+  // All sections show at once — nothing is gated behind filling in a prior one.
   // When another coaching-time in the offering already fixed the mode, this one
   // is locked to match it — keep the stored mode in sync and disable the toggle.
   const mode: "set" | "range" | null = lockedMode ?? (config.mode === "range" ? "range" : config.mode === "set" ? "set" : null);
@@ -4361,33 +5146,13 @@ function CoachingTimeFields({ config, onChange, lockedMode = null }: { config: R
   // The synced price reflects the bulk discount once the coach opts in.
   const syncedPrice = applyDiscount ? autoPrice - discountAmount : autoPrice;
 
-  // Step gates — each later section unlocks once the prior answer exists.
-  const timeEntered = mode === "set" && hrs > 0;
-  const rangeEntered = mode === "range" && Number(config.minHours || 0) > 0 && Number(config.maxHours || 0) > 0;
-  const rangePriceEntered = rangeEntered && Number(config.price || 0) > 0;
-  // Delivery format is the final section, shown once pricing has been resolved.
-  const showDelivery = mode === "set"
-    ? (v2 ? timeEntered && priceMode !== null : timeEntered)
-    : rangePriceEntered;
-
   // Every section opens with the same header treatment so the form reads as one
-  // consistent sequence of choices.
+  // consistent set of choices.
   const sectionHeader = "mb-2.5 block text-[15px] font-semibold text-gray-dark";
 
-  // Each section slides up + fades as it's revealed. `initial={false}` on the
-  // surrounding AnimatePresence keeps already-answered sections from animating
-  // when the modal first opens (e.g. editing a saved product) — only sections
-  // that appear in response to a selection play the entrance.
-  const sectionAnim = {
-    initial: { opacity: 0, y: -10 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: 6 },
-    transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] as const },
-  };
-
   return (
-    <div>
-      <motion.div className="mt-3" initial={sectionAnim.initial} animate={sectionAnim.animate} transition={sectionAnim.transition}>
+    <div className="flex flex-col gap-6 pt-3">
+      <div>
         <h3 className={sectionHeader}>Choose a time format</h3>
         <div className="grid grid-cols-2 gap-3">
           {modes.map((opt) => {
@@ -4409,52 +5174,42 @@ function CoachingTimeFields({ config, onChange, lockedMode = null }: { config: R
                 </button>
                 {disabled && (
                   <span role="tooltip" className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-max max-w-[220px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
-                    All coaching time in an offering must use the same format.
+                    {lockTooltip}
                   </span>
                 )}
               </div>
             );
           })}
         </div>
-      </motion.div>
+      </div>
 
-      {/* Amount of time — revealed once a time format is chosen; re-animates when
-          switching between set and range. */}
-      <AnimatePresence initial={false} mode="wait">
-        {mode && (
-          <motion.div key={mode} {...sectionAnim}>
-            <h3 className={`${sectionHeader} mt-6`}>
-              {mode === "set" ? "Amount of time" : "Range of time"}
-            </h3>
-            {mode === "set" ? (
-              <div className="grid grid-cols-2 gap-4">
-                <TimeField value={config.hours ?? ""} onChange={(v) => onChange({ hours: v })} label="hours" />
-                <TimeField value={config.minutes ?? ""} onChange={(v) => onChange({ minutes: v })} label="minutes" />
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <TimeField value={config.minHours ?? ""} onChange={(v) => onChange({ minHours: v })} label="min hours" />
-                <span className="shrink-0 text-[24px] font-medium text-gray-light" aria-hidden="true">–</span>
-                <TimeField value={config.maxHours ?? ""} onChange={(v) => onChange({ maxHours: v })} label="max hours" />
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Amount of time — set vs range fields swap with the format toggle. */}
+      {mode && (
+        <div>
+          <h3 className={sectionHeader}>{mode === "set" ? "Amount of time" : "Range of time"}</h3>
+          {mode === "set" ? (
+            <div className="grid grid-cols-2 gap-4">
+              <TimeField value={config.hours ?? ""} onChange={(v) => onChange({ hours: v })} label="hours" />
+              <TimeField value={config.minutes ?? ""} onChange={(v) => onChange({ minutes: v })} label="minutes" />
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <TimeField value={config.minHours ?? ""} onChange={(v) => onChange({ minHours: v })} label="min hours" />
+              <span className="shrink-0 text-[24px] font-medium text-gray-light" aria-hidden="true">–</span>
+              <TimeField value={config.maxHours ?? ""} onChange={(v) => onChange({ maxHours: v })} label="max hours" />
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Range mode isn't auto-priced — once a range is entered, collect a manual
-          price, then the scope of work it covers. */}
-      <AnimatePresence initial={false}>
-        {rangeEntered && (
-          <motion.div key="range-price" {...sectionAnim} className="mt-6">
+      {/* Range mode isn't auto-priced — collect a manual price + scope of work. */}
+      {mode === "range" && (
+        <>
+          <div>
             <label className={sectionHeader}>Price</label>
             <PriceField value={config.price ?? ""} onChange={(v) => onChange({ price: v })} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <AnimatePresence initial={false}>
-        {rangePriceEntered && (
-          <motion.div key="work-on" {...sectionAnim} className="mt-6">
+          </div>
+          <div>
             <label className={sectionHeader}>What you'll work on</label>
             <textarea
               value={config.workOn ?? ""}
@@ -4464,84 +5219,84 @@ function CoachingTimeFields({ config, onChange, lockedMode = null }: { config: R
               autoComplete="off"
               className={`${configInputClass} resize-none`}
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </>
+      )}
 
-      {/* Pricing — revealed once an amount of time is entered. Price by syncing
-          to the expert's hourly rate or by entering a custom price. */}
-      <AnimatePresence initial={false}>
-        {v2 && timeEntered && (
-          <motion.div key="pricing" {...sectionAnim} className="mt-6">
-            <h3 className={sectionHeader}>Pricing</h3>
-            {/* Pricing-mode toggle — same card treatment as the time format toggle:
-                icon on top, label + subtext, selection shown by the border alone. */}
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { value: "sync", label: "Sync to my hourly rate", sub: `$${formatMoney(syncedPrice)} · $${EXPERT_HOURLY_RATE.toLocaleString()}/hr`, icon: repostIcon },
-                { value: "custom", label: "Set a custom price", sub: "Will not sync to your rate", icon: writeIcon },
-              ].map((opt) => {
-                const active = priceMode === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => onChange({ priceMode: opt.value })}
-                    className={`flex w-full flex-col items-center gap-2 rounded-xl border-[1.5px] bg-white px-4 py-5 text-center transition-colors ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
-                  >
-                    <MaskIcon src={opt.icon} className="h-[26px] w-[26px] text-gray-dark" />
-                    <span className="flex flex-col gap-0.5">
-                      <span className="text-[15px] font-semibold text-gray-dark">{opt.label}</span>
-                      <span className="text-[14px] leading-snug text-gray-light">{opt.sub}</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+      {/* Pricing (set mode) — sync to the hourly rate or enter a custom price. */}
+      {v2 && mode === "set" && (
+        <div>
+          <h3 className={sectionHeader}>Pricing</h3>
+          {/* Pricing-mode toggle — same card treatment as the time format toggle:
+              icon on top, label + subtext, selection shown by the border alone. */}
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { value: "sync", label: "Sync to my hourly rate", sub: `$${formatMoney(syncedPrice)} · $${EXPERT_HOURLY_RATE.toLocaleString()}/hr`, icon: repostIcon },
+              { value: "custom", label: "Set a custom price", sub: "Will not sync to your rate", icon: writeIcon },
+            ].map((opt) => {
+              const active = priceMode === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => onChange({ priceMode: opt.value })}
+                  className={`flex w-full flex-col items-center gap-2 rounded-xl border-[1.5px] bg-white px-4 py-5 text-center transition-colors ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
+                >
+                  <MaskIcon src={opt.icon} className="h-[26px] w-[26px] text-gray-dark" />
+                  <span className="flex flex-col gap-0.5">
+                    <span className="text-[15px] font-semibold text-gray-dark">{opt.label}</span>
+                    <span className="text-[14px] leading-snug text-gray-light">{opt.sub}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-            {/* The sync/custom detail swaps in place as the pricing mode changes. */}
-            <AnimatePresence initial={false} mode="wait">
-              {/* Synced: the price basis is already shown on the toggle, so just the
-                  bulk-discount opt-in appears here. */}
-              {priceMode === "sync" && (
-                <motion.div key="sync" {...sectionAnim}>
-                  <ToggleRow
-                    className="mt-3.5"
-                    muted
-                    label={`Apply bulk discounts · $${formatMoney(autoPrice)} → $${formatMoney(autoPrice - discountAmount)} (−$${formatMoney(discountAmount)})`}
-                    checked={applyDiscount}
-                    onChange={() => onChange({ applyDiscount: applyDiscount ? "false" : "true" })}
-                  />
-                </motion.div>
-              )}
-
-              {/* Custom: enter the price directly. */}
-              {priceMode === "custom" && (
-                <motion.div key="custom" {...sectionAnim} className="mt-5">
-                  <label className={sectionHeader}>Set a custom price</label>
-                  <PriceField value={config.customPrice ?? ""} onChange={(v) => onChange({ customPrice: v })} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Delivery format — the final section, shown once pricing is resolved. */}
-      <AnimatePresence initial={false}>
-        {showDelivery && (
-          <motion.div key="delivery" {...sectionAnim} className="mt-6">
-            <h3 className={sectionHeader}>How will this time be delivered?</h3>
-            <Select
-              value={config.delivery ?? ""}
-              onChange={(v) => onChange({ delivery: v })}
-              options={deliveryFormats}
-              placeholder="Select an option"
-              triggerClassName="py-3 pl-4 pr-3 text-[15px]"
+          {/* The sync/custom detail follows directly from the selected mode. */}
+          {priceMode === "sync" && (
+            <ToggleRow
+              className="mt-3.5"
+              muted
+              label={`Apply bulk discounts · $${formatMoney(autoPrice)} → $${formatMoney(autoPrice - discountAmount)} (−$${formatMoney(discountAmount)})`}
+              checked={applyDiscount}
+              onChange={() => onChange({ applyDiscount: applyDiscount ? "false" : "true" })}
             />
-          </motion.div>
+          )}
+          {priceMode === "custom" && (
+            <div className="mt-5">
+              <label className={sectionHeader}>Set a custom price</label>
+              <PriceField value={config.customPrice ?? ""} onChange={(v) => onChange({ customPrice: v })} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Delivery format. */}
+      <div>
+        <h3 className={sectionHeader}>How will this time be delivered?</h3>
+        <Select
+          value={config.delivery ?? ""}
+          onChange={(v) => onChange({ delivery: v })}
+          options={deliveryFormats}
+          placeholder="Select an option"
+          triggerClassName="py-3 pl-4 pr-3 text-[15px]"
+        />
+      </div>
+
+      {/* Expiration term — defaults to 3 months; applies to one-time and
+          subscription alike. */}
+      <div>
+        <h3 className={sectionHeader}>When does this coaching time expire?</h3>
+        <Select
+          value={config.expiration ?? DEFAULT_EXPIRATION}
+          onChange={(v) => onChange({ expiration: v })}
+          options={EXPIRATION_OPTIONS}
+          triggerClassName="py-3 pl-4 pr-3 text-[15px]"
+        />
+        {isSubscription && (
+          <p className="mt-2 text-[14px] leading-snug text-gray-light">Note that this time will roll over for subscriptions.</p>
         )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 }
@@ -4549,10 +5304,10 @@ function CoachingTimeFields({ config, onChange, lockedMode = null }: { config: R
 /* ---------- Step 3: Customer-facing page ---------- */
 
 function PageStep({
-  name, headline, pricingMode, paidType, price, description, setDescription,
+  name, headline, pricingMode, paidType, interval, price, description, setDescription,
   sections, onAddSection, onUpdateSection, onRemoveSection, onReorderSections,
 }: {
-  name: string; headline: string; pricingMode: "free" | "paid"; paidType: "recurring" | "one-time"; price: string;
+  name: string; headline: string; pricingMode: "free" | "paid"; paidType: "recurring" | "one-time"; interval: string; price: string;
   description: string; setDescription: (v: string) => void;
   sections: PageSection[];
   onAddSection: (kind: PageSectionKind) => void;
@@ -4579,7 +5334,7 @@ function PageStep({
       <div className="mt-4 flex items-center rounded-xl border border-gray-stroke">
         <div className="flex flex-1 items-center justify-center gap-2 py-3 text-[15px] font-medium text-gray-dark">
           <MaskIcon src={labelTagIcon} className="h-4 w-4 text-gray-light" />
-          {pricingMode === "free" ? "Free" : `$${price}${paidType === "recurring" ? " / month" : ""}`}
+          {pricingMode === "free" ? "Free" : `$${price}${paidType === "recurring" ? ` ${intervalSuffix(interval)}` : ""}`}
         </div>
         <div className="h-6 w-px bg-gray-stroke" />
         <div className="flex flex-1 items-center justify-center gap-2 py-3 text-[15px] font-medium text-gray-dark">
@@ -5036,7 +5791,7 @@ function ReviewPicker({ open, chosen, onSelect, onClose }: { open: boolean; chos
 
 /* ---------- Live preview card ---------- */
 
-function ProductPreview({ name, headline, pricingMode, paidType, price, cover, multiOption, joinLabel }: { name: string; headline: string; pricingMode: "free" | "paid"; paidType: "recurring" | "one-time"; price: string; cover: string | null; multiOption: boolean; joinLabel: string }) {
+function ProductPreview({ name, headline, pricingMode, paidType, interval, price, cover, multiOption, joinLabel }: { name: string; headline: string; pricingMode: "free" | "paid"; paidType: "recurring" | "one-time"; interval: string; price: string; cover: string | null; multiOption: boolean; joinLabel: string }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_1px_3px_rgba(16,24,40,0.06)]">
       <img src={cover || coverImage9} alt="" className={`aspect-[1200/630] w-full object-cover ${cover ? "" : "opacity-25"}`} />
@@ -5051,7 +5806,7 @@ function ProductPreview({ name, headline, pricingMode, paidType, price, cover, m
         {pricingMode === "paid" && (
           <p className="mt-3 text-[15px] font-semibold text-gray-dark">
             {multiOption && "Starting at "}
-            ${formatMoney(Number(price))} <span className="font-normal text-gray-light">{paidType === "recurring" ? "/ month" : "one-time"}</span>
+            ${formatMoney(Number(price))} <span className="font-normal text-gray-light">{paidType === "recurring" ? intervalSuffix(interval) : "one-time"}</span>
           </p>
         )}
 

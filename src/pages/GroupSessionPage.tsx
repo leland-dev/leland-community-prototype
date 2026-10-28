@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Button } from "../components/Button";
 import { getOfferingBySlug, type Offering } from "../lib/offerings";
 import {
@@ -9,7 +9,11 @@ import {
   ATTENDEES,
   STANDALONE_SESSION_KEY,
   isStandaloneSessionMode,
+  WAITLIST_KEY,
+  isWaitlistMode,
+  getCohorts,
   type GroupSession,
+  type SessionSlot,
   type BundledProduct,
 } from "../lib/groupSessions";
 import { COACH } from "./OfferingPage";
@@ -27,7 +31,8 @@ import shareArrowIcon from "../assets/icons/share-arrow.svg";
 // Customer-facing page for a single group session. It's a sub-page of the
 // offering (/offering/:slug/session/:id) that experts can share on its own, so
 // the layout follows the livestream event page — but access is gated behind the
-// parent offering, and the rest of the bundle stays visible throughout.
+// parent offering, and the rest of the bundle stays visible throughout. Dates
+// come from the offering's cohorts (?cohort= picks one; defaults to the soonest).
 
 const formatMoney = (n: number) => `$${n.toLocaleString("en-US")}`;
 const parseMoney = (s?: string) => Number((s ?? "").replace(/[^0-9.]/g, "")) || 0;
@@ -38,9 +43,10 @@ const productIcon: Record<BundledProduct["kind"], string> = {
   course: myCoursesIcon,
 };
 
-// Medium calendar chip — same 48px width as the icon tiles below it.
-function DateTile({ session }: { session: GroupSession }) {
-  return <CalendarIcon size="md" month={session.month} day={session.day} />;
+// Medium calendar chip — same 48px width as the icon tiles below it. Undated
+// (waitlisted) sessions show "TBA".
+function DateTile({ slot }: { slot?: SessionSlot }) {
+  return slot ? <CalendarIcon size="md" month={slot.month} day={slot.day} /> : <CalendarIcon size="md" month="TBA" day="–" />;
 }
 
 function IconTile({ src }: { src: string }) {
@@ -121,6 +127,7 @@ function AccessPanel({
   productCount,
   purchased,
   standalone,
+  waitlist,
   startsIn,
   onViewOffering,
 }: {
@@ -129,6 +136,7 @@ function AccessPanel({
   productCount: number;
   purchased: boolean;
   standalone: boolean;
+  waitlist: boolean;
   startsIn: string;
   onViewOffering: () => void;
 }) {
@@ -159,7 +167,7 @@ function AccessPanel({
     return (
       <div className="border-t border-gray-stroke p-5">
         <Button size="lg" variant="primary" rounded="rounded-full" className="w-full text-[15px]">
-          Register · {formatMoney(session.price)}
+          {waitlist ? "Join waitlist" : `Register · ${formatMoney(session.price)}`}
         </Button>
       </div>
     );
@@ -189,7 +197,7 @@ function AccessPanel({
         <svg className="mr-1 h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
       </button>
       <Button size="lg" variant="primary" rounded="rounded-full" className="mt-4 w-full text-[15px]">
-        Get access · {offering.price}
+        {waitlist ? "Join waitlist" : `Get access · ${offering.price}`}
       </Button>
       <Button size="lg" variant="secondary" rounded="rounded-full" className="mt-2 w-full text-[15px]" onClick={onViewOffering}>
         See everything included
@@ -222,8 +230,23 @@ export default function GroupSessionPage() {
       try { localStorage.setItem(STANDALONE_SESSION_KEY, next ? "1" : "0"); } catch { /* ignore */ }
       return next;
     });
+  const [waitlist, setWaitlist] = useState<boolean>(isWaitlistMode);
+  const toggleWaitlist = () =>
+    setWaitlist((v) => {
+      const next = !v;
+      try { localStorage.setItem(WAITLIST_KEY, next ? "1" : "0"); } catch { /* ignore */ }
+      return next;
+    });
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
+
+  // Which cohort's dates to show — from ?cohort=, else the soonest. None while
+  // waitlisted (every cohort has passed).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const cohorts = getCohorts(slug);
+  const cohort = waitlist ? undefined : cohorts.find((c) => c.id === searchParams.get("cohort")) ?? cohorts[0];
+  const pickCohort = (id: string) => setSearchParams({ cohort: id }, { replace: true });
+  const cohortQuery = cohort ? `?cohort=${cohort.id}` : "";
 
   // Prototype countdown: the session starts a fixed 2d 4h 6m after page load,
   // ticking down once a minute.
@@ -254,6 +277,8 @@ export default function GroupSessionPage() {
   const offeringUrl = `/offering/${offering.slug}`;
   const viewOffering = () => navigate(offeringUrl);
   const productCount = siblings.length + bundled.length;
+  const slot = cohort?.sessions[session.id];
+  const enrolled = cohort?.enrolled ?? 0;
   const total = parseMoney(offering.price);
   const subtotal = parseMoney(offering.origPrice) || total;
 
@@ -271,17 +296,19 @@ export default function GroupSessionPage() {
           <aside className="flex w-full flex-col gap-8 lg:w-[400px] lg:shrink-0">
             <img src={session.image} alt="" className="aspect-[1200/630] w-full rounded-2xl object-cover" />
 
-            <div className="order-last lg:order-none">
-              <p className="text-[18px] font-medium text-gray-dark">{session.enrolled} people going</p>
-              <div className="mt-3 flex items-center">
-                {ATTENDEES.map((a, i) => (
-                  <img key={a.name} src={a.photo} alt="" className={`h-8 w-8 rounded-full border-2 border-white object-cover ${i > 0 ? "-ml-2" : ""}`} />
-                ))}
+            {enrolled > 2 && (
+              <div className="order-last lg:order-none">
+                <p className="text-[18px] font-medium text-gray-dark">{enrolled} people going</p>
+                <div className="mt-3 flex items-center">
+                  {ATTENDEES.map((a, i) => (
+                    <img key={a.name} src={a.photo} alt="" className={`h-8 w-8 rounded-full border-2 border-white object-cover ${i > 0 ? "-ml-2" : ""}`} />
+                  ))}
+                </div>
+                <p className="mt-2 text-[15px] text-gray-light">
+                  {ATTENDEES[0].name}, {ATTENDEES[1].name}, and {enrolled - 2} others
+                </p>
               </div>
-              <p className="mt-2 text-[15px] text-gray-light">
-                {ATTENDEES[0].name}, {ATTENDEES[1].name}, and {session.enrolled - 2} others
-              </p>
-            </div>
+            )}
 
             <div className="order-last lg:order-none">
               <p className="mb-3 text-[18px] font-medium text-gray-dark">Hosted by</p>
@@ -323,12 +350,34 @@ export default function GroupSessionPage() {
             <div className="mt-6 overflow-hidden rounded-2xl border border-gray-stroke">
               <div className="flex flex-col gap-4 p-5">
                 <div className="flex items-center gap-4">
-                  <DateTile session={session} />
+                  <DateTile slot={slot} />
                   <div>
-                    <p className="text-[15px] font-semibold text-gray-dark">{session.dateLabel}</p>
-                    <p className="text-[14px] text-gray-light">{session.timeLabel} · {session.durationMin} min</p>
+                    <p className="text-[15px] font-semibold text-gray-dark">{slot ? slot.dateLabel : "Dates to be announced"}</p>
+                    <p className="text-[14px] text-gray-light">{slot ? `${slot.timeLabel} · ` : ""}{session.durationMin} min</p>
                   </div>
                 </div>
+                {/* Other cohorts' dates for this session — pick before buying. */}
+                {!purchased && cohort && cohorts.length > 1 && (
+                  <div className="flex flex-wrap items-center gap-2 sm:pl-16">
+                    <span className="text-[13px] text-gray-light">Also offered:</span>
+                    {cohorts.map((c) => {
+                      const sl = c.sessions[session.id];
+                      if (!sl) return null;
+                      const active = c.id === cohort.id;
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => pickCohort(c.id)}
+                          aria-pressed={active}
+                          className={`cursor-pointer rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors ${active ? "border-gray-dark bg-gray-dark text-white" : "border-gray-stroke text-gray-dark hover:border-[#c9c9c9]"}`}
+                        >
+                          {sl.month} {sl.day}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <div className="flex items-center gap-4">
                   <IconTile src={videoIcon} />
                   <div>
@@ -343,6 +392,7 @@ export default function GroupSessionPage() {
                 productCount={productCount}
                 purchased={purchased}
                 standalone={standalone}
+                waitlist={waitlist}
                 startsIn={startsIn}
                 onViewOffering={viewOffering}
               />
@@ -395,21 +445,22 @@ export default function GroupSessionPage() {
                 <div className="overflow-hidden rounded-2xl border border-gray-stroke px-4">
                   {siblings.map((s) => {
                     const current = s.id === session.id;
+                    const sl = cohort?.sessions[s.id];
                     return (
                       <Link
                         key={s.id}
-                        to={`${offeringUrl}/session/${s.id}`}
+                        to={`${offeringUrl}/session/${s.id}${cohortQuery}`}
                         className={`-mx-4 flex items-center gap-3 border-b border-gray-stroke px-4 py-4 no-underline ${current ? "bg-[#f7f7f7]" : "hover:bg-[#fafafa]"}`}
                       >
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center">
-                          <CalendarIcon day={s.day} />
+                          <CalendarIcon day={sl?.day ?? "–"} />
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-2">
                             <span className="truncate text-[15px] font-semibold text-gray-dark">{s.name}</span>
                             {current && <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[12px] font-medium text-gray-light ring-1 ring-gray-stroke">Viewing</span>}
                           </span>
-                          <span className="block text-[15px] text-gray-light">Group session · {s.dateLabel}</span>
+                          <span className="block text-[15px] text-gray-light">Group session · {sl ? sl.dateLabel : "Dates to be announced"}</span>
                         </span>
                       </Link>
                     );
@@ -450,6 +501,7 @@ export default function GroupSessionPage() {
         toggles={[
           { label: "Viewer owns offering", checked: purchased, onChange: togglePurchased },
           { label: "Session is the only product", checked: standalone, onChange: toggleStandalone },
+          { label: "No upcoming cohorts", checked: waitlist, onChange: toggleWaitlist },
         ]}
       />
     </div>

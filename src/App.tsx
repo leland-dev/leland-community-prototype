@@ -153,6 +153,7 @@ import AiOnboarding from "./pages/ai-onboarding/AiOnboarding";
 import ContentViewer from "./pages/ContentViewer";
 import LelandKitTest from "./pages/LelandKitTest";
 import LessonBlocksGallery from "./pages/LessonBlocksGallery";
+import VideoMode from "./pages/VideoMode";
 import Waitlist from "./pages/waitlist/Waitlist";
 import WaitlistOnboarding from "./pages/waitlist/WaitlistOnboarding";
 import { FeedAdminProvider } from "./contexts/FeedAdminContext";
@@ -188,6 +189,7 @@ export default function App() {
       <Route path="/onboarding-minimal-v2" element={<MinimalOnboardingV2 />} />
       <Route path="/onboarding-v4" element={<MinimalOnboardingV4 />} />
       <Route path="/ai-onboarding" element={<AiOnboarding />} />
+      <Route path="/video" element={<VideoMode />} />
       <Route path="/waitlist" element={<Waitlist />} />
       <Route path="/waitlist-onboarding" element={<WaitlistOnboarding />} />
       <Route path="/reply/:postId" element={<ReplyCompose />} />
@@ -209,9 +211,9 @@ export default function App() {
         <Route path="/profile-v2" element={<ProfileV2 />} />
         {/* Customer-facing offering page — uses the default customer top nav */}
         <Route path="/offering/:slug" element={<OfferingPage />} />
+        <Route path="/offering/:slug/session/:sessionId" element={<GroupSessionPage />} />
         <Route path="/profile/:slug" element={<ProfileTemplate />} />
         <Route path="/profile/:slug/:category" element={<ProfileTemplate />} />
-        <Route path="/offering/:slug/session/:sessionId" element={<GroupSessionPage />} />
         <Route path="/coach-profile" element={<ProfileV2 coach coachId="samantha" />} />
         <Route path="/coach-profile-john" element={<ProfileV2 coach coachId="john" />} />
         <Route path="/agent/:agentSlug" element={<CoachAgent />} />
