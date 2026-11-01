@@ -193,6 +193,8 @@
   --shadow-avatarRing: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   --shadow-nav: 0 1px 4px rgba(0, 0, 0, 0.08);
   --shadow-cardHover: 0 16px 21px 0 rgba(0, 0, 0, 0.07);
+  --shadow-cardFloat: 0 1px 2px rgba(0, 0, 0, 0.04), 0 10px 30px -14px rgba(0, 0, 0, 0.14);
+  --shadow-cardFloatHover: 0 1px 2px rgba(0, 0, 0, 0.05), 0 14px 34px -14px rgba(0, 0, 0, 0.2);
   --shadow-popover: 0 12px 32px rgba(16, 24, 40, 0.12), 0 2px 8px rgba(16, 24, 40, 0.06);
 }
 
@@ -231,6 +233,7 @@
 
 @utility outline-1\.5 { outline-width: 1.5px; }
 @utility border-1\.5 { border-width: 1.5px; }
+@utility line-clamp-7 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 7; }
 @utility line-clamp-8 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 8; }
 @utility line-clamp-10 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 10; }
 
