@@ -322,7 +322,7 @@ const ROW_VERSIONS = [
 type RowVersion = (typeof ROW_VERSIONS)[number]["key"];
 
 // Display props for a single content row, derived from a ContentRow by kind.
-type RowDisplay = {
+export type RowDisplay = {
   cover: React.ReactNode;
   title: string;
   meta: string;
@@ -469,7 +469,7 @@ function TableRow({ d, isLast, ctaAsButton, offeringsAlign }: { d: RowDisplay; i
 // ── v1 (default) — table-header columns, left-aligned. Muted treatment:
 // Leland+ and Offerings values are gray-light medium text; a not-sold item reads
 // as a plain "Not sold on your profile" status in gray-extra-light. ──
-function ContentRowV1({ d, isLast }: { d: RowDisplay; isLast: boolean }) {
+export function ContentRowV1({ d, isLast }: { d: RowDisplay; isLast: boolean }) {
   return (
     <div className={`flex items-center gap-6 ${isLast ? "" : "border-b border-gray-stroke"}`}>
       <button onClick={d.onClick} className="flex min-w-0 flex-1 items-center gap-4 py-4 text-left">
@@ -514,7 +514,7 @@ function ContentRowV4({ d, isLast }: { d: RowDisplay; isLast: boolean }) {
 // mirror the row layout (flex-1 title, w-28 Leland+, auto Offerings, w-8 chevron
 // spacer) so the labels sit above their values. Bleeds to the card edges with
 // -mx-6, then re-pads so the content aligns with the rows.
-function ContentTableHeader({ offeringsAlign }: { offeringsAlign: "left" | "right" }) {
+export function ContentTableHeader({ offeringsAlign }: { offeringsAlign: "left" | "right" }) {
   return (
     <div className="-mx-6 flex items-center gap-6 bg-gray-hover px-6 py-1.5">
       <span className="min-w-0 flex-1 text-[14px] font-medium text-gray-light">Content</span>

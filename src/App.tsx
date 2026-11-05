@@ -77,6 +77,7 @@ import ConversationRelationship from "./pages/ConversationRelationship";
 import Profile from "./pages/Profile";
 import ProfileV2 from "./pages/ProfileV2";
 import ProfileTemplate from "./pages/ProfileTemplate";
+import CoachBadgeMockups from "./pages/CoachBadgeMockups";
 import CoachAgent from "./pages/CoachAgent";
 import CoachAgentEdit from "./pages/CoachAgentEdit";
 import Group from "./pages/Group";
@@ -130,6 +131,7 @@ import CoachEarnings from "./pages/CoachEarnings";
 import CoachAnalytics from "./pages/CoachAnalytics";
 import CoachMyContent from "./pages/CoachMyContent";
 import CoachReviews from "./pages/CoachReviews";
+import CoachOutcomes from "./pages/CoachOutcomes";
 import CoachDiscountCodes from "./pages/CoachDiscountCodes";
 import Account from "./pages/Account";
 import ReferFriend from "./pages/ReferFriend";
@@ -139,6 +141,7 @@ import AltNavLivestreams from "./pages/AltNavLivestreams";
 import AltNavContent from "./pages/AltNavContent";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
 import CoachProductNew from "./pages/CoachProductNew";
+import CoachProductTypeSelect from "./pages/CoachProductTypeSelect";
 import OfferingPage from "./pages/OfferingPage";
 import GroupSessionPage from "./pages/GroupSessionPage";
 import LiveSession from "./pages/program/session/LiveSession";
@@ -200,9 +203,11 @@ export default function App() {
       <Route path="/messages/:conversationId" element={<ConversationDetail />} />
       <Route path="/messages/:conversationId/relationship" element={<ConversationRelationship />} />
       <Route path="/content-viewer/:lessonId?/:sectionId?" element={<ContentViewer />} />
-      {/* Product-creation flow — standalone full-screen surface (no app chrome) */}
-      <Route path="/coach/manage/:category/new-product" element={<CoachProductNew />} />
-      <Route path="/coach/manage/:category/new-product/:type" element={<CoachProductNew />} />
+      {/* Product-creation flow — standalone full-screen surface (no app chrome).
+          Lives under /my-leland so it stays in the My Leland shell's context. */}
+      <Route path="/my-leland/manage/:category/new" element={<CoachProductTypeSelect />} />
+      <Route path="/my-leland/manage/:category/new-product" element={<CoachProductNew />} />
+      <Route path="/my-leland/manage/:category/new-product/:type" element={<CoachProductNew />} />
       {/* Course builder — standalone full-screen editor (no app chrome) */}
       <Route path="/coach/content/course/new" element={<CourseBuilder />} />
       <Route path="/coach/content/course/:courseId" element={<CourseBuilder />} />
@@ -212,6 +217,7 @@ export default function App() {
         {/* Customer-facing offering page — uses the default customer top nav */}
         <Route path="/offering/:slug" element={<OfferingPage />} />
         <Route path="/offering/:slug/session/:sessionId" element={<GroupSessionPage />} />
+        <Route path="/profile-badges" element={<CoachBadgeMockups />} />
         <Route path="/profile/:slug" element={<ProfileTemplate />} />
         <Route path="/profile/:slug/:category" element={<ProfileTemplate />} />
         <Route path="/coach-profile" element={<ProfileV2 coach coachId="samantha" />} />
@@ -255,6 +261,7 @@ export default function App() {
           <Route path="/coach/earnings" element={<CoachEarnings />} />
           <Route path="/coach/analytics" element={<CoachAnalytics />} />
           <Route path="/coach/reviews" element={<CoachReviews />} />
+          <Route path="/coach/outcomes" element={<CoachOutcomes />} />
           <Route path="/coach/discount-codes" element={<CoachDiscountCodes />} />
         </Route>
         {/* "My Store" — the coach dashboard recreated inside the LinkedIn-nav
@@ -294,6 +301,7 @@ export default function App() {
           <Route path="/my-leland/earnings" element={<CoachEarnings />} />
           <Route path="/my-leland/analytics" element={<CoachAnalytics />} />
           <Route path="/my-leland/reviews" element={<CoachReviews />} />
+          <Route path="/my-leland/outcomes" element={<CoachOutcomes />} />
           <Route path="/my-leland/discount-codes" element={<CoachDiscountCodes />} />
           <Route path="/my-leland/refer" element={<ReferFriend />} />
           <Route path="/my-leland/account" element={<Account />} />

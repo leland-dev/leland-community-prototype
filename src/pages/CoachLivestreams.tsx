@@ -48,7 +48,7 @@ type EventItem = {
 
 const YOU: HostPerson = { name: "Jane Doe", avatar: profilePhoto };
 
-const upcoming: EventItem[] = [
+export const upcoming: EventItem[] = [
   {
     id: "test-event",
     title: "This is a Test Event: Title TBD",
@@ -252,7 +252,7 @@ function ActionCell({ item, past }: { item: EventItem; past: boolean }) {
   );
 }
 
-function EventRow({ item, past = false }: { item: EventItem; past?: boolean }) {
+export function EventRow({ item, past = false }: { item: EventItem; past?: boolean }) {
   return (
     <div className="flex items-center gap-4 px-5 py-4">
       <div className="flex min-w-0 flex-1 items-center gap-4">

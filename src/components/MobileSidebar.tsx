@@ -30,6 +30,7 @@ import toolsIcon from "../assets/icons/tools-wrench-ruler.svg";
 import chartIcon from "../assets/icons/chart.svg";
 import userIcon from "../assets/icons/user.svg";
 import starIcon from "../assets/icons/star-icon.svg";
+import outcomesIcon from "../assets/icons/Target.1.svg";
 import chevronRight from "../assets/icons/chevron-right.svg";
 import discountIcon from "../assets/icons/discount.svg";
 import giftIcon from "../assets/icons/gift.svg";
@@ -98,6 +99,7 @@ const expertItems = [
   { icon: moneyIcon, label: "Earnings", to: "/my-leland/earnings" },
   { icon: chartIcon, label: "Analytics", to: "/my-leland/analytics" },
   { icon: starIcon, label: "Reviews", to: "/my-leland/reviews" },
+  { icon: outcomesIcon, label: "Outcomes", to: "/my-leland/outcomes" },
   { icon: discountIcon, label: "Discount Codes", to: "/my-leland/discount-codes" },
 ];
 

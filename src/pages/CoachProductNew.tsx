@@ -5,7 +5,7 @@ import { AnimatePresence, motion, Reorder, useDragControls } from "motion/react"
 import { Button } from "../components/Button";
 import { CalendarIcon } from "../components/SessionCard";
 import { useCollections, upsertCollection, newCollectionId, type Collection } from "../lib/collections";
-import { getOfferingBySlug } from "../lib/offerings";
+import { getOfferingBySlug, OFFERINGS, type Offering } from "../lib/offerings";
 import { getGroupSessionsForOffering, getCohorts, BUNDLED_PRODUCTS } from "../lib/groupSessions";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import crownIcon from "../assets/icons/crown-membership.svg";
@@ -127,6 +127,32 @@ const STEPS: { key: StepKey; label: string; icon: string }[] = [
   { key: "scheduling", label: "Scheduling", icon: calendarPageIcon },
   { key: "page", label: "Page", icon: storeIcon },
 ];
+
+// Per product-type configuration, keyed by the `:type` route param (the card id
+// from CoachProductTypeSelect). The default "package" is the full bundle builder;
+// the other types are constrained specializations of the same flow:
+//  - `slug`: for single-product types, the one product seeded into the builder;
+//    null for bundle types that let the coach add any mix of products.
+//  - `billing`: the offering-level billing model the type implies.
+//  - `gate`: whether the upfront "How do people pay?" screen shows (bundle only).
+//  - `firstStep`: "single" swaps the Products tab for that product's inline setup;
+//    "sessions" is a multi-session setup (1 session = one-off, several = a program);
+//    "bundle" keeps the multi-product OfferingsStep.
+//  - `seedConfig`: extra config merged into the seeded product (e.g. mark a
+//    livestream free so its setup hides the price).
+//  - `lockBilling`: hide the inline Payment switcher so a forced model can't change.
+const TYPE_CONFIG: Record<string, { label: string; slug: string | null; billing: BillingModel; gate: boolean; firstStep: "single" | "sessions" | "bundle" | "subscription"; lockBilling: boolean; seedConfig?: Record<string, string> }> = {
+  hourly:       { label: "Coaching",   slug: "coaching-time",  billing: "one-time",  gate: false, firstStep: "single",   lockBilling: false },
+  async:        { label: "Content",    slug: "content",        billing: "one-time",  gate: false, firstStep: "single",   lockBilling: false },
+  collection:   { label: "Collection", slug: "collection",     billing: "one-time",  gate: false, firstStep: "single",   lockBilling: false },
+  course:       { label: "Course",     slug: "course",         billing: "one-time",  gate: false, firstStep: "single",   lockBilling: false },
+  livestream:   { label: "Livestream", slug: "paid-livestream",billing: "one-time",  gate: false, firstStep: "single",   lockBilling: false, seedConfig: { free: "true" } },
+  live:         { label: "Sessions",   slug: "workshop",       billing: "one-time",  gate: false, firstStep: "sessions", lockBilling: false },
+  subscription: { label: "Included", slug: null,            billing: "recurring", gate: false, firstStep: "subscription", lockBilling: true },
+  // Bundles are one-time only now — recurring billing is its own "Subscriptions"
+  // type, so there's no "How do people pay?" gate and no inline billing switcher.
+  package:      { label: "Products", slug: null,            billing: "one-time",  gate: false, firstStep: "bundle", lockBilling: true },
+};
 
 // Mask-tinted icon so it follows the surrounding text color (bg-current).
 function MaskIcon({ src, className = "h-[18px] w-[18px]" }: { src: string; className?: string }) {
@@ -813,8 +839,11 @@ function PublishMenu({ disabled, onChoose }: { disabled: boolean; onChoose: (sta
 }
 
 export default function CoachProductNew() {
-  const { category } = useParams<{ category: string; type?: string }>();
+  const { category, type } = useParams<{ category: string; type?: string }>();
   const navigate = useNavigate();
+  // The product type being created (card id from the type picker). Defaults to
+  // the full bundle builder when no type is in the URL (e.g. edit links).
+  const typeCfg = TYPE_CONFIG[type ?? "package"] ?? TYPE_CONFIG.package;
 
   const [pendingNav, setPendingNav] = useState<string | null>(null);
   const [step, setStep] = useState<StepKey>("offerings");
@@ -825,6 +854,18 @@ export default function CoachProductNew() {
   const [seed] = useState(() => seedFromOffering(searchParams.get("edit")));
   const editing = seed !== null;
 
+  // Single-product and session types (hourly / content / livestream / live) open
+  // with one product of their fixed type already seeded, so the first tab shows
+  // that product's setup inline and the preview/pricing light up immediately — no
+  // "add a product" step. The sessions type starts with one session the coach can
+  // add more to. Edit mode and bundle types seed nothing here.
+  const [singleSeed] = useState<OfferingItem[] | null>(() => {
+    const seeds = typeCfg.firstStep === "single" || typeCfg.firstStep === "sessions";
+    if (editing || !seeds || !typeCfg.slug) return null;
+    const slug = typeCfg.slug;
+    return [{ id: 0, slug, config: { ...defaultConfigFor(slug), ...(typeCfg.seedConfig ?? {}) }, configured: false, ...(isListOffering(slug) ? { items: [] } : {}) }];
+  });
+
   // Offering status — shown in the top bar and chosen when publishing. New
   // offerings start as a draft until the coach publishes; edited ones are live.
   const [status, setStatus] = useState<OfferingStatus>(editing ? "public" : "draft");
@@ -834,7 +875,9 @@ export default function CoachProductNew() {
   const [headline, setHeadline] = useState(seed?.headline ?? "");
   // Always keep at least one pricing option. Each option is a self-contained
   // unit: name + its own products + its own access (free/paid) + price.
-  const [pricingOptions, setPricingOptions] = useState<PricingOption[]>(() => [seed?.pricingOption ?? newPricingOption(0)]);
+  const [pricingOptions, setPricingOptions] = useState<PricingOption[]>(() => [
+    seed?.pricingOption ?? { ...newPricingOption(0), productIds: singleSeed ? singleSeed.map((s) => s.id) : [] },
+  ]);
   const nextPricingId = useRef(1);
   // v2: whether the offering has multiple pricing options (tabs). Off collapses
   // back to a single option.
@@ -842,14 +885,14 @@ export default function CoachProductNew() {
   // Offering-level billing model (one-time vs subscription). Chosen on an upfront
   // gate before the builder opens; billing is offering-wide, so every pricing
   // option tracks it (they differ only by price / products / interval).
-  const [billingModel, setBillingModel] = useState<BillingModel>(seed?.pricingOption?.billing === "recurring" ? "recurring" : "one-time");
-  // Whether the model has been picked. New offerings start on the gate; edits
-  // already have a model, so they skip straight into the builder.
-  const [modelConfirmed, setModelConfirmed] = useState(editing);
+  const [billingModel, setBillingModel] = useState<BillingModel>(editing ? (seed?.pricingOption?.billing === "recurring" ? "recurring" : "one-time") : typeCfg.billing);
+  // Whether the model has been picked. The upfront gate shows only for a new
+  // bundle; edits and the typed flows (which imply a model) skip straight in.
+  const [modelConfirmed, setModelConfirmed] = useState(editing || !typeCfg.gate);
   // Confirm when switching to subscription would conflict with a product (a
   // coaching-time range), which gets converted to a set amount.
   const [confirmRecurring, setConfirmRecurring] = useState(false);
-  const [added, setAdded] = useState<OfferingItem[]>(seed?.added ?? []);
+  const [added, setAdded] = useState<OfferingItem[]>(seed?.added ?? singleSeed ?? []);
   // Cohorts — scoped per pricing tier (each tier schedules its own sessions),
   // keyed by pricing-option id. The primary option is id 0.
   const [cohortsByOption, setCohortsByOption] = useState<Record<number, BuilderCohort[]>>(() => ({ 0: seed?.cohorts.length ? seed.cohorts : [newCohort(0)] }));
@@ -861,13 +904,24 @@ export default function CoachProductNew() {
   const nextOccurrenceId = useRef(1);
   const [description, setDescription] = useState(seed?.description ?? "");
   const [buttonText, setButtonText] = useState("Purchase");
+  // Offering-level settings for the Live group learning (sessions) type. Price,
+  // subcategories, and the Leland+ recording toggle apply to the whole offering
+  // (set on the Details tab), not to each individual session.
+  const [sessionPrice, setSessionPrice] = useState("");
+  const [sessionSubcats, setSessionSubcats] = useState("");
+  const [sessionLelandPlus, setSessionLelandPlus] = useState(false);
+  // Subscription type: the coach's existing offerings (by slug) that this
+  // subscription grants access to — picked on the first tab, not built from
+  // product types like the other flows.
+  const isSubscriptionType = typeCfg.firstStep === "subscription";
+  const [subOfferings, setSubOfferings] = useState<string[]>([]);
   // Thumbnail image (demo-only object URL) — set on the Details step, previewed
   // in the sidebar card and on the Page step.
   const [thumbnail, setThumbnail] = useState<string | null>(seed?.thumbnail ?? null);
   const [sections, setSections] = useState<PageSection[]>(() => [
     { id: INCLUDED_SECTION_ID, kind: "included", heading: "What's included" },
   ]);
-  const nextOfferingId = useRef(seed?.added.length ?? 0);
+  const nextOfferingId = useRef(seed?.added.length ?? singleSeed?.length ?? 0);
   const nextSectionId = useRef(0);
 
   // Admin tool — MVP on shows the full feature set; off hides not-yet-built bits.
@@ -898,8 +952,17 @@ export default function CoachProductNew() {
   // step after Details. Removing the last one drops the step again.
   const liveItems = added.filter((a) => a.slug === "workshop");
   const hasLive = liveItems.length > 0;
-  const steps = STEPS.filter((s) => s.key !== "scheduling" || hasLive);
-  if (step === "scheduling" && !hasLive) setStep("product");
+  // Relabel the first tab per type (e.g. "Coaching" / "Content" / "Sessions");
+  // bundle types keep the generic "Products". The sessions type folds the
+  // Scheduling step into its first tab, so it drops the standalone Scheduling
+  // step and takes the calendar icon for its first tab.
+  const foldScheduling = typeCfg.firstStep === "sessions";
+  const steps = STEPS
+    .filter((s) => s.key !== "scheduling" || (hasLive && !foldScheduling))
+    .map((s) => (s.key === "offerings"
+      ? { ...s, label: typeCfg.label, icon: foldScheduling ? calendarPageIcon : s.icon }
+      : s));
+  if (step === "scheduling" && (!hasLive || foldScheduling)) setStep(foldScheduling ? "offerings" : "product");
   const stepIndex = steps.findIndex((s) => s.key === step);
   const isLast = stepIndex === steps.length - 1;
 
@@ -943,8 +1006,12 @@ export default function CoachProductNew() {
   // stays true through the column's exit animation (cleared on exit-complete).
   // The main column keeps its two-column width until the preview is fully gone,
   // so it doesn't thrash against the still-collapsing preview on the way out.
-  const [previewMounted, setPreviewMounted] = useState(added.length > 0);
-  if (added.length > 0 && !previewMounted) setPreviewMounted(true);
+  // Whether the offering has enough to proceed / show the preview. The
+  // subscription type counts its selected offerings; every other flow counts the
+  // products added.
+  const hasContent = isSubscriptionType ? subOfferings.length > 0 : added.length > 0;
+  const [previewMounted, setPreviewMounted] = useState(hasContent);
+  if (hasContent && !previewMounted) setPreviewMounted(true);
 
   // Pricing options (step 2). Each is a self-contained option, created already
   // matching the offering-level billing model (billing is offering-wide).
@@ -994,12 +1061,22 @@ export default function CoachProductNew() {
   const previewItems = (primaryPricing?.productIds ?? [])
     .map((id) => added.find((a) => a.id === id))
     .filter((it): it is OfferingItem => Boolean(it));
+  // Live group learning: a lone session IS the offering, so its own title +
+  // description stand in as the offering's (the Details tab hides the duplicate
+  // name/headline fields). Adding a second session makes it a program, at which
+  // point the offering needs its own name/headline (entered on the Details tab).
+  const isSessionsType = typeCfg.firstStep === "sessions";
+  const isSingleSession = isSessionsType && previewItems.length === 1;
+  const effectiveName = isSingleSession ? (previewItems[0]?.config.name ?? "") : name;
+  const effectiveHeadline = isSingleSession ? (previewItems[0]?.config.description ?? "") : headline;
   const previewPaidType: "recurring" | "one-time" = billingModel === "recurring" ? "recurring" : "one-time";
   const previewInterval = primaryPricing?.interval ?? "1 month";
   // v2 derives the price from the option's roll-up total; v1 uses its set price.
   // Free is derived from a $0 price either way.
   const v2Total = optionRollup(previewItems, primaryPricing ?? { discountType: "percent", discountValue: "" }).total;
-  const previewPrice = v2 ? v2Total.toFixed(2) : (primaryPricing?.price ?? "");
+  // Sessions type prices the whole offering once (on Details), not per session —
+  // so the preview reads that single price instead of the per-product roll-up.
+  const previewPrice = isSessionsType ? (sessionPrice || "") : v2 ? v2Total.toFixed(2) : (primaryPricing?.price ?? "");
   const previewMode: "free" | "paid" = Number(previewPrice || 0) === 0 ? "free" : "paid";
 
   const makeOffering = (slug: string): OfferingItem => ({ id: nextOfferingId.current++, slug, config: defaultConfigFor(slug), configured: false, ...(isListOffering(slug) ? { items: [] } : {}) });
@@ -1105,7 +1182,7 @@ export default function CoachProductNew() {
             {steps.map((s, i) => {
               const active = s.key === step;
               // The Details and Page steps are locked until a product exists.
-              const locked = added.length === 0 && s.key !== "offerings";
+              const locked = !hasContent && s.key !== "offerings";
               return (
                 <motion.div
                   key={s.key}
@@ -1135,9 +1212,9 @@ export default function CoachProductNew() {
         <div className="flex items-center gap-3">
           <OfferingStatusPill status={status} />
           {isLast ? (
-            <PublishMenu disabled={added.length === 0} onChoose={publish} />
+            <PublishMenu disabled={!hasContent} onChoose={publish} />
           ) : (
-            <Button size="sm" variant="dark" rounded="rounded-full" className="text-[14px] font-semibold" onClick={next} disabled={added.length === 0}>
+            <Button size="sm" variant="dark" rounded="rounded-full" className="text-[14px] font-semibold" onClick={next} disabled={!hasContent}>
               Next
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
             </Button>
@@ -1163,24 +1240,61 @@ export default function CoachProductNew() {
                     headline={headline} setHeadline={setHeadline}
                     thumbnail={thumbnail} setThumbnail={setThumbnail}
                     buttonText={buttonText} setButtonText={setButtonText}
+                    hideIdentity={isSingleSession}
+                    offeringExtras={isSessionsType ? {
+                      price: sessionPrice, setPrice: setSessionPrice,
+                      subcategories: sessionSubcats, setSubcategories: setSessionSubcats,
+                      lelandPlus: sessionLelandPlus, setLelandPlus: setSessionLelandPlus,
+                    } : undefined}
                     mvp={mvp}
                   />
                 )}
                 {step === "offerings" && (
-                  <OfferingsStep
-                    added={added} onConfigChange={updateOfferingConfig} onItemsChange={setOfferingItems} onConfigured={markOfferingConfigured}
-                    billingModel={billingModel}
-                    onChangeBillingModel={chooseBillingModel}
-                    pricingOptions={pricingOptions}
-                    onAddPricingOption={addPricingOption}
-                    onRemovePricingOption={removePricingOption}
-                    onUpdatePricingOption={updatePricingOption}
-                    onAddProductToOption={addOfferingToOption}
-                    onRemoveProductFromOption={removeOfferingFromOption}
-                    multiEnabled={multiEnabled}
-                    onToggleMulti={toggleMulti}
-                    mvp={mvp}
-                  />
+                  typeCfg.firstStep === "subscription" ? (
+                    <SubscriptionSetupStep
+                      selected={subOfferings}
+                      onChange={setSubOfferings}
+                      onCreateNew={() => setPendingNav(`/my-leland/manage/${category}/new`)}
+                    />
+                  ) : typeCfg.firstStep === "single" ? (
+                    <SingleProductSetupStep
+                      item={added[0] ?? null}
+                      billingModel={billingModel}
+                      onConfigChange={updateOfferingConfig}
+                      onItemsChange={setOfferingItems}
+                      onConfigured={markOfferingConfigured}
+                    />
+                  ) : typeCfg.firstStep === "sessions" ? (
+                    // Sessions type: each session carries its own date/time, and
+                    // cohorts (tabs) re-run the whole set of sessions on new dates.
+                    <SessionsSetupStep
+                      sessions={previewItems}
+                      cohorts={primaryPricing ? (cohortsByOption[primaryPricing.id] ?? []) : []}
+                      onAddSession={() => primaryPricing && addOfferingToOption(primaryPricing.id, "workshop")}
+                      onRemoveSession={(id) => primaryPricing && removeOfferingFromOption(primaryPricing.id, id)}
+                      onConfigChange={updateOfferingConfig}
+                      onConfigured={markOfferingConfigured}
+                      onAddCohort={() => primaryPricing && addCohort(primaryPricing.id)}
+                      onRemoveCohort={(id) => primaryPricing && removeCohort(primaryPricing.id, id)}
+                      onUpdateCohort={(id, patch) => primaryPricing && updateCohort(primaryPricing.id, id, patch)}
+                    />
+                  ) : (
+                    <OfferingsStep
+                      added={added} onConfigChange={updateOfferingConfig} onItemsChange={setOfferingItems} onConfigured={markOfferingConfigured}
+                      billingModel={billingModel}
+                      onChangeBillingModel={chooseBillingModel}
+                      lockBilling={typeCfg.lockBilling}
+                      pricingOptions={pricingOptions}
+                      onAddPricingOption={addPricingOption}
+                      onRemovePricingOption={removePricingOption}
+                      onUpdatePricingOption={updatePricingOption}
+                      onAddProductToOption={addOfferingToOption}
+                      onRemoveProductFromOption={removeOfferingFromOption}
+                      multiEnabled={multiEnabled}
+                      onToggleMulti={toggleMulti}
+                      mvp={mvp}
+                    />
+                  )
                 )}
                 {step === "scheduling" && (
                   billingModel === "recurring" ? (
@@ -1207,8 +1321,8 @@ export default function CoachProductNew() {
                 )}
                 {step === "page" && (
                   <PageStep
-                    name={name}
-                    headline={headline}
+                    name={effectiveName}
+                    headline={effectiveHeadline}
                     pricingMode={previewMode}
                     paidType={previewPaidType}
                     interval={previewInterval}
@@ -1231,7 +1345,7 @@ export default function CoachProductNew() {
             in; persists across steps thereafter. On the way out, the main column
             waits for this to finish exiting before re-centering. */}
         <AnimatePresence onExitComplete={() => setPreviewMounted(false)}>
-          {added.length > 0 && (
+          {hasContent && (
             <motion.aside
               initial={{ opacity: 0, x: 24 }}
               animate={{ opacity: 1, x: 0 }}
@@ -1240,8 +1354,8 @@ export default function CoachProductNew() {
               className="w-full lg:sticky lg:top-[88px] lg:h-fit lg:w-[320px] lg:shrink-0"
             >
               <ProductPreview
-                name={name}
-                headline={headline}
+                name={effectiveName}
+                headline={effectiveHeadline}
                 pricingMode={previewMode}
                 paidType={previewPaidType}
                 interval={previewInterval}
@@ -1315,30 +1429,95 @@ export default function CoachProductNew() {
 
 /* ---------- Step 1: Product details + pricing ---------- */
 
+type OfferingExtras = {
+  price: string; setPrice: (v: string) => void;
+  subcategories: string; setSubcategories: (v: string) => void;
+  lelandPlus: boolean; setLelandPlus: (v: boolean) => void;
+};
+
 function ProductStep({
   name, setName, headline, setHeadline, thumbnail, setThumbnail,
-  buttonText, setButtonText, mvp,
+  buttonText, setButtonText, hideIdentity = false, offeringExtras, mvp,
 }: {
   name: string; setName: (v: string) => void;
   headline: string; setHeadline: (v: string) => void;
   thumbnail: string | null; setThumbnail: (v: string | null) => void;
   buttonText: string; setButtonText: (v: string) => void;
+  // When the offering is a single live session, that session's own title and
+  // description double as the offering's — so the name/headline fields are
+  // hidden here to avoid asking for the same thing twice.
+  hideIdentity?: boolean;
+  // Offering-level settings surfaced on Details for the sessions type (price,
+  // subcategories, Leland+ recording) — they apply to the whole offering, not
+  // to each individual session.
+  offeringExtras?: OfferingExtras;
   mvp: boolean;
 }) {
+  const selectedSubs = offeringExtras ? (offeringExtras.subcategories || "").split(",").filter(Boolean) : [];
+  const toggleSub = (s: string) => {
+    if (!offeringExtras) return;
+    const set = new Set(selectedSubs);
+    if (set.has(s)) set.delete(s); else set.add(s);
+    offeringExtras.setSubcategories([...set].join(","));
+  };
   return (
     <div className="flex flex-col gap-12">
       <section>
         <h2 className="text-[22px] font-semibold text-gray-dark">Create your offering</h2>
-        <p className="mt-0.5 text-[15px] text-gray-light">Describe your offering.</p>
+        <p className="mt-0.5 text-[15px] text-gray-light">
+          {hideIdentity ? "Your session's title and description are used for this offering. Add a cover image below." : "Describe your offering."}
+        </p>
         <div className="mt-5 flex flex-col gap-5">
-          <CharField label="Name" required value={name} onChange={setName} placeholder="My offering name" max={80} />
-          <CharField label="Headline" value={headline} onChange={setHeadline} placeholder="A short subheadline for my offering here." max={72} />
+          {!hideIdentity && (
+            <>
+              <CharField label="Name" required value={name} onChange={setName} placeholder="My offering name" max={80} />
+              <CharField label="Headline" value={headline} onChange={setHeadline} placeholder="A short subheadline for my offering here." max={72} />
+            </>
+          )}
           <div>
             <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Thumbnail</label>
             <ImageUploadField value={thumbnail} onChange={setThumbnail} label="Add a thumbnail image" hint="Recommended 1200 × 630" />
           </div>
         </div>
       </section>
+
+      {/* Offering-level pricing & visibility (sessions type). */}
+      {offeringExtras && (
+        <section>
+          <h2 className="text-[22px] font-semibold text-gray-dark">Pricing & visibility</h2>
+          <p className="mt-0.5 text-[15px] text-gray-light">Set one price for the offering and how it's discovered.</p>
+          <div className="mt-5 flex flex-col gap-5">
+            <div>
+              <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Price</label>
+              <PriceField value={offeringExtras.price} onChange={offeringExtras.setPrice} />
+            </div>
+            <div>
+              <label className="mb-2 block text-[14px] font-medium text-gray-light">Subcategories</label>
+              <div className="flex flex-wrap gap-2">
+                {MBA_SUBCATEGORIES.map((s) => {
+                  const active = selectedSubs.includes(s);
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => toggleSub(s)}
+                      className={`rounded-full border px-3.5 py-1.5 text-[14px] font-medium transition-colors ${active ? "border-gray-dark bg-gray-dark text-white" : "border-gray-stroke text-gray-dark hover:border-[#c9c9c9]"}`}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <ToggleRow
+              label="Upload recording to Leland+"
+              desc="Reach new leads and earn passive income by sharing your recording with Leland+ subscribers. You keep full rights to your content."
+              checked={offeringExtras.lelandPlus}
+              onChange={() => offeringExtras.setLelandPlus(!offeringExtras.lelandPlus)}
+            />
+          </div>
+        </section>
+      )}
 
       {!mvp && (
         <AdvancedSection buttonText={buttonText} setButtonText={setButtonText} />
@@ -2316,7 +2495,7 @@ function PriceFields({ option, products, onChange, mvp, recurring }: { option: P
 // Total. The products themselves are already listed above, so this only carries
 // the totals; the rows share the product list's rhythm (py-4 + dividers) so they
 // read as an extension of it.
-function PricingRollup({ products, option, onChange, recurring, onChangeBillingModel }: { products: OfferingItem[]; option: PricingOption; onChange: (patch: Partial<PricingOption>) => void; recurring: boolean; onChangeBillingModel: (m: BillingModel) => void }) {
+function PricingRollup({ products, option, onChange, recurring, onChangeBillingModel, lockBilling = false }: { products: OfferingItem[]; option: PricingOption; onChange: (patch: Partial<PricingOption>) => void; recurring: boolean; onChangeBillingModel: (m: BillingModel) => void; lockBilling?: boolean }) {
   const { items, subtotal, freeAmount, discount, total } = optionRollup(products, option);
   // Discount has three states: idle (an "Add discount" link), editing (the
   // %/$ controls + an "Apply" action), and done (the applied amount, editable,
@@ -2335,17 +2514,20 @@ function PricingRollup({ products, option, onChange, recurring, onChangeBillingM
 
   return (
     <div className="flex flex-col">
-      {/* Billing model + cycle as separate line items. The model is an editable
-          inline switcher (one-time ↔ subscription); the cycle shows only for a
-          subscription, also as an inline link. */}
-      <div className="flex items-center justify-between py-4 text-[15px]">
-        <span className="text-gray-light">Payment</span>
-        <InlineSelectLink
-          value={recurring ? "recurring" : "one-time"}
-          options={BILLING_MODEL_OPTIONS}
-          onChange={(v) => onChangeBillingModel(v as BillingModel)}
-        />
-      </div>
+      {/* Billing model + cycle as separate line items. When billing is locked
+          (subscription / one-time bundle) the model is implied, so the Payment
+          line is omitted; the inline switcher only shows when billing is editable.
+          The cycle shows only for a subscription, as an inline link. */}
+      {!lockBilling && (
+        <div className="flex items-center justify-between py-4 text-[15px]">
+          <span className="text-gray-light">Payment</span>
+          <InlineSelectLink
+            value={recurring ? "recurring" : "one-time"}
+            options={BILLING_MODEL_OPTIONS}
+            onChange={(v) => onChangeBillingModel(v as BillingModel)}
+          />
+        </div>
+      )}
 
       <AnimatePresence initial={false}>
         {recurring && (
@@ -2357,7 +2539,7 @@ function PricingRollup({ products, option, onChange, recurring, onChangeBillingM
             transition={offeringTransition}
             className="overflow-hidden"
           >
-            <div className="flex items-center justify-between border-t border-gray-stroke py-4 text-[15px]">
+            <div className={`flex items-center justify-between py-4 text-[15px] ${lockBilling ? "" : "border-t border-gray-stroke"}`}>
               <span className="text-gray-light">Billing cycle</span>
               <span className="flex items-center gap-1.5">
                 <MaskIcon src={repostIcon} className="h-[18px] w-[18px] text-gray-light" />
@@ -2372,7 +2554,7 @@ function PricingRollup({ products, option, onChange, recurring, onChangeBillingM
         )}
       </AnimatePresence>
 
-      <div className="flex items-center justify-between border-t border-gray-stroke py-4 text-[15px]">
+      <div className={`flex items-center justify-between py-4 text-[15px] ${lockBilling && !recurring ? "" : "border-t border-gray-stroke"}`}>
         <span className="text-gray-light">Subtotal</span>
         <span className="text-gray-dark">${formatMoney(subtotal)}</span>
       </div>
@@ -2485,7 +2667,7 @@ function PricingRollup({ products, option, onChange, recurring, onChangeBillingM
 // When `bare` (the single-option default), renders as two flat labeled sections
 // ("Add products" and "Pricing"). Otherwise wraps in card chrome with an
 // editable option name — used when there are multiple options.
-function PricingOptionCard({ option, index, products, available, comingSoon = [], bare, canDelete, mvp, recurring, onChangeBillingModel, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct, onToggleFreeProduct }: {
+function PricingOptionCard({ option, index, products, available, comingSoon = [], bare, canDelete, mvp, recurring, onChangeBillingModel, lockBilling = false, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct, onToggleFreeProduct }: {
   option: PricingOption;
   index: number;
   products: OfferingItem[];
@@ -2496,6 +2678,7 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
   mvp: boolean;
   recurring: boolean;
   onChangeBillingModel: (m: BillingModel) => void;
+  lockBilling?: boolean;
   onRemove: () => void;
   onChange: (patch: Partial<PricingOption>) => void;
   onAddProduct: (slug: string) => void;
@@ -2553,7 +2736,7 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
             <section className="mt-14">
               <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
               <div className="mt-5 border-t border-gray-stroke">
-                <PricingRollup products={products} option={option} onChange={onChange} recurring={recurring} onChangeBillingModel={onChangeBillingModel} />
+                <PricingRollup products={products} option={option} onChange={onChange} recurring={recurring} onChangeBillingModel={onChangeBillingModel} lockBilling={lockBilling} />
               </div>
             </section>
           )
@@ -2665,7 +2848,7 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
           once at least one product has been configured. */}
       {v2 && anyConfigured && (
         <div className="mt-5 border-t border-gray-stroke">
-          <PricingRollup products={products} option={option} onChange={onChange} recurring={recurring} onChangeBillingModel={onChangeBillingModel} />
+          <PricingRollup products={products} option={option} onChange={onChange} recurring={recurring} onChangeBillingModel={onChangeBillingModel} lockBilling={lockBilling} />
         </div>
       )}
     </div>
@@ -2907,7 +3090,381 @@ function BillingModelSelector({ model, onChange, className = "" }: { model: Bill
   );
 }
 
-function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, billingModel, onChangeBillingModel, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, multiEnabled, onToggleMulti, mvp }: { added: OfferingItem[]; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; billingModel: BillingModel; onChangeBillingModel: (m: BillingModel) => void; pricingOptions: PricingOption[]; onAddPricingOption: () => number; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => number; onRemoveProductFromOption: (optionId: number, itemId: number) => void; multiEnabled: boolean; onToggleMulti: () => void; mvp: boolean }) {
+// The first tab for the Subscription type. A subscription grants recurring access
+// to a selection of the coach's EXISTING offerings — so rather than building new
+// products, the coach picks offerings from their catalog, or creates a new one
+// (which leaves this flow for the product picker).
+function SubscriptionSetupStep({ selected, onChange, onCreateNew }: { selected: string[]; onChange: (slugs: string[]) => void; onCreateNew: () => void }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [menuOpen]);
+
+  const selectedOfferings = selected
+    .map((s) => OFFERINGS.find((o) => o.slug === s))
+    .filter((o): o is Offering => Boolean(o));
+  const remaining = OFFERINGS.filter((o) => !selected.includes(o.slug));
+  const add = (slug: string) => { onChange([...selected, slug]); setMenuOpen(false); };
+  const remove = (slug: string) => onChange(selected.filter((s) => s !== slug));
+
+  return (
+    <div>
+      <h2 className="text-[22px] font-semibold text-gray-dark">Choose what's included</h2>
+      <p className="mt-1.5 text-[15px] leading-snug text-gray-light">
+        Members get access to the offerings you include for as long as they stay subscribed. Add an existing offering, or create a new one.
+      </p>
+
+      {selectedOfferings.length > 0 && (
+        <div className="mt-6 flex flex-col gap-3">
+          {selectedOfferings.map((o) => (
+            <div key={o.slug} className="flex items-center gap-3 rounded-2xl border border-gray-stroke bg-white p-3">
+              {o.image
+                ? <img src={o.image} alt="" className="h-12 w-[72px] shrink-0 rounded-lg object-cover" />
+                : <div className="h-12 w-[72px] shrink-0 rounded-lg bg-gray-hover" />}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[15px] font-semibold text-gray-dark">{o.title}</p>
+                <p className="truncate text-[14px] text-gray-light">{o.headline}</p>
+              </div>
+              <span className="shrink-0 text-[14px] font-semibold text-gray-dark">{o.price}</span>
+              <Button size="sm" variant="ghost" iconOnly aria-label={`Remove ${o.title}`} className="shrink-0" onClick={() => remove(o.slug)}>
+                <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add: 1) select an existing offering (dropdown), or 2) create a new one. */}
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="relative" ref={menuRef}>
+          <Button size="md" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={() => setMenuOpen((o) => !o)} disabled={remaining.length === 0}>
+            Select an offering
+            <svg className={`h-4 w-4 text-gray-light transition-transform ${menuOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+          </Button>
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.97, y: -4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.97, y: -4 }}
+                transition={{ duration: 0.15 }}
+                className="absolute left-0 top-full z-30 mt-2 max-h-[340px] w-[360px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border border-gray-stroke bg-white p-1.5 shadow-lg"
+              >
+                {remaining.map((o) => (
+                  <button key={o.slug} type="button" onClick={() => add(o.slug)} className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-gray-hover">
+                    {o.image
+                      ? <img src={o.image} alt="" className="h-9 w-[54px] shrink-0 rounded-md object-cover" />
+                      : <div className="h-9 w-[54px] shrink-0 rounded-md bg-gray-hover" />}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[14px] font-semibold text-gray-dark">{o.title}</span>
+                      <span className="block truncate text-[13px] text-gray-light">{o.price}</span>
+                    </span>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        <Button size="md" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={onCreateNew}>
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+          Create a new offering
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// The first tab for single-product types (hourly / content / live). In place of
+// the bundle's multi-product OfferingsStep, it renders that one product's setup
+// fields inline via OfferingConfigFields — the same field groups the bundle uses
+// inside its config modal, just without the modal chrome. The product is marked
+// "configured" the moment its setup is complete, so the preview's "What's
+// included" + pricing roll-up stay in lockstep with the bundle path.
+const singleSetupCopy: Record<string, { title: string; subtitle: string }> = {
+  "coaching-time": { title: "Set up your coaching", subtitle: "Choose how much time buyers get and how it's priced." },
+  content: { title: "Set up your content", subtitle: "Upload your file and add the details." },
+  workshop: { title: "Set up your group session", subtitle: "Name it and set a price — you'll schedule dates next." },
+  "paid-livestream": { title: "Set up your livestream", subtitle: "It's free to attend — just add the details and schedule it." },
+};
+function SingleProductSetupStep({ item, billingModel, onConfigChange, onItemsChange, onConfigured }: { item: OfferingItem | null; billingModel: BillingModel; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void }) {
+  const v2 = useV2();
+  const complete = item ? isConfigComplete(item, v2) : false;
+  // Collection / Course are built in their own modal (General info + an ordered
+  // list of resources/lessons), so the step surfaces a summary card that opens it.
+  const [modalOpen, setModalOpen] = useState(false);
+  // Flip to "configured" as soon as setup is complete (the bundle path does this
+  // on the modal's Save; here there's no modal, so track it inline).
+  useEffect(() => {
+    if (item && complete && !item.configured) onConfigured(item.id);
+  }, [item, complete, onConfigured]);
+
+  if (!item) return null;
+
+  if (isListOffering(item.slug)) {
+    const isCourse = item.slug === "course";
+    const noun = listOfferingCopy[item.slug].noun;
+    const count = item.items?.length ?? 0;
+    return (
+      <div>
+        <h2 className="text-[22px] font-semibold text-gray-dark">Set up your {isCourse ? "course" : "collection"}</h2>
+        <p className="mt-1.5 text-[15px] leading-snug text-gray-light">
+          {isCourse ? "Organize lessons and sections into a structured course." : "Group related guides, templates, and videos into one collection."}
+        </p>
+
+        <div className="mt-6 rounded-2xl border border-gray-stroke p-5">
+          {complete ? (
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="truncate text-[15px] font-semibold text-gray-dark">{item.config.title || (isCourse ? "Untitled course" : "Untitled collection")}</p>
+                <p className="mt-0.5 text-[14px] text-gray-light">{count} {count === 1 ? noun : `${noun}s`}</p>
+              </div>
+              <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => setModalOpen(true)}>Edit</Button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => setModalOpen(true)} className="flex w-full items-center justify-center gap-2 py-6 text-[15px] font-semibold text-gray-dark transition-colors hover:text-black">
+              <MaskIcon src={isCourse ? myCoursesIcon : stackIcon} className="h-5 w-5" />
+              Set up your {isCourse ? "course" : "collection"}
+            </button>
+          )}
+        </div>
+
+        {isCourse ? (
+          <CourseModal
+            item={modalOpen ? item : null}
+            onGeneralChange={(patch) => onConfigChange(item.id, patch)}
+            onItemsChange={(items) => onItemsChange(item.id, items)}
+            onSave={() => { onConfigured(item.id); setModalOpen(false); }}
+            onClose={() => setModalOpen(false)}
+          />
+        ) : (
+          <ListConfigModal
+            item={modalOpen ? item : null}
+            onGeneralChange={(patch) => onConfigChange(item.id, patch)}
+            onItemsChange={(items) => onItemsChange(item.id, items)}
+            onSave={() => { onConfigured(item.id); setModalOpen(false); }}
+            onClose={() => setModalOpen(false)}
+          />
+        )}
+      </div>
+    );
+  }
+
+  const copy = singleSetupCopy[item.slug] ?? { title: "Set up your product", subtitle: "" };
+  // Content renders its own per-view header (library / upload / editor), so skip
+  // the step header for it to avoid a doubled title.
+  const ownHeader = item.slug === "content";
+  return (
+    <div>
+      {!ownHeader && (
+        <>
+          <h2 className="text-[22px] font-semibold text-gray-dark">{copy.title}</h2>
+          {copy.subtitle && <p className="mt-1.5 text-[15px] leading-snug text-gray-light">{copy.subtitle}</p>}
+        </>
+      )}
+      <div className={ownHeader ? "" : "mt-6"}>
+        <OfferingConfigFields
+          slug={item.slug}
+          config={item.config}
+          onChange={(patch) => onConfigChange(item.id, patch)}
+          lockedCoachingMode={billingModel === "recurring" ? "set" : null}
+          lockedCoachingReason={billingModel === "recurring" ? "subscription" : "format"}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Cohort tabs — mirrors the bundle builder's OptionTabs (OptionTabs), but for
+// scheduling cohorts: each tab is one run of the whole set of sessions on its own
+// dates. The "+" adds a cohort; hovering a tab (when there's more than one)
+// reveals a remove control.
+function CohortTabs({ cohorts, activeId, onSelect, onAdd, onRemove }: { cohorts: BuilderCohort[]; activeId: number; onSelect: (id: number) => void; onAdd: () => void; onRemove: (id: number) => void }) {
+  return (
+    <div className="flex items-center gap-1 overflow-x-auto border-b border-gray-stroke">
+      {cohorts.map((c, i) => {
+        const active = c.id === activeId;
+        const label = c.label || `Cohort ${i + 1}`;
+        return (
+          <div key={c.id} className="group relative flex shrink-0 items-center">
+            <button
+              type="button"
+              onClick={() => onSelect(c.id)}
+              className={`flex items-center border-b-2 py-2.5 pl-1 text-[15px] transition-colors ${cohorts.length > 1 ? "pr-7" : "pr-3"} ${active ? "border-gray-dark font-semibold text-gray-dark" : "border-transparent font-medium text-gray-light hover:text-gray-dark"}`}
+            >
+              <span className="max-w-[160px] truncate">{label}</span>
+            </button>
+            {cohorts.length > 1 && (
+              <button
+                type="button"
+                onClick={() => onRemove(c.id)}
+                aria-label={`Remove ${label}`}
+                className="absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-gray-extra-light opacity-0 transition-opacity hover:text-gray-dark group-hover:opacity-100"
+              >
+                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+              </button>
+            )}
+          </div>
+        );
+      })}
+      <button
+        type="button"
+        onClick={onAdd}
+        aria-label="Add cohort"
+        className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+      >
+        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+      </button>
+    </div>
+  );
+}
+
+// One session within the active cohort. Name/description/duration define the
+// session (shared across cohorts); date & time belong to the cohort being
+// edited. Price, cover, subcategories and the Leland+ toggle live on the Details
+// tab (they're offering-level), so they're intentionally absent here.
+function SessionCard({ item, index, isProgram, canRemove, slot, onConfigChange, onSlotChange, onRemove }: { item: OfferingItem; index: number; isProgram: boolean; canRemove: boolean; slot: CohortSlot | undefined; onConfigChange: (patch: Record<string, string>) => void; onSlotChange: (patch: Partial<CohortSlot>) => void; onRemove: () => void }) {
+  return (
+    <div className="rounded-2xl border border-gray-stroke p-5">
+      <div className="flex items-center justify-between">
+        <span className="text-[15px] font-semibold text-gray-dark">{isProgram ? `Session ${index + 1}` : "Session"}</span>
+        {canRemove && (
+          <Button size="sm" variant="ghost" iconOnly aria-label="Remove session" onClick={onRemove}>
+            <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
+          </Button>
+        )}
+      </div>
+      <div className="mt-4 flex flex-col gap-5">
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Name</label>
+          <input value={item.config.name ?? ""} onChange={(e) => onConfigChange({ name: e.target.value })} placeholder="Name your session" autoComplete="off" className={configInputClass} />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Description</label>
+          <textarea value={item.config.description ?? ""} onChange={(e) => onConfigChange({ description: e.target.value })} rows={3} placeholder="What will attendees learn?" autoComplete="off" className={`${configInputClass} resize-none`} />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Duration</label>
+          <Select value={item.config.duration ?? "30"} onChange={(v) => onConfigChange({ duration: v })} options={LIVESTREAM_DURATIONS} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Date</label>
+            <input type="date" value={slot?.date ?? ""} onChange={(e) => onSlotChange({ date: e.target.value })} className={configInputClass} />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Time</label>
+            <input type="time" value={slot?.time ?? ""} onChange={(e) => onSlotChange({ time: e.target.value })} className={configInputClass} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// The first tab for the "Live group learning" type. The coach adds one session
+// for a one-off, or several to build a program; each session carries its own
+// date & time. Cohorts (tabs, like the bundle builder's tiers) re-run the whole
+// set of sessions on a fresh schedule.
+function SessionsSetupStep({ sessions, cohorts, onAddSession, onRemoveSession, onConfigChange, onConfigured, onAddCohort, onRemoveCohort, onUpdateCohort }: { sessions: OfferingItem[]; cohorts: BuilderCohort[]; onAddSession: () => void; onRemoveSession: (id: number) => void; onConfigChange: (id: number, patch: Record<string, string>) => void; onConfigured: (id: number) => void; onAddCohort: () => void; onRemoveCohort: (id: number) => void; onUpdateCohort: (id: number, patch: Partial<BuilderCohort>) => void }) {
+  // A session is "set up" once it has a name — price is offering-level now, so
+  // completeness no longer depends on it.
+  useEffect(() => {
+    for (const s of sessions) {
+      if (s.config.name && !s.configured) onConfigured(s.id);
+    }
+  }, [sessions, onConfigured]);
+
+  // Multiple cohorts off by default (mirrors the bundle builder's "Enable tiers"
+  // toggle). Off = one implicit cohort, no tab bar; on = the cohort tab bar.
+  // Seeded offerings that already have more than one cohort start enabled.
+  const [multiCohorts, setMultiCohorts] = useState(cohorts.length > 1);
+  const [activeCohortId, setActiveCohortId] = useState<number>(cohorts[0]?.id ?? 0);
+  const activeCohort = multiCohorts
+    ? (cohorts.find((c) => c.id === activeCohortId) ?? cohorts[0])
+    : cohorts[0];
+  const isProgram = sessions.length > 1;
+
+  const setSlot = (sessionId: number, patch: Partial<CohortSlot>) => {
+    if (!activeCohort) return;
+    onUpdateCohort(activeCohort.id, { slots: { ...activeCohort.slots, [sessionId]: { ...(activeCohort.slots[sessionId] ?? { date: "", time: "" }), ...patch } } });
+  };
+
+  const handleToggleMulti = () => {
+    if (multiCohorts) {
+      // Collapse back to the first cohort, discarding the extras.
+      cohorts.slice(1).forEach((c) => onRemoveCohort(c.id));
+      setActiveCohortId(cohorts[0]?.id ?? 0);
+      setMultiCohorts(false);
+    } else {
+      setMultiCohorts(true);
+    }
+  };
+
+  return (
+    <div>
+      <h2 className="text-[22px] font-semibold text-gray-dark">Set up your sessions</h2>
+      <p className="mt-1.5 text-[15px] leading-snug text-gray-light">
+        Add one session for a one-off, or several to build a program.
+      </p>
+
+      {/* Cohort tabs (when enabled) + the "Multiple cohorts" toggle — mirrors the
+          bundle builder's tier bar. */}
+      <div className="mt-6">
+        <div className={`flex items-end justify-between gap-4 ${multiCohorts ? "border-b border-gray-stroke" : ""}`}>
+          <div className="min-w-0 flex-1">
+            {multiCohorts && (
+              <CohortTabs
+                cohorts={cohorts}
+                activeId={activeCohort?.id ?? 0}
+                onSelect={setActiveCohortId}
+                onAdd={onAddCohort}
+                onRemove={onRemoveCohort}
+              />
+            )}
+          </div>
+          <div className="flex shrink-0 items-center gap-2.5 pb-2.5">
+            <span className="group relative flex">
+              <span className={`cursor-help text-[14px] font-medium underline decoration-dotted underline-offset-2 transition-colors ${multiCohorts ? "text-gray-light" : "text-gray-extra-light"}`}>
+                Multiple cohorts
+              </span>
+              <span role="tooltip" className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 hidden w-max max-w-[260px] rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
+                Run the same set of sessions multiple times on different dates. Buyers pick a cohort when they enroll.
+              </span>
+            </span>
+            <Toggle checked={multiCohorts} onChange={handleToggleMulti} size="sm" />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 flex flex-col gap-5">
+        {sessions.map((s, i) => (
+          <SessionCard
+            key={s.id}
+            item={s}
+            index={i}
+            isProgram={isProgram}
+            canRemove={sessions.length > 1}
+            slot={activeCohort?.slots[s.id]}
+            onConfigChange={(patch) => onConfigChange(s.id, patch)}
+            onSlotChange={(patch) => setSlot(s.id, patch)}
+            onRemove={() => onRemoveSession(s.id)}
+          />
+        ))}
+      </div>
+
+      <Button size="md" variant="secondary" rounded="rounded-full" className="mt-4 font-semibold" onClick={onAddSession}>
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+        Add another session
+      </Button>
+    </div>
+  );
+}
+
+function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, billingModel, onChangeBillingModel, lockBilling = false, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, multiEnabled, onToggleMulti, mvp }: { added: OfferingItem[]; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; billingModel: BillingModel; onChangeBillingModel: (m: BillingModel) => void; lockBilling?: boolean; pricingOptions: PricingOption[]; onAddPricingOption: () => number; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => number; onRemoveProductFromOption: (optionId: number, itemId: number) => void; multiEnabled: boolean; onToggleMulti: () => void; mvp: boolean }) {
   // When MVP is on: Agent / Private group are hidden entirely, while Course and
   // Livestream are shown as non-clickable "coming soon" options. Collection is
   // fully available — it reuses buckets built on the Content page.
@@ -2942,7 +3499,13 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, bil
       .filter((it): it is OfferingItem => Boolean(it));
     // Every type stays addable (you can add multiples of a product); MVP hides
     // the not-yet-built types and moves the "coming soon" ones out of `avail`.
-    const avail = offeringTypes.filter((o) => !mvp || (!mvpHidden.includes(o.slug) && !mvpComingSoon.includes(o.slug)));
+    // Group sessions run in fixed-date cohorts, which don't fit a subscription's
+    // rolling access — so they're not addable to a recurring offering.
+    const avail = offeringTypes.filter((o) => {
+      if (mvp && (mvpHidden.includes(o.slug) || mvpComingSoon.includes(o.slug))) return false;
+      if (billingModel === "recurring" && o.slug === "workshop") return false;
+      return true;
+    });
     const comingSoon = mvp ? offeringTypes.filter((o) => mvpComingSoon.includes(o.slug)) : [];
     return { items, avail, comingSoon };
   };
@@ -3043,6 +3606,7 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, bil
         mvp={mvp}
         recurring={billingModel === "recurring"}
         onChangeBillingModel={onChangeBillingModel}
+        lockBilling={lockBilling}
         onRemove={() => onRemovePricingOption(opt.id)}
         onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
         onAddProduct={(slug) => addProduct(opt.id, slug)}
@@ -3056,8 +3620,8 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, bil
   return (
     <div>
       {/* Persistent offering-level header — kept across single and multi. */}
-      <h2 className="text-[22px] font-semibold text-gray-dark">Build your offering</h2>
-      <p className="mt-0.5 text-[15px] text-gray-light">The products you add will show up as a single offering on your profile.</p>
+      <h2 className="text-[22px] font-semibold text-gray-dark">{billingModel === "recurring" ? "Build your subscription" : "Build your offering"}</h2>
+      <p className="mt-0.5 text-[15px] text-gray-light">The products you add will show up as a single {billingModel === "recurring" ? "subscription" : "offering"} on your profile.</p>
 
       {!v2 ? (
         // v1 (legacy): options stack as cards, added via the button below.
@@ -3086,6 +3650,7 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, bil
                       mvp={mvp}
                       recurring={billingModel === "recurring"}
                       onChangeBillingModel={onChangeBillingModel}
+                      lockBilling={lockBilling}
                       onRemove={() => onRemovePricingOption(opt.id)}
                       onChange={(patch) => onUpdatePricingOption(opt.id, patch)}
                       onAddProduct={(slug) => addProduct(opt.id, slug)}
@@ -3831,7 +4396,9 @@ function PaidLivestreamFields({ config, onChange }: { config: Record<string, str
         <textarea value={config.description ?? ""} onChange={(e) => onChange({ description: e.target.value })} rows={3} placeholder="What will you cover?" autoComplete="off" className={`${configInputClass} resize-none`} />
       </div>
 
-      {v2 && (
+      {/* Free livestreams have no price — the "Free livestream" type seeds
+          config.free so this field is hidden. */}
+      {v2 && config.free !== "true" && (
         <div>
           <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Price</label>
           <PriceField value={config.price ?? ""} onChange={(v) => onChange({ price: v })} />

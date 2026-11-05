@@ -12,6 +12,7 @@ import calendarIcon from "../assets/icons/calendar-page.svg";
 import starReviewIcon from "../assets/icons/star-review.svg";
 import moneyIcon from "../assets/icons/money.svg";
 import starIcon from "../assets/icons/star-icon.svg";
+import outcomesIcon from "../assets/icons/Target.1.svg";
 import discountIcon from "../assets/icons/discount.svg";
 import labelTagIcon from "../assets/icons/label-tag.svg";
 import livestreamIcon from "../assets/icons/lte-signal.svg";
@@ -39,6 +40,7 @@ const bottomItems = [
   { to: "/coach/calendar", label: "Calendar", icon: calendarIcon },
   { to: "/coach/earnings", label: "Earnings", icon: moneyIcon },
   { to: "/coach/reviews", label: "Reviews", icon: starIcon },
+  { to: "/coach/outcomes", label: "Outcomes", icon: outcomesIcon },
   { to: "/coach/discount-codes", label: "Discount Codes", icon: discountIcon },
 ];
 
@@ -259,6 +261,7 @@ function SidebarV1() {
               {navRow(findItem("/coach/earnings"))}
               {navRow({ to: "/coach/analytics", label: "Analytics", icon: analyticsChartIcon })}
               {navRow(findItem("/coach/reviews"))}
+              {navRow(findItem("/coach/outcomes"))}
               {navRow({ ...findItem("/coach/discount-codes"), icon: labelTagIcon })}
             </nav>
           </div>
@@ -349,6 +352,11 @@ export default function CoachLayout() {
     pathname === "/my-leland/calendar" ||
     pathname === "/my-leland/profile" ||
     pathname === "/my-leland/profile/edit" ||
+    // Category management pages (/coach|/my-leland + /manage/:category). Painted
+    // here on the persistent layout container so the beige is instant and stable —
+    // CoachCategoryEdit no longer draws its own backdrop (which flashed white→beige
+    // because it sat inside the fade-up entrance animation).
+    pathname.includes("/manage/") ||
     (pathname === "/my-leland/profile/inline" && boxedMode);
   const inMyLeland = pathname.startsWith("/my-leland");
   // The Messages tab renders the full-height chat surface, so it fills the

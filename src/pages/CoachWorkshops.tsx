@@ -51,7 +51,7 @@ type WorkshopItem = {
 
 const YOU: HostPerson = { name: "Jane Doe", avatar: profilePhoto };
 
-const upcoming: WorkshopItem[] = [
+export const upcoming: WorkshopItem[] = [
   {
     id: "case-math-intensive",
     title: "Case Math Intensive: Mental Math Drills for the Case Interview",
@@ -246,7 +246,7 @@ function RowMenu({ items }: { items: MenuItem[] }) {
   );
 }
 
-function ActionCell({ item, past, onAddToOffering }: { item: WorkshopItem; past: boolean; onAddToOffering: () => void }) {
+function ActionCell({ item, past, onAddToOffering }: { item: WorkshopItem; past: boolean; onAddToOffering?: () => void }) {
   const menu: MenuItem[] = past
     ? [
         { label: "Add to an offering", icon: <Store size={18} />, onClick: onAddToOffering },
@@ -282,7 +282,7 @@ function ActionCell({ item, past, onAddToOffering }: { item: WorkshopItem; past:
   );
 }
 
-function WorkshopRow({ item, past = false, onAddToOffering }: { item: WorkshopItem; past?: boolean; onAddToOffering: () => void }) {
+export function WorkshopRow({ item, past = false, onAddToOffering }: { item: WorkshopItem; past?: boolean; onAddToOffering?: () => void }) {
   return (
     <div className="flex items-center gap-4 px-5 py-4">
       <div className="flex min-w-0 flex-1 items-center gap-4">

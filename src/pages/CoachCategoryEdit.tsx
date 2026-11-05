@@ -5,9 +5,16 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button, LinkButton } from "../components/Button";
 import AdminToggle from "../components/AdminToggle";
 import { OFFERINGS, type Offering } from "../lib/offerings";
+import { EventRow, upcoming as upcomingLivestreams } from "./CoachLivestreams";
+import { WorkshopRow, upcoming as upcomingWorkshops } from "./CoachWorkshops";
+import { ContentRowV1, ContentTableHeader } from "./CoachContent";
+import { formatViews } from "./CoachProductNew";
+import { RESOURCES } from "../lib/resources";
+import { CalendarIcon } from "../components/SessionCard";
 import { LELAND_PACKAGES, fmtPrice, type LelandPackage } from "../lib/lelandPackages";
 import editIcon from "../assets/icons/edit.svg";
 import eyeIcon from "../assets/icons/eye.svg";
+import copyIcon from "../assets/icons/copy.svg";
 import lockIcon from "../assets/icons/lock.svg";
 import sortIcon from "../assets/icons/sort.svg";
 import dragDotsIcon from "../assets/icons/drag-dots.svg";
@@ -15,6 +22,11 @@ import shareArrowIcon from "../assets/icons/share-arrow.svg";
 import trashIcon from "../assets/icons/trash.svg";
 import lelandMark from "../assets/logos/Leland Profile Image Logo Icon White on black.png";
 import pic6 from "../assets/profile photos/pic-6.png";
+import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
+import bookOpenIcon from "../assets/icons/book-open.svg";
+import videoIcon from "../assets/icons/video-icon.svg";
+import packageBoxOpenIcon from "../assets/icons/package-box-open.svg";
+import repostIcon from "../assets/icons/repost-2.svg";
 
 // Icons ship with hardcoded strokes, so tint them via CSS mask + bg-current to
 // follow the surrounding text color (e.g. red for the delete menu item).
@@ -119,9 +131,28 @@ const categoryData: Record<string, {
 
 const HERO_BG = "#F3F1E6";
 
+// Product modalities — mirrors the "New product" selection page. v2 groups the
+// category's offerings into a card per modality.
+const MODALITIES = [
+  { id: "hourly", name: "Hourly coaching", icon: hourglassIcon, color: "#3B82F6" },
+  { id: "async", name: "Content", icon: bookOpenIcon, color: "#10B981" },
+  { id: "live", name: "Live group sessions", icon: videoIcon, color: "#F43F5E" },
+  { id: "package", name: "Bundles", icon: packageBoxOpenIcon, color: "#6366F1" },
+  { id: "subscription", name: "Subscriptions", icon: repostIcon, color: "#F59E0B" },
+] as const;
+
+// Prototype mapping of an offering to a modality (offerings carry no real type).
+function modalityForOffering(o: Offering): string {
+  const price = Number(o.price.replace(/[^0-9.]/g, ""));
+  if (o.slug.includes("bootcamp")) return "live";
+  if (o.slug.includes("hour")) return "hourly";
+  if (price <= 30) return "async";
+  return "package";
+}
+
 // Admin-toggleable layout version for this page — persisted so a demo survives
 // reloads. v1 is the current design; v2 is the in-progress redesign.
-type CategoryVersion = "v1" | "v2" | "v3";
+type CategoryVersion = "v1" | "v2" | "v3" | "v4" | "v5";
 const VERSION_KEY = "coachCategoryVersion";
 
 // Dashed border drawn as an SVG background so we can set a larger dash length
@@ -396,6 +427,42 @@ const OFFERING_BY_SLUG: Record<string, Offering> = Object.fromEntries(OFFERINGS.
 const PACKAGE_BY_SLUG: Record<string, LelandPackage> = Object.fromEntries(LELAND_PACKAGES.map((p) => [p.slug, p]));
 const DEFAULT_OFFERING_ORDER = OFFERING_ROWS.map((r) => r.id);
 
+// Recurring memberships for the v5 Subscriptions tab. The prototype's offerings
+// don't model a billing cadence, so subscriptions are their own small catalog:
+// a monthly/annual price, a member count, and the perks each tier includes.
+type SubscriptionPlan = {
+  slug: string;
+  title: string;
+  headline: string;
+  monthly: number;
+  annual: number;
+  members: number;
+  image?: string;
+  perks: string[];
+};
+const SUBSCRIPTIONS: SubscriptionPlan[] = [
+  {
+    slug: "mba-insider-membership",
+    title: "MBA Insider Membership",
+    headline: "Monthly group coaching, live Q&A, and a members-only resource library.",
+    monthly: 49,
+    annual: 490,
+    members: 128,
+    image: OFFERING_BY_SLUG["how-i-got-into-stanford-gsb"]?.image,
+    perks: ["2 live group sessions / month", "Members-only content library", "Priority essay feedback"],
+  },
+  {
+    slug: "premium-mentorship",
+    title: "Premium 1:1 Mentorship",
+    headline: "A standing monthly 1:1, unlimited async review, and full content access.",
+    monthly: 299,
+    annual: 2990,
+    members: 24,
+    image: OFFERING_BY_SLUG["gmat-study-plan"]?.image,
+    perks: ["Monthly 1:1 coaching call", "Unlimited async essay review", "Everything in Insider"],
+  },
+];
+
 // Modal that lists every offering as a draggable row so the coach can reorder how
 // they appear on the listing. Rows mirror the horizontal cards on the public
 // profile (thumbnail + title + price), with a drag handle in place of "Details".
@@ -469,11 +536,352 @@ function ReorderModal({ open, order, onClose, onSave }: { open: boolean; order: 
   );
 }
 
+// v2 — one card per product modality, holding that modality's offerings (or an
+// empty state). Offerings run in a horizontal carousel (header chevrons + a
+// footer "See all"), matching the Dashboard's "My content" CardCarousel so the
+// cards page rather than wrap to multiple rows.
+function ModalityCard({ modality, offerings, onPreview, onEdit, onAdd, onSeeAll }: {
+  modality: (typeof MODALITIES)[number];
+  offerings: Offering[];
+  onPreview: (o: Offering) => void;
+  onEdit: (o: Offering) => void;
+  onAdd: () => void;
+  onSeeAll: () => void;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(0);
+  const [pages, setPages] = useState(1);
+  const empty = offerings.length === 0;
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth || 1;
+      setPage(Math.round(el.scrollLeft / w));
+      setPages(Math.max(1, Math.ceil(el.scrollWidth / w)));
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => { el.removeEventListener("scroll", update); ro.disconnect(); };
+  }, [offerings.length]);
+
+  const scrollByPage = (dir: 1 | -1) => {
+    const el = scrollRef.current;
+    if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" });
+  };
+
+  return (
+    <div className={boxClass}>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h3 className="min-w-0 truncate text-[18px] font-semibold text-gray-dark">{modality.name}</h3>
+        <div className="flex shrink-0 items-center gap-2">
+          {!empty && (
+            <div className="flex items-center gap-2">
+              <button onClick={() => scrollByPage(-1)} disabled={page <= 0} aria-label="Previous" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#222222]/[0.12] text-gray-dark transition-colors hover:bg-[#222222]/5 disabled:opacity-30 disabled:hover:bg-transparent">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+              </button>
+              <button onClick={() => scrollByPage(1)} disabled={page >= pages - 1} aria-label="Next" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#222222]/[0.12] text-gray-dark transition-colors hover:bg-[#222222]/5 disabled:opacity-30 disabled:hover:bg-transparent">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </button>
+            </div>
+          )}
+          <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={onAdd}>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            Add
+          </Button>
+        </div>
+      </div>
+      {empty ? (
+        <p className="rounded-xl bg-gray-hover px-4 py-6 text-center text-[14px] text-gray-light">No {modality.name.toLowerCase()} offerings yet.</p>
+      ) : (
+        <>
+          {/* Carousel breaks out of the card's p-6 to run edge-to-edge; the inner
+              track's px-6 keeps the first/last cards aligned, and the gradients
+              fade cards at both edges. */}
+          <div className="relative -mx-6">
+            <div ref={scrollRef} className="scrollbar-hide snap-x snap-mandatory scroll-pl-6 overflow-x-auto py-1">
+              <div className="flex w-max items-stretch gap-4 px-6">
+                {offerings.map((o) => (
+                  <div key={o.slug} className="w-[280px] shrink-0 snap-start">
+                    <CoachOfferingCard offering={o} onPreview={() => onPreview(o)} onEdit={() => onEdit(o)} />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-white to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white to-transparent" />
+          </div>
+          <Button onClick={onSeeAll} size="md" variant="secondary" className="mt-4 self-start font-semibold">
+            See all
+          </Button>
+        </>
+      )}
+    </div>
+  );
+}
+
+// v3 — Live group sessions (pulled from the Free Livestreams list) above a single,
+// filterable Offerings grid that sits directly on the page (no parent card).
+function CategoryV3Content({ category }: { category: string | undefined }) {
+  const navigate = useNavigate();
+  const [filter, setFilter] = useState<string>("all");
+  const FILTERS = [
+    { key: "all", label: "All" },
+    { key: "hourly", label: "Hourly" },
+    { key: "async", label: "Content" },
+    { key: "package", label: "Bundles" },
+    { key: "subscription", label: "Subscriptions" },
+  ];
+  // Source dropdown (matches v1): All / Created by you / Created by Leland. The
+  // coach's offerings are all their own, so "Leland" shows none.
+  const [source, setSource] = useState<OfferingFilter>("all");
+  const [sourceMenuOpen, setSourceMenuOpen] = useState(false);
+  const sourceMenuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!sourceMenuOpen) return;
+    const onDown = (e: MouseEvent) => { if (sourceMenuRef.current && !sourceMenuRef.current.contains(e.target as Node)) setSourceMenuOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [sourceMenuOpen]);
+  const sourceLabel = OFFERING_FILTERS.find((f) => f.key === source)?.label ?? "All";
+
+  const nonLive = OFFERINGS.filter((o) => modalityForOffering(o) !== "live");
+  const bySource = source === "leland" ? [] : nonLive;
+  const shown = filter === "all" ? bySource : bySource.filter((o) => modalityForOffering(o) === filter);
+  const onPreview = (o: Offering) => navigate(`/offering/${o.slug}`);
+  const onEdit = (o: Offering) => navigate(`/my-leland/manage/${category}/new-product?edit=${o.slug}`);
+
+  return (
+    <>
+      {/* Live group sessions — scheduled, so rendered as session cards inside a
+          parent card (matching the v2 card layout). */}
+      <section className={boxClass}>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="text-[18px] font-semibold text-gray-dark">Live group sessions</h2>
+          <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new`)}>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            Add
+          </Button>
+        </div>
+        <div className="-mx-6 mt-2 divide-y divide-gray-stroke border-t border-gray-stroke">
+          {[...upcomingLivestreams].reverse().map((item) => (
+            <EventRow key={item.id} item={item} />
+          ))}
+        </div>
+      </section>
+
+      {/* Offerings — one filterable grid, no parent card background. */}
+      <section>
+        <h2 className="text-[18px] font-semibold text-gray-dark">Offerings</h2>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          {/* Left — modality filter buttons. */}
+          <div className="flex flex-wrap items-center gap-1 rounded-full bg-[#222222]/5 p-1">
+            {FILTERS.map((f) => {
+              const active = filter === f.key;
+              return (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => setFilter(f.key)}
+                  className={`rounded-full px-3.5 py-1.5 text-[14px] font-medium transition-colors ${active ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(16,24,40,0.12)]" : "text-gray-light hover:text-gray-dark"}`}
+                >
+                  {f.label}
+                </button>
+              );
+            })}
+          </div>
+          {/* Right — reorder + source dropdown + New (matches v1 controls). */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold">
+              <img src={sortIcon} alt="" className="h-4 w-4" />
+              Reorder
+            </Button>
+            <div className="relative" ref={sourceMenuRef}>
+              <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={() => setSourceMenuOpen((o) => !o)}>
+                {sourceLabel}
+                <svg className={`h-4 w-4 text-gray-light transition-transform ${sourceMenuOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+              </Button>
+              <AnimatePresence>
+                {sourceMenuOpen && (
+                  <motion.div initial={{ opacity: 0, scale: 0.95, y: -4 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -4 }} transition={{ duration: 0.15 }} className="absolute right-0 top-full z-30 mt-2 w-[200px] rounded-xl border border-gray-200 bg-white p-1.5 shadow-lg">
+                    {OFFERING_FILTERS.map((f) => (
+                      <button key={f.key} onClick={() => { setSource(f.key); setSourceMenuOpen(false); }} className="flex w-full items-center justify-between gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
+                        {f.label}
+                        {source === f.key && (<svg className="h-[18px] w-[18px] shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>)}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            <Button size="sm" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new`)}>
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+              New
+            </Button>
+          </div>
+        </div>
+        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {shown.map((o) => (
+            <CoachOfferingCard key={o.slug} offering={o} onPreview={() => onPreview(o)} onEdit={() => onEdit(o)} />
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+// A live group-session card for the v4 Offerings grid — matches CoachOfferingCard
+// (cover, title, subtext, price, hover Preview/Edit) but adds the blue calendar
+// chip (the same CalendarIcon used in the home feed's Upcoming sessions) to the
+// top-left corner over the thumbnail, marking it as a scheduled live session.
+function LiveSessionCard({ item, onPreview, onEdit }: { item: (typeof upcomingLivestreams)[number]; onPreview: () => void; onEdit: () => void }) {
+  const day = item.date.match(/\d+/)?.[0] ?? "";
+  const price = item.pricing.kind === "free" ? "Free" : item.pricing.price;
+  return (
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_1px_3px_rgba(16,24,40,0.06)] transition-shadow duration-200 hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]">
+      <div className="relative">
+        {item.thumb ? (
+          <img src={item.thumb} alt="" className="aspect-[1200/630] w-full object-cover" />
+        ) : (
+          <div className="flex aspect-[1200/630] w-full items-center justify-center bg-[#D9D9D9]">
+            <MaskIcon src={videoIcon} className="h-9 w-9 text-white" />
+          </div>
+        )}
+        {/* Blue calendar chip — top-left, on top of the thumbnail. */}
+        <div className="absolute left-3 top-3">
+          <CalendarIcon day={day} />
+        </div>
+        {/* Hover: darken the thumbnail and reveal Preview + Edit controls. */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-3 bg-black/45 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          <button onClick={onPreview} aria-label="Preview session" className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-gray-dark shadow-[0_2px_8px_rgba(16,24,40,0.2)] transition-colors hover:bg-gray-hover">
+            <img src={eyeIcon} alt="" className="h-5 w-5" />
+          </button>
+          <button onClick={onEdit} aria-label="Edit session" className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-gray-dark shadow-[0_2px_8px_rgba(16,24,40,0.2)] transition-colors hover:bg-gray-hover">
+            <img src={editIcon} alt="" className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col p-4">
+        <p className="text-[15px] font-semibold leading-tight text-gray-dark">{item.title}</p>
+        <p className="mt-1 text-[14px] leading-snug text-gray-light">{item.date} · {item.startTime}</p>
+        <div className="mt-auto pt-3">
+          <p className="text-[14px] font-semibold text-gray-dark">{price}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// v4 — like v3 but the Live group sessions section is gone; those sessions are
+// folded into the single Offerings grid as cards (with a "Live group learning"
+// filter tag and the blue calendar chip), so everything the coach sells lives in
+// one place.
+function CategoryV4Content({ category }: { category: string | undefined }) {
+  const navigate = useNavigate();
+  const [filter, setFilter] = useState<string>("all");
+  const FILTERS = [
+    { key: "all", label: "All" },
+    { key: "live", label: "Live group learning" },
+    { key: "hourly", label: "Hourly" },
+    { key: "async", label: "Content" },
+    { key: "package", label: "Bundles" },
+    { key: "subscription", label: "Subscriptions" },
+  ];
+  // Source dropdown (matches v1/v3): All / Created by you / Created by Leland.
+  const [source, setSource] = useState<OfferingFilter>("all");
+  const [sourceMenuOpen, setSourceMenuOpen] = useState(false);
+  const sourceMenuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!sourceMenuOpen) return;
+    const onDown = (e: MouseEvent) => { if (sourceMenuRef.current && !sourceMenuRef.current.contains(e.target as Node)) setSourceMenuOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [sourceMenuOpen]);
+  const sourceLabel = OFFERING_FILTERS.find((f) => f.key === source)?.label ?? "All";
+
+  // Live sessions are the coach's own, so they're hidden under the "Leland"
+  // source. They show when the filter is "all" or "live".
+  const nonLive = OFFERINGS.filter((o) => modalityForOffering(o) !== "live");
+  const showLive = source !== "leland" && (filter === "all" || filter === "live");
+  const offeringItems = source === "leland" || filter === "live"
+    ? []
+    : filter === "all"
+      ? nonLive
+      : nonLive.filter((o) => modalityForOffering(o) === filter);
+  const onPreview = (o: Offering) => navigate(`/offering/${o.slug}`);
+  const onEdit = (o: Offering) => navigate(`/my-leland/manage/${category}/new-product?edit=${o.slug}`);
+
+  return (
+    <section>
+      <h2 className="text-[18px] font-semibold text-gray-dark">Offerings</h2>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        {/* Left — modality filter buttons (now including Live group learning). */}
+        <div className="flex flex-wrap items-center gap-1 rounded-full bg-[#222222]/5 p-1">
+          {FILTERS.map((f) => {
+            const active = filter === f.key;
+            return (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => setFilter(f.key)}
+                className={`rounded-full px-3.5 py-1.5 text-[14px] font-medium transition-colors ${active ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(16,24,40,0.12)]" : "text-gray-light hover:text-gray-dark"}`}
+              >
+                {f.label}
+              </button>
+            );
+          })}
+        </div>
+        {/* Right — reorder + source dropdown + New (matches v1/v3 controls). */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold">
+            <img src={sortIcon} alt="" className="h-4 w-4" />
+            Reorder
+          </Button>
+          <div className="relative" ref={sourceMenuRef}>
+            <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={() => setSourceMenuOpen((o) => !o)}>
+              {sourceLabel}
+              <svg className={`h-4 w-4 text-gray-light transition-transform ${sourceMenuOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+            </Button>
+            <AnimatePresence>
+              {sourceMenuOpen && (
+                <motion.div initial={{ opacity: 0, scale: 0.95, y: -4 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -4 }} transition={{ duration: 0.15 }} className="absolute right-0 top-full z-30 mt-2 w-[200px] rounded-xl border border-gray-200 bg-white p-1.5 shadow-lg">
+                  {OFFERING_FILTERS.map((f) => (
+                    <button key={f.key} onClick={() => { setSource(f.key); setSourceMenuOpen(false); }} className="flex w-full items-center justify-between gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
+                      {f.label}
+                      {source === f.key && (<svg className="h-[18px] w-[18px] shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>)}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          <Button size="sm" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new`)}>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            New
+          </Button>
+        </div>
+      </div>
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {/* Live sessions lead the grid, then the rest of the offerings. */}
+        {showLive && [...upcomingLivestreams].reverse().map((item) => (
+          <LiveSessionCard key={item.id} item={item} onPreview={() => navigate("/events")} onEdit={() => navigate("/my-leland/livestreams")} />
+        ))}
+        {offeringItems.map((o) => (
+          <CoachOfferingCard key={o.slug} offering={o} onPreview={() => onPreview(o)} onEdit={() => onEdit(o)} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // "Offerings" heading + a pill filter + a grid of offering cards. The coach's
 // own offerings lead the grid (behind the dashed "New offering" tile), and
 // Leland's standardized packages come last (each with a "Created by Leland"
 // badge + offer toggle). The filter narrows the grid to one source. gridClass
-// sets the column layout so the wide (v1/v2) and two-column (v3) layouts differ.
+// sets the column layout so the wide (v1) and modality-card (v2) layouts differ.
 function OfferingsSection({ category, gridClass }: { category: string | undefined; gridClass: string }) {
   const navigate = useNavigate();
   // Per-package offer state, seeded from each package's default.
@@ -557,13 +965,13 @@ function OfferingsSection({ category, gridClass }: { category: string | undefine
         {/* Add-new tile — leads the coach's own offerings. */}
         {showYours && (
           <button
-            onClick={() => navigate(`/coach/manage/${category}/new-product`)}
+            onClick={() => navigate(`/my-leland/manage/${category}/new`)}
             style={dashedBorderStyle}
             className="group relative flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl bg-gray-hover transition-colors hover:bg-[#eeeeee]"
           >
             <span aria-hidden style={dashedBorderHoverStyle} className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100" />
             <svg className="h-7 w-7 text-gray-extra-light transition-colors group-hover:text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-            <span className="text-[15px] font-semibold leading-tight text-gray-extra-light transition-colors group-hover:text-gray-light">New offering</span>
+            <span className="text-[15px] font-semibold leading-tight text-gray-extra-light transition-colors group-hover:text-gray-light">New product</span>
           </button>
         )}
         {/* Cards rendered in the coach's chosen order; the filter hides sources. */}
@@ -578,7 +986,7 @@ function OfferingsSection({ category, gridClass }: { category: string | undefine
                 key={id}
                 offering={o}
                 onPreview={() => navigate(`/offering/${o.slug}`)}
-                onEdit={() => navigate(`/coach/manage/${category}/new-product?edit=${o.slug}`)}
+                onEdit={() => navigate(`/my-leland/manage/${category}/new-product?edit=${o.slug}`)}
               />
             );
           }
@@ -654,6 +1062,40 @@ function CategoryInfoCard({ settings, onEdit, category, className = "" }: { sett
       <LinkButton size="lg" variant="white" rounded="rounded-full" href={`/profile/samantha-parker/${category}`} className="mt-auto w-full border border-gray-stroke text-[15px] font-semibold">
         <img src={eyeIcon} alt="" className="h-[18px] w-[18px]" />
         Preview listing
+      </LinkButton>
+    </section>
+  );
+}
+
+// Public profile card for this category listing — mirrors the Profile tab's
+// "Public profile" card (editable URL + copy + View public profile).
+function CategoryPublicProfileCard({ category, className = "" }: { category: string | undefined; className?: string }) {
+  const path = `samantha-parker/${category}`;
+  const [copied, setCopied] = useState(false);
+  const copyLink = () => {
+    navigator.clipboard?.writeText(`leland.com/${path}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <section className={`${boxClass} ${className}`}>
+      <h2 className="mb-4 text-[18px] font-semibold text-gray-dark">Public profile</h2>
+      <div className="flex items-center gap-1.5 rounded-lg bg-gray-hover px-3 py-2.5">
+        <span className="min-w-0 flex-1 truncate text-[13px] text-gray-dark">leland.com/{path}</span>
+        <button type="button" onClick={copyLink} aria-label={copied ? "Copied" : "Copy link"} title={copied ? "Copied" : "Copy link"} className="shrink-0 text-gray-light transition-colors hover:text-gray-dark">
+          {copied ? (
+            <svg className="h-[16px] w-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M20 6L9 17l-5-5" vectorEffect="non-scaling-stroke" /></svg>
+          ) : (
+            <MaskIcon src={copyIcon} className="h-[16px] w-[16px]" />
+          )}
+        </button>
+        <button type="button" aria-label="Edit URL" title="Edit URL" className="shrink-0 text-gray-light transition-colors hover:text-gray-dark">
+          <MaskIcon src={editIcon} className="h-[16px] w-[16px]" />
+        </button>
+      </div>
+      <LinkButton size="lg" variant="white" rounded="rounded-full" href={`/profile/${path}`} className="mt-4 w-full border border-gray-stroke font-semibold">
+        <MaskIcon src={eyeIcon} className="h-[16px] w-[16px]" />
+        View public profile
       </LinkButton>
     </section>
   );
@@ -826,12 +1268,16 @@ function Sparkline({ id, data }: { id: string; data: number[] }) {
   );
 }
 
-function CategoryAnalyticsCard({ analytics, className = "" }: { analytics: CategoryAnalytics; className?: string }) {
+function CategoryAnalyticsCard({ analytics, className = "", onSeeAll }: { analytics: CategoryAnalytics; className?: string; onSeeAll?: () => void }) {
   return (
     <section className={`${boxClass} ${className}`}>
       <div className="flex items-center justify-between">
         <h2 className="text-[19px] font-semibold leading-tight text-gray-dark">Analytics</h2>
-        <Link to="/coach/earnings" className="text-[15px] font-medium text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-opacity hover:opacity-70">See all</Link>
+        {onSeeAll ? (
+          <button type="button" onClick={onSeeAll} className="text-[15px] font-medium text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-opacity hover:opacity-70">View all</button>
+        ) : (
+          <Link to="/coach/earnings" className="text-[15px] font-medium text-gray-dark underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-opacity hover:opacity-70">See all</Link>
+        )}
       </div>
       <div className="mt-6 flex flex-1 items-center">
         <div className="grid w-full grid-cols-3 gap-x-6">
@@ -953,6 +1399,525 @@ function ListingSettingsModal({ open, settings, allServices, onPatch, onClose }:
   );
 }
 
+// ─── v5 ─────────────────────────────────────────────────────────────────────
+// A tabbed category workspace: a horizontal tab bar separates the pieces a coach
+// manages (Overview, Group Sessions, Offerings, Subscriptions, Analytics,
+// Settings). Overview previews each area with a quick entry point into its tab.
+
+const V5_TABS = [
+  { key: "overview", label: "Overview" },
+  { key: "group-sessions", label: "Group Sessions" },
+  { key: "offerings", label: "Offerings" },
+  { key: "content", label: "Content" },
+  { key: "subscriptions", label: "Subscriptions" },
+  { key: "analytics", label: "Analytics" },
+  { key: "settings", label: "Settings" },
+] as const;
+type V5Tab = (typeof V5_TABS)[number]["key"];
+
+const ChevronRight = ({ className = "h-4 w-4" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+);
+const PlusIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+);
+
+// Horizontal tab bar — underline indicator slides between tabs via a shared
+// layoutId. Scrolls horizontally on narrow viewports.
+function V5TabBar({ tab, onTab }: { tab: V5Tab; onTab: (t: V5Tab) => void }) {
+  return (
+    <div className="mt-10 border-b border-[#222222]/10">
+      <div className="scrollbar-hide -mb-px flex gap-1 overflow-x-auto">
+        {V5_TABS.map((t) => {
+          const active = tab === t.key;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => onTab(t.key)}
+              className={`relative whitespace-nowrap px-4 py-3 text-[15px] font-semibold transition-colors ${active ? "text-gray-dark" : "text-gray-light hover:text-gray-dark"}`}
+            >
+              {t.label}
+              {active && <motion.span layoutId="v5-tab-underline" className="absolute inset-x-3 -bottom-px h-[2.5px] rounded-full bg-gray-dark" transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }} />}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Subscription card for the v5 Subscriptions tab — mirrors CoachOfferingCard
+// (cover, title, headline, hover Preview/Edit) but carries a recurring badge, a
+// short perk list, a /mo price, and a member count.
+function SubscriptionCard({ plan, onPreview, onEdit }: { plan: SubscriptionPlan; onPreview: () => void; onEdit: () => void }) {
+  return (
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_1px_3px_rgba(16,24,40,0.06)] transition-shadow duration-200 hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]">
+      <div className="relative">
+        {plan.image ? (
+          <img src={plan.image} alt="" className="aspect-[1200/630] w-full object-cover" />
+        ) : (
+          <div className="flex aspect-[1200/630] w-full items-center justify-center bg-[#D9D9D9]">
+            <MaskIcon src={repostIcon} className="h-9 w-9 text-white" />
+          </div>
+        )}
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 py-1 pl-2.5 pr-2.5 shadow-[0_1px_3px_rgba(16,24,40,0.18)]">
+          <MaskIcon src={repostIcon} className="h-3.5 w-3.5 text-gray-dark" />
+          <span className="text-[12px] font-semibold text-gray-dark">Subscription</span>
+        </span>
+        {/* Hover: darken the thumbnail and reveal Preview + Edit controls. */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-3 bg-black/45 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          <button onClick={onPreview} aria-label="Preview subscription" className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-gray-dark shadow-[0_2px_8px_rgba(16,24,40,0.2)] transition-colors hover:bg-gray-hover">
+            <img src={eyeIcon} alt="" className="h-5 w-5" />
+          </button>
+          <button onClick={onEdit} aria-label="Edit subscription" className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-gray-dark shadow-[0_2px_8px_rgba(16,24,40,0.2)] transition-colors hover:bg-gray-hover">
+            <img src={editIcon} alt="" className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col p-4">
+        <p className="text-[15px] font-semibold leading-tight text-gray-dark">{plan.title}</p>
+        <p className="mt-1 text-[14px] leading-snug text-gray-light">{plan.headline}</p>
+        <ul className="mt-3 flex flex-col gap-1.5">
+          {plan.perks.slice(0, 3).map((perk) => (
+            <li key={perk} className="flex items-start gap-2 text-[13px] leading-snug text-gray-dark">
+              <svg className="mt-0.5 h-[15px] w-[15px] shrink-0 text-[#1B8A54]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+              {perk}
+            </li>
+          ))}
+        </ul>
+        <div className="mt-auto flex items-end justify-between gap-3 pt-4">
+          <p className="flex items-baseline gap-1 text-[15px] font-semibold text-gray-dark">
+            ${plan.monthly}
+            <span className="text-[13px] font-normal text-gray-light">/mo</span>
+          </p>
+          <span className="text-[12px] font-medium text-gray-extra-light">{plan.members} members</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Overview preview card — a titled section with an optional count chip and a
+// "Manage" button that jumps to the matching tab.
+function OverviewSection({ title, count, onManage, children }: { title: string; count?: number; onManage: () => void; children: ReactNode }) {
+  return (
+    <section className={boxClass}>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <h2 className="text-[18px] font-semibold text-gray-dark">{title}</h2>
+          {count != null && <span className="rounded-full bg-[#222222]/5 px-2 py-0.5 text-[12px] font-semibold text-gray-light">{count}</span>}
+        </div>
+        <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold" onClick={onManage}>
+          Manage
+          <ChevronRight />
+        </Button>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+// Shared list of this category's non-live offerings (live sessions live in the
+// Group Sessions tab; subscriptions in their own tab).
+const V5_OFFERINGS = OFFERINGS.filter((o) => modalityForOffering(o) !== "live");
+
+function V5Overview({ category, data, settings, onEditSettings, setTab }: {
+  category: string | undefined;
+  data: (typeof categoryData)[string];
+  settings: ListingSettings;
+  onEditSettings: () => void;
+  setTab: (t: V5Tab) => void;
+}) {
+  const navigate = useNavigate();
+  const content = RESOURCES.filter((r) => resourceMatchesCategory(r.category, data.name));
+  return (
+    <div className="flex flex-col gap-5">
+      {/* Listing summary + analytics snapshot. */}
+      <div className="grid gap-5 lg:grid-cols-2">
+        <CategoryInfoCard settings={settings} onEdit={onEditSettings} category={category} />
+        <CategoryAnalyticsCard analytics={data.analytics} onSeeAll={() => setTab("analytics")} />
+      </div>
+
+      {/* Group sessions — next couple of scheduled sessions. */}
+      <OverviewSection title="Group Sessions" count={upcomingLivestreams.length} onManage={() => setTab("group-sessions")}>
+        <div className="-mx-6 divide-y divide-gray-stroke border-t border-gray-stroke">
+          {[...upcomingLivestreams].reverse().slice(0, 2).map((item) => (
+            <EventRow key={item.id} item={item} />
+          ))}
+        </div>
+      </OverviewSection>
+
+      {/* Offerings — first few cards. */}
+      <OverviewSection title="Offerings" count={V5_OFFERINGS.length} onManage={() => setTab("offerings")}>
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {V5_OFFERINGS.slice(0, 3).map((o) => (
+            <CoachOfferingCard
+              key={o.slug}
+              offering={o}
+              onPreview={() => navigate(`/offering/${o.slug}`)}
+              onEdit={() => navigate(`/my-leland/manage/${category}/new-product?edit=${o.slug}`)}
+            />
+          ))}
+        </div>
+      </OverviewSection>
+
+      {/* Subscriptions — recurring memberships. */}
+      <OverviewSection title="Subscriptions" count={SUBSCRIPTIONS.length} onManage={() => setTab("subscriptions")}>
+        <div className="grid gap-5 sm:grid-cols-2">
+          {SUBSCRIPTIONS.map((p) => (
+            <SubscriptionCard
+              key={p.slug}
+              plan={p}
+              onPreview={() => navigate(`/offering/${p.slug}`)}
+              onEdit={() => navigate(`/my-leland/manage/${category}/new-product/subscription`)}
+            />
+          ))}
+        </div>
+      </OverviewSection>
+
+      {/* Content — resources tagged to this category. */}
+      <OverviewSection title="Content" count={content.length} onManage={() => setTab("content")}>
+        {content.length === 0 ? (
+          <p className="rounded-xl bg-gray-hover px-4 py-6 text-center text-[14px] text-gray-light">No content tagged to {data.name} yet.</p>
+        ) : (
+          <div>
+            <ContentTableHeader offeringsAlign="left" />
+            {content.slice(0, 3).map((r, i, arr) => (
+              <ContentRowV1
+                key={r.id}
+                isLast={i === arr.length - 1}
+                d={{
+                  cover: <img src={r.cover} alt="" className="h-10 w-[60px] shrink-0 rounded-lg object-cover" />,
+                  title: r.title,
+                  meta: r.fileType,
+                  lelandPlus: r.lelandPlus,
+                  views: `${formatViews(r.views)} views`,
+                  offerings: r.offerings.length,
+                  onClick: () => navigate("/my-leland/content"),
+                  onOfferings: () => navigate("/my-leland/content"),
+                  ariaLabel: `View details for ${r.title}`,
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </OverviewSection>
+    </div>
+  );
+}
+
+function V5GroupSessionsPanel({ category }: { category: string | undefined }) {
+  const navigate = useNavigate();
+  return (
+    <div className="flex flex-col gap-5">
+      {/* Free Livestreams — the CoachLivestreams row UI (Host · Status · Actions). */}
+      <section className={boxClass}>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-[18px] font-semibold text-gray-dark">Free Livestreams</h2>
+            <p className="mt-1 text-[14px] text-gray-light">Free live events that grow your audience and bring in new leads.</p>
+          </div>
+          <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new-product/livestream`)}>
+            <PlusIcon />
+            New livestream
+          </Button>
+        </div>
+        <div className="-mx-6 mt-4 divide-y divide-gray-stroke border-t border-gray-stroke">
+          {[...upcomingLivestreams].reverse().map((item) => (
+            <EventRow key={item.id} item={item} />
+          ))}
+        </div>
+      </section>
+
+      {/* Paid Group Sessions — the CoachWorkshops row UI (Host · Earnings · Actions). */}
+      <section className={boxClass}>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-[18px] font-semibold text-gray-dark">Paid Group Sessions</h2>
+            <p className="mt-1 text-[14px] text-gray-light">Paid live classes — host one on its own or bundle it into an offering.</p>
+          </div>
+          <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new-product/live`)}>
+            <PlusIcon />
+            New session
+          </Button>
+        </div>
+        <div className="-mx-6 mt-4 divide-y divide-gray-stroke border-t border-gray-stroke">
+          {upcomingWorkshops.map((item) => (
+            <WorkshopRow key={item.id} item={item} />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function V5OfferingsPanel({ category }: { category: string | undefined }) {
+  const navigate = useNavigate();
+  const [filter, setFilter] = useState<string>("all");
+  const FILTERS = [
+    { key: "all", label: "All" },
+    { key: "hourly", label: "Hourly" },
+    { key: "async", label: "Content" },
+    { key: "package", label: "Bundles" },
+  ];
+  const shown = filter === "all" ? V5_OFFERINGS : V5_OFFERINGS.filter((o) => modalityForOffering(o) === filter);
+  return (
+    <section>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-[20px] font-semibold text-gray-dark">Offerings</h2>
+          <p className="mt-1 text-[14px] text-gray-light">Hourly coaching, content, and bundles clients can buy outright.</p>
+        </div>
+        <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new`)}>
+          <PlusIcon />
+          New
+        </Button>
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-1 rounded-full bg-[#222222]/5 p-1 self-start w-fit">
+        {FILTERS.map((f) => {
+          const active = filter === f.key;
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setFilter(f.key)}
+              className={`rounded-full px-3.5 py-1.5 text-[14px] font-medium transition-colors ${active ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(16,24,40,0.12)]" : "text-gray-light hover:text-gray-dark"}`}
+            >
+              {f.label}
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {shown.map((o) => (
+          <CoachOfferingCard
+            key={o.slug}
+            offering={o}
+            onPreview={() => navigate(`/offering/${o.slug}`)}
+            onEdit={() => navigate(`/my-leland/manage/${category}/new-product?edit=${o.slug}`)}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// Matches a resource's category label (e.g. "MBA", "Consulting") against this
+// page's category name ("MBA", "Management Consulting") with a loose contains
+// check, so "Consulting" lands under "Management Consulting".
+function resourceMatchesCategory(resourceCategory: string, categoryName: string): boolean {
+  const rc = resourceCategory.trim().toLowerCase();
+  const name = categoryName.trim().toLowerCase();
+  if (!rc) return false;
+  return name === rc || name.includes(rc) || rc.includes(name);
+}
+
+// Content tab — the same row UI as /my-leland/content, filtered to resources
+// tagged with this category. Rows deep-link into the full Content page.
+function V5ContentPanel({ category, categoryName }: { category: string | undefined; categoryName: string }) {
+  const navigate = useNavigate();
+  const matches = RESOURCES.filter((r) => resourceMatchesCategory(r.category, categoryName));
+  const goToContent = () => navigate("/my-leland/content");
+  return (
+    <section>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-[20px] font-semibold text-gray-dark">Content</h2>
+          <p className="mt-1 text-[14px] text-gray-light">Guides, templates, and recordings tagged to {categoryName}.</p>
+        </div>
+        <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new-product/async`)}>
+          <PlusIcon />
+          New content
+        </Button>
+      </div>
+      {matches.length === 0 ? (
+        <p className="mt-5 rounded-xl border border-gray-stroke bg-white px-4 py-12 text-center text-[14px] text-gray-light">No content tagged to {categoryName} yet.</p>
+      ) : (
+        <div className="mt-5 overflow-hidden rounded-xl border border-gray-stroke bg-white px-6">
+          <ContentTableHeader offeringsAlign="left" />
+          {matches.map((r, i) => (
+            <ContentRowV1
+              key={r.id}
+              isLast={i === matches.length - 1}
+              d={{
+                cover: <img src={r.cover} alt="" className="h-10 w-[60px] shrink-0 rounded-lg object-cover" />,
+                title: r.title,
+                meta: r.fileType,
+                lelandPlus: r.lelandPlus,
+                views: `${formatViews(r.views)} views`,
+                offerings: r.offerings.length,
+                onClick: goToContent,
+                onOfferings: goToContent,
+                ariaLabel: `View details for ${r.title}`,
+              }}
+            />
+          ))}
+          <button onClick={goToContent} className="-mx-6 flex w-[calc(100%+3rem)] items-center justify-center gap-2 border-t border-gray-stroke px-6 py-4 text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover">
+            Manage all content
+            <ChevronRight />
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function V5SubscriptionsPanel({ category }: { category: string | undefined }) {
+  const navigate = useNavigate();
+  return (
+    <section>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-[20px] font-semibold text-gray-dark">Subscriptions</h2>
+          <p className="mt-1 text-[14px] text-gray-light">Recurring memberships that bill monthly or annually for ongoing access.</p>
+        </div>
+        <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new-product/subscription`)}>
+          <PlusIcon />
+          New subscription
+        </Button>
+      </div>
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {SUBSCRIPTIONS.map((p) => (
+          <SubscriptionCard
+            key={p.slug}
+            plan={p}
+            onPreview={() => navigate(`/offering/${p.slug}`)}
+            onEdit={() => navigate(`/my-leland/manage/${category}/new-product/subscription`)}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// Simple revenue-by-offering breakdown for the Analytics tab. Sales counts are
+// illustrative; revenue is derived from each offering's real listed price.
+function V5OfferingPerformance() {
+  const rows = V5_OFFERINGS.slice(0, 6)
+    .map((o, i) => {
+      const price = Number(o.price.replace(/[^0-9.]/g, "")) || 0;
+      const sales = [12, 9, 7, 5, 4, 3][i] ?? 2;
+      return { title: o.title, revenue: price * sales, sales };
+    })
+    .sort((a, b) => b.revenue - a.revenue);
+  const max = Math.max(...rows.map((r) => r.revenue), 1);
+  return (
+    <section className={boxClass}>
+      <h2 className="text-[19px] font-semibold leading-tight text-gray-dark">Revenue by offering</h2>
+      <div className="mt-5 flex flex-col gap-4">
+        {rows.map((r) => (
+          <div key={r.title}>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="min-w-0 truncate text-[14px] text-gray-dark">{r.title}</span>
+              <span className="shrink-0 text-[14px] font-semibold text-gray-dark">${r.revenue.toLocaleString()}</span>
+            </div>
+            <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#222222]/[0.06]">
+              <div className="h-full rounded-full" style={{ width: `${(r.revenue / max) * 100}%`, backgroundColor: SPARK_COLOR }} />
+            </div>
+            <p className="mt-1 text-[12px] text-gray-extra-light">{r.sales} sales</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function V5AnalyticsPanel({ analytics }: { analytics: CategoryAnalytics }) {
+  return (
+    <div className="flex flex-col gap-5">
+      <CategoryAnalyticsCard analytics={analytics} />
+      <V5OfferingPerformance />
+    </div>
+  );
+}
+
+function V5SettingsPanel({ settings, onEditSettings, category, firstStep, onFirstStepChange, rate, onRateChange, showPricingCard }: {
+  settings: ListingSettings;
+  onEditSettings: () => void;
+  category: string | undefined;
+  firstStep: FirstStep;
+  onFirstStepChange: (v: FirstStep) => void;
+  rate: string;
+  onRateChange: (v: string) => void;
+  showPricingCard: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="grid gap-5 lg:grid-cols-2">
+        <CategoryInfoCard settings={settings} onEdit={onEditSettings} category={category} />
+        {showPricingCard && <CategoryPricingCard firstStep={firstStep} onFirstStepChange={onFirstStepChange} rate={rate} onRateChange={onRateChange} />}
+      </div>
+      <CategoryPublicProfileCard category={category} />
+    </div>
+  );
+}
+
+function CategoryV5Content(props: {
+  category: string | undefined;
+  data: (typeof categoryData)[string];
+  settings: ListingSettings;
+  onEditSettings: () => void;
+  firstStep: FirstStep;
+  onFirstStepChange: (v: FirstStep) => void;
+  rate: string;
+  onRateChange: (v: string) => void;
+  showPricingCard: boolean;
+}) {
+  const { category, data, settings, onEditSettings, firstStep, onFirstStepChange, rate, onRateChange, showPricingCard } = props;
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<V5Tab>("overview");
+  return (
+    <>
+      {/* Primary actions — new product + edit this category's listing. */}
+      <div className="mt-8 flex flex-wrap items-center gap-3">
+        <Button size="lg" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new`)}>
+          <PlusIcon className="h-5 w-5" />
+          New
+        </Button>
+        <Button size="lg" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={onEditSettings}>
+          <img src={editIcon} alt="" className="h-[18px] w-[18px]" />
+          Edit category profile
+        </Button>
+      </div>
+
+      <V5TabBar tab={tab} onTab={setTab} />
+      <div className="mt-8">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={tab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            {tab === "overview" && (
+              <V5Overview category={category} data={data} settings={settings} onEditSettings={onEditSettings} setTab={setTab} />
+            )}
+            {tab === "group-sessions" && <V5GroupSessionsPanel category={category} />}
+            {tab === "offerings" && <V5OfferingsPanel category={category} />}
+            {tab === "content" && <V5ContentPanel category={category} categoryName={data.name} />}
+            {tab === "subscriptions" && <V5SubscriptionsPanel category={category} />}
+            {tab === "analytics" && <V5AnalyticsPanel analytics={data.analytics} />}
+            {tab === "settings" && (
+              <V5SettingsPanel
+                settings={settings}
+                onEditSettings={onEditSettings}
+                category={category}
+                firstStep={firstStep}
+                onFirstStepChange={onFirstStepChange}
+                rate={rate}
+                onRateChange={onRateChange}
+                showPricingCard={showPricingCard}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </>
+  );
+}
+
 export default function CoachCategoryEdit() {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
@@ -990,11 +1955,14 @@ export default function CoachCategoryEdit() {
   }, [category]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Admin: v1/v2 layout switch (bottom-right 3-dot menu), persisted for demos.
-  const [version, setVersion] = useState<CategoryVersion>(() => (localStorage.getItem(VERSION_KEY) as CategoryVersion) || "v3");
+  const [version, setVersion] = useState<CategoryVersion>(() => {
+    const stored = localStorage.getItem(VERSION_KEY);
+    return stored === "v1" || stored === "v2" || stored === "v3" || stored === "v4" || stored === "v5" ? stored : "v1";
+  });
   useEffect(() => { localStorage.setItem(VERSION_KEY, version); }, [version]);
   const [adminOpen, setAdminOpen] = useState(false);
   // Admin toggle: show/hide the pricing card (hourly rate + first step).
-  const [showPricingCard, setShowPricingCard] = useState(false);
+  const [showPricingCard, setShowPricingCard] = useState(true);
   const adminRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!adminOpen) return;
@@ -1032,132 +2000,153 @@ export default function CoachCategoryEdit() {
     );
   }
 
-  // v3 mirrors the customer Dashboard's two-column layout at its wider max
-  // width; v1/v2 stay in the narrower single-column layout.
-  const contentMax = version === "v3" ? "max-w-[1280px]" : "max-w-[1040px]";
+  // v1 keeps the current dashboard-style layout (wide two columns under a beige
+  // hero band). v2 is the redesign: a beige full-bleed page with the listing
+  // preview up top and offerings grouped into modality cards.
+  const contentMax = "max-w-[1280px]";
+
+  // Back + category-options menu — shared by both versions.
+  const topBar = (
+    <div className="mb-6 flex items-center justify-between gap-3">
+      <Button size="sm" variant="secondary" iconOnly onClick={() => navigate("/coach/profile")} aria-label="Go back">
+        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+      </Button>
+      <div className="relative" ref={catMenuRef}>
+        <Button size="sm" variant="secondary" iconOnly onClick={() => setCatMenuOpen((o) => !o)} aria-label="Category options">
+          <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></svg>
+        </Button>
+        <AnimatePresence>
+          {catMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -4 }}
+              transition={{ duration: 0.15 }}
+              className="absolute right-0 top-full z-30 mt-2 w-[200px] rounded-xl border border-gray-200 bg-white p-1.5 shadow-lg"
+            >
+              <button onClick={() => setCatMenuOpen(false)} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
+                <MaskIcon src={shareArrowIcon} className="h-[18px] w-[18px]" />
+                Share
+              </button>
+              <button onClick={() => setCatMenuOpen(false)} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-[#DC2B23] transition-colors hover:bg-[#DC2B23]/[0.06]">
+                <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
+                Delete category
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
 
   return (
     <div>
-      {/* Hero — colored band bled to the edges of CoachLayout's flex-1 region
-          (flush to the sidebar on the left, the window on the right). Cancels
-          both the container's px padding and its mx-auto centering gutter: the
-          container is centered in flex-1, so the gutter is symmetric, and equal
-          negative margins reach both edges. The gutter only exists once flex-1
-          exceeds the max-w-[1080px] cap, hence the -24px floor. The constant
-          626 = (1080 max-width + 220 sidebar) / 2 - 24 padding. The overlapping
-          cards below pull up into it, matching the customer Dashboard hero. */}
-      <div
-        className="-ml-4 -mr-4 -mt-8 pb-28 pt-8 sm:-mt-10 sm:pb-32 sm:pt-10 sm:[margin-left:min(-24px,calc(626px_-_50vw))] sm:[margin-right:min(-24px,calc(626px_-_50vw))]"
-        style={{ backgroundColor: HERO_BG }}
-      >
-        {/* Recreate CoachLayout's padded max-w container so the hero content
-            box matches the main content box exactly (which lives inside that
-            same container), then constrain to the per-version content width. */}
-        <div className="mx-auto max-w-[1080px] px-4 sm:px-6">
-          <div className={`mx-auto ${contentMax}`}>
-          {/* Back + Preview listing */}
-          <div className="mb-6 flex items-center justify-between gap-3">
-            <Button size="sm" variant="secondary" iconOnly onClick={() => navigate("/coach/profile")} aria-label="Go back">
-              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-            </Button>
-            <div className="relative" ref={catMenuRef}>
-              <Button size="sm" variant="secondary" iconOnly onClick={() => setCatMenuOpen((o) => !o)} aria-label="Category options">
-                <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></svg>
-              </Button>
-              <AnimatePresence>
-                {catMenuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -4 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-full z-30 mt-2 w-[200px] rounded-xl border border-gray-200 bg-white p-1.5 shadow-lg"
-                  >
-                    <button onClick={() => setCatMenuOpen(false)} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
-                      <MaskIcon src={shareArrowIcon} className="h-[18px] w-[18px]" />
-                      Share
-                    </button>
-                    <button onClick={() => setCatMenuOpen(false)} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-[#DC2B23] transition-colors hover:bg-[#DC2B23]/[0.06]">
-                      <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
-                      Delete category
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+      {version === "v5" ? (
+        // v5 — a tabbed workspace on the same beige full-bleed page. Hero + a
+        // horizontal tab bar, then the active tab's panel.
+        <>
+          {topBar}
+          <div>
+            <h1 className="font-serif text-[42px] leading-[1.05] text-gray-dark md:text-[48px]">{data.name}</h1>
+            <p className="mt-3 text-[18px] leading-relaxed text-gray-light">
+              Manage the products, pricing, and details that appear on your public listing for this category.
+            </p>
+          </div>
+          <CategoryV5Content
+            category={category}
+            data={data}
+            settings={settings}
+            onEditSettings={() => setEditOpen(true)}
+            firstStep={firstStep}
+            onFirstStepChange={setFirstStep}
+            rate={hourlyRate}
+            onRateChange={setHourlyRate}
+            showPricingCard={showPricingCard}
+          />
+        </>
+      ) : version !== "v1" ? (
+        // v2 / v3 — beige full-bleed page. The beige is painted by CoachLayout's
+        // persistent container (see its `beigePage`), not here, so it's instant and
+        // doesn't flash white→beige through the fade-up entrance animation.
+        <>
+          {topBar}
+
+          {/* Hero — identical to v1 (category name + subtitle), with actions. */}
+          <div>
+            <h1 className="font-serif text-[42px] leading-[1.05] text-gray-dark md:text-[48px]">{data.name}</h1>
+            <p className="mt-3 text-[18px] leading-relaxed text-gray-light">
+              Manage the products, pricing, and details that appear on your public listing for this category.
+            </p>
           </div>
 
-          {/* Header — v1: generic title + subtitle. v2: a preview of the
-              coach's category information (name, headline, expertise, bio). */}
-          {version === "v2" ? (
-            <div>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-2.5">
-                  <img src={pic6} alt="Samantha Parker" className="h-8 w-8 rounded-full object-cover" />
-                  <span className="text-[16px] text-gray-dark">Samantha Parker <span className="text-gray-extra-light">·</span> {data.name} listing</span>
-                </div>
-                <button onClick={() => setEditOpen(true)} className="flex shrink-0 items-center gap-1.5 text-[15px] font-medium text-gray-dark transition-opacity hover:opacity-70">
-                  <img src={editIcon} alt="" className="h-[16px] w-[16px]" />
-                  <span className="underline decoration-dotted decoration-[1.5px] underline-offset-[3px]">Edit</span>
-                </button>
-              </div>
-              <h1 className="mt-4 font-serif text-[42px] leading-[1.05] text-gray-dark md:text-[48px]">{settings.headline}</h1>
-              {settings.services.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {settings.services.slice(0, 4).map((s) => (
-                    <span key={s} className="rounded-full bg-[#222222]/5 px-3 py-1.5 text-[13px] font-medium text-gray-light">{s}</span>
-                  ))}
-                  {settings.services.length > 4 && (
-                    <span className="rounded-full bg-[#222222]/5 px-3 py-1.5 text-[13px] font-medium text-gray-light">+{settings.services.length - 4}</span>
-                  )}
-                </div>
-              )}
-              <p className="mt-4 line-clamp-2 max-w-[720px] text-[16px] leading-relaxed text-gray-light">{settings.qualifications}</p>
-            </div>
-          ) : (
-            <div>
-              <h1 className="font-serif text-[42px] leading-[1.05] text-gray-dark md:text-[48px]">{data.name}</h1>
-              <p className="mt-3 text-[18px] leading-relaxed text-gray-light">
-                Manage the products, pricing, and details that appear on your public listing for this category.
-              </p>
-            </div>
-          )}
-          </div>
-        </div>
-      </div>
-
-      {/* Content — pulled up to overlap the hero band */}
-      <div className={`relative z-10 mx-auto -mt-16 sm:-mt-20 ${contentMax}`}>
-        {version === "v3" ? (
-          // v3 — Dashboard-style two columns: left holds category info + first
-          // step + hourly rate; right holds analytics then offerings.
-          <div className="grid grid-cols-1 gap-6 lg:gap-x-10 lg:grid-cols-[320px_minmax(0,1fr)]">
-            <div className="flex flex-col gap-6 lg:sticky lg:top-[77px] lg:self-start">
+          {/* All card sections share one consistent vertical gap. */}
+          <div className="mt-10 flex flex-col gap-5">
+            {/* First row — profile info card + hourly rate / first step card. */}
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
               <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} category={category} />
               {showPricingCard && <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />}
             </div>
-            <div className="flex min-w-0 flex-col gap-8">
-              <CategoryAnalyticsCard analytics={data.analytics} />
-              <OfferingsSection category={category} gridClass="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3" />
+
+            {/* Analytics row — category-scoped, Dashboard-style. */}
+            <CategoryAnalyticsCard analytics={data.analytics} />
+
+            {version === "v4" ? (
+              // v4 — no separate Live section; live sessions live in the Offerings
+              // grid as cards (with a "Live group learning" filter + calendar badge).
+              <CategoryV4Content category={category} />
+            ) : version === "v3" ? (
+              // v3 — Live sessions section + one filterable Offerings grid.
+              <CategoryV3Content category={category} />
+            ) : (
+              // v2 — offerings grouped into a card per modality.
+              MODALITIES.map((m) => (
+                <ModalityCard
+                  key={m.id}
+                  modality={m}
+                  offerings={OFFERINGS.filter((o) => modalityForOffering(o) === m.id)}
+                  onPreview={(o) => navigate(`/offering/${o.slug}`)}
+                  onEdit={(o) => navigate(`/my-leland/manage/${category}/new-product?edit=${o.slug}`)}
+                  onAdd={() => navigate(`/my-leland/manage/${category}/new`)}
+                  onSeeAll={() => navigate(`/profile/samantha-parker/${category}`)}
+                />
+              ))
+            )}
+          </div>
+        </>
+      ) : (
+        // v1 — dashboard-style two columns under a beige hero band.
+        <>
+          <div
+            className="-ml-4 -mr-4 -mt-8 pb-28 pt-8 sm:-mt-10 sm:pb-32 sm:pt-10 sm:[margin-left:min(-24px,calc(626px_-_50vw))] sm:[margin-right:min(-24px,calc(626px_-_50vw))]"
+            style={{ backgroundColor: HERO_BG }}
+          >
+            <div className="mx-auto max-w-[1080px] px-4 sm:px-6">
+              <div className={`mx-auto ${contentMax}`}>
+                {topBar}
+                <div>
+                  <h1 className="font-serif text-[42px] leading-[1.05] text-gray-dark md:text-[48px]">{data.name}</h1>
+                  <p className="mt-3 text-[18px] leading-relaxed text-gray-light">
+                    Manage the products, pricing, and details that appear on your public listing for this category.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-        ) : (
-          <>
-            {/* v1: category info + pricing. v2: analytics + pricing (the
-                category info moves up into the hero preview). */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              {version === "v2"
-                ? <CategoryAnalyticsCard analytics={data.analytics} className="lg:col-span-2" />
-                : <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} category={category} className="lg:col-span-2" />}
-              {showPricingCard && <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />}
-            </div>
 
-            <div className="mt-12">
-              <OfferingsSection category={category} gridClass="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" />
+          <div className={`relative z-10 mx-auto -mt-16 sm:-mt-20 ${contentMax}`}>
+            <div className="grid grid-cols-1 gap-6 lg:gap-x-10 lg:grid-cols-[320px_minmax(0,1fr)]">
+              <div className="flex flex-col gap-6 lg:sticky lg:top-[77px] lg:self-start">
+                <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} category={category} />
+                {showPricingCard && <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />}
+              </div>
+              <div className="flex min-w-0 flex-col gap-8">
+                <CategoryAnalyticsCard analytics={data.analytics} />
+                <OfferingsSection category={category} gridClass="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3" />
+              </div>
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
 
       <ListingSettingsModal open={editOpen} settings={settings} allServices={data.allServices} onPatch={patchSettings} onClose={() => setEditOpen(false)} />
 
@@ -1177,7 +2166,7 @@ export default function CoachCategoryEdit() {
             >
               <p className="px-2 pb-1.5 pt-1 text-[12px] font-medium text-gray-light">Layout version</p>
               <div className="flex gap-1 rounded-lg bg-gray-hover p-1">
-                {(["v1", "v2", "v3"] as const).map((v) => (
+                {(["v1", "v2", "v3", "v4", "v5"] as const).map((v) => (
                   <button
                     key={v}
                     onClick={() => setVersion(v)}

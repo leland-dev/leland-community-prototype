@@ -95,6 +95,7 @@ function IconNavLink({
   icon,
   badge,
   dot,
+  isNew,
   hideLabel,
 }: {
   to: string;
@@ -103,6 +104,9 @@ function IconNavLink({
   icon: string;
   badge?: number;
   dot?: boolean;
+  // Show a soft "New" chip at the icon's top-right corner to flag a new
+  // destination.
+  isNew?: boolean;
   // Force an icon-only item (no label, snug width) regardless of the global
   // label toggle — used for Messages/Notifications in the alt layout.
   hideLabel?: boolean;
@@ -123,6 +127,11 @@ function IconNavLink({
           <span className={iconWrap}>
             <img src={icon} alt="" className={iconCls(isActive)} />
             <NavBadge count={badge} dot={dot} />
+            {isNew && (
+              <span className="absolute left-full top-0 -ml-[10px] -translate-y-1/2 rounded-md border-[1.5px] border-white bg-[#F2F2F2] px-1 py-[3px] text-[10px] font-semibold leading-none text-gray-dark">
+                New
+              </span>
+            )}
           </span>
           {showLabel && <span className={labelCls(isActive)}>{label}</span>}
           {underline(isActive)}
@@ -300,7 +309,7 @@ export default function TopNavLinkedIn() {
           <IconNavLink to={navTo("/content")} label="Leland+" icon={contentBookFilledIcon} />
         </div>
       )}
-      {showJobs && <IconNavLink to={navTo("/jobs")} label="Jobs" icon={jobsIcon} />}
+      {showJobs && <IconNavLink to={navTo("/jobs")} label="Jobs" icon={jobsIcon} isNew />}
 
       {/* Messages + Notifications — in the alt layout these move to the right of
           the divider (icon-only), so they're dropped from the icon group here. */}
