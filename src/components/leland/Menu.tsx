@@ -353,6 +353,7 @@ export interface MenuProps {
   hasCustomTriggerRadius?: boolean;
   searchable?: boolean;
   searchPlaceholder?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 const MENU_ITEM_HEIGHT_PX = 44;
@@ -403,6 +404,7 @@ export const Menu: FC<MenuProps> = ({
   hasCustomTriggerRadius = false,
   searchable = false,
   searchPlaceholder = 'Search',
+  onSearchChange,
 }) => {
   const itemSections = useMemo(
     () => rawItemSections.filter((section) => section.length > 0),
@@ -445,7 +447,8 @@ export const Menu: FC<MenuProps> = ({
       return;
     }
     resetQuery();
-  }, [searchable, effectiveOpen, resetQuery]);
+    onSearchChange?.('');
+  }, [searchable, effectiveOpen, resetQuery, onSearchChange]);
 
   useEffect(() => {
     if (!searchable || loading || !effectiveOpen) {
@@ -488,6 +491,7 @@ export const Menu: FC<MenuProps> = ({
       return;
     }
     parent.style.right = "0";
+    parent.style.minWidth = "0";
     parent.style.position = "absolute";
     parent.style.zIndex = "5";
   };
@@ -570,7 +574,10 @@ export const Menu: FC<MenuProps> = ({
                     aria-label={searchPlaceholder}
                     placeholder={searchPlaceholder}
                     className="w-full min-w-0 bg-transparent text-[0.875rem] leading-tight text-leland-gray-dark outline-none placeholder:text-leland-gray-extra-light"
-                    onChange={(event) => onQueryChange(event.target.value)}
+                    onChange={(event) => {
+                      onQueryChange(event.target.value);
+                      onSearchChange?.(event.target.value);
+                    }}
                     onKeyDown={handleSearchKeyDown}
                   />
                 </div>

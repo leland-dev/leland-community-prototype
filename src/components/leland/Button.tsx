@@ -116,8 +116,36 @@ const getLabelledPaddingFromBreakpointClass = ({
   hideLabelBelow?: Breakpoints;
   hasIcon: boolean;
 }): string => {
-  if (size === ButtonSize.SMALL || hideLabelBelow == null || !hasIcon) return '';
+  if (size === ButtonSize.SMALL || hideLabelBelow == null || !hasIcon)
+    return '';
   return LABELLED_PADDING_FROM_BREAKPOINT[size][hideLabelBelow];
+};
+
+const CLAMPED_LABEL_FROM_BREAKPOINT: Record<Breakpoints, string> = {
+  [Breakpoints.SM]: 'hidden sm:line-clamp-2',
+  [Breakpoints.MD]: 'hidden md:line-clamp-2',
+  [Breakpoints.LG]: 'hidden lg:line-clamp-2',
+  [Breakpoints.XL]: 'hidden xl:line-clamp-2',
+  [Breakpoints['2XL']]: 'hidden 2xl:line-clamp-2',
+};
+
+const getLabelVisibilityClass = ({
+  hideLabelBelow,
+  truncateLabel,
+}: {
+  hideLabelBelow?: Breakpoints;
+  truncateLabel?: boolean;
+}): string => {
+  if (!truncateLabel) {
+    return hideLabelBelow != null
+      ? `hidden ${breakpointToTailwind(hideLabelBelow)}:inline`
+      : '';
+  }
+  const clamp =
+    hideLabelBelow != null
+      ? CLAMPED_LABEL_FROM_BREAKPOINT[hideLabelBelow]
+      : 'line-clamp-2';
+  return `min-w-0 whitespace-normal break-words ${clamp}`;
 };
 
 export type ButtonFontWeight = PickEnum<
@@ -339,6 +367,7 @@ export interface ButtonProps
   selected?: boolean;
   hideLabel?: boolean;
   hideLabelBelow?: Breakpoints;
+  truncateLabel?: boolean;
   size?: ButtonSize;
   width?: ButtonWidth;
   roundedSide?: ButtonRoundedSide;
@@ -363,6 +392,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       selected,
       hideLabel,
       hideLabelBelow,
+      truncateLabel,
       size = ButtonSize.MEDIUM,
       width = ButtonWidth.AUTO,
       roundedSide = ButtonRoundedSide.BOTH,
@@ -373,10 +403,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    const labelVisibilityClass =
-      hideLabelBelow != null
-        ? `hidden ${breakpointToTailwind(hideLabelBelow)}:inline`
-        : '';
+    const labelVisibilityClass = getLabelVisibilityClass({
+      hideLabelBelow,
+      truncateLabel,
+    });
 
     const hasLeftIcon = Boolean(CustomLeftIcon || LeftIcon);
     const hasRightIcon = Boolean(CustomRightIcon || RightIcon);

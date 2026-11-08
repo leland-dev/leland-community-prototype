@@ -84,6 +84,7 @@
   --color-leland-tan-light: rgb(245 234 218);
   --color-leland-tan-dark: rgb(126 69 46);
   --color-leland-slate: rgb(134 154 166);
+  --color-leland-slate-dark: rgba(94, 110, 121, 1);
 
   /*
    * Avatar fallback palette — fixed backgrounds for name initials when no
@@ -126,6 +127,12 @@
   --text-heading-4xl--line-height: 110%;
   --text-heading-5xl: 2.875rem;
   --text-heading-5xl--line-height: 100%;
+  --text-rank-sm: 6rem;
+  --text-rank-sm--line-height: 0.8;
+  --text-rank: 9rem;
+  --text-rank--line-height: 0.8;
+  --text-rank-lg: 12rem;
+  --text-rank-lg--line-height: 0.8;
   --text-heading-6xl: 3.875rem;
   --text-heading-6xl--line-height: 95%;
 
@@ -162,6 +169,8 @@
   --text-caption--line-height: 125%;
 
   /* ── Aspect ratios ───────────────────────────────────────────────────── */
+  --aspect-portrait-video: 9 / 16;
+  --aspect-expert-card: 4 / 5;
   --aspect-profile-cover: 7 / 2;
   --aspect-profile-cover-narrow: 3 / 1;
   --aspect-profile-card-cover: 4 / 1;
@@ -177,6 +186,9 @@
   --spacing-feed: 37.5rem;
   --spacing-page: 80rem;
   --spacing-page-medium: 67.5rem;
+
+  /* ── Min-height ──────────────────────────────────────────────────────── */
+  --min-h-below-full-nav: calc(100vh - 120px);
 
   /* ── Animations ──────────────────────────────────────────────────────── */
   /* Starts one band-width before the leading edge and ends past the trailing
@@ -233,7 +245,6 @@
 
 @utility outline-1\.5 { outline-width: 1.5px; }
 @utility border-1\.5 { border-width: 1.5px; }
-@utility line-clamp-7 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 7; }
 @utility line-clamp-8 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 8; }
 @utility line-clamp-10 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 10; }
 

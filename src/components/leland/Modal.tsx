@@ -94,6 +94,7 @@ export interface ModalContentProps {
   autoFocusFirstField?: boolean;
   srTitle?: string;
   surface?: ModalSurface;
+  portalContainer?: HTMLElement | null;
   /** Extra classes appended to the modal content root — use `md:!min-w-0` and a tighter `sm:!max-w-*` to override default sizing. */
   className?: string;
 }
@@ -116,6 +117,7 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
   autoFocusFirstField,
   srTitle,
   surface = ModalSurface.DEFAULT,
+  portalContainer,
   className,
 }) => {
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -195,7 +197,7 @@ export const ModalContent: FC<PropsWithChildren<ModalContentProps>> = ({
     </RdxDialog.Content>
   );
   return (
-    <RdxDialog.Portal>
+    <RdxDialog.Portal container={portalContainer ?? undefined}>
       <RdxDialog.Overlay
         className={`${OVERLAY_LAYOUT} ${ModalSurfaceToScrimClass[surface]} ${OVERLAY_GUTTER}`}
       >
