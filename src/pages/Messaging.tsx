@@ -1051,7 +1051,7 @@ const outcomeSectionHeader = "mb-2.5 block text-[15px] font-semibold text-gray-d
 // Modal 2 — the coach logs the outcome themselves. Mirrors the "Configure
 // coaching time" modal: 24px shell, serif header, choice cards, floating save.
 function AddOutcomeModal({ goal, firstName, onClose, onSave }: { goal: Goal; firstName: string; onClose: () => void; onSave: (goalId: string, outcome: Outcome) => void }) {
-  const [completed, setCompleted] = useState<boolean | null>(null);
+  const [choice, setChoice] = useState<"yes" | "not-yet" | "na" | null>(null);
   // The outcome type is inferred from the goal's category — no need to ask.
   const type: OutcomePayload["type"] = /mba|admission|school|college|grad/i.test(goal.category)
     ? "school"
@@ -1111,8 +1111,8 @@ function AddOutcomeModal({ goal, firstName, onClose, onSave }: { goal: Goal; fir
           <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
         </button>
 
-        {/* Scrollable content (pb clears the floating Save button) */}
-        <div className="flex-1 overflow-y-auto px-7 pb-28">
+        {/* Scrollable content (extra pb clears the floating button when shown) */}
+        <div className={`flex-1 overflow-y-auto px-7 ${choice === null ? "pb-8" : "pb-28"}`}>
           <div className="pt-8">
             <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">Log an outcome</h2>
             <p className="mt-1.5 text-[15px] text-gray-light">Record the result {firstName} reached for this goal.</p>
@@ -1130,8 +1130,8 @@ function AddOutcomeModal({ goal, firstName, onClose, onSave }: { goal: Goal; fir
             <h3 className={outcomeSectionHeader}>Did {firstName} reach this goal?</h3>
             <div className="grid grid-cols-2 gap-3">
               <ChoiceCard
-                active={completed === true}
-                onClick={() => setCompleted(true)}
+                active={choice === "yes"}
+                onClick={() => setChoice((c) => (c === "yes" ? null : "yes"))}
                 label="Yes"
                 sub="Log the result"
                 icon={
@@ -1141,10 +1141,10 @@ function AddOutcomeModal({ goal, firstName, onClose, onSave }: { goal: Goal; fir
                 }
               />
               <ChoiceCard
-                active={completed === false}
-                onClick={() => setCompleted(false)}
-                label="Not yet"
-                sub="Still in progress"
+                active={choice === "not-yet"}
+                onClick={() => setChoice((c) => (c === "not-yet" ? null : "not-yet"))}
+                label="No"
+                sub="Goal not reached"
                 icon={
                   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FBEAEA] text-[#C0362C]">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
@@ -1152,15 +1152,33 @@ function AddOutcomeModal({ goal, firstName, onClose, onSave }: { goal: Goal; fir
                 }
               />
             </div>
+            {/* Not applicable — hidden once Yes / Not yet is chosen */}
+            {(choice === null || choice === "na") && (
+              <div className="mt-3 text-center">
+                <button
+                  type="button"
+                  onClick={() => setChoice((c) => (c === "na" ? null : "na"))}
+                  className={`text-[16px] underline decoration-dotted decoration-[1.5px] underline-offset-[3px] transition-opacity hover:opacity-70 ${choice === "na" ? "font-medium text-gray-dark" : "text-gray-light"}`}
+                >
+                  Not applicable
+                </button>
+              </div>
+            )}
           </div>
 
-          {completed === false && (
+          {choice === "not-yet" && (
             <p className="mt-4 text-[14px] leading-relaxed text-gray-light">
               No problem — you can nudge {firstName} or log it whenever the result comes in.
             </p>
           )}
 
-          {completed === true && (
+          {choice === "na" && (
+            <p className="mt-4 text-[14px] leading-relaxed text-gray-light">
+              This goal won't be tracked as an outcome.
+            </p>
+          )}
+
+          {choice === "yes" && (
             <div className="mt-6 flex flex-col gap-5">
               {type === "school" && (
                 <div>
@@ -1217,21 +1235,25 @@ function AddOutcomeModal({ goal, firstName, onClose, onSave }: { goal: Goal; fir
           )}
         </div>
 
-        {/* Soft fade so content dissolves under the floating Save button */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-28 bg-gradient-to-t from-white via-white/85 to-transparent" />
+        {/* Soft fade so content dissolves under the floating button */}
+        {choice !== null && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-28 bg-gradient-to-t from-white via-white/85 to-transparent" />
+        )}
 
-        {/* Floating Save button */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-7 pb-7">
-          {completed === false ? (
-            <Button size="lg" variant="primary" rounded="rounded-full" onClick={onClose} className="pointer-events-auto w-full !py-[18px] font-semibold shadow-[0_6px_16px_rgba(16,24,40,0.10)]">
-              Done
-            </Button>
-          ) : (
-            <Button size="lg" variant="primary" rounded="rounded-full" disabled={completed !== true || !canSave} onClick={handleSave} className="pointer-events-auto w-full !py-[18px] font-semibold shadow-[0_6px_16px_rgba(16,24,40,0.10)]">
-              Save outcome
-            </Button>
-          )}
-        </div>
+        {/* Floating action button — hidden until an option is chosen */}
+        {choice !== null && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-7 pb-7">
+            {choice === "yes" ? (
+              <Button size="lg" variant="primary" rounded="rounded-full" disabled={!canSave} onClick={handleSave} className="pointer-events-auto w-full !py-[18px] font-semibold shadow-[0_6px_16px_rgba(16,24,40,0.10)]">
+                Save outcome
+              </Button>
+            ) : (
+              <Button size="lg" variant="primary" rounded="rounded-full" onClick={onClose} className="pointer-events-auto w-full !py-[18px] font-semibold shadow-[0_6px_16px_rgba(16,24,40,0.10)]">
+                Done
+              </Button>
+            )}
+          </div>
+        )}
       </motion.div>
     </div>,
     document.body,

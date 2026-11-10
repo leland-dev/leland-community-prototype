@@ -252,13 +252,21 @@ function ActionCell({ item, past }: { item: EventItem; past: boolean }) {
   );
 }
 
-export function EventRow({ item, past = false }: { item: EventItem; past?: boolean }) {
+export function EventRow({ item, past = false, showPricing = false }: { item: EventItem; past?: boolean; showPricing?: boolean }) {
   return (
     <div className="flex items-center gap-4 px-5 py-4">
       <div className="flex min-w-0 flex-1 items-center gap-4">
         <Thumbnail item={item} />
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-[15px] font-semibold text-gray-dark">{item.title}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="truncate text-[15px] font-semibold text-gray-dark">{item.title}</h3>
+            {/* Free/paid marker — opt-in, so the Livestreams page and v3 stay as-is. */}
+            {showPricing && (item.pricing.kind === "free" ? (
+              <span className="shrink-0 rounded-full bg-[#E3F2E9] px-2.5 py-0.5 text-[12px] font-semibold text-[#1B8A54]">Free</span>
+            ) : (
+              <span className="shrink-0 rounded-full bg-[#FBEFC9] px-2.5 py-0.5 text-[12px] font-semibold text-[#7A5E00]">{item.pricing.price}</span>
+            ))}
+          </div>
           <p className="mt-0.5 truncate text-[14px] text-gray-light">
             {item.date} · {item.startTime} · {item.duration}
           </p>

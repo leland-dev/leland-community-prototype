@@ -22,6 +22,13 @@ import shareArrowIcon from "../assets/icons/share-arrow.svg";
 import trashIcon from "../assets/icons/trash.svg";
 import lelandMark from "../assets/logos/Leland Profile Image Logo Icon White on black.png";
 import pic6 from "../assets/profile photos/pic-6.png";
+import pic1 from "../assets/profile photos/pic-1.png";
+import pic2 from "../assets/profile photos/pic-2.png";
+import pic3 from "../assets/profile photos/pic-3.png";
+import eventPlaceholder1 from "../assets/placeholder images/placeholder-event-01.png";
+import eventPlaceholder2 from "../assets/placeholder images/placeholder-event-02.png";
+import eventPlaceholder3 from "../assets/placeholder images/placeholder-event-03.png";
+import { SUBSCRIPTIONS, type SubscriptionPlan } from "../lib/subscriptions";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
 import videoIcon from "../assets/icons/video-icon.svg";
@@ -132,13 +139,15 @@ const categoryData: Record<string, {
 const HERO_BG = "#F3F1E6";
 
 // Product modalities — mirrors the "New product" selection page. v2 groups the
-// category's offerings into a card per modality.
+// category's offerings into a storefront section per modality. The `desc` is the
+// one-line "what is this?" the coach sees under each section heading, so they
+// understand the type without opening the builder.
 const MODALITIES = [
-  { id: "hourly", name: "Hourly coaching", icon: hourglassIcon, color: "#3B82F6" },
-  { id: "async", name: "Content", icon: bookOpenIcon, color: "#10B981" },
-  { id: "live", name: "Live group sessions", icon: videoIcon, color: "#F43F5E" },
-  { id: "package", name: "Bundles", icon: packageBoxOpenIcon, color: "#6366F1" },
-  { id: "subscription", name: "Subscriptions", icon: repostIcon, color: "#F59E0B" },
+  { id: "hourly", name: "Hourly coaching", icon: hourglassIcon, color: "#3B82F6", desc: "One-on-one sessions with you, booked by the hour." },
+  { id: "async", name: "Content", icon: bookOpenIcon, color: "#10B981", desc: "Guides, templates, and recordings people buy and use on their own." },
+  { id: "live", name: "Live group sessions", icon: videoIcon, color: "#F43F5E", desc: "Scheduled classes, workshops, and livestreams for groups." },
+  { id: "package", name: "Bundles", icon: packageBoxOpenIcon, color: "#6366F1", desc: "Multi-session packages of your coaching and content, sold together." },
+  { id: "subscription", name: "Subscriptions", icon: repostIcon, color: "#F59E0B", desc: "Recurring memberships for ongoing access and perks." },
 ] as const;
 
 // Prototype mapping of an offering to a modality (offerings carry no real type).
@@ -151,7 +160,8 @@ function modalityForOffering(o: Offering): string {
 }
 
 // Admin-toggleable layout version for this page — persisted so a demo survives
-// reloads. v1 is the current design; v2 is the in-progress redesign.
+// reloads. v2 is the current design (the default); v1/v3/v4/v5 are kept for
+// comparison via the admin menu.
 type CategoryVersion = "v1" | "v2" | "v3" | "v4" | "v5";
 const VERSION_KEY = "coachCategoryVersion";
 
@@ -427,42 +437,6 @@ const OFFERING_BY_SLUG: Record<string, Offering> = Object.fromEntries(OFFERINGS.
 const PACKAGE_BY_SLUG: Record<string, LelandPackage> = Object.fromEntries(LELAND_PACKAGES.map((p) => [p.slug, p]));
 const DEFAULT_OFFERING_ORDER = OFFERING_ROWS.map((r) => r.id);
 
-// Recurring memberships for the v5 Subscriptions tab. The prototype's offerings
-// don't model a billing cadence, so subscriptions are their own small catalog:
-// a monthly/annual price, a member count, and the perks each tier includes.
-type SubscriptionPlan = {
-  slug: string;
-  title: string;
-  headline: string;
-  monthly: number;
-  annual: number;
-  members: number;
-  image?: string;
-  perks: string[];
-};
-const SUBSCRIPTIONS: SubscriptionPlan[] = [
-  {
-    slug: "mba-insider-membership",
-    title: "MBA Insider Membership",
-    headline: "Monthly group coaching, live Q&A, and a members-only resource library.",
-    monthly: 49,
-    annual: 490,
-    members: 128,
-    image: OFFERING_BY_SLUG["how-i-got-into-stanford-gsb"]?.image,
-    perks: ["2 live group sessions / month", "Members-only content library", "Priority essay feedback"],
-  },
-  {
-    slug: "premium-mentorship",
-    title: "Premium 1:1 Mentorship",
-    headline: "A standing monthly 1:1, unlimited async review, and full content access.",
-    monthly: 299,
-    annual: 2990,
-    members: 24,
-    image: OFFERING_BY_SLUG["gmat-study-plan"]?.image,
-    perks: ["Monthly 1:1 coaching call", "Unlimited async essay review", "Everything in Insider"],
-  },
-];
-
 // Modal that lists every offering as a draggable row so the coach can reorder how
 // they appear on the listing. Rows mirror the horizontal cards on the public
 // profile (thumbnail + title + price), with a drag handle in place of "Details".
@@ -536,89 +510,383 @@ function ReorderModal({ open, order, onClose, onSave }: { open: boolean; order: 
   );
 }
 
-// v2 — one card per product modality, holding that modality's offerings (or an
-// empty state). Offerings run in a horizontal carousel (header chevrons + a
-// footer "See all"), matching the Dashboard's "My content" CardCarousel so the
-// cards page rather than wrap to multiple rows.
-function ModalityCard({ modality, offerings, onPreview, onEdit, onAdd, onSeeAll }: {
-  modality: (typeof MODALITIES)[number];
-  offerings: Offering[];
-  onPreview: (o: Offering) => void;
-  onEdit: (o: Offering) => void;
+// v2 — storefront sections. A shared header (title with a hover tooltip + count +
+// Add) sits above each section's body. The three sections map to how a coach
+// actually thinks about their category: upcoming events, standalone content, and
+// the core offerings that anchor their public profile.
+function StorefrontSection({ title, tooltip, count, addLabel = "Add", onAdd, actions, children }: {
+  title: string;
+  tooltip: string;
+  count?: number;
+  addLabel?: string;
   onAdd: () => void;
-  onSeeAll: () => void;
+  actions?: ReactNode;
+  children: ReactNode;
 }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [page, setPage] = useState(0);
-  const [pages, setPages] = useState(1);
-  const empty = offerings.length === 0;
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const update = () => {
-      const w = el.clientWidth || 1;
-      setPage(Math.round(el.scrollLeft / w));
-      setPages(Math.max(1, Math.ceil(el.scrollWidth / w)));
-    };
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => { el.removeEventListener("scroll", update); ro.disconnect(); };
-  }, [offerings.length]);
-
-  const scrollByPage = (dir: 1 | -1) => {
-    const el = scrollRef.current;
-    if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" });
-  };
-
   return (
-    <div className={boxClass}>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h3 className="min-w-0 truncate text-[18px] font-semibold text-gray-dark">{modality.name}</h3>
-        <div className="flex shrink-0 items-center gap-2">
-          {!empty && (
-            <div className="flex items-center gap-2">
-              <button onClick={() => scrollByPage(-1)} disabled={page <= 0} aria-label="Previous" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#222222]/[0.12] text-gray-dark transition-colors hover:bg-[#222222]/5 disabled:opacity-30 disabled:hover:bg-transparent">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-              </button>
-              <button onClick={() => scrollByPage(1)} disabled={page >= pages - 1} aria-label="Next" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#222222]/[0.12] text-gray-dark transition-colors hover:bg-[#222222]/5 disabled:opacity-30 disabled:hover:bg-transparent">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-              </button>
-            </div>
+    <section className={boxClass}>
+      {/* Header — title (with a hover tooltip) + count, and the Add action. */}
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="group relative flex">
+            <h2 className="cursor-help text-[18px] font-semibold leading-tight text-gray-dark">{title}</h2>
+            <span role="tooltip" className="pointer-events-none absolute bottom-full left-0 z-20 mb-2 hidden w-max max-w-[260px] rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
+              {tooltip}
+            </span>
+          </span>
+          {count != null && count > 0 && (
+            <span className="text-[16px] font-normal text-gray-extra-light">{count}</span>
           )}
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {actions}
           <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={onAdd}>
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-            Add
+            {addLabel}
           </Button>
         </div>
       </div>
-      {empty ? (
-        <p className="rounded-xl bg-gray-hover px-4 py-6 text-center text-[14px] text-gray-light">No {modality.name.toLowerCase()} offerings yet.</p>
-      ) : (
-        <>
-          {/* Carousel breaks out of the card's p-6 to run edge-to-edge; the inner
-              track's px-6 keeps the first/last cards aligned, and the gradients
-              fade cards at both edges. */}
-          <div className="relative -mx-6">
-            <div ref={scrollRef} className="scrollbar-hide snap-x snap-mandatory scroll-pl-6 overflow-x-auto py-1">
-              <div className="flex w-max items-stretch gap-4 px-6">
-                {offerings.map((o) => (
-                  <div key={o.slug} className="w-[280px] shrink-0 snap-start">
-                    <CoachOfferingCard offering={o} onPreview={() => onPreview(o)} onEdit={() => onEdit(o)} />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-white to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white to-transparent" />
-          </div>
-          <Button onClick={onSeeAll} size="md" variant="secondary" className="mt-4 self-start font-semibold">
-            See all
-          </Button>
-        </>
+      {children}
+    </section>
+  );
+}
+
+// A grid of offering cards with a trailing dashed "add" tile, or a full-width
+// dashed invite when the section is empty.
+function OfferingGrid({ offerings, addLabel, onAdd, onPreview, onEdit }: {
+  offerings: Offering[];
+  addLabel: string;
+  onAdd: () => void;
+  onPreview: (o: Offering) => void;
+  onEdit: (o: Offering) => void;
+}) {
+  if (offerings.length === 0) {
+    return (
+      <button
+        onClick={onAdd}
+        style={dashedBorderStyle}
+        className="group relative flex w-full items-center justify-center gap-2 rounded-2xl bg-white/50 py-7 transition-colors hover:bg-white"
+      >
+        <span aria-hidden style={dashedBorderHoverStyle} className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100" />
+        <svg className="h-5 w-5 text-gray-extra-light transition-colors group-hover:text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+        <span className="text-[15px] font-semibold text-gray-extra-light transition-colors group-hover:text-gray-light">{addLabel}</span>
+      </button>
+    );
+  }
+  return (
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      {offerings.map((o) => (
+        <CoachOfferingCard key={o.slug} offering={o} onPreview={() => onPreview(o)} onEdit={() => onEdit(o)} />
+      ))}
+    </div>
+  );
+}
+
+// Banner inside the Content section — flags library content not attached to any
+// offering (and so not for sale). This is the "I uploaded it but nothing
+// happened" gap, surfaced instead of hidden.
+function ContentNotForSaleBanner({ count, onReview, onDismiss }: { count: number; onReview: () => void; onDismiss: () => void }) {
+  return (
+    <div className="mb-4 flex items-center gap-3.5 rounded-2xl bg-[#FBF5E4] px-4 py-3.5">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F2E4B8] text-[#8A6D1B]">
+        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 16.5h.01" /></svg>
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[14px] font-semibold text-gray-dark">{count} {count === 1 ? "piece" : "pieces"} of content {count === 1 ? "isn't" : "aren't"} for sale</p>
+        <p className="mt-0.5 text-[13px] leading-snug text-gray-light">Not added to any offering yet, so buyers can't find {count === 1 ? "it" : "them"}.</p>
+      </div>
+      <div className="flex shrink-0 items-center gap-1.5">
+        <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={onReview}>Review</Button>
+        <button onClick={onDismiss} aria-label="Dismiss" className="flex h-8 w-8 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-[#222222]/[0.06] hover:text-gray-dark">
+          <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// 3-dot menu for an Upcoming events row.
+function EventRowMenu() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+  const items = [
+    { label: "Edit", icon: editIcon },
+    { label: "Duplicate", icon: copyIcon },
+    { label: "Share", icon: shareArrowIcon },
+  ];
+  return (
+    <div ref={ref} className="relative">
+      <button aria-label="More actions" onClick={() => setOpen((v) => !v)} className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${open ? "bg-gray-hover text-gray-dark" : "text-gray-xlight hover:bg-gray-hover hover:text-gray-dark"}`}>
+        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="12" cy="19" r="1.7" /></svg>
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-30 mt-2 w-48 rounded-xl border border-gray-stroke bg-white p-1.5 shadow-lg">
+          {items.map((it) => (
+            <button key={it.label} onClick={() => setOpen(false)} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover">
+              <MaskIcon src={it.icon} className="h-[18px] w-[18px]" />
+              {it.label}
+            </button>
+          ))}
+        </div>
       )}
+    </div>
+  );
+}
+
+export type UpcomingEvent = {
+  id: string;
+  title: string;
+  dateTime: string;
+  duration: string;
+  thumb?: string;
+  free: boolean;
+  price: string;
+  enrolled: number | null;
+  joinable: boolean;
+};
+
+// A single Upcoming events row — hover-highlighted (no dividers), with a price-
+// per-seat + enrolled column that's consistent across free and paid (free rows
+// read "Free"), and a Join now / Details action.
+export function UpcomingEventRow({ ev, onJoin, onDetails, showPrice = true, enrolledNoun = "enrolled" }: { ev: UpcomingEvent; onJoin: () => void; onDetails: () => void; showPrice?: boolean; enrolledNoun?: string }) {
+  return (
+    <div className="group flex items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-[#F7F7F7]">
+      {ev.thumb ? (
+        <img src={ev.thumb} alt="" className="h-[60px] w-[100px] shrink-0 rounded-md object-cover" />
+      ) : (
+        <div className="flex h-[60px] w-[100px] shrink-0 items-center justify-center rounded-md bg-[#D9D9D9]">
+          <MaskIcon src={videoIcon} className="h-6 w-6 text-white" />
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <h3 className="truncate text-[15px] font-semibold text-gray-dark">{ev.title}</h3>
+        <p className="mt-0.5 truncate text-[14px] text-gray-light">{ev.dateTime} · {ev.duration}</p>
+      </div>
+      {/* Price per seat + enrolled — shown on every row (free reads "Free").
+          showPrice=false drops the price line and lets the column hug its text
+          (e.g. membership-included sessions). */}
+      <div className={`hidden shrink-0 md:block ${showPrice ? "w-[116px]" : ""}`}>
+        {showPrice && <p className="text-[15px] font-semibold text-gray-dark">{ev.free ? "Free" : ev.price}</p>}
+        <p className={`${showPrice ? "text-[13px]" : "text-[14px]"} text-gray-light`}>{ev.enrolled != null ? `${ev.enrolled} ${enrolledNoun}` : "Draft"}</p>
+      </div>
+      {/* Action + menu. Fixed width keeps buttons aligned across varied labels;
+          dropped when the row is compact (showPrice=false). */}
+      <div className={`flex shrink-0 items-center justify-end gap-2 ${showPrice ? "lg:w-[184px]" : ""}`}>
+        {ev.joinable ? (
+          <Button size="md" variant="dark" rounded="rounded-full" className="font-semibold" onClick={onJoin}>Join now</Button>
+        ) : (
+          <Button size="md" variant="white" rounded="rounded-full" className="border border-gray-stroke font-semibold" onClick={onDetails}>Details</Button>
+        )}
+        <EventRowMenu />
+      </div>
+    </div>
+  );
+}
+
+// v2 subscription card — a horizontal row (thumbnail + details) in the style of
+// the Meetup "Organizer" card, denser than v5's vertical SubscriptionCard.
+function SubscriptionRowCard({ plan, onOpen }: { plan: SubscriptionPlan; onOpen: () => void }) {
+  return (
+    <button
+      onClick={onOpen}
+      aria-label={`Manage ${plan.title}`}
+      className="group flex w-full gap-4 rounded-2xl border border-gray-stroke bg-white p-3 text-left shadow-[0_1px_3px_rgba(16,24,40,0.06)] transition-shadow duration-200 hover:shadow-[0_6px_20px_rgba(16,24,40,0.12)]"
+    >
+      <div className="h-[116px] w-[140px] shrink-0 overflow-hidden rounded-xl">
+        {plan.image ? (
+          <img src={plan.image} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-[#D9D9D9]"><MaskIcon src={repostIcon} className="h-8 w-8 text-white" /></div>
+        )}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col py-0.5">
+        <div className="flex items-start justify-between gap-3">
+          <p className="min-w-0 text-[16px] font-semibold leading-snug text-gray-dark line-clamp-2">{plan.title}</p>
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#222222]/5 px-2 py-0.5 text-[12px] font-semibold text-gray-light">
+            <MaskIcon src={repostIcon} className="h-3 w-3" />
+            Membership
+          </span>
+        </div>
+        <span className="mt-1 inline-flex w-fit items-center gap-0.5 text-[14px] font-medium text-gray-light transition-colors group-hover:text-gray-dark">
+          Membership details
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+        </span>
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-gray-stroke pt-2.5">
+          <div className="flex items-center gap-1.5">
+            <div className="flex -space-x-1">
+              {[pic1, pic2, pic3].map((src, i) => (
+                <img key={i} src={src} alt="" className="h-[18px] w-[18px] rounded-full border border-white object-cover" />
+              ))}
+            </div>
+            <span className="text-[13px] text-gray-light">{plan.members} members</span>
+          </div>
+          <p className="text-[14px] text-gray-light">
+            <span className="font-semibold text-gray-dark">${plan.monthly}</span>/mo
+          </p>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+// v2 right column — the three storefront sections (events, content, offerings).
+function CategoryV2Sections({ category }: { category: string | undefined }) {
+  const navigate = useNavigate();
+  const data = categoryData[category ?? ""];
+  const goNew = () => navigate(`/my-leland/manage/${category}/new`);
+  const onPreview = (o: Offering) => navigate(`/offering/${o.slug}`);
+  const onEdit = (o: Offering) => navigate(`/my-leland/manage/${category}/new-product?edit=${o.slug}`);
+
+  // Content sold on its own vs. everything else (hourly, bundles, the cohort),
+  // which anchors the public profile. Live/paid *events* come from their own
+  // schedules, not the offerings catalog.
+  const contentOfferings = OFFERINGS.filter((o) => modalityForOffering(o) === "async");
+  const coreOfferings = OFFERINGS.filter((o) => modalityForOffering(o) !== "async");
+
+  // Reorderable display order for the Offerings grid (same ReorderModal as v1).
+  const [reorderOpen, setReorderOpen] = useState(false);
+  const [offeringsOrder, setOfferingsOrder] = useState<string[]>(() => coreOfferings.map((o) => `custom:${o.slug}`));
+  const orderedCoreOfferings = offeringsOrder
+    .map((id) => OFFERING_BY_SLUG[id.split(":")[1]])
+    .filter((o): o is Offering => Boolean(o));
+
+  // Library content for this category that hasn't been attached to any offering.
+  const notForSaleCount = RESOURCES.filter((r) => r.category === (data?.name ?? "") && r.offerings.length === 0).length;
+
+  // Upcoming events = free livestreams + paid group sessions, rendered with the
+  // same table rows as v3's "Live group sessions". A discriminated list lets the
+  // two row components interleave, sorted so anything live/joinable leads.
+  // Event thumbnails are drawn from a fixed set of placeholders, cycled by the
+  // final display index so adjacent rows never repeat an image.
+  const eventThumbs = [eventPlaceholder1, eventPlaceholder2, eventPlaceholder3];
+  const eventList = [
+    ...upcomingLivestreams.map((e) => ({
+      id: `ls-${e.id}`,
+      title: e.title,
+      dateTime: `${e.date} · ${e.startTime}`,
+      duration: e.duration,
+      free: e.pricing.kind === "free",
+      price: e.pricing.kind === "free" ? "Free" : e.pricing.price,
+      enrolled: e.status.kind === "enrolled" ? e.status.count : null,
+      joinable: !!e.joinable,
+    })),
+    ...upcomingWorkshops.map((w) => ({
+      id: `ws-${w.id}`,
+      title: w.title,
+      dateTime: `${w.date} · ${w.startTime}`,
+      duration: w.duration,
+      free: false,
+      price: w.price,
+      enrolled: w.status.kind === "enrolled" ? w.status.count : null,
+      joinable: !!w.joinable,
+    })),
+  ].sort((a, b) => Number(b.joinable) - Number(a.joinable));
+  // Only the top row shows "Join now"; thumbnails cycle by final index.
+  const eventRows: UpcomingEvent[] = eventList.map((e, i) => ({
+    ...e,
+    thumb: eventThumbs[i % eventThumbs.length],
+    joinable: i === 0 && e.joinable,
+  }));
+  const eventCount = eventRows.length;
+
+  // Events collapse to 3 by default; the rest expand in an animated drawer.
+  const EVENT_PREVIEW = 3;
+  const [eventsExpanded, setEventsExpanded] = useState(false);
+  // Dismiss the not-for-sale banner for this visit (resets on next page load).
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const visibleEvents = eventRows.slice(0, EVENT_PREVIEW);
+  const hiddenEvents = eventRows.slice(EVENT_PREVIEW);
+  const renderEventRow = (ev: UpcomingEvent) => (
+    <UpcomingEventRow key={ev.id} ev={ev} onJoin={() => navigate("/my-leland/calendar")} onDetails={() => navigate("/my-leland/calendar")} />
+  );
+
+  return (
+    <div className="flex min-w-0 flex-col gap-5">
+      {/* 1 — Upcoming events: free livestreams + paid group sessions as hover rows
+          (no dividers). A single row is live ("Join now"); the rest are upcoming. */}
+      <StorefrontSection title="Upcoming events" tooltip="Your scheduled free livestreams and paid group sessions." count={eventCount} addLabel="New" onAdd={() => navigate(`/my-leland/manage/${category}/new-event`)}>
+        <div className="-mx-3">
+          <div className="flex flex-col gap-1">
+            {visibleEvents.map(renderEventRow)}
+          </div>
+          <AnimatePresence initial={false}>
+            {eventsExpanded && hiddenEvents.length > 0 && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="flex flex-col gap-1 pt-1">
+                  {hiddenEvents.map(renderEventRow)}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        {hiddenEvents.length > 0 && (
+          <Button onClick={() => setEventsExpanded((v) => !v)} size="md" variant="secondary" rounded="rounded-full" className="mt-4 self-start font-semibold">
+            {eventsExpanded ? "Show less" : `See ${hiddenEvents.length} more`}
+            <svg className={`h-4 w-4 transition-transform duration-300 ${eventsExpanded ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+          </Button>
+        )}
+      </StorefrontSection>
+
+      {/* 2 — Subscriptions: recurring memberships, sat right under events. */}
+      <StorefrontSection title="Memberships" tooltip="Recurring memberships for ongoing access and perks." count={SUBSCRIPTIONS.length} addLabel="New" onAdd={() => navigate(`/my-leland/manage/${category}/new-product/subscription`)}>
+        {SUBSCRIPTIONS.length === 0 ? (
+          <p className="rounded-xl bg-gray-hover px-4 py-6 text-center text-[14px] text-gray-light">No subscriptions yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {SUBSCRIPTIONS.map((p) => (
+              <SubscriptionRowCard
+                key={p.slug}
+                plan={p}
+                onOpen={() => navigate(`/my-leland/manage/${category}/membership/${p.slug}`)}
+              />
+            ))}
+          </div>
+        )}
+      </StorefrontSection>
+
+      {/* 3 — Content: standalone content offerings, plus a banner for library
+          content that isn't for sale yet. */}
+      <StorefrontSection title="Content" tooltip="Guides, templates, and recordings people buy and use on their own." count={contentOfferings.length} addLabel="New" onAdd={() => navigate(`/my-leland/manage/${category}/new-content`)}>
+        {notForSaleCount > 0 && !bannerDismissed && <ContentNotForSaleBanner count={notForSaleCount} onReview={() => navigate("/my-leland/content")} onDismiss={() => setBannerDismissed(true)} />}
+        <OfferingGrid offerings={contentOfferings} addLabel="Add content" onAdd={() => navigate(`/my-leland/manage/${category}/new-content`)} onPreview={onPreview} onEdit={onEdit} />
+      </StorefrontSection>
+
+      {/* 4 — Offerings: hourly coaching, bundles, and the cohort — the core of the
+          public profile. */}
+      <StorefrontSection
+        title="Offerings"
+        tooltip="Hourly coaching, bundles, and cohorts — the core of your public profile."
+        count={coreOfferings.length}
+        addLabel="New"
+        onAdd={goNew}
+        actions={
+          <Button size="sm" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={() => setReorderOpen(true)}>
+            <img src={sortIcon} alt="" className="h-4 w-4" />
+            Reorder
+          </Button>
+        }
+      >
+        <OfferingGrid offerings={orderedCoreOfferings} addLabel="New offering" onAdd={goNew} onPreview={onPreview} onEdit={onEdit} />
+      </StorefrontSection>
+
+      <ReorderModal
+        open={reorderOpen}
+        order={offeringsOrder}
+        onClose={() => setReorderOpen(false)}
+        onSave={(next) => { setOfferingsOrder(next); setReorderOpen(false); }}
+      />
     </div>
   );
 }
@@ -1957,7 +2225,7 @@ export default function CoachCategoryEdit() {
   // Admin: v1/v2 layout switch (bottom-right 3-dot menu), persisted for demos.
   const [version, setVersion] = useState<CategoryVersion>(() => {
     const stored = localStorage.getItem(VERSION_KEY);
-    return stored === "v1" || stored === "v2" || stored === "v3" || stored === "v4" || stored === "v5" ? stored : "v1";
+    return stored === "v1" || stored === "v2" || stored === "v3" || stored === "v4" || stored === "v5" ? stored : "v2";
   });
   useEffect(() => { localStorage.setItem(VERSION_KEY, version); }, [version]);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -2064,8 +2332,41 @@ export default function CoachCategoryEdit() {
             showPricingCard={showPricingCard}
           />
         </>
+      ) : version === "v2" ? (
+        // v2 — a Meetup-style storefront on the beige full-bleed page. A slim,
+        // sticky category-profile card on the left; the right column stacks three
+        // sections (upcoming events, content, offerings) so the coach reads their
+        // store the way they think about it.
+        // v2 runs wider than the 1080 layout cap: break out symmetrically past it
+        // on large viewports (the min(0px, …) is a no-op below ~1320px, so it
+        // stays within the cap on smaller screens), then re-center at 1320.
+        <div className="sm:[margin-left:min(0px,calc(660px_-_50vw))] sm:[margin-right:min(0px,calc(660px_-_50vw))]">
+          <div className="mx-auto max-w-[1320px]">
+          {topBar}
+
+          {/* Hero — identical to v1 (category name + subtitle). */}
+          <div>
+            <h1 className="font-serif text-[42px] leading-[1.05] text-gray-dark md:text-[48px]">{data.name}</h1>
+            <p className="mt-3 text-[18px] leading-relaxed text-gray-light">
+              Manage the products, pricing, and details that appear on your public listing for this category.
+            </p>
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 gap-6 2xl:grid-cols-[340px_minmax(0,1fr)] 2xl:gap-x-10">
+            {/* Left rail — identity + pricing. Side-by-side when stacked on top;
+                stacks vertically once it's the sticky side rail (2xl). */}
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-1 2xl:sticky 2xl:top-[77px] 2xl:self-start">
+              <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} category={category} />
+              {showPricingCard && <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />}
+            </div>
+
+            {/* Right — the three storefront sections. */}
+            <CategoryV2Sections category={category} />
+          </div>
+          </div>
+        </div>
       ) : version !== "v1" ? (
-        // v2 / v3 — beige full-bleed page. The beige is painted by CoachLayout's
+        // v3 / v4 — beige full-bleed page. The beige is painted by CoachLayout's
         // persistent container (see its `beigePage`), not here, so it's instant and
         // doesn't flash white→beige through the fade-up entrance animation.
         <>
@@ -2094,22 +2395,9 @@ export default function CoachCategoryEdit() {
               // v4 — no separate Live section; live sessions live in the Offerings
               // grid as cards (with a "Live group learning" filter + calendar badge).
               <CategoryV4Content category={category} />
-            ) : version === "v3" ? (
+            ) : (
               // v3 — Live sessions section + one filterable Offerings grid.
               <CategoryV3Content category={category} />
-            ) : (
-              // v2 — offerings grouped into a card per modality.
-              MODALITIES.map((m) => (
-                <ModalityCard
-                  key={m.id}
-                  modality={m}
-                  offerings={OFFERINGS.filter((o) => modalityForOffering(o) === m.id)}
-                  onPreview={(o) => navigate(`/offering/${o.slug}`)}
-                  onEdit={(o) => navigate(`/my-leland/manage/${category}/new-product?edit=${o.slug}`)}
-                  onAdd={() => navigate(`/my-leland/manage/${category}/new`)}
-                  onSeeAll={() => navigate(`/profile/samantha-parker/${category}`)}
-                />
-              ))
             )}
           </div>
         </>

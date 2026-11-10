@@ -100,6 +100,7 @@ const expertItems = [
   { icon: chartIcon, label: "Analytics", to: "/my-leland/analytics" },
   { icon: starIcon, label: "Reviews", to: "/my-leland/reviews" },
   { icon: outcomesIcon, label: "Outcomes", to: "/my-leland/outcomes" },
+  { icon: starIcon, label: "Reviews & Outcomes", to: "/my-leland/reviews-outcomes" },
   { icon: discountIcon, label: "Discount Codes", to: "/my-leland/discount-codes" },
 ];
 

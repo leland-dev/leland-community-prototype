@@ -132,6 +132,7 @@ import CoachAnalytics from "./pages/CoachAnalytics";
 import CoachMyContent from "./pages/CoachMyContent";
 import CoachReviews from "./pages/CoachReviews";
 import CoachOutcomes from "./pages/CoachOutcomes";
+import CoachReviewsOutcomes from "./pages/CoachReviewsOutcomes";
 import CoachDiscountCodes from "./pages/CoachDiscountCodes";
 import Account from "./pages/Account";
 import ReferFriend from "./pages/ReferFriend";
@@ -142,6 +143,9 @@ import AltNavContent from "./pages/AltNavContent";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
 import CoachProductNew from "./pages/CoachProductNew";
 import CoachProductTypeSelect from "./pages/CoachProductTypeSelect";
+import CoachEventTypeSelect from "./pages/CoachEventTypeSelect";
+import CoachContentTypeSelect from "./pages/CoachContentTypeSelect";
+import CoachMembershipDetails from "./pages/CoachMembershipDetails";
 import OfferingPage from "./pages/OfferingPage";
 import GroupSessionPage from "./pages/GroupSessionPage";
 import LiveSession from "./pages/program/session/LiveSession";
@@ -206,6 +210,8 @@ export default function App() {
       {/* Product-creation flow — standalone full-screen surface (no app chrome).
           Lives under /my-leland so it stays in the My Leland shell's context. */}
       <Route path="/my-leland/manage/:category/new" element={<CoachProductTypeSelect />} />
+      <Route path="/my-leland/manage/:category/new-event" element={<CoachEventTypeSelect />} />
+      <Route path="/my-leland/manage/:category/new-content" element={<CoachContentTypeSelect />} />
       <Route path="/my-leland/manage/:category/new-product" element={<CoachProductNew />} />
       <Route path="/my-leland/manage/:category/new-product/:type" element={<CoachProductNew />} />
       {/* Course builder — standalone full-screen editor (no app chrome) */}
@@ -262,6 +268,7 @@ export default function App() {
           <Route path="/coach/analytics" element={<CoachAnalytics />} />
           <Route path="/coach/reviews" element={<CoachReviews />} />
           <Route path="/coach/outcomes" element={<CoachOutcomes />} />
+          <Route path="/coach/reviews-outcomes" element={<CoachReviewsOutcomes />} />
           <Route path="/coach/discount-codes" element={<CoachDiscountCodes />} />
         </Route>
         {/* "My Store" — the coach dashboard recreated inside the LinkedIn-nav
@@ -290,6 +297,7 @@ export default function App() {
           <Route path="/my-leland/profile/inline-2" element={<MyLelandProfileInline2 />} />
           <Route path="/my-leland/products" element={<CoachProducts />} />
           <Route path="/my-leland/manage/:category" element={<CoachCategoryEdit />} />
+          <Route path="/my-leland/manage/:category/membership/:slug" element={<CoachMembershipDetails />} />
           <Route path="/my-leland/opportunities" element={<CoachOpportunities />} />
           <Route path="/my-leland/livestreams" element={<CoachLivestreams />} />
           <Route path="/my-leland/workshops" element={<CoachWorkshops />} />
@@ -302,6 +310,7 @@ export default function App() {
           <Route path="/my-leland/analytics" element={<CoachAnalytics />} />
           <Route path="/my-leland/reviews" element={<CoachReviews />} />
           <Route path="/my-leland/outcomes" element={<CoachOutcomes />} />
+          <Route path="/my-leland/reviews-outcomes" element={<CoachReviewsOutcomes />} />
           <Route path="/my-leland/discount-codes" element={<CoachDiscountCodes />} />
           <Route path="/my-leland/refer" element={<ReferFriend />} />
           <Route path="/my-leland/account" element={<Account />} />

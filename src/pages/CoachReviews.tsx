@@ -688,19 +688,16 @@ export function LogoStrip({ outcomes }: { outcomes: Outcome[] }) {
   );
 }
 
-// Expert view — the coach's own reviews, ratings breakdown, and outcomes.
-function ExpertReviews() {
-  const [tab, setTab] = useState<"reviews" | "pending" | "submitted">("reviews");
+// Aggregate review + outcome summary — the header, rating breakdown, category
+// scores, and "Outcomes from your reviews" strip. Shared by the Reviews page
+// and the combined Reviews & Outcomes page.
+export function ReviewsSummary() {
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [outcomesOpen, setOutcomesOpen] = useState(false);
   const [outcomes, setOutcomes] = useState<Outcome[]>(initialOutcomes);
   const [schoolOutcomes, setSchoolOutcomes] = useState<Outcome[]>(initialSchools);
   const shareRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    document.title = "Leland Prototype | Reviews";
-  }, []);
 
   // Close the share popover on outside click or Escape.
   useEffect(() => {
@@ -728,7 +725,7 @@ function ExpertReviews() {
   const visibleOutcomes = [...outcomes, ...schoolOutcomes].filter((o) => !o.hidden);
 
   return (
-    <div className="mx-auto max-w-[1080px]">
+    <>
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="font-serif text-[30px] font-medium text-gray-dark md:text-[38px]">37 reviews</h1>
@@ -848,6 +845,30 @@ function ExpertReviews() {
         </div>
       </div>
 
+      <OutcomesModal
+        open={outcomesOpen}
+        onClose={() => setOutcomesOpen(false)}
+        schools={schoolOutcomes}
+        setSchools={setSchoolOutcomes}
+        companies={outcomes}
+        setCompanies={setOutcomes}
+      />
+    </>
+  );
+}
+
+// Expert view — the coach's own reviews, ratings breakdown, and outcomes.
+function ExpertReviews() {
+  const [tab, setTab] = useState<"reviews" | "pending" | "submitted">("reviews");
+
+  useEffect(() => {
+    document.title = "Leland Prototype | Reviews";
+  }, []);
+
+  return (
+    <div className="mx-auto max-w-[1080px]">
+      <ReviewsSummary />
+
       {/* Tabs */}
       <div className="mt-10 border-b border-gray-stroke">
         <div className="flex gap-8">
@@ -890,15 +911,6 @@ function ExpertReviews() {
           ))}
         </div>
       )}
-
-      <OutcomesModal
-        open={outcomesOpen}
-        onClose={() => setOutcomesOpen(false)}
-        schools={schoolOutcomes}
-        setSchools={setSchoolOutcomes}
-        companies={outcomes}
-        setCompanies={setOutcomes}
-      />
     </div>
   );
 }

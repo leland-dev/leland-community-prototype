@@ -41,6 +41,7 @@ const bottomItems = [
   { to: "/coach/earnings", label: "Earnings", icon: moneyIcon },
   { to: "/coach/reviews", label: "Reviews", icon: starIcon },
   { to: "/coach/outcomes", label: "Outcomes", icon: outcomesIcon },
+  { to: "/coach/reviews-outcomes", label: "Reviews & Outcomes", icon: starIcon },
   { to: "/coach/discount-codes", label: "Discount Codes", icon: discountIcon },
 ];
 
@@ -262,6 +263,7 @@ function SidebarV1() {
               {navRow({ to: "/coach/analytics", label: "Analytics", icon: analyticsChartIcon })}
               {navRow(findItem("/coach/reviews"))}
               {navRow(findItem("/coach/outcomes"))}
+              {navRow(findItem("/coach/reviews-outcomes"))}
               {navRow({ ...findItem("/coach/discount-codes"), icon: labelTagIcon })}
             </nav>
           </div>
