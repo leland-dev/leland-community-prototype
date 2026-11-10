@@ -33,18 +33,18 @@ export const STATUS_OPTIONS: { value: PersonalizationStatus; label: string }[] =
 ];
 
 const BASE_ROLE_OPTIONS: ToggleChipOption[] = [
-  { value: "swe", label: "Software Engineer / Developer" },
-  { value: "pm", label: "Product Manager" },
-  { value: "design", label: "Designer / UX" },
-  { value: "data", label: "Data Analyst / Scientist" },
+  { value: "swe", label: "Engineering" },
+  { value: "pm", label: "Product" },
+  { value: "design", label: "Design" },
+  { value: "data", label: "Data & Analytics" },
   { value: "marketing", label: "Marketing" },
   { value: "sales", label: "Sales" },
   { value: "ops", label: "Operations" },
-  { value: "finance", label: "Finance / Accounting" },
-  { value: "hr", label: "HR / People" },
+  { value: "finance", label: "Finance" },
+  { value: "hr", label: "Human Resources" },
   { value: "legal", label: "Legal" },
-  { value: "exec", label: "Executive / Leadership" },
-  { value: "founder", label: "Founder / Entrepreneur" },
+  { value: "exec", label: "Executive" },
+  { value: "founder", label: "Founder" },
   { value: "other", label: "Other" },
 ];
 

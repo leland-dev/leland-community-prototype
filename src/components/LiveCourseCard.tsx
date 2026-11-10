@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "./Button";
+import { IconChevronDown, IconClock, IconX } from "./leland";
 import SessionCard from "./SessionCard";
 import { useSessionLayout } from "./SessionLayoutContext";
 import calendarIcon from "../assets/icons/calendar-page.svg";
@@ -171,12 +172,24 @@ function SessionRow({ session, isNext }: { session: Session; isNext: boolean; is
 // ─── Select Cohort Modal ──────────────────────────────────────────────────────
 
 const mockCohorts = [
-  { id: 1, dates: "May 5 – Jun 9, 2026",   days: "Tuesdays & Thursdays", time: "7:00 PM PT", urgencyTag: "6 days left to enroll" },
-  { id: 2, dates: "Jul 7 – Aug 11, 2026",  days: "Mondays & Wednesdays",  time: "9:00 AM PT", urgencyTag: null },
-  { id: 3, dates: "Sep 8 – Oct 13, 2026",  days: "Tuesdays & Thursdays", time: "7:00 PM PT", urgencyTag: null },
+  { id: 1, name: null, dates: "Nov 2 - Nov 12, 2026", urgencyTag: null },
+  { id: 2, name: "47G AI Builder Cohort", dates: "Nov 9 - Nov 16, 2026", urgencyTag: "4 days left to enroll" },
+  { id: 3, name: "Lola AI Builder Cohort", dates: "Nov 12 - Dec 10, 2026", urgencyTag: "6 days left to enroll" },
+  { id: 4, name: "82B AI Builder Cohort", dates: "Nov 16 - Dec 14, 2026", urgencyTag: null },
+  { id: 5, name: "Nomad AI Builder Cohort", dates: "Nov 23 - Dec 21, 2026", urgencyTag: null },
+  { id: 6, name: "19C AI Builder Cohort", dates: "Dec 1 - Jan 5, 2027", urgencyTag: null },
+  { id: 7, name: null, dates: "Dec 7 - Jan 11, 2027", urgencyTag: null },
 ];
 
 export function SelectCohortModal({ open, onClose, onSelect }: { open: boolean; onClose: () => void; onSelect: () => void }) {
+  const [showAll, setShowAll] = useState(false);
+  const visibleCohorts = showAll ? mockCohorts : mockCohorts.slice(0, 3);
+  const remaining = mockCohorts.length - visibleCohorts.length;
+
+  useEffect(() => {
+    if (!open) setShowAll(false);
+  }, [open]);
+
   return (
     <AnimatePresence>
       {open && (
@@ -196,51 +209,65 @@ export function SelectCohortModal({ open, onClose, onSelect }: { open: boolean; 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-            className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white shadow-xl sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-[480px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
+            className="fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-[560px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-stroke px-5 py-4">
-              <h2 className="text-[16px] font-medium text-gray-dark">Select a cohort</h2>
+            <div className="relative px-6 pb-5 pt-6 sm:px-8">
               <button
                 onClick={onClose}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover"
+                aria-label="Close"
+                className="absolute right-6 top-6 flex size-9 items-center justify-center rounded-full border border-gray-stroke text-gray-dark transition-colors hover:bg-gray-hover sm:right-8"
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
+                <IconX className="size-4" />
               </button>
+              <h2 className="pr-12 text-heading-3xl font-season font-normal text-gray-dark">Select a cohort</h2>
+              <p className="mt-1 leland-paragraph-lg text-gray-light">Level 1: AI Builder Program</p>
             </div>
 
             {/* Cohort list */}
-            <div className="divide-y divide-gray-stroke">
-              {mockCohorts.map((cohort) => (
-                <div key={cohort.id} className="flex items-center justify-between gap-4 px-5 py-4">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-[14px] font-medium leading-[1.2] text-gray-dark">{cohort.dates}</p>
-                    <p className="text-[12px] leading-[1.3] text-gray-light">{cohort.days} · {cohort.time}</p>
+            <div className="divide-y divide-gray-stroke border-t border-gray-stroke px-6 sm:px-8">
+              {visibleCohorts.map((cohort) => (
+                <div key={cohort.id} className="flex items-center justify-between gap-4 py-5">
+                  <div className="flex min-w-0 flex-col gap-1.5">
+                    <p className="leland-paragraph-lg font-medium leading-[1.2] text-gray-dark">
+                      {cohort.name ? `${cohort.name} · ${cohort.dates}` : cohort.dates}
+                    </p>
+                    <button type="button" className="w-fit text-left leland-paragraph-base text-gray-light underline decoration-dotted underline-offset-4 hover:text-gray-dark">
+                      More details
+                    </button>
                     {cohort.urgencyTag && (
-                      <span className="mt-0.5 inline-flex w-fit items-center rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-[12px] font-medium text-[#92400E]">
+                      <span className="mt-0.5 inline-flex w-fit items-center gap-1.5 rounded-lg bg-[#FDF3E3] px-3 py-1.5 leland-paragraph-base font-medium text-[#92400E]">
+                        <IconClock className="size-4 shrink-0" />
                         {cohort.urgencyTag}
                       </span>
                     )}
                   </div>
-                  <button
+                  <Button
                     onClick={() => { onSelect(); onClose(); }}
-                    className="shrink-0 rounded-lg bg-gray-dark px-4 py-2 text-[13px] font-medium leading-[1.2] text-white transition-colors hover:bg-[#444444]"
+                    size="md"
+                    variant="primary"
+                    className="shrink-0"
                   >
                     Enroll
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
 
-            {/* Footer */}
-            <div className="border-t border-gray-stroke px-5 py-4">
-              <p className="text-[12px] text-gray-light">
-                Don't see a time that works?{" "}
-                <a href="#" className="font-medium text-gray-dark underline">Get notified about future cohorts</a>
-              </p>
-            </div>
+            {!showAll && remaining > 0 ? (
+              <div className="px-6 pb-6 pt-5 sm:px-8">
+                <button
+                  type="button"
+                  onClick={() => setShowAll(true)}
+                  className="flex items-center gap-1.5 leland-paragraph-base font-medium text-gray-dark underline decoration-dotted underline-offset-4 hover:no-underline"
+                >
+                  Show {remaining} more cohort{remaining === 1 ? "" : "s"}
+                  <IconChevronDown className="size-4 shrink-0" />
+                </button>
+              </div>
+            ) : (
+              <div className="pb-6" />
+            )}
           </motion.div>
         </>
       )}

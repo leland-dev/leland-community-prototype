@@ -1,6 +1,8 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
+import { loadPersonalizationData } from "../components/PersonalizationModal";
+import { IconSparkle, Tag, TagColor } from "../components/leland";
 import homeIcon from "../assets/img/program-hub/hdr-e8a6d.svg";
 import calendarArrowIcon from "../assets/img/program-hub/hdr-03896.svg";
 import slackIcon from "../assets/icons/slack-black.svg";
@@ -29,6 +31,11 @@ import pic8 from "../assets/profile photos/pic-8.png";
 import pic9 from "../assets/profile photos/pic-9.png";
 import pic11 from "../assets/profile photos/pic-11.png";
 import pic13 from "../assets/profile photos/pic-13.png";
+import lelandProfileIcon from "../assets/leland-logos/leland-profile.png";
+import imgSalesIntelTool from "../assets/img/program-hub/sales-intel-tool.jpg";
+import imgCustomerCallFollowup from "../assets/img/program-hub/customer-call-followup.jpg";
+import imgLeadQualAgent from "../assets/img/program-hub/lead-qualification-agent.png";
+import imgMeetingNotesToCrm from "../assets/img/program-hub/meeting-notes-to-crm.png";
 import heroPhoto from "../assets/placeholder images/placeholder-event-02.png";
 
 // Program hub: the page between "My content" and a course. It shows where the learner is in the program,
@@ -83,6 +90,90 @@ const ITEMS: Item[] = [
   { title: "18-week marathon plan built from your own Garmin and coaching data", author: "Noah Wilson", avatar: pic13, image: imgPrompts, category: "Finance & Accounting", useCase: "Reporting & Analytics", collection: "Community builds", tool: "Google Drive" },
 ];
 
+// Each upcoming session's featured/capstone build — shown on the "Upcoming
+// builds" card in place of session logistics when that prototype toggle is
+// on. Placeholder copy for sessions after the first, until each lesson has
+// its own role-based build picker like Session 1's.
+const UPCOMING_BUILDS = [
+  {
+    lessonNumber: 1,
+    sessionTitle: "Build a real product with world-class design",
+    buildTitle: "Build a one-page account brief for any prospect",
+    otherOptionsCount: 6,
+    to: `${COURSE_PATH}/lesson-1/featured-build`,
+  },
+  {
+    lessonNumber: 2,
+    sessionTitle: "Automate Communication in Your Voice",
+    buildTitle: "Build a scheduled email manager",
+    otherOptionsCount: 0,
+    to: `${COURSE_PATH}/lesson-2/build-3`,
+  },
+  {
+    lessonNumber: 3,
+    sessionTitle: "Analyze data and design presentations",
+    buildTitle: "Build and design a presentation on your own topic",
+    otherOptionsCount: 0,
+    to: `${COURSE_PATH}/lesson-3/build-4`,
+  },
+];
+
+// Maps the role saved in onboarding (PersonalizationModal's role codes) to
+// this page's own Item.category strings, so "Recommended for you" can reuse
+// the same library data instead of a separate recommendation source.
+const ROLE_TO_CATEGORY: Record<string, string> = {
+  sales: "Sales",
+  marketing: "Marketing",
+  hr: "Human Resources",
+  finance: "Finance & Accounting",
+};
+
+// Curated real examples for Sales — screenshots of actual Leland+/community
+// builds, standing in for role-specific recommendations until every role has
+// a curated set like this one.
+const SALES_RECOMMENDED_ITEMS: Item[] = [
+  {
+    title: "A Sales Intelligence Tool for Amazon Brand Outreach",
+    author: "Mike P.",
+    avatar: pic1,
+    image: imgSalesIntelTool,
+    category: "Sales",
+    useCase: "Research & Intelligence",
+    collection: "Community builds",
+    tool: "Notion",
+  },
+  {
+    title: "Turning Every Customer Call Into a Ready-to-Send Follow-Up Email",
+    author: "Brian W.",
+    avatar: pic13,
+    image: imgCustomerCallFollowup,
+    category: "Sales",
+    useCase: "Productivity & Planning",
+    collection: "Community builds",
+    tool: "Hubspot",
+  },
+  {
+    title: "Build a Lead Qualification Agent",
+    author: "Leland Team",
+    avatar: lelandProfileIcon,
+    image: imgLeadQualAgent,
+    category: "Sales",
+    useCase: "Automation & Ops",
+    collection: "Tutorials",
+    tool: "Hubspot",
+  },
+  {
+    title: "Meeting Notes to CRM",
+    author: "Leland Team",
+    avatar: lelandProfileIcon,
+    image: imgMeetingNotesToCrm,
+    category: "Sales",
+    useCase: "Automation & Ops",
+    collection: "Tutorials",
+    tool: "Hubspot",
+  },
+];
+
 const CATEGORIES = ["Sales", "Marketing", "Human Resources", "Business Analytics & Intelligence", "Design", "Finance & Accounting"];
 const USE_CASES = ["Productivity & Planning", "Content Creation", "Personal website", "Reporting & Analytics", "Automation & Ops", "App development"];
 const COLLECTIONS = ["Community builds", "Tutorials", "Skills"];
@@ -132,10 +223,83 @@ function ContentCard({ item }: { item: Item }) {
       </div>
       <div className="flex flex-col gap-1.5 pt-2">
         <p className="line-clamp-2 text-[14px] font-semibold leading-[1.35] text-gray-dark">{item.title}</p>
-        <div className="flex items-center gap-1.5">
-          <img src={item.avatar} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />
-          <span className="truncate text-[12px] text-gray-light">{item.author}</span>
-        </div>
+        {item.collection !== "Tutorials" ? (
+          <div className="flex items-center gap-1.5">
+            <img src={item.avatar} alt="" className="h-[14px] w-[14px] rounded-full object-cover" />
+            <span className="truncate text-[12px] text-gray-light">{item.author}</span>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+// Shared scroll state for a horizontal card row — the header's nav arrows
+// and the row itself both read/drive this, so the arrows can live in the
+// card header instead of floating below the row.
+function useCardCarousel<T>(items: T[]) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(0);
+  const [pages, setPages] = useState(1);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth || 1;
+      setPage(Math.round(el.scrollLeft / w));
+      setPages(Math.max(1, Math.ceil(el.scrollWidth / w)));
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", update);
+      ro.disconnect();
+    };
+  }, [items]);
+
+  const scrollByPage = (dir: 1 | -1) => {
+    const el = scrollRef.current;
+    if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" });
+  };
+
+  return { scrollRef, page, pages, scrollByPage };
+}
+
+// Cards styled like the build-option cards on the lesson's own build picker
+// (plain text, border, no leading icon), in a horizontal scroll-snap row.
+// Nav arrows live in the card header (see ProgramHub), driven by the same
+// scroll state via `carousel`.
+function UpcomingBuildsCarousel({
+  builds,
+  carousel,
+}: {
+  builds: typeof UPCOMING_BUILDS;
+  carousel: ReturnType<typeof useCardCarousel<typeof UPCOMING_BUILDS[number]>>;
+}) {
+  return (
+    <div className="relative min-h-0 flex-1">
+      <div ref={carousel.scrollRef} className="flex h-full snap-x snap-mandatory gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {builds.map((b) => (
+          <Link
+            key={b.sessionTitle}
+            to={b.to}
+            className="group flex h-full w-[75%] shrink-0 snap-start flex-col gap-3 rounded-lg bg-leland-gray-hover p-4 text-left transition-shadow hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)] sm:w-[calc((100%-1.5rem)/3)]"
+          >
+            <IconSparkle className="size-4 shrink-0 text-gray-dark" />
+            <div className="flex flex-col gap-1">
+              <p className="line-clamp-2 text-[16px] font-semibold leading-[1.3] text-gray-dark">{b.buildTitle}.</p>
+              <p className="line-clamp-2 text-[14px] text-gray-light">Lesson {b.lessonNumber} · {b.sessionTitle}</p>
+            </div>
+            {b.otherOptionsCount ? (
+              <div className="mt-auto pt-2">
+                <Tag text={`${b.otherOptionsCount} more options`} tagColor={TagColor.WHITE} />
+              </div>
+            ) : null}
+          </Link>
+        ))}
       </div>
     </div>
   );
@@ -151,6 +315,7 @@ export default function ProgramHub() {
   const [filters, setFilters] = useState<{ category: string[]; useCase: string[]; collection: string[]; tool: string[] }>({ category: ["Marketing"], useCase: [], collection: [], tool: [] });
   const [open, setOpen] = useState<Record<string, boolean>>({ category: true, useCase: false, collection: false, tool: false });
   const [query, setQuery] = useState("");
+  const upcomingBuildsCarousel = useCardCarousel(UPCOMING_BUILDS);
 
   const toggleChip = (group: keyof typeof filters, value: string) =>
     setFilters((f) => ({ ...f, [group]: f[group].includes(value) ? f[group].filter((v) => v !== value) : [...f[group], value] }));
@@ -171,6 +336,15 @@ export default function ProgramHub() {
   );
 
   const scrollShipped = () => shippedRef.current?.scrollBy({ left: shippedRef.current.clientWidth * 0.75, behavior: "smooth" });
+
+  const learnerRole = loadPersonalizationData()?.role ?? null;
+  const recommendedCategory = learnerRole ? ROLE_TO_CATEGORY[learnerRole] : null;
+  const recommendedRef = useRef<HTMLDivElement>(null);
+  const recommendedItems = useMemo(() => {
+    if (recommendedCategory === "Sales") return SALES_RECOMMENDED_ITEMS;
+    return (recommendedCategory ? ITEMS.filter((it) => it.category === recommendedCategory) : ITEMS).slice(0, 8);
+  }, [recommendedCategory]);
+  const scrollRecommended = () => recommendedRef.current?.scrollBy({ left: recommendedRef.current.clientWidth * 0.75, behavior: "smooth" });
 
   const FilterGroup = ({ id, title, options, search }: { id: keyof typeof filters; title: string; options: string[]; search?: boolean }) => (
     <div className="border-t border-gray-stroke">
@@ -242,7 +416,7 @@ export default function ProgramHub() {
 
         {/* Current course + live sessions */}
         <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-stretch">
-          <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-stroke bg-white p-6 shadow-[0_1px_1px_rgba(16,24,40,0.05)] lg:max-w-[400px] lg:flex-1">
+          <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-stroke bg-white p-6 shadow-[0_1px_1px_rgba(16,24,40,0.05)] lg:max-w-[400px] lg:flex-1 lg:justify-between">
             <img src={levelOne} alt="AI Builder Program Level 1" className="max-h-[120px] w-auto max-w-full self-start rounded-lg border border-black/5 object-cover" />
             <div className="flex flex-col gap-2.5 py-2.5">
               <p className="truncate text-[16px] font-semibold leading-[1.3] text-gray-dark">Level 1: Use AI to 10x your impact</p>
@@ -256,44 +430,15 @@ export default function ProgramHub() {
             </div>
           </div>
 
-          <div className="flex min-w-[280px] flex-1 flex-col gap-4 rounded-2xl border border-gray-stroke bg-white p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex min-w-px flex-1 flex-col gap-1.5">
-                <p className="text-[22px] font-semibold leading-[1.2] text-gray-dark">Live sessions</p>
-                <p className="text-[14px] font-medium leading-[1.35] text-gray-light">Level 1: Use AI to 10x your impact</p>
-              </div>
-              <Button size="sm" variant="secondary" rounded="rounded-full" className="!gap-1.5 !bg-black/5 font-semibold">
-                May 24 cohort
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11V9a3 3 0 013-3h15" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v2a3 3 0 01-3 3H3" /></svg>
-              </Button>
-            </div>
-            <div className="flex flex-col gap-1">
-              <div className="flex h-16 items-center gap-3 py-2.5">
-                <div className="flex size-11 shrink-0 flex-col overflow-hidden rounded-lg border border-gray-stroke bg-white shadow-[0_1px_3px_rgba(16,24,40,0.1),0_1px_2px_rgba(16,24,40,0.06)]">
-                  <div className="h-3 w-full bg-[#80aced]" />
-                  <div className="flex flex-1 items-center justify-center pb-1 pt-0.5 text-[16px] font-semibold leading-[1.3] text-gray-dark">18</div>
-                </div>
-                <div className="flex min-w-px flex-1 flex-col gap-0.5">
-                  <p className="truncate text-[16px] font-semibold leading-[1.3] text-gray-dark">
-                    Today at 6:00 PM <span className="text-[14px] font-normal text-gray-extra-light">· 60 min</span>
-                  </p>
-                  <p className="truncate text-[14px] text-gray-light">Build your Agentic Operating System</p>
-                </div>
-                <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" className="shrink-0 text-gray-dark" aria-hidden><circle cx="8" cy="3.5" r="1" /><circle cx="8" cy="8" r="1" /><circle cx="8" cy="12.5" r="1" /></svg>
-              </div>
-              <div className="flex h-16 items-center gap-3 py-2.5">
-                <div className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-light">
-                  <img src={sessionThumb} alt="" className="absolute inset-0 h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-black/30" />
-                  <img src={playIcon} alt="" className="relative h-3 w-[11px]" />
-                </div>
-                <div className="flex min-w-px flex-1 flex-col gap-0.5">
-                  <p className="truncate text-[16px] font-semibold leading-[1.3] text-gray-dark">Analyze data and design presentations</p>
-                  <p className="truncate text-[14px] text-gray-light">Sept 31, 8am · Session Title Goes Here</p>
-                </div>
+          <div className="flex min-w-[280px] flex-1 flex-col gap-5 rounded-2xl border border-gray-stroke bg-white p-6">
+            <div className="flex items-center gap-4">
+              <p className="min-w-px flex-1 text-[22px] font-semibold leading-[1.2] text-gray-dark">Suggested builds</p>
+              <div className="flex items-center gap-2">
+                <RoundArrow dir="left" disabled={upcomingBuildsCarousel.page <= 0} onClick={() => upcomingBuildsCarousel.scrollByPage(-1)} />
+                <RoundArrow dir="right" disabled={upcomingBuildsCarousel.page >= upcomingBuildsCarousel.pages - 1} onClick={() => upcomingBuildsCarousel.scrollByPage(1)} />
               </div>
             </div>
-            <Button size="md" variant="secondary" className="self-start !bg-black/5 font-semibold">See all sessions</Button>
+            <UpcomingBuildsCarousel builds={UPCOMING_BUILDS} carousel={upcomingBuildsCarousel} />
           </div>
         </div>
 
@@ -335,11 +480,54 @@ export default function ProgramHub() {
           </div>
         </section>
 
+        {/* Live sessions */}
+        <section className="mt-10">
+          <div className="flex flex-col gap-4 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+              <div className="flex min-w-px flex-1 flex-col gap-1.5">
+                <p className={sectionTitle}>Live sessions</p>
+                <p className="text-[14px] font-medium leading-[1.35] text-gray-light">Level 1: Use AI to 10x your impact</p>
+              </div>
+              <Button size="sm" variant="secondary" rounded="rounded-full" className="self-start !gap-1.5 !bg-black/5 font-semibold">
+                May 24 cohort
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11V9a3 3 0 013-3h15" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v2a3 3 0 01-3 3H3" /></svg>
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="flex h-16 items-center gap-3 py-2.5">
+                <div className="flex size-11 shrink-0 flex-col overflow-hidden rounded-lg border border-gray-stroke bg-white shadow-[0_1px_3px_rgba(16,24,40,0.1),0_1px_2px_rgba(16,24,40,0.06)]">
+                  <div className="h-3 w-full bg-[#80aced]" />
+                  <div className="flex flex-1 items-center justify-center pb-1 pt-0.5 text-[16px] font-semibold leading-[1.3] text-gray-dark">18</div>
+                </div>
+                <div className="flex min-w-px flex-1 flex-col gap-0.5">
+                  <p className="truncate text-[16px] font-semibold leading-[1.3] text-gray-dark">
+                    Today at 6:00 PM <span className="text-[14px] font-normal text-gray-extra-light">· 60 min</span>
+                  </p>
+                  <p className="truncate text-[14px] text-gray-light">Build your Agentic Operating System</p>
+                </div>
+                <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" className="shrink-0 text-gray-dark" aria-hidden><circle cx="8" cy="3.5" r="1" /><circle cx="8" cy="8" r="1" /><circle cx="8" cy="12.5" r="1" /></svg>
+              </div>
+              <div className="flex h-16 items-center gap-3 py-2.5">
+                <div className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-light">
+                  <img src={sessionThumb} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-black/30" />
+                  <img src={playIcon} alt="" className="relative h-3 w-[11px]" />
+                </div>
+                <div className="flex min-w-px flex-1 flex-col gap-0.5">
+                  <p className="truncate text-[16px] font-semibold leading-[1.3] text-gray-dark">Analyze data and design presentations</p>
+                  <p className="truncate text-[14px] text-gray-light">Sept 31, 8am · Session Title Goes Here</p>
+                </div>
+              </div>
+            </div>
+            <Button size="md" variant="secondary" className="self-start !bg-black/5 font-semibold">
+              See all sessions
+            </Button>
+          </div>
+        </section>
+
         {/* Program resources */}
         <section className="mt-10 flex flex-col gap-8">
-          <h2 className={sectionTitle + " !text-[28px]"}>Program resources</h2>
-
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 rounded-2xl border border-gray-stroke bg-white p-6">
             <div className="flex items-center gap-4">
               <p className="flex-1 text-[12px] font-semibold uppercase leading-[1.2] tracking-[1.2px] text-gray-light">Recently viewed</p>
               <div className="flex items-center gap-2">
@@ -372,6 +560,41 @@ export default function ProgramHub() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Recommended for you */}
+          <div className="flex flex-col gap-6 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+              <div className="flex min-w-px flex-1 flex-col gap-2">
+                <p className={sectionTitle}>Recommended for you</p>
+                <p className="text-[16px] leading-[1.5] text-gray-light">
+                  {recommendedCategory ? `Builds picked for ${recommendedCategory}` : "Builds picked for your role"}
+                </p>
+              </div>
+              <Button
+                size="md"
+                variant="dark"
+                className="self-start font-semibold"
+                onClick={() => {
+                  setFilters((f) => ({ ...f, category: recommendedCategory ? [recommendedCategory] : [] }));
+                  document.getElementById("browse-all")?.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                Browse all
+              </Button>
+            </div>
+            <div className="relative">
+              <div ref={recommendedRef} className="flex gap-5 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {recommendedItems.map((it) => (
+                  <div key={it.title} className="w-[240px] shrink-0 sm:w-[calc((100%-60px)/4)]">
+                    <ContentCard item={it} />
+                  </div>
+                ))}
+              </div>
+              <div className="absolute right-[-22px] top-1/2 hidden -translate-y-1/2 sm:block">
+                <RoundArrow dir="right" floating onClick={scrollRecommended} />
+              </div>
             </div>
           </div>
 
@@ -441,7 +664,7 @@ export default function ProgramHub() {
         </section>
 
         {/* Browse all */}
-        <section className="mt-16">
+        <section id="browse-all" className="mt-16">
           <div className="flex flex-col gap-4 px-0 sm:flex-row sm:items-end sm:justify-between sm:px-6">
             <div className="flex flex-col gap-2">
               <h2 className={sectionTitle}>Browse all</h2>
@@ -486,6 +709,8 @@ export default function ProgramHub() {
           </div>
         </section>
       </div>
+
+      {/* Floating prototype options button — bottom-left corner */}
     </div>
   );
 }

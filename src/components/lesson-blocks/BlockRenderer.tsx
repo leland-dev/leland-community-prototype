@@ -2,6 +2,7 @@ import type { Block } from "../../data/lessonBlocks";
 
 import {
   BannerBlock,
+  BuildsCarousel,
   CalloutBlock,
   CodeBlock,
   DividerBlock,
@@ -10,7 +11,11 @@ import {
   HtmlBlock,
   ImageBlock,
   InviteTeamBlock,
+  PromptQuiz,
   RadioCardGroup,
+  RoleBuildPicker,
+  SelectedBuildSummary,
+  ShareBuildForm,
   SlackJoinBlock,
   StepsBlock,
   TableBlock,
@@ -58,6 +63,16 @@ export function BlockRenderer({ block, allowH1 = true }: { block: Block; allowH1
       return <InviteTeamBlock block={block} />;
     case "radioCardGroup":
       return <RadioCardGroup block={block} />;
+    case "roleBuildPicker":
+      return <RoleBuildPicker block={block} />;
+    case "promptQuiz":
+      return <PromptQuiz block={block} />;
+    case "buildsCarousel":
+      return <BuildsCarousel block={block} />;
+    case "selectedBuildSummary":
+      return <SelectedBuildSummary block={block} />;
+    case "shareBuildForm":
+      return <ShareBuildForm block={block} />;
     case "toggleChipGroup":
       return <ToggleChipGroup block={block} />;
     case "liveSessionBanner":
@@ -70,7 +85,7 @@ export function BlockRenderer({ block, allowH1 = true }: { block: Block; allowH1
   }
 }
 
-const isTextBlock = (block: Block) => block.kind === "markdown";
+const isTextBlock = (block: Block) => block.kind === "markdown" || block.kind === "selectedBuildSummary";
 
 export function BlockList({
   blocks,

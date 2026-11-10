@@ -2,18 +2,18 @@ import type { FlowProps } from "../index";
 import { QuizEngine, type Question } from "../quiz-engine/QuizEngine";
 
 const ROLES = [
-  "Software Engineer / Developer",
-  "Product Manager",
-  "Designer / UX",
-  "Data Analyst / Scientist",
+  "Engineering",
+  "Product",
+  "Design",
+  "Data & Analytics",
   "Marketing",
   "Sales",
   "Operations",
-  "Finance / Accounting",
-  "HR / People",
+  "Finance",
+  "Human Resources",
   "Legal",
-  "Executive / Leadership",
-  "Founder / Entrepreneur",
+  "Executive",
+  "Founder",
   "Other",
 ];
 

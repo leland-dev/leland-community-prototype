@@ -2,16 +2,23 @@
 // lesson-blocks renderer (demo of the block/CMS model). Text is adapted from the
 // real Session 1 guide. Lessons 2–4 still use the legacy HTML iframe manifest.
 import type { Block, BlockSection } from "./lessonBlocks";
-
-// A small self-contained HTML animation, to demo the `embed` block (the one
-// iframe among native blocks). Inlined as a data URL so it needs no asset.
-const ANIMATION_HTML = `<!doctype html><html><head><meta charset="utf-8"><style>
-html,body{margin:0;height:100%;display:grid;place-items:center;font-family:system-ui,-apple-system,sans-serif;background:#faf9f6}
-.card{padding:36px 52px;border-radius:20px;color:#222;font-weight:600;font-size:22px;text-align:center;background:linear-gradient(120deg,#FFD96F,#80ACED,#FFD96F);background-size:200% 200%;animation:g 6s ease infinite;box-shadow:0 12px 32px rgba(0,0,0,.10)}
-@keyframes g{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-</style></head><body><div class="card">The AI Builder Process<br/>Plan &rarr; Build &rarr; Learn</div></body></html>`;
-
-const ANIMATION_SRC = `data:text/html;charset=utf-8,${encodeURIComponent(ANIMATION_HTML)}`;
+import leadGenBotImg from "../assets/community-builds/lead-gen-bot.png";
+import churnedCustomerInterviewsImg from "../assets/community-builds/churned-customer-interviews.png";
+import followUpEmailImg from "../assets/community-builds/follow-up-email.png";
+import amazonBrandOutreachImg from "../assets/community-builds/amazon-brand-outreach.png";
+import {
+  SALES_TUTORIAL,
+  SALES_PROPOSAL_TUTORIAL,
+  SALES_RECAP_TUTORIAL,
+  SALES_DEMO_DECK_TUTORIAL,
+  LOREM_STUB_TUTORIAL,
+  MARKETING_TUTORIAL,
+  PEOPLE_TUTORIAL,
+  FINANCE_TUTORIAL,
+  PRODUCT_TUTORIAL,
+  OPERATIONS_TUTORIAL,
+  GENERIC_TUTORIAL,
+} from "./roleBuildTutorials";
 
 // Placed above the lesson body on every section of Lesson 1.
 export const LESSON_1_TOP_BLOCKS: Block[] = [
@@ -30,32 +37,347 @@ export const LESSON_1_TOP_BLOCKS: Block[] = [
 export const LESSON_1_SECTIONS: BlockSection[] = [
   {
     kind: "blocks",
-    id: "welcome",
-    title: "Welcome",
+    id: "tool-setup",
+    title: "Set up your tools",
     durationMin: 5,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
     blocks: [
       {
         kind: "markdown",
         body: [
-          "Vibe code a portfolio website, extract design DNA from a site you love, turn it into a reusable design skill, and publish your styled portfolio live at a shareable URL.",
+          "Go through this page before your first live session so everything is set up.",
           "",
-          "**By the end of this session you'll have:**",
+          "We demo everything in **Claude**, so ask the TAs for help with anything that looks different in your tool.",
+        ].join("\n"),
+      },
+      {
+        kind: "banner",
+        text: "Stuck? Get help at pre-course office hours",
+        subtext: "A TA will walk you through setup before your first session.",
+        href: "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours",
+        icon: "IconHeadset",
+      },
+      {
+        kind: "markdown",
+        body: "### Set up the Claude desktop app",
+      },
+      {
+        kind: "steps",
+        items: [
+          {
+            text: "**Download the Claude desktop app.** Go to [claude.com/download](https://claude.com/download) and download the version for your computer. On a Mac, open the `.dmg` file and drag Claude into your Applications folder — if it asks to install Git, click **Install** and let it finish. On Windows, double-click the installer and follow the prompts.",
+          },
+          {
+            text: "**Sign in.** Open the app and click **Sign in**. No account yet? Create one at [claude.ai](https://claude.ai).",
+          },
+          {
+            text: "**Confirm you have a paid plan.** You need Claude Pro, Max, Team, or Enterprise — Pro starts at $20/month. Check or upgrade at [claude.ai/upgrade](https://claude.ai/upgrade).",
+          },
+          {
+            text: "**Windows only: turn on Virtual Machine Platform.** Cowork needs one Windows feature turned on before it shows up in the app — skip this on a Mac.",
+            blocks: [
+              {
+                kind: "markdown",
+                body: [
+                  "1. Press the Windows key and type **Turn Windows features on or off**. Open it.",
+                  "2. Scroll the list and check the box next to **Virtual Machine Platform**.",
+                  "3. Click **OK** and let Windows apply the change.",
+                  "4. Click **Restart now**.",
+                  "5. After the restart, open the Claude desktop app again.",
+                ].join("\n"),
+              },
+            ],
+          },
+          {
+            text: "**Open Claude and send a test message.** Click the **Chat** button in the top-left corner and send this:",
+            blocks: [
+              {
+                kind: "code",
+                language: "prompt",
+                filename: "Prompt",
+                code: "I'm starting a course learning how to use AI as a tool at work. Tell me what features the desktop app has that can help me in my work.",
+              },
+              {
+                kind: "table",
+                headers: ["", "Chat", "Code"],
+                firstColumnBold: false,
+                rows: [
+                  ["Use for", "Ask, connect your tools, and run tasks", "Open a folder and build agents"],
+                  ["Used in", "Level 1 and Level 2", "Level 3 and Level 4"],
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        kind: "markdown",
+        body: [
+          "### Prefer the terminal?",
           "",
-          "- A portfolio website scaffolded with your real content",
-          "- Design DNA extracted from a site you love",
-          "- A reusable design-system AI skill",
-          "- A fully styled portfolio, published live at a shareable URL",
+          "**Claude Code** does the same thing, through a text window instead of an app. You don't need to know how to code — most people can skip this section.",
+        ].join("\n"),
+      },
+      {
+        kind: "toggle",
+        rows: [
+          {
+            title: "Set up Claude in the terminal on a Mac",
+            body: [
+              "1. **Open Terminal** — Press **Cmd + Space**, type **Terminal**, and press Enter.",
+              "2. **Install Claude** — Paste this command and press Enter: `curl -fsSL https://claude.ai/install.sh | bash`. Wait until you see **'Installation complete!'** (about 30 seconds).",
+              "3. **Verify your plan** — Terminal mode requires **Claude Pro, Max, Team, or Enterprise**. Check or upgrade at [claude.ai/upgrade](https://claude.ai/upgrade).",
+              "4. **Sign in** — Type `claude` and press Enter. A browser window will open — sign in with your Anthropic account and return to Terminal. Once you see a `>` prompt, you're ready.",
+            ].join("\n"),
+          },
+          {
+            title: "Set up Claude in the terminal on Windows",
+            body: [
+              "1. **Open PowerShell** — Press the **Windows key**, search for **PowerShell**, and open it.",
+              "2. **Install Claude** — Paste this command and press Enter: `irm https://claude.ai/install.ps1 | iex`. Wait for the installation to complete.",
+              "3. **Verify your plan** — Terminal mode requires **Claude Pro, Max, Team, or Enterprise**. Check or upgrade at [claude.ai/upgrade](https://claude.ai/upgrade).",
+              "4. **Sign in** — Type `claude` and press Enter. A browser window will open — sign in and return to PowerShell. Once you see a `>` prompt, you're ready.",
+            ].join("\n"),
+          },
+        ],
+      },
+      {
+        kind: "markdown",
+        body: "### You're ready when",
+      },
+      {
+        kind: "markdown",
+        body: [
+          "- Your AI tool opens, you're signed in, and it answered your test message",
+          "- You're on a paid plan",
+          "- You've joined the AI Builder Slack community and have the Slack app open",
+        ].join("\n"),
+      },
+      {
+        kind: "banner",
+        text: "Stuck? Get help at pre-course office hours",
+        subtext: "A TA will walk you through setup before your first session.",
+        href: "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours",
+        icon: "IconHeadset",
+      },
+    ],
+  },
+  {
+    kind: "blocks",
+    id: "how-program-works",
+    title: "How this program works",
+    durationMin: 5,
+    meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
+    blocks: [
+      {
+        kind: "markdown",
+        body: [
+          "### What this program is for",
+          "",
+          "This program changes how you work. Instead of making every email, slide, and spreadsheet by hand, you'll direct AI to make them, then judge what comes back. That takes new skills, and you'll practice them in every build.",
+          "",
+          "**AI-fluent professionals:**",
+          "",
+          "- Spot problems in their role that AI can solve, and start right away",
+          "- Give AI the context it needs to do good work",
+          "- Hold AI's output to a high bar for quality and integrity",
+          "- Share what they learn with their team and this community",
+        ].join("\n"),
+      },
+      {
+        kind: "markdown",
+        body: "### Program overview",
+      },
+      {
+        kind: "table",
+        headers: ["Level", "Theme"],
+        firstColumnBold: false,
+        rows: [
+          ["Level 1 — you are here", "AI as a Tool"],
+          ["Level 2", "AI as an Intern"],
+          ["Level 3", "AI as a Coworker"],
+          ["Level 4", "AI as a Whole Team"],
+        ],
+      },
+      {
+        kind: "banner",
+        text: "Feeling behind? Start with AI Builder Foundations",
+        subtext: "It covers the basics we build on in Level 1.",
+        icon: "IconScreenShare",
+      },
+      {
+        kind: "banner",
+        text: "Get help from Leland AI Experts",
+        icon: "IconUser",
+      },
+      {
+        kind: "banner",
+        text: "Find Builder blueprints for your function",
+        subtext: "Ready-made starting points for your role, in the program hub.",
+        icon: "IconBriefcase",
+      },
+      {
+        kind: "markdown",
+        body: [
+          "### How each build page works",
+          "",
+          "Work through the numbered steps in order. You'll see these blocks along the way.",
         ].join("\n"),
       },
       {
         kind: "callout",
         tone: "blue",
-        title: "Before you start",
+        title: "Concept",
         content: [
           {
             kind: "markdown",
-            body: "You'll need access to **Claude** and about 90 minutes. No engineering background required — just bring a project idea.",
+            body: "Blue boxes hold dropdowns that explain the idea behind a build. Open them before you start, or when a term is new to you.",
+          },
+        ],
+      },
+      {
+        kind: "callout",
+        tone: "tan",
+        title: "For your role",
+        content: [
+          {
+            kind: "markdown",
+            body: "Dropdowns under the \"For your role\" header show how people in marketing, finance, operations, and other jobs use each build.",
+          },
+        ],
+      },
+      {
+        kind: "banner",
+        text: "Go further",
+        subtext: "Optional extras under the \"Go further\" header, for when you finish early or between sessions.",
+        icon: "IconLightning",
+      },
+      {
+        kind: "markdown",
+        body: "### Where to find things",
+      },
+      {
+        kind: "banner",
+        text: "Syllabus",
+        subtext: "Every session guide, setup step, and recording link as it goes live. Find it on your Leland dashboard.",
+        icon: "IconCalendar",
+      },
+      {
+        kind: "banner",
+        text: "Email",
+        subtext: "Recordings and key resources land in your inbox after each session.",
+        icon: "IconBell",
+      },
+      {
+        kind: "banner",
+        text: "Slack",
+        subtext: "Your cohort channel is for intros, build links, screenshots, and questions. Share AI news in #ai-news.",
+        icon: "IconChatBubbles",
+      },
+      {
+        kind: "banner",
+        text: "Office hours",
+        subtext: "Stay on after each session. TAs troubleshoot your AI, answer questions, and help you keep building.",
+        href: "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours",
+        icon: "IconHeadset",
+      },
+    ],
+  },
+  {
+    kind: "blocks",
+    id: "intro",
+    title: "Session intro",
+    description: "The principle behind today's build.",
+    durationMin: 10,
+    meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
+    blocks: [
+      {
+        kind: "callout",
+        tone: "blue",
+        title: "Today's principle: English to software",
+        content: [
+          {
+            kind: "markdown",
+            body: "If you can describe what you want in plain English, AI can build it. Today you'll turn English into a working page.",
+          },
+        ],
+      },
+      {
+        kind: "markdown",
+        body: [
+          "### Where you're headed",
+          "",
+          "Today you'll turn English into one real HTML page — not a generic portfolio. You'll pick from a few role-specific builds, so you walk away with something built for your own job.",
+        ].join("\n"),
+      },
+      {
+        kind: "markdown",
+        body: [
+          "### What is vibe coding?",
+          "",
+          "Vibe coding is building real software by describing what you want in plain language, without writing a single line of code yourself. If you can describe what you want clearly, you can build it.",
+        ].join("\n"),
+      },
+      {
+        kind: "table",
+        headers: ["Vibe coding works best when you..."],
+        firstColumnBold: false,
+        rows: [
+          ["Start with a clear description of what you want and why"],
+          ["Iterate in plain language (\"make the header bigger\", \"add a contact section\")"],
+          ["Think in outcomes, not instructions"],
+        ],
+      },
+      {
+        kind: "callout",
+        tone: "blue",
+        title: "The limitation",
+        content: [
+          {
+            kind: "markdown",
+            body: "AI output is only as good as the context you give it. Generic prompt → generic output. Today's page will be hosted locally on your machine, so it only works when opened on your computer — in a later session you'll learn to deploy it so anyone can see it.",
+          },
+        ],
+      },
+      {
+        kind: "buildsCarousel",
+        title: "See what others built",
+        items: [
+          {
+            title: "Build a signal-based lead gen bot",
+            description: "A system that watches a specific niche for buying signals and drafts a short personalized outreach the moment one appears.",
+            image: leadGenBotImg,
+            author: "Leland Team",
+            avatarInitials: "L",
+            avatarColor: "bg-[#F2B705]",
+            kind: "resource",
+          },
+          {
+            title: "AI-Powered Churned Customer Interviews at Scale",
+            description: "An AI workflow that sorts churned customers and drafts personalized outreach for review.",
+            image: churnedCustomerInterviewsImg,
+            author: "Travis B.",
+            avatarInitials: "TB",
+            avatarColor: "bg-[#2F8F5B]",
+            kind: "community",
+          },
+          {
+            title: "Turning Every Customer Call Into a Ready-to-Send Follow-Up Email",
+            description: "An hourly automation that drafts follow-up emails from customer-call transcripts.",
+            image: followUpEmailImg,
+            author: "Brian W.",
+            avatarInitials: "BW",
+            avatarColor: "bg-[#B0405A]",
+            kind: "community",
+          },
+          {
+            title: "A Sales Intelligence Tool for Amazon Brand Outreach",
+            description: "Built Target, a tool that turns brand research into a ready sales deck in seconds.",
+            image: amazonBrandOutreachImg,
+            author: "Mike P.",
+            avatarInitials: "MP",
+            avatarColor: "bg-[#3A5FCD]",
+            kind: "community",
           },
         ],
       },
@@ -64,8 +386,8 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
   {
     kind: "blocks",
     id: "concepts",
-    title: "Opening concepts",
-    description: "Core frameworks and the AI ecosystem you'll work in.",
+    title: "Prompt framework",
+    description: "The Goal/Context/Rules framework behind every prompt in this program.",
     durationMin: 10,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
     blocks: [
@@ -74,83 +396,105 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
         body: [
           "### Prompt framework",
           "",
-          "One of the most foundational principles for working with AI is learning how to prompt well. Better prompts directly raise the quality of your AI's work. Every prompt in this program follows the same shape:",
-          "",
-          "- **Goal** — a clear deliverable",
-          "- **Context** — the information the AI needs",
-          "- **Rules** — examples, method, and don'ts",
+          "One of the most foundational principles for working with AI is learning how to prompt well. In the AI Builder program we use a Goal/Context/Rules prompt framework. Pay attention to how all the prompts we give you are structured. By session 3, you will be writing your own.",
         ].join("\n"),
       },
       {
-        kind: "callout",
-        tone: "blue",
-        content: [
+        kind: "steps",
+        items: [
           {
-            kind: "markdown",
-            body: "New to prompting? Read [How to write better prompts](https://www.lelandcourses.com/ai-builder/docs/how-to-write-better-prompts/) before the session.",
+            text: "**Goal** — The assignment. What should the finished thing be? Name the output, not just the topic.",
+          },
+          {
+            text: "**Context** — The background they need. Who it's for, what's going on, and what good looks like. The stuff a new hire wouldn't know on day one.",
+          },
+          {
+            text: "**Rules** — The dos and don'ts. Length, tone, format, and anything that's off-limits.",
           },
         ],
       },
       {
         kind: "markdown",
         body: [
-          "### The AI Builder Process",
+          "### Brief AI the way you'd brief a new hire",
           "",
-          "The loop behind everything you build: three phases — **Plan, Build, Learn** — with eight steps nested inside. It's a loop, not a line: what you learn at the end of one build feeds the start of the next, so every cycle gets faster.",
+          "Great results come from a great brief. Every strong prompt answers the same three questions you'd answer for someone on their first day.",
         ].join("\n"),
       },
       {
         kind: "table",
-        headers: ["Phase", "What happens"],
+        headers: ["", "Your brief — same for a new hire or for AI"],
+        firstColumnBold: true,
         rows: [
-          ["Plan", "Scope the work, then set goal, context, rules"],
-          ["Build", "Create → review → feedback"],
-          ["Learn", "Measure, log, skillify"],
+          ["Goal", "Write a welcome email for customers who just booked their first session."],
+          [
+            "Context",
+            "Most are career switchers and a little nervous. This is their first message from us, and our tone is warm and direct, never salesy.",
+          ],
+          ["Rules", "Keep it under 150 words. Don't promise outcomes. End with one clear next step."],
         ],
       },
       {
-        kind: "embed",
-        title: "The AI Builder Process",
-        height: 240,
-        src: ANIMATION_SRC,
+        kind: "promptQuiz",
+        title: "Quick check: Goal, Context, or Rules?",
+        questions: [
+          {
+            prompt: "\"Draft a one-page summary of last quarter's sales results.\" Which part of the prompt is this?",
+            options: [
+              { label: "Goal", correct: true },
+              { label: "Context" },
+              { label: "Rules" },
+            ],
+          },
+          {
+            prompt: "\"Keep it under 200 words and end with a single call to action.\" Which part of the prompt is this?",
+            options: [
+              { label: "Goal" },
+              { label: "Context" },
+              { label: "Rules", correct: true },
+            ],
+          },
+          {
+            prompt:
+              "\"Most of our customers are small business owners who are new to budgeting software.\" Which part of the prompt is this?",
+            options: [
+              { label: "Goal" },
+              { label: "Context", correct: true },
+              { label: "Rules" },
+            ],
+          },
+          {
+            prompt: "\"Write a LinkedIn post announcing our new product launch.\" Which part of the prompt is this?",
+            options: [
+              { label: "Goal", correct: true },
+              { label: "Context" },
+              { label: "Rules" },
+            ],
+          },
+        ],
       },
       {
         kind: "markdown",
         body: [
-          "### Claude Chat vs Cowork vs Code",
+          "### Talk to AI like a person, not software",
           "",
-          "Anthropic offers three ways to work with Claude. Each is built for a different workflow.",
+          "Think about the last time you asked someone to get something done for you. You probably didn't send them a vague one-liner and walk away. You told them exactly what needed to get done. You gave them the information they'd need to do it well. And you told them how you wanted it done: an example to follow, a deadline, maybe a few things to avoid.",
+          "",
+          "That's the whole framework. The **goal** is what needs to get done. The **context** is the information they need. The **rules** are the way you want it done.",
+          "",
+          "AI works the same way. Brief it like a capable new teammate instead of typing into a search bar, and you'll get much better work back.",
         ].join("\n"),
-      },
-      {
-        kind: "table",
-        headers: ["", "Claude Chat", "Claude Cowork", "Claude Code"],
-        rows: [
-          ["Interface", "Web or desktop", "Desktop app only", "Terminal, desktop, or web"],
-          ["Access", "Free or paid", "Paid plan required", "Free or paid"],
-          ["Best for", "Quick tasks, brainstorming", "Extended work on your files", "Building & shipping code"],
-        ],
-      },
-      {
-        kind: "callout",
-        tone: "blue",
-        title: "Today we use Cowork",
-        content: [
-          {
-            kind: "markdown",
-            body: "It's built for extended work sessions — it plans the work, runs code inside an isolated VM, reads and edits files in your folders, and delivers finished outputs.",
-          },
-        ],
       },
     ],
   },
   {
     kind: "blocks",
-    id: "build-1",
-    title: "Begin vibe coding your AI portfolio",
+    id: "practice-1",
+    title: "Vibe code an AI portfolio",
     description: "Design a portfolio website with AI in one focused build.",
     durationMin: 13,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
+    label: { text: "Practice", color: "gray" },
     blocks: [
       {
         kind: "markdown",
@@ -178,52 +522,12 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
   },
   {
     kind: "blocks",
-    id: "intro",
-    title: "Session intro",
-    durationMin: 10,
-    meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    blocks: [
-      {
-        kind: "markdown",
-        body: [
-          "### What we're building today",
-          "",
-          "In this session you'll go from zero to a live, published portfolio — using AI at every step. By the end you'll have built five times: scaffolding, design DNA extraction, skill creation, styling, and publishing.",
-        ].join("\n"),
-      },
-      {
-        kind: "table",
-        headers: ["Step", "What you do", "Output"],
-        columnWidths: ["56px", "1fr", "1fr"],
-        firstColumnBold: false,
-        rows: [
-          ["1", "Scaffold your portfolio", "Working website with your real content"],
-          ["2", "Extract design DNA", "A set of visual rules Claude can follow"],
-          ["3", "Convert to a skill", "A reusable design-system prompt"],
-          ["4", "Style your portfolio", "Fully styled site matching your inspiration"],
-          ["5", "Publish live", "A shareable URL"],
-        ],
-      },
-      {
-        kind: "callout",
-        tone: "blue",
-        title: "How this session runs",
-        content: [
-          {
-            kind: "markdown",
-            body: "Each build is self-contained — you can pause after any step and still have something complete. If you finish early, use the extra time to iterate.",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    kind: "blocks",
-    id: "build-2",
+    id: "practice-2",
     title: "Extract design DNA from an inspiration website",
     description: "Pull the visual rules from a site you love and give them to Claude.",
     durationMin: 13,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
+    label: { text: "Practice", color: "gray" },
     blocks: [
       {
         kind: "markdown",
@@ -252,11 +556,12 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
   },
   {
     kind: "blocks",
-    id: "build-3",
+    id: "practice-3",
     title: "Convert design DNA to a skill",
     description: "Turn your extracted design rules into a reusable AI skill.",
     durationMin: 13,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
+    label: { text: "Practice", color: "gray" },
     blocks: [
       {
         kind: "markdown",
@@ -291,11 +596,12 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
   },
   {
     kind: "blocks",
-    id: "build-4",
+    id: "practice-4",
     title: "Design your custom portfolio",
     description: "Apply your design system skill to style the portfolio you scaffolded.",
     durationMin: 20,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
+    label: { text: "Practice", color: "gray" },
     blocks: [
       {
         kind: "markdown",
@@ -335,33 +641,157 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
   },
   {
     kind: "blocks",
-    id: "share",
-    title: "Share what you built",
-    durationMin: 3,
+    id: "featured-build",
+    title: "Vibe code something you'll actually use",
+    durationMin: 13,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
+    label: { text: "Apply", color: "black" },
     blocks: [
       {
-        kind: "markdown",
-        body: [
-          "Post your live portfolio URL in the cohort Slack channel. Include:",
-          "",
-          "- The link to your published site",
-          "- The inspiration site you extracted design DNA from",
-          "- One thing that surprised you about the process",
-        ].join("\n"),
+        kind: "roleBuildPicker",
+        fallback: {
+          value: "generic",
+          label: "Generic",
+          builds: [
+            {
+              id: "generic",
+              buildTitle: "Build a one-page summary of a real piece of your work",
+              tutorial: GENERIC_TUTORIAL,
+            },
+          ],
+        },
+        options: [
+          {
+            value: "sales",
+            label: "Sales",
+            matchesRoles: ["sales"],
+            builds: [
+              {
+                id: "sales-account-brief",
+                buildTitle: "Build a one-page account brief for any prospect",
+                description: "A company snapshot, likely pains, and talking points for your next call.",
+                tutorial: SALES_TUTORIAL,
+              },
+              {
+                id: "sales-demo-deck",
+                buildTitle: "Build a demo deck for a prospect",
+                description: "Turn your talking points into a short, on-brand deck scoped to one prospect.",
+                tutorial: SALES_DEMO_DECK_TUTORIAL,
+              },
+              {
+                id: "sales-branded-proposal",
+                buildTitle: "Build a branded one-page proposal",
+                description: "Turn a rough draft into a polished proposal in your company's colors and fonts.",
+                tutorial: SALES_PROPOSAL_TUTORIAL,
+              },
+              {
+                id: "sales-branded-recap",
+                buildTitle: "Build a branded deal recap page",
+                description: "Turn your call notes into a client-ready recap, styled with your brand.",
+                tutorial: SALES_RECAP_TUTORIAL,
+              },
+              {
+                id: "sales-battlecard",
+                buildTitle: "Build a branded objection-handling page",
+                description: "Turn scattered objection answers into a page you can reference live on calls.",
+                tutorial: LOREM_STUB_TUTORIAL,
+              },
+              {
+                id: "sales-customer-welcome",
+                buildTitle: "Build a branded welcome page for a new customer",
+                description: "Turn a signed deal's details into a kickoff page for their first week.",
+                tutorial: LOREM_STUB_TUTORIAL,
+              },
+              {
+                id: "sales-win-loss",
+                buildTitle: "Build a win/loss summary page",
+                description: "Turn notes from a closed deal into a page the team can learn from.",
+                tutorial: LOREM_STUB_TUTORIAL,
+              },
+            ],
+          },
+          {
+            value: "marketing",
+            label: "Marketing",
+            matchesRoles: ["marketing"],
+            builds: [
+              {
+                id: "marketing-company-story",
+                buildTitle: "Build a one-page story of your company",
+                tutorial: MARKETING_TUTORIAL,
+              },
+            ],
+          },
+          {
+            value: "people",
+            label: "Human Resources",
+            matchesRoles: ["hr"],
+            builds: [
+              {
+                id: "people-welcome-page",
+                buildTitle: "Build a personal welcome page for each new hire",
+                tutorial: PEOPLE_TUTORIAL,
+              },
+            ],
+          },
+          {
+            value: "finance",
+            label: "Finance",
+            matchesRoles: ["finance"],
+            builds: [
+              {
+                id: "finance-budget-summary",
+                buildTitle: "Build a one-page budget summary for your team",
+                tutorial: FINANCE_TUTORIAL,
+              },
+            ],
+          },
+          {
+            value: "product",
+            label: "Product",
+            matchesRoles: ["pm"],
+            builds: [
+              {
+                id: "product-launch-page",
+                buildTitle: "Build a one-page launch page for a new feature",
+                tutorial: PRODUCT_TUTORIAL,
+              },
+            ],
+          },
+          {
+            value: "operations",
+            label: "Operations",
+            matchesRoles: ["ops"],
+            builds: [
+              {
+                id: "operations-checklist",
+                buildTitle: "Build an interactive checklist for a process you run again and again",
+                tutorial: OPERATIONS_TUTORIAL,
+              },
+            ],
+          },
+        ],
       },
       {
         kind: "callout",
-        tone: "blue",
-        title: "Not quite done yet?",
+        tone: "tan",
+        title: "If Claude stalls",
         content: [
           {
             kind: "markdown",
-            body: "Share a screenshot of wherever you got to. Seeing work-in-progress is just as valuable — others can see how the builds stack up.",
+            body: "If the build stops partway, re-share the goal and ask it to continue from the last completed step — don't restart from scratch.",
           },
         ],
       },
     ],
+  },
+  {
+    kind: "blocks",
+    id: "share",
+    title: "Share what you built",
+    durationMin: 3,
+    meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
+    blocks: [{ kind: "shareBuildForm" }],
   },
   {
     kind: "blocks",
@@ -375,11 +805,19 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
         body: [
           "### What you built",
           "",
-          "- A portfolio website scaffolded with your real content",
+          "- A website scaffolded with your real content",
           "- A `design-dna.md` extracted from a site you admire",
           "- A reusable `design-system-skill.md` you can apply to any project",
-          "- A fully styled portfolio, published live",
-          "",
+          "- A fully styled site, published live",
+        ].join("\n"),
+      },
+      {
+        kind: "selectedBuildSummary",
+        fallbackText: "A build scoped to your role, from the Vibe code section",
+      },
+      {
+        kind: "markdown",
+        body: [
           "### Before Lesson 2",
           "",
           "- Add your portfolio URL to your cohort profile",

@@ -215,6 +215,101 @@ export type ToggleChipGroupBlock = {
   options: ToggleChipOption[];
 };
 
+// One specific build a learner can walk through — a title plus the full
+// step-by-step tutorial, embedded inline rather than linking out to the
+// role-specific page it's adapted from.
+export type RoleBuild = {
+  id: string;
+  buildTitle: string; // what they'll build, e.g. "Build a one-page account brief for any prospect"
+  description?: string; // one-line card subtext
+  tutorial: Block[];
+};
+
+// One role's set of suggested builds in a RoleBuildPickerBlock. The learner
+// still picks which build to do — these are just scoped to their function,
+// not auto-applied.
+export type RoleBuildOption = {
+  value: string;
+  label: string; // role/department name, e.g. "Sales"
+  builds: RoleBuild[]; // first is the one we recommend by default
+  // PersonalizationData role codes (see PersonalizationModal.tsx) that this
+  // build set is tailored for — lets the picker auto-surface a learner's
+  // suggested builds from their onboarding answer instead of asking again.
+  matchesRoles?: string[];
+};
+
+// Surfaces build options scoped to the learner's role (known from
+// onboarding) — same exercise, different real-world output per function —
+// but still lets them choose which one to do, or build something custom.
+// Never asks a question up front: an unknown or unmatched role falls back to
+// a generic set of builds.
+export type RoleBuildPickerBlock = {
+  kind: "roleBuildPicker";
+  eyebrow?: string;
+  options: RoleBuildOption[];
+  fallback: RoleBuildOption; // shown when the role isn't on file or doesn't match any option
+};
+
+// One multiple-choice question in a PromptQuizBlock — a short prompt excerpt
+// and which Goal/Context/Rules part it is.
+export type QuizOption = {
+  label: string;
+  correct?: boolean;
+};
+
+export type QuizQuestion = {
+  prompt: Markdown; // the excerpt/question text, inline markdown
+  subtext?: string; // e.g. "Choose an answer to check it."
+  options: QuizOption[];
+};
+
+// Inline "quick check" quiz embedded in a lesson page (not the full-page
+// getting-started QuizEngine) — a few questions, answered one at a time,
+// with a running correct count.
+export type PromptQuizBlock = {
+  kind: "promptQuiz";
+  title: string;
+  questions: QuizQuestion[];
+};
+
+// One card in a BuildsCarouselBlock — a build someone shipped, shown with a
+// screenshot, a short description, and who made it.
+export type BuildCarouselItem = {
+  title: string;
+  description: string;
+  image: string; // imported asset path
+  author: string;
+  avatarInitials: string;
+  avatarColor?: string; // any Tailwind bg-* class; defaults to a neutral gray
+  // "resource" = an official Leland+ tutorial/skill card (lightbulb badge);
+  // "community" = a build a real learner shipped (people badge).
+  kind: "resource" | "community";
+};
+
+// Horizontal scrollable row of build cards — "See what others built" style,
+// modeled on the Leland+ library and course-complete "shipped" carousels.
+export type BuildsCarouselBlock = {
+  kind: "buildsCarousel";
+  title: string;
+  items: BuildCarouselItem[];
+};
+
+// Renders a single bullet naming whichever build the learner picked in this
+// lesson's RoleBuildPicker — read from localStorage at render time, since the
+// picker's own selection state doesn't otherwise reach a later section.
+export type SelectedBuildSummaryBlock = {
+  kind: "selectedBuildSummary";
+  fallbackText?: string; // shown if nothing was picked, e.g. the section was skipped
+};
+
+// Self-contained "share your build" submission form — upload, title,
+// description, an optional live link, and a reflection question. Every field
+// starts blank regardless of whether the learner followed a tutorial or
+// built something custom, so the write-up is always in their own words.
+export type ShareBuildFormBlock = {
+  kind: "shareBuildForm";
+};
+
 export type Block =
   | MarkdownBlock
   | CalloutBlock
@@ -234,7 +329,12 @@ export type Block =
   | InviteTeamBlock
   | LiveSessionBannerBlock
   | RadioCardGroupBlock
-  | ToggleChipGroupBlock;
+  | ToggleChipGroupBlock
+  | RoleBuildPickerBlock
+  | PromptQuizBlock
+  | BuildsCarouselBlock
+  | SelectedBuildSummaryBlock
+  | ShareBuildFormBlock;
 
 // A section rendered as native blocks. Coexists with the legacy html/video/pdf
 // sections (see the Section union in ContentViewer.tsx) — chosen per-section by
@@ -252,6 +352,10 @@ export type BlockSection = {
     builds?: number;
     model?: string;
   };
+  // Small tag shown next to the section title — e.g. a muted "Practice" vs a
+  // louder "Featured", to distinguish build types at a glance without
+  // baking the label into the title text.
+  label?: { text: string; color?: BannerColor };
   blocks: Block[];
   track?: "claude" | "codex" | "gemini" | "copilot";
 };

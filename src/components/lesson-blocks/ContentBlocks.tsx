@@ -1,29 +1,37 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import aiBuilderTile from "../../assets/ai-onboarding/aibp-tile.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../Button";
+import { loadPersonalizationData } from "../PersonalizationModal";
 
 import {
   BrandSlack,
   IconCheck,
   IconChevronDown,
+  IconChevronLeft,
   IconChevronRight,
   IconCopy,
   IconDownload,
   IconInfo,
+  IconLightBulb,
+  IconSparkle,
+  IconUpload,
+  IconUserGroup,
+  IconX,
   Tag,
   TagColor,
 } from "../leland";
 import * as LelandIcons from "../leland/svg/icons";
 import * as LelandBrands from "../leland/svg/brands";
 
-import { BlockRenderer } from "./BlockRenderer";
+import { BlockList, BlockRenderer } from "./BlockRenderer";
 import { H3_CLASS, Prose } from "./Prose";
 
 import type {
   BannerBlock as BannerBlockType,
   BannerColor,
   Block,
+  BuildsCarouselBlock as BuildsCarouselBlockType,
   CalloutBlock as CalloutBlockType,
   CodeBlock as CodeBlockType,
   DividerBlock as DividerBlockType,
@@ -32,7 +40,12 @@ import type {
   HtmlBlock as HtmlBlockType,
   InviteTeamBlock as InviteTeamBlockType,
   ImageBlock as ImageBlockType,
+  PromptQuizBlock as PromptQuizBlockType,
   RadioCardGroupBlock as RadioCardGroupBlockType,
+  RoleBuild as RoleBuildType,
+  RoleBuildPickerBlock as RoleBuildPickerBlockType,
+  SelectedBuildSummaryBlock as SelectedBuildSummaryBlockType,
+  ShareBuildFormBlock as ShareBuildFormBlockType,
   SlackJoinBlock as SlackJoinBlockType,
   StepsBlock as StepsBlockType,
   TableBlock as TableBlockType,
@@ -43,6 +56,10 @@ import type {
 } from "../../data/lessonBlocks";
 
 const isTextBlock = (block: Block) => block.kind === "markdown";
+
+// Read by SelectedBuildSummary in a later section — RoleBuildPicker has no
+// other way to hand its selection forward once that section unmounts.
+const SELECTED_BUILD_KEY = "content-viewer-selected-build";
 
 const CALLOUT_TONES = {
   blue: { container: "bg-leland-blue-light", eyebrow: "text-leland-blue-dark" },
@@ -469,6 +486,213 @@ export function RadioCardGroup({ block }: { block: RadioCardGroupBlockType }) {
   );
 }
 
+// One suggested or custom build card in the picker grid.
+function BuildOptionCard({
+  title,
+  description,
+  selected,
+  onClick,
+}: {
+  title: string;
+  description?: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex h-full flex-col items-start gap-2 rounded-lg p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
+        selected
+          ? "border-[1.5px] border-leland-gray-dark bg-leland-gray-hover"
+          : "bg-leland-gray-hover hover:bg-leland-gray-stroke"
+      }`}
+    >
+      <IconSparkle className="size-4 shrink-0 text-leland-gray-dark" />
+      <span className="leland-paragraph-lg font-semibold text-leland-gray-dark">{title}</span>
+      {description ? <span className="line-clamp-3 leland-paragraph-base text-leland-gray-light">{description}</span> : null}
+    </button>
+  );
+}
+
+// Switches between the role-specific suggestions and the generic custom
+// build — the active segment is the "selected" state, and it decides
+// whether the suggestion row even renders.
+function BuildModeToggle({
+  mode,
+  onChange,
+}: {
+  mode: "suggested" | "custom";
+  onChange: (mode: "suggested" | "custom") => void;
+}) {
+  const options: { value: "suggested" | "custom"; label: string }[] = [
+    { value: "suggested", label: "Suggested builds" },
+    { value: "custom", label: "Custom build" },
+  ];
+  return (
+    <div className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-leland-gray-hover p-1">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          onClick={() => onChange(o.value)}
+          className={`whitespace-nowrap rounded-full px-4 py-2 leland-paragraph-base font-medium transition-colors ${
+            mode === o.value
+              ? "bg-white text-leland-gray-dark shadow-sm"
+              : "text-leland-gray-light hover:text-leland-gray-dark"
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// Horizontal, swipeable row of build cards — shows three at a time on
+// desktop with nav arrows, one-and-a-bit at a time on mobile (a sliver of
+// the next card invites a swipe), same scroll-snap mechanics as the "See
+// what others built" carousel.
+function SuggestedBuildsCarousel({
+  builds,
+  selectedId,
+  onSelect,
+}: {
+  builds: RoleBuildType[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(0);
+  const [pages, setPages] = useState(1);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth || 1;
+      setPage(Math.round(el.scrollLeft / w));
+      setPages(Math.max(1, Math.ceil(el.scrollWidth / w)));
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", update);
+      ro.disconnect();
+    };
+  }, [builds]);
+
+  const scrollByPage = (dir: 1 | -1) => {
+    const el = scrollRef.current;
+    if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" });
+  };
+
+  return (
+    <div className="relative">
+      <div ref={scrollRef} className="scrollbar-hide -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 py-1">
+        {builds.map((b) => (
+          <div key={b.id} className="w-[75%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/3)]">
+            <BuildOptionCard
+              title={b.buildTitle}
+              description={b.description}
+              selected={b.id === selectedId}
+              onClick={() => onSelect(b.id)}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#F9F8F3] to-transparent" />
+      <div className="pointer-events-none absolute inset-0 top-1/2 flex -translate-y-1/2 items-center justify-between px-1">
+        <button
+          type="button"
+          onClick={() => scrollByPage(-1)}
+          disabled={page <= 0}
+          aria-label="Previous"
+          className="pointer-events-auto flex size-9 items-center justify-center rounded-full border border-leland-gray-stroke bg-white shadow-sm transition-colors hover:bg-leland-gray-hover disabled:opacity-0"
+        >
+          <IconChevronLeft className="size-4 text-leland-gray-dark" />
+        </button>
+        <button
+          type="button"
+          onClick={() => scrollByPage(1)}
+          disabled={page >= pages - 1}
+          aria-label="Next"
+          className="pointer-events-auto flex size-9 items-center justify-center rounded-full border border-leland-gray-stroke bg-white shadow-sm transition-colors hover:bg-leland-gray-hover disabled:opacity-0"
+        >
+          <IconChevronRight className="size-4 text-leland-gray-dark" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Known from onboarding — surface builds scoped to this role, but let the
+// learner switch to a generic "build something custom" build instead, or to
+// a different role's suggestions via the text link under the carousel.
+// Falls back to the generic build (no toggle) when no role is known or
+// matched — there's nothing to switch between.
+export function RoleBuildPicker({ block }: { block: RoleBuildPickerBlockType }) {
+  const knownRole = loadPersonalizationData()?.role ?? null;
+  const matched = knownRole ? block.options.filter((opt) => opt.matchesRoles?.includes(knownRole)) : [];
+  const roleOption = matched.length === 1 ? matched[0] : null;
+  const suggestedBuilds = roleOption?.builds ?? block.fallback.builds;
+  const customBuild = block.fallback.builds[0];
+
+  // The fallback's single generic build doubles as "custom" when a role
+  // isn't on file, so there's no distinct mode to switch to in that case.
+  const hasCustom = suggestedBuilds.some((b) => b.id === customBuild.id);
+  const customOption: RoleBuildType = {
+    ...customBuild,
+    buildTitle: "Build something custom",
+    description: "Pick your own piece of real work instead.",
+  };
+
+  const [mode, setMode] = useState<"suggested" | "custom">("suggested");
+  const [selectedId, setSelectedId] = useState(suggestedBuilds[0].id);
+  const selected =
+    mode === "custom" ? customOption : (suggestedBuilds.find((b) => b.id === selectedId) ?? suggestedBuilds[0]);
+
+  useEffect(() => {
+    setSelectedId(suggestedBuilds[0].id);
+    setMode("suggested");
+    // Only reset when the active role (and so the build set) actually changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roleOption?.value]);
+
+  useEffect(() => {
+    localStorage.setItem(SELECTED_BUILD_KEY, selected.buildTitle);
+  }, [selected.buildTitle]);
+
+  const suggestedLabel = roleOption ? `Suggested builds for ${roleOption.label}` : "Suggested builds";
+
+  return (
+    <div className="flex flex-col gap-8">
+      {block.eyebrow ? (
+        <span className="leland-subtext-sm font-semibold uppercase tracking-[1.3px] text-leland-gray-extra-light">
+          {block.eyebrow}
+        </span>
+      ) : null}
+
+      <div className="flex flex-col gap-6">
+        {hasCustom ? (
+          <h3 className={H3_CLASS}>{suggestedLabel}</h3>
+        ) : (
+          <BuildModeToggle mode={mode} onChange={setMode} />
+        )}
+
+        {mode === "suggested" ? <SuggestedBuildsCarousel builds={suggestedBuilds} selectedId={selectedId} onSelect={setSelectedId} /> : null}
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <h2 className="leland-heading-3xl font-semibold! text-leland-gray-dark">{selected.buildTitle}</h2>
+        <BlockList blocks={selected.tutorial} allowH1={false} />
+      </div>
+    </div>
+  );
+}
+
 export function ToggleChipGroup({ block }: { block: ToggleChipGroupBlockType }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const toggle = (value: string) => {
@@ -510,6 +734,346 @@ export function ToggleChipGroup({ block }: { block: ToggleChipGroupBlockType }) 
   );
 }
 
+const QUIZ_LETTERS = ["A", "B", "C", "D", "E", "F"];
+
+export function PromptQuiz({ block }: { block: PromptQuizBlockType }) {
+  const [index, setIndex] = useState(0);
+  const [answered, setAnswered] = useState<Record<number, number>>({});
+  const total = block.questions.length;
+  const correctCount = Object.entries(answered).filter(
+    ([qIdx, optIdx]) => block.questions[Number(qIdx)].options[optIdx]?.correct,
+  ).length;
+  const question = block.questions[index];
+  const pickedOption = answered[index];
+  const hasAnswered = pickedOption !== undefined;
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-leland-gray-stroke">
+      <div className="flex items-center justify-between gap-4 bg-leland-gray-hover px-6 py-5">
+        <div className="flex flex-col gap-0.5">
+          <span className="leland-paragraph-lg font-semibold text-leland-gray-dark">{block.title}</span>
+          <span className="leland-paragraph-base text-leland-gray-light">
+            Question {index + 1} of {total} · {correctCount} correct
+          </span>
+        </div>
+        <div className="flex shrink-0 gap-2">
+          {block.questions.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setIndex(i)}
+              aria-label={`Go to question ${i + 1}`}
+              className={`flex size-8 items-center justify-center rounded-full leland-paragraph-base font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
+                i === index
+                  ? "border-2 border-leland-gray-dark text-leland-gray-dark"
+                  : answered[i] !== undefined
+                    ? "bg-leland-gray-dark text-white"
+                    : "bg-white text-leland-gray-light"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-col gap-4 bg-white px-6 py-6">
+        <div className="flex flex-col gap-1.5">
+          <p className="leland-heading-base font-semibold text-leland-gray-dark">{question.prompt}</p>
+          <p className="leland-paragraph-base text-leland-gray-light">
+            {question.subtext ?? "Choose an answer to check it."}
+          </p>
+        </div>
+        <div className="flex flex-col gap-3">
+          {question.options.map((opt, i) => {
+            const isPicked = pickedOption === i;
+            const showCorrect = hasAnswered && opt.correct;
+            const showWrong = hasAnswered && isPicked && !opt.correct;
+            return (
+              <button
+                key={i}
+                type="button"
+                disabled={hasAnswered}
+                onClick={() => setAnswered((prev) => ({ ...prev, [index]: i }))}
+                className={`flex w-full items-center gap-3 rounded-lg border p-5 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary disabled:cursor-default ${
+                  showCorrect
+                    ? "border-[1.5px] border-green-600 bg-green-50"
+                    : showWrong
+                      ? "border-[1.5px] border-red-500 bg-red-50"
+                      : "border-leland-gray-stroke bg-white hover:bg-leland-gray-hover"
+                }`}
+              >
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-leland-gray-hover leland-paragraph-base font-semibold text-leland-gray-dark">
+                  {QUIZ_LETTERS[i] ?? i + 1}
+                </span>
+                <span className="min-w-0 flex-1 leland-paragraph-lg text-leland-gray-dark">{opt.label}</span>
+                {showCorrect ? <IconCheck className="size-5 shrink-0 text-green-600" /> : null}
+                {showWrong ? <IconX className="size-5 shrink-0 text-red-500" /> : null}
+              </button>
+            );
+          })}
+        </div>
+        {hasAnswered && index < total - 1 ? (
+          <Button size="sm" variant="secondary" className="self-start" onClick={() => setIndex(index + 1)}>
+            Next question
+          </Button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+const AVATAR_COLOR_FALLBACK = "bg-leland-gray-dark";
+
+function BuildCard({ item }: { item: BuildsCarouselBlockType["items"][number] }) {
+  const KindIcon = item.kind === "resource" ? IconLightBulb : IconUserGroup;
+  return (
+    <div className="w-[260px] shrink-0 snap-start">
+      <div className="relative aspect-[1.91/1] w-full overflow-hidden rounded-xl border border-leland-gray-stroke bg-leland-gray-hover">
+        <img src={item.image} alt="" className="size-full object-cover object-top" />
+        <div className="absolute right-2.5 top-2.5 flex size-7 items-center justify-center rounded-full bg-white/90 shadow-sm">
+          <KindIcon className="size-4 text-leland-gray-dark" />
+        </div>
+      </div>
+      <h3 className="mt-3 leland-paragraph-lg line-clamp-2 font-semibold text-leland-gray-dark">{item.title}</h3>
+      <p className="mt-1 leland-paragraph-base line-clamp-2 text-leland-gray-light">{item.description}</p>
+      <div className="mt-3 flex items-center gap-2">
+        <span
+          className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white ${item.avatarColor ?? AVATAR_COLOR_FALLBACK}`}
+        >
+          {item.avatarInitials}
+        </span>
+        <span className="leland-paragraph-base text-leland-gray-light">{item.author}</span>
+      </div>
+    </div>
+  );
+}
+
+export function BuildsCarousel({ block }: { block: BuildsCarouselBlockType }) {
+  const navigate = useNavigate();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(0);
+  const [pages, setPages] = useState(1);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth || 1;
+      setPage(Math.round(el.scrollLeft / w));
+      setPages(Math.max(1, Math.ceil(el.scrollWidth / w)));
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", update);
+      ro.disconnect();
+    };
+  }, []);
+
+  const scrollByPage = (dir: 1 | -1) => {
+    const el = scrollRef.current;
+    if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" });
+  };
+
+  return (
+    <div className="flex flex-col gap-8">
+      <hr className="border-t border-leland-gray-stroke" />
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className={H3_CLASS}>{block.title}</h3>
+          <Button size="sm" variant="secondary" onClick={() => navigate("/program/ai-builder")}>
+            Browse all
+          </Button>
+        </div>
+        <div className="relative">
+          <div ref={scrollRef} className="scrollbar-hide snap-x snap-mandatory overflow-x-auto py-1">
+            <div className="flex w-max items-start gap-4">
+              {block.items.map((item, i) => (
+                <BuildCard key={i} item={item} />
+              ))}
+            </div>
+          </div>
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#F9F8F3] to-transparent" />
+          <div className="pointer-events-none absolute inset-0 top-1/2 flex -translate-y-1/2 items-center justify-between px-1">
+            <button
+              type="button"
+              onClick={() => scrollByPage(-1)}
+              disabled={page <= 0}
+              aria-label="Previous"
+              className="pointer-events-auto flex size-9 items-center justify-center rounded-full border border-leland-gray-stroke bg-white shadow-sm transition-colors hover:bg-leland-gray-hover disabled:opacity-0"
+            >
+              <IconChevronLeft className="size-4 text-leland-gray-dark" />
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollByPage(1)}
+              disabled={page >= pages - 1}
+              aria-label="Next"
+              className="pointer-events-auto flex size-9 items-center justify-center rounded-full border border-leland-gray-stroke bg-white shadow-sm transition-colors hover:bg-leland-gray-hover disabled:opacity-0"
+            >
+              <IconChevronRight className="size-4 text-leland-gray-dark" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function HtmlBlock({ block }: { block: HtmlBlockType }) {
   return <div dangerouslySetInnerHTML={{ __html: block.html }} />;
+}
+
+// One bullet naming the build the learner picked earlier in this lesson's
+// RoleBuildPicker — styled to match the markdown list it visually continues.
+export function SelectedBuildSummary({ block }: { block: SelectedBuildSummaryBlockType }) {
+  const buildTitle = typeof window !== "undefined" ? localStorage.getItem(SELECTED_BUILD_KEY) : null;
+  const text = buildTitle ?? block.fallbackText;
+  if (!text) return null;
+  return (
+    <ul className="flex list-disc flex-col gap-4 pl-5 leland-paragraph-lg text-leland-gray-dark marker:text-leland-gray-extra-light">
+      <li>{text}</li>
+    </ul>
+  );
+}
+
+const SHARE_FORM_FIELD_CLASS =
+  "w-full rounded-xl border border-leland-gray-stroke bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark placeholder:text-leland-gray-extra-light focus:border-leland-gray-dark focus:outline-none";
+
+// "Share what you built" — every field starts blank regardless of whether
+// the learner followed a tutorial or built something custom, so the
+// write-up is always in their own words (see RoleBuildPicker's selected
+// build, which this deliberately does NOT pull a title/description from).
+export function ShareBuildForm({ block: _block }: { block: ShareBuildFormBlockType }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [link, setLink] = useState("");
+  const [reflection, setReflection] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFileName(file.name);
+    setFilePreviewUrl(file.type.startsWith("image/") ? URL.createObjectURL(file) : null);
+  };
+
+  const canSubmit = title.trim() && description.trim() && reflection.trim();
+
+  if (submitted) {
+    return (
+      <div className="flex flex-col items-center gap-4 rounded-xl border border-leland-gray-stroke bg-white px-6 py-12 text-center">
+        <span className="flex size-12 items-center justify-center rounded-full bg-leland-gray-hover">
+          <IconCheck className="size-5 text-leland-gray-dark" />
+        </span>
+        <div className="flex flex-col gap-1">
+          <p className="leland-heading-base font-semibold text-leland-gray-dark">Shared with your cohort</p>
+          <p className="leland-paragraph-base text-leland-gray-light">Your build now shows up in the cohort showcase.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      className="flex flex-col gap-6"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (canSubmit) setSubmitted(true);
+      }}
+    >
+      <div className="flex flex-col gap-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*,video/*"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="flex flex-col items-center gap-4 rounded-xl border-[3px] border-dashed border-leland-gray-stroke bg-white px-6 py-12 text-center hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+        >
+          {filePreviewUrl ? (
+            <img src={filePreviewUrl} alt="" className="max-h-32 rounded-lg border border-leland-gray-stroke object-cover" />
+          ) : (
+            <span className="flex size-14 items-center justify-center rounded-full bg-leland-gray-hover">
+              <IconUpload className="size-6 text-leland-gray-dark" />
+            </span>
+          )}
+          <span className="leland-paragraph-lg font-semibold text-leland-gray-dark">
+            {fileName ?? "Upload a screenshot or screen recording"}
+          </span>
+          {!fileName ? (
+            <span className="leland-paragraph-base text-leland-gray-light">Optional, but it helps others see what you made</span>
+          ) : null}
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="share-build-title" className="leland-paragraph-base font-medium text-leland-gray-dark">
+          Title
+        </label>
+        <input
+          id="share-build-title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="What did you build?"
+          className={SHARE_FORM_FIELD_CLASS}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="share-build-description" className="leland-paragraph-base font-medium text-leland-gray-dark">
+          Description
+        </label>
+        <textarea
+          id="share-build-description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="How does it work, and what value did it create?"
+          rows={4}
+          className={`${SHARE_FORM_FIELD_CLASS} resize-none`}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="share-build-link" className="leland-paragraph-base font-medium text-leland-gray-dark">
+          Link <span className="text-leland-gray-light">(optional)</span>
+        </label>
+        <input
+          id="share-build-link"
+          type="url"
+          value={link}
+          onChange={(e) => setLink(e.target.value)}
+          placeholder="If it's live somewhere, share the link"
+          className={SHARE_FORM_FIELD_CLASS}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="share-build-reflection" className="leland-paragraph-base font-medium text-leland-gray-dark">
+          What did you learn, and how will you apply this to your work?
+        </label>
+        <textarea
+          id="share-build-reflection"
+          value={reflection}
+          onChange={(e) => setReflection(e.target.value)}
+          rows={4}
+          className={`${SHARE_FORM_FIELD_CLASS} resize-none`}
+        />
+      </div>
+
+      <Button type="submit" size="md" variant="dark" disabled={!canSubmit} className="self-start font-semibold">
+        Submit
+      </Button>
+    </form>
+  );
 }

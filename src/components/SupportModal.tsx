@@ -5,7 +5,6 @@ import {
   ButtonColor,
   ButtonSize,
   ButtonWidth,
-  IconCalendar,
   IconCheck,
   IconChevronRight,
   IconMoney,
@@ -18,18 +17,15 @@ import {
 
 type SupportPath = "stuck" | "issue";
 
-const OFFICE_HOURS_HREF = "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours";
-
 // General "get help" entry point — separate from the per-section/course
-// feedback flows. "I'm stuck" routes to a direct message + office-hours
-// signup; "Feedback or product issue" routes to the same course-improvement
-// form/incentive used elsewhere. Every "Get help" affordance in the course
-// viewer opens this same modal, whatever state it happens to be in.
+// feedback flows. "I'm stuck" routes to a direct message; "Feedback or
+// product issue" routes to the same course-improvement form/incentive used
+// elsewhere. Every "Get help" affordance in the course viewer opens this
+// same modal, whatever state it happens to be in.
 const SupportModalImpl = ({
   open,
   onOpenChange,
-  hasOfficeHours = true,
-}: ModalProps & { hasOfficeHours?: boolean }) => {
+}: ModalProps) => {
   const [step, setStep] = useState<"pick" | "message" | "feedback" | "thanks">("pick");
   const [path, setPath] = useState<SupportPath | null>(null);
   const [text, setText] = useState("");
@@ -58,9 +54,7 @@ const SupportModalImpl = ({
                     {
                       id: "stuck",
                       label: "I'm stuck on something",
-                      subtext: hasOfficeHours
-                        ? "Message support or sign up for office hours"
-                        : "Message support",
+                      subtext: "Message support",
                     },
                     {
                       id: "issue",
@@ -129,23 +123,6 @@ const SupportModalImpl = ({
                   className="w-full flex-1 resize-none rounded-xl border border-leland-gray-stroke bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark placeholder:text-leland-gray-extra-light focus:border-leland-gray-dark focus:outline-none"
                 />
               </div>
-              {hasOfficeHours ? (
-                <a
-                  href={OFFICE_HOURS_HREF}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex w-full items-center gap-4 rounded-xl bg-leland-gray-hover px-5 py-4 text-left transition-colors hover:brightness-95"
-                >
-                  <IconCalendar className="size-6 shrink-0 text-leland-gray-dark" />
-                  <span className="flex min-w-0 flex-1 items-baseline gap-1.5">
-                    <span className="leland-paragraph-lg font-semibold! text-leland-gray-dark">
-                      Sign up for office hours
-                    </span>
-                    <span className="leland-paragraph-base text-leland-gray-light">Get live support</span>
-                  </span>
-                  <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
-                </a>
-              ) : null}
             </div>
             <div className="pt-8">
               <Button
