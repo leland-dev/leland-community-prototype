@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { loadPersonalizationData } from "../components/PersonalizationModal";
-import { IconSparkle, Tag, TagColor } from "../components/leland";
+import { IconDotsHorizontal, IconSparkle, Modal, ModalContent, ModalSize, SwitchInput, Tag, TagColor } from "../components/leland";
 import homeIcon from "../assets/img/program-hub/hdr-e8a6d.svg";
 import calendarArrowIcon from "../assets/img/program-hub/hdr-03896.svg";
 import slackIcon from "../assets/icons/slack-black.svg";
@@ -117,6 +117,23 @@ const UPCOMING_BUILDS = [
     to: `${COURSE_PATH}/lesson-3/build-4`,
   },
 ];
+
+const PROGRAM_HUB_OPTIONS_KEY = "program-hub-prototype-options";
+
+function useProgramHubOptions() {
+  const [showUseCaseSection, setShowUseCaseSectionState] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(PROGRAM_HUB_OPTIONS_KEY) ?? "{}").showUseCaseSection ?? false;
+    } catch {
+      return false;
+    }
+  });
+  const setShowUseCaseSection = (value: boolean) => {
+    setShowUseCaseSectionState(value);
+    localStorage.setItem(PROGRAM_HUB_OPTIONS_KEY, JSON.stringify({ showUseCaseSection: value }));
+  };
+  return { showUseCaseSection, setShowUseCaseSection };
+}
 
 // Maps the role saved in onboarding (PersonalizationModal's role codes) to
 // this page's own Item.category strings, so "Recommended for you" can reuse
@@ -315,6 +332,8 @@ export default function ProgramHub() {
   const [filters, setFilters] = useState<{ category: string[]; useCase: string[]; collection: string[]; tool: string[] }>({ category: ["Marketing"], useCase: [], collection: [], tool: [] });
   const [open, setOpen] = useState<Record<string, boolean>>({ category: true, useCase: false, collection: false, tool: false });
   const [query, setQuery] = useState("");
+  const { showUseCaseSection, setShowUseCaseSection } = useProgramHubOptions();
+  const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
   const upcomingBuildsCarousel = useCardCarousel(UPCOMING_BUILDS);
 
   const toggleChip = (group: keyof typeof filters, value: string) =>
@@ -409,7 +428,7 @@ export default function ProgramHub() {
             </Button>
             <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 !bg-black/5 font-semibold">
               Resource library
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0" aria-hidden><path d="M7 17L17 7" /><path d="M8 7h9v9" /></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0" aria-hidden><path d="M12 5v14M5 12l7 7 7-7" /></svg>
             </Button>
           </div>
         </div>
@@ -630,37 +649,39 @@ export default function ProgramHub() {
           </div>
 
           {/* Browse by use case */}
-          <div className="flex flex-col gap-6 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-              <div className="flex min-w-px flex-1 flex-col gap-2">
-                <p className={sectionTitle}>Browse by use case</p>
-                <p className="text-[16px] leading-[1.5] text-gray-light">Tutorials, inspo and downloadable skills</p>
-              </div>
-              <Button size="md" variant="dark" className="self-start font-semibold">See all 137 resources</Button>
-            </div>
-            <div className="flex items-start gap-2.5">
-              <div className="flex min-w-px flex-1 flex-wrap content-start gap-3">
-                {USE_CASE_TILES.map((u) => (
-                  <button
-                    key={u}
-                    type="button"
-                    onClick={() => setFilters((f) => ({ ...f, useCase: [u] }))}
-                    className="rounded-lg bg-black/5 px-6 py-4 text-[14px] font-semibold leading-[1.5] text-gray-dark transition-colors hover:bg-black/[0.08]"
-                  >
-                    {u}
-                  </button>
-                ))}
-              </div>
-              <div className="relative hidden h-[118px] w-[287px] shrink-0 lg:block" aria-hidden>
-                <div className="absolute left-[-10px] top-[28px] h-[80px] w-[151px] -rotate-3 overflow-hidden rounded border border-gray-stroke bg-[#F5C84A] shadow-sm">
-                  <img src={levelOne} alt="" className="h-full w-full object-cover" />
+          {showUseCaseSection ? (
+            <div className="flex flex-col gap-6 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+                <div className="flex min-w-px flex-1 flex-col gap-2">
+                  <p className={sectionTitle}>Browse by use case</p>
+                  <p className="text-[16px] leading-[1.5] text-gray-light">Tutorials, inspo and downloadable skills</p>
                 </div>
-                <div className="absolute left-[80px] top-0 h-[108px] w-[205px] rotate-3 overflow-hidden rounded border border-gray-stroke shadow-sm">
-                  <img src={heroPhoto} alt="" className="h-full w-full object-cover" />
+                <Button size="md" variant="dark" className="self-start font-semibold">See all 137 resources</Button>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <div className="flex min-w-px flex-1 flex-wrap content-start gap-3">
+                  {USE_CASE_TILES.map((u) => (
+                    <button
+                      key={u}
+                      type="button"
+                      onClick={() => setFilters((f) => ({ ...f, useCase: [u] }))}
+                      className="rounded-lg bg-black/5 px-6 py-4 text-[14px] font-semibold leading-[1.5] text-gray-dark transition-colors hover:bg-black/[0.08]"
+                    >
+                      {u}
+                    </button>
+                  ))}
+                </div>
+                <div className="relative hidden h-[118px] w-[287px] shrink-0 lg:block" aria-hidden>
+                  <div className="absolute left-[-10px] top-[28px] h-[80px] w-[151px] -rotate-3 overflow-hidden rounded border border-gray-stroke bg-[#F5C84A] shadow-sm">
+                    <img src={levelOne} alt="" className="h-full w-full object-cover" />
+                  </div>
+                  <div className="absolute left-[80px] top-0 h-[108px] w-[205px] rotate-3 overflow-hidden rounded border border-gray-stroke shadow-sm">
+                    <img src={heroPhoto} alt="" className="h-full w-full object-cover" />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : null}
         </section>
 
         {/* Browse all */}
@@ -711,6 +732,26 @@ export default function ProgramHub() {
       </div>
 
       {/* Floating prototype options button — bottom-left corner */}
+      <button
+        type="button"
+        onClick={() => setPrototypeOptionsOpen(true)}
+        aria-label="Prototype options"
+        className="fixed bottom-20 left-4 z-50 flex items-center justify-center rounded-full border border-gray-stroke bg-white p-2.5 shadow-sm hover:bg-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary md:bottom-4"
+      >
+        <IconDotsHorizontal className="size-4 text-gray-light" />
+      </button>
+      <Modal open={prototypeOptionsOpen} onOpenChange={setPrototypeOptionsOpen}>
+        <ModalContent size={ModalSize.SMALL}>
+          <div className="flex flex-col gap-4 p-6">
+            <h2 className="text-[18px] font-semibold text-gray-dark">Prototype options</h2>
+            <SwitchInput
+              label="Show 'Browse by use case' section"
+              isChecked={showUseCaseSection}
+              onToggle={setShowUseCaseSection}
+            />
+          </div>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
