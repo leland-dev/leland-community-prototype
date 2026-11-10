@@ -426,7 +426,13 @@ export default function ProgramHub() {
             <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 !bg-black/5 font-semibold">
               <IconImg src={slackIcon} />Community
             </Button>
-            <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 !bg-black/5 font-semibold">
+            <Button
+              size="md"
+              variant="secondary"
+              rounded="rounded-full"
+              className="!gap-2 !bg-black/5 font-semibold"
+              onClick={() => document.getElementById("recommended-for-you")?.scrollIntoView({ behavior: "smooth" })}
+            >
               Resource library
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0" aria-hidden><path d="M12 5v14M5 12l7 7 7-7" /></svg>
             </Button>
@@ -583,7 +589,7 @@ export default function ProgramHub() {
           </div>
 
           {/* Recommended for you */}
-          <div className="flex flex-col gap-6 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
+          <div id="recommended-for-you" className="flex flex-col gap-6 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
               <div className="flex min-w-px flex-1 flex-col gap-2">
                 <p className={sectionTitle}>Recommended for you</p>
