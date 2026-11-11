@@ -67,29 +67,93 @@ type Item = {
   author: string;
   avatar: string;
   image: string;
-  category: string;
+  // Every category this resource is tagged with (per the tutorials/skills
+  // tagging sheet) — a resource shows up under each one in the "Browse all"
+  // filters, not just a single primary category.
+  categories: string[];
   useCase: string;
   collection: "Community builds" | "Tutorials" | "Skills";
   tool: string;
 };
 
 const ITEMS: Item[] = [
-  { title: "Soulbox: Voice-to-Memory Capture and Auto-Built Memory Books", author: "Matthew Watkins", avatar: pic9, image: imgNotes, category: "Marketing", useCase: "Content Creation", collection: "Community builds", tool: "Notion" },
-  { title: "A resident portal replacing HOA Group Texts", author: "Matthew Watkins", avatar: pic9, image: imgOnboarding, category: "Human Resources", useCase: "App development", collection: "Community builds", tool: "Slack" },
-  { title: "Lux: A Multi-Agent Travel Planning Operating System", author: "Matthew Watkins", avatar: pic9, image: imgLeadBrief, category: "Sales", useCase: "Research & Intelligence", collection: "Community builds", tool: "Google Drive" },
-  { title: "SIFT: A Celiac App", author: "Matthew Watkins", avatar: pic9, image: imgMetrics, category: "Design", useCase: "App development", collection: "Community builds", tool: "Wordpress" },
-  { title: "A Living Competitive Intelligence Wiki for Healthcare", author: "Isabella Martinez", avatar: pic1, image: imgCrm, category: "Business Analytics & Intelligence", useCase: "Research & Intelligence", collection: "Community builds", tool: "Notion" },
-  { title: "Winning copy analysis", author: "Leland", avatar: pic11, image: imgPrompts, category: "Marketing", useCase: "Content Creation", collection: "Skills", tool: "Notion" },
-  { title: "Trigger recap", author: "Leland", avatar: pic11, image: imgInvoice, category: "Sales", useCase: "Automation & Ops", collection: "Skills", tool: "Hubspot" },
-  { title: "Automated Weekly Meme Monday content for LinkedIn", author: "Lucas Gonzalez", avatar: pic5, image: imgTriage, category: "Marketing", useCase: "Content Creation", collection: "Community builds", tool: "Slack" },
-  { title: "Turning Every Customer Call Into a Ready-to-Send Follow-Up Email", author: "Ethan Carter", avatar: pic13, image: imgCallCoach, category: "Sales", useCase: "Productivity & Planning", collection: "Tutorials", tool: "Hubspot" },
-  { title: "Create an agent that helps you think through decisions", author: "Maya Thompson", avatar: pic6, image: imgNotes, category: "Business Analytics & Intelligence", useCase: "Productivity & Planning", collection: "Tutorials", tool: "Notion" },
-  { title: "Weekly recap", author: "Leland", avatar: pic11, image: imgMetrics, category: "Marketing", useCase: "Reporting & Analytics", collection: "Skills", tool: "Asana" },
-  { title: "Customer feedback workflow", author: "Ava Johnson", avatar: pic3, image: imgCrm, category: "Marketing", useCase: "Reporting & Analytics", collection: "Community builds", tool: "Slack" },
-  { title: "Build your job search OS with Claude", author: "Maya Thompson", avatar: pic6, image: imgLeadBrief, category: "Human Resources", useCase: "Personal website", collection: "Tutorials", tool: "Notion" },
-  { title: "Build a 1:1 prep assistant", author: "Maya Thompson", avatar: pic6, image: imgCallCoach, category: "Human Resources", useCase: "Productivity & Planning", collection: "Tutorials", tool: "Google Drive" },
-  { title: "An interactive book club site with live voting", author: "Sophia Lee", avatar: pic8, image: imgOnboarding, category: "Design", useCase: "App development", collection: "Community builds", tool: "Wordpress" },
-  { title: "18-week marathon plan built from your own Garmin and coaching data", author: "Noah Wilson", avatar: pic13, image: imgPrompts, category: "Finance & Accounting", useCase: "Reporting & Analytics", collection: "Community builds", tool: "Google Drive" },
+  { title: "A resident portal replacing HOA Group Texts", author: "Matthew Watkins", avatar: pic9, image: imgOnboarding, categories: ["Human Resources"], useCase: "App development", collection: "Community builds", tool: "Slack" },
+  { title: "Lux: A Multi-Agent Travel Planning Operating System", author: "Matthew Watkins", avatar: pic9, image: imgLeadBrief, categories: ["Sales"], useCase: "Research & Intelligence", collection: "Community builds", tool: "Google Drive" },
+  { title: "SIFT: A Celiac App", author: "Matthew Watkins", avatar: pic9, image: imgMetrics, categories: ["Design"], useCase: "App development", collection: "Community builds", tool: "Wordpress" },
+  { title: "A Living Competitive Intelligence Wiki for Healthcare", author: "Isabella Martinez", avatar: pic1, image: imgCrm, categories: ["Business Analytics & Intelligence"], useCase: "Research & Intelligence", collection: "Community builds", tool: "Notion" },
+  { title: "Winning copy analysis", author: "Leland", avatar: pic11, image: imgPrompts, categories: ["Marketing"], useCase: "Content Creation", collection: "Skills", tool: "Notion" },
+  { title: "Trigger recap", author: "Leland", avatar: pic11, image: imgInvoice, categories: ["Sales"], useCase: "Automation & Ops", collection: "Skills", tool: "Hubspot" },
+  { title: "Automated Weekly Meme Monday content for LinkedIn", author: "Lucas Gonzalez", avatar: pic5, image: imgTriage, categories: ["Marketing"], useCase: "Content Creation", collection: "Community builds", tool: "Slack" },
+  { title: "Turning Every Customer Call Into a Ready-to-Send Follow-Up Email", author: "Ethan Carter", avatar: pic13, image: imgCallCoach, categories: ["Sales"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Hubspot" },
+  { title: "Create an agent that helps you think through decisions", author: "Maya Thompson", avatar: pic6, image: imgNotes, categories: ["Business Analytics & Intelligence"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Notion" },
+  { title: "Weekly recap", author: "Leland", avatar: pic11, image: imgMetrics, categories: ["Marketing"], useCase: "Reporting & Analytics", collection: "Skills", tool: "Asana" },
+  { title: "Customer feedback workflow", author: "Ava Johnson", avatar: pic3, image: imgCrm, categories: ["Marketing"], useCase: "Reporting & Analytics", collection: "Community builds", tool: "Slack" },
+  { title: "Build your job search OS with Claude", author: "Maya Thompson", avatar: pic6, image: imgLeadBrief, categories: ["Human Resources"], useCase: "Personal website", collection: "Tutorials", tool: "Notion" },
+  { title: "Build a 1:1 prep assistant", author: "Maya Thompson", avatar: pic6, image: imgCallCoach, categories: ["Human Resources"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Google Drive" },
+  { title: "An interactive book club site with live voting", author: "Sophia Lee", avatar: pic8, image: imgOnboarding, categories: ["Design"], useCase: "App development", collection: "Community builds", tool: "Wordpress" },
+  { title: "18-week marathon plan built from your own Garmin and coaching data", author: "Noah Wilson", avatar: pic13, image: imgPrompts, categories: ["Finance & Accounting"], useCase: "Reporting & Analytics", collection: "Community builds", tool: "Google Drive" },
+  // Curated from the Sales-tagged rows of the tutorials/skills tagging sheet.
+  { title: "Web Design Guidelines", author: "Leland Team", avatar: lelandProfileIcon, image: imgTriage, categories: ["Design", "Engineering"], useCase: "Productivity & Planning", collection: "Skills", tool: "Notion" },
+  { title: "Transcript Analysis", author: "Leland Team", avatar: lelandProfileIcon, image: imgMetrics, categories: ["Sales"], useCase: "Reporting & Analytics", collection: "Skills", tool: "Hubspot" },
+  { title: "Winning Copy Extraction", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrompts, categories: ["Marketing", "Sales"], useCase: "Content Creation", collection: "Skills", tool: "Google Drive" },
+  { title: "Startup Financial Modeling", author: "Leland Team", avatar: lelandProfileIcon, image: imgInvoice, categories: ["Finance & Accounting", "Executive"], useCase: "Productivity & Planning", collection: "Skills", tool: "Asana" },
+  { title: "Trigger Mapping", author: "Leland Team", avatar: lelandProfileIcon, image: imgNotes, categories: ["Sales", "Marketing"], useCase: "Productivity & Planning", collection: "Skills", tool: "Slack" },
+  { title: "Systematic Debugging", author: "Leland Team", avatar: lelandProfileIcon, image: imgOnboarding, categories: ["Engineering"], useCase: "Automation & Ops", collection: "Skills", tool: "Wordpress" },
+  { title: "Skill Creator", author: "Leland Team", avatar: lelandProfileIcon, image: imgCrm, categories: ["Engineering"], useCase: "Productivity & Planning", collection: "Skills", tool: "Notion" },
+  { title: "Stack Trace Explainer", author: "Leland Team", avatar: lelandProfileIcon, image: imgCallCoach, categories: ["Engineering"], useCase: "Productivity & Planning", collection: "Skills", tool: "Hubspot" },
+  { title: "SOP Creator", author: "Leland Team", avatar: lelandProfileIcon, image: imgLeadBrief, categories: ["Operations"], useCase: "Productivity & Planning", collection: "Skills", tool: "Google Drive" },
+  { title: "Skill Audit", author: "Leland Team", avatar: lelandProfileIcon, image: imgColdOutboundEmail, categories: ["Engineering"], useCase: "Productivity & Planning", collection: "Skills", tool: "Asana" },
+  { title: "Revenue Monitor", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrecallBriefing, categories: ["Sales"], useCase: "Reporting & Analytics", collection: "Skills", tool: "Slack" },
+  { title: "Sequence Architecture", author: "Leland Team", avatar: lelandProfileIcon, image: imgTriage, categories: ["Sales"], useCase: "Productivity & Planning", collection: "Skills", tool: "Wordpress" },
+  { title: "Share Skills", author: "Leland Team", avatar: lelandProfileIcon, image: imgMetrics, categories: ["Engineering"], useCase: "Productivity & Planning", collection: "Skills", tool: "Notion" },
+  { title: "Rep Coaching Report", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrompts, categories: ["Sales"], useCase: "Reporting & Analytics", collection: "Skills", tool: "Hubspot" },
+  { title: "QBR Generator", author: "Leland Team", avatar: lelandProfileIcon, image: imgInvoice, categories: ["Sales"], useCase: "Productivity & Planning", collection: "Skills", tool: "Google Drive" },
+  { title: "Personalization Engine", author: "Leland Team", avatar: lelandProfileIcon, image: imgNotes, categories: ["Sales", "Marketing"], useCase: "Content Creation", collection: "Skills", tool: "Asana" },
+  { title: "Data Cleaner", author: "Leland Team", avatar: lelandProfileIcon, image: imgOnboarding, categories: ["Business Analytics & Intelligence"], useCase: "Productivity & Planning", collection: "Skills", tool: "Slack" },
+  { title: "Marketing Psychology", author: "Leland Team", avatar: lelandProfileIcon, image: imgCrm, categories: ["Marketing"], useCase: "Content Creation", collection: "Skills", tool: "Wordpress" },
+  { title: "Persona Development", author: "Leland Team", avatar: lelandProfileIcon, image: imgCallCoach, categories: ["Marketing"], useCase: "Content Creation", collection: "Skills", tool: "Notion" },
+  { title: "Learn", author: "Leland Team", avatar: lelandProfileIcon, image: imgLeadBrief, categories: ["Engineering"], useCase: "Productivity & Planning", collection: "Skills", tool: "Hubspot" },
+  { title: "Brainstorming", author: "Leland Team", avatar: lelandProfileIcon, image: imgColdOutboundEmail, categories: ["Engineering", "Product"], useCase: "Productivity & Planning", collection: "Skills", tool: "Google Drive" },
+  { title: "Investor Revenue Report", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrecallBriefing, categories: ["Executive", "Finance & Accounting"], useCase: "Reporting & Analytics", collection: "Skills", tool: "Asana" },
+  { title: "Financial Operations Expert", author: "Leland Team", avatar: lelandProfileIcon, image: imgTriage, categories: ["Finance & Accounting", "Executive"], useCase: "Productivity & Planning", collection: "Skills", tool: "Slack" },
+  { title: "Business Case Builder", author: "Leland Team", avatar: lelandProfileIcon, image: imgMetrics, categories: ["Executive"], useCase: "Productivity & Planning", collection: "Skills", tool: "Wordpress" },
+  { title: "Frontend Design", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrompts, categories: ["Design", "Engineering"], useCase: "Productivity & Planning", collection: "Skills", tool: "Notion" },
+  { title: "LinkedIn Writer", author: "Leland Team", avatar: lelandProfileIcon, image: imgInvoice, categories: ["Marketing"], useCase: "Content Creation", collection: "Skills", tool: "Hubspot" },
+  { title: "Build an interactive checklist for a process you run again and again", author: "Leland Team", avatar: lelandProfileIcon, image: imgNotes, categories: ["Operations"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Google Drive" },
+  { title: "Build a one-page launch page for a new feature", author: "Leland Team", avatar: lelandProfileIcon, image: imgOnboarding, categories: ["Product", "Marketing"], useCase: "App development", collection: "Tutorials", tool: "Asana" },
+  { title: "Build a one-page budget summary for your team", author: "Leland Team", avatar: lelandProfileIcon, image: imgCrm, categories: ["Finance & Accounting"], useCase: "App development", collection: "Tutorials", tool: "Slack" },
+  { title: "Build a personal welcome page for each new hire", author: "Leland Team", avatar: lelandProfileIcon, image: imgCallCoach, categories: ["Human Resources"], useCase: "Personal website", collection: "Tutorials", tool: "Wordpress" },
+  { title: "Build a one-page story of your company", author: "Leland Team", avatar: lelandProfileIcon, image: imgLeadBrief, categories: ["Marketing", "Executive"], useCase: "App development", collection: "Tutorials", tool: "Notion" },
+  { title: "Build an AI Document Auditor", author: "Leland Team", avatar: lelandProfileIcon, image: imgColdOutboundEmail, categories: ["Legal"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Hubspot" },
+  { title: "Designing AI Systems That People Actually Trust and Use", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrecallBriefing, categories: ["Product", "Design"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Google Drive" },
+  { title: "Build an AI personal trainer", author: "Leland Team", avatar: lelandProfileIcon, image: imgTriage, categories: ["Design", "Product"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Asana" },
+  { title: "Build a financial model and runway tracker", author: "Leland Team", avatar: lelandProfileIcon, image: imgMetrics, categories: ["Finance & Accounting", "Executive"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Slack" },
+  { title: "Automate support ticket triage", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrompts, categories: ["Operations"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Wordpress" },
+  { title: "Create an agent that helps you think through decisions", author: "Leland Team", avatar: lelandProfileIcon, image: imgInvoice, categories: ["Executive"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Notion" },
+  { title: "Build a customer interview analyzer", author: "Leland Team", avatar: lelandProfileIcon, image: imgNotes, categories: ["Product", "Design"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Hubspot" },
+  { title: "Design your AI chief of staff", author: "Leland Team", avatar: lelandProfileIcon, image: imgOnboarding, categories: ["Executive"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Google Drive" },
+  { title: "Automate your A/B test readouts", author: "Leland Team", avatar: lelandProfileIcon, image: imgCrm, categories: ["Business Analytics & Intelligence", "Product", "Marketing"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Asana" },
+  { title: "Automate your recurring reports", author: "Leland Team", avatar: lelandProfileIcon, image: imgCallCoach, categories: ["Business Analytics & Intelligence"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Slack" },
+  { title: "Build an agent that finds where work gets stuck", author: "Leland Team", avatar: lelandProfileIcon, image: imgLeadBrief, categories: ["Operations"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Wordpress" },
+  { title: "Build a bot to answer common HR questions", author: "Leland Team", avatar: lelandProfileIcon, image: imgColdOutboundEmail, categories: ["Human Resources"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Notion" },
+  { title: "Build a Q&A bot for your internal docs", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrecallBriefing, categories: ["Operations"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Hubspot" },
+  { title: "Build a rolling cash flow forecast", author: "Leland Team", avatar: lelandProfileIcon, image: imgTriage, categories: ["Finance & Accounting", "Executive"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Google Drive" },
+  { title: "Automate your invoice bookkeeping", author: "Leland Team", avatar: lelandProfileIcon, image: imgMetrics, categories: ["Finance & Accounting"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Asana" },
+  { title: "Automate invoice and PO data entry", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrompts, categories: ["Finance & Accounting"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Slack" },
+  { title: "Automate contract reviews", author: "Leland Team", avatar: lelandProfileIcon, image: imgInvoice, categories: ["Legal"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Wordpress" },
+  { title: "Build a contract renewal tracker", author: "Leland Team", avatar: lelandProfileIcon, image: imgNotes, categories: ["Legal"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Notion" },
+  { title: "Build a system that summarizes contract changes", author: "Leland Team", avatar: lelandProfileIcon, image: imgOnboarding, categories: ["Legal"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Hubspot" },
+  { title: "Build an NDA triage system", author: "Leland Team", avatar: lelandProfileIcon, image: imgCrm, categories: ["Legal"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Google Drive" },
+  { title: "Automate resume screens", author: "Leland Team", avatar: lelandProfileIcon, image: imgCallCoach, categories: ["Human Resources"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Asana" },
+  { title: "Build a 1:1 prep assistant", author: "Leland Team", avatar: lelandProfileIcon, image: imgLeadBrief, categories: ["Human Resources"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Slack" },
+  { title: "Automate interview scheduling", author: "Leland Team", avatar: lelandProfileIcon, image: imgColdOutboundEmail, categories: ["Human Resources"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Wordpress" },
+  { title: "Automate interview debrief summaries", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrecallBriefing, categories: ["Human Resources"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Notion" },
+  { title: "Automate the user interview process", author: "Leland Team", avatar: lelandProfileIcon, image: imgTriage, categories: ["Product", "Design"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Hubspot" },
+  { title: "Create interview scorecards for every role", author: "Leland Team", avatar: lelandProfileIcon, image: imgMetrics, categories: ["Human Resources"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Google Drive" },
+  { title: "Build a feedback theme tracker", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrompts, categories: ["Product"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Asana" },
+  { title: "Build a new hire onboarding assistant", author: "Leland Team", avatar: lelandProfileIcon, image: imgInvoice, categories: ["Human Resources"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Slack" },
+  { title: "Build an audit evidence collector", author: "Leland Team", avatar: lelandProfileIcon, image: imgNotes, categories: ["Legal", "Finance & Accounting"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Wordpress" },
+  { title: "Build a citation checker for legal documents", author: "Leland Team", avatar: lelandProfileIcon, image: imgOnboarding, categories: ["Legal"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Notion" },
 ];
 
 // Each upcoming session's featured/capstone build — shown on the "Upcoming
@@ -158,7 +222,7 @@ const SALES_RECOMMENDED_ITEMS: Item[] = [
     author: "Leland Team",
     avatar: lelandProfileIcon,
     image: imgLeadBrief,
-    category: "Sales",
+    categories: ["Sales"],
     useCase: "Productivity & Planning",
     collection: "Tutorials",
     tool: "Notion",
@@ -168,7 +232,7 @@ const SALES_RECOMMENDED_ITEMS: Item[] = [
     author: "Leland Team",
     avatar: lelandProfileIcon,
     image: imgLeadQualAgent,
-    category: "Sales",
+    categories: ["Sales"],
     useCase: "Automation & Ops",
     collection: "Tutorials",
     tool: "Hubspot",
@@ -178,7 +242,7 @@ const SALES_RECOMMENDED_ITEMS: Item[] = [
     author: "Leland Team",
     avatar: lelandProfileIcon,
     image: imgColdOutboundEmail,
-    category: "Sales",
+    categories: ["Sales"],
     useCase: "Automation & Ops",
     collection: "Tutorials",
     tool: "Hubspot",
@@ -188,7 +252,7 @@ const SALES_RECOMMENDED_ITEMS: Item[] = [
     author: "Leland Team",
     avatar: lelandProfileIcon,
     image: imgPrecallBriefing,
-    category: "Sales",
+    categories: ["Sales"],
     useCase: "Productivity & Planning",
     collection: "Tutorials",
     tool: "Google Drive",
@@ -198,7 +262,7 @@ const SALES_RECOMMENDED_ITEMS: Item[] = [
     author: "Leland Team",
     avatar: lelandProfileIcon,
     image: imgMeetingNotesToCrm,
-    category: "Sales",
+    categories: ["Sales"],
     useCase: "Automation & Ops",
     collection: "Skills",
     tool: "Hubspot",
@@ -208,14 +272,26 @@ const SALES_RECOMMENDED_ITEMS: Item[] = [
     author: "Leland Team",
     avatar: lelandProfileIcon,
     image: imgCallCoach,
-    category: "Sales",
+    categories: ["Sales"],
     useCase: "Reporting & Analytics",
     collection: "Skills",
     tool: "Notion",
   },
 ];
 
-const CATEGORIES = ["Sales", "Marketing", "Human Resources", "Business Analytics & Intelligence", "Design", "Finance & Accounting"];
+const CATEGORIES = [
+  "Sales",
+  "Marketing",
+  "Human Resources",
+  "Business Analytics & Intelligence",
+  "Design",
+  "Finance & Accounting",
+  "Engineering",
+  "Product",
+  "Operations",
+  "Executive",
+  "Legal",
+];
 const USE_CASES = ["Productivity & Planning", "Content Creation", "Personal website", "Reporting & Analytics", "Automation & Ops", "App development"];
 const COLLECTIONS = ["Community builds", "Tutorials", "Skills"];
 const TOOLS = ["Notion", "Hubspot", "Google Drive", "Asana", "Slack", "Wordpress"];
@@ -403,7 +479,7 @@ export default function ProgramHub() {
   const results = useMemo(
     () =>
       ITEMS.filter((it) => {
-        if (filters.category.length && !filters.category.includes(it.category)) return false;
+        if (filters.category.length && !filters.category.some((c) => it.categories.includes(c))) return false;
         if (filters.useCase.length && !filters.useCase.includes(it.useCase)) return false;
         if (filters.collection.length && !filters.collection.includes(it.collection)) return false;
         if (filters.tool.length && !filters.tool.includes(it.tool)) return false;
