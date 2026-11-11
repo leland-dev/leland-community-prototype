@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
-import { AboutMeEditModal } from "../components/AboutMeEditModal";
+import { QuickPreferencesModal } from "../components/QuickPreferencesModal";
 import { loadPersonalizationData, type PersonalizationData } from "../components/PersonalizationModal";
 import { FontWeight, IconDotsHorizontal, IconPencil, IconSparkle, Modal, ModalContent, ModalSize, SwitchInput, Tag, TagColor, TagSize } from "../components/leland";
 import { type BuildCardStyle, setBuildCardStyle, useBuildCardStyle } from "../components/lesson-blocks";
@@ -796,13 +796,13 @@ export default function ProgramHub() {
         </section>
       </div>
 
-      {/* Floating prototype options button — bottom-left corner */}
-      <AboutMeEditModal
+      <QuickPreferencesModal
         open={aboutMeModalOpen}
         onOpenChange={setAboutMeModalOpen}
         initialData={aboutMe}
         onSave={setAboutMe}
       />
+      {/* Floating prototype options button — bottom-left corner */}
       <button
         type="button"
         onClick={() => setPrototypeOptionsOpen(true)}

@@ -32,7 +32,7 @@ export const STATUS_OPTIONS: { value: PersonalizationStatus; label: string }[] =
   { value: "not_working", label: "Focusing on life outside of work" },
 ];
 
-const BASE_ROLE_OPTIONS: ToggleChipOption[] = [
+export const BASE_ROLE_OPTIONS: ToggleChipOption[] = [
   { value: "swe", label: "Engineering" },
   { value: "pm", label: "Product" },
   { value: "design", label: "Design" },
@@ -102,6 +102,112 @@ export const INDUSTRY_OPTIONS_BY_STATUS: Record<Exclude<PersonalizationStatus, "
   in_school: withNotSure(BASE_INDUSTRY_OPTIONS),
 };
 
+// "What do you want to use AI for?" options — every role gets these General
+// tags plus its own role-specific ones below. Source: the onboarding
+// focus-area rollout sheet (Tutorial Tags tab).
+export const MAX_FOCUS_AREAS = 3;
+
+export const GENERAL_FOCUS_AREAS: ToggleChipOption[] = [
+  { value: "general-email", label: "Email & messages" },
+  { value: "general-docs", label: "Documents & decks" },
+  { value: "general-research", label: "Research & synthesis" },
+  { value: "general-data", label: "Data analysis & reporting" },
+  { value: "general-meetings", label: "Meetings & follow-up" },
+  { value: "general-tasks", label: "Task management" },
+];
+
+// Role-specific focus areas, keyed by the same role codes as
+// BASE_ROLE_OPTIONS. "other" has no role-specific tags of its own — just
+// the General list above.
+export const ROLE_FOCUS_AREAS: Record<string, ToggleChipOption[]> = {
+  pm: [
+    { value: "product-research", label: "User research" },
+    { value: "product-competitive", label: "Competitive analysis" },
+    { value: "product-specs", label: "PRDs & specs" },
+    { value: "product-prototyping", label: "Prototyping" },
+    { value: "product-roadmap", label: "Roadmap & prioritization" },
+    { value: "product-stakeholders", label: "Stakeholder communications" },
+  ],
+  swe: [
+    { value: "engineering-codegen", label: "Code generation" },
+    { value: "engineering-review", label: "Code review & debugging" },
+    { value: "engineering-testing", label: "Testing & QA" },
+    { value: "engineering-docs", label: "Documentation" },
+    { value: "engineering-tools", label: "Internal tools" },
+    { value: "engineering-security", label: "Security" },
+  ],
+  design: [
+    { value: "design-prototyping", label: "Prototyping" },
+    { value: "design-research", label: "User research" },
+    { value: "design-handoff", label: "Specs & handoff" },
+    { value: "design-qa", label: "Design QA" },
+    { value: "design-systems", label: "Design systems & assets" },
+    { value: "design-creative", label: "Creative assets" },
+  ],
+  data: [
+    { value: "data-sql", label: "Ad hoc SQL" },
+    { value: "data-pipelines", label: "Data pipelines" },
+    { value: "data-dashboards", label: "Dashboards & reporting" },
+    { value: "data-qa", label: "Data QA" },
+    { value: "data-selfserve", label: "Self-serve answers" },
+    { value: "data-forecasting", label: "Experiments & forecasting" },
+  ],
+  marketing: [
+    { value: "marketing-content", label: "Content creation" },
+    { value: "marketing-seo", label: "SEO" },
+    { value: "marketing-creative", label: "Creative assets" },
+    { value: "marketing-campaign", label: "Campaign planning" },
+    { value: "marketing-reporting", label: "Performance reporting" },
+    { value: "marketing-research", label: "Market research" },
+  ],
+  sales: [
+    { value: "sales-prospecting", label: "Prospecting" },
+    { value: "sales-outreach", label: "Outreach & follow-up" },
+    { value: "sales-callprep", label: "Call & meeting prep" },
+    { value: "sales-crm", label: "CRM upkeep" },
+    { value: "sales-proposals", label: "Proposals & pricing docs" },
+  ],
+  ops: [
+    { value: "ops-sops", label: "SOPs & playbooks" },
+    { value: "ops-intake", label: "Request intake & routing" },
+    { value: "ops-prioritization", label: "Prioritization & scoping" },
+  ],
+  finance: [
+    { value: "finance-recon", label: "Reconciliation" },
+    { value: "finance-variance", label: "Variance & forecasting" },
+    { value: "finance-modeling", label: "Financial modeling" },
+    { value: "finance-compliance", label: "Compliance & regulatory" },
+  ],
+  hr: [
+    { value: "people-jd", label: "Job descriptions" },
+    { value: "people-interviews", label: "Interview guides" },
+    { value: "people-onboarding", label: "Onboarding & training" },
+    { value: "people-policy", label: "Policy Q&A" },
+    { value: "people-reviews", label: "Performance reviews" },
+  ],
+  legal: [
+    { value: "legal-drafting", label: "Contract drafting" },
+    { value: "legal-review", label: "Contract review" },
+    { value: "legal-intake", label: "Intake triage" },
+    { value: "legal-policy", label: "Policy summaries" },
+    { value: "legal-research", label: "Legal research" },
+  ],
+  exec: [
+    { value: "exec-updates", label: "Leadership updates" },
+    { value: "exec-strategy", label: "Strategy & planning" },
+    { value: "exec-resourcing", label: "Resource planning" },
+    { value: "exec-orgdesign", label: "Hiring and org design" },
+  ],
+  founder: [
+    { value: "founder-investors", label: "Investor relations" },
+    { value: "founder-strategy", label: "Strategy & planning" },
+    { value: "founder-hiring", label: "Hiring & team planning" },
+    { value: "founder-prototyping", label: "Product prototyping" },
+    { value: "founder-support", label: "Customer support" },
+  ],
+  other: [],
+};
+
 // Prototype-only persistence, mirroring the pattern used for track/rating
 // selections elsewhere in the course viewer — no real backend here.
 export const PERSONALIZATION_KEY = "content-viewer-personalization";
@@ -151,7 +257,7 @@ export function summarizePersonalizationParts(
   return { primary: roleLabel ?? statusLabel, secondary: industryLabel };
 }
 
-export type Step = "status" | "role" | "industry" | "goal";
+export type Step = "status" | "role" | "focus";
 
 export function RadioList<T extends string>({
   options,
@@ -298,24 +404,24 @@ export function OtherTextField({
 
 // Branching onboarding personalization flow, shown right after picking an AI
 // tool track. A status question routes each learner (working, job
-// searching, in school, or not working) into role + industry follow-ups
-// worded for their situation — someone laid off shouldn't be asked "what's
-// your role?" in the present tense — before everyone answers the same
-// closing open-ended question. Role/industry are skipped entirely for the
-// not-working branch, since their learning here isn't tied to a job.
+// searching, in school, or not working) into a role follow-up worded for
+// their situation — someone laid off shouldn't be asked "what's your
+// role?" in the present tense — before everyone picks from the same
+// closing "what do you want to use AI for" focus areas, scoped to their
+// role (or just the General list for the not-working branch, which has no
+// role). Role is skipped entirely for the not-working branch, since their
+// learning here isn't tied to a job.
 const PersonalizationModalImpl = ({ open, onOpenChange }: ModalProps) => {
   const [step, setStep] = useState<Step>("status");
   const [status, setStatus] = useState<PersonalizationStatus | null>(null);
   const [role, setRole] = useState<string | null>(null);
-  const [industry, setIndustry] = useState<string | null>(null);
-  const [goalText, setGoalText] = useState("");
+  const [focusAreas, setFocusAreas] = useState<string[]>([]);
 
   const reset = () => {
     setStep("status");
     setStatus(null);
     setRole(null);
-    setIndustry(null);
-    setGoalText("");
+    setFocusAreas([]);
   };
 
   const handleOpenChange = (next: boolean) => {
@@ -325,7 +431,15 @@ const PersonalizationModalImpl = ({ open, onOpenChange }: ModalProps) => {
 
   const handleStatusSelect = (next: PersonalizationStatus) => {
     setStatus(next);
-    setStep(next === "not_working" ? "goal" : "role");
+    setStep(next === "not_working" ? "focus" : "role");
+  };
+
+  const toggleFocusArea = (value: string) => {
+    setFocusAreas((prev) => {
+      if (prev.includes(value)) return prev.filter((v) => v !== value);
+      if (prev.length >= MAX_FOCUS_AREAS) return prev;
+      return [...prev, value];
+    });
   };
 
   const handleSubmit = () => {
@@ -335,9 +449,9 @@ const PersonalizationModalImpl = ({ open, onOpenChange }: ModalProps) => {
         status,
         role: status === "not_working" ? null : role,
         roleTense: status === "not_working" ? "n/a" : tense,
-        industry: status === "not_working" ? null : industry,
-        industryTense: status === "not_working" ? "n/a" : tense,
-        aiGoalText: goalText,
+        industry: null,
+        industryTense: "n/a",
+        aiGoalText: focusAreas.join(", "),
       };
       localStorage.setItem(PERSONALIZATION_KEY, JSON.stringify(data));
     }
@@ -345,17 +459,12 @@ const PersonalizationModalImpl = ({ open, onOpenChange }: ModalProps) => {
   };
 
   const roleQuestion = status && status !== "not_working" ? ROLE_QUESTION[status] : "";
-  const industryQuestion = status && status !== "not_working" ? INDUSTRY_QUESTION[status] : "";
   const roleOptions = status && status !== "not_working" ? ROLE_OPTIONS_BY_STATUS[status] : [];
-  const industryOptions = status && status !== "not_working" ? INDUSTRY_OPTIONS_BY_STATUS[status] : [];
+  const focusOptions = role ? [...GENERAL_FOCUS_AREAS, ...(ROLE_FOCUS_AREAS[role] ?? [])] : GENERAL_FOCUS_AREAS;
 
   const roleChip = useChipGroupWithOther(roleOptions, role, (next) => {
     setRole(next);
-    setStep("industry");
-  });
-  const industryChip = useChipGroupWithOther(industryOptions, industry, (next) => {
-    setIndustry(next);
-    setStep("goal");
+    setStep("focus");
   });
 
   return (
@@ -391,36 +500,38 @@ const PersonalizationModalImpl = ({ open, onOpenChange }: ModalProps) => {
                 />
               ) : null}
             </div>
-          ) : step === "industry" ? (
-            <div className="flex min-h-0 flex-1 flex-col gap-6">
-              <h2 className="shrink-0 text-heading-3xl font-season font-normal text-leland-gray-dark">{industryQuestion}</h2>
-              <div className="min-h-0 flex-1 overflow-y-auto">
-                <ChipGroup options={industryOptions} selected={industryChip.selected} onSelect={industryChip.handleSelect} />
-              </div>
-              {industryChip.isOther ? (
-                <OtherTextField
-                  value={industryChip.otherText}
-                  onChange={industryChip.setOtherText}
-                  placeholder="e.g. Healthcare"
-                  onSubmit={industryChip.submitOther}
-                />
-              ) : null}
-            </div>
           ) : (
             <div className="flex min-h-0 flex-1 flex-col gap-6">
-              <h2 className="shrink-0 text-heading-3xl font-season font-normal text-leland-gray-dark">
-                What are you hoping to use AI for?
-              </h2>
-              <div className="flex min-h-0 flex-1 flex-col gap-2">
-                <textarea
-                  value={goalText}
-                  onChange={(e) => setGoalText(e.target.value)}
-                  placeholder="e.g., automating reports at work, building a personal project, drafting emails and messages"
-                  className="w-full flex-1 resize-none rounded-xl border border-leland-gray-stroke bg-white px-3 py-3 leland-paragraph-base text-leland-gray-dark placeholder:text-leland-gray-extra-light focus:border-leland-gray-dark focus:outline-none"
-                />
-                <p className="shrink-0 leland-paragraph-sm text-leland-gray-light">
-                  Your instructor may look at these to tailor examples for your cohort.
-                </p>
+              <div className="flex shrink-0 flex-col gap-2">
+                <h2 className="text-heading-3xl font-season font-normal text-leland-gray-dark">
+                  What are you most interested in using AI for?
+                </h2>
+                <p className="leland-paragraph-lg text-leland-gray-light">Select up to three.</p>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <div className="flex flex-wrap gap-2">
+                  {focusOptions.map((opt) => {
+                    const isSelected = focusAreas.includes(opt.value);
+                    const isDisabled = !isSelected && focusAreas.length >= MAX_FOCUS_AREAS;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() => toggleFocusArea(opt.value)}
+                        className={`rounded-full border-2 px-4 py-2.5 leland-paragraph-base font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
+                          isSelected
+                            ? "border-leland-gray-dark bg-leland-gray-hover text-leland-gray-dark"
+                            : isDisabled
+                              ? "cursor-not-allowed border-transparent bg-leland-gray-hover text-leland-gray-light opacity-50"
+                              : "border-transparent bg-leland-gray-hover text-leland-gray-dark hover:border-leland-gray-stroke"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               <Button
                 label="Done"
@@ -428,7 +539,7 @@ const PersonalizationModalImpl = ({ open, onOpenChange }: ModalProps) => {
                 size={ButtonSize.LARGE}
                 rounded
                 width={ButtonWidth.FULL}
-                disabled={goalText.trim() === ""}
+                disabled={focusAreas.length === 0}
                 onClick={handleSubmit}
               />
             </div>
