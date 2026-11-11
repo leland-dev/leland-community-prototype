@@ -625,7 +625,7 @@ function CategoryChip({
     >
       <button
         type="button"
-        className="hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-leland-gray-stroke bg-white px-4 py-2 leland-paragraph-base font-medium text-leland-gray-dark shadow-sm transition-colors hover:bg-leland-gray-hover sm:inline-flex"
+        className="hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-leland-gray-stroke bg-white px-4 py-2 leland-paragraph-base font-medium text-leland-gray-dark transition-colors hover:bg-leland-gray-hover sm:inline-flex"
       >
         <span>{selected?.label ?? "Category"}</span>
         <IconChevronDown className="size-4" />
