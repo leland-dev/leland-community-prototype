@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import aiBuilderTile from "../../assets/ai-onboarding/aibp-tile.png";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../Button";
@@ -20,6 +20,7 @@ import {
   IconX,
   Tag,
   TagColor,
+  TagSize,
 } from "../leland";
 import * as LelandIcons from "../leland/svg/icons";
 import * as LelandBrands from "../leland/svg/brands";
@@ -486,31 +487,108 @@ export function RadioCardGroup({ block }: { block: RadioCardGroupBlockType }) {
   );
 }
 
-// One suggested or custom build card in the picker grid.
+// Prototype toggle for the build-option card look (sparkle/default vs. the
+// dot-indicator + dark "complete" treatment). Lives outside React state
+// (module-level store + useSyncExternalStore) so the control in the
+// ContentViewer "Prototype options" menu and the cards themselves — which
+// sit in unrelated parts of the tree — stay in sync without prop-drilling.
+export type BuildCardStyle = "default" | "dots";
+const BUILD_CARD_STYLE_KEY = "content-viewer-build-card-style";
+
+function readBuildCardStyle(): BuildCardStyle {
+  try {
+    return localStorage.getItem(BUILD_CARD_STYLE_KEY) === "dots" ? "dots" : "default";
+  } catch {
+    return "default";
+  }
+}
+
+let buildCardStyle: BuildCardStyle = readBuildCardStyle();
+const buildCardStyleListeners = new Set<() => void>();
+
+export function setBuildCardStyle(style: BuildCardStyle) {
+  buildCardStyle = style;
+  try {
+    localStorage.setItem(BUILD_CARD_STYLE_KEY, style);
+  } catch {
+    // ignore
+  }
+  buildCardStyleListeners.forEach((listener) => listener());
+}
+
+function subscribeBuildCardStyle(listener: () => void) {
+  buildCardStyleListeners.add(listener);
+  return () => buildCardStyleListeners.delete(listener);
+}
+
+export function useBuildCardStyle(): BuildCardStyle {
+  return useSyncExternalStore(subscribeBuildCardStyle, () => buildCardStyle, () => "default");
+}
+
+// One suggested or custom build card in the picker grid. The "dots" style
+// (prototype direction, toggled from the Prototype options menu) swaps the
+// sparkle icon for a level-dot indicator, shows a "Complete"/"Not started"
+// status tag, and gives a completed build a faded card treatment.
 function BuildOptionCard({
   title,
   description,
   selected,
+  completed,
+  level = 1,
+  cardStyle,
   onClick,
 }: {
   title: string;
   description?: string;
   selected: boolean;
+  completed?: boolean;
+  level?: number;
+  cardStyle: BuildCardStyle;
   onClick: () => void;
 }) {
+  if (cardStyle !== "dots") {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`flex h-full flex-col items-start gap-2 rounded-lg p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
+          selected
+            ? "border-[1.5px] border-leland-gray-dark bg-leland-gray-hover"
+            : "bg-leland-gray-hover hover:bg-[rgba(34,34,34,0.08)]"
+        }`}
+      >
+        <IconSparkle className="size-4 shrink-0 text-leland-gray-dark" />
+        <span className="leland-paragraph-lg font-semibold text-leland-gray-dark">{title}</span>
+        {description ? <span className="line-clamp-3 leland-paragraph-base text-leland-gray-light">{description}</span> : null}
+      </button>
+    );
+  }
+
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-full flex-col items-start gap-2 rounded-lg p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
+      className={`relative flex h-full flex-col items-start gap-4 rounded-lg p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
         selected
           ? "border-[1.5px] border-leland-gray-dark bg-leland-gray-hover"
-          : "bg-leland-gray-hover hover:bg-leland-gray-stroke"
+          : "bg-leland-gray-hover hover:bg-[rgba(34,34,34,0.08)]"
       }`}
     >
-      <IconSparkle className="size-4 shrink-0 text-leland-gray-dark" />
-      <span className="leland-paragraph-lg font-semibold text-leland-gray-dark">{title}</span>
-      {description ? <span className="line-clamp-3 leland-paragraph-base text-leland-gray-light">{description}</span> : null}
+      {completed ? (
+        <div className="absolute right-3 top-3 flex size-5 items-center justify-center rounded-full bg-leland-gray-dark">
+          <IconCheck className="size-3 text-white" />
+        </div>
+      ) : null}
+      <div className="flex flex-1 flex-col items-start">
+        <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-leland-gray-light">Level {level}</span>
+        <span
+          className={`mt-3 leland-paragraph-lg font-semibold ${completed ? "text-leland-gray-light" : "text-leland-gray-dark"}`}
+        >
+          {title}
+        </span>
+        {description ? <span className="mt-0.5 line-clamp-3 leland-paragraph-base text-leland-gray-light">{description}</span> : null}
+      </div>
+      <Tag text={completed ? "Complete" : "Not started"} tagColor={completed ? TagColor.WHITE : TagColor.GRAY} size={TagSize.XS} />
     </button>
   );
 }
@@ -589,41 +667,45 @@ function SuggestedBuildsCarousel({
     if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" });
   };
 
+  const cardStyle = useBuildCardStyle();
+
   return (
     <div className="relative">
       <div ref={scrollRef} className="scrollbar-hide -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 py-1">
-        {builds.map((b) => (
+        {builds.map((b, i) => (
           <div key={b.id} className="w-[75%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/3)]">
             <BuildOptionCard
               title={b.buildTitle}
               description={b.description}
               selected={b.id === selectedId}
+              // Demo stand-in for real progress data — just shows the first
+              // card as "complete" so both states are visible side by side.
+              completed={i === 0}
+              level={b.level}
+              cardStyle={cardStyle}
               onClick={() => onSelect(b.id)}
             />
           </div>
         ))}
       </div>
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#F9F8F3] to-transparent" />
-      <div className="pointer-events-none absolute inset-0 top-1/2 flex -translate-y-1/2 items-center justify-between px-1">
-        <button
-          type="button"
-          onClick={() => scrollByPage(-1)}
-          disabled={page <= 0}
-          aria-label="Previous"
-          className="pointer-events-auto flex size-9 items-center justify-center rounded-full border border-leland-gray-stroke bg-white shadow-sm transition-colors hover:bg-leland-gray-hover disabled:opacity-0"
-        >
-          <IconChevronLeft className="size-4 text-leland-gray-dark" />
-        </button>
-        <button
-          type="button"
-          onClick={() => scrollByPage(1)}
-          disabled={page >= pages - 1}
-          aria-label="Next"
-          className="pointer-events-auto flex size-9 items-center justify-center rounded-full border border-leland-gray-stroke bg-white shadow-sm transition-colors hover:bg-leland-gray-hover disabled:opacity-0"
-        >
-          <IconChevronRight className="size-4 text-leland-gray-dark" />
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => scrollByPage(-1)}
+        disabled={page <= 0}
+        aria-label="Previous"
+        className="absolute left-0 top-1/2 flex size-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-leland-gray-stroke bg-white shadow-sm transition-colors hover:bg-leland-gray-hover disabled:opacity-0"
+      >
+        <IconChevronLeft className="size-4 text-leland-gray-dark" />
+      </button>
+      <button
+        type="button"
+        onClick={() => scrollByPage(1)}
+        disabled={page >= pages - 1}
+        aria-label="Next"
+        className="absolute right-0 top-1/2 flex size-9 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border border-leland-gray-stroke bg-white shadow-sm transition-colors hover:bg-leland-gray-hover disabled:opacity-0"
+      >
+        <IconChevronRight className="size-4 text-leland-gray-dark" />
+      </button>
     </div>
   );
 }

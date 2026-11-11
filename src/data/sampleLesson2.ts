@@ -2,6 +2,15 @@
 // lesson-blocks renderer (demo of the block/CMS model). Text is adapted from
 // the real Session 2 guide. Lesson 1 uses the same pattern; see sampleLesson.ts.
 import type { Block, BlockSection } from "./lessonBlocks";
+import {
+  SALES_WORKFLOW_TUTORIAL,
+  MARKETING_WORKFLOW_TUTORIAL,
+  PEOPLE_WORKFLOW_TUTORIAL,
+  FINANCE_WORKFLOW_TUTORIAL,
+  PRODUCT_WORKFLOW_TUTORIAL,
+  OPERATIONS_WORKFLOW_TUTORIAL,
+  GENERIC_WORKFLOW_TUTORIAL,
+} from "./roleBuildTutorials";
 
 // Placed above the lesson body on every section of Lesson 2.
 export const LESSON_2_TOP_BLOCKS: Block[] = [
@@ -148,6 +157,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
     description: "Link Google Workspace to Claude Cowork so it can read and draft emails.",
     durationMin: 15,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
+    label: { text: "Practice", color: "gray" },
     blocks: [
       {
         kind: "markdown",
@@ -197,6 +207,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
     description: "Teach Claude how you write so every draft sounds like you.",
     durationMin: 20,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
+    label: { text: "Practice", color: "gray" },
     blocks: [
       {
         kind: "markdown",
@@ -257,6 +268,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
     description: "Create an automation that drafts email replies on a timer.",
     durationMin: 20,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
+    label: { text: "Practice", color: "gray" },
     blocks: [
       {
         kind: "markdown",
@@ -321,64 +333,99 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
     description: "Map out a workflow from your own work and write its brief.",
     durationMin: 20,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
+    label: { text: "Apply", color: "black" },
     blocks: [
       {
-        kind: "markdown",
-        body: "You've built an email automation — now scope one for your own work. You won't build it today, but you'll leave with a complete brief that makes the next build session take 20 minutes instead of 2 hours.",
-      },
-      {
-        kind: "steps",
-        items: [
-          { text: "Think of a **recurring task** you do that involves reading, writing, or organizing information. Good candidates: weekly status reports, meeting prep, client follow-ups, competitive research." },
+        kind: "roleBuildPicker",
+        fallback: {
+          value: "generic",
+          label: "Generic",
+          builds: [
+            {
+              id: "generic-workflow",
+              buildTitle: "Scope your first custom workflow",
+              tutorial: GENERIC_WORKFLOW_TUTORIAL,
+            },
+          ],
+        },
+        options: [
           {
-            text: "In Claude Cowork, describe the task using this starter:",
-            blocks: [{
-              kind: "code",
-              language: "prompt",
-              filename: "Prompt",
-              code: "I have a recurring workflow: [describe it]. Help me map this as an automation with a clear trigger, the steps Claude would take, and what the output looks like.",
-            }],
-          },
-          { text: "Claude will produce a draft workflow brief. Review and fill in any gaps — especially the output format (should it be a doc, an email draft, a Slack message?)." },
-          { text: "Add any data sources it needs access to (Gmail, Calendar, Drive, a specific spreadsheet)." },
-          { text: "Save the final brief as `workflow-[name].md` in your Cowork project folder." },
-        ],
-      },
-      {
-        kind: "callout",
-        tone: "blue",
-        title: "What makes a good candidate workflow",
-        content: [
-          {
-            kind: "markdown",
-            body: [
-              "The best workflows to automate are ones that are:",
-              "",
-              "- **Repetitive** — you do them at least weekly",
-              "- **Rule-based** — the same steps in the same order each time",
-              "- **Low-stakes on a bad day** — a draft you can edit beats a decision only you can make",
-            ].join("\n"),
-          },
-        ],
-      },
-      {
-        kind: "callout",
-        tone: "blue",
-        title: "The scoping prompt is the hardest part",
-        content: [
-          {
-            kind: "markdown",
-            body: "Most automation failures happen because the scope was fuzzy. If Claude's brief feels vague, ask:",
+            value: "sales",
+            label: "Sales",
+            matchesRoles: ["sales"],
+            builds: [
+              {
+                id: "sales-workflow",
+                buildTitle: "Scope a workflow for your sales follow-up",
+                description: "Map the recap, CRM update, or check-in you do after almost every call.",
+                tutorial: SALES_WORKFLOW_TUTORIAL,
+              },
+            ],
           },
           {
-            kind: "code",
-            language: "prompt",
-            filename: "Prompt",
-            code: "What information would you need that you don't currently have access to?",
+            value: "marketing",
+            label: "Marketing",
+            matchesRoles: ["marketing"],
+            builds: [
+              {
+                id: "marketing-workflow",
+                buildTitle: "Scope a workflow for your content or campaign reporting",
+                description: "Map a recurring report, digest, or content-calendar update.",
+                tutorial: MARKETING_WORKFLOW_TUTORIAL,
+              },
+            ],
           },
           {
-            kind: "markdown",
-            body: "Its answer tells you what to add to the permissions or the prompt.",
+            value: "people",
+            label: "Human Resources",
+            matchesRoles: ["hr"],
+            builds: [
+              {
+                id: "people-workflow",
+                buildTitle: "Scope a workflow for a recurring people-ops task",
+                description: "Map an onboarding, benefits, or policy task tied to a date or event.",
+                tutorial: PEOPLE_WORKFLOW_TUTORIAL,
+              },
+            ],
+          },
+          {
+            value: "finance",
+            label: "Finance",
+            matchesRoles: ["finance"],
+            builds: [
+              {
+                id: "finance-workflow",
+                buildTitle: "Scope a workflow for a recurring report or reconciliation",
+                description: "Map a monthly close, variance report, or reconciliation you run on a schedule.",
+                tutorial: FINANCE_WORKFLOW_TUTORIAL,
+              },
+            ],
+          },
+          {
+            value: "product",
+            label: "Product",
+            matchesRoles: ["pm"],
+            builds: [
+              {
+                id: "product-workflow",
+                buildTitle: "Scope a workflow for recurring product updates",
+                description: "Map a changelog, status update, or triage pass you do on a schedule.",
+                tutorial: PRODUCT_WORKFLOW_TUTORIAL,
+              },
+            ],
+          },
+          {
+            value: "operations",
+            label: "Operations",
+            matchesRoles: ["ops"],
+            builds: [
+              {
+                id: "operations-workflow",
+                buildTitle: "Scope a workflow for a process you run again and again",
+                description: "Map a checklist, rollup, or check you do the same way every time.",
+                tutorial: OPERATIONS_WORKFLOW_TUTORIAL,
+              },
+            ],
           },
         ],
       },
@@ -433,29 +480,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
     title: "Share what you built",
     durationMin: 3,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    blocks: [
-      {
-        kind: "markdown",
-        body: [
-          "Post in the cohort Slack channel. Include:",
-          "",
-          "- A screenshot of your scheduled email manager's first draft",
-          "- The name of the custom workflow you scoped in Build 4",
-          "- One thing that surprised you about your own writing style when you saw the voice guide",
-        ].join("\n"),
-      },
-      {
-        kind: "callout",
-        tone: "blue",
-        title: "Not quite done yet?",
-        content: [
-          {
-            kind: "markdown",
-            body: "Share wherever you got to. A voice guide draft, a half-built automation, even just the workflow brief — all of it is real progress worth showing. Others can build on your ideas.",
-          },
-        ],
-      },
-    ],
+    blocks: [{ kind: "shareBuildForm" }],
   },
   {
     kind: "blocks",

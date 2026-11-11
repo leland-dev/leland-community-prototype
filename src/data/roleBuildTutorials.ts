@@ -617,3 +617,373 @@ export const GENERIC_TUTORIAL: Block[] = buildTutorial({
     },
   ],
 });
+
+// ─── Lesson 2 / build-4's role picker: "Scope your first custom workflow" ───
+// Unlike the Lesson 1 builds, these don't produce a working artifact today —
+// they produce a written brief (a markdown document) scoping an automation
+// the learner will actually build in a later session. Same three-stage
+// pattern (Scope, Build, Evaluate), but "Build" means drafting the brief.
+
+export const SALES_WORKFLOW_TUTORIAL: Block[] = buildTutorial({
+  about: [
+    "Most reps have one piece of follow-up that happens the same way after almost every call: a recap email, an updated CRM note, a check-in three days later. It's repetitive and rule-based, which makes it a good first automation — but you won't build it today. You'll leave with a complete brief: a clear trigger, the steps your AI would take, and what the output looks like, so your next build session takes 20 minutes instead of two hours.",
+    "First you'll answer a few questions about the task itself. Then your AI turns your answers into a workflow brief, and you check it against a real instance of the task before saving it.",
+  ],
+  setupHeaders: ["You need", "Why", "How to set it up"],
+  setupRows: [
+    [
+      "A recurring post-call task",
+      "The brief only works if it's scoping something real",
+      "Think of what you do after almost every call — a recap, a CRM update, a follow-up.",
+    ],
+    [
+      "One real recent example of it",
+      "You'll check the brief against something you actually did",
+      "Have the email, note, or CRM entry from your last call on hand.",
+    ],
+  ],
+  niceToHave:
+    "If your team has a CRM field list or a recap template, paste it in — it tells your AI what a complete output already looks like. Without it, your AI will ask you to describe the fields from scratch.",
+  buildIntro:
+    "Paste this into a new chat in your AI tool. It asks about the task first, then drafts the brief, then tests the brief against something real.",
+  prompt:
+    "I have a recurring task I do after most sales calls, and I want to scope it as an automation brief — not build it yet, just write a clear spec I can hand to an AI builder later. First, ask me what my role is and what I sell. Then walk me through three stages: Scope, Build, and Evaluate. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. What's the recurring task, in plain language — what happens right after, and what do I produce?\n2. What triggers it: right after the call, at the end of the day, or on a schedule?\n3. What information does it need, and where does that information live — my notes, the CRM, the call recording?\n4. What should the output look like: a CRM entry, a drafted email, a Slack message? What fields or sections does it need?\n5. What should it never do or assume? For example, never send anything without my review, never invent a next step I didn't actually commit to.\n6. What would make the output good? Help me turn my answer into three checks I can answer yes or no.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, write the workflow brief as a markdown document with these sections: Trigger, Inputs, Steps (numbered, specific enough that an AI builder could follow them without asking me anything), Output format, and Guardrails (what it should never do). Use my own words from Stage 1 wherever you can instead of generic phrasing.\n\nStage 3: Evaluate\nAsk me for one real recent example of the task — the call notes or whatever I'd normally start from. Walk through your own brief against that example, step by step, and tell me anywhere a step is too vague to follow or a case the brief doesn't cover. Fix those gaps. When the brief holds up against the real example, tell me to save it as `workflow-[name].md`.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Your AI asks what the recurring task actually is, what triggers it, what it needs, what the output should look like, and what it should never do. Then it writes a short spec with three yes/no checks for you to confirm.",
+      tips: [
+        "**Tip:** Describe the task the way you'd explain it to a new hire shadowing you, not in CRM jargon — your AI will ask follow-ups until it's concrete either way.",
+        "**Tip:** Write one check about review, like \"nothing sends without me looking at it first.\" It's the constraint that matters most once this becomes a real automation.",
+      ],
+    },
+    {
+      title: "Build",
+      body: "With the spec confirmed, your AI writes the brief itself — trigger, inputs, numbered steps, output format, and guardrails — as one markdown document.",
+      tips: [
+        "**Tip:** If a step reads vague to you, it'll read vague to whoever builds it later. Push for specifics now.",
+        "**Tip:** Keep the guardrails section short and concrete — one sentence per rule beats a paragraph of caveats.",
+      ],
+    },
+    {
+      title: "Evaluate",
+      body: "Last, your AI checks its own brief against a real example you give it, and fixes any step that doesn't hold up. You end with a brief that's already been tested once, not just written.",
+      tips: [
+        "**Tip:** Use your messiest recent example, not your cleanest one — it's the better stress test.",
+        "**Tip:** Save the finished brief somewhere you'll actually find it before your next build session.",
+      ],
+    },
+  ],
+});
+
+export const MARKETING_WORKFLOW_TUTORIAL: Block[] = buildTutorial({
+  about: [
+    "Marketing has no shortage of recurring reporting — weekly campaign performance, a content calendar update, a competitor-mentions roundup. These are good first automations because they're repetitive and rule-based, but you won't build one today. You'll leave with a complete brief: a trigger, the steps your AI would take, and what the output looks like, so your next build session takes 20 minutes instead of two hours.",
+    "First you'll answer a few questions about the reporting task itself. Then your AI turns your answers into a workflow brief, and you check it against a real recent report before saving it.",
+  ],
+  setupHeaders: ["You need", "Why", "How to set it up"],
+  setupRows: [
+    [
+      "A recurring reporting or content task",
+      "The brief only works if it's scoping something real",
+      "Think of the report, digest, or calendar update you put together on a schedule.",
+    ],
+    [
+      "A real recent example of it",
+      "You'll check the brief against something you actually sent",
+      "Have your last version of it open or pasted somewhere.",
+    ],
+  ],
+  niceToHave:
+    "If you have a reporting template or a list of the metrics you always include, paste it in — it tells your AI what a complete output looks like without guessing. Without it, your AI will ask you to list the sections from scratch.",
+  buildIntro:
+    "Paste this into a new chat in your AI tool. It asks about the task first, then drafts the brief, then tests the brief against something real.",
+  prompt:
+    "I have a recurring marketing reporting or content task, and I want to scope it as an automation brief — not build it yet, just write a clear spec I can hand to an AI builder later. First, ask me what my role is and what I'm responsible for. Then walk me through three stages: Scope, Build, and Evaluate. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. What's the recurring task, in plain language — what do I produce and who reads it?\n2. What triggers it: a day of the week, the end of a campaign, a monthly cutoff?\n3. What data or material does it need, and where does it live — a dashboard, a spreadsheet, email performance tools?\n4. What should the output look like: a doc, a Slack digest, a slide? What sections or metrics does it always include?\n5. What should it never do or assume? For example, never report a number it can't trace to a source, never draw a conclusion I haven't reviewed.\n6. What would make the output good? Help me turn my answer into three checks I can answer yes or no.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, write the workflow brief as a markdown document with these sections: Trigger, Inputs, Steps (numbered, specific enough that an AI builder could follow them without asking me anything), Output format, and Guardrails (what it should never do). Use my own words from Stage 1 wherever you can instead of generic phrasing.\n\nStage 3: Evaluate\nAsk me for a real recent version of this report or update. Walk through your own brief against that example, step by step, and tell me anywhere a step is too vague to follow or a case the brief doesn't cover. Fix those gaps. When the brief holds up against the real example, tell me to save it as `workflow-[name].md`.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Your AI asks what the recurring task is, what triggers it, what data it needs, what the output should look like, and what it should never do. Then it writes a short spec with three yes/no checks for you to confirm.",
+      tips: [
+        "**Tip:** Name the actual reader, like \"my manager skims this in Slack,\" not a generic audience — it decides what goes first in the output.",
+        "**Tip:** Write one check about sourcing, like \"every number traces back to the dashboard.\" Reporting that drifts from the real numbers loses trust fast.",
+      ],
+    },
+    {
+      title: "Build",
+      body: "With the spec confirmed, your AI writes the brief itself — trigger, inputs, numbered steps, output format, and guardrails — as one markdown document.",
+      tips: [
+        "**Tip:** If the task pulls from more than one source, call out the order it should check them in — that's usually where a vague brief falls apart later.",
+        "**Tip:** Keep the guardrails section short and concrete — one sentence per rule beats a paragraph of caveats.",
+      ],
+    },
+    {
+      title: "Evaluate",
+      body: "Last, your AI checks its own brief against a real report you give it, and fixes any step that doesn't hold up. You end with a brief that's already been tested once, not just written.",
+      tips: [
+        "**Tip:** Use the messiest recent version of the report, not the cleanest — it's the better stress test.",
+        "**Tip:** Save the finished brief somewhere you'll actually find it before your next build session.",
+      ],
+    },
+  ],
+});
+
+export const PEOPLE_WORKFLOW_TUTORIAL: Block[] = buildTutorial({
+  about: [
+    "HR runs on recurring, rule-based tasks — a new-hire checklist, a benefits enrollment reminder, a policy question that comes up the same way every time. These are good first automations, but you won't build one today. You'll leave with a complete brief: a trigger, the steps your AI would take, and what the output looks like, so your next build session takes 20 minutes instead of two hours.",
+    "First you'll answer a few questions about the task itself. Then your AI turns your answers into a workflow brief, and you check it against a real recent instance before saving it.",
+  ],
+  setupHeaders: ["You need", "Why", "How to set it up"],
+  setupRows: [
+    [
+      "A recurring people-ops task",
+      "The brief only works if it's scoping something real",
+      "Think of a task tied to a date or event — onboarding, a review cycle, a policy reminder.",
+    ],
+    [
+      "A real recent example of it",
+      "You'll check the brief against something that actually happened",
+      "Have the checklist, email, or note from the last time you did it.",
+    ],
+  ],
+  niceToHave:
+    "If you have a written policy or checklist this task follows, paste it in — it tells your AI the rules to work from instead of guessing. Without it, your AI will ask you to describe the rules from scratch.",
+  buildIntro:
+    "Paste this into a new chat in your AI tool. It asks about the task first, then drafts the brief, then tests the brief against something real.",
+  prompt:
+    "I have a recurring people-ops task, and I want to scope it as an automation brief — not build it yet, just write a clear spec I can hand to an AI builder later. First, ask me what my role is and what I'm responsible for. Then walk me through three stages: Scope, Build, and Evaluate. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. What's the recurring task, in plain language — what happens and who's it for?\n2. What triggers it: a start date, a review cycle, a date on the calendar?\n3. What information does it need, and where does it live — an HRIS, a shared doc, an email thread?\n4. What should the output look like: a checklist, an email, a calendar invite? What does it always need to include?\n5. What should it never do or assume? For example, never include confidential details beyond what's needed, never send without my review.\n6. What would make the output good? Help me turn my answer into three checks I can answer yes or no.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, write the workflow brief as a markdown document with these sections: Trigger, Inputs, Steps (numbered, specific enough that an AI builder could follow them without asking me anything), Output format, and Guardrails (what it should never do). Use my own words from Stage 1 wherever you can instead of generic phrasing.\n\nStage 3: Evaluate\nAsk me for a real recent instance of this task. Walk through your own brief against that example, step by step, and tell me anywhere a step is too vague to follow or a case the brief doesn't cover. Fix those gaps. When the brief holds up against the real example, tell me to save it as `workflow-[name].md`.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Your AI asks what the recurring task is, what triggers it, what information it needs, what the output should look like, and what it should never do. Then it writes a short spec with three yes/no checks for you to confirm.",
+      tips: [
+        "**Tip:** Name the trigger as a specific date or event, like \"start date minus five business days,\" not \"before they start\" — specifics are what make a brief buildable later.",
+        "**Tip:** Write one check about privacy, like \"only includes information the recipient is cleared to see.\" HR tasks carry more sensitive information than most.",
+      ],
+    },
+    {
+      title: "Build",
+      body: "With the spec confirmed, your AI writes the brief itself — trigger, inputs, numbered steps, output format, and guardrails — as one markdown document.",
+      tips: [
+        "**Tip:** If the task differs by role, level, or location, call that out as its own step instead of folding it into a general one.",
+        "**Tip:** Keep the guardrails section short and concrete — one sentence per rule beats a paragraph of caveats.",
+      ],
+    },
+    {
+      title: "Evaluate",
+      body: "Last, your AI checks its own brief against a real instance you give it, and fixes any step that doesn't hold up. You end with a brief that's already been tested once, not just written.",
+      tips: [
+        "**Tip:** Use a real recent case, not a hypothetical one — edge cases in HR work are usually where the brief needs the most fixing.",
+        "**Tip:** Save the finished brief somewhere you'll actually find it before your next build session.",
+      ],
+    },
+  ],
+});
+
+export const FINANCE_WORKFLOW_TUTORIAL: Block[] = buildTutorial({
+  about: [
+    "Finance has plenty of recurring, rule-based work — a monthly close checklist, a budget-variance report, a reconciliation between two systems. These are good first automations, but you won't build one today. You'll leave with a complete brief: a trigger, the steps your AI would take, and what the output looks like, so your next build session takes 20 minutes instead of two hours.",
+    "First you'll answer a few questions about the task itself. Then your AI turns your answers into a workflow brief, and you check it against a real recent instance before saving it.",
+  ],
+  setupHeaders: ["You need", "Why", "How to set it up"],
+  setupRows: [
+    [
+      "A recurring reporting or reconciliation task",
+      "The brief only works if it's scoping something real",
+      "Think of a task tied to a schedule — month-end, a weekly spend report, a reconciliation.",
+    ],
+    [
+      "A real recent example of it",
+      "You'll check the brief against something you actually produced",
+      "Have your last version of the report or reconciliation on hand.",
+    ],
+  ],
+  niceToHave:
+    "If you have a close checklist or a list of the accounts and categories this task touches, paste it in — it tells your AI the structure to work from instead of guessing. Without it, your AI will ask you to describe the structure from scratch.",
+  buildIntro:
+    "Paste this into a new chat in your AI tool. It asks about the task first, then drafts the brief, then tests the brief against something real.",
+  prompt:
+    "I have a recurring finance task, and I want to scope it as an automation brief — not build it yet, just write a clear spec I can hand to an AI builder later. First, ask me what my role is and what I'm responsible for. Then walk me through three stages: Scope, Build, and Evaluate. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. What's the recurring task, in plain language — what are you checking or reporting on, and who reads the result?\n2. What triggers it: month-end, a weekly cutoff, a specific day?\n3. What numbers or documents does it need, and where do they live — which system, which spreadsheet?\n4. What should the output look like: a reconciled total, a flagged-discrepancies list, a summary doc? What does it always need to include?\n5. What should it never do or assume? For example, never flag a discrepancy as resolved without a documented reason, never round a number for presentation.\n6. What would make the output good? Help me turn my answer into three checks I can answer yes or no.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, write the workflow brief as a markdown document with these sections: Trigger, Inputs, Steps (numbered, specific enough that an AI builder could follow them without asking me anything), Output format, and Guardrails (what it should never do). Use my own words from Stage 1 wherever you can instead of generic phrasing.\n\nStage 3: Evaluate\nAsk me for a real recent version of this task — the numbers or report you'd normally start from. Walk through your own brief against that example, step by step, and tell me anywhere a step is too vague to follow or a case the brief doesn't cover. Fix those gaps. When the brief holds up against the real example, tell me to save it as `workflow-[name].md`.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Your AI asks what the recurring task is, what triggers it, what numbers or systems it needs, what the output should look like, and what it should never do. Then it writes a short spec with three yes/no checks for you to confirm.",
+      tips: [
+        "**Tip:** Name the exact systems involved, like \"the general ledger export versus the bank statement,\" not \"our records\" — the brief needs to say exactly where each number comes from.",
+        "**Tip:** Write one check about precision, like \"every flagged discrepancy includes the exact amount and both source numbers.\" Vague flags create more work than they save.",
+      ],
+    },
+    {
+      title: "Build",
+      body: "With the spec confirmed, your AI writes the brief itself — trigger, inputs, numbered steps, output format, and guardrails — as one markdown document.",
+      tips: [
+        "**Tip:** If the task involves comparing two sources, make that comparison its own numbered step, not a side note inside a bigger one.",
+        "**Tip:** Keep the guardrails section short and concrete — one sentence per rule beats a paragraph of caveats.",
+      ],
+    },
+    {
+      title: "Evaluate",
+      body: "Last, your AI checks its own brief against a real example you give it, and fixes any step that doesn't hold up. You end with a brief that's already been tested once, not just written.",
+      tips: [
+        "**Tip:** Use a period that had at least one real discrepancy in it, not a clean one — that's the better stress test.",
+        "**Tip:** Save the finished brief somewhere you'll actually find it before your next build session.",
+      ],
+    },
+  ],
+});
+
+export const PRODUCT_WORKFLOW_TUTORIAL: Block[] = buildTutorial({
+  about: [
+    "Product work has its share of recurring tasks — a weekly changelog, a roadmap status update, a feature-request triage pass. These are good first automations, but you won't build one today. You'll leave with a complete brief: a trigger, the steps your AI would take, and what the output looks like, so your next build session takes 20 minutes instead of two hours.",
+    "First you'll answer a few questions about the task itself. Then your AI turns your answers into a workflow brief, and you check it against a real recent instance before saving it.",
+  ],
+  setupHeaders: ["You need", "Why", "How to set it up"],
+  setupRows: [
+    [
+      "A recurring product-update or triage task",
+      "The brief only works if it's scoping something real",
+      "Think of a status update, changelog, or triage pass you do on a schedule.",
+    ],
+    [
+      "A real recent example of it",
+      "You'll check the brief against something you actually sent",
+      "Have your last version of it open or pasted somewhere.",
+    ],
+  ],
+  niceToHave:
+    "If you have a changelog template or a list of the sections your updates always include, paste it in — it tells your AI the structure to work from instead of guessing. Without it, your AI will ask you to list the sections from scratch.",
+  buildIntro:
+    "Paste this into a new chat in your AI tool. It asks about the task first, then drafts the brief, then tests the brief against something real.",
+  prompt:
+    "I have a recurring product task, and I want to scope it as an automation brief — not build it yet, just write a clear spec I can hand to an AI builder later. First, ask me what my role is and what I'm responsible for. Then walk me through three stages: Scope, Build, and Evaluate. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. What's the recurring task, in plain language — what do you produce and who reads it?\n2. What triggers it: a day of the week, a sprint boundary, a release?\n3. What does it need, and where does it live — a ticket tracker, a roadmap doc, release notes?\n4. What should the output look like: a changelog, a status doc, a triage summary? What does it always need to include?\n5. What should it never do or assume? For example, never mark a ticket resolved without a linked change, never promise a date that isn't confirmed.\n6. What would make the output good? Help me turn my answer into three checks I can answer yes or no.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, write the workflow brief as a markdown document with these sections: Trigger, Inputs, Steps (numbered, specific enough that an AI builder could follow them without asking me anything), Output format, and Guardrails (what it should never do). Use my own words from Stage 1 wherever you can instead of generic phrasing.\n\nStage 3: Evaluate\nAsk me for a real recent version of this update or triage pass. Walk through your own brief against that example, step by step, and tell me anywhere a step is too vague to follow or a case the brief doesn't cover. Fix those gaps. When the brief holds up against the real example, tell me to save it as `workflow-[name].md`.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Your AI asks what the recurring task is, what triggers it, what it needs, what the output should look like, and what it should never do. Then it writes a short spec with three yes/no checks for you to confirm.",
+      tips: [
+        "**Tip:** Name the actual tracker and its fields, like \"the Linear ticket's status and linked PR,\" not \"our ticket system\" — the brief needs to know exactly where to look.",
+        "**Tip:** Write one check about dates, like \"no date appears unless it's confirmed in the ticket.\" A wrong date in a changelog is worse than a missing one.",
+      ],
+    },
+    {
+      title: "Build",
+      body: "With the spec confirmed, your AI writes the brief itself — trigger, inputs, numbered steps, output format, and guardrails — as one markdown document.",
+      tips: [
+        "**Tip:** If tickets need grouping (by theme, by team, by severity), make the grouping rule its own step, not an afterthought.",
+        "**Tip:** Keep the guardrails section short and concrete — one sentence per rule beats a paragraph of caveats.",
+      ],
+    },
+    {
+      title: "Evaluate",
+      body: "Last, your AI checks its own brief against a real example you give it, and fixes any step that doesn't hold up. You end with a brief that's already been tested once, not just written.",
+      tips: [
+        "**Tip:** Use a week with a messy mix of tickets, not a clean sprint — it's the better stress test.",
+        "**Tip:** Save the finished brief somewhere you'll actually find it before your next build session.",
+      ],
+    },
+  ],
+});
+
+export const OPERATIONS_WORKFLOW_TUTORIAL: Block[] = buildTutorial({
+  about: [
+    "Ops runs on processes you do the same way every time — a vendor-invoice check, a weekly status rollup, an onboarding or offboarding checklist. These are good first automations, but you won't build one today. You'll leave with a complete brief: a trigger, the steps your AI would take, and what the output looks like, so your next build session takes 20 minutes instead of two hours.",
+    "First you'll answer a few questions about the process itself. Then your AI turns your answers into a workflow brief, and you check it against a real recent instance before saving it.",
+  ],
+  setupHeaders: ["You need", "Why", "How to set it up"],
+  setupRows: [
+    [
+      "A process you run again and again",
+      "The brief only works if it's scoping something real",
+      "Think of a checklist, rollup, or check you do the same way each time.",
+    ],
+    [
+      "A real recent example of it",
+      "You'll check the brief against something that actually happened",
+      "Have the notes, spreadsheet, or checklist from the last time you ran it.",
+    ],
+  ],
+  niceToHave:
+    "If you have a written SOP for this process, paste it in — it tells your AI the exact steps to work from instead of guessing. Without it, your AI will ask you to describe each step from scratch.",
+  buildIntro:
+    "Paste this into a new chat in your AI tool. It asks about the process first, then drafts the brief, then tests the brief against something real.",
+  prompt:
+    "I have a process I run again and again, and I want to scope it as an automation brief — not build it yet, just write a clear spec I can hand to an AI builder later. First, ask me what my role is and what I'm responsible for. Then walk me through three stages: Scope, Build, and Evaluate. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. What's the process, in plain language — what are you checking or producing, step by step?\n2. What triggers it: a schedule, an event, a request coming in?\n3. What information does it need, and where does it live — a spreadsheet, an inbox, a ticketing tool?\n4. What should the output look like: a checklist marked complete, a flagged-items list, a summary? What does it always need to include?\n5. What should it never do or assume? For example, never mark a step done without evidence, never skip an exception case without flagging it to me.\n6. What would make the output good? Help me turn my answer into three checks I can answer yes or no.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, write the workflow brief as a markdown document with these sections: Trigger, Inputs, Steps (numbered, specific enough that an AI builder could follow them without asking me anything), Output format, and Guardrails (what it should never do). Use my own words from Stage 1 wherever you can instead of generic phrasing.\n\nStage 3: Evaluate\nAsk me for a real recent instance of this process. Walk through your own brief against that example, step by step, and tell me anywhere a step is too vague to follow or a case the brief doesn't cover. Fix those gaps. When the brief holds up against the real example, tell me to save it as `workflow-[name].md`.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Your AI asks what the process is, what triggers it, what information it needs, what the output should look like, and what it should never do. Then it writes a short spec with three yes/no checks for you to confirm.",
+      tips: [
+        "**Tip:** Walk through the process the way you'd train someone covering for you, step by step, not as a summary — that's the level of detail the brief needs.",
+        "**Tip:** Write one check about exceptions, like \"anything that doesn't fit the normal pattern gets flagged to me, not skipped.\" Exceptions are where processes usually break.",
+      ],
+    },
+    {
+      title: "Build",
+      body: "With the spec confirmed, your AI writes the brief itself — trigger, inputs, numbered steps, output format, and guardrails — as one markdown document.",
+      tips: [
+        "**Tip:** If you have an informal SOP in your head but nothing written down, this is the moment to get it onto the page — the brief forces the detail out.",
+        "**Tip:** Keep the guardrails section short and concrete — one sentence per rule beats a paragraph of caveats.",
+      ],
+    },
+    {
+      title: "Evaluate",
+      body: "Last, your AI checks its own brief against a real instance you give it, and fixes any step that doesn't hold up. You end with a brief that's already been tested once, not just written.",
+      tips: [
+        "**Tip:** Use an instance that had at least one exception in it, not a perfectly clean run — that's the better stress test.",
+        "**Tip:** Save the finished brief somewhere you'll actually find it before your next build session.",
+      ],
+    },
+  ],
+});
+
+export const GENERIC_WORKFLOW_TUTORIAL: Block[] = buildTutorial({
+  about: [
+    "You've built a few things today — now scope one for your own work. You won't build it today, but you'll leave with a complete brief that makes your next build session take 20 minutes instead of two hours.",
+    "First you'll answer a few questions about the task itself. Then your AI turns your answers into a workflow brief, and you check it against a real instance of the task before saving it.",
+  ],
+  setupHeaders: ["You need", "Why", "How to set it up"],
+  setupRows: [
+    [
+      "A recurring task you do that involves reading, writing, or organizing information",
+      "The brief only works if it's scoping something real",
+      "Good candidates: weekly status reports, meeting prep, client follow-ups, competitive research.",
+    ],
+    [
+      "A real recent example of it",
+      "You'll check the brief against something you actually did",
+      "Have the notes, email, or document from the last time you did it.",
+    ],
+  ],
+  niceToHave:
+    "If there's a template or past example you always start from, paste it in — it tells your AI what a complete output already looks like. Without it, your AI will ask you to describe it from scratch.",
+  buildIntro:
+    "Paste this into a new chat in your AI tool. It asks about the task first, then drafts the brief, then tests the brief against something real.",
+  prompt:
+    "I have a recurring workflow, and I want to scope it as an automation brief — not build it yet, just write a clear spec I can hand to an AI builder later. First, ask me what my role is and what I work on. Then walk me through three stages: Scope, Build, and Evaluate. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. What's the recurring task, in plain language — what do I produce and who's it for?\n2. What triggers it, and how often does it happen?\n3. What information does it need, and where does it live?\n4. What should the output look like — a doc, an email draft, a Slack message? What does it always need to include?\n5. What should it never do or assume?\n6. What would make the output good? Help me turn my answer into three checks I can answer yes or no.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, write the workflow brief as a markdown document with these sections: Trigger, Inputs, Steps (numbered, specific enough that an AI builder could follow them without asking me anything), Output format, and Guardrails (what it should never do). Use my own words from Stage 1 wherever you can instead of generic phrasing.\n\nStage 3: Evaluate\nAsk me for a real recent example of this task. Walk through your own brief against that example, step by step, and tell me anywhere a step is too vague to follow or a case the brief doesn't cover. Fix those gaps. When the brief holds up against the real example, tell me to save it as `workflow-[name].md`.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Your AI asks what the recurring task is, what triggers it, what it needs, what the output should look like, and what it should never do. Then it writes a short spec with three yes/no checks for you to confirm.",
+      tips: [
+        "**Tip:** Pick a task that's repetitive, rule-based, and low-stakes on a bad day — a draft you can edit beats a decision only you can make.",
+        "**Tip:** Write one check about scope creep, like \"the brief covers one task, not a whole job.\"",
+      ],
+    },
+    {
+      title: "Build",
+      body: "With the spec confirmed, your AI writes the brief itself — trigger, inputs, numbered steps, output format, and guardrails — as one markdown document.",
+      tips: [
+        "**Tip:** If a step reads vague to you, it'll read vague to whoever builds it later. Push for specifics now.",
+        "**Tip:** Keep the guardrails section short and concrete — one sentence per rule beats a paragraph of caveats.",
+      ],
+    },
+    {
+      title: "Evaluate",
+      body: "Last, your AI checks its own brief against a real example you give it, and fixes any step that doesn't hold up. You end with a brief that's already been tested once, not just written.",
+      tips: [
+        "**Tip:** Use your messiest recent example, not your cleanest one — it's the better stress test.",
+        "**Tip:** Save the finished brief somewhere you'll actually find it before your next build session.",
+      ],
+    },
+  ],
+});

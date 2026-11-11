@@ -88,10 +88,13 @@ import { LESSON_3_SECTIONS, LESSON_3_TOP_BLOCKS } from "../data/sampleLesson3";
 import CourseComplete from "../components/course-complete/CourseComplete";
 import {
   BlockList,
+  type BuildCardStyle,
   LessonFooterActions,
   LessonPageProvider,
   LiveElapsedTime,
   LiveSessionCallout,
+  setBuildCardStyle,
+  useBuildCardStyle,
 } from "../components/lesson-blocks";
 import { SwitchInput } from "../components/leland";
 import { GettingStartedFlow, type FlowKey } from "../components/getting-started";
@@ -1398,6 +1401,8 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onSetVariant,
   role,
   onSetRole,
+  cardStyle,
+  onSetCardStyle,
   onOpenFeedback,
   onOpenReview,
   onOpenSupport,
@@ -1411,6 +1416,8 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onSetVariant: (variant: LiveSessionVariant) => void;
   role: string | null;
   onSetRole: (role: string | null) => void;
+  cardStyle: BuildCardStyle;
+  onSetCardStyle: (style: BuildCardStyle) => void;
   onOpenFeedback: () => void;
   onOpenReview: () => void;
   onOpenSupport: () => void;
@@ -1466,6 +1473,28 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
                   className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
                 >
                   <Tag text={o.label} tagColor={TagColor.GRAY} size={TagSize.SMALL} selected={role === o.value} />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5 rounded-lg p-3">
+            <span className="leland-paragraph-base font-medium text-leland-gray-dark">
+              Build card style (featured-build picker)
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {(
+                [
+                  { value: "default", label: "Default" },
+                  { value: "dots", label: "Level dots + status" },
+                ] as { value: BuildCardStyle; label: string }[]
+              ).map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => onSetCardStyle(o.value)}
+                  className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+                >
+                  <Tag text={o.label} tagColor={TagColor.GRAY} size={TagSize.SMALL} selected={cardStyle === o.value} />
                 </button>
               ))}
             </div>
@@ -1668,7 +1697,7 @@ function SessionRecordingView({
 }) {
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-[720px] flex-col gap-8 px-4 md:px-8 py-10">
+      <div className="mx-auto flex w-full max-w-[752px] flex-col gap-8 px-4 py-10 md:max-w-[784px] md:px-8">
         {/* Breadcrumb / back nav */}
         {breadcrumb ? (
           <div className="leland-paragraph-base text-leland-gray-light">
@@ -1881,7 +1910,7 @@ function LiveProgramOverview({
   const buildSessions = BUILD_SESSIONS.filter((s) => !s.isRecording);
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-[720px] flex-col gap-8 px-4 md:px-8 py-10">
+      <div className="mx-auto flex w-full max-w-[752px] flex-col gap-8 px-4 py-10 md:max-w-[784px] md:px-8">
         <div className="flex flex-col gap-3">
           <h1 className="text-heading-4xl md:text-heading-5xl font-normal font-season text-leland-gray-dark">
             {COURSE_TITLE_FULL}
@@ -2088,7 +2117,7 @@ function SessionDetailView({
 }) {
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-[720px] flex-col gap-8 px-4 md:px-8 pt-10 pb-16">
+      <div className="mx-auto flex w-full max-w-[752px] flex-col gap-8 px-4 pt-10 pb-16 md:max-w-[784px] md:px-8">
         {/* Breadcrumb: ‹ Calendar (back) / Session N */}
         <div className="flex items-center gap-2 leland-paragraph-base text-leland-gray-light">
           <button
@@ -2273,6 +2302,7 @@ export default function ContentViewer() {
   const [trackPickerOpen, setTrackPickerOpen] = useState(false);
   const [personalizationModalOpen, setPersonalizationModalOpen] = useState(false);
   const [aboutMe, setAboutMe] = useState<PersonalizationData | null>(() => loadPersonalizationData());
+  const cardStyle = useBuildCardStyle();
   const aboutMeParts = aboutMe ? summarizePersonalizationParts(aboutMe) : null;
   const [aboutMeModalOpen, setAboutMeModalOpen] = useState(false);
   const [roleModalOpen, setRoleModalOpen] = useState(false);
@@ -2444,7 +2474,7 @@ export default function ContentViewer() {
   // are consistent.
   const breadcrumbBar = (
     <div className={`hidden md:block z-10 bg-[#F9F8F3] ${!sidebarOpen ? "sticky top-0" : ""}`}>
-      <div className={`flex w-full items-center gap-2 px-4 md:px-8 leland-paragraph-base ${sidebarOpen ? `mx-auto py-8 ${isCompletion ? "max-w-[800px]" : "max-w-[720px]"}` : "py-4"}`}>
+      <div className={`flex w-full items-center gap-2 px-4 md:px-8 leland-paragraph-base ${sidebarOpen ? `mx-auto py-8 ${isCompletion ? "max-w-[800px]" : "max-w-[784px]"}` : "py-4"}`}>
         {!sidebarOpen ? (
           <>
             {/* Full trail only on desktop; on mobile the page header already
@@ -2685,7 +2715,7 @@ export default function ContentViewer() {
                     {/* Larger gap-10 between product-level blocks (top banner,
                         bottom feedback) and the lesson content zone; gap-6
                         within the content zone. */}
-                    <div className="mx-auto flex w-full max-w-[720px] flex-col gap-10 px-4 md:px-8 pt-8 md:pt-4 pb-16">
+                    <div className="mx-auto flex w-full max-w-[752px] flex-col gap-10 px-4 pt-8 pb-16 md:max-w-[784px] md:px-8 md:pt-4">
                       <div className="flex flex-col gap-8">
                         {lesson.topBlocks?.length && !hideTopBlocks ? (
                           <BlockList blocks={lesson.topBlocks} />
@@ -2791,7 +2821,7 @@ export default function ContentViewer() {
               ) : section.kind === 'interactive' ? (
                 <div ref={contentScrollRef} className="min-h-0 flex-1 overflow-y-auto">
                   {breadcrumbBar}
-                  <div className="mx-auto w-full max-w-[720px] px-4 md:px-8 pb-8 md:pb-16 pt-8 md:pt-4">
+                  <div className="mx-auto w-full max-w-[752px] px-4 pb-8 pt-8 md:max-w-[784px] md:px-8 md:pb-16 md:pt-4">
                     <GettingStartedFlow
                       key={`${lesson.id}/${section.id}`}
                       flow={section.flow}
@@ -2922,6 +2952,8 @@ export default function ContentViewer() {
           localStorage.setItem(PERSONALIZATION_KEY, JSON.stringify(next));
           window.location.reload();
         }}
+        cardStyle={cardStyle}
+        onSetCardStyle={setBuildCardStyle}
         onOpenFeedback={() => { setPrototypeOptionsOpen(false); setFeedbackModalOpen(true); }}
         onOpenReview={() => { setPrototypeOptionsOpen(false); setReviewModalOpen(true); }}
         onOpenSupport={() => { setPrototypeOptionsOpen(false); setSupportModalOpen(true); }}

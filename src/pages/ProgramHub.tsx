@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { loadPersonalizationData } from "../components/PersonalizationModal";
-import { IconDotsHorizontal, IconSparkle, Modal, ModalContent, ModalSize, SwitchInput, Tag, TagColor } from "../components/leland";
+import { FontWeight, IconDotsHorizontal, IconSparkle, Modal, ModalContent, ModalSize, SwitchInput, Tag, TagColor, TagSize } from "../components/leland";
+import { type BuildCardStyle, setBuildCardStyle, useBuildCardStyle } from "../components/lesson-blocks";
 import homeIcon from "../assets/img/program-hub/hdr-e8a6d.svg";
 import calendarArrowIcon from "../assets/img/program-hub/hdr-03896.svg";
 import slackIcon from "../assets/icons/slack-black.svg";
@@ -101,6 +102,7 @@ const UPCOMING_BUILDS = [
     buildTitle: "Build a one-page account brief for any prospect",
     otherOptionsCount: 6,
     to: `${COURSE_PATH}/lesson-1/featured-build`,
+    image: imgLeadBrief,
   },
   {
     lessonNumber: 2,
@@ -108,6 +110,7 @@ const UPCOMING_BUILDS = [
     buildTitle: "Build a scheduled email manager",
     otherOptionsCount: 0,
     to: `${COURSE_PATH}/lesson-2/build-3`,
+    image: imgTriage,
   },
   {
     lessonNumber: 3,
@@ -115,6 +118,7 @@ const UPCOMING_BUILDS = [
     buildTitle: "Build and design a presentation on your own topic",
     otherOptionsCount: 0,
     to: `${COURSE_PATH}/lesson-3/build-4`,
+    image: imgMetrics,
   },
 ];
 
@@ -292,31 +296,65 @@ function useCardCarousel<T>(items: T[]) {
 function UpcomingBuildsCarousel({
   builds,
   carousel,
+  cardStyle,
 }: {
   builds: typeof UPCOMING_BUILDS;
   carousel: ReturnType<typeof useCardCarousel<typeof UPCOMING_BUILDS[number]>>;
+  cardStyle: BuildCardStyle;
 }) {
   return (
     <div className="relative min-h-0 flex-1">
       <div ref={carousel.scrollRef} className="flex h-full snap-x snap-mandatory gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {builds.map((b) => (
-          <Link
-            key={b.sessionTitle}
-            to={b.to}
-            className="group flex h-full w-[75%] shrink-0 snap-start flex-col gap-3 rounded-lg bg-leland-gray-hover p-4 text-left transition-shadow hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)] sm:w-[calc((100%-1.5rem)/3)]"
-          >
-            <IconSparkle className="size-4 shrink-0 text-gray-dark" />
-            <div className="flex flex-col gap-1">
-              <p className="line-clamp-2 text-[16px] font-semibold leading-[1.3] text-gray-dark">{b.buildTitle}.</p>
-              <p className="line-clamp-2 text-[14px] text-gray-light">Lesson {b.lessonNumber} · {b.sessionTitle}</p>
-            </div>
-            {b.otherOptionsCount ? (
-              <div className="mt-auto pt-2">
-                <Tag text={`${b.otherOptionsCount} more options`} tagColor={TagColor.WHITE} />
+        {builds.map((b, i) => {
+          if (cardStyle !== "dots") {
+            return (
+              <Link
+                key={b.sessionTitle}
+                to={b.to}
+                className="group flex h-full w-[75%] shrink-0 snap-start flex-col gap-3 rounded-lg bg-leland-gray-hover p-4 text-left transition-shadow hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)] sm:w-[calc((100%-1.5rem)/3)]"
+              >
+                <IconSparkle className="size-4 shrink-0 text-gray-dark" />
+                <div className="flex flex-col gap-1">
+                  <p className="line-clamp-2 text-[16px] font-semibold leading-[1.3] text-gray-dark">{b.buildTitle}.</p>
+                  <p className="line-clamp-2 text-[14px] text-gray-light">Lesson {b.lessonNumber} · {b.sessionTitle}</p>
+                </div>
+                {b.otherOptionsCount ? (
+                  <div className="mt-auto pt-2">
+                    <Tag text={`${b.otherOptionsCount} more options`} tagColor={TagColor.WHITE} />
+                  </div>
+                ) : null}
+              </Link>
+            );
+          }
+
+          // Demo stand-in for real progress data — just shows the first card
+          // as "complete" so both states are visible side by side.
+          const completed = i === 0;
+          return (
+            <Link
+              key={b.sessionTitle}
+              to={b.to}
+              className="group flex h-full w-[75%] shrink-0 snap-start flex-col gap-4 rounded-lg bg-leland-gray-hover p-4 text-left transition-shadow hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)] sm:w-[calc((100%-1.5rem)/3)]"
+            >
+              <div className="relative h-16 w-[120px] shrink-0 overflow-hidden rounded-md border border-leland-gray-hover">
+                <img src={b.image} alt="" className="h-full w-full object-cover" />
+                <span className="absolute left-2 top-2 rounded-[4px] bg-leland-black/[87%] px-1 pt-[3px] pb-[4px] text-[0.75rem] font-semibold leading-none text-leland-white shadow-[0_1px_3px_rgba(0,0,0,0.25)]">
+                  Level 1
+                </span>
               </div>
-            ) : null}
-          </Link>
-        ))}
+              <div className="flex flex-1 flex-col items-start">
+                <p className="line-clamp-2 text-[16px] font-semibold leading-[1.3] text-gray-dark">{b.buildTitle}.</p>
+                <p className="mt-0.5 line-clamp-2 text-[14px] text-gray-light">
+                  Lesson {b.lessonNumber} · {b.sessionTitle}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Tag text={completed ? "Complete" : "Not started"} tagColor={completed ? TagColor.BLACK : TagColor.WHITE} size={TagSize.XS} fontWeight={FontWeight.SEMIBOLD} />
+                {b.otherOptionsCount ? <span className="text-[12px] font-medium text-gray-light">{b.otherOptionsCount} more options</span> : null}
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
@@ -333,6 +371,7 @@ export default function ProgramHub() {
   const [open, setOpen] = useState<Record<string, boolean>>({ category: true, useCase: false, collection: false, tool: false });
   const [query, setQuery] = useState("");
   const { showUseCaseSection, setShowUseCaseSection } = useProgramHubOptions();
+  const cardStyle = useBuildCardStyle();
   const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
   const upcomingBuildsCarousel = useCardCarousel(UPCOMING_BUILDS);
 
@@ -442,7 +481,11 @@ export default function ProgramHub() {
         {/* Current course + live sessions */}
         <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-stretch">
           <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-stroke bg-white p-6 shadow-[0_1px_1px_rgba(16,24,40,0.05)] lg:max-w-[400px] lg:flex-1 lg:justify-between">
-            <img src={levelOne} alt="AI Builder Program Level 1" className="max-h-[120px] w-auto max-w-full self-start rounded-lg border border-black/5 object-cover" />
+            <img
+              src={levelOne}
+              alt="AI Builder Program Level 1"
+              className="max-h-[120px] w-auto max-w-full self-start rounded-lg border border-black/5 object-cover lg:h-full lg:max-h-none lg:w-auto lg:flex-1 lg:self-start"
+            />
             <div className="flex flex-col gap-2.5 py-2.5">
               <p className="truncate text-[16px] font-semibold leading-[1.3] text-gray-dark">Level 1: Use AI to 10x your impact</p>
               <ProgressBar pct={50} label="50% complete" className="max-w-[300px]" />
@@ -457,13 +500,16 @@ export default function ProgramHub() {
 
           <div className="flex min-w-[280px] flex-1 flex-col gap-5 rounded-2xl border border-gray-stroke bg-white p-6">
             <div className="flex items-center gap-4">
-              <p className="min-w-px flex-1 text-[22px] font-semibold leading-[1.2] text-gray-dark">Suggested builds</p>
+              <div className="flex min-w-px flex-1 flex-col gap-2">
+                <p className="text-[22px] font-semibold leading-[1.2] text-gray-dark">Your featured builds</p>
+                <p className="text-[14px] font-medium leading-[1.35] text-gray-light">{recommendedCategory ?? "every role"}</p>
+              </div>
               <div className="flex items-center gap-2">
                 <RoundArrow dir="left" disabled={upcomingBuildsCarousel.page <= 0} onClick={() => upcomingBuildsCarousel.scrollByPage(-1)} />
                 <RoundArrow dir="right" disabled={upcomingBuildsCarousel.page >= upcomingBuildsCarousel.pages - 1} onClick={() => upcomingBuildsCarousel.scrollByPage(1)} />
               </div>
             </div>
-            <UpcomingBuildsCarousel builds={UPCOMING_BUILDS} carousel={upcomingBuildsCarousel} />
+            <UpcomingBuildsCarousel builds={UPCOMING_BUILDS} carousel={upcomingBuildsCarousel} cardStyle={cardStyle} />
           </div>
         </div>
 
@@ -755,6 +801,26 @@ export default function ProgramHub() {
               isChecked={showUseCaseSection}
               onToggle={setShowUseCaseSection}
             />
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[14px] font-medium text-gray-dark">Build card style</span>
+              <div className="flex flex-wrap gap-1.5">
+                {(
+                  [
+                    { value: "default", label: "Default" },
+                    { value: "dots", label: "Level dots + status" },
+                  ] as { value: BuildCardStyle; label: string }[]
+                ).map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => setBuildCardStyle(o.value)}
+                    className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+                  >
+                    <Tag text={o.label} tagColor={TagColor.GRAY} selected={cardStyle === o.value} />
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </ModalContent>
       </Modal>
