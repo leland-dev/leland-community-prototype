@@ -6,6 +6,7 @@ import { loadPersonalizationData } from "../PersonalizationModal";
 
 import {
   BrandSlack,
+  FontWeight,
   IconCheck,
   IconChevronDown,
   IconChevronLeft,
@@ -535,6 +536,7 @@ function BuildOptionCard({
   selected,
   completed,
   level = 1,
+  image,
   cardStyle,
   onClick,
 }: {
@@ -543,6 +545,7 @@ function BuildOptionCard({
   selected: boolean;
   completed?: boolean;
   level?: number;
+  image?: string;
   cardStyle: BuildCardStyle;
   onClick: () => void;
 }) {
@@ -568,27 +571,27 @@ function BuildOptionCard({
     <button
       type="button"
       onClick={onClick}
-      className={`relative flex h-full flex-col items-start gap-4 rounded-lg p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
+      className={`flex h-full flex-col gap-4 rounded-lg p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
         selected
           ? "border-[1.5px] border-leland-gray-dark bg-leland-gray-hover"
           : "bg-leland-gray-hover hover:bg-[rgba(34,34,34,0.08)]"
       }`}
     >
-      {completed ? (
-        <div className="absolute right-3 top-3 flex size-5 items-center justify-center rounded-full bg-leland-gray-dark">
-          <IconCheck className="size-3 text-white" />
-        </div>
-      ) : null}
+      <div className="relative h-16 w-[120px] shrink-0 overflow-hidden rounded-md border border-leland-gray-hover">
+        <img src={image ?? aiBuilderTile} alt="" className="h-full w-full object-cover" />
+        <span className="absolute left-2 top-2 rounded-[4px] bg-leland-black/[87%] px-1 pt-[3px] pb-[4px] text-[0.75rem] font-semibold leading-none text-white shadow-[0_1px_3px_rgba(0,0,0,0.25)]">
+          Level {level}
+        </span>
+      </div>
       <div className="flex flex-1 flex-col items-start">
-        <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-leland-gray-light">Level {level}</span>
-        <span
-          className={`mt-3 leland-paragraph-lg font-semibold ${completed ? "text-leland-gray-light" : "text-leland-gray-dark"}`}
-        >
+        <span className={`line-clamp-2 text-[16px] font-semibold leading-[1.3] ${completed ? "text-leland-gray-light" : "text-leland-gray-dark"}`}>
           {title}
         </span>
-        {description ? <span className="mt-0.5 line-clamp-3 leland-paragraph-base text-leland-gray-light">{description}</span> : null}
+        {description ? <span className="mt-0.5 line-clamp-2 text-[14px] text-leland-gray-light">{description}</span> : null}
       </div>
-      <Tag text={completed ? "Complete" : "Not started"} tagColor={completed ? TagColor.WHITE : TagColor.GRAY} size={TagSize.XS} />
+      <div className="self-start">
+        <Tag text={completed ? "Complete" : "Not started"} tagColor={completed ? TagColor.BLACK : TagColor.WHITE} size={TagSize.XS} fontWeight={FontWeight.SEMIBOLD} />
+      </div>
     </button>
   );
 }
@@ -682,6 +685,7 @@ function SuggestedBuildsCarousel({
               // card as "complete" so both states are visible side by side.
               completed={i === 0}
               level={b.level}
+              image={b.image}
               cardStyle={cardStyle}
               onClick={() => onSelect(b.id)}
             />

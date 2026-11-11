@@ -223,9 +223,12 @@ export type RoleBuild = {
   buildTitle: string; // what they'll build, e.g. "Build a one-page account brief for any prospect"
   description?: string; // one-line card subtext
   tutorial: Block[];
-  // Difficulty tier (1-4), shown as filled dots on the build-option card.
+  // Difficulty tier (1-4), shown in the Level tag on the build-option card.
   // Defaults to 1 — this sample course only has level-1 builds so far.
   level?: number;
+  // Thumbnail shown on the build-option card. Falls back to a generic
+  // AI Builder tile when a build doesn't have its own.
+  image?: string;
 };
 
 // One role's set of suggested builds in a RoleBuildPickerBlock. The learner

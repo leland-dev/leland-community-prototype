@@ -6,6 +6,13 @@ import leadGenBotImg from "../assets/community-builds/lead-gen-bot.png";
 import churnedCustomerInterviewsImg from "../assets/community-builds/churned-customer-interviews.png";
 import followUpEmailImg from "../assets/community-builds/follow-up-email.png";
 import amazonBrandOutreachImg from "../assets/community-builds/amazon-brand-outreach.png";
+import imgLeadBrief from "../assets/img/builds/lead-brief.svg";
+import imgDemoDeck from "../assets/img/builds/demo-deck.svg";
+import imgBrandedProposal from "../assets/img/builds/branded-proposal.svg";
+import imgBrandedRecap from "../assets/img/builds/branded-recap.svg";
+import imgBattlecard from "../assets/img/builds/battlecard.svg";
+import imgCustomerWelcome from "../assets/img/builds/customer-welcome.svg";
+import imgWinLoss from "../assets/img/builds/win-loss.svg";
 import {
   SALES_TUTORIAL,
   SALES_PROPOSAL_TUTORIAL,
@@ -671,42 +678,49 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
                 buildTitle: "Build a one-page account brief for any prospect",
                 description: "A company snapshot, likely pains, and talking points for your next call.",
                 tutorial: SALES_TUTORIAL,
+                image: imgLeadBrief,
               },
               {
                 id: "sales-demo-deck",
                 buildTitle: "Build a demo deck for a prospect",
                 description: "Turn your talking points into a short, on-brand deck scoped to one prospect.",
                 tutorial: SALES_DEMO_DECK_TUTORIAL,
+                image: imgDemoDeck,
               },
               {
                 id: "sales-branded-proposal",
                 buildTitle: "Build a branded one-page proposal",
                 description: "Turn a rough draft into a polished proposal in your company's colors and fonts.",
                 tutorial: SALES_PROPOSAL_TUTORIAL,
+                image: imgBrandedProposal,
               },
               {
                 id: "sales-branded-recap",
                 buildTitle: "Build a branded deal recap page",
                 description: "Turn your call notes into a client-ready recap, styled with your brand.",
                 tutorial: SALES_RECAP_TUTORIAL,
+                image: imgBrandedRecap,
               },
               {
                 id: "sales-battlecard",
                 buildTitle: "Build a branded objection-handling page",
                 description: "Turn scattered objection answers into a page you can reference live on calls.",
                 tutorial: LOREM_STUB_TUTORIAL,
+                image: imgBattlecard,
               },
               {
                 id: "sales-customer-welcome",
                 buildTitle: "Build a branded welcome page for a new customer",
                 description: "Turn a signed deal's details into a kickoff page for their first week.",
                 tutorial: LOREM_STUB_TUTORIAL,
+                image: imgCustomerWelcome,
               },
               {
                 id: "sales-win-loss",
                 buildTitle: "Build a win/loss summary page",
                 description: "Turn notes from a closed deal into a page the team can learn from.",
                 tutorial: LOREM_STUB_TUTORIAL,
+                image: imgWinLoss,
               },
             ],
           },

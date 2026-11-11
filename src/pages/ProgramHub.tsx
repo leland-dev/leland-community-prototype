@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
-import { loadPersonalizationData } from "../components/PersonalizationModal";
-import { FontWeight, IconDotsHorizontal, IconSparkle, Modal, ModalContent, ModalSize, SwitchInput, Tag, TagColor, TagSize } from "../components/leland";
+import { AboutMeEditModal } from "../components/AboutMeEditModal";
+import { loadPersonalizationData, type PersonalizationData } from "../components/PersonalizationModal";
+import { FontWeight, IconDotsHorizontal, IconPencil, IconSparkle, Modal, ModalContent, ModalSize, SwitchInput, Tag, TagColor, TagSize } from "../components/leland";
 import { type BuildCardStyle, setBuildCardStyle, useBuildCardStyle } from "../components/lesson-blocks";
 import homeIcon from "../assets/img/program-hub/hdr-e8a6d.svg";
 import calendarArrowIcon from "../assets/img/program-hub/hdr-03896.svg";
@@ -395,7 +396,9 @@ export default function ProgramHub() {
 
   const scrollShipped = () => shippedRef.current?.scrollBy({ left: shippedRef.current.clientWidth * 0.75, behavior: "smooth" });
 
-  const learnerRole = loadPersonalizationData()?.role ?? null;
+  const [aboutMe, setAboutMe] = useState<PersonalizationData | null>(() => loadPersonalizationData());
+  const [aboutMeModalOpen, setAboutMeModalOpen] = useState(false);
+  const learnerRole = aboutMe?.role ?? null;
   const recommendedCategory = learnerRole ? ROLE_TO_CATEGORY[learnerRole] : null;
   const recommendedRef = useRef<HTMLDivElement>(null);
   const recommendedItems = useMemo(() => {
@@ -502,7 +505,17 @@ export default function ProgramHub() {
             <div className="flex items-center gap-4">
               <div className="flex min-w-px flex-1 flex-col gap-2">
                 <p className="text-[22px] font-semibold leading-[1.2] text-gray-dark">Your featured builds</p>
-                <p className="text-[14px] font-medium leading-[1.35] text-gray-light">{recommendedCategory ?? "every role"}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-[14px] font-medium leading-[1.35] text-gray-light">Selected based on your responses</p>
+                  <button
+                    type="button"
+                    onClick={() => setAboutMeModalOpen(true)}
+                    aria-label="Edit learning preferences"
+                    className="flex items-center justify-center rounded-full p-1 text-gray-light transition-colors hover:bg-leland-gray-hover hover:text-gray-dark"
+                  >
+                    <IconPencil className="size-3" />
+                  </button>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <RoundArrow dir="left" disabled={upcomingBuildsCarousel.page <= 0} onClick={() => upcomingBuildsCarousel.scrollByPage(-1)} />
@@ -784,6 +797,12 @@ export default function ProgramHub() {
       </div>
 
       {/* Floating prototype options button — bottom-left corner */}
+      <AboutMeEditModal
+        open={aboutMeModalOpen}
+        onOpenChange={setAboutMeModalOpen}
+        initialData={aboutMe}
+        onSave={setAboutMe}
+      />
       <button
         type="button"
         onClick={() => setPrototypeOptionsOpen(true)}
