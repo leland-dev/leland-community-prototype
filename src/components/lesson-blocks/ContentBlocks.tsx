@@ -498,9 +498,9 @@ const BUILD_CARD_STYLE_KEY = "content-viewer-build-card-style";
 
 function readBuildCardStyle(): BuildCardStyle {
   try {
-    return localStorage.getItem(BUILD_CARD_STYLE_KEY) === "dots" ? "dots" : "default";
+    return localStorage.getItem(BUILD_CARD_STYLE_KEY) === "default" ? "default" : "dots";
   } catch {
-    return "default";
+    return "dots";
   }
 }
 
@@ -523,7 +523,7 @@ function subscribeBuildCardStyle(listener: () => void) {
 }
 
 export function useBuildCardStyle(): BuildCardStyle {
-  return useSyncExternalStore(subscribeBuildCardStyle, () => buildCardStyle, () => "default");
+  return useSyncExternalStore(subscribeBuildCardStyle, () => buildCardStyle, () => "dots");
 }
 
 // One suggested or custom build card in the picker grid. The "dots" style

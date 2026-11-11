@@ -825,8 +825,8 @@ export default function ProgramHub() {
               <div className="flex flex-wrap gap-1.5">
                 {(
                   [
-                    { value: "default", label: "Default" },
-                    { value: "dots", label: "Level dots + status" },
+                    { value: "default", label: "Simple" },
+                    { value: "dots", label: "Image + status" },
                   ] as { value: BuildCardStyle; label: string }[]
                 ).map((o) => (
                   <button
