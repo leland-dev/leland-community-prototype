@@ -760,7 +760,11 @@ function SuggestedBuildsCarousel({
 export function RoleBuildPicker({ block }: { block: RoleBuildPickerBlockType }) {
   const knownRole = loadPersonalizationData()?.role ?? null;
   const matched = knownRole ? block.options.filter((opt) => opt.matchesRoles?.includes(knownRole)) : [];
-  const defaultOption = matched.length === 1 ? matched[0] : null;
+  // Sales is this prototype's default persona — fall back to it (rather than
+  // the generic single build) whenever no role is on file or it doesn't
+  // match any option, instead of leaving the picker looking empty.
+  const defaultOption =
+    matched.length === 1 ? matched[0] : (block.options.find((o) => o.value === "sales") ?? block.options[0] ?? null);
 
   const [roleOverride, setRoleOverride] = useState<string | null>(null);
   const roleOption = roleOverride ? (block.options.find((o) => o.value === roleOverride) ?? null) : defaultOption;
@@ -807,11 +811,7 @@ export function RoleBuildPicker({ block }: { block: RoleBuildPickerBlockType }) 
           {hasCustom ? <h3 className={H3_CLASS}>{suggestedLabel}</h3> : <BuildModeToggle mode={mode} onChange={setMode} />}
 
           {block.options.length > 1 ? (
-            <CategoryChip
-              options={block.options}
-              value={roleOption?.value ?? block.options[0].value}
-              onChange={setRoleOverride}
-            />
+            <CategoryChip options={block.options} value={roleOption?.value ?? ""} onChange={setRoleOverride} />
           ) : null}
         </div>
 
