@@ -25,6 +25,8 @@ import imgOnboarding from "../assets/img/builds/onboarding-bot.svg";
 import imgCrm from "../assets/img/builds/crm-cleanup.svg";
 import imgCallCoach from "../assets/img/builds/sales-call-coach.svg";
 import imgLeadBrief from "../assets/img/builds/lead-brief.svg";
+import imgColdOutboundEmail from "../assets/img/builds/cold-outbound-email.svg";
+import imgPrecallBriefing from "../assets/img/builds/precall-briefing.svg";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic3 from "../assets/profile photos/pic-3.png";
 import pic5 from "../assets/profile photos/pic-5.png";
@@ -401,10 +403,11 @@ export default function ProgramHub() {
   const learnerRole = aboutMe?.role ?? null;
   const recommendedCategory = learnerRole ? ROLE_TO_CATEGORY[learnerRole] : null;
   const recommendedRef = useRef<HTMLDivElement>(null);
-  const recommendedItems = useMemo(() => {
-    if (recommendedCategory === "Sales") return SALES_RECOMMENDED_ITEMS;
-    return (recommendedCategory ? ITEMS.filter((it) => it.category === recommendedCategory) : ITEMS).slice(0, 8);
-  }, [recommendedCategory]);
+  // Only Sales has a curated, work-specific set so far (see
+  // SALES_RECOMMENDED_ITEMS) — other roles fall back to it too rather than
+  // the generic cross-category library, which mixes in personal-project
+  // builds that don't read as work use cases.
+  const recommendedItems = useMemo(() => SALES_RECOMMENDED_ITEMS, []);
   const scrollRecommended = () => recommendedRef.current?.scrollBy({ left: recommendedRef.current.clientWidth * 0.75, behavior: "smooth" });
 
   const FilterGroup = ({ id, title, options, search }: { id: keyof typeof filters; title: string; options: string[]; search?: boolean }) => (
