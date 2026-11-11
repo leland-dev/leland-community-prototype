@@ -649,7 +649,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
   {
     kind: "blocks",
     id: "featured-build",
-    title: "Vibe code something you'll actually use",
+    title: "Vibe code something you'll actually use in your work",
     durationMin: 13,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
     label: { text: "Apply", color: "black" },

@@ -645,8 +645,8 @@ function BuildModeToggle({
   onChange: (mode: "suggested" | "custom") => void;
 }) {
   const options: { value: "suggested" | "custom"; label: string }[] = [
-    { value: "suggested", label: "Suggested builds" },
-    { value: "custom", label: "Custom build" },
+    { value: "suggested", label: "Suggested" },
+    { value: "custom", label: "Custom" },
   ];
   return (
     <div className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-leland-gray-hover p-1">
@@ -735,7 +735,7 @@ function SuggestedBuildsCarousel({
         onClick={() => scrollByPage(-1)}
         disabled={page <= 0}
         aria-label="Previous"
-        className="absolute left-0 top-1/2 flex size-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-leland-gray-stroke bg-white shadow-sm transition-colors hover:bg-leland-gray-hover disabled:opacity-0"
+        className="absolute left-0 top-1/2 hidden size-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-leland-gray-stroke bg-white shadow-sm transition-colors hover:bg-leland-gray-hover disabled:opacity-0 sm:flex"
       >
         <IconChevronLeft className="size-4 text-leland-gray-dark" />
       </button>
@@ -744,7 +744,7 @@ function SuggestedBuildsCarousel({
         onClick={() => scrollByPage(1)}
         disabled={page >= pages - 1}
         aria-label="Next"
-        className="absolute right-0 top-1/2 flex size-9 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border border-leland-gray-stroke bg-white shadow-sm transition-colors hover:bg-leland-gray-hover disabled:opacity-0"
+        className="absolute right-0 top-1/2 hidden size-9 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border border-leland-gray-stroke bg-white shadow-sm transition-colors hover:bg-leland-gray-hover disabled:opacity-0 sm:flex"
       >
         <IconChevronRight className="size-4 text-leland-gray-dark" />
       </button>
@@ -803,7 +803,7 @@ export function RoleBuildPicker({ block }: { block: RoleBuildPickerBlockType }) 
       ) : null}
 
       <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-4">
           {hasCustom ? <h3 className={H3_CLASS}>{suggestedLabel}</h3> : <BuildModeToggle mode={mode} onChange={setMode} />}
 
           {block.options.length > 1 ? (
@@ -815,7 +815,9 @@ export function RoleBuildPicker({ block }: { block: RoleBuildPickerBlockType }) 
           ) : null}
         </div>
 
-        {mode === "suggested" ? <SuggestedBuildsCarousel builds={suggestedBuilds} selectedId={selectedId} onSelect={setSelectedId} /> : null}
+        {mode === "suggested" && suggestedBuilds.length > 1 ? (
+          <SuggestedBuildsCarousel builds={suggestedBuilds} selectedId={selectedId} onSelect={setSelectedId} />
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-4">
