@@ -19,6 +19,7 @@ import {
   IconUpload,
   IconUserGroup,
   IconX,
+  Menu,
   Tag,
   TagColor,
   TagSize,
@@ -45,6 +46,7 @@ import type {
   PromptQuizBlock as PromptQuizBlockType,
   RadioCardGroupBlock as RadioCardGroupBlockType,
   RoleBuild as RoleBuildType,
+  RoleBuildOption as RoleBuildOptionType,
   RoleBuildPickerBlock as RoleBuildPickerBlockType,
   SelectedBuildSummaryBlock as SelectedBuildSummaryBlockType,
   ShareBuildFormBlock as ShareBuildFormBlockType,
@@ -596,6 +598,42 @@ function BuildOptionCard({
   );
 }
 
+// Lets the learner switch to a different role's suggested builds — a
+// rounded white chip at the right edge of the toggle row (hidden on
+// mobile, where the nav menu already exposes category switching).
+function CategoryChip({
+  options,
+  value,
+  onChange,
+}: {
+  options: RoleBuildOptionType[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const selected = options.find((o) => o.value === value);
+  return (
+    <Menu
+      align="end"
+      hasCustomTriggerRadius
+      itemSections={[
+        options.map((o) => ({
+          label: o.label,
+          selected: o.value === value,
+          onSelect: () => onChange(o.value),
+        })),
+      ]}
+    >
+      <button
+        type="button"
+        className="hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-leland-gray-stroke bg-white px-4 py-2 leland-paragraph-base font-medium text-leland-gray-dark shadow-sm transition-colors hover:bg-leland-gray-hover sm:inline-flex"
+      >
+        <span>{selected?.label ?? "Category"}</span>
+        <IconChevronDown className="size-4" />
+      </button>
+    </Menu>
+  );
+}
+
 // Switches between the role-specific suggestions and the generic custom
 // build — the active segment is the "selected" state, and it decides
 // whether the suggestion row even renders.
@@ -722,7 +760,10 @@ function SuggestedBuildsCarousel({
 export function RoleBuildPicker({ block }: { block: RoleBuildPickerBlockType }) {
   const knownRole = loadPersonalizationData()?.role ?? null;
   const matched = knownRole ? block.options.filter((opt) => opt.matchesRoles?.includes(knownRole)) : [];
-  const roleOption = matched.length === 1 ? matched[0] : null;
+  const defaultOption = matched.length === 1 ? matched[0] : null;
+
+  const [roleOverride, setRoleOverride] = useState<string | null>(null);
+  const roleOption = roleOverride ? (block.options.find((o) => o.value === roleOverride) ?? null) : defaultOption;
   const suggestedBuilds = roleOption?.builds ?? block.fallback.builds;
   const customBuild = block.fallback.builds[0];
 
@@ -762,11 +803,17 @@ export function RoleBuildPicker({ block }: { block: RoleBuildPickerBlockType }) 
       ) : null}
 
       <div className="flex flex-col gap-6">
-        {hasCustom ? (
-          <h3 className={H3_CLASS}>{suggestedLabel}</h3>
-        ) : (
-          <BuildModeToggle mode={mode} onChange={setMode} />
-        )}
+        <div className="flex items-center justify-between gap-3">
+          {hasCustom ? <h3 className={H3_CLASS}>{suggestedLabel}</h3> : <BuildModeToggle mode={mode} onChange={setMode} />}
+
+          {block.options.length > 1 ? (
+            <CategoryChip
+              options={block.options}
+              value={roleOption?.value ?? block.options[0].value}
+              onChange={setRoleOverride}
+            />
+          ) : null}
+        </div>
 
         {mode === "suggested" ? <SuggestedBuildsCarousel builds={suggestedBuilds} selectedId={selectedId} onSelect={setSelectedId} /> : null}
       </div>
