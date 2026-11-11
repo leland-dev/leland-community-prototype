@@ -36,8 +36,6 @@ import pic9 from "../assets/profile photos/pic-9.png";
 import pic11 from "../assets/profile photos/pic-11.png";
 import pic13 from "../assets/profile photos/pic-13.png";
 import lelandProfileIcon from "../assets/leland-logos/leland-profile.png";
-import imgSalesIntelTool from "../assets/img/program-hub/sales-intel-tool.jpg";
-import imgCustomerCallFollowup from "../assets/img/program-hub/customer-call-followup.jpg";
 import imgLeadQualAgent from "../assets/img/program-hub/lead-qualification-agent.png";
 import imgMeetingNotesToCrm from "../assets/img/program-hub/meeting-notes-to-crm.png";
 import heroPhoto from "../assets/placeholder images/placeholder-event-02.png";
@@ -152,29 +150,18 @@ const ROLE_TO_CATEGORY: Record<string, string> = {
   finance: "Finance & Accounting",
 };
 
-// Curated real examples for Sales — screenshots of actual Leland+/community
-// builds, standing in for role-specific recommendations until every role has
-// a curated set like this one.
+// Curated Sales examples — Tutorials and Skills only (no community builds),
+// sourced from the Sales-tagged rows of the tutorials/skills tagging sheet.
 const SALES_RECOMMENDED_ITEMS: Item[] = [
   {
-    title: "A Sales Intelligence Tool for Amazon Brand Outreach",
-    author: "Mike P.",
-    avatar: pic1,
-    image: imgSalesIntelTool,
-    category: "Sales",
-    useCase: "Research & Intelligence",
-    collection: "Community builds",
-    tool: "Notion",
-  },
-  {
-    title: "Turning Every Customer Call Into a Ready-to-Send Follow-Up Email",
-    author: "Brian W.",
-    avatar: pic13,
-    image: imgCustomerCallFollowup,
+    title: "Build a one-page account brief for any prospect",
+    author: "Leland Team",
+    avatar: lelandProfileIcon,
+    image: imgLeadBrief,
     category: "Sales",
     useCase: "Productivity & Planning",
-    collection: "Community builds",
-    tool: "Hubspot",
+    collection: "Tutorials",
+    tool: "Notion",
   },
   {
     title: "Build a Lead Qualification Agent",
@@ -187,14 +174,44 @@ const SALES_RECOMMENDED_ITEMS: Item[] = [
     tool: "Hubspot",
   },
   {
+    title: "Cold Outbound Email Agent",
+    author: "Leland Team",
+    avatar: lelandProfileIcon,
+    image: imgColdOutboundEmail,
+    category: "Sales",
+    useCase: "Automation & Ops",
+    collection: "Tutorials",
+    tool: "Hubspot",
+  },
+  {
+    title: "Build a pre-call research briefing agent",
+    author: "Leland Team",
+    avatar: lelandProfileIcon,
+    image: imgPrecallBriefing,
+    category: "Sales",
+    useCase: "Productivity & Planning",
+    collection: "Tutorials",
+    tool: "Google Drive",
+  },
+  {
     title: "Meeting Notes to CRM",
     author: "Leland Team",
     avatar: lelandProfileIcon,
     image: imgMeetingNotesToCrm,
     category: "Sales",
     useCase: "Automation & Ops",
-    collection: "Tutorials",
+    collection: "Skills",
     tool: "Hubspot",
+  },
+  {
+    title: "Transcript Analysis",
+    author: "Leland Team",
+    avatar: lelandProfileIcon,
+    image: imgCallCoach,
+    category: "Sales",
+    useCase: "Reporting & Analytics",
+    collection: "Skills",
+    tool: "Notion",
   },
 ];
 
