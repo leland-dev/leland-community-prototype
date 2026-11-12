@@ -14,7 +14,6 @@ import {
   loadSections,
   saveSections,
   resolveItems,
-  itemsByKind,
   getUnassignedItems,
   CATCH_ALL_TITLE,
   CATCH_ALL_SIZE,
@@ -22,16 +21,13 @@ import {
   CARD_SIZES,
   type SectionConfig,
   type CardSize,
-  type StorefrontKind,
   type StorefrontItem,
 } from "../lib/storefrontSections";
 import addPlusIcon from "../assets/icons/add-plus.svg";
+import layoutGridIcon from "../assets/icons/layout-grid.svg";
 import trashIcon from "../assets/icons/trash.svg";
 import dotsIcon from "../assets/icons/dots-horizontal.svg";
 import dragDotsIcon from "../assets/icons/drag-dots.svg";
-import checkIcon from "../assets/icons/check.svg";
-
-const KIND_ORDER: StorefrontKind[] = ["group-session", "membership", "package", "content"];
 
 // Sentinel drop target for the catch-all "All offerings" section — dropping here
 // removes an item from every section (leaving it unassigned). Not a real section
@@ -133,10 +129,57 @@ function SectionMenu({ onMoveUp, onMoveDown, onRemove, canMoveUp, canMoveDown }:
   );
 }
 
-// Modal to add/remove items for one section — a grouped checklist of everything
-// in the catalog. Toggling a row flips its membership in the section.
-function ItemPickerModal({ open, selectedIds, onToggle, onClose }: { open: boolean; selectedIds: string[]; onToggle: (id: string) => void; onClose: () => void }) {
-  if (!open) return null;
+// "Add offerings" splits into two paths: pull in an offering you already have,
+// or build a brand-new one. A small menu anchored to the button offers the choice.
+function AddOfferingsButton({ onChooseExisting, onCreateNew }: { onChooseExisting: () => void; onCreateNew: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+  const row = "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover";
+  return (
+    <div ref={ref} className="relative">
+      <Button size="md" variant="secondary" className="font-semibold" onClick={() => setOpen((v) => !v)}>
+        <MaskIcon src={addPlusIcon} className="h-4 w-4" />
+        Add offerings
+      </Button>
+      {open && (
+        <div className="absolute left-0 top-full z-30 mt-2 w-[220px] rounded-xl border border-gray-stroke bg-white p-1.5 shadow-lg">
+          <button onClick={() => { setOpen(false); onChooseExisting(); }} className={row}>
+            <MaskIcon src={layoutGridIcon} className="h-[18px] w-[18px] shrink-0" />
+            Choose from existing
+          </button>
+          <button onClick={() => { setOpen(false); onCreateNew(); }} className={row}>
+            <MaskIcon src={addPlusIcon} className="h-[18px] w-[18px] shrink-0" />
+            Create new
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Modal to pull existing offerings into a target section. Lists every offering
+// grouped by the section it currently lives in (plus the unplaced "All
+// offerings"); "Move" relocates it into the target. Items already in the target
+// read "Added".
+function MoveOfferingsModal({ open, targetId, sections, onMove, onClose }: {
+  open: boolean;
+  targetId: string | null;
+  sections: SectionConfig[];
+  onMove: (itemId: string) => void;
+  onClose: () => void;
+}) {
+  if (!open || !targetId) return null;
+  const target = sections.find((s) => s.id === targetId);
+  const groups = [
+    ...sections.map((s) => ({ id: s.id, title: s.title || "Untitled section", items: resolveItems(s.itemIds) })),
+    { id: CATCH_ALL_DROP_ID, title: CATCH_ALL_TITLE, items: getUnassignedItems(sections) },
+  ].filter((g) => g.items.length > 0);
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal>
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
@@ -146,47 +189,44 @@ function ItemPickerModal({ open, selectedIds, onToggle, onClose }: { open: boole
         transition={{ duration: 0.18 }}
         className="relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white sm:max-w-[560px] sm:rounded-2xl"
       >
-        <div className="flex items-center justify-between border-b border-gray-stroke px-5 py-4">
-          <h2 className="text-[17px] font-semibold text-gray-dark">Add offerings</h2>
+        <div className="flex items-center justify-between gap-3 border-b border-gray-stroke px-5 py-4">
+          <div className="min-w-0">
+            <h2 className="text-[17px] font-semibold text-gray-dark">Choose from existing</h2>
+            <p className="truncate text-[13px] text-gray-light">Move offerings into “{target?.title || "this section"}”</p>
+          </div>
           <Button size="sm" variant="secondary" iconOnly onClick={onClose} aria-label="Close">
             <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          {KIND_ORDER.map((kind) => {
-            const items = itemsByKind(kind);
-            if (items.length === 0) return null;
-            return (
-              <div key={kind} className="mb-5 last:mb-0">
-                <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.04em] text-gray-light">{KIND_LABELS[kind]}</p>
-                <div className="flex flex-col gap-1">
-                  {items.map((item) => {
-                    const selected = selectedIds.includes(item.id);
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => onToggle(item.id)}
-                        className="flex items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-gray-hover"
-                      >
-                        {item.image ? (
-                          <img src={item.image} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
-                        ) : (
-                          <div className="h-10 w-10 shrink-0 rounded-lg bg-gray-hover" />
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-[14px] font-semibold text-gray-dark">{item.title}</p>
-                          <p className="truncate text-[13px] text-gray-light">{item.price}{item.priceSuffix ?? ""}</p>
-                        </div>
-                        <span className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border transition-colors ${selected ? "border-gray-dark bg-gray-dark" : "border-gray-stroke bg-white"}`}>
-                          {selected && <MaskIcon src={checkIcon} className="h-3.5 w-3.5 text-white" />}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+          {groups.map((g) => (
+            <div key={g.id} className="mb-5 last:mb-0">
+              <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.04em] text-gray-light">{g.title}</p>
+              <div className="flex flex-col gap-1.5">
+                {g.items.map((item) => {
+                  const here = g.id === targetId;
+                  return (
+                    <div key={item.id} className="flex items-center gap-3 rounded-xl border border-gray-stroke p-2.5">
+                      {item.image ? (
+                        <img src={item.image} alt="" className="h-10 w-14 shrink-0 rounded-md object-cover" />
+                      ) : (
+                        <div className="h-10 w-14 shrink-0 rounded-md bg-gray-hover" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[14px] font-semibold text-gray-dark">{item.title}</p>
+                        <p className="truncate text-[13px] text-gray-light">{KIND_LABELS[item.kind]}</p>
+                      </div>
+                      {here ? (
+                        <span className="shrink-0 px-2 text-[13px] font-medium text-gray-light">Added</span>
+                      ) : (
+                        <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => onMove(item.id)}>Move</Button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
         <div className="border-t border-gray-stroke px-5 py-3">
           <Button size="md" variant="dark" rounded="rounded-full" className="w-full font-semibold" onClick={onClose}>Done</Button>
@@ -200,7 +240,8 @@ function ItemPickerModal({ open, selectedIds, onToggle, onClose }: { open: boole
 export default function CategorySectionBuilder({ category }: { category?: string }) {
   const navigate = useNavigate();
   const [sections, setSections] = useState<SectionConfig[]>(() => loadSections(category));
-  const [pickerFor, setPickerFor] = useState<string | null>(null);
+  // Section targeted by the "Choose from existing" move modal.
+  const [moveFor, setMoveFor] = useState<string | null>(null);
 
   // Render cards in their expert (manage) form — member counts, a "Manage" CTA,
   // the hover Preview/Edit overlay — and open an item's detail/edit page on
@@ -233,15 +274,6 @@ export default function CategorySectionBuilder({ category }: { category?: string
 
   const addSection = () =>
     commit([{ id: `sec-${Date.now()}`, title: "New section", cardSize: "medium", itemIds: [] }, ...sections]);
-
-  const toggleItem = (sectionId: string, itemId: string) => {
-    const s = sections.find((x) => x.id === sectionId);
-    if (!s) return;
-    const itemIds = s.itemIds.includes(itemId)
-      ? s.itemIds.filter((x) => x !== itemId)
-      : [...s.itemIds, itemId];
-    patch(sectionId, { itemIds });
-  };
 
   // ── Drag & drop: move an offering between sections, reorder within a section,
   // and drop into/out of the catch-all. While dragging, the dragged card is
@@ -384,8 +416,6 @@ export default function CategorySectionBuilder({ category }: { category?: string
     return { list, placeholderIndex };
   }
 
-  const pickerSection = sections.find((s) => s.id === pickerFor);
-
   const unassigned = getUnassignedItems(sections);
 
   return (
@@ -449,10 +479,10 @@ export default function CategorySectionBuilder({ category }: { category?: string
               />
 
               <div className="mt-4 flex">
-                <Button size="md" variant="secondary" className="font-semibold" onClick={() => setPickerFor(section.id)}>
-                  <MaskIcon src={addPlusIcon} className="h-4 w-4" />
-                  Add offerings
-                </Button>
+                <AddOfferingsButton
+                  onChooseExisting={() => setMoveFor(section.id)}
+                  onCreateNew={() => navigate(`/my-leland/manage/${category}/new`)}
+                />
               </div>
             </motion.section>
             );
@@ -487,11 +517,12 @@ export default function CategorySectionBuilder({ category }: { category?: string
         })()}
       </div>
 
-      <ItemPickerModal
-        open={pickerFor != null}
-        selectedIds={pickerSection?.itemIds ?? []}
-        onToggle={(itemId) => pickerFor && toggleItem(pickerFor, itemId)}
-        onClose={() => setPickerFor(null)}
+      <MoveOfferingsModal
+        open={moveFor != null}
+        targetId={moveFor}
+        sections={sections}
+        onMove={(itemId) => moveFor && moveItem(itemId, moveFor, null)}
+        onClose={() => setMoveFor(null)}
       />
     </div>
   );
