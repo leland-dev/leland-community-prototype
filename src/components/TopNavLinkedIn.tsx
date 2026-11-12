@@ -153,7 +153,7 @@ export default function TopNavLinkedIn() {
   const isCoachMode = useIsCoachMode();
   const navTheme = useNavTheme();
   const { pathname } = useLocation();
-  const { setStyle, showNavLabels, showLivestreams, setShowLivestreams, showLelandPlus, setShowLelandPlus, showJobs, setShowJobs, showSearch, setShowSearch, altLayout, setAltLayout, feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
+  const { setStyle, showNavLabels, showLivestreams, setShowLivestreams, showLelandPlus, setShowLelandPlus, showJobs, setShowJobs, showSearch, setShowSearch, altLayout, setAltLayout, feedEdgeToEdge, setFeedEdgeToEdge, hideNavSelections } = useTopNavStyle();
   const { expert, setExpert } = useExpertMode();
   // Inside the isolated /alt-nav experience, the nav destinations stay within
   // it (e.g. /alt-nav/messages); elsewhere they point at the normal routes.
@@ -348,12 +348,12 @@ export default function TopNavLinkedIn() {
             <img src={lelandWordmark} alt="Leland" className="h-6 w-auto" />
           </NavLink>
           {/* The search input is hidden unless the admin toggle turns it on */}
-          {showSearch && searchBar}
+          {!hideNavSelections && showSearch && searchBar}
         </div>
 
         {/* Right: icon group + Me dropdown */}
         <div className="flex items-stretch">
-          {!isCoachMode && (
+          {!hideNavSelections && !isCoachMode && (
             <>
               <div className="flex items-stretch gap-[2px]">{iconGroup}</div>
               {/* Divider before the trailing items (Me dropdown, plus the

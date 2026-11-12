@@ -80,7 +80,7 @@ export default function TopNavClassic() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [showSearch] = useState(false);
   const { showSubNav } = useSubNavStyle();
-  const { setStyle, feedEdgeToEdge, setFeedEdgeToEdge } = useTopNavStyle();
+  const { setStyle, feedEdgeToEdge, setFeedEdgeToEdge, hideNavSelections } = useTopNavStyle();
   const isCoachMode = useIsCoachMode();
   const navTheme = useNavTheme();
 
@@ -157,7 +157,7 @@ export default function TopNavClassic() {
             <img src={lelandWordmark} alt="Leland" className="h-6 w-auto" />
           </NavLink>
 
-          {!isCoachMode && (
+          {!hideNavSelections && !isCoachMode && (
             <nav className="flex items-stretch gap-3">
               {/* Feed */}
               <NavLink to="/" end className="relative flex self-stretch items-center">
@@ -271,7 +271,7 @@ export default function TopNavClassic() {
         <div className="flex shrink-0 items-stretch gap-1">
 
           {/* Dashboard */}
-          {!isCoachMode && (
+          {!hideNavSelections && !isCoachMode && (
             <NavLink to="/dashboard" className="relative flex self-stretch items-center">
               <span className="flex items-center rounded-lg px-3 py-2 text-[15px] font-medium whitespace-nowrap text-[#222222] hover:bg-[#222222]/5">
                 Dashboard
@@ -280,7 +280,7 @@ export default function TopNavClassic() {
           )}
 
           {/* Inbox */}
-          {!isCoachMode && (
+          {!hideNavSelections && !isCoachMode && (
             <NavLink to="/messages" className="relative flex self-stretch items-center">
               {({ isActive }) => (
                 <>
@@ -293,15 +293,17 @@ export default function TopNavClassic() {
           )}
 
           {/* Notifications */}
-          <NavLink to="/notifications" className="relative flex self-stretch items-center">
-            {({ isActive }) => (
-              <>
-                <span className="flex items-center justify-center h-10 w-10 rounded-full py-5 hover:bg-[#222222]/5">
-                  <img src={isActive ? notificationsActive : notificationsInactive} alt="Notifications" className="h-[20px] w-[20px]" />
-                </span>
-              </>
-            )}
-          </NavLink>
+          {!hideNavSelections && (
+            <NavLink to="/notifications" className="relative flex self-stretch items-center">
+              {({ isActive }) => (
+                <>
+                  <span className="flex items-center justify-center h-10 w-10 rounded-full py-5 hover:bg-[#222222]/5">
+                    <img src={isActive ? notificationsActive : notificationsInactive} alt="Notifications" className="h-[20px] w-[20px]" />
+                  </span>
+                </>
+              )}
+            </NavLink>
+          )}
 
           {/* Profile avatar + dropdown */}
           <div ref={profileRef} className="relative ml-1 flex items-center">

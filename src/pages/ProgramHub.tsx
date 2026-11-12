@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { QuickPreferencesModal } from "../components/QuickPreferencesModal";
+import { SelectCohortModal } from "../components/LiveCourseCard";
 import { loadPersonalizationData, type PersonalizationData } from "../components/PersonalizationModal";
 import { FontWeight, IconDotsHorizontal, IconPencil, IconSparkle, Modal, ModalContent, ModalSize, SwitchInput, Tag, TagColor, TagSize } from "../components/leland";
 import { type BuildCardStyle, setBuildCardStyle, useBuildCardStyle } from "../components/lesson-blocks";
+import { useTopNavStyle } from "../contexts/TopNavStyleContext";
 import homeIcon from "../assets/img/program-hub/hdr-e8a6d.svg";
 import calendarArrowIcon from "../assets/img/program-hub/hdr-03896.svg";
 import slackIcon from "../assets/icons/slack-black.svg";
@@ -53,14 +55,66 @@ type Level = {
   status: "complete" | "in-progress" | "not-started";
   progressPct?: number;
   to: string;
+  liveSessions: string | null;
 };
 
 const LEVELS: Level[] = [
-  { number: 1, title: "Level 1: Use AI to 10x your impact", image: levelOne, status: "in-progress", progressPct: 50, to: COURSE_PATH },
-  { number: 2, title: "Level 2: Build Complex Agentic Workflows", image: levelTwo, status: "not-started", to: "/course/1" },
-  { number: 3, title: "Level 3: Create Autonomous Agents", image: levelThree, status: "not-started", to: "/course/1" },
-  { number: 4, title: "Level 4: Build Your Agent Workforce", image: levelFour, status: "not-started", to: "/course/1" },
+  { number: 1, title: "Level 1: Use AI to 10x your impact", image: levelOne, status: "in-progress", progressPct: 50, to: COURSE_PATH, liveSessions: "May 24 cohort · 4 live sessions" },
+  { number: 2, title: "Level 2: Build Complex Agentic Workflows", image: levelTwo, status: "not-started", to: "/course/1", liveSessions: "Next cohort starts Jun 21" },
+  { number: 3, title: "Level 3: Create Autonomous Agents", image: levelThree, status: "not-started", to: "/course/1", liveSessions: "Next cohort starts Jul 19" },
+  { number: 4, title: "Level 4: Build Your Agent Workforce", image: levelFour, status: "not-started", to: "/course/1", liveSessions: null },
 ];
+
+function AllLevelsModal({
+  open,
+  onOpenChange,
+  onOpenLevel,
+  onSelectCohort,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onOpenLevel: (level: Level) => void;
+  onSelectCohort: () => void;
+}) {
+  return (
+    <Modal open={open} onOpenChange={onOpenChange}>
+      <ModalContent
+        size={ModalSize.MEDIUM}
+        header={<h2 className="text-[20px] font-semibold leading-[1.3] text-gray-dark">All levels</h2>}
+      >
+        <ul className="flex flex-col divide-y divide-gray-stroke px-6 pb-6">
+          {LEVELS.map((lvl) => (
+            <li key={lvl.number} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:gap-4">
+              <button
+                type="button"
+                onClick={() => onOpenLevel(lvl)}
+                className="flex min-w-px flex-1 items-center gap-4 rounded-lg text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+              >
+                <img src={lvl.image} alt="" className="aspect-[115.25/60.5] w-[136px] shrink-0 rounded-lg border border-black/5 object-cover sm:w-[160px]" />
+                <div className="flex min-w-px flex-1 flex-col gap-1.5">
+                  <p className="text-[14px] font-semibold leading-[1.35] text-gray-dark">{lvl.title}</p>
+                  {lvl.status === "not-started" ? (
+                    <span className="text-[12px] leading-[1.5] text-gray-extra-light">Not started</span>
+                  ) : (
+                    <ProgressBar pct={lvl.progressPct ?? 0} label={`${lvl.progressPct}% complete`} className="max-w-[180px]" />
+                  )}
+                </div>
+              </button>
+              <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
+                <span className="text-[12px] leading-[1.5] text-gray-light sm:text-right">{lvl.liveSessions ?? "Self-paced"}</span>
+                {lvl.liveSessions ? (
+                  <Button size="sm" variant="outline" onClick={onSelectCohort} className="w-full font-semibold sm:w-auto">
+                    Select cohort
+                  </Button>
+                ) : null}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </ModalContent>
+    </Modal>
+  );
+}
 
 type Item = {
   title: string;
@@ -407,7 +461,7 @@ function UpcomingBuildsCarousel({
               <Link
                 key={b.sessionTitle}
                 to={b.to}
-                className="group flex h-full w-[75%] shrink-0 snap-start flex-col gap-3 rounded-lg bg-leland-gray-hover p-4 text-left transition-shadow hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)] sm:w-[calc((100%-1.5rem)/3)]"
+                className="group flex h-full w-[75%] shrink-0 snap-start flex-col gap-3 rounded-lg border border-gray-stroke bg-white p-4 text-left transition-shadow hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)] sm:w-[calc((100%-1.5rem)/3)]"
               >
                 <IconSparkle className="size-4 shrink-0 text-gray-dark" />
                 <div className="flex flex-col gap-1">
@@ -430,10 +484,10 @@ function UpcomingBuildsCarousel({
             <Link
               key={b.sessionTitle}
               to={b.to}
-              className="group flex h-full w-[75%] shrink-0 snap-start flex-col gap-4 rounded-lg bg-leland-gray-hover p-4 text-left transition-shadow hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)] sm:w-[calc((100%-1.5rem)/3)]"
+              className="group flex h-full w-[75%] shrink-0 snap-start flex-col gap-4 rounded-lg border border-gray-stroke bg-white p-4 text-left transition-shadow hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)] sm:w-[calc((100%-1.5rem)/3)]"
             >
-              <div className="relative h-16 w-[120px] shrink-0 overflow-hidden rounded-md border border-leland-gray-hover">
-                <img src={b.image} alt="" className="h-full w-full object-cover" />
+              <div className="relative w-full shrink-0 overflow-hidden rounded-md border border-leland-gray-hover">
+                <img src={b.image} alt="" className="block h-auto w-full" />
                 <span className="absolute left-2 top-2 rounded-[4px] bg-leland-black/[87%] px-1 pt-[3px] pb-[4px] text-[0.75rem] font-semibold leading-none text-leland-white shadow-[0_1px_3px_rgba(0,0,0,0.25)]">
                   Level 1
                 </span>
@@ -468,7 +522,10 @@ export default function ProgramHub() {
   const [query, setQuery] = useState("");
   const { showUseCaseSection, setShowUseCaseSection } = useProgramHubOptions();
   const cardStyle = useBuildCardStyle();
+  const { hideNavSelections, setHideNavSelections } = useTopNavStyle();
   const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
+  const [allLevelsOpen, setAllLevelsOpen] = useState(false);
+  const [selectCohortOpen, setSelectCohortOpen] = useState(false);
   const upcomingBuildsCarousel = useCardCarousel(UPCOMING_BUILDS);
 
   const toggleChip = (group: keyof typeof filters, value: string) =>
@@ -546,16 +603,9 @@ export default function ProgramHub() {
 
       <div className="relative mx-auto max-w-[1280px] px-4 sm:px-6">
         {/* Header */}
-        <div className="flex flex-col gap-6 pt-8">
+        <div className="flex flex-col gap-6 pt-16">
           <div className="flex flex-col gap-3">
-            <nav className="flex items-center gap-2 text-[14px] leading-[1.35]" aria-label="Breadcrumb">
-              <Link to="/my-leland" aria-label="Home"><IconImg src={homeIcon} size={16} /></Link>
-              <span className="text-gray-extra-light">/</span>
-              <span className="text-gray-light">Build with AI</span>
-              <span className="text-gray-extra-light">/</span>
-              <span className="text-gray-light">Leland+</span>
-            </nav>
-            <h1 className="font-serif text-[36px] font-medium leading-[1.1] text-gray-dark sm:text-[46px]">AI Builder Program</h1>
+            <h1 className="font-serif text-[36px] font-medium leading-[1.1] text-gray-dark sm:text-[46px]">Welcome, Maddy</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 !bg-black/5 font-semibold">
@@ -588,30 +638,22 @@ export default function ProgramHub() {
             <div className="flex flex-col gap-2.5 py-2.5">
               <p className="truncate text-[16px] font-semibold leading-[1.3] text-gray-dark">Level 1: Use AI to 10x your impact</p>
               <ProgressBar pct={50} label="50% complete" className="max-w-[300px]" />
+              <p className="truncate text-[14px] leading-[1.35] text-gray-light">Lesson 2/3: Automate communication in your voice</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <Button size="md" variant="dark" onClick={() => navigate(COURSE_PATH)} className="!gap-2 font-semibold">
                 Resume<IconImg src={chevronOverWhiteIcon} />
               </Button>
-              <p className="min-w-px flex-1 truncate text-[14px] leading-[1.35] text-gray-light">Automate communication in your voice</p>
+              <Button size="md" variant="secondary" onClick={() => setAllLevelsOpen(true)} className="!bg-black/5 font-semibold">
+                See all levels
+              </Button>
             </div>
           </div>
 
           <div className="flex min-w-[280px] flex-1 flex-col gap-5 rounded-2xl border border-gray-stroke bg-white p-6">
             <div className="flex items-center gap-4">
               <div className="flex min-w-px flex-1 flex-col gap-2">
-                <p className="text-[22px] font-semibold leading-[1.2] text-gray-dark">Your featured builds</p>
-                <div className="flex items-center gap-1.5">
-                  <p className="text-[14px] font-medium leading-[1.35] text-gray-light">Selected based on your responses</p>
-                  <button
-                    type="button"
-                    onClick={() => setAboutMeModalOpen(true)}
-                    aria-label="Edit learning preferences"
-                    className="flex items-center justify-center rounded-full p-1 text-gray-light transition-colors hover:bg-leland-gray-hover hover:text-gray-dark"
-                  >
-                    <IconPencil className="size-3" />
-                  </button>
-                </div>
+                <p className="text-[22px] font-semibold leading-[1.2] text-gray-dark">Up Next</p>
               </div>
               <div className="flex items-center gap-2">
                 <RoundArrow dir="left" disabled={upcomingBuildsCarousel.page <= 0} onClick={() => upcomingBuildsCarousel.scrollByPage(-1)} />
@@ -622,51 +664,13 @@ export default function ProgramHub() {
           </div>
         </div>
 
-        {/* Roadmap */}
-        <section className="mt-5 flex flex-col gap-4 pb-4">
-          <div className="flex items-center gap-5">
-            <h2 className="text-[18px] font-semibold leading-[1.3] text-gray-light">Roadmap</h2>
-            <div className="h-px flex-1 bg-gray-stroke" />
-          </div>
-          <div className="flex gap-4 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {LEVELS.map((lvl) => {
-              const notStarted = lvl.status === "not-started";
-              return (
-                <div key={lvl.number} className="flex min-w-[216px] max-w-[250px] flex-1 flex-col gap-2.5 rounded-xl border border-gray-stroke bg-white p-4">
-                  <img src={lvl.image} alt="" className="aspect-[115.25/60.5] w-full rounded-lg border border-black/5 object-cover" />
-                  <div className="flex flex-col gap-1.5">
-                    <p className="flex h-[38px] items-center overflow-hidden text-[14px] font-semibold leading-[1.35] text-gray-dark">{lvl.title}</p>
-                    {notStarted ? (
-                      <span className="text-[12px] leading-[1.5] text-gray-extra-light">Not started</span>
-                    ) : (
-                      <ProgressBar pct={lvl.progressPct ?? 0} label={`${lvl.progressPct}% complete`} className="max-w-[180px]" />
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {notStarted ? (
-                      <Button size="sm" variant="secondary" onClick={() => navigate(lvl.to)} className="!gap-1.5 !bg-black/5 font-semibold">
-                        Start<IconImg src={chevronOverIcon} size={18} />
-                      </Button>
-                    ) : (
-                      <>
-                        <Button size="sm" variant="dark" onClick={() => navigate(lvl.to)} className="font-semibold">Resume</Button>
-                        <Button size="sm" variant="outline" className="font-semibold">Select cohort</Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
         {/* Live sessions */}
         <section className="mt-10">
           <div className="flex flex-col gap-4 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-              <div className="flex min-w-px flex-1 flex-col gap-1.5">
+              <div className="flex min-w-px flex-1 flex-col gap-2">
                 <p className={sectionTitle}>Live sessions</p>
-                <p className="text-[14px] font-medium leading-[1.35] text-gray-light">Level 1: Use AI to 10x your impact</p>
+                <p className="text-[16px] leading-[1.5] text-gray-light">Level 1: Use AI to 10x your impact</p>
               </div>
               <Button size="sm" variant="secondary" rounded="rounded-full" className="self-start !gap-1.5 !bg-black/5 font-semibold">
                 May 24 cohort
@@ -907,6 +911,20 @@ export default function ProgramHub() {
       >
         <IconDotsHorizontal className="size-4 text-gray-light" />
       </button>
+      <AllLevelsModal
+        open={allLevelsOpen}
+        onOpenChange={setAllLevelsOpen}
+        onOpenLevel={(lvl) => navigate(lvl.to)}
+        onSelectCohort={() => {
+          setAllLevelsOpen(false);
+          setSelectCohortOpen(true);
+        }}
+      />
+      <SelectCohortModal
+        open={selectCohortOpen}
+        onClose={() => setSelectCohortOpen(false)}
+        onSelect={() => setSelectCohortOpen(false)}
+      />
       <Modal open={prototypeOptionsOpen} onOpenChange={setPrototypeOptionsOpen}>
         <ModalContent size={ModalSize.SMALL}>
           <div className="flex flex-col gap-4 p-6">
@@ -915,6 +933,11 @@ export default function ProgramHub() {
               label="Show 'Browse by use case' section"
               isChecked={showUseCaseSection}
               onToggle={setShowUseCaseSection}
+            />
+            <SwitchInput
+              label="Hide top nav selections (keep logo + profile)"
+              isChecked={hideNavSelections}
+              onToggle={setHideNavSelections}
             />
             <div className="flex flex-col gap-1.5">
               <span className="text-[14px] font-medium text-gray-dark">Build card style</span>

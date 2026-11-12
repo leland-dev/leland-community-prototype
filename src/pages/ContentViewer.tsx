@@ -2248,6 +2248,27 @@ function CourseViewerSectionNav({
 
 // ─── Page (mirrors CourseViewerShell.client.tsx) ─────────────────────────────
 
+function scrollParentOf(el: HTMLElement): HTMLElement | null {
+  for (let node = el.parentElement; node; node = node.parentElement) {
+    const { overflowY } = getComputedStyle(node);
+    if (overflowY === "auto" || overflowY === "scroll") return node;
+  }
+  return null;
+}
+
+function centerSidebarSectionIfHidden(sectionId: string) {
+  const row = document.getElementById(`sidebar-section-${sectionId}`);
+  if (!row) return;
+  const container = scrollParentOf(row);
+  if (!container) return;
+  const rowRect = row.getBoundingClientRect();
+  const boxRect = container.getBoundingClientRect();
+  const fullyVisible = rowRect.top >= boxRect.top && rowRect.bottom <= boxRect.bottom;
+  if (fullyVisible) return;
+  const offset = rowRect.top - boxRect.top - (container.clientHeight - rowRect.height) / 2;
+  container.scrollBy({ top: offset, behavior: "smooth" });
+}
+
 export default function ContentViewer() {
   const params = useParams<{ lessonId?: string; sectionId?: string }>();
   const navigate = useNavigate();
@@ -2277,6 +2298,10 @@ export default function ContentViewer() {
       }, 50);
       return () => clearTimeout(timer);
     }
+    const id = params.sectionId;
+    if (!id) return;
+    const timer = setTimeout(() => centerSidebarSectionIfHidden(id), 50);
+    return () => clearTimeout(timer);
   }, [params.sectionId]); // eslint-disable-line react-hooks/exhaustive-deps
   const [selectedSessionNumber, setSelectedSessionNumber] = useState<
     number | null
@@ -2443,11 +2468,7 @@ export default function ContentViewer() {
   // course title/header off-screen for no reason.
   useEffect(() => {
     if (!sidebarOpen) return;
-    const timer = setTimeout(() => {
-      document
-        .getElementById(`sidebar-section-${section.id}`)
-        ?.scrollIntoView({ block: "nearest" });
-    }, 60);
+    const timer = setTimeout(() => centerSidebarSectionIfHidden(section.id), 60);
     return () => clearTimeout(timer);
   }, [sidebarOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 

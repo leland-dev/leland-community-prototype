@@ -556,10 +556,10 @@ function BuildOptionCard({
       <button
         type="button"
         onClick={onClick}
-        className={`flex h-full flex-col items-start gap-2 rounded-lg p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
+        className={`flex h-full flex-col items-start gap-2 rounded-lg p-4 text-left transition-[colors,box-shadow] focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
           selected
-            ? "border-[1.5px] border-leland-gray-dark bg-leland-gray-hover"
-            : "bg-leland-gray-hover hover:bg-[rgba(34,34,34,0.08)]"
+            ? "border-[1.5px] border-leland-gray-dark bg-white"
+            : "border border-leland-gray-stroke bg-white hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)]"
         }`}
       >
         <IconSparkle className="size-4 shrink-0 text-leland-gray-dark" />
@@ -573,10 +573,10 @@ function BuildOptionCard({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-full flex-col gap-4 rounded-lg p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
+      className={`flex h-full flex-col gap-4 rounded-lg p-4 text-left transition-[colors,box-shadow] focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
         selected
-          ? "border-[1.5px] border-leland-gray-dark bg-leland-gray-hover"
-          : "bg-leland-gray-hover hover:bg-[rgba(34,34,34,0.08)]"
+          ? "border-[1.5px] border-leland-gray-dark bg-white"
+          : "border border-leland-gray-stroke bg-white hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)]"
       }`}
     >
       <div className="relative h-16 w-[120px] shrink-0 overflow-hidden rounded-md border border-leland-gray-hover">

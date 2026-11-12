@@ -37,6 +37,11 @@ interface TopNavStyleContextValue {
   // from the Navigation admin dropdown.
   feedEdgeToEdge: boolean;
   setFeedEdgeToEdge: (v: boolean) => void;
+  // Hides every top-nav selection (links/icon group, search bar) except the
+  // logo on the left and the profile avatar on the right. Off by default;
+  // toggled from the Program Hub prototype-options menu.
+  hideNavSelections: boolean;
+  setHideNavSelections: (v: boolean) => void;
 }
 
 const TopNavStyleContext = createContext<TopNavStyleContextValue>({
@@ -57,6 +62,8 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
   setAltLayout: () => {},
   feedEdgeToEdge: false,
   setFeedEdgeToEdge: () => {},
+  hideNavSelections: false,
+  setHideNavSelections: () => {},
 });
 
 // v2: the default flipped to "linkedin" (alt-nav is now the default experience).
@@ -70,6 +77,7 @@ const JOBS_STORAGE_KEY = "prototype-topnav-jobs";
 const SEARCH_STORAGE_KEY = "prototype-topnav-search";
 const ALT_LAYOUT_STORAGE_KEY = "prototype-topnav-alt-layout";
 const FEED_EDGE_STORAGE_KEY = "prototype-feed-edge-to-edge";
+const HIDE_NAV_SELECTIONS_STORAGE_KEY = "prototype-topnav-hide-selections";
 
 export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const [style, setStyleState] = useState<TopNavStyle>(() => {
@@ -103,6 +111,10 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
   const [feedEdgeToEdge, setFeedEdgeToEdgeState] = useState<boolean>(() => {
     // Centered (constrained) by default; only an explicit "1" pushes to edges.
     return localStorage.getItem(FEED_EDGE_STORAGE_KEY) === "1";
+  });
+  const [hideNavSelections, setHideNavSelectionsState] = useState<boolean>(() => {
+    // Shown by default; only an explicit "1" hides the nav selections.
+    return localStorage.getItem(HIDE_NAV_SELECTIONS_STORAGE_KEY) === "1";
   });
   const setStyle = (v: TopNavStyle) => {
     localStorage.setItem(STORAGE_KEY, v);
@@ -144,10 +156,15 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
     setFeedEdgeToEdgeState(v);
   };
 
+  const setHideNavSelections = (v: boolean) => {
+    localStorage.setItem(HIDE_NAV_SELECTIONS_STORAGE_KEY, v ? "1" : "0");
+    setHideNavSelectionsState(v);
+  };
+
   const toggle = () => setStyle(style === "linkedin" ? "classic" : "linkedin");
 
   return (
-    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, showNavLabels, setShowNavLabels, showLivestreams, setShowLivestreams, showLelandPlus, setShowLelandPlus, showJobs, setShowJobs, showSearch, setShowSearch, altLayout, setAltLayout, feedEdgeToEdge, setFeedEdgeToEdge }}>
+    <TopNavStyleContext.Provider value={{ style, setStyle, toggle, showNavLabels, setShowNavLabels, showLivestreams, setShowLivestreams, showLelandPlus, setShowLelandPlus, showJobs, setShowJobs, showSearch, setShowSearch, altLayout, setAltLayout, feedEdgeToEdge, setFeedEdgeToEdge, hideNavSelections, setHideNavSelections }}>
       {children}
     </TopNavStyleContext.Provider>
   );
